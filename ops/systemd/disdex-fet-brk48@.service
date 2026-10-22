@@ -18,6 +18,7 @@ Environment=FET_BRK48_LIVE_ENABLED=true
 Environment=FET_BRK48_TRAILING_STOP_ENABLED=true
 Environment=FET_BRK48_TRAILING_STOP_POLICY=FET_TRAIL_8P_GIVEBACK_4P
 Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+Environment=FET_BRK48_OPERATOR_ACTIVATION_PATH=/var/lib/disdex/shared/operator-activation/fet-brk48.json
 Environment=DISDEX_SHARED_CRYPTO_DAILY_RISK_FILE=/var/lib/disdex/shared/crypto-daily-risk.json
 Environment=DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock
 Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
@@ -26,7 +27,7 @@ ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json 
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-current-live-target-readiness.ts --require-implementation-ready
-ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/%i --sha %i --runner FET_BRK48_RESIDUAL --activation-path /var/lib/disdex/shared/operator-activation/current.json
+ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/%i --sha %i --runner FET_BRK48_RESIDUAL --activation-path /var/lib/disdex/shared/operator-activation/fet-brk48.json
 ExecStartPre=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-fet-brk48-live-runner.ts --preflight
 ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-fet-brk48-live-runner.ts --daemon
 Restart=on-failure

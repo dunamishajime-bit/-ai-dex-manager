@@ -13,6 +13,11 @@ test("FET trailing policy and production wiring stay bound to the adopted resear
   const unit = await readFile("ops/systemd/disdex-fet-brk48@.service", "utf8");
   assert.match(unit, /Environment=FET_BRK48_TRAILING_STOP_ENABLED=true/);
   assert.match(unit, /Environment=FET_BRK48_TRAILING_STOP_POLICY=FET_TRAIL_8P_GIVEBACK_4P/);
+  assert.match(unit, /Environment=FET_BRK48_OPERATOR_ACTIVATION_PATH=\/var\/lib\/disdex\/shared\/operator-activation\/fet-brk48\.json/);
+  assert.match(unit, /--activation-path \/var\/lib\/disdex\/shared\/operator-activation\/fet-brk48\.json/);
+  assert.match(unit, /Environment=DISDEX_ACCOUNT_LOCK_PATH=\/var\/lib\/disdex\/shared\/account-order\.lock/);
+  assert.match(unit, /Environment=DISDEX_SHARED_CRYPTO_DAILY_RISK_FILE=\/var\/lib\/disdex\/shared\/crypto-daily-risk\.json/);
+  assert.match(unit, /ReadWritePaths=.*\/var\/lib\/disdex\/shared/);
 
   const runner = await readFile("scripts/disdex-fet-brk48-live-runner.ts", "utf8");
   assert.match(runner, /FET_TRAILING_STOP_POLICY_MISMATCH/);

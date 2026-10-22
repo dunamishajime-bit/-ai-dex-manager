@@ -47,5 +47,16 @@
     "signedFetTrailingStopFill": "UNOBSERVED",
     "testOrders": 0,
     "manualPositionChanges": 0
+  },
+  "scopedActivation": {
+    "status": "IMPLEMENTED_PENDING_REMOTE_RELEASE_AND_OPERATOR_AUDIT",
+    "branch": "codex/fet-trailing-stop-production-20261022",
+    "runner": "FET_BRK48_RESIDUAL",
+    "operatorActivationPath": "/var/lib/disdex/shared/operator-activation/fet-brk48.json",
+    "commonOperatorArtifactChanged": false,
+    "commonCurrentSymlinkChanged": false,
+    "nonTargetRunnersChanged": false,
+    "sharedSafetyPathsUnchanged": true,
+    "researchIsNotVenueCertification": true
   }
 }

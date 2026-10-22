@@ -12,9 +12,14 @@ HEALTH_DROPIN="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzz
 WATCHDOG_DROPIN="/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 ALERT_DROPIN="/etc/systemd/system/disdex-runner-health-alert.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 V4_OPERATOR_ACTIVATION_PATH="/var/lib/disdex/shared/operator-activation/v12-v4-full.json"
+FET_OPERATOR_ACTIVATION_DEFAULT="/var/lib/disdex/shared/operator-activation/fet-brk48.json"
 COHERENCE_LOCK_PATH="${DISDEX_CURRENT_RUNTIME_COHERENCE_LOCK_PATH:-/var/lib/disdex/runner-health/private/current-runtime-coherence.lock}"
 MONITOR_RUNTIME_SHA=""
 MONITOR_RUNTIME_ROOT=""
+FET_SCOPE_ENV_FILE=""
+FET_SCOPED_SHA=""
+FET_SCOPED_RELEASE_ROOT=""
+FET_SCOPED_OPERATOR_ACTIVATION_PATH=""
 
 FAMILIES=(
   "disdex-v12-x1-all"
@@ -69,6 +74,21 @@ resolve_current() {
   HEALTH_ENV="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.health-snapshot.env"
   WATCHDOG_ENV="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.watchdog.env"
   PRIMARY_V12_MODE_FILE="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.v12-primary.env"
+  FET_SCOPE_ENV_FILE="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.fet-scope.env"
+  FET_SCOPED_SHA="$DEPLOYED_SHA"
+  FET_SCOPED_RELEASE_ROOT="$CURRENT_RELEASE"
+  FET_SCOPED_OPERATOR_ACTIVATION_PATH="$FET_OPERATOR_ACTIVATION_DEFAULT"
+  if [[ -e "$FET_SCOPE_ENV_FILE" ]]; then
+    [[ -f "$FET_SCOPE_ENV_FILE" && ! -L "$FET_SCOPE_ENV_FILE" ]] || { echo "FET scope environment is not a regular file" >&2; return 1; }
+    FET_SCOPED_SHA="$(sed -n 's/^DISDEX_FET_SCOPED_SHA=//p' "$FET_SCOPE_ENV_FILE" | tail -n1)"
+    FET_SCOPED_RELEASE_ROOT="$(sed -n 's/^DISDEX_FET_SCOPED_RELEASE_ROOT=//p' "$FET_SCOPE_ENV_FILE" | tail -n1)"
+    FET_SCOPED_OPERATOR_ACTIVATION_PATH="$(sed -n 's/^DISDEX_FET_OPERATOR_ACTIVATION_PATH=//p' "$FET_SCOPE_ENV_FILE" | tail -n1)"
+  fi
+  [[ "$FET_SCOPED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "FET scoped SHA is missing or invalid" >&2; return 1; }
+  [[ "$FET_SCOPED_RELEASE_ROOT" == "$TRADING_RELEASES/$FET_SCOPED_SHA" ]] || { echo "FET scoped release root is not exact" >&2; return 1; }
+  [[ -d "$FET_SCOPED_RELEASE_ROOT" && ! -L "$FET_SCOPED_RELEASE_ROOT" && -f "$FET_SCOPED_RELEASE_ROOT/.disdex-release-sha" && ! -L "$FET_SCOPED_RELEASE_ROOT/.disdex-release-sha" ]] || { echo "FET scoped release or marker is missing or unsafe" >&2; return 1; }
+  [[ "$(tr -d '[:space:]' < "$FET_SCOPED_RELEASE_ROOT/.disdex-release-sha")" == "$FET_SCOPED_SHA" ]] || { echo "FET scoped release marker mismatch" >&2; return 1; }
+  [[ "$FET_SCOPED_OPERATOR_ACTIVATION_PATH" == "/var/lib/disdex/shared/operator-activation/"* ]] || { echo "FET scoped operator path is not canonical" >&2; return 1; }
   PRIMARY_V12_MODE="LEGACY"
   if [[ -f "$PRIMARY_V12_MODE_FILE" ]]; then
     PRIMARY_V12_MODE="$(sed -n 's/^DISDEX_PRIMARY_V12_RUNNER=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
@@ -128,6 +148,9 @@ build_current_units() {
     if [[ "$PRIMARY_V12_MODE" == "V4" && "$index" -eq 0 ]]; then
       sha="$V4_PRIMARY_SHA"
       root="$V4_PRIMARY_RELEASE"
+    elif [[ "$index" -eq 4 ]]; then
+      sha="$FET_SCOPED_SHA"
+      root="$FET_SCOPED_RELEASE_ROOT"
     fi
     unit="${family}@${sha}.service"
     CURRENT_UNITS+=("$unit")
@@ -227,6 +250,7 @@ monitor_pins_current() {
   for sleeve in V12 PENGU V52 Q102 FET HYPE IDLE; do
     local expected_sha="$DEPLOYED_SHA"
     if [[ "$PRIMARY_V12_MODE" == "V4" && "$sleeve" == "V12" ]]; then expected_sha="$V4_PRIMARY_SHA"; fi
+    if [[ "$sleeve" == "FET" ]]; then expected_sha="$FET_SCOPED_SHA"; fi
     grep -Fxq "DISDEX_HEALTH_SNAPSHOT_${sleeve}_EXPECTED_SHA=$expected_sha" "$HEALTH_ENV" || return 1
     grep -Fxq "DISDEX_WATCHDOG_${sleeve}_EXPECTED_SHA=$expected_sha" "$WATCHDOG_ENV" || return 1
   done
@@ -241,6 +265,11 @@ monitor_pins_current() {
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_MODE=$PRIMARY_V12_MODE" "$HEALTH_ENV" || return 1
   grep -Fxq "DISDEX_WATCHDOG_V12_MODE=$PRIMARY_V12_MODE" "$WATCHDOG_ENV" || return 1
   grep -Fxq "DISDEX_WATCHDOG_V12_SERVICE_UNIT=$V12_EXPECTED_UNIT" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=$FET_SCOPED_RELEASE_ROOT" "$HEALTH_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_FET_RELEASE_ROOT=$FET_SCOPED_RELEASE_ROOT" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_FET_SERVICE_UNIT=disdex-fet-brk48@$FET_SCOPED_SHA.service" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_FET_OPERATOR_ACTIVATION_PATH=$FET_SCOPED_OPERATOR_ACTIVATION_PATH" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_ALERT_FET_BRK48_SERVICE_UNIT=disdex-fet-brk48@$FET_SCOPED_SHA.service" "$ALERT_DROPIN" || return 1
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=$V4_PRIMARY_RELEASE" "$HEALTH_ENV" || return 1
     grep -Fxq "DISDEX_WATCHDOG_V12_RELEASE_ROOT=$V4_PRIMARY_RELEASE" "$WATCHDOG_ENV" || return 1
@@ -292,7 +321,7 @@ timer_waiting() {
 }
 
 operator_ready() {
-  local runner gate
+  local runner gate release_root sha activation_path
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     gate="$V4_PRIMARY_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     [[ -f "$gate" ]] || return 1
@@ -306,7 +335,16 @@ operator_ready() {
   fi
   for runner in PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
     gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
-    /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$DEPLOYED_SHA" --runner "$runner" --activation-path /var/lib/disdex/shared/operator-activation/current.json >/dev/null 2>&1 || return 1
+    release_root="$CURRENT_RELEASE"
+    sha="$DEPLOYED_SHA"
+    activation_path="/var/lib/disdex/shared/operator-activation/current.json"
+    if [[ "$runner" == "FET_BRK48_RESIDUAL" ]]; then
+      gate="$FET_SCOPED_RELEASE_ROOT/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+      release_root="$FET_SCOPED_RELEASE_ROOT"
+      sha="$FET_SCOPED_SHA"
+      activation_path="$FET_SCOPED_OPERATOR_ACTIVATION_PATH"
+    fi
+    /usr/bin/node "$gate" --release-root "$release_root" --sha "$sha" --runner "$runner" --activation-path "$activation_path" >/dev/null 2>&1 || return 1
   done
   return 0
 }
@@ -404,7 +442,11 @@ repair_coherence() {
     return 0
   fi
   verify_current_units_active || return 20
-  DISDEX_PRIMARY_V12_RUNNER="$PRIMARY_V12_MODE" DISDEX_V12_V4_PRIMARY_SHA="$V4_PRIMARY_SHA" /usr/local/sbin/disdex-current-runtime-wiring --apply
+  if [[ -n "$FET_SCOPE_ENV_FILE" && -f "$FET_SCOPE_ENV_FILE" ]]; then
+    DISDEX_CURRENT_RUNTIME_COHERENCE_SCOPE_ENV_FILE="$FET_SCOPE_ENV_FILE" /usr/local/sbin/disdex-fet-scoped-runtime-wiring --apply
+  else
+    DISDEX_PRIMARY_V12_RUNNER="$PRIMARY_V12_MODE" DISDEX_V12_V4_PRIMARY_SHA="$V4_PRIMARY_SHA" /usr/local/sbin/disdex-current-runtime-wiring --apply
+  fi
   retire_stale_units
   systemctl daemon-reload
   systemctl reset-failed >/dev/null 2>&1 || true
@@ -420,6 +462,9 @@ main() {
   if [[ "$mode" == "--self-test-v4-mixed-sha" ]]; then
     DEPLOYED_SHA="ce1edeead8d0f9e5d88e829d415057117502a335"
     CURRENT_RELEASE="/home/deploy/disdex-trading/releases/$DEPLOYED_SHA"
+    FET_SCOPED_SHA="$DEPLOYED_SHA"
+    FET_SCOPED_RELEASE_ROOT="$CURRENT_RELEASE"
+    FET_SCOPED_OPERATOR_ACTIVATION_PATH="$FET_OPERATOR_ACTIVATION_DEFAULT"
     PRIMARY_V12_MODE="V4"
     V4_PRIMARY_SHA="428ddfae4df7bcecdab46604013855bea746262b"
     V4_PRIMARY_RELEASE="/home/deploy/disdex-trading/releases/$V4_PRIMARY_SHA"
@@ -440,6 +485,26 @@ main() {
     [[ "${HEARTBEAT_EXPECTED_SHAS[0]}" == "$V4_PRIMARY_SHA" ]]
     [[ "${HEARTBEAT_EXPECTED_SHAS[1]}" == "$DEPLOYED_SHA" ]]
     printf 'V4_MIXED_SHA_COHERENCE_SELFTEST_PASS\n'
+    exit 0
+  fi
+  if [[ "$mode" == "--self-test-fet-mixed-sha" ]]; then
+    DEPLOYED_SHA="ce1edeead8d0f9e5d88e829d415057117502a335"
+    CURRENT_RELEASE="/home/deploy/disdex-trading/releases/$DEPLOYED_SHA"
+    FET_SCOPED_SHA="26a32d2b4303d0614d665b12efc63294fe5cb2e0"
+    FET_SCOPED_RELEASE_ROOT="/home/deploy/disdex-trading/releases/$FET_SCOPED_SHA"
+    FET_SCOPED_OPERATOR_ACTIVATION_PATH="$FET_OPERATOR_ACTIVATION_DEFAULT"
+    PRIMARY_V12_MODE="V4"
+    V4_PRIMARY_SHA="428ddfae4df7bcecdab46604013855bea746262b"
+    V4_PRIMARY_RELEASE="/home/deploy/disdex-trading/releases/$V4_PRIMARY_SHA"
+    FAMILIES[0]="disdex-v12-v4"
+    build_current_units
+    [[ "${CURRENT_UNITS[0]}" == "disdex-v12-v4@$V4_PRIMARY_SHA.service" ]]
+    [[ "${CURRENT_UNITS[4]}" == "disdex-fet-brk48@$FET_SCOPED_SHA.service" ]]
+    [[ "${EXPECTED_ROOT_BY_UNIT[${CURRENT_UNITS[4]}]}" == "$FET_SCOPED_RELEASE_ROOT" ]]
+    for index in 1 2 3 5 6 7 8; do
+      [[ "${EXPECTED_SHA_BY_UNIT[${CURRENT_UNITS[$index]}]}" == "$DEPLOYED_SHA" ]]
+    done
+    printf 'FET_MIXED_SHA_COHERENCE_SELFTEST_PASS\n'
     exit 0
   fi
   if [[ "$mode" == "--self-test-margin-guard-exec" ]]; then

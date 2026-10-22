@@ -76,6 +76,23 @@ test("operator activation artifact is exact-SHA and runner scoped", () => {
   }).allowed, false);
 });
 
+test("FET scoped activation artifact cannot authorize another runner", () => {
+  const fetOnly = artifact({
+    target: "FET BRK48 Residual",
+    approvedRunners: ["FET_BRK48_RESIDUAL"],
+  });
+  assert.equal(validateOperatorActivationArtifact(fetOnly, {
+    sha: SHA,
+    target: "FET BRK48 Residual",
+    runner: "FET_BRK48_RESIDUAL",
+  }).allowed, true);
+  assert.equal(validateOperatorActivationArtifact(fetOnly, {
+    sha: SHA,
+    target: "FET BRK48 Residual",
+    runner: "QUALITY102_CAUSAL_V1",
+  }).allowed, false);
+});
+
 test("operator activation file must be root-owned non-writable regular file", () => {
   assert.equal(validateOperatorActivationFileMetadata(stats()).allowed, true);
   assert.equal(validateOperatorActivationFileMetadata(stats({ uid: 1000 })).allowed, false);
