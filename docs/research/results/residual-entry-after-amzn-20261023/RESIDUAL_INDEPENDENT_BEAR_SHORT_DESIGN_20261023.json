@@ -1,0 +1,3878 @@
+{
+  "status": "RESEARCH_ONLY_ALTERNATIVE_BEAR_MARKET_SHORT_NOT_LIVE_OR_INTEGRATED",
+  "period": "2025-08-10..2026-08-10",
+  "split": "2026-02-10",
+  "entry": "Completed M5 at 55min prior to exact HH:00, next 5m open",
+  "feeBpsRoundtrip": [
+    10,
+    30
+  ],
+  "rules": {
+    "BTC6_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC24_DOWN": [
+      [
+        "btc24h",
+        "lt",
+        0
+      ]
+    ],
+    "DOGE3_DOWN": [
+      [
+        "ret3h",
+        "lt",
+        0
+      ]
+    ],
+    "DOGE6_DOWN": [
+      [
+        "ret6h",
+        "lt",
+        0
+      ]
+    ],
+    "REL3_DOWN": [
+      [
+        "rel3h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC6_DOWN_DOGE3_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret3h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC6_DOWN_REL3_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "rel3h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC6_DOWN_REL6_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "rel6h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC24_DOWN_DOGE6_DOWN": [
+      [
+        "btc24h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_MINUS1": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "le",
+        -1
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_MINUS2": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "le",
+        -2
+      ]
+    ],
+    "BTC6_DOWN_DOGE3_DOWN_REL3_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret3h",
+        "lt",
+        0
+      ],
+      [
+        "rel3h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN_VOL1P2": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ],
+      [
+        "volratio",
+        "ge",
+        1.2
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN_ATR0P7": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ],
+      [
+        "atr3h",
+        "ge",
+        0.7
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN_REL3_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ],
+      [
+        "rel3h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC24_DOWN_DOGE3_DOWN_REL24_DOWN": [
+      [
+        "btc24h",
+        "lt",
+        0
+      ],
+      [
+        "ret3h",
+        "lt",
+        0
+      ],
+      [
+        "rel24h",
+        "lt",
+        0
+      ]
+    ],
+    "BTC6_DOWN_REL24_LE_MINUS3_VOL1P2": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "rel24h",
+        "le",
+        -3
+      ],
+      [
+        "volratio",
+        "ge",
+        1.2
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN_BREAK1H": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ],
+      [
+        "breakdown",
+        "flag",
+        true
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN_EMA_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ],
+      [
+        "emaDown",
+        "flag",
+        true
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN_RETEST": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ],
+      [
+        "retest",
+        "flag",
+        true
+      ]
+    ],
+    "BTC6_DOWN_DOGE6_DOWN_VOL1P2_EMA_DOWN": [
+      [
+        "btc6h",
+        "lt",
+        0
+      ],
+      [
+        "ret6h",
+        "lt",
+        0
+      ],
+      [
+        "volratio",
+        "ge",
+        1.2
+      ],
+      [
+        "emaDown",
+        "flag",
+        true
+      ]
+    ]
+  },
+  "cases": {
+    "BTC6_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 561,
+            "wins": 276,
+            "losses": 285,
+            "winRatePct": 49.19786096256685,
+            "pf": 1.0400558190328182,
+            "endingEquityJpy": 9999.224328889564,
+            "closedDDPct": -31.771103588045555,
+            "grossProfitPctPoints": 533.0002203880492,
+            "grossLossPctPoints": -512.4727064011848,
+            "totalNetReturnPctPoints": 20.527513986864392
+          },
+          "early": {
+            "trades": 288,
+            "wins": 146,
+            "losses": 142,
+            "winRatePct": 50.69444444444444,
+            "pf": 1.0854642417790608,
+            "endingEquityJpy": 11192.466620348496,
+            "closedDDPct": -31.771103588045555,
+            "grossProfitPctPoints": 334.3189965617462,
+            "grossLossPctPoints": -307.9963242398497,
+            "totalNetReturnPctPoints": 26.322672321896505
+          },
+          "late": {
+            "trades": 273,
+            "wins": 130,
+            "losses": 143,
+            "winRatePct": 47.61904761904761,
+            "pf": 0.9716585442593582,
+            "endingEquityJpy": 8933.888005268152,
+            "closedDDPct": -26.383441764095338,
+            "grossProfitPctPoints": 198.68122382630304,
+            "grossLossPctPoints": -204.4763821613351,
+            "totalNetReturnPctPoints": -5.795158335032056
+          },
+          "potentialSignalsBeforeSlotExclusion": 4387
+        },
+        "30": {
+          "all": {
+            "trades": 561,
+            "wins": 254,
+            "losses": 307,
+            "winRatePct": 45.27629233511586,
+            "pf": 0.8398463481332564,
+            "endingEquityJpy": 3251.0435660809585,
+            "closedDDPct": -68.92310713058158,
+            "grossProfitPctPoints": 480.7308588035783,
+            "grossLossPctPoints": -572.4033448167139,
+            "totalNetReturnPctPoints": -91.6724860131356
+          },
+          "early": {
+            "trades": 288,
+            "wins": 136,
+            "losses": 152,
+            "winRatePct": 47.22222222222222,
+            "pf": 0.9074530467773674,
+            "endingEquityJpy": 6287.683493133935,
+            "closedDDPct": -41.73953980742851,
+            "grossProfitPctPoints": 306.684394334098,
+            "grossLossPctPoints": -337.96172201220156,
+            "totalNetReturnPctPoints": -31.277327678103575
+          },
+          "late": {
+            "trades": 273,
+            "wins": 118,
+            "losses": 155,
+            "winRatePct": 43.223443223443226,
+            "pf": 0.7423872194171247,
+            "endingEquityJpy": 5170.494936061992,
+            "closedDDPct": -51.30963542554241,
+            "grossProfitPctPoints": 174.04646446948033,
+            "grossLossPctPoints": -234.44162280451238,
+            "totalNetReturnPctPoints": -60.39515833503205
+          },
+          "potentialSignalsBeforeSlotExclusion": 4387
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 560,
+            "wins": 270,
+            "losses": 290,
+            "winRatePct": 48.214285714285715,
+            "pf": 1.0194247471856517,
+            "endingEquityJpy": 8918.657810623452,
+            "closedDDPct": -49.44722148661968,
+            "grossProfitPctPoints": 542.3857126215969,
+            "grossLossPctPoints": -532.0507610973474,
+            "totalNetReturnPctPoints": 10.334951524249504
+          },
+          "early": {
+            "trades": 288,
+            "wins": 138,
+            "losses": 150,
+            "winRatePct": 47.91666666666667,
+            "pf": 1.0878977575592608,
+            "endingEquityJpy": 11184.844267389843,
+            "closedDDPct": -49.44722148661968,
+            "grossProfitPctPoints": 334.1043800727833,
+            "grossLossPctPoints": -307.1100916894607,
+            "totalNetReturnPctPoints": 26.994288383322555
+          },
+          "late": {
+            "trades": 272,
+            "wins": 132,
+            "losses": 140,
+            "winRatePct": 48.529411764705884,
+            "pf": 0.9259389735838982,
+            "endingEquityJpy": 7973.8775054976795,
+            "closedDDPct": -30.061192930012957,
+            "grossProfitPctPoints": 208.2813325488136,
+            "grossLossPctPoints": -224.9406694078867,
+            "totalNetReturnPctPoints": -16.659336859073107
+          },
+          "potentialSignalsBeforeSlotExclusion": 4387
+        },
+        "30": {
+          "all": {
+            "trades": 560,
+            "wins": 249,
+            "losses": 311,
+            "winRatePct": 44.46428571428571,
+            "pf": 0.8284005392628934,
+            "endingEquityJpy": 2904.7916210353387,
+            "closedDDPct": -71.87914674958142,
+            "grossProfitPctPoints": 490.7904757959907,
+            "grossLossPctPoints": -592.4555242717413,
+            "totalNetReturnPctPoints": -101.66504847575061
+          },
+          "early": {
+            "trades": 288,
+            "wins": 127,
+            "losses": 161,
+            "winRatePct": 44.09722222222222,
+            "pf": 0.9094996807890835,
+            "endingEquityJpy": 6283.297553507616,
+            "closedDDPct": -56.03404149510385,
+            "grossProfitPctPoints": 307.57775429297294,
+            "grossLossPctPoints": -338.1834659096504,
+            "totalNetReturnPctPoints": -30.605711616677468
+          },
+          "late": {
+            "trades": 272,
+            "wins": 122,
+            "losses": 150,
+            "winRatePct": 44.85294117647059,
+            "pf": 0.7205381616965457,
+            "endingEquityJpy": 4623.036862886992,
+            "closedDDPct": -55.358399509750036,
+            "grossProfitPctPoints": 183.21272150301775,
+            "grossLossPctPoints": -254.27205836209086,
+            "totalNetReturnPctPoints": -71.05933685907311
+          },
+          "potentialSignalsBeforeSlotExclusion": 4387
+        }
+      }
+    },
+    "BTC24_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 453,
+            "wins": 214,
+            "losses": 239,
+            "winRatePct": 47.24061810154526,
+            "pf": 1.0193051577169152,
+            "endingEquityJpy": 9035.334378226169,
+            "closedDDPct": -45.90417912134392,
+            "grossProfitPctPoints": 432.0892843887248,
+            "grossLossPctPoints": -423.90571765234415,
+            "totalNetReturnPctPoints": 8.18356673638067
+          },
+          "early": {
+            "trades": 234,
+            "wins": 123,
+            "losses": 111,
+            "winRatePct": 52.56410256410257,
+            "pf": 1.118262406130427,
+            "endingEquityJpy": 11808.868781793637,
+            "closedDDPct": -26.12431008663536,
+            "grossProfitPctPoints": 288.5827509943647,
+            "grossLossPctPoints": -258.0635362615474,
+            "totalNetReturnPctPoints": 30.51921473281726
+          },
+          "late": {
+            "trades": 219,
+            "wins": 91,
+            "losses": 128,
+            "winRatePct": 41.55251141552511,
+            "pf": 0.865319861273387,
+            "endingEquityJpy": 7651.3123696966,
+            "closedDDPct": -44.92046790486641,
+            "grossProfitPctPoints": 143.50653339436013,
+            "grossLossPctPoints": -165.84218139079675,
+            "totalNetReturnPctPoints": -22.33564799643662
+          },
+          "potentialSignalsBeforeSlotExclusion": 4376
+        },
+        "30": {
+          "all": {
+            "trades": 453,
+            "wins": 201,
+            "losses": 252,
+            "winRatePct": 44.370860927152314,
+            "pf": 0.8256736199939149,
+            "endingEquityJpy": 3646.137389830497,
+            "closedDDPct": -65.40306608747046,
+            "grossProfitPctPoints": 390.3544305651506,
+            "grossLossPctPoints": -472.7708638287699,
+            "totalNetReturnPctPoints": -82.4164332636193
+          },
+          "early": {
+            "trades": 234,
+            "wins": 118,
+            "losses": 116,
+            "winRatePct": 50.427350427350426,
+            "pf": 0.9420335312608783,
+            "endingEquityJpy": 7392.314684575642,
+            "closedDDPct": -35.699145905660636,
+            "grossProfitPctPoints": 264.58478445476254,
+            "grossLossPctPoints": -280.8655697219453,
+            "totalNetReturnPctPoints": -16.28078526718275
+          },
+          "late": {
+            "trades": 219,
+            "wins": 83,
+            "losses": 136,
+            "winRatePct": 37.89954337899543,
+            "pf": 0.6553735096040549,
+            "endingEquityJpy": 4932.335195954669,
+            "closedDDPct": -54.15412466417021,
+            "grossProfitPctPoints": 125.76964611038802,
+            "grossLossPctPoints": -191.90529410682464,
+            "totalNetReturnPctPoints": -66.13564799643662
+          },
+          "potentialSignalsBeforeSlotExclusion": 4376
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 453,
+            "wins": 220,
+            "losses": 233,
+            "winRatePct": 48.56512141280353,
+            "pf": 1.0183230663680396,
+            "endingEquityJpy": 8900.89478329447,
+            "closedDDPct": -47.526559130306744,
+            "grossProfitPctPoints": 463.9454009440617,
+            "grossLossPctPoints": -455.59745847530843,
+            "totalNetReturnPctPoints": 8.347942468753274
+          },
+          "early": {
+            "trades": 234,
+            "wins": 120,
+            "losses": 114,
+            "winRatePct": 51.28205128205128,
+            "pf": 1.1622911788088095,
+            "endingEquityJpy": 13086.055672909253,
+            "closedDDPct": -46.05292292798471,
+            "grossProfitPctPoints": 294.68673200106974,
+            "grossLossPctPoints": -253.5395066003027,
+            "totalNetReturnPctPoints": 41.14722540076704
+          },
+          "late": {
+            "trades": 219,
+            "wins": 100,
+            "losses": 119,
+            "winRatePct": 45.662100456621005,
+            "pf": 0.8376738820340829,
+            "endingEquityJpy": 6801.816380562323,
+            "closedDDPct": -43.457504594831384,
+            "grossProfitPctPoints": 169.25866894299196,
+            "grossLossPctPoints": -202.05795187500576,
+            "totalNetReturnPctPoints": -32.799282932013796
+          },
+          "potentialSignalsBeforeSlotExclusion": 4376
+        },
+        "30": {
+          "all": {
+            "trades": 453,
+            "wins": 204,
+            "losses": 249,
+            "winRatePct": 45.033112582781456,
+            "pf": 0.8368742149184054,
+            "endingEquityJpy": 3591.6531878242295,
+            "closedDDPct": -64.3948964615697,
+            "grossProfitPctPoints": 421.97268836103956,
+            "grossLossPctPoints": -504.2247458922863,
+            "totalNetReturnPctPoints": -82.25205753124675
+          },
+          "early": {
+            "trades": 234,
+            "wins": 111,
+            "losses": 123,
+            "winRatePct": 47.43589743589743,
+            "pf": 0.9796199736604468,
+            "endingEquityJpy": 8193.45008174826,
+            "closedDDPct": -52.698215362268385,
+            "grossProfitPctPoints": 271.7155911257032,
+            "grossLossPctPoints": -277.3683657249362,
+            "totalNetReturnPctPoints": -5.652774599232998
+          },
+          "late": {
+            "trades": 219,
+            "wins": 93,
+            "losses": 126,
+            "winRatePct": 42.465753424657535,
+            "pf": 0.6623445949569189,
+            "endingEquityJpy": 4383.566326748003,
+            "closedDDPct": -57.35990170165752,
+            "grossProfitPctPoints": 150.25709723533632,
+            "grossLossPctPoints": -226.85638016735012,
+            "totalNetReturnPctPoints": -76.59928293201381
+          },
+          "potentialSignalsBeforeSlotExclusion": 4376
+        }
+      }
+    },
+    "DOGE3_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 596,
+            "wins": 293,
+            "losses": 303,
+            "winRatePct": 49.16107382550335,
+            "pf": 1.1125155263205686,
+            "endingEquityJpy": 14518.797155083006,
+            "closedDDPct": -44.879710590020636,
+            "grossProfitPctPoints": 598.3766174811358,
+            "grossLossPctPoints": -537.8591159623196,
+            "totalNetReturnPctPoints": 60.517501518816175
+          },
+          "early": {
+            "trades": 299,
+            "wins": 156,
+            "losses": 143,
+            "winRatePct": 52.17391304347826,
+            "pf": 1.2082639172221594,
+            "endingEquityJpy": 16212.570668230388,
+            "closedDDPct": -30.933838662704982,
+            "grossProfitPctPoints": 374.23714192260456,
+            "grossLossPctPoints": -309.73129014974535,
+            "totalNetReturnPctPoints": 64.50585177285922
+          },
+          "late": {
+            "trades": 297,
+            "wins": 137,
+            "losses": 160,
+            "winRatePct": 46.12794612794613,
+            "pf": 0.9825170373678145,
+            "endingEquityJpy": 8955.2714693997,
+            "closedDDPct": -44.87971059002069,
+            "grossProfitPctPoints": 224.13947555853125,
+            "grossLossPctPoints": -228.1278258125742,
+            "totalNetReturnPctPoints": -3.988350254042956
+          },
+          "potentialSignalsBeforeSlotExclusion": 4448
+        },
+        "30": {
+          "all": {
+            "trades": 596,
+            "wins": 269,
+            "losses": 327,
+            "winRatePct": 45.13422818791946,
+            "pf": 0.9023489516191804,
+            "endingEquityJpy": 4404.102219362023,
+            "closedDDPct": -61.695940800643214,
+            "grossProfitPctPoints": 542.2582948253431,
+            "grossLossPctPoints": -600.9407933065269,
+            "totalNetReturnPctPoints": -58.68249848118376
+          },
+          "early": {
+            "trades": 299,
+            "wins": 145,
+            "losses": 154,
+            "winRatePct": 48.49498327759198,
+            "pf": 1.013862049349169,
+            "endingEquityJpy": 8915.909408456007,
+            "closedDDPct": -40.06937138874513,
+            "grossProfitPctPoints": 344.18320135690794,
+            "grossLossPctPoints": -339.47734958404874,
+            "totalNetReturnPctPoints": 4.705851772859205
+          },
+          "late": {
+            "trades": 297,
+            "wins": 124,
+            "losses": 173,
+            "winRatePct": 41.75084175084175,
+            "pf": 0.7575632396193616,
+            "endingEquityJpy": 4939.599560292854,
+            "closedDDPct": -56.96031197367199,
+            "grossProfitPctPoints": 198.07509346843517,
+            "grossLossPctPoints": -261.46344372247813,
+            "totalNetReturnPctPoints": -63.38835025404296
+          },
+          "potentialSignalsBeforeSlotExclusion": 4448
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 601,
+            "wins": 305,
+            "losses": 296,
+            "winRatePct": 50.74875207986689,
+            "pf": 1.1816555606238772,
+            "endingEquityJpy": 21236.72947442866,
+            "closedDDPct": -32.602712706909976,
+            "grossProfitPctPoints": 646.6140141386074,
+            "grossLossPctPoints": -547.2102325632145,
+            "totalNetReturnPctPoints": 99.40378157539294
+          },
+          "early": {
+            "trades": 304,
+            "wins": 157,
+            "losses": 147,
+            "winRatePct": 51.64473684210527,
+            "pf": 1.2251989426049603,
+            "endingEquityJpy": 17049.486636229823,
+            "closedDDPct": -32.602712706909976,
+            "grossProfitPctPoints": 382.65825292472124,
+            "grossLossPctPoints": -312.3233620420299,
+            "totalNetReturnPctPoints": 70.33489088269135
+          },
+          "late": {
+            "trades": 297,
+            "wins": 148,
+            "losses": 149,
+            "winRatePct": 49.831649831649834,
+            "pf": 1.1237569840672719,
+            "endingEquityJpy": 12455.934848678093,
+            "closedDDPct": -23.42299461055871,
+            "grossProfitPctPoints": 263.9557612138862,
+            "grossLossPctPoints": -234.88687052118462,
+            "totalNetReturnPctPoints": 29.068890692701586
+          },
+          "potentialSignalsBeforeSlotExclusion": 4480
+        },
+        "30": {
+          "all": {
+            "trades": 601,
+            "wins": 287,
+            "losses": 314,
+            "winRatePct": 47.75374376039934,
+            "pf": 0.9658053035590116,
+            "endingEquityJpy": 6382.493475171473,
+            "closedDDPct": -47.92815507184584,
+            "grossProfitPctPoints": 587.3746556902181,
+            "grossLossPctPoints": -608.1708741148251,
+            "totalNetReturnPctPoints": -20.79621842460699
+          },
+          "early": {
+            "trades": 304,
+            "wins": 147,
+            "losses": 157,
+            "winRatePct": 48.35526315789473,
+            "pf": 1.0278279351340793,
+            "endingEquityJpy": 9283.545503272966,
+            "closedDDPct": -37.076157988704075,
+            "grossProfitPctPoints": 352.17227438782095,
+            "grossLossPctPoints": -342.63738350512955,
+            "totalNetReturnPctPoints": 9.5348908826914
+          },
+          "late": {
+            "trades": 297,
+            "wins": 140,
+            "losses": 157,
+            "winRatePct": 47.13804713804714,
+            "pf": 0.8857729424727003,
+            "endingEquityJpy": 6875.06025895095,
+            "closedDDPct": -39.952375696853224,
+            "grossProfitPctPoints": 235.2023813023972,
+            "grossLossPctPoints": -265.5334906096956,
+            "totalNetReturnPctPoints": -30.33110930729839
+          },
+          "potentialSignalsBeforeSlotExclusion": 4480
+        }
+      }
+    },
+    "DOGE6_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 569,
+            "wins": 290,
+            "losses": 279,
+            "winRatePct": 50.96660808435852,
+            "pf": 1.0614742125532277,
+            "endingEquityJpy": 11062.219010843924,
+            "closedDDPct": -34.64389001939341,
+            "grossProfitPctPoints": 564.3612908438816,
+            "grossLossPctPoints": -531.6768737003883,
+            "totalNetReturnPctPoints": 32.684417143493306
+          },
+          "early": {
+            "trades": 289,
+            "wins": 151,
+            "losses": 138,
+            "winRatePct": 52.24913494809689,
+            "pf": 1.1010817189874507,
+            "endingEquityJpy": 11726.18400657276,
+            "closedDDPct": -32.27005546208874,
+            "grossProfitPctPoints": 346.1745935261353,
+            "grossLossPctPoints": -314.3950058897316,
+            "totalNetReturnPctPoints": 31.779587636403733
+          },
+          "late": {
+            "trades": 280,
+            "wins": 139,
+            "losses": 141,
+            "winRatePct": 49.642857142857146,
+            "pf": 1.0041643120809238,
+            "endingEquityJpy": 9433.775731852193,
+            "closedDDPct": -34.64389001939339,
+            "grossProfitPctPoints": 218.1866973177464,
+            "grossLossPctPoints": -217.28186781065676,
+            "totalNetReturnPctPoints": 0.9048295070896302
+          },
+          "potentialSignalsBeforeSlotExclusion": 4507
+        },
+        "30": {
+          "all": {
+            "trades": 569,
+            "wins": 267,
+            "losses": 302,
+            "winRatePct": 46.92442882249561,
+            "pf": 0.8624593126331068,
+            "endingEquityJpy": 3540.0770677665787,
+            "closedDDPct": -66.64948195105312,
+            "grossProfitPctPoints": 508.64141494101676,
+            "grossLossPctPoints": -589.7569977975235,
+            "totalNetReturnPctPoints": -81.1155828565067
+          },
+          "early": {
+            "trades": 289,
+            "wins": 142,
+            "losses": 147,
+            "winRatePct": 49.13494809688581,
+            "pf": 0.9240908160782345,
+            "endingEquityJpy": 6574.844079094742,
+            "closedDDPct": -41.269903839322645,
+            "grossProfitPctPoints": 316.763043066694,
+            "grossLossPctPoints": -342.78345543029025,
+            "totalNetReturnPctPoints": -26.020412363596222
+          },
+          "late": {
+            "trades": 280,
+            "wins": 125,
+            "losses": 155,
+            "winRatePct": 44.642857142857146,
+            "pf": 0.7769187340278437,
+            "endingEquityJpy": 5384.275315398776,
+            "closedDDPct": -53.4473929242832,
+            "grossProfitPctPoints": 191.8783718743228,
+            "grossLossPctPoints": -246.97354236723314,
+            "totalNetReturnPctPoints": -55.09517049291034
+          },
+          "potentialSignalsBeforeSlotExclusion": 4507
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 563,
+            "wins": 275,
+            "losses": 288,
+            "winRatePct": 48.84547069271758,
+            "pf": 1.0824447838172182,
+            "endingEquityJpy": 12406.328182047671,
+            "closedDDPct": -40.11068566248465,
+            "grossProfitPctPoints": 595.181088594557,
+            "grossLossPctPoints": -549.8489137669117,
+            "totalNetReturnPctPoints": 45.332174827645304
+          },
+          "early": {
+            "trades": 285,
+            "wins": 135,
+            "losses": 150,
+            "winRatePct": 47.368421052631575,
+            "pf": 1.181151777795434,
+            "endingEquityJpy": 14778.025601589896,
+            "closedDDPct": -27.791633291902418,
+            "grossProfitPctPoints": 358.47277531252,
+            "grossLossPctPoints": -303.4942520101804,
+            "totalNetReturnPctPoints": 54.978523302339624
+          },
+          "late": {
+            "trades": 278,
+            "wins": 140,
+            "losses": 138,
+            "winRatePct": 50.35971223021583,
+            "pf": 0.9608436535931286,
+            "endingEquityJpy": 8395.118885646627,
+            "closedDDPct": -40.11068566248467,
+            "grossProfitPctPoints": 236.708313282037,
+            "grossLossPctPoints": -246.35466175673122,
+            "totalNetReturnPctPoints": -9.646348474694207
+          },
+          "potentialSignalsBeforeSlotExclusion": 4533
+        },
+        "30": {
+          "all": {
+            "trades": 563,
+            "wins": 258,
+            "losses": 305,
+            "winRatePct": 45.825932504440495,
+            "pf": 0.8896788235839006,
+            "endingEquityJpy": 4019.021321986452,
+            "closedDDPct": -66.86772917560933,
+            "grossProfitPctPoints": 542.4775324971458,
+            "grossLossPctPoints": -609.7453576695004,
+            "totalNetReturnPctPoints": -67.2678251723546
+          },
+          "early": {
+            "trades": 285,
+            "wins": 125,
+            "losses": 160,
+            "winRatePct": 43.859649122807014,
+            "pf": 0.9939621055988275,
+            "endingEquityJpy": 8356.501722190522,
+            "closedDDPct": -34.95068215240307,
+            "grossProfitPctPoints": 332.7768094843234,
+            "grossLossPctPoints": -334.79828618198377,
+            "totalNetReturnPctPoints": -2.0214766976603755
+          },
+          "late": {
+            "trades": 278,
+            "wins": 133,
+            "losses": 145,
+            "winRatePct": 47.84172661870504,
+            "pf": 0.762694877520612,
+            "endingEquityJpy": 4809.454309467825,
+            "closedDDPct": -56.9307608441252,
+            "grossProfitPctPoints": 209.7007230128225,
+            "grossLossPctPoints": -274.94707148751667,
+            "totalNetReturnPctPoints": -65.24634847469417
+          },
+          "potentialSignalsBeforeSlotExclusion": 4533
+        }
+      }
+    },
+    "REL3_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 605,
+            "wins": 305,
+            "losses": 300,
+            "winRatePct": 50.413223140495866,
+            "pf": 1.0226038775090989,
+            "endingEquityJpy": 8988.87843770925,
+            "closedDDPct": -36.9214130239534,
+            "grossProfitPctPoints": 588.0058707835378,
+            "grossLossPctPoints": -575.008450208332,
+            "totalNetReturnPctPoints": 12.997420575205865
+          },
+          "early": {
+            "trades": 306,
+            "wins": 152,
+            "losses": 154,
+            "winRatePct": 49.673202614379086,
+            "pf": 1.029605667066174,
+            "endingEquityJpy": 9422.607186181644,
+            "closedDDPct": -36.9214130239534,
+            "grossProfitPctPoints": 357.5308376323111,
+            "grossLossPctPoints": -347.2502619872742,
+            "totalNetReturnPctPoints": 10.28057564503689
+          },
+          "late": {
+            "trades": 299,
+            "wins": 153,
+            "losses": 146,
+            "winRatePct": 51.17056856187291,
+            "pf": 1.01192863778637,
+            "endingEquityJpy": 9539.69348408318,
+            "closedDDPct": -33.52883182452818,
+            "grossProfitPctPoints": 230.4750331512267,
+            "grossLossPctPoints": -227.75818822105782,
+            "totalNetReturnPctPoints": 2.7168449301688895
+          },
+          "potentialSignalsBeforeSlotExclusion": 4612
+        },
+        "30": {
+          "all": {
+            "trades": 605,
+            "wins": 273,
+            "losses": 332,
+            "winRatePct": 45.123966942148755,
+            "pf": 0.8307873038336502,
+            "endingEquityJpy": 2675.384416006944,
+            "closedDDPct": -74.64766006135078,
+            "grossProfitPctPoints": 530.2626445901872,
+            "grossLossPctPoints": -638.2652240149814,
+            "totalNetReturnPctPoints": -108.00257942479425
+          },
+          "early": {
+            "trades": 306,
+            "wins": 143,
+            "losses": 163,
+            "winRatePct": 46.73202614379085,
+            "pf": 0.8656468375580483,
+            "endingEquityJpy": 5104.183694894428,
+            "closedDDPct": -60.68514434633671,
+            "grossProfitPctPoints": 328.07741821629537,
+            "grossLossPctPoints": -378.99684257125847,
+            "totalNetReturnPctPoints": -50.9194243549631
+          },
+          "late": {
+            "trades": 299,
+            "wins": 130,
+            "losses": 169,
+            "winRatePct": 43.47826086956522,
+            "pf": 0.7798298629706929,
+            "endingEquityJpy": 5241.551981530468,
+            "closedDDPct": -53.30875518372776,
+            "grossProfitPctPoints": 202.1852263738918,
+            "grossLossPctPoints": -259.26838144372294,
+            "totalNetReturnPctPoints": -57.08315506983115
+          },
+          "potentialSignalsBeforeSlotExclusion": 4612
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 601,
+            "wins": 311,
+            "losses": 290,
+            "winRatePct": 51.74708818635607,
+            "pf": 1.1221613861808435,
+            "endingEquityJpy": 15577.663314723306,
+            "closedDDPct": -35.51874174806861,
+            "grossProfitPctPoints": 645.839379819294,
+            "grossLossPctPoints": -575.5316372249622,
+            "totalNetReturnPctPoints": 70.30774259433178
+          },
+          "early": {
+            "trades": 305,
+            "wins": 163,
+            "losses": 142,
+            "winRatePct": 53.442622950819676,
+            "pf": 1.2380622813870665,
+            "endingEquityJpy": 17683.800178407415,
+            "closedDDPct": -30.928046062539938,
+            "grossProfitPctPoints": 385.62975578987397,
+            "grossLossPctPoints": -311.4784785768876,
+            "totalNetReturnPctPoints": 74.15127721298637
+          },
+          "late": {
+            "trades": 296,
+            "wins": 148,
+            "losses": 148,
+            "winRatePct": 50.0,
+            "pf": 0.9854440877044112,
+            "endingEquityJpy": 8809.00211355261,
+            "closedDDPct": -35.51874174806859,
+            "grossProfitPctPoints": 260.20962402942,
+            "grossLossPctPoints": -264.0531586480746,
+            "totalNetReturnPctPoints": -3.843534618654587
+          },
+          "potentialSignalsBeforeSlotExclusion": 4615
+        },
+        "30": {
+          "all": {
+            "trades": 601,
+            "wins": 288,
+            "losses": 313,
+            "winRatePct": 47.920133111480865,
+            "pf": 0.9215647851945737,
+            "endingEquityJpy": 4678.624079178209,
+            "closedDDPct": -58.07729485743345,
+            "grossProfitPctPoints": 586.2028629995676,
+            "grossLossPctPoints": -636.0951204052358,
+            "totalNetReturnPctPoints": -49.89225740566815
+          },
+          "early": {
+            "trades": 305,
+            "wins": 151,
+            "losses": 154,
+            "winRatePct": 49.50819672131148,
+            "pf": 1.0385301214723701,
+            "endingEquityJpy": 9610.352279392291,
+            "closedDDPct": -35.30585097540309,
+            "grossProfitPctPoints": 354.4758490137025,
+            "grossLossPctPoints": -341.32457180071617,
+            "totalNetReturnPctPoints": 13.151277212986315
+          },
+          "late": {
+            "trades": 296,
+            "wins": 137,
+            "losses": 159,
+            "winRatePct": 46.28378378378378,
+            "pf": 0.7861267520886654,
+            "endingEquityJpy": 4868.316939026986,
+            "closedDDPct": -51.56836584987017,
+            "grossProfitPctPoints": 231.72701398586509,
+            "grossLossPctPoints": -294.7705486045196,
+            "totalNetReturnPctPoints": -63.04353461865452
+          },
+          "potentialSignalsBeforeSlotExclusion": 4615
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE3_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 510,
+            "wins": 255,
+            "losses": 255,
+            "winRatePct": 50.0,
+            "pf": 1.0850197693555554,
+            "endingEquityJpy": 12181.073113000193,
+            "closedDDPct": -33.23099006498551,
+            "grossProfitPctPoints": 513.6655827528112,
+            "grossLossPctPoints": -473.4158743097386,
+            "totalNetReturnPctPoints": 40.24970844307262
+          },
+          "early": {
+            "trades": 259,
+            "wins": 136,
+            "losses": 123,
+            "winRatePct": 52.509652509652504,
+            "pf": 1.1604728607390917,
+            "endingEquityJpy": 13521.290109813148,
+            "closedDDPct": -32.43007068180954,
+            "grossProfitPctPoints": 330.018495184399,
+            "grossLossPctPoints": -284.382777356994,
+            "totalNetReturnPctPoints": 45.63571782740502
+          },
+          "late": {
+            "trades": 251,
+            "wins": 119,
+            "losses": 132,
+            "winRatePct": 47.410358565737056,
+            "pf": 0.9715075853321137,
+            "endingEquityJpy": 9008.809820713583,
+            "closedDDPct": -33.23099006498549,
+            "grossProfitPctPoints": 183.64708756841227,
+            "grossLossPctPoints": -189.03309695274464,
+            "totalNetReturnPctPoints": -5.386009384332368
+          },
+          "potentialSignalsBeforeSlotExclusion": 2953
+        },
+        "30": {
+          "all": {
+            "trades": 510,
+            "wins": 233,
+            "losses": 277,
+            "winRatePct": 45.68627450980392,
+            "pf": 0.882826832181556,
+            "endingEquityJpy": 4387.898788209099,
+            "closedDDPct": -58.387766270373795,
+            "grossProfitPctPoints": 465.24998253831126,
+            "grossLossPctPoints": -527.0002740952386,
+            "totalNetReturnPctPoints": -61.75029155692738
+          },
+          "early": {
+            "trades": 259,
+            "wins": 126,
+            "losses": 133,
+            "winRatePct": 48.64864864864865,
+            "pf": 0.9801295070378945,
+            "endingEquityJpy": 8053.01549972992,
+            "closedDDPct": -38.7794344305423,
+            "grossProfitPctPoints": 304.0586289726262,
+            "grossLossPctPoints": -310.2229111452212,
+            "totalNetReturnPctPoints": -6.164282172594994
+          },
+          "late": {
+            "trades": 251,
+            "wins": 107,
+            "losses": 144,
+            "winRatePct": 42.62948207171315,
+            "pf": 0.7435801938547021,
+            "endingEquityJpy": 5448.764861257565,
+            "closedDDPct": -49.598710806385746,
+            "grossProfitPctPoints": 161.19135356568506,
+            "grossLossPctPoints": -216.77736295001742,
+            "totalNetReturnPctPoints": -55.58600938433236
+          },
+          "potentialSignalsBeforeSlotExclusion": 2953
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 510,
+            "wins": 245,
+            "losses": 265,
+            "winRatePct": 48.03921568627451,
+            "pf": 1.0995237442866739,
+            "endingEquityJpy": 13159.278845627496,
+            "closedDDPct": -54.6277453606379,
+            "grossProfitPctPoints": 557.4580779848363,
+            "grossLossPctPoints": -506.9995813018957,
+            "totalNetReturnPctPoints": 50.45849668294062
+          },
+          "early": {
+            "trades": 256,
+            "wins": 124,
+            "losses": 132,
+            "winRatePct": 48.4375,
+            "pf": 1.2434968627387297,
+            "endingEquityJpy": 16745.349100695737,
+            "closedDDPct": -54.6277453606379,
+            "grossProfitPctPoints": 346.5283436555182,
+            "grossLossPctPoints": -278.6724711892796,
+            "totalNetReturnPctPoints": 67.85587246623862
+          },
+          "late": {
+            "trades": 254,
+            "wins": 121,
+            "losses": 133,
+            "winRatePct": 47.63779527559055,
+            "pf": 0.9238050366655226,
+            "endingEquityJpy": 7858.467904428916,
+            "closedDDPct": -29.187424828970222,
+            "grossProfitPctPoints": 210.92973432931814,
+            "grossLossPctPoints": -228.3271101126161,
+            "totalNetReturnPctPoints": -17.397375783297974
+          },
+          "potentialSignalsBeforeSlotExclusion": 2911
+        },
+        "30": {
+          "all": {
+            "trades": 510,
+            "wins": 226,
+            "losses": 284,
+            "winRatePct": 44.31372549019608,
+            "pf": 0.9082990361662887,
+            "endingEquityJpy": 4740.768318561013,
+            "closedDDPct": -60.07156051602121,
+            "grossProfitPctPoints": 510.51914645455804,
+            "grossLossPctPoints": -562.0606497716174,
+            "totalNetReturnPctPoints": -51.54150331705932
+          },
+          "early": {
+            "trades": 256,
+            "wins": 118,
+            "losses": 138,
+            "winRatePct": 46.09375,
+            "pf": 1.0545302984448328,
+            "endingEquityJpy": 10037.413081370258,
+            "closedDDPct": -60.07156051602121,
+            "grossProfitPctPoints": 322.09840517287813,
+            "grossLossPctPoints": -305.4425327066395,
+            "totalNetReturnPctPoints": 16.655872466238634
+          },
+          "late": {
+            "trades": 254,
+            "wins": 108,
+            "losses": 146,
+            "winRatePct": 42.51968503937008,
+            "pf": 0.7342456699344037,
+            "endingEquityJpy": 4723.097754500129,
+            "closedDDPct": -54.686466378608486,
+            "grossProfitPctPoints": 188.42074128167994,
+            "grossLossPctPoints": -256.6181170649779,
+            "totalNetReturnPctPoints": -68.19737578329799
+          },
+          "potentialSignalsBeforeSlotExclusion": 2911
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 520,
+            "wins": 272,
+            "losses": 248,
+            "winRatePct": 52.307692307692314,
+            "pf": 1.0465240108085048,
+            "endingEquityJpy": 10234.513017967587,
+            "closedDDPct": -34.495066641223815,
+            "grossProfitPctPoints": 503.36553885417095,
+            "grossLossPctPoints": -480.9880458120496,
+            "totalNetReturnPctPoints": 22.37749304212133
+          },
+          "early": {
+            "trades": 264,
+            "wins": 142,
+            "losses": 122,
+            "winRatePct": 53.78787878787878,
+            "pf": 1.1344755524944998,
+            "endingEquityJpy": 12647.419319606017,
+            "closedDDPct": -29.73953269655779,
+            "grossProfitPctPoints": 323.3896379853181,
+            "grossLossPctPoints": -285.05650674820157,
+            "totalNetReturnPctPoints": 38.333131237116504
+          },
+          "late": {
+            "trades": 256,
+            "wins": 130,
+            "losses": 126,
+            "winRatePct": 50.78125,
+            "pf": 0.9185652382907289,
+            "endingEquityJpy": 8092.174979999321,
+            "closedDDPct": -30.368774931654386,
+            "grossProfitPctPoints": 179.97590086885285,
+            "grossLossPctPoints": -195.93153906384805,
+            "totalNetReturnPctPoints": -15.955638194995203
+          },
+          "potentialSignalsBeforeSlotExclusion": 3503
+        },
+        "30": {
+          "all": {
+            "trades": 520,
+            "wins": 247,
+            "losses": 273,
+            "winRatePct": 47.5,
+            "pf": 0.8469727794301823,
+            "endingEquityJpy": 3612.3954098279432,
+            "closedDDPct": -65.843165963844,
+            "grossProfitPctPoints": 451.76303486890316,
+            "grossLossPctPoints": -533.3855418267818,
+            "totalNetReturnPctPoints": -81.62250695787867
+          },
+          "early": {
+            "trades": 264,
+            "wins": 131,
+            "losses": 133,
+            "winRatePct": 49.621212121212125,
+            "pf": 0.9534404165063254,
+            "endingEquityJpy": 7456.615527749954,
+            "closedDDPct": -36.596903847943416,
+            "grossProfitPctPoints": 296.2504460698162,
+            "grossLossPctPoints": -310.7173148326996,
+            "totalNetReturnPctPoints": -14.46686876288345
+          },
+          "late": {
+            "trades": 256,
+            "wins": 116,
+            "losses": 140,
+            "winRatePct": 45.3125,
+            "pf": 0.6984049358924478,
+            "endingEquityJpy": 4844.550984805817,
+            "closedDDPct": -54.87346721199861,
+            "grossProfitPctPoints": 155.51258879908696,
+            "grossLossPctPoints": -222.66822699408215,
+            "totalNetReturnPctPoints": -67.15563819499519
+          },
+          "potentialSignalsBeforeSlotExclusion": 3503
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 513,
+            "wins": 247,
+            "losses": 266,
+            "winRatePct": 48.148148148148145,
+            "pf": 1.0120098284888472,
+            "endingEquityJpy": 8544.966410668294,
+            "closedDDPct": -41.37263028463505,
+            "grossProfitPctPoints": 528.4891515105351,
+            "grossLossPctPoints": -522.2174099827522,
+            "totalNetReturnPctPoints": 6.271741527782865
+          },
+          "early": {
+            "trades": 264,
+            "wins": 126,
+            "losses": 138,
+            "winRatePct": 47.72727272727273,
+            "pf": 1.0837157421168748,
+            "endingEquityJpy": 10970.4646759043,
+            "closedDDPct": -41.37263028463505,
+            "grossProfitPctPoints": 321.1948436808213,
+            "grossLossPctPoints": -296.3829269965348,
+            "totalNetReturnPctPoints": 24.811916684286473
+          },
+          "late": {
+            "trades": 249,
+            "wins": 121,
+            "losses": 128,
+            "winRatePct": 48.59437751004016,
+            "pf": 0.9179037013686029,
+            "endingEquityJpy": 7789.0651518495715,
+            "closedDDPct": -29.08356083591669,
+            "grossProfitPctPoints": 207.29430782971374,
+            "grossLossPctPoints": -225.8344829862174,
+            "totalNetReturnPctPoints": -18.540175156503665
+          },
+          "potentialSignalsBeforeSlotExclusion": 3423
+        },
+        "30": {
+          "all": {
+            "trades": 513,
+            "wins": 234,
+            "losses": 279,
+            "winRatePct": 45.614035087719294,
+            "pf": 0.8330473622616059,
+            "endingEquityJpy": 3057.3905266314573,
+            "closedDDPct": -70.79203499835774,
+            "grossProfitPctPoints": 480.6512955924418,
+            "grossLossPctPoints": -576.9795540646589,
+            "totalNetReturnPctPoints": -96.32825847221716
+          },
+          "early": {
+            "trades": 264,
+            "wins": 119,
+            "losses": 145,
+            "winRatePct": 45.07575757575758,
+            "pf": 0.9138069208079342,
+            "endingEquityJpy": 6465.989072449531,
+            "closedDDPct": -48.06864112738257,
+            "grossProfitPctPoints": 296.72572872187635,
+            "grossLossPctPoints": -324.7138120375899,
+            "totalNetReturnPctPoints": -27.98808331571354
+          },
+          "late": {
+            "trades": 249,
+            "wins": 115,
+            "losses": 134,
+            "winRatePct": 46.1847389558233,
+            "pf": 0.7290945072154486,
+            "endingEquityJpy": 4728.418950874004,
+            "closedDDPct": -54.58729930114949,
+            "grossProfitPctPoints": 183.92556687056543,
+            "grossLossPctPoints": -252.2657420270691,
+            "totalNetReturnPctPoints": -68.34017515650368
+          },
+          "potentialSignalsBeforeSlotExclusion": 3423
+        }
+      }
+    },
+    "BTC6_DOWN_REL3_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 482,
+            "wins": 247,
+            "losses": 235,
+            "winRatePct": 51.244813278008294,
+            "pf": 1.1010702640456835,
+            "endingEquityJpy": 12974.529657600902,
+            "closedDDPct": -33.01915811810222,
+            "grossProfitPctPoints": 473.46759428668,
+            "grossLossPctPoints": -430.0067032479916,
+            "totalNetReturnPctPoints": 43.46089103868843
+          },
+          "early": {
+            "trades": 246,
+            "wins": 129,
+            "losses": 117,
+            "winRatePct": 52.4390243902439,
+            "pf": 1.1735012479343436,
+            "endingEquityJpy": 13674.158905367534,
+            "closedDDPct": -33.01915811810222,
+            "grossProfitPctPoints": 300.66232417286983,
+            "grossLossPctPoints": -256.2096330976306,
+            "totalNetReturnPctPoints": 44.452691075239215
+          },
+          "late": {
+            "trades": 236,
+            "wins": 118,
+            "losses": 118,
+            "winRatePct": 50.0,
+            "pf": 0.994293344325697,
+            "endingEquityJpy": 9488.356649496012,
+            "closedDDPct": -24.836778617281617,
+            "grossProfitPctPoints": 172.8052701138102,
+            "grossLossPctPoints": -173.79707015036098,
+            "totalNetReturnPctPoints": -0.9918000365507851
+          },
+          "potentialSignalsBeforeSlotExclusion": 2476
+        },
+        "30": {
+          "all": {
+            "trades": 482,
+            "wins": 223,
+            "losses": 259,
+            "winRatePct": 46.2655601659751,
+            "pf": 0.8895427953669572,
+            "endingEquityJpy": 4944.131787058317,
+            "closedDDPct": -53.11278189324062,
+            "grossProfitPctPoints": 426.33346666817397,
+            "grossLossPctPoints": -479.2725756294855,
+            "totalNetReturnPctPoints": -52.93910896131155
+          },
+          "early": {
+            "trades": 246,
+            "wins": 120,
+            "losses": 126,
+            "winRatePct": 48.78048780487805,
+            "pf": 0.983061096687584,
+            "endingEquityJpy": 8359.382059553582,
+            "closedDDPct": -38.22705084163118,
+            "grossProfitPctPoints": 275.5133925623968,
+            "grossLossPctPoints": -280.26070148715763,
+            "totalNetReturnPctPoints": -4.74730892476083
+          },
+          "late": {
+            "trades": 236,
+            "wins": 103,
+            "losses": 133,
+            "winRatePct": 43.64406779661017,
+            "pf": 0.7578445997544584,
+            "endingEquityJpy": 5914.4704140037165,
+            "closedDDPct": -44.75534976976731,
+            "grossProfitPctPoints": 150.82007410577714,
+            "grossLossPctPoints": -199.0118741423279,
+            "totalNetReturnPctPoints": -48.191800036550774
+          },
+          "potentialSignalsBeforeSlotExclusion": 2476
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 485,
+            "wins": 238,
+            "losses": 247,
+            "winRatePct": 49.072164948453604,
+            "pf": 1.0165132674253836,
+            "endingEquityJpy": 8735.58618820787,
+            "closedDDPct": -51.67163853915115,
+            "grossProfitPctPoints": 507.4096687989524,
+            "grossLossPctPoints": -499.1667940391131,
+            "totalNetReturnPctPoints": 8.24287475983931
+          },
+          "early": {
+            "trades": 247,
+            "wins": 121,
+            "losses": 126,
+            "winRatePct": 48.987854251012145,
+            "pf": 1.1523462710083718,
+            "endingEquityJpy": 13028.98581358678,
+            "closedDDPct": -51.67163853915115,
+            "grossProfitPctPoints": 316.79973211972964,
+            "grossLossPctPoints": -274.9171321937033,
+            "totalNetReturnPctPoints": 41.88259992602633
+          },
+          "late": {
+            "trades": 238,
+            "wins": 117,
+            "losses": 121,
+            "winRatePct": 49.159663865546214,
+            "pf": 0.8499898510911599,
+            "endingEquityJpy": 6704.732289368426,
+            "closedDDPct": -39.1475019356211,
+            "grossProfitPctPoints": 190.6099366792228,
+            "grossLossPctPoints": -224.24966184540978,
+            "totalNetReturnPctPoints": -33.63972516618696
+          },
+          "potentialSignalsBeforeSlotExclusion": 2504
+        },
+        "30": {
+          "all": {
+            "trades": 485,
+            "wins": 223,
+            "losses": 262,
+            "winRatePct": 45.97938144329897,
+            "pf": 0.8387021656855485,
+            "endingEquityJpy": 3305.9675953821466,
+            "closedDDPct": -67.95485178955558,
+            "grossProfitPctPoints": 461.5114237294917,
+            "grossLossPctPoints": -550.2685489696523,
+            "totalNetReturnPctPoints": -88.75712524016063
+          },
+          "early": {
+            "trades": 247,
+            "wins": 115,
+            "losses": 132,
+            "winRatePct": 46.558704453441294,
+            "pf": 0.9749902842654791,
+            "endingEquityJpy": 7947.896478309756,
+            "closedDDPct": -57.46461246632324,
+            "grossProfitPctPoints": 293.0617889808395,
+            "grossLossPctPoints": -300.5791890548132,
+            "totalNetReturnPctPoints": -7.517400073973704
+          },
+          "late": {
+            "trades": 238,
+            "wins": 108,
+            "losses": 130,
+            "winRatePct": 45.378151260504204,
+            "pf": 0.6746368159464419,
+            "endingEquityJpy": 4159.550397270919,
+            "closedDDPct": -59.57282839066189,
+            "grossProfitPctPoints": 168.44963474865224,
+            "grossLossPctPoints": -249.6893599148392,
+            "totalNetReturnPctPoints": -81.23972516618696
+          },
+          "potentialSignalsBeforeSlotExclusion": 2504
+        }
+      }
+    },
+    "BTC6_DOWN_REL6_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 471,
+            "wins": 243,
+            "losses": 228,
+            "winRatePct": 51.59235668789809,
+            "pf": 1.0514470198596229,
+            "endingEquityJpy": 10450.531557560584,
+            "closedDDPct": -33.120001576108585,
+            "grossProfitPctPoints": 456.3043904111222,
+            "grossLossPctPoints": -433.97753932674874,
+            "totalNetReturnPctPoints": 22.32685108437346
+          },
+          "early": {
+            "trades": 240,
+            "wins": 128,
+            "losses": 112,
+            "winRatePct": 53.333333333333336,
+            "pf": 1.08045698055241,
+            "endingEquityJpy": 10810.4100122496,
+            "closedDDPct": -33.120001576108585,
+            "grossProfitPctPoints": 275.3955497289233,
+            "grossLossPctPoints": -254.8880285711335,
+            "totalNetReturnPctPoints": 20.507521157789796
+          },
+          "late": {
+            "trades": 231,
+            "wins": 115,
+            "losses": 116,
+            "winRatePct": 49.78354978354979,
+            "pf": 1.0101587743408733,
+            "endingEquityJpy": 9667.100087525618,
+            "closedDDPct": -20.49718308100096,
+            "grossProfitPctPoints": 180.9088406821989,
+            "grossLossPctPoints": -179.0895107556152,
+            "totalNetReturnPctPoints": 1.8193299265836913
+          },
+          "potentialSignalsBeforeSlotExclusion": 2652
+        },
+        "30": {
+          "all": {
+            "trades": 471,
+            "wins": 222,
+            "losses": 249,
+            "winRatePct": 47.13375796178344,
+            "pf": 0.8509373226399356,
+            "endingEquityJpy": 4069.1821741848826,
+            "closedDDPct": -61.52404030622508,
+            "grossProfitPctPoints": 410.294152708879,
+            "grossLossPctPoints": -482.1673016245055,
+            "totalNetReturnPctPoints": -71.87314891562653
+          },
+          "early": {
+            "trades": 240,
+            "wins": 117,
+            "losses": 123,
+            "winRatePct": 48.75,
+            "pf": 0.9013700156328399,
+            "endingEquityJpy": 6685.458109433551,
+            "closedDDPct": -43.51667958379702,
+            "grossProfitPctPoints": 251.25114074376395,
+            "grossLossPctPoints": -278.7436195859742,
+            "totalNetReturnPctPoints": -27.49247884221026
+          },
+          "late": {
+            "trades": 231,
+            "wins": 105,
+            "losses": 126,
+            "winRatePct": 45.45454545454545,
+            "pf": 0.7818313500735379,
+            "endingEquityJpy": 6086.616814550147,
+            "closedDDPct": -41.33085782583247,
+            "grossProfitPctPoints": 159.04301196511503,
+            "grossLossPctPoints": -203.4236820385313,
+            "totalNetReturnPctPoints": -44.38067007341627
+          },
+          "potentialSignalsBeforeSlotExclusion": 2652
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 463,
+            "wins": 223,
+            "losses": 240,
+            "winRatePct": 48.16414686825054,
+            "pf": 0.932910098921934,
+            "endingEquityJpy": 5841.54826389405,
+            "closedDDPct": -53.84902807852813,
+            "grossProfitPctPoints": 458.51663542012545,
+            "grossLossPctPoints": -491.49069771029906,
+            "totalNetReturnPctPoints": -32.974062290173606
+          },
+          "early": {
+            "trades": 240,
+            "wins": 109,
+            "losses": 131,
+            "winRatePct": 45.416666666666664,
+            "pf": 0.9003498461914293,
+            "endingEquityJpy": 6370.466518577106,
+            "closedDDPct": -53.84902807852813,
+            "grossProfitPctPoints": 271.0717355579834,
+            "grossLossPctPoints": -301.0737844901559,
+            "totalNetReturnPctPoints": -30.0020489321725
+          },
+          "late": {
+            "trades": 223,
+            "wins": 114,
+            "losses": 109,
+            "winRatePct": 51.12107623318386,
+            "pf": 0.9843920725961715,
+            "endingEquityJpy": 9169.733875626436,
+            "closedDDPct": -26.370212683111262,
+            "grossProfitPctPoints": 187.44489986214205,
+            "grossLossPctPoints": -190.41691322014316,
+            "totalNetReturnPctPoints": -2.9720133580011066
+          },
+          "potentialSignalsBeforeSlotExclusion": 2575
+        },
+        "30": {
+          "all": {
+            "trades": 463,
+            "wins": 210,
+            "losses": 253,
+            "winRatePct": 45.35637149028078,
+            "pf": 0.7677692912138628,
+            "endingEquityJpy": 2308.448448829893,
+            "closedDDPct": -78.50478005878232,
+            "grossProfitPctPoints": 415.1557272649861,
+            "grossLossPctPoints": -540.7297895551596,
+            "totalNetReturnPctPoints": -125.57406229017352
+          },
+          "early": {
+            "trades": 240,
+            "wins": 103,
+            "losses": 137,
+            "winRatePct": 42.916666666666664,
+            "pf": 0.7620584678079355,
+            "endingEquityJpy": 3935.3048887528207,
+            "closedDDPct": -67.21005406688614,
+            "grossProfitPctPoints": 249.8181857850262,
+            "grossLossPctPoints": -327.8202347171987,
+            "totalNetReturnPctPoints": -78.00204893217247
+          },
+          "late": {
+            "trades": 223,
+            "wins": 107,
+            "losses": 116,
+            "winRatePct": 47.98206278026906,
+            "pf": 0.7765623370251903,
+            "endingEquityJpy": 5865.996445224581,
+            "closedDDPct": -45.087084153497734,
+            "grossProfitPctPoints": 165.3375414799599,
+            "grossLossPctPoints": -212.909554837961,
+            "totalNetReturnPctPoints": -47.5720133580011
+          },
+          "potentialSignalsBeforeSlotExclusion": 2575
+        }
+      }
+    },
+    "BTC24_DOWN_DOGE6_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 398,
+            "wins": 188,
+            "losses": 210,
+            "winRatePct": 47.23618090452261,
+            "pf": 0.9956930266248121,
+            "endingEquityJpy": 8130.908784233876,
+            "closedDDPct": -47.732620289577355,
+            "grossProfitPctPoints": 412.2176225434669,
+            "grossLossPctPoints": -414.00071258990044,
+            "totalNetReturnPctPoints": -1.7830900464335286
+          },
+          "early": {
+            "trades": 207,
+            "wins": 105,
+            "losses": 102,
+            "winRatePct": 50.72463768115942,
+            "pf": 1.1164877015938386,
+            "endingEquityJpy": 11588.908887273139,
+            "closedDDPct": -21.83991168502534,
+            "grossProfitPctPoints": 271.82931400696935,
+            "grossLossPctPoints": -243.46825640705245,
+            "totalNetReturnPctPoints": 28.361057599916904
+          },
+          "late": {
+            "trades": 191,
+            "wins": 83,
+            "losses": 108,
+            "winRatePct": 43.455497382198956,
+            "pf": 0.8232351288365345,
+            "endingEquityJpy": 7016.112442788445,
+            "closedDDPct": -47.73262028957737,
+            "grossProfitPctPoints": 140.38830853649756,
+            "grossLossPctPoints": -170.53245618284802,
+            "totalNetReturnPctPoints": -30.14414764635046
+          },
+          "potentialSignalsBeforeSlotExclusion": 2739
+        },
+        "30": {
+          "all": {
+            "trades": 398,
+            "wins": 172,
+            "losses": 226,
+            "winRatePct": 43.21608040201005,
+            "pf": 0.822064171872293,
+            "endingEquityJpy": 3662.2766787428336,
+            "closedDDPct": -63.70107752430654,
+            "grossProfitPctPoints": 375.990171442106,
+            "grossLossPctPoints": -457.3732614885395,
+            "totalNetReturnPctPoints": -81.38309004643355
+          },
+          "early": {
+            "trades": 207,
+            "wins": 99,
+            "losses": 108,
+            "winRatePct": 47.82608695652174,
+            "pf": 0.9506843910853702,
+            "endingEquityJpy": 7657.311882528023,
+            "closedDDPct": -37.965896827477394,
+            "grossProfitPctPoints": 251.35893662955274,
+            "grossLossPctPoints": -264.3978790296359,
+            "totalNetReturnPctPoints": -13.03894240008313
+          },
+          "late": {
+            "trades": 191,
+            "wins": 73,
+            "losses": 118,
+            "winRatePct": 38.21989528795812,
+            "pf": 0.6458400715391501,
+            "endingEquityJpy": 4782.718446011301,
+            "closedDDPct": -55.34942296205282,
+            "grossProfitPctPoints": 124.63123481255322,
+            "grossLossPctPoints": -192.97538245890368,
+            "totalNetReturnPctPoints": -68.34414764635046
+          },
+          "potentialSignalsBeforeSlotExclusion": 2739
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 390,
+            "wins": 186,
+            "losses": 204,
+            "winRatePct": 47.69230769230769,
+            "pf": 1.0348903074990994,
+            "endingEquityJpy": 9526.212622811829,
+            "closedDDPct": -43.69542201389876,
+            "grossProfitPctPoints": 436.2687591069684,
+            "grossLossPctPoints": -421.5603875557102,
+            "totalNetReturnPctPoints": 14.70837155125821
+          },
+          "early": {
+            "trades": 200,
+            "wins": 97,
+            "losses": 103,
+            "winRatePct": 48.5,
+            "pf": 1.2486272121012099,
+            "endingEquityJpy": 15258.260489437527,
+            "closedDDPct": -31.887782058004632,
+            "grossProfitPctPoints": 279.5989602785585,
+            "grossLossPctPoints": -223.9250895453775,
+            "totalNetReturnPctPoints": 55.67387073318099
+          },
+          "late": {
+            "trades": 190,
+            "wins": 89,
+            "losses": 101,
+            "winRatePct": 46.8421052631579,
+            "pf": 0.7927217476111931,
+            "endingEquityJpy": 6243.314976439358,
+            "closedDDPct": -40.4263188698886,
+            "grossProfitPctPoints": 156.66979882840988,
+            "grossLossPctPoints": -197.6352980103327,
+            "totalNetReturnPctPoints": -40.96549918192281
+          },
+          "potentialSignalsBeforeSlotExclusion": 2716
+        },
+        "30": {
+          "all": {
+            "trades": 390,
+            "wins": 175,
+            "losses": 215,
+            "winRatePct": 44.871794871794876,
+            "pf": 0.8635369526975434,
+            "endingEquityJpy": 4361.345145428974,
+            "closedDDPct": -61.202267203204386,
+            "grossProfitPctPoints": 400.5088633317344,
+            "grossLossPctPoints": -463.8004917804762,
+            "totalNetReturnPctPoints": -63.29162844874179
+          },
+          "early": {
+            "trades": 200,
+            "wins": 93,
+            "losses": 107,
+            "winRatePct": 46.5,
+            "pf": 1.063942582121626,
+            "endingEquityJpy": 10229.79257777688,
+            "closedDDPct": -38.83508967808209,
+            "grossProfitPctPoints": 260.79801513147225,
+            "grossLossPctPoints": -245.12414439829124,
+            "totalNetReturnPctPoints": 15.673870733181019
+          },
+          "late": {
+            "trades": 190,
+            "wins": 82,
+            "losses": 108,
+            "winRatePct": 43.15789473684211,
+            "pf": 0.6388932770862811,
+            "endingEquityJpy": 4263.375930909412,
+            "closedDDPct": -58.454085958612175,
+            "grossProfitPctPoints": 139.71084820026215,
+            "grossLossPctPoints": -218.67634738218496,
+            "totalNetReturnPctPoints": -78.96549918192281
+          },
+          "potentialSignalsBeforeSlotExclusion": 2716
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_MINUS1": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 373,
+            "wins": 184,
+            "losses": 189,
+            "winRatePct": 49.32975871313673,
+            "pf": 0.9176200041495562,
+            "endingEquityJpy": 6097.273642997953,
+            "closedDDPct": -46.10233827152087,
+            "grossProfitPctPoints": 371.1537729542457,
+            "grossLossPctPoints": -404.47436986536536,
+            "totalNetReturnPctPoints": -33.32059691111965
+          },
+          "early": {
+            "trades": 202,
+            "wins": 101,
+            "losses": 101,
+            "winRatePct": 50.0,
+            "pf": 0.9848245865790574,
+            "endingEquityJpy": 8538.836912850345,
+            "closedDDPct": -46.10233827152087,
+            "grossProfitPctPoints": 242.40799863269066,
+            "grossLossPctPoints": -246.14332535577006,
+            "totalNetReturnPctPoints": -3.735326723079396
+          },
+          "late": {
+            "trades": 171,
+            "wins": 83,
+            "losses": 88,
+            "winRatePct": 48.53801169590643,
+            "pf": 0.8131429608155758,
+            "endingEquityJpy": 7140.637191257263,
+            "closedDDPct": -31.94327570377238,
+            "grossProfitPctPoints": 128.74577432155505,
+            "grossLossPctPoints": -158.3310445095953,
+            "totalNetReturnPctPoints": -29.585270188040255
+          },
+          "potentialSignalsBeforeSlotExclusion": 1883
+        },
+        "30": {
+          "all": {
+            "trades": 373,
+            "wins": 172,
+            "losses": 201,
+            "winRatePct": 46.11260053619303,
+            "pf": 0.7564268871904523,
+            "endingEquityJpy": 2885.743419284346,
+            "closedDDPct": -72.31769573951128,
+            "grossProfitPctPoints": 335.1521037917033,
+            "grossLossPctPoints": -443.072700702823,
+            "totalNetReturnPctPoints": -107.92059691111967
+          },
+          "early": {
+            "trades": 202,
+            "wins": 95,
+            "losses": 107,
+            "winRatePct": 47.02970297029702,
+            "pf": 0.8345205769722638,
+            "endingEquityJpy": 5695.442129994654,
+            "closedDDPct": -56.97623976179103,
+            "grossProfitPctPoints": 222.57654545743824,
+            "grossLossPctPoints": -266.7118721805176,
+            "totalNetReturnPctPoints": -44.13532672307937
+          },
+          "late": {
+            "trades": 171,
+            "wins": 77,
+            "losses": 94,
+            "winRatePct": 45.02923976608187,
+            "pf": 0.6383251840985031,
+            "endingEquityJpy": 5066.759267180995,
+            "closedDDPct": -51.422926587160546,
+            "grossProfitPctPoints": 112.57555833426511,
+            "grossLossPctPoints": -176.36082852230535,
+            "totalNetReturnPctPoints": -63.78527018804024
+          },
+          "potentialSignalsBeforeSlotExclusion": 1883
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 391,
+            "wins": 185,
+            "losses": 206,
+            "winRatePct": 47.31457800511509,
+            "pf": 0.9405163819735903,
+            "endingEquityJpy": 6499.172781505198,
+            "closedDDPct": -47.640380640908866,
+            "grossProfitPctPoints": 397.58188741456144,
+            "grossLossPctPoints": -422.7272326509306,
+            "totalNetReturnPctPoints": -25.145345236369167
+          },
+          "early": {
+            "trades": 206,
+            "wins": 96,
+            "losses": 110,
+            "winRatePct": 46.601941747572816,
+            "pf": 0.9882027893953484,
+            "endingEquityJpy": 8525.960864744788,
+            "closedDDPct": -38.25312485200209,
+            "grossProfitPctPoints": 247.7747218618593,
+            "grossLossPctPoints": -250.73266795114512,
+            "totalNetReturnPctPoints": -2.9579460892858265
+          },
+          "late": {
+            "trades": 185,
+            "wins": 89,
+            "losses": 96,
+            "winRatePct": 48.10810810810811,
+            "pf": 0.8709994168373216,
+            "endingEquityJpy": 7622.803909855538,
+            "closedDDPct": -34.83535365013025,
+            "grossProfitPctPoints": 149.80716555270214,
+            "grossLossPctPoints": -171.99456469978549,
+            "totalNetReturnPctPoints": -22.18739914708334
+          },
+          "potentialSignalsBeforeSlotExclusion": 1956
+        },
+        "30": {
+          "all": {
+            "trades": 391,
+            "wins": 173,
+            "losses": 218,
+            "winRatePct": 44.24552429667519,
+            "pf": 0.7778391278462743,
+            "endingEquityJpy": 2967.3601292958515,
+            "closedDDPct": -74.6248079549488,
+            "grossProfitPctPoints": 361.8371337235562,
+            "grossLossPctPoints": -465.18247895992533,
+            "totalNetReturnPctPoints": -103.34534523636916
+          },
+          "early": {
+            "trades": 206,
+            "wins": 91,
+            "losses": 115,
+            "winRatePct": 44.1747572815534,
+            "pf": 0.838393949048555,
+            "endingEquityJpy": 5641.377078804873,
+            "closedDDPct": -53.541529822881174,
+            "grossProfitPctPoints": 229.08643943532073,
+            "grossLossPctPoints": -273.24438552460657,
+            "totalNetReturnPctPoints": -44.15794608928584
+          },
+          "late": {
+            "trades": 185,
+            "wins": 82,
+            "losses": 103,
+            "winRatePct": 44.32432432432433,
+            "pf": 0.6916328692874669,
+            "endingEquityJpy": 5259.992529916986,
+            "closedDDPct": -52.45623221113485,
+            "grossProfitPctPoints": 132.75069428823548,
+            "grossLossPctPoints": -191.93809343531882,
+            "totalNetReturnPctPoints": -59.18739914708334
+          },
+          "potentialSignalsBeforeSlotExclusion": 1956
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_MINUS2": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 219,
+            "wins": 111,
+            "losses": 108,
+            "winRatePct": 50.68493150684932,
+            "pf": 1.0436990238053647,
+            "endingEquityJpy": 9933.093492000427,
+            "closedDDPct": -23.719026706359614,
+            "grossProfitPctPoints": 250.05363348821535,
+            "grossLossPctPoints": -239.58404461902308,
+            "totalNetReturnPctPoints": 10.469588869192279
+          },
+          "early": {
+            "trades": 131,
+            "wins": 66,
+            "losses": 65,
+            "winRatePct": 50.38167938931297,
+            "pf": 1.0830564561866547,
+            "endingEquityJpy": 10440.789122856731,
+            "closedDDPct": -23.719026706359614,
+            "grossProfitPctPoints": 174.75861441263237,
+            "grossLossPctPoints": -161.3568834887351,
+            "totalNetReturnPctPoints": 13.401730923897276
+          },
+          "late": {
+            "trades": 88,
+            "wins": 45,
+            "losses": 43,
+            "winRatePct": 51.13636363636363,
+            "pf": 0.962517596032643,
+            "endingEquityJpy": 9513.73825782492,
+            "closedDDPct": -16.274774395436907,
+            "grossProfitPctPoints": 75.295019075583,
+            "grossLossPctPoints": -78.22716113028798,
+            "totalNetReturnPctPoints": -2.9321420547049826
+          },
+          "potentialSignalsBeforeSlotExclusion": 894
+        },
+        "30": {
+          "all": {
+            "trades": 219,
+            "wins": 106,
+            "losses": 113,
+            "winRatePct": 48.401826484018265,
+            "pf": 0.8725118919137036,
+            "endingEquityJpy": 6405.791368111483,
+            "closedDDPct": -43.16601089604677,
+            "grossProfitPctPoints": 228.10896255764987,
+            "grossLossPctPoints": -261.4393736884576,
+            "totalNetReturnPctPoints": -33.330411130807704
+          },
+          "early": {
+            "trades": 131,
+            "wins": 62,
+            "losses": 69,
+            "winRatePct": 47.32824427480916,
+            "pf": 0.9266798381803081,
+            "endingEquityJpy": 8031.474181164129,
+            "closedDDPct": -31.487118293686013,
+            "grossProfitPctPoints": 161.75493373291582,
+            "grossLossPctPoints": -174.55320280901856,
+            "totalNetReturnPctPoints": -12.798269076102741
+          },
+          "late": {
+            "trades": 88,
+            "wins": 44,
+            "losses": 44,
+            "winRatePct": 50.0,
+            "pf": 0.7636891826756316,
+            "endingEquityJpy": 7975.860002307809,
+            "closedDDPct": -25.392411898008906,
+            "grossProfitPctPoints": 66.35402882473406,
+            "grossLossPctPoints": -86.88617087943904,
+            "totalNetReturnPctPoints": -20.532142054704977
+          },
+          "potentialSignalsBeforeSlotExclusion": 894
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 231,
+            "wins": 116,
+            "losses": 115,
+            "winRatePct": 50.21645021645021,
+            "pf": 1.0385720519671646,
+            "endingEquityJpy": 9762.806976220187,
+            "closedDDPct": -38.11239912320119,
+            "grossProfitPctPoints": 261.29498285512693,
+            "grossLossPctPoints": -251.59061652025662,
+            "totalNetReturnPctPoints": 9.704366334870315
+          },
+          "early": {
+            "trades": 126,
+            "wins": 68,
+            "losses": 58,
+            "winRatePct": 53.96825396825397,
+            "pf": 1.2935589101187686,
+            "endingEquityJpy": 13866.772064834999,
+            "closedDDPct": -16.99207445763442,
+            "grossProfitPctPoints": 184.99776080607194,
+            "grossLossPctPoints": -143.01456188731777,
+            "totalNetReturnPctPoints": 41.98319891875417
+          },
+          "late": {
+            "trades": 105,
+            "wins": 48,
+            "losses": 57,
+            "winRatePct": 45.714285714285715,
+            "pf": 0.7027076302136017,
+            "endingEquityJpy": 7040.432287033736,
+            "closedDDPct": -38.1123991232012,
+            "grossProfitPctPoints": 76.29722204905501,
+            "grossLossPctPoints": -108.57605463293885,
+            "totalNetReturnPctPoints": -32.27883258388384
+          },
+          "potentialSignalsBeforeSlotExclusion": 946
+        },
+        "30": {
+          "all": {
+            "trades": 231,
+            "wins": 105,
+            "losses": 126,
+            "winRatePct": 45.45454545454545,
+            "pf": 0.8674935945745069,
+            "endingEquityJpy": 6146.189871947788,
+            "closedDDPct": -51.557030462581565,
+            "grossProfitPctPoints": 238.9297961315511,
+            "grossLossPctPoints": -275.42542979668076,
+            "totalNetReturnPctPoints": -36.495633665129674
+          },
+          "early": {
+            "trades": 126,
+            "wins": 63,
+            "losses": 63,
+            "winRatePct": 50.0,
+            "pf": 1.108188986482652,
+            "endingEquityJpy": 10780.278523344967,
+            "closedDDPct": -21.70682695549475,
+            "grossProfitPctPoints": 171.9117333878828,
+            "grossLossPctPoints": -155.12853446912862,
+            "totalNetReturnPctPoints": 16.78319891875418
+          },
+          "late": {
+            "trades": 105,
+            "wins": 42,
+            "losses": 63,
+            "winRatePct": 40.0,
+            "pf": 0.5571055060164869,
+            "endingEquityJpy": 5701.327529375109,
+            "closedDDPct": -45.29487735227702,
+            "grossProfitPctPoints": 67.01806274366828,
+            "grossLossPctPoints": -120.29689532755211,
+            "totalNetReturnPctPoints": -53.278832583883826
+          },
+          "potentialSignalsBeforeSlotExclusion": 946
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE3_DOWN_REL3_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 472,
+            "wins": 242,
+            "losses": 230,
+            "winRatePct": 51.271186440677965,
+            "pf": 1.0845090521832272,
+            "endingEquityJpy": 12053.205795522388,
+            "closedDDPct": -31.57814609956696,
+            "grossProfitPctPoints": 466.5566239973535,
+            "grossLossPctPoints": -430.20076509101284,
+            "totalNetReturnPctPoints": 36.35585890634064
+          },
+          "early": {
+            "trades": 242,
+            "wins": 129,
+            "losses": 113,
+            "winRatePct": 53.30578512396694,
+            "pf": 1.1961608968932966,
+            "endingEquityJpy": 14332.831099520872,
+            "closedDDPct": -31.57814609956696,
+            "grossProfitPctPoints": 298.57491548985183,
+            "grossLossPctPoints": -249.6109982071134,
+            "totalNetReturnPctPoints": 48.963917282738436
+          },
+          "late": {
+            "trades": 230,
+            "wins": 113,
+            "losses": 117,
+            "winRatePct": 49.130434782608695,
+            "pf": 0.9301839822158722,
+            "endingEquityJpy": 8409.508011243719,
+            "closedDDPct": -30.41276764526504,
+            "grossProfitPctPoints": 167.98170850750162,
+            "grossLossPctPoints": -180.58976688389944,
+            "totalNetReturnPctPoints": -12.608058376397821
+          },
+          "potentialSignalsBeforeSlotExclusion": 2266
+        },
+        "30": {
+          "all": {
+            "trades": 472,
+            "wins": 217,
+            "losses": 255,
+            "winRatePct": 45.97457627118644,
+            "pf": 0.878728917758446,
+            "endingEquityJpy": 4685.208278742512,
+            "closedDDPct": -55.56825911962615,
+            "grossProfitPctPoints": 420.5872030057035,
+            "grossLossPctPoints": -478.6313440993629,
+            "totalNetReturnPctPoints": -58.04414109365939
+          },
+          "early": {
+            "trades": 242,
+            "wins": 119,
+            "losses": 123,
+            "winRatePct": 49.17355371900827,
+            "pf": 1.0020656691356349,
+            "endingEquityJpy": 8833.36251612568,
+            "closedDDPct": -36.76886067909484,
+            "grossProfitPctPoints": 273.5588868111729,
+            "grossLossPctPoints": -272.9949695284344,
+            "totalNetReturnPctPoints": 0.5639172827384868
+          },
+          "late": {
+            "trades": 230,
+            "wins": 98,
+            "losses": 132,
+            "winRatePct": 42.608695652173914,
+            "pf": 0.7149917737137375,
+            "endingEquityJpy": 5303.991849298005,
+            "closedDDPct": -52.03081281568134,
+            "grossProfitPctPoints": 147.02831619453062,
+            "grossLossPctPoints": -205.63637457092844,
+            "totalNetReturnPctPoints": -58.60805837639782
+          },
+          "potentialSignalsBeforeSlotExclusion": 2266
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 470,
+            "wins": 229,
+            "losses": 241,
+            "winRatePct": 48.723404255319146,
+            "pf": 0.9975096064068278,
+            "endingEquityJpy": 7970.262058178169,
+            "closedDDPct": -52.53822854967427,
+            "grossProfitPctPoints": 490.01685767561895,
+            "grossLossPctPoints": -491.240239220081,
+            "totalNetReturnPctPoints": -1.223381544462029
+          },
+          "early": {
+            "trades": 239,
+            "wins": 113,
+            "losses": 126,
+            "winRatePct": 47.28033472803347,
+            "pf": 1.1196274583931904,
+            "endingEquityJpy": 11932.586278245142,
+            "closedDDPct": -52.53822854967427,
+            "grossProfitPctPoints": 308.0233161205966,
+            "grossLossPctPoints": -275.11232759747577,
+            "totalNetReturnPctPoints": 32.91098852312081
+          },
+          "late": {
+            "trades": 231,
+            "wins": 116,
+            "losses": 115,
+            "winRatePct": 50.21645021645021,
+            "pf": 0.8420640360085139,
+            "endingEquityJpy": 6679.408698438776,
+            "closedDDPct": -40.280920987015904,
+            "grossProfitPctPoints": 181.99354155502235,
+            "grossLossPctPoints": -216.1279116226052,
+            "totalNetReturnPctPoints": -34.134370067582864
+          },
+          "potentialSignalsBeforeSlotExclusion": 2300
+        },
+        "30": {
+          "all": {
+            "trades": 470,
+            "wins": 215,
+            "losses": 255,
+            "winRatePct": 45.744680851063826,
+            "pf": 0.8240134665362593,
+            "endingEquityJpy": 3107.732630904262,
+            "closedDDPct": -70.07182794929734,
+            "grossProfitPctPoints": 445.85995972199515,
+            "grossLossPctPoints": -541.0833412664572,
+            "totalNetReturnPctPoints": -95.22338154446203
+          },
+          "early": {
+            "trades": 239,
+            "wins": 109,
+            "losses": 130,
+            "winRatePct": 45.60669456066946,
+            "pf": 0.9504584352822993,
+            "endingEquityJpy": 7395.319117178404,
+            "closedDDPct": -58.061242034144655,
+            "grossProfitPctPoints": 285.64674191969283,
+            "grossLossPctPoints": -300.53575339657203,
+            "totalNetReturnPctPoints": -14.889011476879205
+          },
+          "late": {
+            "trades": 231,
+            "wins": 106,
+            "losses": 125,
+            "winRatePct": 45.887445887445885,
+            "pf": 0.6660354369837348,
+            "endingEquityJpy": 4202.296860571418,
+            "closedDDPct": -59.393939617469606,
+            "grossProfitPctPoints": 160.21321780230232,
+            "grossLossPctPoints": -240.54758786988518,
+            "totalNetReturnPctPoints": -80.33437006758285
+          },
+          "potentialSignalsBeforeSlotExclusion": 2300
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN_VOL1P2": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 366,
+            "wins": 172,
+            "losses": 194,
+            "winRatePct": 46.994535519125684,
+            "pf": 0.9142189267241404,
+            "endingEquityJpy": 6071.6466933146685,
+            "closedDDPct": -46.56463875464725,
+            "grossProfitPctPoints": 356.3855668842649,
+            "grossLossPctPoints": -389.82519007922696,
+            "totalNetReturnPctPoints": -33.43962319496205
+          },
+          "early": {
+            "trades": 187,
+            "wins": 92,
+            "losses": 95,
+            "winRatePct": 49.19786096256685,
+            "pf": 0.9362207038827134,
+            "endingEquityJpy": 7548.461385015424,
+            "closedDDPct": -46.56463875464725,
+            "grossProfitPctPoints": 226.99628885251315,
+            "grossLossPctPoints": -242.46023177132224,
+            "totalNetReturnPctPoints": -15.463942918809096
+          },
+          "late": {
+            "trades": 179,
+            "wins": 80,
+            "losses": 99,
+            "winRatePct": 44.6927374301676,
+            "pf": 0.8780193033502949,
+            "endingEquityJpy": 8043.555346746018,
+            "closedDDPct": -31.458539631094474,
+            "grossProfitPctPoints": 129.38927803175173,
+            "grossLossPctPoints": -147.3649583079047,
+            "totalNetReturnPctPoints": -17.975680276152957
+          },
+          "potentialSignalsBeforeSlotExclusion": 1094
+        },
+        "30": {
+          "all": {
+            "trades": 366,
+            "wins": 156,
+            "losses": 210,
+            "winRatePct": 42.62295081967213,
+            "pf": 0.751980475249979,
+            "endingEquityJpy": 2914.130379762372,
+            "closedDDPct": -72.0190229704768,
+            "grossProfitPctPoints": 323.32500681730886,
+            "grossLossPctPoints": -429.9646300122709,
+            "totalNetReturnPctPoints": -106.63962319496204
+          },
+          "early": {
+            "trades": 187,
+            "wins": 86,
+            "losses": 101,
+            "winRatePct": 45.98930481283423,
+            "pf": 0.7982200891771307,
+            "endingEquityJpy": 5187.0044957897035,
+            "closedDDPct": -59.7858891457845,
+            "grossProfitPctPoints": 209.12419407276317,
+            "grossLossPctPoints": -261.9881369915723,
+            "totalNetReturnPctPoints": -52.8639429188091
+          },
+          "late": {
+            "trades": 179,
+            "wins": 70,
+            "losses": 109,
+            "winRatePct": 39.10614525139665,
+            "pf": 0.6798618704968049,
+            "endingEquityJpy": 5618.137370283311,
+            "closedDDPct": -49.79847546256406,
+            "grossProfitPctPoints": 114.20081274454569,
+            "grossLossPctPoints": -167.97649302069865,
+            "totalNetReturnPctPoints": -53.77568027615297
+          },
+          "potentialSignalsBeforeSlotExclusion": 1094
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 352,
+            "wins": 167,
+            "losses": 185,
+            "winRatePct": 47.44318181818182,
+            "pf": 0.864414658275943,
+            "endingEquityJpy": 4742.969695103521,
+            "closedDDPct": -55.78656497711163,
+            "grossProfitPctPoints": 362.1241439453757,
+            "grossLossPctPoints": -418.9241129571134,
+            "totalNetReturnPctPoints": -56.79996901173769
+          },
+          "early": {
+            "trades": 183,
+            "wins": 85,
+            "losses": 98,
+            "winRatePct": 46.44808743169399,
+            "pf": 0.8889058671331181,
+            "endingEquityJpy": 6708.107615057494,
+            "closedDDPct": -55.462778501435515,
+            "grossProfitPctPoints": 219.26919877552902,
+            "grossLossPctPoints": -246.67313703610907,
+            "totalNetReturnPctPoints": -27.40393826058005
+          },
+          "late": {
+            "trades": 169,
+            "wins": 82,
+            "losses": 87,
+            "winRatePct": 48.5207100591716,
+            "pf": 0.8293418623959561,
+            "endingEquityJpy": 7070.50328837467,
+            "closedDDPct": -36.60431515054006,
+            "grossProfitPctPoints": 142.8549451698467,
+            "grossLossPctPoints": -172.2509759210043,
+            "totalNetReturnPctPoints": -29.39603075115761
+          },
+          "potentialSignalsBeforeSlotExclusion": 1023
+        },
+        "30": {
+          "all": {
+            "trades": 352,
+            "wins": 155,
+            "losses": 197,
+            "winRatePct": 44.034090909090914,
+            "pf": 0.7217838725904037,
+            "endingEquityJpy": 2339.9050171333456,
+            "closedDDPct": -77.44312771949434,
+            "grossProfitPctPoints": 329.9984335254052,
+            "grossLossPctPoints": -457.19840253714284,
+            "totalNetReturnPctPoints": -127.19996901173766
+          },
+          "early": {
+            "trades": 183,
+            "wins": 78,
+            "losses": 105,
+            "winRatePct": 42.62295081967213,
+            "pf": 0.7601522865828394,
+            "endingEquityJpy": 4645.521420284876,
+            "closedDDPct": -66.63332558445502,
+            "grossProfitPctPoints": 202.84846299312608,
+            "grossLossPctPoints": -266.85240125370615,
+            "totalNetReturnPctPoints": -64.00393826058007
+          },
+          "late": {
+            "trades": 169,
+            "wins": 77,
+            "losses": 92,
+            "winRatePct": 45.562130177514796,
+            "pf": 0.6679939146341461,
+            "endingEquityJpy": 5036.905021933698,
+            "closedDDPct": -50.22501039064847,
+            "grossProfitPctPoints": 127.14997053227908,
+            "grossLossPctPoints": -190.3460012834367,
+            "totalNetReturnPctPoints": -63.19603075115761
+          },
+          "potentialSignalsBeforeSlotExclusion": 1023
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN_ATR0P7": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 34,
+            "wins": 15,
+            "losses": 19,
+            "winRatePct": 44.11764705882353,
+            "pf": 0.8406338826643667,
+            "endingEquityJpy": 8710.891956862873,
+            "closedDDPct": -32.36742380427907,
+            "grossProfitPctPoints": 49.13075582883422,
+            "grossLossPctPoints": -58.4448912207959,
+            "totalNetReturnPctPoints": -9.314135391961685
+          },
+          "early": {
+            "trades": 28,
+            "wins": 13,
+            "losses": 15,
+            "winRatePct": 46.42857142857143,
+            "pf": 0.9135876028235755,
+            "endingEquityJpy": 9206.53704371481,
+            "closedDDPct": -28.851282278056633,
+            "grossProfitPctPoints": 44.04254193901814,
+            "grossLossPctPoints": -48.20834017766688,
+            "totalNetReturnPctPoints": -4.165798238648733
+          },
+          "late": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "pf": 0.49706330465976506,
+            "endingEquityJpy": 9461.637872634956,
+            "closedDDPct": -9.782704843875633,
+            "grossProfitPctPoints": 5.088213889816079,
+            "grossLossPctPoints": -10.236551043129026,
+            "totalNetReturnPctPoints": -5.148337153312947
+          },
+          "potentialSignalsBeforeSlotExclusion": 112
+        },
+        "30": {
+          "all": {
+            "trades": 34,
+            "wins": 12,
+            "losses": 22,
+            "winRatePct": 35.294117647058826,
+            "pf": 0.7424895139749528,
+            "endingEquityJpy": 8134.756493952587,
+            "closedDDPct": -35.85004581081213,
+            "grossProfitPctPoints": 46.46248290696968,
+            "grossLossPctPoints": -62.57661829893136,
+            "totalNetReturnPctPoints": -16.114135391961675
+          },
+          "early": {
+            "trades": 28,
+            "wins": 10,
+            "losses": 18,
+            "winRatePct": 35.714285714285715,
+            "pf": 0.8105202659092512,
+            "endingEquityJpy": 8702.551258369234,
+            "closedDDPct": -31.82858262835513,
+            "grossProfitPctPoints": 41.7742690171536,
+            "grossLossPctPoints": -51.540067255802335,
+            "totalNetReturnPctPoints": -9.765798238648735
+          },
+          "late": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "pf": 0.4247897619007342,
+            "endingEquityJpy": 9347.55366839052,
+            "closedDDPct": -10.341955973330098,
+            "grossProfitPctPoints": 4.688213889816079,
+            "grossLossPctPoints": -11.036551043129027,
+            "totalNetReturnPctPoints": -6.348337153312948
+          },
+          "potentialSignalsBeforeSlotExclusion": 112
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 28,
+            "wins": 13,
+            "losses": 15,
+            "winRatePct": 46.42857142857143,
+            "pf": 1.1312298681785056,
+            "endingEquityJpy": 10203.297805269223,
+            "closedDDPct": -23.71422472151029,
+            "grossProfitPctPoints": 54.987412071138976,
+            "grossLossPctPoints": -48.608522120865786,
+            "totalNetReturnPctPoints": 6.378889950273191
+          },
+          "early": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "pf": 1.0742362531644694,
+            "endingEquityJpy": 9914.78055759478,
+            "closedDDPct": -23.71422472151029,
+            "grossProfitPctPoints": 47.135281063611934,
+            "grossLossPctPoints": -43.87794670377351,
+            "totalNetReturnPctPoints": 3.257334359838424
+          },
+          "late": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "pf": 1.6598680530821104,
+            "endingEquityJpy": 10290.997108809872,
+            "closedDDPct": -4.730575417092275,
+            "grossProfitPctPoints": 7.852131007527047,
+            "grossLossPctPoints": -4.730575417092275,
+            "totalNetReturnPctPoints": 3.121555590434772
+          },
+          "potentialSignalsBeforeSlotExclusion": 96
+        },
+        "30": {
+          "all": {
+            "trades": 28,
+            "wins": 12,
+            "losses": 16,
+            "winRatePct": 42.857142857142854,
+            "pf": 1.0150832072936413,
+            "endingEquityJpy": 9646.687261222201,
+            "closedDDPct": -26.456015182471106,
+            "grossProfitPctPoints": 52.418434187098335,
+            "grossLossPctPoints": -51.63954423682514,
+            "totalNetReturnPctPoints": 0.7788899502731965
+          },
+          "early": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "pf": 0.9712355462273786,
+            "endingEquityJpy": 9467.717236484601,
+            "closedDDPct": -26.456015182471106,
+            "grossProfitPctPoints": 45.33528106361193,
+            "grossLossPctPoints": -46.67794670377351,
+            "totalNetReturnPctPoints": -1.3426656401615773
+          },
+          "late": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "pf": 1.4275952606599085,
+            "endingEquityJpy": 10189.03186509196,
+            "closedDDPct": -4.960067964228287,
+            "grossProfitPctPoints": 7.083153123486405,
+            "grossLossPctPoints": -4.961597533051633,
+            "totalNetReturnPctPoints": 2.121555590434772
+          },
+          "potentialSignalsBeforeSlotExclusion": 96
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN_REL3_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 463,
+            "wins": 243,
+            "losses": 220,
+            "winRatePct": 52.48380129589633,
+            "pf": 1.089355113724828,
+            "endingEquityJpy": 12199.287202788248,
+            "closedDDPct": -29.85557166657641,
+            "grossProfitPctPoints": 460.5821351746851,
+            "grossLossPctPoints": -422.8025639865206,
+            "totalNetReturnPctPoints": 37.77957118816448
+          },
+          "early": {
+            "trades": 237,
+            "wins": 124,
+            "losses": 113,
+            "winRatePct": 52.320675105485236,
+            "pf": 1.178765675535002,
+            "endingEquityJpy": 13680.741355748962,
+            "closedDDPct": -29.85557166657641,
+            "grossProfitPctPoints": 290.73762869209327,
+            "grossLossPctPoints": -246.64582174921006,
+            "totalNetReturnPctPoints": 44.09180694288321
+          },
+          "late": {
+            "trades": 226,
+            "wins": 119,
+            "losses": 107,
+            "winRatePct": 52.654867256637175,
+            "pf": 0.9641669363627585,
+            "endingEquityJpy": 8917.124361584267,
+            "closedDDPct": -23.22120626602161,
+            "grossProfitPctPoints": 169.84450648259184,
+            "grossLossPctPoints": -176.15674223731054,
+            "totalNetReturnPctPoints": -6.312235754718699
+          },
+          "potentialSignalsBeforeSlotExclusion": 2288
+        },
+        "30": {
+          "all": {
+            "trades": 463,
+            "wins": 219,
+            "losses": 244,
+            "winRatePct": 47.30021598272138,
+            "pf": 0.883124467653912,
+            "endingEquityJpy": 4828.298364813114,
+            "closedDDPct": -53.970786614394406,
+            "grossProfitPctPoints": 414.22923206588365,
+            "grossLossPctPoints": -469.04966087771913,
+            "totalNetReturnPctPoints": -54.820428811835484
+          },
+          "early": {
+            "trades": 237,
+            "wins": 115,
+            "losses": 122,
+            "winRatePct": 48.52320675105485,
+            "pf": 0.9877409225172232,
+            "endingEquityJpy": 8515.541244171023,
+            "closedDDPct": -35.94832825546938,
+            "grossProfitPctPoints": 266.5484141602369,
+            "grossLossPctPoints": -269.8566072173537,
+            "totalNetReturnPctPoints": -3.308193057116796
+          },
+          "late": {
+            "trades": 226,
+            "wins": 104,
+            "losses": 122,
+            "winRatePct": 46.017699115044245,
+            "pf": 0.7413954211347663,
+            "endingEquityJpy": 5669.984122404599,
+            "closedDDPct": -45.97710561025055,
+            "grossProfitPctPoints": 147.68081790564673,
+            "grossLossPctPoints": -199.19305366036542,
+            "totalNetReturnPctPoints": -51.51223575471869
+          },
+          "potentialSignalsBeforeSlotExclusion": 2288
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 462,
+            "wins": 225,
+            "losses": 237,
+            "winRatePct": 48.701298701298704,
+            "pf": 1.0402884904484895,
+            "endingEquityJpy": 9799.25429005118,
+            "closedDDPct": -40.63893439925539,
+            "grossProfitPctPoints": 489.98019090005675,
+            "grossLossPctPoints": -471.004144906781,
+            "totalNetReturnPctPoints": 18.97604599327576
+          },
+          "early": {
+            "trades": 232,
+            "wins": 114,
+            "losses": 118,
+            "winRatePct": 49.137931034482754,
+            "pf": 1.1897146376018846,
+            "endingEquityJpy": 13949.829180436958,
+            "closedDDPct": -40.63893439925539,
+            "grossProfitPctPoints": 298.7780107405776,
+            "grossLossPctPoints": -251.13418066606826,
+            "totalNetReturnPctPoints": 47.64383007450934
+          },
+          "late": {
+            "trades": 230,
+            "wins": 111,
+            "losses": 119,
+            "winRatePct": 48.26086956521739,
+            "pf": 0.8696148235606741,
+            "endingEquityJpy": 7024.641064274477,
+            "closedDDPct": -36.521239708619355,
+            "grossProfitPctPoints": 191.20218015947916,
+            "grossLossPctPoints": -219.86996424071276,
+            "totalNetReturnPctPoints": -28.667784081233606
+          },
+          "potentialSignalsBeforeSlotExclusion": 2281
+        },
+        "30": {
+          "all": {
+            "trades": 462,
+            "wins": 213,
+            "losses": 249,
+            "winRatePct": 46.103896103896105,
+            "pf": 0.8586774924588118,
+            "endingEquityJpy": 3884.219488858146,
+            "closedDDPct": -62.81421103518598,
+            "grossProfitPctPoints": 446.12495072329557,
+            "grossLossPctPoints": -519.5489047300199,
+            "totalNetReturnPctPoints": -73.42395400672433
+          },
+          "early": {
+            "trades": 232,
+            "wins": 108,
+            "losses": 124,
+            "winRatePct": 46.55172413793103,
+            "pf": 1.0045201322120727,
+            "endingEquityJpy": 8770.438839726601,
+            "closedDDPct": -46.888170742216595,
+            "grossProfitPctPoints": 276.41942586510595,
+            "grossLossPctPoints": -275.17559579059656,
+            "totalNetReturnPctPoints": 1.2438300745093898
+          },
+          "late": {
+            "trades": 230,
+            "wins": 105,
+            "losses": 125,
+            "winRatePct": 45.65217391304348,
+            "pf": 0.6944519661116398,
+            "endingEquityJpy": 4428.762984201185,
+            "closedDDPct": -57.48727424898621,
+            "grossProfitPctPoints": 169.70552485818968,
+            "grossLossPctPoints": -244.37330893942328,
+            "totalNetReturnPctPoints": -74.6677840812336
+          },
+          "potentialSignalsBeforeSlotExclusion": 2281
+        }
+      }
+    },
+    "BTC24_DOWN_DOGE3_DOWN_REL24_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 319,
+            "wins": 151,
+            "losses": 168,
+            "winRatePct": 47.33542319749217,
+            "pf": 0.9522685225599749,
+            "endingEquityJpy": 7350.230721269011,
+            "closedDDPct": -37.54368903284553,
+            "grossProfitPctPoints": 322.1462656834508,
+            "grossLossPctPoints": -338.2935149609145,
+            "totalNetReturnPctPoints": -16.147249277463686
+          },
+          "early": {
+            "trades": 174,
+            "wins": 86,
+            "losses": 88,
+            "winRatePct": 49.42528735632184,
+            "pf": 0.9915450146027994,
+            "endingEquityJpy": 8801.116328634738,
+            "closedDDPct": -31.965023238981118,
+            "grossProfitPctPoints": 213.01585134473575,
+            "grossLossPctPoints": -214.83225492295702,
+            "totalNetReturnPctPoints": -1.8164035782212693
+          },
+          "late": {
+            "trades": 145,
+            "wins": 65,
+            "losses": 80,
+            "winRatePct": 44.827586206896555,
+            "pf": 0.8839243525067174,
+            "endingEquityJpy": 8351.475479712475,
+            "closedDDPct": -37.218668457394976,
+            "grossProfitPctPoints": 109.13041433871504,
+            "grossLossPctPoints": -123.46126003795749,
+            "totalNetReturnPctPoints": -14.330845699242445
+          },
+          "potentialSignalsBeforeSlotExclusion": 1739
+        },
+        "30": {
+          "all": {
+            "trades": 319,
+            "wins": 141,
+            "losses": 178,
+            "winRatePct": 44.20062695924764,
+            "pf": 0.785524429431541,
+            "endingEquityJpy": 3877.4848597915766,
+            "closedDDPct": -63.34315938040132,
+            "grossProfitPctPoints": 292.80965289823257,
+            "grossLossPctPoints": -372.75690217569627,
+            "totalNetReturnPctPoints": -79.9472492774637
+          },
+          "early": {
+            "trades": 174,
+            "wins": 83,
+            "losses": 91,
+            "winRatePct": 47.701149425287355,
+            "pf": 0.8426760078381365,
+            "endingEquityJpy": 6209.372452318608,
+            "closedDDPct": -43.97187728181675,
+            "grossProfitPctPoints": 196.12879361044588,
+            "grossLossPctPoints": -232.74519718866713,
+            "totalNetReturnPctPoints": -36.61640357822125
+          },
+          "late": {
+            "trades": 145,
+            "wins": 58,
+            "losses": 87,
+            "winRatePct": 40.0,
+            "pf": 0.6905198340149015,
+            "endingEquityJpy": 6244.568013219606,
+            "closedDDPct": -47.53379847125453,
+            "grossProfitPctPoints": 96.6808592877867,
+            "grossLossPctPoints": -140.01170498702913,
+            "totalNetReturnPctPoints": -43.33084569924243
+          },
+          "potentialSignalsBeforeSlotExclusion": 1739
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 318,
+            "wins": 144,
+            "losses": 174,
+            "winRatePct": 45.28301886792453,
+            "pf": 0.8886495300254055,
+            "endingEquityJpy": 5776.162873333852,
+            "closedDDPct": -47.31987416188619,
+            "grossProfitPctPoints": 317.8125893783574,
+            "grossLossPctPoints": -357.63546667185153,
+            "totalNetReturnPctPoints": -39.822877293494116
+          },
+          "early": {
+            "trades": 169,
+            "wins": 76,
+            "losses": 93,
+            "winRatePct": 44.97041420118343,
+            "pf": 1.02023035459774,
+            "endingEquityJpy": 9340.838446764958,
+            "closedDDPct": -37.55429800469212,
+            "grossProfitPctPoints": 212.82089170614816,
+            "grossLossPctPoints": -208.60082308574314,
+            "totalNetReturnPctPoints": 4.220068620405016
+          },
+          "late": {
+            "trades": 149,
+            "wins": 68,
+            "losses": 81,
+            "winRatePct": 45.63758389261745,
+            "pf": 0.7044784698770238,
+            "endingEquityJpy": 6183.773444164778,
+            "closedDDPct": -42.70366907367181,
+            "grossProfitPctPoints": 104.99169767220924,
+            "grossLossPctPoints": -149.0346435861084,
+            "totalNetReturnPctPoints": -44.042945913899146
+          },
+          "potentialSignalsBeforeSlotExclusion": 1731
+        },
+        "30": {
+          "all": {
+            "trades": 318,
+            "wins": 129,
+            "losses": 189,
+            "winRatePct": 40.56603773584906,
+            "pf": 0.7374791810462243,
+            "endingEquityJpy": 3051.7200818930387,
+            "closedDDPct": -69.9304098005041,
+            "grossProfitPctPoints": 290.5377910666967,
+            "grossLossPctPoints": -393.96066836019077,
+            "totalNetReturnPctPoints": -103.42287729349408
+          },
+          "early": {
+            "trades": 169,
+            "wins": 69,
+            "losses": 100,
+            "winRatePct": 40.828402366863905,
+            "pf": 0.870160247251321,
+            "endingEquityJpy": 6657.241841214805,
+            "closedDDPct": -43.333224275797086,
+            "grossProfitPctPoints": 198.23882792481191,
+            "grossLossPctPoints": -227.8187593044069,
+            "totalNetReturnPctPoints": -29.579931379594996
+          },
+          "late": {
+            "trades": 149,
+            "wins": 60,
+            "losses": 89,
+            "winRatePct": 40.26845637583892,
+            "pf": 0.5555429311390325,
+            "endingEquityJpy": 4584.060718659673,
+            "closedDDPct": -55.98427451301622,
+            "grossProfitPctPoints": 92.29896314188473,
+            "grossLossPctPoints": -166.14190905578386,
+            "totalNetReturnPctPoints": -73.84294591389913
+          },
+          "potentialSignalsBeforeSlotExclusion": 1731
+        }
+      }
+    },
+    "BTC6_DOWN_REL24_LE_MINUS3_VOL1P2": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 61,
+            "wins": 29,
+            "losses": 32,
+            "winRatePct": 47.540983606557376,
+            "pf": 1.272857625243857,
+            "endingEquityJpy": 11549.110310870275,
+            "closedDDPct": -28.038400643400696,
+            "grossProfitPctPoints": 90.04281638797728,
+            "grossLossPctPoints": -70.74068191305109,
+            "totalNetReturnPctPoints": 19.30213447492619
+          },
+          "early": {
+            "trades": 45,
+            "wins": 18,
+            "losses": 27,
+            "winRatePct": 40.0,
+            "pf": 1.0217952510322468,
+            "endingEquityJpy": 9705.047890157874,
+            "closedDDPct": -28.038400643400696,
+            "grossProfitPctPoints": 64.40327588422613,
+            "grossLossPctPoints": -63.02953142438674,
+            "totalNetReturnPctPoints": 1.3737444598393935
+          },
+          "late": {
+            "trades": 16,
+            "wins": 11,
+            "losses": 5,
+            "winRatePct": 68.75,
+            "pf": 3.3249954778398,
+            "endingEquityJpy": 11900.106461692489,
+            "closedDDPct": -4.0047511567543275,
+            "grossProfitPctPoints": 25.639540503751153,
+            "grossLossPctPoints": -7.711150488664357,
+            "totalNetReturnPctPoints": 17.928390015086798
+          },
+          "potentialSignalsBeforeSlotExclusion": 137
+        },
+        "30": {
+          "all": {
+            "trades": 61,
+            "wins": 28,
+            "losses": 33,
+            "winRatePct": 45.90163934426229,
+            "pf": 1.0919445577396378,
+            "endingEquityJpy": 10223.44778760369,
+            "closedDDPct": -31.215472437130142,
+            "grossProfitPctPoints": 84.34579793391542,
+            "grossLossPctPoints": -77.24366345898923,
+            "totalNetReturnPctPoints": 7.1021344749261885
+          },
+          "early": {
+            "trades": 45,
+            "wins": 17,
+            "losses": 28,
+            "winRatePct": 37.77777777777778,
+            "pf": 0.8887206201899698,
+            "endingEquityJpy": 8867.700993272882,
+            "closedDDPct": -31.215472437130142,
+            "grossProfitPctPoints": 60.90625743016427,
+            "grossLossPctPoints": -68.53251297032487,
+            "totalNetReturnPctPoints": -7.6262555401606065
+          },
+          "late": {
+            "trades": 16,
+            "wins": 11,
+            "losses": 5,
+            "winRatePct": 68.75,
+            "pf": 2.690751415011433,
+            "endingEquityJpy": 11528.85939135667,
+            "closedDDPct": -4.204751156754327,
+            "grossProfitPctPoints": 23.439540503751154,
+            "grossLossPctPoints": -8.711150488664357,
+            "totalNetReturnPctPoints": 14.728390015086797
+          },
+          "potentialSignalsBeforeSlotExclusion": 137
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 79,
+            "wins": 34,
+            "losses": 45,
+            "winRatePct": 43.037974683544306,
+            "pf": 0.7391952277190655,
+            "endingEquityJpy": 6488.775850734857,
+            "closedDDPct": -43.25380995297054,
+            "grossProfitPctPoints": 100.04682095026367,
+            "grossLossPctPoints": -135.34559910374165,
+            "totalNetReturnPctPoints": -35.29877815347798
+          },
+          "early": {
+            "trades": 47,
+            "wins": 23,
+            "losses": 24,
+            "winRatePct": 48.93617021276596,
+            "pf": 1.240637398591186,
+            "endingEquityJpy": 11134.085317041885,
+            "closedDDPct": -22.175894803744455,
+            "grossProfitPctPoints": 85.52213071009895,
+            "grossLossPctPoints": -68.93402601534838,
+            "totalNetReturnPctPoints": 16.58810469475057
+          },
+          "late": {
+            "trades": 32,
+            "wins": 11,
+            "losses": 21,
+            "winRatePct": 34.375,
+            "pf": 0.21870721569616286,
+            "endingEquityJpy": 5827.848149145318,
+            "closedDDPct": -42.60294842647087,
+            "grossProfitPctPoints": 14.524690240164714,
+            "grossLossPctPoints": -66.41157308839328,
+            "totalNetReturnPctPoints": -51.886882848228566
+          },
+          "potentialSignalsBeforeSlotExclusion": 166
+        },
+        "30": {
+          "all": {
+            "trades": 79,
+            "wins": 30,
+            "losses": 49,
+            "winRatePct": 37.9746835443038,
+            "pf": 0.6467049118449482,
+            "endingEquityJpy": 5533.907498149635,
+            "closedDDPct": -50.039259754337884,
+            "grossProfitPctPoints": 93.53606072956954,
+            "grossLossPctPoints": -144.63483888304754,
+            "totalNetReturnPctPoints": -51.098778153477994
+          },
+          "early": {
+            "trades": 47,
+            "wins": 21,
+            "losses": 26,
+            "winRatePct": 44.680851063829785,
+            "pf": 1.0972971251453842,
+            "endingEquityJpy": 10135.273499754674,
+            "closedDDPct": -24.819947525298357,
+            "grossProfitPctPoints": 81.06597810580855,
+            "grossLossPctPoints": -73.87787341105799,
+            "totalNetReturnPctPoints": 7.188104694750564
+          },
+          "late": {
+            "trades": 32,
+            "wins": 9,
+            "losses": 23,
+            "winRatePct": 28.125,
+            "pf": 0.17623823379901024,
+            "endingEquityJpy": 5460.0475244043355,
+            "closedDDPct": -46.119195081300276,
+            "grossProfitPctPoints": 12.470082623760991,
+            "grossLossPctPoints": -70.75696547198956,
+            "totalNetReturnPctPoints": -58.28688284822857
+          },
+          "potentialSignalsBeforeSlotExclusion": 166
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN_BREAK1H": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 160,
+            "wins": 73,
+            "losses": 87,
+            "winRatePct": 45.625,
+            "pf": 1.0465719898599053,
+            "endingEquityJpy": 10016.597494683987,
+            "closedDDPct": -33.12525666149604,
+            "grossProfitPctPoints": 164.38583404359107,
+            "grossLossPctPoints": -157.07073726060244,
+            "totalNetReturnPctPoints": 7.315096782988633
+          },
+          "early": {
+            "trades": 91,
+            "wins": 46,
+            "losses": 45,
+            "winRatePct": 50.54945054945055,
+            "pf": 1.4385675418922792,
+            "endingEquityJpy": 13690.991027411534,
+            "closedDDPct": -13.859474069138145,
+            "grossProfitPctPoints": 121.22049530765733,
+            "grossLossPctPoints": -84.26472291193568,
+            "totalNetReturnPctPoints": 36.95577239572165
+          },
+          "late": {
+            "trades": 69,
+            "wins": 27,
+            "losses": 42,
+            "winRatePct": 39.130434782608695,
+            "pf": 0.5928814964271452,
+            "endingEquityJpy": 7316.1960844391515,
+            "closedDDPct": -29.04762562183054,
+            "grossProfitPctPoints": 43.16533873593375,
+            "grossLossPctPoints": -72.80601434866676,
+            "totalNetReturnPctPoints": -29.640675612733013
+          },
+          "potentialSignalsBeforeSlotExclusion": 217
+        },
+        "30": {
+          "all": {
+            "trades": 160,
+            "wins": 62,
+            "losses": 98,
+            "winRatePct": 38.75,
+            "pf": 0.8593418487577935,
+            "endingEquityJpy": 7270.247444310296,
+            "closedDDPct": -41.64019170931572,
+            "grossProfitPctPoints": 150.81081458540146,
+            "grossLossPctPoints": -175.49571780241283,
+            "totalNetReturnPctPoints": -24.684903217011367
+          },
+          "early": {
+            "trades": 91,
+            "wins": 39,
+            "losses": 52,
+            "winRatePct": 42.857142857142854,
+            "pf": 1.199868300791519,
+            "endingEquityJpy": 11416.750815581812,
+            "closedDDPct": -18.282610619533955,
+            "grossProfitPctPoints": 112.59642807471121,
+            "grossLossPctPoints": -93.84065567898956,
+            "totalNetReturnPctPoints": 18.75577239572165
+          },
+          "late": {
+            "trades": 69,
+            "wins": 23,
+            "losses": 46,
+            "winRatePct": 33.33333333333333,
+            "pf": 0.46799776421611733,
+            "endingEquityJpy": 6368.053014162065,
+            "closedDDPct": -36.4442827950036,
+            "grossProfitPctPoints": 38.21438651069026,
+            "grossLossPctPoints": -81.65506212342328,
+            "totalNetReturnPctPoints": -43.44067561273302
+          },
+          "potentialSignalsBeforeSlotExclusion": 217
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 163,
+            "wins": 79,
+            "losses": 84,
+            "winRatePct": 48.466257668711656,
+            "pf": 1.2892390408784866,
+            "endingEquityJpy": 14418.3147539444,
+            "closedDDPct": -26.394414555401546,
+            "grossProfitPctPoints": 204.20575113554253,
+            "grossLossPctPoints": -158.3924661452983,
+            "totalNetReturnPctPoints": 45.81328499024423
+          },
+          "early": {
+            "trades": 88,
+            "wins": 46,
+            "losses": 42,
+            "winRatePct": 52.27272727272727,
+            "pf": 1.7555675688970127,
+            "endingEquityJpy": 17505.59979019913,
+            "closedDDPct": -12.482225758001997,
+            "grossProfitPctPoints": 146.87515666756727,
+            "grossLossPctPoints": -83.66249141857065,
+            "totalNetReturnPctPoints": 63.212665248996615
+          },
+          "late": {
+            "trades": 75,
+            "wins": 33,
+            "losses": 42,
+            "winRatePct": 44.0,
+            "pf": 0.7671699967465748,
+            "endingEquityJpy": 8236.401452532224,
+            "closedDDPct": -22.385278803143503,
+            "grossProfitPctPoints": 57.33059446797527,
+            "grossLossPctPoints": -74.72997472672765,
+            "totalNetReturnPctPoints": -17.39938025875238
+          },
+          "potentialSignalsBeforeSlotExclusion": 221
+        },
+        "30": {
+          "all": {
+            "trades": 163,
+            "wins": 77,
+            "losses": 86,
+            "winRatePct": 47.239263803680984,
+            "pf": 1.0753172802991762,
+            "endingEquityJpy": 10409.612703758541,
+            "closedDDPct": -34.46053019117975,
+            "grossProfitPctPoints": 188.64825738646306,
+            "grossLossPctPoints": -175.43497239621882,
+            "totalNetReturnPctPoints": 13.213284990244233
+          },
+          "early": {
+            "trades": 88,
+            "wins": 46,
+            "losses": 42,
+            "winRatePct": 52.27272727272727,
+            "pf": 1.4954533007543147,
+            "endingEquityJpy": 14692.402952532637,
+            "closedDDPct": -13.72352080345436,
+            "grossProfitPctPoints": 137.67515666756725,
+            "grossLossPctPoints": -92.06249141857064,
+            "totalNetReturnPctPoints": 45.612665248996606
+          },
+          "late": {
+            "trades": 75,
+            "wins": 31,
+            "losses": 44,
+            "winRatePct": 41.333333333333336,
+            "pf": 0.6113899948900583,
+            "endingEquityJpy": 7085.030772290489,
+            "closedDDPct": -29.860396120127408,
+            "grossProfitPctPoints": 50.97310071889581,
+            "grossLossPctPoints": -83.37248097764818,
+            "totalNetReturnPctPoints": -32.39938025875237
+          },
+          "potentialSignalsBeforeSlotExclusion": 221
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN_EMA_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 454,
+            "wins": 235,
+            "losses": 219,
+            "winRatePct": 51.76211453744494,
+            "pf": 1.039073599411434,
+            "endingEquityJpy": 9777.959602861927,
+            "closedDDPct": -41.06550052006273,
+            "grossProfitPctPoints": 463.75146795511904,
+            "grossLossPctPoints": -446.3124346704635,
+            "totalNetReturnPctPoints": 17.439033284655522
+          },
+          "early": {
+            "trades": 227,
+            "wins": 120,
+            "losses": 107,
+            "winRatePct": 52.863436123348016,
+            "pf": 1.21646938924001,
+            "endingEquityJpy": 14841.644958357501,
+            "closedDDPct": -28.91308944283516,
+            "grossProfitPctPoints": 301.4361427534073,
+            "grossLossPctPoints": -247.79591284391438,
+            "totalNetReturnPctPoints": 53.640229909492916
+          },
+          "late": {
+            "trades": 227,
+            "wins": 115,
+            "losses": 112,
+            "winRatePct": 50.66079295154186,
+            "pf": 0.8176413918007909,
+            "endingEquityJpy": 6588.191288968844,
+            "closedDDPct": -39.25781513562343,
+            "grossProfitPctPoints": 162.31532520171174,
+            "grossLossPctPoints": -198.51652182654917,
+            "totalNetReturnPctPoints": -36.20119662483742
+          },
+          "potentialSignalsBeforeSlotExclusion": 1900
+        },
+        "30": {
+          "all": {
+            "trades": 454,
+            "wins": 210,
+            "losses": 244,
+            "winRatePct": 46.25550660792951,
+            "pf": 0.8511067332098218,
+            "endingEquityJpy": 3938.4401875677368,
+            "closedDDPct": -66.7822921431517,
+            "grossProfitPctPoints": 419.34745655221303,
+            "grossLossPctPoints": -492.7084232675575,
+            "totalNetReturnPctPoints": -73.36096671534449
+          },
+          "early": {
+            "trades": 227,
+            "wins": 112,
+            "losses": 115,
+            "winRatePct": 49.33920704845815,
+            "pf": 1.03052412237183,
+            "endingEquityJpy": 9426.218285141707,
+            "closedDDPct": -33.50557164305227,
+            "grossProfitPctPoints": 278.19819329053433,
+            "grossLossPctPoints": -269.9579633810414,
+            "totalNetReturnPctPoints": 8.240229909492939
+          },
+          "late": {
+            "trades": 227,
+            "wins": 98,
+            "losses": 129,
+            "winRatePct": 43.17180616740088,
+            "pf": 0.6336654179461155,
+            "endingEquityJpy": 4178.176304038912,
+            "closedDDPct": -60.27035515515769,
+            "grossProfitPctPoints": 141.14926326167867,
+            "grossLossPctPoints": -222.7504598865161,
+            "totalNetReturnPctPoints": -81.60119662483743
+          },
+          "potentialSignalsBeforeSlotExclusion": 1900
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 459,
+            "wins": 218,
+            "losses": 241,
+            "winRatePct": 47.49455337690632,
+            "pf": 1.0006040157854657,
+            "endingEquityJpy": 8091.198605199576,
+            "closedDDPct": -41.87936998016759,
+            "grossProfitPctPoints": 485.85799132489757,
+            "grossLossPctPoints": -485.5647025796745,
+            "totalNetReturnPctPoints": 0.29328874522309434
+          },
+          "early": {
+            "trades": 228,
+            "wins": 108,
+            "losses": 120,
+            "winRatePct": 47.368421052631575,
+            "pf": 1.1358672977495505,
+            "endingEquityJpy": 12297.046843740829,
+            "closedDDPct": -30.223388675385955,
+            "grossProfitPctPoints": 298.6033061197933,
+            "grossLossPctPoints": -262.8857320845528,
+            "totalNetReturnPctPoints": 35.71757403524049
+          },
+          "late": {
+            "trades": 231,
+            "wins": 110,
+            "losses": 121,
+            "winRatePct": 47.61904761904761,
+            "pf": 0.8409176887639985,
+            "endingEquityJpy": 6579.790016265542,
+            "closedDDPct": -36.71421269352225,
+            "grossProfitPctPoints": 187.25468520510432,
+            "grossLossPctPoints": -222.67897049512166,
+            "totalNetReturnPctPoints": -35.42428529001734
+          },
+          "potentialSignalsBeforeSlotExclusion": 1876
+        },
+        "30": {
+          "all": {
+            "trades": 459,
+            "wins": 206,
+            "losses": 253,
+            "winRatePct": 44.88017429193899,
+            "pf": 0.8289698346432232,
+            "endingEquityJpy": 3225.233433195255,
+            "closedDDPct": -69.9932174177898,
+            "grossProfitPctPoints": 443.5258724060624,
+            "grossLossPctPoints": -535.0325836608392,
+            "totalNetReturnPctPoints": -91.50671125477686
+          },
+          "early": {
+            "trades": 228,
+            "wins": 102,
+            "losses": 126,
+            "winRatePct": 44.73684210526316,
+            "pf": 0.9656185003402489,
+            "endingEquityJpy": 7791.3917561074295,
+            "closedDDPct": -37.44350186795409,
+            "grossProfitPctPoints": 277.5519809854543,
+            "grossLossPctPoints": -287.4344069502138,
+            "totalNetReturnPctPoints": -9.882425964759534
+          },
+          "late": {
+            "trades": 231,
+            "wins": 104,
+            "losses": 127,
+            "winRatePct": 45.02164502164502,
+            "pf": 0.6703356770457408,
+            "endingEquityJpy": 4139.483078446283,
+            "closedDDPct": -59.66140191718343,
+            "grossProfitPctPoints": 165.9738914206081,
+            "grossLossPctPoints": -247.59817671062547,
+            "totalNetReturnPctPoints": -81.62428529001735
+          },
+          "potentialSignalsBeforeSlotExclusion": 1876
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN_RETEST": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 401,
+            "wins": 217,
+            "losses": 184,
+            "winRatePct": 54.11471321695761,
+            "pf": 1.068317040971446,
+            "endingEquityJpy": 10978.319718468043,
+            "closedDDPct": -30.611007503533404,
+            "grossProfitPctPoints": 384.99480044156866,
+            "grossLossPctPoints": -360.3750438086093,
+            "totalNetReturnPctPoints": 24.619756632959366
+          },
+          "early": {
+            "trades": 194,
+            "wins": 109,
+            "losses": 85,
+            "winRatePct": 56.18556701030928,
+            "pf": 1.2091670377326298,
+            "endingEquityJpy": 13439.832950524107,
+            "closedDDPct": -30.611007503533404,
+            "grossProfitPctPoints": 232.75061217213445,
+            "grossLossPctPoints": -192.4883865578877,
+            "totalNetReturnPctPoints": 40.262225614246745
+          },
+          "late": {
+            "trades": 207,
+            "wins": 108,
+            "losses": 99,
+            "winRatePct": 52.17391304347826,
+            "pf": 0.9068272057026727,
+            "endingEquityJpy": 8168.494176142205,
+            "closedDDPct": -24.739859284001742,
+            "grossProfitPctPoints": 152.2441882694342,
+            "grossLossPctPoints": -167.88665725072158,
+            "totalNetReturnPctPoints": -15.64246898128738
+          },
+          "potentialSignalsBeforeSlotExclusion": 1180
+        },
+        "30": {
+          "all": {
+            "trades": 401,
+            "wins": 195,
+            "losses": 206,
+            "winRatePct": 48.6284289276808,
+            "pf": 0.8607993577420098,
+            "endingEquityJpy": 4918.505445551428,
+            "closedDDPct": -59.70760163984615,
+            "grossProfitPctPoints": 343.7012719008982,
+            "grossLossPctPoints": -399.2815152679388,
+            "totalNetReturnPctPoints": -55.58024336704062
+          },
+          "early": {
+            "trades": 194,
+            "wins": 98,
+            "losses": 96,
+            "winRatePct": 50.51546391752577,
+            "pf": 1.0069455797222764,
+            "endingEquityJpy": 9117.706192166394,
+            "closedDDPct": -35.162585052318406,
+            "grossProfitPctPoints": 211.9882972619433,
+            "grossLossPctPoints": -210.52607164769657,
+            "totalNetReturnPctPoints": 1.4622256142467336
+          },
+          "late": {
+            "trades": 207,
+            "wins": 97,
+            "losses": 110,
+            "winRatePct": 46.85990338164252,
+            "pf": 0.6977969594559016,
+            "endingEquityJpy": 5394.4548572723525,
+            "closedDDPct": -49.57184034788362,
+            "grossProfitPctPoints": 131.7129746389549,
+            "grossLossPctPoints": -188.75544362024226,
+            "totalNetReturnPctPoints": -57.04246898128736
+          },
+          "potentialSignalsBeforeSlotExclusion": 1180
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 392,
+            "wins": 183,
+            "losses": 209,
+            "winRatePct": 46.683673469387756,
+            "pf": 0.9877467659741355,
+            "endingEquityJpy": 8089.93663654825,
+            "closedDDPct": -40.484431240376864,
+            "grossProfitPctPoints": 384.8262260773724,
+            "grossLossPctPoints": -389.6000871213677,
+            "totalNetReturnPctPoints": -4.773861043995339
+          },
+          "early": {
+            "trades": 186,
+            "wins": 90,
+            "losses": 96,
+            "winRatePct": 48.38709677419355,
+            "pf": 1.1894760649063811,
+            "endingEquityJpy": 12865.7895347662,
+            "closedDDPct": -33.61700528341635,
+            "grossProfitPctPoints": 223.24788313012493,
+            "grossLossPctPoints": -187.6858977802936,
+            "totalNetReturnPctPoints": 35.56198534983133
+          },
+          "late": {
+            "trades": 206,
+            "wins": 93,
+            "losses": 113,
+            "winRatePct": 45.14563106796117,
+            "pf": 0.8002327299262202,
+            "endingEquityJpy": 6287.944175277744,
+            "closedDDPct": -40.48443124037687,
+            "grossProfitPctPoints": 161.57834294724742,
+            "grossLossPctPoints": -201.9141893410741,
+            "totalNetReturnPctPoints": -40.33584639382667
+          },
+          "potentialSignalsBeforeSlotExclusion": 1107
+        },
+        "30": {
+          "all": {
+            "trades": 392,
+            "wins": 176,
+            "losses": 216,
+            "winRatePct": 44.89795918367347,
+            "pf": 0.8076265664717219,
+            "endingEquityJpy": 3688.006327155941,
+            "closedDDPct": -64.48457115002776,
+            "grossProfitPctPoints": 349.1824135128504,
+            "grossLossPctPoints": -432.35627455684573,
+            "totalNetReturnPctPoints": -83.17386104399532
+          },
+          "early": {
+            "trades": 186,
+            "wins": 87,
+            "losses": 99,
+            "winRatePct": 46.774193548387096,
+            "pf": 0.9920952699931144,
+            "endingEquityJpy": 8868.470868667153,
+            "closedDDPct": -38.16292145441598,
+            "grossProfitPctPoints": 205.58154234188757,
+            "grossLossPctPoints": -207.21955699205623,
+            "totalNetReturnPctPoints": -1.6380146501686568
+          },
+          "late": {
+            "trades": 206,
+            "wins": 89,
+            "losses": 117,
+            "winRatePct": 43.203883495145625,
+            "pf": 0.637838521962272,
+            "endingEquityJpy": 4158.55944251437,
+            "closedDDPct": -60.24742920094253,
+            "grossProfitPctPoints": 143.60087117096282,
+            "grossLossPctPoints": -225.1367175647895,
+            "totalNetReturnPctPoints": -81.53584639382669
+          },
+          "potentialSignalsBeforeSlotExclusion": 1107
+        }
+      }
+    },
+    "BTC6_DOWN_DOGE6_DOWN_VOL1P2_EMA_DOWN": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 336,
+            "wins": 157,
+            "losses": 179,
+            "winRatePct": 46.726190476190474,
+            "pf": 0.8676844180982674,
+            "endingEquityJpy": 5296.298080649308,
+            "closedDDPct": -49.01273650557463,
+            "grossProfitPctPoints": 318.09488087096395,
+            "grossLossPctPoints": -366.60204359569235,
+            "totalNetReturnPctPoints": -48.5071627247284
+          },
+          "early": {
+            "trades": 170,
+            "wins": 85,
+            "losses": 85,
+            "winRatePct": 50.0,
+            "pf": 0.9556465919694309,
+            "endingEquityJpy": 8080.769256533627,
+            "closedDDPct": -44.352398016628335,
+            "grossProfitPctPoints": 210.3353167122296,
+            "grossLossPctPoints": -220.09738587437747,
+            "totalNetReturnPctPoints": -9.762069162147867
+          },
+          "late": {
+            "trades": 166,
+            "wins": 72,
+            "losses": 94,
+            "winRatePct": 43.373493975903614,
+            "pf": 0.7355367797501532,
+            "endingEquityJpy": 6554.200364485145,
+            "closedDDPct": -42.246970514201806,
+            "grossProfitPctPoints": 107.75956415873436,
+            "grossLossPctPoints": -146.50465772131489,
+            "totalNetReturnPctPoints": -38.74509356258052
+          },
+          "potentialSignalsBeforeSlotExclusion": 792
+        },
+        "30": {
+          "all": {
+            "trades": 336,
+            "wins": 139,
+            "losses": 197,
+            "winRatePct": 41.36904761904761,
+            "pf": 0.7133698195504335,
+            "endingEquityJpy": 2698.6833222937926,
+            "closedDDPct": -73.8053499657866,
+            "grossProfitPctPoints": 287.9738541983568,
+            "grossLossPctPoints": -403.68101692308517,
+            "totalNetReturnPctPoints": -115.70716272472839
+          },
+          "early": {
+            "trades": 170,
+            "wins": 79,
+            "losses": 91,
+            "winRatePct": 46.470588235294116,
+            "pf": 0.8157341459122792,
+            "endingEquityJpy": 5745.93527719571,
+            "closedDDPct": -56.03293345048337,
+            "grossProfitPctPoints": 193.73211758671488,
+            "grossLossPctPoints": -237.49418674886272,
+            "totalNetReturnPctPoints": -43.76206916214784
+          },
+          "late": {
+            "trades": 166,
+            "wins": 60,
+            "losses": 106,
+            "winRatePct": 36.144578313253014,
+            "pf": 0.5670830625558195,
+            "endingEquityJpy": 4696.682423493775,
+            "closedDDPct": -57.9447679026835,
+            "grossProfitPctPoints": 94.24173661164193,
+            "grossLossPctPoints": -166.18683017422242,
+            "totalNetReturnPctPoints": -71.9450935625805
+          },
+          "potentialSignalsBeforeSlotExclusion": 792
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 316,
+            "wins": 152,
+            "losses": 164,
+            "winRatePct": 48.10126582278481,
+            "pf": 0.8658830413774184,
+            "endingEquityJpy": 5000.735489630084,
+            "closedDDPct": -52.55402050007516,
+            "grossProfitPctPoints": 335.91653395573053,
+            "grossLossPctPoints": -387.9467756076681,
+            "totalNetReturnPctPoints": -52.03024165193756
+          },
+          "early": {
+            "trades": 159,
+            "wins": 75,
+            "losses": 84,
+            "winRatePct": 47.16981132075472,
+            "pf": 0.9295700350112859,
+            "endingEquityJpy": 7605.058267023278,
+            "closedDDPct": -48.22238334682768,
+            "grossProfitPctPoints": 203.58519991579055,
+            "grossLossPctPoints": -219.01007159005383,
+            "totalNetReturnPctPoints": -15.424871674263272
+          },
+          "late": {
+            "trades": 157,
+            "wins": 77,
+            "losses": 80,
+            "winRatePct": 49.044585987261144,
+            "pf": 0.7833190235920691,
+            "endingEquityJpy": 6575.538692864532,
+            "closedDDPct": -38.76062806246316,
+            "grossProfitPctPoints": 132.33133403993997,
+            "grossLossPctPoints": -168.93670401761426,
+            "totalNetReturnPctPoints": -36.605369977674286
+          },
+          "potentialSignalsBeforeSlotExclusion": 729
+        },
+        "30": {
+          "all": {
+            "trades": 316,
+            "wins": 142,
+            "losses": 174,
+            "winRatePct": 44.936708860759495,
+            "pf": 0.726857604937221,
+            "endingEquityJpy": 2651.7502947147345,
+            "closedDDPct": -74.4369141996396,
+            "grossProfitPctPoints": 306.6385115507758,
+            "grossLossPctPoints": -421.8687532027133,
+            "totalNetReturnPctPoints": -115.23024165193755
+          },
+          "early": {
+            "trades": 159,
+            "wins": 70,
+            "losses": 89,
+            "winRatePct": 44.0251572327044,
+            "pf": 0.800009337169626,
+            "endingEquityJpy": 5527.365181966729,
+            "closedDDPct": -59.449624443816404,
+            "grossProfitPctPoints": 188.91051087766087,
+            "grossLossPctPoints": -236.13538255192412,
+            "totalNetReturnPctPoints": -47.224871674263255
+          },
+          "late": {
+            "trades": 157,
+            "wins": 72,
+            "losses": 85,
+            "winRatePct": 45.85987261146497,
+            "pf": 0.633854865502139,
+            "endingEquityJpy": 4797.494298669084,
+            "closedDDPct": -52.59088114083559,
+            "grossProfitPctPoints": 117.7280006731149,
+            "grossLossPctPoints": -185.7333706507892,
+            "totalNetReturnPctPoints": -68.00536997767429
+          },
+          "potentialSignalsBeforeSlotExclusion": 729
+        }
+      }
+    }
+  },
+  "limitations": [
+    "No original V52 ledger wallet ownership, no live/canonical parity",
+    "M5 12h emergency STOP10 TAKE25 research proxy; no signed venue orderbook/funding",
+    "Short entry candidates entirely new; no proof admission/slot priority equals production",
+    "Case selection uses historic sample; cannot claim true unseen OOS"
+  ]
+}

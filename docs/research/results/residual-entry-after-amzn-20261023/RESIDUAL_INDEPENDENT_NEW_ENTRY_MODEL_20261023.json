@@ -1,0 +1,3602 @@
+{
+  "schema": "residual-new-independent-hourly-entry-design-v1",
+  "status": "RESEARCH_ONLY_INDEPENDENT_CANDIDATE_STREAM_NOT_FULL8_NOT_LIVE",
+  "originalPolicy": "rel24>=+3%, volratio>=1.2 DOGE/0.8 AVAX, ATR3h>=0.7%, hold12h, STOP-10%, TAKE+25%",
+  "estimatedRoundTripCostsBps": [
+    10,
+    30
+  ],
+  "period": "2025-08-10..2026-08-10",
+  "trainEnd": "2026-02-10",
+  "causality": "HH:55 completed M5 -> next HH:00 M5 open entry; gap fail; stop-before-take same candle",
+  "limitations": [
+    "No funding, financing, venue L2 slippage, exact price source parity, or margin/liquidation accounting",
+    "No integration into eight-strategy wallet, no shared cap, pending exposures or original stock suppressed 11",
+    "Same-year exploratory signal research; no independent unseen external holdout"
+  ],
+  "definitions": {
+    "ORIGINAL_REL_VOL": [
+      "base"
+    ],
+    "BTC6_UP": [
+      "base",
+      "btc6up"
+    ],
+    "BTC24_UP": [
+      "base",
+      "btc24up"
+    ],
+    "DOGE3_UP": [
+      "base",
+      "ret3up"
+    ],
+    "DOGE6_UP": [
+      "base",
+      "ret6up"
+    ],
+    "REL3_UP": [
+      "base",
+      "rel3up"
+    ],
+    "BTC6_UP_REL3_UP": [
+      "base",
+      "btc6up",
+      "rel3up"
+    ],
+    "BTC6_UP_RET3_UP": [
+      "base",
+      "btc6up",
+      "ret3up"
+    ],
+    "BTC24_UP_RET3_UP": [
+      "base",
+      "btc24up",
+      "ret3up"
+    ],
+    "BTC6_UP_RET3_UP_VOL15": [
+      "base",
+      "btc6up",
+      "ret3up",
+      "vol15"
+    ],
+    "BTC6_UP_REL3_UP_VOL15": [
+      "base",
+      "btc6up",
+      "rel3up",
+      "vol15"
+    ],
+    "BTC6_UP_REL3_UP_EMA_UP": [
+      "base",
+      "btc6up",
+      "rel3up",
+      "ema"
+    ],
+    "REL3_UP_EMA_UP": [
+      "base",
+      "rel3up",
+      "ema"
+    ],
+    "BTC6_UP_REL3_UP_BREAKOUT1H": [
+      "base",
+      "btc6up",
+      "rel3up",
+      "breakout"
+    ],
+    "BTC6_UP_REL3_UP_PULLBACK": [
+      "base",
+      "btc6up",
+      "rel3up",
+      "pullback"
+    ],
+    "BTC6_UP_REL3_UP_COOLDOWN6": [
+      "base",
+      "btc6up",
+      "rel3up",
+      "cooldown6"
+    ],
+    "NO_REL24_BTC6_REL3": [
+      "btc6up",
+      "rel3up",
+      "vol15",
+      "ema"
+    ],
+    "NO_REL24_BTC24_RET3": [
+      "btc24up",
+      "ret3up",
+      "vol15"
+    ],
+    "NO_REL24_BTC6_BREAKOUT": [
+      "btc6up",
+      "rel3up",
+      "breakout"
+    ],
+    "NO_REL24_PULLBACK": [
+      "btc6up",
+      "rel3up",
+      "pullback",
+      "ema"
+    ]
+  },
+  "cases": {
+    "ORIGINAL_REL_VOL": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "grossProfitPercentPoints": 9.184646319869628,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.33467033105352745,
+            "sumNetReturnPoints": -18.259215497689063,
+            "compoundJpyFrom10000": 8239.854499950401,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -1.8259215497689063
+          },
+          "early": {
+            "trades": 5,
+            "wins": 5,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 9.184646319869628,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 9.184646319869628,
+            "compoundJpyFrom10000": 10939.74688403102,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.8369292639739256
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 13
+        },
+        "30": {
+          "all": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "grossProfitPercentPoints": 8.23360425848274,
+            "grossLossPercentPoints": -28.492819756171805,
+            "tradeProfitFactor": 0.288971197969947,
+            "sumNetReturnPoints": -20.259215497689063,
+            "compoundJpyFrom10000": 8073.215754438686,
+            "closedTradeDDPct": -25.473605590538607,
+            "avgNetPnlPct": -2.0259215497689063
+          },
+          "early": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 8.23360425848274,
+            "grossLossPercentPoints": -0.04895793861311422,
+            "tradeProfitFactor": 168.17710246234162,
+            "sumNetReturnPoints": 8.184646319869627,
+            "compoundJpyFrom10000": 10832.693327524996,
+            "closedTradeDDPct": -0.04895793861311448,
+            "avgNetPnlPct": 1.6369292639739255
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 13
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      }
+    },
+    "BTC6_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.22179430174201353,
+            "sumNetReturnPoints": -21.356969648628954,
+            "compoundJpyFrom10000": 7997.627023629921,
+            "closedTradeDDPct": -24.679660440971528,
+            "avgNetPnlPct": -2.6696212060786193
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.086892168929737,
+            "compoundJpyFrom10000": 10618.150516119473,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.028964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        },
+        "30": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.1929025040313837,
+            "sumNetReturnPoints": -22.956969648628956,
+            "compoundJpyFrom10000": 7866.871508031057,
+            "closedTradeDDPct": -25.473605590538572,
+            "avgNetPnlPct": -2.8696212060786195
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.486892168929736,
+            "compoundJpyFrom10000": 10555.819277676374,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.828964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        },
+        "30": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        }
+      }
+    },
+    "BTC24_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "grossProfitPercentPoints": 6.237934230316623,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.22729797547390243,
+            "sumNetReturnPoints": -21.20592758724207,
+            "compoundJpyFrom10000": 8009.706804348448,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -2.3562141763602296
+          },
+          "early": {
+            "trades": 4,
+            "wins": 4,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.237934230316623,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.237934230316623,
+            "compoundJpyFrom10000": 10634.188389540182,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.5594835575791557
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 11
+        },
+        "30": {
+          "all": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.333333333333336,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -28.492819756171805,
+            "tradeProfitFactor": 0.19257104828107527,
+            "sumNetReturnPoints": -23.00592758724207,
+            "compoundJpyFrom10000": 7863.020049907382,
+            "closedTradeDDPct": -25.473605590538572,
+            "avgNetPnlPct": -2.5562141763602297
+          },
+          "early": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -0.04895793861311422,
+            "tradeProfitFactor": 112.07359468889032,
+            "sumNetReturnPoints": 5.437934230316622,
+            "compoundJpyFrom10000": 10550.651366154298,
+            "closedTradeDDPct": -0.048957938613125584,
+            "avgNetPnlPct": 1.3594835575791555
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 11
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 12.000387301314918,
+            "grossLossPercentPoints": -5.4870233352305124,
+            "tradeProfitFactor": 2.1870487089537365,
+            "sumNetReturnPoints": 6.513363966084405,
+            "compoundJpyFrom10000": 10635.84742856665,
+            "closedTradeDDPct": -5.4870233352305124,
+            "avgNetPnlPct": 1.3026727932168811
+          },
+          "early": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 12.000387301314918,
+            "grossLossPercentPoints": -5.4870233352305124,
+            "tradeProfitFactor": 2.1870487089537365,
+            "sumNetReturnPoints": 6.513363966084405,
+            "compoundJpyFrom10000": 10635.84742856665,
+            "closedTradeDDPct": -5.4870233352305124,
+            "avgNetPnlPct": 1.3026727932168811
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 8
+        },
+        "30": {
+          "all": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 11.200387301314919,
+            "grossLossPercentPoints": -5.687023335230512,
+            "tradeProfitFactor": 1.9694639253420496,
+            "sumNetReturnPoints": 5.513363966084407,
+            "compoundJpyFrom10000": 10531.140341679702,
+            "closedTradeDDPct": -5.687023335230512,
+            "avgNetPnlPct": 1.1026727932168816
+          },
+          "early": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 11.200387301314919,
+            "grossLossPercentPoints": -5.687023335230512,
+            "tradeProfitFactor": 1.9694639253420496,
+            "sumNetReturnPoints": 5.513363966084407,
+            "compoundJpyFrom10000": 10531.140341679702,
+            "closedTradeDDPct": -5.687023335230512,
+            "avgNetPnlPct": 1.1026727932168816
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 8
+        }
+      }
+    },
+    "DOGE3_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.310512417279691,
+            "sumNetReturnPoints": -18.922201945098728,
+            "compoundJpyFrom10000": 8185.585179568687,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -2.102466882788747
+          },
+          "early": {
+            "trades": 4,
+            "wins": 4,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 8.521659872459963,
+            "compoundJpyFrom10000": 10867.695535485009,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.130414968114991
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.333333333333336,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -28.492819756171805,
+            "tradeProfitFactor": 0.2727219656590812,
+            "sumNetReturnPoints": -20.72220194509873,
+            "compoundJpyFrom10000": 8036.0101166859595,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -2.3024668827887473
+          },
+          "early": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -0.04895793861311422,
+            "tradeProfitFactor": 158.7202817602207,
+            "sumNetReturnPoints": 7.721659872459964,
+            "compoundJpyFrom10000": 10782.77056117149,
+            "closedTradeDDPct": -0.048957938613125584,
+            "avgNetPnlPct": 1.9304149681149907
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      }
+    },
+    "DOGE6_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.310512417279691,
+            "sumNetReturnPoints": -18.922201945098728,
+            "compoundJpyFrom10000": 8185.585179568687,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -2.102466882788747
+          },
+          "early": {
+            "trades": 4,
+            "wins": 4,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 8.521659872459963,
+            "compoundJpyFrom10000": 10867.695535485009,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.130414968114991
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.333333333333336,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -28.492819756171805,
+            "tradeProfitFactor": 0.2727219656590812,
+            "sumNetReturnPoints": -20.72220194509873,
+            "compoundJpyFrom10000": 8036.0101166859595,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -2.3024668827887473
+          },
+          "early": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -0.04895793861311422,
+            "tradeProfitFactor": 158.7202817602207,
+            "sumNetReturnPoints": 7.721659872459964,
+            "compoundJpyFrom10000": 10782.77056117149,
+            "closedTradeDDPct": -0.048957938613125584,
+            "avgNetPnlPct": 1.9304149681149907
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      }
+    },
+    "REL3_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.310512417279691,
+            "sumNetReturnPoints": -18.922201945098728,
+            "compoundJpyFrom10000": 8185.585179568687,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -2.102466882788747
+          },
+          "early": {
+            "trades": 4,
+            "wins": 4,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 8.521659872459963,
+            "compoundJpyFrom10000": 10867.695535485009,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.130414968114991
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.333333333333336,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -28.492819756171805,
+            "tradeProfitFactor": 0.2727219656590812,
+            "sumNetReturnPoints": -20.72220194509873,
+            "compoundJpyFrom10000": 8036.0101166859595,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -2.3024668827887473
+          },
+          "early": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -0.04895793861311422,
+            "tradeProfitFactor": 158.7202817602207,
+            "sumNetReturnPoints": 7.721659872459964,
+            "compoundJpyFrom10000": 10782.77056117149,
+            "closedTradeDDPct": -0.048957938613125584,
+            "avgNetPnlPct": 1.9304149681149907
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      }
+    },
+    "BTC6_UP_REL3_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.22179430174201353,
+            "sumNetReturnPoints": -21.356969648628954,
+            "compoundJpyFrom10000": 7997.627023629921,
+            "closedTradeDDPct": -24.679660440971528,
+            "avgNetPnlPct": -2.6696212060786193
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.086892168929737,
+            "compoundJpyFrom10000": 10618.150516119473,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.028964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        },
+        "30": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.1929025040313837,
+            "sumNetReturnPoints": -22.956969648628956,
+            "compoundJpyFrom10000": 7866.871508031057,
+            "closedTradeDDPct": -25.473605590538572,
+            "avgNetPnlPct": -2.8696212060786195
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.486892168929736,
+            "compoundJpyFrom10000": 10555.819277676374,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.828964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        },
+        "30": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        }
+      }
+    },
+    "BTC6_UP_RET3_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.22179430174201353,
+            "sumNetReturnPoints": -21.356969648628954,
+            "compoundJpyFrom10000": 7997.627023629921,
+            "closedTradeDDPct": -24.679660440971528,
+            "avgNetPnlPct": -2.6696212060786193
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.086892168929737,
+            "compoundJpyFrom10000": 10618.150516119473,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.028964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        },
+        "30": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.1929025040313837,
+            "sumNetReturnPoints": -22.956969648628956,
+            "compoundJpyFrom10000": 7866.871508031057,
+            "closedTradeDDPct": -25.473605590538572,
+            "avgNetPnlPct": -2.8696212060786195
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.486892168929736,
+            "compoundJpyFrom10000": 10555.819277676374,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.828964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        },
+        "30": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        }
+      }
+    },
+    "BTC24_UP_RET3_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "grossProfitPercentPoints": 6.237934230316623,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.22729797547390243,
+            "sumNetReturnPoints": -21.20592758724207,
+            "compoundJpyFrom10000": 8009.706804348448,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -2.3562141763602296
+          },
+          "early": {
+            "trades": 4,
+            "wins": 4,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.237934230316623,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.237934230316623,
+            "compoundJpyFrom10000": 10634.188389540182,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.5594835575791557
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 11
+        },
+        "30": {
+          "all": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.333333333333336,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -28.492819756171805,
+            "tradeProfitFactor": 0.19257104828107527,
+            "sumNetReturnPoints": -23.00592758724207,
+            "compoundJpyFrom10000": 7863.020049907382,
+            "closedTradeDDPct": -25.473605590538572,
+            "avgNetPnlPct": -2.5562141763602297
+          },
+          "early": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -0.04895793861311422,
+            "tradeProfitFactor": 112.07359468889032,
+            "sumNetReturnPoints": 5.437934230316622,
+            "compoundJpyFrom10000": 10550.651366154298,
+            "closedTradeDDPct": -0.048957938613125584,
+            "avgNetPnlPct": 1.3594835575791555
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 11
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 12.000387301314918,
+            "grossLossPercentPoints": -5.4870233352305124,
+            "tradeProfitFactor": 2.1870487089537365,
+            "sumNetReturnPoints": 6.513363966084405,
+            "compoundJpyFrom10000": 10635.84742856665,
+            "closedTradeDDPct": -5.4870233352305124,
+            "avgNetPnlPct": 1.3026727932168811
+          },
+          "early": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 12.000387301314918,
+            "grossLossPercentPoints": -5.4870233352305124,
+            "tradeProfitFactor": 2.1870487089537365,
+            "sumNetReturnPoints": 6.513363966084405,
+            "compoundJpyFrom10000": 10635.84742856665,
+            "closedTradeDDPct": -5.4870233352305124,
+            "avgNetPnlPct": 1.3026727932168811
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 8
+        },
+        "30": {
+          "all": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 11.200387301314919,
+            "grossLossPercentPoints": -5.687023335230512,
+            "tradeProfitFactor": 1.9694639253420496,
+            "sumNetReturnPoints": 5.513363966084407,
+            "compoundJpyFrom10000": 10531.140341679702,
+            "closedTradeDDPct": -5.687023335230512,
+            "avgNetPnlPct": 1.1026727932168816
+          },
+          "early": {
+            "trades": 5,
+            "wins": 4,
+            "losses": 1,
+            "winRatePct": 80.0,
+            "grossProfitPercentPoints": 11.200387301314919,
+            "grossLossPercentPoints": -5.687023335230512,
+            "tradeProfitFactor": 1.9694639253420496,
+            "sumNetReturnPoints": 5.513363966084407,
+            "compoundJpyFrom10000": 10531.140341679702,
+            "closedTradeDDPct": -5.687023335230512,
+            "avgNetPnlPct": 1.1026727932168816
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 8
+        }
+      }
+    },
+    "BTC6_UP_RET3_UP_VOL15": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": -19.152984440281006,
+            "tradeProfitFactor": 0.3178038486852356,
+            "sumNetReturnPoints": -13.06609227135127,
+            "compoundJpyFrom10000": 8710.475903665056,
+            "closedTradeDDPct": -17.96616660837842,
+            "avgNetPnlPct": -2.1776820452252115
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.086892168929737,
+            "compoundJpyFrom10000": 10618.150516119473,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.028964056309912
+          },
+          "late": {
+            "trades": 3,
+            "wins": 0,
+            "losses": 3,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -19.152984440281006,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -19.152984440281006,
+            "compoundJpyFrom10000": 8203.38333916216,
+            "closedTradeDDPct": -17.96616660837841,
+            "avgNetPnlPct": -6.384328146760335
+          },
+          "triggerEventsBeforeOccupancy": 6
+        },
+        "30": {
+          "all": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -19.752984440281008,
+            "tradeProfitFactor": 0.27777535012586074,
+            "sumNetReturnPoints": -14.266092271351273,
+            "compoundJpyFrom10000": 8603.957883155055,
+            "closedTradeDDPct": -18.49085649513864,
+            "avgNetPnlPct": -2.377682045225212
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.486892168929736,
+            "compoundJpyFrom10000": 10555.819277676374,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.828964056309912
+          },
+          "late": {
+            "trades": 3,
+            "wins": 0,
+            "losses": 3,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -19.752984440281008,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -19.752984440281008,
+            "compoundJpyFrom10000": 8150.914350486134,
+            "closedTradeDDPct": -18.490856495138665,
+            "avgNetPnlPct": -6.584328146760336
+          },
+          "triggerEventsBeforeOccupancy": 6
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.897150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.897150145353569,
+            "compoundJpyFrom10000": 10598.214859982896,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.9485750726767845
+          },
+          "early": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.897150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.897150145353569,
+            "compoundJpyFrom10000": 10598.214859982896,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.9485750726767845
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 2
+        },
+        "30": {
+          "all": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.497150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.497150145353569,
+            "compoundJpyFrom10000": 10557.075429953828,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.7485750726767844
+          },
+          "early": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.497150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.497150145353569,
+            "compoundJpyFrom10000": 10557.075429953828,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.7485750726767844
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 2
+        }
+      }
+    },
+    "BTC6_UP_REL3_UP_VOL15": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": -19.152984440281006,
+            "tradeProfitFactor": 0.3178038486852356,
+            "sumNetReturnPoints": -13.06609227135127,
+            "compoundJpyFrom10000": 8710.475903665056,
+            "closedTradeDDPct": -17.96616660837842,
+            "avgNetPnlPct": -2.1776820452252115
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.086892168929737,
+            "compoundJpyFrom10000": 10618.150516119473,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.028964056309912
+          },
+          "late": {
+            "trades": 3,
+            "wins": 0,
+            "losses": 3,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -19.152984440281006,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -19.152984440281006,
+            "compoundJpyFrom10000": 8203.38333916216,
+            "closedTradeDDPct": -17.96616660837841,
+            "avgNetPnlPct": -6.384328146760335
+          },
+          "triggerEventsBeforeOccupancy": 6
+        },
+        "30": {
+          "all": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -19.752984440281008,
+            "tradeProfitFactor": 0.27777535012586074,
+            "sumNetReturnPoints": -14.266092271351273,
+            "compoundJpyFrom10000": 8603.957883155055,
+            "closedTradeDDPct": -18.49085649513864,
+            "avgNetPnlPct": -2.377682045225212
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.486892168929736,
+            "compoundJpyFrom10000": 10555.819277676374,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.828964056309912
+          },
+          "late": {
+            "trades": 3,
+            "wins": 0,
+            "losses": 3,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -19.752984440281008,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -19.752984440281008,
+            "compoundJpyFrom10000": 8150.914350486134,
+            "closedTradeDDPct": -18.490856495138665,
+            "avgNetPnlPct": -6.584328146760336
+          },
+          "triggerEventsBeforeOccupancy": 6
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.897150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.897150145353569,
+            "compoundJpyFrom10000": 10598.214859982896,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.9485750726767845
+          },
+          "early": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.897150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.897150145353569,
+            "compoundJpyFrom10000": 10598.214859982896,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.9485750726767845
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 2
+        },
+        "30": {
+          "all": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.497150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.497150145353569,
+            "compoundJpyFrom10000": 10557.075429953828,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.7485750726767844
+          },
+          "early": {
+            "trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.497150145353569,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.497150145353569,
+            "compoundJpyFrom10000": 10557.075429953828,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.7485750726767844
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 2
+        }
+      }
+    },
+    "BTC6_UP_REL3_UP_EMA_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.22179430174201353,
+            "sumNetReturnPoints": -21.356969648628954,
+            "compoundJpyFrom10000": 7997.627023629921,
+            "closedTradeDDPct": -24.679660440971528,
+            "avgNetPnlPct": -2.6696212060786193
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.086892168929737,
+            "compoundJpyFrom10000": 10618.150516119473,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.028964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        },
+        "30": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.1929025040313837,
+            "sumNetReturnPoints": -22.956969648628956,
+            "compoundJpyFrom10000": 7866.871508031057,
+            "closedTradeDDPct": -25.473605590538572,
+            "avgNetPnlPct": -2.8696212060786195
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.486892168929736,
+            "compoundJpyFrom10000": 10555.819277676374,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.828964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 5
+        },
+        "30": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 5
+        }
+      }
+    },
+    "REL3_UP_EMA_UP": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.310512417279691,
+            "sumNetReturnPoints": -18.922201945098728,
+            "compoundJpyFrom10000": 8185.585179568687,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -2.102466882788747
+          },
+          "early": {
+            "trades": 4,
+            "wins": 4,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 8.521659872459963,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 8.521659872459963,
+            "compoundJpyFrom10000": 10867.695535485009,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.130414968114991
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        },
+        "30": {
+          "all": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.333333333333336,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -28.492819756171805,
+            "tradeProfitFactor": 0.2727219656590812,
+            "sumNetReturnPoints": -20.72220194509873,
+            "compoundJpyFrom10000": 8036.0101166859595,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -2.3024668827887473
+          },
+          "early": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "grossProfitPercentPoints": 7.770617811073078,
+            "grossLossPercentPoints": -0.04895793861311422,
+            "tradeProfitFactor": 158.7202817602207,
+            "sumNetReturnPoints": 7.721659872459964,
+            "compoundJpyFrom10000": 10782.77056117149,
+            "closedTradeDDPct": -0.048957938613125584,
+            "avgNetPnlPct": 1.9304149681149907
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 12
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 12.475675661027552,
+            "grossLossPercentPoints": -1.4819034984351331,
+            "tradeProfitFactor": 8.418682913024815,
+            "sumNetReturnPoints": 10.993772162592418,
+            "compoundJpyFrom10000": 11139.865558713447,
+            "closedTradeDDPct": -0.8052600646488273,
+            "avgNetPnlPct": 1.5705388803703455
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 9
+        },
+        "30": {
+          "all": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "early": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "grossProfitPercentPoints": 11.475675661027553,
+            "grossLossPercentPoints": -1.8819034984351326,
+            "tradeProfitFactor": 6.097908670965314,
+            "sumNetReturnPoints": 9.59377216259242,
+            "compoundJpyFrom10000": 10987.173607363335,
+            "closedTradeDDPct": -1.0052600646488274,
+            "avgNetPnlPct": 1.3705388803703458
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 9
+        }
+      }
+    },
+    "BTC6_UP_REL3_UP_BREAKOUT1H": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -0.5956836535783715,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -0.5956836535783715,
+            "compoundJpyFrom10000": 9940.431634642162,
+            "closedTradeDDPct": -0.5956836535783827,
+            "avgNetPnlPct": -0.5956836535783715
+          },
+          "early": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -0.5956836535783715,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -0.5956836535783715,
+            "compoundJpyFrom10000": 9940.431634642162,
+            "closedTradeDDPct": -0.5956836535783827,
+            "avgNetPnlPct": -0.5956836535783715
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 1
+        },
+        "30": {
+          "all": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -0.7956836535783715,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -0.7956836535783715,
+            "compoundJpyFrom10000": 9920.431634642162,
+            "closedTradeDDPct": -0.7956836535783829,
+            "avgNetPnlPct": -0.7956836535783715
+          },
+          "early": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -0.7956836535783715,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -0.7956836535783715,
+            "compoundJpyFrom10000": 9920.431634642162,
+            "closedTradeDDPct": -0.7956836535783829,
+            "avgNetPnlPct": -0.7956836535783715
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 1
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "early": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 0
+        },
+        "30": {
+          "all": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "early": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 0
+        }
+      }
+    },
+    "BTC6_UP_REL3_UP_PULLBACK": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -6.690633831247483,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -6.690633831247483,
+            "compoundJpyFrom10000": 9330.936616875251,
+            "closedTradeDDPct": -6.690633831247483,
+            "avgNetPnlPct": -6.690633831247483
+          },
+          "early": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "late": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -6.690633831247483,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -6.690633831247483,
+            "compoundJpyFrom10000": 9330.936616875251,
+            "closedTradeDDPct": -6.690633831247483,
+            "avgNetPnlPct": -6.690633831247483
+          },
+          "triggerEventsBeforeOccupancy": 1
+        },
+        "30": {
+          "all": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -6.8906338312474835,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -6.8906338312474835,
+            "compoundJpyFrom10000": 9310.936616875251,
+            "closedTradeDDPct": -6.8906338312474835,
+            "avgNetPnlPct": -6.8906338312474835
+          },
+          "early": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "late": {
+            "trades": 1,
+            "wins": 0,
+            "losses": 1,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -6.8906338312474835,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -6.8906338312474835,
+            "compoundJpyFrom10000": 9310.936616875251,
+            "closedTradeDDPct": -6.8906338312474835,
+            "avgNetPnlPct": -6.8906338312474835
+          },
+          "triggerEventsBeforeOccupancy": 1
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "early": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 0
+        },
+        "30": {
+          "all": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "early": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 0
+        }
+      }
+    },
+    "BTC6_UP_REL3_UP_COOLDOWN6": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.22179430174201353,
+            "sumNetReturnPoints": -21.356969648628954,
+            "compoundJpyFrom10000": 7997.627023629921,
+            "closedTradeDDPct": -24.679660440971528,
+            "avgNetPnlPct": -2.6696212060786193
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 6.086892168929737,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 6.086892168929737,
+            "compoundJpyFrom10000": 10618.150516119473,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.028964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -27.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -27.44386181755869,
+            "compoundJpyFrom10000": 7532.033955902848,
+            "closedTradeDDPct": -24.679660440971517,
+            "avgNetPnlPct": -5.488772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        },
+        "30": {
+          "all": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.1929025040313837,
+            "sumNetReturnPoints": -22.956969648628956,
+            "compoundJpyFrom10000": 7866.871508031057,
+            "closedTradeDDPct": -25.473605590538572,
+            "avgNetPnlPct": -2.8696212060786195
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 5.486892168929736,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 5.486892168929736,
+            "compoundJpyFrom10000": 10555.819277676374,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 1.828964056309912
+          },
+          "late": {
+            "trades": 5,
+            "wins": 0,
+            "losses": 5,
+            "winRatePct": 0.0,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": -28.44386181755869,
+            "tradeProfitFactor": 0.0,
+            "sumNetReturnPoints": -28.44386181755869,
+            "compoundJpyFrom10000": 7452.639440946141,
+            "closedTradeDDPct": -25.473605590538597,
+            "avgNetPnlPct": -5.688772363511738
+          },
+          "triggerEventsBeforeOccupancy": 10
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.720537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.720537242127767,
+            "compoundJpyFrom10000": 10791.461342228231,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.573512414042589
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        },
+        "30": {
+          "all": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "early": {
+            "trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "grossProfitPercentPoints": 7.120537242127767,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 7.120537242127767,
+            "compoundJpyFrom10000": 10728.457630280416,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": 2.3735124140425894
+          },
+          "late": {
+            "trades": 0,
+            "wins": 0,
+            "losses": 0,
+            "winRatePct": null,
+            "grossProfitPercentPoints": 0,
+            "grossLossPercentPoints": 0,
+            "tradeProfitFactor": null,
+            "sumNetReturnPoints": 0,
+            "compoundJpyFrom10000": 10000.0,
+            "closedTradeDDPct": 0.0,
+            "avgNetPnlPct": null
+          },
+          "triggerEventsBeforeOccupancy": 6
+        }
+      }
+    },
+    "NO_REL24_BTC6_REL3": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 218,
+            "wins": 92,
+            "losses": 126,
+            "winRatePct": 42.20183486238532,
+            "grossProfitPercentPoints": 175.09358072080028,
+            "grossLossPercentPoints": -240.2875850972591,
+            "tradeProfitFactor": 0.7286834259453279,
+            "sumNetReturnPoints": -65.19400437645882,
+            "compoundJpyFrom10000": 4794.4579181857125,
+            "closedTradeDDPct": -52.58692409798604,
+            "avgNetPnlPct": -0.29905506594705883
+          },
+          "early": {
+            "trades": 106,
+            "wins": 47,
+            "losses": 59,
+            "winRatePct": 44.339622641509436,
+            "grossProfitPercentPoints": 104.51280989263806,
+            "grossLossPercentPoints": -133.1467556603363,
+            "tradeProfitFactor": 0.7849444725431778,
+            "sumNetReturnPoints": -28.63394576769825,
+            "compoundJpyFrom10000": 7131.9232455561505,
+            "closedTradeDDPct": -33.86485238340619,
+            "avgNetPnlPct": -0.27013156384620984
+          },
+          "late": {
+            "trades": 112,
+            "wins": 45,
+            "losses": 67,
+            "winRatePct": 40.17857142857143,
+            "grossProfitPercentPoints": 70.58077082816223,
+            "grossLossPercentPoints": -107.1408294369228,
+            "tradeProfitFactor": 0.6587663283838526,
+            "sumNetReturnPoints": -36.56005860876057,
+            "compoundJpyFrom10000": 6722.531571232355,
+            "closedTradeDDPct": -40.37474220793944,
+            "avgNetPnlPct": -0.32642909472107656
+          },
+          "triggerEventsBeforeOccupancy": 375
+        },
+        "30": {
+          "all": {
+            "trades": 218,
+            "wins": 80,
+            "losses": 138,
+            "winRatePct": 36.69724770642202,
+            "grossProfitPercentPoints": 158.11862316052225,
+            "grossLossPercentPoints": -266.91262753698106,
+            "tradeProfitFactor": 0.5923984362209117,
+            "sumNetReturnPoints": -108.79400437645882,
+            "compoundJpyFrom10000": 3093.7466313876084,
+            "closedTradeDDPct": -69.2833603353352,
+            "avgNetPnlPct": -0.49905506594705873
+          },
+          "early": {
+            "trades": 106,
+            "wins": 45,
+            "losses": 61,
+            "winRatePct": 42.45283018867924,
+            "grossProfitPercentPoints": 95.32388591184713,
+            "grossLossPercentPoints": -145.15783167954535,
+            "tradeProfitFactor": 0.6566913049671815,
+            "sumNetReturnPoints": -49.833945767698225,
+            "compoundJpyFrom10000": 5763.735445175568,
+            "closedTradeDDPct": -43.95235340761191,
+            "avgNetPnlPct": -0.4701315638462097
+          },
+          "late": {
+            "trades": 112,
+            "wins": 35,
+            "losses": 77,
+            "winRatePct": 31.25,
+            "grossProfitPercentPoints": 62.79473724867512,
+            "grossLossPercentPoints": -121.7547958574357,
+            "tradeProfitFactor": 0.5157475465870134,
+            "sumNetReturnPoints": -58.960058608760576,
+            "compoundJpyFrom10000": 5367.606929247901,
+            "closedTradeDDPct": -52.307597540615866,
+            "avgNetPnlPct": -0.5264290947210765
+          },
+          "triggerEventsBeforeOccupancy": 375
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 215,
+            "wins": 95,
+            "losses": 120,
+            "winRatePct": 44.18604651162791,
+            "grossProfitPercentPoints": 201.40646848020623,
+            "grossLossPercentPoints": -242.68074873139162,
+            "tradeProfitFactor": 0.8299235499027187,
+            "sumNetReturnPoints": -41.27428025118539,
+            "compoundJpyFrom10000": 6038.371931340792,
+            "closedTradeDDPct": -48.12928578073343,
+            "avgNetPnlPct": -0.19197339651714138
+          },
+          "early": {
+            "trades": 107,
+            "wins": 47,
+            "losses": 60,
+            "winRatePct": 43.925233644859816,
+            "grossProfitPercentPoints": 106.36439385002684,
+            "grossLossPercentPoints": -151.67425419851887,
+            "tradeProfitFactor": 0.7012686128709213,
+            "sumNetReturnPoints": -45.30986034849202,
+            "compoundJpyFrom10000": 5985.885855153996,
+            "closedTradeDDPct": -45.419588035627015,
+            "avgNetPnlPct": -0.4234566387709535
+          },
+          "late": {
+            "trades": 108,
+            "wins": 48,
+            "losses": 60,
+            "winRatePct": 44.44444444444444,
+            "grossProfitPercentPoints": 95.04207463017937,
+            "grossLossPercentPoints": -91.00649453287275,
+            "tradeProfitFactor": 1.0443438692812073,
+            "sumNetReturnPoints": 4.035580097306621,
+            "compoundJpyFrom10000": 10087.683055535734,
+            "closedTradeDDPct": -27.280016423097166,
+            "avgNetPnlPct": 0.037366482382468764
+          },
+          "triggerEventsBeforeOccupancy": 361
+        },
+        "30": {
+          "all": {
+            "trades": 215,
+            "wins": 86,
+            "losses": 129,
+            "winRatePct": 40.0,
+            "grossProfitPercentPoints": 183.47800967944866,
+            "grossLossPercentPoints": -267.75228993063405,
+            "tradeProfitFactor": 0.6852528123176159,
+            "sumNetReturnPoints": -84.27428025118539,
+            "compoundJpyFrom10000": 3921.632190179352,
+            "closedTradeDDPct": -64.08535306212747,
+            "avgNetPnlPct": -0.3919733965171413
+          },
+          "early": {
+            "trades": 107,
+            "wins": 44,
+            "losses": 63,
+            "winRatePct": 41.12149532710281,
+            "grossProfitPercentPoints": 97.35863182498787,
+            "grossLossPercentPoints": -164.06849217347988,
+            "tradeProfitFactor": 0.5934023683355637,
+            "sumNetReturnPoints": -66.70986034849201,
+            "compoundJpyFrom10000": 4826.101733059809,
+            "closedTradeDDPct": -53.64055228730247,
+            "avgNetPnlPct": -0.6234566387709534
+          },
+          "late": {
+            "trades": 108,
+            "wins": 42,
+            "losses": 66,
+            "winRatePct": 38.888888888888886,
+            "grossProfitPercentPoints": 86.1193778544608,
+            "grossLossPercentPoints": -103.68379775715415,
+            "tradeProfitFactor": 0.8305962910055402,
+            "sumNetReturnPoints": -17.56441990269336,
+            "compoundJpyFrom10000": 8125.879658348992,
+            "closedTradeDDPct": -35.29450802201478,
+            "avgNetPnlPct": -0.16263351761753114
+          },
+          "triggerEventsBeforeOccupancy": 361
+        }
+      }
+    },
+    "NO_REL24_BTC24_RET3": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 237,
+            "wins": 102,
+            "losses": 135,
+            "winRatePct": 43.037974683544306,
+            "grossProfitPercentPoints": 198.417268855052,
+            "grossLossPercentPoints": -260.5228129141067,
+            "tradeProfitFactor": 0.7616118781907569,
+            "sumNetReturnPoints": -62.105544059054694,
+            "compoundJpyFrom10000": 4926.516308075792,
+            "closedTradeDDPct": -50.98924710911368,
+            "avgNetPnlPct": -0.26204870910993533
+          },
+          "early": {
+            "trades": 115,
+            "wins": 47,
+            "losses": 68,
+            "winRatePct": 40.869565217391305,
+            "grossProfitPercentPoints": 99.8640411843411,
+            "grossLossPercentPoints": -163.18290447772577,
+            "tradeProfitFactor": 0.6119761227682549,
+            "sumNetReturnPoints": -63.318863293384666,
+            "compoundJpyFrom10000": 5045.837288950212,
+            "closedTradeDDPct": -49.541627110497885,
+            "avgNetPnlPct": -0.5505988112468232
+          },
+          "late": {
+            "trades": 122,
+            "wins": 55,
+            "losses": 67,
+            "winRatePct": 45.08196721311475,
+            "grossProfitPercentPoints": 98.5532276707109,
+            "grossLossPercentPoints": -97.33990843638091,
+            "tradeProfitFactor": 1.0124647665466315,
+            "sumNetReturnPoints": 1.2133192343299868,
+            "compoundJpyFrom10000": 9763.525904539745,
+            "closedTradeDDPct": -26.21503008424465,
+            "avgNetPnlPct": 0.009945239625655689
+          },
+          "triggerEventsBeforeOccupancy": 542
+        },
+        "30": {
+          "all": {
+            "trades": 237,
+            "wins": 94,
+            "losses": 143,
+            "winRatePct": 39.66244725738397,
+            "grossProfitPercentPoints": 178.96734189495672,
+            "grossLossPercentPoints": -288.47288595401136,
+            "tradeProfitFactor": 0.6203957134587958,
+            "sumNetReturnPoints": -109.50554405905464,
+            "compoundJpyFrom10000": 3060.4602383176048,
+            "closedTradeDDPct": -69.43160265098592,
+            "avgNetPnlPct": -0.46204870910993523
+          },
+          "early": {
+            "trades": 115,
+            "wins": 44,
+            "losses": 71,
+            "winRatePct": 38.26086956521739,
+            "grossProfitPercentPoints": 90.79785475618384,
+            "grossLossPercentPoints": -177.1167180495685,
+            "tradeProfitFactor": 0.5126441803803796,
+            "sumNetReturnPoints": -86.31886329338467,
+            "compoundJpyFrom10000": 4002.259135309702,
+            "closedTradeDDPct": -59.97740864690297,
+            "avgNetPnlPct": -0.7505988112468231
+          },
+          "late": {
+            "trades": 122,
+            "wins": 50,
+            "losses": 72,
+            "winRatePct": 40.98360655737705,
+            "grossProfitPercentPoints": 88.16948713877288,
+            "grossLossPercentPoints": -111.35616790444287,
+            "tradeProfitFactor": 0.7917791066089219,
+            "sumNetReturnPoints": -23.18668076566999,
+            "compoundJpyFrom10000": 7646.831788868612,
+            "closedTradeDDPct": -38.39232674963261,
+            "avgNetPnlPct": -0.19005476037434418
+          },
+          "triggerEventsBeforeOccupancy": 542
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 241,
+            "wins": 90,
+            "losses": 151,
+            "winRatePct": 37.344398340248965,
+            "grossProfitPercentPoints": 196.42652153847044,
+            "grossLossPercentPoints": -291.37506599982646,
+            "tradeProfitFactor": 0.6741363433568041,
+            "sumNetReturnPoints": -94.94854446135602,
+            "compoundJpyFrom10000": 3537.444889597884,
+            "closedTradeDDPct": -68.03044457737681,
+            "avgNetPnlPct": -0.39397736291019103
+          },
+          "early": {
+            "trades": 123,
+            "wins": 44,
+            "losses": 79,
+            "winRatePct": 35.77235772357724,
+            "grossProfitPercentPoints": 100.54012651211552,
+            "grossLossPercentPoints": -176.70849288700927,
+            "tradeProfitFactor": 0.5689603531189797,
+            "sumNetReturnPoints": -76.16836637489375,
+            "compoundJpyFrom10000": 4406.504417490796,
+            "closedTradeDDPct": -59.73404057199112,
+            "avgNetPnlPct": -0.6192550111779979
+          },
+          "late": {
+            "trades": 118,
+            "wins": 46,
+            "losses": 72,
+            "winRatePct": 38.983050847457626,
+            "grossProfitPercentPoints": 95.88639502635492,
+            "grossLossPercentPoints": -114.66657311281722,
+            "tradeProfitFactor": 0.8362192435280593,
+            "sumNetReturnPoints": -18.7801780864623,
+            "compoundJpyFrom10000": 8027.780195922776,
+            "closedTradeDDPct": -26.38379662586917,
+            "avgNetPnlPct": -0.15915405158018903
+          },
+          "triggerEventsBeforeOccupancy": 502
+        },
+        "30": {
+          "all": {
+            "trades": 241,
+            "wins": 86,
+            "losses": 155,
+            "winRatePct": 35.684647302904565,
+            "grossProfitPercentPoints": 179.02441012626608,
+            "grossLossPercentPoints": -322.1729545876221,
+            "tradeProfitFactor": 0.5556779598567341,
+            "sumNetReturnPoints": -143.148544461356,
+            "compoundJpyFrom10000": 2178.547920793274,
+            "closedTradeDDPct": -79.25422674117061,
+            "avgNetPnlPct": -0.5939773629101909
+          },
+          "early": {
+            "trades": 123,
+            "wins": 42,
+            "losses": 81,
+            "winRatePct": 34.146341463414636,
+            "grossProfitPercentPoints": 92.02970888190967,
+            "grossLossPercentPoints": -192.7980752568034,
+            "tradeProfitFactor": 0.4773372802572216,
+            "sumNetReturnPoints": -100.76836637489373,
+            "compoundJpyFrom10000": 3438.63895978767,
+            "closedTradeDDPct": -67.25469130247274,
+            "avgNetPnlPct": -0.8192550111779977
+          },
+          "late": {
+            "trades": 118,
+            "wins": 44,
+            "losses": 74,
+            "winRatePct": 37.28813559322034,
+            "grossProfitPercentPoints": 86.9947012443564,
+            "grossLossPercentPoints": -129.37487933081871,
+            "tradeProfitFactor": 0.6724234387257371,
+            "sumNetReturnPoints": -42.38017808646231,
+            "compoundJpyFrom10000": 6335.494788111736,
+            "closedTradeDDPct": -38.65639762285299,
+            "avgNetPnlPct": -0.3591540515801889
+          },
+          "triggerEventsBeforeOccupancy": 502
+        }
+      }
+    },
+    "NO_REL24_BTC6_BREAKOUT": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 145,
+            "wins": 62,
+            "losses": 83,
+            "winRatePct": 42.758620689655174,
+            "grossProfitPercentPoints": 107.32415641809241,
+            "grossLossPercentPoints": -158.88262667694872,
+            "tradeProfitFactor": 0.6754933416119272,
+            "sumNetReturnPoints": -51.5584702588563,
+            "compoundJpyFrom10000": 5672.482139142434,
+            "closedTradeDDPct": -48.67274501427386,
+            "avgNetPnlPct": -0.35557565695762966
+          },
+          "early": {
+            "trades": 80,
+            "wins": 32,
+            "losses": 48,
+            "winRatePct": 40.0,
+            "grossProfitPercentPoints": 60.42607991501718,
+            "grossLossPercentPoints": -104.87485615664936,
+            "tradeProfitFactor": 0.5761731851604166,
+            "sumNetReturnPoints": -44.448776241632174,
+            "compoundJpyFrom10000": 6207.291707175261,
+            "closedTradeDDPct": -40.48737531590195,
+            "avgNetPnlPct": -0.5556097030204021
+          },
+          "late": {
+            "trades": 65,
+            "wins": 30,
+            "losses": 35,
+            "winRatePct": 46.15384615384615,
+            "grossProfitPercentPoints": 46.89807650307523,
+            "grossLossPercentPoints": -54.00777052029936,
+            "tradeProfitFactor": 0.8683579427787733,
+            "sumNetReturnPoints": -7.109694017224129,
+            "compoundJpyFrom10000": 9138.417214363204,
+            "closedTradeDDPct": -22.252308805845345,
+            "avgNetPnlPct": -0.1093799079572943
+          },
+          "triggerEventsBeforeOccupancy": 180
+        },
+        "30": {
+          "all": {
+            "trades": 145,
+            "wins": 55,
+            "losses": 90,
+            "winRatePct": 37.93103448275862,
+            "grossProfitPercentPoints": 95.55615499082168,
+            "grossLossPercentPoints": -176.11462524967797,
+            "tradeProfitFactor": 0.5425793278403288,
+            "sumNetReturnPoints": -80.55847025885629,
+            "compoundJpyFrom10000": 4238.021228322075,
+            "closedTradeDDPct": -60.71445637645002,
+            "avgNetPnlPct": -0.5555756569576296
+          },
+          "early": {
+            "trades": 80,
+            "wins": 29,
+            "losses": 51,
+            "winRatePct": 36.25,
+            "grossProfitPercentPoints": 54.1904720359057,
+            "grossLossPercentPoints": -114.63924827753786,
+            "tradeProfitFactor": 0.4727043560571188,
+            "sumNetReturnPoints": -60.44877624163216,
+            "compoundJpyFrom10000": 5283.2548639143215,
+            "closedTradeDDPct": -49.2492957943659,
+            "avgNetPnlPct": -0.7556097030204021
+          },
+          "late": {
+            "trades": 65,
+            "wins": 26,
+            "losses": 39,
+            "winRatePct": 40.0,
+            "grossProfitPercentPoints": 41.36568295491599,
+            "grossLossPercentPoints": -61.47537697214012,
+            "tradeProfitFactor": 0.6728821357803533,
+            "sumNetReturnPoints": -20.10969401722413,
+            "compoundJpyFrom10000": 8021.610422901609,
+            "closedTradeDDPct": -29.952273836732346,
+            "avgNetPnlPct": -0.30937990795729425
+          },
+          "triggerEventsBeforeOccupancy": 180
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 148,
+            "wins": 72,
+            "losses": 76,
+            "winRatePct": 48.648648648648646,
+            "grossProfitPercentPoints": 121.90360432405134,
+            "grossLossPercentPoints": -138.5290557830306,
+            "tradeProfitFactor": 0.879985816946456,
+            "sumNetReturnPoints": -16.625451458979256,
+            "compoundJpyFrom10000": 8083.830196781944,
+            "closedTradeDDPct": -37.170361679054494,
+            "avgNetPnlPct": -0.11233413147958964
+          },
+          "early": {
+            "trades": 93,
+            "wins": 45,
+            "losses": 48,
+            "winRatePct": 48.38709677419355,
+            "grossProfitPercentPoints": 68.95198055747339,
+            "grossLossPercentPoints": -83.75307212911969,
+            "tradeProfitFactor": 0.8232770309747219,
+            "sumNetReturnPoints": -14.801091571646296,
+            "compoundJpyFrom10000": 8403.981763148739,
+            "closedTradeDDPct": -37.170361679054494,
+            "avgNetPnlPct": -0.15915152227576662
+          },
+          "late": {
+            "trades": 55,
+            "wins": 27,
+            "losses": 28,
+            "winRatePct": 49.09090909090909,
+            "grossProfitPercentPoints": 52.95162376657795,
+            "grossLossPercentPoints": -54.77598365391092,
+            "tradeProfitFactor": 0.9666941647481905,
+            "sumNetReturnPoints": -1.8243598873329674,
+            "compoundJpyFrom10000": 9619.047761656677,
+            "closedTradeDDPct": -17.42009691702838,
+            "avgNetPnlPct": -0.03317017976969038
+          },
+          "triggerEventsBeforeOccupancy": 195
+        },
+        "30": {
+          "all": {
+            "trades": 148,
+            "wins": 62,
+            "losses": 86,
+            "winRatePct": 41.891891891891895,
+            "grossProfitPercentPoints": 108.48051467328163,
+            "grossLossPercentPoints": -154.70596613226087,
+            "tradeProfitFactor": 0.7012044679682212,
+            "sumNetReturnPoints": -46.22545145897924,
+            "compoundJpyFrom10000": 6007.750212756071,
+            "closedTradeDDPct": -44.5350599341678,
+            "avgNetPnlPct": -0.3123341314795895
+          },
+          "early": {
+            "trades": 93,
+            "wins": 39,
+            "losses": 54,
+            "winRatePct": 41.935483870967744,
+            "grossProfitPercentPoints": 60.57051199386434,
+            "grossLossPercentPoints": -93.97160356551062,
+            "tradeProfitFactor": 0.6445618643895834,
+            "sumNetReturnPoints": -33.401091571646276,
+            "compoundJpyFrom10000": 6973.510747637311,
+            "closedTradeDDPct": -41.243295584150495,
+            "avgNetPnlPct": -0.35915152227576647
+          },
+          "late": {
+            "trades": 55,
+            "wins": 23,
+            "losses": 32,
+            "winRatePct": 41.81818181818182,
+            "grossProfitPercentPoints": 47.91000267941729,
+            "grossLossPercentPoints": -60.73436256675026,
+            "tradeProfitFactor": 0.7888450731126334,
+            "sumNetReturnPoints": -12.824359887332967,
+            "compoundJpyFrom10000": 8615.101388911684,
+            "closedTradeDDPct": -20.94462430714468,
+            "avgNetPnlPct": -0.23317017976969023
+          },
+          "triggerEventsBeforeOccupancy": 195
+        }
+      }
+    },
+    "NO_REL24_PULLBACK": {
+      "DOGEUSDT": {
+        "10": {
+          "all": {
+            "trades": 297,
+            "wins": 126,
+            "losses": 171,
+            "winRatePct": 42.42424242424242,
+            "grossProfitPercentPoints": 237.58713520289385,
+            "grossLossPercentPoints": -322.4420355754084,
+            "tradeProfitFactor": 0.7368367302945219,
+            "sumNetReturnPoints": -84.85490037251455,
+            "compoundJpyFrom10000": 3858.34506582858,
+            "closedTradeDDPct": -65.71468125114033,
+            "avgNetPnlPct": -0.28570673526099166
+          },
+          "early": {
+            "trades": 151,
+            "wins": 71,
+            "losses": 80,
+            "winRatePct": 47.019867549668874,
+            "grossProfitPercentPoints": 141.52210570038002,
+            "grossLossPercentPoints": -187.16573621194632,
+            "tradeProfitFactor": 0.7561325516339193,
+            "sumNetReturnPoints": -45.6436305115663,
+            "compoundJpyFrom10000": 5935.538399194229,
+            "closedTradeDDPct": -47.38643560093412,
+            "avgNetPnlPct": -0.3022756987520947
+          },
+          "late": {
+            "trades": 146,
+            "wins": 55,
+            "losses": 91,
+            "winRatePct": 37.67123287671233,
+            "grossProfitPercentPoints": 96.06502950251382,
+            "grossLossPercentPoints": -135.27629936346204,
+            "tradeProfitFactor": 0.7101393958479386,
+            "sumNetReturnPoints": -39.21126986094822,
+            "compoundJpyFrom10000": 6500.412947126021,
+            "closedTradeDDPct": -43.923593882716474,
+            "avgNetPnlPct": -0.268570341513344
+          },
+          "triggerEventsBeforeOccupancy": 610
+        },
+        "30": {
+          "all": {
+            "trades": 297,
+            "wins": 117,
+            "losses": 180,
+            "winRatePct": 39.39393939393939,
+            "grossProfitPercentPoints": 213.26476764944886,
+            "grossLossPercentPoints": -357.51966802196335,
+            "tradeProfitFactor": 0.5965119872407899,
+            "sumNetReturnPoints": -144.2549003725145,
+            "compoundJpyFrom10000": 2124.476965129186,
+            "closedTradeDDPct": -79.87071036276832,
+            "avgNetPnlPct": -0.48570673526099156
+          },
+          "early": {
+            "trades": 151,
+            "wins": 66,
+            "losses": 85,
+            "winRatePct": 43.70860927152318,
+            "grossProfitPercentPoints": 127.90297138120856,
+            "grossLossPercentPoints": -203.74660189277483,
+            "tradeProfitFactor": 0.6277551144068636,
+            "sumNetReturnPoints": -75.84363051156627,
+            "compoundJpyFrom10000": 4381.875848365137,
+            "closedTradeDDPct": -58.48199366060503,
+            "avgNetPnlPct": -0.5022756987520945
+          },
+          "late": {
+            "trades": 146,
+            "wins": 51,
+            "losses": 95,
+            "winRatePct": 34.93150684931507,
+            "grossProfitPercentPoints": 85.36179626824028,
+            "grossLossPercentPoints": -153.7730661291885,
+            "tradeProfitFactor": 0.5551153945029994,
+            "sumNetReturnPoints": -68.41126986094821,
+            "compoundJpyFrom10000": 4848.327608190502,
+            "closedTradeDDPct": -57.85091328448767,
+            "avgNetPnlPct": -0.46857034151334387
+          },
+          "triggerEventsBeforeOccupancy": 610
+        }
+      },
+      "AVAXUSDT": {
+        "10": {
+          "all": {
+            "trades": 288,
+            "wins": 129,
+            "losses": 159,
+            "winRatePct": 44.791666666666664,
+            "grossProfitPercentPoints": 245.66536290523067,
+            "grossLossPercentPoints": -315.51273747100925,
+            "tradeProfitFactor": 0.7786226472958275,
+            "sumNetReturnPoints": -69.84737456577858,
+            "compoundJpyFrom10000": 4437.55194834564,
+            "closedTradeDDPct": -70.8865311432235,
+            "avgNetPnlPct": -0.24252560613117569
+          },
+          "early": {
+            "trades": 152,
+            "wins": 69,
+            "losses": 83,
+            "winRatePct": 45.39473684210526,
+            "grossProfitPercentPoints": 150.91007236391198,
+            "grossLossPercentPoints": -202.88101554114021,
+            "tradeProfitFactor": 0.7438353557201631,
+            "sumNetReturnPoints": -51.970943177228236,
+            "compoundJpyFrom10000": 5460.891451820213,
+            "closedTradeDDPct": -61.971044845851274,
+            "avgNetPnlPct": -0.3419140998501859
+          },
+          "late": {
+            "trades": 136,
+            "wins": 60,
+            "losses": 76,
+            "winRatePct": 44.11764705882353,
+            "grossProfitPercentPoints": 94.75529054131869,
+            "grossLossPercentPoints": -112.63172192986903,
+            "tradeProfitFactor": 0.8412842218670754,
+            "sumNetReturnPoints": -17.876431388550344,
+            "compoundJpyFrom10000": 8126.057782867154,
+            "closedTradeDDPct": -27.742829228718925,
+            "avgNetPnlPct": -0.13144434844522315
+          },
+          "triggerEventsBeforeOccupancy": 595
+        },
+        "30": {
+          "all": {
+            "trades": 288,
+            "wins": 110,
+            "losses": 178,
+            "winRatePct": 38.19444444444444,
+            "grossProfitPercentPoints": 221.8931421222229,
+            "grossLossPercentPoints": -349.3405166880015,
+            "tradeProfitFactor": 0.635177231160957,
+            "sumNetReturnPoints": -127.4473745657786,
+            "compoundJpyFrom10000": 2488.465930743146,
+            "closedTradeDDPct": -82.21246999304158,
+            "avgNetPnlPct": -0.4425256061311756
+          },
+          "early": {
+            "trades": 152,
+            "wins": 60,
+            "losses": 92,
+            "winRatePct": 39.473684210526315,
+            "grossProfitPercentPoints": 138.34099927448432,
+            "grossLossPercentPoints": -220.71194245171253,
+            "tradeProfitFactor": 0.6267943534806715,
+            "sumNetReturnPoints": -82.37094317722821,
+            "compoundJpyFrom10000": 4022.5713204124486,
+            "closedTradeDDPct": -70.15427866013428,
+            "avgNetPnlPct": -0.5419140998501858
+          },
+          "late": {
+            "trades": 136,
+            "wins": 50,
+            "losses": 86,
+            "winRatePct": 36.76470588235294,
+            "grossProfitPercentPoints": 83.55214284773861,
+            "grossLossPercentPoints": -128.62857423628896,
+            "tradeProfitFactor": 0.6495612918343824,
+            "sumNetReturnPoints": -45.07643138855035,
+            "compoundJpyFrom10000": 6186.2568305886325,
+            "closedTradeDDPct": -43.059441165739045,
+            "avgNetPnlPct": -0.331444348445223
+          },
+          "triggerEventsBeforeOccupancy": 595
+        }
+      }
+    }
+  }
+}

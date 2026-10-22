@@ -1,0 +1,44 @@
+{
+  "schema": "RESIDUAL_entry_redesign_20261023_v1",
+  "status": "NO_ROBUST_70PCT_WR_ENTRY_MODEL_FROM_AVAILABLE_SCREEN_RESEARCH_NOT_LIVE",
+  "entryUniverse": "DOGEUSDT and AVAXUSDT, original LONG and new direction-aware SHORT",
+  "costsBps": [
+    10,
+    30
+  ],
+  "qualification": {
+    "winRatePctBothCosts": 70,
+    "profitFactorBothCosts": 1.2,
+    "maxClosedDrawdownPct": 15,
+    "minTrades": 20,
+    "minLateTrades": 10
+  },
+  "screenCount": 25,
+  "newLongCount": 20,
+  "newShortCount": 22,
+  "predictiveTrainScoreQuantiles": [
+    70,
+    80,
+    90,
+    95
+  ],
+  "passedNewLong": [],
+  "passedNewShort": [],
+  "passedProbScoreValidationAndLater": [],
+  "sourceRawArtifacts": [
+    "RESIDUAL_CAUSAL_ENTRY_PRE_SCREEN_20261023.json",
+    "RESIDUAL_CAUSAL_ENTRY_ALL_59_TRADES_20261023.csv",
+    "RESIDUAL_INDEPENDENT_NEW_ENTRY_MODEL_20261023.json",
+    "RESIDUAL_INDEPENDENT_NEW_ENTRY_ALL_EVENTS_10BPS_20261023.csv",
+    "RESIDUAL_INDEPENDENT_BEAR_SHORT_DESIGN_20261023.json",
+    "RESIDUAL_INDEPENDENT_BEAR_SHORT_EVENTS_10BPS_20261023.csv",
+    "RESIDUAL_ENTRY_PROBABILITY_TIME_SPLIT_20261023.json",
+    "RESIDUAL_ENTRY_PROBABILITY_SELECTED_10BPS_20261023.csv"
+  ],
+  "riskLimits": [
+    "New signal generators are independent standalone research; no 8-logic ownership, admission, shared loss risk or venue matching",
+    "Original accepted-trade gate screens condition on a small selected sample; not new candidate economic backtests",
+    "Training and holdout were retrospectively examined in prior research, not independent untouched OOS",
+    "No production V52 AMZN gate made live by this research; no Production or orders changed"
+  ]
+}
