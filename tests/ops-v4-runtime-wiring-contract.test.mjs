@@ -75,6 +75,7 @@ test("V4 wiring projects the root-managed TIME37 approval for deploy read access
   const fn = wiring.match(/ensure_v4_time_stop_approval_runtime_access\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
   assert.ok(fn, "TIME37 approval runtime-access function must be present");
   assert.match(fn, /\/etc\/disdex\/v12-v4-time-stop-approval\.json/);
+  assert.match(fn, /\/etc\/disdex\/v12-v4-production-certification\.json/);
   assert.match(fn, /chown root:deploy/);
   assert.match(fn, /chmod 0640/);
   assert.match(fn, /! -L/);

@@ -1727,21 +1727,25 @@ ensure_v4_canary_permit_runtime_access() {
 
 ensure_v4_time_stop_approval_runtime_access() {
   [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 0
-  local approval=/etc/disdex/v12-v4-time-stop-approval.json
-  [[ -f "$approval" && ! -L "$approval" ]] || {
-    printf 'V4 TIME37 approval is missing or symlinked: %s\n' "$approval" >&2
-    return 1
-  }
-  # The approval remains root-owned and non-writable by deploy. The V4 daemon
-  # runs as deploy and its reader accepts the process group, so project only
-  # read access at cutover time without changing the approved JSON contents.
-  chown root:deploy "$approval"
-  chmod 0640 "$approval"
-  [[ "$(stat -c '%U:%G:%a' "$approval")" == "root:deploy:640" ]] || {
-    printf 'V4 TIME37 approval runtime ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$approval")" >&2
-    return 1
-  }
-  printf 'DISDEX_V4_TIME_STOP_APPROVAL_RUNTIME_ACCESS_PASS path=%s owner=root group=deploy mode=640\n' "$approval"
+  local approval
+  for approval in \
+    /etc/disdex/v12-v4-production-certification.json \
+    /etc/disdex/v12-v4-time-stop-approval.json; do
+    [[ -f "$approval" && ! -L "$approval" ]] || {
+      printf 'V4 root-managed approval is missing or symlinked: %s\n' "$approval" >&2
+      return 1
+    }
+    # The JSON remains root-owned and non-writable by deploy. The V4 daemon
+    # runs as deploy and its readers accept the process group, so project only
+    # read access at cutover time without changing approved JSON contents.
+    chown root:deploy "$approval"
+    chmod 0640 "$approval"
+    [[ "$(stat -c '%U:%G:%a' "$approval")" == "root:deploy:640" ]] || {
+      printf 'V4 root-managed approval runtime ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$approval")" >&2
+      return 1
+    }
+  done
+  printf 'DISDEX_V4_ROOT_APPROVAL_RUNTIME_ACCESS_PASS owner=root group=deploy mode=640\n'
 }
 
 operator_activation_all_trading_ready() {
