@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
-import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle} from "../lib/v12-v4-runner-engine";
+import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
 
@@ -16,6 +16,11 @@ test("unresolved V4 entry lifecycle blocks fresh candidate admission",()=>{
  };
  assert.equal(hasUnresolvedV4EntryLifecycle(doc),true);
  assert.equal(hasUnresolvedV4EntryLifecycle({intents:{cid:{action:"ENTRY",stage:"TERMINAL"}},state:{legs:{leg:{status:"OPEN",reservationUsd:0}}}} as any),false);
+});
+test("terminal V4 entry intents are not reconciled again after restart",()=>{
+ assert.equal(isReconciliableV4EntryIntent({action:"ENTRY",stage:"TERMINAL"}),false);
+ assert.equal(isReconciliableV4EntryIntent({action:"ENTRY",stage:"UNKNOWN"}),true);
+ assert.equal(isReconciliableV4EntryIntent({action:"STOP",stage:"ACKNOWLEDGED"}),false);
 });
 function peers(now:number){return families.map(kind=>({kind,programSha:sha,raw:{
  updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:

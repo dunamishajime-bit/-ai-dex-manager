@@ -6,7 +6,7 @@
 import type {AsterV3Client,AsterBalanceRow,AsterPositionRiskRow,AsterOrderResponse} from "./aster-v3-client";
 import type {AccountLockHandle,FileAccountOrderLock} from "./disdex-account-order-lock";
 import {readPendingExposureRegistry,type PendingExposureRegistry} from "./disdex-pending-exposure-registry";
-import {V4ExecutionStore,advanceV4Protection,advanceV4Intent,type V4ExecutionDocument,type V4ProtectionPhase} from "./v12-v4-execution-store";
+import {V4ExecutionStore,advanceV4Protection,advanceV4Intent,type V4ExecutionDocument,type V4OrderIntent,type V4ProtectionPhase} from "./v12-v4-execution-store";
 import {V4SharedReservations,bindV4SharedDispatchGuards} from "./v12-v4-shared-reservations";
 import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
@@ -25,8 +25,11 @@ export type V4PreparedDecision =
 
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
  eventTs:number;candidateCount:number;orderEnabled:boolean};
+export function isReconciliableV4EntryIntent(intent:Pick<V4OrderIntent,"action"|"stage">):boolean{
+ return intent.action==="ENTRY"&&intent.stage!=="TERMINAL";
+}
 export function hasUnresolvedV4EntryLifecycle(doc: Pick<V4ExecutionDocument,"intents"|"state">): boolean {
- return Object.values(doc.intents).some(intent=>intent.action==="ENTRY"&&intent.stage!=="TERMINAL")||
+ return Object.values(doc.intents).some(isReconciliableV4EntryIntent)||
   Object.values(doc.state.legs).some(leg=>leg.status==="PENDING_ENTRY"||leg.reservationUsd>1e-12);
 }
 function safeDecisionFailureReason(error:unknown){
@@ -186,7 +189,7 @@ export class V4RunnerEngine{
  }
  private async reconcileEntriesAndProtection(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle){
   const d=this.deps;
-  for(const snapshot of Object.values(d.store.read().intents).filter(i=>i.action==="ENTRY")){
+  for(const snapshot of Object.values(d.store.read().intents).filter(isReconciliableV4EntryIntent)){
    let intent=d.store.read().intents[snapshot.clientOrderId];
    if(intent.stage==="PREPARED"){this.abandonPreparedEntry(intent.clientOrderId);continue;}
    const currentProtection=d.store.read().protections[intent.legId];
