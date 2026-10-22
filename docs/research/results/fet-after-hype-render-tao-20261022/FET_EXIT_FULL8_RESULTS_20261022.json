@@ -1,0 +1,1689 @@
+{
+  "schema": "fet-full8-exit-after-cumulative-adoption-v1",
+  "date": "2026-10-22",
+  "status": "RESEARCH_ONLY_NOT_LIVE",
+  "baselineAnchor": {
+    "10": {
+      "finalEquityJPY": 239985734.6618664,
+      "deltaFromHypeOnlyJPY": 8095832.38492009,
+      "maxMtmDrawdownPct": -14.603309760733396,
+      "profitFactor": 4.099058603638445,
+      "renderShortWins": 15,
+      "renderShortLosses": 9,
+      "taoShortWins": 5,
+      "taoShortLosses": 0
+    },
+    "30": {
+      "finalEquityJPY": 135946895.1553796,
+      "deltaFromHypeOnlyJPY": 6091073.199716732,
+      "maxMtmDrawdownPct": -15.80770763869479,
+      "profitFactor": 3.443661412489594,
+      "renderShortWins": 10,
+      "renderShortLosses": 12,
+      "taoShortWins": 6,
+      "taoShortLosses": 0
+    }
+  },
+  "selectedCases": [
+    "FET_AFTER_ALL_ADOPTED_BASELINE",
+    "FET_TRAIL_5P_GIVEBACK_3P",
+    "FET_TRAIL_8P_GIVEBACK_4P",
+    "FET_TRAIL_5P_GIVEBACK_5P",
+    "FET_INITIAL_3H_MINUS1P5_LOW_MFE",
+    "FET_INITIAL_4H_MINUS2P_LOW_MFE",
+    "FET_COMBO_TRAIL8GB4_PLUS_INITIAL3H",
+    "FET_COMBO_TRAIL8GB4_PLUS_INITIAL4H"
+  ],
+  "qualifiedBothCostImprovementNonWorseningDd": [
+    "FET_TRAIL_5P_GIVEBACK_3P",
+    "FET_TRAIL_8P_GIVEBACK_4P",
+    "FET_TRAIL_5P_GIVEBACK_5P",
+    "FET_INITIAL_3H_MINUS1P5_LOW_MFE",
+    "FET_INITIAL_4H_MINUS2P_LOW_MFE",
+    "FET_COMBO_TRAIL8GB4_PLUS_INITIAL3H",
+    "FET_COMBO_TRAIL8GB4_PLUS_INITIAL4H"
+  ],
+  "results": {
+    "FET_AFTER_ALL_ADOPTED_BASELINE": {
+      "rule": null,
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 239985734.6618664,
+          "deltaVsFormalAdoptedJpy": 0.0,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.099058603638445,
+          "closedTrades": 1300,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 4603040.977130893,
+            "byExit": {
+              "FET_24H_TIME_EXIT": 5,
+              "FET_PROFIT_FLOOR_STOP": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 778201.6263116128,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773435600000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C001970",
+                "pnl": 477308.9648284196,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773720000000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002023",
+                "pnl": 632078.8701940933,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -170452.9305074775,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": 16348.575805560315,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 2271375.039036331,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779814800000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002626",
+                "pnl": 471906.71153929335,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "e07c6f53e6238b1b0d7c024954e4570506f080d52fe596e79038d2712417a0d6",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 135946895.1553796,
+          "deltaVsFormalAdoptedJpy": 0.0,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.443661412489594,
+          "closedTrades": 1298,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 6,
+            "losses": 2,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 3401661.808952068,
+            "byExit": {
+              "FET_24H_TIME_EXIT": 5,
+              "FET_PROFIT_FLOOR_STOP": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 388299.3058130301,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773435600000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C001970",
+                "pnl": 183987.3021310061,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773720000000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002023",
+                "pnl": 276553.8749380533,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -203534.4745245715,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": -18604.514655245675,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 2232985.953749034,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779814800000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002626",
+                "pnl": 438622.4773817763,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "05bbffd6d3e5452acf589a043430ebeccd6f0d940f7687210f613810f386a838",
+          "accounting": "PASS"
+        }
+      }
+    },
+    "FET_TRAIL_5P_GIVEBACK_3P": {
+      "rule": {
+        "kind": "fet_trail",
+        "arm": 0.05,
+        "giveback": 0.03,
+        "id": "FET_TRAIL_5P_GIVEBACK_3P",
+        "strategy": "FET",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 245792561.18159243,
+          "deltaVsFormalAdoptedJpy": 5806826.519726038,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.106595188063898,
+          "closedTrades": 1299,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 5252163.539332822,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P": 5,
+              "FET_24H_TIME_EXIT": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 1597728.4771921132,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 2091971.8010200155,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681000000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 468025.7489280894,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774441500000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C002250",
+                "pnl": -170452.9305074775,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": 16348.575805560315,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 705276.7888676629,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779779700000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 416990.9581037979,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781412300000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "ac43af66ea3f5ed00363b82b5fa1e3f47540ffcd7900ca3068bbdae598f27412",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 141826215.2682107,
+          "deltaVsFormalAdoptedJpy": 5879320.112831116,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.4351857774869075,
+          "closedTrades": 1298,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 6,
+            "losses": 2,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 2709826.9858598495,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P": 5,
+              "FET_24H_TIME_EXIT": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 796300.8676463834,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 843246.0369148368,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681000000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 208025.24987995878,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774441500000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C002250",
+                "pnl": -203534.4745245715,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": -18604.514655245675,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 630929.0223031702,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779779700000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 350112.9141763321,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781412300000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_3P"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "d5907a8e7feca11f27a40e66fa870708a66b2ab5b8000261d97ec45ae51ac0fb",
+          "accounting": "PASS"
+        }
+      }
+    },
+    "FET_TRAIL_8P_GIVEBACK_4P": {
+      "rule": {
+        "kind": "fet_trail",
+        "arm": 0.08,
+        "giveback": 0.04,
+        "id": "FET_TRAIL_8P_GIVEBACK_4P",
+        "strategy": "FET",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 247247316.48637345,
+          "deltaVsFormalAdoptedJpy": 7261581.824507058,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.120700112246955,
+          "closedTrades": 1299,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 6404947.229280591,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "FET_24H_TIME_EXIT": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 1465045.4314424836,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 1903749.7518299262,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681600000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 632078.8701940933,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -170452.9305074775,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": 16348.575805560315,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1959996.6990536514,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800100000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 471906.71153929335,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "efb1603a83397da174423855f4143ea5bcb139c680b1d8aa01aba7d6c77502e1",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 143906605.34174916,
+          "deltaVsFormalAdoptedJpy": 7959710.186369568,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.456156361142333,
+          "closedTrades": 1298,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 6,
+            "losses": 2,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 4005325.34431595,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "FET_24H_TIME_EXIT": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 727889.1867655298,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 763688.069551589,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681600000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 312032.2614535063,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -203534.4745245715,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": -18604.514655245675,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1881880.4542243802,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800100000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 438622.4773817763,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "25d07849173423eae6beee104e988e388cf3725787d7842ab005ec7f05972885",
+          "accounting": "PASS"
+        }
+      }
+    },
+    "FET_TRAIL_5P_GIVEBACK_5P": {
+      "rule": {
+        "kind": "fet_trail",
+        "arm": 0.05,
+        "giveback": 0.05,
+        "id": "FET_TRAIL_5P_GIVEBACK_5P",
+        "strategy": "FET",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 245668294.1750319,
+          "deltaVsFormalAdoptedJpy": 5682559.513165504,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.114532832016902,
+          "closedTrades": 1299,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 5906288.714634259,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "FET_24H_TIME_EXIT": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 1332362.3856928514,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773384000000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 1718217.0596887576,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773682200000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 632078.8701940933,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -170452.9305074775,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": 16348.575805560315,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1779553.9222981203,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800700000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 471906.71153929335,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "679ebfb878c22a721e78b627524a1efa7820962be7d7fccbe7dcb4cba9d87784",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 142227912.30661017,
+          "deltaVsFormalAdoptedJpy": 6281017.151230574,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.4506163207697327,
+          "closedTrades": 1298,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 6,
+            "losses": 2,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 3673094.5689110267,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "FET_24H_TIME_EXIT": 3
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 659477.5058846764,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773384000000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 685498.5216321332,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773682200000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 306304.8248447231,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -203534.4745245715,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777957200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002259",
+                "pnl": -18604.514655245675,
+                "entryTsMs": 1778043600000,
+                "exitTsMs": 1778130000000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1701978.3442285496,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800700000,
+                "exitReason": "RESEARCH_FET_TRAIL_5P_GIVEBACK_5P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 438622.4773817763,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "b8988cb713a37b659c09e2160fa76b0dd4d174dae6cfc93e71edf98d88d3f62b",
+          "accounting": "PASS"
+        }
+      }
+    },
+    "FET_INITIAL_3H_MINUS1P5_LOW_MFE": {
+      "rule": {
+        "kind": "initial",
+        "arm_hours": 3,
+        "stop_pct": 0.015,
+        "mfe_gate_pct": 0.005,
+        "reentry_hours": 0,
+        "id": "FET_INITIAL_3H_MINUS1P5_LOW_MFE",
+        "strategy": "FET",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 240901246.67198902,
+          "deltaVsFormalAdoptedJpy": 915512.010122627,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.100317364047812,
+          "closedTrades": 1300,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 5012959.106642502,
+            "byExit": {
+              "FET_24H_TIME_EXIT": 4,
+              "FET_PROFIT_FLOOR_STOP": 3,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE": 1
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 778201.6263116128,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773435600000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C001970",
+                "pnl": 477308.9648284196,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773720000000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002023",
+                "pnl": 632078.8701940933,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -281694.8342417367,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777881900000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 537508.6090514286,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 2271375.039036331,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779814800000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002626",
+                "pnl": 471906.71153929335,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "0bc962b9ed2f82fc19dcf4e4d27ce6b8fb05b2628e9cb4a3cd0e6f81ee0ec76f",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 137308927.13748944,
+          "deltaVsFormalAdoptedJpy": 1362031.9821098447,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.4481653531978878,
+          "closedTrades": 1298,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 3779235.29032344,
+            "byExit": {
+              "FET_24H_TIME_EXIT": 4,
+              "FET_PROFIT_FLOOR_STOP": 3,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE": 1
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 388299.3058130301,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773435600000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C001970",
+                "pnl": 183987.3021310061,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773720000000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002023",
+                "pnl": 276553.8749380533,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -347110.69823930244,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777881900000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 502545.19043085707,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 2232985.953749034,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779814800000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002626",
+                "pnl": 438622.4773817763,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "c1aeced0fdab6ecc52b4319d39b13c227ef33c9e0570fb5deab4466b4391096e",
+          "accounting": "PASS"
+        }
+      }
+    },
+    "FET_INITIAL_4H_MINUS2P_LOW_MFE": {
+      "rule": {
+        "kind": "initial",
+        "arm_hours": 4,
+        "stop_pct": 0.02,
+        "mfe_gate_pct": 0.005,
+        "reentry_hours": 0,
+        "id": "FET_INITIAL_4H_MINUS2P_LOW_MFE",
+        "strategy": "FET",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 240712688.30011258,
+          "deltaVsFormalAdoptedJpy": 726953.6382461786,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.095783202914377,
+          "closedTrades": 1300,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 4929892.423106656,
+            "byExit": {
+              "FET_24H_TIME_EXIT": 4,
+              "FET_PROFIT_FLOOR_STOP": 3,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE": 1
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 778201.6263116128,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773435600000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C001970",
+                "pnl": 477308.9648284196,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773720000000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002023",
+                "pnl": 632078.8701940933,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -364761.51777758246,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777889400000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 537508.6090514286,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 2271375.039036331,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779814800000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002626",
+                "pnl": 471906.71153929335,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "79262c294c2e4d604957aa01713d073863f8576cfd15a892fb6e3ec231552e32",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 137046200.08834344,
+          "deltaVsFormalAdoptedJpy": 1099304.932963848,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.443046442568334,
+          "closedTrades": 1298,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 3696416.623685007,
+            "byExit": {
+              "FET_24H_TIME_EXIT": 4,
+              "FET_PROFIT_FLOOR_STOP": 3,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE": 1
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 388299.3058130301,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773435600000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C001970",
+                "pnl": 183987.3021310061,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773720000000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002023",
+                "pnl": 276553.8749380533,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -429929.3648777356,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777889400000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 502545.19043085707,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 2232985.953749034,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779814800000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002626",
+                "pnl": 438622.4773817763,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "5fc535b26e00de1eab7a742764a7c0f1048a0aa08708b8e92d48f140e7ec908b",
+          "accounting": "PASS"
+        }
+      }
+    },
+    "FET_COMBO_TRAIL8GB4_PLUS_INITIAL3H": {
+      "rule": {
+        "id": "FET_COMBO_TRAIL8GB4_PLUS_INITIAL3H",
+        "strategy": "FET",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "fet_combo",
+        "trail_rule": {
+          "kind": "fet_trail",
+          "arm": 0.08,
+          "giveback": 0.04,
+          "id": "FET_TRAIL_8P_GIVEBACK_4P",
+          "strategy": "FET",
+          "sides": [
+            "LONG"
+          ]
+        },
+        "initial_rule": {
+          "kind": "initial",
+          "arm_hours": 3,
+          "stop_pct": 0.015,
+          "mfe_gate_pct": 0.005,
+          "reentry_hours": 0,
+          "id": "FET_INITIAL_3H_MINUS1P5_LOW_MFE",
+          "strategy": "FET",
+          "sides": [
+            "LONG"
+          ]
+        }
+      },
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 248137522.03657547,
+          "deltaVsFormalAdoptedJpy": 8151787.37470907,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.122060257582342,
+          "closedTrades": 1299,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 6814865.3587922,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE": 1,
+              "FET_24H_TIME_EXIT": 2
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 1465045.4314424836,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 1903749.7518299262,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681600000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 632078.8701940933,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -281694.8342417367,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777881900000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 537508.6090514286,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1959996.6990536514,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800100000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 471906.71153929335,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "8764f1277b7c3ff28dbcedcebe37c6dbb0cb94be7548703877fe053459a5b49d",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 141914251.16613784,
+          "deltaVsFormalAdoptedJpy": 5967356.010758251,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.425419678820047,
+          "closedTrades": 1297,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 4382898.825687322,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE": 1,
+              "FET_24H_TIME_EXIT": 2
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 727889.1867655298,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 763688.069551589,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681600000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 312032.2614535063,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -347110.69823930244,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777881900000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_3H_MINUS1P5_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 502545.19043085707,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1881880.4542243802,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800100000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 438622.4773817763,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "a3ef4912301624c32acdab27d26d756807c7f89011de559eadfecee9f05623f2",
+          "accounting": "PASS"
+        }
+      }
+    },
+    "FET_COMBO_TRAIL8GB4_PLUS_INITIAL4H": {
+      "rule": {
+        "id": "FET_COMBO_TRAIL8GB4_PLUS_INITIAL4H",
+        "strategy": "FET",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "fet_combo",
+        "trail_rule": {
+          "kind": "fet_trail",
+          "arm": 0.08,
+          "giveback": 0.04,
+          "id": "FET_TRAIL_8P_GIVEBACK_4P",
+          "strategy": "FET",
+          "sides": [
+            "LONG"
+          ]
+        },
+        "initial_rule": {
+          "kind": "initial",
+          "arm_hours": 4,
+          "stop_pct": 0.02,
+          "mfe_gate_pct": 0.005,
+          "reentry_hours": 0,
+          "id": "FET_INITIAL_4H_MINUS2P_LOW_MFE",
+          "strategy": "FET",
+          "sides": [
+            "LONG"
+          ]
+        }
+      },
+      "costs": {
+        "10": {
+          "portfolioFinalEquityJpy": 247954232.06077588,
+          "deltaVsFormalAdoptedJpy": 7968497.398909479,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.117569459434165,
+          "closedTrades": 1299,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 52
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 6731798.675256354,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE": 1,
+              "FET_24H_TIME_EXIT": 2
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 1465045.4314424836,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 1903749.7518299262,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681600000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 632078.8701940933,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -364761.51777758246,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777889400000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 537508.6090514286,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1959996.6990536514,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800100000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 471906.71153929335,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 126274.11992305994,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "a61c71cdcd062609f24938f64b09fa960ffff8fb805061c906e40368aa23b9b6",
+          "accounting": "PASS"
+        },
+        "30": {
+          "portfolioFinalEquityJpy": 141693514.48092458,
+          "deltaVsFormalAdoptedJpy": 5746619.325544983,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.4208006852980817,
+          "closedTrades": 1297,
+          "replayHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldownEvents": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldownEvents": 51
+            }
+          ],
+          "fet": {
+            "trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "winRatePct": 87.5,
+            "modeledPnlJpy": 4300080.159048889,
+            "byExit": {
+              "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P": 3,
+              "FET_PROFIT_FLOOR_STOP": 2,
+              "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE": 1,
+              "FET_24H_TIME_EXIT": 2
+            },
+            "fills": [
+              {
+                "id": "C001940",
+                "pnl": 727889.1867655298,
+                "entryTsMs": 1773349200000,
+                "exitTsMs": 1773383700000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C001970",
+                "pnl": 763688.069551589,
+                "entryTsMs": 1773666000000,
+                "exitTsMs": 1773681600000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002023",
+                "pnl": 312032.2614535063,
+                "entryTsMs": 1774386000000,
+                "exitTsMs": 1774443600000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C002250",
+                "pnl": -429929.3648777356,
+                "entryTsMs": 1777870800000,
+                "exitTsMs": 1777889400000,
+                "exitReason": "RESEARCH_INITIAL_ADVERSE_STOP_FET_INITIAL_4H_MINUS2P_LOW_MFE"
+              },
+              {
+                "id": "C002256",
+                "pnl": 502545.19043085707,
+                "entryTsMs": 1778014800000,
+                "exitTsMs": 1778101200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              },
+              {
+                "id": "C002400",
+                "pnl": 1881880.4542243802,
+                "entryTsMs": 1779728400000,
+                "exitTsMs": 1779800100000,
+                "exitReason": "RESEARCH_FET_TRAIL_8P_GIVEBACK_4P"
+              },
+              {
+                "id": "C002626",
+                "pnl": 438622.4773817763,
+                "entryTsMs": 1781355600000,
+                "exitTsMs": 1781416800000,
+                "exitReason": "FET_PROFIT_FLOOR_STOP"
+              },
+              {
+                "id": "C003068",
+                "pnl": 103351.8841189854,
+                "entryTsMs": 1785790800000,
+                "exitTsMs": 1785877200000,
+                "exitReason": "FET_24H_TIME_EXIT"
+              }
+            ]
+          },
+          "sourceLedgerSha256": "c71473fa76a4d734d9d28c8ddedc149873b996e931d6a46b5dae19cf5cc95525",
+          "accounting": "PASS"
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Causal model replays confirmed M5 bars; not actual signed venue STOP fills",
+    "Optimized on same in-sample period, only eight FET accepted fills",
+    "Independent Task9 TypeScript parity / OOS and venue certification incomplete",
+    "No LIVE, VPS, position, HP or Production modifications"
+  ]
+}
