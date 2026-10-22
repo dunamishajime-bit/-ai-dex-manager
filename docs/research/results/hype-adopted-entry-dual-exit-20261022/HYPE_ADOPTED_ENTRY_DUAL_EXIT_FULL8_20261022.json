@@ -1,0 +1,215 @@
+{
+  "status": "HYPE_USER_ADOPTED_ENTRY_AND_DUAL_EXIT_RESEARCH_NOT_LIVE",
+  "sourceCommit": "a40b72af98ce7e923beb3c4f7474c3fb42d4d7c3",
+  "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "costBps": [
+    10,
+    30
+  ],
+  "period": "2025-08-10..2026-08-10",
+  "initialJpy": 10000,
+  "policy": {
+    "schema": "hype-entry-and-dual-exit-research-adoption-v2",
+    "status": "USER_ADOPTED_CUMULATIVE_ECONOMIC_BT_COMPLETE_RESEARCH_NOT_LIVE",
+    "adoptedAt": "2026-10-22",
+    "strategyId": "HYPE_LONG",
+    "policyId": "HYPE_BTC3H_LE0P6_REL3H_GE2P0_AND_COMBO_I1H1_P3F1P5",
+    "preEntry": {
+      "btc3hMaxPct": 0.6,
+      "hypeMinusBtc3hMinPercentagePoints": 2,
+      "barInterval": "5m",
+      "lookbackBars": 36,
+      "onlyFullyCompletedBars": true,
+      "failClosedOnMissingHistory": true
+    },
+    "existingHype75Exit": "RETAIN_OTHER_EXISTING_HYPE75_TAKE_PROFIT_AND_PROTECTIVE_STOP",
+    "otherLockedOverlays": [
+      "V12 V4 user-adopted 4 exits",
+      "Q102 user-adopted 3 exits"
+    ],
+    "dynamicEightLogicReselection": true,
+    "historicalAnchor": {
+      "sourceCommit": "a40b72af98ce7e923beb3c4f7474c3fb42d4d7c3",
+      "periodStart": "2025-08-10",
+      "periodEnd": "2026-08-10",
+      "initialCapitalJPY": 10000,
+      "tenBps": {
+        "equityJPY": 244636192.77287373,
+        "maxDdpct": -14.603309760733396,
+        "hypeWins": 12,
+        "hypeLosses": 6
+      },
+      "thirtyBps": {
+        "equityJPY": 140458101.84898156,
+        "maxDdpct": -15.80770763869479,
+        "hypeWins": 12,
+        "hypeLosses": 5
+      }
+    },
+    "researchCaveats": [
+      "Small HYPE subset (18 trades at 10bps, 17 at 30bps), optimized in-sample",
+      "Independent unified Task9 TypeScript economic parity not yet certified",
+      "Operator approval, venue execution and LIVE change are separate"
+    ],
+    "adoptedInitialAdverseExit": {
+      "activationAfterEntryHours": 1,
+      "priorMaximumFavorableExcursionLessThanPct": 0.3,
+      "adverseMoveFromEntryPct": -1.0,
+      "side": "LONG",
+      "onTrigger": "close_position",
+      "entryPriceReference": "fill_entry_price",
+      "mfeReference": "since_entry",
+      "onM5Completed": "enforce_causal_no_same_bar_future_use"
+    },
+    "adoptedProfitProtectionExit": {
+      "armedAfterMaximumFavorableExcursionPct": 3.0,
+      "protectedGainFromEntryPct": 1.5,
+      "side": "LONG",
+      "onTrigger": "close_position",
+      "armOnConfirmedM5Close": true,
+      "protectiveLevel": "entryPrice * 1.015"
+    },
+    "adoptedCombinedCaseId": "COMBO_I1H1_P3F1P5",
+    "selectionRationale": "Explicit user adoption prioritizing per-strategy risk controls even if final compounded return falls.",
+    "historicalAnchorIsPreDualExit": true,
+    "adoptedDualExitIntegratedAnchor": {
+      "10": {
+        "finalEquityJpy": 231889902.2769463,
+        "maxMtmDdPct": -14.603309760733396,
+        "profitFactor": 3.914947744244699,
+        "hypeTrades": 18,
+        "hypeWins": 12,
+        "hypeLosses": 6,
+        "hypeWinRatePct": 66.66666666666667,
+        "hypePnlJpy": 29381796.44997702,
+        "equityDeltaFromGatedBaselineJpy": -12746290.495927423
+      },
+      "30": {
+        "finalEquityJpy": 129855821.95566286,
+        "maxMtmDdPct": -15.80770763869479,
+        "profitFactor": 3.35179459175414,
+        "hypeTrades": 17,
+        "hypeWins": 12,
+        "hypeLosses": 5,
+        "hypeWinRatePct": 70.58823529411765,
+        "hypePnlJpy": 13426406.318358226,
+        "equityDeltaFromGatedBaselineJpy": -10602279.893318698
+      }
+    }
+  },
+  "adoptedCombinedCase": {
+    "rule": {
+      "id": "HYPE_GATED_COMBO_I1H1_P3F1P5",
+      "strategy": "HYPE_LONG",
+      "sides": [
+        "LONG"
+      ],
+      "kind": "combined",
+      "arm_hours": 1,
+      "stop_pct": 0.01,
+      "mfe_gate_pct": 0.003,
+      "reentry_hours": 0,
+      "arm": 0.03,
+      "floor": 0.015
+    },
+    "costs": {
+      "10": {
+        "finalEquityJpy": 231889902.2769463,
+        "equityDeltaFromGatedBaselineJpy": -12746290.495927423,
+        "maxMtmDdPct": -14.603309760733396,
+        "ddDeltaFromGatedBaselinePp": 0.0,
+        "profitFactor": 3.914947744244699,
+        "closedTrades": 1303,
+        "hypeTrades": 18,
+        "hypeWins": 12,
+        "hypeLosses": 6,
+        "hypeWinRatePct": 66.66666666666667,
+        "hypePnlJpy": 29381796.44997702,
+        "hypeExitReasons": {
+          "TAKE_PROFIT": 9,
+          "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_GATED_COMBO_I1H1_P3F1P5": 3,
+          "RESEARCH_HYPE_GATED_COMBO_I1H1_P3F1P5": 3,
+          "5M_PROTECTIVE_STOP": 3
+        },
+        "replayPasses": [
+          {
+            "iteration": 0,
+            "v4AdmittedShortStopCount": 52,
+            "appliedPreviousCooldowns": 0,
+            "gateSourceMissing": 0
+          },
+          {
+            "iteration": 1,
+            "v4AdmittedShortStopCount": 52,
+            "appliedPreviousCooldowns": 52,
+            "gateSourceMissing": 0
+          },
+          {
+            "iteration": 2,
+            "v4AdmittedShortStopCount": 52,
+            "appliedPreviousCooldowns": 52,
+            "gateSourceMissing": 0
+          }
+        ],
+        "ledgersSha256": {
+          "candidate-decisions.jsonl": "7eb5f163eb626c493536adc4fdff319c7bec43ec873eca1ee416537a8986adf6",
+          "portfolio-events.jsonl": "7ac4736744038db856637ed8b798b06fc44108df81254c0776ae7d1f1832646c",
+          "portfolio-trades.jsonl": "f56f7c6fd2038b5e7b298d837b315fb9599ccb2ad19598289085a0f28d26bf11",
+          "task9-mtm.jsonl": "6dcea66f0638b38323f8c27331cf55b5a3632f258fa27b0bebd9e310a3ebe446",
+          "metrics.json": "8bb93b8dba9de9f0d16e77b4bc20258d31c1da576e29195dbd3492121793f0ac"
+        },
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 129855821.95566286,
+        "equityDeltaFromGatedBaselineJpy": -10602279.893318698,
+        "maxMtmDdPct": -15.80770763869479,
+        "ddDeltaFromGatedBaselinePp": 0.0,
+        "profitFactor": 3.35179459175414,
+        "closedTrades": 1300,
+        "hypeTrades": 17,
+        "hypeWins": 12,
+        "hypeLosses": 5,
+        "hypeWinRatePct": 70.58823529411765,
+        "hypePnlJpy": 13426406.318358226,
+        "hypeExitReasons": {
+          "TAKE_PROFIT": 9,
+          "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_GATED_COMBO_I1H1_P3F1P5": 3,
+          "RESEARCH_HYPE_GATED_COMBO_I1H1_P3F1P5": 3,
+          "5M_PROTECTIVE_STOP": 2
+        },
+        "replayPasses": [
+          {
+            "iteration": 0,
+            "v4AdmittedShortStopCount": 51,
+            "appliedPreviousCooldowns": 0,
+            "gateSourceMissing": 0
+          },
+          {
+            "iteration": 1,
+            "v4AdmittedShortStopCount": 51,
+            "appliedPreviousCooldowns": 51,
+            "gateSourceMissing": 0
+          },
+          {
+            "iteration": 2,
+            "v4AdmittedShortStopCount": 51,
+            "appliedPreviousCooldowns": 51,
+            "gateSourceMissing": 0
+          }
+        ],
+        "ledgersSha256": {
+          "candidate-decisions.jsonl": "0e24da3b54af080b1d8f3a5466b96581f0025d9f75a002778acf4892f6490e44",
+          "portfolio-events.jsonl": "0ba4f61ef36c5729195aa85d330eaf0b255f74b0c948d32eaf8abf65322ceab2",
+          "portfolio-trades.jsonl": "43518d68f8fb6d3875c6feb77f34c71ec721847ddddf922ae667445fb7c82705",
+          "task9-mtm.jsonl": "4eb5b3fa1292e617d871b90e6c4c6035a8a7bb89556c0082a3973cd41083c18f",
+          "metrics.json": "a6a2216a1ef14d676c0ec5e33f0203149ae0c81eb63bb1a0a34fab165f5e4cde"
+        },
+        "accounting": "PASS"
+      }
+    }
+  },
+  "accounting": "PASS",
+  "independentTask9TSEconomicParityCertified": false,
+  "liveChanges": false
+}

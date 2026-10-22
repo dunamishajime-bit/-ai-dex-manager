@@ -1,6 +1,6 @@
 {
   "schema": "hype-entry-and-dual-exit-research-adoption-v2",
-  "status": "USER_ADOPTED_FOR_NEXT_CUMULATIVE_FULL8_BT_NOT_YET_LIVE",
+  "status": "USER_ADOPTED_CUMULATIVE_ECONOMIC_BT_COMPLETE_RESEARCH_NOT_LIVE",
   "adoptedAt": "2026-10-22",
   "strategyId": "HYPE_LONG",
   "policyId": "HYPE_BTC3H_LE0P6_REL3H_GE2P0_AND_COMBO_I1H1_P3F1P5",
@@ -61,5 +61,29 @@
   },
   "adoptedCombinedCaseId": "COMBO_I1H1_P3F1P5",
   "selectionRationale": "Explicit user adoption prioritizing per-strategy risk controls even if final compounded return falls.",
-  "historicalAnchorIsPreDualExit": true
+  "historicalAnchorIsPreDualExit": true,
+  "adoptedDualExitIntegratedAnchor": {
+    "10": {
+      "finalEquityJpy": 231889902.2769463,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.914947744244699,
+      "hypeTrades": 18,
+      "hypeWins": 12,
+      "hypeLosses": 6,
+      "hypeWinRatePct": 66.66666666666667,
+      "hypePnlJpy": 29381796.44997702,
+      "equityDeltaFromGatedBaselineJpy": -12746290.495927423
+    },
+    "30": {
+      "finalEquityJpy": 129855821.95566286,
+      "maxMtmDdPct": -15.80770763869479,
+      "profitFactor": 3.35179459175414,
+      "hypeTrades": 17,
+      "hypeWins": 12,
+      "hypeLosses": 5,
+      "hypeWinRatePct": 70.58823529411765,
+      "hypePnlJpy": 13426406.318358226,
+      "equityDeltaFromGatedBaselineJpy": -10602279.893318698
+    }
+  }
 }
