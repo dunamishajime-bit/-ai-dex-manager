@@ -1,0 +1,3221 @@
+{
+  "schema": "v52-only-selected-full8-trades-profit-loss-closed-dd-v1",
+  "status": "MODEL_BACKTEST_RESEARCH_ONLY",
+  "period": "2025-08-10..2026-08-10",
+  "baseline": "HYPE_LONG+IDLE_TAO_RENDER+FET_LONG_8P_4PP_USER_ADOPTED_RESEARCH_COMPOUND",
+  "costsBps": [
+    10,
+    30
+  ],
+  "startingCapitalJpy": 10000.0,
+  "ddDefinition": "Synthetic isolated replays original trade ROI PnL/actual integrated wallet pre-entry equity, compounded and ordered by exit; realized closed-only, no MTM, not independent full-gross portfolio.",
+  "pnlDefinition": "JPY gains/losses use actual modeled capital allocation from source integrated wallet, not V52-only capital.",
+  "asterH1Risk": "OHLC bars overlap entry/exit at hh:30 and include pre-entry/post-exit half-hours. Possible STOP-touch counts are upper bounds, NOT exchange fills.",
+  "previousStockResearchV52NativeFixedSuppressedCandidates": 11,
+  "noProductionChanges": true,
+  "cost": {
+    "10": {
+      "sourceLedgerSha256": "efb1603a83397da174423855f4143ea5bcb139c680b1d8aa01aba7d6c77502e1",
+      "sourcePortfolioEquityJpy": 247247316.48637345,
+      "sourcePortfolioMTMDdPct": -14.603309760733396,
+      "sourcePortfolioTrades": 1299,
+      "sourcePortfolioWorstDDContext": {
+        "timestampUtc": "2025-08-14T04:00:00+00:00",
+        "ddPct": -14.603309760733396,
+        "equityJpy": 9525.417339562078,
+        "peakEquityJpy": 11154.316769038149,
+        "v52Positions": 0,
+        "otherOpenStrategySides": {
+          "Q102 SHORT": 1,
+          "V12 SHORT": 7
+        },
+        "mtmPricedHours": 8761
+      },
+      "overall": {
+        "trades": 87,
+        "wins": 71,
+        "losses": 16,
+        "winRatePct": 81.60919540229885,
+        "positiveContributionJpy": 38713791.93108473,
+        "negativeContributionJpy": -1365004.0002649424,
+        "netContributionJpy": 37348787.93081979,
+        "modelContributionProfitFactor": 28.361669213841513,
+        "sumPositiveNetWalletReturnPct": 119.70516444617051,
+        "sumNegativeNetWalletReturnPct": -5.333444861387618,
+        "tradeNormalizedProfitFactor": 22.444248990515764,
+        "averageNetWalletReturnPerTradePct": 1.3146174664917574,
+        "medianNetWalletReturnPerTradePct": 0.9051496568616311,
+        "worstNetWalletReturnPct": -2.0394732971239433,
+        "bestNetWalletReturnPct": 5.4139105969578365,
+        "maxConsecutiveLosses": 2,
+        "syntheticIsolatedStartJpy": 10000.0,
+        "syntheticIsolatedEndJpy": 30866.63455060203,
+        "syntheticIsolatedReturnPct": 208.6663455060203,
+        "closedTradeOnlyMaxDDPct": -2.208417582819866,
+        "closedTradeOnlyTrough": {
+          "exitUtc": "2026-04-15T18:30:00+00:00",
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002159"
+        },
+        "approxPriceOnlyH1MTMDDPct": -2.3782424404568236,
+        "approxPriceOnlyH1MTMTrough": {
+          "candidateId": "C002169",
+          "point": "two-fee-reserve"
+        },
+        "h1CompletedMarks": 157,
+        "note": "Price-only H1 close plus conservative estimated exit-fee reserve. Not signed venue MTM or market microstructure-certified."
+      },
+      "side": {
+        "LONG": {
+          "trades": 35,
+          "wins": 31,
+          "losses": 4,
+          "winRatePct": 88.57142857142857,
+          "positiveContributionJpy": 15674105.6399348,
+          "negativeContributionJpy": -1174.385722807262,
+          "netContributionJpy": 15672931.254211994,
+          "modelContributionProfitFactor": 13346.641853297808,
+          "sumPositiveNetWalletReturnPct": 51.46393341277614,
+          "sumNegativeNetWalletReturnPct": -1.2278746090658061,
+          "tradeNormalizedProfitFactor": 41.91302029767602,
+          "averageNetWalletReturnPerTradePct": 1.4353159658202952,
+          "medianNetWalletReturnPerTradePct": 1.2040108265179787,
+          "worstNetWalletReturnPct": -0.5184701842825614,
+          "bestNetWalletReturnPct": 5.047660088928113,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 16417.329272816813,
+          "syntheticIsolatedReturnPct": 64.17329272816812,
+          "closedTradeOnlyMaxDDPct": -0.5184701842825601,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-24T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "candidateId": "C000673"
+          },
+          "approxPriceOnlyH1MTMDDPct": -0.8040583268178247,
+          "approxPriceOnlyH1MTMTrough": {
+            "candidateId": "C000667",
+            "point": "two-fee-reserve"
+          },
+          "h1CompletedMarks": 60,
+          "note": "Price-only H1 close plus conservative estimated exit-fee reserve. Not signed venue MTM or market microstructure-certified."
+        },
+        "SHORT": {
+          "trades": 52,
+          "wins": 40,
+          "losses": 12,
+          "winRatePct": 76.92307692307692,
+          "positiveContributionJpy": 23039686.29114993,
+          "negativeContributionJpy": -1363829.614542135,
+          "netContributionJpy": 21675856.676607795,
+          "modelContributionProfitFactor": 16.893375862706144,
+          "sumPositiveNetWalletReturnPct": 68.24123103339437,
+          "sumNegativeNetWalletReturnPct": -4.1055702523218125,
+          "tradeNormalizedProfitFactor": 16.62162058846809,
+          "averageNetWalletReturnPerTradePct": 1.2333780919437032,
+          "medianNetWalletReturnPerTradePct": 0.8439756410255967,
+          "worstNetWalletReturnPct": -2.0394732971239433,
+          "bestNetWalletReturnPct": 5.4139105969578365,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 18801.252041469288,
+          "syntheticIsolatedReturnPct": 88.01252041469287,
+          "closedTradeOnlyMaxDDPct": -2.208417582819866,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-15T18:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002159"
+          },
+          "approxPriceOnlyH1MTMDDPct": -2.3782424404568236,
+          "approxPriceOnlyH1MTMTrough": {
+            "candidateId": "C002169",
+            "point": "two-fee-reserve"
+          },
+          "h1CompletedMarks": 97,
+          "note": "Price-only H1 close plus conservative estimated exit-fee reserve. Not signed venue MTM or market microstructure-certified."
+        }
+      },
+      "bySymbol": {
+        "TSLA": {
+          "trades": 19,
+          "wins": 16,
+          "losses": 3,
+          "winRatePct": 84.21052631578948,
+          "positiveContributionJpy": 11808552.811547298,
+          "negativeContributionJpy": -776820.3878502682,
+          "netContributionJpy": 11031732.42369703,
+          "modelContributionProfitFactor": 15.201136577047965,
+          "sumPositiveNetWalletReturnPct": 33.446823788838955,
+          "sumNegativeNetWalletReturnPct": -2.8660060434841257,
+          "tradeNormalizedProfitFactor": 11.670186064289856,
+          "averageNetWalletReturnPerTradePct": 1.609516723439728,
+          "medianNetWalletReturnPerTradePct": 1.4738873026049881,
+          "worstNetWalletReturnPct": -2.0394732971239433,
+          "bestNetWalletReturnPct": 4.708064764744808,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 13507.607812678736,
+          "syntheticIsolatedReturnPct": 35.076078126787365,
+          "closedTradeOnlyMaxDDPct": -2.341253005509547,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-09T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002122"
+          }
+        },
+        "NVDA": {
+          "trades": 13,
+          "wins": 13,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 2819483.001067699,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 2819483.001067699,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 32.905697483862596,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 2.531207498758661,
+          "medianNetWalletReturnPerTradePct": 2.3641532879205984,
+          "worstNetWalletReturnPct": 0.810509542633,
+          "bestNetWalletReturnPct": 5.4139105969578365,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 13821.549356506406,
+          "syntheticIsolatedReturnPct": 38.215493565064065,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "META": {
+          "trades": 22,
+          "wins": 18,
+          "losses": 4,
+          "winRatePct": 81.81818181818181,
+          "positiveContributionJpy": 9407021.852983046,
+          "negativeContributionJpy": -217978.1473520807,
+          "netContributionJpy": 9189043.705630966,
+          "modelContributionProfitFactor": 43.155802392377986,
+          "sumPositiveNetWalletReturnPct": 22.394186142838613,
+          "sumNegativeNetWalletReturnPct": -0.343591457334499,
+          "tradeNormalizedProfitFactor": 65.17678383673272,
+          "averageNetWalletReturnPerTradePct": 1.002299758432005,
+          "medianNetWalletReturnPerTradePct": 0.5732748528016621,
+          "worstNetWalletReturnPct": -0.14699402721867308,
+          "bestNetWalletReturnPct": 4.803776363176877,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 12434.546938959023,
+          "syntheticIsolatedReturnPct": 24.345469389590235,
+          "closedTradeOnlyMaxDDPct": -0.14699402721868315,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-09-30T17:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C000444"
+          }
+        },
+        "MSFT": {
+          "trades": 16,
+          "wins": 14,
+          "losses": 2,
+          "winRatePct": 87.5,
+          "positiveContributionJpy": 11549522.886149716,
+          "negativeContributionJpy": -126778.89636281697,
+          "netContributionJpy": 11422743.989786899,
+          "modelContributionProfitFactor": 91.09972730080555,
+          "sumPositiveNetWalletReturnPct": 19.668222579245768,
+          "sumNegativeNetWalletReturnPct": -0.27478834329061425,
+          "tradeNormalizedProfitFactor": 71.57589853964363,
+          "averageNetWalletReturnPerTradePct": 1.212089639747197,
+          "medianNetWalletReturnPerTradePct": 0.7720160613458255,
+          "worstNetWalletReturnPct": -0.19993226552880888,
+          "bestNetWalletReturnPct": 5.047660088928113,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 12110.79839210628,
+          "syntheticIsolatedReturnPct": 21.10798392106281,
+          "closedTradeOnlyMaxDDPct": -0.1999322655288127,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-20T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "LONG",
+            "candidateId": "C000947"
+          }
+        },
+        "AMZN": {
+          "trades": 17,
+          "wins": 10,
+          "losses": 7,
+          "winRatePct": 58.8235294117647,
+          "positiveContributionJpy": 3129211.379336969,
+          "negativeContributionJpy": -243426.56869977652,
+          "netContributionJpy": 2885784.8106371923,
+          "modelContributionProfitFactor": 12.854847340827025,
+          "sumPositiveNetWalletReturnPct": 11.290234451384586,
+          "sumNegativeNetWalletReturnPct": -1.8490590172783787,
+          "tradeNormalizedProfitFactor": 6.105935151817181,
+          "averageNetWalletReturnPerTradePct": 0.5553632608297768,
+          "medianNetWalletReturnPerTradePct": 0.17079745644436553,
+          "worstNetWalletReturnPct": -0.7745900764976174,
+          "bestNetWalletReturnPct": 3.105699864686231,
+          "maxConsecutiveLosses": 3,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10978.711377664355,
+          "syntheticIsolatedReturnPct": 9.78711377664354,
+          "closedTradeOnlyMaxDDPct": -0.8434116830457583,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-12T20:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000873"
+          }
+        }
+      },
+      "bySymbolSide": {
+        "TSLA|LONG": {
+          "trades": 9,
+          "wins": 8,
+          "losses": 1,
+          "winRatePct": 88.88888888888889,
+          "positiveContributionJpy": 5735453.492632557,
+          "negativeContributionJpy": -356.94953765951584,
+          "netContributionJpy": 5735096.543094898,
+          "modelContributionProfitFactor": 16067.967282544698,
+          "sumPositiveNetWalletReturnPct": 15.723168077714691,
+          "sumNegativeNetWalletReturnPct": -0.5184701842825614,
+          "tradeNormalizedProfitFactor": 30.326079597946006,
+          "averageNetWalletReturnPerTradePct": 1.6894108770480147,
+          "medianNetWalletReturnPerTradePct": 1.2616104652704747,
+          "worstNetWalletReturnPct": -0.5184701842825614,
+          "bestNetWalletReturnPct": 4.708064764744808,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11616.450465343345,
+          "syntheticIsolatedReturnPct": 16.164504653433443,
+          "closedTradeOnlyMaxDDPct": -0.5184701842825601,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-24T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "candidateId": "C000673"
+          }
+        },
+        "TSLA|SHORT": {
+          "trades": 10,
+          "wins": 8,
+          "losses": 2,
+          "winRatePct": 80.0,
+          "positiveContributionJpy": 6073099.318914742,
+          "negativeContributionJpy": -776463.4383126086,
+          "netContributionJpy": 5296635.880602133,
+          "modelContributionProfitFactor": 7.821487811599543,
+          "sumPositiveNetWalletReturnPct": 17.723655711124263,
+          "sumNegativeNetWalletReturnPct": -2.3475358592015643,
+          "tradeNormalizedProfitFactor": 7.54989775412946,
+          "averageNetWalletReturnPerTradePct": 1.5376119851922698,
+          "medianNetWalletReturnPerTradePct": 1.6685031067493428,
+          "worstNetWalletReturnPct": -2.0394732971239433,
+          "bestNetWalletReturnPct": 4.4171636199856215,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11627.999321287934,
+          "syntheticIsolatedReturnPct": 16.27999321287934,
+          "closedTradeOnlyMaxDDPct": -2.341253005509558,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-09T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002122"
+          }
+        },
+        "NVDA|LONG": {
+          "trades": 4,
+          "wins": 4,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 1331155.0442209523,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 1331155.0442209523,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 8.943590810114323,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 2.2358977025285807,
+          "medianNetWalletReturnPerTradePct": 2.077954952345203,
+          "worstNetWalletReturnPct": 0.810509542633,
+          "bestNetWalletReturnPct": 3.9771713627909158,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10921.829550764864,
+          "syntheticIsolatedReturnPct": 9.218295507648634,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "NVDA|SHORT": {
+          "trades": 9,
+          "wins": 9,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 1488327.9568467468,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 1488327.9568467468,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 23.96210667374827,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 2.6624562970831414,
+          "medianNetWalletReturnPerTradePct": 2.3641532879205984,
+          "worstNetWalletReturnPct": 1.171065674078683,
+          "bestNetWalletReturnPct": 5.4139105969578365,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 12654.976249412788,
+          "syntheticIsolatedReturnPct": 26.549762494127883,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "META|LONG": {
+          "trades": 7,
+          "wins": 7,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 4112892.33146131,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 4112892.33146131,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 6.4473982068815605,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 0.9210568866973659,
+          "medianNetWalletReturnPerTradePct": 0.6294189836825117,
+          "worstNetWalletReturnPct": 0.011545398733642747,
+          "bestNetWalletReturnPct": 1.895642694969088,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10661.341896187849,
+          "syntheticIsolatedReturnPct": 6.613418961878481,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "META|SHORT": {
+          "trades": 15,
+          "wins": 11,
+          "losses": 4,
+          "winRatePct": 73.33333333333333,
+          "positiveContributionJpy": 5294129.521521737,
+          "negativeContributionJpy": -217978.1473520807,
+          "netContributionJpy": 5076151.374169656,
+          "modelContributionProfitFactor": 24.28743241390432,
+          "sumPositiveNetWalletReturnPct": 15.946787935957051,
+          "sumNegativeNetWalletReturnPct": -0.343591457334499,
+          "tradeNormalizedProfitFactor": 46.412061754004164,
+          "averageNetWalletReturnPerTradePct": 1.0402130985748368,
+          "medianNetWalletReturnPerTradePct": 0.553005552033496,
+          "worstNetWalletReturnPct": -0.14699402721867308,
+          "bestNetWalletReturnPct": 4.803776363176877,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11663.209997425576,
+          "syntheticIsolatedReturnPct": 16.632099974255766,
+          "closedTradeOnlyMaxDDPct": -0.14699402721868315,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-09-30T17:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C000444"
+          }
+        },
+        "MSFT|LONG": {
+          "trades": 9,
+          "wins": 8,
+          "losses": 1,
+          "winRatePct": 88.88888888888889,
+          "positiveContributionJpy": 4005194.6951339887,
+          "negativeContributionJpy": -525.2659673659673,
+          "netContributionJpy": 4004669.429166623,
+          "modelContributionProfitFactor": 7625.079376870154,
+          "sumPositiveNetWalletReturnPct": 13.631718714127356,
+          "sumNegativeNetWalletReturnPct": -0.19993226552880888,
+          "tradeNormalizedProfitFactor": 68.18168482246863,
+          "averageNetWalletReturnPerTradePct": 1.4924207165109495,
+          "medianNetWalletReturnPerTradePct": 1.2392183335394236,
+          "worstNetWalletReturnPct": -0.19993226552880888,
+          "bestNetWalletReturnPct": 5.047660088928113,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11415.220687726029,
+          "syntheticIsolatedReturnPct": 14.152206877260287,
+          "closedTradeOnlyMaxDDPct": -0.1999322655288127,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-20T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "LONG",
+            "candidateId": "C000947"
+          }
+        },
+        "MSFT|SHORT": {
+          "trades": 7,
+          "wins": 6,
+          "losses": 1,
+          "winRatePct": 85.71428571428571,
+          "positiveContributionJpy": 7544328.191015728,
+          "negativeContributionJpy": -126253.63039545101,
+          "netContributionJpy": 7418074.560620277,
+          "modelContributionProfitFactor": 59.75533667733292,
+          "sumPositiveNetWalletReturnPct": 6.036503865118411,
+          "sumNegativeNetWalletReturnPct": -0.07485607776180535,
+          "tradeNormalizedProfitFactor": 80.64146620568042,
+          "averageNetWalletReturnPerTradePct": 0.8516639696223722,
+          "medianNetWalletReturnPerTradePct": 0.5375081224174405,
+          "worstNetWalletReturnPct": -0.07485607776180535,
+          "bestNetWalletReturnPct": 2.4697704355442953,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10609.342318828887,
+          "syntheticIsolatedReturnPct": 6.093423188288871,
+          "closedTradeOnlyMaxDDPct": -0.07485607776182013,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-06-16T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "SHORT",
+            "candidateId": "C002666"
+          }
+        },
+        "AMZN|LONG": {
+          "trades": 6,
+          "wins": 4,
+          "losses": 2,
+          "winRatePct": 66.66666666666667,
+          "positiveContributionJpy": 489410.07648599404,
+          "negativeContributionJpy": -292.17021778177883,
+          "netContributionJpy": 489117.90626821225,
+          "modelContributionProfitFactor": 1675.0854354756075,
+          "sumPositiveNetWalletReturnPct": 6.71805760393821,
+          "sumNegativeNetWalletReturnPct": -0.5094721592544358,
+          "tradeNormalizedProfitFactor": 13.186309559622355,
+          "averageNetWalletReturnPerTradePct": 1.034764240780629,
+          "medianNetWalletReturnPerTradePct": 0.774076049672844,
+          "worstNetWalletReturnPct": -0.30947572619600994,
+          "bestNetWalletReturnPct": 3.105699864686231,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10632.55129078832,
+          "syntheticIsolatedReturnPct": 6.325512907883213,
+          "closedTradeOnlyMaxDDPct": -0.5088532188408657,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-17T19:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "LONG",
+            "candidateId": "C000642"
+          }
+        },
+        "AMZN|SHORT": {
+          "trades": 11,
+          "wins": 6,
+          "losses": 5,
+          "winRatePct": 54.54545454545455,
+          "positiveContributionJpy": 2639801.3028509747,
+          "negativeContributionJpy": -243134.39848199472,
+          "netContributionJpy": 2396666.90436898,
+          "modelContributionProfitFactor": 10.857374848365872,
+          "sumPositiveNetWalletReturnPct": 4.572176847446376,
+          "sumNegativeNetWalletReturnPct": -1.3395868580239432,
+          "tradeNormalizedProfitFactor": 3.413124591406416,
+          "averageNetWalletReturnPerTradePct": 0.2938718172202211,
+          "medianNetWalletReturnPerTradePct": 0.13148463378122568,
+          "worstNetWalletReturnPct": -0.7745900764976174,
+          "bestNetWalletReturnPct": 1.6445603775325828,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10325.56634565773,
+          "syntheticIsolatedReturnPct": 3.2556634565772846,
+          "closedTradeOnlyMaxDDPct": -0.9730155117785189,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-12T20:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000873"
+          }
+        }
+      },
+      "byExitSide": {
+        "LONG|BASIS_CONVERGED": {
+          "trades": 29,
+          "wins": 27,
+          "losses": 2,
+          "winRatePct": 93.10344827586206,
+          "positiveContributionJpy": 14609875.91161209,
+          "negativeContributionJpy": -882.2155050254831,
+          "netContributionJpy": 14608993.696107063,
+          "modelContributionProfitFactor": 16560.43883652904,
+          "sumPositiveNetWalletReturnPct": 45.116264068118845,
+          "sumNegativeNetWalletReturnPct": -0.7184024498113702,
+          "tradeNormalizedProfitFactor": 62.800821572873176,
+          "averageNetWalletReturnPerTradePct": 1.5309607454588783,
+          "medianNetWalletReturnPerTradePct": 0.9759825200776675,
+          "worstNetWalletReturnPct": -0.5184701842825614,
+          "bestNetWalletReturnPct": 5.047660088928113,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 15494.291868383201,
+          "syntheticIsolatedReturnPct": 54.94291868383201,
+          "closedTradeOnlyMaxDDPct": -0.5184701842825712,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-24T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "candidateId": "C000673"
+          }
+        },
+        "LONG|BASIS_STOP": {
+          "trades": 1,
+          "wins": 0,
+          "losses": 1,
+          "winRatePct": 0.0,
+          "positiveContributionJpy": 0,
+          "negativeContributionJpy": -177.48775482616034,
+          "netContributionJpy": -177.48775482616034,
+          "modelContributionProfitFactor": 0.0,
+          "sumPositiveNetWalletReturnPct": 0,
+          "sumNegativeNetWalletReturnPct": -0.30947572619600994,
+          "tradeNormalizedProfitFactor": 0.0,
+          "averageNetWalletReturnPerTradePct": -0.30947572619600994,
+          "medianNetWalletReturnPerTradePct": -0.30947572619600994,
+          "worstNetWalletReturnPct": -0.30947572619600994,
+          "bestNetWalletReturnPct": -0.30947572619600994,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 9969.052427380399,
+          "syntheticIsolatedReturnPct": -0.30947572619601793,
+          "closedTradeOnlyMaxDDPct": -0.30947572619601793,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-17T16:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "LONG",
+            "candidateId": "C000640"
+          }
+        },
+        "LONG|TIME_OR_SESSION_FLAT": {
+          "trades": 5,
+          "wins": 4,
+          "losses": 1,
+          "winRatePct": 80.0,
+          "positiveContributionJpy": 1064229.7283227115,
+          "negativeContributionJpy": -114.6824629556185,
+          "netContributionJpy": 1064115.045859756,
+          "modelContributionProfitFactor": 9279.794843040323,
+          "sumPositiveNetWalletReturnPct": 6.347669344657299,
+          "sumNegativeNetWalletReturnPct": -0.19999643305842588,
+          "tradeNormalizedProfitFactor": 31.738912777524014,
+          "averageNetWalletReturnPerTradePct": 1.2295345823197745,
+          "medianNetWalletReturnPerTradePct": 1.5339380868081254,
+          "worstNetWalletReturnPct": -0.19999643305842588,
+          "bestNetWalletReturnPct": 1.895642694969088,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10628.620389469264,
+          "syntheticIsolatedReturnPct": 6.286203894692655,
+          "closedTradeOnlyMaxDDPct": -0.19999643305842474,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-17T19:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "LONG",
+            "candidateId": "C000642"
+          }
+        },
+        "SHORT|BASIS_CONVERGED": {
+          "trades": 32,
+          "wins": 29,
+          "losses": 3,
+          "winRatePct": 90.625,
+          "positiveContributionJpy": 13374538.937927023,
+          "negativeContributionJpy": -917136.6738149378,
+          "netContributionJpy": 12457402.264112085,
+          "modelContributionProfitFactor": 14.582928935001645,
+          "sumPositiveNetWalletReturnPct": 53.148247107343295,
+          "sumNegativeNetWalletReturnPct": -2.2066457965220785,
+          "tradeNormalizedProfitFactor": 24.085536152250125,
+          "averageNetWalletReturnPerTradePct": 1.5919250409631627,
+          "medianNetWalletReturnPerTradePct": 1.2025043600456846,
+          "worstNetWalletReturnPct": -2.0394732971239433,
+          "bestNetWalletReturnPct": 5.4139105969578365,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 16509.051522939786,
+          "syntheticIsolatedReturnPct": 65.09051522939787,
+          "closedTradeOnlyMaxDDPct": -2.0394732971239393,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-09T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002122"
+          }
+        },
+        "SHORT|BASIS_STOP": {
+          "trades": 3,
+          "wins": 0,
+          "losses": 3,
+          "winRatePct": 0.0,
+          "positiveContributionJpy": 0,
+          "negativeContributionJpy": -94258.97436642915,
+          "netContributionJpy": -94258.97436642915,
+          "modelContributionProfitFactor": 0.0,
+          "sumPositiveNetWalletReturnPct": 0,
+          "sumNegativeNetWalletReturnPct": -0.6088529705484325,
+          "tradeNormalizedProfitFactor": 0.0,
+          "averageNetWalletReturnPerTradePct": -0.2029509901828108,
+          "medianNetWalletReturnPerTradePct": -0.1537963812521381,
+          "worstNetWalletReturnPct": -0.3080625620776213,
+          "bestNetWalletReturnPct": -0.14699402721867308,
+          "maxConsecutiveLosses": 3,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 9939.229902714327,
+          "syntheticIsolatedReturnPct": -0.6077009728567284,
+          "closedTradeOnlyMaxDDPct": -0.6077009728567284,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-05-04T16:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002252"
+          }
+        },
+        "SHORT|TIME_OR_SESSION_FLAT": {
+          "trades": 17,
+          "wins": 11,
+          "losses": 6,
+          "winRatePct": 64.70588235294117,
+          "positiveContributionJpy": 9665147.353222907,
+          "negativeContributionJpy": -352433.9663607681,
+          "netContributionJpy": 9312713.386862138,
+          "modelContributionProfitFactor": 27.423995062181955,
+          "sumPositiveNetWalletReturnPct": 15.092983926051081,
+          "sumNegativeNetWalletReturnPct": -1.2900714852513004,
+          "tradeNormalizedProfitFactor": 11.699339221586648,
+          "averageNetWalletReturnPerTradePct": 0.8119360259293988,
+          "medianNetWalletReturnPerTradePct": 0.503165627904369,
+          "worstNetWalletReturnPct": -0.7745900764976174,
+          "bestNetWalletReturnPct": 4.803776363176877,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11458.08163668972,
+          "syntheticIsolatedReturnPct": 14.580816366897187,
+          "closedTradeOnlyMaxDDPct": -0.7745900764976277,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-02T19:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000488"
+          }
+        }
+      },
+      "byExitMonth": {
+        "2025-09": {
+          "trades": 3,
+          "wins": 2,
+          "losses": 1,
+          "winRatePct": 66.66666666666667,
+          "positiveContributionJpy": 613.781324997338,
+          "negativeContributionJpy": -28.572742382499026,
+          "netContributionJpy": 585.208582614839,
+          "modelContributionProfitFactor": 21.481358589271522,
+          "sumPositiveNetWalletReturnPct": 3.2402612129329857,
+          "sumNegativeNetWalletReturnPct": -0.14699402721867308,
+          "tradeNormalizedProfitFactor": 22.043488937905405,
+          "averageNetWalletReturnPerTradePct": 1.0310890619047708,
+          "medianNetWalletReturnPerTradePct": 1.171065674078683,
+          "worstNetWalletReturnPct": -0.14699402721867308,
+          "bestNetWalletReturnPct": 2.0691955388543026,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10311.270021488852,
+          "syntheticIsolatedReturnPct": 3.1127002148885197,
+          "closedTradeOnlyMaxDDPct": -0.14699402721867205,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-09-30T17:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C000444"
+          }
+        },
+        "2025-10": {
+          "trades": 22,
+          "wins": 17,
+          "losses": 5,
+          "winRatePct": 77.27272727272727,
+          "positiveContributionJpy": 19851.640464738877,
+          "negativeContributionJpy": -852.492155908349,
+          "netContributionJpy": 18999.14830883053,
+          "modelContributionProfitFactor": 23.286596043322557,
+          "sumPositiveNetWalletReturnPct": 42.25555686423395,
+          "sumNegativeNetWalletReturnPct": -1.9015032004001273,
+          "tradeNormalizedProfitFactor": 22.222185508466275,
+          "averageNetWalletReturnPerTradePct": 1.834275166537901,
+          "medianNetWalletReturnPerTradePct": 1.6520209794049723,
+          "worstNetWalletReturnPct": -0.7745900764976174,
+          "bestNetWalletReturnPct": 5.296670406596284,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 14864.891197980967,
+          "syntheticIsolatedReturnPct": 48.648911979809675,
+          "closedTradeOnlyMaxDDPct": -0.7745900764976166,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-02T19:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000488"
+          }
+        },
+        "2025-11": {
+          "trades": 8,
+          "wins": 6,
+          "losses": 2,
+          "winRatePct": 75.0,
+          "positiveContributionJpy": 26183.356146834678,
+          "negativeContributionJpy": -995.5945607223389,
+          "netContributionJpy": 25187.761586112338,
+          "modelContributionProfitFactor": 26.29921574484872,
+          "sumPositiveNetWalletReturnPct": 12.594963820863454,
+          "sumNegativeNetWalletReturnPct": -0.39990668280143626,
+          "tradeNormalizedProfitFactor": 31.49475705840397,
+          "averageNetWalletReturnPerTradePct": 1.5243821422577524,
+          "medianNetWalletReturnPerTradePct": 1.6847649987870381,
+          "worstNetWalletReturnPct": -0.19997441727262733,
+          "bestNetWalletReturnPct": 3.105699864686231,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11280.234227906218,
+          "syntheticIsolatedReturnPct": 12.802342279062184,
+          "closedTradeOnlyMaxDDPct": -0.19997441727261922,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-12T20:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000873"
+          }
+        },
+        "2025-12": {
+          "trades": 1,
+          "wins": 1,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 16603.90512183418,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 16603.90512183418,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 2.3088573740659784,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 2.3088573740659784,
+          "medianNetWalletReturnPerTradePct": 2.3088573740659784,
+          "worstNetWalletReturnPct": 2.3088573740659784,
+          "bestNetWalletReturnPct": 2.3088573740659784,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10230.8857374066,
+          "syntheticIsolatedReturnPct": 2.308857374065987,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "2026-01": {
+          "trades": 4,
+          "wins": 4,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 80844.46438262906,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 80844.46438262906,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 5.910148351767733,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 1.4775370879419332,
+          "medianNetWalletReturnPerTradePct": 1.2477767556415806,
+          "worstNetWalletReturnPct": 0.5232279400197388,
+          "bestNetWalletReturnPct": 2.891366900464832,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10602.696884962805,
+          "syntheticIsolatedReturnPct": 6.026968849628056,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "2026-02": {
+          "trades": 4,
+          "wins": 3,
+          "losses": 1,
+          "winRatePct": 75.0,
+          "positiveContributionJpy": 198235.14675773674,
+          "negativeContributionJpy": -7807.636284788393,
+          "netContributionJpy": 190427.51047294834,
+          "modelContributionProfitFactor": 25.38990541144418,
+          "sumPositiveNetWalletReturnPct": 3.3168530935427194,
+          "sumNegativeNetWalletReturnPct": -0.3080625620776213,
+          "tradeNormalizedProfitFactor": 10.766816555615693,
+          "averageNetWalletReturnPerTradePct": 0.7521976328662745,
+          "medianNetWalletReturnPerTradePct": 0.8361463580050684,
+          "worstNetWalletReturnPct": -0.3080625620776213,
+          "bestNetWalletReturnPct": 1.6445603775325828,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10303.306752245499,
+          "syntheticIsolatedReturnPct": 3.0330675224549797,
+          "closedTradeOnlyMaxDDPct": -0.3080625620776267,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-02-03T17:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C001525"
+          }
+        },
+        "2026-03": {
+          "trades": 2,
+          "wins": 2,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 1434283.7424495034,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 1434283.7424495034,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 7.983491181705052,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 3.991745590852526,
+          "medianNetWalletReturnPerTradePct": 3.991745590852526,
+          "worstNetWalletReturnPct": 2.5695805847472153,
+          "bestNetWalletReturnPct": 5.4139105969578365,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10812.260597728004,
+          "syntheticIsolatedReturnPct": 8.122605977280028,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "2026-04": {
+          "trades": 10,
+          "wins": 8,
+          "losses": 2,
+          "winRatePct": 80.0,
+          "positiveContributionJpy": 6474344.165846452,
+          "negativeContributionJpy": -847981.5506922823,
+          "netContributionJpy": 5626362.6151541695,
+          "modelContributionProfitFactor": 7.63500592738235,
+          "sumPositiveNetWalletReturnPct": 16.32770529820267,
+          "sumNegativeNetWalletReturnPct": -2.2119348909742342,
+          "tradeNormalizedProfitFactor": 7.381639199610991,
+          "averageNetWalletReturnPerTradePct": 1.4115770407228434,
+          "medianNetWalletReturnPerTradePct": 1.0810494100557546,
+          "worstNetWalletReturnPct": -2.0394732971239433,
+          "bestNetWalletReturnPct": 4.803776363176877,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11485.664760433097,
+          "syntheticIsolatedReturnPct": 14.856647604330963,
+          "closedTradeOnlyMaxDDPct": -2.208417582819855,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-15T18:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002159"
+          }
+        },
+        "2026-05": {
+          "trades": 8,
+          "wins": 7,
+          "losses": 1,
+          "winRatePct": 87.5,
+          "positiveContributionJpy": 6959463.138541091,
+          "negativeContributionJpy": -86422.76533925826,
+          "netContributionJpy": 6873040.373201833,
+          "modelContributionProfitFactor": 80.52812370931733,
+          "sumPositiveNetWalletReturnPct": 10.651779078148682,
+          "sumNegativeNetWalletReturnPct": -0.1537963812521381,
+          "tradeNormalizedProfitFactor": 69.2589707990974,
+          "averageNetWalletReturnPerTradePct": 1.3122478371120678,
+          "medianNetWalletReturnPerTradePct": 1.1623098674867895,
+          "worstNetWalletReturnPct": -0.1537963812521381,
+          "bestNetWalletReturnPct": 3.045934066703265,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11094.97565434733,
+          "syntheticIsolatedReturnPct": 10.949756543473299,
+          "closedTradeOnlyMaxDDPct": -0.1537963812521359,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-05-04T16:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002252"
+          }
+        },
+        "2026-06": {
+          "trades": 14,
+          "wins": 12,
+          "losses": 2,
+          "winRatePct": 85.71428571428571,
+          "positiveContributionJpy": 18212517.69826542,
+          "negativeContributionJpy": -202996.6867851158,
+          "netContributionJpy": 18009521.0114803,
+          "modelContributionProfitFactor": 89.7183002673559,
+          "sumPositiveNetWalletReturnPct": 12.85860061089775,
+          "sumNegativeNetWalletReturnPct": -0.11362046691307487,
+          "tradeNormalizedProfitFactor": 113.17151707126145,
+          "averageNetWalletReturnPerTradePct": 0.910355724570334,
+          "medianNetWalletReturnPerTradePct": 0.5452568372254682,
+          "worstNetWalletReturnPct": -0.07485607776180535,
+          "bestNetWalletReturnPct": 3.132327827007387,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11345.75392467374,
+          "syntheticIsolatedReturnPct": 13.457539246737404,
+          "closedTradeOnlyMaxDDPct": -0.07485607776182013,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-06-16T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "SHORT",
+            "candidateId": "C002666"
+          }
+        },
+        "2026-07": {
+          "trades": 10,
+          "wins": 8,
+          "losses": 2,
+          "winRatePct": 80.0,
+          "positiveContributionJpy": 4920398.38411516,
+          "negativeContributionJpy": -217918.70170448447,
+          "netContributionJpy": 4702479.682410676,
+          "modelContributionProfitFactor": 22.57905515051949,
+          "sumPositiveNetWalletReturnPct": 2.1059030628358375,
+          "sumNegativeNetWalletReturnPct": -0.09762664975031321,
+          "tradeNormalizedProfitFactor": 21.570985670632226,
+          "averageNetWalletReturnPerTradePct": 0.2008276413085524,
+          "medianNetWalletReturnPerTradePct": 0.15886340310810712,
+          "worstNetWalletReturnPct": -0.06820171903262297,
+          "bestNetWalletReturnPct": 0.6849114998152477,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10202.42052821897,
+          "syntheticIsolatedReturnPct": 2.024205282189695,
+          "closedTradeOnlyMaxDDPct": -0.0682017190326234,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-07-06T18:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002875"
+          }
+        },
+        "2026-08": {
+          "trades": 1,
+          "wins": 1,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 370452.50766833243,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 370452.50766833243,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 0.15104449697370098,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 0.15104449697370098,
+          "medianNetWalletReturnPerTradePct": 0.15104449697370098,
+          "worstNetWalletReturnPct": 0.15104449697370098,
+          "bestNetWalletReturnPct": 0.15104449697370098,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10015.10444969737,
+          "syntheticIsolatedReturnPct": 0.1510444969736957,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        }
+      },
+      "worstTradesByPortfolioContribution": [
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002122",
+          "utc": "2026-04-09T16:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -768655.8020278203,
+          "netWalletPct": -2.039473297123943,
+          "priceReturnPct": -0.9192785851864782,
+          "acceptedGross": 1.999996909173238
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002875",
+          "utc": "2026-07-06T18:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -148449.99888190383,
+          "netWalletPct": -0.06820171903262297,
+          "priceReturnPct": -0.12087432427896339,
+          "acceptedGross": 0.30869618971574414
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "SHORT",
+          "candidateId": "C002666",
+          "utc": "2026-06-16T19:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -126253.63039545101,
+          "netWalletPct": -0.07485607776180535,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 0.7485607776180535
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002252",
+          "utc": "2026-05-04T16:30:00+00:00",
+          "exit": "BASIS_STOP",
+          "modeledLossJpy": -86422.76533925826,
+          "netWalletPct": -0.1537963812521381,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 1.5379638125213808
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002159",
+          "utc": "2026-04-15T18:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -79325.74866446196,
+          "netWalletPct": -0.1724615938502908,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 1.7246159385029078
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002732",
+          "utc": "2026-06-23T19:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -76743.05638966481,
+          "netWalletPct": -0.03876438915126951,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 0.3876438915126951
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002998",
+          "utc": "2026-07-23T19:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -69468.70282258064,
+          "netWalletPct": -0.029424930717690246,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 0.29424930717690245
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C001525",
+          "utc": "2026-02-03T17:30:00+00:00",
+          "exit": "BASIS_STOP",
+          "modeledLossJpy": -7807.636284788393,
+          "netWalletPct": -0.3080625620776213,
+          "priceReturnPct": -0.05400835955478023,
+          "acceptedGross": 1.9999469901502882
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "LONG",
+          "candidateId": "C000947",
+          "utc": "2025-11-20T19:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -525.2659673659673,
+          "netWalletPct": -0.19993226552880886,
+          "priceReturnPct": 0.0,
+          "acceptedGross": 1.9993226552880887
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C000873",
+          "utc": "2025-11-12T20:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -470.3285933563715,
+          "netWalletPct": -0.1999744172726273,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 1.9997441727262733
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "LONG",
+          "candidateId": "C000673",
+          "utc": "2025-10-24T16:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -356.94953765951584,
+          "netWalletPct": -0.5184701842825613,
+          "priceReturnPct": -0.1163029349387723,
+          "acceptedGross": 1.9928770803471236
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "LONG",
+          "candidateId": "C000640",
+          "utc": "2025-10-17T16:30:00+00:00",
+          "exit": "BASIS_STOP",
+          "modeledLossJpy": -177.48775482616034,
+          "netWalletPct": -0.30947572619601,
+          "priceReturnPct": -0.004761904761896307,
+          "acceptedGross": 1.999750838523152
+        }
+      ],
+      "potentialShortOHLCStopTouchesAtOrAbovePct": {
+        "0.5": 5,
+        "1": 2,
+        "1.5": 1,
+        "2": 0,
+        "3": 0,
+        "5": 0
+      },
+      "maxShortAdverseOverlappingH1Pct": 1.8940057199556382,
+      "maxLongAdverseOverlappingH1Pct": 1.0450637414764374,
+      "isolatedClosedEquityPath": [
+        {
+          "exitUtc": "2025-09-29T19:30:00+00:00",
+          "equityJpy": 10206.91955388543,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-09-30T16:30:00+00:00",
+          "equityJpy": 10326.449285161805,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-09-30T17:30:00+00:00",
+          "equityJpy": 10311.270021488852,
+          "ddPct": -0.14699402721867205
+        },
+        {
+          "exitUtc": "2025-10-01T17:30:00+00:00",
+          "equityJpy": 10372.471961860198,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-01T18:30:00+00:00",
+          "equityJpy": 10565.723448508761,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-02T19:30:00+00:00",
+          "equityJpy": 10483.88240316643,
+          "ddPct": -0.7745900764976166
+        },
+        {
+          "exitUtc": "2025-10-03T18:30:00+00:00",
+          "equityJpy": 11039.179099877303,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-06T16:30:00+00:00",
+          "equityJpy": 11275.28358201113,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-07T17:30:00+00:00",
+          "equityJpy": 11806.131235460853,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-07T18:30:00+00:00",
+          "equityJpy": 11953.862808350881,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-08T19:30:00+00:00",
+          "equityJpy": 12165.458596775286,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-09T16:30:00+00:00",
+          "equityJpy": 12153.418347467014,
+          "ddPct": -0.09897078036552598
+        },
+        {
+          "exitUtc": "2025-10-09T17:30:00+00:00",
+          "equityJpy": 12440.7437869234,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-10T18:30:00+00:00",
+          "equityJpy": 12520.7380733365,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-13T17:30:00+00:00",
+          "equityJpy": 12849.028297010242,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-16T16:30:00+00:00",
+          "equityJpy": 13300.450724707202,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-17T16:30:00+00:00",
+          "equityJpy": 13259.289058239572,
+          "ddPct": -0.30947572619600683
+        },
+        {
+          "exitUtc": "2025-10-17T19:30:00+00:00",
+          "equityJpy": 13232.770953074187,
+          "ddPct": -0.5088532188408545
+        },
+        {
+          "exitUtc": "2025-10-21T19:30:00+00:00",
+          "equityJpy": 13396.75387675996,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-24T16:30:00+00:00",
+          "equityJpy": 13327.295702247242,
+          "ddPct": -0.5184701842825601
+        },
+        {
+          "exitUtc": "2025-10-24T19:30:00+00:00",
+          "equityJpy": 13531.728166965555,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-28T16:30:00+00:00",
+          "equityJpy": 13905.210438430326,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-28T19:30:00+00:00",
+          "equityJpy": 14607.098196012439,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-30T18:30:00+00:00",
+          "equityJpy": 14679.186990777187,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-31T18:30:00+00:00",
+          "equityJpy": 15327.59069824346,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-03T19:30:00+00:00",
+          "equityJpy": 15799.610873620764,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-06T19:30:00+00:00",
+          "equityJpy": 16099.115042980098,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-12T20:30:00+00:00",
+          "equityJpy": 16066.920931486848,
+          "ddPct": -0.19997441727263032
+        },
+        {
+          "exitUtc": "2025-11-14T18:30:00+00:00",
+          "equityJpy": 16398.57521951388,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-18T20:30:00+00:00",
+          "equityJpy": 16640.271737482424,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-19T17:30:00+00:00",
+          "equityJpy": 16802.677880933676,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-20T19:30:00+00:00",
+          "equityJpy": 16769.083906376814,
+          "ddPct": -0.19993226552882382
+        },
+        {
+          "exitUtc": "2025-11-21T20:30:00+00:00",
+          "equityJpy": 17289.881322566278,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-12-19T20:30:00+00:00",
+          "equityJpy": 17689.08002244961,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-13T18:30:00+00:00",
+          "equityJpy": 18200.536227215453,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-29T19:30:00+00:00",
+          "equityJpy": 18430.156096993345,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-30T17:30:00+00:00",
+          "equityJpy": 18657.57372652148,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-30T18:30:00+00:00",
+          "equityJpy": 18755.19536518842,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-02-03T17:30:00+00:00",
+          "equityJpy": 18697.417629823758,
+          "ddPct": -0.3080625620776267
+        },
+        {
+          "exitUtc": "2026-02-09T18:30:00+00:00",
+          "equityJpy": 19004.90795178563,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-02-20T19:30:00+00:00",
+          "equityJpy": 19168.68905062993,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-02-26T18:30:00+00:00",
+          "equityJpy": 19324.053104582934,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-03-05T18:30:00+00:00",
+          "equityJpy": 20370.24006337371,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-03-30T18:30:00+00:00",
+          "equityJpy": 20893.669797108556,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-02T16:30:00+00:00",
+          "equityJpy": 21354.380412270406,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-07T16:30:00+00:00",
+          "equityJpy": 22203.68071472866,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-08T19:30:00+00:00",
+          "equityJpy": 23270.295880658057,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-09T16:30:00+00:00",
+          "equityJpy": 22795.704410010305,
+          "ddPct": -2.0394732971239393
+        },
+        {
+          "exitUtc": "2026-04-15T18:30:00+00:00",
+          "equityJpy": 22756.3905748554,
+          "ddPct": -2.208417582819866
+        },
+        {
+          "exitUtc": "2026-04-16T16:30:00+00:00",
+          "equityJpy": 22923.435178518364,
+          "ddPct": -1.490572805427881
+        },
+        {
+          "exitUtc": "2026-04-20T18:30:00+00:00",
+          "equityJpy": 23276.554291417837,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-23T17:30:00+00:00",
+          "equityJpy": 23487.241942715817,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-27T17:30:00+00:00",
+          "equityJpy": 23712.27038779524,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-29T16:30:00+00:00",
+          "equityJpy": 23997.76869047751,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-01T18:30:00+00:00",
+          "equityJpy": 24356.724692985135,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-04T16:30:00+00:00",
+          "equityJpy": 24319.26493181578,
+          "ddPct": -0.1537963812521359
+        },
+        {
+          "exitUtc": "2026-05-04T19:30:00+00:00",
+          "equityJpy": 24919.894947243458,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-13T18:30:00+00:00",
+          "equityJpy": 25338.267644695694,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-14T16:30:00+00:00",
+          "equityJpy": 25548.278975438698,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-18T19:30:00+00:00",
+          "equityJpy": 26326.46270820797,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-27T16:30:00+00:00",
+          "equityJpy": 26492.16646222553,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-29T19:30:00+00:00",
+          "equityJpy": 26625.46593795066,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-01T18:30:00+00:00",
+          "equityJpy": 26908.347648565672,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-03T16:30:00+00:00",
+          "equityJpy": 27699.110160654935,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-09T19:30:00+00:00",
+          "equityJpy": 27838.248309870614,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-12T18:30:00+00:00",
+          "equityJpy": 28710.233508232104,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-15T18:30:00+00:00",
+          "equityJpy": 28869.00269353441,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-16T16:30:00+00:00",
+          "equityJpy": 29000.431598660303,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-16T19:30:00+00:00",
+          "equityJpy": 28978.72301303155,
+          "ddPct": -0.07485607776180903
+        },
+        {
+          "exitUtc": "2026-06-17T19:30:00+00:00",
+          "equityJpy": 29389.32513810542,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-22T16:30:00+00:00",
+          "equityJpy": 29607.952812048152,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-22T17:30:00+00:00",
+          "equityJpy": 29646.882720373193,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-22T19:30:00+00:00",
+          "equityJpy": 29806.237123038773,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-23T19:30:00+00:00",
+          "equityJpy": 29794.682917289047,
+          "ddPct": -0.03876438915126901
+        },
+        {
+          "exitUtc": "2026-06-24T18:30:00+00:00",
+          "equityJpy": 30050.65518275211,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-26T18:30:00+00:00",
+          "equityJpy": 30208.598466177067,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-06T18:30:00+00:00",
+          "equityJpy": 30187.995682727473,
+          "ddPct": -0.0682017190326234
+        },
+        {
+          "exitUtc": "2026-07-08T17:30:00+00:00",
+          "equityJpy": 30239.55601150511,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-09T18:30:00+00:00",
+          "equityJpy": 30446.67020812098,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-13T19:30:00+00:00",
+          "equityJpy": 30522.79604466507,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-20T19:30:00+00:00",
+          "equityJpy": 30635.77427326575,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-23T19:30:00+00:00",
+          "equityJpy": 30626.759717911013,
+          "ddPct": -0.02942493071769192
+        },
+        {
+          "exitUtc": "2026-07-24T19:30:00+00:00",
+          "equityJpy": 30671.759416820725,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-27T16:30:00+00:00",
+          "equityJpy": 30675.30059374402,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-28T19:30:00+00:00",
+          "equityJpy": 30781.13189431907,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-31T16:30:00+00:00",
+          "equityJpy": 30820.082512004894,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-08-06T16:30:00+00:00",
+          "equityJpy": 30866.63455060203,
+          "ddPct": 0.0
+        }
+      ],
+      "sourceIsLiveFillCertified": false
+    },
+    "30": {
+      "sourceLedgerSha256": "25d07849173423eae6beee104e988e388cf3725787d7842ab005ec7f05972885",
+      "sourcePortfolioEquityJpy": 143906605.34174916,
+      "sourcePortfolioMTMDdPct": -15.80770763869479,
+      "sourcePortfolioTrades": 1298,
+      "sourcePortfolioWorstDDContext": {
+        "timestampUtc": "2025-12-10T23:00:00+00:00",
+        "ddPct": -15.80770763869479,
+        "equityJpy": 279768.2808388405,
+        "peakEquityJpy": 332296.78512402886,
+        "v52Positions": 0,
+        "otherOpenStrategySides": {
+          "Q102 LONG": 1,
+          "V12 SHORT": 5
+        },
+        "mtmPricedHours": 8761
+      },
+      "overall": {
+        "trades": 87,
+        "wins": 70,
+        "losses": 17,
+        "winRatePct": 80.45977011494253,
+        "positiveContributionJpy": 25347985.349944957,
+        "negativeContributionJpy": -1916562.283284542,
+        "netContributionJpy": 23431423.066660415,
+        "modelContributionProfitFactor": 13.225756121269592,
+        "sumPositiveNetWalletReturnPct": 111.95261271413987,
+        "sumNegativeNetWalletReturnPct": -11.075504754653725,
+        "tradeNormalizedProfitFactor": 10.108127367025817,
+        "averageNetWalletReturnPerTradePct": 1.1595069880400706,
+        "medianNetWalletReturnPerTradePct": 0.8572134938828867,
+        "worstNetWalletReturnPct": -2.441312532659468,
+        "bestNetWalletReturnPct": 5.72289908488069,
+        "maxConsecutiveLosses": 2,
+        "syntheticIsolatedStartJpy": 10000.0,
+        "syntheticIsolatedEndJpy": 26996.47864901807,
+        "syntheticIsolatedReturnPct": 169.96478649018073,
+        "closedTradeOnlyMaxDDPct": -3.02666117115139,
+        "closedTradeOnlyTrough": {
+          "exitUtc": "2026-04-15T18:30:00+00:00",
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002159"
+        },
+        "approxPriceOnlyH1MTMDDPct": -3.606981424472988,
+        "approxPriceOnlyH1MTMTrough": {
+          "candidateId": "C002169",
+          "point": "two-fee-reserve"
+        },
+        "h1CompletedMarks": 157,
+        "note": "Price-only H1 close plus conservative estimated exit-fee reserve. Not signed venue MTM or market microstructure-certified."
+      },
+      "side": {
+        "LONG": {
+          "trades": 35,
+          "wins": 30,
+          "losses": 5,
+          "winRatePct": 85.71428571428571,
+          "positiveContributionJpy": 11410586.474305212,
+          "negativeContributionJpy": -111612.96483554869,
+          "netContributionJpy": 11298973.509469664,
+          "modelContributionProfitFactor": 102.23352180562222,
+          "sumPositiveNetWalletReturnPct": 48.769161330746634,
+          "sumNegativeNetWalletReturnPct": -2.9048279234281935,
+          "tradeNormalizedProfitFactor": 16.78900183291776,
+          "averageNetWalletReturnPerTradePct": 1.310409525923384,
+          "medianNetWalletReturnPerTradePct": 1.0105457858454117,
+          "worstNetWalletReturnPct": -0.9188025210836007,
+          "bestNetWalletReturnPct": 5.72289908488069,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 15713.549230891267,
+          "syntheticIsolatedReturnPct": 57.13549230891266,
+          "closedTradeOnlyMaxDDPct": -1.3914791070657961,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-24T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "candidateId": "C000673"
+          },
+          "approxPriceOnlyH1MTMDDPct": -2.080765246978189,
+          "approxPriceOnlyH1MTMTrough": {
+            "candidateId": "C000674",
+            "point": "two-fee-reserve"
+          },
+          "h1CompletedMarks": 60,
+          "note": "Price-only H1 close plus conservative estimated exit-fee reserve. Not signed venue MTM or market microstructure-certified."
+        },
+        "SHORT": {
+          "trades": 52,
+          "wins": 40,
+          "losses": 12,
+          "winRatePct": 76.92307692307692,
+          "positiveContributionJpy": 13937398.875639744,
+          "negativeContributionJpy": -1804949.3184489934,
+          "netContributionJpy": 12132449.55719075,
+          "modelContributionProfitFactor": 7.7217674386648465,
+          "sumPositiveNetWalletReturnPct": 63.18345138339324,
+          "sumNegativeNetWalletReturnPct": -8.170676831225531,
+          "tradeNormalizedProfitFactor": 7.732951955941728,
+          "averageNetWalletReturnPerTradePct": 1.0579379721570712,
+          "medianNetWalletReturnPerTradePct": 0.8041196748693891,
+          "worstNetWalletReturnPct": -2.441312532659468,
+          "bestNetWalletReturnPct": 5.0194805320799025,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 17180.38251723915,
+          "syntheticIsolatedReturnPct": 71.80382517239153,
+          "closedTradeOnlyMaxDDPct": -3.026661171151379,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-15T18:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002159"
+          },
+          "approxPriceOnlyH1MTMDDPct": -3.606981424472977,
+          "approxPriceOnlyH1MTMTrough": {
+            "candidateId": "C002169",
+            "point": "two-fee-reserve"
+          },
+          "h1CompletedMarks": 97,
+          "note": "Price-only H1 close plus conservative estimated exit-fee reserve. Not signed venue MTM or market microstructure-certified."
+        }
+      },
+      "bySymbol": {
+        "TSLA": {
+          "trades": 19,
+          "wins": 16,
+          "losses": 3,
+          "winRatePct": 84.21052631578948,
+          "positiveContributionJpy": 8602148.42891008,
+          "negativeContributionJpy": -421731.88043926837,
+          "netContributionJpy": 8180416.548470812,
+          "modelContributionProfitFactor": 20.3971974325257,
+          "sumPositiveNetWalletReturnPct": 33.08902121880577,
+          "sumNegativeNetWalletReturnPct": -4.0682233217328685,
+          "tradeNormalizedProfitFactor": 8.13353117613795,
+          "averageNetWalletReturnPerTradePct": 1.5274104156354158,
+          "medianNetWalletReturnPerTradePct": 1.0840976102283593,
+          "worstNetWalletReturnPct": -2.441312532659468,
+          "bestNetWalletReturnPct": 5.72289908488069,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 13289.993469490739,
+          "syntheticIsolatedReturnPct": 32.899934694907394,
+          "closedTradeOnlyMaxDDPct": -3.132133664758052,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-09T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002122"
+          }
+        },
+        "NVDA": {
+          "trades": 13,
+          "wins": 13,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 1087653.983858825,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 1087653.983858825,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 27.73992589235677,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 2.133840453258213,
+          "medianNetWalletReturnPerTradePct": 1.9726072845214337,
+          "worstNetWalletReturnPct": 0.40950588038772057,
+          "bestNetWalletReturnPct": 5.0194805320799025,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 13140.975986074069,
+          "syntheticIsolatedReturnPct": 31.40975986074068,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "META": {
+          "trades": 22,
+          "wins": 17,
+          "losses": 5,
+          "winRatePct": 77.27272727272727,
+          "positiveContributionJpy": 6069401.980109317,
+          "negativeContributionJpy": -601088.533987204,
+          "netContributionJpy": 5468313.446122114,
+          "modelContributionProfitFactor": 10.097351117062772,
+          "sumPositiveNetWalletReturnPct": 22.574133368855716,
+          "sumNegativeNetWalletReturnPct": -1.5012120650851712,
+          "tradeNormalizedProfitFactor": 15.037271478080598,
+          "averageNetWalletReturnPerTradePct": 0.9578600592622977,
+          "medianNetWalletReturnPerTradePct": 0.800807927358502,
+          "worstNetWalletReturnPct": -0.5465565725621032,
+          "bestNetWalletReturnPct": 4.474223655089523,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 12315.227867454803,
+          "syntheticIsolatedReturnPct": 23.152278674548032,
+          "closedTradeOnlyMaxDDPct": -0.546556572562118,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-09-30T17:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C000444"
+          }
+        },
+        "MSFT": {
+          "trades": 16,
+          "wins": 14,
+          "losses": 2,
+          "winRatePct": 87.5,
+          "positiveContributionJpy": 7804180.70261965,
+          "negativeContributionJpy": -379776.15526327613,
+          "netContributionJpy": 7424404.547356375,
+          "modelContributionProfitFactor": 20.549422586074364,
+          "sumPositiveNetWalletReturnPct": 18.60839125255297,
+          "sumNegativeNetWalletReturnPct": -1.0140086348795985,
+          "tradeNormalizedProfitFactor": 18.351314389706843,
+          "averageNetWalletReturnPerTradePct": 1.0996489136045857,
+          "medianNetWalletReturnPerTradePct": 0.9246174523594027,
+          "worstNetWalletReturnPct": -0.5995271450129384,
+          "bestNetWalletReturnPct": 4.64323118975415,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11897.882997916337,
+          "syntheticIsolatedReturnPct": 18.978829979163358,
+          "closedTradeOnlyMaxDDPct": -0.5995271450129347,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-20T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "LONG",
+            "candidateId": "C000947"
+          }
+        },
+        "AMZN": {
+          "trades": 17,
+          "wins": 10,
+          "losses": 7,
+          "winRatePct": 58.8235294117647,
+          "positiveContributionJpy": 1784600.254447084,
+          "negativeContributionJpy": -513965.7135947935,
+          "netContributionJpy": 1270634.5408522903,
+          "modelContributionProfitFactor": 3.472216545273385,
+          "sumPositiveNetWalletReturnPct": 9.941140981568648,
+          "sumNegativeNetWalletReturnPct": -4.492060732956089,
+          "tradeNormalizedProfitFactor": 2.2130468781588992,
+          "averageNetWalletReturnPerTradePct": 0.32053413227132704,
+          "medianNetWalletReturnPerTradePct": 0.17791154152120664,
+          "worstNetWalletReturnPct": -1.1776470320188934,
+          "bestNetWalletReturnPct": 2.702401783285597,
+          "maxConsecutiveLosses": 3,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10549.760116287418,
+          "syntheticIsolatedReturnPct": 5.497601162874188,
+          "closedTradeOnlyMaxDDPct": -2.8151232259593595,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-12T20:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000873"
+          }
+        }
+      },
+      "bySymbolSide": {
+        "TSLA|LONG": {
+          "trades": 9,
+          "wins": 8,
+          "losses": 1,
+          "winRatePct": 88.88888888888889,
+          "positiveContributionJpy": 5186751.931675672,
+          "negativeContributionJpy": -471.0876941810451,
+          "netContributionJpy": 5186280.8439814905,
+          "modelContributionProfitFactor": 11010.162217657793,
+          "sumPositiveNetWalletReturnPct": 16.321467823788893,
+          "sumNegativeNetWalletReturnPct": -0.9188025210836007,
+          "tradeNormalizedProfitFactor": 17.763847452812794,
+          "averageNetWalletReturnPerTradePct": 1.7114072558561435,
+          "medianNetWalletReturnPerTradePct": 1.0840976102283593,
+          "worstNetWalletReturnPct": -0.9188025210836007,
+          "bestNetWalletReturnPct": 5.72289908488069,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11630.593855080193,
+          "syntheticIsolatedReturnPct": 16.305938550801933,
+          "closedTradeOnlyMaxDDPct": -0.9188025210836059,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-24T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "candidateId": "C000673"
+          }
+        },
+        "TSLA|SHORT": {
+          "trades": 10,
+          "wins": 8,
+          "losses": 2,
+          "winRatePct": 80.0,
+          "positiveContributionJpy": 3415396.497234409,
+          "negativeContributionJpy": -421260.7927450873,
+          "netContributionJpy": 2994135.704489322,
+          "modelContributionProfitFactor": 8.107558443733758,
+          "sumPositiveNetWalletReturnPct": 16.767553395016876,
+          "sumNegativeNetWalletReturnPct": -3.149420800649267,
+          "tradeNormalizedProfitFactor": 5.324011764817255,
+          "averageNetWalletReturnPerTradePct": 1.3618132594367611,
+          "medianNetWalletReturnPerTradePct": 1.33305287467104,
+          "worstNetWalletReturnPct": -2.441312532659468,
+          "bestNetWalletReturnPct": 4.022882356607813,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11426.753986156717,
+          "syntheticIsolatedReturnPct": 14.267539861567169,
+          "closedTradeOnlyMaxDDPct": -3.132133664758041,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-09T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002122"
+          }
+        },
+        "NVDA|LONG": {
+          "trades": 4,
+          "wins": 4,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 507703.4806139896,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 507703.4806139896,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 7.3421395267803735,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 1.8355348816950934,
+          "medianNetWalletReturnPerTradePct": 1.6798144342301726,
+          "worstNetWalletReturnPct": 0.40950588038772057,
+          "bestNetWalletReturnPct": 3.573004777932307,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10751.731898133721,
+          "syntheticIsolatedReturnPct": 7.5173189813372066,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "NVDA|SHORT": {
+          "trades": 9,
+          "wins": 9,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 579950.5032448353,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 579950.5032448353,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 20.397786365576394,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 2.266420707286266,
+          "medianNetWalletReturnPerTradePct": 1.9726072845214337,
+          "worstNetWalletReturnPct": 0.7728581892309683,
+          "bestNetWalletReturnPct": 5.0194805320799025,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 12222.194629271842,
+          "syntheticIsolatedReturnPct": 22.22194629271843,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "META|LONG": {
+          "trades": 7,
+          "wins": 6,
+          "losses": 1,
+          "winRatePct": 85.71428571428571,
+          "positiveContributionJpy": 3083022.8570672395,
+          "negativeContributionJpy": -109555.5466555305,
+          "netContributionJpy": 2973467.310411709,
+          "modelContributionProfitFactor": 28.14118455144055,
+          "sumPositiveNetWalletReturnPct": 8.091187992220986,
+          "sumNegativeNetWalletReturnPct": -0.07743830783325474,
+          "tradeNormalizedProfitFactor": 104.48559916422069,
+          "averageNetWalletReturnPerTradePct": 1.1448213834839616,
+          "medianNetWalletReturnPerTradePct": 0.9434490327592406,
+          "worstNetWalletReturnPct": -0.07743830783325474,
+          "bestNetWalletReturnPct": 2.6648905353238503,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10827.171957863193,
+          "syntheticIsolatedReturnPct": 8.27171957863193,
+          "closedTradeOnlyMaxDDPct": -0.07743830783325523,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-07-27T16:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "LONG",
+            "candidateId": "C003042"
+          }
+        },
+        "META|SHORT": {
+          "trades": 15,
+          "wins": 11,
+          "losses": 4,
+          "winRatePct": 73.33333333333333,
+          "positiveContributionJpy": 2986379.1230420773,
+          "negativeContributionJpy": -491532.98733167344,
+          "netContributionJpy": 2494846.135710404,
+          "modelContributionProfitFactor": 6.075643344414945,
+          "sumPositiveNetWalletReturnPct": 14.482945376634731,
+          "sumNegativeNetWalletReturnPct": -1.4237737572519165,
+          "tradeNormalizedProfitFactor": 10.172223854293293,
+          "averageNetWalletReturnPerTradePct": 0.8706114412921878,
+          "medianNetWalletReturnPerTradePct": 0.4628323165226679,
+          "worstNetWalletReturnPct": -0.5465565725621032,
+          "bestNetWalletReturnPct": 4.474223655089523,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11374.37173380341,
+          "syntheticIsolatedReturnPct": 13.7437173380341,
+          "closedTradeOnlyMaxDDPct": -0.546556572562118,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-09-30T17:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C000444"
+          }
+        },
+        "MSFT|LONG": {
+          "trades": 9,
+          "wins": 8,
+          "losses": 1,
+          "winRatePct": 88.88888888888889,
+          "positiveContributionJpy": 2439296.048238218,
+          "negativeContributionJpy": -1015.2640769230767,
+          "netContributionJpy": 2438280.784161295,
+          "modelContributionProfitFactor": 2402.6222375866014,
+          "sumPositiveNetWalletReturnPct": 11.63489179024702,
+          "sumNegativeNetWalletReturnPct": -0.5995271450129384,
+          "tradeNormalizedProfitFactor": 19.406780638758114,
+          "averageNetWalletReturnPerTradePct": 1.2261516272482311,
+          "medianNetWalletReturnPerTradePct": 1.0105457858454117,
+          "worstNetWalletReturnPct": -0.5995271450129384,
+          "bestNetWalletReturnPct": 4.64323118975415,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11149.347531840498,
+          "syntheticIsolatedReturnPct": 11.49347531840499,
+          "closedTradeOnlyMaxDDPct": -0.5995271450129347,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-20T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "LONG",
+            "candidateId": "C000947"
+          }
+        },
+        "MSFT|SHORT": {
+          "trades": 7,
+          "wins": 6,
+          "losses": 1,
+          "winRatePct": 85.71428571428571,
+          "positiveContributionJpy": 5364884.654381433,
+          "negativeContributionJpy": -378760.89118635305,
+          "netContributionJpy": 4986123.76319508,
+          "modelContributionProfitFactor": 14.164304655577208,
+          "sumPositiveNetWalletReturnPct": 6.973499462305951,
+          "sumNegativeNetWalletReturnPct": -0.41448148986666006,
+          "tradeNormalizedProfitFactor": 16.82463423046792,
+          "averageNetWalletReturnPerTradePct": 0.9370025674913274,
+          "medianNetWalletReturnPerTradePct": 0.7352495146384147,
+          "worstNetWalletReturnPct": -0.41448148986666006,
+          "bestNetWalletReturnPct": 2.350229857327191,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10671.371543436204,
+          "syntheticIsolatedReturnPct": 6.713715434362033,
+          "closedTradeOnlyMaxDDPct": -0.4144814898666471,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-06-16T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "SHORT",
+            "candidateId": "C002666"
+          }
+        },
+        "AMZN|LONG": {
+          "trades": 6,
+          "wins": 4,
+          "losses": 2,
+          "winRatePct": 66.66666666666667,
+          "positiveContributionJpy": 193812.1567100933,
+          "negativeContributionJpy": -571.0664089140662,
+          "netContributionJpy": 193241.0903011792,
+          "modelContributionProfitFactor": 339.3863720309595,
+          "sumPositiveNetWalletReturnPct": 5.379474197709367,
+          "sumNegativeNetWalletReturnPct": -1.3090599494983999,
+          "tradeNormalizedProfitFactor": 4.109417754145371,
+          "averageNetWalletReturnPerTradePct": 0.6784023747018278,
+          "medianNetWalletReturnPerTradePct": 0.5070262627364245,
+          "worstNetWalletReturnPct": -0.70914194044281,
+          "bestNetWalletReturnPct": 2.702401783285597,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10409.49082290215,
+          "syntheticIsolatedReturnPct": 4.094908229021499,
+          "closedTradeOnlyMaxDDPct": -1.3048056792879126,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-17T19:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "LONG",
+            "candidateId": "C000642"
+          }
+        },
+        "AMZN|SHORT": {
+          "trades": 11,
+          "wins": 6,
+          "losses": 5,
+          "winRatePct": 54.54545454545455,
+          "positiveContributionJpy": 1590788.0977369905,
+          "negativeContributionJpy": -513394.6471858794,
+          "netContributionJpy": 1077393.4505511113,
+          "modelContributionProfitFactor": 3.098567751839124,
+          "sumPositiveNetWalletReturnPct": 4.561666783859281,
+          "sumNegativeNetWalletReturnPct": -3.1830007834576888,
+          "tradeNormalizedProfitFactor": 1.4331340436881546,
+          "averageNetWalletReturnPerTradePct": 0.12533327276378115,
+          "medianNetWalletReturnPerTradePct": 0.09456904591221045,
+          "worstNetWalletReturnPct": -1.1776470320188934,
+          "bestNetWalletReturnPct": 1.7413406665021822,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10134.751349294296,
+          "syntheticIsolatedReturnPct": 1.3475134929429533,
+          "closedTradeOnlyMaxDDPct": -1.7700151945257536,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-12T20:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000873"
+          }
+        }
+      },
+      "byExitSide": {
+        "LONG|BASIS_CONVERGED": {
+          "trades": 29,
+          "wins": 26,
+          "losses": 3,
+          "winRatePct": 89.65517241379311,
+          "positiveContributionJpy": 10645686.629888467,
+          "negativeContributionJpy": -111041.89842663462,
+          "netContributionJpy": 10534644.731461832,
+          "modelContributionProfitFactor": 95.87089900954884,
+          "sumPositiveNetWalletReturnPct": 42.594134074464364,
+          "sumNegativeNetWalletReturnPct": -1.5957679739297939,
+          "tradeNormalizedProfitFactor": 26.691934397937917,
+          "averageNetWalletReturnPerTradePct": 1.4137367620873988,
+          "medianNetWalletReturnPerTradePct": 1.0105457858454117,
+          "worstNetWalletReturnPct": -0.9188025210836007,
+          "bestNetWalletReturnPct": 5.72289908488069,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 14976.340337338874,
+          "syntheticIsolatedReturnPct": 49.76340337338874,
+          "closedTradeOnlyMaxDDPct": -0.918802521083617,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-24T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "candidateId": "C000673"
+          }
+        },
+        "LONG|BASIS_STOP": {
+          "trades": 1,
+          "wins": 0,
+          "losses": 1,
+          "winRatePct": 0.0,
+          "positiveContributionJpy": 0,
+          "negativeContributionJpy": -309.9334877242644,
+          "netContributionJpy": -309.9334877242644,
+          "modelContributionProfitFactor": 0.0,
+          "sumPositiveNetWalletReturnPct": 0,
+          "sumNegativeNetWalletReturnPct": -0.70914194044281,
+          "tradeNormalizedProfitFactor": 0.0,
+          "averageNetWalletReturnPerTradePct": -0.70914194044281,
+          "medianNetWalletReturnPerTradePct": -0.70914194044281,
+          "worstNetWalletReturnPct": -0.70914194044281,
+          "bestNetWalletReturnPct": -0.70914194044281,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 9929.085805955718,
+          "syntheticIsolatedReturnPct": -0.7091419404428256,
+          "closedTradeOnlyMaxDDPct": -0.7091419404428256,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-17T16:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "LONG",
+            "candidateId": "C000640"
+          }
+        },
+        "LONG|TIME_OR_SESSION_FLAT": {
+          "trades": 5,
+          "wins": 4,
+          "losses": 1,
+          "winRatePct": 80.0,
+          "positiveContributionJpy": 764899.8444167437,
+          "negativeContributionJpy": -261.1329211898017,
+          "netContributionJpy": 764638.711495554,
+          "modelContributionProfitFactor": 2929.158992790435,
+          "sumPositiveNetWalletReturnPct": 6.175027256282275,
+          "sumNegativeNetWalletReturnPct": -0.5999180090555899,
+          "tradeNormalizedProfitFactor": 10.29311866467086,
+          "averageNetWalletReturnPerTradePct": 1.1150218494453368,
+          "medianNetWalletReturnPerTradePct": 1.134986310845512,
+          "worstNetWalletReturnPct": -0.5999180090555899,
+          "bestNetWalletReturnPct": 2.6648905353238503,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10567.185368801893,
+          "syntheticIsolatedReturnPct": 5.671853688018924,
+          "closedTradeOnlyMaxDDPct": -0.5999180090555778,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-17T19:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "LONG",
+            "candidateId": "C000642"
+          }
+        },
+        "SHORT|BASIS_CONVERGED": {
+          "trades": 32,
+          "wins": 29,
+          "losses": 3,
+          "winRatePct": 90.625,
+          "positiveContributionJpy": 7633346.506426071,
+          "negativeContributionJpy": -695437.895247374,
+          "netContributionJpy": 6937908.611178697,
+          "modelContributionProfitFactor": 10.976316589292011,
+          "sumPositiveNetWalletReturnPct": 48.67045774757491,
+          "sumNegativeNetWalletReturnPct": -3.16194143461238,
+          "tradeNormalizedProfitFactor": 15.392586723713743,
+          "averageNetWalletReturnPerTradePct": 1.422141134780079,
+          "medianNetWalletReturnPerTradePct": 0.9318866110904132,
+          "worstNetWalletReturnPct": -2.441312532659468,
+          "bestNetWalletReturnPct": 5.0194805320799025,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 15652.618784402724,
+          "syntheticIsolatedReturnPct": 56.526187844027255,
+          "closedTradeOnlyMaxDDPct": -2.4413125326594676,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-09T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002122"
+          }
+        },
+        "SHORT|BASIS_STOP": {
+          "trades": 3,
+          "wins": 0,
+          "losses": 3,
+          "winRatePct": 0.0,
+          "positiveContributionJpy": 0,
+          "negativeContributionJpy": -163885.91737890695,
+          "netContributionJpy": -163885.91737890695,
+          "modelContributionProfitFactor": 0.0,
+          "sumPositiveNetWalletReturnPct": 0,
+          "sumNegativeNetWalletReturnPct": -1.8546622935474568,
+          "tradeNormalizedProfitFactor": 0.0,
+          "averageNetWalletReturnPerTradePct": -0.618220764515819,
+          "medianNetWalletReturnPerTradePct": -0.5999974529955545,
+          "worstNetWalletReturnPct": -0.7081082679897992,
+          "bestNetWalletReturnPct": -0.5465565725621032,
+          "maxConsecutiveLosses": 3,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 9815.671265464392,
+          "syntheticIsolatedReturnPct": -1.8432873453560705,
+          "closedTradeOnlyMaxDDPct": -1.8432873453560705,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-05-04T16:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002252"
+          }
+        },
+        "SHORT|TIME_OR_SESSION_FLAT": {
+          "trades": 17,
+          "wins": 11,
+          "losses": 6,
+          "winRatePct": 64.70588235294117,
+          "positiveContributionJpy": 6304052.369213674,
+          "negativeContributionJpy": -945625.5058227123,
+          "netContributionJpy": 5358426.863390962,
+          "modelContributionProfitFactor": 6.666542230932136,
+          "sumPositiveNetWalletReturnPct": 14.512993635818331,
+          "sumNegativeNetWalletReturnPct": -3.154073103065695,
+          "tradeNormalizedProfitFactor": 4.601349798047481,
+          "averageNetWalletReturnPerTradePct": 0.6681717960442727,
+          "medianNetWalletReturnPerTradePct": 0.26558490435699245,
+          "worstNetWalletReturnPct": -1.1776470320188934,
+          "bestNetWalletReturnPct": 4.474223655089523,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11182.162926479457,
+          "syntheticIsolatedReturnPct": 11.821629264794575,
+          "closedTradeOnlyMaxDDPct": -1.1776470320188803,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-02T19:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C000488"
+          }
+        }
+      },
+      "byExitMonth": {
+        "2025-09": {
+          "trades": 3,
+          "wins": 2,
+          "losses": 1,
+          "winRatePct": 66.66666666666667,
+          "positiveContributionJpy": 396.5442130735044,
+          "negativeContributionJpy": -90.4303025931955,
+          "netContributionJpy": 306.1139104803089,
+          "modelContributionProfitFactor": 4.385081125487051,
+          "sumPositiveNetWalletReturnPct": 2.447382103288486,
+          "sumNegativeNetWalletReturnPct": -0.5465565725621032,
+          "tradeNormalizedProfitFactor": 4.477820277260318,
+          "averageNetWalletReturnPerTradePct": 0.6336085102421276,
+          "medianNetWalletReturnPerTradePct": 0.7728581892309683,
+          "worstNetWalletReturnPct": -0.5465565725621032,
+          "bestNetWalletReturnPct": 1.6745239140575179,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10190.032016449984,
+          "syntheticIsolatedReturnPct": 1.9003201644998358,
+          "closedTradeOnlyMaxDDPct": -0.5465565725621069,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-09-30T17:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C000444"
+          }
+        },
+        "2025-10": {
+          "trades": 22,
+          "wins": 17,
+          "losses": 5,
+          "winRatePct": 77.27272727272727,
+          "positiveContributionJpy": 12659.329867786531,
+          "negativeContributionJpy": -1382.1722230198523,
+          "netContributionJpy": 11277.15764476668,
+          "modelContributionProfitFactor": 9.15901047419957,
+          "sumPositiveNetWalletReturnPct": 35.78906078347144,
+          "sumNegativeNetWalletReturnPct": -3.8957664358881976,
+          "tradeNormalizedProfitFactor": 9.186654634574332,
+          "averageNetWalletReturnPerTradePct": 1.4496951976174202,
+          "medianNetWalletReturnPerTradePct": 1.252495281680151,
+          "worstNetWalletReturnPct": -1.1776470320188934,
+          "bestNetWalletReturnPct": 4.907003834380514,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 13677.322392322618,
+          "syntheticIsolatedReturnPct": 36.77322392322617,
+          "closedTradeOnlyMaxDDPct": -1.3914791070658183,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-10-24T16:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "candidateId": "C000673"
+          }
+        },
+        "2025-11": {
+          "trades": 8,
+          "wins": 6,
+          "losses": 2,
+          "winRatePct": 75.0,
+          "positiveContributionJpy": 13988.493230233184,
+          "negativeContributionJpy": -1974.9629070915432,
+          "netContributionJpy": 12013.53032314164,
+          "modelContributionProfitFactor": 7.082914408166548,
+          "sumPositiveNetWalletReturnPct": 10.245588807242854,
+          "sumNegativeNetWalletReturnPct": -1.198954445331113,
+          "tradeNormalizedProfitFactor": 8.545436273363455,
+          "averageNetWalletReturnPerTradePct": 1.1308292952389676,
+          "medianNetWalletReturnPerTradePct": 1.3059009474271672,
+          "worstNetWalletReturnPct": -0.5995271450129384,
+          "bestNetWalletReturnPct": 2.702401783285597,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10935.045123272674,
+          "syntheticIsolatedReturnPct": 9.35045123272673,
+          "closedTradeOnlyMaxDDPct": -0.5995271450129458,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2025-11-20T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "LONG",
+            "candidateId": "C000947"
+          }
+        },
+        "2025-12": {
+          "trades": 1,
+          "wins": 1,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 8175.179261615743,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 8175.179261615743,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 1.942825986811047,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 1.942825986811047,
+          "medianNetWalletReturnPerTradePct": 1.942825986811047,
+          "worstNetWalletReturnPct": 1.942825986811047,
+          "bestNetWalletReturnPct": 1.942825986811047,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10194.282598681104,
+          "syntheticIsolatedReturnPct": 1.9428259868110365,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "2026-01": {
+          "trades": 4,
+          "wins": 4,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 29690.376037621063,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 29690.376037621063,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 4.312820477663306,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 1.0782051194158264,
+          "medianNetWalletReturnPerTradePct": 0.8477802260438837,
+          "worstNetWalletReturnPct": 0.12251222836370249,
+          "bestNetWalletReturnPct": 2.494747797211836,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10436.767996313227,
+          "syntheticIsolatedReturnPct": 4.367679963132276,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "2026-02": {
+          "trades": 4,
+          "wins": 3,
+          "losses": 1,
+          "winRatePct": 75.0,
+          "positiveContributionJpy": 55291.126096470834,
+          "negativeContributionJpy": -8859.346059051717,
+          "netContributionJpy": 46431.780037419114,
+          "modelContributionProfitFactor": 6.240994056212436,
+          "sumPositiveNetWalletReturnPct": 2.1187393787652686,
+          "sumNegativeNetWalletReturnPct": -0.7081082679897992,
+          "tradeNormalizedProfitFactor": 2.9921121875613954,
+          "averageNetWalletReturnPerTradePct": 0.3526577776938674,
+          "medianNetWalletReturnPerTradePct": 0.43616909845519425,
+          "worstNetWalletReturnPct": -0.7081082679897992,
+          "bestNetWalletReturnPct": 1.2464011818548804,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10140.832934489636,
+          "syntheticIsolatedReturnPct": 1.408329344896364,
+          "closedTradeOnlyMaxDDPct": -0.7081082679898154,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-02-03T17:30:00+00:00",
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "candidateId": "C001525"
+          }
+        },
+        "2026-03": {
+          "trades": 2,
+          "wins": 2,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 556598.8705937898,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 556598.8705937898,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 7.19182594686335,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 3.595912973431675,
+          "medianNetWalletReturnPerTradePct": 3.595912973431675,
+          "worstNetWalletReturnPct": 2.172345414783449,
+          "bestNetWalletReturnPct": 5.0194805320799025,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10730.086640204792,
+          "syntheticIsolatedReturnPct": 7.300866402047923,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        },
+        "2026-04": {
+          "trades": 10,
+          "wins": 8,
+          "losses": 2,
+          "winRatePct": 80.0,
+          "positiveContributionJpy": 2622373.85802445,
+          "negativeContributionJpy": -539452.7387769845,
+          "netContributionJpy": 2082921.1192474654,
+          "modelContributionProfitFactor": 4.8611744264562295,
+          "sumPositiveNetWalletReturnPct": 14.631732170034834,
+          "sumNegativeNetWalletReturnPct": -3.041308959105728,
+          "tradeNormalizedProfitFactor": 4.810998279614832,
+          "averageNetWalletReturnPerTradePct": 1.1590423210929104,
+          "medianNetWalletReturnPerTradePct": 1.0687606712419564,
+          "worstNetWalletReturnPct": -2.441312532659468,
+          "bestNetWalletReturnPct": 4.474223655089523,
+          "maxConsecutiveLosses": 2,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11202.689687947266,
+          "syntheticIsolatedReturnPct": 12.02689687947267,
+          "closedTradeOnlyMaxDDPct": -3.026661171151379,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-04-15T18:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002159"
+          }
+        },
+        "2026-05": {
+          "trades": 8,
+          "wins": 7,
+          "losses": 1,
+          "winRatePct": 87.5,
+          "positiveContributionJpy": 3299719.6780849486,
+          "negativeContributionJpy": -154936.14101726204,
+          "netContributionJpy": 3144783.5370676867,
+          "modelContributionProfitFactor": 21.29728839520609,
+          "sumPositiveNetWalletReturnPct": 10.734063028927327,
+          "sumNegativeNetWalletReturnPct": -0.5999974529955545,
+          "tradeNormalizedProfitFactor": 17.890180992163074,
+          "averageNetWalletReturnPerTradePct": 1.2667581969914714,
+          "medianNetWalletReturnPerTradePct": 1.0187734353860385,
+          "worstNetWalletReturnPct": -0.5999974529955545,
+          "bestNetWalletReturnPct": 2.8363910311819023,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 11054.177877056343,
+          "syntheticIsolatedReturnPct": 10.541778770563436,
+          "closedTradeOnlyMaxDDPct": -0.5999974529955598,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-05-04T16:30:00+00:00",
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "candidateId": "C002252"
+          }
+        },
+        "2026-06": {
+          "trades": 14,
+          "wins": 12,
+          "losses": 2,
+          "winRatePct": 85.71428571428571,
+          "positiveContributionJpy": 15077763.888055844,
+          "negativeContributionJpy": -608990.0603553475,
+          "netContributionJpy": 14468773.827700498,
+          "modelContributionProfitFactor": 24.7586370773571,
+          "sumPositiveNetWalletReturnPct": 19.789597542173535,
+          "sumNegativeNetWalletReturnPct": -0.6204140615454661,
+          "tradeNormalizedProfitFactor": 31.897403313002254,
+          "averageNetWalletReturnPerTradePct": 1.3692273914734332,
+          "medianNetWalletReturnPerTradePct": 0.8403467328170742,
+          "worstNetWalletReturnPct": -0.41448148986666006,
+          "bestNetWalletReturnPct": 5.72289908488069,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 12077.4687891526,
+          "syntheticIsolatedReturnPct": 20.77468789152599,
+          "closedTradeOnlyMaxDDPct": -0.4144814898666582,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-06-16T19:30:00+00:00",
+            "symbol": "MSFTUSDT",
+            "side": "SHORT",
+            "candidateId": "C002666"
+          }
+        },
+        "2026-07": {
+          "trades": 10,
+          "wins": 7,
+          "losses": 3,
+          "winRatePct": 70.0,
+          "positiveContributionJpy": 3431445.643591819,
+          "negativeContributionJpy": -600876.4316431916,
+          "netContributionJpy": 2830569.211948627,
+          "modelContributionProfitFactor": 5.710734292253714,
+          "sumPositiveNetWalletReturnPct": 2.580872396294981,
+          "sumNegativeNetWalletReturnPct": -0.4643985592357643,
+          "tradeNormalizedProfitFactor": 5.557451342101887,
+          "averageNetWalletReturnPerTradePct": 0.21164738370592165,
+          "medianNetWalletReturnPerTradePct": 0.16750244364589484,
+          "worstNetWalletReturnPct": -0.23037196866560855,
+          "bestNetWalletReturnPct": 1.0105457858454117,
+          "maxConsecutiveLosses": 1,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10213.067923068222,
+          "syntheticIsolatedReturnPct": 2.1306792306822198,
+          "closedTradeOnlyMaxDDPct": -0.23037196866559917,
+          "closedTradeOnlyTrough": {
+            "exitUtc": "2026-07-06T18:30:00+00:00",
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "candidateId": "C002875"
+          }
+        },
+        "2026-08": {
+          "trades": 1,
+          "wins": 1,
+          "losses": 0,
+          "winRatePct": 100.0,
+          "positiveContributionJpy": 239882.36288730425,
+          "negativeContributionJpy": 0,
+          "netContributionJpy": 239882.36288730425,
+          "modelContributionProfitFactor": null,
+          "sumPositiveNetWalletReturnPct": 0.16810409260344636,
+          "sumNegativeNetWalletReturnPct": 0,
+          "tradeNormalizedProfitFactor": null,
+          "averageNetWalletReturnPerTradePct": 0.16810409260344636,
+          "medianNetWalletReturnPerTradePct": 0.16810409260344636,
+          "worstNetWalletReturnPct": 0.16810409260344636,
+          "bestNetWalletReturnPct": 0.16810409260344636,
+          "maxConsecutiveLosses": 0,
+          "syntheticIsolatedStartJpy": 10000.0,
+          "syntheticIsolatedEndJpy": 10016.810409260344,
+          "syntheticIsolatedReturnPct": 0.16810409260343828,
+          "closedTradeOnlyMaxDDPct": 0.0,
+          "closedTradeOnlyTrough": null
+        }
+      },
+      "worstTradesByPortfolioContribution": [
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002122",
+          "utc": "2026-04-09T16:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -412401.4466860356,
+          "netWalletPct": -2.441312532659468,
+          "priceReturnPct": -0.9192785851864782,
+          "acceptedGross": 1.9999979736584292
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "SHORT",
+          "candidateId": "C002666",
+          "utc": "2026-06-16T19:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -378760.89118635305,
+          "netWalletPct": -0.41448148986666006,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 1.3816049662222003
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002875",
+          "utc": "2026-07-06T18:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -282914.7765199192,
+          "netWalletPct": -0.23037196866560852,
+          "priceReturnPct": -0.12087432427896339,
+          "acceptedGross": 0.5471295218429977
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002732",
+          "utc": "2026-06-23T19:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -230229.16916899444,
+          "netWalletPct": -0.20593257167880602,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 0.68644190559602
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002998",
+          "utc": "2026-07-23T19:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -208406.10846774193,
+          "netWalletPct": -0.15658828273690104,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 0.5219609424563367
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002252",
+          "utc": "2026-05-04T16:30:00+00:00",
+          "exit": "BASIS_STOP",
+          "modeledLossJpy": -154936.14101726204,
+          "netWalletPct": -0.5999974529955545,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 1.9999915099851815
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002159",
+          "utc": "2026-04-15T18:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -127051.29209094886,
+          "netWalletPct": -0.59999642644626,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 1.9999880881541998
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "LONG",
+          "candidateId": "C003042",
+          "utc": "2026-07-27T16:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -109555.5466555305,
+          "netWalletPct": -0.07743830783325474,
+          "priceReturnPct": 0.14134628176134534,
+          "acceptedGross": 0.487444989544276
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C001525",
+          "utc": "2026-02-03T17:30:00+00:00",
+          "exit": "BASIS_STOP",
+          "modeledLossJpy": -8859.346059051717,
+          "netWalletPct": -0.7081082679897992,
+          "priceReturnPct": -0.05400835955478023,
+          "acceptedGross": 1.9998009649428428
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "LONG",
+          "candidateId": "C000947",
+          "utc": "2025-11-20T19:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -1015.2640769230767,
+          "netWalletPct": -0.5995271450129384,
+          "priceReturnPct": 0.0,
+          "acceptedGross": 1.9984238167097945
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C000873",
+          "utc": "2025-11-12T20:30:00+00:00",
+          "exit": "TIME_OR_SESSION_FLAT",
+          "modeledLossJpy": -959.6988301684665,
+          "netWalletPct": -0.5994273003181746,
+          "priceReturnPct": -0.0,
+          "acceptedGross": 1.9980910010605821
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "LONG",
+          "candidateId": "C000673",
+          "utc": "2025-10-24T16:30:00+00:00",
+          "exit": "BASIS_CONVERGED",
+          "modeledLossJpy": -471.0876941810451,
+          "netWalletPct": -0.9188025210836008,
+          "priceReturnPct": -0.1163029349387723,
+          "acceptedGross": 1.9971999111484162
+        }
+      ],
+      "potentialShortOHLCStopTouchesAtOrAbovePct": {
+        "0.5": 5,
+        "1": 2,
+        "1.5": 1,
+        "2": 0,
+        "3": 0,
+        "5": 0
+      },
+      "maxShortAdverseOverlappingH1Pct": 1.8940057199556382,
+      "maxLongAdverseOverlappingH1Pct": 1.0450637414764374,
+      "isolatedClosedEquityPath": [
+        {
+          "exitUtc": "2025-09-29T19:30:00+00:00",
+          "equityJpy": 10167.452391405752,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-09-30T16:30:00+00:00",
+          "equityJpy": 10246.03237984889,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-09-30T17:30:00+00:00",
+          "equityJpy": 10190.032016449984,
+          "ddPct": -0.5465565725621069
+        },
+        {
+          "exitUtc": "2025-10-01T17:30:00+00:00",
+          "equityJpy": 10225.318627170916,
+          "ddPct": -0.20216364647365204
+        },
+        {
+          "exitUtc": "2025-10-01T18:30:00+00:00",
+          "equityJpy": 10387.97943193151,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-02T19:30:00+00:00",
+          "equityJpy": 10265.645700464635,
+          "ddPct": -1.1776470320189025
+        },
+        {
+          "exitUtc": "2025-10-03T18:30:00+00:00",
+          "equityJpy": 10769.381328610352,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-06T16:30:00+00:00",
+          "equityJpy": 10956.091213065174,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-07T17:30:00+00:00",
+          "equityJpy": 11431.557306734237,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-07T18:30:00+00:00",
+          "equityJpy": 11529.1094041438,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-08T19:30:00+00:00",
+          "equityJpy": 11687.058693257652,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-09T16:30:00+00:00",
+          "equityJpy": 11629.7620777166,
+          "ddPct": -0.490256933287303
+        },
+        {
+          "exitUtc": "2025-10-09T17:30:00+00:00",
+          "equityJpy": 11859.171611634149,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-10T18:30:00+00:00",
+          "equityJpy": 11888.113935296189,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-13T17:30:00+00:00",
+          "equityJpy": 12152.581977198528,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-16T16:30:00+00:00",
+          "equityJpy": 12531.103674483551,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-17T16:30:00+00:00",
+          "equityJpy": 12442.240362727418,
+          "ddPct": -0.7091419404428145
+        },
+        {
+          "exitUtc": "2025-10-17T19:30:00+00:00",
+          "equityJpy": 12367.597122061432,
+          "ddPct": -1.3048056792879237
+        },
+        {
+          "exitUtc": "2025-10-21T19:30:00+00:00",
+          "equityJpy": 12471.32281339026,
+          "ddPct": -0.4770598236691681
+        },
+        {
+          "exitUtc": "2025-10-24T16:30:00+00:00",
+          "equityJpy": 12356.735984968354,
+          "ddPct": -1.3914791070658294
+        },
+        {
+          "exitUtc": "2025-10-24T19:30:00+00:00",
+          "equityJpy": 12496.983246865067,
+          "ddPct": -0.2722858936037742
+        },
+        {
+          "exitUtc": "2025-10-28T16:30:00+00:00",
+          "equityJpy": 12791.63246653107,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-28T19:30:00+00:00",
+          "equityJpy": 13385.57753489576,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-30T18:30:00+00:00",
+          "equityJpy": 13398.23987949921,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-10-31T18:30:00+00:00",
+          "equityJpy": 13937.235307707575,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-03T19:30:00+00:00",
+          "equityJpy": 14312.659486022998,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-06T19:30:00+00:00",
+          "equityJpy": 14532.567958772663,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-12T20:30:00+00:00",
+          "equityJpy": 14445.455778990487,
+          "ddPct": -0.5994273003181783
+        },
+        {
+          "exitUtc": "2025-11-14T18:30:00+00:00",
+          "equityJpy": 14685.686581644708,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-18T20:30:00+00:00",
+          "equityJpy": 14843.607732376748,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-19T17:30:00+00:00",
+          "equityJpy": 14928.912119064977,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-11-20T19:30:00+00:00",
+          "equityJpy": 14839.409238456057,
+          "ddPct": -0.5995271450129347
+        },
+        {
+          "exitUtc": "2025-11-21T20:30:00+00:00",
+          "equityJpy": 15240.429698345142,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2025-12-19T20:30:00+00:00",
+          "equityJpy": 15536.524727026259,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-13T18:30:00+00:00",
+          "equityJpy": 15924.12183541702,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-29T19:30:00+00:00",
+          "equityJpy": 16061.097833811238,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-30T17:30:00+00:00",
+          "equityJpy": 16195.269219285625,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-01-30T18:30:00+00:00",
+          "equityJpy": 16215.110404495672,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-02-03T17:30:00+00:00",
+          "equityJpy": 16100.289867057763,
+          "ddPct": -0.7081082679898043
+        },
+        {
+          "exitUtc": "2026-02-09T18:30:00+00:00",
+          "equityJpy": 16300.964070242833,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-02-20T19:30:00+00:00",
+          "equityJpy": 16376.410199864666,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-02-26T18:30:00+00:00",
+          "equityJpy": 16443.472562629526,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-03-05T18:30:00+00:00",
+          "equityJpy": 17268.849466708616,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-03-30T18:30:00+00:00",
+          "equityJpy": 17643.988526284516,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-02T16:30:00+00:00",
+          "equityJpy": 17977.103124353183,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-07T16:30:00+00:00",
+          "equityJpy": 18619.425877920137,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-08T19:30:00+00:00",
+          "equityJpy": 19452.5006349919,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-09T16:30:00+00:00",
+          "equityJpy": 18977.604299074177,
+          "ddPct": -2.4413125326594787
+        },
+        {
+          "exitUtc": "2026-04-15T18:30:00+00:00",
+          "equityJpy": 18863.73935145462,
+          "ddPct": -3.02666117115139
+        },
+        {
+          "exitUtc": "2026-04-16T16:30:00+00:00",
+          "equityJpy": 18947.53790190699,
+          "ddPct": -2.595875679739401
+        },
+        {
+          "exitUtc": "2026-04-20T18:30:00+00:00",
+          "equityJpy": 19163.291666276265,
+          "ddPct": -1.4867444250092565
+        },
+        {
+          "exitUtc": "2026-04-23T17:30:00+00:00",
+          "equityJpy": 19310.849471276128,
+          "ddPct": -0.7281899966164906
+        },
+        {
+          "exitUtc": "2026-04-27T17:30:00+00:00",
+          "equityJpy": 19503.73224239756,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-04-29T16:30:00+00:00",
+          "equityJpy": 19766.012831766722,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-01T18:30:00+00:00",
+          "equityJpy": 19982.27235082042,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-04T16:30:00+00:00",
+          "equityJpy": 19862.379225664863,
+          "ddPct": -0.5999974529955598
+        },
+        {
+          "exitUtc": "2026-05-04T19:30:00+00:00",
+          "equityJpy": 20274.014361609814,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-13T18:30:00+00:00",
+          "equityJpy": 20814.294651462555,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-14T16:30:00+00:00",
+          "equityJpy": 20992.717593871435,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-18T19:30:00+00:00",
+          "equityJpy": 21588.15315290535,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-27T16:30:00+00:00",
+          "equityJpy": 21791.82637501702,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-05-29T19:30:00+00:00",
+          "equityJpy": 21849.70217625275,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-01T18:30:00+00:00",
+          "equityJpy": 22230.179925757453,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-03T16:30:00+00:00",
+          "equityJpy": 23028.214980524284,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-09T19:30:00+00:00",
+          "equityJpy": 23209.185548526923,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-12T18:30:00+00:00",
+          "equityJpy": 24537.42381589183,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-15T18:30:00+00:00",
+          "equityJpy": 24749.658328994163,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-16T16:30:00+00:00",
+          "equityJpy": 24921.734623682067,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-16T19:30:00+00:00",
+          "equityJpy": 24818.438646713214,
+          "ddPct": -0.4144814898666582
+        },
+        {
+          "exitUtc": "2026-06-17T19:30:00+00:00",
+          "equityJpy": 25401.729001910702,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-22T16:30:00+00:00",
+          "equityJpy": 25677.1085389771,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-22T17:30:00+00:00",
+          "equityJpy": 25701.391135540252,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-22T19:30:00+00:00",
+          "equityJpy": 25890.360489119634,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-23T19:30:00+00:00",
+          "equityJpy": 25837.043803947476,
+          "ddPct": -0.20593257167881296
+        },
+        {
+          "exitUtc": "2026-06-24T18:30:00+00:00",
+          "equityJpy": 26175.38356425965,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-06-26T18:30:00+00:00",
+          "equityJpy": 26388.90960859723,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-06T18:30:00+00:00",
+          "equityJpy": 26328.116958022518,
+          "ddPct": -0.23037196866561027
+        },
+        {
+          "exitUtc": "2026-07-08T17:30:00+00:00",
+          "equityJpy": 26374.957716756042,
+          "ddPct": -0.05287028546508976
+        },
+        {
+          "exitUtc": "2026-07-09T18:30:00+00:00",
+          "equityJpy": 26641.48874048123,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-13T19:30:00+00:00",
+          "equityJpy": 26705.557466489667,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-20T19:30:00+00:00",
+          "equityJpy": 26827.6760830555,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-23T19:30:00+00:00",
+          "equityJpy": 26785.667085778823,
+          "ddPct": -0.1565882827369025
+        },
+        {
+          "exitUtc": "2026-07-24T19:30:00+00:00",
+          "equityJpy": 26827.745586390844,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-27T16:30:00+00:00",
+          "equityJpy": 26806.97063417893,
+          "ddPct": -0.07743830783325523
+        },
+        {
+          "exitUtc": "2026-07-28T19:30:00+00:00",
+          "equityJpy": 26929.476014946347,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-07-31T16:30:00+00:00",
+          "equityJpy": 26951.172624831113,
+          "ddPct": 0.0
+        },
+        {
+          "exitUtc": "2026-08-06T16:30:00+00:00",
+          "equityJpy": 26996.47864901807,
+          "ddPct": 0.0
+        }
+      ],
+      "sourceIsLiveFillCertified": false
+    }
+  }
+}
