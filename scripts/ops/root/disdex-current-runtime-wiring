@@ -735,8 +735,36 @@ migrate_v4_telemetry_lineage() {
       ((.pending // null) == null) and
       ((.state.pending // null) == null)
     ' "$execution_path" >/dev/null 2>&1; then
-      printf 'V4_TELEMETRY_LINEAGE_MIGRATION_NOT_FLAT ordersSent=0 cancelsSent=0 positionChangesSent=0\n' >&2
-      return 1
+      # A non-flat execution ledger is normally a hard stop: derived
+      # telemetry must never be reset to make an active position look flat.
+      # The one safe exception is an already signed venue-backed execution
+      # lineage rebind.  In that case the ledger itself proves the current
+      # SHA, preserves every legacy release that produced the venue client
+      # ids, and the append-only root audit proves that the transition used
+      # signed read-back with zero mutations.  Only then may stale derived
+      # telemetry be marked stale for HP/monitoring while the active legs stay
+      # untouched.
+      local lineage_audit=/var/lib/disdex/v12-v4/active-lineage-rebind.jsonl
+      local lineage_allowed=0
+      if [[ -f "$lineage_audit" && ! -L "$lineage_audit" ]] &&
+         [[ "$(stat -c '%u:%a' "$lineage_audit" 2>/dev/null || true)" == 0:* ]] &&
+         /usr/bin/jq -e --arg current "$V4_PRIMARY_SHA" --arg old "$from_sha" '
+           .releaseSha == $current and
+           ((.legacyReleaseShas // []) | index($old) != null)
+         ' "$execution_path" >/dev/null 2>&1 &&
+         /usr/bin/jq -s -e --arg current "$V4_PRIMARY_SHA" '
+           any(.[]; .status == "APPLIED" and .newSha == $current and
+             .mutationCalls == 0 and .ordersSent == 0 and
+             .cancelsSent == 0 and .positionChangesSent == 0)
+         ' "$lineage_audit" >/dev/null 2>&1; then
+        lineage_allowed=1
+      fi
+      if [[ "$lineage_allowed" != 1 ]]; then
+        printf 'V4_TELEMETRY_LINEAGE_MIGRATION_NOT_FLAT ordersSent=0 cancelsSent=0 positionChangesSent=0\n' >&2
+        return 1
+      fi
+      printf 'V4_TELEMETRY_LINEAGE_SIGNED_EXECUTION_REBIND_ALLOWED sourceSha=%s targetSha=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' \
+        "$from_sha" "$V4_PRIMARY_SHA"
     fi
 
     backup_path="${telemetry_path}.before-${V4_PRIMARY_SHA}"
@@ -772,7 +800,7 @@ migrate_v4_telemetry_lineage() {
          operationMode: $operationMode,
          status: "STALE_RESET",
          stale: true,
-         staleReason: "V4_TELEMETRY_LINEAGE_MIGRATION",
+          staleReason: "V4_TELEMETRY_LINEAGE_MIGRATION_AFTER_SIGNED_EXECUTION_REBIND",
          updatedAt: $observedAt
        }' "$telemetry_path" > "$temporary"
     chown deploy:deploy "$temporary"
