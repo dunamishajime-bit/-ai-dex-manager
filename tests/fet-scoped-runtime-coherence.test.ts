@@ -7,6 +7,7 @@ import { execFileSync } from "node:child_process";
 const coherence = readFileSync("scripts/ops/root/disdex-current-runtime-coherence-guard", "utf8");
 const watchdog = readFileSync("scripts/ops/root/disdex-runner-watchdog-current.mjs", "utf8");
 const scopedWiring = readFileSync("scripts/ops/root/disdex-fet-scoped-runtime-wiring", "utf8");
+const migration = readFileSync("scripts/disdex-fet-active-state-sha-migrate.ts", "utf8");
 
 test("FET mixed-SHA scope is explicit and keeps the common current release unchanged", () => {
   assert.match(coherence, /FET_SCOPE_ENV_FILE/);
@@ -31,4 +32,11 @@ test("coherence FET mixed-SHA self-test passes without touching systemd", () => 
   const guard = resolve("scripts/ops/root/disdex-current-runtime-coherence-guard");
   const output = execFileSync(bash, [guard, "--self-test-fet-mixed-sha"], { encoding: "utf8" });
   assert.match(output, /FET_MIXED_SHA_COHERENCE_SELFTEST_PASS/);
+});
+
+test("FET state migration can preserve a different common current SHA", () => {
+  assert.match(migration, /arg\('--current-sha'\)\|\|to/);
+  assert.match(migration, /currentSha/);
+  assert.match(migration, /\.trim\(\)!==currentSha/);
+  assert.match(migration, /FET_MIGRATION_CURRENT_SHA_MISMATCH/);
 });

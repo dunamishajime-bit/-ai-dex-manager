@@ -19,6 +19,8 @@ const arg=(name:string)=>{const i=process.argv.indexOf(name);return i<0?undefine
 async function main(){
  const from=String(arg('--from-sha')||''),to=String(arg('--to-sha')||'');
  if(!/^[a-f0-9]{40}$/.test(from)||!/^[a-f0-9]{40}$/.test(to)||from===to)throw new Error('FET_MIGRATION_EXACT_SHA_REQUIRED');
+ const currentSha=String(arg('--current-sha')||to);
+ if(!/^[a-f0-9]{40}$/.test(currentSha))throw new Error('FET_MIGRATION_CURRENT_SHA_INVALID');
  const path=resolve(arg('--state-path')||'/var/lib/disdex/fet-brk48-residual/state.json');
  const before=await readFetBrk48State(path,from);if(before.pending||before.manualReview)throw new Error('FET_MIGRATION_UNRESOLVED_STATE');
  const client=new AsterV3Client({baseUrl:process.env.ASTER_FUTURES_BASE_URL,userAddress:process.env.ASTER_USER_ADDRESS,privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`|undefined,readOnlyRateLimitMaxRetries:0,userAgent:`DisDex-Fet-Migration/${to.slice(0,12)}`});
@@ -27,7 +29,7 @@ async function main(){
  assertFetMigrationProof(before,positions as unknown as Record<string,unknown>[],orders as unknown as Record<string,unknown>[]);
  if(process.argv.includes('--verify-only')){console.log(JSON.stringify({status:'FET_MIGRATION_PREFLIGHT_PASS',position:before.position||null,ordersSent:0,cancelsSent:0}));return;}
  for(const sha of [from,to]){const r=spawnSync('systemctl',['show',`disdex-fet-brk48@${sha}.service`,'-p','MainPID','--value'],{encoding:'utf8'});if(r.status!==0||r.stdout.trim()!=='0')throw new Error('FET_MIGRATION_RUNNER_MUST_BE_STOPPED');}
- if((await readFile('/home/deploy/disdex-trading/current/.disdex-release-sha','utf8')).trim()!==to)throw new Error('FET_MIGRATION_CURRENT_SHA_MISMATCH');
+ if((await readFile('/home/deploy/disdex-trading/current/.disdex-release-sha','utf8')).trim()!==currentSha)throw new Error('FET_MIGRATION_CURRENT_SHA_MISMATCH');
  if(!before.position){console.log(JSON.stringify(await migrateFlatRuntimeState({strategy:'FET',statePath:path,fromSha:from,toSha:to})));return;}
  const backup=`${path}.before-${to}`;try{await stat(backup);throw new Error('FET_MIGRATION_BACKUP_ALREADY_EXISTS');}catch(e:any){if(e.code!=='ENOENT')throw e;}
  const bytes=await readFile(path),metadata=await stat(path);await copyFile(path,backup);if(!(await readFile(backup)).equals(bytes))throw new Error('FET_MIGRATION_BACKUP_MISMATCH');
