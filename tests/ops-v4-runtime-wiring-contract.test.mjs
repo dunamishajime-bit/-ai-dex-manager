@@ -42,6 +42,13 @@ test("V4 full-LIVE wiring pins V4 independently while preserving current peer SH
   assert.match(wiring, /operator_activation_all_trading_ready/);
 });
 
+test("a peer release without a primary marker preserves the prior V4 primary contract", () => {
+  assert.match(wiring, /TRADING_ROOT.*previous/);
+  assert.match(wiring, /previous.*v12-primary\.env/);
+  assert.match(wiring, /DISDEX_V12_V4_PRIMARY_SHA/);
+  assert.match(wiring, /PRIMARY_V12_MODE.*previous/);
+});
+
 test("V4 primary SHA env preserves Idle Residual LONG runtime contract", () => {
   const primaryEnv = wiring.match(/write_v4_primary_runtime_artifacts\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
   assert.ok(primaryEnv, "V4 primary runtime artifact function must be present");

@@ -144,6 +144,27 @@ resolve_current() {
   if [[ -z "$PRIMARY_V12_MODE" && -f "$PRIMARY_V12_MODE_FILE" ]]; then
     PRIMARY_V12_MODE="$(sed -n 's/^DISDEX_PRIMARY_V12_RUNNER=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
   fi
+  # A peer release normally carries an explicit primary marker.  During a
+  # mixed-SHA cutover, however, a newly staged peer may not have one yet.  Do
+  # not silently fall back to LEGACY in that case: preserve the prior V4
+  # primary contract from the rollback release and let the normal V4 checks
+  # validate its SHA, artifacts, and operator approval.  An explicit marker or
+  # operator-provided mode always wins, so an intentional V4 -> LEGACY/disabled
+  # migration remains possible.
+  if [[ -z "$PRIMARY_V12_MODE" && -L "${TRADING_ROOT}/previous" ]]; then
+    previous_release="$(readlink -f -- "${TRADING_ROOT}/previous" 2>/dev/null || true)"
+    previous_sha="$(basename -- "$previous_release" 2>/dev/null || true)"
+    previous_mode_file="${RUNTIME_CONTRACT_ENV_DIR}/${previous_sha}.v12-primary.env"
+    if [[ "$previous_release" == "$TRADING_RELEASES"/* && "$previous_sha" =~ ^[0-9a-f]{40}$ && -f "$previous_mode_file" && ! -L "$previous_mode_file" ]]; then
+      previous_mode="$(sed -n 's/^DISDEX_PRIMARY_V12_RUNNER=//p' "$previous_mode_file" | tail -n1)"
+      if [[ "$previous_mode" == "V4" ]]; then
+        PRIMARY_V12_MODE="V4"
+        DISDEX_V12_V4_OPERATION_MODE="$(sed -n 's/^DISDEX_V12_V4_OPERATION_MODE=//p' "$previous_mode_file" | tail -n1)"
+        DISDEX_V12_V4_PRIMARY_SHA="$(sed -n 's/^DISDEX_V12_V4_PRIMARY_SHA=//p' "$previous_mode_file" | tail -n1)"
+        printf 'DISDEX_PRIMARY_V12_MODE_PRESERVED_FROM_PREVIOUS mode=V4 previousSha=%s\n' "$previous_sha"
+      fi
+    fi
+  fi
   PRIMARY_V12_MODE="${PRIMARY_V12_MODE:-LEGACY}"
   [[ "$PRIMARY_V12_MODE" == "LEGACY" || "$PRIMARY_V12_MODE" == "V4" || "$PRIMARY_V12_MODE" == "DISABLED" ]] || {
     printf 'invalid primary V12 mode: %s\n' "$PRIMARY_V12_MODE" >&2
