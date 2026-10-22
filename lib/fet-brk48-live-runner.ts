@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 
 import { FET_BRK48_RESIDUAL } from "@/config/fetBrk48Runtime";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
-import type { AsterV3Client } from "@/lib/aster-v3-client";
+import type { AsterKline, AsterV3Client } from "@/lib/aster-v3-client";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import {
@@ -34,9 +34,45 @@ import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/dis
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
 import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
+import {
+  advanceFetBrk48LongTrailingStop,
+  FET_BRK48_TRAILING_STOP_POLICY,
+  type FetBrk48TrailingStopState,
+} from "@/lib/fet-brk48-trailing-stop";
+import type { ConfirmedFiveMinuteBar } from "@/lib/disdex-exit-overlay-contract";
 
 const EPS = 1e-9;
 const DEFAULT_RISK_PATH = "/var/lib/disdex/shared/crypto-daily-risk.json";
+const FIVE_MINUTE_MS = 5 * 60_000;
+
+function trailingStopEnabled() {
+  const enabled = /^(1|true|yes|on)$/i.test(String(process.env.FET_BRK48_TRAILING_STOP_ENABLED || ""));
+  if (!enabled) return false;
+  if (String(process.env.FET_BRK48_TRAILING_STOP_POLICY || "") !== FET_BRK48_TRAILING_STOP_POLICY.id) {
+    throw new Error(`FET_TRAILING_STOP_POLICY_MISMATCH:${process.env.FET_BRK48_TRAILING_STOP_POLICY || "MISSING"}`);
+  }
+  return true;
+}
+
+function normalizeCompletedFetM5Bar(row: AsterKline, now: number): ConfirmedFiveMinuteBar | undefined {
+  const [timestampMs, open, high, low, close, , closeTs] = row;
+  const bar = {
+    timestampMs: finite(timestampMs),
+    open: finite(open),
+    high: finite(high),
+    low: finite(low),
+    close: finite(close),
+  };
+  const completedAt = finite(closeTs);
+  if (!(bar.timestampMs > 0 && completedAt > bar.timestampMs && completedAt < now)) return undefined;
+  if (![bar.open, bar.high, bar.low, bar.close].every((value) => value > 0)
+      || bar.high < Math.max(bar.open, bar.close)
+      || bar.low > Math.min(bar.open, bar.close)
+      || bar.high < bar.low) {
+    throw new Error(`FET_TRAILING_M5_OHLC_INVALID:${bar.timestampMs}`);
+  }
+  return bar;
+}
 
 export interface FetBrk48LiveRunnerDependencies {
   client: AsterV3Client;
@@ -79,6 +115,16 @@ function terminalNoFill(status: string) {
 function deterministicId(kind: "entry" | "exit" | "stop" | "failsafe", seed: string) {
   const digest = createHash("sha256").update(`FET_BRK48_RESIDUAL|${kind}|${seed}`).digest("hex");
   return `fet-${kind.slice(0, 5)}-${digest.slice(0, 22)}`.slice(0, 36);
+}
+
+export class FetProtectionReplacementError extends Error {
+  constructor(
+    message: string,
+    readonly newProtectionVerified: boolean,
+  ) {
+    super(message);
+    this.name = "FetProtectionReplacementError";
+  }
 }
 
 function portfolioEquity(walletBalance: number, positions: readonly DirectPosition[]) {
@@ -154,6 +200,7 @@ async function ensureProtection(
     protectionMode?: FetBrk48PositionState["protectionMode"];
     profitFloorArmedAt?: number;
     profitFloorTriggerPrice?: number;
+    trailingStop?: FetBrk48TrailingStopState;
   },
 ) {
   const entryPrice = finite(actual.entryPrice);
@@ -177,6 +224,7 @@ async function ensureProtection(
     protectionMode: input.protectionMode || "INITIAL_HARD_STOP",
     profitFloorArmedAt: input.profitFloorArmedAt,
     profitFloorTriggerPrice: input.profitFloorTriggerPrice,
+    trailingStop: input.trailingStop,
   };
 
   if (!await verifyStop(deps.adapter, position)) {
@@ -200,6 +248,40 @@ async function ensureProtection(
   throw new Error("FET_PROTECTIVE_STOP_READBACK_FAILED");
 }
 
+/**
+ * Replace protection without creating an unprotected interval.  The new
+ * reduce-only STOP is placed and read back by ensureProtection first; only
+ * then is the previous STOP retired.  A failed retirement leaves both orders
+ * visible and moves the runner to manual review instead of deleting safety.
+ */
+async function replaceProtection(
+  deps: FetBrk48LiveRunnerDependencies,
+  state: FetBrk48State,
+  actual: DirectPosition,
+  input: Parameters<typeof ensureProtection>[3],
+  previousStopClientOrderId?: string,
+) {
+  const next = await ensureProtection(deps, state, actual, input);
+  if (previousStopClientOrderId && previousStopClientOrderId !== next.stopClientOrderId) {
+    try {
+      await deps.adapter.cancel(previousStopClientOrderId);
+    } catch (error) {
+      state.manualReview = `FET_PROTECTION_OLD_STOP_RETIREMENT_FAILED:${previousStopClientOrderId}`;
+      await writeFetBrk48State(deps.statePath, state);
+      throw new FetProtectionReplacementError(state.manualReview, true);
+    }
+    const remaining = (await deps.adapter.openOrders("FETUSDT"))
+      .filter((row) => row.clientOrderId === previousStopClientOrderId
+        && ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(row.status || "").toUpperCase()));
+    if (remaining.length) {
+      state.manualReview = `FET_PROTECTION_OLD_STOP_REMAINS:${previousStopClientOrderId}`;
+      await writeFetBrk48State(deps.statePath, state);
+      throw new FetProtectionReplacementError(state.manualReview, true);
+    }
+  }
+  return next;
+}
+
 async function maybeArmProfitFloor(
   deps: FetBrk48LiveRunnerDependencies,
   state: FetBrk48State,
@@ -221,7 +303,7 @@ async function maybeArmProfitFloor(
     position.entryPrice * (1 + FET_BRK48_RESIDUAL.profitFloorStopPct),
   );
   if (!(normalizedFloor.price > position.hardStop + EPS)) {
-    position.protectionMode = "PROFIT_FLOOR_3P0";
+    if (position.protectionMode !== "TRAIL_8P_GIVEBACK_4P") position.protectionMode = "PROFIT_FLOOR_3P0";
     position.profitFloorArmedAt = armedAt;
     position.profitFloorTriggerPrice = triggerPrice;
     state.position = position;
@@ -234,8 +316,7 @@ async function maybeArmProfitFloor(
     `${position.entryTs}|${position.quantity}|${position.entryPrice}|profit-floor|${normalizedFloor.price}`,
   );
 
-  await deps.adapter.cancel(previousStopClientOrderId);
-  await ensureProtection(deps, state, actual, {
+  await replaceProtection(deps, state, actual, {
     entryTs: position.entryTs,
     exitTs: position.exitTs,
     targetGross: position.gross,
@@ -245,8 +326,114 @@ async function maybeArmProfitFloor(
     protectionMode: "PROFIT_FLOOR_3P0",
     profitFloorArmedAt: armedAt,
     profitFloorTriggerPrice: triggerPrice,
-  });
+    trailingStop: position.trailingStop,
+  }, previousStopClientOrderId);
   return true;
+}
+
+async function loadCompletedFetM5Bars(
+  deps: FetBrk48LiveRunnerDependencies,
+  position: FetBrk48PositionState,
+  now: number,
+) {
+  const currentOpen = Math.floor(now / FIVE_MINUTE_MS) * FIVE_MINUTE_MS;
+  const rows = await deps.client.getKlines("FETUSDT", "5m", 1_000, {
+    startTime: Math.floor(position.entryTs / FIVE_MINUTE_MS) * FIVE_MINUTE_MS,
+    endTime: currentOpen + 1,
+  });
+  const completed = rows
+    .map((row) => normalizeCompletedFetM5Bar(row, now))
+    .filter((row): row is ConfirmedFiveMinuteBar => Boolean(row))
+    .filter((row) => row.timestampMs >= position.entryTs)
+    .sort((left, right) => left.timestampMs - right.timestampMs);
+  const unique = new Map<number, ConfirmedFiveMinuteBar>();
+  for (const row of completed) {
+    if (unique.has(row.timestampMs)) throw new Error(`FET_TRAILING_M5_DUPLICATE_BAR:${row.timestampMs}`);
+    unique.set(row.timestampMs, row);
+  }
+  const ordered = [...unique.values()];
+  const previousTs = position.trailingStop?.lastConfirmedBarTs;
+  const unprocessed = previousTs === undefined ? ordered : ordered.filter((row) => row.timestampMs > previousTs);
+  if (previousTs !== undefined && unprocessed.length > 0 && unprocessed[0].timestampMs > previousTs + FIVE_MINUTE_MS) {
+    throw new Error(`FET_TRAILING_M5_GAP:${previousTs}:${unprocessed[0].timestampMs}`);
+  }
+  for (let index = 1; index < unprocessed.length; index += 1) {
+    if (unprocessed[index].timestampMs !== unprocessed[index - 1].timestampMs + FIVE_MINUTE_MS) {
+      throw new Error(`FET_TRAILING_M5_GAP:${unprocessed[index - 1].timestampMs}:${unprocessed[index].timestampMs}`);
+    }
+  }
+  return unprocessed;
+}
+
+async function maybeAdvanceTrailingStop(
+  deps: FetBrk48LiveRunnerDependencies,
+  state: FetBrk48State,
+  actual: DirectPosition,
+): Promise<{ kind: "disabled" | "unchanged" | "updated" | "manual-review" | "unavailable"; message: string; ordersSent: number }> {
+  if (!trailingStopEnabled()) return { kind: "disabled", message: "FET_TRAILING_STOP_DISABLED", ordersSent: 0 };
+  const position = state.position;
+  if (!position) return { kind: "unchanged", message: "FET_TRAILING_STOP_NO_POSITION", ordersSent: 0 };
+
+  let bars: ConfirmedFiveMinuteBar[];
+  try {
+    bars = await loadCompletedFetM5Bars(deps, position, (deps.now || Date.now)());
+  } catch (error) {
+    // Existing protection remains authoritative.  A missing/invalid candle
+    // must not delete it or synthesize an exit from an unconfirmed price.
+    return {
+      kind: "unavailable",
+      message: `FET_TRAILING_M5_UNAVAILABLE:${error instanceof Error ? error.message : String(error)}`,
+      ordersSent: 0,
+    };
+  }
+  if (!bars.length) return { kind: "unchanged", message: "FET_TRAILING_M5_NO_NEW_CONFIRMED_BAR", ordersSent: 0 };
+
+  let trailingState = position.trailingStop;
+  let lastResult: ReturnType<typeof advanceFetBrk48LongTrailingStop> | undefined;
+  for (const bar of bars) {
+    lastResult = advanceFetBrk48LongTrailingStop({ entryPrice: position.entryPrice, state: trailingState, bar });
+    trailingState = lastResult.state;
+    if (lastResult.stopHit) {
+      state.manualReview = "FET_TRAILING_STOP_TRIGGERED_BUT_POSITION_REMAINS";
+      await writeFetBrk48State(deps.statePath, state);
+      return { kind: "manual-review", message: state.manualReview, ordersSent: 0 };
+    }
+  }
+  if (!lastResult || !trailingState) return { kind: "unchanged", message: "FET_TRAILING_M5_NO_NEW_CONFIRMED_BAR", ordersSent: 0 };
+
+  const candidate = Number(trailingState.stopPrice);
+  if (!(candidate > 0)) {
+    position.trailingStop = trailingState;
+    await writeFetBrk48State(deps.statePath, state);
+    return { kind: "unchanged", message: "FET_TRAILING_STOP_NOT_ARMED", ordersSent: 0 };
+  }
+  if (candidate <= position.hardStop + EPS) {
+    position.trailingStop = trailingState;
+    if (trailingState.armed && position.protectionMode === "INITIAL_HARD_STOP") {
+      position.protectionMode = "TRAIL_8P_GIVEBACK_4P";
+    }
+    await writeFetBrk48State(deps.statePath, state);
+    return { kind: "unchanged", message: "FET_TRAILING_STOP_BELOW_EXISTING_PROTECTION", ordersSent: 0 };
+  }
+
+  const previousStopClientOrderId = position.stopClientOrderId;
+  const nextStopClientOrderId = deterministicId(
+    "stop",
+    `${position.entryTs}|${position.quantity}|${position.entryPrice}|${FET_BRK48_TRAILING_STOP_POLICY.id}|${candidate}`,
+  );
+  await replaceProtection(deps, state, actual, {
+    entryTs: position.entryTs,
+    exitTs: position.exitTs,
+    targetGross: position.gross,
+    hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
+    requestedStopPrice: candidate,
+    stopClientOrderId: nextStopClientOrderId,
+    protectionMode: "TRAIL_8P_GIVEBACK_4P",
+    profitFloorArmedAt: position.profitFloorArmedAt,
+    profitFloorTriggerPrice: position.profitFloorTriggerPrice,
+    trailingStop: trailingState,
+  }, previousStopClientOrderId);
+  return { kind: "updated", message: "FET_TRAIL_8P_GIVEBACK_4P_STOP_UPDATED", ordersSent: 1 };
 }
 
 async function emergencyFlattenProtectedFailure(
@@ -493,10 +680,38 @@ export class FetBrk48LiveRunner {
           await writeFetBrk48State(this.deps.statePath, state);
           return { status: "manual-review", message: state.manualReview, ordersSent: 0 };
         }
-        if (ours.length !== 1 || ours[0].quantity <= 0 || Math.abs(Math.abs(ours[0].quantity) - state.position.quantity) > Math.max(1e-8, state.position.quantity * 0.02)) {
+        if (ours.length !== 1 || ours[0].quantity <= 0) {
           state.manualReview = "FET_LIVE_POSITION_STATE_MISMATCH";
           await writeFetBrk48State(this.deps.statePath, state);
           return { status: "manual-review", message: state.manualReview, ordersSent: 0 };
+        }
+        const venueQuantityChanged = Math.abs(Math.abs(ours[0].quantity) - state.position.quantity) > Math.max(1e-8, state.position.quantity * 0.001);
+        if (venueQuantityChanged) {
+          const previousStopClientOrderId = state.position.stopClientOrderId;
+          const nextStopClientOrderId = deterministicId(
+            "stop",
+            `${state.position.entryTs}|${ours[0].quantity}|${state.position.entryPrice}|partial-quantity`,
+          );
+          try {
+            await replaceProtection(this.deps, state, ours[0], {
+              entryTs: state.position.entryTs,
+              exitTs: state.position.exitTs,
+              targetGross: state.position.gross,
+              hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
+              requestedStopPrice: state.position.hardStop,
+              stopClientOrderId: nextStopClientOrderId,
+              protectionMode: state.position.protectionMode,
+              profitFloorArmedAt: state.position.profitFloorArmedAt,
+              profitFloorTriggerPrice: state.position.profitFloorTriggerPrice,
+              trailingStop: state.position.trailingStop,
+            }, previousStopClientOrderId);
+          } catch (error) {
+            if (error instanceof FetProtectionReplacementError && error.newProtectionVerified) {
+              return { status: "manual-review", message: error.message, ordersSent: 1 };
+            }
+            await emergencyFlattenProtectedFailure(this.deps, state, ours[0], error instanceof Error ? error.message : String(error));
+            return { status: "manual-review", message: state.manualReview || "FET_PARTIAL_POSITION_PROTECTION_FAILURE", ordersSent: 1 };
+          }
         }
         if (!await verifyStop(this.deps.adapter, state.position)) {
           try {
@@ -510,6 +725,7 @@ export class FetBrk48LiveRunner {
               protectionMode: state.position.protectionMode,
               profitFloorArmedAt: state.position.profitFloorArmedAt,
               profitFloorTriggerPrice: state.position.profitFloorTriggerPrice,
+              trailingStop: state.position.trailingStop,
             });
             await writeFetBrk48State(this.deps.statePath, state);
           } catch (error) {
@@ -520,12 +736,22 @@ export class FetBrk48LiveRunner {
         if (now >= state.position.exitTs) return executeExit(this.deps, state, ours[0]);
         try {
           const profitFloorArmed = await maybeArmProfitFloor(this.deps, state, ours[0]);
+          const trailing = await maybeAdvanceTrailingStop(this.deps, state, ours[0]);
+          if (trailing.kind === "manual-review") {
+            return { status: "manual-review", message: trailing.message, ordersSent: trailing.ordersSent, gross: state.position?.gross };
+          }
           state.lastReconciledAt = now;
           await writeFetBrk48State(this.deps.statePath, state);
+          if (trailing.kind === "updated") {
+            return { status: "held", message: trailing.message, ordersSent: trailing.ordersSent, gross: state.position?.gross };
+          }
           if (profitFloorArmed) {
             return { status: "held", message: "FET_PROFIT_FLOOR_ARMED_3P0_AFTER_5P0", ordersSent: 1, gross: state.position?.gross };
           }
         } catch (error) {
+          if (error instanceof FetProtectionReplacementError && error.newProtectionVerified) {
+            return { status: "manual-review", message: error.message, ordersSent: 1, gross: state.position?.gross };
+          }
           await emergencyFlattenProtectedFailure(this.deps, state, ours[0], error instanceof Error ? error.message : String(error));
           return { status: "manual-review", message: state.manualReview || "FET_PROFIT_FLOOR_PROTECTION_FAILURE", ordersSent: 1 };
         }

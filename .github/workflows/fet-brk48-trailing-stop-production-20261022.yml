@@ -1,0 +1,79 @@
+name: FET BRK48 LONG Trailing Stop Production Contract 20261022
+
+on:
+  push:
+    branches:
+      - codex/fet-trailing-stop-production-20261022
+    paths:
+      - ".github/workflows/fet-brk48-trailing-stop-production-20261022.yml"
+      - "config/fetBrk48Runtime.ts"
+      - "lib/fet-brk48-live-runner.ts"
+      - "lib/fet-brk48-state.ts"
+      - "lib/fet-brk48-trailing-stop.ts"
+      - "ops/systemd/disdex-fet-brk48@.service"
+      - "scripts/disdex-fet-brk48-live-runner.ts"
+      - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "tests/fet-brk48-*.test.ts"
+      - "tests/test_runtime_wiring_script.py"
+      - "tests/test_runtime_multilineage_monitoring.py"
+      - "docs/research/results/fet-trailing-stop-production-20261022/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fet-brk48-trailing-stop-production-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-and-safety-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout immutable source revision
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: FET pure and live-path tests
+        run: |
+          npx tsx --test \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/fet-brk48-trailing-live-runner.test.ts \
+            tests/fet-brk48-trailing-stop.test.ts \
+            tests/fet-brk48-trailing-contract.test.ts
+      - name: Existing protective-order and runtime safety tests
+        run: |
+          npx tsx --test \
+            tests/managed-protective-orders.test.ts \
+            tests/current_live_target_contract.test.ts \
+            tests/current_live_target_readiness.test.ts \
+            tests/v12-v4-entry-safety.test.ts \
+            tests/flat-state-sha-migration.test.ts
+      - name: TypeScript and shell/Python wiring checks
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npx tsc --noEmit
+          npx tsc --noEmit -p tsconfig.research.json
+          bash -n scripts/ops/root/disdex-current-runtime-wiring
+          bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+          python3 -m unittest -v tests.test_runtime_wiring_script tests.test_runtime_multilineage_monitoring
+      - name: No-venue mutation contract
+        run: |
+          test ! -f /tmp/aster-test-order-sent
+          printf 'status=SOURCE_ONLY_FET_TRAILING_STOP_CI_PASS\nsource_sha=%s\nvenue_orders_sent=0\nproduction_activation=false\n' "$(git rev-parse HEAD)" > source-cert.txt
+      - name: Publish source-only evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fet-brk48-trailing-stop-source-${{ github.sha }}
+          path: source-cert.txt
+          retention-days: 90
