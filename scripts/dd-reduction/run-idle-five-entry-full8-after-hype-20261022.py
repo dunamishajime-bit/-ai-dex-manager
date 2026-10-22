@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pre-allocation causal entry gates for five IDLE SHORT symbols, HYPE adopted 3-condition baseline retained."""
 from __future__ import annotations
-import argparse,collections,hashlib,importlib.util,json,math
+import argparse,bisect,collections,hashlib,importlib.util,json,math
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 ROOT=Path(r"C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research/2026-10-22_hype_entry_plus_exit_full8")
@@ -18,6 +18,13 @@ base=idle.base
 core=idle.core
 SYMBOLS=set(screen.SYMS)
 FEATURE_RULES=dict(screen.CANDIDATES)
+FEATURE_RULES["VETO_BTC6POS_REL6POS"]={"kind":"short_veto","btc6hMustBePositive":True,"relative6hMustBePositive":True}
+def rule_accepts(features,rule_name):
+ if features is None:return False
+ if rule_name=="VETO_BTC6POS_REL6POS":
+  btc=features.get("btc6h");rel=features.get("rel6h")
+  return btc is not None and rel is not None and math.isfinite(btc) and math.isfinite(rel) and not (btc>0 and rel>0)
+ return screen.passes(features,FEATURE_RULES[rule_name])
 POLICIES={
  "HYPE_ADOPTED_BASELINE":{},
  "RENDER_VOL1P2":{"RENDERUSDT":["VOLUME1H_GE1P2"]},
@@ -25,13 +32,61 @@ POLICIES={
  "RENDER_VOL1P2_RET24GE_MINUS7":{"RENDERUSDT":["VOLUME1H_GE1P2","RET24H_GE_MINUS7"]},
  "RENDER_BTC3GE_MINUS0P5_REL6LE0":{"RENDERUSDT":["BTC3H_GE_MINUS0P5","REL6H_LE0"]},
  "RENDER_RET6GE_MINUS4_REL6GE_MINUS2":{"RENDERUSDT":["RET6H_GE_MINUS4","REL6H_GE_MINUS2"]},
+ "RENDER_SKIP_RISING_BTC_STRONG_REL":{"RENDERUSDT":["VETO_BTC6POS_REL6POS"]},
+ "TAO_RET1H_PLUS_RENDER_SKIP_RISING_BTC_STRONG_REL":{"TAOUSDT":["RET1H_LE_MINUS1"],"RENDERUSDT":["VETO_BTC6POS_REL6POS"]},
+ "TAO_RET1H_PLUS_RENDER_SKIP_AND_PROFIT":{"TAOUSDT":["RET1H_LE_MINUS1"],"RENDERUSDT":["VETO_BTC6POS_REL6POS"]},
  "RENDER_RET6GE_MINUS2P5_RET3GE_MINUS1":{"RENDERUSDT":["RET6H_GE_MINUS2P5","RET3H_GE_MINUS1"]},
  "RENDER_ATR3H_LE0P45":{"RENDERUSDT":["ATR3H_LE0P45"]},
  "TAO_RET1H_LE_MINUS1":{"TAOUSDT":["RET1H_LE_MINUS1"]},
+ "RENDER_PROFIT_1P5_FLOOR0P25":{},
+ "TAO_RET1H_PLUS_RENDER_PROFIT":{"TAOUSDT":["RET1H_LE_MINUS1"]},
+ "TAO_RET1H_PLUS_DOT_RET6":{"TAOUSDT":["RET1H_LE_MINUS1"],"DOTUSDT":["RET6H_GE_MINUS4"]},
+ "TAO_RET1H_PLUS_RENDER_RET6REL6":{"TAOUSDT":["RET1H_LE_MINUS1"],"RENDERUSDT":["RET6H_GE_MINUS4","REL6H_GE_MINUS2"]},
  "DOT_VOL1P2":{"DOTUSDT":["VOLUME1H_GE1P2"]},
  "DOT_RET6GE_MINUS4":{"DOTUSDT":["RET6H_GE_MINUS4"]},
  "JUP_REL3GE_MINUS1":{"JUPUSDT":["REL3H_GE_MINUS1"]},
 }
+EXIT_RULES={
+ "RENDER_PROFIT_1P5_FLOOR0P25":{"id":"IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25",
+   "strategy":"IDLE","sides":["SHORT"],"symbols":["RENDERUSDT"],"kind":"profit_short",
+   "arm":.015,"floor":.0025}
+}
+EXIT_RULES["TAO_RET1H_PLUS_RENDER_PROFIT"]=dict(EXIT_RULES["RENDER_PROFIT_1P5_FLOOR0P25"])
+EXIT_RULES["TAO_RET1H_PLUS_RENDER_SKIP_AND_PROFIT"]=dict(EXIT_RULES["RENDER_PROFIT_1P5_FLOOR0P25"])
+M5=300000
+def apply(row,rule,source,cost_bps,obs,original_row=None):
+ if rule.get("kind")!="profit_short":
+  return idle.apply(row,rule,source,cost_bps,obs,original_row=original_row)
+ if not idle.matches(row,rule):return row
+ entry=float(row["entry_price"]);start_ms=int(row["entry_ts_ms"]);original_exit=int(row["exit_ts_ms"])
+ if entry<=0 or original_exit<=start_ms+2*M5:return row
+ bars,times=source.getdata(str(row["symbol"]))
+ first=bisect.bisect_left(times,start_ms);end=bisect.bisect_left(times,original_exit)
+ if first>=len(bars) or first>=end or times[first]>start_ms+M5:
+  obs["data_gap"]+=1;return row
+ anchor=float(bars[first][1])
+ if anchor<=0 or abs(anchor/entry-1)>.025:
+  obs["entry_mismatch"]+=1;return row
+ scale=entry/anchor;armed=False
+ threshold=entry*(1-float(rule["floor"]))
+ for i in range(first,end):
+  ts,op,high,low,close,_=bars[i]
+  if i>first and ts-bars[i-1][0]!=M5:
+   obs["internal_gap"]+=1;return row
+  o=float(op)*scale;h=float(high)*scale;c=float(close)*scale
+  if armed and (o>=threshold or h>=threshold):
+   raw=max(o,threshold)
+   fill=raw*(1+float(cost_bps)/10000.0)
+   exit_ms=int(ts+M5)
+   if exit_ms<original_exit and fill>0:
+    obs["triggered"]+=1
+    obs["by_reason"]["IDLE_RENDER_PROFIT_AFTER_COMPLETED_M5"]+=1
+    return dict(row,exit_ts_ms=exit_ms,exit_price=fill,
+      unit_price_return=1-fill/entry,exit_reason="RESEARCH_"+str(rule["id"]))
+  # Profit protection becomes armed only after a fully completed M5 close.
+  if c<=entry*(1-float(rule["arm"])):armed=True
+ return row
+
 ACTIVE={"policy":{},"passed":set(),"blocked":set(),"missing":set(),"checked":0}
 def entry_filter(rows,overlays,source,cost_bps,obs,baseline_lookup=None):
     # Apply fixed native overlays and the user-adopted HYPE long entry gate first.
@@ -49,7 +104,7 @@ def entry_filter(rows,overlays,source,cost_bps,obs,baseline_lookup=None):
             ACTIVE["missing"].add(tag)
             # Entry unavailable and policy active -> fail closed.
             ACTIVE["blocked"].add(tag);continue
-        if all(screen.passes(f,FEATURE_RULES[k]) for k in rules):
+        if all(rule_accepts(f,k) for k in rules):
             out.append(row);ACTIVE["passed"].add(tag)
         else:ACTIVE["blocked"].add(tag)
     return out
@@ -70,7 +125,7 @@ def replay(name,cost,source,helper,prev_filter):
   for key in ("passed","blocked","missing"):ACTIVE[key].clear()
   ACTIVE["checked"]=0
   ACTIVE["policy"]=POLICIES[name]
-  overlays=[hype.V4,hype.Q102,idle.HYPE_RULE]
+  overlays=[hype.V4,hype.Q102,idle.HYPE_RULE]+([EXIT_RULES[name]] if name in EXIT_RULES else [])
   last=core._run_engine(f"IDLE5_{name}_C{cost}_I{i}","V12_LONG_COMPOSITE",overlays,cost,source,helper,prev_filter)
   assert last["accounting"]=="PASS"
   assert not ACTIVE["missing"] and not entry.ACTIVE["missing"], ("PRICE_WINDOW_MISSING",name,cost,ACTIVE["missing"],entry.ACTIVE["missing"])
@@ -97,7 +152,7 @@ def main():
  core.OUTPUT=args.output
  core.BOOTSTRAP_REDIRECT=args.output/"_legacy-bootstrap-cache"
  core._transform_rows=entry_filter
- core._apply_initial_stop=idle.apply
+ core._apply_initial_stop=apply
  core._matches=idle.matches
  source,helper=core.task8.legacy.bootstrap()
  base.install_legacy_capture(helper)
@@ -118,7 +173,7 @@ def main():
    entry.ACTIVE["lookups"].clear()
    assert all(entry.gate_hype(r,hype.GATE,source) for r in hype_trades)
    assert all((str(r["symbol"]) not in POLICIES[case]) or all(
-    screen.passes(screen.get_feat(source,str(r["symbol"]),int(r["entry_ts_ms"])),FEATURE_RULES[k])
+    rule_accepts(screen.get_feat(source,str(r["symbol"]),int(r["entry_ts_ms"])),k)
     for k in POLICIES[case][str(r["symbol"])]) for r in idle_trades)
    ref=baseline[str(c)]
    if case=="HYPE_ADOPTED_BASELINE":

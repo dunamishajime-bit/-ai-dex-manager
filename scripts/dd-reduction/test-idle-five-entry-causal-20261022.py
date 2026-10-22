@@ -74,4 +74,60 @@ class TestGates(unittest.TestCase):
    for symbol,terms in policy.items():
     self.assertIn(symbol,m.screen.SYMS)
     self.assertTrue(all(term in m.FEATURE_RULES for term in terms))
+
+ def test_render_profit_1p5_protects_quarter_percent(self):
+  bars=[(i*M5,100.,100.,100.,100.,1.) for i in range(22)]
+  bars[2]=(2*M5,100.,100.1,97.5,98.,1.)
+  bars[3]=(3*M5,98.,99.9,97.9,99.6,1.)
+  class Source:
+   def getdata(self,symbol):
+    return bars,[int(r[0]) for r in bars]
+  obs={"by_reason":__import__("collections").Counter()}
+  obs=__import__("collections").defaultdict(int,obs)
+  target={"strategy_id":"IDLE","side":"SHORT","symbol":"RENDERUSDT",
+          "entry_ts_ms":0,"entry_price":100.,"exit_ts_ms":20*M5}
+  new=m.apply(target,m.EXIT_RULES["RENDER_PROFIT_1P5_FLOOR0P25"],Source(),10,obs)
+  self.assertEqual(new["exit_ts_ms"],4*M5)
+  self.assertGreater(new["exit_price"],99.75)
+  self.assertLess(new["exit_price"],100.1)
+  self.assertIn("RESEARCH_IDLE_RENDER",new["exit_reason"])
+ def test_render_profit_no_same_bar_lookahead(self):
+  bars=[(i*M5,100.,100.,100.,100.,1.) for i in range(22)]
+  bars[3]=(3*M5,100.,100.1,97.0,98.0,1.)
+  for j in range(4,22):bars[j]=(j*M5,98.,99.,97.8,98.2,1.)
+  class Source:
+   def getdata(self,symbol):
+    return bars,[int(r[0]) for r in bars]
+  obs=__import__("collections").defaultdict(int)
+  obs["by_reason"]=__import__("collections").Counter()
+  target={"strategy_id":"IDLE","side":"SHORT","symbol":"RENDERUSDT",
+          "entry_ts_ms":0,"entry_price":100.,"exit_ts_ms":20*M5}
+  new=m.apply(target,m.EXIT_RULES["RENDER_PROFIT_1P5_FLOOR0P25"],Source(),10,obs)
+  self.assertEqual(new["exit_ts_ms"],target["exit_ts_ms"])
+ def test_render_profit_is_exclusive_to_short_render(self):
+  rule=m.EXIT_RULES["RENDER_PROFIT_1P5_FLOOR0P25"]
+  self.assertFalse(m.idle.matches({"strategy_id":"IDLE","side":"SHORT","symbol":"TAOUSDT"},rule))
+  self.assertFalse(m.idle.matches({"strategy_id":"IDLE","side":"LONG","symbol":"RENDERUSDT"},rule))
+  self.assertFalse(m.idle.matches({"strategy_id":"HYPE_LONG","side":"LONG","symbol":"HYPEUSDT"},rule))
+
+
+ def test_render_btc_relative_bull_veto_exact(self):
+  good={"btc6h":.3,"rel6h":-.01}
+  bad={"btc6h":.3,"rel6h":.01}
+  self.assertTrue(m.rule_accepts(good,"VETO_BTC6POS_REL6POS"))
+  self.assertFalse(m.rule_accepts(bad,"VETO_BTC6POS_REL6POS"))
+  self.assertTrue(m.rule_accepts({"btc6h":0.,"rel6h":1.},"VETO_BTC6POS_REL6POS"))
+  self.assertTrue(m.rule_accepts({"btc6h":-1.,"rel6h":1.},"VETO_BTC6POS_REL6POS"))
+  self.assertFalse(m.rule_accepts({"btc6h":None,"rel6h":1.},"VETO_BTC6POS_REL6POS"))
+ def test_render_bull_veto_is_symbol_short_scoped(self):
+  m.ACTIVE["policy"]=m.POLICIES["RENDER_SKIP_RISING_BTC_STRONG_REL"]
+  rows=[row("RENDERUSDT",tag="a"),row("TAOUSDT",tag="b"),
+        row("RENDERUSDT",side="LONG",tag="c")]
+  s=Stub()
+  with patch.object(m.entry,"candidate_transform",side_effect=lambda a,*args,**kw:a):
+   with patch.object(m.screen,"get_feat",return_value={"btc6h":1.,"rel6h":1.}):
+    out=m.entry_filter(rows,[],s,10,{},None)
+  self.assertEqual([x["candidate_id"] for x in out],["b","c"])
+  self.assertEqual(len(m.ACTIVE["blocked"]),1)
+
 if __name__=="__main__":unittest.main()
