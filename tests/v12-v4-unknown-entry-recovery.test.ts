@@ -18,6 +18,18 @@ test("unknown entry recovery also accepts an unsent prepared entry with the same
  assert.doesNotThrow(()=>assertUnknownEntryNoVenueExecution(prepared,"cid",evidence()));
 });
 
+test("unknown entry recovery allows funding-only income but rejects execution-linked income",()=>{
+ assert.doesNotThrow(()=>assertUnknownEntryNoVenueExecution(base,"cid",evidence({
+  income:[{symbol:"LTCUSDT",incomeType:"FUNDING_FEE",income:"0.001",asset:"USDT",tradeId:""}],
+ })));
+ assert.throws(()=>assertUnknownEntryNoVenueExecution(base,"cid",evidence({
+  income:[{symbol:"LTCUSDT",incomeType:"FUNDING_FEE",income:"0.001",asset:"USDT",tradeId:"execution-1"}],
+ })),/INCOME_PRESENT/);
+ assert.throws(()=>assertUnknownEntryNoVenueExecution(base,"cid",evidence({
+  income:[{symbol:"LTCUSDT",incomeType:"REALIZED_PNL",income:"1.0",asset:"USDT",tradeId:""}],
+ })),/INCOME_PRESENT/);
+});
+
 test("unknown entry recovery accepts same-symbol venue exposure only when it exactly reconciles to another protected V4 leg",()=>{
  const doc=structuredClone(base);
  doc.intents={

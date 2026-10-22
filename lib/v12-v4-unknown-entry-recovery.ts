@@ -39,12 +39,22 @@ function openOrderClientOrderId(row:unknown){
   return String(record.clientOrderId??record.origClientOrderId??"");
 }
 
+function isBenignFundingIncome(row:unknown){
+  if(!row||typeof row!=="object")return false;
+  const record=row as Record<string,unknown>;
+  const incomeType=String(record.incomeType??record.info??"").trim().toUpperCase();
+  const tradeId=String(record.tradeId??"").trim();
+  return incomeType==="FUNDING_FEE"&&tradeId.length===0;
+}
+
 /**
  * This is an operator-only local-state recovery. It never retries an order and
  * never calls a venue mutation endpoint. A missing order is resolvable only
  * when the signed venue reads show -2013, no additional symbol exposure beyond
  * independently reconciled V4 legs, no unknown symbol open order, no user-trade
- * fill, and no symbol income in the submission window. This same-symbol case is
+ * fill, and no execution-linked symbol income in the submission window. A
+ * funding-only row with an empty trade id is not an execution proof because it
+ * can accrue to an already-open protected leg. This same-symbol case is
  * intentionally strict: every existing V4 leg must retain its signed
  * reduce-only protection read-back.
  */
@@ -77,7 +87,7 @@ export function assertUnknownEntryNoVenueExecution(
     if(!venueOpenOrderIds.has(clientOrderId))throw Error("V4_UNKNOWN_ENTRY_RECOVERY_KNOWN_PROTECTION_NOT_READ_BACK");
   }
   if(evidence.userTrades.length>0)throw Error("V4_UNKNOWN_ENTRY_RECOVERY_TRADE_PRESENT");
-  if(evidence.income.length>0)throw Error("V4_UNKNOWN_ENTRY_RECOVERY_INCOME_PRESENT");
+  if(evidence.income.some(row=>!isBenignFundingIncome(row)))throw Error("V4_UNKNOWN_ENTRY_RECOVERY_INCOME_PRESENT");
   return {intent,leg,protection};
 }
 
