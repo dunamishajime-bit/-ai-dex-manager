@@ -1,0 +1,995 @@
+{
+  "status": "IDLE_SHORT_CUMULATIVE_AFTER_HYPE_ACCEPTED_RESEARCH_NOT_LIVE",
+  "period": "2025-08-10..2026-08-10",
+  "startingJPY": 10000,
+  "costBps": [
+    10,
+    30
+  ],
+  "lockedHypeEntryAndTwoExits": "COMBO_I1H1_P3F1P5",
+  "V12V4FourAndQ102ThreeLocked": true,
+  "dynamicEightLogicReplay": true,
+  "parityWithAdoptedHypeAnchor": "PASS",
+  "fiveMinuteSourceCoverage": "PASS_ALL_ACCEPTED_IDLE_SHORT",
+  "independentTask9TSEconomicParityCertified": false,
+  "productionOrOrdersChanged": false,
+  "baseline": {
+    "rule": null,
+    "costs": {
+      "10": {
+        "finalEquityJpy": 231889902.2769463,
+        "equityDeltaVsHypeAdoptedJpy": 0.0,
+        "maxMtmDdPct": -14.603309760733396,
+        "ddDeltaPp": 0.0,
+        "profitFactor": 3.914947744244699,
+        "totalClosedTrades": 1303,
+        "idleShortTrades": 75,
+        "idleShortWins": 44,
+        "idleShortLosses": 31,
+        "idleShortRealizedJpy": 11024043.087107206,
+        "idleShortExitReasons": {
+          "TIME_EXIT": 60,
+          "5M_PROTECTIVE_STOP": 13,
+          "STOP": 2
+        },
+        "replayPasses": [
+          {
+            "iteration": 0,
+            "v12ShortStopEvents": 52,
+            "hypeSourceMissing": 0
+          },
+          {
+            "iteration": 1,
+            "v12ShortStopEvents": 52,
+            "hypeSourceMissing": 0
+          },
+          {
+            "iteration": 2,
+            "v12ShortStopEvents": 52,
+            "hypeSourceMissing": 0
+          }
+        ],
+        "accounting": "PASS",
+        "hypeAcceptedTradeCount": 18,
+        "ledgersSha256": {
+          "portfolio-trades.jsonl": "f56f7c6fd2038b5e7b298d837b315fb9599ccb2ad19598289085a0f28d26bf11",
+          "candidate-decisions.jsonl": "7eb5f163eb626c493536adc4fdff319c7bec43ec873eca1ee416537a8986adf6",
+          "portfolio-events.jsonl": "7ac4736744038db856637ed8b798b06fc44108df81254c0776ae7d1f1832646c",
+          "task9-mtm.jsonl": "6dcea66f0638b38323f8c27331cf55b5a3632f258fa27b0bebd9e310a3ebe446",
+          "metrics.json": "8bb93b8dba9de9f0d16e77b4bc20258d31c1da576e29195dbd3492121793f0ac"
+        }
+      },
+      "30": {
+        "finalEquityJpy": 129855821.95566286,
+        "equityDeltaVsHypeAdoptedJpy": 0.0,
+        "maxMtmDdPct": -15.80770763869479,
+        "ddDeltaPp": 0.0,
+        "profitFactor": 3.35179459175414,
+        "totalClosedTrades": 1300,
+        "idleShortTrades": 77,
+        "idleShortWins": 47,
+        "idleShortLosses": 30,
+        "idleShortRealizedJpy": 8543901.545866458,
+        "idleShortExitReasons": {
+          "TIME_EXIT": 63,
+          "5M_PROTECTIVE_STOP": 12,
+          "STOP": 2
+        },
+        "replayPasses": [
+          {
+            "iteration": 0,
+            "v12ShortStopEvents": 51,
+            "hypeSourceMissing": 0
+          },
+          {
+            "iteration": 1,
+            "v12ShortStopEvents": 51,
+            "hypeSourceMissing": 0
+          },
+          {
+            "iteration": 2,
+            "v12ShortStopEvents": 51,
+            "hypeSourceMissing": 0
+          }
+        ],
+        "accounting": "PASS",
+        "hypeAcceptedTradeCount": 17,
+        "ledgersSha256": {
+          "portfolio-trades.jsonl": "43518d68f8fb6d3875c6feb77f34c71ec721847ddddf922ae667445fb7c82705",
+          "candidate-decisions.jsonl": "0e24da3b54af080b1d8f3a5466b96581f0025d9f75a002778acf4892f6490e44",
+          "portfolio-events.jsonl": "0ba4f61ef36c5729195aa85d330eaf0b255f74b0c948d32eaf8abf65322ceab2",
+          "task9-mtm.jsonl": "4eb5b3fa1292e617d871b90e6c4c6035a8a7bb89556c0082a3973cd41083c18f",
+          "metrics.json": "a6a2216a1ef14d676c0ec5e33f0203149ae0c81eb63bb1a0a34fab165f5e4cde"
+        }
+      }
+    }
+  },
+  "cases": {
+    "RENDER_SHORT_INITIAL_1H_MINUS1": {
+      "rule": {
+        "id": "IDLE_RENDER_SHORT_INITIAL_1H_1P0_MFE0P3",
+        "strategy": "IDLE",
+        "sides": [
+          "SHORT"
+        ],
+        "symbols": [
+          "RENDERUSDT"
+        ],
+        "kind": "initial",
+        "arm_hours": 1,
+        "stop_pct": 0.01,
+        "mfe_gate_pct": 0.003,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 228975558.27625686,
+          "equityDeltaVsHypeAdoptedJpy": -2914344.000689447,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaPp": 0.0,
+          "profitFactor": 3.919468780116027,
+          "totalClosedTrades": 1304,
+          "idleShortTrades": 75,
+          "idleShortWins": 42,
+          "idleShortLosses": 33,
+          "idleShortRealizedJpy": 11048303.821182335,
+          "idleShortExitReasons": {
+            "TIME_EXIT": 54,
+            "5M_PROTECTIVE_STOP": 12,
+            "STOP": 2,
+            "RESEARCH_INITIAL_ADVERSE_STOP_IDLE_RENDER_SHORT_INITIAL_1H_1P0_MFE0P3": 7
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v12ShortStopEvents": 52,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v12ShortStopEvents": 52,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v12ShortStopEvents": 52,
+              "hypeSourceMissing": 0
+            }
+          ],
+          "accounting": "PASS",
+          "hypeAcceptedTradeCount": 19,
+          "ledgersSha256": {
+            "portfolio-trades.jsonl": "671d54d89d163fe18b20f89f4bba50f3c81f40edd63aebf7ccc70584e734613e",
+            "candidate-decisions.jsonl": "9df26f7b324c819ffa5998ad2392cbd6bce2f2bb06cee6440df9841cdd2e1127",
+            "portfolio-events.jsonl": "d6da71e08cd2b88c6a70f865d93939e41689c80c2ed5ee79bf5a6679b7d93b8b",
+            "task9-mtm.jsonl": "54866b55139de05bfd6a4089bce249a0c83bf1b41c1c75f94374639b1fb04e7e",
+            "metrics.json": "318bb6c31a62498776b44034497c428ac06ebf12cd55722f5ed007bbcbc4457c"
+          }
+        },
+        "30": {
+          "finalEquityJpy": 127199696.21762283,
+          "equityDeltaVsHypeAdoptedJpy": -2656125.73804003,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaPp": 0.0,
+          "profitFactor": 3.3463589056718863,
+          "totalClosedTrades": 1301,
+          "idleShortTrades": 77,
+          "idleShortWins": 45,
+          "idleShortLosses": 32,
+          "idleShortRealizedJpy": 8398299.557324264,
+          "idleShortExitReasons": {
+            "TIME_EXIT": 57,
+            "5M_PROTECTIVE_STOP": 11,
+            "STOP": 2,
+            "RESEARCH_INITIAL_ADVERSE_STOP_IDLE_RENDER_SHORT_INITIAL_1H_1P0_MFE0P3": 7
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v12ShortStopEvents": 51,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v12ShortStopEvents": 51,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v12ShortStopEvents": 51,
+              "hypeSourceMissing": 0
+            }
+          ],
+          "accounting": "PASS",
+          "hypeAcceptedTradeCount": 18,
+          "ledgersSha256": {
+            "portfolio-trades.jsonl": "e1369df077c7a13b746a3a2d3b48df91e63bb6b7386665fd686b7d5e223773aa",
+            "candidate-decisions.jsonl": "dde072da73d526015821ba56db50b5fa5e7750d10018327307f4f27dd991c0c6",
+            "portfolio-events.jsonl": "3849d53fc54ff5701f8f2c1873a28ee140b53d057e4ce83fa8209d439014ba2e",
+            "task9-mtm.jsonl": "4d7bce52d5bd44cd0a512df3852c2ddabe0ce4f0bb5eabe021d17547f1c73d0e",
+            "metrics.json": "95a9b0b97da7c4e7be0e852267b4db55e2f47840008c34bcc012d14d192e8b84"
+          }
+        }
+      }
+    },
+    "TAO_SHORT_INITIAL_1H_MINUS1": {
+      "rule": {
+        "id": "IDLE_TAO_SHORT_INITIAL_1H_1P0_MFE0P3",
+        "strategy": "IDLE",
+        "sides": [
+          "SHORT"
+        ],
+        "symbols": [
+          "TAOUSDT"
+        ],
+        "kind": "initial",
+        "arm_hours": 1,
+        "stop_pct": 0.01,
+        "mfe_gate_pct": 0.003,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 232195520.6068886,
+          "equityDeltaVsHypeAdoptedJpy": 305618.329942286,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaPp": 0.0,
+          "profitFactor": 3.922206503962928,
+          "totalClosedTrades": 1303,
+          "idleShortTrades": 75,
+          "idleShortWins": 44,
+          "idleShortLosses": 31,
+          "idleShortRealizedJpy": 11183129.700016676,
+          "idleShortExitReasons": {
+            "TIME_EXIT": 59,
+            "5M_PROTECTIVE_STOP": 13,
+            "STOP": 2,
+            "RESEARCH_INITIAL_ADVERSE_STOP_IDLE_TAO_SHORT_INITIAL_1H_1P0_MFE0P3": 1
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v12ShortStopEvents": 52,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v12ShortStopEvents": 52,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v12ShortStopEvents": 52,
+              "hypeSourceMissing": 0
+            }
+          ],
+          "accounting": "PASS",
+          "hypeAcceptedTradeCount": 18,
+          "ledgersSha256": {
+            "portfolio-trades.jsonl": "91a7034cb637c280c1442f619d01c1347d3bb6580b9abba81e58266e28281bbb",
+            "candidate-decisions.jsonl": "9eeb7aed24fefb4fa63db845bf9643d832f1db50fc01c4d5457c4e468dcf325c",
+            "portfolio-events.jsonl": "45c4739af51fa20b6e244b976c65ce0f67038261a80c5e39ec336221a27f46ae",
+            "task9-mtm.jsonl": "c61434c94f22d41194d156f81df0e843755f4fc38673d3a8b049a0a346113372",
+            "metrics.json": "3f48a1431665747c074b3fbf6864195abb35d9b19b9de1dc36a9616872cab9d9"
+          }
+        },
+        "30": {
+          "finalEquityJpy": 129979907.84965537,
+          "equityDeltaVsHypeAdoptedJpy": 124085.89399251342,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaPp": 0.0,
+          "profitFactor": 3.352041788153297,
+          "totalClosedTrades": 1300,
+          "idleShortTrades": 77,
+          "idleShortWins": 47,
+          "idleShortLosses": 30,
+          "idleShortRealizedJpy": 8556219.268812235,
+          "idleShortExitReasons": {
+            "TIME_EXIT": 62,
+            "5M_PROTECTIVE_STOP": 12,
+            "STOP": 2,
+            "RESEARCH_INITIAL_ADVERSE_STOP_IDLE_TAO_SHORT_INITIAL_1H_1P0_MFE0P3": 1
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v12ShortStopEvents": 51,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v12ShortStopEvents": 51,
+              "hypeSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v12ShortStopEvents": 51,
+              "hypeSourceMissing": 0
+            }
+          ],
+          "accounting": "PASS",
+          "hypeAcceptedTradeCount": 17,
+          "ledgersSha256": {
+            "portfolio-trades.jsonl": "dc33c33491a0a0fa4207881b93f6a19f28d13328d93d55045adcdaf100900de6",
+            "candidate-decisions.jsonl": "73e196cbc6ff795c420c46d59b08838a86c29002f0fba7c9a091f5c4e107f7b9",
+            "portfolio-events.jsonl": "32cbae4e91409f1c0e9df393948493b75437ccc75444c7387f70c6eb63186237",
+            "task9-mtm.jsonl": "201722084ad29762d22cdb7f93e23782157b3ddb13f109e996eb26b05e578c4e",
+            "metrics.json": "86a0ee58e135227fe3a8a232b8110c2de3fe58d77b7200e2c53b40bf5783f0c5"
+          }
+        }
+      }
+    }
+  },
+  "sourceScreen": {
+    "status": "IDLE_SHORT_PRICE_PATH_RESEARCH_NOT_CUMULATIVE_ECONOMIC_BT",
+    "sourceHypePolicy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0_AND_COMBO_I1H1_P3F1P5",
+    "period": "2025-08-10..2026-08-10",
+    "costs": {
+      "10": {
+        "totalAcceptedIdleShort": 75,
+        "validM5Count": 75,
+        "coverage": {
+          "OK": 75
+        },
+        "baseline": {
+          "trades": 75,
+          "wins": 44,
+          "losses": 31,
+          "winRatePct": 58.6667,
+          "pnlJpy": 11024043.087107206,
+          "loserPnlJpy": -5052832.101862177,
+          "medianMfePct": 2.6472534745201717,
+          "medianMaePct": 2.4974698834513984,
+          "medianHoldH": 12.0,
+          "exitReasons": {
+            "TIME_EXIT": 60,
+            "5M_PROTECTIVE_STOP": 13,
+            "STOP": 2
+          }
+        },
+        "bySymbol": {
+          "DOTUSDT": {
+            "baseline": {
+              "trades": 32,
+              "wins": 20,
+              "losses": 12,
+              "winRatePct": 62.5,
+              "pnlJpy": 3289397.88517098,
+              "loserPnlJpy": -130599.44654908513,
+              "medianMfePct": 2.7306634507041636,
+              "medianMaePct": 2.8958643368057384,
+              "medianHoldH": 24.0,
+              "exitReasons": {
+                "TIME_EXIT": 21,
+                "5M_PROTECTIVE_STOP": 10,
+                "STOP": 1
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 5,
+                "oldWinners": 1,
+                "oldLosers": 4,
+                "oldWinnerPnlJpy": 14.591224273803675,
+                "oldLoserPnlJpy": -6648.141134808513
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 6,
+                "oldWinners": 2,
+                "oldLosers": 4,
+                "oldWinnerPnlJpy": 31051.797788533713,
+                "oldLoserPnlJpy": -6704.55176982733
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 5,
+                "oldWinners": 2,
+                "oldLosers": 3,
+                "oldWinnerPnlJpy": 31051.797788533713,
+                "oldLoserPnlJpy": -5447.806746733264
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 10,
+                "oldWinners": 7,
+                "oldLosers": 3,
+                "oldWinnerPnlJpy": 772619.7680954583,
+                "oldLoserPnlJpy": -71790.35914425242
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 797.5353975536481,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "JUPUSDT": {
+            "baseline": {
+              "trades": 4,
+              "wins": 3,
+              "losses": 1,
+              "winRatePct": 75.0,
+              "pnlJpy": 521273.0130165859,
+              "loserPnlJpy": -11185.549758518766,
+              "medianMfePct": 2.76425012726013,
+              "medianMaePct": 1.0203355122189415,
+              "medianHoldH": 12.0,
+              "exitReasons": {
+                "TIME_EXIT": 4
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 44349.979931329304,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 141329.05824827185,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 141329.05824827185,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "RENDERUSDT": {
+            "baseline": {
+              "trades": 26,
+              "wins": 11,
+              "losses": 15,
+              "winRatePct": 42.3077,
+              "pnlJpy": 2191495.6379224514,
+              "loserPnlJpy": -2677193.2626111754,
+              "medianMfePct": 1.6102314063826273,
+              "medianMaePct": 2.6562323480702146,
+              "medianHoldH": 12.0,
+              "exitReasons": {
+                "TIME_EXIT": 22,
+                "STOP": 1,
+                "5M_PROTECTIVE_STOP": 3
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 7,
+                "oldWinners": 1,
+                "oldLosers": 6,
+                "oldWinnerPnlJpy": 1711.267887673407,
+                "oldLoserPnlJpy": -957092.9196474649
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 8,
+                "oldWinners": 3,
+                "oldLosers": 5,
+                "oldWinnerPnlJpy": 959017.992981426,
+                "oldLoserPnlJpy": -505902.82343102904
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 6,
+                "oldWinners": 2,
+                "oldLosers": 4,
+                "oldWinnerPnlJpy": 707741.4231226067,
+                "oldLoserPnlJpy": -465001.8966999705
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 2,
+                "oldWinners": 0,
+                "oldLosers": 2,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -3214.75012313185
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "TAOUSDT": {
+            "baseline": {
+              "trades": 8,
+              "wins": 5,
+              "losses": 3,
+              "winRatePct": 62.5,
+              "pnlJpy": 4367133.561072389,
+              "loserPnlJpy": -2233853.842943398,
+              "medianMfePct": 3.4509864219550854,
+              "medianMaePct": 1.3208917408626015,
+              "medianHoldH": 12.0,
+              "exitReasons": {
+                "TIME_EXIT": 8
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 1,
+                "oldWinners": 0,
+                "oldLosers": 1,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -875577.6336021647
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 0,
+                "oldLosers": 1,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -875577.6336021647
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 0,
+                "oldLosers": 1,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -875577.6336021647
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 3,
+                "oldWinners": 3,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 1965741.4267008207,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 2,
+                "oldWinners": 2,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 196507.19217333183,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "TIAUSDT": {
+            "baseline": {
+              "trades": 5,
+              "wins": 5,
+              "losses": 0,
+              "winRatePct": 100.0,
+              "pnlJpy": 654742.9899248002,
+              "loserPnlJpy": 0,
+              "medianMfePct": 4.672897196261669,
+              "medianMaePct": 1.322979580097785,
+              "medianHoldH": 24.0,
+              "exitReasons": {
+                "TIME_EXIT": 5
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 82624.05560593998,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 82624.05560593998,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 82624.05560593998,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 20925.193909087837,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 20925.193909087837,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 20925.193909087837,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          }
+        },
+        "ledger": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-22_hype_entry_plus_exit_full8\\adopted_3p1p5_plus_1h_initial\\engine\\cmp_86473c2a0fd2\\cmp_86473c2a0fd2\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+        "sourceHypePortfolioFinalJpy": 231889902.2769463,
+        "evidenceType": "5m path conditional triggers on accepted fixed positions, not fully dynamic portfolio"
+      },
+      "30": {
+        "totalAcceptedIdleShort": 77,
+        "validM5Count": 77,
+        "coverage": {
+          "OK": 77
+        },
+        "baseline": {
+          "trades": 77,
+          "wins": 47,
+          "losses": 30,
+          "winRatePct": 61.039,
+          "pnlJpy": 8543901.545866458,
+          "loserPnlJpy": -2050633.2288481274,
+          "medianMfePct": 2.7027027027027057,
+          "medianMaePct": 2.4396135265700463,
+          "medianHoldH": 12.0,
+          "exitReasons": {
+            "TIME_EXIT": 63,
+            "5M_PROTECTIVE_STOP": 12,
+            "STOP": 2
+          }
+        },
+        "bySymbol": {
+          "DOTUSDT": {
+            "baseline": {
+              "trades": 31,
+              "wins": 20,
+              "losses": 11,
+              "winRatePct": 64.5161,
+              "pnlJpy": 1625628.9915814348,
+              "loserPnlJpy": -69840.21685008054,
+              "medianMfePct": 2.7563395810363893,
+              "medianMaePct": 2.905405405405413,
+              "medianHoldH": 24.0,
+              "exitReasons": {
+                "TIME_EXIT": 20,
+                "5M_PROTECTIVE_STOP": 10,
+                "STOP": 1
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 4,
+                "oldWinners": 1,
+                "oldLosers": 3,
+                "oldWinnerPnlJpy": 8.085603677818073,
+                "oldLoserPnlJpy": -1989.5205804653215
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 5,
+                "oldWinners": 2,
+                "oldLosers": 3,
+                "oldWinnerPnlJpy": 11070.080203719519,
+                "oldLoserPnlJpy": -2036.0493287717345
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 4,
+                "oldWinners": 2,
+                "oldLosers": 2,
+                "oldWinnerPnlJpy": 11070.080203719519,
+                "oldLoserPnlJpy": -1149.923832125933
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 9,
+                "oldWinners": 7,
+                "oldLosers": 2,
+                "oldWinnerPnlJpy": 463134.13018922386,
+                "oldLoserPnlJpy": -39721.57994271574
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 462.8994576506163,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "JUPUSDT": {
+            "baseline": {
+              "trades": 7,
+              "wins": 5,
+              "losses": 2,
+              "winRatePct": 71.4286,
+              "pnlJpy": 486652.86525425204,
+              "loserPnlJpy": -45069.11042453417,
+              "medianMfePct": 2.8477546549835684,
+              "medianMaePct": 0.39171796306659706,
+              "medianHoldH": 12.0,
+              "exitReasons": {
+                "TIME_EXIT": 7
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 14551.226507146917,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 61590.59275698595,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 61590.59275698595,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "RENDERUSDT": {
+            "baseline": {
+              "trades": 24,
+              "wins": 10,
+              "losses": 14,
+              "winRatePct": 41.6667,
+              "pnlJpy": 744218.3064546698,
+              "loserPnlJpy": -1299355.3075383736,
+              "medianMfePct": 1.6102314063826273,
+              "medianMaePct": 3.0136802195625654,
+              "medianHoldH": 12.0,
+              "exitReasons": {
+                "TIME_EXIT": 21,
+                "STOP": 1,
+                "5M_PROTECTIVE_STOP": 2
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 7,
+                "oldWinners": 1,
+                "oldLosers": 6,
+                "oldWinnerPnlJpy": 509.4945177822806,
+                "oldLoserPnlJpy": -441928.2528936251
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 8,
+                "oldWinners": 3,
+                "oldLosers": 5,
+                "oldWinnerPnlJpy": 412420.9860523051,
+                "oldLoserPnlJpy": -237845.0192170123
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 6,
+                "oldWinners": 2,
+                "oldLosers": 4,
+                "oldWinnerPnlJpy": 313075.29992389714,
+                "oldLoserPnlJpy": -217875.136996266
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 2,
+                "oldWinners": 0,
+                "oldLosers": 2,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -2441.2440320649416
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "TAOUSDT": {
+            "baseline": {
+              "trades": 9,
+              "wins": 6,
+              "losses": 3,
+              "winRatePct": 66.6667,
+              "pnlJpy": 5203235.015418828,
+              "loserPnlJpy": -636368.594035139,
+              "medianMfePct": 3.349932095971022,
+              "medianMaePct": 1.9201644309822656,
+              "medianHoldH": 12.0,
+              "exitReasons": {
+                "TIME_EXIT": 9
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 1,
+                "oldWinners": 0,
+                "oldLosers": 1,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -15011.31608559689
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 0,
+                "oldLosers": 1,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -15011.31608559689
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 0,
+                "oldLosers": 1,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": -15011.31608559689
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 4,
+                "oldWinners": 4,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 3884229.180022546,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 2,
+                "oldWinners": 2,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 2286565.1274193893,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 0,
+                "oldWinners": 0,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 0,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          },
+          "TIAUSDT": {
+            "baseline": {
+              "trades": 6,
+              "wins": 6,
+              "losses": 0,
+              "winRatePct": 100.0,
+              "pnlJpy": 484166.3671572728,
+              "loserPnlJpy": 0,
+              "medianMfePct": 4.119057293783008,
+              "medianMaePct": 1.3571419639619409,
+              "medianHoldH": 24.0,
+              "exitReasons": {
+                "TIME_EXIT": 6
+              }
+            },
+            "cases": {
+              "EARLY_1H_1P0_MFE0P3": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 23163.733583336394,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_1H_1P5_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 23163.733583336394,
+                "oldLoserPnlJpy": 0
+              },
+              "EARLY_2H_2P0_MFE0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 23163.733583336394,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_2P0_FLOOR0P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 9562.43463811232,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_3P0_FLOOR1P5": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 9562.43463811232,
+                "oldLoserPnlJpy": 0
+              },
+              "PROFIT_4P0_FLOOR2P0": {
+                "hitTrades": 1,
+                "oldWinners": 1,
+                "oldLosers": 0,
+                "oldWinnerPnlJpy": 9562.43463811232,
+                "oldLoserPnlJpy": 0
+              }
+            }
+          }
+        },
+        "ledger": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-22_hype_entry_plus_exit_full8\\adopted_3p1p5_plus_1h_initial\\engine\\cmp_5bcf114a7e0a\\cmp_5bcf114a7e0a\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+        "sourceHypePortfolioFinalJpy": 129855821.95566286,
+        "evidenceType": "5m path conditional triggers on accepted fixed positions, not fully dynamic portfolio"
+      }
+    },
+    "liveOrProductionChanged": false
+  }
+}
