@@ -1,0 +1,718 @@
+{
+  "schema": "v52-native-stock-tape-h1-full8-after-fet84-research-v1",
+  "status": "RESEARCH_ONLY_NOT_LIVE_NOT_FULL_CAUSAL_ADMISSION_REGEN",
+  "economicBase": "HYPE_LONG_USER_ADOPTED_TAO_RENDER_3IDLE_RULES_PLUS_FET_TRAIL_8P_4PP",
+  "period": "2025-08-10..2026-08-10",
+  "initialCapitalJpy": 10000,
+  "depositsJpy": 0,
+  "compounding": true,
+  "normalFrictionBps": 10,
+  "stressFrictionBps": 30,
+  "stockNativeLedgerRows": 99,
+  "stockNativeClosedRows": 88,
+  "fixedSuppressedStockCandidates": 11,
+  "completeNewExitPathAppliedToV52NativeLedger": true,
+  "newExitNativeRouteIsNotCryptoOnlyPreallocation": true,
+  "userSelectedCases": [
+    "V52_AFTER_FET84_NO_CHANGE"
+  ],
+  "twoCostNonWorseningDdQualified": [],
+  "results": {
+    "V52_AFTER_FET84_NO_CHANGE": {
+      "rule": null,
+      "tapeManifest": {
+        "status": "RESEARCH_MODIFIED_STOCK_TAPE_NOT_LIVE",
+        "case": "V52_AFTER_FET84_NO_CHANGE",
+        "sourceArchiveOriginalSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f",
+        "normalizedScenarioSha256": "84c5aae9217b6acac6496e86874426177e1ee53e0e10e9d333f9fc4b2168fb51",
+        "originalRows": 99,
+        "originalClosed": 88,
+        "suppressedPreentryUnmodified": 11,
+        "modifiedClosedRows": 0,
+        "allChangedExitsWithinOriginalHolding": true,
+        "events": [],
+        "excludedBpsOrReasonMismatch": {},
+        "note": "Subset sensitivity: stock native 11 suppressed entry candidates not regenerated."
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 247247316.48637345,
+          "deltaVsFet84BaselineJpy": 0.0,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.120700112246955,
+          "closedTrades": 1299,
+          "v52Trades": 87,
+          "v52Wins": 71,
+          "v52Losses": 16,
+          "v52ModeledPnlJpy": 37348787.93081979,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 31,
+              "pnlJpy": 15672931.254211994
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 21675856.67660779
+            }
+          },
+          "modifiedV52Exits": 0,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 52
+            }
+          ],
+          "stockSourceRootSha256": "84c5aae9217b6acac6496e86874426177e1ee53e0e10e9d333f9fc4b2168fb51",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "efb1603a83397da174423855f4143ea5bcb139c680b1d8aa01aba7d6c77502e1"
+        },
+        "30": {
+          "equityJpy": 143906605.34174916,
+          "deltaVsFet84BaselineJpy": 0.0,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.456156361142333,
+          "closedTrades": 1298,
+          "v52Trades": 87,
+          "v52Wins": 70,
+          "v52Losses": 17,
+          "v52ModeledPnlJpy": 23431423.066660415,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 30,
+              "pnlJpy": 11298973.509469664
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 12132449.557190752
+            }
+          },
+          "modifiedV52Exits": 0,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 51
+            }
+          ],
+          "stockSourceRootSha256": "84c5aae9217b6acac6496e86874426177e1ee53e0e10e9d333f9fc4b2168fb51",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "25d07849173423eae6beee104e988e388cf3725787d7842ab005ec7f05972885"
+        }
+      }
+    },
+    "V52_SHORT_PARTIAL_CONV30_PNL0P2": {
+      "rule": {
+        "id": "V52_SHORT_PARTIAL_CONV30_PNL0P2",
+        "strategy": "V52",
+        "sides": [
+          "SHORT"
+        ],
+        "kind": "partial_convergence",
+        "progressBps": 30.0,
+        "minPriceGainFraction": 0.002
+      },
+      "tapeManifest": {
+        "status": "RESEARCH_MODIFIED_STOCK_TAPE_NOT_LIVE",
+        "case": "V52_SHORT_PARTIAL_CONV30_PNL0P2",
+        "sourceArchiveOriginalSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f",
+        "normalizedScenarioSha256": "b732176e2ef8d87e329214697db13c5d4ea8fc207e33e009c6de3a75ab1ccba4",
+        "originalRows": 99,
+        "originalClosed": 88,
+        "suppressedPreentryUnmodified": 11,
+        "modifiedClosedRows": 14,
+        "allChangedExitsWithinOriginalHolding": true,
+        "events": [
+          {
+            "entryTsMs": 1759505400000,
+            "symbol": "NVDAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1759516200000,
+            "newExitTsMs": 1759509000000,
+            "oldExitPrice": 186.0,
+            "newExitPrice": 190.04986,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1759941000000,
+            "symbol": "NVDAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1759951800000,
+            "newExitTsMs": 1759944600000,
+            "oldExitPrice": 191.0,
+            "newExitPrice": 192.19199999999998,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1761924600000,
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1761935400000,
+            "newExitTsMs": 1761928200000,
+            "oldExitPrice": 450.0,
+            "newExitPrice": 455.58512999999994,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1762187400000,
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1762198200000,
+            "newExitTsMs": 1762191000000,
+            "oldExitPrice": 644.22,
+            "newExitPrice": 652.4417899999999,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1763490600000,
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1763497800000,
+            "newExitTsMs": 1763494200000,
+            "oldExitPrice": 404.97,
+            "newExitPrice": 405.37496999999996,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1771605000000,
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1771615800000,
+            "newExitTsMs": 1771612200000,
+            "oldExitPrice": 657.94,
+            "newExitPrice": 658.3977399999999,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1775669400000,
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1775676600000,
+            "newExitTsMs": 1775673000000,
+            "oldExitPrice": 614.04,
+            "newExitPrice": 618.9082899999999,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1779121800000,
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1779132600000,
+            "newExitTsMs": 1779129000000,
+            "oldExitPrice": 406.17,
+            "newExitPrice": 409.56915999999995,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1780075800000,
+            "symbol": "MSFTUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1780083000000,
+            "newExitTsMs": 1780079400000,
+            "oldExitPrice": 444.68,
+            "newExitPrice": 444.31386999999995,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1780327800000,
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1780338600000,
+            "newExitTsMs": 1780331400000,
+            "oldExitPrice": 262.84,
+            "newExitPrice": 264.30404,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1782149400000,
+            "symbol": "MSFTUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1782156600000,
+            "newExitTsMs": 1782153000000,
+            "oldExitPrice": 371.76,
+            "newExitPrice": 372.13175999999993,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1783963800000,
+            "symbol": "MSFTUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1783971000000,
+            "newExitTsMs": 1783967400000,
+            "oldExitPrice": 393.68,
+            "newExitPrice": 394.07367999999997,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1784914200000,
+            "symbol": "METAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1784921400000,
+            "newExitTsMs": 1784917800000,
+            "oldExitPrice": 603.23,
+            "newExitPrice": 603.83323,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1785256200000,
+            "symbol": "TSLAUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1785267000000,
+            "newExitTsMs": 1785259800000,
+            "oldExitPrice": 306.96,
+            "newExitPrice": 308.74843999999996,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_SHORT_PARTIAL_CONV30_PNL0P2"
+          }
+        ],
+        "excludedBpsOrReasonMismatch": {
+          "modelled_hourly_early_exit_V52_SHORT_PARTIAL_CONV30_PNL0P2": 14,
+          "basis_entry_mismatch": 2
+        },
+        "note": "Subset sensitivity: stock native 11 suppressed entry candidates not regenerated."
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 237521922.78993028,
+          "deltaVsFet84BaselineJpy": -9725393.69644317,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.110421219398914,
+          "closedTrades": 1299,
+          "v52Trades": 87,
+          "v52Wins": 71,
+          "v52Losses": 16,
+          "v52ModeledPnlJpy": 34092108.23046645,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 31,
+              "pnlJpy": 15504056.066432858
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 18588052.164033584
+            }
+          },
+          "modifiedV52Exits": 14,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 52
+            }
+          ],
+          "stockSourceRootSha256": "b732176e2ef8d87e329214697db13c5d4ea8fc207e33e009c6de3a75ab1ccba4",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "b7ad1cd0386eb1604815a3dade124186f53245fbf888228ceea35e41d8cfe0aa"
+        },
+        "30": {
+          "equityJpy": 132700801.54036874,
+          "deltaVsFet84BaselineJpy": -11205803.801380426,
+          "maxMtmDdPct": -15.801210662825572,
+          "profitFactor": 3.428089900465942,
+          "closedTrades": 1297,
+          "v52Trades": 87,
+          "v52Wins": 70,
+          "v52Losses": 17,
+          "v52ModeledPnlJpy": 20710355.907687515,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 30,
+              "pnlJpy": 11055427.638129614
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 9654928.2695579
+            }
+          },
+          "modifiedV52Exits": 14,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 51
+            }
+          ],
+          "stockSourceRootSha256": "b732176e2ef8d87e329214697db13c5d4ea8fc207e33e009c6de3a75ab1ccba4",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "0188718dc8c2450801b918723aa1ef08eb4d7e67a31534dfcb0a49c623d10711"
+        }
+      }
+    },
+    "V52_SHORT_BASIS125_LOSS0P1": {
+      "rule": {
+        "id": "V52_SHORT_BASIS125_LOSS0P1",
+        "strategy": "V52",
+        "sides": [
+          "SHORT"
+        ],
+        "kind": "basis_early",
+        "basisRatioMin": 1.25,
+        "maxPriceGainFraction": -0.001
+      },
+      "tapeManifest": {
+        "status": "RESEARCH_MODIFIED_STOCK_TAPE_NOT_LIVE",
+        "case": "V52_SHORT_BASIS125_LOSS0P1",
+        "sourceArchiveOriginalSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f",
+        "normalizedScenarioSha256": "494eb3baa7ab8ededa4b9375e61dd29dd2e58651af27630a464b1bb5b0d2921f",
+        "originalRows": 99,
+        "originalClosed": 88,
+        "suppressedPreentryUnmodified": 11,
+        "modifiedClosedRows": 1,
+        "allChangedExitsWithinOriginalHolding": true,
+        "events": [
+          {
+            "entryTsMs": 1759426200000,
+            "symbol": "AMZNUSDT",
+            "side": "SHORT",
+            "oldExitTsMs": 1759433400000,
+            "newExitTsMs": 1759429800000,
+            "oldExitPrice": 225.4,
+            "newExitPrice": 225.62539999999998,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_SHORT_BASIS125_LOSS0P1"
+          }
+        ],
+        "excludedBpsOrReasonMismatch": {
+          "modelled_hourly_early_exit_V52_SHORT_BASIS125_LOSS0P1": 1,
+          "basis_entry_mismatch": 2
+        },
+        "note": "Subset sensitivity: stock native 11 suppressed entry candidates not regenerated."
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 247470405.94272053,
+          "deltaVsFet84BaselineJpy": 223089.45634707808,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.12061197071183,
+          "closedTrades": 1299,
+          "v52Trades": 87,
+          "v52Wins": 71,
+          "v52Losses": 16,
+          "v52ModeledPnlJpy": 37360756.91592936,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 31,
+              "pnlJpy": 15679434.633799909
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 21681322.282129455
+            }
+          },
+          "modifiedV52Exits": 1,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 52
+            }
+          ],
+          "stockSourceRootSha256": "494eb3baa7ab8ededa4b9375e61dd29dd2e58651af27630a464b1bb5b0d2921f",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "806c94c55af77248ad08b14bbd03c6cfbfce076581c6e69fa86787f48c199f97"
+        },
+        "30": {
+          "equityJpy": 143719411.0288058,
+          "deltaVsFet84BaselineJpy": -187194.31294336915,
+          "maxMtmDdPct": -15.80248072170799,
+          "profitFactor": 3.4560609046305073,
+          "closedTrades": 1297,
+          "v52Trades": 87,
+          "v52Wins": 70,
+          "v52Losses": 17,
+          "v52ModeledPnlJpy": 23414842.077970892,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 30,
+              "pnlJpy": 11293150.136788659
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 12121691.941182233
+            }
+          },
+          "modifiedV52Exits": 1,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 51
+            }
+          ],
+          "stockSourceRootSha256": "494eb3baa7ab8ededa4b9375e61dd29dd2e58651af27630a464b1bb5b0d2921f",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "3167608fe00af167d18b26d6d58c4027a0b1a04863ecbab829c141e019df896b"
+        }
+      }
+    },
+    "V52_LONG_PARTIAL_CONV30_PNL0P2": {
+      "rule": {
+        "id": "V52_LONG_PARTIAL_CONV30_PNL0P2",
+        "strategy": "V52",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "partial_convergence",
+        "progressBps": 30.0,
+        "minPriceGainFraction": 0.002
+      },
+      "tapeManifest": {
+        "status": "RESEARCH_MODIFIED_STOCK_TAPE_NOT_LIVE",
+        "case": "V52_LONG_PARTIAL_CONV30_PNL0P2",
+        "sourceArchiveOriginalSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f",
+        "normalizedScenarioSha256": "8f8acacb0cb452ec8d82e839f389c0835e8a7c2ba2fcd2e274c8d212325356bd",
+        "originalRows": 99,
+        "originalClosed": 88,
+        "suppressedPreentryUnmodified": 11,
+        "modifiedClosedRows": 6,
+        "allChangedExitsWithinOriginalHolding": true,
+        "events": [
+          {
+            "entryTsMs": 1759167000000,
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "oldExitTsMs": 1759174200000,
+            "newExitTsMs": 1759170600000,
+            "oldExitPrice": 443.0,
+            "newExitPrice": 440.71884,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_LONG_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1760113800000,
+            "symbol": "AMZNUSDT",
+            "side": "LONG",
+            "oldExitTsMs": 1760121000000,
+            "newExitTsMs": 1760117400000,
+            "oldExitPrice": 218.32,
+            "newExitPrice": 218.10168,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_LONG_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1762446600000,
+            "symbol": "METAUSDT",
+            "side": "LONG",
+            "oldExitTsMs": 1762457400000,
+            "newExitTsMs": 1762453800000,
+            "oldExitPrice": 620.7,
+            "newExitPrice": 620.0793,
+            "oldReason": "TIME_OR_SESSION_FLAT",
+            "newReason": "RESEARCH_H1_V52_LONG_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1766165400000,
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "oldExitTsMs": 1766176200000,
+            "newExitTsMs": 1766172600000,
+            "oldExitPrice": 482.505,
+            "newExitPrice": 481.393125,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_LONG_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1769704200000,
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "oldExitTsMs": 1769715000000,
+            "newExitTsMs": 1769711400000,
+            "oldExitPrice": 420.86,
+            "newExitPrice": 420.49908,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_LONG_PARTIAL_CONV30_PNL0P2"
+          },
+          {
+            "entryTsMs": 1781281800000,
+            "symbol": "TSLAUSDT",
+            "side": "LONG",
+            "oldExitTsMs": 1781289000000,
+            "newExitTsMs": 1781285400000,
+            "oldExitPrice": 402.75,
+            "newExitPrice": 398.39121,
+            "oldReason": "BASIS_CONVERGED",
+            "newReason": "RESEARCH_H1_V52_LONG_PARTIAL_CONV30_PNL0P2"
+          }
+        ],
+        "excludedBpsOrReasonMismatch": {
+          "modelled_hourly_early_exit_V52_LONG_PARTIAL_CONV30_PNL0P2": 6,
+          "basis_entry_mismatch": 1
+        },
+        "note": "Subset sensitivity: stock native 11 suppressed entry candidates not regenerated."
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 243241596.27643767,
+          "deltaVsFet84BaselineJpy": -4005720.2099357843,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 4.101219519583479,
+          "closedTrades": 1297,
+          "v52Trades": 87,
+          "v52Wins": 71,
+          "v52Losses": 16,
+          "v52ModeledPnlJpy": 35816316.61258612,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 31,
+              "pnlJpy": 14206258.123221682
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 21610058.489364434
+            }
+          },
+          "modifiedV52Exits": 6,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 52
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 52
+            }
+          ],
+          "stockSourceRootSha256": "8f8acacb0cb452ec8d82e839f389c0835e8a7c2ba2fcd2e274c8d212325356bd",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "3a8f5240bd6549faba7b52324d5f4a415d8b2e112ecdee3a4dfc7a77f4835b20"
+        },
+        "30": {
+          "equityJpy": 140851222.21118936,
+          "deltaVsFet84BaselineJpy": -3055383.130559802,
+          "maxMtmDdPct": -15.77180672223072,
+          "profitFactor": 3.432937137511757,
+          "closedTrades": 1297,
+          "v52Trades": 87,
+          "v52Wins": 70,
+          "v52Losses": 17,
+          "v52ModeledPnlJpy": 21934147.05569427,
+          "v52BySide": {
+            "LONG": {
+              "trades": 35,
+              "wins": 30,
+              "pnlJpy": 9864194.45618538
+            },
+            "SHORT": {
+              "trades": 52,
+              "wins": 40,
+              "pnlJpy": 12069952.599508893
+            }
+          },
+          "modifiedV52Exits": 6,
+          "reselectionHistory": [
+            {
+              "iteration": 0,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 1,
+              "v12ShortCooldown": 51
+            },
+            {
+              "iteration": 2,
+              "v12ShortCooldown": 51
+            }
+          ],
+          "stockSourceRootSha256": "8f8acacb0cb452ec8d82e839f389c0835e8a7c2ba2fcd2e274c8d212325356bd",
+          "fixedStockOriginallySuppressed11": true,
+          "accounting": "PASS",
+          "ledgerSha256": "c7a1ab6f8460f54f2311210600d05b448bca38a8d52712fa4b6a8911b4d27cd8"
+        }
+      }
+    }
+  },
+  "provenance": {
+    "sourceAudit": "V52_BASIS_AUDIT_20261022.json",
+    "referenceAndAsterH1Parity": "V52_HOURLY_PARITY_20261022.json",
+    "yahooHourlyPricesAcquiredOutsideGit": "v52_hourly_reference_recovery/yahoo-h1-provenance-manifest.json",
+    "asterOfficialHourlySource": "Previous_Projects/bt-analysis-formal/market-Aster-H1-funding-and-manifests/normalized/aster_stock/klines"
+  },
+  "hardLimitations": [
+    "Fixed original 99-row V52 tape; the 11 originally suppressed same-session V52 candidates are not regenerated on earlier exit.",
+    "No complete V52 eligibility re-run, so not full dynamically reselected 8-strategy research in the V52 sleeve (other seven reallocate).",
+    "Yahoo public 60m and Aster official H1 last completed closes are price-model proxies, not simultaneous executable live price or L2 order book.",
+    "One V52 historical exit reason and two entry basis quotes disagree with reconstructed H1; those rows fail closed for new changes.",
+    "In sample exploratory testing 2025-08..2026-08; no untouched OOS, independent production TypeScript parity or actual venue STOP certification.",
+    "Nothing in this research executes orders, authorizes Kill Switch bypass, updates Production/Runner/HP or certifies LIVE."
+  ]
+}

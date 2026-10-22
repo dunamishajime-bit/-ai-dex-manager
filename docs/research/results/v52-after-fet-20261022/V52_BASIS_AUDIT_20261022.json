@@ -1,0 +1,538 @@
+{
+  "schema": "v52-source-basis-audit-after-fet84-v1",
+  "status": "INITIAL_M5_ONLY_AUDIT_SUPERSEDED_BY_RECOVERED_YAHOO_ASTER_H1",
+  "basisEntryQuoteEvidence": {
+    "acceptedRows": 87,
+    "withYahooEntryAndBasis": 87,
+    "maxEntryBasisArithmeticDisagreementBps": 0.0,
+    "hasContinuousReferenceSeries": false,
+    "hasSynchronizedCheckpointBasisSeries": false
+  },
+  "existingExitContract": {
+    "policyId": "V50_B60_C20_STOP1.75_EDGE7.5_COST60_SPREAD20",
+    "strategy": "V50_POST_OPEN_BASIS",
+    "windowPolicy": "POST_EARLY3",
+    "windowsNy": [
+      "11:30",
+      "12:30",
+      "13:30"
+    ],
+    "direction": "BOTH",
+    "minimumEntryBasisBps": 60,
+    "convergenceBps": 20,
+    "basisStopMultiple": 1.75,
+    "minimumNetEdgeBps": 7.5,
+    "maximumRoundTripCostBps": 60,
+    "maximumSpreadBps": 20,
+    "maximumHoldingHours": 3,
+    "stockAggregateGross": 4.0,
+    "slotGross": 2.0
+  },
+  "priorStudyHadIncompleteToken5m": true,
+  "priceHistory": {
+    "TSLAUSDT": {
+      "firstUtc": "2026-01-28T14:30:00Z",
+      "lastUtc": "2026-09-01T00:00:00Z",
+      "nBars": 62034,
+      "20261017Study": {
+        "n": 18,
+        "coverage": 10,
+        "missing": 8,
+        "max_abs_entry_pct": 1.491,
+        "mean_abs_entry_pct": 0.929,
+        "mismatch_over_2p5": 0
+      }
+    },
+    "NVDAUSDT": {
+      "firstUtc": "2026-03-26T14:40:00Z",
+      "lastUtc": "2026-09-01T00:00:00Z",
+      "nBars": 45616,
+      "20261017Study": {
+        "n": 13,
+        "coverage": 2,
+        "missing": 11,
+        "max_abs_entry_pct": 1.927,
+        "mean_abs_entry_pct": 1.349,
+        "mismatch_over_2p5": 0
+      }
+    },
+    "METAUSDT": {
+      "firstUtc": "2026-03-26T14:30:00Z",
+      "lastUtc": "2026-09-01T00:00:00Z",
+      "nBars": 45618,
+      "20261017Study": {
+        "n": 23,
+        "coverage": 15,
+        "missing": 8,
+        "max_abs_entry_pct": 1.979,
+        "mean_abs_entry_pct": 0.881,
+        "mismatch_over_2p5": 0
+      }
+    },
+    "MSFTUSDT": {
+      "firstUtc": "2026-04-20T13:30:00Z",
+      "lastUtc": "2026-09-01T00:00:00Z",
+      "nBars": 38430,
+      "20261017Study": {
+        "n": 16,
+        "coverage": 11,
+        "missing": 5,
+        "max_abs_entry_pct": 1.575,
+        "mean_abs_entry_pct": 0.86,
+        "mismatch_over_2p5": 0
+      }
+    },
+    "AMZNUSDT": {
+      "firstUtc": "2026-02-09T14:40:00Z",
+      "lastUtc": "2026-09-01T00:00:00Z",
+      "nBars": 58576,
+      "20261017Study": {
+        "n": 17,
+        "coverage": 10,
+        "missing": 7,
+        "max_abs_entry_pct": 0.957,
+        "mean_abs_entry_pct": 0.731,
+        "mismatch_over_2p5": 0
+      }
+    }
+  },
+  "scenarios": {
+    "10": {
+      "formalIntegratedEquityJpy": 247247316.48637345,
+      "formalIntegratedMaxMtmDdPct": -14.603309760733396,
+      "ledgerSha256": "efb1603a83397da174423855f4143ea5bcb139c680b1d8aa01aba7d6c77502e1",
+      "totalTrades": 87,
+      "sideReasons": {
+        "LONG|ALL": {
+          "trades": 35,
+          "wins": 31,
+          "losses": 4,
+          "pnlJpy": 15672931.254211994,
+          "negativePnlJpy": -1174.385722807262
+        },
+        "LONG|BASIS_CONVERGED": {
+          "trades": 29,
+          "wins": 27,
+          "losses": 2,
+          "pnlJpy": 14608993.696107063,
+          "negativePnlJpy": -882.2155050254831
+        },
+        "LONG|BASIS_STOP": {
+          "trades": 1,
+          "wins": 0,
+          "losses": 1,
+          "pnlJpy": -177.48775482616034,
+          "negativePnlJpy": -177.48775482616034
+        },
+        "LONG|TIME_OR_SESSION_FLAT": {
+          "trades": 5,
+          "wins": 4,
+          "losses": 1,
+          "pnlJpy": 1064115.045859756,
+          "negativePnlJpy": -114.6824629556185
+        },
+        "SHORT|ALL": {
+          "trades": 52,
+          "wins": 40,
+          "losses": 12,
+          "pnlJpy": 21675856.67660779,
+          "negativePnlJpy": -1363829.614542135
+        },
+        "SHORT|BASIS_CONVERGED": {
+          "trades": 32,
+          "wins": 29,
+          "losses": 3,
+          "pnlJpy": 12457402.264112083,
+          "negativePnlJpy": -917136.6738149378
+        },
+        "SHORT|BASIS_STOP": {
+          "trades": 3,
+          "wins": 0,
+          "losses": 3,
+          "pnlJpy": -94258.97436642915,
+          "negativePnlJpy": -94258.97436642915
+        },
+        "SHORT|TIME_OR_SESSION_FLAT": {
+          "trades": 17,
+          "wins": 11,
+          "losses": 6,
+          "pnlJpy": 9312713.386862138,
+          "negativePnlJpy": -352433.9663607681
+        }
+      },
+      "tokenCoverage": {
+        "total": 87,
+        "withTokenEntryM5": 48,
+        "withFullContiguousToken5m": 48,
+        "entryErrorAbove25bps": 48,
+        "entryErrorAbove100bps": 12,
+        "withCompleteMatchedYahooAndVenueBasisTimeSeries": 0,
+        "causalDynamicBasisExitBTEligible": 0
+      },
+      "entryByMonth": {
+        "2025-09": 3,
+        "2025-10": 22,
+        "2025-11": 8,
+        "2025-12": 1,
+        "2026-01": 4,
+        "2026-02": 4,
+        "2026-03": 2,
+        "2026-04": 10,
+        "2026-05": 8,
+        "2026-06": 14,
+        "2026-07": 10,
+        "2026-08": 1
+      },
+      "worstLosses": [
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002122",
+          "entryUtc": "2026-04-09T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -768655.8020278203
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002875",
+          "entryUtc": "2026-07-06T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -148449.99888190383
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "SHORT",
+          "candidateId": "C002666",
+          "entryUtc": "2026-06-16T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -126253.63039545101
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002252",
+          "entryUtc": "2026-05-04T15:30:00Z",
+          "reason": "BASIS_STOP",
+          "pnlJpy": -86422.76533925826
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002159",
+          "entryUtc": "2026-04-15T15:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -79325.74866446196
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002732",
+          "entryUtc": "2026-06-23T16:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -76743.05638966481
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002998",
+          "entryUtc": "2026-07-23T16:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -69468.70282258064
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C001525",
+          "entryUtc": "2026-02-03T16:30:00Z",
+          "reason": "BASIS_STOP",
+          "pnlJpy": -7807.636284788393
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "LONG",
+          "candidateId": "C000947",
+          "entryUtc": "2025-11-20T16:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -525.2659673659673
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C000873",
+          "entryUtc": "2025-11-12T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -470.3285933563715
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "LONG",
+          "candidateId": "C000673",
+          "entryUtc": "2025-10-24T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -356.94953765951584
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "LONG",
+          "candidateId": "C000640",
+          "entryUtc": "2025-10-17T15:30:00Z",
+          "reason": "BASIS_STOP",
+          "pnlJpy": -177.48775482616034
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C000488",
+          "entryUtc": "2025-10-02T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -172.49949525332764
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "LONG",
+          "candidateId": "C000642",
+          "entryUtc": "2025-10-17T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -114.6824629556185
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C000537",
+          "entryUtc": "2025-10-09T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -30.87290521372668
+        }
+      ]
+    },
+    "30": {
+      "formalIntegratedEquityJpy": 143906605.34174916,
+      "formalIntegratedMaxMtmDdPct": -15.80770763869479,
+      "ledgerSha256": "25d07849173423eae6beee104e988e388cf3725787d7842ab005ec7f05972885",
+      "totalTrades": 87,
+      "sideReasons": {
+        "LONG|ALL": {
+          "trades": 35,
+          "wins": 30,
+          "losses": 5,
+          "pnlJpy": 11298973.509469664,
+          "negativePnlJpy": -111612.96483554869
+        },
+        "LONG|BASIS_CONVERGED": {
+          "trades": 29,
+          "wins": 26,
+          "losses": 3,
+          "pnlJpy": 10534644.731461834,
+          "negativePnlJpy": -111041.89842663462
+        },
+        "LONG|BASIS_STOP": {
+          "trades": 1,
+          "wins": 0,
+          "losses": 1,
+          "pnlJpy": -309.9334877242644,
+          "negativePnlJpy": -309.9334877242644
+        },
+        "LONG|TIME_OR_SESSION_FLAT": {
+          "trades": 5,
+          "wins": 4,
+          "losses": 1,
+          "pnlJpy": 764638.711495554,
+          "negativePnlJpy": -261.1329211898017
+        },
+        "SHORT|ALL": {
+          "trades": 52,
+          "wins": 40,
+          "losses": 12,
+          "pnlJpy": 12132449.557190752,
+          "negativePnlJpy": -1804949.3184489934
+        },
+        "SHORT|BASIS_CONVERGED": {
+          "trades": 32,
+          "wins": 29,
+          "losses": 3,
+          "pnlJpy": 6937908.611178697,
+          "negativePnlJpy": -695437.895247374
+        },
+        "SHORT|BASIS_STOP": {
+          "trades": 3,
+          "wins": 0,
+          "losses": 3,
+          "pnlJpy": -163885.91737890695,
+          "negativePnlJpy": -163885.91737890695
+        },
+        "SHORT|TIME_OR_SESSION_FLAT": {
+          "trades": 17,
+          "wins": 11,
+          "losses": 6,
+          "pnlJpy": 5358426.863390962,
+          "negativePnlJpy": -945625.5058227123
+        }
+      },
+      "tokenCoverage": {
+        "total": 87,
+        "withTokenEntryM5": 48,
+        "withFullContiguousToken5m": 48,
+        "entryErrorAbove25bps": 48,
+        "entryErrorAbove100bps": 12,
+        "withCompleteMatchedYahooAndVenueBasisTimeSeries": 0,
+        "causalDynamicBasisExitBTEligible": 0
+      },
+      "entryByMonth": {
+        "2025-09": 3,
+        "2025-10": 22,
+        "2025-11": 8,
+        "2025-12": 1,
+        "2026-01": 4,
+        "2026-02": 4,
+        "2026-03": 2,
+        "2026-04": 10,
+        "2026-05": 8,
+        "2026-06": 14,
+        "2026-07": 10,
+        "2026-08": 1
+      },
+      "worstLosses": [
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002122",
+          "entryUtc": "2026-04-09T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -412401.4466860356
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "SHORT",
+          "candidateId": "C002666",
+          "entryUtc": "2026-06-16T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -378760.89118635305
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002875",
+          "entryUtc": "2026-07-06T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -282914.7765199192
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002732",
+          "entryUtc": "2026-06-23T16:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -230229.16916899444
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "candidateId": "C002998",
+          "entryUtc": "2026-07-23T16:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -208406.10846774193
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002252",
+          "entryUtc": "2026-05-04T15:30:00Z",
+          "reason": "BASIS_STOP",
+          "pnlJpy": -154936.14101726204
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C002159",
+          "entryUtc": "2026-04-15T15:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -127051.29209094886
+        },
+        {
+          "symbol": "METAUSDT",
+          "side": "LONG",
+          "candidateId": "C003042",
+          "entryUtc": "2026-07-27T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -109555.5466555305
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "candidateId": "C001525",
+          "entryUtc": "2026-02-03T16:30:00Z",
+          "reason": "BASIS_STOP",
+          "pnlJpy": -8859.346059051717
+        },
+        {
+          "symbol": "MSFTUSDT",
+          "side": "LONG",
+          "candidateId": "C000947",
+          "entryUtc": "2025-11-20T16:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -1015.2640769230767
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C000873",
+          "entryUtc": "2025-11-12T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -959.6988301684665
+        },
+        {
+          "symbol": "TSLAUSDT",
+          "side": "LONG",
+          "candidateId": "C000673",
+          "entryUtc": "2025-10-24T15:30:00Z",
+          "reason": "BASIS_CONVERGED",
+          "pnlJpy": -471.0876941810451
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "LONG",
+          "candidateId": "C000640",
+          "entryUtc": "2025-10-17T15:30:00Z",
+          "reason": "BASIS_STOP",
+          "pnlJpy": -309.9334877242644
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "LONG",
+          "candidateId": "C000642",
+          "entryUtc": "2025-10-17T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -261.1329211898017
+        },
+        {
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "candidateId": "C000488",
+          "entryUtc": "2025-10-02T17:30:00Z",
+          "reason": "TIME_OR_SESSION_FLAT",
+          "pnlJpy": -218.34607850563043
+        }
+      ]
+    }
+  },
+  "candidatesNotYetBacktested": [
+    "V52_SHORT hourly Basis profit reversal after verified favorable convergence",
+    "V52_LONG hourly Basis profit reversal after verified favorable convergence",
+    "V52_SHORT and LONG time/session exit decomposition with a true checkpoint series"
+  ],
+  "prohibitedShortcut": "DO_NOT_USE_TOKENIZED_STOCK_M5_AS_YAHOO_REFERENCE_OR_INFER_BASIS_FROM_ENTRY_ONLY",
+  "notChanged": [
+    "Production",
+    "VPS",
+    "LIVE",
+    "Runner",
+    "Orders",
+    "Positions",
+    "HP",
+    "BasisStop1.75"
+  ],
+  "initialM5OnlyAuditStatus": "BLOCKED_YEARLY_V52_BASIS_REPLAY_NO_SYNCHRONIZED_REFERENCE_AND_VENUE_HISTORY",
+  "subsequentHourlyBasisSource": "V52_HOURLY_PARITY_20261022.json",
+  "note": "Original 5m tokenized symbol source not a valid Yahoo reference; recovered hourly two leg historical sources were used later. Intrahour STOP and venue market data remain unproven."
+}
