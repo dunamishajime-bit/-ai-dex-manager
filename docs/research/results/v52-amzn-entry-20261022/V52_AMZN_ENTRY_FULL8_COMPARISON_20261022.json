@@ -1,0 +1,386 @@
+{
+  "schema": "v52-amzn-17-trade-specific-yahoo-entry-gate-native-stock-8strategy-v1",
+  "status": "RESEARCH_ONLY_IN_SAMPLE_AMZN_CAUSAL_ENTRY_VETO_NOT_LIVE",
+  "period": "2025-08-10..2026-08-10",
+  "baseLogic": "HYPE/TAO/RENDER/FET8_4 adopted, all non-AMZN V52 and other strategies unchanged",
+  "startingCapitalJpy": 10000,
+  "previousBenchmark": {
+    "10": {
+      "equityJpy": 247247316.48637345,
+      "deltaVsFet84BaselineJpy": 0.0,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 4.120700112246955,
+      "closedTrades": 1299,
+      "v52Trades": 87,
+      "v52Wins": 71,
+      "v52Losses": 16,
+      "v52ModeledPnlJpy": 37348787.93081979,
+      "v52BySide": {
+        "LONG": {
+          "trades": 35,
+          "wins": 31,
+          "pnlJpy": 15672931.254211994
+        },
+        "SHORT": {
+          "trades": 52,
+          "wins": 40,
+          "pnlJpy": 21675856.67660779
+        }
+      },
+      "modifiedV52Exits": 0,
+      "reselectionHistory": [
+        {
+          "iteration": 0,
+          "v12ShortCooldown": 52
+        },
+        {
+          "iteration": 1,
+          "v12ShortCooldown": 52
+        },
+        {
+          "iteration": 2,
+          "v12ShortCooldown": 52
+        }
+      ],
+      "stockSourceRootSha256": "84c5aae9217b6acac6496e86874426177e1ee53e0e10e9d333f9fc4b2168fb51",
+      "fixedStockOriginallySuppressed11": true,
+      "accounting": "PASS",
+      "ledgerSha256": "efb1603a83397da174423855f4143ea5bcb139c680b1d8aa01aba7d6c77502e1"
+    },
+    "30": {
+      "equityJpy": 143906605.34174916,
+      "deltaVsFet84BaselineJpy": 0.0,
+      "maxMtmDdPct": -15.80770763869479,
+      "profitFactor": 3.456156361142333,
+      "closedTrades": 1298,
+      "v52Trades": 87,
+      "v52Wins": 70,
+      "v52Losses": 17,
+      "v52ModeledPnlJpy": 23431423.066660415,
+      "v52BySide": {
+        "LONG": {
+          "trades": 35,
+          "wins": 30,
+          "pnlJpy": 11298973.509469664
+        },
+        "SHORT": {
+          "trades": 52,
+          "wins": 40,
+          "pnlJpy": 12132449.557190752
+        }
+      },
+      "modifiedV52Exits": 0,
+      "reselectionHistory": [
+        {
+          "iteration": 0,
+          "v12ShortCooldown": 51
+        },
+        {
+          "iteration": 1,
+          "v12ShortCooldown": 51
+        },
+        {
+          "iteration": 2,
+          "v12ShortCooldown": 51
+        }
+      ],
+      "stockSourceRootSha256": "84c5aae9217b6acac6496e86874426177e1ee53e0e10e9d333f9fc4b2168fb51",
+      "fixedStockOriginallySuppressed11": true,
+      "accounting": "PASS",
+      "ledgerSha256": "25d07849173423eae6beee104e988e388cf3725787d7842ab005ec7f05972885"
+    }
+  },
+  "originalAMZNStats": {
+    "10bps": {
+      "trades": 17,
+      "wins": 10,
+      "losses": 7,
+      "winRatePct": 58.8235294117647,
+      "positiveContributionJpy": 3129211.379336969,
+      "negativeContributionJpy": -243426.56869977652,
+      "netContributionJpy": 2885784.8106371923,
+      "modelContributionProfitFactor": 12.854847340827025,
+      "sumPositiveNetWalletReturnPct": 11.290234451384586,
+      "sumNegativeNetWalletReturnPct": -1.8490590172783787,
+      "tradeNormalizedProfitFactor": 6.105935151817181,
+      "averageNetWalletReturnPerTradePct": 0.5553632608297768,
+      "medianNetWalletReturnPerTradePct": 0.17079745644436553,
+      "worstNetWalletReturnPct": -0.7745900764976174,
+      "bestNetWalletReturnPct": 3.105699864686231,
+      "maxConsecutiveLosses": 3,
+      "syntheticIsolatedStartJpy": 10000.0,
+      "syntheticIsolatedEndJpy": 10978.711377664355,
+      "syntheticIsolatedReturnPct": 9.78711377664354,
+      "closedTradeOnlyMaxDDPct": -0.8434116830457583,
+      "closedTradeOnlyTrough": {
+        "exitUtc": "2025-11-12T20:30:00+00:00",
+        "symbol": "AMZNUSDT",
+        "side": "SHORT",
+        "candidateId": "C000873"
+      }
+    },
+    "30bps": {
+      "trades": 17,
+      "wins": 10,
+      "losses": 7,
+      "winRatePct": 58.8235294117647,
+      "positiveContributionJpy": 1784600.254447084,
+      "negativeContributionJpy": -513965.7135947935,
+      "netContributionJpy": 1270634.5408522903,
+      "modelContributionProfitFactor": 3.472216545273385,
+      "sumPositiveNetWalletReturnPct": 9.941140981568648,
+      "sumNegativeNetWalletReturnPct": -4.492060732956089,
+      "tradeNormalizedProfitFactor": 2.2130468781588992,
+      "averageNetWalletReturnPerTradePct": 0.32053413227132704,
+      "medianNetWalletReturnPerTradePct": 0.17791154152120664,
+      "worstNetWalletReturnPct": -1.1776470320188934,
+      "bestNetWalletReturnPct": 2.702401783285597,
+      "maxConsecutiveLosses": 3,
+      "syntheticIsolatedStartJpy": 10000.0,
+      "syntheticIsolatedEndJpy": 10549.760116287418,
+      "syntheticIsolatedReturnPct": 5.497601162874188,
+      "closedTradeOnlyMaxDDPct": -2.8151232259593595,
+      "closedTradeOnlyTrough": {
+        "exitUtc": "2025-11-12T20:30:00+00:00",
+        "symbol": "AMZNUSDT",
+        "side": "SHORT",
+        "candidateId": "C000873"
+      }
+    }
+  },
+  "sourceAsterYahooProvenance": "docs/research/results/v52-after-fet-20261022/V52_YAHOO_ASTER_H1_SOURCE_PROVENANCE_20261022.json",
+  "cases": {
+    "AMZN_SHORT_PRIOR_CLOSE_PLUS0P5": {
+      "label": "SHORT 前営業日比 +0.5%超は見送り",
+      "blockedTrades": 3,
+      "blockedWinningTrades": 0,
+      "blockedLosingTrades": 3,
+      "blockedShort": 3,
+      "blockedLong": 0,
+      "original11SuppressedEntriesFreedByThisVeto": [],
+      "10bps": {
+        "equityJpy": 246893206.062727,
+        "deltaEquityJpy": -354110.42364645004,
+        "maxMtmDdPct": -14.603309760733396,
+        "deltaMtmDdPctPoints": 0.0,
+        "profitFactor": 4.0570204037127535,
+        "closedTrades": 1296,
+        "deltaTotalTrades": -3,
+        "v52Trades": 84,
+        "amzn": {
+          "original": 17,
+          "new": 14,
+          "wins": 10,
+          "losses": 4,
+          "longN": 6,
+          "shortN": 8,
+          "netContributionJpy": 3050328.6548134033,
+          "negativeContributionJpy": -80097.95897750837
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "d53ae2841ad924f82ec7939598a559cf0f3076c382b7a091f2f871d96fc60c71",
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "equityJpy": 141718292.29164422,
+        "deltaEquityJpy": -2188313.050104946,
+        "maxMtmDdPct": -15.795476475094805,
+        "deltaMtmDdPctPoints": 0.012231163599984995,
+        "profitFactor": 3.3979828383691166,
+        "closedTrades": 1295,
+        "deltaTotalTrades": -3,
+        "v52Trades": 84,
+        "amzn": {
+          "original": 17,
+          "new": 14,
+          "wins": 10,
+          "losses": 4,
+          "longN": 6,
+          "shortN": 8,
+          "netContributionJpy": 1664494.6259689506,
+          "negativeContributionJpy": -130653.02429659119
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "76b206bc6b55aa1d1b17ddef393056fdc39ab790761cd74f288ddda3d6796978",
+        "accounting": "PASS"
+      },
+      "sourceStockTapeSha256": "4418a832276b479da74e13f1edc8f68c5a06ae7d35aa8437337c2657bd92e6b0",
+      "sourceOriginalStockTapeSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f"
+    },
+    "AMZN_SHORT_PRIOR_CLOSE_PLUS1P0": {
+      "label": "SHORT 前営業日比 +1.0%超は見送り",
+      "blockedTrades": 1,
+      "blockedWinningTrades": 0,
+      "blockedLosingTrades": 1,
+      "blockedShort": 1,
+      "blockedLong": 0,
+      "original11SuppressedEntriesFreedByThisVeto": [],
+      "10bps": {
+        "equityJpy": 247438945.47375035,
+        "deltaEquityJpy": 191628.98737689853,
+        "maxMtmDdPct": -14.603309760733396,
+        "deltaMtmDdPctPoints": 0.0,
+        "profitFactor": 4.12540014478322,
+        "closedTrades": 1298,
+        "deltaTotalTrades": -1,
+        "v52Trades": 86,
+        "amzn": {
+          "original": 17,
+          "new": 16,
+          "wins": 10,
+          "losses": 6,
+          "longN": 6,
+          "shortN": 10,
+          "netContributionJpy": 2972207.5759764505,
+          "negativeContributionJpy": -157003.80336051824
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "b9b93eee5bfe357dd0265a67b1ee4ed81f197b015daabbd281144ece9593097b",
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "equityJpy": 144336412.92864558,
+        "deltaEquityJpy": 429807.5868964195,
+        "maxMtmDdPct": -15.80770763869479,
+        "deltaMtmDdPctPoints": 0.0,
+        "profitFactor": 3.465018875007997,
+        "closedTrades": 1297,
+        "deltaTotalTrades": -1,
+        "v52Trades": 86,
+        "amzn": {
+          "original": 17,
+          "new": 16,
+          "wins": 10,
+          "losses": 6,
+          "longN": 6,
+          "shortN": 10,
+          "netContributionJpy": 1426988.0501013526,
+          "negativeContributionJpy": -359029.57257753145
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "e4d88bb36373a9697f33c9460abc1535e4b68bf751df25dd28614522830b2ae5",
+        "accounting": "PASS"
+      },
+      "sourceStockTapeSha256": "bb0a013e1d39d1f413aa192e3fae61afe914849aa0c378d38d9bd98d21439f80",
+      "sourceOriginalStockTapeSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f"
+    },
+    "AMZN_LONG_H1_MINUS1P0": {
+      "label": "LONG Yahoo直前H1が-1.0%以下なら見送り",
+      "blockedTrades": 1,
+      "blockedWinningTrades": 0,
+      "blockedLosingTrades": 1,
+      "blockedShort": 0,
+      "blockedLong": 1,
+      "original11SuppressedEntriesFreedByThisVeto": [],
+      "10bps": {
+        "equityJpy": 247464966.0080449,
+        "deltaEquityJpy": 217649.52167144418,
+        "maxMtmDdPct": -14.603309760733396,
+        "deltaMtmDdPctPoints": 0.0,
+        "profitFactor": 4.120630251616854,
+        "closedTrades": 1298,
+        "deltaTotalTrades": -1,
+        "v52Trades": 86,
+        "amzn": {
+          "original": 17,
+          "new": 16,
+          "wins": 10,
+          "losses": 6,
+          "longN": 5,
+          "shortN": 11,
+          "netContributionJpy": 2886251.1016712952,
+          "negativeContributionJpy": -243250.92195637958
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "c532b8bfac18f881922c438c74e049b6ca1d0d9871ca247fe5783ecc238cd4f4",
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "equityJpy": 144184189.87966672,
+        "deltaEquityJpy": 277584.5379175544,
+        "maxMtmDdPct": -15.828728556854276,
+        "deltaMtmDdPctPoints": -0.021020918159486257,
+        "profitFactor": 3.4562077035371717,
+        "closedTrades": 1296,
+        "deltaTotalTrades": -2,
+        "v52Trades": 86,
+        "amzn": {
+          "original": 17,
+          "new": 16,
+          "wins": 10,
+          "losses": 6,
+          "longN": 5,
+          "shortN": 11,
+          "netContributionJpy": 1271979.2190169818,
+          "negativeContributionJpy": -514705.8003883735
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "592d6624c76b7229d121a337bb614f1e2df8c7fd0e5ba724b2bc8904eebe8e77",
+        "accounting": "PASS"
+      },
+      "sourceStockTapeSha256": "f75c1ec4f98a8dfd6fcd518cf642d47cdc2b2f734d3644bf8aac9852a75694a2",
+      "sourceOriginalStockTapeSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f"
+    },
+    "AMZN_SHORT0P5_PLUS_LONG_H1_MINUS1P0": {
+      "label": "SHORT +0.5% / LONG H1 -1.0% 複合",
+      "blockedTrades": 4,
+      "blockedWinningTrades": 0,
+      "blockedLosingTrades": 4,
+      "blockedShort": 3,
+      "blockedLong": 1,
+      "original11SuppressedEntriesFreedByThisVeto": [],
+      "10bps": {
+        "equityJpy": 247124129.80521974,
+        "deltaEquityJpy": -123186.68115371466,
+        "maxMtmDdPct": -14.603309760733396,
+        "deltaMtmDdPctPoints": 0.0,
+        "profitFactor": 4.056949926110374,
+        "closedTrades": 1296,
+        "deltaTotalTrades": -3,
+        "v52Trades": 83,
+        "amzn": {
+          "original": 17,
+          "new": 13,
+          "wins": 10,
+          "losses": 3,
+          "longN": 5,
+          "shortN": 8,
+          "netContributionJpy": 3050809.5889938413,
+          "negativeContributionJpy": -79920.34561078929
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "0f7f098e9d3da119c4abe2e84490c457865f3437fc1f74c986b4674a516cc15d",
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "equityJpy": 142283560.84650913,
+        "deltaEquityJpy": -1623044.4952400327,
+        "maxMtmDdPct": -15.784174780224603,
+        "deltaMtmDdPctPoints": 0.023532858470186824,
+        "profitFactor": 3.4007771189425955,
+        "closedTrades": 1292,
+        "deltaTotalTrades": -6,
+        "v52Trades": 83,
+        "amzn": {
+          "original": 17,
+          "new": 13,
+          "wins": 10,
+          "losses": 3,
+          "longN": 5,
+          "shortN": 8,
+          "netContributionJpy": 1667539.0103896107,
+          "negativeContributionJpy": -131135.00105338535
+        },
+        "reselectionPasses": 3,
+        "ledgerSha256": "75b874007aacb9c0098eb47cba72ca83a12649fffee38bfd93f1a019df55eb2a",
+        "accounting": "PASS"
+      },
+      "sourceStockTapeSha256": "a09a8e13c35ad0b42de538628ac7eb928fdee11295e11af160389d1944756317",
+      "sourceOriginalStockTapeSha256": "7bce3e7cd7363625d17d9a8d0d3bf10130699586e9fb1e184bc1cc51e1b85b6f"
+    }
+  },
+  "timingContract": "Yahoo H1 candle start+one hour <= decision time; previous NY session close not same-day future",
+  "nonRegeneratedSuppressedStock11": true,
+  "sourceIsActualLiveVenueStopFill": false,
+  "oosNotAvailable": true
+}

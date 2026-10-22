@@ -1,0 +1,122 @@
+{
+  "schema": "v52-short-52-negative-control-v1",
+  "period": "2025-08-10..2026-08-10",
+  "researchStatus": "IN_SAMPLE_ONLY_NOT_LIVE",
+  "sourceV52LedgerSha256": "efb1603a83397da174423855f4143ea5bcb139c680b1d8aa01aba7d6c77502e1",
+  "note": "Do not apply AMZN-only regime to other V52 stock symbols: +1pct recent rise coexists with high SHORT winner count outside AMZN",
+  "amznNotGeneralizableFromThisSample": true,
+  "groups": {
+    "ALL": {
+      "notOver1pct": {
+        "trades": 39,
+        "wins": 29,
+        "losses": 10,
+        "modeledSharedContributionJpy": 15561137.854308162
+      },
+      "over1pct": {
+        "trades": 13,
+        "wins": 11,
+        "losses": 2,
+        "modeledSharedContributionJpy": 6114718.822299631
+      }
+    },
+    "AMZN": {
+      "notOver1pct": {
+        "trades": 10,
+        "wins": 6,
+        "losses": 4,
+        "modeledSharedContributionJpy": 2483089.6697082384
+      },
+      "over1pct": {
+        "trades": 1,
+        "wins": 0,
+        "losses": 1,
+        "modeledSharedContributionJpy": -86422.76533925826
+      }
+    },
+    "AMZNUSDT": {
+      "notOver1pct": {
+        "trades": 10,
+        "wins": 6,
+        "losses": 4,
+        "modeledSharedContributionJpy": 2483089.6697082384
+      },
+      "over1pct": {
+        "trades": 1,
+        "wins": 0,
+        "losses": 1,
+        "modeledSharedContributionJpy": -86422.76533925826
+      }
+    },
+    "METAUSDT": {
+      "notOver1pct": {
+        "trades": 11,
+        "wins": 8,
+        "losses": 3,
+        "modeledSharedContributionJpy": 2676889.1121619605
+      },
+      "over1pct": {
+        "trades": 4,
+        "wins": 3,
+        "losses": 1,
+        "modeledSharedContributionJpy": 2399262.2620076956
+      }
+    },
+    "MSFTUSDT": {
+      "notOver1pct": {
+        "trades": 5,
+        "wins": 4,
+        "losses": 1,
+        "modeledSharedContributionJpy": 6379680.884456488
+      },
+      "over1pct": {
+        "trades": 2,
+        "wins": 2,
+        "losses": 0,
+        "modeledSharedContributionJpy": 1038393.676163788
+      }
+    },
+    "NON_AMZN": {
+      "notOver1pct": {
+        "trades": 29,
+        "wins": 23,
+        "losses": 6,
+        "modeledSharedContributionJpy": 13078048.184599923
+      },
+      "over1pct": {
+        "trades": 12,
+        "wins": 11,
+        "losses": 1,
+        "modeledSharedContributionJpy": 6201141.587638889
+      }
+    },
+    "NVDAUSDT": {
+      "notOver1pct": {
+        "trades": 6,
+        "wins": 6,
+        "losses": 0,
+        "modeledSharedContributionJpy": 1486848.7548539876
+      },
+      "over1pct": {
+        "trades": 3,
+        "wins": 3,
+        "losses": 0,
+        "modeledSharedContributionJpy": 1479.2019927591805
+      }
+    },
+    "TSLAUSDT": {
+      "notOver1pct": {
+        "trades": 7,
+        "wins": 5,
+        "losses": 2,
+        "modeledSharedContributionJpy": 2534629.433127486
+      },
+      "over1pct": {
+        "trades": 3,
+        "wins": 3,
+        "losses": 0,
+        "modeledSharedContributionJpy": 2762006.447474647
+      }
+    }
+  }
+}
