@@ -96,6 +96,15 @@ function active(order: DirectOpenOrder) { return ["NEW", "PARTIALLY_FILLED", "PE
 function hasExposure(result: DirectTradeResult) { return ["FILLED", "PARTIALLY_FILLED"].includes(result.status) && result.executedQuantity > EPSILON; }
 function sameQuantity(actual: number, expected: number) { return Math.abs(actual - expected) <= Math.max(1e-8, Math.abs(expected) * 0.01); }
 
+export function venueProvesHypeZecFlat(positions: readonly DirectPosition[], openOrders: readonly DirectOpenOrder[]) {
+  const sidecar = (symbol: unknown) => {
+    const normalized = String(symbol || "").toUpperCase();
+    return normalized === "HYPEUSDT" || normalized === "ZECUSDT";
+  };
+  return !positions.some((position) => sidecar(position.symbol) && Math.abs(Number(position.quantity || 0)) > EPSILON)
+    && !openOrders.some((order) => sidecar(order.symbol) && active(order));
+}
+
 export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
   const managed = new Set<DirectOpenOrder>([
     ...findManagedHypeZecProtectiveOrders(openOrders, positions),
@@ -504,15 +513,47 @@ export class HypeZecLongRunner {
     if (!lock) return { status: "locked", message: "HYPE_ZEC_LONG_ACCOUNT_LOCK_BUSY" };
     let readOnlyBudgetPhase = true;
     try {
-      const state = await this.dependencies.stateStore.load();
+      let venueReadback: { account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[] } | undefined;
+      let state: HypeZecLongRunnerState;
+      try {
+        state = await this.dependencies.stateStore.load();
+      } catch (error) {
+        const stale = error instanceof Error && error.message === "HYPE_ZEC_LONG_STATE_STALE";
+        if (!stale) throw error;
+        const [account, positions, openOrders] = await Promise.all([
+          this.dependencies.executor.getAccountSnapshot(),
+          this.dependencies.executor.getPositions(),
+          this.dependencies.executor.getOpenOrders(),
+        ]);
+        if (!venueProvesHypeZecFlat(positions, openOrders)) {
+          this.log.error("hype-zec-stale-state-venue-not-flat", { ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+          return { status: "manual-review", message: "HYPE_ZEC_STALE_STATE_VENUE_NOT_FLAT" };
+        }
+        const recovered = await this.dependencies.stateStore.recoverFlatStaleState("ASTER_SIGNED_FLAT_READBACK");
+        this.log.warn("hype-zec-stale-flat-state-recovered", {
+          backupPath: recovered.backupPath,
+          ordersSent: 0,
+          cancelsSent: 0,
+          positionChangesSent: 0,
+        });
+        state = await this.dependencies.stateStore.load();
+        venueReadback = { account, positions, openOrders };
+      }
       const benignReview = isBenignMarketDataReview(state.manualReview);
       if (state.manualReview && !benignReview) return { status: "manual-review", message: state.manualReview };
 
-      const [account, positions, openOrders] = await Promise.all([
-        this.dependencies.executor.getAccountSnapshot(),
-        this.dependencies.executor.getPositions(),
-        this.dependencies.executor.getOpenOrders(),
-      ]);
+      let currentVenue: { account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[] };
+      if (venueReadback) {
+        currentVenue = venueReadback;
+      } else {
+        const [accountSnapshot, currentPositions, currentOpenOrders] = await Promise.all([
+          this.dependencies.executor.getAccountSnapshot(),
+          this.dependencies.executor.getPositions(),
+          this.dependencies.executor.getOpenOrders(),
+        ]);
+        currentVenue = { account: accountSnapshot, positions: currentPositions, openOrders: currentOpenOrders };
+      }
+      const { account, positions, openOrders } = currentVenue;
       const protectionFill=await this.reconcileVenueProtectionFills(state,positions);if(protectionFill)return protectionFill;
       if(state.pending)return this.manualReview(state,"HYPE_ZEC_PENDING_REQUIRES_RECONCILIATION");
       const ownershipIssue = await this.reconcileOwnership(state, positions, openOrders);

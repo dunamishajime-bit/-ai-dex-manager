@@ -130,3 +130,47 @@ test("HYPE/ZEC state store rejects malformed adopted M5 restart fields", async (
     /POSITION_INVALID/,
   );
 });
+
+test("HYPE/ZEC state store can recover only a stale flat state with an exact backup", async () => {
+  const root = await mkdtemp(join(tmpdir(), "hype-zec-state-"));
+  const path = join(root, "runner.json");
+  const sha = "a".repeat(40);
+  const before = {
+    schema: "disdex-hype-zec-long/v1",
+    runtimeCommitSha: sha,
+    mode: "LIVE",
+    updatedAt: Date.now() - (4 * 60 * 60_000),
+    lastDecisionTs: Date.now() - (4 * 60 * 60_000),
+    lastDecision: { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason: "OLD_HEARTBEAT" },
+    failures: [],
+  };
+  await writeFile(path, JSON.stringify(before), { mode: 0o600 });
+  const store = new FileHypeZecLongRunnerStateStore(path, sha, "LIVE");
+  const result = await store.recoverFlatStaleState("VENUE_FLAT_RECONCILIATION");
+  assert.equal(result.status, "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_PASS");
+  assert.equal(result.ordersSent, 0);
+  assert.equal(result.cancelsSent, 0);
+  assert.equal(result.positionChangesSent, 0);
+  const after = await store.load();
+  assert.equal(after.lastDecision?.reason, "HYPE_ZEC_STALE_FLAT_RECONCILED:VENUE_FLAT_RECONCILIATION");
+  assert.ok((after.updatedAt || 0) > before.updatedAt);
+  assert.ok(result.backupPath);
+  assert.deepEqual(JSON.parse(await readFile(result.backupPath!, "utf8")), before);
+});
+
+test("HYPE/ZEC stale-state recovery refuses an owned position or pending state", async () => {
+  const root = await mkdtemp(join(tmpdir(), "hype-zec-state-"));
+  const path = join(root, "runner.json");
+  const sha = "a".repeat(40);
+  await writeFile(path, JSON.stringify({
+    schema: "disdex-hype-zec-long/v1",
+    runtimeCommitSha: sha,
+    mode: "LIVE",
+    updatedAt: Date.now() - (4 * 60 * 60_000),
+    positions: [{ positionId: "owned" }],
+    pending: undefined,
+    failures: [],
+  }), { mode: 0o600 });
+  const store = new FileHypeZecLongRunnerStateStore(path, sha, "LIVE");
+  await assert.rejects(() => store.recoverFlatStaleState("VENUE_FLAT_RECONCILIATION"), /STALE_FLAT_RECOVERY_NOT_FLAT/);
+});

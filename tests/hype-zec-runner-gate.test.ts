@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { assertHypeZecLiveGate, resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
-import { isRecoverableHypeZecMarketDataFailure, refreshHypeZecNoEntryDecision, unmanagedHypeZecOrders } from "../lib/hype-zec-long-runner";
+import { isRecoverableHypeZecMarketDataFailure, refreshHypeZecNoEntryDecision, unmanagedHypeZecOrders, venueProvesHypeZecFlat } from "../lib/hype-zec-long-runner";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 
 test("only the known malformed market row is a retryable HYPE data failure", () => {
@@ -50,6 +50,14 @@ test("transient account lock collisions use a bounded short retry without changi
   assert.equal(nextAccountLockAwareWaitMs("locked", 15 * 60_000, 90_000), 30_000);
   assert.equal(nextAccountLockAwareWaitMs("no-change", 15 * 60_000, 5_000), 15 * 60_000);
   assert.throws(() => nextAccountLockAwareWaitMs("locked", 999, 5_000), /NORMAL_WAIT_INVALID/);
+});
+
+test("stale flat recovery requires no live HYPE/ZEC position or active order", () => {
+  assert.equal(venueProvesHypeZecFlat([], []), true);
+  assert.equal(venueProvesHypeZecFlat([{ symbol: "BTCUSDT", quantity: 1 }] as any, []), true);
+  assert.equal(venueProvesHypeZecFlat([{ symbol: "HYPEUSDT", quantity: 1 }] as any, []), false);
+  assert.equal(venueProvesHypeZecFlat([], [{ symbol: "ZECUSDT", status: "NEW" }] as any), false);
+  assert.equal(venueProvesHypeZecFlat([], [{ symbol: "HYPEUSDT", status: "CANCELED" }] as any), true);
 });
 
 

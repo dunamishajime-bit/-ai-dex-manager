@@ -1,4 +1,4 @@
-import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { chmod, copyFile, lstat, mkdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const HYPE_ZEC_LONG_STATE_SCHEMA = "disdex-hype-zec-long/v1" as const;
@@ -147,6 +147,52 @@ export class FileHypeZecLongRunnerStateStore {
       if (code !== "ENOENT") throw error;
       return { schema: HYPE_ZEC_LONG_STATE_SCHEMA, runtimeCommitSha: this.runtimeCommitSha, mode: this.mode, updatedAt: Date.now(), failures: [] };
     }
+  }
+
+  async recoverFlatStaleState(reason: string, now = Date.now()): Promise<{
+    status: "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_PASS" | "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_NOOP" | "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_SKIPPED_MISSING";
+    statePath: string;
+    backupPath?: string;
+    ordersSent: 0;
+    cancelsSent: 0;
+    positionChangesSent: 0;
+  }> {
+    let metadata;
+    try {
+      metadata = await lstat(this.path);
+    } catch (error) {
+      const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
+      if (code === "ENOENT") return { status: "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_SKIPPED_MISSING", statePath: this.path, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+      throw error;
+    }
+    if (metadata.isSymbolicLink()) throw new Error("HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_SYMLINK_FORBIDDEN");
+    if (!metadata.isFile()) throw new Error("HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_NOT_REGULAR_FILE");
+    const beforeBytes = await readFile(this.path);
+    const before = normalizedState(JSON.parse(beforeBytes.toString("utf8")), this.runtimeCommitSha || undefined, this.mode);
+    if ((before.positions || []).length > 0 || before.pending || before.manualReview) throw new Error("HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_NOT_FLAT");
+    if (now - before.updatedAt <= HYPE_ZEC_LONG_STATE_MAX_AGE_MS) return { status: "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_NOOP", statePath: this.path, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+
+    const safeReason = String(reason || "VENUE_FLAT_RECONCILIATION").slice(0, 160);
+    const backupPath = `${this.path}.before-stale-flat-recovery-${now}`;
+    try {
+      await stat(backupPath);
+      throw new Error("HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_BACKUP_EXISTS");
+    } catch (error) {
+      const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
+      if (error instanceof Error && error.message === "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_BACKUP_EXISTS") throw error;
+      if (code !== "ENOENT") throw error;
+    }
+    await copyFile(this.path, backupPath);
+    if (!beforeBytes.equals(await readFile(backupPath))) throw new Error("HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_BACKUP_NOT_EXACT");
+    const next: HypeZecLongRunnerState = {
+      ...before,
+      updatedAt: now,
+      lastDecisionTs: now,
+      lastDecision: { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason: `HYPE_ZEC_STALE_FLAT_RECONCILED:${safeReason}` },
+      failures: [...before.failures, { message: `HYPE_ZEC_STALE_FLAT_RECONCILED:${safeReason}`, occurredAt: now }].slice(-100),
+    };
+    await this.save(next);
+    return { status: "HYPE_ZEC_LONG_STALE_FLAT_RECOVERY_PASS", statePath: this.path, backupPath, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
   }
 
   async save(state: HypeZecLongRunnerState): Promise<void> {
