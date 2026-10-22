@@ -20,6 +20,10 @@ test("FET mixed-SHA scope is explicit and keeps the common current release uncha
   assert.match(scopedWiring, /--fet-sha/);
   assert.match(scopedWiring, /--activation-path/);
   assert.match(scopedWiring, /current symlink/);
+  assert.match(scopedWiring, /DISDEX_RUNTIME_COMMIT_SHA=\$FET_SHA/);
+  assert.match(scopedWiring, /DISDEX_RELEASE_SHA=\$FET_SHA/);
+  assert.match(scopedWiring, /FET_INSTANCE_DROPIN_NAME/);
+  assert.match(scopedWiring, /EnvironmentFile=\$SCOPE_ENV_FILE/);
 });
 
 test("FET watchdog uses a dedicated operator artifact while peer runners retain the common artifact", () => {

@@ -20,6 +20,7 @@ HEALTH_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 ALERT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-alert.service.d"
 DROPIN_NAME="zzzzzzzzzzzzzzzzzzzz-current-release.conf"
+FET_INSTANCE_DROPIN_NAME="zzzzzz-fet-scoped-runtime.conf"
 
 usage() {
   printf '%s\n' \
@@ -118,7 +119,15 @@ read_primary_v12() {
 write_scope_env() {
   write_atomic "$SCOPE_ENV_FILE" "DISDEX_FET_SCOPED_SHA=$FET_SHA
 DISDEX_FET_SCOPED_RELEASE_ROOT=$FET_RELEASE_ROOT
+DISDEX_RUNTIME_COMMIT_SHA=$FET_SHA
+DISDEX_RELEASE_SHA=$FET_SHA
 DISDEX_FET_OPERATOR_ACTIVATION_PATH=$ACTIVATION_PATH"
+}
+
+write_fet_instance_dropin() {
+  local directory="/etc/systemd/system/disdex-fet-brk48@${FET_SHA}.service.d"
+  write_atomic "$directory/$FET_INSTANCE_DROPIN_NAME" "[Service]
+EnvironmentFile=$SCOPE_ENV_FILE"
 }
 
 patch_monitor_environment() {
@@ -275,6 +284,7 @@ main() {
   patch_monitor_environment
   write_monitor_dropins
   write_fet_systemd_template
+  write_fet_instance_dropin
   install_runtime_helpers
   systemctl daemon-reload
   printf 'DISDEX_FET_SCOPED_RUNTIME_WIRING_APPLIED currentSha=%s fetSha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$CURRENT_SHA" "$FET_SHA"
