@@ -1,0 +1,55 @@
+{
+  "schema": "idle-short-next-cumulative-candidate-v1",
+  "date": "2026-10-22",
+  "status": "RESEARCH_ONLY_CANDIDATE_NOT_USER_ADOPTED_NOT_LIVE",
+  "sourceBranch": "research/idle-five-symbol-winrate-causal-20261022",
+  "benchmarkPeriod": [
+    "2025-08-10",
+    "2026-08-10"
+  ],
+  "initialCapitalJPY": 10000,
+  "onlyHypeConfirmedUserAdopted": true,
+  "fixedHypePolicy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0_AND_COMBO_I1H1_P3F1P5",
+  "fixedV12V4FourAndQ102Three": true,
+  "proposals": {
+    "TAO_SHORT_ENTRY": {
+      "fullyCompleted5mReturn1hPctAtMost": -1.0,
+      "otherOriginalRules": "unchanged"
+    },
+    "RENDER_SHORT_ENTRY_VETO": {
+      "btcFullyCompleted5mReturn6hPctGreaterThan": 0,
+      "renderMinusBtcFullyCompleted5mReturn6hPpGreaterThan": 0,
+      "action": "block_only_when_both_positive",
+      "originalStopAndTimeExit": "unchanged"
+    },
+    "RENDER_SHORT_PROFIT_GUARD": {
+      "triggerWhenConfirmed5mCloseFromEntryPctAtMost": -1.5,
+      "protectedPriceGainPct": 0.25,
+      "action": "close_SHORT_if_subsequent_5m_high_crosses_entryPrice*0.9975",
+      "preexistingExit": "earlier_wins",
+      "subjectToVenueFillCertification": true
+    }
+  },
+  "candidate10bps": "TAO_RET1H_PLUS_RENDER_SKIP_AND_PROFIT",
+  "candidate30bps": "TAO_RET1H_PLUS_RENDER_SKIP_RISING_BTC_STRONG_REL",
+  "tenBps": {
+    "finalJpy": 239985734.6618664,
+    "baselineJpy": 231889902.27625686,
+    "renderWins": 15,
+    "renderLosses": 9,
+    "taoWins": 5,
+    "taoLosses": 0,
+    "maxMtmDdPct": -14.603309760733396
+  },
+  "thirtyBps": {
+    "finalJpy": 136216672.7081666,
+    "baselineJpy": 129855821.95566286,
+    "maxMtmDdPct": -15.80770763869479
+  },
+  "caveats": [
+    "In-sample selection among many candidates, small TAO 5/6 accepted trades",
+    "RENDER protective guard can fail to be net profitable at 30bps",
+    "Independent Task9 TypeScript economic parity and signed venue lifecycle evidence not certified",
+    "No runtime, VPS, HP, production order, or LIVE changes"
+  ]
+}
