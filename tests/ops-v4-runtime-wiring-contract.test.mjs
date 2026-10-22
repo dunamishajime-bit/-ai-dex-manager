@@ -71,6 +71,16 @@ test("V4 primary unit must not load the peer-SHA env after the V4 ACK env", () =
   assert.doesNotMatch(v4PrimaryBlock, /EnvironmentFile=\$\{CONTRACT_ENV_FILE\}/);
 });
 
+test("V4 wiring projects the root-managed TIME37 approval for deploy read access", () => {
+  const fn = wiring.match(/ensure_v4_time_stop_approval_runtime_access\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
+  assert.ok(fn, "TIME37 approval runtime-access function must be present");
+  assert.match(fn, /\/etc\/disdex\/v12-v4-time-stop-approval\.json/);
+  assert.match(fn, /chown root:deploy/);
+  assert.match(fn, /chmod 0640/);
+  assert.match(fn, /! -L/);
+  assert.match(wiring, /ensure_v4_time_stop_approval_runtime_access/);
+});
+
 test("V4 wiring runs Idle benign recovery from the pinned V4 primary release", () => {
   const recovery = wiring.match(/recover_idle_benign_state\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
   assert.match(recovery, /local recovery_release="\$CURRENT_RELEASE"/);
