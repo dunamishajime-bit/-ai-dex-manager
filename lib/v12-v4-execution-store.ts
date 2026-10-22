@@ -20,7 +20,7 @@ export type V4ProtectionPhase=
 export type V4ProtectionRecord={legId:string;phase:V4ProtectionPhase;updatedAt:number;
  protectedQty:number;stopClientOrderId?:string};
 export type V4ExecutionDocument={
- schema:2;releaseSha:string;revision:number;state:State;intents:Record<string,V4OrderIntent>;
+ schema:2;releaseSha:string;legacyReleaseShas?:string[];revision:number;state:State;intents:Record<string,V4OrderIntent>;
  protections:Record<string,V4ProtectionRecord>;
 };
 export function v4OrderIdentity(releaseSha:string,legId:string,action:V4OrderAction,sequence:number):string{
@@ -64,11 +64,15 @@ function assertRegular(path:string){
 }
 function validate(doc:V4ExecutionDocument,sha:string){
  if(doc.schema!==2||doc.releaseSha!==sha)throw Error("EXECUTION_RELEASE_MISMATCH");
+ const legacy=doc.legacyReleaseShas??[];
+ if(!Array.isArray(legacy)||legacy.some(x=>!/^[a-f0-9]{40}$/.test(x))||new Set(legacy).size!==legacy.length||legacy.includes(sha))throw Error("INVALID_LEGACY_RELEASE_LINEAGE");
  if(!Number.isInteger(doc.revision)||doc.revision<0||!doc.state||!doc.intents||Array.isArray(doc.intents)||!doc.protections||Array.isArray(doc.protections))throw Error("INVALID_EXECUTION_DOCUMENT");
  const replay=replayProductionJournal(doc.state.initial,doc.state.journal);
  if(JSON.stringify(replay)!==JSON.stringify(doc.state))throw Error("SNAPSHOT_JOURNAL_MISMATCH");
  for(const [cid,x]of Object.entries(doc.intents)){
-  if(cid!==x.clientOrderId||cid!==v4OrderIdentity(sha,x.legId,x.action,x.sequence)||!transitions[x.stage]||
+  const currentIdentity=v4OrderIdentity(sha,x.legId,x.action,x.sequence);
+  const legacyIdentity=legacy.some(old=>cid===v4OrderIdentity(old,x.legId,x.action,x.sequence));
+  if(cid!==x.clientOrderId||!(cid===currentIdentity||legacyIdentity)||!transitions[x.stage]||
     !Number.isFinite(x.createdAt)||!Number.isFinite(x.updatedAt)||x.updatedAt<x.createdAt)throw Error("INVALID_PERSISTED_INTENT");
  }
  for(const [legId,x] of Object.entries(doc.protections)){
@@ -100,6 +104,7 @@ export class V4ExecutionStore{
   try{
    const current=this.read();
    if(current.revision!==expectedRevision||proposed.revision!==expectedRevision)throw Error("STALE_EXECUTION_REVISION");
+   if(JSON.stringify(current.legacyReleaseShas??[])!==JSON.stringify(proposed.legacyReleaseShas??[]))throw Error("LEGACY_RELEASE_LINEAGE_IMMUTABLE");
    if(JSON.stringify(current.state.initial)!==JSON.stringify(proposed.state.initial))throw Error("INITIAL_STATE_MUTATION");
    if(JSON.stringify(proposed.state.journal.slice(0,current.state.journal.length))!==JSON.stringify(current.state.journal))throw Error("JOURNAL_HISTORY_MUTATION");
    for(const [cid,prior]of Object.entries(current.intents)){

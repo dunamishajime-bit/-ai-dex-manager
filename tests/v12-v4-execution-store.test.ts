@@ -4,6 +4,7 @@ import {mkdtempSync,readFileSync,writeFileSync,rmSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {V4ExecutionStore,v4OrderIdentity,advanceV4Intent} from "../lib/v12-v4-execution-store";
+import {rebindV4ActiveLineage} from "../lib/v12-v4-active-lineage-rebind";
 const SHA="a".repeat(40);
 const initial={equityUsd:1000,foreign:[],holdProtected:false};
 test("durable intent survives restart and SUBMITTING cannot return to PREPARED",()=>{
@@ -31,5 +32,28 @@ test("stale writer, wrong release and journal snapshot corruption fail closed",(
  const raw=JSON.parse(readFileSync(path,"utf8"));raw.state.equityUsd=999;
  writeFileSync(path,JSON.stringify(raw));
  assert.throws(()=>store.read(),/SNAPSHOT_JOURNAL_MISMATCH/);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test("active lineage rebind preserves old venue client ids and permits only new ids for new intents",()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-lineage-"));
+ try{
+  const oldSha="a".repeat(40),newSha="b".repeat(40),path=join(dir,"state.json");
+  const oldStore=new V4ExecutionStore(path,oldSha);
+  let doc=oldStore.initialize(initial);
+  const oldId=v4OrderIdentity(oldSha,"ETHUSDT:route:SHORT:123","STOP",0);
+  doc=oldStore.commit(doc.revision,{...doc,intents:{[oldId]:{clientOrderId:oldId,legId:"ETHUSDT:route:SHORT:123",action:"STOP",sequence:0,stage:"PREPARED",createdAt:123,updatedAt:123}}});
+  doc=oldStore.commit(doc.revision,advanceV4Intent(doc,oldId,"SUBMITTING",124));
+  doc=oldStore.commit(doc.revision,advanceV4Intent(doc,oldId,"ACKNOWLEDGED",125));
+  const rebound=rebindV4ActiveLineage(doc,oldSha,newSha);
+  assert.deepEqual(rebound.legacyReleaseShas,[oldSha]);
+  assert.equal(rebound.intents[oldId].clientOrderId,oldId);
+  const reboundPath=join(dir,"rebound.json");writeFileSync(reboundPath,JSON.stringify(rebound));
+  const newStore=new V4ExecutionStore(reboundPath,newSha);
+  assert.deepEqual(newStore.read(),rebound);
+  const newId=v4OrderIdentity(newSha,"ETHUSDT:route:SHORT:123","EXIT",0);
+  assert.notEqual(oldId,newId);
+  const bad={...rebound,intents:{...rebound.intents,["c".repeat(40)]:{clientOrderId:"c".repeat(40),legId:"ETHUSDT:route:SHORT:123",action:"EXIT",sequence:0,stage:"PREPARED",createdAt:124,updatedAt:124}}};
+  writeFileSync(reboundPath,JSON.stringify(bad));
+  assert.throws(()=>newStore.read(),/INVALID_PERSISTED_INTENT/);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
