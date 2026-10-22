@@ -49,6 +49,27 @@ export type V52CostDecision = {
   rejectionReasons?: string[];
   grossRequested?: number;
   grossAccepted?: number;
+  amznShortYahooGate?: V52AmznShortYahooGate;
+};
+
+export type V52AmznShortYahooGate = {
+  status: "PASS" | "BLOCK" | "DATA_UNAVAILABLE";
+  reason?: string;
+  source?: string;
+  thresholdPct?: number;
+  decisionTs?: number;
+  decisionNyDate?: string;
+  previousNySessionDate?: string;
+  previousNySessionLastClose?: number;
+  previousBarStartTs?: number;
+  previousBarCompletedTs?: number;
+  latestConfirmedYahooReferencePrice?: number;
+  latestBarStartTs?: number;
+  latestBarCompletedTs?: number;
+  returnSincePreviousNySessionClosePct?: number;
+  cacheFetchedAtTs?: number;
+  cacheTtlMs?: number;
+  sourceError?: string;
 };
 
 export type V52Top2Window = {
@@ -91,6 +112,7 @@ export type V52Top2Observability = {
     maxSpreadBps: number;
   };
   lastDecision?: V52CostDecision;
+  amznShortYahooGate?: V52AmznShortYahooGate;
   rejectionCounters: Record<string, number>;
   positions: Array<{ slot: string; symbol?: string; side?: string; gross?: number }>;
   windows: V52Top2Window[];
@@ -112,6 +134,32 @@ function text(value: unknown): string | undefined {
 
 function bool(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
+}
+
+function amznShortYahooGate(value: unknown): V52AmznShortYahooGate | undefined {
+  const source = object(value);
+  if (!source) return undefined;
+  const status = source.status;
+  if (status !== "PASS" && status !== "BLOCK" && status !== "DATA_UNAVAILABLE") return undefined;
+  return {
+    status,
+    reason: text(source.reason),
+    source: text(source.source),
+    thresholdPct: finite(source.thresholdPct),
+    decisionTs: finite(source.decisionTs),
+    decisionNyDate: text(source.decisionNyDate),
+    previousNySessionDate: text(source.previousNySessionDate),
+    previousNySessionLastClose: finite(source.previousNySessionLastClose),
+    previousBarStartTs: finite(source.previousBarStartTs),
+    previousBarCompletedTs: finite(source.previousBarCompletedTs),
+    latestConfirmedYahooReferencePrice: finite(source.latestConfirmedYahooReferencePrice),
+    latestBarStartTs: finite(source.latestBarStartTs),
+    latestBarCompletedTs: finite(source.latestBarCompletedTs),
+    returnSincePreviousNySessionClosePct: finite(source.returnSincePreviousNySessionClosePct),
+    cacheFetchedAtTs: finite(source.cacheFetchedAtTs),
+    cacheTtlMs: finite(source.cacheTtlMs),
+    sourceError: text(source.sourceError),
+  };
 }
 
 function nyDay(value = new Date()) {
@@ -148,6 +196,7 @@ function costDecision(value: unknown): V52CostDecision | undefined {
     rejectionReasons: reasons,
     grossRequested: finite(source.grossRequested),
     grossAccepted: finite(source.grossAccepted),
+    amznShortYahooGate: amznShortYahooGate(source.amznShortYahooGate),
   };
 }
 
@@ -335,6 +384,7 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       telemetryState,
       thresholds,
       lastDecision,
+      amznShortYahooGate: amznShortYahooGate(state.amznShortYahooGate ?? lastDecision?.amznShortYahooGate),
       rejectionCounters,
       positions,
       windows,
