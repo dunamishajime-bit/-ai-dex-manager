@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {classifyV4RateBudgetDefer,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
+import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 
 function doc(overrides:Record<string,unknown>={}):V4ExecutionDocument{
@@ -71,4 +71,46 @@ test("bootstrap never waits when durable state requires immediate reconciliation
  }),/ASTER_GLOBAL_RATE_BUDGET_SATURATED:4000/);
  assert.equal(calls,1);
  assert.equal(waits,0);
+});
+
+test("daemon survives precise budget saturation with a durable open leg but remains BLOCKED",()=>{
+ const active=doc({state:{legs:{leg:{qty:1,status:"OPEN"}},journal:[],initial:{}} as any});
+ const outcome=classifyV4DaemonRateBudgetOutcome(
+  new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"),active);
+ assert.deepEqual(outcome,{
+  status:"blocked",
+  reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200",
+  waitMs:15000,
+ });
+ assert.equal(classifyV4RateBudgetDefer(
+  new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"),active),undefined);
+});
+
+test("daemon reports blocked instead of benign observing with unresolved intent or resident STOP",()=>{
+ for(const active of [
+  doc({intents:{cid:{clientOrderId:"cid",legId:"leg",action:"ENTRY",stage:"SUBMITTING"}}}),
+  doc({protections:{leg:{legId:"leg",phase:"STOP_CONFIRMED",protectedQty:1,stopClientOrderId:"stop"}}}),
+ ]){
+  const outcome=classifyV4DaemonRateBudgetOutcome(
+   new Error("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT"),active);
+  assert.equal(outcome?.status,"blocked");
+  assert.match(outcome?.reason??"",/RECONCILIATION_BLOCKED/);
+  assert.ok((outcome?.waitMs??0)>=15000);
+ }
+});
+
+test("daemon flat budget contention remains observing, non-budget exceptions remain fatal",()=>{
+ assert.equal(classifyV4DaemonRateBudgetOutcome(
+  new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:6500"),doc())?.status,"observing");
+ for(const message of ["HTTP 429","ECONNRESET","V4_PROTECTION_RECOVERY_STOP_INVALID","V4_ACCOUNT_MARK_MISMATCH"]){
+  assert.equal(classifyV4DaemonRateBudgetOutcome(new Error(message),doc()),undefined);
+ }
+});
+
+test("daemon blocked budget branch is wired to status-dependent BLOCKED health, with no order path",()=>{
+ const src=require("node:fs").readFileSync("scripts/v12-v4-production-runner.ts","utf8");
+ assert.match(src,/classifyV4DaemonRateBudgetOutcome\(error,store\.read\(\)/);
+ assert.match(src,/result=\{status:budget\.status,reason:budget\.reason,eventTs:Date\.now\(\),candidateCount:0,orderEnabled:false\}/);
+ assert.match(src,/const failed=result\.status==="blocked"\|\|result\.status\.toLowerCase\(\)==="failed"/);
+ assert.match(src,/safetyState:failed\?"BLOCKED"/);
 });
