@@ -176,3 +176,30 @@ test("HYPE does not misclassify a protected Idle SHORT position as an unmanaged 
   };
   assert.deepEqual(unmanagedHypeZecOrders([stop, tp], [position]), []);
 });
+
+test("HYPE does not misclassify a V12 V4 resident STOP as an unmanaged account order", () => {
+  const position: any = {
+    symbol: "NEARUSDT",
+    quantity: -3,
+    entryPrice: 5.358,
+    markPrice: 5.142,
+    unrealizedPnl: 0.648,
+    pnlPct: 0.0403,
+    notionalUsd: 15.426,
+    positionSide: "BOTH",
+    leverage: 5,
+    updatedAt: Date.now(),
+  };
+  const stop: any = {
+    symbol: "NEARUSDT",
+    clientOrderId: `v12-v4-${"a".repeat(28)}`,
+    side: "BUY",
+    status: "NEW",
+    type: "STOP_MARKET",
+    reduceOnly: true,
+    quantity: 3,
+    executedQuantity: 0,
+    stopPrice: 5.7,
+  };
+  assert.deepEqual(unmanagedHypeZecOrders([stop], [position]), []);
+});
