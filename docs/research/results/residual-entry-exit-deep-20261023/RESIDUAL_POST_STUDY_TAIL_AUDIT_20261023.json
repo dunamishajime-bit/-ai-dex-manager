@@ -1,0 +1,795 @@
+{
+  "status": "RESEARCH_POST_STUDY_TAIL_NOT_TRUE_OOS_NOT_FULL8_NO_LIVE",
+  "period": "2026-08-10..available historical M5 tail",
+  "note": "Rules frozen from earlier RESIDUAL 2026-10-23 research. Data dates are later than original 2026-08-10 study cutoff, but not proven untouched from other analyses.",
+  "limitations": [
+    "~22d short tail, small sample and possible regime mismatch",
+    "No 8-strategy capital admission, mark-to-market equity, venue L2, funding or margin parity"
+  ],
+  "costsBps": [
+    10,
+    30
+  ],
+  "cases": {
+    "ORIGINAL_REL_VOL": {
+      "DOGEUSDT": {
+        "rawSignals": 6,
+        "costs": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.66666666666667,
+            "pf": 0.5695745235477835,
+            "sumNetPctPts": -4.347297312167386,
+            "compound10k": 9512.564397871836,
+            "closedDDPct": -10.099999999999987,
+            "wilson95LowerWR": 20.765495512648787,
+            "avgMfePct": 5.987661896843684,
+            "avgMaePct": -5.148350939076811
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.66666666666667,
+            "pf": 0.5196798726051081,
+            "sumNetPctPts": -4.947297312167387,
+            "compound10k": 9454.525697074441,
+            "closedDDPct": -10.299999999999997,
+            "wilson95LowerWR": 20.765495512648787,
+            "avgMfePct": 5.987661896843684,
+            "avgMaePct": -5.148350939076811
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 0,
+        "costs": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          }
+        }
+      }
+    },
+    "PB_RECOVER_BTC": {
+      "DOGEUSDT": {
+        "rawSignals": 20,
+        "costs": {
+          "10": {
+            "n": 11,
+            "wins": 4,
+            "wr": 36.36363636363637,
+            "pf": 0.5723041604703477,
+            "sumNetPctPts": -8.540661287699315,
+            "compound10k": 9103.46447665762,
+            "closedDDPct": -15.881109799730432,
+            "wilson95LowerWR": 15.166223614131386,
+            "avgMfePct": 2.7807389284916377,
+            "avgMaePct": -3.0952023093715053
+          },
+          "30": {
+            "n": 11,
+            "wins": 4,
+            "wr": 36.36363636363637,
+            "pf": 0.4973720023383383,
+            "sumNetPctPts": -10.740661287699313,
+            "compound10k": 8903.343773884444,
+            "closedDDPct": -16.915499734141793,
+            "wilson95LowerWR": 15.166223614131386,
+            "avgMfePct": 2.7807389284916377,
+            "avgMaePct": -3.0952023093715053
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 17,
+        "costs": {
+          "10": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.54545454545455,
+            "pf": 1.7861751955686493,
+            "sumNetPctPts": 6.5742249442944285,
+            "compound10k": 10637.677520756431,
+            "closedDDPct": -4.052228104125399,
+            "wilson95LowerWR": 28.00877556899882,
+            "avgMfePct": 2.982854264209157,
+            "avgMaePct": -2.2932851412964386
+          },
+          "30": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45454545454545,
+            "pf": 1.4577954267628996,
+            "sumNetPctPts": 4.374224944294427,
+            "compound10k": 10407.183580486439,
+            "closedDDPct": -5.015839455802961,
+            "wilson95LowerWR": 21.270957543988047,
+            "avgMfePct": 2.982854264209157,
+            "avgMaePct": -2.2932851412964386
+          }
+        }
+      }
+    },
+    "PB_REL_LEAD": {
+      "DOGEUSDT": {
+        "rawSignals": 15,
+        "costs": {
+          "10": {
+            "n": 6,
+            "wins": 3,
+            "wr": 50.0,
+            "pf": 0.41326576949619614,
+            "sumNetPctPts": -8.668336764725192,
+            "compound10k": 9104.667496227608,
+            "closedDDPct": -13.758125702638925,
+            "wilson95LowerWR": 18.76128068994087,
+            "avgMfePct": 3.7102226927224167,
+            "avgMaePct": -3.7103955403451385
+          },
+          "30": {
+            "n": 6,
+            "wins": 3,
+            "wr": 50.0,
+            "pf": 0.3581098901417209,
+            "sumNetPctPts": -9.868336764725193,
+            "compound10k": 8994.129541255366,
+            "closedDDPct": -14.254020031150816,
+            "wilson95LowerWR": 18.76128068994087,
+            "avgMfePct": 3.7102226927224167,
+            "avgMaePct": -3.7103955403451385
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 6,
+        "costs": {
+          "10": {
+            "n": 5,
+            "wins": 2,
+            "wr": 40.0,
+            "pf": 0.20845398543292587,
+            "sumNetPctPts": -13.435475494034398,
+            "compound10k": 8680.677246575468,
+            "closedDDPct": -13.696460628672247,
+            "wilson95LowerWR": 11.761823115925326,
+            "avgMfePct": 1.522466361976682,
+            "avgMaePct": -4.633329253160583
+          },
+          "30": {
+            "n": 5,
+            "wins": 2,
+            "wr": 40.0,
+            "pf": 0.1785757025686456,
+            "sumNetPctPts": -14.4354754940344,
+            "compound10k": 8591.650226111404,
+            "closedDDPct": -14.411384903230706,
+            "wilson95LowerWR": 11.761823115925326,
+            "avgMfePct": 1.522466361976682,
+            "avgMaePct": -4.633329253160583
+          }
+        }
+      }
+    },
+    "PB_EMA_RECLAIM": {
+      "DOGEUSDT": {
+        "rawSignals": 7,
+        "costs": {
+          "10": {
+            "n": 7,
+            "wins": 2,
+            "wr": 28.571428571428573,
+            "pf": 0.2812444452351635,
+            "sumNetPctPts": -13.684792896265563,
+            "compound10k": 8655.215426482273,
+            "closedDDPct": -17.039680835927797,
+            "wilson95LowerWR": 8.221716570901547,
+            "avgMfePct": 3.040902829816334,
+            "avgMaePct": -3.809801676984064
+          },
+          "30": {
+            "n": 7,
+            "wins": 2,
+            "wr": 28.571428571428573,
+            "pf": 0.24724947303576536,
+            "sumNetPctPts": -15.084792896265563,
+            "compound10k": 8532.160164055207,
+            "closedDDPct": -17.73337670400498,
+            "wilson95LowerWR": 8.221716570901547,
+            "avgMfePct": 3.040902829816334,
+            "avgMaePct": -3.809801676984064
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 7,
+        "costs": {
+          "10": {
+            "n": 6,
+            "wins": 4,
+            "wr": 66.66666666666667,
+            "pf": 0.9605509543530849,
+            "sumNetPctPts": -0.4408976079639082,
+            "compound10k": 9882.715838824042,
+            "closedDDPct": -11.067667515503354,
+            "wilson95LowerWR": 29.99883213415286,
+            "avgMfePct": 3.5646017790677518,
+            "avgMaePct": -2.863906797014709
+          },
+          "30": {
+            "n": 6,
+            "wins": 4,
+            "wr": 66.66666666666667,
+            "pf": 0.8582547126908426,
+            "sumNetPctPts": -1.6408976079639075,
+            "compound10k": 9764.331987342179,
+            "closedDDPct": -11.44491475128644,
+            "wilson95LowerWR": 29.99883213415286,
+            "avgMfePct": 3.5646017790677518,
+            "avgMaePct": -2.863906797014709
+          }
+        }
+      }
+    },
+    "PB_CLIMAX_RECOVERY": {
+      "DOGEUSDT": {
+        "rawSignals": 8,
+        "costs": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.66666666666667,
+            "pf": 1.64353766620505,
+            "sumNetPctPts": 1.5942470188855085,
+            "compound10k": 10152.0430619852,
+            "closedDDPct": -2.4773173391493986,
+            "wilson95LowerWR": 20.765495512648787,
+            "avgMfePct": 4.053431316175045,
+            "avgMaePct": -1.4899600676791747
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.66666666666667,
+            "pf": 1.3713594217416858,
+            "sumNetPctPts": 0.9942470188855093,
+            "compound10k": 10091.540546733093,
+            "closedDDPct": -2.6773173391493987,
+            "wilson95LowerWR": 20.765495512648787,
+            "avgMfePct": 4.053431316175045,
+            "avgMaePct": -1.4899600676791747
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 3,
+        "costs": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "pf": null,
+            "sumNetPctPts": 3.2864844343204136,
+            "compound10k": 10328.648443432043,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": 20.654329147389294,
+            "avgMfePct": 4.570994684889906,
+            "avgMaePct": 0.0
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "pf": null,
+            "sumNetPctPts": 3.086484434320414,
+            "compound10k": 10308.648443432043,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": 20.654329147389294,
+            "avgMfePct": 4.570994684889906,
+            "avgMaePct": 0.0
+          }
+        }
+      }
+    },
+    "PB_RANGE_REVERSAL": {
+      "DOGEUSDT": {
+        "rawSignals": 6,
+        "costs": {
+          "10": {
+            "n": 4,
+            "wins": 1,
+            "wr": 25.0,
+            "pf": 0.005083105760423635,
+            "sumNetPctPts": -12.95110224271484,
+            "compound10k": 8735.326051159509,
+            "closedDDPct": -12.704501315550388,
+            "wilson95LowerWR": 4.558606264463622,
+            "avgMfePct": 3.825126975896886,
+            "avgMaePct": -4.900769517377998
+          },
+          "30": {
+            "n": 4,
+            "wins": 0,
+            "wr": 0.0,
+            "pf": 0.0,
+            "sumNetPctPts": -13.751102242714841,
+            "compound10k": 8663.198872946583,
+            "closedDDPct": -13.368011270534176,
+            "wilson95LowerWR": 0.0,
+            "avgMfePct": 3.825126975896886,
+            "avgMaePct": -4.900769517377998
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 6,
+        "costs": {
+          "10": {
+            "n": 6,
+            "wins": 3,
+            "wr": 50.0,
+            "pf": 1.096277235384425,
+            "sumNetPctPts": 0.5562743717247196,
+            "compound10k": 10040.04602532939,
+            "closedDDPct": -3.234240094618579,
+            "wilson95LowerWR": 18.76128068994087,
+            "avgMfePct": 2.02947306372,
+            "avgMaePct": -1.8731157337264066
+          },
+          "30": {
+            "n": 6,
+            "wins": 3,
+            "wr": 50.0,
+            "pf": 0.8990683801108964,
+            "sumNetPctPts": -0.6437256282752806,
+            "compound10k": 9920.214591574968,
+            "closedDDPct": -3.434240094618579,
+            "wilson95LowerWR": 18.76128068994087,
+            "avgMfePct": 2.02947306372,
+            "avgMaePct": -1.8731157337264066
+          }
+        }
+      }
+    },
+    "PB_BREAK_RETEST": {
+      "DOGEUSDT": {
+        "rawSignals": 1,
+        "costs": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "pf": null,
+            "sumNetPctPts": 2.93776683087027,
+            "compound10k": 10293.776683087028,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": 20.654329147389294,
+            "avgMfePct": 4.529282977558835,
+            "avgMaePct": -0.273672687465798
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "pf": null,
+            "sumNetPctPts": 2.73776683087027,
+            "compound10k": 10273.776683087028,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": 20.654329147389294,
+            "avgMfePct": 4.529282977558835,
+            "avgMaePct": -0.273672687465798
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 2,
+        "costs": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "pf": null,
+            "sumNetPctPts": 5.540728955741992,
+            "compound10k": 10554.0728955742,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": 20.654329147389294,
+            "avgMfePct": 6.45067978015621,
+            "avgMaePct": -0.188024298524736
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "pf": null,
+            "sumNetPctPts": 5.340728955741992,
+            "compound10k": 10534.0728955742,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": 20.654329147389294,
+            "avgMfePct": 6.45067978015621,
+            "avgMaePct": -0.188024298524736
+          }
+        }
+      }
+    },
+    "AVAX_TREND_RECOVER": {
+      "DOGEUSDT": {
+        "rawSignals": 0,
+        "costs": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 24,
+        "costs": {
+          "10": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "pf": 0.9695015300632037,
+            "sumNetPctPts": -0.4477313324433787,
+            "compound10k": 9871.997179940363,
+            "closedDDPct": -13.371886842105251,
+            "wilson95LowerWR": 39.67732199795652,
+            "avgMfePct": 2.9032862553021577,
+            "avgMaePct": -2.3421548400059344
+          },
+          "30": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "pf": 0.8398129002994,
+            "sumNetPctPts": -2.4477313324433787,
+            "compound10k": 9675.904540277403,
+            "closedDDPct": -13.744007894736832,
+            "wilson95LowerWR": 39.67732199795652,
+            "avgMfePct": 2.9032862553021577,
+            "avgMaePct": -2.3421548400059344
+          }
+        }
+      }
+    },
+    "AVAX_VOL_REBOUND": {
+      "DOGEUSDT": {
+        "rawSignals": 0,
+        "costs": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 5,
+        "costs": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "wr": 60.0,
+            "pf": 1.5249344483837088,
+            "sumNetPctPts": 2.1804178839987873,
+            "compound10k": 10205.80291118691,
+            "closedDDPct": -3.234240094618579,
+            "wilson95LowerWR": 23.0719932208837,
+            "avgMfePct": 2.286999723941743,
+            "avgMaePct": -1.6704526652032792
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "wr": 60.0,
+            "pf": 1.2592219594383065,
+            "sumNetPctPts": 1.1804178839987873,
+            "compound10k": 10104.53582629575,
+            "closedDDPct": -3.434240094618579,
+            "wilson95LowerWR": 23.0719932208837,
+            "avgMfePct": 2.286999723941743,
+            "avgMaePct": -1.6704526652032792
+          }
+        }
+      }
+    },
+    "AVAX_LEADER_RESET": {
+      "DOGEUSDT": {
+        "rawSignals": 0,
+        "costs": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "pf": null,
+            "sumNetPctPts": 0,
+            "compound10k": 10000.0,
+            "closedDDPct": 0.0,
+            "wilson95LowerWR": null,
+            "avgMfePct": null,
+            "avgMaePct": null
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 4,
+        "costs": {
+          "10": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "pf": 0.6128534792177295,
+            "sumNetPctPts": -4.3268974482225655,
+            "compound10k": 9510.007596893727,
+            "closedDDPct": -11.067667515503354,
+            "wilson95LowerWR": 15.003570882017145,
+            "avgMfePct": 4.088920587646911,
+            "avgMaePct": -4.120065869642117
+          },
+          "30": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "pf": 0.557124376148839,
+            "sumNetPctPts": -5.126897448222566,
+            "compound10k": 9433.066816857741,
+            "closedDDPct": -11.44491475128644,
+            "wilson95LowerWR": 15.003570882017145,
+            "avgMfePct": 4.088920587646911,
+            "avgMaePct": -4.120065869642117
+          }
+        }
+      }
+    },
+    "SHORT_BOUNCE_REJECT": {
+      "DOGEUSDT": {
+        "rawSignals": 20,
+        "costs": {
+          "10": {
+            "n": 10,
+            "wins": 3,
+            "wr": 30.0,
+            "pf": 0.3507644680065842,
+            "sumNetPctPts": -12.542643953097663,
+            "compound10k": 8749.477183628256,
+            "closedDDPct": -13.314351384606137,
+            "wilson95LowerWR": 10.778928748621182,
+            "avgMfePct": 1.6994318946588338,
+            "avgMaePct": -2.9671790174443347
+          },
+          "30": {
+            "n": 10,
+            "wins": 2,
+            "wr": 20.0,
+            "pf": 0.3020741573426011,
+            "sumNetPctPts": -14.542643953097665,
+            "compound10k": 8573.611627069235,
+            "closedDDPct": -14.263883729307658,
+            "wilson95LowerWR": 5.668094798069332,
+            "avgMfePct": 1.6994318946588338,
+            "avgMaePct": -2.9671790174443347
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 27,
+        "costs": {
+          "10": {
+            "n": 14,
+            "wins": 4,
+            "wr": 28.571428571428573,
+            "pf": 0.3313155707315532,
+            "sumNetPctPts": -8.164000424447426,
+            "compound10k": 9202.843598599167,
+            "closedDDPct": -9.088088796555116,
+            "wilson95LowerWR": 11.721187910109101,
+            "avgMfePct": 1.3295386492183703,
+            "avgMaePct": -1.8782287603106216
+          },
+          "30": {
+            "n": 14,
+            "wins": 4,
+            "wr": 28.571428571428573,
+            "pf": 0.22837896855032336,
+            "sumNetPctPts": -10.964000424447427,
+            "compound10k": 8946.971488504323,
+            "closedDDPct": -11.263310788343372,
+            "wilson95LowerWR": 11.721187910109101,
+            "avgMfePct": 1.3295386492183703,
+            "avgMaePct": -1.8782287603106216
+          }
+        }
+      }
+    },
+    "SHORT_RETEST_FAIL": {
+      "DOGEUSDT": {
+        "rawSignals": 5,
+        "costs": {
+          "10": {
+            "n": 5,
+            "wins": 1,
+            "wr": 20.0,
+            "pf": 0.9609513511491212,
+            "sumNetPctPts": -0.196994716848641,
+            "compound10k": 9962.047311657137,
+            "closedDDPct": -4.232449155371709,
+            "wilson95LowerWR": 3.6223160969787456,
+            "avgMfePct": 1.534472334547352,
+            "avgMaePct": -2.3328766950179114
+          },
+          "30": {
+            "n": 5,
+            "wins": 1,
+            "wr": 20.0,
+            "pf": 0.7952053553182246,
+            "sumNetPctPts": -1.196994716848641,
+            "compound10k": 9862.713456913783,
+            "closedDDPct": -4.814285518302097,
+            "wilson95LowerWR": 3.6223160969787456,
+            "avgMfePct": 1.534472334547352,
+            "avgMaePct": -2.3328766950179114
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 7,
+        "costs": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "wr": 33.333333333333336,
+            "pf": 0.6134648826223822,
+            "sumNetPctPts": -2.104455067738309,
+            "compound10k": 9782.561728651592,
+            "closedDDPct": -5.3616523645174325,
+            "wilson95LowerWR": 9.676933255921684,
+            "avgMfePct": 1.6106905305378394,
+            "avgMaePct": -1.9304813136020504
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "wr": 33.333333333333336,
+            "pf": 0.4708137556011236,
+            "sumNetPctPts": -3.3044550677383087,
+            "compound10k": 9665.312129233853,
+            "closedDDPct": -6.126985941981744,
+            "wilson95LowerWR": 9.676933255921684,
+            "avgMfePct": 1.6106905305378394,
+            "avgMaePct": -1.9304813136020504
+          }
+        }
+      }
+    },
+    "SHORT_DOWN_RESUME": {
+      "DOGEUSDT": {
+        "rawSignals": 16,
+        "costs": {
+          "10": {
+            "n": 9,
+            "wins": 4,
+            "wr": 44.44444444444444,
+            "pf": 0.49450619684175706,
+            "sumNetPctPts": -4.544589860557633,
+            "compound10k": 9536.04299746531,
+            "closedDDPct": -5.600086888183952,
+            "wilson95LowerWR": 18.8775429471914,
+            "avgMfePct": 2.3694706194676396,
+            "avgMaePct": -2.251932582558802
+          },
+          "30": {
+            "n": 9,
+            "wins": 3,
+            "wr": 33.333333333333336,
+            "pf": 0.3723353220317181,
+            "sumNetPctPts": -6.344589860557635,
+            "compound10k": 9364.829994724929,
+            "closedDDPct": -7.034605709899877,
+            "wilson95LowerWR": 12.058159868274291,
+            "avgMfePct": 2.3694706194676396,
+            "avgMaePct": -2.251932582558802
+          }
+        }
+      },
+      "AVAXUSDT": {
+        "rawSignals": 17,
+        "costs": {
+          "10": {
+            "n": 11,
+            "wins": 2,
+            "wr": 18.181818181818183,
+            "pf": 0.11269680162467796,
+            "sumNetPctPts": -9.658834066539345,
+            "compound10k": 9068.345408867814,
+            "closedDDPct": -9.31654591132186,
+            "wilson95LowerWR": 5.136660067100062,
+            "avgMfePct": 1.4550418214254532,
+            "avgMaePct": -2.089985557472392
+          },
+          "30": {
+            "n": 11,
+            "wins": 2,
+            "wr": 18.181818181818183,
+            "pf": 0.06517410646323793,
+            "sumNetPctPts": -11.858834066539345,
+            "compound10k": 8869.064683736862,
+            "closedDDPct": -11.309353162631375,
+            "wilson95LowerWR": 5.136660067100062,
+            "avgMfePct": 1.4550418214254532,
+            "avgMaePct": -2.089985557472392
+          }
+        }
+      }
+    }
+  }
+}
