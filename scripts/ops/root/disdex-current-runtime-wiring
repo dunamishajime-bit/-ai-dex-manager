@@ -675,14 +675,28 @@ migrate_v4_execution_lineage() {
   }
   [[ "$from_sha" == "$V4_PRIMARY_SHA" ]] && return 0
   load_runtime_migration_environment
-  V12_V4_STATE_OWNER_UID="$(id -u deploy)" \
-  V12_V4_STATE_OWNER_GID="$(id -g deploy)" \
-  "$V4_PRIMARY_RELEASE/node_modules/.bin/tsx" \
-    "$V4_PRIMARY_RELEASE/scripts/v12-v4-flat-lineage-migration.ts" \
-    --apply \
-    --old-sha "$from_sha" \
-    --new-sha "$V4_PRIMARY_SHA" \
-    --ack I_ACK_V12_V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION
+  export V12_V4_STATE_OWNER_UID="$(id -u deploy)"
+  export V12_V4_STATE_OWNER_GID="$(id -g deploy)"
+  if /usr/bin/jq -e '
+    ((.state.legs // {}) | length) == 0 and
+    ((.intents // {}) | length) == 0 and
+    ((.protections // {}) | length) == 0 and
+    ((.state.pending // null) == null)
+  ' "$state_path" >/dev/null 2>&1; then
+    "$V4_PRIMARY_RELEASE/node_modules/.bin/tsx" \
+      "$V4_PRIMARY_RELEASE/scripts/v12-v4-flat-lineage-migration.ts" \
+      --apply \
+      --old-sha "$from_sha" \
+      --new-sha "$V4_PRIMARY_SHA" \
+      --ack I_ACK_V12_V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION
+  else
+    "$V4_PRIMARY_RELEASE/node_modules/.bin/tsx" \
+      "$V4_PRIMARY_RELEASE/scripts/v12-v4-active-lineage-rebind.ts" \
+      --apply \
+      --old-sha "$from_sha" \
+      --new-sha "$V4_PRIMARY_SHA" \
+      --ack I_ACK_V12_V4_ACTIVE_LINEAGE_REBIND_AFTER_SIGNED_RECONCILIATION
+  fi
 }
 
 migrate_v4_telemetry_lineage() {
