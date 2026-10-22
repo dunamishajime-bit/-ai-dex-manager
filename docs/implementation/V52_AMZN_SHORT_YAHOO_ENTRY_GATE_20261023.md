@@ -33,3 +33,14 @@ The V52 state stores `amznShortYahooGate` with the status, reason, prior NYSE
 close, latest confirmed price, return percentage, decision timestamp, and bar
 completion timestamp. The production UI renders this evidence read-only on the
 V52 decision page.
+
+## Existing cross-runner safety wiring
+
+V52 can invoke the FET preemption helper while the FET runner is maintained
+on its own immutable release. The helper therefore accepts the explicit
+`FET_BRK48_RUNTIME_SHA` binding for the FET state owner and retains the caller
+runtime SHA as a backward-compatible fallback. This changes no FET entry,
+exit, sizing, or preemption policy; it prevents a valid independently pinned
+FET state from being rejected merely because the invoking V52 release has a
+different SHA. The binding must be populated from the measured active FET
+service and state release, never guessed or copied from the V52 SHA.
