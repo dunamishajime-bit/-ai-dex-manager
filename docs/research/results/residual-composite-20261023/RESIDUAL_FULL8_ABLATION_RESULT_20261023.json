@@ -1,0 +1,326 @@
+{
+  "status": "RESEARCH_ONLY_NATIVE_FULL8_DYNAMIC_RESIDUAL_ABLATION_NO_LIVE",
+  "sourceSha": "e1f2088574c933dab388d26ed3c113ad47c72321",
+  "baseline": "AMZN_SHORT_PRIOR_CLOSE_PLUS1P0 and adopted HYPE+IDLE+FET etc unchanged",
+  "stockOriginalSuppressed11NotRecreated": true,
+  "costsBps": [
+    10,
+    30
+  ],
+  "cases": {
+    "BASE_REPLAY": {
+      "10": {
+        "portfolioEquityJpy": 247438945.47375035,
+        "equityDeltaFrom8LogicBaselineJpy": 0.0,
+        "maxMtmDDPct": -14.603309760733396,
+        "ddDeltaPctPoints": 0.0,
+        "PF": 4.12540014478322,
+        "totalTrades": 1298,
+        "tradeCountDelta": 0,
+        "residualTrades": 30,
+        "residualDoge": 17,
+        "residualAvax": 13,
+        "residualWins": 16,
+        "nonResidualTrades": 1268,
+        "byStrategy": {
+          "V12": 835,
+          "RESIDUAL": 30,
+          "Q102": 183,
+          "PENGU": 67,
+          "IDLE": 71,
+          "V52": 86,
+          "HYPE_LONG": 18,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 7,
+          "HYPE_LONG": 12,
+          "IDLE": 47,
+          "PENGU": 50,
+          "Q102": 140,
+          "RESIDUAL": 16,
+          "V12": 596,
+          "V52": 71
+        },
+        "residualModeledContributionJpy": -6069120.0462816935,
+        "reselectionPasses": 3,
+        "ledgerSha256": "b9b93eee5bfe357dd0265a67b1ee4ed81f197b015daabbd281144ece9593097b",
+        "accounting": "PASS"
+      },
+      "30": {
+        "portfolioEquityJpy": 144336412.92864558,
+        "equityDeltaFrom8LogicBaselineJpy": 0.0,
+        "maxMtmDDPct": -15.80770763869479,
+        "ddDeltaPctPoints": 0.0,
+        "PF": 3.465018875007997,
+        "totalTrades": 1297,
+        "tradeCountDelta": 0,
+        "residualTrades": 29,
+        "residualDoge": 16,
+        "residualAvax": 13,
+        "residualWins": 13,
+        "nonResidualTrades": 1268,
+        "byStrategy": {
+          "V12": 833,
+          "RESIDUAL": 29,
+          "Q102": 182,
+          "PENGU": 67,
+          "IDLE": 75,
+          "V52": 86,
+          "HYPE_LONG": 17,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 6,
+          "HYPE_LONG": 12,
+          "IDLE": 47,
+          "PENGU": 50,
+          "Q102": 138,
+          "RESIDUAL": 13,
+          "V12": 566,
+          "V52": 70
+        },
+        "residualModeledContributionJpy": -3878821.351742737,
+        "reselectionPasses": 3,
+        "ledgerSha256": "e4d88bb36373a9697f33c9460abc1535e4b68bf751df25dd28614522830b2ae5",
+        "accounting": "PASS"
+      }
+    },
+    "NO_RESIDUAL": {
+      "10": {
+        "portfolioEquityJpy": 259925586.70616698,
+        "equityDeltaFrom8LogicBaselineJpy": 12486641.23241663,
+        "maxMtmDDPct": -14.514985270751623,
+        "ddDeltaPctPoints": 0.08832448998177256,
+        "PF": 4.576733568053611,
+        "totalTrades": 1266,
+        "tradeCountDelta": -32,
+        "residualTrades": 0,
+        "residualDoge": 0,
+        "residualAvax": 0,
+        "residualWins": 0,
+        "nonResidualTrades": 1266,
+        "byStrategy": {
+          "V12": 832,
+          "Q102": 183,
+          "PENGU": 67,
+          "IDLE": 71,
+          "V52": 87,
+          "HYPE_LONG": 18,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 7,
+          "HYPE_LONG": 12,
+          "IDLE": 47,
+          "PENGU": 50,
+          "Q102": 140,
+          "V12": 593,
+          "V52": 72
+        },
+        "residualModeledContributionJpy": 0,
+        "reselectionPasses": 3,
+        "ledgerSha256": "ba5ab76fb7e80810e5c1f870b715b355dfd6858c31285b8834842edd646739e0",
+        "accounting": "PASS"
+      },
+      "30": {
+        "portfolioEquityJpy": 154587146.1863596,
+        "equityDeltaFrom8LogicBaselineJpy": 10250733.257714033,
+        "maxMtmDDPct": -15.809892825113304,
+        "ddDeltaPctPoints": -0.0021851864185133962,
+        "PF": 3.7115884501517,
+        "totalTrades": 1267,
+        "tradeCountDelta": -30,
+        "residualTrades": 0,
+        "residualDoge": 0,
+        "residualAvax": 0,
+        "residualWins": 0,
+        "nonResidualTrades": 1267,
+        "byStrategy": {
+          "V12": 833,
+          "Q102": 182,
+          "PENGU": 67,
+          "IDLE": 73,
+          "V52": 87,
+          "HYPE_LONG": 17,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 6,
+          "HYPE_LONG": 12,
+          "IDLE": 46,
+          "PENGU": 50,
+          "Q102": 138,
+          "V12": 563,
+          "V52": 71
+        },
+        "residualModeledContributionJpy": 0,
+        "reselectionPasses": 3,
+        "ledgerSha256": "f557e7f485558a1ce6747e2293fbbd1aa15a1f15f3a4bff10b3c3139f2b3b55f",
+        "accounting": "PASS"
+      }
+    },
+    "NO_DOGE": {
+      "10": {
+        "portfolioEquityJpy": 258560040.15561816,
+        "equityDeltaFrom8LogicBaselineJpy": 11121094.681867808,
+        "maxMtmDDPct": -14.514985270751623,
+        "ddDeltaPctPoints": 0.08832448998177256,
+        "PF": 4.543539174207318,
+        "totalTrades": 1280,
+        "tradeCountDelta": -18,
+        "residualTrades": 15,
+        "residualDoge": 0,
+        "residualAvax": 15,
+        "residualWins": 9,
+        "nonResidualTrades": 1265,
+        "byStrategy": {
+          "V12": 832,
+          "Q102": 183,
+          "PENGU": 67,
+          "IDLE": 71,
+          "RESIDUAL": 15,
+          "V52": 86,
+          "HYPE_LONG": 18,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 7,
+          "HYPE_LONG": 12,
+          "IDLE": 47,
+          "PENGU": 50,
+          "Q102": 140,
+          "RESIDUAL": 9,
+          "V12": 592,
+          "V52": 71
+        },
+        "residualModeledContributionJpy": -491635.0548534854,
+        "reselectionPasses": 3,
+        "ledgerSha256": "c7899fbd08e53262b4d7d47118328c6b98180d2cad20a9874b9c3bfc8939d9f0",
+        "accounting": "PASS"
+      },
+      "30": {
+        "portfolioEquityJpy": 151885081.18403867,
+        "equityDeltaFrom8LogicBaselineJpy": 7548668.255393088,
+        "maxMtmDDPct": -15.799039035524453,
+        "ddDeltaPctPoints": 0.008668603170336908,
+        "PF": 3.6939908481640664,
+        "totalTrades": 1280,
+        "tradeCountDelta": -17,
+        "residualTrades": 15,
+        "residualDoge": 0,
+        "residualAvax": 15,
+        "residualWins": 9,
+        "nonResidualTrades": 1265,
+        "byStrategy": {
+          "V12": 832,
+          "Q102": 182,
+          "PENGU": 67,
+          "IDLE": 73,
+          "RESIDUAL": 15,
+          "V52": 86,
+          "HYPE_LONG": 17,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 6,
+          "HYPE_LONG": 12,
+          "IDLE": 46,
+          "PENGU": 50,
+          "Q102": 138,
+          "RESIDUAL": 9,
+          "V12": 563,
+          "V52": 70
+        },
+        "residualModeledContributionJpy": -243719.4818321511,
+        "reselectionPasses": 3,
+        "ledgerSha256": "57d31dd8962b8c4950f5c3647dc6e5bab0bee1b8543d3ab0bc33aa3a5800e002",
+        "accounting": "PASS"
+      }
+    },
+    "NO_AVAX": {
+      "10": {
+        "portfolioEquityJpy": 244060948.765301,
+        "equityDeltaFrom8LogicBaselineJpy": -3377996.7084493637,
+        "maxMtmDDPct": -14.603309760733396,
+        "ddDeltaPctPoints": 0.0,
+        "PF": 4.147698650391678,
+        "totalTrades": 1282,
+        "tradeCountDelta": -16,
+        "residualTrades": 18,
+        "residualDoge": 18,
+        "residualAvax": 0,
+        "residualWins": 9,
+        "nonResidualTrades": 1264,
+        "byStrategy": {
+          "V12": 830,
+          "RESIDUAL": 18,
+          "Q102": 183,
+          "PENGU": 67,
+          "IDLE": 71,
+          "V52": 87,
+          "HYPE_LONG": 18,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 7,
+          "HYPE_LONG": 12,
+          "IDLE": 47,
+          "PENGU": 50,
+          "Q102": 140,
+          "RESIDUAL": 9,
+          "V12": 590,
+          "V52": 72
+        },
+        "residualModeledContributionJpy": -5501133.716083748,
+        "reselectionPasses": 3,
+        "ledgerSha256": "dcc445767d6d83222d0de7146c64b9718de66cb9c01f16a1b4d19fb5878ab948",
+        "accounting": "PASS"
+      },
+      "30": {
+        "portfolioEquityJpy": 144317986.6690193,
+        "equityDeltaFrom8LogicBaselineJpy": -18426.25962626934,
+        "maxMtmDDPct": -15.778272357784108,
+        "ddDeltaPctPoints": 0.029435280910682593,
+        "PF": 3.4774802591688587,
+        "totalTrades": 1286,
+        "tradeCountDelta": -11,
+        "residualTrades": 17,
+        "residualDoge": 17,
+        "residualAvax": 0,
+        "residualWins": 5,
+        "nonResidualTrades": 1269,
+        "byStrategy": {
+          "V12": 833,
+          "RESIDUAL": 17,
+          "Q102": 182,
+          "PENGU": 67,
+          "IDLE": 75,
+          "V52": 87,
+          "HYPE_LONG": 17,
+          "FET": 8
+        },
+        "byStrategyWins": {
+          "FET": 6,
+          "HYPE_LONG": 12,
+          "IDLE": 47,
+          "PENGU": 50,
+          "Q102": 138,
+          "RESIDUAL": 5,
+          "V12": 565,
+          "V52": 71
+        },
+        "residualModeledContributionJpy": -3660736.824938337,
+        "reselectionPasses": 3,
+        "ledgerSha256": "33bdcd3a68d143a0f93d0a0d8606267d31a2ff45da9b46abb2054bc26cf00183",
+        "accounting": "PASS"
+      }
+    }
+  },
+  "limitations": [
+    "Original non-selected RESIDUAL candidate stream may be incomplete and cannot regenerate novel signals",
+    "No venue L2, real margin/liquidation, production SHA/real-order lifecycle certified",
+    "Result is research 8-strategy wallet on fixed native V52 99-row tape and other archived candidate data",
+    "Do not automatically retire LIVE RESIDUAL even if research economics improve"
+  ]
+}
