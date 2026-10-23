@@ -1,0 +1,481 @@
+{
+  "status": "SELECTED_TRADE_ENTRY_SCREEN_ONLY_NOT_FULL8_NOT_LIVE",
+  "costs": {
+    "10": {
+      "initial": {
+        "n": 24,
+        "wins": 16,
+        "wr": 66.67,
+        "returnSumPct": 8.728
+      },
+      "cases": {
+        "ENTRY_RETAIN_OLD": {
+          "kept": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "returnSumPct": 8.728
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "returnSumPct": 0
+          },
+          "keptPercent": 100.0,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": []
+        },
+        "VETO_RET3_BELOW_M1P5_BTC3_BELOW_M1": {
+          "kept": {
+            "n": 22,
+            "wins": 16,
+            "wr": 72.73,
+            "returnSumPct": 13.588
+          },
+          "removed": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -4.859
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_RET3_BELOW_M2_BTC3_BELOW_M0P75": {
+          "kept": {
+            "n": 21,
+            "wins": 15,
+            "wr": 71.43,
+            "returnSumPct": 10.827
+          },
+          "removed": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.33,
+            "returnSumPct": -2.099
+          },
+          "keptPercent": 87.5,
+          "removedWinnerEntryTs": [
+            1776513600000
+          ],
+          "removedLoserEntryTs": [
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_RET3_BELOW_M1_BTC3_BELOW_M1": {
+          "kept": {
+            "n": 21,
+            "wins": 16,
+            "wr": 76.19,
+            "returnSumPct": 18.352
+          },
+          "removed": {
+            "n": 3,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -9.624
+          },
+          "keptPercent": 87.5,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769097600000,
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_RET3_BELOW_M2_REL3_GT0": {
+          "kept": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "returnSumPct": 8.728
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "returnSumPct": 0
+          },
+          "keptPercent": 100.0,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": []
+        },
+        "VETO_BTC3_BELOW_M1_REL3_GT0": {
+          "kept": {
+            "n": 22,
+            "wins": 16,
+            "wr": 72.73,
+            "returnSumPct": 16.322
+          },
+          "removed": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -7.593
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769097600000,
+            1769893200000
+          ]
+        },
+        "VETO_RET3_BELOW_M1_AND_VOLRATIO_BELOW0P8": {
+          "kept": {
+            "n": 22,
+            "wins": 14,
+            "wr": 63.64,
+            "returnSumPct": 5.429
+          },
+          "removed": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "returnSumPct": 3.3
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [
+            1768500000000,
+            1779876000000
+          ],
+          "removedLoserEntryTs": []
+        },
+        "VETO_ATR_GT0P8_AND_BTC3_BELOW_M0P75": {
+          "kept": {
+            "n": 23,
+            "wins": 16,
+            "wr": 69.57,
+            "returnSumPct": 11.557
+          },
+          "removed": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -2.829
+          },
+          "keptPercent": 95.83,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769893200000
+          ]
+        },
+        "VETO_RET3_BELOW_M1P5_AND_BTC3_BELOW_M0P5": {
+          "kept": {
+            "n": 20,
+            "wins": 14,
+            "wr": 70.0,
+            "returnSumPct": 8.41
+          },
+          "removed": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "returnSumPct": 0.319
+          },
+          "keptPercent": 83.33,
+          "removedWinnerEntryTs": [
+            1776513600000,
+            1780563600000
+          ],
+          "removedLoserEntryTs": [
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_REL3_ABOVE0_AND_BTC3_BELOW_M0P5": {
+          "kept": {
+            "n": 22,
+            "wins": 16,
+            "wr": 72.73,
+            "returnSumPct": 16.322
+          },
+          "removed": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -7.593
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769097600000,
+            1769893200000
+          ]
+        },
+        "VETO_RET3_BELOW_M1P5_OR_REL3_ABOVE1P5": {
+          "kept": {
+            "n": 15,
+            "wins": 11,
+            "wr": 73.33,
+            "returnSumPct": 11.199
+          },
+          "removed": {
+            "n": 9,
+            "wins": 5,
+            "wr": 55.56,
+            "returnSumPct": -2.47
+          },
+          "keptPercent": 62.5,
+          "removedWinnerEntryTs": [
+            1768500000000,
+            1771513200000,
+            1776513600000,
+            1779876000000,
+            1780563600000
+          ],
+          "removedLoserEntryTs": [
+            1769893200000,
+            1770638400000,
+            1772398800000,
+            1778598000000
+          ]
+        }
+      }
+    },
+    "30": {
+      "initial": {
+        "n": 24,
+        "wins": 12,
+        "wr": 50.0,
+        "returnSumPct": 7.93
+      },
+      "cases": {
+        "ENTRY_RETAIN_OLD": {
+          "kept": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "returnSumPct": 7.93
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "returnSumPct": 0
+          },
+          "keptPercent": 100.0,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": []
+        },
+        "VETO_RET3_BELOW_M1P5_BTC3_BELOW_M1": {
+          "kept": {
+            "n": 22,
+            "wins": 12,
+            "wr": 54.55,
+            "returnSumPct": 12.79
+          },
+          "removed": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -4.859
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_RET3_BELOW_M2_BTC3_BELOW_M0P75": {
+          "kept": {
+            "n": 21,
+            "wins": 11,
+            "wr": 52.38,
+            "returnSumPct": 10.029
+          },
+          "removed": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.33,
+            "returnSumPct": -2.099
+          },
+          "keptPercent": 87.5,
+          "removedWinnerEntryTs": [
+            1776513600000
+          ],
+          "removedLoserEntryTs": [
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_RET3_BELOW_M1_BTC3_BELOW_M1": {
+          "kept": {
+            "n": 21,
+            "wins": 12,
+            "wr": 57.14,
+            "returnSumPct": 17.554
+          },
+          "removed": {
+            "n": 3,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -9.624
+          },
+          "keptPercent": 87.5,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769097600000,
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_RET3_BELOW_M2_REL3_GT0": {
+          "kept": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "returnSumPct": 7.93
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "returnSumPct": 0
+          },
+          "keptPercent": 100.0,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": []
+        },
+        "VETO_BTC3_BELOW_M1_REL3_GT0": {
+          "kept": {
+            "n": 22,
+            "wins": 12,
+            "wr": 54.55,
+            "returnSumPct": 15.524
+          },
+          "removed": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -7.593
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769097600000,
+            1769893200000
+          ]
+        },
+        "VETO_RET3_BELOW_M1_AND_VOLRATIO_BELOW0P8": {
+          "kept": {
+            "n": 22,
+            "wins": 11,
+            "wr": 50.0,
+            "returnSumPct": 4.83
+          },
+          "removed": {
+            "n": 2,
+            "wins": 1,
+            "wr": 50.0,
+            "returnSumPct": 3.1
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [
+            1779876000000
+          ],
+          "removedLoserEntryTs": [
+            1768500000000
+          ]
+        },
+        "VETO_ATR_GT0P8_AND_BTC3_BELOW_M0P75": {
+          "kept": {
+            "n": 23,
+            "wins": 12,
+            "wr": 52.17,
+            "returnSumPct": 10.759
+          },
+          "removed": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -2.829
+          },
+          "keptPercent": 95.83,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769893200000
+          ]
+        },
+        "VETO_RET3_BELOW_M1P5_AND_BTC3_BELOW_M0P5": {
+          "kept": {
+            "n": 20,
+            "wins": 10,
+            "wr": 50.0,
+            "returnSumPct": 7.612
+          },
+          "removed": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "returnSumPct": 0.319
+          },
+          "keptPercent": 83.33,
+          "removedWinnerEntryTs": [
+            1776513600000,
+            1780563600000
+          ],
+          "removedLoserEntryTs": [
+            1770638400000,
+            1772398800000
+          ]
+        },
+        "VETO_REL3_ABOVE0_AND_BTC3_BELOW_M0P5": {
+          "kept": {
+            "n": 22,
+            "wins": 12,
+            "wr": 54.55,
+            "returnSumPct": 15.524
+          },
+          "removed": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "returnSumPct": -7.593
+          },
+          "keptPercent": 91.67,
+          "removedWinnerEntryTs": [],
+          "removedLoserEntryTs": [
+            1769097600000,
+            1769893200000
+          ]
+        },
+        "VETO_RET3_BELOW_M1P5_OR_REL3_ABOVE1P5": {
+          "kept": {
+            "n": 15,
+            "wins": 9,
+            "wr": 60.0,
+            "returnSumPct": 10.8
+          },
+          "removed": {
+            "n": 9,
+            "wins": 3,
+            "wr": 33.33,
+            "returnSumPct": -2.869
+          },
+          "keptPercent": 62.5,
+          "removedWinnerEntryTs": [
+            1776513600000,
+            1779876000000,
+            1780563600000
+          ],
+          "removedLoserEntryTs": [
+            1768500000000,
+            1769893200000,
+            1770638400000,
+            1771513200000,
+            1772398800000,
+            1778598000000
+          ]
+        }
+      }
+    }
+  },
+  "sourceNote": "Selected COMBO_KEEP90 ledger; not independent OOS. JUP+DOT kept unchanged."
+}

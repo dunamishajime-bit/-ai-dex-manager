@@ -31,6 +31,8 @@ def rules():
  data['not_btc3_positive_and_symbol_rel3_positive']={'multi':[('btc3h','gt',0),('rel3h','gt',0)],'vetoIfAll':True}
  data['not_oversold_ret6_and_low_volume']={'multi':[('ret6h','lt',-3),('volratio','lt',1)],'vetoIfAll':True}
  data['not_weak_btc_and_strong_symbol']={'multi':[('btc3h','lt',-.5),('rel3h','gt',1)],'vetoIfAll':True}
+ data['not_btc3lt_m1_and_ret3lt_m1p5']={'multi':[('btc3h','lt',-1),('ret3h','lt',-1.5)],'vetoIfAll':True}
+ data['not_btc3lt_m1_and_ret3lt_m1']={'multi':[('btc3h','lt',-1),('ret3h','lt',-1)],'vetoIfAll':True}
  return data
 RULES=rules()
 def accept(f,r):

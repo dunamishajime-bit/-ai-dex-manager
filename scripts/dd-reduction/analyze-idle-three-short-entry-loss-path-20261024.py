@@ -96,6 +96,7 @@ def main():
       'cutWins':sum(x['win'] for x in rows if x not in keep),'cutLosses':sum(not x['win'] for x in rows if x not in keep)}
       for threshold in (-2,-1.5,-1,-.5,0,.5,1)
       for keep in [[x for x in rows if x['features']['ret3h']>=threshold]]},
+    'allTradeFeatures':rows,
     'lossSamples':sorted(losers,key=lambda x:x['pnlFromPricePct'])[:20]}
    print('COST',cost,'SYMBOL',sym,'ALL',len(rows),'WINS',len(wins),'LOSSES',len(losers),
      'INIT_MFE_LT1',sum(x['mfePct']<1 for x in losers),'LOSS_HAD_MFE3',sum(x['mfePct']>=3 for x in losers),
