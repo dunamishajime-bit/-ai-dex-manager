@@ -1,0 +1,4967 @@
+{
+  "status": "RESEARCH_ONLY_PENGU_TIMED_NEGATIVE_FULL8_19_SCENARIO_BOTH_COSTS_NOT_LIVE",
+  "cases": {
+    "BASE": {
+      "10": {
+        "portfolioFinalEquityJpy": 268310796.44031164,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.578942371227553,
+        "portfolioN": 1287,
+        "portfolioDeltaJpy": 0.0,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 20097983.37422873,
+            "grossLossJpy": -8261717.444743344,
+            "hardStopCount": 10,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.4326640929866716
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 4171613.642952204,
+            "grossLossJpy": -2091682.681331783,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.994381690962857
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 612987.3980600357,
+            "grossLossJpy": -2896210.5622921935,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.2116515304656887
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15313382.33321649,
+            "grossLossJpy": -3273824.201119367,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.67752126946237
+          }
+        },
+        "earlyStops": [],
+        "earlyStopN": 0,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 0,
+        "directModeledJpyImprovementAmongMatched": 0,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 158222977.5296772,
+        "portfolioDdPct": -15.785694763547497,
+        "portfolioPf": 3.708147442348795,
+        "portfolioN": 1282,
+        "portfolioDeltaJpy": 0.0,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 15149379.634279497,
+            "grossLossJpy": -7925632.290232909,
+            "hardStopCount": 10,
+            "worstIndividualLossJpy": -2628420.187467506,
+            "profitFactor": 2.9114411417936603
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 2853821.4661691966,
+            "grossLossJpy": -2163141.4087215504,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.319294917411733
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -187553.70866610983,
+            "grossLossJpy": -2666555.014308284,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2628420.187467506,
+            "profitFactor": 0.9296644143249517
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12483111.87677641,
+            "grossLossJpy": -3095935.8672030745,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 5.032096403874762
+          }
+        },
+        "earlyStops": [],
+        "earlyStopN": 0,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 0,
+        "directModeledJpyImprovementAmongMatched": 0,
+        "directWorsenedMatchedCount": 0
+      }
+    },
+    "AT3_MINUS2P5_ALL": {
+      "10": {
+        "portfolioFinalEquityJpy": 272883088.52410525,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.525486371323677,
+        "portfolioN": 1289,
+        "portfolioDeltaJpy": 4572292.08379361,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 19798323.47792845,
+            "grossLossJpy": -8871026.153820775,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.2317963147252424
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 4237466.14293639,
+            "grossLossJpy": -2060574.7773265298,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 3.0564486130584614
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 715729.0868615028,
+            "grossLossJpy": -2900473.2118524276,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.2467628674992632
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 14845128.248130554,
+            "grossLossJpy": -3909978.1646418185,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 4.796729194647682
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -46076.37537010982,
+            "newPnlJpy": -14968.47136485659,
+            "modelPnlDeltaJpy": 31107.90400525323,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -39424.9505018315,
+            "newPnlJpy": -34553.97453025948,
+            "modelPnlDeltaJpy": 4870.975971572021,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -786891.4706032941,
+            "modelPnlDeltaJpy": -616706.7539626654,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": -580727.8739858402,
+        "directWorsenedMatchedCount": 1
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 162571391.6295625,
+        "portfolioDdPct": -15.014723812726594,
+        "portfolioPf": 3.662554395969103,
+        "portfolioN": 1284,
+        "portfolioDeltaJpy": 4348414.099885285,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 15018601.354078738,
+            "grossLossJpy": -8753724.354293792,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2811559.314119839,
+            "profitFactor": 2.7156813198843714
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 3007535.1034519006,
+            "grossLossJpy": -2144722.402915374,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.402295746696022
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -196255.98359803678,
+            "grossLossJpy": -2852313.678048754,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2811559.314119839,
+            "profitFactor": 0.931194109151314
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12207322.234224875,
+            "grossLossJpy": -3756688.2733296626,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 4.24949033458269
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -27955.41294214869,
+            "newPnlJpy": -9536.407135972204,
+            "modelPnlDeltaJpy": 18419.005806176487,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -22200.689464359748,
+            "newPnlJpy": -19687.56571069055,
+            "modelPnlDeltaJpy": 2513.123753669199,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -829544.3786693519,
+            "modelPnlDeltaJpy": -615992.5892110725,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": -595060.4596512269,
+        "directWorsenedMatchedCount": 1
+      }
+    },
+    "AT8_MINUS4_ALL": {
+      "10": {
+        "portfolioFinalEquityJpy": 260326140.04002994,
+        "portfolioDdPct": -17.131850873042474,
+        "portfolioPf": 4.547513017644012,
+        "portfolioN": 1285,
+        "portfolioDeltaJpy": -7984656.4002816975,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 19645844.012733817,
+            "grossLossJpy": -8294713.6345087765,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.36847766883724
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 4796387.802662273,
+            "grossLossJpy": -1417339.2944538926,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -849485.5461445047,
+            "profitFactor": 4.3840787604144875
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 474917.59054683114,
+            "grossLossJpy": -2885483.4983586506,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.1645885657696462
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 14374538.619524714,
+            "grossLossJpy": -3991890.8416962335,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 4.600934792449556
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -11359.696479683493,
+            "modelPnlDeltaJpy": 6101.45414437531,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -926452.4669858718,
+            "modelPnlDeltaJpy": -756267.7503452431,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -849485.5461445047,
+            "modelPnlDeltaJpy": 687042.0239516579,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -63124.2722492099,
+        "directWorsenedMatchedCount": 1
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 151552694.52582252,
+        "portfolioDdPct": -17.45133542328755,
+        "portfolioPf": 3.6901335776490676,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": -6670283.003854692,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 14358424.527013926,
+            "grossLossJpy": -7735406.593003971,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2430578.7809628374,
+            "profitFactor": 2.8561951921182684
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 3285067.3549339855,
+            "grossLossJpy": -1484459.102390548,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -888533.2825380327,
+            "profitFactor": 3.2129726239300016
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -211864.1114976543,
+            "grossLossJpy": -2461874.097140072,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -2430578.7809628374,
+            "profitFactor": 0.9139419388896557
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 11285221.283577595,
+            "grossLossJpy": -3789073.3934733504,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 3.978359116246284
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -7870.3123599613255,
+            "modelPnlDeltaJpy": 4072.838765889849,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -968967.0586833897,
+            "modelPnlDeltaJpy": -755415.2692251103,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -888533.2825380327,
+            "modelPnlDeltaJpy": 687740.7592677929,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -63601.67119142753,
+        "directWorsenedMatchedCount": 1
+      }
+    },
+    "H1X2_MINUS3_ALL": {
+      "10": {
+        "portfolioFinalEquityJpy": 229020728.76768774,
+        "portfolioDdPct": -15.886953250640934,
+        "portfolioPf": 4.31015425118645,
+        "portfolioN": 1291,
+        "portfolioDeltaJpy": -39290067.6726239,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 73,
+            "wins": 45,
+            "losses": 28,
+            "modeledPnlJpy": 14975099.704442168,
+            "grossLossJpy": -10314708.567734376,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1473399.3341776514,
+            "profitFactor": 2.4518199526534414
+          },
+          "SHORT_V20": {
+            "n": 23,
+            "wins": 13,
+            "losses": 10,
+            "modeledPnlJpy": 2032949.3890603823,
+            "grossLossJpy": -3510374.4343222477,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1131675.8452403187,
+            "profitFactor": 1.579126081019584
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": 1487555.3436416157,
+            "grossLossJpy": -1498911.6007408933,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1473399.3341776514,
+            "profitFactor": 1.9924236645485538
+          },
+          "RECOVERY_V8": {
+            "n": 39,
+            "wins": 25,
+            "losses": 14,
+            "modeledPnlJpy": 11454594.97174017,
+            "grossLossJpy": -5305422.532671234,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -992894.2511817039,
+            "profitFactor": 3.1590353833651927
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -688.4624759762199,
+            "newPnlJpy": -364.4586407886006,
+            "modelPnlDeltaJpy": 324.00383518761936,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1755284400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -435.28977469576137,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1755504000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -18.805487804012444,
+            "newPnlJpy": -325.69457095005737,
+            "modelPnlDeltaJpy": -306.8890831460449,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1757059200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 394.48033477155667,
+            "newPnlJpy": -408.9314415022008,
+            "modelPnlDeltaJpy": -803.4117762737575,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 4607.788828651152,
+            "newPnlJpy": -1212.493464402401,
+            "modelPnlDeltaJpy": -5820.282293053553,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -7673.476851890606,
+            "modelPnlDeltaJpy": 9787.673772168197,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -5053.0508953222115,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -5342.16284002209,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1763013600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -14217.747465542674,
+            "newPnlJpy": -9101.257868265815,
+            "modelPnlDeltaJpy": 5116.489597276859,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -46076.37537010982,
+            "newPnlJpy": -11730.597188055663,
+            "modelPnlDeltaJpy": 34345.77818205416,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -43669.26786946031,
+            "newPnlJpy": -12496.62687132916,
+            "modelPnlDeltaJpy": 31172.64099813115,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765486800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -17232.05687217304,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -45147.29522063772,
+            "newPnlJpy": -27645.98900461687,
+            "modelPnlDeltaJpy": 17501.306216020854,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -39424.9505018315,
+            "newPnlJpy": -32421.693227889147,
+            "modelPnlDeltaJpy": 7003.257273942356,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 106061.20690669831,
+            "newPnlJpy": -22883.12555813212,
+            "modelPnlDeltaJpy": -128944.33246483043,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 362247.68537961075,
+            "newPnlJpy": -870251.6812025615,
+            "modelPnlDeltaJpy": -1232499.3665821722,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 1033864.5757823123,
+            "newPnlJpy": -812924.1314297224,
+            "modelPnlDeltaJpy": -1846788.7072120346,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2835080.1437986745,
+            "newPnlJpy": -1473399.3341776514,
+            "modelPnlDeltaJpy": 1361680.809621023,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1779966000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -506654.70357694995,
+            "newPnlJpy": -1131675.8452403187,
+            "modelPnlDeltaJpy": -625021.1416633688,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -971198.4926261429,
+            "modelPnlDeltaJpy": -801013.7759855143,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1124144.8354150266,
+            "newPnlJpy": -992894.2511817039,
+            "modelPnlDeltaJpy": 131250.58423332276,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -877000.2941856572,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -768392.760812133,
+            "modelPnlDeltaJpy": 768134.8092840296,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1058086.5879269477,
+            "newPnlJpy": -821011.1233158086,
+            "modelPnlDeltaJpy": 237075.46461113915,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785232800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -719682.7263122345,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          }
+        ],
+        "earlyStopN": 25,
+        "baselineWinnersCut": 5,
+        "originalHardStopsIntercepted": 10,
+        "directModeledJpyImprovementAmongMatched": -2037805.089436098,
+        "directWorsenedMatchedCount": 8
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 93075714.82248412,
+        "portfolioDdPct": -18.5012546690579,
+        "portfolioPf": 2.9553997073986547,
+        "portfolioN": 1295,
+        "portfolioDeltaJpy": -65147262.70719309,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 73,
+            "wins": 45,
+            "losses": 28,
+            "modeledPnlJpy": 6291353.930133304,
+            "grossLossJpy": -8712685.318586169,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1182637.6782006447,
+            "profitFactor": 1.7220912611996204
+          },
+          "SHORT_V20": {
+            "n": 23,
+            "wins": 13,
+            "losses": 10,
+            "modeledPnlJpy": -434442.34013042285,
+            "grossLossJpy": -3279263.116109793,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1182637.6782006447,
+            "profitFactor": 0.8675183037322715
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": 594554.7616508496,
+            "grossLossJpy": -711669.3877576266,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -694901.8156050985,
+            "profitFactor": 1.8354367517819064
+          },
+          "RECOVERY_V8": {
+            "n": 39,
+            "wins": 25,
+            "losses": 14,
+            "modeledPnlJpy": 6131241.508612877,
+            "grossLossJpy": -4721752.814718748,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1035839.8799277598,
+            "profitFactor": 2.298509631741086
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -695.0930359340763,
+            "newPnlJpy": -378.560979687717,
+            "modelPnlDeltaJpy": 316.5320562463593,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1755284400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -447.4499864945886,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1755504000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -38.9194725798726,
+            "newPnlJpy": -336.286748580521,
+            "modelPnlDeltaJpy": -297.3672760006484,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1757059200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 344.37080207762966,
+            "newPnlJpy": -405.77293293888954,
+            "modelPnlDeltaJpy": -750.1437350165193,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 3556.826160418513,
+            "newPnlJpy": -1005.9497935265391,
+            "modelPnlDeltaJpy": -4562.775953945053,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -5325.066758589645,
+            "modelPnlDeltaJpy": 6618.084367261529,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -3568.1333603835346,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -3712.7797192588596,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1763013600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -9569.046159384234,
+            "newPnlJpy": -6093.596954632328,
+            "modelPnlDeltaJpy": 3475.449204751906,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -27955.41294214869,
+            "newPnlJpy": -7336.917280177575,
+            "modelPnlDeltaJpy": 20618.495661971116,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -26191.675714926496,
+            "newPnlJpy": -7729.725674679577,
+            "modelPnlDeltaJpy": 18461.95004024692,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765486800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -10404.627361496188,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -25858.22221630767,
+            "newPnlJpy": -15783.660800462569,
+            "modelPnlDeltaJpy": 10074.5614158451,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -22200.689464359748,
+            "newPnlJpy": -17961.73099945359,
+            "modelPnlDeltaJpy": 4238.958464906158,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 55068.054441811364,
+            "newPnlJpy": -12763.475827362654,
+            "modelPnlDeltaJpy": -67831.53026917402,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 286150.5251721732,
+            "newPnlJpy": -516128.5601790883,
+            "modelPnlDeltaJpy": -802279.0853512615,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 986072.717278911,
+            "newPnlJpy": -484158.2202296952,
+            "modelPnlDeltaJpy": -1470230.9375086064,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2628420.187467506,
+            "newPnlJpy": -694901.8156050985,
+            "modelPnlDeltaJpy": 1933518.3718624078,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1779966000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -557002.053284954,
+            "newPnlJpy": -1182637.6782006447,
+            "modelPnlDeltaJpy": -625635.6249156906,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -1013668.0510873919,
+            "modelPnlDeltaJpy": -800116.2616291125,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1166838.4106971046,
+            "newPnlJpy": -1035839.8799277598,
+            "modelPnlDeltaJpy": 130998.53076934488,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -916940.2145625349,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -807359.4449464583,
+            "modelPnlDeltaJpy": 768914.5968593673,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1098031.3621564675,
+            "newPnlJpy": -861237.048525758,
+            "modelPnlDeltaJpy": 236794.31363070954,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785232800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -759166.1937401645,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          }
+        ],
+        "earlyStopN": 25,
+        "baselineWinnersCut": 5,
+        "originalHardStopsIntercepted": 10,
+        "directModeledJpyImprovementAmongMatched": -637673.8823057486,
+        "directWorsenedMatchedCount": 8
+      }
+    },
+    "H1X3_MINUS3_ALL": {
+      "10": {
+        "portfolioFinalEquityJpy": 231608951.9760796,
+        "portfolioDdPct": -15.62594434346629,
+        "portfolioPf": 4.442374667315168,
+        "portfolioN": 1288,
+        "portfolioDeltaJpy": -36701844.46423203,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 72,
+            "wins": 45,
+            "losses": 27,
+            "modeledPnlJpy": 16008871.60107828,
+            "grossLossJpy": -9237694.280264176,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -1407151.1125449277,
+            "profitFactor": 2.732994307386893
+          },
+          "SHORT_V20": {
+            "n": 23,
+            "wins": 13,
+            "losses": 10,
+            "modeledPnlJpy": 2943805.291682691,
+            "grossLossJpy": -2592106.6945204013,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -841946.0733581765,
+            "profitFactor": 2.1356806021549053
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": 1548884.8270456295,
+            "grossLossJpy": -1435207.0550231126,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1407151.1125449277,
+            "profitFactor": 2.079206530949422
+          },
+          "RECOVERY_V8": {
+            "n": 38,
+            "wins": 25,
+            "losses": 13,
+            "modeledPnlJpy": 11516181.48234996,
+            "grossLossJpy": -5210380.530720662,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -1136421.8070677412,
+            "profitFactor": 3.2102380842339597
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -688.4624759762199,
+            "newPnlJpy": -426.122509257309,
+            "modelPnlDeltaJpy": 262.33996671891094,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1755284400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -580.4666005867957,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 4607.788828651152,
+            "newPnlJpy": -1494.1132273277342,
+            "modelPnlDeltaJpy": -6101.902055978886,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -8912.738984043346,
+            "modelPnlDeltaJpy": 8548.411640015456,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -7732.192904769773,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -6722.190770481161,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -46076.37537010982,
+            "newPnlJpy": -17298.755841461945,
+            "modelPnlDeltaJpy": 28777.619528647872,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -43669.26786946031,
+            "newPnlJpy": -12421.012723660251,
+            "modelPnlDeltaJpy": 31248.25514580006,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765486800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -15862.8919422155,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -45147.29522063772,
+            "newPnlJpy": -30189.738371677322,
+            "modelPnlDeltaJpy": 14957.556848960401,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -39424.9505018315,
+            "newPnlJpy": -34608.95693135954,
+            "modelPnlDeltaJpy": 4815.993570471961,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 106061.20690669831,
+            "newPnlJpy": -23668.09503328462,
+            "modelPnlDeltaJpy": -129729.30193998292,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 362247.68537961075,
+            "newPnlJpy": -830580.4990526123,
+            "modelPnlDeltaJpy": -1192828.184432223,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 1033864.5757823123,
+            "newPnlJpy": -1136421.8070677412,
+            "modelPnlDeltaJpy": -2170286.3828500537,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2835080.1437986745,
+            "newPnlJpy": -1407151.1125449277,
+            "modelPnlDeltaJpy": 1427929.0312537467,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -787940.5626196977,
+            "modelPnlDeltaJpy": -617755.845979069,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1124144.8354150266,
+            "newPnlJpy": -942713.0521159694,
+            "modelPnlDeltaJpy": 181431.78329905728,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -789854.3342844098,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -841946.0733581765,
+            "modelPnlDeltaJpy": 694581.4967379861,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1058086.5879269477,
+            "newPnlJpy": -719638.1928833,
+            "modelPnlDeltaJpy": 338448.39504364773,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 20,
+        "baselineWinnersCut": 4,
+        "originalHardStopsIntercepted": 9,
+        "directModeledJpyImprovementAmongMatched": -1385700.734222255,
+        "directWorsenedMatchedCount": 5
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 95080617.56203449,
+        "portfolioDdPct": -17.686693182300438,
+        "portfolioPf": 3.0578832708505943,
+        "portfolioN": 1293,
+        "portfolioDeltaJpy": -63142359.967642725,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 72,
+            "wins": 45,
+            "losses": 27,
+            "modeledPnlJpy": 7308074.76538087,
+            "grossLossJpy": -7514797.204417853,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -985708.8871642421,
+            "profitFactor": 1.972491281745374
+          },
+          "SHORT_V20": {
+            "n": 23,
+            "wins": 13,
+            "losses": 10,
+            "modeledPnlJpy": 437942.60980174504,
+            "grossLossJpy": -2369132.296046315,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -880987.3255709683,
+            "profitFactor": 1.184853589870265
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": 615378.3007767897,
+            "grossLossJpy": -669259.0647775478,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -650835.0348673253,
+            "profitFactor": 1.9194919175003367
+          },
+          "RECOVERY_V8": {
+            "n": 38,
+            "wins": 25,
+            "losses": 13,
+            "modeledPnlJpy": 6254753.854802335,
+            "grossLossJpy": -4476405.8435939895,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -985708.8871642421,
+            "profitFactor": 2.3972713988284307
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -695.0930359340763,
+            "newPnlJpy": -438.800915594452,
+            "modelPnlDeltaJpy": 256.29212033962426,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1755284400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -589.0046929616389,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 3556.826160418513,
+            "newPnlJpy": -1213.7695625569522,
+            "modelPnlDeltaJpy": -4770.595722975466,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -6137.300178473325,
+            "modelPnlDeltaJpy": 5805.8509473778495,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -5343.443642836838,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -4612.16949287073,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -27955.41294214869,
+            "newPnlJpy": -10595.48322995945,
+            "modelPnlDeltaJpy": 17359.92971218924,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -26191.675714926496,
+            "newPnlJpy": -7674.560238878424,
+            "modelPnlDeltaJpy": 18517.11547604807,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765486800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -9606.589089334315,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -25858.22221630767,
+            "newPnlJpy": -17154.5465810012,
+            "modelPnlDeltaJpy": 8703.67563530647,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -22200.689464359748,
+            "newPnlJpy": -19092.37864251027,
+            "modelPnlDeltaJpy": 3108.310821849478,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 55068.054441811364,
+            "newPnlJpy": -13154.21637063421,
+            "modelPnlDeltaJpy": -68222.27081244558,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 286150.5251721732,
+            "newPnlJpy": -488982.68792762025,
+            "modelPnlDeltaJpy": -775133.2130997935,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 986072.717278911,
+            "newPnlJpy": -661526.1399527986,
+            "modelPnlDeltaJpy": -1647598.8572317096,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2628420.187467506,
+            "newPnlJpy": -650835.0348673253,
+            "modelPnlDeltaJpy": 1977585.1526001808,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -830593.4706857554,
+            "modelPnlDeltaJpy": -617041.6812274761,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1166838.4106971046,
+            "newPnlJpy": -985708.8871642421,
+            "modelPnlDeltaJpy": 181129.52353286254,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -829881.4442159662,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -880987.3255709683,
+            "modelPnlDeltaJpy": 695286.7162348573,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1098031.3621564675,
+            "newPnlJpy": -759965.541735503,
+            "modelPnlDeltaJpy": 338065.8204209645,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 20,
+        "baselineWinnersCut": 4,
+        "originalHardStopsIntercepted": 9,
+        "directModeledJpyImprovementAmongMatched": 133051.7694075756,
+        "directWorsenedMatchedCount": 5
+      }
+    },
+    "H1X3_MINUS4_ALL": {
+      "10": {
+        "portfolioFinalEquityJpy": 237725361.43011153,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.3707286458117105,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": -30585435.010200113,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 70,
+            "wins": 47,
+            "losses": 23,
+            "modeledPnlJpy": 15407602.523211781,
+            "grossLossJpy": -10271070.951615755,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 2.5000969807133884
+          },
+          "SHORT_V20": {
+            "n": 22,
+            "wins": 13,
+            "losses": 9,
+            "modeledPnlJpy": 3096572.6827237727,
+            "grossLossJpy": -2648608.8323544464,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -872448.4535183833,
+            "profitFactor": 2.169131751316828
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": 219871.20936142714,
+            "grossLossJpy": -2869501.017736265,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.0766234993479398
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 27,
+            "losses": 10,
+            "modeledPnlJpy": 12091158.63112658,
+            "grossLossJpy": -4752961.101525042,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1042194.3175162548,
+            "profitFactor": 3.5439212257064328
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 4607.788828651152,
+            "newPnlJpy": -1512.861461807981,
+            "modelPnlDeltaJpy": -6120.6502904591325,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -9229.988096471217,
+            "modelPnlDeltaJpy": 8231.162527587585,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -8323.63319883168,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -8809.669892549333,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -43669.26786946031,
+            "newPnlJpy": -16381.215948569994,
+            "modelPnlDeltaJpy": 27288.051920890313,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -39424.9505018315,
+            "newPnlJpy": -34226.4281121983,
+            "modelPnlDeltaJpy": 5198.522389633203,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 362247.68537961075,
+            "newPnlJpy": -872448.4535183833,
+            "modelPnlDeltaJpy": -1234696.138897994,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -1042194.3175162548,
+            "modelPnlDeltaJpy": -872009.6008756262,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1124144.8354150266,
+            "newPnlJpy": -980468.4540452899,
+            "modelPnlDeltaJpy": 143676.38136973674,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -874298.1330229321,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -841946.0733581765,
+            "modelPnlDeltaJpy": 694581.4967379861,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1058086.5879269477,
+            "newPnlJpy": -1036723.8497166379,
+            "modelPnlDeltaJpy": 21362.73821030988,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 12,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 5,
+        "directModeledJpyImprovementAmongMatched": -1212488.0369079355,
+        "directWorsenedMatchedCount": 3
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 103149567.52898924,
+        "portfolioDdPct": -15.831515623717928,
+        "portfolioPf": 3.0557122636206584,
+        "portfolioN": 1287,
+        "portfolioDeltaJpy": -55073410.00068797,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 70,
+            "wins": 47,
+            "losses": 23,
+            "modeledPnlJpy": 7662485.359967712,
+            "grossLossJpy": -8564334.624036321,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1528729.0629548484,
+            "profitFactor": 1.8946971009823093
+          },
+          "SHORT_V20": {
+            "n": 22,
+            "wins": 13,
+            "losses": 9,
+            "modeledPnlJpy": 661391.121111468,
+            "grossLossJpy": -2474559.7826741124,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -880987.3255709683,
+            "profitFactor": 1.267276275053958
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": -43836.43727470947,
+            "grossLossJpy": -1551179.7934589202,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -1528729.0629548484,
+            "profitFactor": 0.9717399379107691
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 27,
+            "losses": 10,
+            "modeledPnlJpy": 7044930.676130953,
+            "grossLossJpy": -4538595.047903289,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1084593.1094633671,
+            "profitFactor": 2.5522271984555056
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 3556.826160418513,
+            "newPnlJpy": -1234.9644497982931,
+            "modelPnlDeltaJpy": -4791.790610216806,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -6406.59736653094,
+            "modelPnlDeltaJpy": 5536.553759320234,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -5789.795641540959,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -6039.3743204365255,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -26191.675714926496,
+            "newPnlJpy": -10004.758817104253,
+            "modelPnlDeltaJpy": 16186.916897822242,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -22200.689464359748,
+            "newPnlJpy": -19074.88463670878,
+            "modelPnlDeltaJpy": 3125.804827650969,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 286150.5251721732,
+            "newPnlJpy": -585793.6220868408,
+            "modelPnlDeltaJpy": -871944.147259014,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -1084593.1094633671,
+            "modelPnlDeltaJpy": -871041.3200050879,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1166838.4106971046,
+            "newPnlJpy": -1023305.2553851272,
+            "modelPnlDeltaJpy": 143533.1553119775,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -914241.2826425758,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -880987.3255709683,
+            "modelPnlDeltaJpy": 695286.7162348573,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1098031.3621564675,
+            "newPnlJpy": -1076689.9973710803,
+            "modelPnlDeltaJpy": 21341.36478538718,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 12,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 5,
+        "directModeledJpyImprovementAmongMatched": -862766.7460573032,
+        "directWorsenedMatchedCount": 3
+      }
+    },
+    "H1X4_MINUS4_ALL": {
+      "10": {
+        "portfolioFinalEquityJpy": 260076310.27674305,
+        "portfolioDdPct": -16.041168325091004,
+        "portfolioPf": 4.434537915657993,
+        "portfolioN": 1290,
+        "portfolioDeltaJpy": -8234486.163568586,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 69,
+            "wins": 49,
+            "losses": 20,
+            "modeledPnlJpy": 17663288.780205958,
+            "grossLossJpy": -10159288.423780752,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 2.7386344440088854
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 14,
+            "losses": 7,
+            "modeledPnlJpy": 3420399.830045369,
+            "grossLossJpy": -2461840.549863465,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -994831.7050337136,
+            "profitFactor": 2.389366923148238
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": 569196.9374500159,
+            "grossLossJpy": -2883543.547863981,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.1973949510392015
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 13673692.012710573,
+            "grossLossJpy": -4813904.3260533055,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1058086.5879269477,
+            "profitFactor": 3.840457783655412
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -10476.311811566045,
+            "modelPnlDeltaJpy": 6984.838812492757,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -14864.400581675067,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -12799.77117246242,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -43669.26786946031,
+            "newPnlJpy": -25187.321081278344,
+            "modelPnlDeltaJpy": 18481.946788181966,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -39424.9505018315,
+            "newPnlJpy": -44826.16583803799,
+            "modelPnlDeltaJpy": -5401.2153362064855,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 362247.68537961075,
+            "newPnlJpy": -994831.7050337136,
+            "modelPnlDeltaJpy": -1357079.3904133243,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -1038979.2661126322,
+            "modelPnlDeltaJpy": -868794.5494720036,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1124144.8354150266,
+            "newPnlJpy": -968076.1421751264,
+            "modelPnlDeltaJpy": 156068.69323990028,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -848477.1078670083,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -899335.8725447527,
+            "modelPnlDeltaJpy": 637191.69755141,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 10,
+        "baselineWinnersCut": 1,
+        "originalHardStopsIntercepted": 4,
+        "directModeledJpyImprovementAmongMatched": -1412547.9788295494,
+        "directWorsenedMatchedCount": 3
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 149375344.99381956,
+        "portfolioDdPct": -16.63553875929573,
+        "portfolioPf": 3.577610100727113,
+        "portfolioN": 1288,
+        "portfolioDeltaJpy": -8847632.535857648,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 69,
+            "wins": 49,
+            "losses": 20,
+            "modeledPnlJpy": 12414294.032255812,
+            "grossLossJpy": -9503319.602230802,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -2393490.300544633,
+            "profitFactor": 2.3063113261329957
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 14,
+            "losses": 7,
+            "modeledPnlJpy": 2136120.788903738,
+            "grossLossJpy": -2414189.0847246856,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -938435.4823841704,
+            "profitFactor": 1.8848191727895833
+          },
+          "LONG_V2_FINAL": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "modeledPnlJpy": -162039.9285113419,
+            "grossLossJpy": -2424728.110543805,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -2393490.300544633,
+            "profitFactor": 0.9331719182011707
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 10440213.171863416,
+            "grossLossJpy": -4664402.406962311,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1098031.3621564675,
+            "profitFactor": 3.238274544297433
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -7280.64575450799,
+            "modelPnlDeltaJpy": 4662.505371343184,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1762650000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -10202.394529293519,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1762750800000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -8712.669082050985,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -26191.675714926496,
+            "newPnlJpy": -15244.495162612919,
+            "modelPnlDeltaJpy": 10947.180552313577,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -22200.689464359748,
+            "newPnlJpy": -24915.58705978574,
+            "modelPnlDeltaJpy": -2714.8975954259913,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 286150.5251721732,
+            "newPnlJpy": -880280.8550755008,
+            "modelPnlDeltaJpy": -1166431.380247674,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -1081381.2747194779,
+            "modelPnlDeltaJpy": -867829.4852611986,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1166838.4106971046,
+            "newPnlJpy": -1010925.8642238278,
+            "modelPnlDeltaJpy": 155912.5464732768,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -888446.091428779,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -938435.4823841704,
+            "modelPnlDeltaJpy": 637838.5594216553,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 10,
+        "baselineWinnersCut": 1,
+        "originalHardStopsIntercepted": 4,
+        "directModeledJpyImprovementAmongMatched": -1227614.9712857096,
+        "directWorsenedMatchedCount": 3
+      }
+    },
+    "AT8_MINUS4_SHORT": {
+      "10": {
+        "portfolioFinalEquityJpy": 268984671.33841443,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.620223637046687,
+        "portfolioN": 1287,
+        "portfolioDeltaJpy": 673874.8981027901,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 20785025.398180388,
+            "grossLossJpy": -7574675.420791686,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.744015319934064
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 4858655.666903862,
+            "grossLossJpy": -1404640.657380125,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -849485.5461445047,
+            "profitFactor": 4.459002586445146
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 612987.3980600357,
+            "grossLossJpy": -2896210.5622921935,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.2116515304656887
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15313382.33321649,
+            "grossLossJpy": -3273824.201119367,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.67752126946237
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -849485.5461445047,
+            "modelPnlDeltaJpy": 687042.0239516579,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": 687042.0239516579,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 158917179.72605366,
+        "portfolioDdPct": -15.785694763547497,
+        "portfolioPf": 3.7514597823831575,
+        "portfolioN": 1282,
+        "portfolioDeltaJpy": 694202.1963764429,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 15837120.393547291,
+            "grossLossJpy": -7237891.530965116,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2628420.187467506,
+            "profitFactor": 3.18808479317395
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 3541562.2254369897,
+            "grossLossJpy": -1475400.6494537573,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -888533.2825380327,
+            "profitFactor": 3.400407121108558
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -187553.70866610983,
+            "grossLossJpy": -2666555.014308284,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2628420.187467506,
+            "profitFactor": 0.9296644143249517
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12483111.87677641,
+            "grossLossJpy": -3095935.8672030745,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 5.032096403874762
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -888533.2825380327,
+            "modelPnlDeltaJpy": 687740.7592677929,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": 687740.7592677929,
+        "directWorsenedMatchedCount": 0
+      }
+    },
+    "AT8_MINUS4_BASE_LONG": {
+      "10": {
+        "portfolioFinalEquityJpy": 260863125.21673054,
+        "portfolioDdPct": -17.131850873042474,
+        "portfolioPf": 4.5753639204699255,
+        "portfolioN": 1284,
+        "portfolioDeltaJpy": -7447671.2235811055,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 19715069.739127405,
+            "grossLossJpy": -8225487.908115191,
+            "hardStopCount": 10,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.396826785153583
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 4109345.778710615,
+            "grossLossJpy": -2104381.3184055504,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.9527572036346474
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 474917.59054683114,
+            "grossLossJpy": -2885483.4983586506,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.1645885657696462
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15130806.369869957,
+            "grossLossJpy": -3235623.0913509903,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.676319195000025
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -11359.696479683493,
+            "modelPnlDeltaJpy": 6101.45414437531,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": 6101.45414437531,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 152008945.51415756,
+        "portfolioDdPct": -17.45133542328755,
+        "portfolioPf": 3.708683135996484,
+        "portfolioN": 1282,
+        "portfolioDeltaJpy": -6214032.015519649,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 14426099.036971243,
+            "grossLossJpy": -7667732.083046652,
+            "hardStopCount": 10,
+            "worstIndividualLossJpy": -2430578.7809628374,
+            "profitFactor": 2.881403638093633
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 2597326.5956661925,
+            "grossLossJpy": -2172199.861658341,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.195712531573082
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -211864.1114976543,
+            "grossLossJpy": -2461874.097140072,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -2430578.7809628374,
+            "profitFactor": 0.9139419388896557
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12040636.552802706,
+            "grossLossJpy": -3033658.12424824,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 4.969015643707859
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -7870.3123599613255,
+            "modelPnlDeltaJpy": 4072.838765889849,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": 4072.838765889849,
+        "directWorsenedMatchedCount": 0
+      }
+    },
+    "AT8_MINUS4_RECOVERY": {
+      "10": {
+        "portfolioFinalEquityJpy": 267085398.24929357,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.51091488691004,
+        "portfolioN": 1288,
+        "portfolioDeltaJpy": -1225398.1910180748,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 19341715.623883486,
+            "grossLossJpy": -9017985.195088586,
+            "hardStopCount": 10,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.1447934550189167
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 4171613.642952204,
+            "grossLossJpy": -2091682.681331783,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.994381690962857
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 612987.3980600357,
+            "grossLossJpy": -2896210.5622921935,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.2116515304656887
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 14557114.582871247,
+            "grossLossJpy": -4030091.9514646097,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 4.612104824948455
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -926452.4669858718,
+            "modelPnlDeltaJpy": -756267.7503452431,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 0,
+        "directModeledJpyImprovementAmongMatched": -756267.7503452431,
+        "directWorsenedMatchedCount": 1
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 157058213.96088383,
+        "portfolioDdPct": -15.785694763547497,
+        "portfolioPf": 3.6475618416555324,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": -1164763.5687933862,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 14393964.365054388,
+            "grossLossJpy": -8681047.55945802,
+            "hardStopCount": 10,
+            "worstIndividualLossJpy": -2628420.187467506,
+            "profitFactor": 2.65809071618
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 2853821.4661691966,
+            "grossLossJpy": -2163141.4087215504,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.319294917411733
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -187553.70866610983,
+            "grossLossJpy": -2666555.014308284,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2628420.187467506,
+            "profitFactor": 0.9296644143249517
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 11727696.6075513,
+            "grossLossJpy": -3851351.1364281853,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 4.045086306627389
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -968967.0586833897,
+            "modelPnlDeltaJpy": -755415.2692251103,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 0,
+        "directModeledJpyImprovementAmongMatched": -755415.2692251103,
+        "directWorsenedMatchedCount": 1
+      }
+    },
+    "H1X3_MINUS3_SHORT": {
+      "10": {
+        "portfolioFinalEquityJpy": 250018273.49371496,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.551214303092539,
+        "portfolioN": 1280,
+        "portfolioDeltaJpy": -18292522.946596682,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 48,
+            "losses": 19,
+            "modeledPnlJpy": 18893184.259953614,
+            "grossLossJpy": -8285902.850377111,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.2801600020079573
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 13,
+            "losses": 7,
+            "modeledPnlJpy": 3587616.4064928945,
+            "grossLossJpy": -2201891.1827596636,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -841946.0733581765,
+            "profitFactor": 2.629334108144473
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 340763.9311055078,
+            "grossLossJpy": -2883910.0065343697,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.1181603900029489
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 14964803.92235521,
+            "grossLossJpy": -3200101.661083078,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.676352662274597
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 4607.788828651152,
+            "newPnlJpy": -1532.2505982119746,
+            "modelPnlDeltaJpy": -6140.039426863126,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -46076.37537010982,
+            "newPnlJpy": -19333.00766741541,
+            "modelPnlDeltaJpy": 26743.367702694406,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 362247.68537961075,
+            "newPnlJpy": -830580.4990526123,
+            "modelPnlDeltaJpy": -1192828.184432223,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -841946.0733581765,
+            "modelPnlDeltaJpy": 694581.4967379861,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 4,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -477643.35941840557,
+        "directWorsenedMatchedCount": 2
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 142986774.82697406,
+        "portfolioDdPct": -15.636648488704829,
+        "portfolioPf": 3.7249371777722424,
+        "portfolioN": 1280,
+        "portfolioDeltaJpy": -15236202.702703148,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 48,
+            "losses": 19,
+            "modeledPnlJpy": 12847912.549571747,
+            "grossLossJpy": -7160389.014433655,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2065418.6478881412,
+            "profitFactor": 2.794303706638478
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 13,
+            "losses": 7,
+            "modeledPnlJpy": 1842481.7245510756,
+            "grossLossJpy": -2086697.8018943968,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -880987.3255709683,
+            "profitFactor": 1.8829652874883889
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -156031.6511402433,
+            "grossLossJpy": -2096048.364653981,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2065418.6478881412,
+            "profitFactor": 0.9255591360526639
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 11161462.476160914,
+            "grossLossJpy": -2977642.8478852776,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 4.7484221736289784
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 3556.826160418513,
+            "newPnlJpy": -1250.144001592186,
+            "modelPnlDeltaJpy": -4806.970162010699,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -27955.41294214869,
+            "newPnlJpy": -12027.21126587771,
+            "modelPnlDeltaJpy": 15928.20167627098,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 286150.5251721732,
+            "newPnlJpy": -633964.0858613707,
+            "modelPnlDeltaJpy": -920114.611033544,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -880987.3255709683,
+            "modelPnlDeltaJpy": 695286.7162348573,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 4,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -213706.66328442632,
+        "directWorsenedMatchedCount": 2
+      }
+    },
+    "H1X3_MINUS3_RECOVERY": {
+      "10": {
+        "portfolioFinalEquityJpy": 245356434.34864974,
+        "portfolioDdPct": -23.440674141849914,
+        "portfolioPf": 4.377886870405882,
+        "portfolioN": 1289,
+        "portfolioDeltaJpy": -22954362.0916619,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 70,
+            "wins": 48,
+            "losses": 22,
+            "modeledPnlJpy": 16017289.507441508,
+            "grossLossJpy": -10611772.37397855,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 2.509388718770296
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 3682423.1919781845,
+            "grossLossJpy": -2469546.618224448,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.491133297425164
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 298499.89210040175,
+            "grossLossJpy": -2887282.3044176437,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.103384380406338
+          },
+          "RECOVERY_V8": {
+            "n": 39,
+            "wins": 26,
+            "losses": 13,
+            "modeledPnlJpy": 12036366.423362922,
+            "grossLossJpy": -5254943.451336458,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -1136421.8070677412,
+            "profitFactor": 3.29048448091326
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -688.4624759762199,
+            "newPnlJpy": -426.122509257309,
+            "modelPnlDeltaJpy": 262.33996671891094,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -45147.29522063772,
+            "newPnlJpy": -37112.15973425596,
+            "modelPnlDeltaJpy": 8035.135486381761,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -39424.9505018315,
+            "newPnlJpy": -42541.42318948444,
+            "modelPnlDeltaJpy": -3116.4726876529385,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 106061.20690669831,
+            "newPnlJpy": -29094.311845412092,
+            "modelPnlDeltaJpy": -135155.5187521104,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 1033864.5757823123,
+            "newPnlJpy": -1136421.8070677412,
+            "modelPnlDeltaJpy": -2170286.3828500537,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -787940.5626196977,
+            "modelPnlDeltaJpy": -617755.845979069,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1124144.8354150266,
+            "newPnlJpy": -942713.0521159694,
+            "modelPnlDeltaJpy": 181431.78329905728,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -789854.3342844098,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1058086.5879269477,
+            "newPnlJpy": -719638.1928833,
+            "modelPnlDeltaJpy": 338448.39504364773,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 9,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 4,
+        "directModeledJpyImprovementAmongMatched": -2398136.5664730803,
+        "directWorsenedMatchedCount": 4
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 135109651.09255242,
+        "portfolioDdPct": -24.94209557118101,
+        "portfolioPf": 3.5286277824423538,
+        "portfolioN": 1289,
+        "portfolioDeltaJpy": -23113326.43712479,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 70,
+            "wins": 48,
+            "losses": 22,
+            "modeledPnlJpy": 9355307.083216328,
+            "grossLossJpy": -9435896.891495444,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -1949001.6700847573,
+            "profitFactor": 1.99145923178201
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 1326790.7006544315,
+            "grossLossJpy": -2581835.314582968,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 1.5138943964242515
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -154596.5742982818,
+            "grossLossJpy": -1980458.7215717146,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1949001.6700847573,
+            "profitFactor": 0.921939007052067
+          },
+          "RECOVERY_V8": {
+            "n": 39,
+            "wins": 26,
+            "losses": 13,
+            "modeledPnlJpy": 8183112.956860178,
+            "grossLossJpy": -4873602.855340761,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -989163.0459220273,
+            "profitFactor": 2.6790684837794436
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -695.0930359340763,
+            "newPnlJpy": -438.800915594452,
+            "modelPnlDeltaJpy": 256.29212033962426,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -25858.22221630767,
+            "newPnlJpy": -20569.738543669624,
+            "modelPnlDeltaJpy": 5288.483672638045,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -22200.689464359748,
+            "newPnlJpy": -22893.035290795775,
+            "modelPnlDeltaJpy": -692.345826436027,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 55068.054441811364,
+            "newPnlJpy": -15773.75571411846,
+            "modelPnlDeltaJpy": -70841.81015592982,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 986072.717278911,
+            "newPnlJpy": -989163.0459220273,
+            "modelPnlDeltaJpy": -1975235.7632009382,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -830593.4706857554,
+            "modelPnlDeltaJpy": -617041.6812274761,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1166838.4106971046,
+            "newPnlJpy": -985708.8871642421,
+            "modelPnlDeltaJpy": 181129.52353286254,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -829881.4442159662,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1098031.3621564675,
+            "newPnlJpy": -759965.541735503,
+            "modelPnlDeltaJpy": 338065.8204209645,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 9,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 4,
+        "directModeledJpyImprovementAmongMatched": -2139071.4806639757,
+        "directWorsenedMatchedCount": 4
+      }
+    },
+    "H1X3_MINUS4_MFE1_ALL": {
+      "10": {
+        "portfolioFinalEquityJpy": 240019320.78798953,
+        "portfolioDdPct": -17.132051950856898,
+        "portfolioPf": 4.471118116069457,
+        "portfolioN": 1279,
+        "portfolioDeltaJpy": -28291475.652322114,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 48,
+            "losses": 20,
+            "modeledPnlJpy": 17386455.598727044,
+            "grossLossJpy": -9171000.706963783,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 2.895807900824285
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 13,
+            "losses": 8,
+            "modeledPnlJpy": 3464722.5434071184,
+            "grossLossJpy": -2268820.9731284757,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -872448.4535183833,
+            "profitFactor": 2.5271026601228983
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 180993.38124527436,
+            "grossLossJpy": -2873835.765093195,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.062979723282623
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 13740739.674074652,
+            "grossLossJpy": -4028343.9687421117,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 4.411014496452081
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 4607.788828651152,
+            "newPnlJpy": -1512.861461807981,
+            "modelPnlDeltaJpy": -6120.6502904591325,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -9229.988096471217,
+            "modelPnlDeltaJpy": 8231.162527587585,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 362247.68537961075,
+            "newPnlJpy": -872448.4535183833,
+            "modelPnlDeltaJpy": -1234696.138897994,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -1042194.3175162548,
+            "modelPnlDeltaJpy": -872009.6008756262,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -841946.0733581765,
+            "modelPnlDeltaJpy": 694581.4967379861,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 5,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -1410013.7307985057,
+        "directWorsenedMatchedCount": 3
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 102730965.42713219,
+        "portfolioDdPct": -17.450464770465103,
+        "portfolioPf": 3.133692020282715,
+        "portfolioN": 1282,
+        "portfolioDeltaJpy": -55492012.10254502,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 48,
+            "losses": 20,
+            "modeledPnlJpy": 9508197.653283808,
+            "grossLossJpy": -7311907.005899368,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -1480370.5806547112,
+            "profitFactor": 2.3003717970718767
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 13,
+            "losses": 8,
+            "modeledPnlJpy": 1008438.1657415678,
+            "grossLossJpy": -2036198.7458107173,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -880987.3255709683,
+            "profitFactor": 1.4952552730013866
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -45325.011485555115,
+            "grossLossJpy": -1504513.3051281269,
+            "hardStopCount": 2,
+            "worstIndividualLossJpy": -1480370.5806547112,
+            "profitFactor": 0.9698739709837958
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 8545084.499027794,
+            "grossLossJpy": -3771194.9549605236,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 3.265882459295251
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 3556.826160418513,
+            "newPnlJpy": -1234.9644497982931,
+            "modelPnlDeltaJpy": -4791.790610216806,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -6406.59736653094,
+            "modelPnlDeltaJpy": 5536.553759320234,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 286150.5251721732,
+            "newPnlJpy": -567488.3730412208,
+            "modelPnlDeltaJpy": -853638.898213394,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -1084593.1094633671,
+            "modelPnlDeltaJpy": -871041.3200050879,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -880987.3255709683,
+            "modelPnlDeltaJpy": 695286.7162348573,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 5,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -1028648.7388345212,
+        "directWorsenedMatchedCount": 3
+      }
+    },
+    "H1X2_MINUS3_BASE_LONG": {
+      "10": {
+        "portfolioFinalEquityJpy": 265873599.9710113,
+        "portfolioDdPct": -17.131850873042474,
+        "portfolioPf": 4.670930373946925,
+        "portfolioN": 1284,
+        "portfolioDeltaJpy": -2437196.4693003297,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 21183212.55794943,
+            "grossLossJpy": -6850204.604221939,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 4.092347423446846
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 4121098.3925028457,
+            "grossLossJpy": -2104381.3184055504,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.958342034525056
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 1896450.549576166,
+            "grossLossJpy": -1500680.501847243,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1473399.3341776514,
+            "profitFactor": 2.2637270539876777
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15165663.61587042,
+            "grossLossJpy": -3245142.7839691453,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.673342476882094
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -11359.696479683493,
+            "modelPnlDeltaJpy": 6101.45414437531,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -43669.26786946031,
+            "newPnlJpy": -15921.471189908043,
+            "modelPnlDeltaJpy": 27747.796679552266,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2835080.1437986745,
+            "newPnlJpy": -1473399.3341776514,
+            "modelPnlDeltaJpy": 1361680.809621023,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 3,
+        "directModeledJpyImprovementAmongMatched": 1395530.0604449506,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 158165849.40745458,
+        "portfolioDdPct": -17.45133542328755,
+        "portfolioPf": 3.7989525864355036,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": -57128.12222263217,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 15892706.019363,
+            "grossLossJpy": -6565554.455768902,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 3.420619024094558
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 2718073.881985752,
+            "grossLossJpy": -2172199.861658341,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.251300089813407
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 967469.8625551158,
+            "grossLossJpy": -1343164.424449699,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1325408.1553835021,
+            "profitFactor": 1.7202914586957536
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12207162.27482213,
+            "grossLossJpy": -3050190.1696608616,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 5.002098753134266
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -7870.3123599613255,
+            "modelPnlDeltaJpy": 4072.838765889849,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -26191.675714926496,
+            "newPnlJpy": -9885.956706235494,
+            "modelPnlDeltaJpy": 16305.719008691001,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2628420.187467506,
+            "newPnlJpy": -1325408.1553835021,
+            "modelPnlDeltaJpy": 1303012.032084004,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 3,
+        "directModeledJpyImprovementAmongMatched": 1323390.5898585848,
+        "directWorsenedMatchedCount": 0
+      }
+    },
+    "H1X2_MINUS3_SHORT": {
+      "10": {
+        "portfolioFinalEquityJpy": 246193214.8037676,
+        "portfolioDdPct": -14.959724089052063,
+        "portfolioPf": 4.4371018788458985,
+        "portfolioN": 1280,
+        "portfolioDeltaJpy": -22117581.63654405,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 48,
+            "losses": 19,
+            "modeledPnlJpy": 18278913.025899366,
+            "grossLossJpy": -8867774.29439351,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.06127404905376
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 13,
+            "losses": 7,
+            "modeledPnlJpy": 2997639.7509389454,
+            "grossLossJpy": -2787286.121803852,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1131675.8452403187,
+            "profitFactor": 2.0754689758936404
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 330083.36197874113,
+            "grossLossJpy": -2883290.696348897,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.1144814716035134
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 14951189.912981678,
+            "grossLossJpy": -3197197.4762407597,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.676342335463485
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755504000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -18.805487804012444,
+            "newPnlJpy": -329.1517446355069,
+            "modelPnlDeltaJpy": -310.34625683149443,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 4607.788828651152,
+            "newPnlJpy": -1341.808005617048,
+            "modelPnlDeltaJpy": -5949.596834268199,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -46076.37537010982,
+            "newPnlJpy": -13510.423956030767,
+            "modelPnlDeltaJpy": 32565.95141407905,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 362247.68537961075,
+            "newPnlJpy": -870251.6812025615,
+            "modelPnlDeltaJpy": -1232499.3665821722,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1779966000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -506654.70357694995,
+            "newPnlJpy": -1131675.8452403187,
+            "modelPnlDeltaJpy": -625021.1416633688,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -768392.760812133,
+            "modelPnlDeltaJpy": 768134.8092840296,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 6,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -1063079.690638532,
+        "directWorsenedMatchedCount": 4
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 138792529.29229146,
+        "portfolioDdPct": -17.37979187733162,
+        "portfolioPf": 3.6430610007059263,
+        "portfolioN": 1281,
+        "portfolioDeltaJpy": -19430448.23738575,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 48,
+            "losses": 19,
+            "modeledPnlJpy": 12078525.425422793,
+            "grossLossJpy": -7663617.961804836,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2017249.3725410122,
+            "profitFactor": 2.5760865802055477
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 13,
+            "losses": 7,
+            "modeledPnlJpy": 1194022.3271092689,
+            "grossLossJpy": -2650223.6293253824,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1182637.6782006447,
+            "profitFactor": 1.450536442999419
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -151936.02017851712,
+            "grossLossJpy": -2047066.9204085134,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2017249.3725410122,
+            "profitFactor": 0.9257786745202269
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 11036439.11849204,
+            "grossLossJpy": -2966327.4120709407,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 4.720573485442375
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755504000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -38.9194725798726,
+            "newPnlJpy": -340.7378283198342,
+            "modelPnlDeltaJpy": -301.8183557399616,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1760065200000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_TRAILING_STOP",
+            "oldPnlJpy": 3556.826160418513,
+            "newPnlJpy": -1088.0681440185015,
+            "modelPnlDeltaJpy": -4644.894304437014,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -27955.41294214869,
+            "newPnlJpy": -8430.486297865884,
+            "modelPnlDeltaJpy": 19524.92664428281,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1775152800000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": 286150.5251721732,
+            "newPnlJpy": -648987.3341573973,
+            "modelPnlDeltaJpy": -935137.8593295706,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1779966000000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_MAX_HOLD",
+            "oldPnlJpy": -557002.053284954,
+            "newPnlJpy": -1182637.6782006447,
+            "modelPnlDeltaJpy": -625635.6249156906,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -807359.4449464583,
+            "modelPnlDeltaJpy": 768914.5968593673,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 6,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": -777280.673401788,
+        "directWorsenedMatchedCount": 4
+      }
+    },
+    "H1X2_MINUS3_RECOVERY": {
+      "10": {
+        "portfolioFinalEquityJpy": 238409790.6069269,
+        "portfolioDdPct": -27.251309333915717,
+        "portfolioPf": 4.353705207193582,
+        "portfolioN": 1291,
+        "portfolioDeltaJpy": -29901005.833384752,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 71,
+            "wins": 48,
+            "losses": 23,
+            "modeledPnlJpy": 15577952.441078356,
+            "grossLossJpy": -10665717.23878701,
+            "hardStopCount": 7,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 2.460563044408067
+          },
+          "SHORT_V20": {
+            "n": 23,
+            "wins": 16,
+            "losses": 7,
+            "modeledPnlJpy": 3659386.5698356954,
+            "grossLossJpy": -2466229.3594347136,
+            "hardStopCount": 4,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.4837981535806817
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 204198.36662315181,
+            "grossLossJpy": -2882239.2528921925,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.0708471256916816
+          },
+          "RECOVERY_V8": {
+            "n": 38,
+            "wins": 25,
+            "losses": 13,
+            "modeledPnlJpy": 11714367.504619507,
+            "grossLossJpy": -5317248.626460105,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -992894.2511817039,
+            "profitFactor": 3.203088162235929
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -688.4624759762199,
+            "newPnlJpy": -364.4586407886006,
+            "modelPnlDeltaJpy": 324.00383518761936,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1755597600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -445.25374437660463,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1763013600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -14217.747465542674,
+            "newPnlJpy": -10991.444842634513,
+            "modelPnlDeltaJpy": 3226.3026229081606,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -45147.29522063772,
+            "newPnlJpy": -30691.36737983824,
+            "modelPnlDeltaJpy": 14455.927840799483,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -39424.9505018315,
+            "newPnlJpy": -35995.32512049572,
+            "modelPnlDeltaJpy": 3429.6253813357835,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 106061.20690669831,
+            "newPnlJpy": -25404.593674333995,
+            "modelPnlDeltaJpy": -131465.8005810323,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 1033864.5757823123,
+            "newPnlJpy": -812924.1314297224,
+            "modelPnlDeltaJpy": -1846788.7072120346,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -170184.71664062867,
+            "newPnlJpy": -971198.4926261429,
+            "modelPnlDeltaJpy": -801013.7759855143,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1124144.8354150266,
+            "newPnlJpy": -992894.2511817039,
+            "modelPnlDeltaJpy": 131250.58423332276,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -877000.2941856572,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1058086.5879269477,
+            "newPnlJpy": -821011.1233158086,
+            "modelPnlDeltaJpy": 237075.46461113915,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 11,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 5,
+        "directModeledJpyImprovementAmongMatched": -2389506.3752538883,
+        "directWorsenedMatchedCount": 3
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 133628832.48113544,
+        "portfolioDdPct": -29.20117704067089,
+        "portfolioPf": 3.5159493484966173,
+        "portfolioN": 1290,
+        "portfolioDeltaJpy": -24594145.04854177,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 71,
+            "wins": 48,
+            "losses": 23,
+            "modeledPnlJpy": 9059663.626865136,
+            "grossLossJpy": -9523891.222664589,
+            "hardStopCount": 7,
+            "worstIndividualLossJpy": -1924017.9366410132,
+            "profitFactor": 1.9512565205811356
+          },
+          "SHORT_V20": {
+            "n": 23,
+            "wins": 16,
+            "losses": 7,
+            "modeledPnlJpy": 1267963.4193878947,
+            "grossLossJpy": -2581699.890456274,
+            "hardStopCount": 4,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 1.4911350943907746
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -159714.3401357471,
+            "grossLossJpy": -1954423.7478771794,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1924017.9366410132,
+            "profitFactor": 0.9182805978953015
+          },
+          "RECOVERY_V8": {
+            "n": 38,
+            "wins": 25,
+            "losses": 13,
+            "modeledPnlJpy": 7951414.547612987,
+            "grossLossJpy": -4987767.584331136,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1035839.8799277598,
+            "profitFactor": 2.5941830514701656
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1755223200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -695.0930359340763,
+            "newPnlJpy": -378.560979687717,
+            "modelPnlDeltaJpy": 316.5320562463593,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1755597600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -449.5363203979818,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1763013600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -9569.046159384234,
+            "newPnlJpy": -7637.2094891126335,
+            "modelPnlDeltaJpy": 1931.8366702716003,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767110400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -25858.22221630767,
+            "newPnlJpy": -18262.184462979953,
+            "modelPnlDeltaJpy": 7596.037753327717,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1767888000000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -22200.689464359748,
+            "newPnlJpy": -20778.123973889677,
+            "modelPnlDeltaJpy": 1422.5654904700714,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1768233600000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 55068.054441811364,
+            "newPnlJpy": -14765.279056373995,
+            "modelPnlDeltaJpy": -69833.33349818535,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1776607200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_TRAILING_STOP",
+            "oldPnlJpy": 986072.717278911,
+            "newPnlJpy": -699472.5594875985,
+            "modelPnlDeltaJpy": -1685545.2767665095,
+            "baselineHadWon": true,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1781830800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_MAX_HOLD",
+            "oldPnlJpy": -213551.78945827932,
+            "newPnlJpy": -1013668.0510873919,
+            "modelPnlDeltaJpy": -800116.2616291125,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": false
+          },
+          {
+            "entryTsMs": 1783357200000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1166838.4106971046,
+            "newPnlJpy": -1035839.8799277598,
+            "modelPnlDeltaJpy": 130998.53076934488,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1783648800000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": null,
+            "oldPnlJpy": null,
+            "newPnlJpy": -916940.2145625349,
+            "modelPnlDeltaJpy": null,
+            "baselineHadWon": null,
+            "protectedOriginalHardStop": null
+          },
+          {
+            "entryTsMs": 1785002400000,
+            "side": "LONG",
+            "route": "RECOVERY_V8",
+            "oldExit": "RECOVERY_V8_HARD_STOP",
+            "oldPnlJpy": -1098031.3621564675,
+            "newPnlJpy": -861237.048525758,
+            "modelPnlDeltaJpy": 236794.31363070954,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 11,
+        "baselineWinnersCut": 2,
+        "originalHardStopsIntercepted": 5,
+        "directModeledJpyImprovementAmongMatched": -2176435.0555234374,
+        "directWorsenedMatchedCount": 3
+      }
+    },
+    "H1X3_MINUS4_BASE_LONG": {
+      "10": {
+        "portfolioFinalEquityJpy": 262119577.9157157,
+        "portfolioDdPct": -17.132033880957998,
+        "portfolioPf": 4.577194174902253,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": -6191218.524595946,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 19780230.415299416,
+            "grossLossJpy": -8214194.746419763,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.408054718196305
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 4116976.659558836,
+            "grossLossJpy": -2104179.111646326,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.956571394883624
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 515102.9979623447,
+            "grossLossJpy": -2868393.4218745637,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.179578921787414
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15148150.757778235,
+            "grossLossJpy": -3241622.2128988733,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.67301547277829
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -12186.62186762058,
+            "modelPnlDeltaJpy": 5274.5287564382215,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -43669.26786946031,
+            "newPnlJpy": -21126.656208268796,
+            "modelPnlDeltaJpy": 22542.611661191513,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 2,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": 27817.140417629736,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 153404119.93094814,
+        "portfolioDdPct": -17.450921340460646,
+        "portfolioPf": 3.710434295310579,
+        "portfolioN": 1281,
+        "portfolioDeltaJpy": -4818857.598729074,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 14594510.112262167,
+            "grossLossJpy": -7710588.318825812,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2472580.2578755603,
+            "profitFactor": 2.8927881386986893
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 2679250.953592833,
+            "grossLossJpy": -2172058.4404222225,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.2335077655976967
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -203745.0500690517,
+            "grossLossJpy": -2493930.261564603,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -2472580.2578755603,
+            "profitFactor": 0.9183036297329225
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12119004.208738385,
+            "grossLossJpy": -3044599.6168389865,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 4.980491931257869
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -8422.298327569035,
+            "modelPnlDeltaJpy": 3520.8527982821397,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -26191.675714926496,
+            "newPnlJpy": -12927.705361473882,
+            "modelPnlDeltaJpy": 13263.970353452614,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 2,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": 16784.823151734752,
+        "directWorsenedMatchedCount": 0
+      }
+    },
+    "H1X2_MINUS4_BASE_LONG": {
+      "10": {
+        "portfolioFinalEquityJpy": 263372301.6504283,
+        "portfolioDdPct": -17.131850873042474,
+        "portfolioPf": 4.624739955929773,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": -4938494.789883345,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 20473306.005995713,
+            "grossLossJpy": -7504849.563448652,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2123845.692365248,
+            "profitFactor": 3.7280101796721103
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 4114963.201463943,
+            "grossLossJpy": -2104381.3184055504,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 2.9554265975815506
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 1217638.7719888804,
+            "grossLossJpy": -2160297.0342375934,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -2123845.692365248,
+            "profitFactor": 1.5636441436946222
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15140704.032542892,
+            "grossLossJpy": -3240171.210805508,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.672809875617315
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -17461.150624058802,
+            "newPnlJpy": -11359.696479683493,
+            "modelPnlDeltaJpy": 6101.45414437531,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -43669.26786946031,
+            "newPnlJpy": -25091.645392661863,
+            "modelPnlDeltaJpy": 18577.622476798446,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2835080.1437986745,
+            "newPnlJpy": -2123845.692365248,
+            "modelPnlDeltaJpy": 711234.4514334262,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 3,
+        "directModeledJpyImprovementAmongMatched": 735913.5280546,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 155666044.19118017,
+        "portfolioDdPct": -17.45133542328755,
+        "portfolioPf": 3.7577821415596384,
+        "portfolioN": 1282,
+        "portfolioDeltaJpy": -2556933.3384970427,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 68,
+            "wins": 50,
+            "losses": 18,
+            "modeledPnlJpy": 15224750.237517497,
+            "grossLossJpy": -7098891.391339066,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -1861037.4777817677,
+            "profitFactor": 3.1446658919295913
+          },
+          "SHORT_V20": {
+            "n": 21,
+            "wins": 15,
+            "losses": 6,
+            "modeledPnlJpy": 2696487.7158981482,
+            "grossLossJpy": -2172199.861658341,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.241362622056124
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 398372.5483447689,
+            "grossLossJpy": -1884163.2967356131,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -1861037.4777817677,
+            "profitFactor": 1.2114320712196045
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12129889.97327458,
+            "grossLossJpy": -3042528.2329451125,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 4.986779758337054
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1762556400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -11943.151125851175,
+            "newPnlJpy": -7870.3123599613255,
+            "modelPnlDeltaJpy": 4072.838765889849,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1765299600000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -26191.675714926496,
+            "newPnlJpy": -15255.506593884133,
+            "modelPnlDeltaJpy": 10936.169121042363,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1777982400000,
+            "side": "LONG",
+            "route": "LONG_V2_FINAL",
+            "oldExit": "LONG_HARD_STOP",
+            "oldPnlJpy": -2628420.187467506,
+            "newPnlJpy": -1861037.4777817677,
+            "modelPnlDeltaJpy": 767382.7096857384,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 3,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 3,
+        "directModeledJpyImprovementAmongMatched": 782391.7175726707,
+        "directWorsenedMatchedCount": 0
+      }
+    },
+    "AT3_MINUS2P5_SHORT": {
+      "10": {
+        "portfolioFinalEquityJpy": 273470064.97887814,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.584346278648766,
+        "portfolioN": 1288,
+        "portfolioDeltaJpy": 5159268.5385665,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 20383661.221767154,
+            "grossLossJpy": -8260282.171448268,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.4676712972619077
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 4234915.93446522,
+            "grossLossJpy": -2060574.7773265298,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -1536527.5700961626,
+            "profitFactor": 3.055210993099588
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 707414.6849383304,
+            "grossLossJpy": -2900473.2118524276,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.2438963001097776
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15441330.602363603,
+            "grossLossJpy": -3299234.1822693106,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.68027722474147
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -46076.37537010982,
+            "newPnlJpy": -14968.47136485659,
+            "modelPnlDeltaJpy": 31107.90400525323,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": 31107.90400525323,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 163098088.77773577,
+        "portfolioDdPct": -15.014723812726594,
+        "portfolioPf": 3.7135496943808612,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": 4875111.2480585575,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 15597072.160477277,
+            "grossLossJpy": -8121416.399765274,
+            "hardStopCount": 9,
+            "worstIndividualLossJpy": -2795292.8847633414,
+            "profitFactor": 2.9204866974839594
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 2995269.253208571,
+            "grossLossJpy": -2144722.402915374,
+            "hardStopCount": 1,
+            "worstIndividualLossJpy": -1576274.0418058257,
+            "profitFactor": 2.3965766614537283
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -195690.90958622334,
+            "grossLossJpy": -2836047.2486922564,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2795292.8847633414,
+            "profitFactor": 0.9309987131996975
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12797493.81685493,
+            "grossLossJpy": -3140646.748157643,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 5.074795684793955
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -27955.41294214869,
+            "newPnlJpy": -9536.407135972204,
+            "modelPnlDeltaJpy": 18419.005806176487,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 1,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 1,
+        "directModeledJpyImprovementAmongMatched": 18419.005806176487,
+        "directWorsenedMatchedCount": 0
+      }
+    },
+    "SHORT_AT3_MINUS2P5_OR_AT8_MINUS4": {
+      "10": {
+        "portfolioFinalEquityJpy": 274143936.7102089,
+        "portfolioDdPct": -14.514985270751623,
+        "portfolioPf": 4.624951218307359,
+        "portfolioN": 1288,
+        "portfolioDeltaJpy": 5833140.269897252,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 21070703.24571881,
+            "grossLossJpy": -7573240.14749661,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 3.7822573740361167
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 4921957.958416877,
+            "grossLossJpy": -1373532.7533748718,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -849485.5461445047,
+            "profitFactor": 4.5834296243196695
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": 707414.6849383304,
+            "grossLossJpy": -2900473.2118524276,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2835080.1437986745,
+            "profitFactor": 1.2438963001097776
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 15441330.602363603,
+            "grossLossJpy": -3299234.1822693106,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1124144.8354150266,
+            "profitFactor": 5.68027722474147
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -46076.37537010982,
+            "newPnlJpy": -14968.47136485659,
+            "modelPnlDeltaJpy": 31107.90400525323,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1536527.5700961626,
+            "newPnlJpy": -849485.5461445047,
+            "modelPnlDeltaJpy": 687042.0239516579,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 2,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": 718149.9279569112,
+        "directWorsenedMatchedCount": 0
+      },
+      "30": {
+        "portfolioFinalEquityJpy": 163776886.5022772,
+        "portfolioDdPct": -15.014723812726594,
+        "portfolioPf": 3.7554413273796796,
+        "portfolioN": 1283,
+        "portfolioDeltaJpy": 5553908.972599983,
+        "routeMetrics": {
+          "ALL_PENGU": {
+            "n": 67,
+            "wins": 50,
+            "losses": 17,
+            "modeledPnlJpy": 16284812.91974507,
+            "grossLossJpy": -7433675.6404974805,
+            "hardStopCount": 8,
+            "worstIndividualLossJpy": -2795292.8847633414,
+            "profitFactor": 3.19068112563696
+          },
+          "SHORT_V20": {
+            "n": 20,
+            "wins": 15,
+            "losses": 5,
+            "modeledPnlJpy": 3683010.0124763637,
+            "grossLossJpy": -1456981.6436475809,
+            "hardStopCount": 0,
+            "worstIndividualLossJpy": -888533.2825380327,
+            "profitFactor": 3.527835562331368
+          },
+          "LONG_V2_FINAL": {
+            "n": 10,
+            "wins": 7,
+            "losses": 3,
+            "modeledPnlJpy": -195690.90958622334,
+            "grossLossJpy": -2836047.2486922564,
+            "hardStopCount": 3,
+            "worstIndividualLossJpy": -2795292.8847633414,
+            "profitFactor": 0.9309987131996975
+          },
+          "RECOVERY_V8": {
+            "n": 37,
+            "wins": 28,
+            "losses": 9,
+            "modeledPnlJpy": 12797493.81685493,
+            "grossLossJpy": -3140646.748157643,
+            "hardStopCount": 5,
+            "worstIndividualLossJpy": -1166838.4106971046,
+            "profitFactor": 5.074795684793955
+          }
+        },
+        "earlyStops": [
+          {
+            "entryTsMs": 1765029600000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -27955.41294214869,
+            "newPnlJpy": -9536.407135972204,
+            "modelPnlDeltaJpy": 18419.005806176487,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          },
+          {
+            "entryTsMs": 1784318400000,
+            "side": "SHORT",
+            "route": "SHORT_V20",
+            "oldExit": "SHORT_HARD_STOP",
+            "oldPnlJpy": -1576274.0418058257,
+            "newPnlJpy": -888533.2825380327,
+            "modelPnlDeltaJpy": 687740.7592677929,
+            "baselineHadWon": false,
+            "protectedOriginalHardStop": true
+          }
+        ],
+        "earlyStopN": 2,
+        "baselineWinnersCut": 0,
+        "originalHardStopsIntercepted": 2,
+        "directModeledJpyImprovementAmongMatched": 706159.7650739694,
+        "directWorsenedMatchedCount": 0
+      }
+    }
+  }
+}
