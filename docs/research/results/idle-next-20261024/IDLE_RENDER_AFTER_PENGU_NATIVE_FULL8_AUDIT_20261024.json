@@ -1,0 +1,187 @@
+{
+  "status": "RESEARCH_ONLY_NOT_LIVE_OR_OOS",
+  "baseline": "PENGU approved SHORT two steps plus NORMAL LONG 8h -5 / Recovery V8 24h -3 and AVAX6, 8 dynamic shared wallet",
+  "cases": {
+    "BASE": {
+      "costs": {
+        "10": {
+          "finalEquityJpy": 278755396.9438841,
+          "maxDrawdownPct": -14.514985270751623,
+          "portfolioTrades": 1288,
+          "renderTrades": 24,
+          "ledgerSha256": "44c3ed2d7f3d8b4803a981d19c67e8e475f75073feae0c3bd88457ac036ff615"
+        },
+        "30": {
+          "finalEquityJpy": 168977922.22297707,
+          "maxDrawdownPct": -15.014723812726594,
+          "portfolioTrades": 1284,
+          "renderTrades": 22,
+          "ledgerSha256": "d4c06f9bf412f5f583d047c30625987a1716d9019b0a0614eb01e746e93eeb24"
+        }
+      }
+    },
+    "SUSTAIN2_MIN180_MFE1": {
+      "costs": {
+        "10": {
+          "finalEquityJpy": 277982948.111082,
+          "maxDrawdownPct": -14.514985270751623,
+          "portfolioTrades": 1288,
+          "portfolioPF": 4.686257590610181,
+          "penguCohortPreserved": 68,
+          "renderTradesOriginal": 24,
+          "renderTradesCandidate": 24,
+          "renderOriginalWins": 15,
+          "renderCandidateWins": 15,
+          "renderNewRiskExits": 5,
+          "renderNewRiskExitEntryTsMs": [
+            1768456800000,
+            1769097600000,
+            1770638400000,
+            1772398800000,
+            1778612400000
+          ],
+          "renderModelPnlJpy": 4430756.13694494,
+          "ledgerSha256": "9b8acb14d21e6a53b8ba800ca390630ede1b939c8a825838086d46cb72cb1463",
+          "accounting": "PASS",
+          "deltaFromCumulativeJpy": -772448.8328020573,
+          "ddDeltaPctPoints": 0.0,
+          "tradeDelta": 0
+        },
+        "30": {
+          "finalEquityJpy": 168208943.90402392,
+          "maxDrawdownPct": -15.014723812726594,
+          "portfolioTrades": 1284,
+          "portfolioPF": 3.817193668122357,
+          "penguCohortPreserved": 68,
+          "renderTradesOriginal": 22,
+          "renderTradesCandidate": 22,
+          "renderOriginalWins": 10,
+          "renderCandidateWins": 10,
+          "renderNewRiskExits": 5,
+          "renderNewRiskExitEntryTsMs": [
+            1768456800000,
+            1769097600000,
+            1770638400000,
+            1772398800000,
+            1778612400000
+          ],
+          "renderModelPnlJpy": 2158568.2667374746,
+          "ledgerSha256": "f976e6dda08ec4647eb0fa74423ee1f557b3ce65417f8ad50b780bf6e44f812f",
+          "accounting": "PASS",
+          "deltaFromCumulativeJpy": -768978.3189531565,
+          "ddDeltaPctPoints": 0.0,
+          "tradeDelta": 0
+        }
+      }
+    },
+    "TOUCH1_WATCH2_MFE0P25": {
+      "costs": {
+        "10": {
+          "finalEquityJpy": 279087048.0747037,
+          "maxDrawdownPct": -14.514985270751623,
+          "portfolioTrades": 1288,
+          "portfolioPF": 4.702659313683817,
+          "penguCohortPreserved": 68,
+          "renderTradesOriginal": 24,
+          "renderTradesCandidate": 24,
+          "renderOriginalWins": 15,
+          "renderCandidateWins": 15,
+          "renderNewRiskExits": 4,
+          "renderNewRiskExitEntryTsMs": [
+            1768456800000,
+            1772398800000,
+            1773770400000,
+            1778612400000
+          ],
+          "renderModelPnlJpy": 4695677.751122066,
+          "ledgerSha256": "97217e3223b45bf978b721335d465ee8eb5fcdbacf30475c96d73e87c02cb923",
+          "accounting": "PASS",
+          "deltaFromCumulativeJpy": 331651.1308196187,
+          "ddDeltaPctPoints": 0.0,
+          "tradeDelta": 0
+        },
+        "30": {
+          "finalEquityJpy": 169095335.52909872,
+          "maxDrawdownPct": -15.014723812726594,
+          "portfolioTrades": 1284,
+          "portfolioPF": 3.8253239369294505,
+          "penguCohortPreserved": 68,
+          "renderTradesOriginal": 22,
+          "renderTradesCandidate": 22,
+          "renderOriginalWins": 10,
+          "renderCandidateWins": 10,
+          "renderNewRiskExits": 4,
+          "renderNewRiskExitEntryTsMs": [
+            1768456800000,
+            1772398800000,
+            1773770400000,
+            1778612400000
+          ],
+          "renderModelPnlJpy": 2299022.1461490053,
+          "ledgerSha256": "469a6d737efb5962cf614b8440235a92bf9716947195ac5db29cb764cc890f86",
+          "accounting": "PASS",
+          "deltaFromCumulativeJpy": 117413.30612164736,
+          "ddDeltaPctPoints": 0.0,
+          "tradeDelta": 0
+        }
+      }
+    },
+    "AT4_LOSS1_MFE0P25": {
+      "costs": {
+        "10": {
+          "finalEquityJpy": 278795598.64923775,
+          "maxDrawdownPct": -14.514985270751623,
+          "portfolioTrades": 1288,
+          "portfolioPF": 4.701292348130826,
+          "penguCohortPreserved": 68,
+          "renderTradesOriginal": 24,
+          "renderTradesCandidate": 24,
+          "renderOriginalWins": 15,
+          "renderCandidateWins": 15,
+          "renderNewRiskExits": 4,
+          "renderNewRiskExitEntryTsMs": [
+            1768456800000,
+            1772398800000,
+            1773770400000,
+            1778612400000
+          ],
+          "renderModelPnlJpy": 4669885.9228640245,
+          "ledgerSha256": "e5ce53d40657e936d70ee6537d28b1368ad0fe6527675e28cc346e6600c537e3",
+          "accounting": "PASS",
+          "deltaFromCumulativeJpy": 40201.70535367727,
+          "ddDeltaPctPoints": 0.0,
+          "tradeDelta": 0
+        },
+        "30": {
+          "finalEquityJpy": 168850730.76255363,
+          "maxDrawdownPct": -15.014723812726594,
+          "portfolioTrades": 1284,
+          "portfolioPF": 3.8248417091801565,
+          "penguCohortPreserved": 68,
+          "renderTradesOriginal": 22,
+          "renderTradesCandidate": 22,
+          "renderOriginalWins": 10,
+          "renderCandidateWins": 10,
+          "renderNewRiskExits": 4,
+          "renderNewRiskExitEntryTsMs": [
+            1768456800000,
+            1772398800000,
+            1773770400000,
+            1778612400000
+          ],
+          "renderModelPnlJpy": 2286841.9410943505,
+          "ledgerSha256": "f3ca7eb607940fe8bd0bea529c82363364697f3ae9d419eee6bac25652a0ed84",
+          "accounting": "PASS",
+          "deltaFromCumulativeJpy": -127191.46042343974,
+          "ddDeltaPctPoints": 0.0,
+          "tradeDelta": 0
+        }
+      }
+    }
+  },
+  "notes": [
+    "Selected-trade M5 screen used in-sample and cannot certify these exits",
+    "Both bps economic full8 runs and ledger SHA checks required",
+    "Venue actual order/funding/parity cannot be inferred from H1/M5 model"
+  ]
+}
