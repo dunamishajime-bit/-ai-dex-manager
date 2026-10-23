@@ -1,0 +1,488 @@
+{
+  "status": "RESEARCH_ONLY_NOT_LIVE_NOT_OOS",
+  "baseline": "PENGU SHORT dual + NORMAL LONG MFE2 then -5 profit reversal stop",
+  "baselineByCost": {
+    "10": {
+      "finalEquityJpy": 277331663.8584961,
+      "deltaVsShortDualJpy": 3187727.1482872367,
+      "maxDrawdownPct": -14.514985270751623,
+      "ddDiffVsShortDualPctPoints": 0.0,
+      "portfolioTrades": 1287,
+      "pf": 4.686091458420489,
+      "penguNormalLong": {
+        "trades": 10,
+        "wins": 7,
+        "hardStops": 1,
+        "modeledPnlJpy": 1655400.3794072599
+      },
+      "penguRecoveryLong": {
+        "trades": 37,
+        "wins": 28,
+        "hardStops": 5,
+        "modeledPnlJpy": 15455510.767024009
+      },
+      "penguShort": {
+        "trades": 20,
+        "wins": 15,
+        "hardStops": 0,
+        "modeledPnlJpy": 4929481.556582933
+      },
+      "addedNormalLongStops": 2,
+      "addedRecoveryStops": 0,
+      "originalLongWinnersCut": 0,
+      "originalHardStopEarlyProtected": 2,
+      "allOriginalMatched": true,
+      "newSoftShortStops": 2,
+      "changedPositionDetails": [
+        {
+          "entryUtcMs": 1765299600000,
+          "route": "LONG_V2_FINAL",
+          "oldExitReason": "LONG_HARD_STOP",
+          "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+          "oldWinner": false,
+          "oldModeledPnlJpy": -47931.92,
+          "newModeledPnlJpy": -30867.72,
+          "oldExitTs": 1765407600000,
+          "newExitTs": 1765366500000
+        },
+        {
+          "entryUtcMs": 1777982400000,
+          "route": "LONG_V2_FINAL",
+          "oldExitReason": "LONG_HARD_STOP",
+          "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+          "oldWinner": false,
+          "oldModeledPnlJpy": -2835080.14,
+          "newModeledPnlJpy": -1927113.3,
+          "oldExitTs": 1778122800000,
+          "newExitTs": 1778114400000
+        }
+      ],
+      "ledgerSha256": "dc09ade672304a7c30fa29bef21b6ffa3b8127b40e913d559dded34c8550910c"
+    },
+    "30": {
+      "finalEquityJpy": 167635388.52822807,
+      "deltaVsShortDualJpy": 3858502.025950879,
+      "maxDrawdownPct": -15.014723812726594,
+      "ddDiffVsShortDualPctPoints": 0.0,
+      "portfolioTrades": 1283,
+      "pf": 3.816339051879434,
+      "penguNormalLong": {
+        "trades": 10,
+        "wins": 7,
+        "hardStops": 1,
+        "modeledPnlJpy": 700958.3441138653
+      },
+      "penguRecoveryLong": {
+        "trades": 37,
+        "wins": 28,
+        "hardStops": 5,
+        "modeledPnlJpy": 12849337.548221704
+      },
+      "penguShort": {
+        "trades": 20,
+        "wins": 15,
+        "hardStops": 0,
+        "modeledPnlJpy": 3713830.661651598
+      },
+      "addedNormalLongStops": 2,
+      "addedRecoveryStops": 0,
+      "originalLongWinnersCut": 0,
+      "originalHardStopEarlyProtected": 2,
+      "allOriginalMatched": true,
+      "newSoftShortStops": 2,
+      "changedPositionDetails": [
+        {
+          "entryUtcMs": 1765299600000,
+          "route": "LONG_V2_FINAL",
+          "oldExitReason": "LONG_HARD_STOP",
+          "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+          "oldWinner": false,
+          "oldModeledPnlJpy": -28811.21,
+          "newModeledPnlJpy": -18800.78,
+          "oldExitTs": 1765407600000,
+          "newExitTs": 1765366500000
+        },
+        {
+          "entryUtcMs": 1777982400000,
+          "route": "LONG_V2_FINAL",
+          "oldExitReason": "LONG_HARD_STOP",
+          "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+          "oldWinner": false,
+          "oldModeledPnlJpy": -2795292.88,
+          "newModeledPnlJpy": -1948616.26,
+          "oldExitTs": 1778122800000,
+          "newExitTs": 1778114400000
+        }
+      ],
+      "ledgerSha256": "b3e22f6cee630ae6c8f2d78563bdac8237023c5a4725bc7615145b27de4eaa52"
+    }
+  },
+  "cases": {
+    "AT8_NEG5_MFE1": {
+      "10": {
+        "finalEquityJpy": 269258770.83699393,
+        "deltaVsLongProfit2BaseJpy": -8072893.021502197,
+        "maxDrawdownPct": -17.131850873042474,
+        "ddDeltaPercentagePoints": -2.6168656022908507,
+        "portfolioTrades": 1284,
+        "tradeDelta": -3,
+        "portfolioPF": 4.684613641156279,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762585200000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_AT8_NEG5_MFE1_LONG",
+        "initialStopModelPnLJPY": -11359.696479683493,
+        "initialOriginalHardLossPnLJPY": -17461.150624058802,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "1fe7748472c54297ccdb29008005e053afa67d36147a046dc1f6288f75199c8c",
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 160460113.99906018,
+        "deltaVsLongProfit2BaseJpy": -7175274.529167891,
+        "maxDrawdownPct": -17.45133542328755,
+        "ddDeltaPercentagePoints": -2.4366116105609557,
+        "portfolioTrades": 1282,
+        "tradeDelta": -1,
+        "portfolioPF": 3.8145407453765534,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762585200000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_AT8_NEG5_MFE1_LONG",
+        "initialStopModelPnLJPY": -7870.3123599613255,
+        "initialOriginalHardLossPnLJPY": -11943.151125851175,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "88882d9152a00124ee17676ab069fc58ed1449a6ffaecb9828cb25c290147516",
+        "accounting": "PASS"
+      }
+    },
+    "ARM35_WATCH2_MFE1": {
+      "10": {
+        "finalEquityJpy": 268958114.74479425,
+        "deltaVsLongProfit2BaseJpy": -8373549.11370188,
+        "maxDrawdownPct": -17.13183377648626,
+        "ddDeltaPercentagePoints": -2.6168485057346373,
+        "portfolioTrades": 1284,
+        "tradeDelta": -3,
+        "portfolioPF": 4.684534111989684,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762587300000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_ARM35_WATCH2_MFE1_LONG",
+        "initialStopModelPnLJPY": -12653.434586617312,
+        "initialOriginalHardLossPnLJPY": -17461.150624058802,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "9ba76eaaecdf31162efad495a622036cdcf2c61c6a89deaf92a24eae89a64774",
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 161184343.81111115,
+        "deltaVsLongProfit2BaseJpy": -6451044.717116922,
+        "maxDrawdownPct": -17.450629812688767,
+        "ddDeltaPercentagePoints": -2.4359059999621735,
+        "portfolioTrades": 1283,
+        "tradeDelta": 0,
+        "portfolioPF": 3.821250631705988,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762587300000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_ARM35_WATCH2_MFE1_LONG",
+        "initialStopModelPnLJPY": -8733.90330928306,
+        "initialOriginalHardLossPnLJPY": -11943.151125851175,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "e99ade6a2b3ed001f79f581848d2bbf52d9ef57ac7a6a578eb790ab627082eff",
+        "accounting": "PASS"
+      }
+    },
+    "TOUCH5_AFTER2_MFE1": {
+      "10": {
+        "finalEquityJpy": 269458720.63525206,
+        "deltaVsLongProfit2BaseJpy": -7872943.223244071,
+        "maxDrawdownPct": -17.13178980670136,
+        "ddDeltaPercentagePoints": -2.6168045359497363,
+        "portfolioTrades": 1284,
+        "tradeDelta": -3,
+        "portfolioPF": 4.68466242285842,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762581300000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_TOUCH5_AFTER2_MFE1_LONG",
+        "initialStopModelPnLJPY": -11026.258823257242,
+        "initialOriginalHardLossPnLJPY": -17461.150624058802,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "d4d7a978a5d41a6ee8774896f530e77a87724369620f2c4e37b63f9e2d3fdd56",
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 160580401.64129803,
+        "deltaVsLongProfit2BaseJpy": -7054986.8869300485,
+        "maxDrawdownPct": -17.451036387684994,
+        "ddDeltaPercentagePoints": -2.4363125749584,
+        "portfolioTrades": 1282,
+        "tradeDelta": -1,
+        "portfolioPF": 3.8146922352038395,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762581300000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_TOUCH5_AFTER2_MFE1_LONG",
+        "initialStopModelPnLJPY": -7647.737373022729,
+        "initialOriginalHardLossPnLJPY": -11943.151125851175,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "4a3c320aa6946eaf522c82ff3943722256bf4a4000b1ff28a9eb8dcc60a4d5b1",
+        "accounting": "PASS"
+      }
+    },
+    "AT12_NEG4_MFE1": {
+      "10": {
+        "finalEquityJpy": 269882511.8667008,
+        "deltaVsLongProfit2BaseJpy": -7449151.991795301,
+        "maxDrawdownPct": -17.132409263108705,
+        "ddDeltaPercentagePoints": -2.6174239923570823,
+        "portfolioTrades": 1285,
+        "tradeDelta": -2,
+        "portfolioPF": 4.684733002990053,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762599600000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_AT12_NEG4_MFE1_LONG",
+        "initialStopModelPnLJPY": -9422.648817259136,
+        "initialOriginalHardLossPnLJPY": -17461.150624058802,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "790b9f4cb1fbad8f41176b6d019252da41652c8dab56b888a2e8592b7a44524a",
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 160834268.99356794,
+        "deltaVsLongProfit2BaseJpy": -6801119.534660131,
+        "maxDrawdownPct": -17.450521161542596,
+        "ddDeltaPercentagePoints": -2.4357973488160027,
+        "portfolioTrades": 1282,
+        "tradeDelta": -1,
+        "portfolioPF": 3.815026262538648,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 3,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762599600000,
+        "initialStopExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_PROFIT2_PLUS_AT12_NEG4_MFE1_LONG",
+        "initialStopModelPnLJPY": -6577.308795782052,
+        "initialOriginalHardLossPnLJPY": -11943.151125851175,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762650000000
+        ],
+        "ledgerSha256": "0ecd199251bf61b37182bf64eb39f6c4326847f1175f0b0dc7568fefb2809565",
+        "accounting": "PASS"
+      }
+    },
+    "AT8_NEG5_HARD24H_PROXY": {
+      "10": {
+        "finalEquityJpy": 277327236.39282715,
+        "deltaVsLongProfit2BaseJpy": -4427.465668976307,
+        "maxDrawdownPct": -14.514985270751623,
+        "ddDeltaPercentagePoints": 0.0,
+        "portfolioTrades": 1288,
+        "tradeDelta": 1,
+        "portfolioPF": 4.686086937058892,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 3,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 2,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762585200000,
+        "initialStopExitReason": "RESEARCH_PENGU_INITIAL_ADVERSE_HARD_STOP_COOLDOWN_PROXY",
+        "initialStopModelPnLJPY": -11359.696479683493,
+        "initialOriginalHardLossPnLJPY": -17461.150624058802,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762682400000
+        ],
+        "ledgerSha256": "2a05c25d344caf467664a9ded4679582ce1b128c563a9a2bde184e086036f3c3",
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 167471579.35840884,
+        "deltaVsLongProfit2BaseJpy": -163809.1698192358,
+        "maxDrawdownPct": -15.014723812726594,
+        "ddDeltaPercentagePoints": 0.0,
+        "portfolioTrades": 1284,
+        "tradeDelta": 1,
+        "portfolioPF": 3.816333481869524,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 3,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 2,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762585200000,
+        "initialStopExitReason": "RESEARCH_PENGU_INITIAL_ADVERSE_HARD_STOP_COOLDOWN_PROXY",
+        "initialStopModelPnLJPY": -7870.3123599613255,
+        "initialOriginalHardLossPnLJPY": -11943.151125851175,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762682400000
+        ],
+        "ledgerSha256": "945bf6da4b2ccf2ad878b0558cc9dc99c5574274e9d62919f075c0c2a6708540",
+        "accounting": "PASS"
+      }
+    },
+    "ARM35_WATCH2_HARD24H_PROXY": {
+      "10": {
+        "finalEquityJpy": 276926182.71749,
+        "deltaVsLongProfit2BaseJpy": -405481.1410061121,
+        "maxDrawdownPct": -14.514985270751623,
+        "ddDeltaPercentagePoints": 0.0,
+        "portfolioTrades": 1288,
+        "tradeDelta": 1,
+        "portfolioPF": 4.685927524861489,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 3,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 2,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762587300000,
+        "initialStopExitReason": "RESEARCH_PENGU_INITIAL_ADVERSE_HARD_STOP_COOLDOWN_PROXY",
+        "initialStopModelPnLJPY": -12653.434586617312,
+        "initialOriginalHardLossPnLJPY": -17461.150624058802,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762682400000
+        ],
+        "ledgerSha256": "7f16840085ff53316009701c98c43b02042f62b7c1b1406473af2f85d779a1dc",
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 167303677.95884064,
+        "deltaVsLongProfit2BaseJpy": -331710.5693874359,
+        "maxDrawdownPct": -15.014723812726594,
+        "ddDeltaPercentagePoints": 0.0,
+        "portfolioTrades": 1285,
+        "tradeDelta": 2,
+        "portfolioPF": 3.8191162050063325,
+        "penguTrades": 68,
+        "penguWins": 50,
+        "penguDualShortStops": 3,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 2,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762587300000,
+        "initialStopExitReason": "RESEARCH_PENGU_INITIAL_ADVERSE_HARD_STOP_COOLDOWN_PROXY",
+        "initialStopModelPnLJPY": -8733.90330928306,
+        "initialOriginalHardLossPnLJPY": -11943.151125851175,
+        "newPENGUShortAfterInitialLoss": 1,
+        "newPENGUShortEntryMs": [
+          1762682400000
+        ],
+        "ledgerSha256": "8ac8e4d5917d3d183ab411677cb264ad4f0aad4dcc18805812fef068f6be7143",
+        "accounting": "PASS"
+      }
+    },
+    "AT12_NEG4_HARD24H_PROXY": {
+      "10": {
+        "finalEquityJpy": 280090887.26270056,
+        "deltaVsLongProfit2BaseJpy": 2759223.404204428,
+        "maxDrawdownPct": -14.514985270751623,
+        "ddDeltaPercentagePoints": 0.0,
+        "portfolioTrades": 1285,
+        "tradeDelta": -2,
+        "portfolioPF": 4.687668090711529,
+        "penguTrades": 67,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 2,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762599600000,
+        "initialStopExitReason": "RESEARCH_PENGU_INITIAL_ADVERSE_HARD_STOP_COOLDOWN_PROXY",
+        "initialStopModelPnLJPY": -9422.648817259136,
+        "initialOriginalHardLossPnLJPY": -17461.150624058802,
+        "newPENGUShortAfterInitialLoss": 0,
+        "newPENGUShortEntryMs": [],
+        "ledgerSha256": "215dae07a60bf3505bdb6504954f6c7f4570fcc84d5ac50fc6f868e71146168a",
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 169818281.94553396,
+        "deltaVsLongProfit2BaseJpy": 2182893.4173058867,
+        "maxDrawdownPct": -15.014723812726594,
+        "ddDeltaPercentagePoints": 0.0,
+        "portfolioTrades": 1282,
+        "tradeDelta": -1,
+        "portfolioPF": 3.8087192132843506,
+        "penguTrades": 67,
+        "penguWins": 50,
+        "penguDualShortStops": 2,
+        "adoptedOriginalShortStopCount": 2,
+        "normalLongProfitStopsPreserved": 2,
+        "initialStopEntryTsMs": 1762556400000,
+        "initialStopExitTsMs": 1762599600000,
+        "initialStopExitReason": "RESEARCH_PENGU_INITIAL_ADVERSE_HARD_STOP_COOLDOWN_PROXY",
+        "initialStopModelPnLJPY": -6577.308795782052,
+        "initialOriginalHardLossPnLJPY": -11943.151125851175,
+        "newPENGUShortAfterInitialLoss": 0,
+        "newPENGUShortEntryMs": [],
+        "ledgerSha256": "0ba8a1d9f9aa95285fb1beadd4e28abf9d3e454eb8e1f1b9f19e173143a81b2f",
+        "accounting": "PASS"
+      }
+    }
+  },
+  "notes": [
+    "Changed all8 dynamic wallet re-selection impacts future entry slate; static one-trade saving is not the portfolio gain.",
+    "All early-loss screens select historical 2025-11-07 23:00 UTC normal LONG; in-sample one-event risk.",
+    "Price anchoring is H1 trade model proportional to causal M5 market bars; venue actual fills not certified.",
+    "The HARD24H_PROXY is a research mapping of early soft risk stop to hard-stop-like 24h global PENGU cooldown and 60h same-route quarantine. It is NOT a venue hard stop."
+  ]
+}
