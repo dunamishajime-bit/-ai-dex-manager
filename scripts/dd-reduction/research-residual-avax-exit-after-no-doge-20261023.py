@@ -40,6 +40,7 @@ RULES={
  "COMBO_LOSS3_TIME6":{"kind":"combo","parts":["LOSS_M5_CLOSE3","TIME_6H"]},
  "COMBO_EARLY2H3_TIME8":{"kind":"combo","parts":["EARLY_2H_LOSS3_MFE_LT1","TIME_8H"]},
  "COMBO_LOSS4_TIME8":{"kind":"combo","parts":["LOSS_M5_CLOSE4","TIME_8H"]},
+ "COMBO_TIME6_TRAIL3_GIVE1P5":{"kind":"combo","parts":["TIME_6H","TRAIL_ARM3_GIVE1P5"]},
 }
 def sha(path):
  h=hashlib.sha256()
