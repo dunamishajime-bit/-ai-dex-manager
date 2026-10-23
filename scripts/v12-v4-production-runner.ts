@@ -7,7 +7,7 @@ import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {executeV4WithContentionAudit} from "../lib/v12-v4-lock-contention-observer";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
 import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
-import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
+import {V4RunnerEngine,classifyV4RecoverableExitFeedFailure} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
 import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
@@ -264,11 +264,13 @@ export async function buildV4ProductionRuntime(){
  const engine=new V4RunnerEngine({
   store,accountLock:lock,adapter,client,pendingRegistryPath,
   fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
-  fetchExitFeed:async symbol=>{
+  fetchExitFeed:async (symbol,fromTs,untilTs)=>{
    const now=Date.now();
+   const start=Number.isFinite(fromTs)?Number(fromTs):undefined;
+   const end=Number.isFinite(untilTs)?Math.min(Number(untilTs),now):undefined;
    const [rows,m5rows]=await Promise.all([
-    client.getKlines(symbol,"1h",500),
-    client.getKlines(symbol,"5m",1000),
+    client.getKlines(symbol,"1h",500,{startTime:start,endTime:end}),
+    client.getKlines(symbol,"5m",1000,{startTime:start,endTime:end}),
    ]);
    return {
     closed:rows.filter(x=>Number(x[0])+3600000<=now&&Number(x[6])<now)
@@ -350,10 +352,16 @@ async function main(){
     onContention:()=>{hadLockContention=true;},
    });
   }catch(error){
-   const budget=classifyV4DaemonRateBudgetOutcome(error,store.read());
-   if(!budget)throw error;
-   deferredWaitMs=budget.waitMs;
-   result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+   const recoverableExitGap=classifyV4RecoverableExitFeedFailure(error,Date.now());
+   if(recoverableExitGap){
+    result=recoverableExitGap;
+    deferredWaitMs=Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
+   }else{
+    const budget=classifyV4DaemonRateBudgetOutcome(error,store.read());
+    if(!budget)throw error;
+    deferredWaitMs=budget.waitMs;
+    result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+   }
   }
   try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result);}catch(error){
    console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:error instanceof Error?error.message:String(error)}));

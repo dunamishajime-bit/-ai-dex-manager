@@ -38,13 +38,24 @@ function safeDecisionFailureReason(error:unknown){
   .replace(/(secret|private.?key|signature|token|api.?key)=?[^\s,;]+/ig,"$1=[REDACTED]")
   .replace(/[\r\n\t]+/g," ").replace(/\s{2,}/g," ").slice(0,180)||"DECISION_SOURCE_UNAVAILABLE";
 }
+export function classifyV4RecoverableExitFeedFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+ const reason=safeDecisionFailureReason(error);
+ if(!/^V4_EXIT_FEED_(?:M5_)?GAP:/.test(reason))return;
+ return {status:"blocked",reason:"V4_EXIT_FEED_GAP_RETRY:"+reason,eventTs,
+  candidateCount:0,orderEnabled:false};
+}
+export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number){
+ if(!Number.isFinite(entryTs)||!Number.isFinite(durationHours)||durationHours<=0||
+   !Number.isFinite(now)||now<entryTs)throw Error("V4_EXIT_FEED_WINDOW_INVALID");
+ return {fromTs:entryTs,untilTs:Math.min(now,entryTs+durationHours*3600000)};
+}
 export interface V4RunnerDependencies{
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
  adapter:V12AsterLiveAdapter;
  client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory">;
  pendingRegistryPath:string;
  fetchDecision:()=>Promise<V4LiveDecisionSnapshot>;
- fetchExitFeed:(symbol:string)=>Promise<V4ExitFeed>;
+ fetchExitFeed:(symbol:string,fromTs?:number,untilTs?:number)=>Promise<V4ExitFeed>;
  fetchPeers:()=>Promise<V4PeerSource[]>;
  assertAuthority:(cmd:V4DurableOrderCommand)=>Promise<void>;
  assertSourceParity:(decision:V4LiveDecisionSnapshot)=>Promise<void>;
@@ -330,7 +341,9 @@ export class V4RunnerEngine{
    .filter(l=>l.status==="OPEN"&&l.qty>0);
   for(const old of opens){
    if(!old.plannedExit){
-    const feed=await d.fetchExitFeed(old.candidate.symbol);
+   const spec=productionExitSpec(old.candidate.route);
+   const window=v4ExitFeedWindow(old.entryTs,spec.hours,this.now());
+   const feed=await d.fetchExitFeed(old.candidate.symbol,window.fromTs,window.untilTs);
     const current=d.store.read(),updated=appendV4ClosedExitBars(current.state,old.id,feed,this.now());
     if(updated!==current.state)d.store.commit(current.revision,{...current,state:updated});
     const afterPolicy=d.store.read().state.legs[old.id];
