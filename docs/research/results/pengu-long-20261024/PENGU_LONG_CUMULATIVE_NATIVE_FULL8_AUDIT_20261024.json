@@ -1,0 +1,689 @@
+{
+  "status": "RESEARCH_ONLY_NO_LIVE_ADOPTED_SHORT_DUAL_BASELINE",
+  "costsBps": [
+    10,
+    30
+  ],
+  "researchPeriod": "2025-08-10_to_2026-08-10",
+  "candidateCaveats": [
+    "in-sample selected research window, no independent OOS",
+    "M5 proportional H1 anchor is not real exchange execution",
+    "frozen V52 suppressed signal tape incomplete",
+    "no certified native STOP venue ACK or partial fill/restore",
+    "not current Production exact code/market accounting parity"
+  ],
+  "cases": {
+    "SHORT_DUAL_BASE": {
+      "10": {
+        "finalEquityJpy": 274143936.7102089,
+        "deltaVsShortDualJpy": 0.0,
+        "maxDrawdownPct": -14.514985270751623,
+        "ddDiffVsShortDualPctPoints": 0.0,
+        "portfolioTrades": 1288,
+        "pf": 4.624951218307359,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 3,
+          "modeledPnlJpy": 707414.6849383304
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 15441330.602363603
+        },
+        "penguShort": {
+          "trades": 20,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 4921957.958416877
+        },
+        "addedNormalLongStops": 0,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 0,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [],
+        "ledgerSha256": "026cd6a39e192e0788fb17d3d9d5e41e16976fc96f8d9f86e3a413e93e63f02c"
+      },
+      "30": {
+        "finalEquityJpy": 163776886.5022772,
+        "deltaVsShortDualJpy": 0.0,
+        "maxDrawdownPct": -15.014723812726594,
+        "ddDiffVsShortDualPctPoints": 0.0,
+        "portfolioTrades": 1283,
+        "pf": 3.7554413273796796,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 3,
+          "modeledPnlJpy": -195690.90958622334
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 12797493.81685493
+        },
+        "penguShort": {
+          "trades": 20,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 3683010.0124763637
+        },
+        "addedNormalLongStops": 0,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 0,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [],
+        "ledgerSha256": "8831f4553eafc0db43bb8dea67e4cfe36b75227b0d98b8d8522d643a60be3735"
+      }
+    },
+    "LONG_PEAK2_FLOOR_MINUS5": {
+      "10": {
+        "finalEquityJpy": 277331663.8584961,
+        "deltaVsShortDualJpy": 3187727.1482872367,
+        "maxDrawdownPct": -14.514985270751623,
+        "ddDiffVsShortDualPctPoints": 0.0,
+        "portfolioTrades": 1287,
+        "pf": 4.686091458420489,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 1,
+          "modeledPnlJpy": 1655400.3794072599
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 15455510.767024009
+        },
+        "penguShort": {
+          "trades": 20,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 4929481.556582933
+        },
+        "addedNormalLongStops": 2,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 2,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1765299600000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -47931.92,
+            "newModeledPnlJpy": -30867.72,
+            "oldExitTs": 1765407600000,
+            "newExitTs": 1765366500000
+          },
+          {
+            "entryUtcMs": 1777982400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -2835080.14,
+            "newModeledPnlJpy": -1927113.3,
+            "oldExitTs": 1778122800000,
+            "newExitTs": 1778114400000
+          }
+        ],
+        "ledgerSha256": "dc09ade672304a7c30fa29bef21b6ffa3b8127b40e913d559dded34c8550910c"
+      },
+      "30": {
+        "finalEquityJpy": 167635388.52822807,
+        "deltaVsShortDualJpy": 3858502.025950879,
+        "maxDrawdownPct": -15.014723812726594,
+        "ddDiffVsShortDualPctPoints": 0.0,
+        "portfolioTrades": 1283,
+        "pf": 3.816339051879434,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 1,
+          "modeledPnlJpy": 700958.3441138653
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 12849337.548221704
+        },
+        "penguShort": {
+          "trades": 20,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 3713830.661651598
+        },
+        "addedNormalLongStops": 2,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 2,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1765299600000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -28811.21,
+            "newModeledPnlJpy": -18800.78,
+            "oldExitTs": 1765407600000,
+            "newExitTs": 1765366500000
+          },
+          {
+            "entryUtcMs": 1777982400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -2795292.88,
+            "newModeledPnlJpy": -1948616.26,
+            "oldExitTs": 1778122800000,
+            "newExitTs": 1778114400000
+          }
+        ],
+        "ledgerSha256": "b3e22f6cee630ae6c8f2d78563bdac8237023c5a4725bc7615145b27de4eaa52"
+      }
+    },
+    "LONG_INITIAL2_NEG3_MFE05": {
+      "10": {
+        "finalEquityJpy": 267623008.18703583,
+        "deltaVsShortDualJpy": -6520928.523173064,
+        "maxDrawdownPct": -17.132605131480982,
+        "ddDiffVsShortDualPctPoints": -2.6176198607293593,
+        "portfolioTrades": 1286,
+        "pf": 4.622625311854178,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 2,
+          "modeledPnlJpy": 592985.5478687152
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 15280797.973351777
+        },
+        "penguShort": {
+          "trades": 21,
+          "wins": 15,
+          "hardStops": 1,
+          "modeledPnlJpy": 4862029.464601655
+        },
+        "addedNormalLongStops": 1,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 1,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1762556400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_INITIAL2_NEG3_MFE05_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -17461.15,
+            "newModeledPnlJpy": -7107.76,
+            "oldExitTs": 1762617600000,
+            "newExitTs": 1762563600000
+          }
+        ],
+        "ledgerSha256": "28b2a19438c35b9305849488fc74f94df00c164592d1c1677c3740216b4345fc"
+      },
+      "30": {
+        "finalEquityJpy": 157414660.95388323,
+        "deltaVsShortDualJpy": -6362225.548393965,
+        "maxDrawdownPct": -17.450835449893155,
+        "ddDiffVsShortDualPctPoints": -2.4361116371665616,
+        "portfolioTrades": 1282,
+        "pf": 3.751094027846999,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 2,
+          "modeledPnlJpy": -181781.8205617132
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 12386585.139662165
+        },
+        "penguShort": {
+          "trades": 21,
+          "wins": 15,
+          "hardStops": 1,
+          "modeledPnlJpy": 3512006.943405587
+        },
+        "addedNormalLongStops": 1,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 1,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1762556400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_INITIAL2_NEG3_MFE05_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -11943.15,
+            "newModeledPnlJpy": -5032.07,
+            "oldExitTs": 1762617600000,
+            "newExitTs": 1762563600000
+          }
+        ],
+        "ledgerSha256": "19d15bb54e500dcdcc201e76a519a0d8bdcb402a5f7ad533a220623749a5868a"
+      }
+    },
+    "LONG_COMBO_PROFIT2_INITIAL2": {
+      "10": {
+        "finalEquityJpy": 270736944.91888154,
+        "deltaVsShortDualJpy": -3406991.7913273573,
+        "maxDrawdownPct": -17.132605131480982,
+        "ddDiffVsShortDualPctPoints": -2.6176198607293593,
+        "portfolioTrades": 1285,
+        "pf": 4.68493954028807,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 0,
+          "modeledPnlJpy": 1537725.1328872477
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 15294548.44434196
+        },
+        "penguShort": {
+          "trades": 21,
+          "wins": 15,
+          "hardStops": 1,
+          "modeledPnlJpy": 4868869.125742533
+        },
+        "addedNormalLongStops": 3,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 3,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1762556400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_COMBO_PROFIT2_INITIAL2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -17461.15,
+            "newModeledPnlJpy": -7107.76,
+            "oldExitTs": 1762617600000,
+            "newExitTs": 1762563600000
+          },
+          {
+            "entryUtcMs": 1765299600000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_COMBO_PROFIT2_INITIAL2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -47931.92,
+            "newModeledPnlJpy": -28187.6,
+            "oldExitTs": 1765407600000,
+            "newExitTs": 1765366500000
+          },
+          {
+            "entryUtcMs": 1777982400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_COMBO_PROFIT2_INITIAL2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -2835080.14,
+            "newModeledPnlJpy": -1927113.3,
+            "oldExitTs": 1778122800000,
+            "newExitTs": 1778114400000
+          }
+        ],
+        "ledgerSha256": "96ba61a0f204d9c825ce7135ba84b13ab4eec7125895296dedbc87af8b87bf37"
+      },
+      "30": {
+        "finalEquityJpy": 161532736.25751752,
+        "deltaVsShortDualJpy": -2244150.244759679,
+        "maxDrawdownPct": -17.450835449893155,
+        "ddDiffVsShortDualPctPoints": -2.4361116371665616,
+        "portfolioTrades": 1282,
+        "pf": 3.8156610272216738,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 0,
+          "modeledPnlJpy": 643652.5673171622
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 12484327.427538145
+        },
+        "penguShort": {
+          "trades": 21,
+          "wins": 15,
+          "hardStops": 1,
+          "modeledPnlJpy": 3537680.4058995643
+        },
+        "addedNormalLongStops": 3,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 3,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1762556400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_COMBO_PROFIT2_INITIAL2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -11943.15,
+            "newModeledPnlJpy": -5032.07,
+            "oldExitTs": 1762617600000,
+            "newExitTs": 1762563600000
+          },
+          {
+            "entryUtcMs": 1765299600000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_COMBO_PROFIT2_INITIAL2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -28811.21,
+            "newModeledPnlJpy": -17101.48,
+            "oldExitTs": 1765407600000,
+            "newExitTs": 1765366500000
+          },
+          {
+            "entryUtcMs": 1777982400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_COMBO_PROFIT2_INITIAL2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -2795292.88,
+            "newModeledPnlJpy": -1798283.95,
+            "oldExitTs": 1778122800000,
+            "newExitTs": 1778114400000
+          }
+        ],
+        "ledgerSha256": "d9479edee59d197bac428a35035739443525fc3442ecdfe6ec6580fb034987a1"
+      }
+    },
+    "LONG_PEAK4_FLOOR_MINUS2": {
+      "10": {
+        "finalEquityJpy": 271839744.10572857,
+        "deltaVsShortDualJpy": -2304192.604480326,
+        "maxDrawdownPct": -18.119869790614484,
+        "ddDiffVsShortDualPctPoints": -3.6048845198628605,
+        "portfolioTrades": 1286,
+        "pf": 4.732512332506406,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 6,
+          "hardStops": 1,
+          "modeledPnlJpy": 2193464.963914518
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 15285785.77063768
+        },
+        "penguShort": {
+          "trades": 20,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 4877179.778677351
+        },
+        "addedNormalLongStops": 3,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 1,
+        "originalHardStopEarlyProtected": 2,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1757347200000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_TRAILING_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK4_FLOOR_MINUS2_LONG",
+            "oldWinner": true,
+            "oldModeledPnlJpy": 1245.27,
+            "newModeledPnlJpy": -288.1,
+            "oldExitTs": 1757678400000,
+            "newExitTs": 1757431200000
+          },
+          {
+            "entryUtcMs": 1765299600000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK4_FLOOR_MINUS2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -47931.92,
+            "newModeledPnlJpy": -10889.72,
+            "oldExitTs": 1765407600000,
+            "newExitTs": 1765316100000
+          },
+          {
+            "entryUtcMs": 1777982400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK4_FLOOR_MINUS2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -2835080.14,
+            "newModeledPnlJpy": -1269778.41,
+            "oldExitTs": 1778122800000,
+            "newExitTs": 1778073000000
+          }
+        ],
+        "ledgerSha256": "ce6619df1b73fd0e6904958b5a79222ab15c3171bafb5756ceb316f73478c0b7"
+      },
+      "30": {
+        "finalEquityJpy": 162924216.20411807,
+        "deltaVsShortDualJpy": -852670.2981591225,
+        "maxDrawdownPct": -20.185327303364275,
+        "ddDiffVsShortDualPctPoints": -5.170603490637681,
+        "portfolioTrades": 1284,
+        "pf": 3.857680369197936,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 6,
+          "hardStops": 1,
+          "modeledPnlJpy": 1234843.5735849852
+        },
+        "penguRecoveryLong": {
+          "trades": 37,
+          "wins": 28,
+          "hardStops": 5,
+          "modeledPnlJpy": 12493721.288892876
+        },
+        "penguShort": {
+          "trades": 20,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 3542247.8526013102
+        },
+        "addedNormalLongStops": 3,
+        "addedRecoveryStops": 0,
+        "originalLongWinnersCut": 1,
+        "originalHardStopEarlyProtected": 2,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1757347200000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_TRAILING_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK4_FLOOR_MINUS2_LONG",
+            "oldWinner": true,
+            "oldModeledPnlJpy": 1135.13,
+            "newModeledPnlJpy": -293.65,
+            "oldExitTs": 1757678400000,
+            "newExitTs": 1757431200000
+          },
+          {
+            "entryUtcMs": 1765299600000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK4_FLOOR_MINUS2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -28811.21,
+            "newModeledPnlJpy": -6992.92,
+            "oldExitTs": 1765407600000,
+            "newExitTs": 1765316100000
+          },
+          {
+            "entryUtcMs": 1777982400000,
+            "route": "LONG_V2_FINAL",
+            "oldExitReason": "LONG_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_LONG_PEAK4_FLOOR_MINUS2_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -2795292.88,
+            "newModeledPnlJpy": -1204914.47,
+            "oldExitTs": 1778122800000,
+            "newExitTs": 1778073000000
+          }
+        ],
+        "ledgerSha256": "7937d683a11862f7568cc2a31497961c7c95c17e65bff96139d478977a09bee4"
+      }
+    },
+    "RECOVERY_PEAK2_FLOOR_MINUS5": {
+      "10": {
+        "finalEquityJpy": 271782193.9190377,
+        "deltaVsShortDualJpy": -2361742.791171193,
+        "maxDrawdownPct": -14.514985270751623,
+        "ddDiffVsShortDualPctPoints": 0.0,
+        "portfolioTrades": 1288,
+        "pf": 4.590031788271301,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 3,
+          "modeledPnlJpy": 690357.2735290072
+        },
+        "penguRecoveryLong": {
+          "trades": 36,
+          "wins": 27,
+          "hardStops": 4,
+          "modeledPnlJpy": 14430688.57252307
+        },
+        "penguShort": {
+          "trades": 21,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 4532816.157127086
+        },
+        "addedNormalLongStops": 0,
+        "addedRecoveryStops": 2,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 1,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1767888000000,
+            "route": "RECOVERY_V8",
+            "oldExitReason": "RECOVERY_V8_MAX_HOLD",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_RECOVERY_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -42370.39,
+            "newModeledPnlJpy": -57253.74,
+            "oldExitTs": 1768147200000,
+            "newExitTs": 1768026000000
+          },
+          {
+            "entryUtcMs": 1785002400000,
+            "route": "RECOVERY_V8",
+            "oldExitReason": "RECOVERY_V8_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_RECOVERY_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -1058086.59,
+            "newModeledPnlJpy": -1017764.68,
+            "oldExitTs": 1785204000000,
+            "newExitTs": 1785193500000
+          }
+        ],
+        "ledgerSha256": "44c4d2f9958af7723901e041eb9adf04ade51f0866399d65355539f54435418e"
+      },
+      "30": {
+        "finalEquityJpy": 161566589.3715087,
+        "deltaVsShortDualJpy": -2210297.1307685077,
+        "maxDrawdownPct": -15.014723812726594,
+        "ddDiffVsShortDualPctPoints": 0.0,
+        "portfolioTrades": 1283,
+        "pf": 3.715378843513715,
+        "penguNormalLong": {
+          "trades": 10,
+          "wins": 7,
+          "hardStops": 3,
+          "modeledPnlJpy": -193444.06715832066
+        },
+        "penguRecoveryLong": {
+          "trades": 36,
+          "wins": 27,
+          "hardStops": 4,
+          "modeledPnlJpy": 11802829.088272471
+        },
+        "penguShort": {
+          "trades": 21,
+          "wins": 15,
+          "hardStops": 0,
+          "modeledPnlJpy": 3237477.3957673423
+        },
+        "addedNormalLongStops": 0,
+        "addedRecoveryStops": 2,
+        "originalLongWinnersCut": 0,
+        "originalHardStopEarlyProtected": 1,
+        "allOriginalMatched": true,
+        "newSoftShortStops": 2,
+        "changedPositionDetails": [
+          {
+            "entryUtcMs": 1767888000000,
+            "route": "RECOVERY_V8",
+            "oldExitReason": "RECOVERY_V8_MAX_HOLD",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_RECOVERY_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -23869.96,
+            "newModeledPnlJpy": -31817.35,
+            "oldExitTs": 1768147200000,
+            "newExitTs": 1768026000000
+          },
+          {
+            "entryUtcMs": 1785002400000,
+            "route": "RECOVERY_V8",
+            "oldExitReason": "RECOVERY_V8_HARD_STOP",
+            "newExitReason": "RESEARCH_PENGU_TIMED_NEGATIVE_RECOVERY_PEAK2_FLOOR_MINUS5_LONG",
+            "oldWinner": false,
+            "oldModeledPnlJpy": -1098031.36,
+            "newModeledPnlJpy": -1057794.76,
+            "oldExitTs": 1785204000000,
+            "newExitTs": 1785193500000
+          }
+        ],
+        "ledgerSha256": "1931384c7187aef02ceda13b08db60b02e200bed45f652ae09881c18aa3f39f1"
+      }
+    }
+  }
+}
