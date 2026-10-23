@@ -28,7 +28,10 @@ function underLease<T>(lease:AccountLockHandle,task:()=>Promise<T>):Promise<T>{
 export class V4SharedReservations{
  constructor(readonly store:V4ExecutionStore,readonly lease:AccountLockHandle,readonly path:string,readonly now:()=>number=Date.now){}
  async assertAccountLease(){
-  const doc=await this.lease.document();
+   // A long-running V4 reconciliation may span multiple account reads. Renew
+   // only after the lock implementation has re-validated ownership; this does
+   // not weaken the owner/lease identity or expiry checks below.
+   const doc=await this.lease.renew();
   if(doc.accountScope!=="ASTER_FUTURES"||doc.ownerId!==this.lease.ownerId||doc.leaseId!==this.lease.leaseId||doc.expiresAt<=Date.now())throw Error("V4_ACCOUNT_LEASE_INVALID");
  }
  private identity(doc:V4ExecutionDocument,cid:string){

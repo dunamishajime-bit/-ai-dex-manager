@@ -179,6 +179,24 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
     fourRuleState:createV4FourRuleState(),
   }};
 }
+/**
+ * Clone only the mutable portions of a lifecycle state before applying one
+ * event. The journal is intentionally shallow-copied: its existing event
+ * records are immutable after append, and deep-cloning the entire historical
+ * journal for every M5/H1 bar makes catch-up work quadratic in both CPU and
+ * memory. The newly appended event is still cloned below before persistence.
+ */
+function cloneStateForEvent(state: State): State {
+  return {
+    ...state,
+    initial: structuredClone(state.initial),
+    foreign: structuredClone(state.foreign),
+    prices: { ...state.prices },
+    legs: structuredClone(state.legs),
+    journal: state.journal.slice(),
+    cooldown: { ...state.cooldown },
+  };
+}
 export function applyProductionEvent(state: State, event: Event): State {
   const duplicate=state.journal.find(x=>x.eventId===event.eventId);
   if (duplicate) {
@@ -186,7 +204,7 @@ export function applyProductionEvent(state: State, event: Event): State {
     return state;
   }
   if (!event.eventId || !Number.isFinite(event.ts) || event.ts<(state.journal.at(-1)?.ts??0)) throw Error("INVALID_JOURNAL_ORDER");
-  const next=structuredClone(state);
+  const next=cloneStateForEvent(state);
   if (event.type==="ACCOUNT_MARK") {
     positive(event.equityUsd,"ACCOUNT_EQUITY");
     if(event.foreign!==undefined){validateForeignExposures(event.foreign);next.foreign=structuredClone(event.foreign);next.foreignBasisEquityUsd=event.equityUsd;}

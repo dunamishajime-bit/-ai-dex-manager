@@ -107,8 +107,21 @@ export class V4RunnerEngine{
   const at=this.now();
   const lease=await this.deps.accountLock.acquire("V12_V4_RUNNER");
   if(!lease)return {status:"locked",reason:"SHARED_ACCOUNT_LOCK_BUSY",eventTs:at,candidateCount:0,orderEnabled:false};
-  try{return await this.underLease(lease,prepared);}
-  finally{await lease.release();}
+   let renewalError=false;
+   const renewalTimer=setInterval(()=>{
+    void lease.renew().catch(()=>{renewalError=true;});
+   },lease.renewalIntervalMs);
+   try{
+    // Renew immediately so a lease acquired after a short-lived contention
+    // window has a fresh deadline before signed reconciliation begins.
+    await lease.renew();
+    const result=await this.underLease(lease,prepared);
+    if(renewalError)throw Error("V4_ACCOUNT_LEASE_RENEWAL_FAILED");
+    return result;
+   }finally{
+    clearInterval(renewalTimer);
+    await lease.release();
+   }
  }
  private abandonPreparedEntry(cid:string){
   const at=this.now(),doc=this.deps.store.read(),intent=doc.intents[cid];

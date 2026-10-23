@@ -31,7 +31,11 @@ export interface AccountLockHandle {
     ownerId: string;
     leaseId: string;
     acquiredAt: number;
+    /** The interval used by long-running protected work to renew this lease. */
+    renewalIntervalMs: number;
     document(): Promise<AccountLockDocument>;
+    /** Extend the lease only after re-validating the exact owner and lease ID. */
+    renew(): Promise<AccountLockDocument>;
     reserve(input: Omit<AccountReservation, "reservationId" | "createdAt" | "status">): Promise<AccountReservation>;
     releaseReservation(reservationId: string): Promise<void>;
     release(): Promise<void>;
@@ -133,7 +137,14 @@ export class FileAccountOrderLock {
                     ownerId,
                     leaseId,
                     acquiredAt,
+                    renewalIntervalMs: Math.max(1_000, Math.floor(this.leaseMs / 3)),
                     document: () => enqueue(assertOwner),
+                    renew: () => enqueue(async () => {
+                        const current = await assertOwner();
+                        const renewed = { ...current, expiresAt: Date.now() + this.leaseMs };
+                        await atomicWrite(this.path, renewed);
+                        return renewed;
+                    }),
                     reserve: (input) => enqueue(async () => {
                         if (!(validNumber(input.gross) && Number(input.gross) >= 0 && validNumber(input.notionalUsd) && Number(input.notionalUsd) >= 0)) {
                             throw new Error("ACCOUNT_RESERVATION_INVALID");
