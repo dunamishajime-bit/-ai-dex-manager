@@ -1,0 +1,500 @@
+{
+  "status": "RESEARCH_ONLY_DUAL_AVAX_INITIAL_ADVERSE_STOP_FULL8_NOT_LIVE",
+  "referenceSha": "15ac99319ace43fe81bfe77717dfd075da791f31003dcc3ab67f05ce7585d295",
+  "reference": "RESIDUAL_AVAX_COMPOSITE_ENTRY_VETO_FULL8_20261023.json",
+  "scope": "Only RESIDUAL AVAXUSDT LONG. DOGE veto and AVAX DUAL entry veto fixed.",
+  "exitBaseline": "COMBO_TIME6_TRAIL3_GIVE1P5",
+  "costsBps": [
+    10,
+    30
+  ],
+  "initialLossStopCases": {
+    "BASE_DUAL": null,
+    "EARLY_1H_LOSS2": "EARLY_1H_LOSS2_MFE_LT1",
+    "EARLY_2H_LOSS2": "EARLY_2H_LOSS2_MFE_LT1",
+    "EARLY_1H_LOSS1P5": "EARLY_1H_LOSS1P5_MFE_LT1",
+    "LOSS_CLOSE2P5": "LOSS_M5_CLOSE2P5",
+    "LOSS_CLOSE3": "LOSS_M5_CLOSE3",
+    "EARLY_2H_LOSS3": "EARLY_2H_LOSS3_MFE_LT1"
+  },
+  "cases": {
+    "BASE_DUAL": {
+      "earlyRule": null,
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 268310796.44031164,
+          "deltaVsDualJpy": 0.0,
+          "portfolioPF": 4.578942371227553,
+          "ddPct": -14.514985270751623,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1287,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 936,
+          "avaxCount": 18,
+          "avaxWins": 13,
+          "avaxModeledPnLJpy": 43328.356571043616,
+          "initialStopCount": 0,
+          "initialStopTimes": [],
+          "byStrategy": {
+            "V12": 835,
+            "Q102": 183,
+            "PENGU": 67,
+            "IDLE": 71,
+            "RESIDUAL": 18,
+            "V52": 87,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "415c1011b80eca3f1e91ee928767fe22128c02e7965f967720df784866829b7c",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 158222977.5296772,
+          "deltaVsDualJpy": 0.0,
+          "portfolioPF": 3.708147442348795,
+          "ddPct": -15.785694763547497,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1282,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 896,
+          "avaxCount": 18,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 7602.488092049248,
+          "initialStopCount": 0,
+          "initialStopTimes": [],
+          "byStrategy": {
+            "V12": 832,
+            "Q102": 182,
+            "PENGU": 67,
+            "IDLE": 72,
+            "RESIDUAL": 18,
+            "V52": 86,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "b0d97988af02fd07841657b4ed85fa67f8c59ea194689cf041e4767a6cf7d360",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "EARLY_1H_LOSS2": {
+      "earlyRule": "EARLY_1H_LOSS2_MFE_LT1",
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 266638726.32042113,
+          "deltaVsDualJpy": -1672070.119890511,
+          "portfolioPF": 4.57825250889552,
+          "ddPct": -14.514985270751623,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1287,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 935,
+          "avaxCount": 19,
+          "avaxWins": 13,
+          "avaxModeledPnLJpy": 42023.76788778661,
+          "initialStopCount": 2,
+          "initialStopTimes": [
+            1757750400000,
+            1761541200000
+          ],
+          "byStrategy": {
+            "V12": 835,
+            "Q102": 183,
+            "PENGU": 67,
+            "IDLE": 71,
+            "RESIDUAL": 19,
+            "V52": 86,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "609a786cb871383f9fbb28626a18d7c1148937889d77e13285bed95f9248aa8e",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 156862328.08236903,
+          "deltaVsDualJpy": -1360649.4473081827,
+          "portfolioPF": 3.7060904153656486,
+          "ddPct": -15.789737688340077,
+          "ddDeltaVsDualPctPoints": -0.0040429247925803935,
+          "closedTrades": 1284,
+          "deltaTradesVsDual": 2,
+          "totalWinners": 897,
+          "avaxCount": 19,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 7128.465979022647,
+          "initialStopCount": 2,
+          "initialStopTimes": [
+            1757750400000,
+            1761541200000
+          ],
+          "byStrategy": {
+            "V12": 833,
+            "Q102": 182,
+            "PENGU": 67,
+            "IDLE": 72,
+            "RESIDUAL": 19,
+            "V52": 86,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "2ad617a2dcd1749440efa7fac76c3b4de8d7f22c792b898dc78449c872854a5f",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "EARLY_2H_LOSS2": {
+      "earlyRule": "EARLY_2H_LOSS2_MFE_LT1",
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 266638726.32042113,
+          "deltaVsDualJpy": -1672070.119890511,
+          "portfolioPF": 4.57825250889552,
+          "ddPct": -14.514985270751623,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1287,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 935,
+          "avaxCount": 19,
+          "avaxWins": 13,
+          "avaxModeledPnLJpy": 42023.76788778661,
+          "initialStopCount": 2,
+          "initialStopTimes": [
+            1757750400000,
+            1761541200000
+          ],
+          "byStrategy": {
+            "V12": 835,
+            "Q102": 183,
+            "PENGU": 67,
+            "IDLE": 71,
+            "RESIDUAL": 19,
+            "V52": 86,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "2b21e551e64b28959b04a6918cb6aa684f28e061c88556b07cae2f5f1cd1943e",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 156862328.08236903,
+          "deltaVsDualJpy": -1360649.4473081827,
+          "portfolioPF": 3.7060904153656486,
+          "ddPct": -15.789737688340077,
+          "ddDeltaVsDualPctPoints": -0.0040429247925803935,
+          "closedTrades": 1284,
+          "deltaTradesVsDual": 2,
+          "totalWinners": 897,
+          "avaxCount": 19,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 7128.465979022647,
+          "initialStopCount": 2,
+          "initialStopTimes": [
+            1757750400000,
+            1761541200000
+          ],
+          "byStrategy": {
+            "V12": 833,
+            "Q102": 182,
+            "PENGU": 67,
+            "IDLE": 72,
+            "RESIDUAL": 19,
+            "V52": 86,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "d68b00e5caf5014388fcf2bdf7246393c59e34f1a5f14bb706f82775e5eb8689",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "EARLY_1H_LOSS1P5": {
+      "earlyRule": "EARLY_1H_LOSS1P5_MFE_LT1",
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 265831240.3894881,
+          "deltaVsDualJpy": -2479556.0508235395,
+          "portfolioPF": 4.577966988847176,
+          "ddPct": -14.514985270751623,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1287,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 934,
+          "avaxCount": 19,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 41426.39406632198,
+          "initialStopCount": 3,
+          "initialStopTimes": [
+            1757750400000,
+            1759147200000,
+            1761541200000
+          ],
+          "byStrategy": {
+            "V12": 834,
+            "Q102": 183,
+            "PENGU": 67,
+            "IDLE": 71,
+            "RESIDUAL": 19,
+            "V52": 87,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "2b0c11bd8620976aa69dc8c76055aaab269785688d1460c6cddc2a95b07a9015",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 156825775.35367897,
+          "deltaVsDualJpy": -1397202.1759982407,
+          "portfolioPF": 3.7060514740997945,
+          "ddPct": -15.796070216284196,
+          "ddDeltaVsDualPctPoints": -0.010375452736699486,
+          "closedTrades": 1285,
+          "deltaTradesVsDual": 3,
+          "totalWinners": 897,
+          "avaxCount": 19,
+          "avaxWins": 11,
+          "avaxModeledPnLJpy": 7072.651350153182,
+          "initialStopCount": 3,
+          "initialStopTimes": [
+            1757750400000,
+            1759147200000,
+            1761541200000
+          ],
+          "byStrategy": {
+            "V12": 833,
+            "Q102": 182,
+            "PENGU": 67,
+            "IDLE": 72,
+            "RESIDUAL": 19,
+            "V52": 87,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "32080bf76bad3a7253322ae8be8cf5f9d9fc5fb999e35f39e15e8a7c54ed8318",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "LOSS_CLOSE2P5": {
+      "earlyRule": "LOSS_M5_CLOSE2P5",
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 264315253.74128357,
+          "deltaVsDualJpy": -3995542.6990280747,
+          "portfolioPF": 4.577240907510475,
+          "ddPct": -14.514985270751623,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1287,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 935,
+          "avaxCount": 18,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 39979.20683830129,
+          "initialStopCount": 2,
+          "initialStopTimes": [
+            1757750400000,
+            1758585600000
+          ],
+          "byStrategy": {
+            "V12": 835,
+            "Q102": 183,
+            "PENGU": 67,
+            "IDLE": 71,
+            "RESIDUAL": 18,
+            "V52": 87,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "89fde210ad911429089520d9cc4657481d52ed27a417950326c888e4dde6bf10",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 155655668.18729705,
+          "deltaVsDualJpy": -2567309.342380166,
+          "portfolioPF": 3.7109118376557535,
+          "ddPct": -15.80802271910996,
+          "ddDeltaVsDualPctPoints": -0.022327955562463586,
+          "closedTrades": 1283,
+          "deltaTradesVsDual": 1,
+          "totalWinners": 896,
+          "avaxCount": 18,
+          "avaxWins": 11,
+          "avaxModeledPnLJpy": 6548.39269185457,
+          "initialStopCount": 2,
+          "initialStopTimes": [
+            1757750400000,
+            1758585600000
+          ],
+          "byStrategy": {
+            "V12": 832,
+            "Q102": 182,
+            "PENGU": 67,
+            "IDLE": 73,
+            "RESIDUAL": 18,
+            "V52": 86,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "3666cb8998026654a623c1e245b4563da0316bb85c20225d99a73b7f1d9eac2c",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "LOSS_CLOSE3": {
+      "earlyRule": "LOSS_M5_CLOSE3",
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 263230301.69054127,
+          "deltaVsDualJpy": -5080494.749770373,
+          "portfolioPF": 4.576754552188631,
+          "ddPct": -14.514985270751623,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1286,
+          "deltaTradesVsDual": -1,
+          "totalWinners": 934,
+          "avaxCount": 18,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 39275.64815967369,
+          "initialStopCount": 1,
+          "initialStopTimes": [
+            1758585600000
+          ],
+          "byStrategy": {
+            "V12": 834,
+            "Q102": 183,
+            "PENGU": 67,
+            "IDLE": 71,
+            "RESIDUAL": 18,
+            "V52": 87,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "bf283f3b86120abe63336470fd60c10b1229abb1bdb4b670721557acfe95df27",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 156206684.3202839,
+          "deltaVsDualJpy": -2016293.2093933225,
+          "portfolioPF": 3.7112524719422098,
+          "ddPct": -15.772307994733016,
+          "ddDeltaVsDualPctPoints": 0.013386768814481087,
+          "closedTrades": 1283,
+          "deltaTradesVsDual": 1,
+          "totalWinners": 896,
+          "avaxCount": 18,
+          "avaxWins": 11,
+          "avaxModeledPnLJpy": 6533.796164650495,
+          "initialStopCount": 1,
+          "initialStopTimes": [
+            1758585600000
+          ],
+          "byStrategy": {
+            "V12": 832,
+            "Q102": 182,
+            "PENGU": 67,
+            "IDLE": 73,
+            "RESIDUAL": 18,
+            "V52": 86,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "253c4435d0c601f42f02a3e98e0ab53c7c603e4eac879ce8517306efe45c3f83",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "EARLY_2H_LOSS3": {
+      "earlyRule": "EARLY_2H_LOSS3_MFE_LT1",
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 268310796.44031164,
+          "deltaVsDualJpy": 0.0,
+          "portfolioPF": 4.578942371227553,
+          "ddPct": -14.514985270751623,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1287,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 936,
+          "avaxCount": 18,
+          "avaxWins": 13,
+          "avaxModeledPnLJpy": 43328.356571043616,
+          "initialStopCount": 0,
+          "initialStopTimes": [],
+          "byStrategy": {
+            "V12": 835,
+            "Q102": 183,
+            "PENGU": 67,
+            "IDLE": 71,
+            "RESIDUAL": 18,
+            "V52": 87,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "415c1011b80eca3f1e91ee928767fe22128c02e7965f967720df784866829b7c",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 158222977.5296772,
+          "deltaVsDualJpy": 0.0,
+          "portfolioPF": 3.708147442348795,
+          "ddPct": -15.785694763547497,
+          "ddDeltaVsDualPctPoints": 0.0,
+          "closedTrades": 1282,
+          "deltaTradesVsDual": 0,
+          "totalWinners": 896,
+          "avaxCount": 18,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 7602.488092049248,
+          "initialStopCount": 0,
+          "initialStopTimes": [],
+          "byStrategy": {
+            "V12": 832,
+            "Q102": 182,
+            "PENGU": 67,
+            "IDLE": 72,
+            "RESIDUAL": 18,
+            "V52": 86,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "b0d97988af02fd07841657b4ed85fa67f8c59ea194689cf041e4767a6cf7d360",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Completed M5 entry and exit price model; no real venue stop protection/lifecycle certification",
+    "Already explored 2025-08-10..2026-08-10 in-sample window, only 18 AVAX DUAL entries at baseline",
+    "STOP on confirmed M5 close and next M5 open; intrabar under-water path may be worse",
+    "Frozen V52 selected tape lacks 11 originally suppressed candidates and unrealized new raw signals",
+    "No LIVE Production SHA parity or real venue order book, margin/funding/slippage parity"
+  ]
+}
