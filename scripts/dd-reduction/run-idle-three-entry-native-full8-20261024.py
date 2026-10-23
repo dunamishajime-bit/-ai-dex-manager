@@ -11,6 +11,7 @@ def load(n,p):
  x=importlib.util.module_from_spec(sp);sp.loader.exec_module(x);return x
 screen=load('idle_entry_three_families',HERE/'screen-idle-entry-families-after-pengu-20261024.py')
 render_floor=load('idle_render_cost_floor',HERE/'idle-render-profit-floor-upgrade-20261024.py')
+rebound=load('idle_render_rebound_feature',HERE/'research-idle-render-rebound-fade-20261024.py')
 parent=load('idle_combined_pengu_8h',HERE/'research-pengu-combined-normal8-recovery24-full8-20261024.py')
 base=parent.base
 native=base.native_wrapper.native
@@ -37,11 +38,15 @@ CASE_RULES={
  'RENDER_CO_M1P5_FLOOR0P5':{'RENDERUSDT':['btc3h_ge_-1.5','not_btc3lt_m1_and_ret3lt_m1p5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
  'RENDER_CO_M1P5_FLOOR0P75':{'RENDERUSDT':['btc3h_ge_-1.5','not_btc3lt_m1_and_ret3lt_m1p5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
  'RENDER_PROFIT_F05_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
- 'RENDER_PROFIT_F075_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']}
+ 'RENDER_PROFIT_F075_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'RENDER_REBOUND_NO_LATE_DUMP':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'RENDER_REBOUND_NO_SHARP1H_DUMP':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']}
 }
 for x in CASE_RULES.values():
  for filters in x.values():
   for rule in filters:assert rule in screen.RULES,(rule,'RULE_UNDEFINED')
+REBOUND_POLICY={'RENDER_REBOUND_NO_LATE_DUMP':'VETO_WEAK_REBOUND_LATE_DUMP',
+ 'RENDER_REBOUND_NO_SHARP1H_DUMP':'VETO_LAST1H_SHARP_DUMP'}
 PROFIT_FLOOR={'RENDER_PROFIT_F05_JUP_M1P5':.005,'RENDER_PROFIT_F075_JUP_M1P5':.0075,'RENDER_CO_M1P5_FLOOR0P5':.005,'RENDER_CO_M1P5_FLOOR0P75':.0075}
 ACTIVE={'case':None,'evaluated':collections.Counter(),'blocked':collections.Counter(),
         'baselineFeatureMissing':collections.Counter()}
@@ -61,8 +66,12 @@ def causal_entry_filter(rows,overlays,source,cost_bps,obs,baseline_lookup=None):
    ACTIVE['baselineFeatureMissing'][sym]+=1
    # Fail closed only for targeted candidate. Do not silently accept a missing causal feature.
    raise RuntimeError(('UNVERIFIED_M5_CAUSAL_FEATURES',sym,ts,row.get('candidate_id')))
-  if all(screen.accept(features,screen.RULES[r]) for r in pol[sym]):
-   kept.append(row)
+  valid=all(screen.accept(features,screen.RULES[r]) for r in pol[sym])
+  if valid and sym=='RENDERUSDT' and ACTIVE['case'] in REBOUND_POLICY:
+   feat=rebound.get(source,sym,int(ts))
+   if feat is None:raise RuntimeError(('RENDER_M5_CAUSAL_DATA_MISSING',sym,ts))
+   valid=rebound.rule_accept(feat,REBOUND_POLICY[ACTIVE['case']])
+  if valid:kept.append(row)
   else:
    ACTIVE['blocked'][sym]+=1
    obs['idleEntryThreeBlocked']=obs.get('idleEntryThreeBlocked',0)+1

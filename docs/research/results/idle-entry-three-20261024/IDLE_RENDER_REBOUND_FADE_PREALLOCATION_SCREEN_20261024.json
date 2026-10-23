@@ -1,0 +1,1184 @@
+{
+  "status": "RESEARCH_STATIC_COHORT_ONLY_NO_LIVE_OR_FULL8_RESELECTION",
+  "selectedAnchor": "COMBO_BTC_DOT_JUP3_GE_M1P5",
+  "costs": {
+    "10": {
+      "ledgerSha256": "b8493ae5e236f62b46ed5e3cf6097988143e3b789d08a1fa9003b598e0f55b8d",
+      "selectedCount": 24,
+      "rawCandidates": 164,
+      "rules": {
+        "BASE": {
+          "selected": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.3286
+          },
+          "selectedRejects": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedRetainedPct": 100.0,
+          "candidateAcceptedByGate": {
+            "n": 164,
+            "wins": 95,
+            "wr": 57.93,
+            "netReturnSumPct": -83.4177
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.4418
+          },
+          "laterSelected": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.7704
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 16,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        },
+        "BOUNCE_FADE_TIGHT": {
+          "selected": {
+            "n": 5,
+            "wins": 5,
+            "wr": 100.0,
+            "netReturnSumPct": 8.1615
+          },
+          "selectedRejects": {
+            "n": 19,
+            "wins": 11,
+            "wr": 57.89,
+            "netReturnSumPct": -1.8329
+          },
+          "selectedRetainedPct": 20.833,
+          "candidateAcceptedByGate": {
+            "n": 41,
+            "wins": 24,
+            "wr": 58.54,
+            "netReturnSumPct": -49.3813
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 0.1005
+          },
+          "laterSelected": {
+            "n": 3,
+            "wins": 3,
+            "wr": 100.0,
+            "netReturnSumPct": 8.061
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "TIME_EXIT": 1,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "BOUNCE_FADE_MID": {
+          "selected": {
+            "n": 6,
+            "wins": 5,
+            "wr": 83.33,
+            "netReturnSumPct": 4.6518
+          },
+          "selectedRejects": {
+            "n": 18,
+            "wins": 11,
+            "wr": 61.11,
+            "netReturnSumPct": 1.6768
+          },
+          "selectedRetainedPct": 25.0,
+          "candidateAcceptedByGate": {
+            "n": 53,
+            "wins": 27,
+            "wr": 50.94,
+            "netReturnSumPct": -75.9866
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 0.1005
+          },
+          "laterSelected": {
+            "n": 4,
+            "wins": 3,
+            "wr": 75.0,
+            "netReturnSumPct": 4.5513
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "TIME_EXIT": 2,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "BOUNCE_FADE_LIGHT": {
+          "selected": {
+            "n": 8,
+            "wins": 7,
+            "wr": 87.5,
+            "netReturnSumPct": 8.9621
+          },
+          "selectedRejects": {
+            "n": 16,
+            "wins": 9,
+            "wr": 56.25,
+            "netReturnSumPct": -2.6335
+          },
+          "selectedRetainedPct": 33.333,
+          "candidateAcceptedByGate": {
+            "n": 65,
+            "wins": 35,
+            "wr": 53.85,
+            "netReturnSumPct": -75.3154
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 0.1005
+          },
+          "laterSelected": {
+            "n": 6,
+            "wins": 5,
+            "wr": 83.33,
+            "netReturnSumPct": 8.8616
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "TIME_EXIT": 4,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "RETRACE_FADE": {
+          "selected": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedRejects": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.3286
+          },
+          "selectedRetainedPct": 0.0,
+          "candidateAcceptedByGate": {
+            "n": 13,
+            "wins": 8,
+            "wr": 61.54,
+            "netReturnSumPct": -5.2782
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "laterSelected": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedExitReasons": {}
+        },
+        "PEAK_RESISTANCE_FADE": {
+          "selected": {
+            "n": 8,
+            "wins": 6,
+            "wr": 75.0,
+            "netReturnSumPct": 4.2172
+          },
+          "selectedRejects": {
+            "n": 16,
+            "wins": 10,
+            "wr": 62.5,
+            "netReturnSumPct": 2.1114
+          },
+          "selectedRetainedPct": 33.333,
+          "candidateAcceptedByGate": {
+            "n": 43,
+            "wins": 23,
+            "wr": 53.49,
+            "netReturnSumPct": -40.5864
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": -2.4237
+          },
+          "laterSelected": {
+            "n": 5,
+            "wins": 4,
+            "wr": 80.0,
+            "netReturnSumPct": 6.6409
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 2,
+            "TIME_EXIT": 5,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "VETO_KNIFE_WITHOUT_REBOUND": {
+          "selected": {
+            "n": 20,
+            "wins": 14,
+            "wr": 70.0,
+            "netReturnSumPct": 5.7929
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": 0.5357
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 146,
+            "wins": 84,
+            "wr": 57.53,
+            "netReturnSumPct": -82.2763
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -7.9175
+          },
+          "laterSelected": {
+            "n": 9,
+            "wins": 8,
+            "wr": 88.89,
+            "netReturnSumPct": 13.7104
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 13,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_KNIFE_WITHOUT_FADE": {
+          "selected": {
+            "n": 20,
+            "wins": 13,
+            "wr": 65.0,
+            "netReturnSumPct": 3.8355
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 3,
+            "wr": 75.0,
+            "netReturnSumPct": 2.4931
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 145,
+            "wins": 82,
+            "wr": 56.55,
+            "netReturnSumPct": -84.0975
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 10,
+            "wins": 5,
+            "wr": 50.0,
+            "netReturnSumPct": -7.9567
+          },
+          "laterSelected": {
+            "n": 10,
+            "wins": 8,
+            "wr": 80.0,
+            "netReturnSumPct": 11.7922
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 14,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_WEAK_REBOUND_LATE_DUMP": {
+          "selected": {
+            "n": 23,
+            "wins": 16,
+            "wr": 69.57,
+            "netReturnSumPct": 9.8383
+          },
+          "selectedRejects": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -3.5097
+          },
+          "selectedRetainedPct": 95.833,
+          "candidateAcceptedByGate": {
+            "n": 160,
+            "wins": 94,
+            "wr": 58.75,
+            "netReturnSumPct": -72.8405
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.4418
+          },
+          "laterSelected": {
+            "n": 11,
+            "wins": 10,
+            "wr": 90.91,
+            "netReturnSumPct": 20.2801
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 15,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        },
+        "VETO_BEAR_CONTINUATION": {
+          "selected": {
+            "n": 22,
+            "wins": 15,
+            "wr": 68.18,
+            "netReturnSumPct": 6.5356
+          },
+          "selectedRejects": {
+            "n": 2,
+            "wins": 1,
+            "wr": 50.0,
+            "netReturnSumPct": -0.207
+          },
+          "selectedRetainedPct": 91.667,
+          "candidateAcceptedByGate": {
+            "n": 145,
+            "wins": 84,
+            "wr": 57.93,
+            "netReturnSumPct": -89.1275
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -7.9175
+          },
+          "laterSelected": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.4531
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 15,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_BTC_INDEPENDENT_CHASE": {
+          "selected": {
+            "n": 20,
+            "wins": 13,
+            "wr": 65.0,
+            "netReturnSumPct": 3.4361
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 3,
+            "wr": 75.0,
+            "netReturnSumPct": 2.8925
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 150,
+            "wins": 84,
+            "wr": 56.0,
+            "netReturnSumPct": -112.8121
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 10,
+            "wins": 5,
+            "wr": 50.0,
+            "netReturnSumPct": -7.9678
+          },
+          "laterSelected": {
+            "n": 10,
+            "wins": 8,
+            "wr": 80.0,
+            "netReturnSumPct": 11.4039
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 14,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_BOUNCE_WITHOUT_TURN": {
+          "selected": {
+            "n": 20,
+            "wins": 13,
+            "wr": 65.0,
+            "netReturnSumPct": 4.7326
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 3,
+            "wr": 75.0,
+            "netReturnSumPct": 1.596
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 139,
+            "wins": 77,
+            "wr": 55.4,
+            "netReturnSumPct": -75.0564
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 9,
+            "wins": 4,
+            "wr": 44.44,
+            "netReturnSumPct": -9.833
+          },
+          "laterSelected": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.5656
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 14,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_LAST1H_SHARP_DUMP": {
+          "selected": {
+            "n": 23,
+            "wins": 16,
+            "wr": 69.57,
+            "netReturnSumPct": 8.8528
+          },
+          "selectedRejects": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -2.5242
+          },
+          "selectedRetainedPct": 95.833,
+          "candidateAcceptedByGate": {
+            "n": 161,
+            "wins": 93,
+            "wr": 57.76,
+            "netReturnSumPct": -82.6587
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -7.9175
+          },
+          "laterSelected": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.7704
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 15,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        },
+        "VETO_3H_CHASE_AND_NO_REBOUND": {
+          "selected": {
+            "n": 20,
+            "wins": 14,
+            "wr": 70.0,
+            "netReturnSumPct": 7.3844
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": -1.0558
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 149,
+            "wins": 87,
+            "wr": 58.39,
+            "netReturnSumPct": -73.715
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -7.9175
+          },
+          "laterSelected": {
+            "n": 9,
+            "wins": 8,
+            "wr": 88.89,
+            "netReturnSumPct": 15.3019
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 13,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_LAST30_DUMP_NO_RETRACE": {
+          "selected": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.3286
+          },
+          "selectedRejects": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedRetainedPct": 100.0,
+          "candidateAcceptedByGate": {
+            "n": 163,
+            "wins": 94,
+            "wr": 57.67,
+            "netReturnSumPct": -83.468
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.4418
+          },
+          "laterSelected": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.7704
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 16,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        }
+      }
+    },
+    "30": {
+      "ledgerSha256": "e0c0c6b0fadbe3621481154e7ba21d16c3912313c91e95235f26e9b445a08c67",
+      "selectedCount": 24,
+      "rawCandidates": 164,
+      "rules": {
+        "BASE": {
+          "selected": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.7306
+          },
+          "selectedRejects": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedRetainedPct": 100.0,
+          "candidateAcceptedByGate": {
+            "n": 164,
+            "wins": 65,
+            "wr": 39.63,
+            "netReturnSumPct": -121.6042
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.4403
+          },
+          "laterSelected": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.1709
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 16,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        },
+        "BOUNCE_FADE_TIGHT": {
+          "selected": {
+            "n": 5,
+            "wins": 2,
+            "wr": 40.0,
+            "netReturnSumPct": 6.563
+          },
+          "selectedRejects": {
+            "n": 19,
+            "wins": 10,
+            "wr": 52.63,
+            "netReturnSumPct": -5.8324
+          },
+          "selectedRetainedPct": 20.833,
+          "candidateAcceptedByGate": {
+            "n": 41,
+            "wins": 15,
+            "wr": 36.59,
+            "netReturnSumPct": -58.9778
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -0.6985
+          },
+          "laterSelected": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 7.2615
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "TIME_EXIT": 1,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "BOUNCE_FADE_MID": {
+          "selected": {
+            "n": 6,
+            "wins": 2,
+            "wr": 33.33,
+            "netReturnSumPct": 2.8533
+          },
+          "selectedRejects": {
+            "n": 18,
+            "wins": 10,
+            "wr": 55.56,
+            "netReturnSumPct": -2.1227
+          },
+          "selectedRetainedPct": 25.0,
+          "candidateAcceptedByGate": {
+            "n": 53,
+            "wins": 18,
+            "wr": 33.96,
+            "netReturnSumPct": -87.9831
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -0.6985
+          },
+          "laterSelected": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": 3.5518
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "TIME_EXIT": 2,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "BOUNCE_FADE_LIGHT": {
+          "selected": {
+            "n": 8,
+            "wins": 4,
+            "wr": 50.0,
+            "netReturnSumPct": 6.7636
+          },
+          "selectedRejects": {
+            "n": 16,
+            "wins": 8,
+            "wr": 50.0,
+            "netReturnSumPct": -6.033
+          },
+          "selectedRetainedPct": 33.333,
+          "candidateAcceptedByGate": {
+            "n": 65,
+            "wins": 23,
+            "wr": 35.38,
+            "netReturnSumPct": -90.3104
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 2,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -0.6985
+          },
+          "laterSelected": {
+            "n": 6,
+            "wins": 4,
+            "wr": 66.67,
+            "netReturnSumPct": 7.4621
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "TIME_EXIT": 4,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "RETRACE_FADE": {
+          "selected": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedRejects": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.7306
+          },
+          "selectedRetainedPct": 0.0,
+          "candidateAcceptedByGate": {
+            "n": 13,
+            "wins": 6,
+            "wr": 46.15,
+            "netReturnSumPct": -8.2772
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "laterSelected": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedExitReasons": {}
+        },
+        "PEAK_RESISTANCE_FADE": {
+          "selected": {
+            "n": 8,
+            "wins": 4,
+            "wr": 50.0,
+            "netReturnSumPct": 2.2182
+          },
+          "selectedRejects": {
+            "n": 16,
+            "wins": 8,
+            "wr": 50.0,
+            "netReturnSumPct": -1.4876
+          },
+          "selectedRetainedPct": 33.333,
+          "candidateAcceptedByGate": {
+            "n": 43,
+            "wins": 16,
+            "wr": 37.21,
+            "netReturnSumPct": -50.3834
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 3,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -3.4227
+          },
+          "laterSelected": {
+            "n": 5,
+            "wins": 4,
+            "wr": 80.0,
+            "netReturnSumPct": 5.6409
+          },
+          "selectedExitReasons": {
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 2,
+            "TIME_EXIT": 5,
+            "5M_PROTECTIVE_STOP": 1
+          }
+        },
+        "VETO_KNIFE_WITHOUT_REBOUND": {
+          "selected": {
+            "n": 20,
+            "wins": 10,
+            "wr": 50.0,
+            "netReturnSumPct": 0.9949
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": -0.2643
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 146,
+            "wins": 59,
+            "wr": 40.41,
+            "netReturnSumPct": -115.8653
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -10.716
+          },
+          "laterSelected": {
+            "n": 9,
+            "wins": 7,
+            "wr": 77.78,
+            "netReturnSumPct": 11.7109
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 13,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_KNIFE_WITHOUT_FADE": {
+          "selected": {
+            "n": 20,
+            "wins": 10,
+            "wr": 50.0,
+            "netReturnSumPct": -0.763
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": 1.4936
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 145,
+            "wins": 55,
+            "wr": 37.93,
+            "netReturnSumPct": -117.8855
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 10,
+            "wins": 3,
+            "wr": 30.0,
+            "netReturnSumPct": -10.3557
+          },
+          "laterSelected": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "netReturnSumPct": 9.5927
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 14,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_WEAK_REBOUND_LATE_DUMP": {
+          "selected": {
+            "n": 23,
+            "wins": 12,
+            "wr": 52.17,
+            "netReturnSumPct": 4.4403
+          },
+          "selectedRejects": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -3.7097
+          },
+          "selectedRetainedPct": 95.833,
+          "candidateAcceptedByGate": {
+            "n": 160,
+            "wins": 64,
+            "wr": 40.0,
+            "netReturnSumPct": -110.227
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.4403
+          },
+          "laterSelected": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 17.8806
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 15,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        },
+        "VETO_BEAR_CONTINUATION": {
+          "selected": {
+            "n": 22,
+            "wins": 11,
+            "wr": 50.0,
+            "netReturnSumPct": 1.3376
+          },
+          "selectedRejects": {
+            "n": 2,
+            "wins": 1,
+            "wr": 50.0,
+            "netReturnSumPct": -0.607
+          },
+          "selectedRetainedPct": 91.667,
+          "candidateAcceptedByGate": {
+            "n": 145,
+            "wins": 58,
+            "wr": 40.0,
+            "netReturnSumPct": -122.716
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -10.716
+          },
+          "laterSelected": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.0536
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 15,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_BTC_INDEPENDENT_CHASE": {
+          "selected": {
+            "n": 20,
+            "wins": 10,
+            "wr": 50.0,
+            "netReturnSumPct": -1.1624
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": 1.893
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 150,
+            "wins": 56,
+            "wr": 37.33,
+            "netReturnSumPct": -147.7996
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 10,
+            "wins": 3,
+            "wr": 30.0,
+            "netReturnSumPct": -10.3668
+          },
+          "laterSelected": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "netReturnSumPct": 9.2044
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 14,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_BOUNCE_WITHOUT_TURN": {
+          "selected": {
+            "n": 20,
+            "wins": 10,
+            "wr": 50.0,
+            "netReturnSumPct": 0.1341
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": 0.5965
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 139,
+            "wins": 53,
+            "wr": 38.13,
+            "netReturnSumPct": -107.0459
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 9,
+            "wins": 2,
+            "wr": 22.22,
+            "netReturnSumPct": -12.032
+          },
+          "laterSelected": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.1661
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 14,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 3,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_LAST1H_SHARP_DUMP": {
+          "selected": {
+            "n": 23,
+            "wins": 12,
+            "wr": 52.17,
+            "netReturnSumPct": 3.4548
+          },
+          "selectedRejects": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -2.7242
+          },
+          "selectedRetainedPct": 95.833,
+          "candidateAcceptedByGate": {
+            "n": 161,
+            "wins": 64,
+            "wr": 39.75,
+            "netReturnSumPct": -120.0457
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -10.716
+          },
+          "laterSelected": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.1709
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 15,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        },
+        "VETO_3H_CHASE_AND_NO_REBOUND": {
+          "selected": {
+            "n": 20,
+            "wins": 10,
+            "wr": 50.0,
+            "netReturnSumPct": 2.5864
+          },
+          "selectedRejects": {
+            "n": 4,
+            "wins": 2,
+            "wr": 50.0,
+            "netReturnSumPct": -1.8558
+          },
+          "selectedRetainedPct": 83.333,
+          "candidateAcceptedByGate": {
+            "n": 149,
+            "wins": 60,
+            "wr": 40.27,
+            "netReturnSumPct": -108.303
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -10.716
+          },
+          "laterSelected": {
+            "n": 9,
+            "wins": 7,
+            "wr": 77.78,
+            "netReturnSumPct": 13.3024
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 13,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 3
+          }
+        },
+        "VETO_LAST30_DUMP_NO_RETRACE": {
+          "selected": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.7306
+          },
+          "selectedRejects": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "selectedRetainedPct": 100.0,
+          "candidateAcceptedByGate": {
+            "n": 163,
+            "wins": 65,
+            "wr": 39.88,
+            "netReturnSumPct": -121.255
+          },
+          "candidateTotal": 164,
+          "earlierSelected": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.4403
+          },
+          "laterSelected": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.1709
+          },
+          "selectedExitReasons": {
+            "TIME_EXIT": 16,
+            "RESEARCH_IDLE_RENDER_SHORT_PROFIT_1P5_FLOOR0P25": 4,
+            "5M_PROTECTIVE_STOP": 4
+          }
+        }
+      }
+    }
+  },
+  "temporalSplit2026": "2026-04-01",
+  "warning": "Ex-post exit estimates for rejected portfolio candidates are NOT achievable live without ownership and full8 capital replay; all sample is researched in-sample."
+}
