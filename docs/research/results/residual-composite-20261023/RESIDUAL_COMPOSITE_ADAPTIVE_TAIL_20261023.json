@@ -1,0 +1,479 @@
+{
+  "status": "RESEARCH_ONLY_22DAY_POST_STUDY_TAIL_NOT_PRISTINE_OOS",
+  "dates": "2026-08-10 to 2026-09-01 (12-hour reservation at end)",
+  "warnings": [
+    "22-day period is too short for high-confidence statistical decisions",
+    "Source interval could have informed earlier research; not an untouched validation set",
+    "No full8 capital reallocation/venue/basis/funding model, no LIVE changes"
+  ],
+  "coverage": {
+    "DOGEUSDT": 515,
+    "AVAXUSDT": 515
+  },
+  "cases": {
+    "BASE_DOGE2P5_AVAX1P5": {
+      "10": {
+        "all": {
+          "n": 4,
+          "wins": 1,
+          "wr": 25.0,
+          "pf": 0.3619747337080479,
+          "returnSumPctPoints": -2.4676732645355743,
+          "closedDDPct": -3.841430620852737,
+          "compound10k": 9750.478935045532
+        },
+        "byRoute": {
+          "B": {
+            "n": 4,
+            "wins": 1,
+            "wr": 25.0,
+            "pf": 0.3619747337080479,
+            "returnSumPctPoints": -2.4676732645355743,
+            "closedDDPct": -3.841430620852737,
+            "compound10k": 9750.478935045532
+          }
+        },
+        "primary": {
+          "n": 4,
+          "wins": 1,
+          "wr": 25.0,
+          "pf": 0.3619747337080479,
+          "returnSumPctPoints": -2.4676732645355743,
+          "closedDDPct": -3.841430620852737,
+          "compound10k": 9750.478935045532
+        },
+        "fallback": {
+          "n": 0,
+          "wins": 0,
+          "wr": null,
+          "pf": null,
+          "returnSumPctPoints": 0,
+          "closedDDPct": 0.0,
+          "compound10k": 10000.0
+        }
+      },
+      "30": {
+        "all": {
+          "n": 4,
+          "wins": 1,
+          "wr": 25.0,
+          "pf": 0.26859618619060854,
+          "returnSumPctPoints": -3.267673264535574,
+          "closedDDPct": -4.424828771031097,
+          "compound10k": 9672.207328371653
+        },
+        "byRoute": {
+          "B": {
+            "n": 4,
+            "wins": 1,
+            "wr": 25.0,
+            "pf": 0.26859618619060854,
+            "returnSumPctPoints": -3.267673264535574,
+            "closedDDPct": -4.424828771031097,
+            "compound10k": 9672.207328371653
+          }
+        },
+        "primary": {
+          "n": 4,
+          "wins": 1,
+          "wr": 25.0,
+          "pf": 0.26859618619060854,
+          "returnSumPctPoints": -3.267673264535574,
+          "closedDDPct": -4.424828771031097,
+          "compound10k": 9672.207328371653
+        },
+        "fallback": {
+          "n": 0,
+          "wins": 0,
+          "wr": null,
+          "pf": null,
+          "returnSumPctPoints": 0,
+          "closedDDPct": 0.0,
+          "compound10k": 10000.0
+        }
+      }
+    },
+    "BASE_DOGE_TIME_AVAXTIME": {
+      "10": {
+        "all": {
+          "n": 4,
+          "wins": 0,
+          "wr": 0.0,
+          "pf": 0.0,
+          "returnSumPctPoints": -4.8639600763153545,
+          "closedDDPct": -4.799445765973287,
+          "compound10k": 9520.055423402671
+        },
+        "byRoute": {
+          "B": {
+            "n": 4,
+            "wins": 0,
+            "wr": 0.0,
+            "pf": 0.0,
+            "returnSumPctPoints": -4.8639600763153545,
+            "closedDDPct": -4.799445765973287,
+            "compound10k": 9520.055423402671
+          }
+        },
+        "primary": {
+          "n": 4,
+          "wins": 0,
+          "wr": 0.0,
+          "pf": 0.0,
+          "returnSumPctPoints": -4.8639600763153545,
+          "closedDDPct": -4.799445765973287,
+          "compound10k": 9520.055423402671
+        },
+        "fallback": {
+          "n": 0,
+          "wins": 0,
+          "wr": null,
+          "pf": null,
+          "returnSumPctPoints": 0,
+          "closedDDPct": 0.0,
+          "compound10k": 10000.0
+        }
+      },
+      "30": {
+        "all": {
+          "n": 4,
+          "wins": 0,
+          "wr": 0.0,
+          "pf": 0.0,
+          "returnSumPctPoints": -5.663960076315354,
+          "closedDDPct": -5.568181939779193,
+          "compound10k": 9443.181806022081
+        },
+        "byRoute": {
+          "B": {
+            "n": 4,
+            "wins": 0,
+            "wr": 0.0,
+            "pf": 0.0,
+            "returnSumPctPoints": -5.663960076315354,
+            "closedDDPct": -5.568181939779193,
+            "compound10k": 9443.181806022081
+          }
+        },
+        "primary": {
+          "n": 4,
+          "wins": 0,
+          "wr": 0.0,
+          "pf": 0.0,
+          "returnSumPctPoints": -5.663960076315354,
+          "closedDDPct": -5.568181939779193,
+          "compound10k": 9443.181806022081
+        },
+        "fallback": {
+          "n": 0,
+          "wins": 0,
+          "wr": null,
+          "pf": null,
+          "returnSumPctPoints": 0,
+          "closedDDPct": 0.0,
+          "compound10k": 10000.0
+        }
+      }
+    },
+    "MIX_V_BTC24_HALF": {
+      "10": {
+        "all": {
+          "n": 7,
+          "wins": 2,
+          "wr": 28.571428571428573,
+          "pf": 0.601896204721975,
+          "returnSumPctPoints": -1.186659968064435,
+          "closedDDPct": -2.5640387698271927,
+          "compound10k": 9880.006468739522
+        },
+        "byRoute": {
+          "B": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.333333333333336,
+            "pf": 1.7198403016011192,
+            "returnSumPctPoints": 0.5859709307331376,
+            "closedDDPct": -0.8126003489711153,
+            "compound10k": 10057.602324614329
+          },
+          "V": {
+            "n": 4,
+            "wins": 1,
+            "wr": 25.0,
+            "pf": 0.18189460922432665,
+            "returnSumPctPoints": -1.7726308987975723,
+            "closedDDPct": -1.7657872139184683,
+            "compound10k": 9823.421278608153
+          }
+        },
+        "primary": {
+          "n": 3,
+          "wins": 1,
+          "wr": 33.333333333333336,
+          "pf": 1.7198403016011192,
+          "returnSumPctPoints": 0.5859709307331376,
+          "closedDDPct": -0.8126003489711153,
+          "compound10k": 10057.602324614329
+        },
+        "fallback": {
+          "n": 4,
+          "wins": 1,
+          "wr": 25.0,
+          "pf": 0.18189460922432665,
+          "returnSumPctPoints": -1.7726308987975723,
+          "closedDDPct": -1.7657872139184683,
+          "compound10k": 9823.421278608153
+        }
+      },
+      "30": {
+        "all": {
+          "n": 7,
+          "wins": 2,
+          "wr": 28.571428571428573,
+          "pf": 0.4059248954399569,
+          "returnSumPctPoints": -2.186659968064435,
+          "closedDDPct": -3.3443139698157265,
+          "compound10k": 9781.555426254648
+        },
+        "byRoute": {
+          "B": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.333333333333336,
+            "pf": 0.9884442064675317,
+            "returnSumPctPoints": -0.014029069266862537,
+            "closedDDPct": -1.210572290832579,
+            "compound10k": 9997.490084167743
+          },
+          "V": {
+            "n": 4,
+            "wins": 1,
+            "wr": 25.0,
+            "pf": 0.11923390065809747,
+            "returnSumPctPoints": -2.1726308987975727,
+            "closedDDPct": -2.1598886930135786,
+            "compound10k": 9784.011130698642
+          }
+        },
+        "primary": {
+          "n": 3,
+          "wins": 1,
+          "wr": 33.333333333333336,
+          "pf": 0.9884442064675317,
+          "returnSumPctPoints": -0.014029069266862537,
+          "closedDDPct": -1.210572290832579,
+          "compound10k": 9997.490084167743
+        },
+        "fallback": {
+          "n": 4,
+          "wins": 1,
+          "wr": 25.0,
+          "pf": 0.11923390065809747,
+          "returnSumPctPoints": -2.1726308987975727,
+          "closedDDPct": -2.1598886930135786,
+          "compound10k": 9784.011130698642
+        }
+      }
+    },
+    "MIX_V_HALF": {
+      "10": {
+        "all": {
+          "n": 9,
+          "wins": 2,
+          "wr": 22.22222222222222,
+          "pf": 0.5371332508288766,
+          "returnSumPctPoints": -1.7979628864514594,
+          "closedDDPct": -3.161418650148462,
+          "compound10k": 9819.432148874947
+        },
+        "byRoute": {
+          "B": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.333333333333336,
+            "pf": 1.7198403016011192,
+            "returnSumPctPoints": 0.5859709307331376,
+            "closedDDPct": -0.8126003489711153,
+            "compound10k": 10057.602324614329
+          },
+          "V": {
+            "n": 6,
+            "wins": 1,
+            "wr": 16.666666666666668,
+            "pf": 0.22356993374609235,
+            "returnSumPctPoints": -2.3839338171845967,
+            "closedDDPct": -2.3680611745455438,
+            "compound10k": 9763.193882545445
+          }
+        },
+        "primary": {
+          "n": 3,
+          "wins": 1,
+          "wr": 33.333333333333336,
+          "pf": 1.7198403016011192,
+          "returnSumPctPoints": 0.5859709307331376,
+          "closedDDPct": -0.8126003489711153,
+          "compound10k": 10057.602324614329
+        },
+        "fallback": {
+          "n": 6,
+          "wins": 1,
+          "wr": 16.666666666666668,
+          "pf": 0.22356993374609235,
+          "returnSumPctPoints": -2.3839338171845967,
+          "closedDDPct": -2.3680611745455438,
+          "compound10k": 9763.193882545445
+        }
+      },
+      "30": {
+        "all": {
+          "n": 9,
+          "wins": 2,
+          "wr": 22.22222222222222,
+          "pf": 0.37338883913753074,
+          "returnSumPctPoints": -2.9979628864514596,
+          "closedDDPct": -4.129533820317466,
+          "compound10k": 9702.091177383872
+        },
+        "byRoute": {
+          "B": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.333333333333336,
+            "pf": 0.9884442064675317,
+            "returnSumPctPoints": -0.014029069266862537,
+            "closedDDPct": -1.210572290832579,
+            "compound10k": 9997.490084167743
+          },
+          "V": {
+            "n": 6,
+            "wins": 1,
+            "wr": 16.666666666666668,
+            "pf": 0.16425269475932563,
+            "returnSumPctPoints": -2.983933817184597,
+            "closedDDPct": -2.9547306803701545,
+            "compound10k": 9704.526931962984
+          }
+        },
+        "primary": {
+          "n": 3,
+          "wins": 1,
+          "wr": 33.333333333333336,
+          "pf": 0.9884442064675317,
+          "returnSumPctPoints": -0.014029069266862537,
+          "closedDDPct": -1.210572290832579,
+          "compound10k": 9997.490084167743
+        },
+        "fallback": {
+          "n": 6,
+          "wins": 1,
+          "wr": 16.666666666666668,
+          "pf": 0.16425269475932563,
+          "returnSumPctPoints": -2.983933817184597,
+          "closedDDPct": -2.9547306803701545,
+          "compound10k": 9704.526931962984
+        }
+      }
+    },
+    "MIX_V_QTR": {
+      "10": {
+        "all": {
+          "n": 9,
+          "wins": 2,
+          "wr": 22.22222222222222,
+          "pf": 0.7420435412404979,
+          "returnSumPctPoints": -0.605995977859161,
+          "closedDDPct": -1.9909497583565194,
+          "compound10k": 9938.11769450265
+        },
+        "byRoute": {
+          "B": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.333333333333336,
+            "pf": 1.7198403016011192,
+            "returnSumPctPoints": 0.5859709307331376,
+            "closedDDPct": -0.8126003489711153,
+            "compound10k": 10057.602324614329
+          },
+          "V": {
+            "n": 6,
+            "wins": 1,
+            "wr": 16.666666666666668,
+            "pf": 0.22356993374609235,
+            "returnSumPctPoints": -1.1919669085922984,
+            "closedDDPct": -1.1880031269407065,
+            "compound10k": 9881.199687305929
+          }
+        },
+        "primary": {
+          "n": 3,
+          "wins": 1,
+          "wr": 33.333333333333336,
+          "pf": 1.7198403016011192,
+          "returnSumPctPoints": 0.5859709307331376,
+          "closedDDPct": -0.8126003489711153,
+          "compound10k": 10057.602324614329
+        },
+        "fallback": {
+          "n": 6,
+          "wins": 1,
+          "wr": 16.666666666666668,
+          "pf": 0.22356993374609235,
+          "returnSumPctPoints": -1.1919669085922984,
+          "closedDDPct": -1.1880031269407065,
+          "compound10k": 9881.199687305929
+        }
+      },
+      "30": {
+        "all": {
+          "n": 9,
+          "wins": 2,
+          "wr": 22.22222222222222,
+          "pf": 0.4978704663782909,
+          "returnSumPctPoints": -1.505995977859161,
+          "closedDDPct": -2.677258773448299,
+          "compound10k": 9849.061412127032
+        },
+        "byRoute": {
+          "B": {
+            "n": 3,
+            "wins": 1,
+            "wr": 33.333333333333336,
+            "pf": 0.9884442064675317,
+            "returnSumPctPoints": -0.014029069266862537,
+            "closedDDPct": -1.210572290832579,
+            "compound10k": 9997.490084167743
+          },
+          "V": {
+            "n": 6,
+            "wins": 1,
+            "wr": 16.666666666666668,
+            "pf": 0.16425269475932563,
+            "returnSumPctPoints": -1.4919669085922984,
+            "closedDDPct": -1.4846593574097788,
+            "compound10k": 9851.534064259022
+          }
+        },
+        "primary": {
+          "n": 3,
+          "wins": 1,
+          "wr": 33.333333333333336,
+          "pf": 0.9884442064675317,
+          "returnSumPctPoints": -0.014029069266862537,
+          "closedDDPct": -1.210572290832579,
+          "compound10k": 9997.490084167743
+        },
+        "fallback": {
+          "n": 6,
+          "wins": 1,
+          "wr": 16.666666666666668,
+          "pf": 0.16425269475932563,
+          "returnSumPctPoints": -1.4919669085922984,
+          "closedDDPct": -1.4846593574097788,
+          "compound10k": 9851.534064259022
+        }
+      }
+    }
+  }
+}

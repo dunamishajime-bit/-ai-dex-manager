@@ -1,0 +1,34 @@
+# RESIDUAL composite with symbol-adaptive exits
+
+Research only, full8 NOT run. Composite uses bearish break first, then fallback routes when flat.
+No adding many tiny trades solely to boost trade count.
+
+|Case|Trades|Fallback trades|WR10|WR30|PF10|PF30|Worst Closed DD|Later PF30|
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+|BASE_DOGE_TIME_AVAX1P5|84|0|61.90|60.71|2.09|1.67|-10.58|0.89|
+|BASE_DOGE_TIME_AVAXTIME|81|0|55.56|51.85|1.81|1.42|-8.93|1.17|
+|BASE_DOGE2P5_AVAXTIME|82|0|56.10|52.44|1.66|1.30|-9.37|1.11|
+|BASE_DOGE2P5_AVAX1P5|86|0|62.79|61.63|1.59|1.23|-9.14|0.87|
+|MIX_V_BTC24_HALF|165|88|55.76|51.52|1.55|1.19|-12.98|0.85|
+|BASE_DOGE2P5_AVAX1P0|88|0|67.05|65.91|1.60|1.16|-9.32|0.90|
+|MIX_V_QTR|207|134|50.72|46.86|1.30|1.00|-14.43|0.75|
+|MIX_V_HALF|207|134|50.72|46.86|1.29|0.99|-20.92|0.72|
+|MIX_V_BTC6_HALF|207|134|50.72|46.86|1.29|0.99|-20.92|0.72|
+|MIX_V_ASSET_HALF|207|134|50.72|46.86|1.29|0.99|-20.92|0.72|
+|MIX_R_BTC24_HALF|146|68|54.79|52.05|1.24|0.99|-17.90|0.69|
+|MIX_R_QTR|189|115|51.32|48.68|1.20|0.95|-14.85|0.69|
+|MIX_RV_QTR|252|183|50.40|46.03|1.15|0.90|-16.38|0.69|
+|MIX_R_HALF|189|115|51.32|48.68|1.11|0.89|-19.44|0.66|
+|MIX_R_BTC6_HALF|166|89|53.01|50.60|1.12|0.89|-19.32|0.74|
+|MIX_R_ASSET_HALF|178|103|50.56|48.31|1.11|0.89|-20.31|0.62|
+|MIX_V_L_HALF|360|290|45.83|41.94|1.11|0.86|-35.22|0.68|
+|MIX_RV_HALF|252|183|50.40|46.03|1.07|0.84|-27.41|0.66|
+|MIX_VR_ASSET_HALF|243|173|49.38|45.27|1.06|0.84|-28.81|0.62|
+|MIX_V_F_HALF|254|183|50.00|45.67|1.04|0.81|-33.99|0.60|
+|MIX_R_F_HALF|241|171|48.96|46.89|0.99|0.80|-33.22|0.60|
+
+Provisional balanced gate passes: []
+
+These are standalone one-slot studies, not formal financial portfolio results.
+
+DO NOT ADOPT OR DEPLOY TO LIVE.
