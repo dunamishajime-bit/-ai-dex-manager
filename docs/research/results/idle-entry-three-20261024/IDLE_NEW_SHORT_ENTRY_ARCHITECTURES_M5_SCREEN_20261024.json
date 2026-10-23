@@ -1,0 +1,2138 @@
+{
+  "status": "INDEPENDENT_ROUTE_SCREEN_ONLY_NO_SHARED_WALLET_NO_LIVE",
+  "window": [
+    "2025-08-10",
+    "2026-08-10"
+  ],
+  "signalTemplates": 12,
+  "cooldownAfterExitHours": 12,
+  "costResults": {
+    "10": {
+      "RENDERUSDT": {
+        "holdHours": 12,
+        "strategies": {
+          "BOUNCE_FADE_1": {
+            "signals": 120,
+            "overall": {
+              "n": 95,
+              "wins": 40,
+              "wrPct": 42.11,
+              "pf": 0.7888,
+              "netReturnSumPct": -32.491
+            },
+            "earlier": {
+              "n": 47,
+              "wins": 23,
+              "wrPct": 48.94,
+              "pf": 0.9942,
+              "netReturnSumPct": -0.482
+            },
+            "later": {
+              "n": 48,
+              "wins": 17,
+              "wrPct": 35.42,
+              "pf": 0.5445,
+              "netReturnSumPct": -32.009
+            },
+            "exitReasons": {
+              "TIME_EXIT": 93,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BOUNCE_RANGE_REJECT": {
+            "signals": 279,
+            "overall": {
+              "n": 150,
+              "wins": 77,
+              "wrPct": 51.33,
+              "pf": 0.9955,
+              "netReturnSumPct": -0.93
+            },
+            "earlier": {
+              "n": 84,
+              "wins": 43,
+              "wrPct": 51.19,
+              "pf": 1.3118,
+              "netReturnSumPct": 35.314
+            },
+            "later": {
+              "n": 66,
+              "wins": 34,
+              "wrPct": 51.52,
+              "pf": 0.619,
+              "netReturnSumPct": -36.244
+            },
+            "exitReasons": {
+              "TIME_EXIT": 142,
+              "HARD_STOP": 7,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "BTC_STABLE_RELWEAK": {
+            "signals": 642,
+            "overall": {
+              "n": 220,
+              "wins": 113,
+              "wrPct": 51.36,
+              "pf": 0.9336,
+              "netReturnSumPct": -17.531
+            },
+            "earlier": {
+              "n": 114,
+              "wins": 58,
+              "wrPct": 50.88,
+              "pf": 0.8196,
+              "netReturnSumPct": -31.019
+            },
+            "later": {
+              "n": 106,
+              "wins": 55,
+              "wrPct": 51.89,
+              "pf": 1.1463,
+              "netReturnSumPct": 13.488
+            },
+            "exitReasons": {
+              "TIME_EXIT": 212,
+              "HARD_STOP": 8,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELWEAK_DOWNTREND": {
+            "signals": 610,
+            "overall": {
+              "n": 190,
+              "wins": 104,
+              "wrPct": 54.74,
+              "pf": 0.9841,
+              "netReturnSumPct": -4.501
+            },
+            "earlier": {
+              "n": 105,
+              "wins": 56,
+              "wrPct": 53.33,
+              "pf": 1.0073,
+              "netReturnSumPct": 1.248
+            },
+            "later": {
+              "n": 85,
+              "wins": 48,
+              "wrPct": 56.47,
+              "pf": 0.9485,
+              "netReturnSumPct": -5.749
+            },
+            "exitReasons": {
+              "TIME_EXIT": 180,
+              "HARD_STOP": 9,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "VOLUME_BREAKDOWN_LOW": {
+            "signals": 316,
+            "overall": {
+              "n": 177,
+              "wins": 88,
+              "wrPct": 49.72,
+              "pf": 0.7934,
+              "netReturnSumPct": -50.165
+            },
+            "earlier": {
+              "n": 99,
+              "wins": 48,
+              "wrPct": 48.48,
+              "pf": 0.8359,
+              "netReturnSumPct": -26.461
+            },
+            "later": {
+              "n": 78,
+              "wins": 40,
+              "wrPct": 51.28,
+              "pf": 0.7092,
+              "netReturnSumPct": -23.704
+            },
+            "exitReasons": {
+              "TIME_EXIT": 171,
+              "HARD_STOP": 6,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "EMA_RETEST_FAIL": {
+            "signals": 666,
+            "overall": {
+              "n": 218,
+              "wins": 109,
+              "wrPct": 50.0,
+              "pf": 0.9281,
+              "netReturnSumPct": -21.09
+            },
+            "earlier": {
+              "n": 116,
+              "wins": 58,
+              "wrPct": 50.0,
+              "pf": 1.0095,
+              "netReturnSumPct": 1.645
+            },
+            "later": {
+              "n": 102,
+              "wins": 51,
+              "wrPct": 50.0,
+              "pf": 0.812,
+              "netReturnSumPct": -22.734
+            },
+            "exitReasons": {
+              "TIME_EXIT": 210,
+              "HARD_STOP": 7,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOWVOL_BOUNCE_REJECT": {
+            "signals": 141,
+            "overall": {
+              "n": 93,
+              "wins": 48,
+              "wrPct": 51.61,
+              "pf": 1.6087,
+              "netReturnSumPct": 62.577
+            },
+            "earlier": {
+              "n": 59,
+              "wins": 29,
+              "wrPct": 49.15,
+              "pf": 1.992,
+              "netReturnSumPct": 56.124
+            },
+            "later": {
+              "n": 34,
+              "wins": 19,
+              "wrPct": 55.88,
+              "pf": 1.1396,
+              "netReturnSumPct": 6.452
+            },
+            "exitReasons": {
+              "TIME_EXIT": 91,
+              "HARD_STOP": 1,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "BTC_STABLE_REL6_NEG": {
+            "signals": 717,
+            "overall": {
+              "n": 217,
+              "wins": 117,
+              "wrPct": 53.92,
+              "pf": 1.0364,
+              "netReturnSumPct": 9.962
+            },
+            "earlier": {
+              "n": 116,
+              "wins": 66,
+              "wrPct": 56.9,
+              "pf": 1.0203,
+              "netReturnSumPct": 3.536
+            },
+            "later": {
+              "n": 101,
+              "wins": 51,
+              "wrPct": 50.5,
+              "pf": 1.0644,
+              "netReturnSumPct": 6.426
+            },
+            "exitReasons": {
+              "TIME_EXIT": 207,
+              "HARD_STOP": 10,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_HEADWIND_AVOID": {
+            "signals": 2907,
+            "overall": {
+              "n": 330,
+              "wins": 182,
+              "wrPct": 55.15,
+              "pf": 0.9694,
+              "netReturnSumPct": -13.141
+            },
+            "earlier": {
+              "n": 167,
+              "wins": 87,
+              "wrPct": 52.1,
+              "pf": 0.9626,
+              "netReturnSumPct": -9.333
+            },
+            "later": {
+              "n": 163,
+              "wins": 95,
+              "wrPct": 58.28,
+              "pf": 0.9788,
+              "netReturnSumPct": -3.809
+            },
+            "exitReasons": {
+              "TIME_EXIT": 318,
+              "HARD_STOP": 12,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELATIVE_REJECTION_LAST15": {
+            "signals": 75,
+            "overall": {
+              "n": 62,
+              "wins": 30,
+              "wrPct": 48.39,
+              "pf": 0.7748,
+              "netReturnSumPct": -23.374
+            },
+            "earlier": {
+              "n": 38,
+              "wins": 19,
+              "wrPct": 50.0,
+              "pf": 0.8634,
+              "netReturnSumPct": -8.829
+            },
+            "later": {
+              "n": 24,
+              "wins": 11,
+              "wrPct": 45.83,
+              "pf": 0.6284,
+              "netReturnSumPct": -14.545
+            },
+            "exitReasons": {
+              "TIME_EXIT": 59,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_RANGE_CONTINUATION": {
+            "signals": 956,
+            "overall": {
+              "n": 249,
+              "wins": 134,
+              "wrPct": 53.82,
+              "pf": 1.0989,
+              "netReturnSumPct": 28.812
+            },
+            "earlier": {
+              "n": 128,
+              "wins": 69,
+              "wrPct": 53.91,
+              "pf": 1.1757,
+              "netReturnSumPct": 29.561
+            },
+            "later": {
+              "n": 121,
+              "wins": 65,
+              "wrPct": 53.72,
+              "pf": 0.9939,
+              "netReturnSumPct": -0.749
+            },
+            "exitReasons": {
+              "TIME_EXIT": 243,
+              "HARD_STOP": 6,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_ATR_RELATIVE_FAIL": {
+            "signals": 611,
+            "overall": {
+              "n": 217,
+              "wins": 109,
+              "wrPct": 50.23,
+              "pf": 0.8228,
+              "netReturnSumPct": -50.464
+            },
+            "earlier": {
+              "n": 108,
+              "wins": 56,
+              "wrPct": 51.85,
+              "pf": 0.825,
+              "netReturnSumPct": -26.839
+            },
+            "later": {
+              "n": 109,
+              "wins": 53,
+              "wrPct": 48.62,
+              "pf": 0.8202,
+              "netReturnSumPct": -23.625
+            },
+            "exitReasons": {
+              "TIME_EXIT": 212,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          }
+        }
+      },
+      "DOTUSDT": {
+        "holdHours": 24,
+        "strategies": {
+          "BOUNCE_FADE_1": {
+            "signals": 85,
+            "overall": {
+              "n": 62,
+              "wins": 29,
+              "wrPct": 46.77,
+              "pf": 1.483,
+              "netReturnSumPct": 41.115
+            },
+            "earlier": {
+              "n": 31,
+              "wins": 17,
+              "wrPct": 54.84,
+              "pf": 2.422,
+              "netReturnSumPct": 51.79
+            },
+            "later": {
+              "n": 31,
+              "wins": 12,
+              "wrPct": 38.71,
+              "pf": 0.7808,
+              "netReturnSumPct": -10.676
+            },
+            "exitReasons": {
+              "TIME_EXIT": 60,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BOUNCE_RANGE_REJECT": {
+            "signals": 202,
+            "overall": {
+              "n": 100,
+              "wins": 52,
+              "wrPct": 52.0,
+              "pf": 1.0511,
+              "netReturnSumPct": 7.752
+            },
+            "earlier": {
+              "n": 55,
+              "wins": 30,
+              "wrPct": 54.55,
+              "pf": 1.1938,
+              "netReturnSumPct": 17.58
+            },
+            "later": {
+              "n": 45,
+              "wins": 22,
+              "wrPct": 48.89,
+              "pf": 0.8392,
+              "netReturnSumPct": -9.828
+            },
+            "exitReasons": {
+              "TIME_EXIT": 95,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_STABLE_RELWEAK": {
+            "signals": 535,
+            "overall": {
+              "n": 163,
+              "wins": 88,
+              "wrPct": 53.99,
+              "pf": 0.9143,
+              "netReturnSumPct": -19.152
+            },
+            "earlier": {
+              "n": 84,
+              "wins": 44,
+              "wrPct": 52.38,
+              "pf": 0.8566,
+              "netReturnSumPct": -20.468
+            },
+            "later": {
+              "n": 79,
+              "wins": 44,
+              "wrPct": 55.7,
+              "pf": 1.0163,
+              "netReturnSumPct": 1.316
+            },
+            "exitReasons": {
+              "TIME_EXIT": 158,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELWEAK_DOWNTREND": {
+            "signals": 444,
+            "overall": {
+              "n": 133,
+              "wins": 69,
+              "wrPct": 51.88,
+              "pf": 1.0989,
+              "netReturnSumPct": 18.761
+            },
+            "earlier": {
+              "n": 73,
+              "wins": 42,
+              "wrPct": 57.53,
+              "pf": 1.1938,
+              "netReturnSumPct": 21.984
+            },
+            "later": {
+              "n": 60,
+              "wins": 27,
+              "wrPct": 45.0,
+              "pf": 0.9577,
+              "netReturnSumPct": -3.223
+            },
+            "exitReasons": {
+              "TIME_EXIT": 128,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "VOLUME_BREAKDOWN_LOW": {
+            "signals": 287,
+            "overall": {
+              "n": 132,
+              "wins": 64,
+              "wrPct": 48.48,
+              "pf": 0.9558,
+              "netReturnSumPct": -8.024
+            },
+            "earlier": {
+              "n": 67,
+              "wins": 35,
+              "wrPct": 52.24,
+              "pf": 1.1424,
+              "netReturnSumPct": 12.509
+            },
+            "later": {
+              "n": 65,
+              "wins": 29,
+              "wrPct": 44.62,
+              "pf": 0.7805,
+              "netReturnSumPct": -20.533
+            },
+            "exitReasons": {
+              "TIME_EXIT": 129,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "EMA_RETEST_FAIL": {
+            "signals": 632,
+            "overall": {
+              "n": 170,
+              "wins": 81,
+              "wrPct": 47.65,
+              "pf": 1.0889,
+              "netReturnSumPct": 19.684
+            },
+            "earlier": {
+              "n": 86,
+              "wins": 48,
+              "wrPct": 55.81,
+              "pf": 1.4876,
+              "netReturnSumPct": 54.303
+            },
+            "later": {
+              "n": 84,
+              "wins": 33,
+              "wrPct": 39.29,
+              "pf": 0.6854,
+              "netReturnSumPct": -34.619
+            },
+            "exitReasons": {
+              "TIME_EXIT": 166,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOWVOL_BOUNCE_REJECT": {
+            "signals": 117,
+            "overall": {
+              "n": 76,
+              "wins": 41,
+              "wrPct": 53.95,
+              "pf": 0.9023,
+              "netReturnSumPct": -13.145
+            },
+            "earlier": {
+              "n": 43,
+              "wins": 25,
+              "wrPct": 58.14,
+              "pf": 0.8491,
+              "netReturnSumPct": -15.037
+            },
+            "later": {
+              "n": 33,
+              "wins": 16,
+              "wrPct": 48.48,
+              "pf": 1.0543,
+              "netReturnSumPct": 1.892
+            },
+            "exitReasons": {
+              "TIME_EXIT": 73,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_STABLE_REL6_NEG": {
+            "signals": 609,
+            "overall": {
+              "n": 161,
+              "wins": 83,
+              "wrPct": 51.55,
+              "pf": 0.8484,
+              "netReturnSumPct": -37.777
+            },
+            "earlier": {
+              "n": 82,
+              "wins": 45,
+              "wrPct": 54.88,
+              "pf": 0.8938,
+              "netReturnSumPct": -14.609
+            },
+            "later": {
+              "n": 79,
+              "wins": 38,
+              "wrPct": 48.1,
+              "pf": 0.7925,
+              "netReturnSumPct": -23.167
+            },
+            "exitReasons": {
+              "TIME_EXIT": 153,
+              "HARD_STOP": 8,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_HEADWIND_AVOID": {
+            "signals": 2969,
+            "overall": {
+              "n": 232,
+              "wins": 126,
+              "wrPct": 54.31,
+              "pf": 1.0039,
+              "netReturnSumPct": 1.287
+            },
+            "earlier": {
+              "n": 118,
+              "wins": 64,
+              "wrPct": 54.24,
+              "pf": 1.0316,
+              "netReturnSumPct": 5.803
+            },
+            "later": {
+              "n": 114,
+              "wins": 62,
+              "wrPct": 54.39,
+              "pf": 0.9696,
+              "netReturnSumPct": -4.516
+            },
+            "exitReasons": {
+              "TIME_EXIT": 223,
+              "HARD_STOP": 8,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "RELATIVE_REJECTION_LAST15": {
+            "signals": 53,
+            "overall": {
+              "n": 39,
+              "wins": 20,
+              "wrPct": 51.28,
+              "pf": 1.2321,
+              "netReturnSumPct": 13.093
+            },
+            "earlier": {
+              "n": 24,
+              "wins": 14,
+              "wrPct": 58.33,
+              "pf": 1.5568,
+              "netReturnSumPct": 18.909
+            },
+            "later": {
+              "n": 15,
+              "wins": 6,
+              "wrPct": 40.0,
+              "pf": 0.7409,
+              "netReturnSumPct": -5.816
+            },
+            "exitReasons": {
+              "TIME_EXIT": 37,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_RANGE_CONTINUATION": {
+            "signals": 1064,
+            "overall": {
+              "n": 200,
+              "wins": 103,
+              "wrPct": 51.5,
+              "pf": 1.2226,
+              "netReturnSumPct": 53.869
+            },
+            "earlier": {
+              "n": 101,
+              "wins": 54,
+              "wrPct": 53.47,
+              "pf": 1.3862,
+              "netReturnSumPct": 47.298
+            },
+            "later": {
+              "n": 99,
+              "wins": 49,
+              "wrPct": 49.49,
+              "pf": 1.055,
+              "netReturnSumPct": 6.571
+            },
+            "exitReasons": {
+              "TIME_EXIT": 195,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOW_ATR_RELATIVE_FAIL": {
+            "signals": 610,
+            "overall": {
+              "n": 176,
+              "wins": 92,
+              "wrPct": 52.27,
+              "pf": 1.027,
+              "netReturnSumPct": 6.489
+            },
+            "earlier": {
+              "n": 93,
+              "wins": 48,
+              "wrPct": 51.61,
+              "pf": 0.8509,
+              "netReturnSumPct": -23.394
+            },
+            "later": {
+              "n": 83,
+              "wins": 44,
+              "wrPct": 53.01,
+              "pf": 1.3582,
+              "netReturnSumPct": 29.883
+            },
+            "exitReasons": {
+              "TIME_EXIT": 172,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 0
+            }
+          }
+        }
+      },
+      "JUPUSDT": {
+        "holdHours": 12,
+        "strategies": {
+          "BOUNCE_FADE_1": {
+            "signals": 107,
+            "overall": {
+              "n": 89,
+              "wins": 38,
+              "wrPct": 42.7,
+              "pf": 0.5371,
+              "netReturnSumPct": -70.209
+            },
+            "earlier": {
+              "n": 42,
+              "wins": 19,
+              "wrPct": 45.24,
+              "pf": 0.6317,
+              "netReturnSumPct": -26.185
+            },
+            "later": {
+              "n": 47,
+              "wins": 19,
+              "wrPct": 40.43,
+              "pf": 0.4537,
+              "netReturnSumPct": -44.024
+            },
+            "exitReasons": {
+              "TIME_EXIT": 86,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BOUNCE_RANGE_REJECT": {
+            "signals": 286,
+            "overall": {
+              "n": 156,
+              "wins": 74,
+              "wrPct": 47.44,
+              "pf": 0.7992,
+              "netReturnSumPct": -48.977
+            },
+            "earlier": {
+              "n": 80,
+              "wins": 36,
+              "wrPct": 45.0,
+              "pf": 0.9352,
+              "netReturnSumPct": -7.422
+            },
+            "later": {
+              "n": 76,
+              "wins": 38,
+              "wrPct": 50.0,
+              "pf": 0.679,
+              "netReturnSumPct": -41.555
+            },
+            "exitReasons": {
+              "TIME_EXIT": 151,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "BTC_STABLE_RELWEAK": {
+            "signals": 624,
+            "overall": {
+              "n": 227,
+              "wins": 110,
+              "wrPct": 48.46,
+              "pf": 0.9875,
+              "netReturnSumPct": -3.588
+            },
+            "earlier": {
+              "n": 114,
+              "wins": 54,
+              "wrPct": 47.37,
+              "pf": 1.056,
+              "netReturnSumPct": 8.178
+            },
+            "later": {
+              "n": 113,
+              "wins": 56,
+              "wrPct": 49.56,
+              "pf": 0.9167,
+              "netReturnSumPct": -11.766
+            },
+            "exitReasons": {
+              "TIME_EXIT": 224,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELWEAK_DOWNTREND": {
+            "signals": 628,
+            "overall": {
+              "n": 195,
+              "wins": 98,
+              "wrPct": 50.26,
+              "pf": 1.0292,
+              "netReturnSumPct": 7.352
+            },
+            "earlier": {
+              "n": 99,
+              "wins": 48,
+              "wrPct": 48.48,
+              "pf": 0.9646,
+              "netReturnSumPct": -5.23
+            },
+            "later": {
+              "n": 96,
+              "wins": 50,
+              "wrPct": 52.08,
+              "pf": 1.1212,
+              "netReturnSumPct": 12.582
+            },
+            "exitReasons": {
+              "TIME_EXIT": 190,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "VOLUME_BREAKDOWN_LOW": {
+            "signals": 312,
+            "overall": {
+              "n": 176,
+              "wins": 80,
+              "wrPct": 45.45,
+              "pf": 0.8441,
+              "netReturnSumPct": -38.32
+            },
+            "earlier": {
+              "n": 90,
+              "wins": 39,
+              "wrPct": 43.33,
+              "pf": 0.8762,
+              "netReturnSumPct": -17.244
+            },
+            "later": {
+              "n": 86,
+              "wins": 41,
+              "wrPct": 47.67,
+              "pf": 0.8023,
+              "netReturnSumPct": -21.075
+            },
+            "exitReasons": {
+              "TIME_EXIT": 172,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "EMA_RETEST_FAIL": {
+            "signals": 617,
+            "overall": {
+              "n": 218,
+              "wins": 110,
+              "wrPct": 50.46,
+              "pf": 1.2632,
+              "netReturnSumPct": 63.884
+            },
+            "earlier": {
+              "n": 112,
+              "wins": 57,
+              "wrPct": 50.89,
+              "pf": 1.4357,
+              "netReturnSumPct": 53.731
+            },
+            "later": {
+              "n": 106,
+              "wins": 53,
+              "wrPct": 50.0,
+              "pf": 1.085,
+              "netReturnSumPct": 10.153
+            },
+            "exitReasons": {
+              "TIME_EXIT": 216,
+              "HARD_STOP": 1,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOWVOL_BOUNCE_REJECT": {
+            "signals": 130,
+            "overall": {
+              "n": 84,
+              "wins": 42,
+              "wrPct": 50.0,
+              "pf": 1.3459,
+              "netReturnSumPct": 33.876
+            },
+            "earlier": {
+              "n": 50,
+              "wins": 25,
+              "wrPct": 50.0,
+              "pf": 1.2151,
+              "netReturnSumPct": 14.743
+            },
+            "later": {
+              "n": 34,
+              "wins": 17,
+              "wrPct": 50.0,
+              "pf": 1.6509,
+              "netReturnSumPct": 19.132
+            },
+            "exitReasons": {
+              "TIME_EXIT": 84,
+              "HARD_STOP": 0,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_STABLE_REL6_NEG": {
+            "signals": 762,
+            "overall": {
+              "n": 223,
+              "wins": 103,
+              "wrPct": 46.19,
+              "pf": 0.9157,
+              "netReturnSumPct": -23.208
+            },
+            "earlier": {
+              "n": 113,
+              "wins": 46,
+              "wrPct": 40.71,
+              "pf": 0.7357,
+              "netReturnSumPct": -39.095
+            },
+            "later": {
+              "n": 110,
+              "wins": 57,
+              "wrPct": 51.82,
+              "pf": 1.1248,
+              "netReturnSumPct": 15.887
+            },
+            "exitReasons": {
+              "TIME_EXIT": 219,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_HEADWIND_AVOID": {
+            "signals": 2960,
+            "overall": {
+              "n": 335,
+              "wins": 166,
+              "wrPct": 49.55,
+              "pf": 1.0323,
+              "netReturnSumPct": 13.453
+            },
+            "earlier": {
+              "n": 170,
+              "wins": 90,
+              "wrPct": 52.94,
+              "pf": 1.29,
+              "netReturnSumPct": 56.022
+            },
+            "later": {
+              "n": 165,
+              "wins": 76,
+              "wrPct": 46.06,
+              "pf": 0.8089,
+              "netReturnSumPct": -42.569
+            },
+            "exitReasons": {
+              "TIME_EXIT": 331,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELATIVE_REJECTION_LAST15": {
+            "signals": 64,
+            "overall": {
+              "n": 56,
+              "wins": 27,
+              "wrPct": 48.21,
+              "pf": 0.9113,
+              "netReturnSumPct": -6.221
+            },
+            "earlier": {
+              "n": 29,
+              "wins": 15,
+              "wrPct": 51.72,
+              "pf": 1.2852,
+              "netReturnSumPct": 10.303
+            },
+            "later": {
+              "n": 27,
+              "wins": 12,
+              "wrPct": 44.44,
+              "pf": 0.5138,
+              "netReturnSumPct": -16.524
+            },
+            "exitReasons": {
+              "TIME_EXIT": 54,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_RANGE_CONTINUATION": {
+            "signals": 971,
+            "overall": {
+              "n": 253,
+              "wins": 125,
+              "wrPct": 49.41,
+              "pf": 0.8857,
+              "netReturnSumPct": -34.765
+            },
+            "earlier": {
+              "n": 128,
+              "wins": 65,
+              "wrPct": 50.78,
+              "pf": 1.0335,
+              "netReturnSumPct": 4.926
+            },
+            "later": {
+              "n": 125,
+              "wins": 60,
+              "wrPct": 48.0,
+              "pf": 0.7473,
+              "netReturnSumPct": -39.691
+            },
+            "exitReasons": {
+              "TIME_EXIT": 248,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_ATR_RELATIVE_FAIL": {
+            "signals": 609,
+            "overall": {
+              "n": 221,
+              "wins": 112,
+              "wrPct": 50.68,
+              "pf": 1.1201,
+              "netReturnSumPct": 30.374
+            },
+            "earlier": {
+              "n": 115,
+              "wins": 62,
+              "wrPct": 53.91,
+              "pf": 1.2992,
+              "netReturnSumPct": 38.201
+            },
+            "later": {
+              "n": 106,
+              "wins": 50,
+              "wrPct": 47.17,
+              "pf": 0.9375,
+              "netReturnSumPct": -7.827
+            },
+            "exitReasons": {
+              "TIME_EXIT": 218,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          }
+        }
+      }
+    },
+    "30": {
+      "RENDERUSDT": {
+        "holdHours": 12,
+        "strategies": {
+          "BOUNCE_FADE_1": {
+            "signals": 120,
+            "overall": {
+              "n": 95,
+              "wins": 38,
+              "wrPct": 40.0,
+              "pf": 0.6881,
+              "netReturnSumPct": -51.491
+            },
+            "earlier": {
+              "n": 47,
+              "wins": 22,
+              "wrPct": 46.81,
+              "pf": 0.8884,
+              "netReturnSumPct": -9.882
+            },
+            "later": {
+              "n": 48,
+              "wins": 16,
+              "wrPct": 33.33,
+              "pf": 0.4564,
+              "netReturnSumPct": -41.609
+            },
+            "exitReasons": {
+              "TIME_EXIT": 93,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BOUNCE_RANGE_REJECT": {
+            "signals": 279,
+            "overall": {
+              "n": 150,
+              "wins": 73,
+              "wrPct": 48.67,
+              "pf": 0.8614,
+              "netReturnSumPct": -30.93
+            },
+            "earlier": {
+              "n": 84,
+              "wins": 42,
+              "wrPct": 50.0,
+              "pf": 1.1524,
+              "netReturnSumPct": 18.514
+            },
+            "later": {
+              "n": 66,
+              "wins": 31,
+              "wrPct": 46.97,
+              "pf": 0.5139,
+              "netReturnSumPct": -49.444
+            },
+            "exitReasons": {
+              "TIME_EXIT": 142,
+              "HARD_STOP": 7,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "BTC_STABLE_RELWEAK": {
+            "signals": 642,
+            "overall": {
+              "n": 220,
+              "wins": 105,
+              "wrPct": 47.73,
+              "pf": 0.7849,
+              "netReturnSumPct": -61.531
+            },
+            "earlier": {
+              "n": 114,
+              "wins": 54,
+              "wrPct": 47.37,
+              "pf": 0.7064,
+              "netReturnSumPct": -53.819
+            },
+            "later": {
+              "n": 106,
+              "wins": 51,
+              "wrPct": 48.11,
+              "pf": 0.925,
+              "netReturnSumPct": -7.712
+            },
+            "exitReasons": {
+              "TIME_EXIT": 212,
+              "HARD_STOP": 8,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELWEAK_DOWNTREND": {
+            "signals": 610,
+            "overall": {
+              "n": 190,
+              "wins": 97,
+              "wrPct": 51.05,
+              "pf": 0.8587,
+              "netReturnSumPct": -42.501
+            },
+            "earlier": {
+              "n": 105,
+              "wins": 55,
+              "wrPct": 52.38,
+              "pf": 0.8908,
+              "netReturnSumPct": -19.752
+            },
+            "later": {
+              "n": 85,
+              "wins": 42,
+              "wrPct": 49.41,
+              "pf": 0.8103,
+              "netReturnSumPct": -22.749
+            },
+            "exitReasons": {
+              "TIME_EXIT": 180,
+              "HARD_STOP": 9,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "VOLUME_BREAKDOWN_LOW": {
+            "signals": 316,
+            "overall": {
+              "n": 177,
+              "wins": 83,
+              "wrPct": 46.89,
+              "pf": 0.6723,
+              "netReturnSumPct": -85.565
+            },
+            "earlier": {
+              "n": 99,
+              "wins": 45,
+              "wrPct": 45.45,
+              "pf": 0.7307,
+              "netReturnSumPct": -46.261
+            },
+            "later": {
+              "n": 78,
+              "wins": 38,
+              "wrPct": 48.72,
+              "pf": 0.5598,
+              "netReturnSumPct": -39.304
+            },
+            "exitReasons": {
+              "TIME_EXIT": 171,
+              "HARD_STOP": 6,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "EMA_RETEST_FAIL": {
+            "signals": 666,
+            "overall": {
+              "n": 218,
+              "wins": 107,
+              "wrPct": 49.08,
+              "pf": 0.7948,
+              "netReturnSumPct": -64.69
+            },
+            "earlier": {
+              "n": 116,
+              "wins": 56,
+              "wrPct": 48.28,
+              "pf": 0.8829,
+              "netReturnSumPct": -21.555
+            },
+            "later": {
+              "n": 102,
+              "wins": 51,
+              "wrPct": 50.0,
+              "pf": 0.6711,
+              "netReturnSumPct": -43.134
+            },
+            "exitReasons": {
+              "TIME_EXIT": 210,
+              "HARD_STOP": 7,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOWVOL_BOUNCE_REJECT": {
+            "signals": 141,
+            "overall": {
+              "n": 93,
+              "wins": 44,
+              "wrPct": 47.31,
+              "pf": 1.392,
+              "netReturnSumPct": 43.977
+            },
+            "earlier": {
+              "n": 59,
+              "wins": 27,
+              "wrPct": 45.76,
+              "pf": 1.7059,
+              "netReturnSumPct": 44.324
+            },
+            "later": {
+              "n": 34,
+              "wins": 17,
+              "wrPct": 50.0,
+              "pf": 0.993,
+              "netReturnSumPct": -0.348
+            },
+            "exitReasons": {
+              "TIME_EXIT": 91,
+              "HARD_STOP": 1,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "BTC_STABLE_REL6_NEG": {
+            "signals": 717,
+            "overall": {
+              "n": 217,
+              "wins": 107,
+              "wrPct": 49.31,
+              "pf": 0.8866,
+              "netReturnSumPct": -33.438
+            },
+            "earlier": {
+              "n": 116,
+              "wins": 59,
+              "wrPct": 50.86,
+              "pf": 0.8936,
+              "netReturnSumPct": -19.664
+            },
+            "later": {
+              "n": 101,
+              "wins": 48,
+              "wrPct": 47.52,
+              "pf": 0.875,
+              "netReturnSumPct": -13.774
+            },
+            "exitReasons": {
+              "TIME_EXIT": 207,
+              "HARD_STOP": 10,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_HEADWIND_AVOID": {
+            "signals": 2907,
+            "overall": {
+              "n": 330,
+              "wins": 164,
+              "wrPct": 49.7,
+              "pf": 0.8283,
+              "netReturnSumPct": -79.141
+            },
+            "earlier": {
+              "n": 167,
+              "wins": 80,
+              "wrPct": 47.9,
+              "pf": 0.8396,
+              "netReturnSumPct": -42.733
+            },
+            "later": {
+              "n": 163,
+              "wins": 84,
+              "wrPct": 51.53,
+              "pf": 0.8126,
+              "netReturnSumPct": -36.409
+            },
+            "exitReasons": {
+              "TIME_EXIT": 318,
+              "HARD_STOP": 12,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELATIVE_REJECTION_LAST15": {
+            "signals": 75,
+            "overall": {
+              "n": 62,
+              "wins": 27,
+              "wrPct": 43.55,
+              "pf": 0.676,
+              "netReturnSumPct": -35.774
+            },
+            "earlier": {
+              "n": 38,
+              "wins": 19,
+              "wrPct": 50.0,
+              "pf": 0.76,
+              "netReturnSumPct": -16.429
+            },
+            "later": {
+              "n": 24,
+              "wins": 8,
+              "wrPct": 33.33,
+              "pf": 0.5392,
+              "netReturnSumPct": -19.345
+            },
+            "exitReasons": {
+              "TIME_EXIT": 59,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_RANGE_CONTINUATION": {
+            "signals": 956,
+            "overall": {
+              "n": 249,
+              "wins": 119,
+              "wrPct": 47.79,
+              "pf": 0.9335,
+              "netReturnSumPct": -20.988
+            },
+            "earlier": {
+              "n": 128,
+              "wins": 63,
+              "wrPct": 49.22,
+              "pf": 1.022,
+              "netReturnSumPct": 3.961
+            },
+            "later": {
+              "n": 121,
+              "wins": 56,
+              "wrPct": 46.28,
+              "pf": 0.8153,
+              "netReturnSumPct": -24.949
+            },
+            "exitReasons": {
+              "TIME_EXIT": 243,
+              "HARD_STOP": 6,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_ATR_RELATIVE_FAIL": {
+            "signals": 611,
+            "overall": {
+              "n": 217,
+              "wins": 104,
+              "wrPct": 47.93,
+              "pf": 0.6939,
+              "netReturnSumPct": -93.864
+            },
+            "earlier": {
+              "n": 108,
+              "wins": 52,
+              "wrPct": 48.15,
+              "pf": 0.7046,
+              "netReturnSumPct": -48.439
+            },
+            "later": {
+              "n": 109,
+              "wins": 52,
+              "wrPct": 47.71,
+              "pf": 0.6816,
+              "netReturnSumPct": -45.425
+            },
+            "exitReasons": {
+              "TIME_EXIT": 212,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          }
+        }
+      },
+      "DOTUSDT": {
+        "holdHours": 24,
+        "strategies": {
+          "BOUNCE_FADE_1": {
+            "signals": 85,
+            "overall": {
+              "n": 62,
+              "wins": 29,
+              "wrPct": 46.77,
+              "pf": 1.313,
+              "netReturnSumPct": 28.715
+            },
+            "earlier": {
+              "n": 31,
+              "wins": 17,
+              "wrPct": 54.84,
+              "pf": 2.1624,
+              "netReturnSumPct": 45.59
+            },
+            "later": {
+              "n": 31,
+              "wins": 12,
+              "wrPct": 38.71,
+              "pf": 0.6786,
+              "netReturnSumPct": -16.876
+            },
+            "exitReasons": {
+              "TIME_EXIT": 60,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BOUNCE_RANGE_REJECT": {
+            "signals": 202,
+            "overall": {
+              "n": 100,
+              "wins": 52,
+              "wrPct": 52.0,
+              "pf": 0.9241,
+              "netReturnSumPct": -12.248
+            },
+            "earlier": {
+              "n": 55,
+              "wins": 30,
+              "wrPct": 54.55,
+              "pf": 1.0687,
+              "netReturnSumPct": 6.58
+            },
+            "later": {
+              "n": 45,
+              "wins": 22,
+              "wrPct": 48.89,
+              "pf": 0.7135,
+              "netReturnSumPct": -18.828
+            },
+            "exitReasons": {
+              "TIME_EXIT": 95,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_STABLE_RELWEAK": {
+            "signals": 535,
+            "overall": {
+              "n": 163,
+              "wins": 82,
+              "wrPct": 50.31,
+              "pf": 0.7834,
+              "netReturnSumPct": -51.752
+            },
+            "earlier": {
+              "n": 84,
+              "wins": 43,
+              "wrPct": 51.19,
+              "pf": 0.7529,
+              "netReturnSumPct": -37.268
+            },
+            "later": {
+              "n": 79,
+              "wins": 39,
+              "wrPct": 49.37,
+              "pf": 0.8355,
+              "netReturnSumPct": -14.484
+            },
+            "exitReasons": {
+              "TIME_EXIT": 158,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELWEAK_DOWNTREND": {
+            "signals": 444,
+            "overall": {
+              "n": 133,
+              "wins": 64,
+              "wrPct": 48.12,
+              "pf": 0.9614,
+              "netReturnSumPct": -7.839
+            },
+            "earlier": {
+              "n": 73,
+              "wins": 37,
+              "wrPct": 50.68,
+              "pf": 1.0615,
+              "netReturnSumPct": 7.384
+            },
+            "later": {
+              "n": 60,
+              "wins": 27,
+              "wrPct": 45.0,
+              "pf": 0.8163,
+              "netReturnSumPct": -15.223
+            },
+            "exitReasons": {
+              "TIME_EXIT": 128,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "VOLUME_BREAKDOWN_LOW": {
+            "signals": 287,
+            "overall": {
+              "n": 132,
+              "wins": 60,
+              "wrPct": 45.45,
+              "pf": 0.8239,
+              "netReturnSumPct": -34.424
+            },
+            "earlier": {
+              "n": 67,
+              "wins": 33,
+              "wrPct": 49.25,
+              "pf": 0.9906,
+              "netReturnSumPct": -0.891
+            },
+            "later": {
+              "n": 65,
+              "wins": 27,
+              "wrPct": 41.54,
+              "pf": 0.6681,
+              "netReturnSumPct": -33.533
+            },
+            "exitReasons": {
+              "TIME_EXIT": 129,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "EMA_RETEST_FAIL": {
+            "signals": 632,
+            "overall": {
+              "n": 170,
+              "wins": 79,
+              "wrPct": 46.47,
+              "pf": 0.9402,
+              "netReturnSumPct": -14.316
+            },
+            "earlier": {
+              "n": 86,
+              "wins": 46,
+              "wrPct": 53.49,
+              "pf": 1.3114,
+              "netReturnSumPct": 37.103
+            },
+            "later": {
+              "n": 84,
+              "wins": 33,
+              "wrPct": 39.29,
+              "pf": 0.5724,
+              "netReturnSumPct": -51.419
+            },
+            "exitReasons": {
+              "TIME_EXIT": 166,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOWVOL_BOUNCE_REJECT": {
+            "signals": 117,
+            "overall": {
+              "n": 76,
+              "wins": 40,
+              "wrPct": 52.63,
+              "pf": 0.7999,
+              "netReturnSumPct": -28.345
+            },
+            "earlier": {
+              "n": 43,
+              "wins": 25,
+              "wrPct": 58.14,
+              "pf": 0.7711,
+              "netReturnSumPct": -23.637
+            },
+            "later": {
+              "n": 33,
+              "wins": 15,
+              "wrPct": 45.45,
+              "pf": 0.8775,
+              "netReturnSumPct": -4.708
+            },
+            "exitReasons": {
+              "TIME_EXIT": 73,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_STABLE_REL6_NEG": {
+            "signals": 609,
+            "overall": {
+              "n": 161,
+              "wins": 79,
+              "wrPct": 49.07,
+              "pf": 0.7362,
+              "netReturnSumPct": -69.977
+            },
+            "earlier": {
+              "n": 82,
+              "wins": 43,
+              "wrPct": 52.44,
+              "pf": 0.7864,
+              "netReturnSumPct": -31.009
+            },
+            "later": {
+              "n": 79,
+              "wins": 36,
+              "wrPct": 45.57,
+              "pf": 0.6753,
+              "netReturnSumPct": -38.967
+            },
+            "exitReasons": {
+              "TIME_EXIT": 153,
+              "HARD_STOP": 8,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_HEADWIND_AVOID": {
+            "signals": 2969,
+            "overall": {
+              "n": 232,
+              "wins": 116,
+              "wrPct": 50.0,
+              "pf": 0.8727,
+              "netReturnSumPct": -45.113
+            },
+            "earlier": {
+              "n": 118,
+              "wins": 59,
+              "wrPct": 50.0,
+              "pf": 0.9087,
+              "netReturnSumPct": -17.797
+            },
+            "later": {
+              "n": 114,
+              "wins": 57,
+              "wrPct": 50.0,
+              "pf": 0.8287,
+              "netReturnSumPct": -27.316
+            },
+            "exitReasons": {
+              "TIME_EXIT": 223,
+              "HARD_STOP": 8,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "RELATIVE_REJECTION_LAST15": {
+            "signals": 53,
+            "overall": {
+              "n": 39,
+              "wins": 19,
+              "wrPct": 48.72,
+              "pf": 1.0878,
+              "netReturnSumPct": 5.293
+            },
+            "earlier": {
+              "n": 24,
+              "wins": 13,
+              "wrPct": 54.17,
+              "pf": 1.3916,
+              "netReturnSumPct": 14.109
+            },
+            "later": {
+              "n": 15,
+              "wins": 6,
+              "wrPct": 40.0,
+              "pf": 0.6364,
+              "netReturnSumPct": -8.816
+            },
+            "exitReasons": {
+              "TIME_EXIT": 37,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_RANGE_CONTINUATION": {
+            "signals": 1064,
+            "overall": {
+              "n": 200,
+              "wins": 103,
+              "wrPct": 51.5,
+              "pf": 1.0531,
+              "netReturnSumPct": 13.869
+            },
+            "earlier": {
+              "n": 101,
+              "wins": 54,
+              "wrPct": 53.47,
+              "pf": 1.2055,
+              "netReturnSumPct": 27.098
+            },
+            "later": {
+              "n": 99,
+              "wins": 49,
+              "wrPct": 49.49,
+              "pf": 0.8979,
+              "netReturnSumPct": -13.229
+            },
+            "exitReasons": {
+              "TIME_EXIT": 195,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOW_ATR_RELATIVE_FAIL": {
+            "signals": 610,
+            "overall": {
+              "n": 176,
+              "wins": 89,
+              "wrPct": 50.57,
+              "pf": 0.8885,
+              "netReturnSumPct": -28.711
+            },
+            "earlier": {
+              "n": 93,
+              "wins": 45,
+              "wrPct": 48.39,
+              "pf": 0.7475,
+              "netReturnSumPct": -41.994
+            },
+            "later": {
+              "n": 83,
+              "wins": 44,
+              "wrPct": 53.01,
+              "pf": 1.1456,
+              "netReturnSumPct": 13.283
+            },
+            "exitReasons": {
+              "TIME_EXIT": 172,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 0
+            }
+          }
+        }
+      },
+      "JUPUSDT": {
+        "holdHours": 12,
+        "strategies": {
+          "BOUNCE_FADE_1": {
+            "signals": 107,
+            "overall": {
+              "n": 89,
+              "wins": 36,
+              "wrPct": 40.45,
+              "pf": 0.4567,
+              "netReturnSumPct": -88.009
+            },
+            "earlier": {
+              "n": 42,
+              "wins": 18,
+              "wrPct": 42.86,
+              "pf": 0.5433,
+              "netReturnSumPct": -34.585
+            },
+            "later": {
+              "n": 47,
+              "wins": 18,
+              "wrPct": 38.3,
+              "pf": 0.3808,
+              "netReturnSumPct": -53.424
+            },
+            "exitReasons": {
+              "TIME_EXIT": 86,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BOUNCE_RANGE_REJECT": {
+            "signals": 286,
+            "overall": {
+              "n": 156,
+              "wins": 73,
+              "wrPct": 46.79,
+              "pf": 0.6921,
+              "netReturnSumPct": -80.177
+            },
+            "earlier": {
+              "n": 80,
+              "wins": 35,
+              "wrPct": 43.75,
+              "pf": 0.8102,
+              "netReturnSumPct": -23.422
+            },
+            "later": {
+              "n": 76,
+              "wins": 38,
+              "wrPct": 50.0,
+              "pf": 0.5859,
+              "netReturnSumPct": -56.755
+            },
+            "exitReasons": {
+              "TIME_EXIT": 151,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "BTC_STABLE_RELWEAK": {
+            "signals": 624,
+            "overall": {
+              "n": 227,
+              "wins": 104,
+              "wrPct": 45.81,
+              "pf": 0.8427,
+              "netReturnSumPct": -48.988
+            },
+            "earlier": {
+              "n": 114,
+              "wins": 51,
+              "wrPct": 44.74,
+              "pf": 0.9078,
+              "netReturnSumPct": -14.622
+            },
+            "later": {
+              "n": 113,
+              "wins": 53,
+              "wrPct": 46.9,
+              "pf": 0.7753,
+              "netReturnSumPct": -34.366
+            },
+            "exitReasons": {
+              "TIME_EXIT": 224,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELWEAK_DOWNTREND": {
+            "signals": 628,
+            "overall": {
+              "n": 195,
+              "wins": 91,
+              "wrPct": 46.67,
+              "pf": 0.8835,
+              "netReturnSumPct": -31.648
+            },
+            "earlier": {
+              "n": 99,
+              "wins": 44,
+              "wrPct": 44.44,
+              "pf": 0.8421,
+              "netReturnSumPct": -25.03
+            },
+            "later": {
+              "n": 96,
+              "wins": 47,
+              "wrPct": 48.96,
+              "pf": 0.9415,
+              "netReturnSumPct": -6.618
+            },
+            "exitReasons": {
+              "TIME_EXIT": 190,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "VOLUME_BREAKDOWN_LOW": {
+            "signals": 312,
+            "overall": {
+              "n": 176,
+              "wins": 75,
+              "wrPct": 42.61,
+              "pf": 0.7233,
+              "netReturnSumPct": -73.52
+            },
+            "earlier": {
+              "n": 90,
+              "wins": 36,
+              "wrPct": 40.0,
+              "pf": 0.7648,
+              "netReturnSumPct": -35.244
+            },
+            "later": {
+              "n": 86,
+              "wins": 39,
+              "wrPct": 45.35,
+              "pf": 0.6694,
+              "netReturnSumPct": -38.275
+            },
+            "exitReasons": {
+              "TIME_EXIT": 172,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "EMA_RETEST_FAIL": {
+            "signals": 617,
+            "overall": {
+              "n": 218,
+              "wins": 103,
+              "wrPct": 47.25,
+              "pf": 1.0765,
+              "netReturnSumPct": 20.284
+            },
+            "earlier": {
+              "n": 112,
+              "wins": 53,
+              "wrPct": 47.32,
+              "pf": 1.2325,
+              "netReturnSumPct": 31.331
+            },
+            "later": {
+              "n": 106,
+              "wins": 50,
+              "wrPct": 47.17,
+              "pf": 0.9152,
+              "netReturnSumPct": -11.047
+            },
+            "exitReasons": {
+              "TIME_EXIT": 216,
+              "HARD_STOP": 1,
+              "TAKE_PROFIT": 1
+            }
+          },
+          "LOWVOL_BOUNCE_REJECT": {
+            "signals": 130,
+            "overall": {
+              "n": 84,
+              "wins": 40,
+              "wrPct": 47.62,
+              "pf": 1.16,
+              "netReturnSumPct": 17.076
+            },
+            "earlier": {
+              "n": 50,
+              "wins": 24,
+              "wrPct": 48.0,
+              "pf": 1.0643,
+              "netReturnSumPct": 4.743
+            },
+            "later": {
+              "n": 34,
+              "wins": 16,
+              "wrPct": 47.06,
+              "pf": 1.374,
+              "netReturnSumPct": 12.332
+            },
+            "exitReasons": {
+              "TIME_EXIT": 84,
+              "HARD_STOP": 0,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_STABLE_REL6_NEG": {
+            "signals": 762,
+            "overall": {
+              "n": 223,
+              "wins": 100,
+              "wrPct": 44.84,
+              "pf": 0.7734,
+              "netReturnSumPct": -67.808
+            },
+            "earlier": {
+              "n": 113,
+              "wins": 45,
+              "wrPct": 39.82,
+              "pf": 0.6176,
+              "netReturnSumPct": -61.695
+            },
+            "later": {
+              "n": 110,
+              "wins": 55,
+              "wrPct": 50.0,
+              "pf": 0.9557,
+              "netReturnSumPct": -6.113
+            },
+            "exitReasons": {
+              "TIME_EXIT": 219,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "BTC_HEADWIND_AVOID": {
+            "signals": 2960,
+            "overall": {
+              "n": 335,
+              "wins": 160,
+              "wrPct": 47.76,
+              "pf": 0.8811,
+              "netReturnSumPct": -53.547
+            },
+            "earlier": {
+              "n": 170,
+              "wins": 87,
+              "wrPct": 51.18,
+              "pf": 1.1051,
+              "netReturnSumPct": 22.022
+            },
+            "later": {
+              "n": 165,
+              "wins": 73,
+              "wrPct": 44.24,
+              "pf": 0.6863,
+              "netReturnSumPct": -75.569
+            },
+            "exitReasons": {
+              "TIME_EXIT": 331,
+              "HARD_STOP": 4,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "RELATIVE_REJECTION_LAST15": {
+            "signals": 64,
+            "overall": {
+              "n": 56,
+              "wins": 27,
+              "wrPct": 48.21,
+              "pf": 0.7705,
+              "netReturnSumPct": -17.421
+            },
+            "earlier": {
+              "n": 29,
+              "wins": 15,
+              "wrPct": 51.72,
+              "pf": 1.1157,
+              "netReturnSumPct": 4.503
+            },
+            "later": {
+              "n": 27,
+              "wins": 12,
+              "wrPct": 44.44,
+              "pf": 0.4072,
+              "netReturnSumPct": -21.924
+            },
+            "exitReasons": {
+              "TIME_EXIT": 54,
+              "HARD_STOP": 2,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_RANGE_CONTINUATION": {
+            "signals": 971,
+            "overall": {
+              "n": 253,
+              "wins": 117,
+              "wrPct": 46.25,
+              "pf": 0.7417,
+              "netReturnSumPct": -85.365
+            },
+            "earlier": {
+              "n": 128,
+              "wins": 61,
+              "wrPct": 47.66,
+              "pf": 0.8708,
+              "netReturnSumPct": -20.674
+            },
+            "later": {
+              "n": 125,
+              "wins": 56,
+              "wrPct": 44.8,
+              "pf": 0.6205,
+              "netReturnSumPct": -64.691
+            },
+            "exitReasons": {
+              "TIME_EXIT": 248,
+              "HARD_STOP": 5,
+              "TAKE_PROFIT": 0
+            }
+          },
+          "LOW_ATR_RELATIVE_FAIL": {
+            "signals": 609,
+            "overall": {
+              "n": 221,
+              "wins": 103,
+              "wrPct": 46.61,
+              "pf": 0.9499,
+              "netReturnSumPct": -13.826
+            },
+            "earlier": {
+              "n": 115,
+              "wins": 56,
+              "wrPct": 48.7,
+              "pf": 1.1093,
+              "netReturnSumPct": 15.201
+            },
+            "later": {
+              "n": 106,
+              "wins": 47,
+              "wrPct": 44.34,
+              "pf": 0.7878,
+              "netReturnSumPct": -29.027
+            },
+            "exitReasons": {
+              "TIME_EXIT": 218,
+              "HARD_STOP": 3,
+              "TAKE_PROFIT": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "notes": [
+    "This compares new entry architectures from all confirmed M5 hourly candles, NOT the 8-strategy dynamic portfolio.",
+    "Historical period has been researched repeatedly; later half is a contaminated temporal validation, not untouched OOS.",
+    "Uses linear perpetual SHORT PnL (entry-exit)/entry - roundtrip bps; STOP before TP same bar; funding/margin/venue/slippage omitted."
+  ]
+}
