@@ -18,7 +18,12 @@ CASES={
 'DOT_LOWVOL_OVERSOLD_VETO':'rv24IdleEntryDOTNoOversold',
 'JUP_RET12GE_M5':'rv24IdleEntryJUPRet12GE_M5',
 'COMBO_KEEP90':'rv24IdleEntryComboKeep90',
-'COMBO_BEST_WR':'rv24IdleEntryComboBestWR'
+'COMBO_BEST_WR':'rv24IdleEntryComboBestWR',
+'COMBO_ATR_DOT_JUP':'rv24IdleEntryComboATRDotJUP',
+'COMBO_ATR_JUP_ONLY':'rv24IdleEntryComboATRJUPOnly',
+'COMBO_BTC_ATR_JUP_ONLY':'rv24IdleEntryComboBTCATRJUPOnly',
+'COMBO_BTC_DOT_JUP3_GE_M1P5':'rv24IdleEntryComboBTCDOTJupRet3M1p5',
+'COMBO_BTC_DOT_JUP3_GE_M1':'rv24IdleEntryComboBTCDOTJupRet3M1'
 }
 SYMS=('RENDERUSDT','DOTUSDT','JUPUSDT')
 def load(n,p):

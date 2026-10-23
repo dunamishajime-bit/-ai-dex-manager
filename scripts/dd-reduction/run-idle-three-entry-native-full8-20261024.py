@@ -25,7 +25,12 @@ CASE_RULES={
  'DOT_LOWVOL_OVERSOLD_VETO':{'DOTUSDT':['not_oversold_ret6_and_low_volume']},
  'JUP_RET12GE_M5':{'JUPUSDT':['RET12H_GE_MINUS5']},
  'COMBO_KEEP90':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5']},
- 'COMBO_BEST_WR':{'RENDERUSDT':['btc3h_ge_-1'],'DOTUSDT':['RET6H_GE_MINUS4'],'JUPUSDT':['RET12H_GE_MINUS5']}
+ 'COMBO_BEST_WR':{'RENDERUSDT':['btc3h_ge_-1'],'DOTUSDT':['RET6H_GE_MINUS4'],'JUPUSDT':['RET12H_GE_MINUS5']},
+ 'COMBO_ATR_DOT_JUP':{'RENDERUSDT':['atr3h_le_0.8'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5']},
+ 'COMBO_ATR_JUP_ONLY':{'RENDERUSDT':['atr3h_le_0.8'],'JUPUSDT':['RET12H_GE_MINUS5']},
+ 'COMBO_BTC_ATR_JUP_ONLY':{'RENDERUSDT':['btc3h_ge_-1.5','atr3h_le_0.8'],'JUPUSDT':['RET12H_GE_MINUS5']},
+ 'COMBO_BTC_DOT_JUP3_GE_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'COMBO_BTC_DOT_JUP3_GE_M1':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1']}
 }
 for x in CASE_RULES.values():
  for filters in x.values():

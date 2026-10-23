@@ -1,0 +1,854 @@
+{
+  "status": "CANDIDATE_MODEL_SCREEN_NOT_SHARED_WALLET_NOT_LIVE",
+  "splitEpochMs": 1770681600000,
+  "timeSplitIsNotUntouchedHoldout": true,
+  "trainingPurge": "all label exits before split minus 24h",
+  "riskScoreThreshold": "training 20th percentile applied unchanged to later windows",
+  "predictors": [
+    "ret1h",
+    "ret3h",
+    "ret6h",
+    "rel3h",
+    "rel6h",
+    "btc3h",
+    "btc6h",
+    "volratio",
+    "atr3h",
+    "rangepos3h"
+  ],
+  "costs": {
+    "10": {
+      "sha": "44c3ed2d7f3d8b4803a981d19c67e8e475f75073feae0c3bd88457ac036ff615",
+      "symbols": {
+        "RENDERUSDT": {
+          "trainN": 57,
+          "lateN": 117,
+          "trainingDays": 17,
+          "trainingInsufficientIndependentDays": true,
+          "riskThreshold": 0.535987,
+          "trainLabels": {
+            "n": 57,
+            "wins": 33,
+            "wrPct": 57.89,
+            "returnSumPct": -68.264
+          },
+          "lateLabels": {
+            "n": 117,
+            "wins": 66,
+            "wrPct": 56.41,
+            "returnSumPct": -47.343
+          },
+          "allRawCandidates": {
+            "train": {
+              "all": {
+                "n": 57,
+                "wins": 33,
+                "wrPct": 57.89,
+                "returnSumPct": -68.264
+              },
+              "admit": {
+                "n": 45,
+                "wins": 30,
+                "wrPct": 66.67,
+                "returnSumPct": -21.336
+              },
+              "reject": {
+                "n": 12,
+                "wins": 3,
+                "wrPct": 25.0,
+                "returnSumPct": -46.928
+              },
+              "retainedPct": 78.95
+            },
+            "later": {
+              "all": {
+                "n": 117,
+                "wins": 66,
+                "wrPct": 56.41,
+                "returnSumPct": -47.343
+              },
+              "admit": {
+                "n": 89,
+                "wins": 54,
+                "wrPct": 60.67,
+                "returnSumPct": -20.04
+              },
+              "reject": {
+                "n": 28,
+                "wins": 12,
+                "wrPct": 42.86,
+                "returnSumPct": -27.304
+              },
+              "retainedPct": 76.07
+            }
+          },
+          "acceptedPortfolioCandidates": {
+            "train": {
+              "all": {
+                "n": 7,
+                "wins": 4,
+                "wrPct": 57.14,
+                "returnSumPct": -11.279
+              },
+              "admit": {
+                "n": 6,
+                "wins": 4,
+                "wrPct": 66.67,
+                "returnSumPct": -3.839
+              },
+              "reject": {
+                "n": 1,
+                "wins": 0,
+                "wrPct": 0.0,
+                "returnSumPct": -7.44
+              },
+              "retainedPct": 85.71
+            },
+            "later": {
+              "all": {
+                "n": 16,
+                "wins": 11,
+                "wrPct": 68.75,
+                "returnSumPct": 12.302
+              },
+              "admit": {
+                "n": 12,
+                "wins": 10,
+                "wrPct": 83.33,
+                "returnSumPct": 14.219
+              },
+              "reject": {
+                "n": 4,
+                "wins": 1,
+                "wrPct": 25.0,
+                "returnSumPct": -1.917
+              },
+              "retainedPct": 75.0
+            }
+          },
+          "trainingTopPositiveCoefficients": [
+            [
+              "volratio",
+              0.3449
+            ],
+            [
+              "rel6h",
+              0.2816
+            ],
+            [
+              "ret6h",
+              0.1657
+            ]
+          ],
+          "trainingTopNegativeCoefficients": [
+            [
+              "rangepos3h",
+              -0.2592
+            ],
+            [
+              "rel3h",
+              -0.0212
+            ],
+            [
+              "btc6h",
+              0.0066
+            ]
+          ],
+          "lateSelectedPF": 0.837,
+          "lateUnselectedPF": 0.449
+        },
+        "DOTUSDT": {
+          "trainN": 89,
+          "lateN": 51,
+          "trainingDays": 43,
+          "trainingInsufficientIndependentDays": false,
+          "riskThreshold": 0.504906,
+          "trainLabels": {
+            "n": 89,
+            "wins": 56,
+            "wrPct": 62.92,
+            "returnSumPct": 52.974
+          },
+          "lateLabels": {
+            "n": 51,
+            "wins": 31,
+            "wrPct": 60.78,
+            "returnSumPct": 16.015
+          },
+          "allRawCandidates": {
+            "train": {
+              "all": {
+                "n": 89,
+                "wins": 56,
+                "wrPct": 62.92,
+                "returnSumPct": 52.974
+              },
+              "admit": {
+                "n": 71,
+                "wins": 46,
+                "wrPct": 64.79,
+                "returnSumPct": 50.188
+              },
+              "reject": {
+                "n": 18,
+                "wins": 10,
+                "wrPct": 55.56,
+                "returnSumPct": 2.786
+              },
+              "retainedPct": 79.78
+            },
+            "later": {
+              "all": {
+                "n": 51,
+                "wins": 31,
+                "wrPct": 60.78,
+                "returnSumPct": 16.015
+              },
+              "admit": {
+                "n": 34,
+                "wins": 22,
+                "wrPct": 64.71,
+                "returnSumPct": 14.794
+              },
+              "reject": {
+                "n": 17,
+                "wins": 9,
+                "wrPct": 52.94,
+                "returnSumPct": 1.221
+              },
+              "retainedPct": 66.67
+            }
+          },
+          "acceptedPortfolioCandidates": {
+            "train": {
+              "all": {
+                "n": 19,
+                "wins": 11,
+                "wrPct": 57.89,
+                "returnSumPct": -0.324
+              },
+              "admit": {
+                "n": 12,
+                "wins": 7,
+                "wrPct": 58.33,
+                "returnSumPct": -1.893
+              },
+              "reject": {
+                "n": 7,
+                "wins": 4,
+                "wrPct": 57.14,
+                "returnSumPct": 1.569
+              },
+              "retainedPct": 63.16
+            },
+            "later": {
+              "all": {
+                "n": 10,
+                "wins": 8,
+                "wrPct": 80.0,
+                "returnSumPct": 12.532
+              },
+              "admit": {
+                "n": 6,
+                "wins": 5,
+                "wrPct": 83.33,
+                "returnSumPct": 8.1
+              },
+              "reject": {
+                "n": 4,
+                "wins": 3,
+                "wrPct": 75.0,
+                "returnSumPct": 4.431
+              },
+              "retainedPct": 60.0
+            }
+          },
+          "trainingTopPositiveCoefficients": [
+            [
+              "rel3h",
+              0.2471
+            ],
+            [
+              "atr3h",
+              0.1539
+            ],
+            [
+              "ret3h",
+              0.0739
+            ]
+          ],
+          "trainingTopNegativeCoefficients": [
+            [
+              "rangepos3h",
+              -0.1762
+            ],
+            [
+              "btc3h",
+              -0.1227
+            ],
+            [
+              "ret1h",
+              -0.1158
+            ]
+          ],
+          "lateSelectedPF": 1.364,
+          "lateUnselectedPF": 1.056
+        },
+        "JUPUSDT": {
+          "trainN": 28,
+          "lateN": 175,
+          "trainingDays": 10,
+          "trainingInsufficientIndependentDays": true,
+          "riskThreshold": 0.218487,
+          "trainLabels": {
+            "n": 28,
+            "wins": 9,
+            "wrPct": 32.14,
+            "returnSumPct": -37.157
+          },
+          "lateLabels": {
+            "n": 175,
+            "wins": 103,
+            "wrPct": 58.86,
+            "returnSumPct": 46.347
+          },
+          "allRawCandidates": {
+            "train": {
+              "all": {
+                "n": 28,
+                "wins": 9,
+                "wrPct": 32.14,
+                "returnSumPct": -37.157
+              },
+              "admit": {
+                "n": 22,
+                "wins": 8,
+                "wrPct": 36.36,
+                "returnSumPct": -31.231
+              },
+              "reject": {
+                "n": 6,
+                "wins": 1,
+                "wrPct": 16.67,
+                "returnSumPct": -5.926
+              },
+              "retainedPct": 78.57
+            },
+            "later": {
+              "all": {
+                "n": 175,
+                "wins": 103,
+                "wrPct": 58.86,
+                "returnSumPct": 46.347
+              },
+              "admit": {
+                "n": 131,
+                "wins": 81,
+                "wrPct": 61.83,
+                "returnSumPct": 81.183
+              },
+              "reject": {
+                "n": 44,
+                "wins": 22,
+                "wrPct": 50.0,
+                "returnSumPct": -34.836
+              },
+              "retainedPct": 74.86
+            }
+          },
+          "acceptedPortfolioCandidates": {
+            "train": {
+              "all": {
+                "n": 1,
+                "wins": 0,
+                "wrPct": 0.0,
+                "returnSumPct": -0.054
+              },
+              "admit": {
+                "n": 0,
+                "wins": 0,
+                "wrPct": null,
+                "returnSumPct": 0
+              },
+              "reject": {
+                "n": 1,
+                "wins": 0,
+                "wrPct": 0.0,
+                "returnSumPct": -0.054
+              },
+              "retainedPct": 0.0
+            },
+            "later": {
+              "all": {
+                "n": 5,
+                "wins": 3,
+                "wrPct": 60.0,
+                "returnSumPct": 1.413
+              },
+              "admit": {
+                "n": 4,
+                "wins": 2,
+                "wrPct": 50.0,
+                "returnSumPct": 0.62
+              },
+              "reject": {
+                "n": 1,
+                "wins": 1,
+                "wrPct": 100.0,
+                "returnSumPct": 0.793
+              },
+              "retainedPct": 80.0
+            }
+          },
+          "trainingTopPositiveCoefficients": [
+            [
+              "atr3h",
+              0.369
+            ],
+            [
+              "rel6h",
+              0.1792
+            ],
+            [
+              "ret1h",
+              0.1741
+            ]
+          ],
+          "trainingTopNegativeCoefficients": [
+            [
+              "rangepos3h",
+              -0.2641
+            ],
+            [
+              "btc6h",
+              -0.1736
+            ],
+            [
+              "volratio",
+              -0.119
+            ]
+          ],
+          "lateSelectedPF": 1.505,
+          "lateUnselectedPF": 0.547
+        }
+      }
+    },
+    "30": {
+      "sha": "d4c06f9bf412f5f583d047c30625987a1716d9019b0a0614eb01e746e93eeb24",
+      "symbols": {
+        "RENDERUSDT": {
+          "trainN": 57,
+          "lateN": 117,
+          "trainingDays": 17,
+          "trainingInsufficientIndependentDays": true,
+          "riskThreshold": 0.23412,
+          "trainLabels": {
+            "n": 57,
+            "wins": 20,
+            "wrPct": 35.09,
+            "returnSumPct": -81.859
+          },
+          "lateLabels": {
+            "n": 117,
+            "wins": 48,
+            "wrPct": 41.03,
+            "returnSumPct": -74.135
+          },
+          "allRawCandidates": {
+            "train": {
+              "all": {
+                "n": 57,
+                "wins": 20,
+                "wrPct": 35.09,
+                "returnSumPct": -81.859
+              },
+              "admit": {
+                "n": 45,
+                "wins": 17,
+                "wrPct": 37.78,
+                "returnSumPct": -43.417
+              },
+              "reject": {
+                "n": 12,
+                "wins": 3,
+                "wrPct": 25.0,
+                "returnSumPct": -38.442
+              },
+              "retainedPct": 78.95
+            },
+            "later": {
+              "all": {
+                "n": 117,
+                "wins": 48,
+                "wrPct": 41.03,
+                "returnSumPct": -74.135
+              },
+              "admit": {
+                "n": 104,
+                "wins": 42,
+                "wrPct": 40.38,
+                "returnSumPct": -59.333
+              },
+              "reject": {
+                "n": 13,
+                "wins": 6,
+                "wrPct": 46.15,
+                "returnSumPct": -14.802
+              },
+              "retainedPct": 88.89
+            }
+          },
+          "acceptedPortfolioCandidates": {
+            "train": {
+              "all": {
+                "n": 7,
+                "wins": 2,
+                "wrPct": 28.57,
+                "returnSumPct": -13.078
+              },
+              "admit": {
+                "n": 5,
+                "wins": 1,
+                "wrPct": 20.0,
+                "returnSumPct": -13.234
+              },
+              "reject": {
+                "n": 2,
+                "wins": 1,
+                "wrPct": 50.0,
+                "returnSumPct": 0.155
+              },
+              "retainedPct": 71.43
+            },
+            "later": {
+              "all": {
+                "n": 14,
+                "wins": 8,
+                "wrPct": 57.14,
+                "returnSumPct": 9.242
+              },
+              "admit": {
+                "n": 12,
+                "wins": 7,
+                "wrPct": 58.33,
+                "returnSumPct": 7.527
+              },
+              "reject": {
+                "n": 2,
+                "wins": 1,
+                "wrPct": 50.0,
+                "returnSumPct": 1.715
+              },
+              "retainedPct": 85.71
+            }
+          },
+          "trainingTopPositiveCoefficients": [
+            [
+              "volratio",
+              0.39
+            ],
+            [
+              "rel3h",
+              0.1462
+            ],
+            [
+              "atr3h",
+              0.0791
+            ]
+          ],
+          "trainingTopNegativeCoefficients": [
+            [
+              "btc3h",
+              -0.2247
+            ],
+            [
+              "ret3h",
+              -0.0963
+            ],
+            [
+              "rangepos3h",
+              0.0066
+            ]
+          ],
+          "lateSelectedPF": 0.634,
+          "lateUnselectedPF": 0.444
+        },
+        "DOTUSDT": {
+          "trainN": 89,
+          "lateN": 51,
+          "trainingDays": 43,
+          "trainingInsufficientIndependentDays": false,
+          "riskThreshold": 0.507214,
+          "trainLabels": {
+            "n": 89,
+            "wins": 55,
+            "wrPct": 61.8,
+            "returnSumPct": 35.174
+          },
+          "lateLabels": {
+            "n": 51,
+            "wins": 31,
+            "wrPct": 60.78,
+            "returnSumPct": 5.815
+          },
+          "allRawCandidates": {
+            "train": {
+              "all": {
+                "n": 89,
+                "wins": 55,
+                "wrPct": 61.8,
+                "returnSumPct": 35.174
+              },
+              "admit": {
+                "n": 71,
+                "wins": 43,
+                "wrPct": 60.56,
+                "returnSumPct": 29.655
+              },
+              "reject": {
+                "n": 18,
+                "wins": 12,
+                "wrPct": 66.67,
+                "returnSumPct": 5.519
+              },
+              "retainedPct": 79.78
+            },
+            "later": {
+              "all": {
+                "n": 51,
+                "wins": 31,
+                "wrPct": 60.78,
+                "returnSumPct": 5.815
+              },
+              "admit": {
+                "n": 34,
+                "wins": 22,
+                "wrPct": 64.71,
+                "returnSumPct": 7.994
+              },
+              "reject": {
+                "n": 17,
+                "wins": 9,
+                "wrPct": 52.94,
+                "returnSumPct": -2.179
+              },
+              "retainedPct": 66.67
+            }
+          },
+          "acceptedPortfolioCandidates": {
+            "train": {
+              "all": {
+                "n": 19,
+                "wins": 11,
+                "wrPct": 57.89,
+                "returnSumPct": -4.124
+              },
+              "admit": {
+                "n": 12,
+                "wins": 7,
+                "wrPct": 58.33,
+                "returnSumPct": -4.293
+              },
+              "reject": {
+                "n": 7,
+                "wins": 4,
+                "wrPct": 57.14,
+                "returnSumPct": 0.169
+              },
+              "retainedPct": 63.16
+            },
+            "later": {
+              "all": {
+                "n": 10,
+                "wins": 8,
+                "wrPct": 80.0,
+                "returnSumPct": 10.532
+              },
+              "admit": {
+                "n": 6,
+                "wins": 5,
+                "wrPct": 83.33,
+                "returnSumPct": 6.9
+              },
+              "reject": {
+                "n": 4,
+                "wins": 3,
+                "wrPct": 75.0,
+                "returnSumPct": 3.631
+              },
+              "retainedPct": 60.0
+            }
+          },
+          "trainingTopPositiveCoefficients": [
+            [
+              "rel3h",
+              0.2355
+            ],
+            [
+              "atr3h",
+              0.152
+            ],
+            [
+              "ret3h",
+              0.0727
+            ]
+          ],
+          "trainingTopNegativeCoefficients": [
+            [
+              "rangepos3h",
+              -0.1471
+            ],
+            [
+              "btc3h",
+              -0.112
+            ],
+            [
+              "ret1h",
+              -0.1064
+            ]
+          ],
+          "lateSelectedPF": 1.186,
+          "lateUnselectedPF": 0.907
+        },
+        "JUPUSDT": {
+          "trainN": 28,
+          "lateN": 175,
+          "trainingDays": 10,
+          "trainingInsufficientIndependentDays": true,
+          "riskThreshold": 0.218487,
+          "trainLabels": {
+            "n": 28,
+            "wins": 9,
+            "wrPct": 32.14,
+            "returnSumPct": -42.757
+          },
+          "lateLabels": {
+            "n": 175,
+            "wins": 97,
+            "wrPct": 55.43,
+            "returnSumPct": 11.347
+          },
+          "allRawCandidates": {
+            "train": {
+              "all": {
+                "n": 28,
+                "wins": 9,
+                "wrPct": 32.14,
+                "returnSumPct": -42.757
+              },
+              "admit": {
+                "n": 22,
+                "wins": 8,
+                "wrPct": 36.36,
+                "returnSumPct": -35.631
+              },
+              "reject": {
+                "n": 6,
+                "wins": 1,
+                "wrPct": 16.67,
+                "returnSumPct": -7.126
+              },
+              "retainedPct": 78.57
+            },
+            "later": {
+              "all": {
+                "n": 175,
+                "wins": 97,
+                "wrPct": 55.43,
+                "returnSumPct": 11.347
+              },
+              "admit": {
+                "n": 131,
+                "wins": 77,
+                "wrPct": 58.78,
+                "returnSumPct": 54.983
+              },
+              "reject": {
+                "n": 44,
+                "wins": 20,
+                "wrPct": 45.45,
+                "returnSumPct": -43.636
+              },
+              "retainedPct": 74.86
+            }
+          },
+          "acceptedPortfolioCandidates": {
+            "train": {
+              "all": {
+                "n": 1,
+                "wins": 0,
+                "wrPct": 0.0,
+                "returnSumPct": -0.254
+              },
+              "admit": {
+                "n": 0,
+                "wins": 0,
+                "wrPct": null,
+                "returnSumPct": 0
+              },
+              "reject": {
+                "n": 1,
+                "wins": 0,
+                "wrPct": 0.0,
+                "returnSumPct": -0.254
+              },
+              "retainedPct": 0.0
+            },
+            "later": {
+              "all": {
+                "n": 6,
+                "wins": 4,
+                "wrPct": 66.67,
+                "returnSumPct": 1.743
+              },
+              "admit": {
+                "n": 4,
+                "wins": 2,
+                "wrPct": 50.0,
+                "returnSumPct": -0.183
+              },
+              "reject": {
+                "n": 2,
+                "wins": 2,
+                "wrPct": 100.0,
+                "returnSumPct": 1.926
+              },
+              "retainedPct": 66.67
+            }
+          },
+          "trainingTopPositiveCoefficients": [
+            [
+              "atr3h",
+              0.369
+            ],
+            [
+              "rel6h",
+              0.1792
+            ],
+            [
+              "ret1h",
+              0.1741
+            ]
+          ],
+          "trainingTopNegativeCoefficients": [
+            [
+              "rangepos3h",
+              -0.2641
+            ],
+            [
+              "btc6h",
+              -0.1736
+            ],
+            [
+              "volratio",
+              -0.119
+            ]
+          ],
+          "lateSelectedPF": 1.321,
+          "lateUnselectedPF": 0.465
+        }
+      }
+    }
+  },
+  "note": "Pure historical conditional probability study. Rejected candidate hypothetical exits are labels, not venue fills. Correlated hourly candidates weighted equally within each symbol-day."
+}
