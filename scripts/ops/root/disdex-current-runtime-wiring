@@ -1846,8 +1846,8 @@ apply_wiring() {
   fi
   assert_current_live_target_ready
   ensure_v4_canary_permit_runtime_access
-  ensure_v4_time_stop_approval_runtime_access
   cd "$CURRENT_RELEASE" || return 1
+  ensure_v4_time_stop_approval_runtime_access
   # All release-relative TypeScript invocations below must resolve aliases and
   # configuration from the exact immutable current release. systemd starts
   # this helper with an arbitrary cwd (often /root), so pin it before
