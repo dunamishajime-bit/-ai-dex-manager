@@ -5,7 +5,7 @@ import { Activity, ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet }
 
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
-import { ProductionRuntimeSummary } from "@/components/features/ProductionRuntimeSummary";
+import { RunnerHealthPanel } from "@/components/features/RunnerHealthPanel";
 
 function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
   return (
@@ -52,9 +52,10 @@ export default function HomePage() {
             <SummaryCard title="実建玉 / 未決済注文" value={snapshot ? `${positions.length} / ${snapshot.orders.count}` : "未取得"} detail={snapshot ? `保護注文 ${snapshot.orders.protectionCount} / ${snapshot.capturedAt.replace("T", " ").slice(0, 16)} UTC` : liveError || "Aster実データを取得できません"} />
           </div>
         </section>
-        <ProductionRuntimeSummary />
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <RunnerHealthPanel />
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、FET、V52、Quality102の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/decision-status" title="判定状況・ロジック詳細" detail="V12 V4 / PENGU / Q102 / FET / HYPE / Idle / V52の実効条件を確認します。" icon={ShieldCheck} />
           <QuickLink href="/realtime" title="リアルタイム判定" detail="全通貨ランキング、各ロジックのスコア、判定理由、データ鮮度を30秒更新で確認します。" icon={Activity} />
           <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
