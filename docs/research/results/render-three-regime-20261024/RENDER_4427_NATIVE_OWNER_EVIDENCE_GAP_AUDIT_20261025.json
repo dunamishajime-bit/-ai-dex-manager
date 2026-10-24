@@ -1,0 +1,141 @@
+{
+  "costs": {
+    "10": {
+      "convergedDecisionFile": "C:\\tmp\\render4427-fresh-process-audit-20261025\\A\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_88139ccf92bb\\cmp_88139ccf92bb\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\candidate-decisions.jsonl",
+      "convergedDecisionSha256": "69d73014f348f9c4ba3a4ff43c4c9c78815d113bd61f3d108b6f2f41477c5879",
+      "eventSha256": "edcb568bd30978795372f089f545b5df342d7f8e127bb15fc8d41ec981c46010",
+      "independentProcessSameRawDecisionSha": true,
+      "missingFieldsInDecisionTradeEventArtifacts": [
+        "owner_id",
+        "capital_owner",
+        "native_owner_registration_sha256",
+        "owner_priority_asof_sha256",
+        "shared_risk_asof_sha256",
+        "margin_guard_asof_sha256",
+        "kill_switch_asof_sha256",
+        "account_lock_asof_sha256",
+        "pending_inventory_asof_sha256",
+        "dedup_asof_sha256"
+      ],
+      "proofsAuthenticated": 0,
+      "proofsRequired": 13,
+      "targetDecisions": [
+        {
+          "accepted_gross": null,
+          "capital_owner": null,
+          "decision": "REJECTED_PORTFOLIO",
+          "historical_fill_verified": null,
+          "owner_id": null,
+          "quantity_actual_fill": false,
+          "quantity_provenance": "CAUSAL_HYPOTHETICAL_REJECTED_AT_T",
+          "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "requested_gross": 0.25,
+          "source_venue_signed": false,
+          "utc": "2026-05-27T21:00"
+        },
+        {
+          "accepted_gross": 0.22275389599297446,
+          "capital_owner": null,
+          "decision": "ACCEPTED_MODELED_ENTRY",
+          "historical_fill_verified": false,
+          "owner_id": null,
+          "quantity_actual_fill": true,
+          "quantity_provenance": "MODEL_ACCEPTED_DECISION_AT_T",
+          "reason": "GROSS_ALLOCATED",
+          "requested_gross": 0.25,
+          "source_venue_signed": false,
+          "utc": "2026-06-23T01:00"
+        },
+        {
+          "accepted_gross": 0.21255926278847206,
+          "capital_owner": null,
+          "decision": "ACCEPTED_MODELED_ENTRY",
+          "historical_fill_verified": false,
+          "owner_id": null,
+          "quantity_actual_fill": true,
+          "quantity_provenance": "MODEL_ACCEPTED_DECISION_AT_T",
+          "reason": "GROSS_ALLOCATED",
+          "requested_gross": 0.25,
+          "source_venue_signed": false,
+          "utc": "2026-06-25T07:00"
+        }
+      ],
+      "tradeSha256": "5a025d7912f4c238f1440ab7e866e71f2fb65087570af7d5fcd8e85ededdf4c1",
+      "verdict": "BLOCKED_NATIVE_OWNER_ROUTE_ASOF_PROOFS_MISSING"
+    },
+    "30": {
+      "convergedDecisionFile": "C:\\tmp\\render4427-fresh-process-audit-20261025\\A\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_3a77ec7e46bd\\cmp_3a77ec7e46bd\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\candidate-decisions.jsonl",
+      "convergedDecisionSha256": "12b5ba01beaea4cd3543bcc7cea50cbbc1654c9c8218a2dde34b239c10802e7b",
+      "eventSha256": "8e628311b71184176b843a2f5dac48b76cd420a667c6c2bf69d043447280f296",
+      "independentProcessSameRawDecisionSha": true,
+      "missingFieldsInDecisionTradeEventArtifacts": [
+        "owner_id",
+        "capital_owner",
+        "native_owner_registration_sha256",
+        "owner_priority_asof_sha256",
+        "shared_risk_asof_sha256",
+        "margin_guard_asof_sha256",
+        "kill_switch_asof_sha256",
+        "account_lock_asof_sha256",
+        "pending_inventory_asof_sha256",
+        "dedup_asof_sha256"
+      ],
+      "proofsAuthenticated": 0,
+      "proofsRequired": 13,
+      "targetDecisions": [
+        {
+          "accepted_gross": null,
+          "capital_owner": null,
+          "decision": "REJECTED_PORTFOLIO",
+          "historical_fill_verified": null,
+          "owner_id": null,
+          "quantity_actual_fill": false,
+          "quantity_provenance": "CAUSAL_HYPOTHETICAL_REJECTED_AT_T",
+          "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "requested_gross": 0.25,
+          "source_venue_signed": false,
+          "utc": "2026-05-27T21:00"
+        },
+        {
+          "accepted_gross": 0.24999985769906155,
+          "capital_owner": null,
+          "decision": "ACCEPTED_MODELED_ENTRY",
+          "historical_fill_verified": false,
+          "owner_id": null,
+          "quantity_actual_fill": true,
+          "quantity_provenance": "MODEL_ACCEPTED_DECISION_AT_T",
+          "reason": "GROSS_ALLOCATED",
+          "requested_gross": 0.25,
+          "source_venue_signed": false,
+          "utc": "2026-06-23T01:00"
+        },
+        {
+          "accepted_gross": 0.24999982448271585,
+          "capital_owner": null,
+          "decision": "ACCEPTED_MODELED_ENTRY",
+          "historical_fill_verified": false,
+          "owner_id": null,
+          "quantity_actual_fill": true,
+          "quantity_provenance": "MODEL_ACCEPTED_DECISION_AT_T",
+          "reason": "GROSS_ALLOCATED",
+          "requested_gross": 0.25,
+          "source_venue_signed": false,
+          "utc": "2026-06-25T07:00"
+        }
+      ],
+      "tradeSha256": "0377b2c8eb44549c127ed98f63b8851ad5aed3d2a5d9a453329d7e522120c65d",
+      "verdict": "BLOCKED_NATIVE_OWNER_ROUTE_ASOF_PROOFS_MISSING"
+    }
+  },
+  "limitations": [
+    "Native candidate/decision/trade/event files are modeled research artifacts.",
+    "Absence of a field in these four artifacts does not prove it is absent from all external systems.",
+    "No Aster M5 signed fill, Funding, Margin Guard, Shared Risk, Kill Switch or account lock certification.",
+    "2025 Aster RENDER H1 mark missing; historical windows previously explored, not pristine OOS.",
+    "No production, VPS, HP, LIVE or real order change."
+  ],
+  "reference": "Native8 modeled counterfactual, NOT live venue attestation",
+  "researchOwner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "status": "RESEARCH_ONLY_FAIL_CLOSED_NATIVE_OWNER_EVIDENCE_AUDIT"
+}
