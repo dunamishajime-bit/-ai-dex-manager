@@ -98,8 +98,6 @@ export function buildQuality102CausalV4Signal(
     const occupied = input.sleeveOccupancy.activePosition || input.sleeveOccupancy.unresolvedPendingEntry;
     if (occupied) return { ...legacy, brkEnabled: true };
     const entryTs = currentHour(input.decisionTs);
-    if (input.sleeveOccupancy.basePositionActive) return idleSignal(legacy, "QUALITY102_CAUSAL_V4_BASE_NOT_IDLE", entryTs);
-
     if (legacy.side !== 0 && legacy.symbol) {
         const entryOpen = input.history.entryOpenBySymbol?.[legacy.symbol];
         if (!entryOpen) throw new Error(`QUALITY102_CAUSAL_V4_ENTRY_OPEN_MISSING:${legacy.symbol}`);

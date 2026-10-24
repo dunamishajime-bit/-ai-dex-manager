@@ -42,6 +42,11 @@ test("baseline wins at the same timestamp", () => {
     assert.deepEqual(result, { accepted: false, reason: "BASELINE_ACCEPTED_SAME_TIMESTAMP", gross: 0 });
 });
 
+test("baseline positions and pending exposure are capacity inputs, not standalone stops", () => {
+    const result = evaluateIdleLiveAdmission({ ...base, baselineOpenPositions: 1, baselinePendingExposure: 0.2 });
+    assert.equal(result.accepted, true);
+});
+
 test("risk, margin, kill switch, cross, and side gates all fail closed", () => {
     for (const input of [
         { sharedRiskHealthy: false },
@@ -57,12 +62,17 @@ test("risk, margin, kill switch, cross, and side gates all fail closed", () => {
 
 test("partial capacity never becomes a partial Idle order", () => {
     const result = evaluateIdleLiveAdmission({ ...base, fullCryptoGrossAvailable: 0.99 });
-    assert.deepEqual(result, { accepted: false, reason: "FULL_1X_CAPACITY_UNAVAILABLE", gross: 0 });
+    assert.equal(result.accepted, false);
 });
 
-test("same-symbol Idle occupancy and sidecar exposure block new entry", () => {
+test("partial allocated gross is accepted only at or above the route minimum", () => {
+    assert.deepEqual(evaluateIdleLiveAdmission({ ...base, symbol: "TAOUSDT", allocatedGross: 0.1 }), { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: 0.1 });
+    assert.equal(evaluateIdleLiveAdmission({ ...base, symbol: "TAOUSDT", allocatedGross: 0.099 }).accepted, false);
+});
+
+test("same-symbol Idle occupancy blocks but sidecar exposure alone does not", () => {
     assert.equal(evaluateIdleLiveAdmission({ ...base, sameSymbolIdleActive: true }).reason, "IDLE_SAME_SYMBOL_ACTIVE");
-    assert.equal(evaluateIdleLiveAdmission({ ...base, nonBaselineCryptoExposure: 0.01 }).reason, "NON_BASELINE_SIDECAR_EXPOSURE");
+    assert.equal(evaluateIdleLiveAdmission({ ...base, nonBaselineCryptoExposure: 0.01 }).accepted, true);
 });
 
 test("accepted admission is exactly one gross", () => {
@@ -73,7 +83,7 @@ test("DOT and RENDER accept only their fixed 0.25x gross without partial sizing"
     const dot = evaluateIdleLiveAdmission({ ...base, symbol: "DOTUSDT", fullCryptoGrossAvailable: 0.25, fullTotalGrossAvailable: 0.25 });
     assert.deepEqual(dot, { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: 0.25 });
     const render = evaluateIdleLiveAdmission({ ...base, symbol: "RENDERUSDT", fullCryptoGrossAvailable: 0.249999, fullTotalGrossAvailable: 0.25 });
-    assert.deepEqual(render, { accepted: false, reason: "GROSS_CAPACITY_UNAVAILABLE:0.25X", gross: 0 });
+    assert.equal(render.accepted, false);
 });
 
 test("protection plan is deterministic SHORT-only and uses stop/TP contract", () => {

@@ -6,6 +6,7 @@ import type { AsterV3Client } from "./aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectAccountSnapshot, type DirectOpenOrder, type DirectPosition, type DirectTradeResult } from "./direct-trade-executor";
 import { FileAccountOrderLock, type AccountLockHandle } from "./disdex-account-order-lock";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
+import { FileDynamicEntryIntentRegistry } from "./disdex-dynamic-entry-intent-registry";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
@@ -496,11 +497,6 @@ export class IdlePriorityShortRunner {
         if (!(equity > 0)) return { status: "held", message: "IDLE_EQUITY_INVALID", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
         const ownerPending = pendingExposureByOwner(await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath));
-        if (exposure.baselineOpenPositions > EPSILON || ownerPending.baselinePendingExposure > EPSILON) {
-            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason: "BASELINE_OPEN_OR_PENDING" };
-            await this.dependencies.stateStore.save(state);
-            return { status: "no-change", message: "IDLE_BASELINE_NOT_IDLE", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
-        }
         let baseline: IdleBaselineAdmission;
         try {
             baseline = await buildBaselineAdmissionEvidence({
@@ -575,21 +571,83 @@ export class IdlePriorityShortRunner {
             fullTotalGrossAvailable,
             sameSymbolIdleActive: Boolean(state.positions.find((position) => position.symbol === symbol)),
         } as const;
-        const admission = evaluateIdleLiveAdmission(baseInput);
-        state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.reason };
+        const routePolicy = IDLE_PRIORITY_SHORT_POLICY.routes[symbol];
+        const cycleId = `IDLE:${signal.features.decisionTs}:${signal.features.signalTs}:${symbol}`;
+        const intentPath = `${this.dependencies.runtime.pendingExposurePath}.dynamic-entry-intents.json`;
+        const intentRegistry = new FileDynamicEntryIntentRegistry(intentPath);
+        const pendingSnapshot = await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath);
+        const strategyGrossAvailable = Math.max(0, IDLE_PRIORITY_SHORT_POLICY.gross
+            - state.positions.reduce((sum, position) => sum + position.gross, 0)
+            - (pendingAggregate.byStrategyGross[IDLE_PRIORITY_SHORT_STRATEGY] || 0));
+        const positionGrossAvailable = Math.max(0, routePolicy.gross
+            - positions.filter((position) => position.symbol.toUpperCase() === symbol).reduce((sum, position) => sum + Math.abs(position.notionalUsd) / equity, 0)
+            - pendingSnapshot.entries.filter((entry) => entry.symbol === symbol && ["PENDING", "SUBMITTED", "UNKNOWN"].includes(entry.status)).reduce((sum, entry) => sum + entry.gross, 0));
+        let allocation;
+        try {
+            await intentRegistry.submit({
+                cycleId,
+                id: cycleId,
+                strategy: IDLE_PRIORITY_SHORT_STRATEGY,
+                symbol,
+                side: "SHORT",
+                assetClass: "CRYPTO",
+                marketFitScore: Math.max(0, (Math.abs(signal.features.rel24) + Math.abs(signal.features.ret12)) * 100),
+                targetGross: routePolicy.gross,
+                minGross: routePolicy.minGross,
+                maxGross: routePolicy.gross,
+                concentrationPenalty: exposure.cryptoGross + ownerPending.nonBaselinePendingExposure,
+            }, this.now());
+            allocation = await intentRegistry.allocateCycle({
+                cycleId,
+                now: this.now(),
+                cryptoGrossAvailable: Math.max(0, fullCryptoGrossAvailable),
+                stockGrossAvailable: 0,
+                totalGrossAvailable: Math.max(0, fullTotalGrossAvailable),
+                equityUsd: equity,
+                lock,
+                quality102CausalV1Ready: false,
+                strategyGrossAvailable: { [IDLE_PRIORITY_SHORT_STRATEGY]: strategyGrossAvailable },
+                positionGrossAvailable: { [`${IDLE_PRIORITY_SHORT_STRATEGY}|${symbol}|SHORT`]: positionGrossAvailable },
+            });
+        } catch (error) {
+            const reason = `IDLE_ALLOCATION_FAILED:${error instanceof Error ? error.message : String(error)}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        const allocated = allocation.allocations.find((row) => row.id === cycleId);
+        const allocationReason = allocation.rejected.find((row) => row.id === cycleId)?.reason;
+        const reservation = allocated ? (await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath)).entries
+            .filter((row) => row.strategyId === IDLE_PRIORITY_SHORT_STRATEGY && row.symbol === symbol && row.side === "SHORT"
+                && Math.abs(row.gross - allocated.allocatedGross) <= EPSILON && ["PENDING", "SUBMITTED", "UNKNOWN"].includes(row.status))
+            .sort((a, b) => b.createdAt - a.createdAt)[0] : undefined;
+        const admission = evaluateIdleLiveAdmission({ ...baseInput, allocatedGross: allocated?.allocatedGross ?? 0 });
+        state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.accepted ? admission.reason : allocationReason || admission.reason, finalScore: allocated?.finalScore, allocatedGross: allocated?.allocatedGross, rejectionReason: allocationReason };
         await this.dependencies.stateStore.save(state);
-        if (!admission.accepted) return { status: "held", message: `IDLE_ENTRY_BLOCKED:${admission.reason}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
-        if (this.dependencies.runtime.mode !== "LIVE") return { status: "shadow", message: `IDLE_SHADOW_ENTRY:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
-        await assertOperatorActivation(this.dependencies.runtime);
-        await this.dependencies.executor.getAccountSnapshot();
+        if (!admission.accepted) {
+            if (reservation) await lock.releaseReservation(reservation.reservationId);
+            return { status: "held", message: `IDLE_ENTRY_BLOCKED:${allocationReason || admission.reason}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        if (!reservation) return { status: "held", message: "IDLE_ALLOCATION_RESERVATION_MISSING", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        if (this.dependencies.runtime.mode !== "LIVE") {
+            await lock.releaseReservation(reservation.reservationId);
+            return { status: "shadow", message: `IDLE_SHADOW_ENTRY:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        try {
+            await assertOperatorActivation(this.dependencies.runtime);
+            await this.dependencies.executor.getAccountSnapshot();
+        } catch (error) {
+            await lock.releaseReservation(reservation.reservationId);
+            throw error;
+        }
         let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
         try {
-            const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
-            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * requestedGross / quote.bidPrice, quote.bidPrice);
+            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * admission.gross / quote.bidPrice, quote.bidPrice);
         } catch (error) {
             const reason = `IDLE_VENUE_QUANTITY_REJECTED:${symbol}:${error instanceof Error ? error.message : String(error)}`;
             state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
             await this.dependencies.stateStore.save(state);
+            await lock.releaseReservation(reservation.reservationId);
             return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
         const lot = evaluateIdleOneStepFloor({
@@ -602,12 +660,11 @@ export class IdlePriorityShortRunner {
             const reason = `IDLE_QUANTITY_REJECTED:${symbol}:${lot.code}:actualGross=${lot.actualGross ?? "UNKNOWN"}:minQty=${normalized.minQuantity}:minNotional=${normalized.minNotional}:step=${normalized.stepSize}`;
             state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
             await this.dependencies.stateStore.save(state);
+            await lock.releaseReservation(reservation.reservationId);
             return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
         const clientOrderId = deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
-        const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
-        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: admission.gross, notionalUsd: equity * admission.gross });
-        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: requestedGross };
+        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: admission.gross };
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         try {
@@ -779,11 +836,6 @@ export class IdlePriorityShortRunner {
             }
             const lifecycleExposure = coreAndSidecarExposure(positions, lifecycleEquity, new Set(state.positions.map((row) => row.symbol)));
             const lifecycleOwnerPending = pendingExposureByOwner(pendingRegistry);
-            if (lifecycleExposure.baselineOpenPositions > EPSILON || lifecycleOwnerPending.baselinePendingExposure > EPSILON) {
-                state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "BASELINE_OPEN_OR_PENDING" };
-                await this.dependencies.stateStore.save(state);
-                return { status: "no-change", message: "IDLE_GENERIC_BASELINE_NOT_IDLE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
-            }
             let lifecycleBaseline: IdleBaselineAdmission;
             try {
                 lifecycleBaseline = await buildBaselineAdmissionEvidence({
@@ -811,18 +863,14 @@ export class IdlePriorityShortRunner {
                     positionChangesSent: 0,
                 };
             }
-            if (Math.max(lifecycleBaseline.baselineOpenPositions, lifecycleExposure.baselineOpenPositions) > EPSILON
-                || Math.max(lifecycleBaseline.baselinePendingExposure, lifecycleOwnerPending.baselinePendingExposure) > EPSILON
-                || lifecycleBaseline.baselineAcceptedThisTimestamp > 0) {
+            if (lifecycleBaseline.baselineAcceptedThisTimestamp > 0) {
                 state.lastDecision = {
                     decisionTs: market.decisionTs,
                     accepted: false,
-                    reason: lifecycleBaseline.baselineAcceptedThisTimestamp > 0
-                        ? "BASELINE_ACCEPTED_SAME_TIMESTAMP"
-                        : "BASELINE_OPEN_OR_PENDING",
+                    reason: "BASELINE_ACCEPTED_SAME_TIMESTAMP",
                 };
                 await this.dependencies.stateStore.save(state);
-                return { status: "no-change", message: "IDLE_GENERIC_BASELINE_NOT_IDLE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                return { status: "no-change", message: "IDLE_BASELINE_ACCEPTED_SAME_TIMESTAMP", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
 
             const signals = lifecycleCandidates

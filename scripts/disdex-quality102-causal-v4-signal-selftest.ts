@@ -44,7 +44,7 @@ function flat(symbol:string, entryOpen:number, lastClose=100, close24=100){
 {
   const {history}=flat("FETUSDT",125,94,100);
   const s=buildQuality102CausalV4Signal({history,decisionTs:NOW,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:true}});
-  assert.equal(s.side,0); assert.equal(s.reason,"QUALITY102_CAUSAL_V4_BASE_NOT_IDLE");
+  assert.equal(s.side,1); assert.equal(s.symbol,"FETUSDT");
 }
 
 {

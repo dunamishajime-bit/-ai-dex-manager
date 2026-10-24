@@ -53,6 +53,9 @@ export type IdleDecision={
   route?:string;
   accepted:boolean;
   reason:string;
+  finalScore?:number;
+  allocatedGross?:number;
+  rejectionReason?:string;
 };
 
 export type IdleState={

@@ -223,7 +223,7 @@ test("unprotected filled entry is safety-closed with BUY ask reference", async (
 });
 
 
-test("open formal position short-circuits baseline snapshot clocks and refreshes durable Idle decision", async () => {
+test("open formal position does not short-circuit fresh baseline evidence collection", async () => {
     const pendingPath = join(tmpdir(), `idle-pending-missing-${process.pid}-${Date.now()}.json`);
     const { instance, stateStore } = runner({
         executor: {
@@ -254,8 +254,8 @@ test("open formal position short-circuits baseline snapshot clocks and refreshes
         { async document() {} },
         { cryptoGross: 0, stockGross: 0, byStrategyGross: {} },
     );
-    assert.equal(result.status, "no-change");
-    assert.equal(result.message, "IDLE_BASELINE_NOT_IDLE");
-    assert.equal(stateStore.saved?.lastDecision?.reason, "BASELINE_OPEN_OR_PENDING");
+    assert.equal(result.status, "held");
+    assert.match(result.message, /BASELINE_ADMISSION_BLOCKED/);
+    assert.match(stateStore.saved?.lastDecision?.reason || "", /BASELINE_ADMISSION_BLOCKED/);
     assert.equal(stateStore.saved?.lastDecision?.decisionTs, now);
 });

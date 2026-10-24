@@ -22,6 +22,7 @@ export type IdleLiveAdmissionInput = {
     venueFiveXCrossConfirmed: boolean;
     fullCryptoGrossAvailable: number;
     fullTotalGrossAvailable: number;
+    allocatedGross?: number;
     sameSymbolIdleActive: boolean;
 };
 
@@ -78,22 +79,19 @@ export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLi
         return { accepted: false, reason: "BASELINE_ADMISSION_UNAVAILABLE", gross: 0 };
     }
     if (input.baselineAcceptedThisTimestamp > 0) return { accepted: false, reason: "BASELINE_ACCEPTED_SAME_TIMESTAMP", gross: 0 };
-    if (input.baselineOpenPositions > EPSILON || input.baselinePendingExposure > EPSILON) {
-        return { accepted: false, reason: "BASELINE_OPEN_OR_PENDING", gross: 0 };
-    }
     if (input.sameSymbolIdleActive) return { accepted: false, reason: "IDLE_SAME_SYMBOL_ACTIVE", gross: 0 };
-    if (input.nonBaselineCryptoExposure > EPSILON || input.nonBaselinePendingExposure > EPSILON) {
-        return { accepted: false, reason: "NON_BASELINE_SIDECAR_EXPOSURE", gross: 0 };
-    }
     if (!input.sharedRiskHealthy) return { accepted: false, reason: "SHARED_RISK_NOT_HEALTHY", gross: 0 };
     if (!input.marginGuardHealthy) return { accepted: false, reason: "MARGIN_GUARD_NOT_HEALTHY", gross: 0 };
     if (input.killSwitchActive) return { accepted: false, reason: "SHARED_KILL_SWITCH_ACTIVE", gross: 0 };
     if (!input.venueFiveXCrossConfirmed) return { accepted: false, reason: "VENUE_5X_CROSS_UNCONFIRMED", gross: 0 };
     if (!input.candidateAccepted || input.candidateSide !== "SHORT") return { accepted: false, reason: "SHORT_SIGNAL_NOT_ACCEPTED", gross: 0 };
-    if (input.fullCryptoGrossAvailable < requestedGross - EPSILON || input.fullTotalGrossAvailable < requestedGross - EPSILON) {
-        return { accepted: false, reason: requestedGross === 1 ? "FULL_1X_CAPACITY_UNAVAILABLE" : `GROSS_CAPACITY_UNAVAILABLE:${requestedGross}X`, gross: 0 };
+    const allocatedGross = input.allocatedGross ?? requestedGross;
+    const minimumGross = input.symbol ? IDLE_PRIORITY_SHORT_POLICY.routes[input.symbol].minGross : requestedGross;
+    if (allocatedGross < minimumGross - EPSILON || allocatedGross > requestedGross + EPSILON
+        || allocatedGross > input.fullCryptoGrossAvailable + EPSILON || allocatedGross > input.fullTotalGrossAvailable + EPSILON) {
+        return { accepted: false, reason: `GROSS_CAPACITY_UNAVAILABLE:${minimumGross}X_MINIMUM`, gross: 0 };
     }
-    return { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: requestedGross };
+    return { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: allocatedGross };
 }
 
 export function deterministicIdleClientOrderId(input: { action: "ENTRY" | "EXIT" | "STOP" | "TP"; symbol: string; signalTs: number }) {
