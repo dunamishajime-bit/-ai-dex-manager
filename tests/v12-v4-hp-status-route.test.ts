@@ -4,8 +4,8 @@ import { NextRequest } from "next/server";
 
 import { createV12V4HpStatusGet } from "../lib/server/v12-v4-hp-status-handler";
 import type { V12V4HpSnapshot } from "../lib/v12-v4-hp-contract";
-import { isV12RuntimeFresh } from "../app/api/system/decision-status/route";
-import { createLiveRuntimeGet } from "../app/api/system/live-runtime/route";
+import { isV12RuntimeFresh } from "../lib/server/decision-status-route-handler";
+import { createLiveRuntimeGet } from "../lib/server/live-runtime-route-handler";
 
 const snapshot = {
   schema: "v12-v4-hp-status/v1",

@@ -4,7 +4,7 @@ import test from "node:test";
 import { NextRequest } from "next/server";
 
 import { GET as getTradeHistory } from "../app/api/system/trade-history/route";
-import { createDecisionStatusGet, type DecisionStatusRouteDependencies } from "../app/api/system/decision-status/route";
+import { createDecisionStatusGet, type DecisionStatusRouteDependencies } from "../lib/server/decision-status-route-handler";
 import { assessRuntimeLineage, type CurrentProductionRuntime } from "../lib/server/current-production-runtime";
 import { loadDecisionStatus } from "../lib/server/disdex-decision-status";
 import { isHealthyCurrentRuntime, parseProductionRuntimeResponse, productionRuntimeStrategyLabel } from "../lib/ui/production-runtime";
@@ -25,7 +25,7 @@ function lineage(overrides: Partial<CurrentProductionRuntime["runtimeLineage"]["
 test("decision status reads current VPS runtime and refreshes every 30 seconds", async () => {
   const [server, route] = await Promise.all([
     readFile("lib/server/disdex-decision-status.ts", "utf8"),
-    readFile("app/api/system/decision-status/route.ts", "utf8"),
+    readFile("lib/server/decision-status-route-handler.ts", "utf8"),
   ]);
   assert.match(server, /loadCurrentProductionRuntime/);
   assert.match(server, /CACHE_TTL_MS = 25_000/);
