@@ -27,10 +27,10 @@ Proof SHA shape checking and synthetic test fixtures **are not authentication**.
 
 `python -m unittest -v test_render_4427_independent_owner_route_contract_20261025.py`
 
-- 13 tests passed in an isolated Python environment.
+- 14 tests passed in an isolated Python environment.
 - Synthetic same-symbol RENDER position is rejected even with all other gate proofs marked PASS. This encodes the May 27 collision invariant, not a fresh venue replay.
 - Unknown native Margin/Account Lock evidence rejects a candidate; no inference that the June 23/25 candidates are safe.
-- Each mandatory gate independently rejects when failed; future-dated or candidate-mismatched proof rejects; pending and cooldown reject; wrong Owner/Route and over-0.25 gross reject.
+- Each mandatory gate independently rejects when failed; future-dated or candidate-mismatched proof rejects; pending and cooldown reject; wrong Owner/Route, malformed entry timestamp and over-0.25 gross reject.
 - Even a fully synthetic PASS returns `NEED_NATIVE_ALLOCATOR` and `native_order_authorized=False`.
 
 ## Required next evidence / strict limits
