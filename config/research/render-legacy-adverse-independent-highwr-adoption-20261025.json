@@ -1,0 +1,111 @@
+{
+  "schema": "disdex-render-legacy-adverse-independent-highwr-handoff/v1",
+  "dateJST": "2026-10-25",
+  "status": "SOURCE_IMPLEMENTED_TESTED_NOT_WIRED_VPS_LIVE",
+  "scope": {
+    "existingRender": {
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "appliesTo": "existing IDLE RENDER SHORT only",
+      "legacyGateAndOI": "unchanged",
+      "userDecision": "ADOPT"
+    },
+    "independent": {
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+      "requiresOpenInterest": false,
+      "userDecision": "IMPLEMENT_AND_MONITOR_BEFORE_FINAL_ADOPTION"
+    }
+  },
+  "existingInitialAdverse": {
+    "firstConfirmedM5CloseLossAtMostPct": -1,
+    "watchDurationMinutes": 120,
+    "atWatchExpiryConfirmedM5CloseLossAtMostPct": -1,
+    "maxFavorableExcursionFromFillStrictlyBelowPct": 0.25,
+    "onMatch": "request protected reduce-only CLOSE at next tradable instant after M5 close",
+    "neverOverrideResidentStop": true,
+    "provenSeparateIntegratedModelDeltasJPY": {
+      "bps10": 331651,
+      "bps30": 117413
+    },
+    "source": "docs/research/results/idle-next-20261024/IDLE_RENDER_INITIAL_RISK_DECISION_20261024.md"
+  },
+  "independent": {
+    "rawEntry": {
+      "btcPreviousCompletedH1ReturnMinPct": 0.15,
+      "renderPreviousCompletedH1ReturnMaxPct": -0.5,
+      "renderLastCompletedH4ReturnMaxPct": -0.15,
+      "takerSellShareMin": 0.53,
+      "upperWickHeightAsPercentOfCompletedH1OpeningPriceMin": 0.35,
+      "wickIsPercentOfOpeningPriceNotFractionOfCandle": true,
+      "requiresOpenInterest": false
+    },
+    "qualityShadow": {
+      "usesHypotheticalSixHourOutcomeOnly": true,
+      "shadowTPPct": 1.5,
+      "shadowSLPct": 2,
+      "shadowMaxMinutes": 360,
+      "historicalCostRoundTripBps": 30,
+      "includeClosedShadowsEvenIfTradeNotExecuted": true,
+      "historyOnlySettledBeforeDecisionTs": true,
+      "minLifetimeN": 24,
+      "minLifetimeWR": 0.75,
+      "minLifetimePF": 1.35,
+      "minLifetimeMeanNetPct": 0.1,
+      "min365DayN": 3,
+      "min365DayWR": 0.6,
+      "min365DayMeanNetPct": 0
+    },
+    "realExecutionCandidate": {
+      "maxHoldMinutes": 55,
+      "hardStopLossPct": 2,
+      "takeProfitPct": 1.5,
+      "nominalRequestedGrossX": 0.25,
+      "newEntryCooldownHours": 12,
+      "requireProtectedOrderVenueReadback": true,
+      "symbolOwnerSinglePositionAndPending": true,
+      "ifSameSymbolIncumbentPassesUseHigherAsOfScoreWithIncumbentBias": 8,
+      "onUnknownIncumbentQuality": "PRESERVE_INCUMBENT_AND_REJECT_NEW"
+    },
+    "historicalNative8": {
+      "periodStart": "2025-08-10",
+      "periodEnd": "2026-08-10",
+      "notPristineOOS": true,
+      "newCandidateNativeAcceptedAndWon": {
+        "count": 4,
+        "wins": 4
+      },
+      "cost10bps": {
+        "baselineJPY": 288587378.77052534,
+        "independent55mJPY": 289526286.84056056,
+        "maxMtmDdPct": -14.514985270751623,
+        "oldTradesDisplaced": 0
+      },
+      "cost30bps": {
+        "baselineJPY": 174459200.2195523,
+        "independent55mJPY": 174993564.22014433,
+        "maxMtmDdPct": -15.014723812726594,
+        "oldTradesDisplaced": 0
+      }
+    }
+  },
+  "combinedLegacyAndIndependentEconomicBT": "NOT_YET_RUN; do not add isolated deltas",
+  "liveOrdersPermittedByThisCommit": false,
+  "liveRunnerIntegrated": false,
+  "vpsDeployedByThisCommit": false,
+  "codexMustPerform": [
+    "Merge safely with currently active Production SHA; resolve all type/routing contracts",
+    "Integrate separate independent route with Native8 owner, pending, gross, account lock, shared risk, margin, kill switch and protections; no generic OI gate",
+    "Persist 6h fully-settled hypothetical shadow journal independently from 55m fills, with no same-time future info and crash recovery",
+    "Wire original-only initial adverse M5 stop with idempotent protected reduce-only venue close and resident stop preservation",
+    "Recompute combined Native8 10/30bps and verify no displaced incumbent and DD non-worse",
+    "Certify real venue stop/TP and 55m time exit lifecycle, partial fills, reboot/reconcile",
+    "Run forward SHADOW first; no unsolicited auto LIVE authorization"
+  ],
+  "files": {
+    "implementation": "lib/render-highwr-and-legacy-stop.ts",
+    "monitor": "scripts/render-highwr-shadow-review.mjs",
+    "tests": "tests/render-highwr-and-legacy-stop.test.mjs"
+  }
+}
