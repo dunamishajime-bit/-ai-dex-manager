@@ -81,11 +81,67 @@ function actualPosition(positions: readonly DirectPosition[], symbol: string) {
   return positions.find((position) => position.symbol.toUpperCase() === symbol.toUpperCase() && Math.abs(position.quantity) > EPSILON);
 }
 
+type HypeScopedExecutor = DirectTradeExecutor & {
+  getHypeZecPositions?: () => Promise<DirectPosition[]>;
+  getHypeZecOpenOrders?: () => Promise<DirectOpenOrder[]>;
+  getHypePortfolioPositions?: () => Promise<DirectPosition[]>;
+  getHypePortfolioOpenOrders?: () => Promise<DirectOpenOrder[]>;
+};
+
+function hypeRecoveryPositions(executor: DirectTradeExecutor) {
+  const scoped = executor as HypeScopedExecutor;
+  if (!scoped.getHypeZecPositions) throw new Error("HYPE_ZEC_STALE_RECOVERY_SCOPED_POSITION_CAPABILITY_REQUIRED");
+  return scoped.getHypeZecPositions();
+}
+
+function hypeRecoveryOpenOrders(executor: DirectTradeExecutor) {
+  const scoped = executor as HypeScopedExecutor;
+  if (!scoped.getHypeZecOpenOrders) throw new Error("HYPE_ZEC_STALE_RECOVERY_SCOPED_OPEN_ORDER_CAPABILITY_REQUIRED");
+  return scoped.getHypeZecOpenOrders();
+}
+
+function hypePortfolioPositions(executor: DirectTradeExecutor) {
+  const scoped = executor as HypeScopedExecutor;
+  return scoped.getHypePortfolioPositions ? scoped.getHypePortfolioPositions() : executor.getPositions();
+}
+
+function hypePortfolioOpenOrders(executor: DirectTradeExecutor) {
+  const scoped = executor as HypeScopedExecutor;
+  return scoped.getHypePortfolioOpenOrders ? scoped.getHypePortfolioOpenOrders() : executor.getOpenOrders();
+}
+
+function strictUsdtSymbol(value: unknown, reason: string) {
+  if (typeof value !== "string") throw new Error(reason);
+  const symbol = value.trim().toUpperCase();
+  if (!/^[A-Z0-9]+USDT$/.test(symbol)) throw new Error(reason);
+  return symbol;
+}
+
 function hasZecResidual(state: HypeZecLongRunnerState, positions: readonly DirectPosition[], openOrders: readonly DirectOpenOrder[]) {
-  return (state.positions || []).some((position) => position.symbol === "ZECUSDT")
-    || state.pending?.symbol === "ZECUSDT"
-    || positions.some((position) => position.symbol.toUpperCase() === "ZECUSDT")
-    || openOrders.some((order) => order.symbol.toUpperCase() === "ZECUSDT");
+  for (const position of state.positions || []) {
+    const rawSymbol = position?.symbol;
+    const symbol = strictUsdtSymbol(rawSymbol, "HYPE_ZEC_PERSISTED_SYMBOL_INVALID");
+    if (symbol !== "HYPEUSDT" && symbol !== "ZECUSDT") throw new Error("HYPE_ZEC_PERSISTED_SYMBOL_INVALID");
+    if (!Number.isFinite(position.quantity)) throw new Error("HYPE_ZEC_PERSISTED_QUANTITY_INVALID");
+    if (symbol === "ZECUSDT") return true;
+    if (typeof rawSymbol !== "string" || rawSymbol.trim() !== symbol) throw new Error("HYPE_ZEC_PERSISTED_SYMBOL_INVALID");
+  }
+  if (state.pending) {
+    const rawSymbol = state.pending.symbol;
+    const symbol = strictUsdtSymbol(rawSymbol, "HYPE_ZEC_PERSISTED_SYMBOL_INVALID");
+    if (symbol === "ZECUSDT") return true;
+    if (symbol !== "HYPEUSDT" || rawSymbol.trim() !== symbol) throw new Error("HYPE_ZEC_PERSISTED_SYMBOL_INVALID");
+  }
+  for (const position of positions) {
+    const symbol = strictUsdtSymbol(position?.symbol, "HYPE_ZEC_VENUE_SYMBOL_INVALID");
+    if (!Number.isFinite(position.quantity)) throw new Error("HYPE_ZEC_VENUE_QUANTITY_INVALID");
+    if (symbol === "ZECUSDT" && Math.abs(position.quantity) > EPSILON) return true;
+  }
+  for (const order of openOrders) {
+    const symbol = strictUsdtSymbol(order?.symbol, "HYPE_ZEC_VENUE_SYMBOL_INVALID");
+    if (symbol === "ZECUSDT") return true;
+  }
+  return false;
 }
 
 function actualQuantity(position: DirectPosition) { return Math.abs(position.quantity); }
@@ -221,7 +277,7 @@ export class HypeZecLongRunner {
         if(state.pending&&state.pending.phase!=="planned"){const f=await this.dependencies.executor.reconcileOrder(owned.symbol,state.pending.clientOrderId);if(f.executionUnknown||f.status==="UNKNOWN"||f.side!=="SELL"||f.reduceOnly!==true||f.symbol!==owned.symbol)throw Error("HYPE_STOP_EXIT_RACE");if(f.executedQuantity>0)fills.push(f);}
         if(Math.abs(fills.reduce((n,f)=>n+f.executedQuantity,0)-owned.quantity)>1e-8)throw Error("HYPE_STOP_FILL_QUANTITY");
         for(const id of ids){const f=await this.dependencies.executor.reconcileOrder(owned.symbol,id);if(["NEW","PARTIALLY_FILLED"].includes(f.status)){await this.dependencies.adapter.cancel(id);const after=await this.dependencies.executor.reconcileOrder(owned.symbol,id);if(!["CANCELED","FILLED","EXPIRED"].includes(after.status))throw Error("HYPE_STOP_SIBLING_CANCEL_UNVERIFIED");}}
-        if((await this.dependencies.executor.getOpenOrders()).some(o=>ids.includes(o.clientOrderId)))throw Error("HYPE_STOP_SIBLING_STILL_OPEN");
+        if((await hypePortfolioOpenOrders(this.dependencies.executor)).some(o=>ids.includes(o.clientOrderId)))throw Error("HYPE_STOP_SIBLING_STILL_OPEN");
         state.positions=(state.positions||[]).filter(p=>p.positionId!==owned.positionId);state.pending=undefined;state.manualReview=undefined;state.lastDecision={strategy:owned.strategy,signalTs:owned.signalTs,accepted:true,reason:"EXIT:VENUE_RESIDENT_PROTECTION"};state.lastDecisionTs=this.now();await this.dependencies.stateStore.save(state);
         return {status:"completed",message:"HYPE_VENUE_PROTECTION_FILL_RECONCILED",strategy:owned.strategy};
       }catch(error){return this.manualReview(state,"HYPE_STOP_FILL_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
@@ -268,9 +324,9 @@ export class HypeZecLongRunner {
       return this.manualReview(state, `HYPE_ZEC_EXIT_ERROR:${error instanceof Error ? error.message : String(error)}`);
     }
     if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `HYPE_ZEC_EXIT_UNKNOWN:${idempotencyKey}`);
-    const remaining = await this.dependencies.executor.getPositions();
+    const remaining = await hypePortfolioPositions(this.dependencies.executor);
     if (actualPosition(remaining, owned.symbol)) return this.manualReview(state, `HYPE_ZEC_EXIT_POSITION_REMAINS:${owned.symbol}`);
-    const open = await this.dependencies.executor.getOpenOrders();
+    const open = await hypePortfolioOpenOrders(this.dependencies.executor);
     for (const order of findManagedHypeZecProtectiveOrders(open, [actual])) await this.dependencies.adapter.cancel(order.clientOrderId);
     state.positions = (state.positions || []).filter((row) => row.positionId !== owned.positionId);
     state.pending = undefined;
@@ -364,7 +420,7 @@ export class HypeZecLongRunner {
     }
     if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `HYPE_ZEC_ENTRY_UNKNOWN:${idempotencyKey}`);
     if (!hasExposure(result)) { state.pending = undefined; await this.dependencies.stateStore.save(state); return { status: "held", message: `HYPE_ZEC_ENTRY_${result.status}_NO_EXPOSURE`, strategy: signal.strategy }; }
-    const refreshed = await this.dependencies.executor.getPositions();
+    const refreshed = await hypePortfolioPositions(this.dependencies.executor);
     const actual = actualPosition(refreshed, symbol);
     if (!actual || positionSide(actual) !== "LONG") return this.manualReview(state, `HYPE_ZEC_ENTRY_POSITION_MISMATCH:${symbol}`);
     const actualQty = actualQuantity(actual);
@@ -396,7 +452,7 @@ export class HypeZecLongRunner {
     try {
       await this.dependencies.adapter.placeStopMarket({ symbol, side: "SELL", quantity: levels.quantity, stopPrice: levels.stopPrice, clientOrderId: stopId, reduceOnly: true });
       await this.dependencies.adapter.placeTakeProfit({ symbol, side: "SELL", quantity: levels.quantity, stopPrice: levels.takeProfitPrice, clientOrderId: tpId, reduceOnly: true });
-      const readBack = await this.dependencies.executor.getOpenOrders();
+      const readBack = await hypePortfolioOpenOrders(this.dependencies.executor);
       if (findManagedHypeZecProtectiveOrders(readBack, [actual]).length !== 2) throw new Error("HYPE_ZEC_PROTECTION_READBACK_FAILED");
     } catch (error) {
       return this.manualReview(state, `HYPE_ZEC_PROTECTION_INSTALL_FAILED:${error instanceof Error ? error.message : String(error)}`);
@@ -431,21 +487,72 @@ export class HypeZecLongRunner {
     const lock = await this.dependencies.lock.acquire(`HYPE_ZEC_LONG:${process.pid}:${Date.now()}`);
     if (!lock) return { status: "locked", message: "HYPE_ZEC_LONG_ACCOUNT_LOCK_BUSY" };
     let readOnlyBudgetPhase = true;
+    let state: HypeZecLongRunnerState | undefined;
+    let recoveredThisTick = false;
     try {
-      const state = await this.dependencies.stateStore.load();
+      let venueReadback: { account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[] } | undefined;
+      try {
+        state = await this.dependencies.stateStore.load();
+      } catch (error) {
+        if (!(error instanceof Error) || error.message !== "HYPE_ZEC_LONG_STATE_STALE") throw error;
+        let account: DirectAccountSnapshot;
+        let positions: DirectPosition[];
+        let openOrders: DirectOpenOrder[];
+        try {
+          [account, positions, openOrders] = await Promise.all([
+            this.dependencies.executor.getAccountSnapshot(),
+            hypeRecoveryPositions(this.dependencies.executor),
+            hypeRecoveryOpenOrders(this.dependencies.executor),
+          ]);
+          const recovered = await this.dependencies.stateStore.recoverFlatStaleState({
+            reason: "ASTER_SIGNED_FLAT_READBACK",
+            venue: { source: "ASTER_SIGNED_READ_ONLY", positions, openOrders },
+            lock,
+          });
+          if (!recovered.state) throw new Error(`HYPE_ZEC_STALE_STATE_RECOVERY_${recovered.status}`);
+          state = recovered.state;
+          recoveredThisTick = true;
+          venueReadback = { account, positions, openOrders };
+          this.log.warn("hype-zec-stale-flat-state-recovered", {
+            backupPath: recovered.backupPath,
+            ordersSent: 0,
+            cancelsSent: 0,
+            positionChangesSent: 0,
+          });
+        } catch (recoveryError) {
+          const recoveryMessage = recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
+          this.log.error("hype-zec-stale-state-recovery-refused", { reason: recoveryMessage, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+          return { status: "manual-review", message: `HYPE_ZEC_STALE_STATE_RECOVERY_REFUSED:${recoveryMessage}` };
+        }
+      }
+      if (!state) throw new Error("HYPE_ZEC_LONG_STATE_NOT_LOADED");
+      if (recoveredThisTick) {
+        this.log.info("hype-zec-stale-flat-recovery-read-only-tick", {
+          ordersSent: 0,
+          cancelsSent: 0,
+          positionChangesSent: 0,
+        });
+        return { status: "held", message: "HYPE_ZEC_STALE_FLAT_RECOVERY_READ_ONLY" };
+      }
       const benignReview = isBenignMarketDataReview(state.manualReview);
       if (state.manualReview && !benignReview) return { status: "manual-review", message: state.manualReview };
 
       const currentVenue = venueReadback || await (async () => {
         const [account, positions, openOrders] = await Promise.all([
           this.dependencies.executor.getAccountSnapshot(),
-          this.dependencies.executor.getPositions(),
-          this.dependencies.executor.getOpenOrders(),
+          hypePortfolioPositions(this.dependencies.executor),
+          hypePortfolioOpenOrders(this.dependencies.executor),
         ]);
         return { account, positions, openOrders };
       })();
       const { account, positions, openOrders } = currentVenue;
-      if (hasZecResidual(state, positions, openOrders)) return this.manualReview(state, "HYPE_LIVE_SCOPE_ZEC_RESIDUAL");
+      let zecResidual = false;
+      try {
+        zecResidual = hasZecResidual(state, positions, openOrders);
+      } catch (error) {
+        return this.manualReview(state, error instanceof Error ? error.message : String(error));
+      }
+      if (zecResidual) return this.manualReview(state, "HYPE_LIVE_SCOPE_ZEC_RESIDUAL");
       const protectionFill=await this.reconcileVenueProtectionFills(state,positions);if(protectionFill)return protectionFill;
       if(state.pending)return this.manualReview(state,"HYPE_ZEC_PENDING_REQUIRES_RECONCILIATION");
       const ownershipIssue = await this.reconcileOwnership(state, positions, openOrders);
@@ -530,28 +637,32 @@ export class HypeZecLongRunner {
       return { status: "no-change", message: "HYPE_ZEC_NO_ACCEPTED_ENTRY" };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      const state = await this.dependencies.stateStore.load();
+      const failedState = state;
+      if (!failedState) {
+        this.log.error("hype-zec-runner-fail-closed-before-state", { reason: message, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+        return { status: "manual-review", message: `HYPE_ZEC_RUNNER_FAIL_CLOSED:${message}` };
+      }
       const budget = classifyAsterRateBudgetFailure(error);
-      if (readOnlyBudgetPhase && budget && !state.manualReview && !state.pending && (state.positions || []).length > 0) {
-        const next = heartbeatHypeZecRateBudgetDeferral(state, budget.reason, this.now());
-        if (next !== state) {
+      if (readOnlyBudgetPhase && budget && !failedState.manualReview && !failedState.pending && (failedState.positions || []).length > 0) {
+        const next = heartbeatHypeZecRateBudgetDeferral(failedState, budget.reason, this.now());
+        if (next !== failedState) {
           const reason = next.lastDecision?.reason || `HYPE_ZEC_PROTECTED_RATE_BUDGET_DEFERRED:${budget.reason}`;
           await this.dependencies.stateStore.save(next);
           this.log.warn("hype-zec-rate-budget-deferred", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
           return { status: "held", message: reason };
         }
       }
-      if (readOnlyBudgetPhase && budget && !state.manualReview && !(state.positions || []).length && !state.pending) {
+      if (readOnlyBudgetPhase && budget && !failedState.manualReview && !(failedState.positions || []).length && !failedState.pending) {
         // Reconciliation is deferred, not declared successful: no signal or
         // order may execute until a subsequent tick completes fresh reads.
         const reason = `HYPE_ZEC_RATE_BUDGET_DEFERRED:${budget.reason}`;
-        state.lastDecision = { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason };
-        state.lastDecisionTs = this.now();
-        await this.dependencies.stateStore.save(state);
+        failedState.lastDecision = { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason };
+        failedState.lastDecisionTs = this.now();
+        await this.dependencies.stateStore.save(failedState);
         this.log.warn("hype-zec-rate-budget-deferred", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
         return { status: "held", message: reason };
       }
-      return this.manualReview(state, `HYPE_ZEC_RUNNER_FAIL_CLOSED:${message}`);
+      return this.manualReview(failedState, `HYPE_ZEC_RUNNER_FAIL_CLOSED:${message}`);
     } finally {
       await lock.release();
     }
