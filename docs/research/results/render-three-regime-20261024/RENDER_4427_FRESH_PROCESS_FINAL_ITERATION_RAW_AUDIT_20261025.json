@@ -1,0 +1,105 @@
+{
+  "costs": {
+    "10": {
+      "cross_process_identical_passes": [
+        true,
+        true,
+        true
+      ],
+      "decision_counts_A": [
+        2543,
+        2523,
+        2523
+      ],
+      "decision_counts_B": [
+        2543,
+        2523,
+        2523
+      ],
+      "economic_match_archived": true,
+      "final_metrics": {
+        "closed_trades": 1293,
+        "final_equity_jpy": 290070131.97157055,
+        "maximum_mtm_drawdown_pct": -14.514985270751623,
+        "profit_factor": 4.7568879921039064,
+        "win_rate": 0.7308584686774942
+      },
+      "final_pass_byte_identical_including_candidate_ids": true,
+      "pass": true,
+      "pass_ids": [
+        "cmp_5bb26c207eb3",
+        "cmp_d112f9aef1ff",
+        "cmp_88139ccf92bb"
+      ],
+      "raw_sha256_final": {
+        "candidate-decisions.jsonl": "69d73014f348f9c4ba3a4ff43c4c9c78815d113bd61f3d108b6f2f41477c5879",
+        "core_reference_inputs": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69",
+        "portfolio-events.jsonl": "edcb568bd30978795372f089f545b5df342d7f8e127bb15fc8d41ec981c46010",
+        "portfolio-trades.jsonl": "5a025d7912f4c238f1440ab7e866e71f2fb65087570af7d5fcd8e85ededdf4c1",
+        "preallocation_candidates": "de696304d4b281235891daf320362ef72753a89db9e052cd55322477e522f783",
+        "quantity_vectors": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea",
+        "task9-mtm.jsonl": "3cce0e818667ef86ad5028a0266d5fafc8783200d2fee37bc529455ddc7a5a7f"
+      },
+      "within_process_converged_I1_I2_byte_identical": {
+        "A": true,
+        "B": true
+      }
+    },
+    "30": {
+      "cross_process_identical_passes": [
+        true,
+        true,
+        true
+      ],
+      "decision_counts_A": [
+        2543,
+        2523,
+        2523
+      ],
+      "decision_counts_B": [
+        2543,
+        2523,
+        2523
+      ],
+      "economic_match_archived": true,
+      "final_metrics": {
+        "closed_trades": 1292,
+        "final_equity_jpy": 175324355.2534185,
+        "maximum_mtm_drawdown_pct": -15.014723812726594,
+        "profit_factor": 3.8351451263116614,
+        "win_rate": 0.7027863777089783
+      },
+      "final_pass_byte_identical_including_candidate_ids": true,
+      "pass": true,
+      "pass_ids": [
+        "cmp_2104321c587e",
+        "cmp_433aa2452f5a",
+        "cmp_3a77ec7e46bd"
+      ],
+      "raw_sha256_final": {
+        "candidate-decisions.jsonl": "12b5ba01beaea4cd3543bcc7cea50cbbc1654c9c8218a2dde34b239c10802e7b",
+        "core_reference_inputs": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69",
+        "portfolio-events.jsonl": "8e628311b71184176b843a2f5dac48b76cd420a667c6c2bf69d043447280f296",
+        "portfolio-trades.jsonl": "0377b2c8eb44549c127ed98f63b8851ad5aed3d2a5d9a453329d7e522120c65d",
+        "preallocation_candidates": "774ea47081758005e4fef56ea2b739b32e383485b4f5bf0dfe32e4666d004d78",
+        "quantity_vectors": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea",
+        "task9-mtm.jsonl": "b81ba544da6d922e29d61d0608f7a51e1171868970ba676a46ef1c1b1bea7dab"
+      },
+      "within_process_converged_I1_I2_byte_identical": {
+        "A": true,
+        "B": true
+      }
+    }
+  },
+  "limitations": [
+    "Research in-memory overlay adjustment is not a registered Owner/Route; do not deploy.",
+    "Shared Risk, Margin Guard, Kill Switch, Pending, account lock and dedup parity not fully certified.",
+    "2025 Aster RENDER H1 mark missing; actual Aster M5 fills/funding not verified.",
+    "Historical periods are previously explored, not untouched OOS.",
+    "No VPS/LIVE/Production/HP/orders changed."
+  ],
+  "normalized_runner_sha256": "156d589ffa51e17cc056cab82f8eabf50a68507812b647c0f8694ef960085271",
+  "scope": "Research-only, two fresh independent Python processes A/B, identical pinned scripts except output path",
+  "source_patch_sha256": "c1afa4eba204f3f0e425a3e578897cf3b96fab2433c2fe30912143068632ddc9",
+  "status": "RESEARCH_ONLY_FRESH_PROCESS_RAW_DETERMINISM_PASS"
+}
