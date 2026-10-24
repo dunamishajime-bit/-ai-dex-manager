@@ -7,7 +7,7 @@ import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {executeV4WithContentionAudit} from "../lib/v12-v4-lock-contention-observer";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
 import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
-import {V4RunnerEngine,classifyV4RecoverableExitFeedFailure,classifyV4StaleExitDecisionFailure} from "../lib/v12-v4-runner-engine";
+import {V4RunnerEngine,classifyV4RecoverableExitFeedFailure,classifyV4StaleExitDecisionFailure,type V4OperatorExitAuthorization} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
 import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
@@ -217,7 +217,11 @@ function requireReleaseSha(){
  if(env("V12_V4_LIVE_ACK").toLowerCase()!==sha)throw Error("V4_RELEASE_ACK_MISMATCH");
  return sha;
 }
-export async function buildV4ProductionRuntime(){
+export type V4ProductionRuntimeOptions={
+ operatorExitLegIds?:ReadonlySet<string>;
+ authorizeOperatorExit?:V4OperatorExitAuthorization;
+};
+export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOptions={}){
  const releaseSha=requireReleaseSha();
  const operationModeRaw=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
  if(operationModeRaw!=="CERTIFIED"&&operationModeRaw!=="CANARY")throw Error("V4_OPERATION_MODE_INVALID");
@@ -307,6 +311,8 @@ export async function buildV4ProductionRuntime(){
     (await import("../lib/v12-x1-all")).protectiveLevels(entryPrice,atr14,side).initialStop;
   },
   canaryEntry:canaryPermit?{maxNotionalUsd:canaryPermit.absoluteNotionalCapUsd}:undefined,
+  operatorExitLegIds:options.operatorExitLegIds,
+  authorizeOperatorExit:options.authorizeOperatorExit,
   assertEntrySafety:async()=>{await assertV4EntrySafety();},
   assertSourceParity:async decision=>{
    if(canaryPermit)assertV4CanarySourceSnapshot(decision,canaryPermit,releaseSha);

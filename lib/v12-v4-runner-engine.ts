@@ -15,7 +15,7 @@ import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
 import {planV4RetiredStops} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
 import {createV4FourRuleState,desiredV4FourRuleStop} from "./v12-v4-four-rule-policy";
-import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput} from "./v12-v4-production-lifecycle";
+import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput,type ExitDecision} from "./v12-v4-production-lifecycle";
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
@@ -25,6 +25,10 @@ export type V4PreparedDecision =
 
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
  eventTs:number;candidateCount:number;orderEnabled:boolean};
+export type V4OperatorExitAuthorizationInput={
+ legId:string;symbol:string;positionSide:"LONG"|"SHORT";quantity:number;plannedExit?:ExitDecision;
+};
+export type V4OperatorExitAuthorization=(input:V4OperatorExitAuthorizationInput)=>Promise<void>;
 export function isReconciliableV4EntryIntent(intent:Pick<V4OrderIntent,"action"|"stage">):boolean{
  return intent.action==="ENTRY"&&intent.stage!=="TERMINAL";
 }
@@ -78,6 +82,9 @@ export interface V4RunnerDependencies{
  minimumVenueOrderNotional:(symbol:string,price:number)=>Promise<number>;
  canaryEntry?:{maxNotionalUsd:number};
  peerLineageMode?:V4PeerLineageMode;
+ /** One-shot operator exits are opt-in and must be supplied by a bounded recovery command. */
+ operatorExitLegIds?:ReadonlySet<string>;
+ authorizeOperatorExit?:V4OperatorExitAuthorization;
  now?:()=>number;
 }
 export class V4RunnerEngine{
@@ -365,7 +372,8 @@ export class V4RunnerEngine{
   const opens=Object.values(d.store.read().state.legs)
    .filter(l=>l.status==="OPEN"&&l.qty>0);
   for(const old of opens){
-   if(!old.plannedExit){
+   const operatorExit=d.operatorExitLegIds?.has(old.id)===true;
+   if(!operatorExit&&!old.plannedExit){
    const spec=productionExitSpec(old.candidate.route);
    const window=v4ExitFeedWindow(old.entryTs,spec.hours,this.now());
    const feed=await d.fetchExitFeed(old.candidate.symbol,window.fromTs,window.untilTs);
@@ -376,9 +384,15 @@ export class V4RunnerEngine{
      await this.ensureResidentProtection(old.id,dispatcher,cycle);
    }
    const leg=d.store.read().state.legs[old.id];
-   if(!leg.plannedExit)continue;
+   if(!leg.plannedExit&&!operatorExit)continue;
    const at=this.now();
-   if(at-leg.plannedExit.exitTs>15*60000)throw Error("V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:"+old.id);
+   if(!operatorExit&&leg.plannedExit&&at-leg.plannedExit.exitTs>15*60000)
+    throw Error("V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:"+old.id);
+   if(operatorExit){
+    if(!d.authorizeOperatorExit)throw Error("V4_OPERATOR_EXIT_AUTHORIZATION_MISSING");
+    await d.authorizeOperatorExit({legId:leg.id,symbol:leg.candidate.symbol,
+     positionSide:leg.candidate.effectiveSide,quantity:leg.qty,plannedExit:leg.plannedExit});
+   }
    const same=Object.values(d.store.read().state.legs)
     .filter(l=>l.candidate.symbol===leg.candidate.symbol&&l.qty>0);
    if(same.some(x=>x.candidate.effectiveSide!==leg.candidate.effectiveSide))
