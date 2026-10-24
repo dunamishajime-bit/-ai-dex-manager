@@ -1,0 +1,307 @@
+{
+  "costs": {
+    "10": {
+      "candidates": [
+        {
+          "candidate_key": "fd2f6c4bb1bf7781a0a141bdf1607cfcb0da9645d4c5b20bac3848867743d1ad",
+          "exit_after_entry": true,
+          "future_outcome_fields_in_manifest": [
+            "exit_ts_ms",
+            "exit_price",
+            "unit_price_return",
+            "exit_reason"
+          ],
+          "native_attestation_fields_present": [],
+          "native_registry_verified": false,
+          "order_authorized": false,
+          "preallocation_verdict": "REJECT_FAIL_CLOSED",
+          "preentry_projection": {
+            "entry_price": 2.192,
+            "entry_ts_ms": 1779915600000,
+            "requested_gross": 0.25,
+            "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+            "side": "SHORT",
+            "signal_ts_ms": 1779915600000,
+            "strategy_id": "IDLE",
+            "symbol": "RENDERUSDT"
+          },
+          "reasons": [
+            "COOLDOWN_UNVERIFIED",
+            "NATIVE_PROOF_MISSING_OR_FAIL:ACCOUNT_LOCK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:COOLDOWN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:DEDUP",
+            "NATIVE_PROOF_MISSING_OR_FAIL:GROSS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:KILL_SWITCH",
+            "NATIVE_PROOF_MISSING_OR_FAIL:MARGIN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:NATIVE_SLOTS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:OWNER_PRIORITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:PENDING",
+            "NATIVE_PROOF_MISSING_OR_FAIL:REGISTRATION",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SAME_SYMBOL_EXCLUSIVITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SHARED_RISK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SOURCE_ASOF",
+            "PENDING_INVENTORY_MISSING",
+            "POSITION_INVENTORY_MISSING"
+          ],
+          "requested_gross": 0.25,
+          "research_registry_bound": true,
+          "runtime_label_is_sha256": false,
+          "utc": "2026-05-27T21:00"
+        },
+        {
+          "candidate_key": "1ad42f0c020b2ecef8f4ef11b47c3c5f410a8f40cff33bea39d1da769960b716",
+          "exit_after_entry": true,
+          "future_outcome_fields_in_manifest": [
+            "exit_ts_ms",
+            "exit_price",
+            "unit_price_return",
+            "exit_reason"
+          ],
+          "native_attestation_fields_present": [],
+          "native_registry_verified": false,
+          "order_authorized": false,
+          "preallocation_verdict": "REJECT_FAIL_CLOSED",
+          "preentry_projection": {
+            "entry_price": 1.608,
+            "entry_ts_ms": 1782176400000,
+            "requested_gross": 0.25,
+            "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+            "side": "SHORT",
+            "signal_ts_ms": 1782176400000,
+            "strategy_id": "IDLE",
+            "symbol": "RENDERUSDT"
+          },
+          "reasons": [
+            "COOLDOWN_UNVERIFIED",
+            "NATIVE_PROOF_MISSING_OR_FAIL:ACCOUNT_LOCK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:COOLDOWN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:DEDUP",
+            "NATIVE_PROOF_MISSING_OR_FAIL:GROSS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:KILL_SWITCH",
+            "NATIVE_PROOF_MISSING_OR_FAIL:MARGIN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:NATIVE_SLOTS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:OWNER_PRIORITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:PENDING",
+            "NATIVE_PROOF_MISSING_OR_FAIL:REGISTRATION",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SAME_SYMBOL_EXCLUSIVITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SHARED_RISK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SOURCE_ASOF",
+            "PENDING_INVENTORY_MISSING",
+            "POSITION_INVENTORY_MISSING"
+          ],
+          "requested_gross": 0.25,
+          "research_registry_bound": true,
+          "runtime_label_is_sha256": false,
+          "utc": "2026-06-23T01:00"
+        },
+        {
+          "candidate_key": "dee7f0e191cc207903a36b44fdaf41d67bf4a6f6b174d965b6583fa10c3cd115",
+          "exit_after_entry": true,
+          "future_outcome_fields_in_manifest": [
+            "exit_ts_ms",
+            "exit_price",
+            "unit_price_return",
+            "exit_reason"
+          ],
+          "native_attestation_fields_present": [],
+          "native_registry_verified": false,
+          "order_authorized": false,
+          "preallocation_verdict": "REJECT_FAIL_CLOSED",
+          "preentry_projection": {
+            "entry_price": 1.567,
+            "entry_ts_ms": 1782370800000,
+            "requested_gross": 0.25,
+            "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+            "side": "SHORT",
+            "signal_ts_ms": 1782370800000,
+            "strategy_id": "IDLE",
+            "symbol": "RENDERUSDT"
+          },
+          "reasons": [
+            "COOLDOWN_UNVERIFIED",
+            "NATIVE_PROOF_MISSING_OR_FAIL:ACCOUNT_LOCK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:COOLDOWN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:DEDUP",
+            "NATIVE_PROOF_MISSING_OR_FAIL:GROSS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:KILL_SWITCH",
+            "NATIVE_PROOF_MISSING_OR_FAIL:MARGIN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:NATIVE_SLOTS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:OWNER_PRIORITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:PENDING",
+            "NATIVE_PROOF_MISSING_OR_FAIL:REGISTRATION",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SAME_SYMBOL_EXCLUSIVITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SHARED_RISK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SOURCE_ASOF",
+            "PENDING_INVENTORY_MISSING",
+            "POSITION_INVENTORY_MISSING"
+          ],
+          "requested_gross": 0.25,
+          "research_registry_bound": true,
+          "runtime_label_is_sha256": false,
+          "utc": "2026-06-25T07:00"
+        }
+      ],
+      "converged_preallocation_sha256": "de696304d4b281235891daf320362ef72753a89db9e052cd55322477e522f783",
+      "converged_raw_decision_sha256": "69d73014f348f9c4ba3a4ff43c4c9c78815d113bd61f3d108b6f2f41477c5879",
+      "independent_processes_and_converged_iterations_identical": true,
+      "native_gate_proofs_authenticated": 0,
+      "native_gate_proofs_required": 13,
+      "native_owner_admissions": 0
+    },
+    "30": {
+      "candidates": [
+        {
+          "candidate_key": "fd2f6c4bb1bf7781a0a141bdf1607cfcb0da9645d4c5b20bac3848867743d1ad",
+          "exit_after_entry": true,
+          "future_outcome_fields_in_manifest": [
+            "exit_ts_ms",
+            "exit_price",
+            "unit_price_return",
+            "exit_reason"
+          ],
+          "native_attestation_fields_present": [],
+          "native_registry_verified": false,
+          "order_authorized": false,
+          "preallocation_verdict": "REJECT_FAIL_CLOSED",
+          "preentry_projection": {
+            "entry_price": 2.192,
+            "entry_ts_ms": 1779915600000,
+            "requested_gross": 0.25,
+            "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+            "side": "SHORT",
+            "signal_ts_ms": 1779915600000,
+            "strategy_id": "IDLE",
+            "symbol": "RENDERUSDT"
+          },
+          "reasons": [
+            "COOLDOWN_UNVERIFIED",
+            "NATIVE_PROOF_MISSING_OR_FAIL:ACCOUNT_LOCK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:COOLDOWN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:DEDUP",
+            "NATIVE_PROOF_MISSING_OR_FAIL:GROSS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:KILL_SWITCH",
+            "NATIVE_PROOF_MISSING_OR_FAIL:MARGIN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:NATIVE_SLOTS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:OWNER_PRIORITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:PENDING",
+            "NATIVE_PROOF_MISSING_OR_FAIL:REGISTRATION",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SAME_SYMBOL_EXCLUSIVITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SHARED_RISK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SOURCE_ASOF",
+            "PENDING_INVENTORY_MISSING",
+            "POSITION_INVENTORY_MISSING"
+          ],
+          "requested_gross": 0.25,
+          "research_registry_bound": true,
+          "runtime_label_is_sha256": false,
+          "utc": "2026-05-27T21:00"
+        },
+        {
+          "candidate_key": "1ad42f0c020b2ecef8f4ef11b47c3c5f410a8f40cff33bea39d1da769960b716",
+          "exit_after_entry": true,
+          "future_outcome_fields_in_manifest": [
+            "exit_ts_ms",
+            "exit_price",
+            "unit_price_return",
+            "exit_reason"
+          ],
+          "native_attestation_fields_present": [],
+          "native_registry_verified": false,
+          "order_authorized": false,
+          "preallocation_verdict": "REJECT_FAIL_CLOSED",
+          "preentry_projection": {
+            "entry_price": 1.608,
+            "entry_ts_ms": 1782176400000,
+            "requested_gross": 0.25,
+            "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+            "side": "SHORT",
+            "signal_ts_ms": 1782176400000,
+            "strategy_id": "IDLE",
+            "symbol": "RENDERUSDT"
+          },
+          "reasons": [
+            "COOLDOWN_UNVERIFIED",
+            "NATIVE_PROOF_MISSING_OR_FAIL:ACCOUNT_LOCK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:COOLDOWN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:DEDUP",
+            "NATIVE_PROOF_MISSING_OR_FAIL:GROSS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:KILL_SWITCH",
+            "NATIVE_PROOF_MISSING_OR_FAIL:MARGIN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:NATIVE_SLOTS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:OWNER_PRIORITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:PENDING",
+            "NATIVE_PROOF_MISSING_OR_FAIL:REGISTRATION",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SAME_SYMBOL_EXCLUSIVITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SHARED_RISK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SOURCE_ASOF",
+            "PENDING_INVENTORY_MISSING",
+            "POSITION_INVENTORY_MISSING"
+          ],
+          "requested_gross": 0.25,
+          "research_registry_bound": true,
+          "runtime_label_is_sha256": false,
+          "utc": "2026-06-23T01:00"
+        },
+        {
+          "candidate_key": "dee7f0e191cc207903a36b44fdaf41d67bf4a6f6b174d965b6583fa10c3cd115",
+          "exit_after_entry": true,
+          "future_outcome_fields_in_manifest": [
+            "exit_ts_ms",
+            "exit_price",
+            "unit_price_return",
+            "exit_reason"
+          ],
+          "native_attestation_fields_present": [],
+          "native_registry_verified": false,
+          "order_authorized": false,
+          "preallocation_verdict": "REJECT_FAIL_CLOSED",
+          "preentry_projection": {
+            "entry_price": 1.567,
+            "entry_ts_ms": 1782370800000,
+            "requested_gross": 0.25,
+            "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+            "side": "SHORT",
+            "signal_ts_ms": 1782370800000,
+            "strategy_id": "IDLE",
+            "symbol": "RENDERUSDT"
+          },
+          "reasons": [
+            "COOLDOWN_UNVERIFIED",
+            "NATIVE_PROOF_MISSING_OR_FAIL:ACCOUNT_LOCK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:COOLDOWN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:DEDUP",
+            "NATIVE_PROOF_MISSING_OR_FAIL:GROSS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:KILL_SWITCH",
+            "NATIVE_PROOF_MISSING_OR_FAIL:MARGIN",
+            "NATIVE_PROOF_MISSING_OR_FAIL:NATIVE_SLOTS",
+            "NATIVE_PROOF_MISSING_OR_FAIL:OWNER_PRIORITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:PENDING",
+            "NATIVE_PROOF_MISSING_OR_FAIL:REGISTRATION",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SAME_SYMBOL_EXCLUSIVITY",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SHARED_RISK",
+            "NATIVE_PROOF_MISSING_OR_FAIL:SOURCE_ASOF",
+            "PENDING_INVENTORY_MISSING",
+            "POSITION_INVENTORY_MISSING"
+          ],
+          "requested_gross": 0.25,
+          "research_registry_bound": true,
+          "runtime_label_is_sha256": false,
+          "utc": "2026-06-25T07:00"
+        }
+      ],
+      "converged_preallocation_sha256": "774ea47081758005e4fef56ea2b739b32e383485b4f5bf0dfe32e4666d004d78",
+      "converged_raw_decision_sha256": "12b5ba01beaea4cd3543bcc7cea50cbbc1654c9c8218a2dde34b239c10802e7b",
+      "independent_processes_and_converged_iterations_identical": true,
+      "native_gate_proofs_authenticated": 0,
+      "native_gate_proofs_required": 13,
+      "native_owner_admissions": 0
+    }
+  },
+  "economic_backtest_performed": false,
+  "native_allocator_executed_with_new_owner": false,
+  "native_registry_modified": false,
+  "overlay_block_modified": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "status": "RESEARCH_ONLY_NATIVE_PREALLOCATION_FAIL_CLOSED"
+}
