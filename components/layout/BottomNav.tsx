@@ -5,23 +5,24 @@ import { usePathname } from "next/navigation";
 import { Activity, BarChart3, CalendarDays, FileText, Home, Settings, Wallet } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { BOTTOM_NAV_LAYOUT, BOTTOM_NAV_ROUTES } from "@/components/layout/bottom-nav-contract";
 
 const NAV_ITEMS = [
-  { icon: Home, label: "ホーム", href: "/" },
-  { icon: BarChart3, label: "\u30c0\u30c3\u30b7\u30e5", href: "/positions" },
-  { icon: Activity, label: "リアルタイム", href: "/realtime" },
-  { icon: BarChart3, label: "判定状況", href: "/decision-status" },
-  { icon: Wallet, label: "ウォレット", href: "/wallets" },
-  { icon: CalendarDays, label: "損益", href: "/performance" },
-  { icon: FileText, label: "履歴", href: "/history" },
-  { icon: Settings, label: "設定", href: "/settings" },
+  { icon: Home, ...BOTTOM_NAV_ROUTES[0] },
+  { icon: BarChart3, ...BOTTOM_NAV_ROUTES[1] },
+  { icon: Activity, ...BOTTOM_NAV_ROUTES[2] },
+  { icon: BarChart3, ...BOTTOM_NAV_ROUTES[3] },
+  { icon: Wallet, ...BOTTOM_NAV_ROUTES[4] },
+  { icon: CalendarDays, ...BOTTOM_NAV_ROUTES[5] },
+  { icon: FileText, ...BOTTOM_NAV_ROUTES[6] },
+  { icon: Settings, ...BOTTOM_NAV_ROUTES[7] },
 ] as const;
 
 export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#7c6d38]/30 bg-[#06090f]/95 backdrop-blur-xl safe-area-bottom md:hidden">
-      <div className="overflow-x-auto">
-        <div className="flex min-w-max items-stretch">
+      <div className={BOTTOM_NAV_LAYOUT.overflowClass}>
+        <div className={`flex ${BOTTOM_NAV_LAYOUT.stripClass} items-stretch`}>
           {NAV_ITEMS.map((item) => (
             <BottomNavItem key={item.href} {...item} />
           ))}
@@ -40,7 +41,7 @@ function BottomNavItem({ icon: Icon, label, href }: (typeof NAV_ITEMS)[number]) 
       href={href}
       aria-label={href === "/realtime" ? "リアルタイム" : label}
       className={cn(
-        "relative flex min-w-[58px] flex-none flex-col items-center justify-center gap-1 px-1 py-2 text-center transition-all duration-200",
+        `relative flex ${BOTTOM_NAV_LAYOUT.itemMinWidthClass} flex-none flex-col items-center justify-center gap-1 px-1 py-2 text-center transition-all duration-200`,
         isActive ? "text-[#f0df9c]" : "text-white/45 hover:text-white/72 active:text-[#f0df9c]",
       )}
     >

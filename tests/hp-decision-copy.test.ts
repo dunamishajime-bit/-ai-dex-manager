@@ -5,6 +5,7 @@ import { join } from "node:path";
 
 import { loadDecisionStatus, runtimeSnapshot } from "../lib/server/disdex-decision-status";
 import { v12ObservationStatus } from "../lib/v12-observation-status";
+import { applyDecisionStatusFailure, applyDecisionStatusSuccess, DECISION_STATUS_REFRESH_MS, isDecisionRuntimeAvailable } from "../lib/ui/decision-status-state";
 
 test("判定候補の説明に古いsnapshot注意文を繰り返し表示しない", async () => {
   const directory = await mkdtemp(join(process.cwd(), ".tmp-hp-copy-"));
@@ -49,17 +50,24 @@ test("runtime unavailable has no static FET or V52 policy fallback", () => {
   assert.doesNotMatch(v52?.entryPolicy || "", /Top2|Basis|Net Edge|V50|V11/);
 });
 
-test("decision status refreshes every 30 seconds and separates V4 process from entry readiness", async () => {
-  const panel = await readFile("components/features/DecisionStatusPanel.tsx", "utf8");
-
-  assert.match(panel, /setInterval\(\(\) => void load\(true\), 30_000\)/);
-  assert.match(panel, /V4 process\/runtime/);
-  assert.match(panel, /orderEnabled/);
-  assert.match(panel, /new-entry|新規.*entry|新規.*エントリー/i);
+test("decision status refreshes every 30 seconds and gates entry readiness separately", () => {
+  assert.equal(DECISION_STATUS_REFRESH_MS, 30_000);
+  assert.equal(isDecisionRuntimeAvailable({ ok: true, v12V4: { displayStatus: "LIVE_VERIFIED" } }), true);
+  assert.equal(isDecisionRuntimeAvailable({ ok: true, v12V4: { displayStatus: "STALE" } }), false);
 });
 
-test("decision status hides static detail panels unless V4 is live verified", async () => {
-  const panel = await readFile("components/features/DecisionStatusPanel.tsx", "utf8");
+test("failed decision refresh clears the previous successful snapshot", () => {
+  const successful = applyDecisionStatusSuccess({ ok: true, v12V4: { displayStatus: "LIVE_VERIFIED" } }, null);
+  assert.equal(isDecisionRuntimeAvailable(successful.snapshot), true);
+  const failed = applyDecisionStatusFailure(successful, new Error("503 unavailable"));
+  assert.equal(failed.snapshot, null);
+  assert.equal(failed.error, "503 unavailable");
+  assert.equal(isDecisionRuntimeAvailable(failed.snapshot), false);
+});
 
-  assert.match(panel, /runtimeAvailable = snapshot\.ok && snapshot\.v12V4\?\.displayStatus === "LIVE_VERIFIED"/);
+test("decision detail gating requires an explicitly live-verified V4 snapshot", () => {
+  assert.equal(isDecisionRuntimeAvailable({ ok: true, v12V4: { displayStatus: "LIVE_VERIFIED" } }), true);
+  assert.equal(isDecisionRuntimeAvailable({ ok: true, v12V4: { displayStatus: "STALE" } }), false);
+  assert.equal(isDecisionRuntimeAvailable({ ok: false, v12V4: { displayStatus: "LIVE_VERIFIED" } }), false);
+  assert.equal(isDecisionRuntimeAvailable(null), false);
 });

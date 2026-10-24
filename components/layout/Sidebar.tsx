@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { BarChart3, CalendarDays, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
+import { REALTIME_ROUTE } from "@/components/layout/navigation-contract";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
 
 const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/positions", label: "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9", icon: BarChart3 },
-  { href: "/realtime", label: "リアルタイム", icon: BarChart3 },
+  { ...REALTIME_ROUTE, icon: BarChart3 },
   { href: "/decision-status", label: "判定状況", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/performance", label: "損益カレンダー", icon: CalendarDays },

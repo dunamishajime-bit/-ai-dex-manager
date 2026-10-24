@@ -7,6 +7,8 @@ import { GET as getTradeHistory } from "../app/api/system/trade-history/route";
 import { createDecisionStatusGet, type DecisionStatusRouteDependencies } from "../app/api/system/decision-status/route";
 import { assessRuntimeLineage, type CurrentProductionRuntime } from "../lib/server/current-production-runtime";
 import { loadDecisionStatus } from "../lib/server/disdex-decision-status";
+import { isHealthyCurrentRuntime, parseProductionRuntimeResponse, productionRuntimeStrategyLabel } from "../lib/ui/production-runtime";
+import { livePortfolioFailureState } from "../lib/ui/live-portfolio-state";
 
 const releaseSha = "a".repeat(40);
 const now = 1_800_000_000_000;
@@ -136,32 +138,93 @@ test("authenticated decision status keeps every runtime unit unavailable when cu
   assert.match(response.headers.get("Cache-Control") || "", /no-store/);
 });
 
-test("HP runtime consumers expose observed lineage, V4 state, and no static contract fallback", async () => {
-  const [hook, summary, home, positions, banner, badge, sidebar, topBar] = await Promise.all([
-    readFile("hooks/useProductionRuntime.ts", "utf8"),
-    readFile("components/features/ProductionRuntimeSummary.tsx", "utf8"),
-    readFile("app/page.tsx", "utf8"),
-    readFile("app/positions/page.tsx", "utf8"),
-    readFile("components/layout/LiveProductionBanner.tsx", "utf8"),
-    readFile("components/layout/LiveRuntimeBadge.tsx", "utf8"),
-    readFile("components/layout/Sidebar.tsx", "utf8"),
-    readFile("components/layout/TopBar.tsx", "utf8"),
-  ]);
+function healthyRuntime(): CurrentProductionRuntime {
+  const release = "a".repeat(40);
+  const unit = { runtimeSha: release, expectedSha: release, updatedAt: now, matchesCurrent: true };
+  return {
+    ok: true,
+    status: "LIVE",
+    needsReview: false,
+    readOnly: true,
+    tradingMutation: 0,
+    checkedAt: new Date(now).toISOString(),
+    source: "VPS_CURRENT_RUNTIME",
+    releaseSha: release,
+    productionReleaseShas: { v12: release, pengu: release, quality102: release, v52: release, fet: release, hype: release },
+    runtimeLineage: { synchronized: true, units: { v12: unit, pengu: unit, quality102: unit, v52: unit, fet: unit, hype: unit } },
+    caps: {
+      v12BaseGross: 1,
+      v12DynamicGross: 1,
+      v12PerPositionGross: 0.5,
+      penguGross: 1,
+      quality102Gross: 0.5,
+      cryptoGross: 2,
+      stockGross: 1,
+      totalGross: 2.5,
+      v52V11Gross: 0.5,
+      v52V50Gross: 0.5,
+      sharedCryptoDailyLossPct: 3,
+      stockDailyLossPct: 2,
+    },
+    v12: {
+      strategyId: "V12_RUNTIME",
+      maximumPositions: 2,
+      neutralScoreThreshold: 0,
+      strongRegimeThresholdPct: 0,
+      strongRegimeQualityScoreMinimum: 0,
+      strongRegimeQualityScoreMaximum: 1,
+      strongRegimeQualityMinimumAtrRatio: 0,
+      relaxedRegimeMinimumMomentumPct: 0,
+      relaxedRegimeMinimumAtrRatio: 0,
+    },
+    pengu: {
+      strategyId: "PENGU_RUNTIME",
+      hardStopCooldownHours: 1,
+      recoveryRule: "runtime",
+      recoveryPriority: "runtime",
+      recoveryInitialGross: 0.5,
+      recoveryRsiDelta6Min: 0,
+      recoveryEma168DistanceMinPct: 0,
+      recoveryBtcReturn6hMinPct: 0,
+      recoveryHardStopPct: 0,
+      recoveryTrailActivationPct: 0,
+      recoveryTrailRetracePct: 0,
+      recoveryMaxHoldHours: 1,
+      recoveryPartialAfterHours: 1,
+      recoveryPartialGross: 0.25,
+      longMultiplier: 1,
+      lowGross: 0.25,
+    },
+    quality102: { selectorMode: "CAUSAL_V4", familyGross: { HIGH_VOL: 0.5, MR: 0, BRK: 0, REV: 0, PB: 0 } },
+    v52: {
+      policyId: "V52_RUNTIME",
+      strategy: "V52_RUNTIME",
+      maximumHoldingHours: 1,
+      minimumEntryBasisBps: 0,
+      convergenceBps: 0,
+      basisStopMultiple: 1,
+      minimumNetEdgeBps: 0,
+      maximumRoundTripCostBps: 0,
+      maximumSpreadBps: 0,
+      slotGross: 0.5,
+      stockAggregateGross: 1,
+      windowsNy: ["runtime"],
+    },
+  };
+}
 
-  assert.match(hook, /setInterval\(\(\) => void refresh\(\), 30_000\)/);
-  assert.match(hook, /setSnapshot\(null\)/);
-  assert.match(summary, /useProductionRuntime/);
-  assert.match(summary, /useV12V4HpStatus/);
-  assert.match(summary, /releaseSha/);
-  assert.match(summary, /runtimeLineage/);
-  assert.match(summary, /caps\.totalGross/);
-  assert.match(summary, /routeCoverage/);
-  assert.match(summary, /orderEnabled/);
-  assert.match(summary, /heartbeat/);
-  assert.match(banner, /useProductionRuntime/);
-  assert.match(badge, /useProductionRuntime/);
-  assert.match(sidebar, /useProductionRuntime/);
-  assert.match(topBar, /useProductionRuntime/);
-  assert.doesNotMatch(home, /DIST_TERMINAL_LIVE_CONFIG/);
-  assert.doesNotMatch(positions, /DIST_TERMINAL_LIVE_CONFIG/);
+test("runtime response rejects needsReview and invalid SHA instead of exposing a live contract", () => {
+  const runtime = healthyRuntime();
+  assert.equal(isHealthyCurrentRuntime(runtime), true);
+  assert.equal(productionRuntimeStrategyLabel(runtime), "V12_RUNTIME / PENGU_RUNTIME / V52_RUNTIME");
+  assert.throws(() => parseProductionRuntimeResponse(true, { ...runtime, needsReview: true }), /manual review/i);
+  assert.throws(() => parseProductionRuntimeResponse(true, { ...runtime, releaseSha: "invalid" }), /manual review/i);
+  assert.match(productionRuntimeStrategyLabel(null), /未取得|手動確認/);
+});
+
+test("live portfolio failure clears the prior Aster snapshot", () => {
+  const previous = { snapshot: { account: { balanceUsd: 100 } }, error: null };
+  const next = livePortfolioFailureState(previous, "503 unavailable");
+  assert.equal(next.snapshot, null);
+  assert.equal(next.error, "503 unavailable");
 });

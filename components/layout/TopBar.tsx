@@ -9,6 +9,7 @@ import { useSimulation } from "@/context/SimulationContext";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
+import { REALTIME_ROUTE } from "@/components/layout/navigation-contract";
 
 const PAGE_TITLES: Record<string, string> = {
   "/": "ホーム",
@@ -73,9 +74,9 @@ export function TopBar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link href="/realtime" className="hidden items-center gap-1 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-100 md:inline-flex">
+          <Link href={REALTIME_ROUTE.href} className="hidden items-center gap-1 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-100 md:inline-flex">
             <Activity className="h-3.5 w-3.5" />
-            リアルタイム
+            {REALTIME_ROUTE.label}
           </Link>
           <button
             type="button"

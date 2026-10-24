@@ -9,7 +9,7 @@ import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { cn } from "@/lib/utils";
-import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
+import { isHealthyCurrentRuntime, productionRuntimeStrategyLabel } from "@/lib/ui/production-runtime";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
 
 type TradeHistoryEntry = {
@@ -188,6 +188,7 @@ export default function PerformancePage() {
   const { wallet } = useOperationalWallet();
   const { snapshot: livePortfolio } = useLivePortfolio();
   const { snapshot: productionRuntime, loading: runtimeLoading, error: runtimeError } = useProductionRuntime();
+  const runtimeHealthy = isHealthyCurrentRuntime(productionRuntime);
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -433,7 +434,7 @@ export default function PerformancePage() {
                   {trades.length > 3 ? <div className="text-[11px] text-gray-500">+{trades.length - 3} more</div> : null}
                   {isLogicChangeDay ? (
                     <div className="rounded-lg border border-amber-300/35 bg-amber-300/10 px-2 py-1.5 text-[10px] font-semibold leading-4 text-amber-100">
-                      現行構成: {liveConfig.strategyLabel}
+                      現行構成: {runtimeHealthy ? productionRuntimeStrategyLabel(productionRuntime) : "現在ランタイム未取得 / 手動確認"}
                     </div>
                   ) : null}
                 </div>

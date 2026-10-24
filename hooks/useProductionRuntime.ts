@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { parseProductionRuntimeResponse } from "@/lib/ui/production-runtime";
 import type { CurrentProductionRuntime } from "@/lib/server/current-production-runtime";
-
-type RuntimeResponse = CurrentProductionRuntime & { error?: string };
 
 export function useProductionRuntime() {
   const [snapshot, setSnapshot] = useState<CurrentProductionRuntime | null>(null);
@@ -34,10 +33,7 @@ export function useProductionRuntime() {
         cache: "no-store",
         signal: controller.signal,
       });
-      const data = await response.json() as RuntimeResponse;
-      if (!response.ok || data.ok !== true || data.status !== "LIVE" || data.runtimeLineage?.synchronized !== true) {
-        throw new Error(data.error || "Production runtime unavailable; manual review required.");
-      }
+      const data = parseProductionRuntimeResponse(response.ok, await response.json());
       setSnapshot(data);
       setError(null);
     } catch (cause) {

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { livePortfolioFailureState } from "@/lib/ui/live-portfolio-state";
+
 export type LivePosition = {
   symbol: string;
   side: "LONG" | "SHORT";
@@ -53,7 +55,9 @@ export function useLivePortfolio() {
       setError(null);
       return data;
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Aster live state unavailable.");
+      const failure = livePortfolioFailureState({ snapshot: null, error: null }, nextError instanceof Error ? nextError.message : "Aster live state unavailable.");
+      setSnapshot(failure.snapshot);
+      setError(failure.error);
       return null;
     } finally {
       setLoading(false);

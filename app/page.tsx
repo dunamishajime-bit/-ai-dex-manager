@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Activity, ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
-import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { ProductionRuntimeSummary } from "@/components/features/ProductionRuntimeSummary";
 
@@ -31,11 +30,10 @@ function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: s
 }
 
 export default function HomePage() {
-  const { wallet } = useOperationalWallet();
   const { snapshot, error: liveError } = useLivePortfolio();
   const { formatPrice } = useCurrency();
-  const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
-  const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
+  const balance = snapshot?.account.balanceUsd ?? null;
+  const available = snapshot?.account.availableUsd ?? null;
   const positions = snapshot?.positions ?? [];
 
   return (

@@ -8,6 +8,7 @@ import type { V52Top2Observability, V52Top2DecisionRow } from "@/lib/server/v52-
 import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observability";
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
 import type { V12V4HpSnapshot } from "@/lib/v12-v4-hp-contract";
+import { applyDecisionStatusFailure, applyDecisionStatusSuccess, DECISION_STATUS_REFRESH_MS, isDecisionRuntimeAvailable } from "@/lib/ui/decision-status-state";
 
 type DecisionStatusItem = {
   symbol: string;
@@ -410,18 +411,21 @@ export function DecisionStatusPanel() {
       const response = await fetch(`/api/system/decision-status${force ? "?refresh=1" : ""}`, { cache: "no-store" });
       const data = await response.json();
       if (!response.ok || !data?.readOnly) throw new Error(data?.error || "判定データを取得できません。");
-      setSnapshot(data as Snapshot);
-      setError(data.error || null);
+      const next = applyDecisionStatusSuccess(data as Snapshot, data.error || null);
+      setSnapshot(next.snapshot);
+      setError(next.error);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "判定データを取得できません。");
+      const next = applyDecisionStatusFailure({ snapshot, error }, loadError);
+      setSnapshot(next.snapshot);
+      setError(next.error);
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => { void load(); const timer = window.setInterval(() => void load(true), 30_000); return () => window.clearInterval(timer); }, []);
+  useEffect(() => { void load(); const timer = window.setInterval(() => void load(true), DECISION_STATUS_REFRESH_MS); return () => window.clearInterval(timer); }, []);
   if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">判定状況を取得しています…</div>;
   if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "判定データを取得できません。"}</div>;
-  const runtimeAvailable = snapshot.ok && snapshot.v12V4?.displayStatus === "LIVE_VERIFIED";
+  const runtimeAvailable = isDecisionRuntimeAvailable(snapshot);
   return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HPは読み取り専用 / 発注・取消・決済操作なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />最終確認：{time(snapshot.checkedAt)} / 自動再確認：30秒ごと</span><button type="button" onClick={() => void load(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{loading ? "更新中" : "再確認"}</button></div>{error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部データを取得できません：{error}</div> : null}<V4RuntimeStatus details={snapshot.v12V4} /><RuntimeSummary runtime={snapshot.runtime} />{runtimeAvailable ? <><V12Detail details={snapshot.v12Observability} /><PenguDetail details={snapshot.penguRuntime} /><Quality102Detail details={snapshot.quality102Runtime} /><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} /><div className="grid gap-4 xl:grid-cols-2"><Sleeve title="V12 Top2 補助候補ランキング" items={snapshot.v12.items} /><Sleeve title="V52 Stock 補助候補ランキング" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 取引時間内" : " / 対象時間外")} /></div></> : <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-5 text-sm leading-6 text-rose-100">V4/current runtimeが未取得・不一致・staleのため、候補や旧static policyを表示しません。VPS runtimeとheartbeatを手動確認してください。</div>}</div>;
 }
