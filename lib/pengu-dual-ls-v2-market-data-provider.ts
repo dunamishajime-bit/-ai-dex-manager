@@ -1,12 +1,15 @@
 import { AsterV3Client, type AsterKline } from "@/lib/aster-v3-client";
 import type { DisDexV35Candle } from "@/lib/disdex-v35-signal-engine";
 import type { PenguDualLsV2History } from "@/lib/pengu-dual-ls-v2";
+import type { ConfirmedFiveMinuteBar } from "@/lib/disdex-exit-overlay-contract";
 
 export interface PenguDualLsV2MarketDataProviderOptions {
     hourlyLimit?: number;
     cacheTtlMs?: number;
     now?: () => number;
 }
+
+const FIVE_MINUTE_MS = 5 * 60_000;
 
 function finite(value: unknown, fallback = 0) {
     const parsed = Number(value);
@@ -99,5 +102,42 @@ export class PenguDualLsV2AsterMarketDataProvider {
         }
         this.cached = { expiresAt: now + this.cacheTtlMs, history };
         return history;
+    }
+
+    /** Load completed, contiguous PENGU 5m bars for the timed SHORT V20 checks. */
+    async loadFiveMinuteSince(startTs: number, endTs = this.now()): Promise<ConfirmedFiveMinuteBar[]> {
+        if (!Number.isFinite(startTs) || !Number.isFinite(endTs) || startTs <= 0 || endTs <= startTs) {
+            throw new Error("PENGU_SHORT_V20_M5_WINDOW_INVALID");
+        }
+        const firstOpen = Math.floor(startTs / FIVE_MINUTE_MS) * FIVE_MINUTE_MS;
+        const currentOpen = Math.floor(endTs / FIVE_MINUTE_MS) * FIVE_MINUTE_MS;
+        const limit = Math.min(1000, Math.max(10, Math.ceil((currentOpen - firstOpen) / FIVE_MINUTE_MS) + 3));
+        const rows = await this.client.getKlines("PENGUUSDT", "5m", limit, { startTime: firstOpen, endTime: currentOpen + 1 });
+        const parsed = rows
+            .map((row) => ({
+                timestampMs: Number(row[0]),
+                open: Number(row[1]),
+                high: Number(row[2]),
+                low: Number(row[3]),
+                close: Number(row[4]),
+                closeTime: Number(row[6]),
+            }))
+            .filter((row) => row.timestampMs >= firstOpen && row.timestampMs < currentOpen && row.closeTime < endTs)
+            .sort((left, right) => left.timestampMs - right.timestampMs);
+        const result: ConfirmedFiveMinuteBar[] = [];
+        for (const row of parsed) {
+            if (![row.timestampMs, row.open, row.high, row.low, row.close, row.closeTime].every(Number.isFinite)
+                || row.timestampMs <= 0 || row.timestampMs % FIVE_MINUTE_MS !== 0
+                || ![row.open, row.high, row.low, row.close].every((value) => value > 0)
+                || row.high < Math.max(row.open, row.close) || row.low > Math.min(row.open, row.close) || row.high < row.low) {
+                throw new Error(`PENGU_SHORT_V20_M5_BAR_INVALID:${row.timestampMs}`);
+            }
+            const previous = result.at(-1);
+            if (previous?.timestampMs === row.timestampMs) throw new Error(`PENGU_SHORT_V20_M5_DUPLICATE:${row.timestampMs}`);
+            if (previous && row.timestampMs - previous.timestampMs !== FIVE_MINUTE_MS) throw new Error(`PENGU_SHORT_V20_M5_GAP:${previous.timestampMs}:${row.timestampMs}`);
+            result.push({ timestampMs: row.timestampMs, open: row.open, high: row.high, low: row.low, close: row.close });
+        }
+        if (result.length > 0 && result[0]!.timestampMs !== firstOpen) throw new Error(`PENGU_SHORT_V20_M5_START_GAP:${firstOpen}`);
+        return result;
     }
 }

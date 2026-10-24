@@ -21,6 +21,7 @@ import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-da
 import { chooseIdleResidualLong, evaluateIdleResidualLong, type IdleResidualLongSignal } from "./idle-residual-long-signal";
 import { FileIdleResidualLongStateStore, heartbeatIdleResidualRateBudgetDeferral, type IdleResidualLongPending, type IdleResidualLongPosition, type IdleResidualLongState } from "./idle-residual-long-state";
 import { readAndAssertIdleResidualLongParityCert } from "./idle-residual-long-parity-cert";
+import { advanceAvaxSoftWatch, advanceAvaxTrail, evaluateAvaxResidualEntryVeto } from "./idle-residual-avax-policy";
 
 const EPS=1e-9;
 const CRYPTO_CAP=3.0;
@@ -49,7 +50,10 @@ export type IdleResidualLongTickResult={
 };
 
 export type IdleResidualLongRunnerDependencies={
-  marketData:{load():Promise<IdlePriorityMarketSnapshot>};
+  marketData:{
+    load():Promise<IdlePriorityMarketSnapshot>;
+    loadFiveMinuteSince?(symbol:string,startTs:number,endTs?:number):Promise<import("./disdex-exit-overlay-contract").ConfirmedFiveMinuteBar[]>;
+  };
   executor:AsterDirectTradeExecutor;
   adapter:V12AsterLiveAdapter;
   client:AsterV3Client;
@@ -111,8 +115,9 @@ export class IdleResidualLongRunner{
   }
 
   private protectionPlan(symbol:IdleResidualLongSymbol,signalTs:number,entryPrice:number,quantity:number){
-    const stopPrice=entryPrice*(1-IDLE_RESIDUAL_LONG_POLICY.emergencyStopPct/100);
-    const takeProfitPrice=entryPrice*(1+IDLE_RESIDUAL_LONG_POLICY.emergencyTakeProfitPct/100);
+    const routePolicy=IDLE_RESIDUAL_LONG_POLICY.routes[symbol];
+    const stopPrice=entryPrice*(1-routePolicy.hardStopPct/100);
+    const takeProfitPrice=entryPrice*(1+routePolicy.takeProfitPct/100);
     return {
       stopPrice,takeProfitPrice,
       stopClientOrderId:id([IDLE_RESIDUAL_LONG_STRATEGY,"STOP",symbol,signalTs],"res-stop"),
@@ -136,7 +141,7 @@ export class IdleResidualLongRunner{
          !sameQuantity(so.quantity,quantity)||!sameQuantity(to.quantity,quantity))throw new Error("PROTECTION_READBACK_FAILED");
     }catch(error){throw new Error(`IDLE_RESIDUAL_PROTECTION_INSTALL_FAILED:${error instanceof Error?error.message:String(error)}`);}
     return {
-      symbol:pending.symbol,route:pending.route,side:"LONG",signalTs:pending.signalTs,entryTs:this.now(),exitTs:this.now()+12*3_600_000,
+      symbol:pending.symbol,route:pending.route,side:"LONG",signalTs:pending.signalTs,entryTs:this.now(),exitTs:this.now()+IDLE_RESIDUAL_LONG_POLICY.routes[pending.symbol].maxHoldHours*3_600_000,
       entryPrice:actual.entryPrice,quantity,gross:1,stopPrice:stop.price,takeProfitPrice:tp.price,
       stopClientOrderId:plan.stopClientOrderId,takeProfitClientOrderId:plan.takeProfitClientOrderId,protectionVerified:true,
     };
@@ -248,9 +253,51 @@ export class IdleResidualLongRunner{
     return true;
   }
 
+  private confirmedCloseAtOrBefore(rows:readonly import("./disdex-exit-overlay-contract").ConfirmedFiveMinuteBar[], cutoffTs:number){
+    return [...rows].filter((bar)=>bar.timestampMs+5*60_000<=cutoffTs).sort((a,b)=>a.timestampMs-b.timestampMs).at(-1);
+  }
+
+  private async avaxEntryGate(signal:IdleResidualLongSignal):Promise<{allowed:true}|{allowed:false;reason:string}>{
+    if(signal.symbol!=="AVAXUSDT")return {allowed:true};
+    const loader=this.d.marketData.loadFiveMinuteSince;
+    if(!loader)return {allowed:false,reason:"IDLE_RESIDUAL_AVAX_ENTRY_GATE_DATA_UNAVAILABLE:provider"};
+    const decisionTs=signal.features.decisionTs;
+    const startTs=decisionTs-6*3_600_000-5*60_000;
+    try{
+      const [avax,btc]=await Promise.all([
+        loader("AVAXUSDT",startTs,decisionTs),
+        loader("BTCUSDT",startTs,decisionTs),
+      ]);
+      const currentAvax=this.confirmedCloseAtOrBefore(avax,decisionTs);
+      const currentBtc=this.confirmedCloseAtOrBefore(btc,decisionTs);
+      const avax3=this.confirmedCloseAtOrBefore(avax,decisionTs-3*3_600_000);
+      const btc3=this.confirmedCloseAtOrBefore(btc,decisionTs-3*3_600_000);
+      const avax6=this.confirmedCloseAtOrBefore(avax,decisionTs-6*3_600_000);
+      const btc6=this.confirmedCloseAtOrBefore(btc,decisionTs-6*3_600_000);
+      if(!currentAvax||!currentBtc||!avax3||!btc3||!avax6||!btc6){
+        return {allowed:false,reason:"IDLE_RESIDUAL_AVAX_ENTRY_GATE_DATA_UNAVAILABLE:missing-confirmed-close"};
+      }
+      const veto=evaluateAvaxResidualEntryVeto({
+        avax3hPct:(currentAvax.close/avax3.close-1)*100,
+        btc3hPct:(currentBtc.close/btc3.close-1)*100,
+        avax6hPct:(currentAvax.close/avax6.close-1)*100,
+        btc6hPct:(currentBtc.close/btc6.close-1)*100,
+      });
+      return veto?{allowed:false,reason:`IDLE_RESIDUAL_AVAX_ENTRY_GATE_VETO:${veto}`}:{allowed:true};
+    }catch(error){
+      return {allowed:false,reason:`IDLE_RESIDUAL_AVAX_ENTRY_GATE_DATA_UNAVAILABLE:${error instanceof Error?error.message:String(error)}`};
+    }
+  }
+
   private async enter(state:IdleResidualLongState,signal:IdleResidualLongSignal,positions:DirectPosition[],equity:number,lock:AccountLockHandle,pendingAggregate:ReturnType<typeof aggregatePendingExposure>):Promise<IdleResidualLongTickResult>{
     if(this.d.coreRuntime.mode!=="LIVE")return {status:"shadow",message:`IDLE_RESIDUAL_SHADOW_ENTRY:${signal.symbol}`,symbol:signal.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
     if(!this.d.runtime.operatorArmed)return {status:"held",message:"IDLE_RESIDUAL_OPERATOR_NOT_ARMED",ordersSent:0,cancelsSent:0,positionChangesSent:0};
+    const avaxGate=await this.avaxEntryGate(signal);
+    if(!avaxGate.allowed){
+      state.lastDecision={decisionTs:signal.features.decisionTs,symbol:signal.symbol,route:signal.route,accepted:false,reason:avaxGate.reason};
+      await this.d.stateStore.save(state);
+      return {status:"held",message:avaxGate.reason,symbol:signal.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+    }
     await readAndAssertIdleResidualLongParityCert(this.d.runtime.parityCertificatePath,this.d.runtime.runtimeSha);
     const coreState=await readIdleState(this.d.coreRuntime.statePath,this.d.coreRuntime.runtimeSha);
     if(coreState.positions.length||coreState.pending)return {status:"held",message:"IDLE_RESIDUAL_BLOCKED_BY_IDLE_SHORT_STATE",ordersSent:0,cancelsSent:0,positionChangesSent:0};
@@ -338,6 +385,42 @@ export class IdleResidualLongRunner{
         if(!freshQuote(quote,this.now()))return {status:"held",message:`IDLE_RESIDUAL_HELD_QUOTE_STALE:${owned.symbol}`,symbol:owned.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
         const reason=quote.bidPrice<=owned.stopPrice?"HARD_STOP":quote.askPrice>=owned.takeProfitPrice?"TAKE_PROFIT":this.now()>=owned.exitTs?"FIXED_HOLD_EXIT":undefined;
         if(reason)return await this.exit(state,owned,actual,lock,reason);
+        if(owned.symbol==="AVAXUSDT"){
+          const soft=advanceAvaxSoftWatch({
+            entryPrice:owned.entryPrice,
+            bidPrice:quote.bidPrice,
+            now:this.now(),
+            firstTouchAtTs:owned.firstTouchAtTs,
+            watchDeadlineTs:owned.watchDeadlineTs,
+          });
+          const softChanged=soft.firstTouchAtTs!==owned.firstTouchAtTs||soft.watchDeadlineTs!==owned.watchDeadlineTs;
+          if(softChanged){
+            state.position={...owned,firstTouchAtTs:soft.firstTouchAtTs,watchDeadlineTs:soft.watchDeadlineTs};
+            await this.d.stateStore.save(state);
+          }
+          if(soft.action)return await this.exit(state,state.position!,actual,lock,soft.action);
+          const loader=this.d.marketData.loadFiveMinuteSince;
+          if(!loader)return {status:"held",message:"IDLE_RESIDUAL_AVAX_M5_TRAIL_UNAVAILABLE:provider",symbol:owned.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+          let bars;
+          try{bars=await loader("AVAXUSDT",owned.entryTs,this.now());}
+          catch(error){return {status:"held",message:`IDLE_RESIDUAL_AVAX_M5_TRAIL_UNAVAILABLE:${error instanceof Error?error.message:String(error)}`,symbol:owned.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};}
+          if(!bars.length)return {status:"held",message:"IDLE_RESIDUAL_AVAX_M5_TRAIL_UNAVAILABLE:no-bars",symbol:owned.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+          const trail=advanceAvaxTrail({
+            entryPrice:owned.entryPrice,
+            armed:owned.trailArmed===true,
+            bestClosePct:owned.bestConfirmed5mClosePct,
+            lastConfirmed5mTs:owned.lastConfirmed5mTs,
+            bars,
+          });
+          const trailChanged=trail.state.armed!==owned.trailArmed
+            ||trail.state.bestClosePct!==owned.bestConfirmed5mClosePct
+            ||trail.state.lastConfirmed5mTs!==owned.lastConfirmed5mTs;
+          if(trailChanged){
+            state.position={...state.position!,trailArmed:trail.state.armed,bestConfirmed5mClosePct:trail.state.bestClosePct,lastConfirmed5mTs:trail.state.lastConfirmed5mTs};
+            await this.d.stateStore.save(state);
+          }
+          if(trail.action)return await this.exit(state,state.position!,actual,lock,trail.action);
+        }
         return {status:"held",message:`IDLE_RESIDUAL_POSITION_HELD:${owned.symbol}`,symbol:owned.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
       }
 

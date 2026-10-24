@@ -66,6 +66,15 @@ export interface PenguDualLsV2ShortV20State {
     phase: "TRACKING" | "PROBATION" | "RESUMED";
     failureConfirmedTs?: number;
     thesisResumedTs?: number;
+    /** Adopted timed adverse-price checks; each stage is consumed once. */
+    timedStop3hChecked?: boolean;
+    timedStop3hCheckedAtTs?: number;
+    timedStop3hCheckedClose?: number;
+    timedStop3hTriggered?: boolean;
+    timedStop8hChecked?: boolean;
+    timedStop8hCheckedAtTs?: number;
+    timedStop8hCheckedClose?: number;
+    timedStop8hTriggered?: boolean;
 }
 
 export interface PenguDualLsV2Features {
@@ -98,7 +107,7 @@ export interface PenguDualLsV2Decision {
 
 export interface PenguDualLsV2ExitDecision {
     side: -1 | 1;
-    reason: "LONG_HARD_STOP" | "LONG_TRAILING_STOP" | "LONG_MAX_HOLD" | "SHORT_HARD_STOP" | "SHORT_TRAILING_STOP" | "SHORT_MAX_HOLD" | "SHORT_V20_VOL_TARGET_FAILURE_EXIT" | "SHORT_V20_DEADLINE_EXIT" | "RECOVERY_V8_HARD_STOP" | "RECOVERY_V8_TRAILING_STOP" | "RECOVERY_V8_MAX_HOLD" | "RECOVERY_V8_YIELD_BASE_LONG" | "SHARED_RISK_FLATTEN";
+    reason: "LONG_HARD_STOP" | "LONG_TRAILING_STOP" | "LONG_MAX_HOLD" | "SHORT_HARD_STOP" | "SHORT_TRAILING_STOP" | "SHORT_MAX_HOLD" | "SHORT_V20_VOL_TARGET_FAILURE_EXIT" | "SHORT_V20_DEADLINE_EXIT" | "SHORT_V20_TIMED_NEGATIVE_3H_EXIT" | "SHORT_V20_TIMED_NEGATIVE_8H_EXIT" | "RECOVERY_V8_HARD_STOP" | "RECOVERY_V8_TRAILING_STOP" | "RECOVERY_V8_MAX_HOLD" | "RECOVERY_V8_YIELD_BASE_LONG" | "SHARED_RISK_FLATTEN";
     stopPrice?: number;
     updatedPosition: PenguDualLsV2Position;
 }

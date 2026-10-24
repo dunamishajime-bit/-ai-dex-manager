@@ -128,7 +128,15 @@ function validShortV20State(value: unknown): value is PenguDualLsV2ShortV20State
         && Number.isFinite(state.entryAtr24Ratio)
         && Number.isFinite(state.lowWater)
         && (state.failureConfirmedTs === undefined || Number.isFinite(state.failureConfirmedTs))
-        && (state.thesisResumedTs === undefined || Number.isFinite(state.thesisResumedTs));
+        && (state.thesisResumedTs === undefined || Number.isFinite(state.thesisResumedTs))
+        && (state.timedStop3hChecked === undefined || typeof state.timedStop3hChecked === "boolean")
+        && (state.timedStop3hCheckedAtTs === undefined || Number.isFinite(state.timedStop3hCheckedAtTs))
+        && (state.timedStop3hCheckedClose === undefined || Number.isFinite(state.timedStop3hCheckedClose) && state.timedStop3hCheckedClose > 0)
+        && (state.timedStop3hTriggered === undefined || typeof state.timedStop3hTriggered === "boolean")
+        && (state.timedStop8hChecked === undefined || typeof state.timedStop8hChecked === "boolean")
+        && (state.timedStop8hCheckedAtTs === undefined || Number.isFinite(state.timedStop8hCheckedAtTs))
+        && (state.timedStop8hCheckedClose === undefined || Number.isFinite(state.timedStop8hCheckedClose) && state.timedStop8hCheckedClose > 0)
+        && (state.timedStop8hTriggered === undefined || typeof state.timedStop8hTriggered === "boolean");
 }
 
 function validRecoveryV8State(value: unknown, position: PenguDualLsV2Position): value is RecoveryV8DurableState {

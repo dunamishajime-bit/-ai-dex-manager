@@ -33,6 +33,7 @@ import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
 import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-crypto-daily-risk";
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { createPenguShortV20State } from "@/lib/pengu-short-v20";
+import { advancePenguShortV20TimedStops, type PenguShortV20TimedStopAction } from "@/lib/pengu-short-v20-timed-stop";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
@@ -110,7 +111,10 @@ export interface PenguDualLsV2AccountLock extends LiveRunnerLock {
 }
 
 export interface PenguDualLsV2PortfolioRunnerDependencies {
-    marketData: { load(force?: boolean): Promise<PenguDualLsV2History> };
+    marketData: {
+        load(force?: boolean): Promise<PenguDualLsV2History>;
+        loadFiveMinuteSince?(startTs: number, endTs?: number): Promise<import("@/lib/disdex-exit-overlay-contract").ConfirmedFiveMinuteBar[]>;
+    };
     executor: DirectTradeExecutor;
     stateStore: PenguDualLsV2RunnerStateStore;
     lock: PenguDualLsV2AccountLock;
@@ -950,11 +954,56 @@ export class PenguDualLsV2PortfolioRunner {
                 return { status: "held", message: "PENGU Dual LS will not create an order while any account open order exists." };
             }
 
+            let timedStopAction: PenguShortV20TimedStopAction | undefined;
+            if (state.position?.entryVersion === "SHORT_V20"
+                && state.position.shortV20?.version === "SHORT_V20"
+                && this.now() >= state.position.entryTs + 3 * 3_600_000) {
+                const loadFiveMinuteSince = this.dependencies.marketData.loadFiveMinuteSince;
+                if (!loadFiveMinuteSince) {
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message: "PENGU_SHORT_V20_M5_CHECK_UNAVAILABLE:provider" };
+                }
+                let bars;
+                try {
+                    bars = await loadFiveMinuteSince(state.position.entryTs, this.now());
+                    if (bars.length === 0) throw new Error("PENGU_SHORT_V20_M5_CHECK_UNAVAILABLE:no-bars");
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message: `PENGU_SHORT_V20_M5_CHECK_UNAVAILABLE:${message}` };
+                }
+                const advanced = advancePenguShortV20TimedStops({
+                    position: state.position,
+                    state: state.position.shortV20,
+                    bars,
+                });
+                state.position = { ...state.position, shortV20: advanced.state };
+                timedStopAction = advanced.action;
+                await this.dependencies.stateStore.save(state);
+            }
+
             const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
+            const timedSignal: PenguDualLsV2Signal = timedStopAction && state.position && !baseSignal.exit
+                ? {
+                    ...baseSignal,
+                    side: 0,
+                    targetGross: 0,
+                    reason: timedStopAction.kind === "TIMED_NEGATIVE_3H_EXIT"
+                        ? "PENGU SHORT V20 timed adverse-price check: 3h loss threshold reached."
+                        : "PENGU SHORT V20 timed adverse-price check: 8h loss threshold reached.",
+                    exit: {
+                        side: state.position.side,
+                        reason: timedStopAction.kind === "TIMED_NEGATIVE_3H_EXIT"
+                            ? "SHORT_V20_TIMED_NEGATIVE_3H_EXIT"
+                            : "SHORT_V20_TIMED_NEGATIVE_8H_EXIT",
+                        updatedPosition: state.position,
+                    },
+                }
+                : baseSignal;
             const sharedRisk = await this.sharedRiskStatus();
             const signal: PenguDualLsV2Signal = sharedRisk?.flattenExisting && state.position
                 ? {
-                    ...baseSignal,
+                    ...timedSignal,
                     side: 0,
                     reason: sharedRisk.reason,
                     exit: {
@@ -963,7 +1012,7 @@ export class PenguDualLsV2PortfolioRunner {
                         updatedPosition: state.position,
                     },
                 }
-                : baseSignal;
+                : timedSignal;
             state.lastSignalReferenceTs = signal.referenceTs;
             state.latestSignal = signal;
             if (state.position && signal.updatedPosition) state.position = signal.updatedPosition;

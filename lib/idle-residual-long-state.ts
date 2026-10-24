@@ -1,6 +1,6 @@
 import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
+import { IDLE_RESIDUAL_LONG_POLICY, type IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
 
 export const IDLE_RESIDUAL_LONG_STATE_SCHEMA = "disdex-idle-residual-long-state/v1" as const;
 /** Residual state must be refreshed at least once per three-hour watchdog window. */
@@ -22,6 +22,11 @@ export type IdleResidualLongPosition = {
   stopClientOrderId: string;
   takeProfitClientOrderId: string;
   protectionVerified: true;
+  firstTouchAtTs?: number;
+  watchDeadlineTs?: number;
+  trailArmed?: boolean;
+  bestConfirmed5mClosePct?: number;
+  lastConfirmed5mTs?: number;
 };
 
 export type IdleResidualLongPending = {
@@ -75,10 +80,17 @@ export function normalizeIdleResidualLongState(raw: unknown, runtimeSha: string,
   }
   if (value.position != null) {
     const p = value.position;
+    const routePolicy = validSymbol(p.symbol) ? IDLE_RESIDUAL_LONG_POLICY.routes[p.symbol] : undefined;
     if (!validSymbol(p.symbol) || p.side !== "LONG" || !positive(p.signalTs) || !positive(p.entryTs) || !positive(p.exitTs) ||
         timestamp(p.signalTs, now) > now || timestamp(p.entryTs, now) > now || p.exitTs <= p.entryTs ||
         !positive(p.entryPrice) || !positive(p.quantity) || p.gross !== 1 || !positive(p.stopPrice) || !positive(p.takeProfitPrice) ||
-        !(p.stopPrice < p.entryPrice && p.takeProfitPrice > p.entryPrice) || !p.stopClientOrderId || !p.takeProfitClientOrderId || p.protectionVerified !== true) {
+        !(p.stopPrice < p.entryPrice && p.takeProfitPrice > p.entryPrice) || !p.stopClientOrderId || !p.takeProfitClientOrderId || p.protectionVerified !== true ||
+        (routePolicy && p.exitTs > p.entryTs + routePolicy.maxHoldHours * 3_600_000 + IDLE_RESIDUAL_LONG_STATE_CLOCK_SKEW_MS) ||
+        (p.firstTouchAtTs !== undefined && (!positive(p.firstTouchAtTs) || timestamp(p.firstTouchAtTs, now) > now)) ||
+        (p.watchDeadlineTs !== undefined && (!positive(p.watchDeadlineTs) || p.watchDeadlineTs < (p.firstTouchAtTs || 0))) ||
+        (p.trailArmed !== undefined && typeof p.trailArmed !== "boolean") ||
+        (p.bestConfirmed5mClosePct !== undefined && !Number.isFinite(p.bestConfirmed5mClosePct)) ||
+        (p.lastConfirmed5mTs !== undefined && (!positive(p.lastConfirmed5mTs) || timestamp(p.lastConfirmed5mTs, now) > now))) {
       throw new Error("IDLE_RESIDUAL_STATE_POSITION_INVALID");
     }
   }

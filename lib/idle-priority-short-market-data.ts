@@ -173,4 +173,43 @@ export class IdlePriorityAsterMarketDataProvider {
     }
     return result;
   }
+
+  /** Load only completed contiguous 5m candles for a causal entry/exit rule. */
+  async loadFiveMinuteSince(symbol: string, startTs: number, endTs = (this.options.now || Date.now)()): Promise<ConfirmedFiveMinuteBar[]> {
+    if (!Number.isFinite(startTs) || !Number.isFinite(endTs) || startTs <= 0 || endTs <= startTs) {
+      throw new Error(`IDLE_5M_SERIES_WINDOW_INVALID:${symbol}`);
+    }
+    const firstOpen = Math.floor(startTs / FIVE_MINUTE) * FIVE_MINUTE;
+    const currentOpen = Math.floor(endTs / FIVE_MINUTE) * FIVE_MINUTE;
+    const rows = await this.client.getKlines(symbol, "5m", Math.min(1000, Math.max(10, Math.ceil((currentOpen - firstOpen) / FIVE_MINUTE) + 3)), {
+      startTime: firstOpen,
+      endTime: currentOpen + 1,
+    });
+    const parsed = rows
+      .map((row) => ({
+        timestampMs: Number(row[0]),
+        open: Number(row[1]),
+        high: Number(row[2]),
+        low: Number(row[3]),
+        close: Number(row[4]),
+        closeTime: Number(row[6]),
+      }))
+      .filter((row) => row.timestampMs >= firstOpen && row.timestampMs < currentOpen && row.closeTime < endTs)
+      .sort((left, right) => left.timestampMs - right.timestampMs);
+    const result: ConfirmedFiveMinuteBar[] = [];
+    for (const row of parsed) {
+      if (![row.timestampMs, row.open, row.high, row.low, row.close, row.closeTime].every(Number.isFinite)
+        || row.timestampMs <= 0 || row.timestampMs % FIVE_MINUTE !== 0
+        || ![row.open, row.high, row.low, row.close].every((value) => value > 0)
+        || row.high < Math.max(row.open, row.close) || row.low > Math.min(row.open, row.close) || row.high < row.low) {
+        throw new Error(`IDLE_5M_SERIES_BAR_INVALID:${symbol}:${row.timestampMs}`);
+      }
+      const previous = result.at(-1);
+      if (previous?.timestampMs === row.timestampMs) throw new Error(`IDLE_5M_SERIES_DUPLICATE:${symbol}:${row.timestampMs}`);
+      if (previous && row.timestampMs - previous.timestampMs !== FIVE_MINUTE) throw new Error(`IDLE_5M_SERIES_GAP:${symbol}:${previous.timestampMs}:${row.timestampMs}`);
+      result.push({ timestampMs: row.timestampMs, open: row.open, high: row.high, low: row.low, close: row.close });
+    }
+    if (result.length > 0 && result[0]!.timestampMs !== firstOpen) throw new Error(`IDLE_5M_SERIES_START_GAP:${symbol}:${firstOpen}`);
+    return result;
+  }
 }
