@@ -1,0 +1,183 @@
+{
+  "status": "RESEARCH_ONLY_MODEL_COST_STRESS_REPRODUCED",
+  "dateJST": "2026-10-24",
+  "period": "2025-08-10–2026-08-10",
+  "nativeRuns": {},
+  "modelOnly": true,
+  "venueCertified": false,
+  "prodEdited": false,
+  "costs": {
+    "10": {
+      "baseline": {
+        "metrics": {
+          "final_equity_jpy": 288587378.77052534,
+          "profit_factor": 4.740434170299948,
+          "maximum_mtm_drawdown_pct": -14.514985270751623,
+          "closed_trades": 1291,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "ece2960292f591e4ce2ff67c2c3d0d3f3e8d99704437d39178c96bf35d6939a1",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": 0.0,
+          "pfDelta": 0.0,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 0
+        }
+      },
+      "newNoExtraSlippage": {
+        "metrics": {
+          "final_equity_jpy": 290070131.97157055,
+          "profit_factor": 4.7568879921039064,
+          "maximum_mtm_drawdown_pct": -14.514985270751623,
+          "closed_trades": 1293,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "bbf68dbb6e4d9fcb5ee443bc4d511822045587da411607aa02754b96795600a9",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 2,
+        "existingTradesDisplaced": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": 1482753.2010452151,
+          "pfDelta": 0.01645382180395849,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 2
+        }
+      },
+      "newExtra60Bps": {
+        "metrics": {
+          "final_equity_jpy": 289431209.1156428,
+          "profit_factor": 4.749801957606718,
+          "maximum_mtm_drawdown_pct": -14.514985270751623,
+          "closed_trades": 1293,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "3c1fb9aaaad2969e021ff1109f1ddec0b7ca95799fb5c161c9da8d5656decad9",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 2,
+        "existingTradesDisplaced": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": 843830.3451174498,
+          "pfDelta": 0.009367787306770126,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 2
+        }
+      },
+      "newExtra120Bps": {
+        "metrics": {
+          "final_equity_jpy": 288792247.6957502,
+          "profit_factor": 4.742709506925027,
+          "maximum_mtm_drawdown_pct": -14.514985270751623,
+          "closed_trades": 1293,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "9c755366dc4de34d534e667f1c189967e196664163c72891c38ec15bd49209f7",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 2,
+        "existingTradesDisplaced": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": 204868.92522484064,
+          "pfDelta": 0.0022753366250789497,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 2
+        }
+      }
+    },
+    "30": {
+      "baseline": {
+        "metrics": {
+          "final_equity_jpy": 174459200.2195523,
+          "profit_factor": 3.8259511979311043,
+          "maximum_mtm_drawdown_pct": -15.014723812726594,
+          "closed_trades": 1290,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "3b3e9de0280f97a19c5b1b2954fe8de97c6034dd6a446636f07e13c613627257",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": 0.0,
+          "pfDelta": 0.0,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 0
+        }
+      },
+      "newNoExtraSlippage": {
+        "metrics": {
+          "final_equity_jpy": 175324355.2534185,
+          "profit_factor": 3.8351451263116614,
+          "maximum_mtm_drawdown_pct": -15.014723812726594,
+          "closed_trades": 1292,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "e028ad1d4ef45dd5a5b25e600ad87281c8ecaa9bd801d7786b1d8c7a96bedf05",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 2,
+        "existingTradesDisplaced": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": 865155.0338661969,
+          "pfDelta": 0.009193928380557104,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 2
+        }
+      },
+      "newExtra60Bps": {
+        "metrics": {
+          "final_equity_jpy": 174888946.89603987,
+          "profit_factor": 3.8305230250306295,
+          "maximum_mtm_drawdown_pct": -15.014723812726594,
+          "closed_trades": 1292,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "a00813d3fe688f183f29faa354681bcd89fad546b866c857d98961285415ee28",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 2,
+        "existingTradesDisplaced": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": 429746.67648756504,
+          "pfDelta": 0.004571827099525194,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 2
+        }
+      },
+      "newExtra120Bps": {
+        "metrics": {
+          "final_equity_jpy": 174453863.75384852,
+          "profit_factor": 3.8256293051718653,
+          "maximum_mtm_drawdown_pct": -15.014723812726594,
+          "closed_trades": 1292,
+          "accounting": "PASS"
+        },
+        "economicLedgerSha256": "3db8d4c5a95f6b78855bd2117861b448b09f083a0276aa54a6fcd7fddd80f377",
+        "tripleEconomicMatch": true,
+        "independentAcceptedCount": 2,
+        "existingTradesDisplaced": 0,
+        "vsBaseline": {
+          "finalEquityDeltaJpy": -5336.4657037854195,
+          "pfDelta": -0.0003218927592389953,
+          "ddDeltaPp": 0.0,
+          "closedTradesDelta": 2
+        }
+      }
+    }
+  },
+  "sourceScreenSensitivitySha256": "535a8654909d0928063ceaedd718ad36246c8b489ca51e546c760acd4473c8f6",
+  "sensitivityPassThresholds": [
+    0.55,
+    0.555,
+    0.56,
+    0.565,
+    0.57,
+    0.58,
+    0.6
+  ],
+  "warnings": [
+    "No venue/L2 fill certification; H1 native replay and Binance-modeled new exit",
+    "Thresholds fit on previously inspected historical periods; no untouched OOS",
+    "Only two new accepted fills; 2025 Sep additional candidates lack Aster marks",
+    "0.6% and 1.2% extra fill price disadvantages applied only to research RENDER independent route",
+    "Do not generalize from economic ledgers to real execution performance",
+    "Candidate IDs vary between replay copies; normalized economic ledger excluding ID is stable"
+  ]
+}

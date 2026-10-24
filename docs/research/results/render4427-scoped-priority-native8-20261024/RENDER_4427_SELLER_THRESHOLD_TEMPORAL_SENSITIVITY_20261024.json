@@ -1,0 +1,2057 @@
+{
+  "status": "RESEARCH_ONLY_RETROSPECTIVE_SELL_PRESSURE_SENSITIVITY",
+  "runDateJST": "2026-10-24",
+  "baseline": {
+    "2024": {
+      "10": {
+        "n": 70,
+        "wins": 46,
+        "wrPct": 65.71,
+        "pf": 1.3349,
+        "compoundPct": 27.513,
+        "closedDdPct": -12.079
+      },
+      "30": {
+        "n": 70,
+        "wins": 46,
+        "wrPct": 65.71,
+        "pf": 1.1579,
+        "compoundPct": 10.885,
+        "closedDdPct": -13.152
+      }
+    },
+    "2025H1": {
+      "10": {
+        "n": 45,
+        "wins": 30,
+        "wrPct": 66.67,
+        "pf": 1.9061,
+        "compoundPct": 52.913,
+        "closedDdPct": -9.61
+      },
+      "30": {
+        "n": 45,
+        "wins": 29,
+        "wrPct": 64.44,
+        "pf": 1.6853,
+        "compoundPct": 39.85,
+        "closedDdPct": -10.349
+      }
+    },
+    "2025H2": {
+      "10": {
+        "n": 19,
+        "wins": 11,
+        "wrPct": 57.89,
+        "pf": 1.2758,
+        "compoundPct": 6.63,
+        "closedDdPct": -13.635
+      },
+      "30": {
+        "n": 19,
+        "wins": 10,
+        "wrPct": 52.63,
+        "pf": 1.131,
+        "compoundPct": 2.66,
+        "closedDdPct": -14.521
+      }
+    },
+    "2026JanAug": {
+      "10": {
+        "n": 41,
+        "wins": 33,
+        "wrPct": 80.49,
+        "pf": 2.8933,
+        "compoundPct": 48.075,
+        "closedDdPct": -7.625
+      },
+      "30": {
+        "n": 41,
+        "wins": 32,
+        "wrPct": 78.05,
+        "pf": 2.4013,
+        "compoundPct": 36.51,
+        "closedDdPct": -8.376
+      }
+    },
+    "2026AugOct": {
+      "10": {
+        "n": 13,
+        "wins": 9,
+        "wrPct": 69.23,
+        "pf": 1.3915,
+        "compoundPct": 5.126,
+        "closedDdPct": -7.07
+      },
+      "30": {
+        "n": 13,
+        "wins": 9,
+        "wrPct": 69.23,
+        "pf": 1.1998,
+        "compoundPct": 2.434,
+        "closedDdPct": -7.456
+      }
+    }
+  },
+  "baselineSelected": 188,
+  "config": {
+    "families": [
+      "BTC_RENDER_DIVERGE",
+      "SELL_IMBALANCE",
+      "TREND_BREAK",
+      "REBOUND_FAIL"
+    ],
+    "exit": "S6",
+    "policy": "ninety_mid",
+    "routeRules": {
+      "BTC_RENDER_DIVERGE": {
+        "exit": "S6",
+        "policy": "dual_90_180"
+      },
+      "SELL_IMBALANCE": {
+        "exit": "S12",
+        "policy": "ninety_mid"
+      },
+      "TREND_BREAK": {
+        "exit": "S6",
+        "policy": "recent30_180"
+      },
+      "REBOUND_FAIL": {
+        "exit": "S12",
+        "policy": "recent30_180"
+      }
+    },
+    "oldBonus": 8,
+    "upgradeMargin": 8,
+    "structure": "any",
+    "newCooldownHours": 12
+  },
+  "testedThresholds": [
+    0.53,
+    0.54,
+    0.545,
+    0.55,
+    0.555,
+    0.56,
+    0.565,
+    0.57,
+    0.58,
+    0.6
+  ],
+  "cases": [
+    {
+      "sellPctMinimum": 0.53,
+      "qualifiedRawBtcDivergenceSignals": 195,
+      "selectedTotal": 238,
+      "addedIndependents": 53,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 33
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 112,
+            "deltaN": 42,
+            "wrPct": 67.86,
+            "pf": 1.5096,
+            "compoundPct": 61.827,
+            "deltaCompoundPp": 34.314,
+            "closedDdPct": -10.416,
+            "deltaDdPp": 1.663
+          },
+          "30": {
+            "n": 112,
+            "deltaN": 42,
+            "wrPct": 67.86,
+            "pf": 1.272,
+            "compoundPct": 29.436,
+            "deltaCompoundPp": 18.551,
+            "closedDdPct": -10.972,
+            "deltaDdPp": 2.18
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "deltaN": 1,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "deltaCompoundPp": -3.11,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 42,
+            "deltaN": 1,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "deltaCompoundPp": -3.14,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "deltaN": 1,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "deltaCompoundPp": 1.472,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 14,
+            "deltaN": 1,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "deltaCompoundPp": 1.23,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": false,
+      "nativeWindowIndependentCount": 7,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1770300000000,
+          "utc": "2026-02-05T14:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": -2.3
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.54,
+      "qualifiedRawBtcDivergenceSignals": 154,
+      "selectedTotal": 227,
+      "addedIndependents": 41,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 21
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 2
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 101,
+            "deltaN": 31,
+            "wrPct": 67.33,
+            "pf": 1.4503,
+            "compoundPct": 50.372,
+            "deltaCompoundPp": 22.859,
+            "closedDdPct": -10.416,
+            "deltaDdPp": 1.663
+          },
+          "30": {
+            "n": 101,
+            "deltaN": 31,
+            "wrPct": 67.33,
+            "pf": 1.232,
+            "compoundPct": 22.934,
+            "deltaCompoundPp": 12.049,
+            "closedDdPct": -10.972,
+            "deltaDdPp": 2.18
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "deltaN": 0,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 41,
+            "deltaN": 0,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 15,
+            "deltaN": 2,
+            "wrPct": 60.0,
+            "pf": 1.3432,
+            "compoundPct": 4.582,
+            "deltaCompoundPp": -0.544,
+            "closedDdPct": -7.552,
+            "deltaDdPp": -0.482
+          },
+          "30": {
+            "n": 15,
+            "deltaN": 2,
+            "wrPct": 60.0,
+            "pf": 1.1315,
+            "compoundPct": 1.496,
+            "deltaCompoundPp": -0.938,
+            "closedDdPct": -8.304,
+            "deltaDdPp": -0.848
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": false,
+      "nativeWindowIndependentCount": 6,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.545,
+      "qualifiedRawBtcDivergenceSignals": 137,
+      "selectedTotal": 237,
+      "addedIndependents": 51,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 22
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 9
+        },
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 2
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 102,
+            "deltaN": 32,
+            "wrPct": 69.61,
+            "pf": 1.5498,
+            "compoundPct": 62.27,
+            "deltaCompoundPp": 34.757,
+            "closedDdPct": -10.416,
+            "deltaDdPp": 1.663
+          },
+          "30": {
+            "n": 102,
+            "deltaN": 32,
+            "wrPct": 69.61,
+            "pf": 1.3153,
+            "compoundPct": 32.416,
+            "deltaCompoundPp": 21.531,
+            "closedDdPct": -10.972,
+            "deltaDdPp": 2.18
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 50,
+            "deltaN": 9,
+            "wrPct": 80.0,
+            "pf": 3.1154,
+            "compoundPct": 59.213,
+            "deltaCompoundPp": 11.138,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 50,
+            "deltaN": 9,
+            "wrPct": 76.0,
+            "pf": 2.5285,
+            "compoundPct": 44.177,
+            "deltaCompoundPp": 7.667,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 15,
+            "deltaN": 2,
+            "wrPct": 60.0,
+            "pf": 1.3432,
+            "compoundPct": 4.582,
+            "deltaCompoundPp": -0.544,
+            "closedDdPct": -7.552,
+            "deltaDdPp": -0.482
+          },
+          "30": {
+            "n": 15,
+            "deltaN": 2,
+            "wrPct": 60.0,
+            "pf": 1.1315,
+            "compoundPct": 1.496,
+            "deltaCompoundPp": -0.938,
+            "closedDdPct": -8.304,
+            "deltaDdPp": -0.848
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": false,
+      "nativeWindowIndependentCount": 15,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1776182400000,
+          "utc": "2026-04-14T16:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1776276000000,
+          "utc": "2026-04-15T18:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": -0.3
+        },
+        {
+          "t": 1776754800000,
+          "utc": "2026-04-21T07:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": -0.076286
+        },
+        {
+          "t": 1776884400000,
+          "utc": "2026-04-22T19:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1778342400000,
+          "utc": "2026-05-09T16:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": -1.307049
+        },
+        {
+          "t": 1779469200000,
+          "utc": "2026-05-22T17:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1779915600000,
+          "utc": "2026-05-27T21:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782176400000,
+          "utc": "2026-06-23T01:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782370800000,
+          "utc": "2026-06-25T07:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.55,
+      "qualifiedRawBtcDivergenceSignals": 120,
+      "selectedTotal": 224,
+      "addedIndependents": 38,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 17
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 97,
+            "deltaN": 27,
+            "wrPct": 68.04,
+            "pf": 1.4771,
+            "compoundPct": 52.166,
+            "deltaCompoundPp": 24.653,
+            "closedDdPct": -10.416,
+            "deltaDdPp": 1.663
+          },
+          "30": {
+            "n": 97,
+            "deltaN": 27,
+            "wrPct": 68.04,
+            "pf": 1.2591,
+            "compoundPct": 25.404,
+            "deltaCompoundPp": 14.519,
+            "closedDdPct": -11.055,
+            "deltaDdPp": 2.097
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "deltaN": 3,
+            "wrPct": 81.82,
+            "pf": 3.0891,
+            "compoundPct": 54.382,
+            "deltaCompoundPp": 6.307,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 44,
+            "deltaN": 3,
+            "wrPct": 79.55,
+            "pf": 2.5569,
+            "compoundPct": 41.483,
+            "deltaCompoundPp": 4.973,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": true,
+      "nativeWindowIndependentCount": 9,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1779915600000,
+          "utc": "2026-05-27T21:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782176400000,
+          "utc": "2026-06-23T01:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782370800000,
+          "utc": "2026-06-25T07:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.555,
+      "qualifiedRawBtcDivergenceSignals": 108,
+      "selectedTotal": 222,
+      "addedIndependents": 36,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 15
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 95,
+            "deltaN": 25,
+            "wrPct": 68.42,
+            "pf": 1.4951,
+            "compoundPct": 53.284,
+            "deltaCompoundPp": 25.771,
+            "closedDdPct": -10.416,
+            "deltaDdPp": 1.663
+          },
+          "30": {
+            "n": 95,
+            "deltaN": 25,
+            "wrPct": 68.42,
+            "pf": 1.276,
+            "compoundPct": 26.834,
+            "deltaCompoundPp": 15.949,
+            "closedDdPct": -11.055,
+            "deltaDdPp": 2.097
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "deltaN": 3,
+            "wrPct": 81.82,
+            "pf": 3.0891,
+            "compoundPct": 54.382,
+            "deltaCompoundPp": 6.307,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 44,
+            "deltaN": 3,
+            "wrPct": 79.55,
+            "pf": 2.5569,
+            "compoundPct": 41.483,
+            "deltaCompoundPp": 4.973,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": true,
+      "nativeWindowIndependentCount": 9,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1779915600000,
+          "utc": "2026-05-27T21:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782176400000,
+          "utc": "2026-06-23T01:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782370800000,
+          "utc": "2026-06-25T07:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.56,
+      "qualifiedRawBtcDivergenceSignals": 94,
+      "selectedTotal": 221,
+      "addedIndependents": 35,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 94,
+            "deltaN": 24,
+            "wrPct": 68.09,
+            "pf": 1.4803,
+            "compoundPct": 51.168,
+            "deltaCompoundPp": 23.655,
+            "closedDdPct": -10.416,
+            "deltaDdPp": 1.663
+          },
+          "30": {
+            "n": 94,
+            "deltaN": 24,
+            "wrPct": 68.09,
+            "pf": 1.264,
+            "compoundPct": 25.33,
+            "deltaCompoundPp": 14.445,
+            "closedDdPct": -11.055,
+            "deltaDdPp": 2.097
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "deltaN": 3,
+            "wrPct": 81.82,
+            "pf": 3.0891,
+            "compoundPct": 54.382,
+            "deltaCompoundPp": 6.307,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 44,
+            "deltaN": 3,
+            "wrPct": 79.55,
+            "pf": 2.5569,
+            "compoundPct": 41.483,
+            "deltaCompoundPp": 4.973,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": true,
+      "nativeWindowIndependentCount": 9,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1779915600000,
+          "utc": "2026-05-27T21:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782176400000,
+          "utc": "2026-06-23T01:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782370800000,
+          "utc": "2026-06-25T07:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.565,
+      "qualifiedRawBtcDivergenceSignals": 81,
+      "selectedTotal": 212,
+      "addedIndependents": 26,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 6
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 2
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 86,
+            "deltaN": 16,
+            "wrPct": 67.44,
+            "pf": 1.4362,
+            "compoundPct": 43.279,
+            "deltaCompoundPp": 15.766,
+            "closedDdPct": -12.079,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 86,
+            "deltaN": 16,
+            "wrPct": 67.44,
+            "pf": 1.2335,
+            "compoundPct": 20.695,
+            "deltaCompoundPp": 9.81,
+            "closedDdPct": -13.152,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 43,
+            "deltaN": 2,
+            "wrPct": 81.4,
+            "pf": 3.0239,
+            "compoundPct": 52.25,
+            "deltaCompoundPp": 4.175,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 43,
+            "deltaN": 2,
+            "wrPct": 79.07,
+            "pf": 2.505,
+            "compoundPct": 39.806,
+            "deltaCompoundPp": 3.296,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": true,
+      "nativeWindowIndependentCount": 8,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1782176400000,
+          "utc": "2026-06-23T01:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782370800000,
+          "utc": "2026-06-25T07:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.57,
+      "qualifiedRawBtcDivergenceSignals": 73,
+      "selectedTotal": 206,
+      "addedIndependents": 20,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 2
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 80,
+            "deltaN": 10,
+            "wrPct": 66.25,
+            "pf": 1.3916,
+            "compoundPct": 36.525,
+            "deltaCompoundPp": 9.012,
+            "closedDdPct": -12.079,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 80,
+            "deltaN": 10,
+            "wrPct": 66.25,
+            "pf": 1.2001,
+            "compoundPct": 16.384,
+            "deltaCompoundPp": 5.499,
+            "closedDdPct": -13.152,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 43,
+            "deltaN": 2,
+            "wrPct": 81.4,
+            "pf": 3.0239,
+            "compoundPct": 52.25,
+            "deltaCompoundPp": 4.175,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 43,
+            "deltaN": 2,
+            "wrPct": 79.07,
+            "pf": 2.505,
+            "compoundPct": 39.806,
+            "deltaCompoundPp": 3.296,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": true,
+      "nativeWindowIndependentCount": 8,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1782176400000,
+          "utc": "2026-06-23T01:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        },
+        {
+          "t": 1782370800000,
+          "utc": "2026-06-25T07:00:00+00:00",
+          "family": "BTC_RENDER_DIVERGE",
+          "net30": 1.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.58,
+      "qualifiedRawBtcDivergenceSignals": 52,
+      "selectedTotal": 204,
+      "addedIndependents": 18,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 80,
+            "deltaN": 10,
+            "wrPct": 66.25,
+            "pf": 1.3916,
+            "compoundPct": 36.525,
+            "deltaCompoundPp": 9.012,
+            "closedDdPct": -12.079,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 80,
+            "deltaN": 10,
+            "wrPct": 66.25,
+            "pf": 1.2001,
+            "compoundPct": 16.384,
+            "deltaCompoundPp": 5.499,
+            "closedDdPct": -13.152,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "deltaN": 0,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 41,
+            "deltaN": 0,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": true,
+      "nativeWindowIndependentCount": 6,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        }
+      ]
+    },
+    {
+      "sellPctMinimum": 0.6,
+      "qualifiedRawBtcDivergenceSignals": 28,
+      "selectedTotal": 204,
+      "addedIndependents": 18,
+      "selectedIndependentFamilies": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 80,
+            "deltaN": 10,
+            "wrPct": 66.25,
+            "pf": 1.3916,
+            "compoundPct": 36.525,
+            "deltaCompoundPp": 9.012,
+            "closedDdPct": -12.079,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 80,
+            "deltaN": 10,
+            "wrPct": 66.25,
+            "pf": 1.2001,
+            "compoundPct": 16.384,
+            "deltaCompoundPp": 5.499,
+            "closedDdPct": -13.152,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "deltaCompoundPp": 1.586,
+            "closedDdPct": -9.61,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 45,
+            "deltaN": 0,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "deltaCompoundPp": 1.454,
+            "closedDdPct": -10.349,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "deltaCompoundPp": 3.012,
+            "closedDdPct": -11.195,
+            "deltaDdPp": 2.44
+          },
+          "30": {
+            "n": 25,
+            "deltaN": 6,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "deltaCompoundPp": 1.646,
+            "closedDdPct": -13.151,
+            "deltaDdPp": 1.37
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "deltaN": 0,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.625,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 41,
+            "deltaN": 0,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -8.376,
+            "deltaDdPp": 0.0
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.07,
+            "deltaDdPp": 0.0
+          },
+          "30": {
+            "n": 13,
+            "deltaN": 0,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "deltaCompoundPp": 0.0,
+            "closedDdPct": -7.456,
+            "deltaDdPp": 0.0
+          }
+        }
+      },
+      "nondegradationAllFiveBothCosts": true,
+      "nativeWindowIndependentCount": 6,
+      "nativeWindowIndependentTrades": [
+        {
+          "t": 1757826000000,
+          "utc": "2025-09-14T05:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1758081600000,
+          "utc": "2025-09-17T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 0.744386
+        },
+        {
+          "t": 1758254400000,
+          "utc": "2025-09-19T04:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        },
+        {
+          "t": 1759060800000,
+          "utc": "2025-09-28T12:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759143600000,
+          "utc": "2025-09-29T11:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": -2.8
+        },
+        {
+          "t": 1759219200000,
+          "utc": "2025-09-30T08:00:00+00:00",
+          "family": "SELL_IMBALANCE",
+          "net30": 2.2
+        }
+      ]
+    }
+  ],
+  "bankSha256": "d5234a91155afa2e232b0c2372b4a929a875ee79ef23d085a6417ecfab334c07",
+  "sourceScriptSha256": "2ffb72b8707a3f32e68270b7e89c2ee01d2c2484922057f0037cefdc17c2d230",
+  "sourceAvailability": {
+    "root": "C:\\tmp\\render-btc-complete-20261024",
+    "btc5mMonthlyArchiveCount": 13,
+    "archivedMonths": [
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12",
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08"
+    ]
+  },
+  "limitations": [
+    "Historical data already examined; not a pristine OOS evaluation",
+    "Includes paper shadow outcomes of simultaneously unfilled proposals; not actual independent fills",
+    "Global Native8 economic improvement applies only to previously admitted 2 signals at sell55",
+    "BTC official M5 archive presence does not prove Aster mark/venue equity/funding parity",
+    "Potential data source-note staleness must be separately verified",
+    "Winner selection cannot be generalized from two net-positive trades"
+  ]
+}
