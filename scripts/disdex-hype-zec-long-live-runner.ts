@@ -68,7 +68,10 @@ async function main() {
       oneMinuteLimit: numberEnv("DISDEX_HYPE_ZEC_1M_LIMIT", 240),
       oneHourLimit: numberEnv("DISDEX_HYPE_ZEC_1H_LIMIT", 360),
       signalMode: runtime.signalMode,
-      symbols: runtime.symbols,
+      // The production runner is HYPEUSDT Long only.  ZEC remains present in
+      // legacy state/schema types for defensive residual checks, but this
+      // runner must never request ZEC market data or derive a ZEC signal.
+      symbols: ["HYPEUSDT"],
     }),
     executor,
     adapter,

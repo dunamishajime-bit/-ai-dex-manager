@@ -13,7 +13,7 @@ import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPo
 import type { AccountLockHandle, FileAccountOrderLock } from "./disdex-account-order-lock";
 import type { DirectAccountSnapshot, DirectMarketQuote, DirectOpenOrder, DirectPosition, DirectTradeExecutor, DirectTradeResult } from "./direct-trade-executor";
 import type { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
-import { buildHypeZecProtection, calculateHypeZecQuantity, evaluateHypeLongSignal, evaluateZecLongSignal, type HypeZecSignalResult } from "./hype-zec-long-sleeves";
+import { buildHypeZecProtection, calculateHypeZecQuantity, evaluateHypeLongSignal, type HypeZecSignalResult } from "./hype-zec-long-sleeves";
 import { buildHypeTrendSignal, type HypeTrendCandle } from "./hype-trend-long-signal";
 import { evaluateHypeTrendEntryGate } from "./hype-trend-long-runner";
 import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
@@ -79,6 +79,13 @@ function positionSide(position: DirectPosition): "LONG" | "SHORT" {
 
 function actualPosition(positions: readonly DirectPosition[], symbol: string) {
   return positions.find((position) => position.symbol.toUpperCase() === symbol.toUpperCase() && Math.abs(position.quantity) > EPSILON);
+}
+
+function hasLiveZecResidual(state: HypeZecLongRunnerState, positions: readonly DirectPosition[], openOrders: readonly DirectOpenOrder[]) {
+  return (state.positions || []).some((position) => position.symbol === "ZECUSDT")
+    || state.pending?.symbol === "ZECUSDT"
+    || positions.some((position) => position.symbol.toUpperCase() === "ZECUSDT" && Math.abs(position.quantity) > EPSILON)
+    || openOrders.some((order) => order.symbol.toUpperCase() === "ZECUSDT");
 }
 
 function actualQuantity(position: DirectPosition) { return Math.abs(position.quantity); }
@@ -429,11 +436,18 @@ export class HypeZecLongRunner {
       const benignReview = isBenignMarketDataReview(state.manualReview);
       if (state.manualReview && !benignReview) return { status: "manual-review", message: state.manualReview };
 
-      const [account, positions, openOrders] = await Promise.all([
-        this.dependencies.executor.getAccountSnapshot(),
-        this.dependencies.executor.getPositions(),
-        this.dependencies.executor.getOpenOrders(),
-      ]);
+      const currentVenue = venueReadback || await (async () => {
+        const [account, positions, openOrders] = await Promise.all([
+          this.dependencies.executor.getAccountSnapshot(),
+          this.dependencies.executor.getPositions(),
+          this.dependencies.executor.getOpenOrders(),
+        ]);
+        return { account, positions, openOrders };
+      })();
+      const { account, positions, openOrders } = currentVenue;
+      if (this.dependencies.runtime.mode === "LIVE" && hasLiveZecResidual(state, positions, openOrders)) {
+        return this.manualReview(state, "HYPE_LIVE_SCOPE_ZEC_RESIDUAL");
+      }
       const protectionFill=await this.reconcileVenueProtectionFills(state,positions);if(protectionFill)return protectionFill;
       if(state.pending)return this.manualReview(state,"HYPE_ZEC_PENDING_REQUIRES_RECONCILIATION");
       const ownershipIssue = await this.reconcileOwnership(state, positions, openOrders);
@@ -508,9 +522,6 @@ export class HypeZecLongRunner {
         signals.push(this.dependencies.runtime.signalMode === "TREND"
           ? trendSignalAsLegacy(buildHypeTrendSignal({ now: this.now(), btc: market.btc1h.map(trendCandle), hype: market.hype1h.map(trendCandle) }))
           : evaluateHypeLongSignal({ now: this.now(), btc15m: market.btc15m, symbol15m: market.hype15m, symbol1m: market.hype1m }));
-      }
-      if (this.dependencies.runtime.symbols.includes("ZECUSDT")) {
-        signals.push(evaluateZecLongSignal({ now: this.now(), btc15m: market.btc15m, symbol15m: market.zec15m, symbol1m: market.zec1m }));
       }
       for (const signal of signals) {
         if (existingStrategies.has(signal.strategy)) continue;
