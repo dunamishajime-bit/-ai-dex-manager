@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 import { createV12V4HpStatusGet } from "../lib/server/v12-v4-hp-status-handler";
 import type { V12V4HpSnapshot } from "../lib/v12-v4-hp-contract";
 import { isV12RuntimeFresh } from "../app/api/system/decision-status/route";
+import { createLiveRuntimeGet } from "../app/api/system/live-runtime/route";
 
 const snapshot = {
   schema: "v12-v4-hp-status/v1",
@@ -73,4 +74,18 @@ test("legacy V12 cannot become LIVE without a current matching runtime SHA", () 
   assert.equal(isV12RuntimeFresh({ ...base, runnerState: { ...base.runnerState, releaseSha: "b".repeat(40) } }), false);
   assert.equal(isV12RuntimeFresh({ ...base, runtime: { ...runtime, runtimeLineage: { ...runtime.runtimeLineage, synchronized: false } } }), false);
   assert.equal(isV12RuntimeFresh({ ...base, runnerState: { ...base.runnerState, updatedAt: now + 1 } }), false);
+});
+
+test("live runtime loader failures return explicit unavailable and review flags", async () => {
+  const get = createLiveRuntimeGet(async () => { throw new Error("runtime source unavailable"); });
+  const response = await get(new NextRequest("http://localhost/api/system/live-runtime", { headers: { cookie: "disdex_auth=1" } }));
+  const body = await response.json();
+  assert.equal(response.status, 503);
+  assert.equal(body.ok, false);
+  assert.equal(body.status, "UNAVAILABLE");
+  assert.equal(body.needsReview, true);
+  assert.equal(body.readOnly, true);
+  assert.equal(body.tradingMutation, 0);
+  assert.match(response.headers.get("Cache-Control") || "", /private/);
+  assert.match(response.headers.get("Cache-Control") || "", /no-store/);
 });
