@@ -114,7 +114,7 @@ def assess(candidate: Candidate, ctx: Context) -> Decision:
             STRATEGY, ROUTE, SYMBOL, SIDE, OWNER, CAPITAL_OWNER):
         reasons.append("ROUTE_OWNER_BINDING_MISMATCH")
     if not isinstance(candidate.entry_ts_ms, int) or candidate.entry_ts_ms <= 0:
-        reasons.append("INVALID_ENTRY_TS")
+        return Decision(Verdict.REJECT, ("INVALID_ENTRY_TS",))
     if not isinstance(candidate.requested_gross, (int, float)) or not (0 < candidate.requested_gross <= 0.25):
         reasons.append("INVALID_REQUESTED_GROSS")
     if ctx.open_symbols is None:
