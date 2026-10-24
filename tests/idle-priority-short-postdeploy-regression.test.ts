@@ -93,6 +93,13 @@ test("Idle ownership is durable-state backed; same symbol owned by another strat
     assert.equal(exposure.nonBaselineCryptoExposure, 0.2);
 });
 
+test("an unknown non-flat venue row is a baseline blocker, not an Idle-owned position", () => {
+    const exposure = coreAndSidecarExposure([position("SUSHIUSDT", 100)], 100);
+    assert.equal(exposure.baselineOpenPositions, 1);
+    assert.equal(exposure.totalGross, 1);
+    assert.equal(exposure.nonBaselineCryptoExposure, 0);
+});
+
 test("per-symbol cooldown is not global and is exactly 12h", () => {
     const { instance } = runner();
     const r = instance as any;

@@ -183,10 +183,16 @@ export function coreAndSidecarExposure(positions: readonly DirectPosition[], equ
     let cryptoGross = 0;
     let stockGross = 0;
     for (const position of positions) {
-        const classification = classifyAsterSymbol(position.symbol);
-        if (!classification.tradable || classification.assetClass === "UNKNOWN") throw new Error(`IDLE_UNKNOWN_ACTIVE_POSITION:${position.symbol}`);
         const gross = equity > 0 ? Math.abs(position.notionalUsd) / equity : Number.POSITIVE_INFINITY;
         totalGross += gross;
+        const classification = classifyAsterSymbol(position.symbol);
+        if (!classification.tradable || classification.assetClass === "UNKNOWN") {
+            // Unknown non-flat venue rows are never adopted or guessed. They are
+            // conservative baseline exposure, so Idle cannot open new risk while
+            // another reconciler owns or explains the row.
+            baselineOpenPositions += 1;
+            continue;
+        }
         if (classification.assetClass === "CRYPTO") cryptoGross += gross;
         else if (classification.assetClass === "STOCK") stockGross += gross;
 
