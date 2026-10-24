@@ -1,0 +1,701 @@
+{
+  "status": "RESEARCH_ONLY_NATIVE_EIGHT_LOGIC_INTEGRATED_ACCOUNTING_VERIFIED",
+  "periodStart": "2025-08-10",
+  "periodEnd": "2026-08-10",
+  "initialCapitalJpy": 10000,
+  "monthlyContributionJpy": 0,
+  "newRenderEntryCoverage": "2026-01-08 through 2026-08-09 only: native mark source starts 2026-01-06",
+  "whyNot2025RENDER": "H1 verified mark tape lacks RENDER before 2026-01-06; Fail Closed remained enforced; no interpolated or invented mark bars",
+  "baselineCase": "RENDER_TWO_REGIME_PARITY_BASELINE",
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 284418780.7271706,
+      "portfolioPF": 4.727629118463831,
+      "ddPct": -14.514985270751623,
+      "closedTrades": 1285,
+      "byStrategy": {
+        "V12": 835,
+        "Q102": 183,
+        "PENGU": 68,
+        "IDLE": 68,
+        "RESIDUAL": 19,
+        "V52": 87,
+        "HYPE_LONG": 17,
+        "FET": 8
+      },
+      "ledgerSha256": "8f5bcca9aa591b092e333890085244b9862ce9bfb9801356d41ff4e08706af29",
+      "RENDER_Existing": 24
+    },
+    "30": {
+      "finalEquityJpy": 173611665.16277647,
+      "portfolioPF": 3.839966790525148,
+      "ddPct": -15.014723812726594,
+      "closedTrades": 1284,
+      "byStrategy": {
+        "V12": 834,
+        "Q102": 183,
+        "PENGU": 68,
+        "IDLE": 70,
+        "RESIDUAL": 19,
+        "V52": 86,
+        "HYPE_LONG": 16,
+        "FET": 8
+      },
+      "ledgerSha256": "1ff713d59c903de3f277eba2258529504980dce516fef62105f6dfee8d46d57b",
+      "RENDER_Existing": 24
+    }
+  },
+  "cases": {
+    "RENDER_TRI_ALPHA_BTC_TRAP_OI06_ADD": {
+      "10": {
+        "finalEquityJpy": 287970658.3949555,
+        "portfolioPF": 4.732055393534954,
+        "maxMtmDdPct": -14.514985270751623,
+        "closedTrades": 1290,
+        "byStrategy": {
+          "V12": 834,
+          "Q102": 183,
+          "PENGU": 68,
+          "IDLE": 74,
+          "RESIDUAL": 19,
+          "V52": 87,
+          "HYPE_LONG": 17,
+          "FET": 8
+        },
+        "deltaEquityJpy": 3551877.66778,
+        "deltaDdPctPoints": 0.0,
+        "deltaTrades": 5,
+        "deltaPF": 0.004426,
+        "modelLedgerSha256": "c3e12dda04be73dcfd12c9772c6d41ed06cd39d975cd621cfef962f6d395c7df",
+        "threeReplayEconomicsEqual": true,
+        "economicLedgerSha256": "5567fae33b4ea2130a6f724a2e14f45b66c729e0a57a88409b0c3f9240de2bbd",
+        "rawByteLedgersEqual": false,
+        "strategyReallocationCounts": {
+          "FET": 0,
+          "HYPE_LONG": 0,
+          "IDLE": 6,
+          "PENGU": 0,
+          "Q102": 0,
+          "RESIDUAL": 0,
+          "V12": -1,
+          "V52": 0
+        },
+        "newResearchTradesCount": 8,
+        "newResearchTradesByRoute": {
+          "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT": 6,
+          "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT": 2
+        },
+        "newResearchMaxGross": 0.24999999,
+        "nativeOtherRoutesRemovedByConflict": {
+          "V12": 1,
+          "IDLE": 3
+        },
+        "nativeOtherRoutesAdded": {
+          "IDLE": 1
+        },
+        "nativeCandidateDecisions": [
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 14
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FULL_1X_UNAVAILABLE",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 2
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 4
+          }
+        ],
+        "tradeDetails": [
+          {
+            "utc": "2026-01-14T17:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249978,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 13692.04
+          },
+          {
+            "utc": "2026-01-23T18:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249992,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 17381.79
+          },
+          {
+            "utc": "2026-03-04T10:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -114380.86
+          },
+          {
+            "utc": "2026-03-13T08:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -185753.68
+          },
+          {
+            "utc": "2026-03-18T19:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 287678.34
+          },
+          {
+            "utc": "2026-04-11T19:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 493363.89
+          },
+          {
+            "utc": "2026-05-01T04:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TIME",
+            "netModeledJpy": -226507.82
+          },
+          {
+            "utc": "2026-06-18T03:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 2068317.98
+          }
+        ]
+      },
+      "30": {
+        "finalEquityJpy": 173918915.61720914,
+        "portfolioPF": 3.823844781804326,
+        "maxMtmDdPct": -15.014723812726594,
+        "closedTrades": 1289,
+        "byStrategy": {
+          "V12": 833,
+          "Q102": 183,
+          "PENGU": 68,
+          "IDLE": 76,
+          "RESIDUAL": 19,
+          "V52": 86,
+          "HYPE_LONG": 16,
+          "FET": 8
+        },
+        "deltaEquityJpy": 307250.45443,
+        "deltaDdPctPoints": 0.0,
+        "deltaTrades": 5,
+        "deltaPF": -0.016122,
+        "modelLedgerSha256": "e0c677ef226ed378e9e69ca2ef95f71b9d124c54ab823f23748dfa37a11319d0",
+        "threeReplayEconomicsEqual": true,
+        "economicLedgerSha256": "a70e8745485e51fd885c58666743b47be242de739115e335346cd2142ce5d613",
+        "rawByteLedgersEqual": false,
+        "strategyReallocationCounts": {
+          "FET": 0,
+          "HYPE_LONG": 0,
+          "IDLE": 6,
+          "PENGU": 0,
+          "Q102": 0,
+          "RESIDUAL": 0,
+          "V12": -1,
+          "V52": 0
+        },
+        "newResearchTradesCount": 7,
+        "newResearchTradesByRoute": {
+          "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT": 6,
+          "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT": 1
+        },
+        "newResearchMaxGross": 0.24999982,
+        "nativeOtherRoutesRemovedByConflict": {
+          "V12": 1,
+          "IDLE": 2
+        },
+        "nativeOtherRoutesAdded": {
+          "IDLE": 1
+        },
+        "nativeCandidateDecisions": [
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 14
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FULL_1X_UNAVAILABLE",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 3
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 2
+          }
+        ],
+        "tradeDetails": [
+          {
+            "utc": "2026-01-14T17:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249993,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 6780.22
+          },
+          {
+            "utc": "2026-01-23T18:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249971,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 8341.08
+          },
+          {
+            "utc": "2026-03-04T10:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249997,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -51431.88
+          },
+          {
+            "utc": "2026-03-13T08:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249998,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -84469.51
+          },
+          {
+            "utc": "2026-04-11T19:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 228563.81
+          },
+          {
+            "utc": "2026-05-01T04:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TIME",
+            "netModeledJpy": -130156.0
+          },
+          {
+            "utc": "2026-06-18T03:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 1126066.3
+          }
+        ]
+      }
+    },
+    "RENDER_TRI_ALPHA_BTC_TRAP_OI02_ADD": {
+      "10": {
+        "finalEquityJpy": 288120929.77070844,
+        "portfolioPF": 4.733655429105426,
+        "maxMtmDdPct": -14.514985270751623,
+        "closedTrades": 1291,
+        "byStrategy": {
+          "V12": 834,
+          "Q102": 183,
+          "PENGU": 68,
+          "IDLE": 75,
+          "RESIDUAL": 19,
+          "V52": 87,
+          "HYPE_LONG": 17,
+          "FET": 8
+        },
+        "deltaEquityJpy": 3702149.04354,
+        "deltaDdPctPoints": 0.0,
+        "deltaTrades": 6,
+        "deltaPF": 0.006026,
+        "modelLedgerSha256": "c7c654c56e68800696ec87e87dc84f7173c73f944863a3f0a9dee43dc4a71449",
+        "threeReplayEconomicsEqual": true,
+        "economicLedgerSha256": "f427e98250bc11224b7fc4ee9258887937c9d0467199f03e388c5b2f593285ea",
+        "rawByteLedgersEqual": false,
+        "strategyReallocationCounts": {
+          "FET": 0,
+          "HYPE_LONG": 0,
+          "IDLE": 7,
+          "PENGU": 0,
+          "Q102": 0,
+          "RESIDUAL": 0,
+          "V12": -1,
+          "V52": 0
+        },
+        "newResearchTradesCount": 9,
+        "newResearchTradesByRoute": {
+          "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT": 6,
+          "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT": 3
+        },
+        "newResearchMaxGross": 0.24999999,
+        "nativeOtherRoutesRemovedByConflict": {
+          "V12": 1,
+          "IDLE": 3
+        },
+        "nativeOtherRoutesAdded": {
+          "IDLE": 1
+        },
+        "nativeCandidateDecisions": [
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 14
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FULL_1X_UNAVAILABLE",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 3
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 9
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 4
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 2
+          }
+        ],
+        "tradeDetails": [
+          {
+            "utc": "2026-01-14T17:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249978,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 13692.04
+          },
+          {
+            "utc": "2026-01-23T18:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249992,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 17381.79
+          },
+          {
+            "utc": "2026-03-04T10:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -114380.86
+          },
+          {
+            "utc": "2026-03-13T08:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -185753.68
+          },
+          {
+            "utc": "2026-03-18T19:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 287678.34
+          },
+          {
+            "utc": "2026-04-11T19:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 493363.89
+          },
+          {
+            "utc": "2026-05-01T04:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TIME",
+            "netModeledJpy": -226507.82
+          },
+          {
+            "utc": "2026-06-08T09:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TIME",
+            "netModeledJpy": 119179.7
+          },
+          {
+            "utc": "2026-06-18T03:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 2069692.28
+          }
+        ]
+      },
+      "30": {
+        "finalEquityJpy": 173946438.6979451,
+        "portfolioPF": 3.824124994016385,
+        "maxMtmDdPct": -15.014723812726594,
+        "closedTrades": 1290,
+        "byStrategy": {
+          "V12": 833,
+          "Q102": 183,
+          "PENGU": 68,
+          "IDLE": 77,
+          "RESIDUAL": 19,
+          "V52": 86,
+          "HYPE_LONG": 16,
+          "FET": 8
+        },
+        "deltaEquityJpy": 334773.53517,
+        "deltaDdPctPoints": 0.0,
+        "deltaTrades": 6,
+        "deltaPF": -0.015842,
+        "modelLedgerSha256": "621f2acc2f705b38fbc7007e5d948994d15c0f06f3c0e61987990eaf47d199f1",
+        "threeReplayEconomicsEqual": true,
+        "economicLedgerSha256": "20a5e26562bd69d44b039776de4326f5606c5f6a6e232d6af1743d6a7d8f17f4",
+        "rawByteLedgersEqual": false,
+        "strategyReallocationCounts": {
+          "FET": 0,
+          "HYPE_LONG": 0,
+          "IDLE": 7,
+          "PENGU": 0,
+          "Q102": 0,
+          "RESIDUAL": 0,
+          "V12": -1,
+          "V52": 0
+        },
+        "newResearchTradesCount": 8,
+        "newResearchTradesByRoute": {
+          "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT": 6,
+          "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT": 2
+        },
+        "newResearchMaxGross": 0.24999999,
+        "nativeOtherRoutesRemovedByConflict": {
+          "V12": 1,
+          "IDLE": 2
+        },
+        "nativeOtherRoutesAdded": {
+          "IDLE": 1
+        },
+        "nativeCandidateDecisions": [
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 14
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FULL_1X_UNAVAILABLE",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 2
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 9
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 3
+          },
+          {
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 4
+          }
+        ],
+        "tradeDetails": [
+          {
+            "utc": "2026-01-14T17:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249993,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 6780.22
+          },
+          {
+            "utc": "2026-01-23T18:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249971,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 8341.08
+          },
+          {
+            "utc": "2026-03-04T10:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249997,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -51431.88
+          },
+          {
+            "utc": "2026-03-13T08:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249998,
+            "exitReason": "RESEARCH_TRI_STOP_OR_TRAIL",
+            "netModeledJpy": -84469.51
+          },
+          {
+            "utc": "2026-04-11T19:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 228563.81
+          },
+          {
+            "utc": "2026-05-01T04:00",
+            "route": "IDLE_RENDER_TRI_2024_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TIME",
+            "netModeledJpy": -130156.0
+          },
+          {
+            "utc": "2026-06-08T09:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TIME",
+            "netModeledJpy": 20752.46
+          },
+          {
+            "utc": "2026-06-18T03:00",
+            "route": "IDLE_RENDER_TRI_OI3_BEAR_REBOUND_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_TRI_TAKE",
+            "netModeledJpy": 1126291.01
+          }
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "This is 8-strategy native H1 model, not L2/live venue certification or current VPS accounting",
+    "2025 RENDER alpha entries intentionally excluded due missing Aster H1 mark evidence",
+    "New entry modeled fills and exits are Binance futures M5 proxy, not actual Aster executions",
+    "2024/2025/2026 thresholds were explored retrospectively; no pristine forward live fills",
+    "Native wallet original IDLE existing route and seven other strategies unchanged",
+    "new route funding_return_per_gross initialized to 0 even though other positions use engine venue funding: residual evidence gap",
+    "No Production/VPS/HP/real trading changes"
+  ]
+}
