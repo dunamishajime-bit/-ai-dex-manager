@@ -1,0 +1,153 @@
+{
+  "status": "OFFICIAL_BINANCE_VISION_BTCUSDT_5M_2025AUG_2026AUG_SOURCE_VERIFIED",
+  "sourcePrefix": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/5m/",
+  "asOf": "2026-10-24",
+  "files": [
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2025-08.zip",
+      "filename": "BTCUSDT-5m-2025-08.zip",
+      "sha256": "7f78f6f88ae1946f8bd8312a37d1d74b24e24d6b13bc37d2909ad7c8c0c7e9ae",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1756684500000",
+      "size": 405889
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2025-09.zip",
+      "filename": "BTCUSDT-5m-2025-09.zip",
+      "sha256": "dbfb8bc2f9343107c7a702acd6919d77060a8f7ea4b25359c71e5fc018a85209",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8641,
+      "first": "open_time",
+      "last": "1759276500000",
+      "size": 388679
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2025-10.zip",
+      "filename": "BTCUSDT-5m-2025-10.zip",
+      "sha256": "fab262ca4318f8f65164ae33a020458439adc6f7bc2e59bbfce1886118d05a48",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1761954900000",
+      "size": 412617
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2025-11.zip",
+      "filename": "BTCUSDT-5m-2025-11.zip",
+      "sha256": "2759d4be0fe68cc2be3d4d91940fcd95abc69f0c31f25d0b6cb5e0629c625d2d",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8641,
+      "first": "open_time",
+      "last": "1764546900000",
+      "size": 398908
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2025-12.zip",
+      "filename": "BTCUSDT-5m-2025-12.zip",
+      "sha256": "0e923a3d2ac4f6711d8c841220f4e5d2e479c1bdb40b41515eb250e16808304f",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1767225300000",
+      "size": 404647
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-01.zip",
+      "filename": "BTCUSDT-5m-2026-01.zip",
+      "sha256": "c092f3b26036f203bb5b11c28958574aa8501315ed26dd0f8c017051b9fb3abf",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1769903700000",
+      "size": 402596
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-02.zip",
+      "filename": "BTCUSDT-5m-2026-02.zip",
+      "sha256": "8be83befce2cd9bf0959c872d91108debd03e1b51a451bac3a56b8ddca196bb4",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8065,
+      "first": "open_time",
+      "last": "1772322900000",
+      "size": 374045
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-03.zip",
+      "filename": "BTCUSDT-5m-2026-03.zip",
+      "sha256": "0302ccef9b3e5e38c35bc8667a1e890138c9136e89145688220eea99b748200e",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1775001300000",
+      "size": 411027
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-04.zip",
+      "filename": "BTCUSDT-5m-2026-04.zip",
+      "sha256": "e2934467bdb6a000124948f4c8fef176e2066520a6b2e5a0522450fed51396f7",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8641,
+      "first": "open_time",
+      "last": "1777593300000",
+      "size": 391115
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-05.zip",
+      "filename": "BTCUSDT-5m-2026-05.zip",
+      "sha256": "b1a73378796bb62084c32ca5865903beeaf87d521d950d5e7776343f682dea93",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1780271700000",
+      "size": 400649
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-06.zip",
+      "filename": "BTCUSDT-5m-2026-06.zip",
+      "sha256": "782c555963c852ca768335de21d5743147e5d50bff449600f8fceb9ebe5273de",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8641,
+      "first": "open_time",
+      "last": "1782863700000",
+      "size": 395606
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-07.zip",
+      "filename": "BTCUSDT-5m-2026-07.zip",
+      "sha256": "ec750f7aa69c8f842fa1464a90ad4aa92452cfa767df9e8d70dc484e466c8fc3",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1785542100000",
+      "size": 400503
+    },
+    {
+      "file": "C:\\tmp\\render-btc-complete-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-08.zip",
+      "filename": "BTCUSDT-5m-2026-08.zip",
+      "sha256": "14fd408e5d2902665c66b701e861b173568b66399e3fa462b94c766d209567d1",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8929,
+      "first": "open_time",
+      "last": "1788220500000",
+      "size": 397158
+    }
+  ],
+  "requestedN": 13,
+  "goodN": 13,
+  "missingN": 0
+}

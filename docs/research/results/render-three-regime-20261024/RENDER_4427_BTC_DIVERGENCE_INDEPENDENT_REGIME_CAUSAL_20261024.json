@@ -1,0 +1,5411 @@
+{
+  "status": "RESEARCH_ONLY_NOT_PRISTINE_PAST_EX_POST_HYPOTHESIS",
+  "source": "Official BTC complete 2025Aug-2026Aug checksum verified, Binance RENDER M5",
+  "original188": {
+    "2024": {
+      "10": {
+        "n": 70,
+        "wins": 46,
+        "wrPct": 65.71,
+        "pf": 1.3349,
+        "compoundPct": 27.513,
+        "closedDdPct": -12.079
+      },
+      "30": {
+        "n": 70,
+        "wins": 46,
+        "wrPct": 65.71,
+        "pf": 1.1579,
+        "compoundPct": 10.885,
+        "closedDdPct": -13.152
+      }
+    },
+    "2025H1": {
+      "10": {
+        "n": 45,
+        "wins": 30,
+        "wrPct": 66.67,
+        "pf": 1.9061,
+        "compoundPct": 52.913,
+        "closedDdPct": -9.61
+      },
+      "30": {
+        "n": 45,
+        "wins": 29,
+        "wrPct": 64.44,
+        "pf": 1.6853,
+        "compoundPct": 39.85,
+        "closedDdPct": -10.349
+      }
+    },
+    "2025H2": {
+      "10": {
+        "n": 19,
+        "wins": 11,
+        "wrPct": 57.89,
+        "pf": 1.2758,
+        "compoundPct": 6.63,
+        "closedDdPct": -13.635
+      },
+      "30": {
+        "n": 19,
+        "wins": 10,
+        "wrPct": 52.63,
+        "pf": 1.131,
+        "compoundPct": 2.66,
+        "closedDdPct": -14.521
+      }
+    },
+    "2026JanAug": {
+      "10": {
+        "n": 41,
+        "wins": 33,
+        "wrPct": 80.49,
+        "pf": 2.8933,
+        "compoundPct": 48.075,
+        "closedDdPct": -7.625
+      },
+      "30": {
+        "n": 41,
+        "wins": 32,
+        "wrPct": 78.05,
+        "pf": 2.4013,
+        "compoundPct": 36.51,
+        "closedDdPct": -8.376
+      }
+    },
+    "2026AugOct": {
+      "10": {
+        "n": 13,
+        "wins": 9,
+        "wrPct": 69.23,
+        "pf": 1.3915,
+        "compoundPct": 5.126,
+        "closedDdPct": -7.07
+      },
+      "30": {
+        "n": 13,
+        "wins": 9,
+        "wrPct": 69.23,
+        "pf": 1.1998,
+        "compoundPct": 2.434,
+        "closedDdPct": -7.456
+      }
+    }
+  },
+  "cases": [
+    {
+      "btcRegime": "ALL_D1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 41,
+      "selectedOriginal": {
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 62,
+        "BTC_RENDER_DIVERGE": 35,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 33
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 102,
+            "wins": 69,
+            "wrPct": 67.65,
+            "pf": 1.4677,
+            "compoundPct": 51.145,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 102,
+            "wins": 69,
+            "wrPct": 67.65,
+            "pf": 1.2404,
+            "compoundPct": 23.32,
+            "closedDdPct": -11.913
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "ALL_D1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 47,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 62,
+        "BTC_RENDER_DIVERGE": 35,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 33
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 108,
+            "wins": 73,
+            "wrPct": 67.59,
+            "pf": 1.4621,
+            "compoundPct": 53.148,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 108,
+            "wins": 73,
+            "wrPct": 67.59,
+            "pf": 1.232,
+            "compoundPct": 23.465,
+            "closedDdPct": -11.81
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "ALL_D1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 47,
+      "selectedOriginal": {
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 62,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 35,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 33
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 106,
+            "wins": 72,
+            "wrPct": 67.92,
+            "pf": 1.5171,
+            "compoundPct": 59.711,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 106,
+            "wins": 72,
+            "wrPct": 67.92,
+            "pf": 1.282,
+            "compoundPct": 29.284,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "ALL_D1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 53,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 62,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 35,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 33
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 112,
+            "wins": 76,
+            "wrPct": 67.86,
+            "pf": 1.5096,
+            "compoundPct": 61.827,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 112,
+            "wins": 76,
+            "wrPct": 67.86,
+            "pf": 1.272,
+            "compoundPct": 29.436,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 21,
+      "selectedOriginal": {
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 84,
+            "wins": 58,
+            "wrPct": 69.05,
+            "pf": 1.4743,
+            "compoundPct": 45.07,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 84,
+            "wins": 58,
+            "wrPct": 69.05,
+            "pf": 1.2639,
+            "compoundPct": 22.697,
+            "closedDdPct": -11.913
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 27,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 90,
+            "wins": 62,
+            "wrPct": 68.89,
+            "pf": 1.4678,
+            "compoundPct": 46.992,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 90,
+            "wins": 62,
+            "wrPct": 68.89,
+            "pf": 1.2534,
+            "compoundPct": 22.841,
+            "closedDdPct": -11.81
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 27,
+      "selectedOriginal": {
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 88,
+            "wins": 61,
+            "wrPct": 69.32,
+            "pf": 1.5294,
+            "compoundPct": 53.291,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 88,
+            "wins": 61,
+            "wrPct": 69.32,
+            "pf": 1.3102,
+            "compoundPct": 28.63,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 33,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 94,
+            "wins": 65,
+            "wrPct": 69.15,
+            "pf": 1.5204,
+            "compoundPct": 55.323,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 94,
+            "wins": 65,
+            "wrPct": 69.15,
+            "pf": 1.2977,
+            "compoundPct": 28.782,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 9,
+      "selectedOriginal": {
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 3,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 73,
+            "wins": 46,
+            "wrPct": 63.01,
+            "pf": 1.2554,
+            "compoundPct": 20.895,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 73,
+            "wins": 46,
+            "wrPct": 63.01,
+            "pf": 1.0855,
+            "compoundPct": 4.489,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 15,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 3,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 79,
+            "wins": 50,
+            "wrPct": 63.29,
+            "pf": 1.2589,
+            "compoundPct": 22.497,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 79,
+            "wins": 50,
+            "wrPct": 63.29,
+            "pf": 1.0836,
+            "compoundPct": 4.612,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 15,
+      "selectedOriginal": {
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 3,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 77,
+            "wins": 49,
+            "wrPct": 63.64,
+            "pf": 1.3129,
+            "compoundPct": 27.747,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 77,
+            "wins": 49,
+            "wrPct": 63.64,
+            "pf": 1.134,
+            "compoundPct": 9.542,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 21,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 3,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 83,
+            "wins": 53,
+            "wrPct": 63.86,
+            "pf": 1.3138,
+            "compoundPct": 29.44,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 83,
+            "wins": 53,
+            "wrPct": 63.86,
+            "pf": 1.1299,
+            "compoundPct": 9.671,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP_H4_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 21,
+      "selectedOriginal": {
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 84,
+            "wins": 58,
+            "wrPct": 69.05,
+            "pf": 1.4743,
+            "compoundPct": 45.07,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 84,
+            "wins": 58,
+            "wrPct": 69.05,
+            "pf": 1.2639,
+            "compoundPct": 22.697,
+            "closedDdPct": -11.913
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP_H4_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 27,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 90,
+            "wins": 62,
+            "wrPct": 68.89,
+            "pf": 1.4678,
+            "compoundPct": 46.992,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 90,
+            "wins": 62,
+            "wrPct": 68.89,
+            "pf": 1.2534,
+            "compoundPct": 22.841,
+            "closedDdPct": -11.81
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP_H4_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 27,
+      "selectedOriginal": {
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 88,
+            "wins": 61,
+            "wrPct": 69.32,
+            "pf": 1.5294,
+            "compoundPct": 53.291,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 88,
+            "wins": 61,
+            "wrPct": 69.32,
+            "pf": 1.3102,
+            "compoundPct": 28.63,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "D1_UP_H4_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": false,
+      "extraCount": 33,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 15,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 14
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 1
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 94,
+            "wins": 65,
+            "wrPct": 69.15,
+            "pf": 1.5204,
+            "compoundPct": 55.323,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 94,
+            "wins": 65,
+            "wrPct": 69.15,
+            "pf": 1.2977,
+            "compoundPct": 28.782,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.6354,
+            "compoundPct": 44.965,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 32,
+            "wrPct": 76.19,
+            "pf": 2.1841,
+            "compoundPct": 33.37,
+            "closedDdPct": -8.457
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "NOT_EXTENDED_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 27,
+      "selectedOriginal": {
+        "ORIGINAL_A": 112,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 21,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 20
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 89,
+            "wins": 61,
+            "wrPct": 68.54,
+            "pf": 1.4768,
+            "compoundPct": 47.218,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 89,
+            "wins": 61,
+            "wrPct": 68.54,
+            "pf": 1.2605,
+            "compoundPct": 23.277,
+            "closedDdPct": -11.913
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "NOT_EXTENDED_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 33,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 112,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 21,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 20
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 95,
+            "wins": 65,
+            "wrPct": 68.42,
+            "pf": 1.4703,
+            "compoundPct": 49.169,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 95,
+            "wins": 65,
+            "wrPct": 68.42,
+            "pf": 1.2505,
+            "compoundPct": 23.423,
+            "closedDdPct": -11.81
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "NOT_EXTENDED_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 33,
+      "selectedOriginal": {
+        "ORIGINAL_A": 110,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 21,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 20
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 93,
+            "wins": 64,
+            "wrPct": 68.82,
+            "pf": 1.5301,
+            "compoundPct": 55.562,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 93,
+            "wins": 64,
+            "wrPct": 68.82,
+            "pf": 1.3054,
+            "compoundPct": 29.239,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "NOT_EXTENDED_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 39,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 110,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 21,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 20
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {
+          "BTC_RENDER_DIVERGE": 1
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 99,
+            "wins": 68,
+            "wrPct": 68.69,
+            "pf": 1.5214,
+            "compoundPct": 57.623,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 99,
+            "wins": 68,
+            "wrPct": 68.69,
+            "pf": 1.2935,
+            "compoundPct": 29.391,
+            "closedDdPct": -10.972
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.4887,
+            "compoundPct": 6.598,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2788,
+            "compoundPct": 3.664,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "SELLER_STRONGER",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 26,
+      "selectedOriginal": {
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 20,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 17
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 87,
+            "wins": 59,
+            "wrPct": 67.82,
+            "pf": 1.4303,
+            "compoundPct": 42.121,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 87,
+            "wins": 59,
+            "wrPct": 67.82,
+            "pf": 1.2243,
+            "compoundPct": 19.478,
+            "closedDdPct": -11.913
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "wins": 36,
+            "wrPct": 81.82,
+            "pf": 3.0891,
+            "compoundPct": 54.382,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 44,
+            "wins": 35,
+            "wrPct": 79.55,
+            "pf": 2.5569,
+            "compoundPct": 41.483,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "SELLER_STRONGER",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 32,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 20,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 17
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 93,
+            "wins": 63,
+            "wrPct": 67.74,
+            "pf": 1.426,
+            "compoundPct": 44.005,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 93,
+            "wins": 63,
+            "wrPct": 67.74,
+            "pf": 1.2161,
+            "compoundPct": 19.619,
+            "closedDdPct": -11.81
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "wins": 36,
+            "wrPct": 81.82,
+            "pf": 3.0891,
+            "compoundPct": 54.382,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 44,
+            "wins": 35,
+            "wrPct": 79.55,
+            "pf": 2.5569,
+            "compoundPct": 41.483,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "SELLER_STRONGER",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 32,
+      "selectedOriginal": {
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 20,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 17
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 91,
+            "wins": 62,
+            "wrPct": 68.13,
+            "pf": 1.4836,
+            "compoundPct": 50.176,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 91,
+            "wins": 62,
+            "wrPct": 68.13,
+            "pf": 1.2692,
+            "compoundPct": 25.256,
+            "closedDdPct": -11.055
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "wins": 36,
+            "wrPct": 81.82,
+            "pf": 3.0891,
+            "compoundPct": 54.382,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 44,
+            "wins": 35,
+            "wrPct": 79.55,
+            "pf": 2.5569,
+            "compoundPct": 41.483,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "SELLER_STRONGER",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 38,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 20,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 17
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {
+          "BTC_RENDER_DIVERGE": 3
+        },
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 97,
+            "wins": 66,
+            "wrPct": 68.04,
+            "pf": 1.4771,
+            "compoundPct": 52.166,
+            "closedDdPct": -10.416
+          },
+          "30": {
+            "n": 97,
+            "wins": 66,
+            "wrPct": 68.04,
+            "pf": 1.2591,
+            "compoundPct": 25.404,
+            "closedDdPct": -11.055
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "wins": 36,
+            "wrPct": 81.82,
+            "pf": 3.0891,
+            "compoundPct": 54.382,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 44,
+            "wins": 35,
+            "wrPct": 79.55,
+            "pf": 2.5569,
+            "compoundPct": 41.483,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "HIGHER_VOLUME",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 17,
+      "selectedOriginal": {
+        "ORIGINAL_A": 112,
+        "ORIGINAL_B": 62,
+        "BTC_RENDER_DIVERGE": 11,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 11
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 79,
+            "wins": 54,
+            "wrPct": 68.35,
+            "pf": 1.4754,
+            "compoundPct": 42.749,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 79,
+            "wins": 54,
+            "wrPct": 68.35,
+            "pf": 1.2676,
+            "compoundPct": 21.945,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "HIGHER_VOLUME",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 23,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 112,
+        "ORIGINAL_B": 62,
+        "BTC_RENDER_DIVERGE": 11,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 11
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 85,
+            "wins": 58,
+            "wrPct": 68.24,
+            "pf": 1.4685,
+            "compoundPct": 44.64,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 85,
+            "wins": 58,
+            "wrPct": 68.24,
+            "pf": 1.2564,
+            "compoundPct": 22.088,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "HIGHER_VOLUME",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 23,
+      "selectedOriginal": {
+        "ORIGINAL_A": 110,
+        "ORIGINAL_B": 62,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 11,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 11
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 83,
+            "wins": 57,
+            "wrPct": 68.67,
+            "pf": 1.5329,
+            "compoundPct": 50.839,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 83,
+            "wins": 57,
+            "wrPct": 68.67,
+            "pf": 1.316,
+            "compoundPct": 27.842,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "HIGHER_VOLUME",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 29,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 110,
+        "ORIGINAL_B": 62,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 11,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 11
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 89,
+            "wins": 61,
+            "wrPct": 68.54,
+            "pf": 1.5234,
+            "compoundPct": 52.837,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 89,
+            "wins": 61,
+            "wrPct": 68.54,
+            "pf": 1.3026,
+            "compoundPct": 27.992,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "IN_UPPER_HALF_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 6,
+      "selectedOriginal": {
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {},
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "IN_UPPER_HALF_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 12,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 76,
+            "wins": 50,
+            "wrPct": 65.79,
+            "pf": 1.3348,
+            "compoundPct": 29.202,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 76,
+            "wins": 50,
+            "wrPct": 65.79,
+            "pf": 1.1522,
+            "compoundPct": 11.015,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "IN_UPPER_HALF_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 12,
+      "selectedOriginal": {
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 74,
+            "wins": 49,
+            "wrPct": 66.22,
+            "pf": 1.3944,
+            "compoundPct": 34.739,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 74,
+            "wins": 49,
+            "wrPct": 66.22,
+            "pf": 1.2081,
+            "compoundPct": 16.247,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "IN_UPPER_HALF_H1",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 18,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 80,
+            "wins": 53,
+            "wrPct": 66.25,
+            "pf": 1.3916,
+            "compoundPct": 36.525,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 80,
+            "wins": 53,
+            "wrPct": 66.25,
+            "pf": 1.2001,
+            "compoundPct": 16.384,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "H4_STRONG_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 12,
+      "selectedOriginal": {
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 6,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "BTC_RENDER_DIVERGE": 6
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 76,
+            "wins": 51,
+            "wrPct": 67.11,
+            "pf": 1.3839,
+            "compoundPct": 33.821,
+            "closedDdPct": -10.849
+          },
+          "30": {
+            "n": 76,
+            "wins": 51,
+            "wrPct": 67.11,
+            "pf": 1.1948,
+            "compoundPct": 14.992,
+            "closedDdPct": -12.11
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "H4_STRONG_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 18,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 113,
+        "ORIGINAL_B": 63,
+        "BTC_RENDER_DIVERGE": 6,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "BTC_RENDER_DIVERGE": 6
+        },
+        "2025H1": {},
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 82,
+            "wins": 55,
+            "wrPct": 67.07,
+            "pf": 1.3816,
+            "compoundPct": 35.595,
+            "closedDdPct": -10.849
+          },
+          "30": {
+            "n": 82,
+            "wins": 55,
+            "wrPct": 67.07,
+            "pf": 1.1875,
+            "compoundPct": 15.128,
+            "closedDdPct": -12.11
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "H4_STRONG_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 18,
+      "selectedOriginal": {
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 6,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 6
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 80,
+            "wins": 54,
+            "wrPct": 67.5,
+            "pf": 1.4412,
+            "compoundPct": 41.406,
+            "closedDdPct": -10.849
+          },
+          "30": {
+            "n": 80,
+            "wins": 54,
+            "wrPct": 67.5,
+            "pf": 1.243,
+            "compoundPct": 20.553,
+            "closedDdPct": -12.11
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    },
+    {
+      "btcRegime": "H4_STRONG_DOWN",
+      "config": {
+        "families": [
+          "BTC_RENDER_DIVERGE",
+          "TREND_BREAK",
+          "REBOUND_FAIL",
+          "SELL_IMBALANCE"
+        ],
+        "exit": "S6",
+        "policy": "ninety_mid",
+        "routeRules": {
+          "BTC_RENDER_DIVERGE": {
+            "exit": "S6",
+            "policy": "dual_90_180"
+          },
+          "TREND_BREAK": {
+            "exit": "S6",
+            "policy": "recent30_180"
+          },
+          "REBOUND_FAIL": {
+            "exit": "S12",
+            "policy": "recent30_180"
+          },
+          "SELL_IMBALANCE": {
+            "exit": "S12",
+            "policy": "ninety_mid"
+          }
+        },
+        "oldBonus": 8,
+        "upgradeMargin": 8,
+        "structure": "any",
+        "newCooldownHours": 12
+      },
+      "robust5": true,
+      "extraCount": 24,
+      "selectedOriginal": {
+        "TREND_BREAK": 6,
+        "ORIGINAL_A": 111,
+        "ORIGINAL_B": 63,
+        "REBOUND_FAIL": 6,
+        "BTC_RENDER_DIVERGE": 6,
+        "ORIGINAL_X": 12,
+        "SELL_IMBALANCE": 6
+      },
+      "passedNewByPeriod": {
+        "2024": {
+          "TREND_BREAK": 6,
+          "REBOUND_FAIL": 5,
+          "BTC_RENDER_DIVERGE": 6
+        },
+        "2025H1": {
+          "REBOUND_FAIL": 1
+        },
+        "2025H2": {
+          "SELL_IMBALANCE": 6
+        },
+        "2026JanAug": {},
+        "2026AugOct": {}
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 86,
+            "wins": 58,
+            "wrPct": 67.44,
+            "pf": 1.4362,
+            "compoundPct": 43.279,
+            "closedDdPct": -10.849
+          },
+          "30": {
+            "n": 86,
+            "wins": 58,
+            "wrPct": 67.44,
+            "pf": 1.2335,
+            "compoundPct": 20.695,
+            "closedDdPct": -12.11
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9449,
+            "compoundPct": 54.499,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.7176,
+            "compoundPct": 41.304,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 25,
+            "wins": 15,
+            "wrPct": 60.0,
+            "pf": 1.3215,
+            "compoundPct": 9.642,
+            "closedDdPct": -11.195
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.1596,
+            "compoundPct": 4.306,
+            "closedDdPct": -13.151
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "btcCandidateRegimeSource": "Only f known at H1 signal. Histories rebuilt on eligible gates."
+    }
+  ],
+  "nCases": 36,
+  "btcnames": [
+    "ALL_D1",
+    "D1_UP",
+    "D1_DOWN",
+    "D1_UP_H4_DOWN",
+    "NOT_EXTENDED_H1",
+    "SELLER_STRONGER",
+    "HIGHER_VOLUME",
+    "IN_UPPER_HALF_H1",
+    "H4_STRONG_DOWN"
+  ],
+  "caveats": [
+    "Regimes including D1 trend were explored after seeing 2026 February losing and October winning events",
+    "No independent unused OOS remains for this regime selection",
+    "No native8 / LIVE changes, no Aster signed M5 fills"
+  ],
+  "currentStatus": "NO_LIVE_ADOPTION"
+}

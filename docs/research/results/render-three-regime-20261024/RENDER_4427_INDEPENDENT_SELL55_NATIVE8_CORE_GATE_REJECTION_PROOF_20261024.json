@@ -1,0 +1,199 @@
+{
+  "status": "RESEARCH_ONLY_NO_NATIVE_ORDER_DESPITE_NEW_INDEPENDENT_SIGNAL",
+  "competingGateReason": "IDLE:CORE_SIGNAL_OR_POSITION",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "why": "Full8 engine recognizes candidate but existing IDLE CORE entry filter/position gate does not admit this independent gate; priority score by itself is not a substitute for a dedicated registered owner.",
+  "costs": {
+    "10": {
+      "baselineEqJpy": 288587378.77052534,
+      "experimentalEqJpy": 288587378.77052534,
+      "deltaAssetJpy": 0,
+      "maxMtmDdPct": -14.514985270751623,
+      "tradeCount": 1291,
+      "nNativeReplays": 3,
+      "newSignalsPerReplay": 3,
+      "acceptedNewSignalsPerReplay": 0,
+      "original4427AcceptedRoutes": {
+        "IDLE_RENDER_4427_BTC_TRAP_SHORT": 6,
+        "IDLE_RENDER_4427_BEAR_OI_SHORT": 3
+      },
+      "rejectionProof": [
+        {
+          "sim": "10bps",
+          "candidateEvents": [
+            {
+              "entryTsMs": 1779915600000,
+              "modelEntryPrice": 2.192,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782176400000,
+              "modelEntryPrice": 1.608,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782370800000,
+              "modelEntryPrice": 1.567,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            }
+          ]
+        },
+        {
+          "sim": "10bps",
+          "candidateEvents": [
+            {
+              "entryTsMs": 1779915600000,
+              "modelEntryPrice": 2.192,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782176400000,
+              "modelEntryPrice": 1.608,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782370800000,
+              "modelEntryPrice": 1.567,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            }
+          ]
+        },
+        {
+          "sim": "10bps",
+          "candidateEvents": [
+            {
+              "entryTsMs": 1779915600000,
+              "modelEntryPrice": 2.192,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782176400000,
+              "modelEntryPrice": 1.608,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782370800000,
+              "modelEntryPrice": 1.567,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            }
+          ]
+        }
+      ],
+      "accounting": true
+    },
+    "30": {
+      "baselineEqJpy": 174459200.2195523,
+      "experimentalEqJpy": 174459200.2195523,
+      "deltaAssetJpy": 0,
+      "maxMtmDdPct": -15.014723812726594,
+      "tradeCount": 1290,
+      "nNativeReplays": 3,
+      "newSignalsPerReplay": 3,
+      "acceptedNewSignalsPerReplay": 0,
+      "original4427AcceptedRoutes": {
+        "IDLE_RENDER_4427_BTC_TRAP_SHORT": 6,
+        "IDLE_RENDER_4427_BEAR_OI_SHORT": 2
+      },
+      "rejectionProof": [
+        {
+          "sim": "30bps",
+          "candidateEvents": [
+            {
+              "entryTsMs": 1779915600000,
+              "modelEntryPrice": 2.192,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782176400000,
+              "modelEntryPrice": 1.608,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782370800000,
+              "modelEntryPrice": 1.567,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            }
+          ]
+        },
+        {
+          "sim": "30bps",
+          "candidateEvents": [
+            {
+              "entryTsMs": 1779915600000,
+              "modelEntryPrice": 2.192,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782176400000,
+              "modelEntryPrice": 1.608,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782370800000,
+              "modelEntryPrice": 1.567,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            }
+          ]
+        },
+        {
+          "sim": "30bps",
+          "candidateEvents": [
+            {
+              "entryTsMs": 1779915600000,
+              "modelEntryPrice": 2.192,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782176400000,
+              "modelEntryPrice": 1.608,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            },
+            {
+              "entryTsMs": 1782370800000,
+              "modelEntryPrice": 1.567,
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "priority": 5
+            }
+          ]
+        }
+      ],
+      "accounting": true
+    }
+  },
+  "noLiveOrProductionChanges": true
+}

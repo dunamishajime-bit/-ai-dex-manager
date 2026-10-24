@@ -1,0 +1,51 @@
+{
+  "status": "RESEARCH_ONLY_NATIVE8_INDEPENDENT_GATE_DYNAMIC_RANK_NOT_LIVE",
+  "source2025BtcManifest": "C:/tmp/render-mtf-study-20261024/RENDER_4427_BTC_5M_2025AUG_2026AUG_VERIFIED_SOURCE_MANIFEST_20261024.json",
+  "case": "RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024",
+  "method": "Original #4427 42 candidates unchanged, plus independently gating owner-prioritized S6 BTC divergence candidates based on past shadow, SELL>=0.55",
+  "2024To2026ResearchSelected": 38,
+  "researchWindowSelectedIndependent": 3,
+  "nativeNewDates": [
+    {
+      "sym": "RENDERUSDT",
+      "t": 1779915600000,
+      "family": "BTC_RENDER_DIVERGE",
+      "net30": 1.2000000000000013,
+      "score": 56.5442
+    },
+    {
+      "sym": "RENDERUSDT",
+      "t": 1782176400000,
+      "family": "BTC_RENDER_DIVERGE",
+      "net30": 1.1999999999999902,
+      "score": 65.8842
+    },
+    {
+      "sym": "RENDERUSDT",
+      "t": 1782370800000,
+      "family": "BTC_RENDER_DIVERGE",
+      "net30": 1.2000000000000124,
+      "score": 61.3995
+    }
+  ],
+  "uniqueKeys": {
+    "10": 3,
+    "30": 3
+  },
+  "candidateCounts": {
+    "10": {
+      "new_independent": 9
+    },
+    "30": {
+      "new_independent": 9
+    }
+  },
+  "riskContract": "Unmodified full8 native wallet, account caps/gross/owner locks, 0.25x IDLE nominal only",
+  "limitations": [
+    "Aster 2025 RENDER H1 marks unavailable. Native wallet only adds NEW 2026-Jan-Aug candidate dates.",
+    "Binance futures M5 is venue proxy, Aster actual M5 slippage/L2/partial fill not independently authenticated",
+    "Modeled funding zero for new route, no actual signed venue stop lifecycle evidence",
+    "All years have been previously viewed; ex-post SELL55 regime filter selected after inspecting 2026 losing trade",
+    "LIVE VPS Production HP and actual orders have not been changed"
+  ]
+}
