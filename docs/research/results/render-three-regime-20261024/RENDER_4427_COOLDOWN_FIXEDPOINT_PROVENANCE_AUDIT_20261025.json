@@ -1,0 +1,62 @@
+{
+  "conclusion": "The archived I0/I1/I2 files are dynamic cooldown fixed-point iterations, not three identical-input independent replays. I0 starts without previous accepted V12 SHORT stop windows. I1/I2 use accepted prior-pass stops to prefilter V12 SHORT proposals. Every one of the 20 I0-only V12 candidates falls inside a first-pass accepted STOP 12h cooldown window. Therefore the 20-row difference is explained by explicit iteration feedback, not evidence of nondeterministic Python cache pollution. Exact raw SHA should be tested across independent fresh processes at the same converged iteration and frozen inputs.",
+  "costs": {
+    "10": {
+      "all_20_match_actual_first_pass_12h_stop_windows": true,
+      "economic_fields_identical_across_passes": true,
+      "extra_witness_sha256": "4e7d738baa7ac91c658a9708184924e6f50f0205ab6df5f1171a4e9701949678",
+      "feedback_pass_candidate_rows": [
+        2424,
+        2424
+      ],
+      "first_pass_candidate_rows": 2444,
+      "first_pass_only_rejections_match_source": true,
+      "first_pass_only_v12_short_rows": 20,
+      "later_pass_source_and_decisions_identical": true,
+      "run_ids": [
+        "cmp_5bb26c207eb3",
+        "cmp_88139ccf92bb",
+        "cmp_d112f9aef1ff"
+      ],
+      "stop_event_count_in_first_pass": 53
+    },
+    "30": {
+      "all_20_match_actual_first_pass_12h_stop_windows": true,
+      "economic_fields_identical_across_passes": true,
+      "extra_witness_sha256": "4e7d738baa7ac91c658a9708184924e6f50f0205ab6df5f1171a4e9701949678",
+      "feedback_pass_candidate_rows": [
+        2424,
+        2424
+      ],
+      "first_pass_candidate_rows": 2444,
+      "first_pass_only_rejections_match_source": true,
+      "first_pass_only_v12_short_rows": 20,
+      "later_pass_source_and_decisions_identical": true,
+      "run_ids": [
+        "cmp_2104321c587e",
+        "cmp_3a77ec7e46bd",
+        "cmp_433aa2452f5a"
+      ],
+      "stop_event_count_in_first_pass": 52
+    }
+  },
+  "limits": [
+    "Archived replay evidence plus source-level control-flow proof; no fresh clean-process full8 repeat.",
+    "The prior claim of raw three-pass nondeterminism is not supported because the passes have different cooldown inputs.",
+    "Formal independent Owner/Route and safety gate parity not certified.",
+    "2025 Aster RENDER H1 mark missing, Aster signed fills/funding unverified, explored periods not untouched OOS.",
+    "No VPS/LIVE/Production/HP/orders changed."
+  ],
+  "live_changes": 0,
+  "model_only": true,
+  "not_independent_replays": true,
+  "production_changes": 0,
+  "source_contract": {
+    "filter_source_sha256": "e3924889edd140e3210d51de633f2a92be3073235115de2ec0760f1d92741ec4",
+    "first_pass_has_no_prior_cooldown_events": true,
+    "later_passes_feed_back_actual_stops": true,
+    "preallocation_filters_v12_short_with_previous_stop_windows": true,
+    "runner_source_sha256": "7f7f422d25abbc517743a307df341dbc928c8d8bfa47ffe1fab066980e00e4a4"
+  },
+  "status": "RESEARCH_ONLY_ITERATIVE_COOLDOWN_FEEDBACK_CAUSAL_EVIDENCE"
+}
