@@ -1,0 +1,163 @@
+{
+  "status": "RESEARCH_ONLY_NATIVE8_SCOPED_PRIORITY_CONFIRMED",
+  "period": "2025-08-10_to_2026-08-10",
+  "productionParity": false,
+  "venueFillCertified": false,
+  "costs": {
+    "10": {
+      "baseline": {
+        "cost_bps": 10,
+        "final_equity_jpy": 288587378.77052534,
+        "profit_factor": 4.740434170299948,
+        "maximum_mtm_drawdown_pct": -14.514985270751623,
+        "closed_trades": 1291,
+        "accounting": "PASS"
+      },
+      "scopedPriority": {
+        "cost_bps": 10,
+        "final_equity_jpy": 290070131.97157055,
+        "profit_factor": 4.7568879921039064,
+        "maximum_mtm_drawdown_pct": -14.514985270751623,
+        "closed_trades": 1293,
+        "accounting": "PASS"
+      },
+      "final_equity_improvement_jpy": 1482753.2010452151,
+      "trades_delta": 2,
+      "profit_factor_delta": 0.01645382180395849,
+      "maximum_mtm_dd_delta_pp": 0.0,
+      "baseline_ledger_shas": [
+        "d1a76b935ef408f6c8cda4c6fa45870e7014935d9f03822f26d2b41428a86b2c",
+        "c222b170d40c91f959a49e507a8315748de4156f09787e3660299bd0b1e361b2",
+        "c222b170d40c91f959a49e507a8315748de4156f09787e3660299bd0b1e361b2"
+      ],
+      "scoped_ledger_shas": [
+        "553d5c285817117cacfa676d21f7cd0ffe39f229dc533e5143077919fb16c61f",
+        "5a025d7912f4c238f1440ab7e866e71f2fb65087570af7d5fcd8e85ededdf4c1",
+        "5a025d7912f4c238f1440ab7e866e71f2fb65087570af7d5fcd8e85ededdf4c1"
+      ],
+      "three_run_ledger_sha_exact_match": false,
+      "three_run_decision_sha_exact_match": false,
+      "old_cohort_displaced": 0,
+      "same_symbol_conflict_count": 0,
+      "independent_decisions": [
+        [
+          1779915600000,
+          "REJECTED_PORTFOLIO",
+          "IDLE:CORE_SIGNAL_OR_POSITION"
+        ],
+        [
+          1782176400000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ],
+        [
+          1782370800000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ]
+      ],
+      "new_trades": [
+        {
+          "candidate_id": "C002213",
+          "entryUTC": "2026-06-23T01:00:00+00:00",
+          "exitUTC": "2026-06-23T06:20:00+00:00",
+          "acceptedGross": 0.22275389599297446,
+          "modeledPnlJpy": 719557.0255335869,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        },
+        {
+          "candidate_id": "C002263",
+          "entryUTC": "2026-06-25T07:00:00+00:00",
+          "exitUTC": "2026-06-25T09:20:00+00:00",
+          "acceptedGross": 0.21255926278847206,
+          "modeledPnlJpy": 711043.1837962997,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        }
+      ],
+      "candidate_id_excluded_economic_ledger_sha256": "bbf68dbb6e4d9fcb5ee443bc4d511822045587da411607aa02754b96795600a9",
+      "three_run_economic_ledger_exact_except_candidate_id": true
+    },
+    "30": {
+      "baseline": {
+        "cost_bps": 30,
+        "final_equity_jpy": 174459200.2195523,
+        "profit_factor": 3.8259511979311043,
+        "maximum_mtm_drawdown_pct": -15.014723812726594,
+        "closed_trades": 1290,
+        "accounting": "PASS"
+      },
+      "scopedPriority": {
+        "cost_bps": 30,
+        "final_equity_jpy": 175324355.2534185,
+        "profit_factor": 3.8351451263116614,
+        "maximum_mtm_drawdown_pct": -15.014723812726594,
+        "closed_trades": 1292,
+        "accounting": "PASS"
+      },
+      "final_equity_improvement_jpy": 865155.0338661969,
+      "trades_delta": 2,
+      "profit_factor_delta": 0.009193928380557104,
+      "maximum_mtm_dd_delta_pp": 0.0,
+      "baseline_ledger_shas": [
+        "b439a93563c019655eeb9959c90f780df74ae938c22ca64bb3be46796b59e2f4",
+        "248d455b55c97eb8623533ecdf31aba665458ab36f91da10e7f2fd281572cae4",
+        "248d455b55c97eb8623533ecdf31aba665458ab36f91da10e7f2fd281572cae4"
+      ],
+      "scoped_ledger_shas": [
+        "ffc7f05c872fa6264dbecce419f41507cc930d04d98989f7bc42a12d6dfbad7d",
+        "0377b2c8eb44549c127ed98f63b8851ad5aed3d2a5d9a453329d7e522120c65d",
+        "0377b2c8eb44549c127ed98f63b8851ad5aed3d2a5d9a453329d7e522120c65d"
+      ],
+      "three_run_ledger_sha_exact_match": false,
+      "three_run_decision_sha_exact_match": false,
+      "old_cohort_displaced": 0,
+      "same_symbol_conflict_count": 0,
+      "independent_decisions": [
+        [
+          1779915600000,
+          "REJECTED_PORTFOLIO",
+          "IDLE:CORE_SIGNAL_OR_POSITION"
+        ],
+        [
+          1782176400000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ],
+        [
+          1782370800000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ]
+      ],
+      "new_trades": [
+        {
+          "candidate_id": "C002213",
+          "entryUTC": "2026-06-23T01:00:00+00:00",
+          "exitUTC": "2026-06-23T06:20:00+00:00",
+          "acceptedGross": 0.24999985769906155,
+          "modeledPnlJpy": 406086.4119681886,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        },
+        {
+          "candidate_id": "C002263",
+          "entryUTC": "2026-06-25T07:00:00+00:00",
+          "exitUTC": "2026-06-25T09:20:00+00:00",
+          "acceptedGross": 0.24999982448271585,
+          "modeledPnlJpy": 423673.8772727185,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        }
+      ],
+      "candidate_id_excluded_economic_ledger_sha256": "e028ad1d4ef45dd5a5b25e600ad87281c8ecaa9bd801d7786b1d8c7a96bedf05",
+      "three_run_economic_ledger_exact_except_candidate_id": true
+    }
+  },
+  "scriptSha256": "c1afa4eba204f3f0e425a3e578897cf3b96fab2433c2fe30912143068632ddc9",
+  "three_run_status": "PASS_ECONOMIC_AND_LEDGER_NORMALIZED_EXACT;RAW_CANDIDATE_IDS_DIFFER",
+  "knownLimitations": [
+    "H1 price-model research, not LIVE fills or production parity",
+    "Candidate ID numbering is not bitwise stable; economic ledger is exact after excluding candidate_id",
+    "Only two new accepted modeled trades; no statistically defensible future edge",
+    "Gate thresholds and family choice were tuned on observed historical periods; untouched OOS needed",
+    "Research-only scoped exception changes global CORE-over-IDLE priority and requires separate authorization before LIVE"
+  ]
+}
