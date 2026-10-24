@@ -1,0 +1,184 @@
+{
+  "status": "RESEARCH_ONLY_NATIVE_8_STRATEGY_FULL_WALLET_NOT_ADOPTED",
+  "period": "2025-08-10 to 2026-08-10",
+  "dataProvenance": "Binance futures OHLCV plus official SHA-256 verified metrics/funding. Shared8 H1 native research, not signed venue fills",
+  "baseline": "RENDER_TWO_REGIME_PARITY_BASELINE",
+  "cases": {
+    "10": {
+      "RENDER_TWO_REGIME_PARITY_BASELINE": {
+        "equityJpy": 284418780.72717,
+        "maxDrawdownPct": -14.514985,
+        "PF": 4.72763,
+        "totalTrades": 1285,
+        "idleTrades": 68,
+        "ledgerSha256": "8f5bcca9aa591b092e333890085244b9862ce9bfb9801356d41ff4e08706af29",
+        "deltaEquityFromBaselineJpy": 0.0,
+        "deltaDrawdownPctPoints": 0.0,
+        "deltaTrades": 0
+      },
+      "RENDER_TWO_REGIME_A_WEAK_SELLER_0P05_OI_UP": {
+        "equityJpy": 282905987.17326,
+        "maxDrawdownPct": -14.514985,
+        "PF": 4.70534,
+        "totalTrades": 1278,
+        "idleTrades": 61,
+        "ledgerSha256": "1a5038449f6fcd2166562de8af17a12e834b23771d6a1e974181ce86b211f292",
+        "deltaEquityFromBaselineJpy": -1512793.55391,
+        "deltaDrawdownPctPoints": 0.0,
+        "deltaTrades": -7
+      },
+      "RENDER_DUAL_A_ADD_SELLER_0P0_OI_UP": {
+        "equityJpy": 284418780.72717,
+        "maxDrawdownPct": -14.514985,
+        "PF": 4.72763,
+        "totalTrades": 1285,
+        "idleTrades": 68,
+        "ledgerSha256": "d5c15aa92112c971b84e01db488da32b46d8ccfe6748816b5abcbcc8069c7899",
+        "deltaEquityFromBaselineJpy": 0.0,
+        "deltaDrawdownPctPoints": 0.0,
+        "deltaTrades": 0
+      }
+    },
+    "30": {
+      "RENDER_TWO_REGIME_PARITY_BASELINE": {
+        "equityJpy": 173611665.16278,
+        "maxDrawdownPct": -15.014724,
+        "PF": 3.83997,
+        "totalTrades": 1284,
+        "idleTrades": 70,
+        "ledgerSha256": "1ff713d59c903de3f277eba2258529504980dce516fef62105f6dfee8d46d57b",
+        "deltaEquityFromBaselineJpy": 0.0,
+        "deltaDrawdownPctPoints": 0.0,
+        "deltaTrades": 0
+      },
+      "RENDER_TWO_REGIME_A_WEAK_SELLER_0P05_OI_UP": {
+        "equityJpy": 173159511.80939,
+        "maxDrawdownPct": -15.014724,
+        "PF": 3.8269,
+        "totalTrades": 1277,
+        "idleTrades": 63,
+        "ledgerSha256": "ede249175b93be85b7c48a5070c4c94065f6c9ece6b4881d48b21c2eef5fb426",
+        "deltaEquityFromBaselineJpy": -452153.35339,
+        "deltaDrawdownPctPoints": 0.0,
+        "deltaTrades": -7
+      },
+      "RENDER_DUAL_A_ADD_SELLER_0P0_OI_UP": {
+        "equityJpy": 173611665.16278,
+        "maxDrawdownPct": -15.014724,
+        "PF": 3.83997,
+        "totalTrades": 1284,
+        "idleTrades": 70,
+        "ledgerSha256": "3964197ec76fb190d6d72aae7ccf92d25bcc12780c18ab0bfdbf8b9ef9e10e2d",
+        "deltaEquityFromBaselineJpy": 0.0,
+        "deltaDrawdownPctPoints": 0.0,
+        "deltaTrades": 0
+      }
+    }
+  },
+  "nativeAdditionalCandidates": [
+    {
+      "timestampMs": 1769875200000,
+      "dateUTC": "2026-01-31",
+      "modeledPriceReturnShortPct": 4.0305,
+      "nativeAdmissionReason": "IDLE:CORE_SIGNAL_OR_POSITION",
+      "nativeDecision": "REJECTED_PORTFOLIO",
+      "modelExitReason": "5M_PROTECTIVE_STOP",
+      "featureEntryCausal": {
+        "btc3h": -1.77312,
+        "render7Pct": -21.7413,
+        "btc7Pct": -8.9274,
+        "vol7DailyPct": 5.8616,
+        "seller1": 0.09687,
+        "oi1Pct": 0.1234,
+        "macroScore": 100
+      }
+    },
+    {
+      "timestampMs": 1769878800000,
+      "dateUTC": "2026-01-31",
+      "modeledPriceReturnShortPct": 2.6748,
+      "nativeAdmissionReason": "IDLE:CORE_SIGNAL_OR_POSITION",
+      "nativeDecision": "REJECTED_PORTFOLIO",
+      "modelExitReason": "5M_PROTECTIVE_STOP",
+      "featureEntryCausal": {
+        "btc3h": -2.91552,
+        "render7Pct": -23.2616,
+        "btc7Pct": -10.0032,
+        "vol7DailyPct": 5.908,
+        "seller1": 0.06319,
+        "oi1Pct": 1.95739,
+        "macroScore": 100
+      }
+    },
+    {
+      "timestampMs": 1770321600000,
+      "dateUTC": "2026-02-05",
+      "modeledPriceReturnShortPct": 2.181,
+      "nativeAdmissionReason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+      "nativeDecision": "REJECTED_PORTFOLIO",
+      "modelExitReason": "5M_PROTECTIVE_STOP",
+      "featureEntryCausal": {
+        "btc3h": -4.43185,
+        "render7Pct": -24.7982,
+        "btc7Pct": -22.3174,
+        "vol7DailyPct": 7.7541,
+        "seller1": 0.03666,
+        "oi1Pct": 0.62739,
+        "macroScore": 100
+      }
+    },
+    {
+      "timestampMs": 1770368400000,
+      "dateUTC": "2026-02-06",
+      "modeledPriceReturnShortPct": -10.0,
+      "nativeAdmissionReason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+      "nativeDecision": "REJECTED_PORTFOLIO",
+      "modelExitReason": "STOP",
+      "featureEntryCausal": {
+        "btc3h": -2.28312,
+        "render7Pct": -25.8387,
+        "btc7Pct": -21.513,
+        "vol7DailyPct": 8.8967,
+        "seller1": 0.01792,
+        "oi1Pct": 0.27625,
+        "macroScore": 100
+      }
+    },
+    {
+      "timestampMs": 1772269200000,
+      "dateUTC": "2026-02-28",
+      "modeledPriceReturnShortPct": -7.4468,
+      "nativeAdmissionReason": "IDLE:CORE_SIGNAL_OR_POSITION",
+      "nativeDecision": "REJECTED_PORTFOLIO",
+      "modelExitReason": "TIME_EXIT",
+      "featureEntryCausal": {
+        "btc3h": -3.23207,
+        "render7Pct": -11.9143,
+        "btc7Pct": -6.7295,
+        "vol7DailyPct": 4.9968,
+        "seller1": 0.09388,
+        "oi1Pct": 2.32156,
+        "macroScore": 70
+      }
+    }
+  ],
+  "nativeAdditionalCandidateTotals": {
+    "newDistinct": 5,
+    "hypotheticalPriceWinners": 3,
+    "hypotheticalPriceLosers": 2,
+    "blockReasons": {
+      "IDLE:CORE_SIGNAL_OR_POSITION": 3,
+      "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 1,
+      "IDLE:FILLED_SYMBOL_COOLDOWN": 1
+    },
+    "actualAdditionalModelFills": 0
+  },
+  "limitations": [
+    "Historical backtest not current LIVE account positions or venue certification",
+    "candidate hypothetical price PnL excludes commissions/slippage/funding and any displaced core position",
+    "2016-2026 research optimized after repeated historical visibility; not independent future OOS",
+    "The native 8-strategy full-wallet runner reselects three times; gate/log counts include repeat passes",
+    "All LIVE/Production/VPS/HP and orders remain unchanged"
+  ],
+  "decision": "NO_NEW_ENTRY_OR_EXIT_ADOPTION"
+}

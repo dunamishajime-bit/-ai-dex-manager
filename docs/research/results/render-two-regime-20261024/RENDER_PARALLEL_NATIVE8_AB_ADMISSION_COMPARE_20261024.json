@@ -1,0 +1,228 @@
+{
+  "status": "RESEARCH_ONLY_FULL8_DYNAMIC_RESELECTION_CAUSAL_A_B",
+  "researchEpoch": "2026-10-24T01:17:54.116944+00:00",
+  "baselineCase": "RENDER_TWO_REGIME_PARITY_BASELINE",
+  "cases": {
+    "RENDER_TWO_REGIME_A_WEAK_SELLER_0P05_OI_UP": {
+      "10": {
+        "base": {
+          "finalEquityJpy": 284418780.7271706,
+          "ddPct": -14.514985270751623,
+          "portfolioPF": 4.727629118463831,
+          "closedTrades": 1285,
+          "byStrategy": {
+            "V12": 835,
+            "Q102": 183,
+            "PENGU": 68,
+            "IDLE": 68,
+            "RESIDUAL": 19,
+            "V52": 87,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "8f5bcca9aa591b092e333890085244b9862ce9bfb9801356d41ff4e08706af29"
+        },
+        "candidate": {
+          "finalEquityJpy": 282905987.1732648,
+          "ddPct": -14.514985270751623,
+          "portfolioPF": 4.705338503675672,
+          "closedTrades": 1278,
+          "byStrategy": {
+            "V12": 835,
+            "Q102": 183,
+            "PENGU": 68,
+            "IDLE": 61,
+            "RESIDUAL": 19,
+            "V52": 87,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "1a5038449f6fcd2166562de8af17a12e834b23771d6a1e974181ce86b211f292"
+        },
+        "delta": {
+          "equityJpy": -1512793.554,
+          "ddPctPoints": 0.0,
+          "trades": -7
+        },
+        "renderBaseline": {
+          "all": {
+            "n": 24,
+            "wins": 16,
+            "winsPct": 66.67,
+            "pnlJpy": 32558.51
+          },
+          "JAN_MAR_2026": {
+            "n": 12,
+            "wins": 6,
+            "winsPct": 50.0,
+            "pnlJpy": -1222.81
+          },
+          "APR_AUG_2026": {
+            "n": 12,
+            "wins": 10,
+            "winsPct": 83.33,
+            "pnlJpy": 33781.32
+          }
+        },
+        "renderVariant": {
+          "all": {
+            "n": 17,
+            "wins": 12,
+            "winsPct": 70.59,
+            "pnlJpy": 20451.6
+          },
+          "JAN_MAR_2026": {
+            "n": 6,
+            "wins": 3,
+            "winsPct": 50.0,
+            "pnlJpy": -936.09
+          },
+          "APR_AUG_2026": {
+            "n": 11,
+            "wins": 9,
+            "winsPct": 81.82,
+            "pnlJpy": 21387.7
+          }
+        },
+        "renderRemovedEntryTimes": [
+          1768824000000,
+          1769097600000,
+          1769230800000,
+          1769274000000,
+          1769893200000,
+          1770343200000,
+          1770638400000,
+          1779105600000,
+          1781100000000
+        ],
+        "renderNewEntryTimes": [
+          1768838400000,
+          1781125200000
+        ],
+        "otherStrategyRemoved": {},
+        "otherStrategyAdded": {},
+        "renderLossCuts": 3,
+        "renderWinsRemoved": 6,
+        "renderLossesRemoved": 3,
+        "gatingEvidenceSummary": {
+          "KEEP_B": 312,
+          "VETO_A": 147,
+          "KEEP_A": 33
+        },
+        "nativeSharedWalletAccounting": "PASS"
+      },
+      "30": {
+        "base": {
+          "finalEquityJpy": 173611665.16277647,
+          "ddPct": -15.014723812726594,
+          "portfolioPF": 3.839966790525148,
+          "closedTrades": 1284,
+          "byStrategy": {
+            "V12": 834,
+            "Q102": 183,
+            "PENGU": 68,
+            "IDLE": 70,
+            "RESIDUAL": 19,
+            "V52": 86,
+            "HYPE_LONG": 16,
+            "FET": 8
+          },
+          "ledgerSha256": "1ff713d59c903de3f277eba2258529504980dce516fef62105f6dfee8d46d57b"
+        },
+        "candidate": {
+          "finalEquityJpy": 173159511.80939034,
+          "ddPct": -15.014723812726594,
+          "portfolioPF": 3.8269039806139684,
+          "closedTrades": 1277,
+          "byStrategy": {
+            "V12": 834,
+            "Q102": 183,
+            "PENGU": 68,
+            "IDLE": 63,
+            "RESIDUAL": 19,
+            "V52": 86,
+            "HYPE_LONG": 16,
+            "FET": 8
+          },
+          "ledgerSha256": "ede249175b93be85b7c48a5070c4c94065f6c9ece6b4881d48b21c2eef5fb426"
+        },
+        "delta": {
+          "equityJpy": -452153.353,
+          "ddPctPoints": 0.0,
+          "trades": -7
+        },
+        "renderBaseline": {
+          "all": {
+            "n": 24,
+            "wins": 12,
+            "winsPct": 50.0,
+            "pnlJpy": 17139.31
+          },
+          "JAN_MAR_2026": {
+            "n": 12,
+            "wins": 3,
+            "winsPct": 25.0,
+            "pnlJpy": -656.98
+          },
+          "APR_AUG_2026": {
+            "n": 12,
+            "wins": 9,
+            "winsPct": 75.0,
+            "pnlJpy": 17796.29
+          }
+        },
+        "renderVariant": {
+          "all": {
+            "n": 17,
+            "wins": 9,
+            "winsPct": 52.94,
+            "pnlJpy": 10427.99
+          },
+          "JAN_MAR_2026": {
+            "n": 6,
+            "wins": 1,
+            "winsPct": 16.67,
+            "pnlJpy": -487.41
+          },
+          "APR_AUG_2026": {
+            "n": 11,
+            "wins": 8,
+            "winsPct": 72.73,
+            "pnlJpy": 10915.4
+          }
+        },
+        "renderRemovedEntryTimes": [
+          1768824000000,
+          1769097600000,
+          1769230800000,
+          1769274000000,
+          1769893200000,
+          1770343200000,
+          1770638400000,
+          1779105600000,
+          1781100000000
+        ],
+        "renderNewEntryTimes": [
+          1768838400000,
+          1781125200000
+        ],
+        "otherStrategyRemoved": {},
+        "otherStrategyAdded": {},
+        "renderLossCuts": 5,
+        "renderWinsRemoved": 4,
+        "renderLossesRemoved": 5,
+        "gatingEvidenceSummary": {
+          "KEEP_B": 312,
+          "VETO_A": 147,
+          "KEEP_A": 33
+        },
+        "nativeSharedWalletAccounting": "PASS"
+      }
+    }
+  },
+  "warnings": [
+    "Native 8 wallet research is not current venue production SHA or actual fill certification",
+    "New gate uses 2026 post-hoc 7d market thresholds, not pristine OOS",
+    "No new synthetic native route added; only existing H1 candidates veto/reselect"
+  ]
+}
