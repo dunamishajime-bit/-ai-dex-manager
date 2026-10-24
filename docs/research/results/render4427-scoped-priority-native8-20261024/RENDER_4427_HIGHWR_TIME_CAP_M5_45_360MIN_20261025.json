@@ -1,0 +1,546 @@
+{
+  "status": "RESEARCH_ONLY_H1_CAUSAL_FIXED_MAX_HOLD_45_360",
+  "date": "2026-10-25",
+  "policySha256": "7dd0840b4dbe8424eff93ae2010cf9141975d783e3ca523aaa4e80de3f6b56c0",
+  "archives": [
+    {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-01.zip",
+      "sha256": "5c49d0d0250f69be36f0467d3544d9a327f84c78178606cf87b3d10318a6ebc6"
+    },
+    {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-02.zip",
+      "sha256": "8ddc453b8198028b2dc83d1a924434c4debc513fbe01b0383673e7ef04103a12"
+    },
+    {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-05.zip",
+      "sha256": "1905f2b0e4f250c8ed1fe3a7fdfa11493efa71cf0e8310ba3b38582bb8278f57"
+    }
+  ],
+  "results": {
+    "45": {
+      "costs": {
+        "10": {
+          "count": 6,
+          "wins": 4,
+          "wrPct": 66.66666666666667,
+          "meanPct": 0.15703627549334045,
+          "pf": 1.3689597402366402
+        },
+        "30": {
+          "count": 6,
+          "wins": 4,
+          "wrPct": 66.66666666666667,
+          "meanPct": -0.04296372450665951,
+          "pf": 0.9127260299052115
+        }
+      },
+      "trades": [
+        {
+          "entry_ts_ms": 1768640400000,
+          "exit_ts_ms": 1768642200000,
+          "entry_price_binance": 2.229,
+          "exit_price_binance": 2.195565,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.1999999999999902,
+          "net10Pct": 1.3999999999999901
+        },
+        {
+          "entry_ts_ms": 1768896000000,
+          "exit_ts_ms": 1768898700000,
+          "entry_price_binance": 1.996,
+          "exit_price_binance": 1.972,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.9024048096192396,
+          "net10Pct": 1.1024048096192396
+        },
+        {
+          "entry_ts_ms": 1770210000000,
+          "exit_ts_ms": 1770212700000,
+          "entry_price_binance": 1.532,
+          "exit_price_binance": 1.521,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.4180156657963566,
+          "net10Pct": 0.6180156657963566
+        },
+        {
+          "entry_ts_ms": 1770300000000,
+          "exit_ts_ms": 1770302100000,
+          "entry_price_binance": 1.396,
+          "exit_price_binance": 1.4239199999999999,
+          "exit_kind": "STOP",
+          "net30Pct": -2.3000000000000016,
+          "net10Pct": -2.100000000000002
+        },
+        {
+          "entry_ts_ms": 1779469200000,
+          "exit_ts_ms": 1779471900000,
+          "entry_price_binance": 1.979,
+          "exit_price_binance": 1.986,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": -0.6537139969681525,
+          "net10Pct": -0.4537139969681524
+        },
+        {
+          "entry_ts_ms": 1779930000000,
+          "exit_ts_ms": 1779932700000,
+          "entry_price_binance": 2.103,
+          "exit_price_binance": 2.093,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.1755111745126106,
+          "net10Pct": 0.3755111745126106
+        }
+      ]
+    },
+    "55": {
+      "costs": {
+        "10": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.4232704883181671,
+          "pf": 2.209344252337619
+        },
+        "30": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.22327048831816712,
+          "pf": 1.5824447521343488
+        }
+      },
+      "trades": [
+        {
+          "entry_ts_ms": 1768640400000,
+          "exit_ts_ms": 1768642200000,
+          "entry_price_binance": 2.229,
+          "exit_price_binance": 2.195565,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.1999999999999902,
+          "net10Pct": 1.3999999999999901
+        },
+        {
+          "entry_ts_ms": 1768896000000,
+          "exit_ts_ms": 1768899300000,
+          "entry_price_binance": 1.996,
+          "exit_price_binance": 1.97,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 1.0026052104208374,
+          "net10Pct": 1.2026052104208373
+        },
+        {
+          "entry_ts_ms": 1770210000000,
+          "exit_ts_ms": 1770213300000,
+          "entry_price_binance": 1.532,
+          "exit_price_binance": 1.514,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.8749347258485642,
+          "net10Pct": 1.0749347258485642
+        },
+        {
+          "entry_ts_ms": 1770300000000,
+          "exit_ts_ms": 1770302100000,
+          "entry_price_binance": 1.396,
+          "exit_price_binance": 1.4239199999999999,
+          "exit_kind": "STOP",
+          "net30Pct": -2.3000000000000016,
+          "net10Pct": -2.100000000000002
+        },
+        {
+          "entry_ts_ms": 1779469200000,
+          "exit_ts_ms": 1779472500000,
+          "entry_price_binance": 1.979,
+          "exit_price_binance": 1.972,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.05371399696817464,
+          "net10Pct": 0.25371399696817465
+        },
+        {
+          "entry_ts_ms": 1779930000000,
+          "exit_ts_ms": 1779933300000,
+          "entry_price_binance": 2.103,
+          "exit_price_binance": 2.086,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.508368996671438,
+          "net10Pct": 0.708368996671438
+        }
+      ]
+    },
+    "60": {
+      "costs": {
+        "10": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.38708739338069736,
+          "pf": 2.1059639810877058
+        },
+        "30": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.18708739338069744,
+          "pf": 1.4880540696887756
+        }
+      },
+      "trades": [
+        {
+          "entry_ts_ms": 1768640400000,
+          "exit_ts_ms": 1768642200000,
+          "entry_price_binance": 2.229,
+          "exit_price_binance": 2.195565,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.1999999999999902,
+          "net10Pct": 1.3999999999999901
+        },
+        {
+          "entry_ts_ms": 1768896000000,
+          "exit_ts_ms": 1768899600000,
+          "entry_price_binance": 1.996,
+          "exit_price_binance": 1.981,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.45150300601202203,
+          "net10Pct": 0.651503006012022
+        },
+        {
+          "entry_ts_ms": 1770210000000,
+          "exit_ts_ms": 1770213300000,
+          "entry_price_binance": 1.532,
+          "exit_price_binance": 1.50902,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1770300000000,
+          "exit_ts_ms": 1770302100000,
+          "entry_price_binance": 1.396,
+          "exit_price_binance": 1.4239199999999999,
+          "exit_kind": "STOP",
+          "net30Pct": -2.3000000000000016,
+          "net10Pct": -2.100000000000002
+        },
+        {
+          "entry_ts_ms": 1779469200000,
+          "exit_ts_ms": 1779472800000,
+          "entry_price_binance": 1.979,
+          "exit_price_binance": 1.969,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.20530570995451775,
+          "net10Pct": 0.40530570995451776
+        },
+        {
+          "entry_ts_ms": 1779930000000,
+          "exit_ts_ms": 1779933600000,
+          "entry_price_binance": 2.103,
+          "exit_price_binance": 2.089,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.36571564431765485,
+          "net10Pct": 0.5657156443176549
+        }
+      ]
+    },
+    "90": {
+      "costs": {
+        "10": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.5344130909621141,
+          "pf": 2.5268945456060385
+        },
+        "30": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.33441309096211413,
+          "pf": 1.8723819764229057
+        }
+      },
+      "trades": [
+        {
+          "entry_ts_ms": 1768640400000,
+          "exit_ts_ms": 1768642200000,
+          "entry_price_binance": 2.229,
+          "exit_price_binance": 2.195565,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.1999999999999902,
+          "net10Pct": 1.3999999999999901
+        },
+        {
+          "entry_ts_ms": 1768896000000,
+          "exit_ts_ms": 1768901400000,
+          "entry_price_binance": 1.996,
+          "exit_price_binance": 1.979,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.5517034068136197,
+          "net10Pct": 0.7517034068136198
+        },
+        {
+          "entry_ts_ms": 1770210000000,
+          "exit_ts_ms": 1770213300000,
+          "entry_price_binance": 1.532,
+          "exit_price_binance": 1.50902,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1770300000000,
+          "exit_ts_ms": 1770302100000,
+          "entry_price_binance": 1.396,
+          "exit_price_binance": 1.4239199999999999,
+          "exit_kind": "STOP",
+          "net30Pct": -2.3000000000000016,
+          "net10Pct": -2.100000000000002
+        },
+        {
+          "entry_ts_ms": 1779469200000,
+          "exit_ts_ms": 1779474600000,
+          "entry_price_binance": 1.979,
+          "exit_price_binance": 1.97,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.15477513895907374,
+          "net10Pct": 0.35477513895907375
+        },
+        {
+          "entry_ts_ms": 1779930000000,
+          "exit_ts_ms": 1779935100000,
+          "entry_price_binance": 2.103,
+          "exit_price_binance": 2.0714550000000003,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        }
+      ]
+    },
+    "120": {
+      "costs": {
+        "10": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.6585170340681346,
+          "pf": 2.8814772401946684
+        },
+        "30": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.45851703406813465,
+          "pf": 2.19613139322122
+        }
+      },
+      "trades": [
+        {
+          "entry_ts_ms": 1768640400000,
+          "exit_ts_ms": 1768642200000,
+          "entry_price_binance": 2.229,
+          "exit_price_binance": 2.195565,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.1999999999999902,
+          "net10Pct": 1.3999999999999901
+        },
+        {
+          "entry_ts_ms": 1768896000000,
+          "exit_ts_ms": 1768903200000,
+          "entry_price_binance": 1.996,
+          "exit_price_binance": 1.985,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.2511022044088154,
+          "net10Pct": 0.45110220440881543
+        },
+        {
+          "entry_ts_ms": 1770210000000,
+          "exit_ts_ms": 1770213300000,
+          "entry_price_binance": 1.532,
+          "exit_price_binance": 1.50902,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1770300000000,
+          "exit_ts_ms": 1770302100000,
+          "entry_price_binance": 1.396,
+          "exit_price_binance": 1.4239199999999999,
+          "exit_kind": "STOP",
+          "net30Pct": -2.3000000000000016,
+          "net10Pct": -2.100000000000002
+        },
+        {
+          "entry_ts_ms": 1779469200000,
+          "exit_ts_ms": 1779474900000,
+          "entry_price_binance": 1.979,
+          "exit_price_binance": 1.9493150000000001,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1779930000000,
+          "exit_ts_ms": 1779935100000,
+          "entry_price_binance": 2.103,
+          "exit_price_binance": 2.0714550000000003,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        }
+      ]
+    },
+    "180": {
+      "costs": {
+        "10": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.6418169672678664,
+          "pf": 2.833762763622474
+        },
+        "30": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.4418169672678665,
+          "pf": 2.1525660015683465
+        }
+      },
+      "trades": [
+        {
+          "entry_ts_ms": 1768640400000,
+          "exit_ts_ms": 1768642200000,
+          "entry_price_binance": 2.229,
+          "exit_price_binance": 2.195565,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.1999999999999902,
+          "net10Pct": 1.3999999999999901
+        },
+        {
+          "entry_ts_ms": 1768896000000,
+          "exit_ts_ms": 1768906800000,
+          "entry_price_binance": 1.996,
+          "exit_price_binance": 1.987,
+          "exit_kind": "TIME_LIMIT",
+          "net30Pct": 0.15090180360720656,
+          "net10Pct": 0.3509018036072066
+        },
+        {
+          "entry_ts_ms": 1770210000000,
+          "exit_ts_ms": 1770213300000,
+          "entry_price_binance": 1.532,
+          "exit_price_binance": 1.50902,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1770300000000,
+          "exit_ts_ms": 1770302100000,
+          "entry_price_binance": 1.396,
+          "exit_price_binance": 1.4239199999999999,
+          "exit_kind": "STOP",
+          "net30Pct": -2.3000000000000016,
+          "net10Pct": -2.100000000000002
+        },
+        {
+          "entry_ts_ms": 1779469200000,
+          "exit_ts_ms": 1779474900000,
+          "entry_price_binance": 1.979,
+          "exit_price_binance": 1.9493150000000001,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1779930000000,
+          "exit_ts_ms": 1779935100000,
+          "entry_price_binance": 2.103,
+          "exit_price_binance": 2.0714550000000003,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        }
+      ]
+    },
+    "360": {
+      "costs": {
+        "10": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.8166666666666655,
+          "pf": 3.3333333333333277
+        },
+        "30": {
+          "count": 6,
+          "wins": 5,
+          "wrPct": 83.33333333333333,
+          "meanPct": 0.6166666666666657,
+          "pf": 2.608695652173909
+        }
+      },
+      "trades": [
+        {
+          "entry_ts_ms": 1768640400000,
+          "exit_ts_ms": 1768642200000,
+          "entry_price_binance": 2.229,
+          "exit_price_binance": 2.195565,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.1999999999999902,
+          "net10Pct": 1.3999999999999901
+        },
+        {
+          "entry_ts_ms": 1768896000000,
+          "exit_ts_ms": 1768909200000,
+          "entry_price_binance": 1.996,
+          "exit_price_binance": 1.96606,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1770210000000,
+          "exit_ts_ms": 1770213300000,
+          "entry_price_binance": 1.532,
+          "exit_price_binance": 1.50902,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1770300000000,
+          "exit_ts_ms": 1770302100000,
+          "entry_price_binance": 1.396,
+          "exit_price_binance": 1.4239199999999999,
+          "exit_kind": "STOP",
+          "net30Pct": -2.3000000000000016,
+          "net10Pct": -2.100000000000002
+        },
+        {
+          "entry_ts_ms": 1779469200000,
+          "exit_ts_ms": 1779474900000,
+          "entry_price_binance": 1.979,
+          "exit_price_binance": 1.9493150000000001,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        },
+        {
+          "entry_ts_ms": 1779930000000,
+          "exit_ts_ms": 1779935100000,
+          "entry_price_binance": 2.103,
+          "exit_price_binance": 2.0714550000000003,
+          "exit_kind": "TAKE",
+          "net30Pct": 1.2000000000000013,
+          "net10Pct": 1.4000000000000012
+        }
+      ]
+    }
+  },
+  "caveats": [
+    "Known TAO opportunity one hour after May28 new RENDER entry affects hypothesis and creates after-the-fact selection risk",
+    "Official Binance 5m not Aster fills or mark; Native8 integration is a separate required test",
+    "No 2025 history native mark; only six 2026 entries",
+    "Simultaneous bar stop conservatively wins over profit target",
+    "No changes to LIVE, VPS, Production or HP"
+  ]
+}

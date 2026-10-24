@@ -1,0 +1,3111 @@
+{
+  "status": "RESEARCH_ONLY_CHRONOLOGICAL_HIGH_WR_NEW_GATE_SCREEN",
+  "timestampJST": "2026-10-25",
+  "bankSha256": "d5234a91155afa2e232b0c2372b4a929a875ee79ef23d085a6417ecfab334c07",
+  "testedPredicates": [
+    "downH4",
+    "strongDownH4",
+    "downD1",
+    "strongDownD1",
+    "sell56",
+    "sell58",
+    "vol110",
+    "vol140",
+    "h1NotLate",
+    "h1SharpDown",
+    "h1Bottom",
+    "h1Upper",
+    "last15Down",
+    "last15NotFast",
+    "prevH1Positive",
+    "prevH1Negative",
+    "btcUp",
+    "btcDown",
+    "highUpperWick",
+    "smallUpperWick",
+    "h3_nonpositive",
+    "h3_positive"
+  ],
+  "screen": {
+    "singleAndPairFeatures": true,
+    "familyCount": 7,
+    "exitCount": 3,
+    "signalLevelOnly": true,
+    "incumbentOverlapsExcluded": true,
+    "train2024Gate": "n>=12, WR>=70, PF>=1.35, mean net30>0.08%",
+    "verification2025H1Gate": "n>=4, WR>=60, PF>=1, mean net30>=0",
+    "futurePeriodsNotUsedToRank": true,
+    "allPeriodsPreviouslyInspected": true
+  },
+  "trainValidationPassed": 52,
+  "strongCandidates": [
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol110+prevH1Negative",
+      "train": {
+        "n": 34,
+        "wr": 82.353,
+        "pf": 2.7995,
+        "mean30": 1.16401,
+        "wins": 28,
+        "wilsonLo90": 69.346,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 6,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.36667,
+        "wins": 6,
+        "wilsonLo90": 68.918,
+        "maxLoss": 0.7
+      },
+      "trainValRank": 89.45548,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 3.7841,
+        "mean30": 1.85773,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 69.231,
+        "pf": 1.7233,
+        "mean30": 0.57304,
+        "wins": 9,
+        "wilsonLo90": 46.475,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 1.2368,
+        "mean30": 0.45,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "strongDownH4+vol110",
+      "train": {
+        "n": 21,
+        "wr": 80.952,
+        "pf": 1.9711,
+        "mean30": 0.66559,
+        "wins": 17,
+        "wilsonLo90": 63.69,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 4,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.11566,
+        "wins": 4,
+        "wilsonLo90": 59.648,
+        "maxLoss": 0.7
+      },
+      "trainValRank": 84.02632,
+      "test2025H2": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 4.7,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 4.7
+      },
+      "test2026JanAug": {
+        "n": 6,
+        "wr": 83.333,
+        "pf": 4.0789,
+        "mean30": 1.95,
+        "wins": 5,
+        "wilsonLo90": 49.755,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 4.7,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 4.7
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol140+h1NotLate",
+      "train": {
+        "n": 23,
+        "wr": 78.261,
+        "pf": 2.1616,
+        "mean30": 0.95958,
+        "wins": 18,
+        "wilsonLo90": 61.577,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 4,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.7,
+        "wins": 4,
+        "wilsonLo90": 59.648,
+        "maxLoss": 0.7
+      },
+      "trainValRank": 83.47093,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 3.5218,
+        "mean30": 2.24364,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 9,
+        "wr": 44.444,
+        "pf": 0.4823,
+        "mean30": -0.8111,
+        "wins": 4,
+        "wilsonLo90": 21.803,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 0.1842,
+        "mean30": -1.55,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol140+h3_nonpositive",
+      "train": {
+        "n": 33,
+        "wr": 81.818,
+        "pf": 2.4039,
+        "mean30": 0.93565,
+        "wins": 27,
+        "wilsonLo90": 68.519,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 1.7895,
+        "mean30": 0.6,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 81.37279,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 5.2827,
+        "mean30": 2.85773,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 12,
+        "wr": 58.333,
+        "pf": 0.9149,
+        "mean30": -0.09999,
+        "wins": 7,
+        "wilsonLo90": 35.596,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 0.7,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 0.7
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol110+h1NotLate",
+      "train": {
+        "n": 31,
+        "wr": 70.968,
+        "pf": 1.3997,
+        "mean30": 0.44098,
+        "wins": 22,
+        "wilsonLo90": 56.313,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 6,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.31044,
+        "wins": 6,
+        "wilsonLo90": 68.918,
+        "maxLoss": 0.7
+      },
+      "trainValRank": 79.97935,
+      "test2025H2": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.5613,
+        "mean30": 0.72618,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 15,
+        "wr": 60.0,
+        "pf": 1.2151,
+        "mean30": 0.25663,
+        "wins": 9,
+        "wilsonLo90": 39.259,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 4,
+        "wr": 50.0,
+        "pf": 0.7105,
+        "mean30": -0.55,
+        "wins": 2,
+        "wilsonLo90": 18.238,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol110+h3_nonpositive",
+      "train": {
+        "n": 48,
+        "wr": 72.917,
+        "pf": 1.4502,
+        "mean30": 0.45576,
+        "wins": 35,
+        "wilsonLo90": 61.355,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 9,
+        "wr": 88.889,
+        "pf": 4.0165,
+        "mean30": 1.27363,
+        "wins": 8,
+        "wilsonLo90": 62.317,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 79.85328,
+      "test2025H2": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 2.2878,
+        "mean30": 1.38849,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 19,
+        "wr": 73.684,
+        "pf": 2.4208,
+        "mean30": 1.05441,
+        "wins": 14,
+        "wilsonLo90": 54.906,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 1.4211,
+        "mean30": 0.53333,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol110+vol140",
+      "train": {
+        "n": 34,
+        "wr": 79.412,
+        "pf": 2.0498,
+        "mean30": 0.79636,
+        "wins": 27,
+        "wilsonLo90": 66.053,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 1.7895,
+        "mean30": 0.6,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 79.06996,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 5.2827,
+        "mean30": 2.85773,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 53.846,
+        "pf": 0.7207,
+        "mean30": -0.38461,
+        "wins": 7,
+        "wilsonLo90": 32.48,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 0.1842,
+        "mean30": -1.55,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol140",
+      "train": {
+        "n": 34,
+        "wr": 79.412,
+        "pf": 2.0498,
+        "mean30": 0.79636,
+        "wins": 27,
+        "wilsonLo90": 66.053,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 1.7895,
+        "mean30": 0.6,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 79.06996,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 5.2827,
+        "mean30": 2.85773,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 53.846,
+        "pf": 0.7207,
+        "mean30": -0.38461,
+        "wins": 7,
+        "wilsonLo90": 32.48,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 0.1842,
+        "mean30": -1.55,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol110+highUpperWick",
+      "train": {
+        "n": 24,
+        "wr": 70.833,
+        "pf": 1.414,
+        "mean30": 0.44494,
+        "wins": 17,
+        "wilsonLo90": 54.101,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 4,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.11566,
+        "wins": 4,
+        "wilsonLo90": 59.648,
+        "maxLoss": 0.7
+      },
+      "trainValRank": 76.37317,
+      "test2025H2": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 4.7,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 4.7
+      },
+      "test2026JanAug": {
+        "n": 10,
+        "wr": 90.0,
+        "pf": 5.9562,
+        "mean30": 1.88336,
+        "wins": 9,
+        "wilsonLo90": 65.225,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 0.7,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 0.7
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol140+h1NotLate",
+      "train": {
+        "n": 23,
+        "wr": 82.609,
+        "pf": 3.2877,
+        "mean30": 0.68979,
+        "wins": 19,
+        "wilsonLo90": 66.408,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.5652,
+        "mean30": 0.325,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 76.00841,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 1.0435,
+        "mean30": 0.03333,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 9,
+        "wr": 55.556,
+        "pf": 1.0197,
+        "mean30": 0.01007,
+        "wins": 5,
+        "wilsonLo90": 30.346,
+        "maxLoss": -1.58
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 0.60256,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 0.0051
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "sell56+h1NotLate",
+      "train": {
+        "n": 31,
+        "wr": 74.194,
+        "pf": 3.1597,
+        "mean30": 1.25125,
+        "wins": 23,
+        "wilsonLo90": 59.702,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 28,
+        "wr": 71.429,
+        "pf": 1.8963,
+        "mean30": 0.89983,
+        "wins": 20,
+        "wilsonLo90": 55.997,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 74.41955,
+      "test2025H2": {
+        "n": 7,
+        "wr": 57.143,
+        "pf": 0.4885,
+        "mean30": -0.72585,
+        "wins": 4,
+        "wilsonLo90": 28.946,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 16,
+        "wr": 43.75,
+        "pf": 0.4711,
+        "mean30": -0.90504,
+        "wins": 7,
+        "wilsonLo90": 25.764,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 8,
+        "wr": 37.5,
+        "pf": 0.1373,
+        "mean30": -1.64923,
+        "wins": 3,
+        "wilsonLo90": 16.116,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "TREND_BREAK",
+      "exit": "T24",
+      "gate": "vol140+prevH1Positive",
+      "train": {
+        "n": 31,
+        "wr": 74.194,
+        "pf": 2.0255,
+        "mean30": 0.84556,
+        "wins": 23,
+        "wilsonLo90": 59.702,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 11,
+        "wr": 72.727,
+        "pf": 1.9084,
+        "mean30": 0.94148,
+        "wins": 8,
+        "wilsonLo90": 47.949,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 73.93115,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 0.5526,
+        "mean30": -0.425,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 30.769,
+        "pf": 0.3887,
+        "mean30": -1.30675,
+        "wins": 4,
+        "wilsonLo90": 14.641,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 5.2777,
+        "mean30": 1.51481,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -1.7706
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "strongDownH4+vol110",
+      "train": {
+        "n": 21,
+        "wr": 76.19,
+        "pf": 2.3695,
+        "mean30": 0.91302,
+        "wins": 16,
+        "wilsonLo90": 58.504,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.3571,
+        "mean30": 0.95,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 73.61948,
+      "test2025H2": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 2.2
+      },
+      "test2026JanAug": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 1.5714,
+        "mean30": 0.53333,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 2.2
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol110+h1SharpDown",
+      "train": {
+        "n": 30,
+        "wr": 73.333,
+        "pf": 1.3786,
+        "mean30": 0.3735,
+        "wins": 22,
+        "wilsonLo90": 58.537,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 7,
+        "wr": 85.714,
+        "pf": 2.1579,
+        "mean30": 0.62857,
+        "wins": 6,
+        "wilsonLo90": 54.768,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 73.55604,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 3.7841,
+        "mean30": 1.85773,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 69.231,
+        "pf": 1.6482,
+        "mean30": 0.70136,
+        "wins": 9,
+        "wilsonLo90": 46.475,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.7,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 0.7
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "downH4+vol140",
+      "train": {
+        "n": 26,
+        "wr": 76.923,
+        "pf": 1.3855,
+        "mean30": 0.32605,
+        "wins": 20,
+        "wilsonLo90": 61.203,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 1.7895,
+        "mean30": 0.6,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 73.42846,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 3.5218,
+        "mean30": 2.24364,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 6,
+        "wr": 50.0,
+        "pf": 0.7991,
+        "mean30": -0.25556,
+        "wins": 3,
+        "wilsonLo90": 22.124,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 0,
+        "wr": null,
+        "pf": null,
+        "mean30": null,
+        "wins": 0,
+        "wilsonLo90": null,
+        "maxLoss": null
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol140+last15NotFast",
+      "train": {
+        "n": 20,
+        "wr": 80.0,
+        "pf": 1.6559,
+        "mean30": 0.49846,
+        "wins": 16,
+        "wilsonLo90": 62.161,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.6053,
+        "mean30": 0.575,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 73.04549,
+      "test2025H2": {
+        "n": 1,
+        "wr": 0.0,
+        "pf": 0.0,
+        "mean30": -2.66908,
+        "wins": 0,
+        "wilsonLo90": 0.0,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 9,
+        "wr": 55.556,
+        "pf": 1.1165,
+        "mean30": 0.13334,
+        "wins": 5,
+        "wilsonLo90": 30.346,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 0.0,
+        "pf": 0.0,
+        "mean30": -3.8,
+        "wins": 0,
+        "wilsonLo90": 0.0,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "TREND_PRESSURE",
+      "exit": "T24",
+      "gate": "downD1+prevH1Positive",
+      "train": {
+        "n": 35,
+        "wr": 71.429,
+        "pf": 1.6441,
+        "mean30": 0.59517,
+        "wins": 25,
+        "wilsonLo90": 57.691,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 13,
+        "wr": 69.231,
+        "pf": 2.894,
+        "mean30": 1.72677,
+        "wins": 9,
+        "wilsonLo90": 46.475,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 72.47755,
+      "test2025H2": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 1.7895,
+        "mean30": 0.6,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 16,
+        "wr": 37.5,
+        "pf": 0.5146,
+        "mean30": -0.95505,
+        "wins": 6,
+        "wilsonLo90": 20.806,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 6,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.67686,
+        "wins": 6,
+        "wilsonLo90": 68.918,
+        "maxLoss": 0.7
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "h1SharpDown+highUpperWick",
+      "train": {
+        "n": 30,
+        "wr": 73.333,
+        "pf": 1.4348,
+        "mean30": 0.26667,
+        "wins": 22,
+        "wilsonLo90": 58.537,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 6,
+        "wr": 83.333,
+        "pf": 2.6087,
+        "mean30": 0.61667,
+        "wins": 5,
+        "wilsonLo90": 49.755,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 72.41444,
+      "test2025H2": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 1.2
+      },
+      "test2026JanAug": {
+        "n": 9,
+        "wr": 88.889,
+        "pf": 3.8165,
+        "mean30": 0.71977,
+        "wins": 8,
+        "wilsonLo90": 62.317,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 1.2
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "vol140+h1NotLate",
+      "train": {
+        "n": 23,
+        "wr": 73.913,
+        "pf": 2.2519,
+        "mean30": 0.855,
+        "wins": 17,
+        "wilsonLo90": 56.928,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.3571,
+        "mean30": 0.95,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 72.34365,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 1.5714,
+        "mean30": 0.53333,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 9,
+        "wr": 44.444,
+        "pf": 0.9311,
+        "mean30": -0.07238,
+        "wins": 4,
+        "wilsonLo90": 21.803,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.17883,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 0.1577
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "strongDownD1+h1NotLate",
+      "train": {
+        "n": 57,
+        "wr": 71.93,
+        "pf": 1.8976,
+        "mean30": 0.82067,
+        "wins": 41,
+        "wilsonLo90": 61.318,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 51,
+        "wr": 68.627,
+        "pf": 1.3615,
+        "mean30": 0.39466,
+        "wins": 35,
+        "wilsonLo90": 57.231,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 72.22584,
+      "test2025H2": {
+        "n": 19,
+        "wr": 47.368,
+        "pf": 0.4883,
+        "mean30": -0.9019,
+        "wins": 9,
+        "wilsonLo90": 30.064,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 26,
+        "wr": 50.0,
+        "pf": 0.5193,
+        "mean30": -0.77443,
+        "wins": 13,
+        "wilsonLo90": 34.649,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 10,
+        "wr": 50.0,
+        "pf": 0.4904,
+        "mean30": -0.77938,
+        "wins": 5,
+        "wilsonLo90": 26.926,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol140+h1SharpDown",
+      "train": {
+        "n": 21,
+        "wr": 76.19,
+        "pf": 1.5719,
+        "mean30": 0.49547,
+        "wins": 16,
+        "wilsonLo90": 58.504,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 1.7895,
+        "mean30": 0.6,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 71.94928,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 3.5218,
+        "mean30": 2.24364,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 10,
+        "wr": 60.0,
+        "pf": 0.8673,
+        "mean30": -0.18666,
+        "wins": 6,
+        "wilsonLo90": 35.162,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 0.7,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 0.7
+      }
+    },
+    {
+      "family": "TREND_BREAK",
+      "exit": "T24",
+      "gate": "h1NotLate+h1Bottom",
+      "train": {
+        "n": 50,
+        "wr": 72.0,
+        "pf": 1.3821,
+        "mean30": 0.35378,
+        "wins": 36,
+        "wilsonLo90": 60.634,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 22,
+        "wr": 68.182,
+        "pf": 1.8275,
+        "mean30": 0.9311,
+        "wins": 15,
+        "wilsonLo90": 50.648,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 71.79898,
+      "test2025H2": {
+        "n": 19,
+        "wr": 68.421,
+        "pf": 1.3896,
+        "mean30": 0.38189,
+        "wins": 13,
+        "wilsonLo90": 49.552,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 42,
+        "wr": 40.476,
+        "pf": 0.4377,
+        "mean30": -0.83785,
+        "wins": 17,
+        "wilsonLo90": 28.963,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 15,
+        "wr": 40.0,
+        "pf": 0.3144,
+        "mean30": -1.05385,
+        "wins": 6,
+        "wilsonLo90": 22.316,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "last15NotFast+prevH1Negative",
+      "train": {
+        "n": 24,
+        "wr": 79.167,
+        "pf": 1.4077,
+        "mean30": 0.32276,
+        "wins": 19,
+        "wilsonLo90": 62.95,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 8,
+        "wr": 75.0,
+        "pf": 1.0789,
+        "mean30": 0.075,
+        "wins": 6,
+        "wilsonLo90": 46.013,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 71.09309,
+      "test2025H2": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 0.2623,
+        "mean30": -0.98454,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 12,
+        "wr": 58.333,
+        "pf": 0.9963,
+        "mean30": -0.00384,
+        "wins": 7,
+        "wilsonLo90": 35.596,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 4,
+        "wr": 50.0,
+        "pf": 0.7105,
+        "mean30": -0.55,
+        "wins": 2,
+        "wilsonLo90": 18.238,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "vol110+prevH1Negative",
+      "train": {
+        "n": 34,
+        "wr": 73.529,
+        "pf": 2.3592,
+        "mean30": 0.89762,
+        "wins": 25,
+        "wilsonLo90": 59.691,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 1.5714,
+        "mean30": 0.53333,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 70.89444,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.6302,
+        "mean30": 0.44114,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 53.846,
+        "pf": 1.3685,
+        "mean30": 0.319,
+        "wins": 7,
+        "wilsonLo90": 32.48,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 0.7857,
+        "mean30": -0.3,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -2.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "downH4+vol110",
+      "train": {
+        "n": 37,
+        "wr": 75.676,
+        "pf": 1.6232,
+        "mean30": 0.34865,
+        "wins": 28,
+        "wilsonLo90": 62.59,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 7,
+        "wr": 71.429,
+        "pf": 1.3043,
+        "mean30": 0.2,
+        "wins": 5,
+        "wilsonLo90": 40.864,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 70.87044,
+      "test2025H2": {
+        "n": 4,
+        "wr": 50.0,
+        "pf": 0.5217,
+        "mean30": -0.55,
+        "wins": 2,
+        "wilsonLo90": 18.238,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 9,
+        "wr": 44.444,
+        "pf": 0.5312,
+        "mean30": -0.47064,
+        "wins": 4,
+        "wilsonLo90": 21.803,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 1.2
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "downD1+last15NotFast",
+      "train": {
+        "n": 74,
+        "wr": 70.27,
+        "pf": 1.4243,
+        "mean30": 0.42613,
+        "wins": 52,
+        "wilsonLo90": 60.941,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 48,
+        "wr": 66.667,
+        "pf": 1.4799,
+        "mean30": 0.5567,
+        "wins": 32,
+        "wilsonLo90": 54.851,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 70.4756,
+      "test2025H2": {
+        "n": 24,
+        "wr": 62.5,
+        "pf": 1.1638,
+        "mean30": 0.21184,
+        "wins": 15,
+        "wilsonLo90": 45.771,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 35,
+        "wr": 42.857,
+        "pf": 0.4732,
+        "mean30": -0.99104,
+        "wins": 15,
+        "wilsonLo90": 30.103,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 13,
+        "wr": 53.846,
+        "pf": 0.7731,
+        "mean30": -0.33328,
+        "wins": 7,
+        "wilsonLo90": 32.48,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "downH4+last15NotFast",
+      "train": {
+        "n": 14,
+        "wr": 71.429,
+        "pf": 1.5069,
+        "mean30": 0.44729,
+        "wins": 10,
+        "wilsonLo90": 49.448,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 7,
+        "wr": 85.714,
+        "pf": 4.2632,
+        "mean30": 1.77143,
+        "wins": 6,
+        "wilsonLo90": 54.768,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 70.24154,
+      "test2025H2": {
+        "n": 3,
+        "wr": 33.333,
+        "pf": 0.0921,
+        "mean30": -2.3,
+        "wins": 1,
+        "wilsonLo90": 7.826,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 1.2368,
+        "mean30": 0.45,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 0.674,
+        "mean30": -0.61943,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "TREND_BREAK",
+      "exit": "T24",
+      "gate": "sell58+btcDown",
+      "train": {
+        "n": 52,
+        "wr": 71.154,
+        "pf": 1.5236,
+        "mean30": 0.52814,
+        "wins": 37,
+        "wilsonLo90": 59.977,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 25,
+        "wr": 60.0,
+        "pf": 1.6447,
+        "mean30": 0.98,
+        "wins": 15,
+        "wilsonLo90": 43.682,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 69.96724,
+      "test2025H2": {
+        "n": 17,
+        "wr": 52.941,
+        "pf": 0.5214,
+        "mean30": -0.77565,
+        "wins": 9,
+        "wilsonLo90": 34.037,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 33,
+        "wr": 30.303,
+        "pf": 0.2869,
+        "mean30": -1.48599,
+        "wins": 10,
+        "wilsonLo90": 19.056,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 8,
+        "wr": 25.0,
+        "pf": 0.0614,
+        "mean30": -2.675,
+        "wins": 2,
+        "wilsonLo90": 8.651,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "vol140+h3_nonpositive",
+      "train": {
+        "n": 33,
+        "wr": 75.758,
+        "pf": 2.8538,
+        "mean30": 1.04275,
+        "wins": 25,
+        "wilsonLo90": 61.847,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.1786,
+        "mean30": 0.2,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 69.79735,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.3571,
+        "mean30": 0.95,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 12,
+        "wr": 58.333,
+        "pf": 1.6294,
+        "mean30": 0.49572,
+        "wins": 7,
+        "wilsonLo90": 35.596,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 2.2
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "strongDownD1+last15NotFast",
+      "train": {
+        "n": 57,
+        "wr": 70.175,
+        "pf": 1.354,
+        "mean30": 0.38354,
+        "wins": 40,
+        "wilsonLo90": 59.479,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 46,
+        "wr": 67.391,
+        "pf": 1.4977,
+        "mean30": 0.56134,
+        "wins": 31,
+        "wilsonLo90": 55.333,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 69.47388,
+      "test2025H2": {
+        "n": 21,
+        "wr": 61.905,
+        "pf": 1.1279,
+        "mean30": 0.16591,
+        "wins": 13,
+        "wilsonLo90": 44.082,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 25,
+        "wr": 40.0,
+        "pf": 0.3808,
+        "mean30": -1.27844,
+        "wins": 10,
+        "wilsonLo90": 25.635,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 12,
+        "wr": 50.0,
+        "pf": 0.7364,
+        "mean30": -0.41939,
+        "wins": 6,
+        "wilsonLo90": 28.552,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol110+prevH1Negative",
+      "train": {
+        "n": 34,
+        "wr": 76.471,
+        "pf": 1.7674,
+        "mean30": 0.39843,
+        "wins": 26,
+        "wilsonLo90": 62.838,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 1.0435,
+        "mean30": 0.03333,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 69.16352,
+      "test2025H2": {
+        "n": 4,
+        "wr": 50.0,
+        "pf": 0.5217,
+        "mean30": -0.55,
+        "wins": 2,
+        "wilsonLo90": 18.238,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 53.846,
+        "pf": 0.7334,
+        "mean30": -0.19821,
+        "wins": 7,
+        "wilsonLo90": 32.48,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 1.0458,
+        "mean30": 0.02627,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -1.1475
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "strongDownH4+vol110",
+      "train": {
+        "n": 21,
+        "wr": 76.19,
+        "pf": 1.6696,
+        "mean30": 0.36667,
+        "wins": 16,
+        "wilsonLo90": 58.504,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.5652,
+        "mean30": 0.325,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 68.93408,
+      "test2025H2": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 1.2
+      },
+      "test2026JanAug": {
+        "n": 6,
+        "wr": 50.0,
+        "pf": 0.5217,
+        "mean30": -0.55,
+        "wins": 3,
+        "wilsonLo90": 22.124,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 1.2
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol110+highUpperWick",
+      "train": {
+        "n": 24,
+        "wr": 75.0,
+        "pf": 1.5652,
+        "mean30": 0.325,
+        "wins": 18,
+        "wilsonLo90": 58.452,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.5652,
+        "mean30": 0.325,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 68.86349,
+      "test2025H2": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 1.2
+      },
+      "test2026JanAug": {
+        "n": 10,
+        "wr": 70.0,
+        "pf": 2.1095,
+        "mean30": 0.40199,
+        "wins": 7,
+        "wilsonLo90": 44.168,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 1.2
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol110",
+      "train": {
+        "n": 49,
+        "wr": 73.469,
+        "pf": 1.6067,
+        "mean30": 0.33289,
+        "wins": 36,
+        "wilsonLo90": 62.067,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 9,
+        "wr": 66.667,
+        "pf": 1.0435,
+        "mean30": 0.03333,
+        "wins": 6,
+        "wilsonLo90": 39.824,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 68.7117,
+      "test2025H2": {
+        "n": 6,
+        "wr": 50.0,
+        "pf": 0.5217,
+        "mean30": -0.55,
+        "wins": 3,
+        "wilsonLo90": 22.124,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 21,
+        "wr": 52.381,
+        "pf": 0.9218,
+        "mean30": -0.04803,
+        "wins": 11,
+        "wilsonLo90": 35.233,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.096,
+        "mean30": 0.31441,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -1.1475
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "h1NotLate+last15NotFast",
+      "train": {
+        "n": 54,
+        "wr": 72.222,
+        "pf": 1.7747,
+        "mean30": 0.68461,
+        "wins": 39,
+        "wilsonLo90": 61.32,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 34,
+        "wr": 61.765,
+        "pf": 1.0547,
+        "mean30": 0.07122,
+        "wins": 21,
+        "wilsonLo90": 47.674,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 68.4569,
+      "test2025H2": {
+        "n": 17,
+        "wr": 47.059,
+        "pf": 0.3754,
+        "mean30": -1.14018,
+        "wins": 8,
+        "wilsonLo90": 28.962,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 26,
+        "wr": 38.462,
+        "pf": 0.3881,
+        "mean30": -1.19179,
+        "wins": 10,
+        "wilsonLo90": 24.573,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 10,
+        "wr": 60.0,
+        "pf": 0.7134,
+        "mean30": -0.32938,
+        "wins": 6,
+        "wilsonLo90": 35.162,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "last15NotFast+highUpperWick",
+      "train": {
+        "n": 50,
+        "wr": 72.0,
+        "pf": 1.4689,
+        "mean30": 0.46487,
+        "wins": 36,
+        "wilsonLo90": 60.634,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 29,
+        "wr": 62.069,
+        "pf": 1.2584,
+        "mean30": 0.37241,
+        "wins": 18,
+        "wilsonLo90": 46.826,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 68.29694,
+      "test2025H2": {
+        "n": 13,
+        "wr": 46.154,
+        "pf": 0.6332,
+        "mean30": -0.70269,
+        "wins": 6,
+        "wilsonLo90": 26.113,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 16,
+        "wr": 43.75,
+        "pf": 0.3979,
+        "mean30": -1.22026,
+        "wins": 7,
+        "wilsonLo90": 25.764,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 9,
+        "wr": 66.667,
+        "pf": 1.2334,
+        "mean30": 0.29568,
+        "wins": 6,
+        "wilsonLo90": 39.824,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "h1SharpDown+last15Down",
+      "train": {
+        "n": 32,
+        "wr": 71.875,
+        "pf": 1.462,
+        "mean30": 0.27254,
+        "wins": 23,
+        "wilsonLo90": 57.5,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.5652,
+        "mean30": 0.325,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 68.2559,
+      "test2025H2": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 1.2
+      },
+      "test2026JanAug": {
+        "n": 8,
+        "wr": 75.0,
+        "pf": 1.8464,
+        "mean30": 0.36547,
+        "wins": 6,
+        "wilsonLo90": 46.013,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 1.2
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol110+h3_nonpositive",
+      "train": {
+        "n": 48,
+        "wr": 72.917,
+        "pf": 1.562,
+        "mean30": 0.31483,
+        "wins": 35,
+        "wilsonLo90": 61.355,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 9,
+        "wr": 66.667,
+        "pf": 1.0435,
+        "mean30": 0.03333,
+        "wins": 6,
+        "wilsonLo90": 39.824,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 68.1062,
+      "test2025H2": {
+        "n": 6,
+        "wr": 50.0,
+        "pf": 0.5217,
+        "mean30": -0.55,
+        "wins": 3,
+        "wilsonLo90": 22.124,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 19,
+        "wr": 57.895,
+        "pf": 0.9693,
+        "mean30": -0.01983,
+        "wins": 11,
+        "wilsonLo90": 39.45,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 2.0916,
+        "mean30": 0.41751,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -1.1475
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "vol110+vol140",
+      "train": {
+        "n": 34,
+        "wr": 73.529,
+        "pf": 2.4797,
+        "mean30": 0.92973,
+        "wins": 25,
+        "wilsonLo90": 59.691,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.1786,
+        "mean30": 0.2,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 67.8228,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.3571,
+        "mean30": 0.95,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 53.846,
+        "pf": 1.257,
+        "mean30": 0.2422,
+        "wins": 7,
+        "wilsonLo90": 32.48,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.17883,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 0.1577
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "vol140",
+      "train": {
+        "n": 34,
+        "wr": 73.529,
+        "pf": 2.4797,
+        "mean30": 0.92973,
+        "wins": 25,
+        "wilsonLo90": 59.691,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.1786,
+        "mean30": 0.2,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 67.8228,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.3571,
+        "mean30": 0.95,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 53.846,
+        "pf": 1.257,
+        "mean30": 0.2422,
+        "wins": 7,
+        "wilsonLo90": 32.48,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.17883,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 0.1577
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol110+h1SharpDown",
+      "train": {
+        "n": 30,
+        "wr": 73.333,
+        "pf": 1.6362,
+        "mean30": 0.34217,
+        "wins": 22,
+        "wilsonLo90": 58.537,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 7,
+        "wr": 71.429,
+        "pf": 1.3043,
+        "mean30": 0.2,
+        "wins": 5,
+        "wilsonLo90": 40.864,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 67.71664,
+      "test2025H2": {
+        "n": 4,
+        "wr": 50.0,
+        "pf": 0.5217,
+        "mean30": -0.55,
+        "wins": 2,
+        "wilsonLo90": 18.238,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 61.538,
+        "pf": 1.1874,
+        "mean30": 0.10982,
+        "wins": 8,
+        "wilsonLo90": 39.259,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.2,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 1.2
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "sell56+last15NotFast",
+      "train": {
+        "n": 24,
+        "wr": 75.0,
+        "pf": 1.8061,
+        "mean30": 0.38741,
+        "wins": 18,
+        "wilsonLo90": 58.452,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 7,
+        "wr": 71.429,
+        "pf": 1.3043,
+        "mean30": 0.2,
+        "wins": 5,
+        "wilsonLo90": 40.864,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 67.61325,
+      "test2025H2": {
+        "n": 4,
+        "wr": 25.0,
+        "pf": 0.1739,
+        "mean30": -1.425,
+        "wins": 1,
+        "wilsonLo90": 5.79,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 14,
+        "wr": 78.571,
+        "pf": 3.0375,
+        "mean30": 0.60585,
+        "wins": 11,
+        "wilsonLo90": 56.793,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 1.7333,
+        "mean30": 0.16995,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -0.6953
+      }
+    },
+    {
+      "family": "TREND_BREAK",
+      "exit": "T24",
+      "gate": "h1NotLate+smallUpperWick",
+      "train": {
+        "n": 32,
+        "wr": 71.875,
+        "pf": 1.9474,
+        "mean30": 0.80543,
+        "wins": 23,
+        "wilsonLo90": 57.5,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 12,
+        "wr": 66.667,
+        "pf": 1.1579,
+        "mean30": 0.2,
+        "wins": 8,
+        "wilsonLo90": 43.147,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 67.55422,
+      "test2025H2": {
+        "n": 9,
+        "wr": 77.778,
+        "pf": 1.723,
+        "mean30": 0.61055,
+        "wins": 7,
+        "wilsonLo90": 50.362,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 35,
+        "wr": 37.143,
+        "pf": 0.306,
+        "mean30": -1.07519,
+        "wins": 13,
+        "wilsonLo90": 25.089,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 8,
+        "wr": 12.5,
+        "pf": 0.3048,
+        "mean30": -1.3403,
+        "wins": 1,
+        "wilsonLo90": 2.84,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "last15NotFast+btcUp",
+      "train": {
+        "n": 20,
+        "wr": 75.0,
+        "pf": 1.5257,
+        "mean30": 0.26957,
+        "wins": 15,
+        "wilsonLo90": 56.778,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.5652,
+        "mean30": 0.325,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 67.25417,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 1.0435,
+        "mean30": 0.03333,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 7,
+        "wr": 57.143,
+        "pf": 1.3434,
+        "mean30": 0.17526,
+        "wins": 4,
+        "wilsonLo90": 28.946,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 1.726,
+        "mean30": 0.25237,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -0.6953
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol110+h1NotLate",
+      "train": {
+        "n": 31,
+        "wr": 74.194,
+        "pf": 1.7936,
+        "mean30": 0.39393,
+        "wins": 23,
+        "wilsonLo90": 59.702,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 1.0435,
+        "mean30": 0.03333,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 66.79523,
+      "test2025H2": {
+        "n": 5,
+        "wr": 40.0,
+        "pf": 0.3478,
+        "mean30": -0.9,
+        "wins": 2,
+        "wilsonLo90": 14.269,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 15,
+        "wr": 46.667,
+        "pf": 0.8543,
+        "mean30": -0.08058,
+        "wins": 7,
+        "wilsonLo90": 27.666,
+        "maxLoss": -2.3
+      },
+      "test2026AugOct": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.096,
+        "mean30": 0.31441,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -1.1475
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "strongDownH4+h1SharpDown",
+      "train": {
+        "n": 14,
+        "wr": 78.571,
+        "pf": 1.7281,
+        "mean30": 0.59286,
+        "wins": 11,
+        "wilsonLo90": 56.793,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 1.4211,
+        "mean30": 0.53333,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 66.70154,
+      "test2025H2": {
+        "n": 0,
+        "wr": null,
+        "pf": null,
+        "mean30": null,
+        "wins": 0,
+        "wilsonLo90": null,
+        "maxLoss": null
+      },
+      "test2026JanAug": {
+        "n": 3,
+        "wr": 33.333,
+        "pf": 0.6184,
+        "mean30": -0.96667,
+        "wins": 1,
+        "wilsonLo90": 7.826,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.56113,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 2.5611
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "sell58+last15NotFast",
+      "train": {
+        "n": 14,
+        "wr": 71.429,
+        "pf": 1.6811,
+        "mean30": 0.60312,
+        "wins": 10,
+        "wilsonLo90": 49.448,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 15,
+        "wr": 73.333,
+        "pf": 2.4553,
+        "mean30": 1.2526,
+        "wins": 11,
+        "wilsonLo90": 52.115,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 66.19774,
+      "test2025H2": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 1.3728,
+        "mean30": 0.38102,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 15,
+        "wr": 33.333,
+        "pf": 0.1122,
+        "mean30": -1.84537,
+        "wins": 5,
+        "wilsonLo90": 17.276,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 6,
+        "wr": 16.667,
+        "pf": 0.054,
+        "mean30": -2.04249,
+        "wins": 1,
+        "wilsonLo90": 3.81,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "downH4+vol140",
+      "train": {
+        "n": 26,
+        "wr": 73.077,
+        "pf": 2.149,
+        "mean30": 0.81789,
+        "wins": 19,
+        "wilsonLo90": 57.11,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.1786,
+        "mean30": 0.2,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 65.24886,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 1.5714,
+        "mean30": 0.53333,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 6,
+        "wr": 50.0,
+        "pf": 0.9773,
+        "mean30": -0.02556,
+        "wins": 3,
+        "wilsonLo90": 22.124,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 0,
+        "wr": null,
+        "pf": null,
+        "mean30": null,
+        "wins": 0,
+        "wilsonLo90": null,
+        "maxLoss": null
+      }
+    },
+    {
+      "family": "SELL_IMBALANCE",
+      "exit": "T24",
+      "gate": "downD1+btcDown",
+      "train": {
+        "n": 17,
+        "wr": 70.588,
+        "pf": 1.4947,
+        "mean30": 0.55294,
+        "wins": 12,
+        "wilsonLo90": 50.641,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 8,
+        "wr": 62.5,
+        "pf": 1.7105,
+        "mean30": 1.0125,
+        "wins": 5,
+        "wilsonLo90": 34.797,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 63.05649,
+      "test2025H2": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 0.01447,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 0.0145
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 30.769,
+        "pf": 0.2878,
+        "mean30": -1.4448,
+        "wins": 4,
+        "wilsonLo90": 14.641,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 5,
+        "wr": 40.0,
+        "pf": 0.1228,
+        "mean30": -2.0,
+        "wins": 2,
+        "wilsonLo90": 14.269,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "SELL_IMBALANCE",
+      "exit": "T24",
+      "gate": "strongDownH4+vol140",
+      "train": {
+        "n": 15,
+        "wr": 73.333,
+        "pf": 1.5924,
+        "mean30": 0.4733,
+        "wins": 11,
+        "wilsonLo90": 52.115,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.5165,
+        "mean30": 0.51751,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 60.99409,
+      "test2025H2": {
+        "n": 4,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.50585,
+        "wins": 4,
+        "wilsonLo90": 59.648,
+        "maxLoss": 0.7
+      },
+      "test2026JanAug": {
+        "n": 12,
+        "wr": 66.667,
+        "pf": 1.5757,
+        "mean30": 0.41863,
+        "wins": 8,
+        "wilsonLo90": 43.147,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 9,
+        "wr": 55.556,
+        "pf": 0.8389,
+        "mean30": -0.27214,
+        "wins": 5,
+        "wilsonLo90": 30.346,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "FALSE_BREAKOUT",
+      "exit": "S12",
+      "gate": "sell58+h3_nonpositive",
+      "train": {
+        "n": 17,
+        "wr": 70.588,
+        "pf": 1.7717,
+        "mean30": 0.52422,
+        "wins": 12,
+        "wilsonLo90": 50.641,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.1786,
+        "mean30": 0.2,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 58.99161,
+      "test2025H2": {
+        "n": 8,
+        "wr": 50.0,
+        "pf": 1.1905,
+        "mean30": 0.17599,
+        "wins": 4,
+        "wilsonLo90": 24.863,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 4,
+        "wr": 25.0,
+        "pf": 0.0171,
+        "mean30": -1.19314,
+        "wins": 1,
+        "wilsonLo90": 5.79,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 0.0,
+        "pf": 0.0,
+        "mean30": -2.15628,
+        "wins": 0,
+        "wilsonLo90": 0.0,
+        "maxLoss": -2.8
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "strongDownH4+strongDownD1",
+      "train": {
+        "n": 14,
+        "wr": 71.429,
+        "pf": 1.4954,
+        "mean30": 0.4496,
+        "wins": 10,
+        "wilsonLo90": 49.448,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 8,
+        "wr": 62.5,
+        "pf": 1.0088,
+        "mean30": 0.0125,
+        "wins": 5,
+        "wilsonLo90": 34.797,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 57.59002,
+      "test2025H2": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 0.1842,
+        "mean30": -1.55,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 3,
+        "wr": 33.333,
+        "pf": 0.6184,
+        "mean30": -0.96667,
+        "wins": 1,
+        "wilsonLo90": 7.826,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.56113,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 2.5611
+      }
+    }
+  ],
+  "oneBestPerFamilyExit": [
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "T24",
+      "gate": "vol110+prevH1Negative",
+      "train": {
+        "n": 34,
+        "wr": 82.353,
+        "pf": 2.7995,
+        "mean30": 1.16401,
+        "wins": 28,
+        "wilsonLo90": 69.346,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 6,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.36667,
+        "wins": 6,
+        "wilsonLo90": 68.918,
+        "maxLoss": 0.7
+      },
+      "trainValRank": 89.45548,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 3.7841,
+        "mean30": 1.85773,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.6691
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 69.231,
+        "pf": 1.7233,
+        "mean30": 0.57304,
+        "wins": 9,
+        "wilsonLo90": 46.475,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 50.0,
+        "pf": 1.2368,
+        "mean30": 0.45,
+        "wins": 1,
+        "wilsonLo90": 12.085,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S6",
+      "gate": "vol140+h1NotLate",
+      "train": {
+        "n": 23,
+        "wr": 82.609,
+        "pf": 3.2877,
+        "mean30": 0.68979,
+        "wins": 19,
+        "wilsonLo90": 66.408,
+        "maxLoss": -2.3
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 1.5652,
+        "mean30": 0.325,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.3
+      },
+      "trainValRank": 76.00841,
+      "test2025H2": {
+        "n": 3,
+        "wr": 66.667,
+        "pf": 1.0435,
+        "mean30": 0.03333,
+        "wins": 2,
+        "wilsonLo90": 25.351,
+        "maxLoss": -2.3
+      },
+      "test2026JanAug": {
+        "n": 9,
+        "wr": 55.556,
+        "pf": 1.0197,
+        "mean30": 0.01007,
+        "wins": 5,
+        "wilsonLo90": 30.346,
+        "maxLoss": -1.58
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 0.60256,
+        "wins": 2,
+        "wilsonLo90": 42.499,
+        "maxLoss": 0.0051
+      }
+    },
+    {
+      "family": "REBOUND_FAIL",
+      "exit": "T24",
+      "gate": "sell56+h1NotLate",
+      "train": {
+        "n": 31,
+        "wr": 74.194,
+        "pf": 3.1597,
+        "mean30": 1.25125,
+        "wins": 23,
+        "wilsonLo90": 59.702,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 28,
+        "wr": 71.429,
+        "pf": 1.8963,
+        "mean30": 0.89983,
+        "wins": 20,
+        "wilsonLo90": 55.997,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 74.41955,
+      "test2025H2": {
+        "n": 7,
+        "wr": 57.143,
+        "pf": 0.4885,
+        "mean30": -0.72585,
+        "wins": 4,
+        "wilsonLo90": 28.946,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 16,
+        "wr": 43.75,
+        "pf": 0.4711,
+        "mean30": -0.90504,
+        "wins": 7,
+        "wilsonLo90": 25.764,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 8,
+        "wr": 37.5,
+        "pf": 0.1373,
+        "mean30": -1.64923,
+        "wins": 3,
+        "wilsonLo90": 16.116,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "TREND_BREAK",
+      "exit": "T24",
+      "gate": "vol140+prevH1Positive",
+      "train": {
+        "n": 31,
+        "wr": 74.194,
+        "pf": 2.0255,
+        "mean30": 0.84556,
+        "wins": 23,
+        "wilsonLo90": 59.702,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 11,
+        "wr": 72.727,
+        "pf": 1.9084,
+        "mean30": 0.94148,
+        "wins": 8,
+        "wilsonLo90": 47.949,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 73.93115,
+      "test2025H2": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 0.5526,
+        "mean30": -0.425,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 30.769,
+        "pf": 0.3887,
+        "mean30": -1.30675,
+        "wins": 4,
+        "wilsonLo90": 14.641,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 5.2777,
+        "mean30": 1.51481,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -1.7706
+      }
+    },
+    {
+      "family": "BTC_RENDER_DIVERGE",
+      "exit": "S12",
+      "gate": "strongDownH4+vol110",
+      "train": {
+        "n": 21,
+        "wr": 76.19,
+        "pf": 2.3695,
+        "mean30": 0.91302,
+        "wins": 16,
+        "wilsonLo90": 58.504,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 4,
+        "wr": 75.0,
+        "pf": 2.3571,
+        "mean30": 0.95,
+        "wins": 3,
+        "wilsonLo90": 35.614,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 73.61948,
+      "test2025H2": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 2.2
+      },
+      "test2026JanAug": {
+        "n": 6,
+        "wr": 66.667,
+        "pf": 1.5714,
+        "mean30": 0.53333,
+        "wins": 4,
+        "wilsonLo90": 34.699,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 2.2,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 2.2
+      }
+    },
+    {
+      "family": "TREND_PRESSURE",
+      "exit": "T24",
+      "gate": "downD1+prevH1Positive",
+      "train": {
+        "n": 35,
+        "wr": 71.429,
+        "pf": 1.6441,
+        "mean30": 0.59517,
+        "wins": 25,
+        "wilsonLo90": 57.691,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 13,
+        "wr": 69.231,
+        "pf": 2.894,
+        "mean30": 1.72677,
+        "wins": 9,
+        "wilsonLo90": 46.475,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 72.47755,
+      "test2025H2": {
+        "n": 5,
+        "wr": 80.0,
+        "pf": 1.7895,
+        "mean30": 0.6,
+        "wins": 4,
+        "wilsonLo90": 43.526,
+        "maxLoss": -3.8
+      },
+      "test2026JanAug": {
+        "n": 16,
+        "wr": 37.5,
+        "pf": 0.5146,
+        "mean30": -0.95505,
+        "wins": 6,
+        "wilsonLo90": 20.806,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 6,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 1.67686,
+        "wins": 6,
+        "wilsonLo90": 68.918,
+        "maxLoss": 0.7
+      }
+    },
+    {
+      "family": "SELL_IMBALANCE",
+      "exit": "T24",
+      "gate": "downD1+btcDown",
+      "train": {
+        "n": 17,
+        "wr": 70.588,
+        "pf": 1.4947,
+        "mean30": 0.55294,
+        "wins": 12,
+        "wilsonLo90": 50.641,
+        "maxLoss": -3.8
+      },
+      "validation": {
+        "n": 8,
+        "wr": 62.5,
+        "pf": 1.7105,
+        "mean30": 1.0125,
+        "wins": 5,
+        "wilsonLo90": 34.797,
+        "maxLoss": -3.8
+      },
+      "trainValRank": 63.05649,
+      "test2025H2": {
+        "n": 1,
+        "wr": 100.0,
+        "pf": null,
+        "mean30": 0.01447,
+        "wins": 1,
+        "wilsonLo90": 26.983,
+        "maxLoss": 0.0145
+      },
+      "test2026JanAug": {
+        "n": 13,
+        "wr": 30.769,
+        "pf": 0.2878,
+        "mean30": -1.4448,
+        "wins": 4,
+        "wilsonLo90": 14.641,
+        "maxLoss": -3.8
+      },
+      "test2026AugOct": {
+        "n": 5,
+        "wr": 40.0,
+        "pf": 0.1228,
+        "mean30": -2.0,
+        "wins": 2,
+        "wilsonLo90": 14.269,
+        "maxLoss": -3.8
+      }
+    },
+    {
+      "family": "FALSE_BREAKOUT",
+      "exit": "S12",
+      "gate": "sell58+h3_nonpositive",
+      "train": {
+        "n": 17,
+        "wr": 70.588,
+        "pf": 1.7717,
+        "mean30": 0.52422,
+        "wins": 12,
+        "wilsonLo90": 50.641,
+        "maxLoss": -2.8
+      },
+      "validation": {
+        "n": 5,
+        "wr": 60.0,
+        "pf": 1.1786,
+        "mean30": 0.2,
+        "wins": 3,
+        "wilsonLo90": 27.246,
+        "maxLoss": -2.8
+      },
+      "trainValRank": 58.99161,
+      "test2025H2": {
+        "n": 8,
+        "wr": 50.0,
+        "pf": 1.1905,
+        "mean30": 0.17599,
+        "wins": 4,
+        "wilsonLo90": 24.863,
+        "maxLoss": -2.8
+      },
+      "test2026JanAug": {
+        "n": 4,
+        "wr": 25.0,
+        "pf": 0.0171,
+        "mean30": -1.19314,
+        "wins": 1,
+        "wilsonLo90": 5.79,
+        "maxLoss": -2.8
+      },
+      "test2026AugOct": {
+        "n": 2,
+        "wr": 0.0,
+        "pf": 0.0,
+        "mean30": -2.15628,
+        "wins": 0,
+        "wilsonLo90": 0.0,
+        "maxLoss": -2.8
+      }
+    }
+  ],
+  "warnings": [
+    "Results are on shadow signal bank, not de-overlapped portfolio fills",
+    "All dates previously inspected during prior research: chronological test is NOT pristine OOS",
+    "Some local train+val combinations are tiny and selection-biased (multiple comparisons)",
+    "No safety controls relaxed, no LIVE/VPS/HP order execution"
+  ]
+}

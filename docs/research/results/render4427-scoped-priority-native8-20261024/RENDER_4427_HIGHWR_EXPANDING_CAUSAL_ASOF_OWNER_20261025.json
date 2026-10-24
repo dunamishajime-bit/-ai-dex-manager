@@ -1,0 +1,3176 @@
+{
+  "status": "RESEARCH_ONLY_HIGHWR_EXPANDING_CAUSAL_PRIORITY",
+  "dateJST": "2026-10-25",
+  "moduleSourceSha256": "2ffb72b8707a3f32e68270b7e89c2ee01d2c2484922057f0037cefdc17c2d230",
+  "policies": [
+    "expanding_balanced",
+    "expanding_conservative",
+    "expanding_highwr",
+    "ninety_loose"
+  ],
+  "cases": [
+    {
+      "gate": "WICK_SHARP_S6",
+      "exit": "S6",
+      "policy": "expanding_balanced",
+      "selectedIndependent": 21,
+      "independentPerf": {
+        "10": {
+          "n": 21,
+          "wins": 19,
+          "wrPct": 90.476,
+          "pf": 6.33333,
+          "meanNetPct": 1.06667
+        },
+        "30": {
+          "n": 21,
+          "wins": 19,
+          "wrPct": 90.476,
+          "pf": 4.95652,
+          "meanNetPct": 0.86667
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 7,
+            "wins": 6,
+            "wrPct": 85.714,
+            "pf": 4.0,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 7,
+            "wins": 6,
+            "wrPct": 85.714,
+            "pf": 3.13043,
+            "meanNetPct": 0.7
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 4,
+            "wins": 4,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 4,
+            "wins": 4,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 3.33333,
+            "meanNetPct": 0.81667
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 2.6087,
+            "meanNetPct": 0.61667
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        }
+      },
+      "incumbentDisplaced": 3,
+      "accepted2026": [
+        {
+          "t": 1768640400000,
+          "utc": "2026-01-17T09:00:00+00:00",
+          "net30": 1.1999999999999902,
+          "score": 58.4227,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1768896000000,
+          "utc": "2026-01-20T08:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 61.0499,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770210000000,
+          "utc": "2026-02-04T13:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 69.9495,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770300000000,
+          "utc": "2026-02-05T14:00:00+00:00",
+          "net30": -2.3000000000000016,
+          "score": 64.2072,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779469200000,
+          "utc": "2026-05-22T17:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 54.6795,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779930000000,
+          "utc": "2026-05-28T01:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 65.0052,
+          "overlapCandidates": 0
+        }
+      ],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 15,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 61,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 21
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 77,
+            "wins": 52,
+            "wrPct": 67.53,
+            "pf": 1.4003,
+            "compoundPct": 35.695,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 77,
+            "wins": 52,
+            "wrPct": 67.53,
+            "pf": 1.208,
+            "compoundPct": 16.372,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 48,
+            "wins": 33,
+            "wrPct": 68.75,
+            "pf": 1.9201,
+            "compoundPct": 54.106,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 48,
+            "wins": 32,
+            "wrPct": 66.67,
+            "pf": 1.6872,
+            "compoundPct": 40.1,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 20,
+            "wins": 13,
+            "wrPct": 65.0,
+            "pf": 1.5807,
+            "compoundPct": 13.73,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.3901,
+            "compoundPct": 9.292,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 47,
+            "wins": 38,
+            "wrPct": 80.85,
+            "pf": 2.9326,
+            "compoundPct": 55.401,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 47,
+            "wins": 37,
+            "wrPct": 78.72,
+            "pf": 2.42,
+            "compoundPct": 41.567,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 15,
+            "wins": 11,
+            "wrPct": 73.33,
+            "pf": 1.5859,
+            "compoundPct": 8.09,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 15,
+            "wins": 11,
+            "wrPct": 73.33,
+            "pf": 1.3577,
+            "compoundPct": 4.908,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1718258400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1718258400000,
+          "exitTs": 1718273700000,
+          "score": 55.5308,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1718600400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1718600400000,
+          "exitTs": 1718604000000,
+          "score": 50.7864,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720141200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1720141200000,
+          "exitTs": 1720141800000,
+          "score": 59.4191,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1721048400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1721048400000,
+          "exitTs": 1721051100000,
+          "score": 52.8165,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1732147200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1732147200000,
+          "exitTs": 1732148400000,
+          "score": 61.8421,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1733781600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1733781600000,
+          "exitTs": 1733781900000,
+          "score": 47.5895,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1735113600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1735113600000,
+          "exitTs": 1735127700000,
+          "score": 45.38,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1736870400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1736870400000,
+          "exitTs": 1736872200000,
+          "score": 48.4484,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1737432000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1737432000000,
+          "exitTs": 1737433800000,
+          "score": 56.214,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1741640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1741640400000,
+          "exitTs": 1741652100000,
+          "score": 55.7303,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1753718400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1753718400000,
+          "exitTs": 1753725600000,
+          "score": 43.721,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1762290000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1762290000000,
+          "exitTs": 1762290600000,
+          "score": 50.8962,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1764903600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1764903600000,
+          "exitTs": 1764909000000,
+          "score": 52.3544,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1768640400000,
+          "exitTs": 1768642200000,
+          "score": 58.4227,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768896000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1768896000000,
+          "exitTs": 1768909200000,
+          "score": 61.0499,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770210000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1770210000000,
+          "exitTs": 1770213300000,
+          "score": 69.9495,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770300000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1770300000000,
+          "exitTs": 1770302100000,
+          "score": 64.2072,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779469200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1779469200000,
+          "exitTs": 1779474900000,
+          "score": 54.6795,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779930000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1779930000000,
+          "exitTs": 1779935100000,
+          "score": 65.0052,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1787752800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1787752800000,
+          "exitTs": 1787755200000,
+          "score": 49.5669,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1791820800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1791820800000,
+          "exitTs": 1791824100000,
+          "score": 50.9876,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_SHARP_S6",
+      "exit": "S6",
+      "policy": "expanding_conservative",
+      "selectedIndependent": 16,
+      "independentPerf": {
+        "10": {
+          "n": 16,
+          "wins": 14,
+          "wrPct": 87.5,
+          "pf": 4.66667,
+          "meanNetPct": 0.9625
+        },
+        "30": {
+          "n": 16,
+          "wins": 14,
+          "wrPct": 87.5,
+          "pf": 3.65217,
+          "meanNetPct": 0.7625
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 0.66667,
+            "meanNetPct": -0.35
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 0.52174,
+            "meanNetPct": -0.55
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 4,
+            "wins": 4,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 4,
+            "wins": 4,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 3.33333,
+            "meanNetPct": 0.81667
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 2.6087,
+            "meanNetPct": 0.61667
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        }
+      },
+      "incumbentDisplaced": 2,
+      "accepted2026": [
+        {
+          "t": 1768640400000,
+          "utc": "2026-01-17T09:00:00+00:00",
+          "net30": 1.1999999999999902,
+          "score": 58.4227,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1768896000000,
+          "utc": "2026-01-20T08:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 61.0499,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770210000000,
+          "utc": "2026-02-04T13:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 69.9495,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770300000000,
+          "utc": "2026-02-05T14:00:00+00:00",
+          "net30": -2.3000000000000016,
+          "score": 64.2072,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779469200000,
+          "utc": "2026-05-22T17:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 54.6795,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779930000000,
+          "utc": "2026-05-28T01:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 65.0052,
+          "overlapCandidates": 0
+        }
+      ],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 21,
+        "selected_ORIGINAL_A": 112,
+        "selected_ORIGINAL_B": 62,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 16
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 72,
+            "wins": 47,
+            "wrPct": 65.28,
+            "pf": 1.3184,
+            "compoundPct": 26.583,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 72,
+            "wins": 47,
+            "wrPct": 65.28,
+            "pf": 1.1417,
+            "compoundPct": 9.634,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 48,
+            "wins": 33,
+            "wrPct": 68.75,
+            "pf": 1.9201,
+            "compoundPct": 54.106,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 48,
+            "wins": 32,
+            "wrPct": 66.67,
+            "pf": 1.6872,
+            "compoundPct": 40.1,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 20,
+            "wins": 13,
+            "wrPct": 65.0,
+            "pf": 1.5807,
+            "compoundPct": 13.73,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.3901,
+            "compoundPct": 9.292,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 47,
+            "wins": 38,
+            "wrPct": 80.85,
+            "pf": 2.9326,
+            "compoundPct": 55.401,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 47,
+            "wins": 37,
+            "wrPct": 78.72,
+            "pf": 2.42,
+            "compoundPct": 41.567,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 15,
+            "wins": 11,
+            "wrPct": 73.33,
+            "pf": 1.5859,
+            "compoundPct": 8.09,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 15,
+            "wins": 11,
+            "wrPct": 73.33,
+            "pf": 1.3577,
+            "compoundPct": 4.908,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1732147200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1732147200000,
+          "exitTs": 1732148400000,
+          "score": 61.8421,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1735113600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1735113600000,
+          "exitTs": 1735127700000,
+          "score": 45.38,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1736870400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1736870400000,
+          "exitTs": 1736872200000,
+          "score": 48.4484,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1737432000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1737432000000,
+          "exitTs": 1737433800000,
+          "score": 56.214,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1741640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1741640400000,
+          "exitTs": 1741652100000,
+          "score": 55.7303,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1753718400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1753718400000,
+          "exitTs": 1753725600000,
+          "score": 43.721,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1762290000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1762290000000,
+          "exitTs": 1762290600000,
+          "score": 50.8962,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1764903600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1764903600000,
+          "exitTs": 1764909000000,
+          "score": 52.3544,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1768640400000,
+          "exitTs": 1768642200000,
+          "score": 58.4227,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768896000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1768896000000,
+          "exitTs": 1768909200000,
+          "score": 61.0499,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770210000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1770210000000,
+          "exitTs": 1770213300000,
+          "score": 69.9495,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770300000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1770300000000,
+          "exitTs": 1770302100000,
+          "score": 64.2072,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779469200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1779469200000,
+          "exitTs": 1779474900000,
+          "score": 54.6795,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779930000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1779930000000,
+          "exitTs": 1779935100000,
+          "score": 65.0052,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1787752800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1787752800000,
+          "exitTs": 1787755200000,
+          "score": 49.5669,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1791820800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1791820800000,
+          "exitTs": 1791824100000,
+          "score": 50.9876,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_SHARP_S6",
+      "exit": "S6",
+      "policy": "expanding_highwr",
+      "selectedIndependent": 12,
+      "independentPerf": {
+        "10": {
+          "n": 12,
+          "wins": 11,
+          "wrPct": 91.667,
+          "pf": 7.33333,
+          "meanNetPct": 1.10833
+        },
+        "30": {
+          "n": 12,
+          "wins": 11,
+          "wrPct": 91.667,
+          "pf": 5.73913,
+          "meanNetPct": 0.90833
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 3.33333,
+            "meanNetPct": 0.81667
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 2.6087,
+            "meanNetPct": 0.61667
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        }
+      },
+      "incumbentDisplaced": 1,
+      "accepted2026": [
+        {
+          "t": 1768640400000,
+          "utc": "2026-01-17T09:00:00+00:00",
+          "net30": 1.1999999999999902,
+          "score": 58.4227,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1768896000000,
+          "utc": "2026-01-20T08:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 61.0499,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770210000000,
+          "utc": "2026-02-04T13:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 69.9495,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770300000000,
+          "utc": "2026-02-05T14:00:00+00:00",
+          "net30": -2.3000000000000016,
+          "score": 64.2072,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779469200000,
+          "utc": "2026-05-22T17:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 54.6795,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779930000000,
+          "utc": "2026-05-28T01:00:00+00:00",
+          "net30": 1.2000000000000013,
+          "score": 65.0052,
+          "overlapCandidates": 0
+        }
+      ],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 25,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 62,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 12
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 47,
+            "wins": 32,
+            "wrPct": 68.09,
+            "pf": 1.962,
+            "compoundPct": 57.225,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 47,
+            "wins": 31,
+            "wrPct": 65.96,
+            "pf": 1.7305,
+            "compoundPct": 43.227,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 20,
+            "wins": 13,
+            "wrPct": 65.0,
+            "pf": 1.5807,
+            "compoundPct": 13.73,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.3901,
+            "compoundPct": 9.292,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 47,
+            "wins": 38,
+            "wrPct": 80.85,
+            "pf": 2.9326,
+            "compoundPct": 55.401,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 47,
+            "wins": 37,
+            "wrPct": 78.72,
+            "pf": 2.42,
+            "compoundPct": 41.567,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 15,
+            "wins": 11,
+            "wrPct": 73.33,
+            "pf": 1.5859,
+            "compoundPct": 8.09,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 15,
+            "wins": 11,
+            "wrPct": 73.33,
+            "pf": 1.3577,
+            "compoundPct": 4.908,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1737432000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1737432000000,
+          "exitTs": 1737433800000,
+          "score": 56.214,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1753718400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1753718400000,
+          "exitTs": 1753725600000,
+          "score": 43.721,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1762290000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1762290000000,
+          "exitTs": 1762290600000,
+          "score": 50.8962,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1764903600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1764903600000,
+          "exitTs": 1764909000000,
+          "score": 52.3544,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.1999999999999902,
+          "entry": 1768640400000,
+          "exitTs": 1768642200000,
+          "score": 58.4227,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768896000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1768896000000,
+          "exitTs": 1768909200000,
+          "score": 61.0499,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770210000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1770210000000,
+          "exitTs": 1770213300000,
+          "score": 69.9495,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770300000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1770300000000,
+          "exitTs": 1770302100000,
+          "score": 64.2072,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779469200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1779469200000,
+          "exitTs": 1779474900000,
+          "score": 54.6795,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779930000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1779930000000,
+          "exitTs": 1779935100000,
+          "score": 65.0052,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1787752800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1787752800000,
+          "exitTs": 1787755200000,
+          "score": 49.5669,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1791820800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1791820800000,
+          "exitTs": 1791824100000,
+          "score": 50.9876,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_SHARP_S6",
+      "exit": "S6",
+      "policy": "ninety_loose",
+      "selectedIndependent": 7,
+      "independentPerf": {
+        "10": {
+          "n": 7,
+          "wins": 5,
+          "wrPct": 71.429,
+          "pf": 1.66667,
+          "meanNetPct": 0.4
+        },
+        "30": {
+          "n": 7,
+          "wins": 5,
+          "wrPct": 71.429,
+          "pf": 1.30435,
+          "meanNetPct": 0.2
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 6,
+            "wins": 4,
+            "wrPct": 66.667,
+            "pf": 1.33333,
+            "meanNetPct": 0.23333
+          },
+          "30": {
+            "n": 6,
+            "wins": 4,
+            "wrPct": 66.667,
+            "pf": 1.04348,
+            "meanNetPct": 0.03333
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incumbentDisplaced": 0,
+      "accepted2026": [],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 29,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_BTC_RENDER_DIVERGE": 7,
+        "protect_original_overlap": 1,
+        "live_overlap_h1": 1,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 76,
+            "wins": 50,
+            "wrPct": 65.79,
+            "pf": 1.3348,
+            "compoundPct": 29.202,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 76,
+            "wins": 50,
+            "wrPct": 65.79,
+            "pf": 1.1522,
+            "compoundPct": 11.015,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 46,
+            "wins": 31,
+            "wrPct": 67.39,
+            "pf": 1.934,
+            "compoundPct": 55.054,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 46,
+            "wins": 30,
+            "wrPct": 65.22,
+            "pf": 1.7079,
+            "compoundPct": 41.528,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1709820000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1709820000000,
+          "exitTs": 1709822700000,
+          "score": 48.812,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1709985600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1709985600000,
+          "exitTs": 1709986800000,
+          "score": 41.4901,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1711990800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1711990800000,
+          "exitTs": 1712001300000,
+          "score": 58.2125,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720220400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1720220400000,
+          "exitTs": 1720225200000,
+          "score": 55.3169,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1721048400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1721048400000,
+          "exitTs": 1721051100000,
+          "score": 52.8165,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1724965200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1724965200000,
+          "exitTs": 1724968800000,
+          "score": 56.1846,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1737432000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1737432000000,
+          "exitTs": 1737433800000,
+          "score": 56.214,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "exit": "T24",
+      "policy": "expanding_balanced",
+      "selectedIndependent": 16,
+      "independentPerf": {
+        "10": {
+          "n": 16,
+          "wins": 14,
+          "wrPct": 87.5,
+          "pf": 5.3606,
+          "meanNetPct": 1.96227
+        },
+        "30": {
+          "n": 16,
+          "wins": 14,
+          "wrPct": 87.5,
+          "pf": 4.71004,
+          "meanNetPct": 1.76227
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "wrPct": 66.667,
+            "pf": 0.96185,
+            "meanNetPct": -0.04578
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "wrPct": 66.667,
+            "pf": 0.80596,
+            "meanNetPct": -0.24578
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 4.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 4.7
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 9,
+            "wins": 8,
+            "wrPct": 88.889,
+            "pf": 6.53712,
+            "meanNetPct": 2.21485
+          },
+          "30": {
+            "n": 9,
+            "wins": 8,
+            "wrPct": 88.889,
+            "pf": 5.77201,
+            "meanNetPct": 2.01485
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        }
+      },
+      "incumbentDisplaced": 3,
+      "accepted2026": [
+        {
+          "t": 1768640400000,
+          "utc": "2026-01-17T09:00:00+00:00",
+          "net30": 1.5842530282638048,
+          "score": 66.1712,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1769936400000,
+          "utc": "2026-02-01T09:00:00+00:00",
+          "net30": 4.699999999999993,
+          "score": 67.1882,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770210000000,
+          "utc": "2026-02-04T13:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 78.6504,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770300000000,
+          "utc": "2026-02-05T14:00:00+00:00",
+          "net30": 4.700000000000005,
+          "score": 72.1613,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1772845200000,
+          "utc": "2026-03-07T01:00:00+00:00",
+          "net30": -3.799999999999992,
+          "score": 77.73,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1773759600000,
+          "utc": "2026-03-17T15:00:00+00:00",
+          "net30": 4.149388209121253,
+          "score": 61.1224,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1776276000000,
+          "utc": "2026-04-15T18:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 70.0299,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779930000000,
+          "utc": "2026-05-28T01:00:00+00:00",
+          "net30": 4.700000000000005,
+          "score": 76.1462,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1780671600000,
+          "utc": "2026-06-05T15:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 74.8234,
+          "overlapCandidates": 0
+        }
+      ],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 21,
+        "selected_ORIGINAL_A": 112,
+        "selected_ORIGINAL_B": 61,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 16,
+        "live_overlap_h1": 1
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.3456,
+            "compoundPct": 28.66,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.1658,
+            "compoundPct": 11.661,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 47,
+            "wins": 32,
+            "wrPct": 68.09,
+            "pf": 1.9752,
+            "compoundPct": 58.243,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 47,
+            "wins": 31,
+            "wrPct": 65.96,
+            "pf": 1.7429,
+            "compoundPct": 44.156,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 20,
+            "wins": 13,
+            "wrPct": 65.0,
+            "pf": 1.8694,
+            "compoundPct": 21.717,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.661,
+            "compoundPct": 16.983,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 49,
+            "wins": 40,
+            "wrPct": 81.63,
+            "pf": 3.2214,
+            "compoundPct": 71.378,
+            "closedDdPct": -10.149
+          },
+          "30": {
+            "n": 49,
+            "wins": 39,
+            "wrPct": 79.59,
+            "pf": 2.7023,
+            "compoundPct": 55.526,
+            "closedDdPct": -12.03
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.454,
+            "compoundPct": 6.072,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2459,
+            "compoundPct": 3.151,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1735113600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1735113600000,
+          "exitTs": 1735156800000,
+          "score": 53.0325,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1739610000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.3626583637534786,
+          "entry": 1739610000000,
+          "exitTs": 1739696400000,
+          "score": 73.9009,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1746183600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1746183600000,
+          "exitTs": 1746192600000,
+          "score": 69.9103,
+          "gateCompetitors": 1
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1753718400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1753718400000,
+          "exitTs": 1753770000000,
+          "score": 45.3953,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1762290000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1762290000000,
+          "exitTs": 1762292100000,
+          "score": 49.8962,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1764903600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1764903600000,
+          "exitTs": 1764952200000,
+          "score": 57.7544,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 1.5842530282638048,
+          "entry": 1768640400000,
+          "exitTs": 1768726800000,
+          "score": 66.1712,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1769936400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.699999999999993,
+          "entry": 1769936400000,
+          "exitTs": 1769959500000,
+          "score": 67.1882,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770210000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1770210000000,
+          "exitTs": 1770215700000,
+          "score": 78.6504,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770300000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1770300000000,
+          "exitTs": 1770305400000,
+          "score": 72.1613,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1772845200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1772845200000,
+          "exitTs": 1772892000000,
+          "score": 77.73,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1773759600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.149388209121253,
+          "entry": 1773759600000,
+          "exitTs": 1773846000000,
+          "score": 61.1224,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1776276000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1776276000000,
+          "exitTs": 1776355500000,
+          "score": 70.0299,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779930000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1779930000000,
+          "exitTs": 1779940800000,
+          "score": 76.1462,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1780671600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1780671600000,
+          "exitTs": 1780676100000,
+          "score": 74.8234,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1787752800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.700000000000012,
+          "entry": 1787752800000,
+          "exitTs": 1787765100000,
+          "score": 51.5569,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "exit": "T24",
+      "policy": "expanding_conservative",
+      "selectedIndependent": 12,
+      "independentPerf": {
+        "10": {
+          "n": 12,
+          "wins": 10,
+          "wrPct": 83.333,
+          "pf": 4.07412,
+          "meanNetPct": 1.84447
+        },
+        "30": {
+          "n": 12,
+          "wins": 10,
+          "wrPct": 83.333,
+          "pf": 3.59653,
+          "meanNetPct": 1.64447
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "meanNetPct": -3.6
+          },
+          "30": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "meanNetPct": -3.8
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 4.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 4.7
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 9,
+            "wins": 8,
+            "wrPct": 88.889,
+            "pf": 6.53712,
+            "meanNetPct": 2.21485
+          },
+          "30": {
+            "n": 9,
+            "wins": 8,
+            "wrPct": 88.889,
+            "pf": 5.77201,
+            "meanNetPct": 2.01485
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        }
+      },
+      "incumbentDisplaced": 2,
+      "accepted2026": [
+        {
+          "t": 1768640400000,
+          "utc": "2026-01-17T09:00:00+00:00",
+          "net30": 1.5842530282638048,
+          "score": 66.1712,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1769936400000,
+          "utc": "2026-02-01T09:00:00+00:00",
+          "net30": 4.699999999999993,
+          "score": 67.1882,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770210000000,
+          "utc": "2026-02-04T13:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 78.6504,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770300000000,
+          "utc": "2026-02-05T14:00:00+00:00",
+          "net30": 4.700000000000005,
+          "score": 72.1613,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1772845200000,
+          "utc": "2026-03-07T01:00:00+00:00",
+          "net30": -3.799999999999992,
+          "score": 77.73,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1773759600000,
+          "utc": "2026-03-17T15:00:00+00:00",
+          "net30": 4.149388209121253,
+          "score": 61.1224,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1776276000000,
+          "utc": "2026-04-15T18:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 70.0299,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779930000000,
+          "utc": "2026-05-28T01:00:00+00:00",
+          "net30": 4.700000000000005,
+          "score": 76.1462,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1780671600000,
+          "utc": "2026-06-05T15:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 74.8234,
+          "overlapCandidates": 0
+        }
+      ],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 25,
+        "selected_ORIGINAL_A": 112,
+        "selected_ORIGINAL_B": 62,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 12,
+        "live_overlap_h1": 1
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.4518,
+            "compoundPct": 11.855,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 20,
+            "wins": 11,
+            "wrPct": 55.0,
+            "pf": 1.2895,
+            "compoundPct": 7.486,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 49,
+            "wins": 40,
+            "wrPct": 81.63,
+            "pf": 3.2214,
+            "compoundPct": 71.378,
+            "closedDdPct": -10.149
+          },
+          "30": {
+            "n": 49,
+            "wins": 39,
+            "wrPct": 79.59,
+            "pf": 2.7023,
+            "compoundPct": 55.526,
+            "closedDdPct": -12.03
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.454,
+            "compoundPct": 6.072,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2459,
+            "compoundPct": 3.151,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1746183600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1746183600000,
+          "exitTs": 1746192600000,
+          "score": 69.9103,
+          "gateCompetitors": 1
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1764903600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1764903600000,
+          "exitTs": 1764952200000,
+          "score": 57.7544,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 1.5842530282638048,
+          "entry": 1768640400000,
+          "exitTs": 1768726800000,
+          "score": 66.1712,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1769936400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.699999999999993,
+          "entry": 1769936400000,
+          "exitTs": 1769959500000,
+          "score": 67.1882,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770210000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1770210000000,
+          "exitTs": 1770215700000,
+          "score": 78.6504,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770300000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1770300000000,
+          "exitTs": 1770305400000,
+          "score": 72.1613,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1772845200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1772845200000,
+          "exitTs": 1772892000000,
+          "score": 77.73,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1773759600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.149388209121253,
+          "entry": 1773759600000,
+          "exitTs": 1773846000000,
+          "score": 61.1224,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1776276000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1776276000000,
+          "exitTs": 1776355500000,
+          "score": 70.0299,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779930000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1779930000000,
+          "exitTs": 1779940800000,
+          "score": 76.1462,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1780671600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1780671600000,
+          "exitTs": 1780676100000,
+          "score": 74.8234,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1787752800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.700000000000012,
+          "entry": 1787752800000,
+          "exitTs": 1787765100000,
+          "score": 51.5569,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "exit": "T24",
+      "policy": "expanding_highwr",
+      "selectedIndependent": 10,
+      "independentPerf": {
+        "10": {
+          "n": 10,
+          "wins": 9,
+          "wrPct": 90.0,
+          "pf": 6.78712,
+          "meanNetPct": 2.08336
+        },
+        "30": {
+          "n": 10,
+          "wins": 9,
+          "wrPct": 90.0,
+          "pf": 5.95622,
+          "meanNetPct": 1.88336
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 9,
+            "wins": 8,
+            "wrPct": 88.889,
+            "pf": 6.53712,
+            "meanNetPct": 2.21485
+          },
+          "30": {
+            "n": 9,
+            "wins": 8,
+            "wrPct": 88.889,
+            "pf": 5.77201,
+            "meanNetPct": 2.01485
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        }
+      },
+      "incumbentDisplaced": 1,
+      "accepted2026": [
+        {
+          "t": 1768640400000,
+          "utc": "2026-01-17T09:00:00+00:00",
+          "net30": 1.5842530282638048,
+          "score": 66.1712,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1769936400000,
+          "utc": "2026-02-01T09:00:00+00:00",
+          "net30": 4.699999999999993,
+          "score": 67.1882,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770210000000,
+          "utc": "2026-02-04T13:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 78.6504,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1770300000000,
+          "utc": "2026-02-05T14:00:00+00:00",
+          "net30": 4.700000000000005,
+          "score": 72.1613,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1772845200000,
+          "utc": "2026-03-07T01:00:00+00:00",
+          "net30": -3.799999999999992,
+          "score": 77.73,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1773759600000,
+          "utc": "2026-03-17T15:00:00+00:00",
+          "net30": 4.149388209121253,
+          "score": 61.1224,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1776276000000,
+          "utc": "2026-04-15T18:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 70.0299,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1779930000000,
+          "utc": "2026-05-28T01:00:00+00:00",
+          "net30": 4.700000000000005,
+          "score": 76.1462,
+          "overlapCandidates": 0
+        },
+        {
+          "t": 1780671600000,
+          "utc": "2026-06-05T15:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 74.8234,
+          "overlapCandidates": 0
+        }
+      ],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 27,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 62,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 10
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 49,
+            "wins": 40,
+            "wrPct": 81.63,
+            "pf": 3.2214,
+            "compoundPct": 71.378,
+            "closedDdPct": -10.149
+          },
+          "30": {
+            "n": 49,
+            "wins": 39,
+            "wrPct": 79.59,
+            "pf": 2.7023,
+            "compoundPct": 55.526,
+            "closedDdPct": -12.03
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.454,
+            "compoundPct": 6.072,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "wrPct": 71.43,
+            "pf": 1.2459,
+            "compoundPct": 3.151,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1768640400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 1.5842530282638048,
+          "entry": 1768640400000,
+          "exitTs": 1768726800000,
+          "score": 66.1712,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1769936400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.699999999999993,
+          "entry": 1769936400000,
+          "exitTs": 1769959500000,
+          "score": 67.1882,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770210000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1770210000000,
+          "exitTs": 1770215700000,
+          "score": 78.6504,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1770300000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1770300000000,
+          "exitTs": 1770305400000,
+          "score": 72.1613,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1772845200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1772845200000,
+          "exitTs": 1772892000000,
+          "score": 77.73,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1773759600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.149388209121253,
+          "entry": 1773759600000,
+          "exitTs": 1773846000000,
+          "score": 61.1224,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1776276000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1776276000000,
+          "exitTs": 1776355500000,
+          "score": 70.0299,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1779930000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1779930000000,
+          "exitTs": 1779940800000,
+          "score": 76.1462,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1780671600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1780671600000,
+          "exitTs": 1780676100000,
+          "score": 74.8234,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1787752800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.700000000000012,
+          "entry": 1787752800000,
+          "exitTs": 1787765100000,
+          "score": 51.5569,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "exit": "T24",
+      "policy": "ninety_loose",
+      "selectedIndependent": 3,
+      "independentPerf": {
+        "10": {
+          "n": 3,
+          "wins": 3,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.45422
+        },
+        "30": {
+          "n": 3,
+          "wins": 3,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.25422
+        }
+      },
+      "periods": {
+        "2024": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 2.56266
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 2.36266
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incumbentDisplaced": 0,
+      "accepted2026": [
+        {
+          "t": 1776276000000,
+          "utc": "2026-04-15T18:00:00+00:00",
+          "net30": 0.7000000000000008,
+          "score": 70.0299,
+          "overlapCandidates": 0
+        }
+      ],
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 34,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 3
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.3456,
+            "compoundPct": 28.66,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.1658,
+            "compoundPct": 11.661,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 46,
+            "wins": 31,
+            "wrPct": 67.39,
+            "pf": 1.9572,
+            "compoundPct": 56.832,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 46,
+            "wins": 30,
+            "wrPct": 65.22,
+            "pf": 1.7298,
+            "compoundPct": 43.154,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 34,
+            "wrPct": 80.95,
+            "pf": 2.9353,
+            "compoundPct": 49.408,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.4315,
+            "compoundPct": 37.465,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "shadowAddedTrades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1735113600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1735113600000,
+          "exitTs": 1735156800000,
+          "score": 53.0325,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1739610000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.3626583637534786,
+          "entry": 1739610000000,
+          "exitTs": 1739696400000,
+          "score": 73.9009,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1776276000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1776276000000,
+          "exitTs": 1776355500000,
+          "score": 70.0299,
+          "gateCompetitors": 0
+        }
+      ]
+    }
+  ],
+  "baselineN": 188,
+  "noProductionMutation": true,
+  "notPristineOOS": true,
+  "warnings": [
+    "Original research scorer unchanged except additional quality admission rules",
+    "Lifetime histories only include shadow trades EXITED before as-of H1 timestamp",
+    "No new venue fills/mark sources; source is Binance M5 shadow prices",
+    "No real Native8 result unless separately replayed and verified",
+    "Selection among gate/policy options after seeing all dates would be overfitting"
+  ]
+}

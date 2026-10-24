@@ -1,0 +1,673 @@
+{
+  "status": "RESEARCH_ONLY_HIGHWR_OWNER_SLOT_AND_TIME55_NATIVE8_AUDIT",
+  "dateJST": "2026-10-25",
+  "period": "2025-08-10_2026-08-10",
+  "sourceRoots": {
+    "baseline": "C:\\tmp\\r4427cx",
+    "highwr_s6_original_exit": "C:\\tmp\\r4427hwr1",
+    "highwr_s6_max55m": "C:\\tmp\\r4427hw55"
+  },
+  "testedCostsBps": [
+    10,
+    30
+  ],
+  "cases": {
+    "10": {
+      "baseline": {
+        "tripleSame": true,
+        "canonicalEconomicSha256": "ece2960292f591e4ce2ff67c2c3d0d3f3e8d99704437d39178c96bf35d6939a1",
+        "metrics": {
+          "final_equity_jpy": 288587378.77052534,
+          "profit_factor": 4.740434170299948,
+          "maximum_mtm_drawdown_pct": -14.514985270751623,
+          "closed_trades": 1291,
+          "accounting": "PASS"
+        },
+        "triplicateLedgerPaths": [
+          "C:\\tmp\\r4427cx\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_5bb26c207eb3\\cmp_5bb26c207eb3\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427cx\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_88139ccf92bb\\cmp_88139ccf92bb\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427cx\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_d112f9aef1ff\\cmp_d112f9aef1ff\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl"
+        ],
+        "finalEquityVsBaselineJpy": 0.0,
+        "pfVsBaseline": 0.0,
+        "ddPctPointsVsBaseline": 0.0,
+        "tradeDelta": 0,
+        "newIndependentFilledN": 0,
+        "newIndependentWinsN": 0,
+        "newIndependentRealizedPnlJpyAtExitFx": 0,
+        "addedTradeDiff": [],
+        "baselineTradeDisplacements": [],
+        "newRouteAcceptedTrades": []
+      },
+      "highwr_s6_original_exit": {
+        "tripleSame": true,
+        "canonicalEconomicSha256": "a9211fd7fe0c13bbb2850b55c9a35bcab63a72a631e434272e42cc34fa0f3d42",
+        "metrics": {
+          "final_equity_jpy": 289031768.8935805,
+          "profit_factor": 4.750332398698827,
+          "maximum_mtm_drawdown_pct": -14.514985270751623,
+          "closed_trades": 1296,
+          "accounting": "PASS"
+        },
+        "triplicateLedgerPaths": [
+          "C:\\tmp\\r4427hwr1\\RENDER_4427_HIGHWR_WICK_SHARP_S6_CAUSAL_NATIVE8_20261025\\engine\\cmp_75e97d8eea29\\cmp_75e97d8eea29\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hwr1\\RENDER_4427_HIGHWR_WICK_SHARP_S6_CAUSAL_NATIVE8_20261025\\engine\\cmp_b90c62e46363\\cmp_b90c62e46363\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hwr1\\RENDER_4427_HIGHWR_WICK_SHARP_S6_CAUSAL_NATIVE8_20261025\\engine\\cmp_ea6c27098493\\cmp_ea6c27098493\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl"
+        ],
+        "finalEquityVsBaselineJpy": 444390.12305516005,
+        "pfVsBaseline": 0.009898228398879105,
+        "ddPctPointsVsBaseline": 0.0,
+        "tradeDelta": 5,
+        "newIndependentFilledN": 4,
+        "newIndependentWinsN": 4,
+        "newIndependentRealizedPnlJpyAtExitFx": 735729.0880058361,
+        "addedTradeDiff": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 5497.154076732815,
+            "feeIncludedPnlUsd": 34.76911793401487,
+            "acceptedGross": 0.2499868717208096,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768909200000,
+            "pnlJpyAtExitFx": 5928.998909707168,
+            "feeIncludedPnlUsd": 37.5416115840841,
+            "acceptedGross": 0.24999599839109563,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "TAOUSDT",
+            "side": "SHORT",
+            "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+            "entryTs": 1768917600000,
+            "exitTs": 1768960800000,
+            "pnlJpyAtExitFx": -4370.161036485348,
+            "feeIncludedPnlUsd": -27.677529234204645,
+            "acceptedGross": 0.9999871126544566,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_RELATIVE_SHORT",
+            "entryTs": 1768968000000,
+            "exitTs": 1769000100000,
+            "pnlJpyAtExitFx": 599.875859109721,
+            "feeIncludedPnlUsd": 3.7991921782259466,
+            "acceptedGross": 0.24999515856995314,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779474900000,
+            "pnlJpyAtExitFx": 336496.25289993203,
+            "feeIncludedPnlUsd": 2114.4265872399974,
+            "acceptedGross": 0.2499997091512189,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779935100000,
+            "pnlJpyAtExitFx": 387806.6821194641,
+            "feeIncludedPnlUsd": 2432.571345312744,
+            "acceptedGross": 0.24999999314081753,
+            "researchHistoricalFillVerified": false
+          }
+        ],
+        "baselineTradeDisplacements": [
+          {
+            "strategy": "IDLE",
+            "symbol": "TIAUSDT",
+            "side": "SHORT",
+            "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+            "entryTs": 1768899600000,
+            "exitTs": 1768986000000,
+            "pnlJpyAtExitFx": 25466.725876954482,
+            "feeIncludedPnlUsd": 161.28834705957564,
+            "acceptedGross": 0.9999795134240977,
+            "researchHistoricalFillVerified": false
+          }
+        ],
+        "newRouteAcceptedTrades": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 5497.154076732815,
+            "feeIncludedPnlUsd": 34.76911793401487,
+            "acceptedGross": 0.2499868717208096,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768909200000,
+            "pnlJpyAtExitFx": 5928.998909707168,
+            "feeIncludedPnlUsd": 37.5416115840841,
+            "acceptedGross": 0.24999599839109563,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779474900000,
+            "pnlJpyAtExitFx": 336496.25289993203,
+            "feeIncludedPnlUsd": 2114.4265872399974,
+            "acceptedGross": 0.2499997091512189,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779935100000,
+            "pnlJpyAtExitFx": 387806.6821194641,
+            "feeIncludedPnlUsd": 2432.571345312744,
+            "acceptedGross": 0.24999999314081753,
+            "researchHistoricalFillVerified": false
+          }
+        ]
+      },
+      "highwr_s6_max55m": {
+        "tripleSame": true,
+        "canonicalEconomicSha256": "7cccc7180fff67610f9371fc08203062eb92e6fd50c9b35107f2709757aac06a",
+        "metrics": {
+          "final_equity_jpy": 289526286.84056056,
+          "profit_factor": 4.743980216883784,
+          "maximum_mtm_drawdown_pct": -14.514985270751623,
+          "closed_trades": 1295,
+          "accounting": "PASS"
+        },
+        "triplicateLedgerPaths": [
+          "C:\\tmp\\r4427hw55\\RENDER_4427_HIGHWR_WICK_SHARP_MAX55M_NATIVE8_20261025\\engine\\cmp_0cfa75b651d6\\cmp_0cfa75b651d6\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hw55\\RENDER_4427_HIGHWR_WICK_SHARP_MAX55M_NATIVE8_20261025\\engine\\cmp_2c4057043d61\\cmp_2c4057043d61\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hw55\\RENDER_4427_HIGHWR_WICK_SHARP_MAX55M_NATIVE8_20261025\\engine\\cmp_69a7b6cc59c1\\cmp_69a7b6cc59c1\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl"
+        ],
+        "finalEquityVsBaselineJpy": 938908.0700352192,
+        "pfVsBaseline": 0.003546046583836393,
+        "ddPctPointsVsBaseline": 0.0,
+        "tradeDelta": 4,
+        "newIndependentFilledN": 4,
+        "newIndependentWinsN": 4,
+        "newIndependentRealizedPnlJpyAtExitFx": 269092.7563102075,
+        "addedTradeDiff": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 5497.154076732815,
+            "feeIncludedPnlUsd": 34.76911793401487,
+            "acceptedGross": 0.2499868717208096,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768899300000,
+            "pnlJpyAtExitFx": 5095.567517394898,
+            "feeIncludedPnlUsd": 32.26443780000003,
+            "acceptedGross": 0.24999599839109563,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779472500000,
+            "pnlJpyAtExitFx": 61400.45166441907,
+            "feeIncludedPnlUsd": 385.8192962000091,
+            "acceptedGross": 0.24999998663485598,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779933300000,
+            "pnlJpyAtExitFx": 197099.58305166068,
+            "feeIncludedPnlUsd": 1236.3345450475285,
+            "acceptedGross": 0.24999997790841566,
+            "researchHistoricalFillVerified": false
+          }
+        ],
+        "baselineTradeDisplacements": [],
+        "newRouteAcceptedTrades": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 5497.154076732815,
+            "feeIncludedPnlUsd": 34.76911793401487,
+            "acceptedGross": 0.2499868717208096,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768899300000,
+            "pnlJpyAtExitFx": 5095.567517394898,
+            "feeIncludedPnlUsd": 32.26443780000003,
+            "acceptedGross": 0.24999599839109563,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779472500000,
+            "pnlJpyAtExitFx": 61400.45166441907,
+            "feeIncludedPnlUsd": 385.8192962000091,
+            "acceptedGross": 0.24999998663485598,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779933300000,
+            "pnlJpyAtExitFx": 197099.58305166068,
+            "feeIncludedPnlUsd": 1236.3345450475285,
+            "acceptedGross": 0.24999997790841566,
+            "researchHistoricalFillVerified": false
+          }
+        ]
+      }
+    },
+    "30": {
+      "baseline": {
+        "tripleSame": true,
+        "canonicalEconomicSha256": "3b3e9de0280f97a19c5b1b2954fe8de97c6034dd6a446636f07e13c613627257",
+        "metrics": {
+          "final_equity_jpy": 174459200.2195523,
+          "profit_factor": 3.8259511979311043,
+          "maximum_mtm_drawdown_pct": -15.014723812726594,
+          "closed_trades": 1290,
+          "accounting": "PASS"
+        },
+        "triplicateLedgerPaths": [
+          "C:\\tmp\\r4427cx\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_2104321c587e\\cmp_2104321c587e\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427cx\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_3a77ec7e46bd\\cmp_3a77ec7e46bd\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427cx\\RENDER_4427_INDEPENDENT_ASOF_SELL55_NATIVE8_20261024\\engine\\cmp_433aa2452f5a\\cmp_433aa2452f5a\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl"
+        ],
+        "finalEquityVsBaselineJpy": 0.0,
+        "pfVsBaseline": 0.0,
+        "ddPctPointsVsBaseline": 0.0,
+        "tradeDelta": 0,
+        "newIndependentFilledN": 0,
+        "newIndependentWinsN": 0,
+        "newIndependentRealizedPnlJpyAtExitFx": 0,
+        "addedTradeDiff": [],
+        "baselineTradeDisplacements": [],
+        "newRouteAcceptedTrades": []
+      },
+      "highwr_s6_original_exit": {
+        "tripleSame": true,
+        "canonicalEconomicSha256": "7e912e35b0a3523cfb7981b6187af6e2c361b72462c16251c01324a47e4e8d32",
+        "metrics": {
+          "final_equity_jpy": 172722276.76188037,
+          "profit_factor": 3.8183754708411652,
+          "maximum_mtm_drawdown_pct": -15.014723812726594,
+          "closed_trades": 1295,
+          "accounting": "PASS"
+        },
+        "triplicateLedgerPaths": [
+          "C:\\tmp\\r4427hwr1\\RENDER_4427_HIGHWR_WICK_SHARP_S6_CAUSAL_NATIVE8_20261025\\engine\\cmp_49ff925c3d97\\cmp_49ff925c3d97\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hwr1\\RENDER_4427_HIGHWR_WICK_SHARP_S6_CAUSAL_NATIVE8_20261025\\engine\\cmp_c554cfec808d\\cmp_c554cfec808d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hwr1\\RENDER_4427_HIGHWR_WICK_SHARP_S6_CAUSAL_NATIVE8_20261025\\engine\\cmp_cd1e7b6b06e9\\cmp_cd1e7b6b06e9\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl"
+        ],
+        "finalEquityVsBaselineJpy": -1736923.4576719403,
+        "pfVsBaseline": -0.007575727089939033,
+        "ddPctPointsVsBaseline": 0.0,
+        "tradeDelta": 5,
+        "newIndependentFilledN": 4,
+        "newIndependentWinsN": 4,
+        "newIndependentRealizedPnlJpyAtExitFx": 338085.64637753775,
+        "addedTradeDiff": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 2443.449618807361,
+            "feeIncludedPnlUsd": 15.454649219624933,
+            "acceptedGross": 0.24998373986681277,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768909200000,
+            "pnlJpyAtExitFx": 2618.432971645083,
+            "feeIncludedPnlUsd": 16.57956007033805,
+            "acceptedGross": 0.24998766318018456,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "TAOUSDT",
+            "side": "SHORT",
+            "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+            "entryTs": 1768917600000,
+            "exitTs": 1768960800000,
+            "pnlJpyAtExitFx": -4000.394714732362,
+            "feeIncludedPnlUsd": -25.33568917506272,
+            "acceptedGross": 0.9999983371126115,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_RELATIVE_SHORT",
+            "entryTs": 1768968000000,
+            "exitTs": 1769000100000,
+            "pnlJpyAtExitFx": -574.9947639401698,
+            "feeIncludedPnlUsd": -3.6416128045632963,
+            "acceptedGross": 0.24997882624412465,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779474900000,
+            "pnlJpyAtExitFx": 151408.67415922153,
+            "feeIncludedPnlUsd": 951.3999737649982,
+            "acceptedGross": 0.24999955816200023,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779935100000,
+            "pnlJpyAtExitFx": 181615.08962786375,
+            "feeIncludedPnlUsd": 1139.205906640497,
+            "acceptedGross": 0.2499999448513021,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "TAOUSDT",
+            "side": "SHORT",
+            "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+            "entryTs": 1779940800000,
+            "exitTs": 1779984000000,
+            "pnlJpyAtExitFx": 503249.1803783477,
+            "feeIncludedPnlUsd": 3156.700470064053,
+            "acceptedGross": 0.9999994876437117,
+            "researchHistoricalFillVerified": false
+          }
+        ],
+        "baselineTradeDisplacements": [
+          {
+            "strategy": "IDLE",
+            "symbol": "TIAUSDT",
+            "side": "SHORT",
+            "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+            "entryTs": 1768899600000,
+            "exitTs": 1768986000000,
+            "pnlJpyAtExitFx": 11375.574160530396,
+            "feeIncludedPnlUsd": 72.04489348455583,
+            "acceptedGross": 0.9999473552136973,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "TAOUSDT",
+            "side": "SHORT",
+            "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+            "entryTs": 1779933600000,
+            "exitTs": 1779976800000,
+            "pnlJpyAtExitFx": 1284063.1028914081,
+            "feeIncludedPnlUsd": 8054.4643856982075,
+            "acceptedGross": 0.9999999920453325,
+            "researchHistoricalFillVerified": false
+          }
+        ],
+        "newRouteAcceptedTrades": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 2443.449618807361,
+            "feeIncludedPnlUsd": 15.454649219624933,
+            "acceptedGross": 0.24998373986681277,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768909200000,
+            "pnlJpyAtExitFx": 2618.432971645083,
+            "feeIncludedPnlUsd": 16.57956007033805,
+            "acceptedGross": 0.24998766318018456,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779474900000,
+            "pnlJpyAtExitFx": 151408.67415922153,
+            "feeIncludedPnlUsd": 951.3999737649982,
+            "acceptedGross": 0.24999955816200023,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779935100000,
+            "pnlJpyAtExitFx": 181615.08962786375,
+            "feeIncludedPnlUsd": 1139.205906640497,
+            "acceptedGross": 0.2499999448513021,
+            "researchHistoricalFillVerified": false
+          }
+        ]
+      },
+      "highwr_s6_max55m": {
+        "tripleSame": true,
+        "canonicalEconomicSha256": "9eae09115a4f88fac2911a3f42f2a9e34330de1e1663261f734cef2be193d49b",
+        "metrics": {
+          "final_equity_jpy": 174993564.22014433,
+          "profit_factor": 3.8276823913186906,
+          "maximum_mtm_drawdown_pct": -15.014723812726594,
+          "closed_trades": 1294,
+          "accounting": "PASS"
+        },
+        "triplicateLedgerPaths": [
+          "C:\\tmp\\r4427hw55\\RENDER_4427_HIGHWR_WICK_SHARP_MAX55M_NATIVE8_20261025\\engine\\cmp_182273d4c07a\\cmp_182273d4c07a\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hw55\\RENDER_4427_HIGHWR_WICK_SHARP_MAX55M_NATIVE8_20261025\\engine\\cmp_7213eaaeed11\\cmp_7213eaaeed11\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "C:\\tmp\\r4427hw55\\RENDER_4427_HIGHWR_WICK_SHARP_MAX55M_NATIVE8_20261025\\engine\\cmp_f0a57f358cc5\\cmp_f0a57f358cc5\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl"
+        ],
+        "finalEquityVsBaselineJpy": 534364.0005920231,
+        "pfVsBaseline": 0.0017311933875863161,
+        "ddPctPointsVsBaseline": 0.0,
+        "tradeDelta": 4,
+        "newIndependentFilledN": 4,
+        "newIndependentWinsN": 4,
+        "newIndependentRealizedPnlJpyAtExitFx": 89178.20373086593,
+        "addedTradeDiff": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 2443.449618807361,
+            "feeIncludedPnlUsd": 15.454649219624933,
+            "acceptedGross": 0.24998373986681277,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768899300000,
+            "pnlJpyAtExitFx": 2189.1274780732547,
+            "feeIncludedPnlUsd": 13.861256300000015,
+            "acceptedGross": 0.24998766318018456,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779472500000,
+            "pnlJpyAtExitFx": 6906.157455743053,
+            "feeIncludedPnlUsd": 43.39591545000469,
+            "acceptedGross": 0.24999955419307246,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779933300000,
+            "pnlJpyAtExitFx": 77639.46917824226,
+            "feeIncludedPnlUsd": 487.0043676300157,
+            "acceptedGross": 0.24999958590981927,
+            "researchHistoricalFillVerified": false
+          }
+        ],
+        "baselineTradeDisplacements": [],
+        "newRouteAcceptedTrades": [
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768640400000,
+            "exitTs": 1768642200000,
+            "pnlJpyAtExitFx": 2443.449618807361,
+            "feeIncludedPnlUsd": 15.454649219624933,
+            "acceptedGross": 0.24998373986681277,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1768896000000,
+            "exitTs": 1768899300000,
+            "pnlJpyAtExitFx": 2189.1274780732547,
+            "feeIncludedPnlUsd": 13.861256300000015,
+            "acceptedGross": 0.24998766318018456,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779469200000,
+            "exitTs": 1779472500000,
+            "pnlJpyAtExitFx": 6906.157455743053,
+            "feeIncludedPnlUsd": 43.39591545000469,
+            "acceptedGross": 0.24999955419307246,
+            "researchHistoricalFillVerified": false
+          },
+          {
+            "strategy": "IDLE",
+            "symbol": "RENDERUSDT",
+            "side": "SHORT",
+            "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+            "entryTs": 1779930000000,
+            "exitTs": 1779933300000,
+            "pnlJpyAtExitFx": 77639.46917824226,
+            "feeIncludedPnlUsd": 487.0043676300157,
+            "acceptedGross": 0.24999958590981927,
+            "researchHistoricalFillVerified": false
+          }
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "All dates have already been seen; native8 portfolio is non-pristine in-sample replay",
+    "Time55 intervention chosen specifically after observed original May28 TAO profitable displacement: material ex-post bias",
+    "Native filling uses modeled H1 prices and Binance M5 exits; no signed venue fill/partial/stop parity",
+    "New route is modeled as IDLE; true independent owner/slot not yet implemented",
+    "LIVE, VPS, Production, HP, actual orders untouched"
+  ]
+}

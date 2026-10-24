@@ -1,0 +1,6720 @@
+{
+  "status": "RESEARCH_ONLY_WIN_RATE_FIRST_ASOF_PRIORITY_GATE",
+  "dateJST": "2026-10-25",
+  "frozenIncumbentTrades": 188,
+  "gates": {
+    "WICK_SHARP_S6": "S6",
+    "WICK_VOL_S6": "S6",
+    "WICK_VOL_T24": "T24",
+    "VOL_PREVH1_T24": "T24"
+  },
+  "policies": [
+    "ninety_loose",
+    "ninety_mid",
+    "dual_90_180",
+    "long365_90",
+    "conservative_180"
+  ],
+  "cases": [
+    {
+      "gate": "WICK_SHARP_S6",
+      "policy": "ninety_loose",
+      "totalSelected": 195,
+      "independentAccepted": 7,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 29,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_BTC_RENDER_DIVERGE": 7,
+        "protect_original_overlap": 1,
+        "live_overlap_h1": 1,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 6,
+            "wins": 4,
+            "wrPct": 66.67,
+            "pf": 1.33333,
+            "meanNetPct": 0.233333
+          },
+          "30": {
+            "n": 6,
+            "wins": 4,
+            "wrPct": 66.67,
+            "pf": 1.04348,
+            "meanNetPct": 0.033333
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 7,
+          "wins": 5,
+          "wrPct": 71.43,
+          "pf": 1.66667,
+          "meanNetPct": 0.4
+        },
+        "30": {
+          "n": 7,
+          "wins": 5,
+          "wrPct": 71.43,
+          "pf": 1.30435,
+          "meanNetPct": 0.2
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 76,
+            "wins": 50,
+            "wrPct": 65.79,
+            "pf": 1.3348,
+            "compoundPct": 29.202,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 76,
+            "wins": 50,
+            "wrPct": 65.79,
+            "pf": 1.1522,
+            "compoundPct": 11.015,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 46,
+            "wins": 31,
+            "wrPct": 67.39,
+            "pf": 1.934,
+            "compoundPct": 55.054,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 46,
+            "wins": 30,
+            "wrPct": 65.22,
+            "pf": 1.7079,
+            "compoundPct": 41.528,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1709820000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1709820000000,
+          "exitTs": 1709822700000,
+          "score": 48.812,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1709985600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1709985600000,
+          "exitTs": 1709986800000,
+          "score": 41.4901,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1711990800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1711990800000,
+          "exitTs": 1712001300000,
+          "score": 58.2125,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720220400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1720220400000,
+          "exitTs": 1720225200000,
+          "score": 55.3169,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1721048400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1721048400000,
+          "exitTs": 1721051100000,
+          "score": 52.8165,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1724965200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1724965200000,
+          "exitTs": 1724968800000,
+          "score": 56.1846,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1737432000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1737432000000,
+          "exitTs": 1737433800000,
+          "score": 56.214,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_SHARP_S6",
+      "policy": "ninety_mid",
+      "totalSelected": 189,
+      "independentAccepted": 1,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 36,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_BTC_RENDER_DIVERGE": 1,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "meanNetPct": -2.1
+          },
+          "30": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "meanNetPct": -2.3
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 1,
+          "wins": 0,
+          "wrPct": 0.0,
+          "pf": 0.0,
+          "meanNetPct": -2.1
+        },
+        "30": {
+          "n": 1,
+          "wins": 0,
+          "wrPct": 0.0,
+          "pf": 0.0,
+          "meanNetPct": -2.3
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 71,
+            "wins": 46,
+            "wrPct": 64.79,
+            "pf": 1.3021,
+            "compoundPct": 24.835,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 71,
+            "wins": 46,
+            "wrPct": 64.79,
+            "pf": 1.1285,
+            "compoundPct": 8.334,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1711990800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1711990800000,
+          "exitTs": 1712001300000,
+          "score": 58.2125,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_SHARP_S6",
+      "policy": "dual_90_180",
+      "totalSelected": 189,
+      "independentAccepted": 1,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 36,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 1
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 1,
+          "wins": 1,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.4
+        },
+        "30": {
+          "n": 1,
+          "wins": 1,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.2
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.3516,
+            "compoundPct": 29.298,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.1715,
+            "compoundPct": 12.215,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1721048400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1721048400000,
+          "exitTs": 1721051100000,
+          "score": 52.8165,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_SHARP_S6",
+      "policy": "long365_90",
+      "totalSelected": 189,
+      "independentAccepted": 1,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 36,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 1
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 1,
+          "wins": 1,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.4
+        },
+        "30": {
+          "n": 1,
+          "wins": 1,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.2
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 46,
+            "wins": 31,
+            "wrPct": 67.39,
+            "pf": 1.934,
+            "compoundPct": 55.054,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 46,
+            "wins": 30,
+            "wrPct": 65.22,
+            "pf": 1.7079,
+            "compoundPct": 41.528,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1737432000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1737432000000,
+          "exitTs": 1737433800000,
+          "score": 56.214,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_SHARP_S6",
+      "policy": "conservative_180",
+      "totalSelected": 190,
+      "independentAccepted": 2,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 35,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 2
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 0.66667,
+            "meanNetPct": -0.35
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 0.52174,
+            "meanNetPct": -0.55
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 2,
+          "wins": 1,
+          "wrPct": 50.0,
+          "pf": 0.66667,
+          "meanNetPct": -0.35
+        },
+        "30": {
+          "n": 2,
+          "wins": 1,
+          "wrPct": 50.0,
+          "pf": 0.52174,
+          "meanNetPct": -0.55
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 72,
+            "wins": 47,
+            "wrPct": 65.28,
+            "pf": 1.3184,
+            "compoundPct": 26.583,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 72,
+            "wins": 47,
+            "wrPct": 65.28,
+            "pf": 1.1417,
+            "compoundPct": 9.634,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720220400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1720220400000,
+          "exitTs": 1720225200000,
+          "score": 55.3169,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1721048400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1721048400000,
+          "exitTs": 1721051100000,
+          "score": 52.8165,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_S6",
+      "policy": "ninety_loose",
+      "totalSelected": 193,
+      "independentAccepted": 6,
+      "incumbentDisplacedCount": 1,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 31,
+        "selected_ORIGINAL_A": 112,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 6
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 5,
+            "wins": 4,
+            "wrPct": 80.0,
+            "pf": 2.66667,
+            "meanNetPct": 0.7
+          },
+          "30": {
+            "n": 5,
+            "wins": 4,
+            "wrPct": 80.0,
+            "pf": 2.08696,
+            "meanNetPct": 0.5
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 6,
+          "wins": 5,
+          "wrPct": 83.33,
+          "pf": 3.33333,
+          "meanNetPct": 0.816667
+        },
+        "30": {
+          "n": 6,
+          "wins": 5,
+          "wrPct": 83.33,
+          "pf": 2.6087,
+          "meanNetPct": 0.616667
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 74,
+            "wins": 50,
+            "wrPct": 67.57,
+            "pf": 1.4277,
+            "compoundPct": 36.902,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 74,
+            "wins": 50,
+            "wrPct": 67.57,
+            "pf": 1.2333,
+            "compoundPct": 18.117,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 46,
+            "wins": 31,
+            "wrPct": 67.39,
+            "pf": 1.934,
+            "compoundPct": 55.054,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 46,
+            "wins": 30,
+            "wrPct": 65.22,
+            "pf": 1.7079,
+            "compoundPct": 41.528,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1721048400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1721048400000,
+          "exitTs": 1721051100000,
+          "score": 53.0427,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1722168000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1722168000000,
+          "exitTs": 1722176100000,
+          "score": 64.1654,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723064400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1723064400000,
+          "exitTs": 1723069500000,
+          "score": 52.3584,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723309200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1723309200000,
+          "exitTs": 1723315200000,
+          "score": 55.7892,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1735113600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000013,
+          "entry": 1735113600000,
+          "exitTs": 1735127700000,
+          "score": 49.0635,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1739610000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": 1.2000000000000124,
+          "entry": 1739610000000,
+          "exitTs": 1739619300000,
+          "score": 56.9832,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_S6",
+      "policy": "ninety_mid",
+      "totalSelected": 188,
+      "independentAccepted": 1,
+      "incumbentDisplacedCount": 1,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 36,
+        "selected_ORIGINAL_A": 112,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 1
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "meanNetPct": -2.1
+          },
+          "30": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "meanNetPct": -2.3
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 1,
+          "wins": 0,
+          "wrPct": 0.0,
+          "pf": 0.0,
+          "meanNetPct": -2.1
+        },
+        "30": {
+          "n": 1,
+          "wins": 0,
+          "wrPct": 0.0,
+          "pf": 0.0,
+          "meanNetPct": -2.3
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3593,
+            "compoundPct": 29.497,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1779,
+            "compoundPct": 12.614,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723309200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "S6",
+          "net30": -2.3000000000000016,
+          "entry": 1723309200000,
+          "exitTs": 1723315200000,
+          "score": 55.7892,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_S6",
+      "policy": "dual_90_180",
+      "totalSelected": 188,
+      "independentAccepted": 0,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 37,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        },
+        "30": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": []
+    },
+    {
+      "gate": "WICK_VOL_S6",
+      "policy": "long365_90",
+      "totalSelected": 188,
+      "independentAccepted": 0,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 37,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        },
+        "30": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": []
+    },
+    {
+      "gate": "WICK_VOL_S6",
+      "policy": "conservative_180",
+      "totalSelected": 188,
+      "independentAccepted": 0,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 37,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        },
+        "30": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": []
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "policy": "ninety_loose",
+      "totalSelected": 191,
+      "independentAccepted": 3,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 34,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 3
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 2.562658
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 2.362658
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 3,
+          "wins": 3,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.454219
+        },
+        "30": {
+          "n": 3,
+          "wins": 3,
+          "wrPct": 100.0,
+          "pf": null,
+          "meanNetPct": 1.254219
+        }
+      },
+      "nativeWindowAccepted": [
+        {
+          "utc": "2026-04-15T18:00:00+00:00",
+          "t": 1776276000000,
+          "sym": "RENDERUSDT",
+          "family": "BTC_RENDER_DIVERGE",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "score": 70.0299,
+          "gateCompetitors": 0
+        }
+      ],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.3456,
+            "compoundPct": 28.66,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 71,
+            "wins": 47,
+            "wrPct": 66.2,
+            "pf": 1.1658,
+            "compoundPct": 11.661,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 46,
+            "wins": 31,
+            "wrPct": 67.39,
+            "pf": 1.9572,
+            "compoundPct": 56.832,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 46,
+            "wins": 30,
+            "wrPct": 65.22,
+            "pf": 1.7298,
+            "compoundPct": 43.154,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 42,
+            "wins": 34,
+            "wrPct": 80.95,
+            "pf": 2.9353,
+            "compoundPct": 49.408,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 42,
+            "wins": 33,
+            "wrPct": 78.57,
+            "pf": 2.4315,
+            "compoundPct": 37.465,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1735113600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1735113600000,
+          "exitTs": 1735156800000,
+          "score": 53.0325,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1739610000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.3626583637534786,
+          "entry": 1739610000000,
+          "exitTs": 1739696400000,
+          "score": 73.9009,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1776276000000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1776276000000,
+          "exitTs": 1776355500000,
+          "score": 70.0299,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "policy": "ninety_mid",
+      "totalSelected": 188,
+      "independentAccepted": 0,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 37,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        },
+        "30": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": []
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "policy": "dual_90_180",
+      "totalSelected": 188,
+      "independentAccepted": 0,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 37,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        },
+        "30": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": []
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "policy": "long365_90",
+      "totalSelected": 188,
+      "independentAccepted": 0,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 37,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        },
+        "30": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": []
+    },
+    {
+      "gate": "WICK_VOL_T24",
+      "policy": "conservative_180",
+      "totalSelected": 188,
+      "independentAccepted": 0,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 37,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        },
+        "30": {
+          "n": 0,
+          "wins": 0,
+          "wrPct": null,
+          "pf": null,
+          "meanNetPct": null
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": []
+    },
+    {
+      "gate": "VOL_PREVH1_T24",
+      "policy": "ninety_loose",
+      "totalSelected": 203,
+      "independentAccepted": 16,
+      "incumbentDisplacedCount": 3,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 33,
+        "selected_ORIGINAL_A": 114,
+        "selected_ORIGINAL_B": 60,
+        "selected_BTC_RENDER_DIVERGE": 16,
+        "selected_ORIGINAL_X": 13
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 12,
+            "wins": 8,
+            "wrPct": 66.67,
+            "pf": 1.19231,
+            "meanNetPct": 0.23077
+          },
+          "30": {
+            "n": 12,
+            "wins": 8,
+            "wrPct": 66.67,
+            "pf": 1.02429,
+            "meanNetPct": 0.03077
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 2.19579,
+            "meanNetPct": 0.737372
+          },
+          "30": {
+            "n": 4,
+            "wins": 2,
+            "wrPct": 50.0,
+            "pf": 1.79614,
+            "meanNetPct": 0.537372
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 16,
+          "wins": 11,
+          "wrPct": 68.75,
+          "pf": 1.33906,
+          "meanNetPct": 0.357421
+        },
+        "30": {
+          "n": 16,
+          "wins": 10,
+          "wrPct": 62.5,
+          "pf": 1.14071,
+          "meanNetPct": 0.157421
+        }
+      },
+      "nativeWindowAccepted": [
+        {
+          "utc": "2026-03-17T15:00:00+00:00",
+          "t": 1773759600000,
+          "sym": "RENDERUSDT",
+          "family": "BTC_RENDER_DIVERGE",
+          "exit": "T24",
+          "net30": 4.149388209121253,
+          "score": 57.9556,
+          "gateCompetitors": 0
+        },
+        {
+          "utc": "2026-04-12T16:00:00+00:00",
+          "t": 1776009600000,
+          "sym": "RENDERUSDT",
+          "family": "BTC_RENDER_DIVERGE",
+          "exit": "T24",
+          "net30": -0.03333333333334049,
+          "score": 61.7153,
+          "gateCompetitors": 0
+        },
+        {
+          "utc": "2026-04-14T16:00:00+00:00",
+          "t": 1776182400000,
+          "sym": "RENDERUSDT",
+          "family": "BTC_RENDER_DIVERGE",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "score": 62.5277,
+          "gateCompetitors": 0
+        },
+        {
+          "utc": "2026-05-09T16:00:00+00:00",
+          "t": 1778342400000,
+          "sym": "RENDERUSDT",
+          "family": "BTC_RENDER_DIVERGE",
+          "exit": "T24",
+          "net30": -2.6665659617321253,
+          "score": 65.4101,
+          "gateCompetitors": 0
+        }
+      ],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 82,
+            "wins": 54,
+            "wrPct": 65.85,
+            "pf": 1.319,
+            "compoundPct": 31.017,
+            "closedDdPct": -12.297
+          },
+          "30": {
+            "n": 82,
+            "wins": 54,
+            "wrPct": 65.85,
+            "pf": 1.1431,
+            "compoundPct": 11.232,
+            "closedDdPct": -13.02
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 44,
+            "wins": 35,
+            "wrPct": 79.55,
+            "pf": 2.6166,
+            "compoundPct": 45.199,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 44,
+            "wins": 33,
+            "wrPct": 75.0,
+            "pf": 2.1561,
+            "compoundPct": 33.052,
+            "closedDdPct": -8.676
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1710784800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1710784800000,
+          "exitTs": 1710789900000,
+          "score": 61.2433,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1711990800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1711990800000,
+          "exitTs": 1712011500000,
+          "score": 58.2687,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1715846400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1715846400000,
+          "exitTs": 1715862900000,
+          "score": 52.8997,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1716166800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1716166800000,
+          "exitTs": 1716183900000,
+          "score": 69.7858,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1718110800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.700000000000012,
+          "entry": 1718110800000,
+          "exitTs": 1718120700000,
+          "score": 65.5373,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1718600400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.700000000000005,
+          "entry": 1718600400000,
+          "exitTs": 1718617200000,
+          "score": 59.2016,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1719590400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 1.2714668812013998,
+          "entry": 1719590400000,
+          "exitTs": 1719676800000,
+          "score": 63.3513,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720141200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.6999999999999897,
+          "entry": 1720141200000,
+          "exitTs": 1720143900000,
+          "score": 68.8566,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720731600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1720731600000,
+          "exitTs": 1720748100000,
+          "score": 58.7137,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1722369600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.598801597869514,
+          "entry": 1722369600000,
+          "exitTs": 1722399000000,
+          "score": 72.7225,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723183200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.198975829578043,
+          "entry": 1723183200000,
+          "exitTs": 1723269600000,
+          "score": 58.8999,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1724245200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1724245200000,
+          "exitTs": 1724265000000,
+          "score": 68.5404,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1773759600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 4.149388209121253,
+          "entry": 1773759600000,
+          "exitTs": 1773846000000,
+          "score": 57.9556,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1776009600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -0.03333333333334049,
+          "entry": 1776009600000,
+          "exitTs": 1776096000000,
+          "score": 61.7153,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1776182400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1776182400000,
+          "exitTs": 1776213900000,
+          "score": 62.5277,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1778342400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -2.6665659617321253,
+          "entry": 1778342400000,
+          "exitTs": 1778428800000,
+          "score": 65.4101,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "VOL_PREVH1_T24",
+      "policy": "ninety_mid",
+      "totalSelected": 194,
+      "independentAccepted": 6,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 45,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_BTC_RENDER_DIVERGE": 6,
+        "selected_ORIGINAL_X": 12
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 6,
+            "wins": 3,
+            "wrPct": 50.0,
+            "pf": 0.37942,
+            "meanNetPct": -1.117037
+          },
+          "30": {
+            "n": 6,
+            "wins": 3,
+            "wrPct": 50.0,
+            "pf": 0.30682,
+            "meanNetPct": -1.317037
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 6,
+          "wins": 3,
+          "wrPct": 50.0,
+          "pf": 0.37942,
+          "meanNetPct": -1.117037
+        },
+        "30": {
+          "n": 6,
+          "wins": 3,
+          "wrPct": 50.0,
+          "pf": 0.30682,
+          "meanNetPct": -1.317037
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 76,
+            "wins": 49,
+            "wrPct": 64.47,
+            "pf": 1.2253,
+            "compoundPct": 18.967,
+            "closedDdPct": -15.245
+          },
+          "30": {
+            "n": 76,
+            "wins": 49,
+            "wrPct": 64.47,
+            "pf": 1.0605,
+            "compoundPct": 2.203,
+            "closedDdPct": -16.452
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1711990800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1711990800000,
+          "exitTs": 1712011500000,
+          "score": 58.2687,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1716166800000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1716166800000,
+          "exitTs": 1716183900000,
+          "score": 69.7858,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720760400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.700000000000012,
+          "entry": 1720760400000,
+          "exitTs": 1720782900000,
+          "score": 58.5354,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1722369600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.598801597869514,
+          "entry": 1722369600000,
+          "exitTs": 1722399000000,
+          "score": 72.7225,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723183200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.198975829578043,
+          "entry": 1723183200000,
+          "exitTs": 1723269600000,
+          "score": 58.8999,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1724245200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1724245200000,
+          "exitTs": 1724265000000,
+          "score": 68.5404,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "VOL_PREVH1_T24",
+      "policy": "dual_90_180",
+      "totalSelected": 193,
+      "independentAccepted": 5,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 46,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 5
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "wrPct": 60.0,
+            "pf": 0.56914,
+            "meanNetPct": -0.620445
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "wrPct": 60.0,
+            "pf": 0.46023,
+            "meanNetPct": -0.820445
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 0.56914,
+          "meanNetPct": -0.620445
+        },
+        "30": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 0.46023,
+          "meanNetPct": -0.820445
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 75,
+            "wins": 49,
+            "wrPct": 65.33,
+            "pf": 1.274,
+            "compoundPct": 23.41,
+            "closedDdPct": -12.297
+          },
+          "30": {
+            "n": 75,
+            "wins": 49,
+            "wrPct": 65.33,
+            "pf": 1.1026,
+            "compoundPct": 6.241,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720220400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1720220400000,
+          "exitTs": 1720226100000,
+          "score": 64.096,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720731600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1720731600000,
+          "exitTs": 1720748100000,
+          "score": 58.7137,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1722369600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.598801597869514,
+          "entry": 1722369600000,
+          "exitTs": 1722399000000,
+          "score": 72.7225,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723183200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.198975829578043,
+          "entry": 1723183200000,
+          "exitTs": 1723269600000,
+          "score": 58.8999,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1724245200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1724245200000,
+          "exitTs": 1724265000000,
+          "score": 68.5404,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "VOL_PREVH1_T24",
+      "policy": "long365_90",
+      "totalSelected": 190,
+      "independentAccepted": 2,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 50,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 2
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 0.66638,
+            "meanNetPct": -0.600512
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 0.57868,
+            "meanNetPct": -0.800512
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 2,
+          "wins": 1,
+          "wrPct": 50.0,
+          "pf": 0.66638,
+          "meanNetPct": -0.600512
+        },
+        "30": {
+          "n": 2,
+          "wins": 1,
+          "wrPct": 50.0,
+          "pf": 0.57868,
+          "meanNetPct": -0.800512
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 72,
+            "wins": 47,
+            "wrPct": 65.28,
+            "pf": 1.3072,
+            "compoundPct": 25.871,
+            "closedDdPct": -12.297
+          },
+          "30": {
+            "n": 72,
+            "wins": 47,
+            "wrPct": 65.28,
+            "pf": 1.134,
+            "compoundPct": 9.017,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723183200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.198975829578043,
+          "entry": 1723183200000,
+          "exitTs": 1723269600000,
+          "score": 58.8999,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1724245200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1724245200000,
+          "exitTs": 1724265000000,
+          "score": 68.5404,
+          "gateCompetitors": 0
+        }
+      ]
+    },
+    {
+      "gate": "VOL_PREVH1_T24",
+      "policy": "conservative_180",
+      "totalSelected": 193,
+      "independentAccepted": 5,
+      "incumbentDisplacedCount": 0,
+      "selectedReasons": {
+        "rejected_shadow_BTC_RENDER_DIVERGE": 46,
+        "selected_ORIGINAL_A": 113,
+        "selected_ORIGINAL_B": 63,
+        "selected_ORIGINAL_X": 12,
+        "selected_BTC_RENDER_DIVERGE": 5
+      },
+      "perPeriod": {
+        "2024": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "wrPct": 60.0,
+            "pf": 0.56914,
+            "meanNetPct": -0.620445
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "wrPct": 60.0,
+            "pf": 0.46023,
+            "meanNetPct": -0.820445
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          },
+          "30": {
+            "n": 0,
+            "wins": 0,
+            "wrPct": null,
+            "pf": null,
+            "meanNetPct": null
+          }
+        }
+      },
+      "incrementalIndependentPerf": {
+        "10": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 0.56914,
+          "meanNetPct": -0.620445
+        },
+        "30": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 0.46023,
+          "meanNetPct": -0.820445
+        }
+      },
+      "nativeWindowAccepted": [],
+      "baselinePerPeriod": {
+        "2024": {
+          "10": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.3349,
+            "compoundPct": 27.513,
+            "closedDdPct": -12.079
+          },
+          "30": {
+            "n": 70,
+            "wins": 46,
+            "wrPct": 65.71,
+            "pf": 1.1579,
+            "compoundPct": 10.885,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "perPeriodWalletLike": {
+        "2024": {
+          "10": {
+            "n": 75,
+            "wins": 49,
+            "wrPct": 65.33,
+            "pf": 1.274,
+            "compoundPct": 23.41,
+            "closedDdPct": -12.297
+          },
+          "30": {
+            "n": 75,
+            "wins": 49,
+            "wrPct": 65.33,
+            "pf": 1.1026,
+            "compoundPct": 6.241,
+            "closedDdPct": -13.152
+          }
+        },
+        "2025H1": {
+          "10": {
+            "n": 45,
+            "wins": 30,
+            "wrPct": 66.67,
+            "pf": 1.9061,
+            "compoundPct": 52.913,
+            "closedDdPct": -9.61
+          },
+          "30": {
+            "n": 45,
+            "wins": 29,
+            "wrPct": 64.44,
+            "pf": 1.6853,
+            "compoundPct": 39.85,
+            "closedDdPct": -10.349
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.2758,
+            "compoundPct": 6.63,
+            "closedDdPct": -13.635
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.131,
+            "compoundPct": 2.66,
+            "closedDdPct": -14.521
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 41,
+            "wins": 33,
+            "wrPct": 80.49,
+            "pf": 2.8933,
+            "compoundPct": 48.075,
+            "closedDdPct": -7.625
+          },
+          "30": {
+            "n": 41,
+            "wins": 32,
+            "wrPct": 78.05,
+            "pf": 2.4013,
+            "compoundPct": 36.51,
+            "closedDdPct": -8.376
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.3915,
+            "compoundPct": 5.126,
+            "closedDdPct": -7.07
+          },
+          "30": {
+            "n": 13,
+            "wins": 9,
+            "wrPct": 69.23,
+            "pf": 1.1998,
+            "compoundPct": 2.434,
+            "closedDdPct": -7.456
+          }
+        }
+      },
+      "trades": [
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720220400000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1720220400000,
+          "exitTs": 1720226100000,
+          "score": 64.096,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RNDRUSDT",
+          "t": 1720731600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.7000000000000008,
+          "entry": 1720731600000,
+          "exitTs": 1720748100000,
+          "score": 58.7137,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1722369600000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 0.598801597869514,
+          "entry": 1722369600000,
+          "exitTs": 1722399000000,
+          "score": 72.7225,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1723183200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": 2.198975829578043,
+          "entry": 1723183200000,
+          "exitTs": 1723269600000,
+          "score": 58.8999,
+          "gateCompetitors": 0
+        },
+        {
+          "sym": "RENDERUSDT",
+          "t": 1724245200000,
+          "family": "BTC_RENDER_DIVERGE",
+          "kind": "INDEPENDENT",
+          "exit": "T24",
+          "net30": -3.799999999999992,
+          "entry": 1724245200000,
+          "exitTs": 1724265000000,
+          "score": 68.5404,
+          "gateCompetitors": 0
+        }
+      ]
+    }
+  ],
+  "noGenuineUntouchedOOS": true,
+  "limitations": [
+    "Shadow-model results are not actual shared 8-strategy wallet acceptance",
+    "Family-dependent PF history uses only past fully CLOSED shadow outcomes, not future labels",
+    "Original cohort may be displaced by a different exit or earlier 12h cooldown; collisions must be separately controlled",
+    "This is retrospective multiple-testing, not real forward evidence",
+    "Existing research source and production unchanged"
+  ]
+}

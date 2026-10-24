@@ -1,0 +1,450 @@
+{
+  "status": "RESEARCH_ONLY_COMPLETE_12_SELECTED_SHADOW_REPRICED_WITH55_TIME_CAP",
+  "dateJST": "2026-10-25",
+  "selectedPolicy": "WICK_SHARP_S6 expanding_highwr on original six-hour CLOSED shadow history",
+  "count": 12,
+  "sources": {
+    "('RENDERUSDT', '2025-01')": {
+      "file": "C:\\tmp\\idle-render-independent-older-m5-20261024\\RENDERUSDT\\5m\\RENDERUSDT-5m-2025-01.zip",
+      "sha256": "613caee201751c24d87a0e964b62ff4fe82e9ddc6d2c163a31b542c4084930ee",
+      "rows": 8928
+    },
+    "('RENDERUSDT', '2025-07')": {
+      "file": "C:\\tmp\\idle-render-independent-older-m5-20261024\\RENDERUSDT\\5m\\RENDERUSDT-5m-2025-07.zip",
+      "sha256": "a7f2803891f0c4dca43ba23466b8db375e822fb85ecdf4a100fba67d28d29004",
+      "rows": 8928
+    },
+    "('RENDERUSDT', '2025-11')": {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2025-11.zip",
+      "sha256": "a3ff4cf7a4c7b93bfe55583b352ce44b1694cd8af921aec6585c39d826049f63",
+      "rows": 8640
+    },
+    "('RENDERUSDT', '2025-12')": {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2025-12.zip",
+      "sha256": "17b9690bec9f7443e6f3676c6a908df05b4a4a17e3324a1b41e4c2af09e1be47",
+      "rows": 8928
+    },
+    "('RENDERUSDT', '2026-01')": {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-01.zip",
+      "sha256": "5c49d0d0250f69be36f0467d3544d9a327f84c78178606cf87b3d10318a6ebc6",
+      "rows": 8928
+    },
+    "('RENDERUSDT', '2026-02')": {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-02.zip",
+      "sha256": "8ddc453b8198028b2dc83d1a924434c4debc513fbe01b0383673e7ef04103a12",
+      "rows": 8064
+    },
+    "('RENDERUSDT', '2026-05')": {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-05.zip",
+      "sha256": "1905f2b0e4f250c8ed1fe3a7fdfa11493efa71cf0e8310ba3b38582bb8278f57",
+      "rows": 8928
+    },
+    "('RENDERUSDT', '2026-08')": {
+      "file": "C:\\tmp\\render-flow-raw-data-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-08.zip",
+      "sha256": "f61627bfc5a770bb33d14de7ceec304b69cdb55a2b12c8a7542df7dcf0ba1945",
+      "rows": 8928
+    },
+    "('RENDERUSDT', '2026-10')": {
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-12.zip",
+      "sha256": "d9a1fb9b875dcf7349eb1700d1e4a421be32831fdc1a5d6de606a912b9b463c5",
+      "rows": 288
+    }
+  },
+  "results": {
+    "55": {
+      "performance": {
+        "10": {
+          "n": 12,
+          "wins": 10,
+          "wrPct": 83.333,
+          "pf": 4.34416,
+          "meanNetPct": 0.63315
+        },
+        "30": {
+          "n": 12,
+          "wins": 10,
+          "wrPct": 83.333,
+          "pf": 2.94531,
+          "meanNetPct": 0.43315
+        }
+      },
+      "byPeriod": {
+        "2025H1": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 8.14144,
+            "meanNetPct": 0.61402
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "wrPct": 50.0,
+            "pf": 3.22616,
+            "meanNetPct": 0.41402
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.9436
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.7436
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 2.20934,
+            "meanNetPct": 0.42327
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 1.58244,
+            "meanNetPct": 0.22327
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.97146
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 0.77146
+          }
+        }
+      },
+      "trades": [
+        {
+          "entry_ts": 1737432000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1737433800000,
+          "net30": 1.2000000000000013,
+          "entry_price": 6.578,
+          "exit_price": 6.47933,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1753718400000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1753721700000,
+          "net30": -0.3719597025665708,
+          "entry_price": 4.169,
+          "exit_price": 4.172,
+          "reason": "TIME_LIMIT"
+        },
+        {
+          "entry_ts": 1762290000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1762290600000,
+          "net30": 1.2000000000000013,
+          "entry_price": 1.84,
+          "exit_price": 1.8124,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1764903600000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1764906900000,
+          "net30": 0.2871990604815025,
+          "entry_price": 1.703,
+          "exit_price": 1.693,
+          "reason": "TIME_LIMIT"
+        },
+        {
+          "entry_ts": 1768640400000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1768642200000,
+          "net30": 1.1999999999999902,
+          "entry_price": 2.229,
+          "exit_price": 2.195565,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1768896000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1768899300000,
+          "net30": 1.0026052104208374,
+          "entry_price": 1.996,
+          "exit_price": 1.97,
+          "reason": "TIME_LIMIT"
+        },
+        {
+          "entry_ts": 1770210000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1770213300000,
+          "net30": 0.8749347258485642,
+          "entry_price": 1.532,
+          "exit_price": 1.514,
+          "reason": "TIME_LIMIT"
+        },
+        {
+          "entry_ts": 1770300000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1770302100000,
+          "net30": -2.3000000000000016,
+          "entry_price": 1.396,
+          "exit_price": 1.4239199999999999,
+          "reason": "STOP"
+        },
+        {
+          "entry_ts": 1779469200000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1779472500000,
+          "net30": 0.05371399696817464,
+          "entry_price": 1.979,
+          "exit_price": 1.972,
+          "reason": "TIME_LIMIT"
+        },
+        {
+          "entry_ts": 1779930000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1779933300000,
+          "net30": 0.508368996671438,
+          "entry_price": 2.103,
+          "exit_price": 2.086,
+          "reason": "TIME_LIMIT"
+        },
+        {
+          "entry_ts": 1787752800000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1787755200000,
+          "net30": 1.2000000000000013,
+          "entry_price": 1.51,
+          "exit_price": 1.48735,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1791820800000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1791824100000,
+          "net30": 0.342927794263104,
+          "entry_price": 2.022,
+          "exit_price": 2.009,
+          "reason": "TIME_LIMIT"
+        }
+      ]
+    },
+    "360": {
+      "performance": {
+        "10": {
+          "n": 12,
+          "wins": 11,
+          "wrPct": 91.667,
+          "pf": 7.33333,
+          "meanNetPct": 1.10833
+        },
+        "30": {
+          "n": 12,
+          "wins": 11,
+          "wrPct": 91.667,
+          "pf": 5.73913,
+          "meanNetPct": 0.90833
+        }
+      },
+      "byPeriod": {
+        "2025H1": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2025H2": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        },
+        "2026JanAug": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 3.33333,
+            "meanNetPct": 0.81667
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "wrPct": 83.333,
+            "pf": 2.6087,
+            "meanNetPct": 0.61667
+          }
+        },
+        "2026AugOct": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.4
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "pf": null,
+            "meanNetPct": 1.2
+          }
+        }
+      },
+      "trades": [
+        {
+          "entry_ts": 1737432000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1737433800000,
+          "net30": 1.2000000000000013,
+          "entry_price": 6.578,
+          "exit_price": 6.47933,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1753718400000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1753725600000,
+          "net30": 1.2000000000000124,
+          "entry_price": 4.169,
+          "exit_price": 4.106464999999999,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1762290000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1762290600000,
+          "net30": 1.2000000000000013,
+          "entry_price": 1.84,
+          "exit_price": 1.8124,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1764903600000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1764909000000,
+          "net30": 1.1999999999999902,
+          "entry_price": 1.703,
+          "exit_price": 1.6774550000000001,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1768640400000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1768642200000,
+          "net30": 1.1999999999999902,
+          "entry_price": 2.229,
+          "exit_price": 2.195565,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1768896000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1768909200000,
+          "net30": 1.2000000000000013,
+          "entry_price": 1.996,
+          "exit_price": 1.96606,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1770210000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1770213300000,
+          "net30": 1.2000000000000013,
+          "entry_price": 1.532,
+          "exit_price": 1.50902,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1770300000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1770302100000,
+          "net30": -2.3000000000000016,
+          "entry_price": 1.396,
+          "exit_price": 1.4239199999999999,
+          "reason": "STOP"
+        },
+        {
+          "entry_ts": 1779469200000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1779474900000,
+          "net30": 1.2000000000000013,
+          "entry_price": 1.979,
+          "exit_price": 1.9493150000000001,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1779930000000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1779935100000,
+          "net30": 1.2000000000000013,
+          "entry_price": 2.103,
+          "exit_price": 2.0714550000000003,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1787752800000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1787755200000,
+          "net30": 1.2000000000000013,
+          "entry_price": 1.51,
+          "exit_price": 1.48735,
+          "reason": "TAKE"
+        },
+        {
+          "entry_ts": 1791820800000,
+          "symbol": "RENDERUSDT",
+          "exit_ts": 1791824100000,
+          "net30": 1.2000000000000013,
+          "entry_price": 2.022,
+          "exit_price": 1.9916699999999998,
+          "reason": "TAKE"
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "55m time cap was proposed after known TAO collision, not pristine forward research",
+    "Selection still uses prior closed 6h shadow-trade results; it is NOT re-trained with 55m outcomes",
+    "Official Binance M5 price modeling, not Aster actual signed fills",
+    "Only 12 selected, not sufficient for high-confidence generalization",
+    "LIVE/VPS/Production/HP untouched"
+  ]
+}
