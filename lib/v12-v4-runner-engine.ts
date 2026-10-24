@@ -44,6 +44,18 @@ export function classifyV4RecoverableExitFeedFailure(error:unknown,eventTs=Date.
  return {status:"blocked",reason:"V4_EXIT_FEED_GAP_RETRY:"+reason,eventTs,
   candidateCount:0,orderEnabled:false};
 }
+/**
+ * A planned exit that is older than the bounded execution window requires an
+ * operator decision. Keep the daemon alive so monitoring and protective-stop
+ * reconciliation continue, but never turn this review state into an exit or
+ * a fresh entry implicitly.
+ */
+export function classifyV4StaleExitDecisionFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+ const reason=safeDecisionFailureReason(error);
+ if(!/^V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:/.test(reason))return;
+ return {status:"blocked",reason:"V4_STALE_EXIT_REVIEW_REQUIRED:"+reason,eventTs,
+  candidateCount:0,orderEnabled:false};
+}
 export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number){
  if(!Number.isFinite(entryTs)||!Number.isFinite(durationHours)||durationHours<=0||
    !Number.isFinite(now)||now<entryTs)throw Error("V4_EXIT_FEED_WINDOW_INVALID");

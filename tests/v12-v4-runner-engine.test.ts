@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
-import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent} from "../lib/v12-v4-runner-engine";
+import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
 
@@ -21,6 +21,20 @@ test("terminal V4 entry intents are not reconciled again after restart",()=>{
  assert.equal(isReconciliableV4EntryIntent({action:"ENTRY",stage:"TERMINAL"}),false);
  assert.equal(isReconciliableV4EntryIntent({action:"ENTRY",stage:"UNKNOWN"}),true);
  assert.equal(isReconciliableV4EntryIntent({action:"STOP",stage:"ACKNOWLEDGED"}),false);
+});
+test("stale V4 exit decisions remain blocked review instead of terminating the daemon",()=>{
+ const result=classifyV4StaleExitDecisionFailure(
+  new Error("V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:AAVEUSDT:REC_Y06_REV_D0_T72:SHORT:1792598400000"),
+  1792859642887,
+ );
+ assert.deepEqual(result,{
+  status:"blocked",
+  reason:"V4_STALE_EXIT_REVIEW_REQUIRED:V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:AAVEUSDT:REC_Y06_REV_D0_T72:SHORT:1792598400000",
+  eventTs:1792859642887,
+  candidateCount:0,
+  orderEnabled:false,
+ });
+ assert.equal(classifyV4StaleExitDecisionFailure(new Error("OTHER_FAILURE")),undefined);
 });
 function peers(now:number){return families.map(kind=>({kind,programSha:sha,raw:{
  updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
