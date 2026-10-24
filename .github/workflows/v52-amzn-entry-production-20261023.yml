@@ -1,0 +1,50 @@
+name: V52 AMZN SHORT Yahoo entry gate
+
+on:
+  push:
+    branches:
+      - codex/v52-amzn-yahoo-live-20261024-minimal
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: AMZN Yahoo gate deterministic tests
+        run: |
+          python scripts/dd-reduction/test_v52_amzn_yahoo_gate.py
+          python -m py_compile \
+            scripts/dd-reduction/v52_amzn_yahoo_gate.py \
+            scripts/v52_amzn_yahoo_gate.py \
+            scripts/disdex_v52_aster_only_legacy_engine.py \
+            scripts/disdex_v52_aster_only_live_engine.py
+
+      - name: V52 safety self-test
+        run: python scripts/disdex_v52_aster_only_live_engine.py --self-test
+
+      - name: Root TypeScript contracts
+        run: npm run typecheck
+
+      - name: Production UI typecheck
+        working-directory: apps/production-ui
+        run: |
+          npm ci
+          npx tsc --noEmit
