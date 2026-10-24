@@ -1,0 +1,95 @@
+{
+  "actual_native_owner_registered": false,
+  "finding": "Old GateProof.valid verifies digest shape, not artifact bytes or trusted provenance",
+  "limitations": [
+    "The 64-hex format-only acceptance is a research preflight validation gap, not evidence of a LIVE exploit",
+    "NEED_NATIVE_ALLOCATOR is not an order authorization",
+    "Synthetic test fixtures do not constitute native venue or runtime evidence",
+    "A digest provided by the candidate itself is NOT a trusted out-of-band root",
+    "No authenticated native proof bytes or externally pinned trust root found in the audited preallocation artifacts",
+    "2025 Aster RENDER H1 mark missing; Aster M5 fills and Funding not certified",
+    "Previously explored 2026 Aug-Oct is not unused OOS",
+    "No VPS, LIVE, Production, HP, or real order changes"
+  ],
+  "native_allocator_executed_with_new_owner": false,
+  "new_economic_backtest_performed": false,
+  "new_verifier_requires": "externally pinned manifest digest plus exact canonical candidate-bound as-of artifact bytes for all 13 gates",
+  "real_candidate_checks": {
+    "10": {
+      "candidates": [
+        {
+          "candidate_key": "fd2f6c4bb1bf7781a0a141bdf1607cfcb0da9645d4c5b20bac3848867743d1ad",
+          "order_authorized": false,
+          "reasons": [
+            "TRUSTED_MANIFEST_DIGEST_ABSENT",
+            "TRUSTED_MANIFEST_BYTES_ABSENT"
+          ],
+          "utc": "2026-05-27T21:00",
+          "verdict": "REJECT"
+        },
+        {
+          "candidate_key": "1ad42f0c020b2ecef8f4ef11b47c3c5f410a8f40cff33bea39d1da769960b716",
+          "order_authorized": false,
+          "reasons": [
+            "TRUSTED_MANIFEST_DIGEST_ABSENT",
+            "TRUSTED_MANIFEST_BYTES_ABSENT"
+          ],
+          "utc": "2026-06-23T01:00",
+          "verdict": "REJECT"
+        },
+        {
+          "candidate_key": "dee7f0e191cc207903a36b44fdaf41d67bf4a6f6b174d965b6583fa10c3cd115",
+          "order_authorized": false,
+          "reasons": [
+            "TRUSTED_MANIFEST_DIGEST_ABSENT",
+            "TRUSTED_MANIFEST_BYTES_ABSENT"
+          ],
+          "utc": "2026-06-25T07:00",
+          "verdict": "REJECT"
+        }
+      ],
+      "independent_raw_replay_verified": true,
+      "preallocation_sha256": "de696304d4b281235891daf320362ef72753a89db9e052cd55322477e522f783"
+    },
+    "30": {
+      "candidates": [
+        {
+          "candidate_key": "fd2f6c4bb1bf7781a0a141bdf1607cfcb0da9645d4c5b20bac3848867743d1ad",
+          "order_authorized": false,
+          "reasons": [
+            "TRUSTED_MANIFEST_DIGEST_ABSENT",
+            "TRUSTED_MANIFEST_BYTES_ABSENT"
+          ],
+          "utc": "2026-05-27T21:00",
+          "verdict": "REJECT"
+        },
+        {
+          "candidate_key": "1ad42f0c020b2ecef8f4ef11b47c3c5f410a8f40cff33bea39d1da769960b716",
+          "order_authorized": false,
+          "reasons": [
+            "TRUSTED_MANIFEST_DIGEST_ABSENT",
+            "TRUSTED_MANIFEST_BYTES_ABSENT"
+          ],
+          "utc": "2026-06-23T01:00",
+          "verdict": "REJECT"
+        },
+        {
+          "candidate_key": "dee7f0e191cc207903a36b44fdaf41d67bf4a6f6b174d965b6583fa10c3cd115",
+          "order_authorized": false,
+          "reasons": [
+            "TRUSTED_MANIFEST_DIGEST_ABSENT",
+            "TRUSTED_MANIFEST_BYTES_ABSENT"
+          ],
+          "utc": "2026-06-25T07:00",
+          "verdict": "REJECT"
+        }
+      ],
+      "independent_raw_replay_verified": true,
+      "preallocation_sha256": "774ea47081758005e4fef56ea2b739b32e383485b4f5bf0dfe32e4666d004d78"
+    }
+  },
+  "status": "RESEARCH_ONLY_PROOF_AUTHENTICITY_GAP_CONFIRMED_FAIL_CLOSED",
+  "synthetic_format_only_order_authorized": false,
+  "synthetic_format_only_verdict": "NEED_NATIVE_ALLOCATOR",
+  "trusted_native_manifest_available_in_audited_inputs": false
+}
