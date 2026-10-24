@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { cn } from "@/lib/utils";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
@@ -186,6 +187,7 @@ export default function PerformancePage() {
   const { formatPrice } = useCurrency();
   const { wallet } = useOperationalWallet();
   const { snapshot: livePortfolio } = useLivePortfolio();
+  const { snapshot: productionRuntime, loading: runtimeLoading, error: runtimeError } = useProductionRuntime();
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,7 +199,7 @@ export default function PerformancePage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/system/trade-history", { cache: "no-store" });
+      const response = await fetch("/api/system/trade-history?range=90d", { cache: "no-store" });
       if (!response.ok) throw new Error("Official trade history could not be loaded.");
       const data = await response.json();
       setEntries(Array.isArray(data.entries) ? data.entries : []);
@@ -305,6 +307,14 @@ export default function PerformancePage() {
             {latestMonth ? `${latestMonth.label} / ${formatPct(latestMonth.returnPct, 2)} / 手数料控除後 / ${historyLabel}` : "\u516c\u5f0f\u6c7a\u6e08\u5c65\u6b74\u3092\u53d6\u5f97\u3067\u304d\u307e\u305b\u3093\u3002"}
           </div>
         </Card>
+      </div>
+
+      <div className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm leading-6 text-sky-100">
+        <div className="font-semibold">成績データのprovenance</div>
+        <div className="mt-1 text-xs text-sky-100/80">
+          {historySource === "aster" ? "Aster公式決済履歴" : historySource === "local-fallback" ? "保存済みledger（公式履歴が0件のため明示的fallback）" : "公式決済履歴未取得"} / range=90d / current runtime={runtimeLoading && !productionRuntime ? "確認中" : productionRuntime?.runtimeLineage.synchronized ? "同期済み" : "未取得 / 要確認"}
+        </div>
+        {runtimeError ? <div className="mt-1 text-xs text-amber-100">runtime provenance: {runtimeError}</div> : null}
       </div>
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">

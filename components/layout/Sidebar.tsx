@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, CalendarDays, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
 
@@ -21,6 +22,8 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { snapshot: runtime, loading: runtimeLoading } = useProductionRuntime();
+  const runtimeLabel = runtimeLoading && !runtime ? "確認中" : runtime?.runtimeLineage.synchronized ? "LIVE / lineage同期済み" : "未取得 / 要確認";
 
   return (
     <aside className="hidden w-[188px] shrink-0 bg-[#04070c] px-3 py-4 md:flex md:flex-col">
@@ -32,7 +35,7 @@ export function Sidebar() {
           <div className="min-w-0">
             <div className="truncate text-[11px] font-bold text-white">{SITE_BRAND_NAME}</div>
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Personal</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 + PENGU + Q102 LIVE / V52時間外停止</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">VPS runtime: {runtimeLabel}</div>
           </div>
         </div>
       </div>

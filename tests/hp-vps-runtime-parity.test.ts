@@ -135,3 +135,33 @@ test("authenticated decision status keeps every runtime unit unavailable when cu
   assert.match(response.headers.get("Cache-Control") || "", /private/);
   assert.match(response.headers.get("Cache-Control") || "", /no-store/);
 });
+
+test("HP runtime consumers expose observed lineage, V4 state, and no static contract fallback", async () => {
+  const [hook, summary, home, positions, banner, badge, sidebar, topBar] = await Promise.all([
+    readFile("hooks/useProductionRuntime.ts", "utf8"),
+    readFile("components/features/ProductionRuntimeSummary.tsx", "utf8"),
+    readFile("app/page.tsx", "utf8"),
+    readFile("app/positions/page.tsx", "utf8"),
+    readFile("components/layout/LiveProductionBanner.tsx", "utf8"),
+    readFile("components/layout/LiveRuntimeBadge.tsx", "utf8"),
+    readFile("components/layout/Sidebar.tsx", "utf8"),
+    readFile("components/layout/TopBar.tsx", "utf8"),
+  ]);
+
+  assert.match(hook, /setInterval\(\(\) => void refresh\(\), 30_000\)/);
+  assert.match(hook, /setSnapshot\(null\)/);
+  assert.match(summary, /useProductionRuntime/);
+  assert.match(summary, /useV12V4HpStatus/);
+  assert.match(summary, /releaseSha/);
+  assert.match(summary, /runtimeLineage/);
+  assert.match(summary, /caps\.totalGross/);
+  assert.match(summary, /routeCoverage/);
+  assert.match(summary, /orderEnabled/);
+  assert.match(summary, /heartbeat/);
+  assert.match(banner, /useProductionRuntime/);
+  assert.match(badge, /useProductionRuntime/);
+  assert.match(sidebar, /useProductionRuntime/);
+  assert.match(topBar, /useProductionRuntime/);
+  assert.doesNotMatch(home, /DIST_TERMINAL_LIVE_CONFIG/);
+  assert.doesNotMatch(positions, /DIST_TERMINAL_LIVE_CONFIG/);
+});

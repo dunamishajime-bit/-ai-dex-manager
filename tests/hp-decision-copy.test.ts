@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import test from "node:test";
 import { join } from "node:path";
 
@@ -47,4 +47,19 @@ test("runtime unavailable has no static FET or V52 policy fallback", () => {
   assert.match(v52?.reason || "", /手動確認|needs review|unavailable/i);
   assert.doesNotMatch(fet?.entryPolicy || "", /BRK48|Core entry|残余枠/);
   assert.doesNotMatch(v52?.entryPolicy || "", /Top2|Basis|Net Edge|V50|V11/);
+});
+
+test("decision status refreshes every 30 seconds and separates V4 process from entry readiness", async () => {
+  const panel = await readFile("components/features/DecisionStatusPanel.tsx", "utf8");
+
+  assert.match(panel, /setInterval\(\(\) => void load\(true\), 30_000\)/);
+  assert.match(panel, /V4 process\/runtime/);
+  assert.match(panel, /orderEnabled/);
+  assert.match(panel, /new-entry|新規.*entry|新規.*エントリー/i);
+});
+
+test("decision status hides static detail panels unless V4 is live verified", async () => {
+  const panel = await readFile("components/features/DecisionStatusPanel.tsx", "utf8");
+
+  assert.match(panel, /runtimeAvailable = snapshot\.ok && snapshot\.v12V4\?\.displayStatus === "LIVE_VERIFIED"/);
 });

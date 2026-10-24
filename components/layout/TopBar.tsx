@@ -1,13 +1,14 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, CreditCard, ShieldAlert, Wallet } from "lucide-react";
+import { Activity, Bell, CreditCard, ShieldAlert, Wallet } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
 import { useSimulation } from "@/context/SimulationContext";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
-import { useLiveStatus } from "@/hooks/useLiveStatus";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 
 const PAGE_TITLES: Record<string, string> = {
   "/": "ホーム",
@@ -18,23 +19,23 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings": "設定",
   "/admin": "管理",
   "/history": "トレード履歴",
+  "/realtime": "リアルタイム",
 };
 
 export function TopBar() {
   const pathname = usePathname();
   const { currency, symbol } = useCurrency();
   const { riskStatus } = useSimulation();
-  const { snapshot: liveSnapshot, loading: liveLoading } = useLiveStatus();
+  const { snapshot: liveSnapshot, loading: liveLoading, error: liveError } = useProductionRuntime();
 
   const title = PAGE_TITLES[pathname || "/"] || SITE_BRAND_NAME;
   const riskLabel =
     riskStatus === "CRITICAL" ? "警戒" : riskStatus === "CAUTION" ? "注意" : "通常";
-  const liveLabel = liveLoading ? "確認中" : liveSnapshot?.status === "LIVE" ? "確認済み" : liveSnapshot?.status === "STALE" ? "要確認" : "未確認";
-  const liveClass = liveSnapshot?.status === "LIVE"
+  const liveReady = liveSnapshot?.status === "LIVE" && liveSnapshot.runtimeLineage.synchronized;
+  const liveLabel = liveLoading && !liveSnapshot ? "確認中" : liveReady ? "確認済み" : "未取得 / 要確認";
+  const liveClass = liveReady
     ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-100"
-    : liveSnapshot?.status === "STALE"
-      ? "border-amber-400/30 bg-amber-500/10 text-amber-100"
-      : "border-white/10 bg-white/[0.03] text-white/60";
+    : "border-amber-400/30 bg-amber-500/10 text-amber-100";
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/6 bg-[linear-gradient(180deg,rgba(5,8,12,0.92),rgba(4,6,10,0.78))] px-3 py-3 backdrop-blur-2xl md:px-4">
@@ -56,7 +57,7 @@ export function TopBar() {
           <span className="rounded-full border border-gold-400/20 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold text-white/80">
             基準: {symbol}
           </span>
-          <span title={liveSnapshot?.reason || "LIVE runner state is being checked."} className={cn("rounded-full border px-3 py-1 text-[10px] font-semibold", liveClass)}>LIVE稼働: {liveLabel}</span>
+          <span title={liveError || "VPS current runtime state is being checked."} className={cn("rounded-full border px-3 py-1 text-[10px] font-semibold", liveClass)}>LIVE稼働: {liveLabel}</span>
           <span
             className={cn(
               "rounded-full border px-3 py-1 text-[10px] font-semibold",
@@ -72,6 +73,10 @@ export function TopBar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link href="/realtime" className="hidden items-center gap-1 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-100 md:inline-flex">
+            <Activity className="h-3.5 w-3.5" />
+            リアルタイム
+          </Link>
           <button
             type="button"
             className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-white/80"
@@ -79,7 +84,7 @@ export function TopBar() {
             <Bell className="mr-1 inline h-3.5 w-3.5" />
             通知
           </button>
-          <span title={liveSnapshot?.reason || "LIVE runner state is being checked."} className={cn("rounded-full border px-3 py-2 text-xs font-semibold", liveClass)}>LIVE: {liveLabel}</span>
+          <span title={liveError || "VPS current runtime state is being checked."} className={cn("rounded-full border px-3 py-2 text-xs font-semibold", liveClass)}>LIVE: {liveLabel}</span>
           <button
             type="button"
             className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.14),rgba(245,158,11,0.08))] px-3 py-2 text-xs font-semibold text-white"

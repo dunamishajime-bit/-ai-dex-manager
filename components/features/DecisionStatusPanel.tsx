@@ -7,6 +7,7 @@ import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-conf
 import type { V52Top2Observability, V52Top2DecisionRow } from "@/lib/server/v52-top2-observability";
 import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observability";
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
+import type { V12V4HpSnapshot } from "@/lib/v12-v4-hp-contract";
 
 type DecisionStatusItem = {
   symbol: string;
@@ -116,6 +117,7 @@ type Snapshot = {
   penguRuntime?: PenguRuntimeStatus;
   v52Top2Observability?: V52Top2Observability;
   quality102Runtime?: Quality102RuntimeStatus;
+  v12V4?: V12V4HpSnapshot;
   error?: string;
 };
 
@@ -188,6 +190,29 @@ function RuntimeSummary({ runtime }: { runtime: Snapshot["runtime"] }) {
   const badge = verified ? "全runner LIVE確認済み" : liveCount > 0 ? `${liveCount}/${runtime.units.length} runner LIVE確認` : "LIVE未確認";
   const badgeClass = verified ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : liveCount > 0 ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
   return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><ServerCog className="h-5 w-5 text-gold-100" />VPS実稼働ロジック</div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}>{badge}</span></div><p className="mt-2 text-xs leading-5 text-white/55">確認時刻：{time(runtime.checkedAt)} / runnerごとに実stateの更新時刻・mode・保護状態を判定します。1つのrunnerが要確認でも、他runnerのLIVE状態は独立して表示します。ここから発注操作は行いません。</p><div className="mt-4 grid gap-3 xl:grid-cols-3">{runtime.units.map((unit) => <article key={unit.id} className="rounded-2xl border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-2"><div><div className="font-bold text-white">{unit.label}</div><div className="mt-1 text-[11px] text-white/45">{unit.venue} / {unit.timeframe}</div></div><span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${runtimeStatusClass(unit.status)}`}>{unit.status === "UNAVAILABLE" ? "未取得" : unit.status === "UNCONFIRMED" ? "未確認" : unit.status === "STALE" ? "要確認" : "LIVE"}</span></div><div className="mt-3 space-y-2 text-xs leading-5 text-white/72"><p><span className="text-white/45">判定：</span>{unit.entryPolicy}</p><p><span className="text-white/45">保護：</span>{unit.protection}</p><p className="text-white/50">{unit.note}</p><p className="text-amber-100/80">状態根拠：{unit.reason || "未取得"}</p></div><div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">release {shortSha(unit.releaseSha)}… / state更新 {time(unit.updatedAt)}</div></article>)}</div></section>;
+}
+
+function V4RuntimeStatus({ details }: { details?: V12V4HpSnapshot }) {
+  const processState = details?.actual.activeRunnerState || "未取得";
+  const processStatus = details?.displayStatus || "UNAVAILABLE";
+  const entryReady = details?.actual.orderEnabled === true
+    && details.freshness.heartbeat
+    && details.freshness.decision
+    && details.displayStatus === "LIVE_VERIFIED";
+  return (
+    <section className="rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-bold text-white"><ServerCog className="h-4 w-4 text-cyan-200" />V4 process/runtime と新規エントリー readiness</div>
+        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${entryReady ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-100" : "border-amber-400/30 bg-amber-500/10 text-amber-100"}`}>{entryReady ? "観測上の条件内" : "Fail Closed / 要確認"}</span>
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">V4 process/runtime</div><div className="mt-1 text-sm font-semibold text-white">{processState}</div><div className="text-[11px] text-white/55">displayStatus={processStatus}</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">新規エントリー</div><div className="mt-1 text-sm font-semibold text-white">{entryReady ? "条件内" : "許可を推測しない"}</div><div className="text-[11px] text-white/55">orderEnabled={details?.actual.orderEnabled === true ? "true" : details?.actual.orderEnabled === false ? "false" : "未取得"}</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">heartbeat</div><div className="mt-1 text-sm font-semibold text-white">{details?.freshness.heartbeat ? "fresh" : "stale / 未取得"}</div><div className="text-[11px] text-white/55">{time(details?.timestamps.heartbeatUpdatedAt)}</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">route coverage</div><div className="mt-1 text-sm font-semibold text-white">{details ? `${details.routeCoverage.observed}/${details.routeCoverage.expected}` : "未取得"}</div><div className="text-[11px] text-white/55">emitted route presence only</div></div>
+      </div>
+    </section>
+  );
 }
 
 function V12Detail({ details }: { details?: V12Observability }) {
@@ -394,8 +419,9 @@ export function DecisionStatusPanel() {
     }
   }
 
-  useEffect(() => { void load(); const timer = window.setInterval(() => void load(), 3 * 60 * 60 * 1000); return () => window.clearInterval(timer); }, []);
+  useEffect(() => { void load(); const timer = window.setInterval(() => void load(true), 30_000); return () => window.clearInterval(timer); }, []);
   if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">判定状況を取得しています…</div>;
   if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "判定データを取得できません。"}</div>;
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HPは読み取り専用 / 発注・取消・決済操作なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />最終確認：{time(snapshot.checkedAt)} / 自動再確認：3時間ごと</span><button type="button" onClick={() => void load(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{loading ? "更新中" : "再確認"}</button></div>{error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部データを取得できません：{error}</div> : null}<RuntimeSummary runtime={snapshot.runtime} /><V12Detail details={snapshot.v12Observability} /><PenguDetail details={snapshot.penguRuntime} /><Quality102Detail details={snapshot.quality102Runtime} /><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} /><div className="grid gap-4 xl:grid-cols-2"><Sleeve title="V12 Top2 補助候補ランキング" items={snapshot.v12.items} /><Sleeve title="V52 Stock 補助候補ランキング" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 取引時間内" : " / 対象時間外")} /></div></div>;
+  const runtimeAvailable = snapshot.ok && snapshot.v12V4?.displayStatus === "LIVE_VERIFIED";
+  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HPは読み取り専用 / 発注・取消・決済操作なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />最終確認：{time(snapshot.checkedAt)} / 自動再確認：30秒ごと</span><button type="button" onClick={() => void load(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{loading ? "更新中" : "再確認"}</button></div>{error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部データを取得できません：{error}</div> : null}<V4RuntimeStatus details={snapshot.v12V4} /><RuntimeSummary runtime={snapshot.runtime} />{runtimeAvailable ? <><V12Detail details={snapshot.v12Observability} /><PenguDetail details={snapshot.penguRuntime} /><Quality102Detail details={snapshot.quality102Runtime} /><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} /><div className="grid gap-4 xl:grid-cols-2"><Sleeve title="V12 Top2 補助候補ランキング" items={snapshot.v12.items} /><Sleeve title="V52 Stock 補助候補ランキング" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 取引時間内" : " / 対象時間外")} /></div></> : <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-5 text-sm leading-6 text-rose-100">V4/current runtimeが未取得・不一致・staleのため、候補や旧static policyを表示しません。VPS runtimeとheartbeatを手動確認してください。</div>}</div>;
 }

@@ -5,6 +5,7 @@ import { Download, ExternalLink, RefreshCw, CalendarDays } from "lucide-react";
 import Link from "next/link";
 
 import { Card } from "@/components/ui/Card";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
 import { formatTradeHistoryAttributionLabel, getTradeHistoryAttributionTone } from "@/lib/trade-history-attribution";
 
@@ -113,16 +114,23 @@ export default function HistoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [historyNotice, setHistoryNotice] = useState<string | null>(null);
+  const [historySource, setHistorySource] = useState<"aster" | "local-fallback" | "empty">("empty");
+  const [historyRange, setHistoryRange] = useState<string | null>(null);
+  const [officialHistory, setOfficialHistory] = useState(false);
+  const { snapshot: productionRuntime, loading: runtimeLoading, error: runtimeError } = useProductionRuntime();
 
   const loadEntries = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/system/trade-history", { cache: "no-store" });
+      const response = await fetch("/api/system/trade-history?range=90d", { cache: "no-store" });
       if (!response.ok) throw new Error("履歴の読み込みに失敗しました。");
       const data = await response.json();
       setEntries(Array.isArray(data.entries) ? data.entries : []);
       setHistoryNotice(typeof data.historyNotice === "string" ? data.historyNotice : null);
+      setHistorySource(data.historySource === "aster" || data.historySource === "local-fallback" ? data.historySource : "empty");
+      setHistoryRange(typeof data.historyRange === "string" ? data.historyRange : null);
+      setOfficialHistory(data.officialHistory === true);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "履歴の読み込みに失敗しました。");
     } finally {
@@ -246,6 +254,14 @@ export default function HistoryPage() {
             CSV出力
           </button>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm leading-6 text-sky-100">
+        <div className="font-semibold">データソース / provenance</div>
+        <div className="mt-1 text-xs text-sky-100/80">
+          {officialHistory ? "Aster公式約定履歴" : historySource === "local-fallback" ? "保存済みledger（公式約定が0件のため明示的fallback）" : "公式履歴未取得"} / range={historyRange || "未取得"} / current runtime={runtimeLoading && !productionRuntime ? "確認中" : productionRuntime?.runtimeLineage.synchronized ? "同期済み" : "未取得 / 要確認"}
+        </div>
+        {runtimeError ? <div className="mt-1 text-xs text-amber-100">runtime provenance: {runtimeError}</div> : null}
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
