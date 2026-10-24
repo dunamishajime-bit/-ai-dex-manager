@@ -1,0 +1,665 @@
+{
+  "status": "FIRST_UNSEEN_2026_AUG_OCT_HISTORICAL_RECHECK_NOT_LIVE",
+  "sources": {
+    "manifest": "HOLDOUT_INPUTS_READY",
+    "freshZipCount": 99,
+    "OctoberFundingSource": "Binance official public FAPI; response SHA stored",
+    "freshMetrics": 14960,
+    "freshFunding": 132
+  },
+  "period": {
+    "start": 1786320000000,
+    "latestCompleteM5": 1792713300000,
+    "endExcluded": 1792713600000,
+    "lastEligibleH1EntryBefore": 1792627200000
+  },
+  "frozenCutoffs": {
+    "2024_BTC_RALLY_FAILURE": "btc1>=.28 ret3>=.7 wick>=.4 last15<=-.12 position<=.65 sell1>=.03",
+    "OI3_FADE_GATE": "oi3Pct <= -0.6%",
+    "exit": "SHORT TP4% SL3% max24h 12h same symbol cooldown",
+    "cost": "10bps/30bps"
+  },
+  "warnings": [
+    "Validation period from 2026-08-10; inputs were not in earlier selection, but retrospective, not prospective forward shadow",
+    "Study candidate-specific tick/PnL research only, not 8 strategy shared wallet or signed venue fills",
+    "Market-model selection and thresholds repeatedly optimized on prior historical periods; this holdout is frozen first-look",
+    "Only Binance futures proxy trades; funding settlement PnL and L2 / order fill latency excluded"
+  ],
+  "candidateN": 19,
+  "variants": {
+    "A_2024_BTC_TRAP_ONLY": {
+      "entireWindow": {
+        "10": {
+          "n": 8,
+          "wins": 4,
+          "wrPct": 50.0,
+          "pf": 1.2581,
+          "sumPct": 3.2,
+          "compoundPct": 2.744,
+          "closeDDPct": -6.104,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 8
+          }
+        },
+        "30": {
+          "n": 8,
+          "wins": 4,
+          "wrPct": 50.0,
+          "pf": 1.1212,
+          "sumPct": 1.6,
+          "compoundPct": 1.116,
+          "closeDDPct": -6.491,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 8
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 4,
+          "wins": 2,
+          "wrPct": 50.0,
+          "pf": 1.2581,
+          "sumPct": 1.6,
+          "compoundPct": 1.363,
+          "closeDDPct": -6.104,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 4
+          }
+        },
+        "30": {
+          "n": 4,
+          "wins": 2,
+          "wrPct": 50.0,
+          "pf": 1.1212,
+          "sumPct": 0.8,
+          "compoundPct": 0.557,
+          "closeDDPct": -6.491,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 4
+          }
+        }
+      },
+      "modelSelected": 8,
+      "details": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1787296500000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1787492400000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1787691900000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1787906400000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1789479300000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1789782300000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1789976700000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1790163300000,
+          "exitReason": "TAKE"
+        }
+      ]
+    },
+    "B_BEARFADE_OI3_LE_M0P2_ONLY": {
+      "entireWindow": {
+        "10": {
+          "n": 6,
+          "wins": 3,
+          "wrPct": 50.0,
+          "pf": 0.9287,
+          "sumPct": -0.663,
+          "compoundPct": -0.957,
+          "closeDDPct": -6.104,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 6
+          }
+        },
+        "30": {
+          "n": 6,
+          "wins": 3,
+          "wrPct": 50.0,
+          "pf": 0.8118,
+          "sumPct": -1.863,
+          "compoundPct": -2.142,
+          "closeDDPct": -6.491,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 6
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 1.3931,
+          "sumPct": 2.437,
+          "compoundPct": 2.211,
+          "closeDDPct": -3.1,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 5
+          }
+        },
+        "30": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 1.2178,
+          "sumPct": 1.437,
+          "compoundPct": 1.197,
+          "closeDDPct": -3.3,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 5
+          }
+        }
+      },
+      "modelSelected": 6,
+      "details": [
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": -3.3,
+          "exitTs": 1787492400000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": -3.3,
+          "exitTs": 1790682300000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1791472200000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": -3.3,
+          "exitTs": 1791523800000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1792030800000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 0.63716,
+          "exitTs": 1792461600000,
+          "exitReason": "TIME"
+        }
+      ]
+    },
+    "B_BEARFADE_OI3_LE_M0P6_ONLY": {
+      "entireWindow": {
+        "10": {
+          "n": 3,
+          "wins": 2,
+          "wrPct": 66.67,
+          "pf": 2.5161,
+          "sumPct": 4.7,
+          "compoundPct": 4.606,
+          "closeDDPct": -3.1,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 3
+          }
+        },
+        "30": {
+          "n": 3,
+          "wins": 2,
+          "wrPct": 66.67,
+          "pf": 2.2424,
+          "sumPct": 4.1,
+          "compoundPct": 3.988,
+          "closeDDPct": -3.3,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 3
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 2,
+          "wins": 2,
+          "wrPct": 100.0,
+          "pf": null,
+          "sumPct": 7.8,
+          "compoundPct": 7.952,
+          "closeDDPct": 0,
+          "maxLossPct": 3.9,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 2
+          }
+        },
+        "30": {
+          "n": 2,
+          "wins": 2,
+          "wrPct": 100.0,
+          "pf": null,
+          "sumPct": 7.4,
+          "compoundPct": 7.537,
+          "closeDDPct": 0,
+          "maxLossPct": 3.7,
+          "byExpert": {
+            "B_OI3_CONFIRMED_REBOUND_FADE": 2
+          }
+        }
+      },
+      "modelSelected": 3,
+      "details": [
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": -3.3,
+          "exitTs": 1787492400000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1791529200000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1791570900000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1792030800000,
+          "exitReason": "TAKE"
+        }
+      ]
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2": {
+      "entireWindow": {
+        "10": {
+          "n": 13,
+          "wins": 7,
+          "wrPct": 53.85,
+          "pf": 1.3031,
+          "sumPct": 5.637,
+          "compoundPct": 5.016,
+          "closeDDPct": -6.104,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 8,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 7,
+          "wrPct": 53.85,
+          "pf": 1.1534,
+          "sumPct": 3.037,
+          "compoundPct": 2.327,
+          "closeDDPct": -6.491,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 8,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 5
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 9,
+          "wins": 5,
+          "wrPct": 55.56,
+          "pf": 1.3256,
+          "sumPct": 4.037,
+          "compoundPct": 3.604,
+          "closeDDPct": -6.104,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 4,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 5,
+          "wrPct": 55.56,
+          "pf": 1.1695,
+          "sumPct": 2.237,
+          "compoundPct": 1.761,
+          "closeDDPct": -6.491,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 4,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 5
+          }
+        }
+      },
+      "modelSelected": 13,
+      "details": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1787296500000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1787492400000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1787691900000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1787906400000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1789479300000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1789782300000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1789976700000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1790163300000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": -3.3,
+          "exitTs": 1790682300000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1791472200000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": -3.3,
+          "exitTs": 1791523800000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1792030800000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 0.63716,
+          "exitTs": 1792461600000,
+          "exitReason": "TIME"
+        }
+      ]
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6": {
+      "entireWindow": {
+        "10": {
+          "n": 10,
+          "wins": 6,
+          "wrPct": 60.0,
+          "pf": 1.8871,
+          "sumPct": 11.0,
+          "compoundPct": 10.915,
+          "closeDDPct": -6.104,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 8,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 2
+          }
+        },
+        "30": {
+          "n": 10,
+          "wins": 6,
+          "wrPct": 60.0,
+          "pf": 1.6818,
+          "sumPct": 9.0,
+          "compoundPct": 8.737,
+          "closeDDPct": -6.491,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 8,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 2
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 6,
+          "wins": 4,
+          "wrPct": 66.67,
+          "pf": 2.5161,
+          "sumPct": 9.4,
+          "compoundPct": 9.423,
+          "closeDDPct": -6.104,
+          "maxLossPct": -3.1,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 4,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 2
+          }
+        },
+        "30": {
+          "n": 6,
+          "wins": 4,
+          "wrPct": 66.67,
+          "pf": 2.2424,
+          "sumPct": 8.2,
+          "compoundPct": 8.135,
+          "closeDDPct": -6.491,
+          "maxLossPct": -3.3,
+          "byExpert": {
+            "A_2024_BTC_RALLY_FAILURE": 4,
+            "B_OI3_CONFIRMED_REBOUND_FADE": 2
+          }
+        }
+      },
+      "modelSelected": 10,
+      "details": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1787296500000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1787492400000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1787691900000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1787906400000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1789479300000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1789782300000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": -3.3,
+          "exitTs": 1789976700000,
+          "exitReason": "STOP_OR_TRAIL"
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "expert": "A_2024_BTC_RALLY_FAILURE",
+          "return30bps": 3.7,
+          "exitTs": 1790163300000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1791529200000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1791570900000,
+          "exitReason": "TAKE"
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+          "return30bps": 3.7,
+          "exitTs": 1792030800000,
+          "exitReason": "TAKE"
+        }
+      ]
+    }
+  },
+  "frozenPrimaryStatus": "PASS_HISTORICAL_RECHECK_NOT_NATIVE8"
+}

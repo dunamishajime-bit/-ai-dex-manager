@@ -1,0 +1,1942 @@
+{
+  "status": "HOLDOUT_INPUTS_READY",
+  "staticPublisherChecksumVerified": 99,
+  "staticRequested": 99,
+  "staticBad": 0,
+  "historyBoundary": {
+    "start": "2026-08-10",
+    "maxEntryEnd": "2026-10-21",
+    "noUseBeyond": "2026-10-23T00:00:00Z"
+  },
+  "fundingOctoberPublicApi": {
+    "source": "Public Binance Futures FAPI /fapi/v1/fundingRate",
+    "requestURL": "https://fapi.binance.com/fapi/v1/fundingRate?symbol=RENDERUSDT&startTime=1790812800000&endTime=1792713600000&limit=300",
+    "rawResponseSHA256": "8469f30653741394651b053c75781f7e42484112bfc74982845a8ca0d9157e2a",
+    "count": 132,
+    "first": 1790812800001,
+    "last": 1792699200000,
+    "rows": [
+      [
+        1790812800001,
+        5e-05
+      ],
+      [
+        1790827200002,
+        5e-05
+      ],
+      [
+        1790841600005,
+        5e-05
+      ],
+      [
+        1790856000000,
+        5e-05
+      ],
+      [
+        1790870400003,
+        5e-05
+      ],
+      [
+        1790884800000,
+        5e-05
+      ],
+      [
+        1790899200002,
+        5e-05
+      ],
+      [
+        1790913600005,
+        5e-05
+      ],
+      [
+        1790928000000,
+        5e-05
+      ],
+      [
+        1790942400001,
+        5e-05
+      ],
+      [
+        1790956800000,
+        5e-05
+      ],
+      [
+        1790971200000,
+        5e-05
+      ],
+      [
+        1790985600001,
+        5e-05
+      ],
+      [
+        1791000000001,
+        5e-05
+      ],
+      [
+        1791014400000,
+        5e-05
+      ],
+      [
+        1791028800000,
+        5e-05
+      ],
+      [
+        1791043200001,
+        5e-05
+      ],
+      [
+        1791057600001,
+        5e-05
+      ],
+      [
+        1791072000000,
+        5e-05
+      ],
+      [
+        1791086400000,
+        5e-05
+      ],
+      [
+        1791100800001,
+        5e-05
+      ],
+      [
+        1791115200001,
+        1.276e-05
+      ],
+      [
+        1791129600002,
+        5e-05
+      ],
+      [
+        1791144000000,
+        5e-05
+      ],
+      [
+        1791158400002,
+        1.415e-05
+      ],
+      [
+        1791172800000,
+        5e-05
+      ],
+      [
+        1791187200001,
+        5e-05
+      ],
+      [
+        1791201600002,
+        5e-05
+      ],
+      [
+        1791216000000,
+        5e-05
+      ],
+      [
+        1791230400000,
+        5e-05
+      ],
+      [
+        1791244800003,
+        5e-05
+      ],
+      [
+        1791259200000,
+        5e-05
+      ],
+      [
+        1791273600001,
+        5e-05
+      ],
+      [
+        1791288000001,
+        5e-05
+      ],
+      [
+        1791302400000,
+        5e-05
+      ],
+      [
+        1791316800006,
+        5e-05
+      ],
+      [
+        1791331200002,
+        5e-05
+      ],
+      [
+        1791345600001,
+        5e-05
+      ],
+      [
+        1791360000002,
+        5e-05
+      ],
+      [
+        1791374400000,
+        5e-05
+      ],
+      [
+        1791388800000,
+        4.668e-05
+      ],
+      [
+        1791403200001,
+        5e-05
+      ],
+      [
+        1791417600000,
+        5e-05
+      ],
+      [
+        1791432000001,
+        5e-05
+      ],
+      [
+        1791446400000,
+        5e-05
+      ],
+      [
+        1791460800000,
+        5e-05
+      ],
+      [
+        1791475200000,
+        5e-05
+      ],
+      [
+        1791489600000,
+        -7.03e-06
+      ],
+      [
+        1791504000000,
+        -2.847e-05
+      ],
+      [
+        1791518400000,
+        2.155e-05
+      ],
+      [
+        1791532800000,
+        5e-05
+      ],
+      [
+        1791547200003,
+        2.4e-05
+      ],
+      [
+        1791561600000,
+        -1.277e-05
+      ],
+      [
+        1791576000000,
+        2.09e-05
+      ],
+      [
+        1791590400002,
+        5e-05
+      ],
+      [
+        1791604800007,
+        5e-05
+      ],
+      [
+        1791619200001,
+        5e-05
+      ],
+      [
+        1791633600003,
+        5e-05
+      ],
+      [
+        1791648000002,
+        5e-05
+      ],
+      [
+        1791662400001,
+        5e-05
+      ],
+      [
+        1791676800007,
+        5e-05
+      ],
+      [
+        1791691200000,
+        5e-05
+      ],
+      [
+        1791705600000,
+        5e-05
+      ],
+      [
+        1791720000006,
+        5e-05
+      ],
+      [
+        1791734400002,
+        -2.59e-06
+      ],
+      [
+        1791748800002,
+        5e-05
+      ],
+      [
+        1791763200006,
+        5e-05
+      ],
+      [
+        1791777600000,
+        5e-05
+      ],
+      [
+        1791792000002,
+        -5.318e-05
+      ],
+      [
+        1791806400000,
+        5e-05
+      ],
+      [
+        1791820800006,
+        5e-05
+      ],
+      [
+        1791835200000,
+        3.539e-05
+      ],
+      [
+        1791849600002,
+        5e-05
+      ],
+      [
+        1791864000001,
+        5e-05
+      ],
+      [
+        1791878400005,
+        5e-05
+      ],
+      [
+        1791892800002,
+        -2.575e-05
+      ],
+      [
+        1791907200000,
+        5e-05
+      ],
+      [
+        1791921600000,
+        5e-05
+      ],
+      [
+        1791936000001,
+        2.564e-05
+      ],
+      [
+        1791950400005,
+        2.742e-05
+      ],
+      [
+        1791964800001,
+        3.221e-05
+      ],
+      [
+        1791979200000,
+        5.74e-06
+      ],
+      [
+        1791993600002,
+        -1.664e-05
+      ],
+      [
+        1792008000003,
+        -2.1e-07
+      ],
+      [
+        1792022400000,
+        -4.28e-06
+      ],
+      [
+        1792036800000,
+        2.853e-05
+      ],
+      [
+        1792051200000,
+        6.92e-06
+      ],
+      [
+        1792065600000,
+        -6.87e-06
+      ],
+      [
+        1792080000000,
+        3.844e-05
+      ],
+      [
+        1792094400000,
+        5e-05
+      ],
+      [
+        1792108800001,
+        5e-05
+      ],
+      [
+        1792123200005,
+        5e-05
+      ],
+      [
+        1792137600001,
+        3.817e-05
+      ],
+      [
+        1792152000002,
+        5e-05
+      ],
+      [
+        1792166400000,
+        4.94e-06
+      ],
+      [
+        1792180800000,
+        -5.282e-05
+      ],
+      [
+        1792195200000,
+        4.539e-05
+      ],
+      [
+        1792209600000,
+        5e-05
+      ],
+      [
+        1792224000000,
+        5e-05
+      ],
+      [
+        1792238400000,
+        5e-05
+      ],
+      [
+        1792252800003,
+        5e-05
+      ],
+      [
+        1792267200000,
+        5e-05
+      ],
+      [
+        1792281600000,
+        5e-05
+      ],
+      [
+        1792296000005,
+        5e-05
+      ],
+      [
+        1792310400002,
+        5e-05
+      ],
+      [
+        1792324800000,
+        1.188e-05
+      ],
+      [
+        1792339200000,
+        5e-05
+      ],
+      [
+        1792353600000,
+        2.64e-05
+      ],
+      [
+        1792368000000,
+        -1.1e-05
+      ],
+      [
+        1792382400000,
+        4.702e-05
+      ],
+      [
+        1792396800004,
+        -1.946e-05
+      ],
+      [
+        1792411200007,
+        5e-05
+      ],
+      [
+        1792425600003,
+        -4.088e-05
+      ],
+      [
+        1792440000000,
+        5e-05
+      ],
+      [
+        1792454400006,
+        7.54e-06
+      ],
+      [
+        1792468800000,
+        2.18e-05
+      ],
+      [
+        1792483200005,
+        5e-05
+      ],
+      [
+        1792497600006,
+        3.992e-05
+      ],
+      [
+        1792512000006,
+        5e-05
+      ],
+      [
+        1792526400006,
+        5e-05
+      ],
+      [
+        1792540800000,
+        -7.83e-06
+      ],
+      [
+        1792555200000,
+        2.732e-05
+      ],
+      [
+        1792569600000,
+        2.344e-05
+      ],
+      [
+        1792584000000,
+        1.457e-05
+      ],
+      [
+        1792598400001,
+        5e-05
+      ],
+      [
+        1792612800001,
+        5e-05
+      ],
+      [
+        1792627200007,
+        5e-05
+      ],
+      [
+        1792641600000,
+        4.26e-06
+      ],
+      [
+        1792656000003,
+        9.69e-06
+      ],
+      [
+        1792670400002,
+        1.935e-05
+      ],
+      [
+        1792684800001,
+        2.407e-05
+      ],
+      [
+        1792699200000,
+        -2.804e-05
+      ]
+    ]
+  },
+  "files": [
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "fundingRate",
+      "key": "2026-09",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\monthly\\fundingRate\\RENDERUSDT\\RENDERUSDT-fundingRate-2026-09.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/monthly/fundingRate/RENDERUSDT/RENDERUSDT-fundingRate-2026-09.zip",
+      "sha256": "6f9fff81f004459a815268c29fc2a869933135e731f96d488e2545b4e6a39af8",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 180,
+      "first": "1788220800005,4,-0.00002826",
+      "last": "1790798400000,4,0.00005000",
+      "bytes": 1197
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-09",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\monthly\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-09.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/5m/BTCUSDT-5m-2026-09.zip",
+      "sha256": "3a2d163a2bd28ca614fa0840a92ecbcde0d9c4962b278dd619d5bf81a9918e26",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8640,
+      "first": "1788220800000,78549.60,78613.00,78519.70,78609.40,510.141,1788221099999,40080419.91280,9427,356.872,28038269.82350,0",
+      "last": "1790812500000,83555.30,83584.80,83526.50,83576.90,89.601,1790812799999,7486136.47680,3406,46.667,3898862.65760,0",
+      "bytes": 389713
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-01",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-01.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-01.zip",
+      "sha256": "10cd0734819af381d7cd032c84ba4a9a080a57bba1f97e8e71d45a16f27b067e",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1790812800000,83576.80,83612.60,83484.50,83493.50,341.248,1790813099999,28510169.27740,9134,150.856,12603200.27270,0",
+      "last": "1790898900000,84797.40,84863.40,84797.30,84829.60,222.706,1790899199999,18893860.56770,5223,119.850,10167689.49840,0",
+      "bytes": 13773
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-02",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-02.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-02.zip",
+      "sha256": "2a492563746eba6c3689b90c00a081bfce3ceab86a06493e80f22c4d55e8c7ea",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1790899200000,84829.60,84829.70,84726.30,84726.30,276.410,1790899499999,23432898.20660,7512,121.640,10312513.07070,0",
+      "last": "1790985300000,84505.20,84505.20,84482.70,84482.80,90.405,1790985599999,7638614.81190,1637,15.602,1318105.61870,0",
+      "bytes": 14036
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-03",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-03.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-03.zip",
+      "sha256": "fccefc7f641f37118ba60b6890590da2600db284383815e157ae51f9d743f630",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1790985600000,84482.70,84487.10,84423.60,84432.80,247.875,1790985899999,20935323.62880,4565,65.266,5511862.93450,0",
+      "last": "1791071700000,84688.70,84754.10,84681.60,84710.60,1666.685,1791071999999,141201647.87100,22888,776.267,65765885.49300,0",
+      "bytes": 12836
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-04",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-04.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-04.zip",
+      "sha256": "c97345f772ec5dd965c0d87c2b32c17a7652ba3820a8eaa99371f83c79f2e487",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791072000000,84710.50,84804.00,84710.50,84783.00,571.437,1791072299999,48436713.85890,10660,403.175,34174237.48690,0",
+      "last": "1791158100000,86443.30,86490.00,86416.00,86482.80,180.308,1791158399999,15588260.48230,6288,79.885,6906308.95110,0",
+      "bytes": 13035
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-05",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-05.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-05.zip",
+      "sha256": "53154ab4fc649a2fe3bf13357fea7b3d2aede3ce47fff2f5dcbc4f6c7c1c1294",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791158400000,86482.80,86482.80,86293.20,86412.20,908.000,1791158699999,78409474.33230,18385,380.486,32855708.64560,0",
+      "last": "1791244500000,85779.50,85809.00,85717.10,85717.20,234.305,1791244799999,20095386.64880,7658,73.780,6327822.14570,0",
+      "bytes": 13863
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-06",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-06.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-06.zip",
+      "sha256": "dea89e33c0ea6df7b9ccb3ff6e0a087cc2c8ebcde55b3bde4c41694399899117",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791244800000,85717.20,85842.00,85710.20,85755.40,198.336,1791245099999,17010980.23890,8896,126.783,10874206.37240,0",
+      "last": "1791330900000,85541.50,85541.60,85505.50,85507.50,81.934,1791331199999,7008029.88300,2258,40.496,3463891.92580,0",
+      "bytes": 13652
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-07",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-07.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-07.zip",
+      "sha256": "2d622f67e9a9d5eba0449c01b79191877a6e4494bc4f7206c5f59d4b917858b0",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791331200000,85507.60,85507.60,85459.00,85459.00,148.349,1791331499999,12682160.16090,4925,49.889,4264861.76320,0",
+      "last": "1791417300000,83231.60,83300.00,83231.50,83281.90,282.844,1791417599999,23552283.92570,5245,197.006,16404550.61680,0",
+      "bytes": 13783
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-08",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-08.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-08.zip",
+      "sha256": "9963f007248198e8dc3d975e7d1bfe80eff702eb130babf0efc2dfe3ea8859fe",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791417600000,83281.90,83292.60,83202.00,83207.70,359.480,1791417899999,29919823.77040,10981,156.436,13019985.13860,0",
+      "last": "1791503700000,81680.50,81711.00,81654.60,81711.00,163.684,1791503999999,13368396.98450,4802,76.554,6252397.70610,0",
+      "bytes": 13926
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-09",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-09.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-09.zip",
+      "sha256": "011749606208b211ef7efb61d45d093bfa6a0d7e6f46b71b6f75f8a420ceec58",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791504000000,81711.00,81785.30,81685.50,81778.60,378.817,1791504299999,30962943.13740,10705,224.810,18375053.68350,0",
+      "last": "1791590100000,82618.00,82618.10,82570.70,82578.50,755.333,1791590399999,62381686.67710,5174,483.717,39947960.83680,0",
+      "bytes": 13561
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-10",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-10.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-10.zip",
+      "sha256": "872803cf56b398c7a999758fe59c865e3c749bda74ea896b958d98010fffe56b",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791590400000,82578.50,82593.80,82536.00,82552.00,268.354,1791590699999,22155846.25270,5890,61.439,5072348.26160,0",
+      "last": "1791676500000,82941.00,82941.10,82941.00,82941.00,34.231,1791676799999,2839154.49380,912,11.228,931262.67080,0",
+      "bytes": 12785
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-11",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-11.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-11.zip",
+      "sha256": "7c279f1a78a64171d8a61f6328146d5239f0d516339a87231c610cd5a3caf4a0",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791676800000,82941.00,82958.60,82941.00,82946.80,69.637,1791677099999,5776459.01950,2257,31.213,2589094.41860,0",
+      "last": "1791762900000,83723.30,83732.70,83693.20,83723.00,100.822,1791763199999,8440463.76780,2468,58.041,4858989.85790,0",
+      "bytes": 12967
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-12",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-12.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-12.zip",
+      "sha256": "4994f82eb9bb04c54e2f32ce249c462ea28e41a2de8bad330e6564779501bfe9",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791763200000,83723.10,83742.50,83710.00,83710.00,193.635,1791763499999,16212074.89660,5634,102.968,8620947.89120,0",
+      "last": "1791849300000,81809.90,81858.90,81792.10,81813.40,310.687,1791849599999,25419884.23550,6357,131.877,10790222.00740,0",
+      "bytes": 13753
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-13",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-13.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-13.zip",
+      "sha256": "25177351a6b096b98eaa77f42e362203de224be94881350a951bfffa059faed6",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791849600000,81813.50,81913.80,81713.60,81716.00,770.036,1791849899999,63022318.32140,19642,371.100,30376898.17970,0",
+      "last": "1791935700000,83088.40,83132.60,83080.50,83125.70,287.412,1791935999999,23884148.03730,4710,199.807,16603106.76220,0",
+      "bytes": 13759
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-14",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-14.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-14.zip",
+      "sha256": "21879fa478777d0b68252321d6b2b609160404340126b93640e4d641bc2119ce",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791936000000,83125.80,83196.70,83125.70,83175.00,249.338,1791936299999,20738571.72920,6491,146.217,12160923.92720,0",
+      "last": "1792022100000,81555.40,81649.00,81534.50,81641.50,101.949,1792022399999,8317661.94620,4377,67.737,5526115.11580,0",
+      "bytes": 13795
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-15",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-15.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-15.zip",
+      "sha256": "def03b137860740b184bb113fce1149e3a1e77f70fcd2153a3715bef787b2b65",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792022400000,81641.60,81783.40,81620.50,81783.40,352.686,1792022699999,28815146.65570,10857,205.552,16795077.30970,0",
+      "last": "1792108500000,82217.40,82226.00,82191.30,82195.40,66.390,1792108799999,5457759.55910,2355,33.793,2778008.84180,0",
+      "bytes": 13947
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-16",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-16.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-16.zip",
+      "sha256": "507f9d8d3b6c33ea4ce581d1b48a5faf07761ff5af221721dd646e59a3f08d48",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792108800000,82195.30,82241.50,82167.90,82238.90,188.595,1792109099999,15503612.64500,5330,108.100,8886169.44750,0",
+      "last": "1792194900000,81577.70,81593.30,81549.70,81578.30,533.479,1792195199999,43517071.25520,4404,315.474,25732623.85230,0",
+      "bytes": 13623
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-17",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-17.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-17.zip",
+      "sha256": "a5bc6c7950653285287b9f8d56dae0285650173dbd57bbe3b7e88e74e3680246",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792195200000,81578.30,81582.60,81554.30,81569.90,256.928,1792195499999,20957185.48850,4328,117.505,9584141.33260,0",
+      "last": "1792281300000,81461.80,81465.00,81451.60,81455.90,49.175,1792281599999,4005592.96310,1795,22.261,1813287.16520,0",
+      "bytes": 12879
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-18",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-18.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-18.zip",
+      "sha256": "19f09a3f566064d165d69f3020542f376acc7c765c6d7deb2248914388aa3d8f",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792281600000,81455.80,81455.90,81366.30,81382.50,290.094,1792281899999,23610527.28360,5965,50.425,4103916.91040,0",
+      "last": "1792367700000,82026.00,82118.00,82010.60,82078.00,420.984,1792367999999,34554098.98840,14186,213.511,17523981.18900,0",
+      "bytes": 13487
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-19",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-19.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-19.zip",
+      "sha256": "4339c1eed677cef74b128d2e3d67f554fa07c61323a0fc9d1614d80be5ab9617",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792368000000,82077.90,82102.80,82030.00,82030.00,338.140,1792368299999,27749159.35790,12541,143.679,11790477.95350,0",
+      "last": "1792454100000,81935.20,81935.20,81888.70,81903.30,189.508,1792454399999,15521830.27560,3736,38.819,3179624.88670,0",
+      "bytes": 13665
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-20",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-20.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-20.zip",
+      "sha256": "e0104e94f5a1110707fe8e19e96a6be8aa593b2294538bdfe10f7d1f886cb3ea",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792454400000,81903.30,81987.80,81842.30,81843.60,302.850,1792454699999,24801939.96650,11654,150.935,12361517.81790,0",
+      "last": "1792540500000,83004.80,83011.40,82984.70,82984.80,87.328,1792540799999,7247977.13090,2224,28.840,2393630.98070,0",
+      "bytes": 13743
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-21",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-21.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-21.zip",
+      "sha256": "ea557930877523ed41707fc62aa5a15c18322698c48deb61f113e2f226b14b79",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792540800000,82984.70,82984.80,82824.10,82936.70,488.859,1792541099999,40523768.90650,11966,183.192,15186420.52140,0",
+      "last": "1792626900000,84098.40,84100.00,84019.20,84050.00,570.232,1792627199999,47936117.99300,14283,266.247,22381939.59250,0",
+      "bytes": 13741
+    },
+    {
+      "symbol": "BTCUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-22",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\BTCUSDT\\5m\\BTCUSDT-5m-2026-10-22.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/5m/BTCUSDT-5m-2026-10-22.zip",
+      "sha256": "87409b05d9b93fefff23576e07270820ff613fecb7fec1561ad04643cc612e9c",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792627200000,84049.90,84194.90,84042.90,84187.40,795.099,1792627499999,66885213.05270,18193,498.424,41931164.53900,0",
+      "last": "1792713300000,81369.20,81401.20,81369.10,81384.60,135.024,1792713599999,10989435.78900,2888,102.954,8379249.23210,0",
+      "bytes": 13845
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-09",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\monthly\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-09.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/monthly/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-09.zip",
+      "sha256": "39c488f815ac0bb3620dc31530ed0c00a5faf79f53de5d6fdd0c0dac2bb5dba6",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 8640,
+      "first": "1788220800000,1.4220000,1.4310000,1.4220000,1.4250000,114428.0,1788221099999,163310.62410000,904,88935.1,126938.81570000,0",
+      "last": "1790812500000,1.9090000,1.9140000,1.9080000,1.9130000,16566.7,1790812799999,31659.74280000,281,13581.5,25955.93180000,0",
+      "bytes": 314158
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-01",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-01.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-01.zip",
+      "sha256": "70c9134e0a72212000b124f4acb41898217ff0c6a4edb96bfc1c6f9c29162afc",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1790812800000,1.9130000,1.9140000,1.9090000,1.9110000,16850.7,1790813099999,32209.03910000,312,9181.2,17546.04120000,0",
+      "last": "1790898900000,1.9090000,1.9110000,1.9080000,1.9100000,14444.9,1790899199999,27590.00810000,210,6498.5,12413.14620000,0",
+      "bytes": 11019
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-02",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-02.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-02.zip",
+      "sha256": "f6246be012c9395c3d8d2aec6d603d0a5e922b671e1d010c0eddf30b1c96ec13",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1790899200000,1.9090000,1.9100000,1.9050000,1.9050000,10108.0,1790899499999,19279.59650000,319,2983.7,5692.12500000,0",
+      "last": "1790985300000,1.9750000,1.9750000,1.9720000,1.9740000,41428.1,1790985599999,81745.45210000,469,16925.2,33400.65460000,0",
+      "bytes": 11344
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-03",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-03.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-03.zip",
+      "sha256": "4712d8d49a31af4417d40896c0410ba2bd0fc06e2e94ace013939e320389f912",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1790985600000,1.9740000,1.9930000,1.9720000,1.9800000,227079.3,1790985899999,450649.60380000,2044,143187.0,284203.73760000,0",
+      "last": "1791071700000,1.9820000,1.9880000,1.9820000,1.9860000,20350.2,1791071999999,40399.23530000,325,12989.8,25788.79590000,0",
+      "bytes": 11005
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-04",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-04.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-04.zip",
+      "sha256": "6494fd37ca5d970a1e2eb987fbaffeb81959b071ac4f7a2bc757d796bd07d3c5",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791072000000,1.9860000,1.9880000,1.9820000,1.9850000,22538.7,1791072299999,44741.28580000,447,8029.6,15942.09580000,0",
+      "last": "1791158100000,1.9730000,1.9740000,1.9720000,1.9730000,3169.0,1791158399999,6254.62430000,102,2270.8,4482.53390000,0",
+      "bytes": 10729
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-05",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-05.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-05.zip",
+      "sha256": "09d6032edba2c19ff6420ec482f7e77fa4c0e7e740b4ebffd6dc5c26725bf42e",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791158400000,1.9720000,1.9730000,1.9650000,1.9690000,76769.6,1791158699999,151128.27060000,765,23083.7,45446.82710000,0",
+      "last": "1791244500000,2.0640000,2.0700000,2.0640000,2.0640000,41574.9,1791244799999,85904.93400000,544,19777.1,40872.47780000,0",
+      "bytes": 11397
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-06",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-06.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-06.zip",
+      "sha256": "763f070ed60fc58d617099473d7a2b823034d730eb0a6958de221cc265460384",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791244800000,2.0650000,2.0740000,2.0630000,2.0640000,112240.8,1791245099999,232097.27170000,1309,69791.6,144341.75500000,0",
+      "last": "1791330900000,2.1400000,2.1410000,2.1390000,2.1400000,8483.0,1791331199999,18155.22370000,164,2661.7,5698.01960000,0",
+      "bytes": 11614
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-07",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-07.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-07.zip",
+      "sha256": "22bea9fa6ee57b762f52a61a0b511517d42281e24b7e572b586a8ab52734514f",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791331200000,2.1400000,2.1460000,2.1390000,2.1450000,94205.0,1791331499999,201786.80850000,1196,57489.2,123161.14740000,0",
+      "last": "1791417300000,2.0220000,2.0250000,2.0210000,2.0210000,15691.2,1791417599999,31752.67480000,531,3750.8,7591.28630000,0",
+      "bytes": 11566
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-08",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-08.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-08.zip",
+      "sha256": "90eff5aec9f650ee4aace19700e6064e1e8d70ff5559b1ced4b46a917f8b74fa",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791417600000,2.0210000,2.0270000,2.0200000,2.0220000,53756.1,1791417899999,108794.16540000,1016,33989.2,68785.71720000,0",
+      "last": "1791503700000,1.8340000,1.8340000,1.8250000,1.8270000,95011.6,1791503999999,173730.27290000,899,18397.0,33640.61440000,0",
+      "bytes": 11487
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-09",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-09.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-09.zip",
+      "sha256": "66cf71562d11f8b5a0d4f44d459cddd5767f80f6f54da8335b2050a4db417c85",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791504000000,1.8270000,1.8290000,1.8230000,1.8290000,86104.9,1791504299999,157183.72240000,1308,23912.7,43671.28610000,0",
+      "last": "1791590100000,1.8960000,1.9010000,1.8940000,1.8980000,53071.1,1791590399999,100731.58110000,521,35481.8,67352.88720000,0",
+      "bytes": 11292
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-10",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-10.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-10.zip",
+      "sha256": "73af58006e4a27743c4b45e0e67e663258668a46bcfc23f4d86700d7993160a4",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791590400000,1.8980000,1.9010000,1.8940000,1.8940000,63978.1,1791590699999,121411.88200000,786,29038.2,55120.90330000,0",
+      "last": "1791676500000,1.9290000,1.9310000,1.9280000,1.9310000,9970.5,1791676799999,19235.99930000,391,8245.9,15909.31070000,0",
+      "bytes": 10774
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-11",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-11.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-11.zip",
+      "sha256": "75d6ab2b1d58a914170779d9b2c69053b1fa0984fe505bc5dec6054c85d4e912",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791676800000,1.9310000,1.9310000,1.9270000,1.9280000,17942.3,1791677099999,34616.08610000,559,10343.4,19958.36710000,0",
+      "last": "1791762900000,1.9990000,1.9990000,1.9960000,1.9960000,14998.4,1791763199999,29953.40830000,261,5817.8,11617.95580000,0",
+      "bytes": 10911
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-12",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-12.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-12.zip",
+      "sha256": "d9a1fb9b875dcf7349eb1700d1e4a421be32831fdc1a5d6de606a912b9b463c5",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791763200000,1.9970000,2.0070000,1.9950000,2.0030000,81691.8,1791763499999,163491.85010000,882,58058.0,116215.51430000,0",
+      "last": "1791849300000,2.0800000,2.0910000,2.0800000,2.0840000,78728.3,1791849599999,164130.71840000,1061,37769.8,78784.41980000,0",
+      "bytes": 11745
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-13",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-13.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-13.zip",
+      "sha256": "8083fb91b65cdd63a3232629347b3f603b1ac9d97b87864c012f8a4eb7ebbcfb",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791849600000,2.0840000,2.1000000,2.0820000,2.0850000,162923.6,1791849899999,340494.80970000,2266,84623.0,176863.38130000,0",
+      "last": "1791935700000,2.0040000,2.0060000,2.0030000,2.0050000,19257.9,1791935999999,38603.77480000,348,10680.5,21412.21250000,0",
+      "bytes": 11895
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-14",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-14.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-14.zip",
+      "sha256": "421918134412873480c7a11f8098dd6aa58c2d7798d6eb6a6e96fd537a6dd1f3",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1791936000000,2.0050000,2.0050000,1.9950000,1.9960000,85771.4,1791936299999,171521.26200000,1191,30176.9,60355.75420000,0",
+      "last": "1792022100000,1.9220000,1.9240000,1.9200000,1.9230000,11643.2,1792022399999,22382.52560000,193,6571.1,12635.41850000,0",
+      "bytes": 11539
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-15",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-15.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-15.zip",
+      "sha256": "2c465dea10215de9130290d6b751e028464920aaf130b88eb9f52e6317ce1598",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792022400000,1.9230000,1.9350000,1.9200000,1.9350000,45399.5,1792022699999,87458.14800000,625,33822.5,65196.50600000,0",
+      "last": "1792108500000,1.9580000,1.9610000,1.9560000,1.9580000,17681.8,1792108799999,34631.48420000,344,10479.4,20528.45610000,0",
+      "bytes": 11460
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-16",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-16.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-16.zip",
+      "sha256": "8db8b0de06ac7157d1849245d75c833f0c9def5baf3f60625d8e8807460f02bd",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792108800000,1.9570000,1.9590000,1.9520000,1.9540000,57044.5,1792109099999,111525.61620000,594,19617.4,38343.71820000,0",
+      "last": "1792194900000,1.9320000,1.9320000,1.9290000,1.9310000,15191.5,1792195199999,29322.06970000,264,5573.4,10760.65880000,0",
+      "bytes": 11166
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-17",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-17.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-17.zip",
+      "sha256": "b761dd010583960c549b6ce129191310978537efae4ba8973abbeba4e142ba73",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792195200000,1.9320000,1.9320000,1.9260000,1.9280000,28412.9,1792195499999,54801.85030000,484,16106.1,31064.63880000,0",
+      "last": "1792281300000,1.8490000,1.8500000,1.8480000,1.8490000,5037.0,1792281599999,9311.10270000,139,2238.4,4139.02530000,0",
+      "bytes": 10811
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-18",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-18.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-18.zip",
+      "sha256": "deee8261dd8fb3fe15d6015665da754129d2a11d90fe55019bdebfa024d621fc",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792281600000,1.8490000,1.8500000,1.8440000,1.8460000,44163.5,1792281899999,81545.09440000,681,17083.7,31557.55630000,0",
+      "last": "1792367700000,1.8110000,1.8150000,1.8100000,1.8130000,33954.5,1792367999999,61531.01460000,519,18606.4,33713.65250000,0",
+      "bytes": 10987
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-19",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-19.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-19.zip",
+      "sha256": "8f14f0a41ed84689eddc33150de4b156353796e53a2b444b9c8c85b993c8dda1",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792368000000,1.8130000,1.8150000,1.8100000,1.8130000,55841.2,1792368299999,101188.46050000,834,18648.4,33800.97100000,0",
+      "last": "1792454100000,1.8080000,1.8100000,1.8080000,1.8100000,9933.5,1792454399999,17966.62840000,177,7632.1,13804.73560000,0",
+      "bytes": 10909
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-20",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-20.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-20.zip",
+      "sha256": "5ecc7b062c21925aedb90722448457cdd5f5e89943a2811e650e53b96b846d1b",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792454400000,1.8100000,1.8120000,1.8070000,1.8100000,38023.0,1792454699999,68812.25650000,442,16087.8,29116.26840000,0",
+      "last": "1792540500000,1.8540000,1.8540000,1.8520000,1.8520000,9960.8,1792540799999,18458.04190000,141,4871.4,9027.56370000,0",
+      "bytes": 11150
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-21",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-21.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-21.zip",
+      "sha256": "2e4b0643aa4ef1a7fae5566015a027fc1a58e44d3acf06ecd54a7ba3790dfbbe",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792540800000,1.8530000,1.8530000,1.8490000,1.8520000,81443.3,1792541099999,150798.70620000,734,36547.8,67672.51980000,0",
+      "last": "1792626900000,1.9060000,1.9100000,1.9050000,1.9090000,32128.9,1792627199999,61275.51850000,414,18045.6,34422.82320000,0",
+      "bytes": 11075
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "klines5m",
+      "key": "2026-10-22",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\klines\\RENDERUSDT\\5m\\RENDERUSDT-5m-2026-10-22.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/klines/RENDERUSDT/5m/RENDERUSDT-5m-2026-10-22.zip",
+      "sha256": "7c9e21d0be8e62dd5e39e33978e9074d6fd6dd69ce8a50cf7303a02d8a6f650c",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "1792627200000,1.9100000,1.9160000,1.9080000,1.9150000,78837.5,1792627499999,150682.90020000,927,47240.4,90294.19020000,0",
+      "last": "1792713300000,1.7600000,1.7630000,1.7600000,1.7620000,23636.5,1792713599999,41638.74550000,291,13013.7,22932.25690000,0",
+      "bytes": 11114
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-01",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-01.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-01.zip",
+      "sha256": "2e7e00de2ea87b5a112faa0a7ec170cf1c39c2fe47f7616413a005ca5447eb57",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-01 01:30:00,RENDERUSDT,5595347.0000000000000000,8050107.3090592600000000,1.76630037,2.45818300,1.28711256,1.04292300",
+      "last": "2026-09-01 23:10:00,RENDERUSDT,5290795.1000000000000000,7502347.4518000000000000,1.89652510,2.56771700,1.36885246,0.80454500",
+      "bytes": 11138
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-02",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-02.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-02.zip",
+      "sha256": "fa19fad19855b6dec0bf2a882156aae4d08c8cfe6eeda12927ddedcda44d7880",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-02 00:20:00,RENDERUSDT,5286802.7000000000000000,7538980.6502000000000000,1.88488104,2.58176700,1.38277512,0.68463600",
+      "last": "2026-09-02 19:30:00,RENDERUSDT,5425836.0000000000000000,7606304.2881555600000000,1.84621155,2.69339900,1.33015346,0.82834200",
+      "bytes": 10858
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-03",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-03.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-03.zip",
+      "sha256": "5d7efee8dc6efe45f1435cf0cbc7e7db73363bd1a445b58b8650659a58c8fd5e",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-03 00:55:00,RENDERUSDT,5455839.3000000000000000,7651250.2116744200000000,1.85015060,2.59179600,1.34739040,0.39460500",
+      "last": "2026-09-03 21:45:00,RENDERUSDT,5703431.1000000000000000,8424127.5448394200000000,1.84586181,2.64462300,1.36069758,1.39534700",
+      "bytes": 11042
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-04",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-04.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-04.zip",
+      "sha256": "6e8212e9036c7aa358483b0d33204ac3c4bae390db68081ef6be796c35fe46ab",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-04 00:25:00,RENDERUSDT,5717240.0000000000000000,8389809.2900580000000000,1.81456456,2.68194200,1.34900466,0.70822900",
+      "last": "2026-09-04 23:50:00,RENDERUSDT,5854142.5000000000000000,8342153.0625000000000000,1.79840464,3.03826500,1.25763508,2.81629500",
+      "bytes": 11030
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-05",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-05.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-05.zip",
+      "sha256": "5befaf5007794e7e2e8454a1380c07031abe816b72c038b65f7638250f28bded",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-05 01:45:00,RENDERUSDT,5919542.4000000000000000,8555181.6564600000000000,1.69134948,2.90048700,1.20914286,0.52311600",
+      "last": "2026-09-05 22:00:00,RENDERUSDT,6117991.3000000000000000,9014860.1805500000000000,1.94364052,2.98286800,1.35460420,2.55216900",
+      "bytes": 11299
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-06",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-06.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-06.zip",
+      "sha256": "fa3b20b37442fbaf31f6dea33c6bf70d10a22787ad69d6bd8dee57c2bc320eff",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-06 01:00:00,RENDERUSDT,6132399.4000000000000000,9020759.5174000000000000,2.06830818,3.06598000,1.45927505,1.09629400",
+      "last": "2026-09-06 23:05:00,RENDERUSDT,6286147.2000000000000000,9779431.2382869100000000,1.81450488,2.94247000,1.32161000,1.00586400",
+      "bytes": 11261
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-07",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-07.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-07.zip",
+      "sha256": "d744ffa6478f44e65b56c7b06e4faf6c8f3e37cf1bfcd916ca5d5d2b765d234a",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-07 00:35:00,RENDERUSDT,6295140.4000000000000000,9816353.4334754700000000,1.83309958,2.88405100,1.34414557,1.81037300",
+      "last": "2026-09-07 22:05:00,RENDERUSDT,6565243.5000000000000000,10159714.3162500000000000,2.09340252,3.41133800,1.47547016,1.27756600",
+      "bytes": 11493
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-08",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-08.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-08.zip",
+      "sha256": "906a6d619e3a7b943f82cb70952b01a6b2710d1ae5ac9478a6116c9768bd7de6",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-08 01:50:00,RENDERUSDT,6504014.0000000000000000,10308221.2844604400000000,1.98556999,3.37794700,1.45380545,0.37747000",
+      "last": "2026-09-08 22:05:00,RENDERUSDT,6410850.4000000000000000,9661151.5528000000000000,2.04259928,3.65523600,1.44873341,0.26225100",
+      "bytes": 11255
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-09",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-09.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-09.zip",
+      "sha256": "680ece4647353457e823bebe2b0705c6847e2bcdba20b975373213e2a793bc0d",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-09 03:10:00,RENDERUSDT,6293071.3000000000000000,9320038.5953000000000000,2.04737976,3.68368900,1.45363308,1.10847700",
+      "last": "2026-09-09 22:05:00,RENDERUSDT,6240686.2000000000000000,9164122.6697627100000000,1.92084806,3.96967800,1.39695269,0.39523900",
+      "bytes": 11222
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-10",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-10.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-10.zip",
+      "sha256": "748b91ed7700386ca2edc6e2914c9d83a640a749f74caee1d78f98b418cc636f",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-10 00:40:00,RENDERUSDT,6080171.8000000000000000,8738777.5673810900000000,1.94555874,3.90741700,1.39567481,0.42494800",
+      "last": "2026-09-10 23:20:00,RENDERUSDT,5879181.9000000000000000,8231272.7874167300000000,1.71511628,3.12102500,1.23269300,0.99344500",
+      "bytes": 11228
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-11",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-11.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-11.zip",
+      "sha256": "88e37b6a3e5956455cdbf6e5685d9a9157eb9de35e77cf77f6d01ff5c9cf6993",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-11 00:50:00,RENDERUSDT,5988729.8000000000000000,8366255.5306000000000000,1.67465322,2.82666900,1.21762397,4.84112000",
+      "last": "2026-09-11 22:20:00,RENDERUSDT,5810299.1000000000000000,8035643.6553000000000000,1.36153017,2.55808900,0.99816570,0.68500200",
+      "bytes": 11249
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-12",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-12.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-12.zip",
+      "sha256": "7655c0ad366a5e49276916c873e246fab05a502ea602bfb40baa105ce8faddd2",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-12 00:20:00,RENDERUSDT,5660472.8000000000000000,7885038.6104000000000000,1.28823224,2.57320700,0.94877833,0.21911100",
+      "last": "2026-09-12 23:55:00,RENDERUSDT,5577761.0000000000000000,7694521.2995000000000000,1.21906117,2.70584200,0.86450432,0.04364400",
+      "bytes": 10792
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-13",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-13.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-13.zip",
+      "sha256": "6a2d1c26e9442de1dbd306f1b241f94cfffba48c2d0b4434b717f0417fb3beb4",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-13 00:35:00,RENDERUSDT,5590111.0000000000000000,7742303.7350000000000000,1.21199245,2.72049900,0.85532468,10.72733400",
+      "last": "2026-09-13 23:45:00,RENDERUSDT,5528729.6000000000000000,7553517.4024412200000000,1.28876740,2.59977900,0.89778857,1.40476600",
+      "bytes": 10836
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-14",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-14.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-14.zip",
+      "sha256": "56a617157545122948bf44ed8e9fd7edb56f821f72ac53ebe09c3822f8b59e08",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-14 00:45:00,RENDERUSDT,5446194.1000000000000000,7483070.6934000000000000,1.26232742,2.62818000,0.88632088,0.23166100",
+      "last": "2026-09-14 22:10:00,RENDERUSDT,5918973.1000000000000000,8237318.1411204700000000,1.30350000,2.46118300,0.93660419,0.90123000",
+      "bytes": 11079
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-15",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-15.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-15.zip",
+      "sha256": "da3d17754d51e82b9a4354da4186a83be10e58057bc6587412b9e8c77480d758",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-15 00:30:00,RENDERUSDT,5927471.9000000000000000,8191766.1658000000000000,1.32674772,2.48762700,0.95826331,1.69135800",
+      "last": "2026-09-15 23:20:00,RENDERUSDT,5969432.6000000000000000,7890429.5588912100000000,1.20791607,2.33073300,0.85796646,1.87462300",
+      "bytes": 11073
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-16",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-16.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-16.zip",
+      "sha256": "b381f4c7e9447a4d94ad1eecdaf3c963c002fa50f4ac859c92b3239ab76e1968",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-16 00:25:00,RENDERUSDT,6080617.3000000000000000,7989931.1322000000000000,1.23017780,2.17517100,0.87186923,3.30194600",
+      "last": "2026-09-16 16:05:00,RENDERUSDT,6202193.8000000000000000,7996277.9638824300000000,1.21239789,1.95717900,0.86712185,0.93448800",
+      "bytes": 10879
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-17",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-17.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-17.zip",
+      "sha256": "1329d1bbffe6add950fbb9ea4b90b3286b16ee3b7f5ec0817f0f40f8766b7be2",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-17 04:05:00,RENDERUSDT,6191303.1000000000000000,8540902.6264500000000000,1.19101124,2.08290800,0.87431394,0.54095100",
+      "last": "2026-09-17 23:30:00,RENDERUSDT,5805891.7000000000000000,8358241.5223308800000000,1.44321670,2.09970400,1.13357664,1.41955100",
+      "bytes": 11272
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-18",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-18.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-18.zip",
+      "sha256": "8da749cd66938ba51fe8fda718a9cfbd09e68789627c3e23c32ae4f583c3c88e",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-18 01:45:00,RENDERUSDT,5987730.3000000000000000,8970026.6760419800000000,1.50124224,2.20429600,1.16064849,0.71785300",
+      "last": "2026-09-18 22:20:00,RENDERUSDT,6073629.2000000000000000,9371871.2646007700000000,1.66019417,2.37818100,1.24768425,0.48461900",
+      "bytes": 11467
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-19",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-19.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-19.zip",
+      "sha256": "30e089c91abe726af3a6ca02cb032488eb5288a9c207a96a10ef00daaba09185",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-19 01:40:00,RENDERUSDT,6089398.9000000000000000,9544016.4062496600000000,1.69045936,2.42464600,1.29306020,5.04226500",
+      "last": "2026-09-19 22:10:00,RENDERUSDT,5964375.7000000000000000,9248292.1911681800000000,1.98940998,3.16110400,1.41706161,0.90237500",
+      "bytes": 11415
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-20",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-20.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-20.zip",
+      "sha256": "477bd293b4be7efe7fa33c6912cdf0c135c65532fe6af7d8ca1aba2009417960",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-20 00:20:00,RENDERUSDT,6011470.2000000000000000,9480088.5054000000000000,1.97676162,3.17958100,1.40666382,0.64026700",
+      "last": "2026-09-20 22:50:00,RENDERUSDT,6556429.9000000000000000,11322454.9029059200000000,2.00559441,2.69227100,1.52687731,0.49995600",
+      "bytes": 11375
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-21",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-21.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-21.zip",
+      "sha256": "63e28f6d19088c272e34743e35694e5c919f52000539619cd4de5552378a0016",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-21 02:00:00,RENDERUSDT,6379884.0000000000000000,10699651.2051500400000000,2.30318379,2.85013100,1.73986486,0.82724600",
+      "last": "2026-09-21 23:05:00,RENDERUSDT,6635086.6000000000000000,12349748.4797261200000000,1.97870925,2.70874000,1.58468862,0.65336500",
+      "bytes": 11523
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-22",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-22.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-22.zip",
+      "sha256": "1264ca1c96d4c37988e9f23348964fc7c9c26b371e1659b5270ec10b2c15ca56",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-22 00:00:00,RENDERUSDT,6680069.0000000000000000,12458876.0498538600000000,2.01072386,2.78117300,1.59285714,0.83222900",
+      "last": "2026-09-22 22:05:00,RENDERUSDT,6365795.7000000000000000,11590165.8452419300000000,2.04608939,2.81196500,1.53462490,1.05956200",
+      "bytes": 11483
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-23",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-23.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-23.zip",
+      "sha256": "2ebee412662e6b15a53894442dc0766dfd06699f92c674f76fd59a36b04e4831",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-23 01:40:00,RENDERUSDT,6384589.7000000000000000,11734875.8686000000000000,2.02093510,2.91293600,1.51937345,1.73954200",
+      "last": "2026-09-23 23:45:00,RENDERUSDT,6093248.4000000000000000,10516229.5021308400000000,1.95248227,3.44380400,1.39423467,1.35995600",
+      "bytes": 11509
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-24",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-24.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-24.zip",
+      "sha256": "30080e0226a685eaa6a7089c67518030011919fadaa04d1b6b3df7b1b248ea24",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-24 00:35:00,RENDERUSDT,6114343.6000000000000000,10609643.2550441600000000,1.94964539,3.58288100,1.38464646,0.77564700",
+      "last": "2026-09-24 23:25:00,RENDERUSDT,6851766.1000000000000000,12748909.8881175000000000,2.45547675,2.80386400,1.84543430,0.55859700",
+      "bytes": 11562
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-25",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-25.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-25.zip",
+      "sha256": "f93da1ef732a43cdde3f6823860ddf0bed5387bc7486a05d666429d0531cad2c",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-25 00:55:00,RENDERUSDT,6920866.6000000000000000,12926219.6498828700000000,2.44687500,2.67802200,1.82534096,0.48939900",
+      "last": "2026-09-25 19:20:00,RENDERUSDT,7506372.4000000000000000,14397222.2632000000000000,2.61295297,3.14902600,1.89698821,1.43287000",
+      "bytes": 11598
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-26",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-26.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-26.zip",
+      "sha256": "8c509d1453b7e334a6f55e2bfb2637b99edcdde59aae2d0351d515e14259c0f0",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-26 00:05:00,RENDERUSDT,7600137.6000000000000000,14810003.1941505600000000,2.55530130,3.04340700,1.89628009,0.43167200",
+      "last": "2026-09-26 23:55:00,RENDERUSDT,7523235.7000000000000000,14969193.7009102400000000,2.49231895,3.19112700,1.80997921,2.51670600",
+      "bytes": 11427
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-27",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-27.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-27.zip",
+      "sha256": "9809858077e24bb3557b1623dc41652ec2c062ea32be1a737326694d21b4a125",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-27 01:00:00,RENDERUSDT,7560102.8000000000000000,15125290.7519463600000000,2.45035971,3.19054800,1.79111842,0.52540500",
+      "last": "2026-09-27 23:05:00,RENDERUSDT,7779619.6000000000000000,15792627.7880000000000000,2.53925165,2.98809700,1.87762826,0.61348700",
+      "bytes": 11431
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-28",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-28.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-28.zip",
+      "sha256": "c9a80d8004c2cb025a5ed60ae034dd96b4d596215b423e6130cb8363511253a0",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-28 02:15:00,RENDERUSDT,7787180.3000000000000000,15857859.3621811500000000,2.50616389,3.09215000,1.86540881,0.51656000",
+      "last": "2026-09-28 23:45:00,RENDERUSDT,7423862.3000000000000000,14422343.4520157100000000,2.53819201,3.59189600,1.77768987,0.24575200",
+      "bytes": 11620
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-29",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-29.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-29.zip",
+      "sha256": "bc26960e93cc09fbd307920755e820e40422ff9e33c4da85199aad55eeed0550",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-29 01:50:00,RENDERUSDT,7483542.5000000000000000,14209759.4044155800000000,2.53365718,3.57562700,1.77331759,0.90800800",
+      "last": "2026-09-29 23:25:00,RENDERUSDT,6874602.1000000000000000,13178612.2257000000000000,2.43280496,3.54938900,1.64850549,0.84497900",
+      "bytes": 11573
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-09-30",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-09-30.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-09-30.zip",
+      "sha256": "4f8f94c14aa4efdf5bbe29d1e8dbcd313efd68a2c8875cd6a86f87d8ee98c1d3",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-09-30 04:00:00,RENDERUSDT,6818193.7000000000000000,13220477.5843000000000000,2.38377641,3.42342900,1.64779635,4.50325700",
+      "last": "2026-09-30 23:25:00,RENDERUSDT,6828425.1000000000000000,13060785.5695510800000000,2.47847565,3.52971800,1.64070730,1.44869600",
+      "bytes": 11184
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-01",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-01.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-01.zip",
+      "sha256": "500510ec77df3466da07b26666e83dee138642c79a060bfd969572bb796a20b3",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-01 01:15:00,RENDERUSDT,6877082.1000000000000000,13263496.7021419600000000,2.46578212,3.48658700,1.63202980,2.68572200",
+      "last": "2026-10-01 23:35:00,RENDERUSDT,7006030.6000000000000000,13355683.7081625000000000,2.28831169,3.30477600,1.53859649,3.45264600",
+      "bytes": 11314
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-02",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-02.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-02.zip",
+      "sha256": "a147ec8900d848cd4dc8528f6870159593908cf41d970e6c80ca071836510641",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-02 00:30:00,RENDERUSDT,7010431.5000000000000000,13399037.7259500000000000,2.26434558,3.31560700,1.53095488,0.28293000",
+      "last": "2026-10-02 23:55:00,RENDERUSDT,7462919.1000000000000000,14724339.3843000000000000,2.32154997,3.47030500,1.59183673,0.69088400",
+      "bytes": 11344
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-03",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-03.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-03.zip",
+      "sha256": "e77012b668e6f92de8854ef396b08ad72fd553ec5b01882ebb11e97c35101829",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-03 00:15:00,RENDERUSDT,7479190.5000000000000000,14913505.8570000000000000,2.31405514,3.52112000,1.60288675,0.48153100",
+      "last": "2026-10-03 21:50:00,RENDERUSDT,7564935.4000000000000000,14918052.6088000000000000,2.67947788,3.34209600,1.82576057,0.77241000",
+      "bytes": 11254
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-04",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-04.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-04.zip",
+      "sha256": "eb581b4cd7dc8ad547983688a3ee8c89d28750dc97d66396bfe158c57d706922",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-04 00:00:00,RENDERUSDT,7523903.2000000000000000,14929916.2417350000000000,2.63498920,3.38426300,1.80892223,0.55356100",
+      "last": "2026-10-04 22:00:00,RENDERUSDT,7341807.7000000000000000,14501014.2171340700000000,2.47403911,3.46096600,1.68653987,1.66982800",
+      "bytes": 11197
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-05",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-05.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-05.zip",
+      "sha256": "272cdfb467b5b5d41d573dda07a2d3cc60da9ae34fca9bfb752ae5dccbe03fd9",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-05 00:55:00,RENDERUSDT,7299681.6000000000000000,14395773.5472428600000000,2.50753425,3.45991500,1.71166544,0.36588300",
+      "last": "2026-10-05 23:35:00,RENDERUSDT,7920300.1000000000000000,16265969.8172456300000000,2.58523490,3.36228000,1.82777778,0.55847500",
+      "bytes": 11465
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-06",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-06.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-06.zip",
+      "sha256": "4c2b70c0a13bdde87396c855ed8ad238a54d05914d2b2ca6d4cdc6cc017f7b94",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-06 00:25:00,RENDERUSDT,7933769.5000000000000000,16270740.9410841100000000,2.63254237,3.38621200,1.85842697,0.65236700",
+      "last": "2026-10-06 22:20:00,RENDERUSDT,8441537.6000000000000000,17922052.6413317900000000,3.00626305,3.06005100,2.24940898,3.01025800",
+      "bytes": 11580
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-07",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-07.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-07.zip",
+      "sha256": "2ed4d81f170bcdbfece4bee34a06c0bf0c973f77b60924d5c07519fadfe11893",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-07 00:05:00,RENDERUSDT,8474141.9000000000000000,18243780.6152096700000000,2.96423659,3.08189000,2.23888233,0.88637000",
+      "last": "2026-10-07 23:35:00,RENDERUSDT,8094313.6000000000000000,16388089.2183664700000000,3.10754414,2.96491000,2.21946903,0.70853600",
+      "bytes": 11388
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-08",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-08.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-08.zip",
+      "sha256": "813d25a3854199ce810c5abf3fcd02f0e08fb22bd0e72d3801ab0abda22479e3",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-08 02:00:00,RENDERUSDT,8044948.1000000000000000,16236850.6121098300000000,3.06349206,2.91294400,2.18752745,1.06823000",
+      "last": "2026-10-08 22:30:00,RENDERUSDT,8177750.8000000000000000,15090858.3977395000000000,2.29710145,2.50224000,1.46964106,1.42674200",
+      "bytes": 11656
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-09",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-09.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-09.zip",
+      "sha256": "f940c0b89436b25ac8f5ca5969dd11475df76ed741a169aeb4b974087855e3a1",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-09 00:25:00,RENDERUSDT,8179387.7000000000000000,14955499.1977187500000000,2.07926829,2.48778900,1.34753788,0.96142100",
+      "last": "2026-10-09 23:55:00,RENDERUSDT,7891539.6000000000000000,14978142.1608000000000000,1.65916070,2.74531300,1.12262854,2.01784100",
+      "bytes": 11284
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-10",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-10.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-10.zip",
+      "sha256": "1bafe6d0cefd143fc7ab87bffcb2c869bf73856ee8faad27c1ee2f3ea1d66337",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-10 00:20:00,RENDERUSDT,7865394.5000000000000000,14991441.9170000000000000,1.65743590,2.72874300,1.12355212,0.45420500",
+      "last": "2026-10-10 23:55:00,RENDERUSDT,7661985.7000000000000000,14795294.3867000000000000,1.71242171,2.96128600,1.14857303,4.78232600",
+      "bytes": 10854
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-11",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-11.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-11.zip",
+      "sha256": "0f8ef0813434953021e5a2272e081f7e0f53d88529f93092986e4130fa1ce288",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-11 04:10:00,RENDERUSDT,7679197.4000000000000000,14565174.4851181900000000,1.76591268,2.92816600,1.14732143,0.39572400",
+      "last": "2026-10-11 23:50:00,RENDERUSDT,7312925.4000000000000000,14625850.8000000000000000,1.64866229,2.96790100,1.10146500,1.89941000",
+      "bytes": 10973
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-12",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-12.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-12.zip",
+      "sha256": "aff4d7fdf5e9000edb51b366d5adae98fec9f37fdd770761ef56bd7537421e0d",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-12 01:35:00,RENDERUSDT,7280874.4000000000000000,14437973.9352000000000000,1.66938360,3.00686500,1.11485746,0.80549500",
+      "last": "2026-10-12 22:30:00,RENDERUSDT,7860435.7000000000000000,16640542.3769000000000000,2.27339004,2.32484600,1.72834373,1.08755200",
+      "bytes": 11598
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-13",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-13.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-13.zip",
+      "sha256": "c1c5914dd95879d312305b6d9b1290aa91b56d9fdc313503cdd09e6c68641531",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-13 10:45:00,RENDERUSDT,8570636.3000000000000000,17784305.1579346200000000,2.50031786,2.36117100,2.03179948,0.44643800",
+      "last": "2026-10-13 23:15:00,RENDERUSDT,7827303.1000000000000000,15769879.5189379500000000,2.50491573,2.19014600,1.99670103,0.32951500",
+      "bytes": 11629
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-14",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-14.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-14.zip",
+      "sha256": "1d0632ffc3af4357fe0e2212369c3193fd73e97916af26f219c36ea7151720e0",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-14 00:25:00,RENDERUSDT,7794142.1000000000000000,15759755.3262000000000000,2.50670430,2.25021500,1.99423394,0.89982300",
+      "last": "2026-10-14 23:20:00,RENDERUSDT,7676804.8000000000000000,14831586.8736000000000000,2.01329114,1.93736500,1.46540218,0.50542000",
+      "bytes": 11470
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-15",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-15.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-15.zip",
+      "sha256": "95e516fccf92d97dd71908283412f454a499c0202079db9e895d37d3fe602e17",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-15 01:40:00,RENDERUSDT,7628778.0000000000000000,14578594.7580000000000000,2.02731893,1.92891100,1.45635475,0.96152500",
+      "last": "2026-10-15 21:15:00,RENDERUSDT,6874002.0000000000000000,13541783.9400000000000000,1.90732624,2.12511000,1.31239831,2.77238100",
+      "bytes": 11310
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-16",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-16.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-16.zip",
+      "sha256": "918db22434e3c2aa4c454b9cba0a374468516f176e3f2b4fbd1dc1b75f64a366",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-16 00:20:00,RENDERUSDT,6925284.4000000000000000,13521329.2143990500000000,1.95216837,2.14928400,1.32381890,0.71641500",
+      "last": "2026-10-16 23:35:00,RENDERUSDT,7004499.0000000000000000,13518683.0700000000000000,1.99609375,2.23221600,1.32940781,6.21593400",
+      "bytes": 11164
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-17",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-17.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-17.zip",
+      "sha256": "7f0aa3ba794c3a87754bc3078f5e25b954b573763fba86737b797fa0faecbb6b",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-17 00:05:00,RENDERUSDT,7138426.0000000000000000,13762885.3280000000000000,2.01241830,2.23380200,1.33546649,1.15568200",
+      "last": "2026-10-17 23:20:00,RENDERUSDT,7549364.6000000000000000,13869912.8580853800000000,1.49871861,1.88713500,0.98279458,0.81545900",
+      "bytes": 11134
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-18",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-18.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-18.zip",
+      "sha256": "63d3a1008070915bb909919b5b498b88a5f42c76d1f092c54825b6d8adc4ff87",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-18 00:30:00,RENDERUSDT,7580162.9000000000000000,14027091.4464500000000000,1.40951447,1.84805800,0.94235145,0.66458400",
+      "last": "2026-10-18 23:50:00,RENDERUSDT,7550245.3000000000000000,13673494.2383000000000000,1.15269710,1.61426000,0.77268780,2.06785100",
+      "bytes": 11167
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-19",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-19.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-19.zip",
+      "sha256": "d480a5dc25222682e3fd3597b9ac3e75b464a76247f2d4fa688ccc2df419b8a4",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-19 03:25:00,RENDERUSDT,7545312.1000000000000000,13665885.5471703700000000,1.15169002,1.66221700,0.76588413,1.14527500",
+      "last": "2026-10-19 18:05:00,RENDERUSDT,7450044.7000000000000000,13395180.3706000000000000,1.10200866,1.65009800,0.74410426,0.83690100",
+      "bytes": 10960
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-20",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-20.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-20.zip",
+      "sha256": "b2d95f8c42f271bb0075ec5e9f2e427697dd0d0a1ff4e02ddf102dd85b0d11bb",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-20 00:55:00,RENDERUSDT,7433968.8000000000000000,13403445.7464000000000000,1.11691939,1.62764700,0.75130073,2.11414500",
+      "last": "2026-10-20 23:50:00,RENDERUSDT,6991048.9000000000000000,12961404.6606000000000000,1.13501423,1.73024500,0.75362319,0.31294600",
+      "bytes": 11103
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-21",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-21.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-21.zip",
+      "sha256": "1121661536e46be1ca7c0245fbc6c9c08741fa8daa3602c6cea23f35578cef57",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-21 00:05:00,RENDERUSDT,6998435.9000000000000000,12936608.7611500000000000,1.14600326,1.72386200,0.75989057,0.36885600",
+      "last": "2026-10-21 23:50:00,RENDERUSDT,6753574.1000000000000000,12872312.2346000000000000,1.17164816,1.79959500,0.78217382,0.58316500",
+      "bytes": 11030
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "kind": "metrics",
+      "key": "2026-10-22",
+      "file": "C:\\tmp\\render-2026-aug-oct-research-20261024\\daily\\metrics\\RENDERUSDT\\RENDERUSDT-metrics-2026-10-22.zip",
+      "sourceURL": "https://data.binance.vision/data/futures/um/daily/metrics/RENDERUSDT/RENDERUSDT-metrics-2026-10-22.zip",
+      "sha256": "ebbfa66b37b688a74584cb6a68483ea493a81231547d7dfb084220088874aa3e",
+      "publisherChecksumMatch": true,
+      "zipCRC": true,
+      "csvRows": 288,
+      "first": "2026-10-22 00:00:00,RENDERUSDT,6745093.8000000000000000,12922356.0604051600000000,1.16744781,1.80917600,0.78358541,1.49521600",
+      "last": "2026-10-22 22:45:00,RENDERUSDT,6918046.1000000000000000,12165384.0668500000000000,1.20119607,1.74316100,0.77916667,1.64452600",
+      "bytes": 11152
+    }
+  ],
+  "warnings": [
+    "Historical period not used in model discovery up to Aug10; first recheck now Oct24",
+    "Binance Vision official ZIP SHA+CRC, separate public funding API response SHA.",
+    "Public Binance futures proxy is NOT Aster realized order venue"
+  ]
+}

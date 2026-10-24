@@ -1,0 +1,437 @@
+{
+  "status": "RESEARCH_ONLY_THREE_EXPERT_PROVISIONAL_SCORE_AND_ALLOCATED_SLEEVE_RISK",
+  "candidate": "AB_TRAP_PLUS_FADE_OI3_LE_M0P6",
+  "n": 157,
+  "nativePortfolioB": "Existing RENDER share-wallet entry remains UNCHANGED. Native competitor priority not calibrated or replayed.",
+  "data": {
+    "selectedProfileChangedWithoutEconomicEffect": 7,
+    "sameHourTwoCandidateExpertMatches": 9,
+    "newEntryTimesNearNative24h": 9,
+    "nativeCollisionsFirst15": [
+      {
+        "t": 1768410000000,
+        "expert": "A_2024_BTC_RALLY_FAILURE",
+        "nearestNativeEntryTs": 1768456800000,
+        "deltaHours": 13.0
+      },
+      {
+        "t": 1768485600000,
+        "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+        "nearestNativeEntryTs": 1768500000000,
+        "deltaHours": 4.0
+      },
+      {
+        "t": 1769187600000,
+        "expert": "A_2024_BTC_RALLY_FAILURE",
+        "nearestNativeEntryTs": 1769230800000,
+        "deltaHours": 12.0
+      },
+      {
+        "t": 1769338800000,
+        "expert": "A_2024_BTC_RALLY_FAILURE",
+        "nearestNativeEntryTs": 1769274000000,
+        "deltaHours": 18.0
+      },
+      {
+        "t": 1772413200000,
+        "expert": "A_2024_BTC_RALLY_FAILURE",
+        "nearestNativeEntryTs": 1772398800000,
+        "deltaHours": 4.0
+      },
+      {
+        "t": 1776607200000,
+        "expert": "A_2024_BTC_RALLY_FAILURE",
+        "nearestNativeEntryTs": 1776560400000,
+        "deltaHours": 13.0
+      },
+      {
+        "t": 1779562800000,
+        "expert": "A_2024_BTC_RALLY_FAILURE",
+        "nearestNativeEntryTs": 1779516000000,
+        "deltaHours": 13.0
+      },
+      {
+        "t": 1780592400000,
+        "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+        "nearestNativeEntryTs": 1780563600000,
+        "deltaHours": 8.0
+      },
+      {
+        "t": 1782640800000,
+        "expert": "B_OI3_CONFIRMED_REBOUND_FADE",
+        "nearestNativeEntryTs": 1782633600000,
+        "deltaHours": 2.0
+      }
+    ],
+    "2024RouteLabels": {
+      "B_OI3_CONFIRMED_REBOUND_FADE": 19,
+      "A_2024_BTC_RALLY_FAILURE": 46
+    },
+    "2025RouteLabels": {
+      "A_2024_BTC_RALLY_FAILURE": 32,
+      "B_OI3_CONFIRMED_REBOUND_FADE": 25
+    },
+    "2026RouteLabels": {
+      "A_2024_BTC_RALLY_FAILURE": 23,
+      "B_OI3_CONFIRMED_REBOUND_FADE": 12
+    }
+  },
+  "sizing": {
+    "10bps__0.25x": {
+      "2024": {
+        "trades": 65,
+        "wins": 35,
+        "pf": 1.36342,
+        "closeDDPct": -4.37717,
+        "compoundPct": 8.55592,
+        "largestSingleLossPctAllocatedCapital": -0.775
+      },
+      "2025": {
+        "trades": 57,
+        "wins": 31,
+        "pf": 1.48944,
+        "closeDDPct": -3.06415,
+        "compoundPct": 9.77166,
+        "largestSingleLossPctAllocatedCapital": -0.775
+      },
+      "2026": {
+        "trades": 35,
+        "wins": 20,
+        "pf": 1.85606,
+        "closeDDPct": -6.12659,
+        "compoundPct": 8.6484,
+        "largestSingleLossPctAllocatedCapital": -0.775
+      },
+      "2025_H1": {
+        "trades": 36,
+        "wins": 20,
+        "pf": 1.49497,
+        "closeDDPct": -3.06415,
+        "compoundPct": 6.10287,
+        "largestSingleLossPctAllocatedCapital": -0.775
+      },
+      "2025_H2": {
+        "trades": 21,
+        "wins": 11,
+        "pf": 1.48009,
+        "closeDDPct": -2.30703,
+        "compoundPct": 3.45777,
+        "largestSingleLossPctAllocatedCapital": -0.775
+      },
+      "2026_JANMAR": {
+        "trades": 21,
+        "wins": 12,
+        "pf": 1.49843,
+        "closeDDPct": -6.03441,
+        "compoundPct": 3.45922,
+        "largestSingleLossPctAllocatedCapital": -0.775
+      },
+      "2026_APRAUG": {
+        "trades": 14,
+        "wins": 8,
+        "pf": 2.72871,
+        "closeDDPct": -1.12292,
+        "compoundPct": 5.01568,
+        "largestSingleLossPctAllocatedCapital": -0.775
+      }
+    },
+    "10bps__0.5x": {
+      "2024": {
+        "trades": 65,
+        "wins": 35,
+        "pf": 1.36342,
+        "closeDDPct": -8.6103,
+        "compoundPct": 17.28186,
+        "largestSingleLossPctAllocatedCapital": -1.55
+      },
+      "2025": {
+        "trades": 57,
+        "wins": 31,
+        "pf": 1.48944,
+        "closeDDPct": -6.05733,
+        "compoundPct": 19.98563,
+        "largestSingleLossPctAllocatedCapital": -1.55
+      },
+      "2026": {
+        "trades": 35,
+        "wins": 20,
+        "pf": 1.85606,
+        "closeDDPct": -11.94187,
+        "compoundPct": 17.75553,
+        "largestSingleLossPctAllocatedCapital": -1.55
+      },
+      "2025_H1": {
+        "trades": 36,
+        "wins": 20,
+        "pf": 1.49497,
+        "closeDDPct": -6.05733,
+        "compoundPct": 12.27682,
+        "largestSingleLossPctAllocatedCapital": -1.55
+      },
+      "2025_H2": {
+        "trades": 21,
+        "wins": 11,
+        "pf": 1.48009,
+        "closeDDPct": -4.5783,
+        "compoundPct": 6.8659,
+        "largestSingleLossPctAllocatedCapital": -1.55
+      },
+      "2026_JANMAR": {
+        "trades": 21,
+        "wins": 12,
+        "pf": 1.49843,
+        "closeDDPct": -11.74775,
+        "compoundPct": 6.87664,
+        "largestSingleLossPctAllocatedCapital": -1.55
+      },
+      "2026_APRAUG": {
+        "trades": 14,
+        "wins": 8,
+        "pf": 2.72871,
+        "closeDDPct": -2.2404,
+        "compoundPct": 10.17892,
+        "largestSingleLossPctAllocatedCapital": -1.55
+      }
+    },
+    "10bps__1.0x": {
+      "2024": {
+        "trades": 65,
+        "wins": 35,
+        "pf": 1.36342,
+        "closeDDPct": -16.65453,
+        "compoundPct": 34.95914,
+        "largestSingleLossPctAllocatedCapital": -3.1
+      },
+      "2025": {
+        "trades": 57,
+        "wins": 31,
+        "pf": 1.48944,
+        "closeDDPct": -11.83522,
+        "compoundPct": 41.54747,
+        "largestSingleLossPctAllocatedCapital": -3.1
+      },
+      "2026": {
+        "trades": 35,
+        "wins": 20,
+        "pf": 1.85606,
+        "closeDDPct": -22.68519,
+        "compoundPct": 37.32077,
+        "largestSingleLossPctAllocatedCapital": -3.1
+      },
+      "2025_H1": {
+        "trades": 36,
+        "wins": 20,
+        "pf": 1.49497,
+        "closeDDPct": -11.83522,
+        "compoundPct": 24.72508,
+        "largestSingleLossPctAllocatedCapital": -3.1
+      },
+      "2025_H2": {
+        "trades": 21,
+        "wins": 11,
+        "pf": 1.48009,
+        "closeDDPct": -9.01468,
+        "compoundPct": 13.48758,
+        "largestSingleLossPctAllocatedCapital": -3.1
+      },
+      "2026_JANMAR": {
+        "trades": 21,
+        "wins": 12,
+        "pf": 1.49843,
+        "closeDDPct": -22.26972,
+        "compoundPct": 13.54264,
+        "largestSingleLossPctAllocatedCapital": -3.1
+      },
+      "2026_APRAUG": {
+        "trades": 14,
+        "wins": 8,
+        "pf": 2.72871,
+        "closeDDPct": -4.45907,
+        "compoundPct": 20.94203,
+        "largestSingleLossPctAllocatedCapital": -3.1
+      }
+    },
+    "30bps__0.25x": {
+      "2024": {
+        "trades": 65,
+        "wins": 35,
+        "pf": 1.21008,
+        "closeDDPct": -4.76113,
+        "compoundPct": 5.0879,
+        "largestSingleLossPctAllocatedCapital": -0.825
+      },
+      "2025": {
+        "trades": 57,
+        "wins": 30,
+        "pf": 1.32166,
+        "closeDDPct": -3.25939,
+        "compoundPct": 6.69143,
+        "largestSingleLossPctAllocatedCapital": -0.825
+      },
+      "2026": {
+        "trades": 35,
+        "wins": 20,
+        "pf": 1.63004,
+        "closeDDPct": -6.69125,
+        "compoundPct": 6.76749,
+        "largestSingleLossPctAllocatedCapital": -0.825
+      },
+      "2025_H1": {
+        "trades": 36,
+        "wins": 19,
+        "pf": 1.32648,
+        "closeDDPct": -3.25939,
+        "compoundPct": 4.21266,
+        "largestSingleLossPctAllocatedCapital": -0.825
+      },
+      "2025_H2": {
+        "trades": 21,
+        "wins": 11,
+        "pf": 1.31355,
+        "closeDDPct": -2.45464,
+        "compoundPct": 2.37858,
+        "largestSingleLossPctAllocatedCapital": -0.825
+      },
+      "2026_JANMAR": {
+        "trades": 21,
+        "wins": 12,
+        "pf": 1.32681,
+        "closeDDPct": -6.41254,
+        "compoundPct": 2.38002,
+        "largestSingleLossPctAllocatedCapital": -0.825
+      },
+      "2026_APRAUG": {
+        "trades": 14,
+        "wins": 8,
+        "pf": 2.34289,
+        "closeDDPct": -1.32074,
+        "compoundPct": 4.28548,
+        "largestSingleLossPctAllocatedCapital": -0.825
+      }
+    },
+    "30bps__0.5x": {
+      "2024": {
+        "trades": 65,
+        "wins": 35,
+        "pf": 1.21008,
+        "closeDDPct": -9.34712,
+        "compoundPct": 9.91393,
+        "largestSingleLossPctAllocatedCapital": -1.65
+      },
+      "2025": {
+        "trades": 57,
+        "wins": 30,
+        "pf": 1.32166,
+        "closeDDPct": -6.43844,
+        "compoundPct": 13.35419,
+        "largestSingleLossPctAllocatedCapital": -1.65
+      },
+      "2026": {
+        "trades": 35,
+        "wins": 20,
+        "pf": 1.63004,
+        "closeDDPct": -13.00397,
+        "compoundPct": 13.72143,
+        "largestSingleLossPctAllocatedCapital": -1.65
+      },
+      "2025_H1": {
+        "trades": 36,
+        "wins": 19,
+        "pf": 1.32648,
+        "closeDDPct": -6.43844,
+        "compoundPct": 8.31677,
+        "largestSingleLossPctAllocatedCapital": -1.65
+      },
+      "2025_H2": {
+        "trades": 21,
+        "wins": 11,
+        "pf": 1.31355,
+        "closeDDPct": -4.86877,
+        "compoundPct": 4.65064,
+        "largestSingleLossPctAllocatedCapital": -1.65
+      },
+      "2026_JANMAR": {
+        "trades": 21,
+        "wins": 12,
+        "pf": 1.32681,
+        "closeDDPct": -12.46234,
+        "compoundPct": 4.66119,
+        "largestSingleLossPctAllocatedCapital": -1.65
+      },
+      "2026_APRAUG": {
+        "trades": 14,
+        "wins": 8,
+        "pf": 2.34289,
+        "closeDDPct": -2.64763,
+        "compoundPct": 8.65674,
+        "largestSingleLossPctAllocatedCapital": -1.65
+      }
+    },
+    "30bps__1.0x": {
+      "2024": {
+        "trades": 65,
+        "wins": 35,
+        "pf": 1.21008,
+        "closeDDPct": -18.0094,
+        "compoundPct": 18.55377,
+        "largestSingleLossPctAllocatedCapital": -3.3
+      },
+      "2025": {
+        "trades": 57,
+        "wins": 30,
+        "pf": 1.32166,
+        "closeDDPct": -12.56086,
+        "compoundPct": 26.36184,
+        "largestSingleLossPctAllocatedCapital": -3.3
+      },
+      "2026": {
+        "trades": 35,
+        "wins": 20,
+        "pf": 1.63004,
+        "closeDDPct": -24.56028,
+        "compoundPct": 28.10448,
+        "largestSingleLossPctAllocatedCapital": -3.3
+      },
+      "2025_H1": {
+        "trades": 36,
+        "wins": 19,
+        "pf": 1.32648,
+        "closeDDPct": -12.56086,
+        "compoundPct": 16.09862,
+        "largestSingleLossPctAllocatedCapital": -3.3
+      },
+      "2025_H2": {
+        "trades": 21,
+        "wins": 11,
+        "pf": 1.31355,
+        "closeDDPct": -9.57689,
+        "compoundPct": 8.84009,
+        "largestSingleLossPctAllocatedCapital": -3.3
+      },
+      "2026_JANMAR": {
+        "trades": 21,
+        "wins": 12,
+        "pf": 1.32681,
+        "closeDDPct": -23.54396,
+        "compoundPct": 8.89313,
+        "largestSingleLossPctAllocatedCapital": -3.3
+      },
+      "2026_APRAUG": {
+        "trades": 14,
+        "wins": 8,
+        "pf": 2.34289,
+        "closeDDPct": -5.31735,
+        "compoundPct": 17.64239,
+        "largestSingleLossPctAllocatedCapital": -3.3
+      }
+    }
+  },
+  "warnings": [
+    "Funding cashflows not included; M5 modeling stop-first and 10/30bps fixed modeled fee",
+    "Risk calculations are *closed-trade only*, not intratrade MTM drawdown or native wallet",
+    "0.25x or 0.5x scales independent allocated research capital not account production gross",
+    "Third native route is not scored against models A/B, needs source-compatible common priority calibration",
+    "2024-2026 windows repeatedly studied; study-only, not independent OOS",
+    "Live exchange constraints, other assets, account risk locks and pending exposure have not been replayed"
+  ]
+}

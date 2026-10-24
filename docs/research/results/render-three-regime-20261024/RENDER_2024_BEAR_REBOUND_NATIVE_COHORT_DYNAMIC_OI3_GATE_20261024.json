@@ -1,0 +1,3866 @@
+{
+  "status": "RESEARCH_ONLY_CAUSAL_DYNAMIC_SAME_SYMBOL_12H_COOLDOWN_NOT_NATIVE8",
+  "sourceFilename": "RENDER_2024_FRESH_LONG_SHORT_12_ENTRY_7_EXIT_SCREENER_20261024.json",
+  "candidateN": 151,
+  "periods": [
+    "2024_RNDR_JAN_MAY",
+    "2024_RNDR_JUN_JUL16",
+    "2024_RENDER_JUL_DEC",
+    "2025_RENDER_JAN_MAR",
+    "2025_RENDER_APR_JUL",
+    "2025_RENDER_AUG_DEC",
+    "2026_RENDER_JAN_MAR",
+    "2026_RENDER_APR_AUG"
+  ],
+  "researchState": "LOOKBACK_IN_SAMPLE_NOT_OOS",
+  "warnings": [
+    "Thresholds explored after seeing historical returns; no untouched holdout",
+    "Native shared wallet does not apply this independent signal family",
+    "No material return quote or claim should be construed as LIVE or Aster fill"
+  ],
+  "gates": {
+    "UNFILTERED": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 20,
+            "wins": 11,
+            "winPct": 55.0,
+            "PF": 1.4649,
+            "netPctSum": 12.971,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 20,
+            "wins": 11,
+            "winPct": 55.0,
+            "PF": 1.302,
+            "netPctSum": 8.971,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 6.2903,
+            "netPctSum": 16.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 5.6061,
+            "netPctSum": 15.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 22,
+            "wins": 11,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 8.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 22,
+            "wins": 11,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 4.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 19,
+            "wins": 7,
+            "winPct": 36.84,
+            "PF": 0.7339,
+            "netPctSum": -9.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 19,
+            "wins": 7,
+            "winPct": 36.84,
+            "PF": 0.654,
+            "netPctSum": -13.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 16,
+            "wins": 6,
+            "winPct": 37.5,
+            "PF": 0.7707,
+            "netPctSum": -6.961,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 16,
+            "wins": 6,
+            "winPct": 37.5,
+            "PF": 0.686,
+            "netPctSum": -10.161,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 11,
+            "wins": 4,
+            "winPct": 36.36,
+            "PF": 0.7189,
+            "netPctSum": -6.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 4,
+            "winPct": 36.36,
+            "PF": 0.6407,
+            "netPctSum": -8.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 17,
+            "wins": 11,
+            "winPct": 64.71,
+            "PF": 2.038,
+            "netPctSum": 19.306,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 17,
+            "wins": 11,
+            "winPct": 64.71,
+            "PF": 1.8033,
+            "netPctSum": 15.906,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 10,
+            "wins": 6,
+            "winPct": 60.0,
+            "PF": 1.6769,
+            "netPctSum": 6.406,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 10,
+            "wins": 5,
+            "winPct": 50.0,
+            "PF": 1.4214,
+            "netPctSum": 4.406,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 48,
+            "wins": 27,
+            "winPct": 56.25,
+            "PF": 1.5863,
+            "netPctSum": 38.171,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 48,
+            "wins": 27,
+            "winPct": 56.25,
+            "PF": 1.4123,
+            "netPctSum": 28.571,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 46,
+            "wins": 17,
+            "winPct": 36.96,
+            "PF": 0.7428,
+            "netPctSum": -22.961,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 46,
+            "wins": 17,
+            "winPct": 36.96,
+            "PF": 0.6617,
+            "netPctSum": -32.161,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 27,
+            "wins": 17,
+            "winPct": 62.96,
+            "PF": 1.9162,
+            "netPctSum": 25.712,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 27,
+            "wins": 16,
+            "winPct": 59.26,
+            "PF": 1.6713,
+            "netPctSum": 20.312,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_CONTRACTION_MIN0P2": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 13,
+            "wins": 8,
+            "winPct": 61.54,
+            "PF": 1.882,
+            "netPctSum": 13.671,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 13,
+            "wins": 8,
+            "winPct": 61.54,
+            "PF": 1.6709,
+            "netPctSum": 11.071,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.7742,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.3636,
+            "netPctSum": 7.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 11,
+            "wins": 6,
+            "winPct": 54.55,
+            "PF": 1.5097,
+            "netPctSum": 7.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 6,
+            "winPct": 54.55,
+            "PF": 1.3455,
+            "netPctSum": 5.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 12,
+            "wins": 8,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 18.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 12,
+            "wins": 8,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 16.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 13,
+            "wins": 5,
+            "winPct": 38.46,
+            "PF": 0.8071,
+            "netPctSum": -4.661,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 13,
+            "wins": 5,
+            "winPct": 38.46,
+            "PF": 0.7182,
+            "netPctSum": -7.261,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 10,
+            "wins": 4,
+            "winPct": 40.0,
+            "PF": 0.8387,
+            "netPctSum": -3.0,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 10,
+            "wins": 4,
+            "winPct": 40.0,
+            "PF": 0.7475,
+            "netPctSum": -5.0,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 11,
+            "wins": 7,
+            "winPct": 63.64,
+            "PF": 1.7989,
+            "netPctSum": 9.906,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 7,
+            "winPct": 63.64,
+            "PF": 1.5838,
+            "netPctSum": 7.706,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 4.8599,
+            "netPctSum": 12.599,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 4.0565,
+            "netPctSum": 11.199,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 28,
+            "wins": 17,
+            "winPct": 60.71,
+            "PF": 1.8848,
+            "netPctSum": 30.171,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 28,
+            "wins": 17,
+            "winPct": 60.71,
+            "PF": 1.6769,
+            "netPctSum": 24.571,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 35,
+            "wins": 17,
+            "winPct": 48.57,
+            "PF": 1.2019,
+            "netPctSum": 11.139,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 35,
+            "wins": 17,
+            "winPct": 48.57,
+            "PF": 1.0704,
+            "netPctSum": 4.139,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 18,
+            "wins": 12,
+            "winPct": 66.67,
+            "PF": 2.4367,
+            "netPctSum": 22.505,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 18,
+            "wins": 12,
+            "winPct": 66.67,
+            "PF": 2.121,
+            "netPctSum": 18.905,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_CONTRACTION_MIN0P4": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 11,
+            "wins": 6,
+            "winPct": 54.55,
+            "PF": 1.5097,
+            "netPctSum": 7.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 6,
+            "winPct": 54.55,
+            "PF": 1.3455,
+            "netPctSum": 5.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.7742,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.3636,
+            "netPctSum": 7.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 9,
+            "wins": 4,
+            "winPct": 44.44,
+            "PF": 1.0065,
+            "netPctSum": 0.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 4,
+            "winPct": 44.44,
+            "PF": 0.897,
+            "netPctSum": -1.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 12,
+            "wins": 8,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 18.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 12,
+            "wins": 8,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 16.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 12,
+            "wins": 4,
+            "winPct": 33.33,
+            "PF": 0.6457,
+            "netPctSum": -8.561,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 12,
+            "wins": 4,
+            "winPct": 33.33,
+            "PF": 0.5745,
+            "netPctSum": -10.961,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.7548,
+            "netPctSum": -3.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.6727,
+            "netPctSum": -5.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 1.9792,
+            "netPctSum": 9.106,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 1.738,
+            "netPctSum": 7.306,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 95.0387,
+            "netPctSum": 15.436,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 40.6433,
+            "netPctSum": 14.436,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 24,
+            "wins": 13,
+            "winPct": 54.17,
+            "PF": 1.4868,
+            "netPctSum": 16.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 24,
+            "wins": 13,
+            "winPct": 54.17,
+            "PF": 1.3251,
+            "netPctSum": 11.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 32,
+            "wins": 15,
+            "winPct": 46.88,
+            "PF": 1.1237,
+            "netPctSum": 6.439,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 32,
+            "wins": 15,
+            "winPct": 46.88,
+            "PF": 1.0007,
+            "netPctSum": 0.039,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 14,
+            "wins": 10,
+            "winPct": 71.43,
+            "PF": 3.5932,
+            "netPctSum": 24.542,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 14,
+            "wins": 10,
+            "winPct": 71.43,
+            "PF": 3.1183,
+            "netPctSum": 21.742,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_CONTRACTION_MIN0P6": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 10,
+            "wins": 6,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 11.0,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 10,
+            "wins": 6,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 9.0,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.7742,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.3636,
+            "netPctSum": 7.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 8,
+            "wins": 4,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 3.2,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 4,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 1.6,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 3.3548,
+            "netPctSum": 21.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 2.9899,
+            "netPctSum": 19.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 11,
+            "wins": 4,
+            "winPct": 36.36,
+            "PF": 0.7407,
+            "netPctSum": -5.461,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 4,
+            "winPct": 36.36,
+            "PF": 0.6589,
+            "netPctSum": -7.661,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.9435,
+            "netPctSum": -0.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.8409,
+            "netPctSum": -2.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 2.3397,
+            "netPctSum": 8.306,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 2.0464,
+            "netPctSum": 6.906,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 95.0387,
+            "netPctSum": 15.436,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 40.6433,
+            "netPctSum": 14.436,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 22,
+            "wins": 13,
+            "winPct": 59.09,
+            "PF": 1.8172,
+            "netPctSum": 22.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 22,
+            "wins": 13,
+            "winPct": 59.09,
+            "PF": 1.6195,
+            "netPctSum": 18.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 29,
+            "wins": 15,
+            "winPct": 51.72,
+            "PF": 1.3681,
+            "netPctSum": 15.739,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 29,
+            "wins": 15,
+            "winPct": 51.72,
+            "PF": 1.2182,
+            "netPctSum": 9.939,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 12,
+            "wins": 9,
+            "winPct": 75.0,
+            "PF": 4.7306,
+            "netPctSum": 23.742,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 12,
+            "wins": 9,
+            "winPct": 75.0,
+            "PF": 4.0646,
+            "netPctSum": 21.342,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_CONTRACTION_MIN0P8": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 9,
+            "wins": 5,
+            "winPct": 55.56,
+            "PF": 1.5726,
+            "netPctSum": 7.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 5,
+            "winPct": 55.56,
+            "PF": 1.4015,
+            "netPctSum": 5.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.7742,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.3636,
+            "netPctSum": 7.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.7548,
+            "netPctSum": -3.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.6727,
+            "netPctSum": -5.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 14.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 12.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 9,
+            "wins": 3,
+            "winPct": 33.33,
+            "PF": 0.6514,
+            "netPctSum": -6.261,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 3,
+            "winPct": 33.33,
+            "PF": 0.5793,
+            "netPctSum": -8.061,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.8387,
+            "netPctSum": -1.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.7475,
+            "netPctSum": -2.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.6794,
+            "netPctSum": 11.406,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.0928,
+            "netPctSum": 10.206,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.7,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.1,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 21,
+            "wins": 11,
+            "winPct": 52.38,
+            "PF": 1.3839,
+            "netPctSum": 11.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 21,
+            "wins": 11,
+            "winPct": 52.38,
+            "PF": 1.2333,
+            "netPctSum": 7.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 23,
+            "wins": 11,
+            "winPct": 47.83,
+            "PF": 1.1734,
+            "netPctSum": 6.339,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 23,
+            "wins": 11,
+            "winPct": 47.83,
+            "PF": 1.0446,
+            "netPctSum": 1.739,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 9,
+            "wins": 8,
+            "winPct": 88.89,
+            "PF": 8.4536,
+            "netPctSum": 23.106,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 8,
+            "winPct": 88.89,
+            "PF": 7.4564,
+            "netPctSum": 21.306,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_CONTRACTION_MIN1P0": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 7,
+            "wins": 4,
+            "winPct": 57.14,
+            "PF": 1.6774,
+            "netPctSum": 6.3,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 4,
+            "winPct": 57.14,
+            "PF": 1.4949,
+            "netPctSum": 4.9,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 4.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 4.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 3,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 2.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 3,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 1.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 14.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 12.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.9006,
+            "netPctSum": -0.861,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.7991,
+            "netPctSum": -1.861,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 4.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 4.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.6794,
+            "netPctSum": 11.406,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.0928,
+            "netPctSum": 10.206,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.7,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.1,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 16,
+            "wins": 9,
+            "winPct": 56.25,
+            "PF": 1.6175,
+            "netPctSum": 13.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 16,
+            "wins": 9,
+            "winPct": 56.25,
+            "PF": 1.4416,
+            "netPctSum": 10.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 17,
+            "wins": 10,
+            "winPct": 58.82,
+            "PF": 1.8518,
+            "netPctSum": 17.939,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 17,
+            "wins": 10,
+            "winPct": 58.82,
+            "PF": 1.6473,
+            "netPctSum": 14.539,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 9,
+            "wins": 8,
+            "winPct": 88.89,
+            "PF": 8.4536,
+            "netPctSum": 23.106,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 8,
+            "winPct": 88.89,
+            "PF": 7.4564,
+            "netPctSum": 21.306,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI1_CONTRACTION_MIN0P25": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 13,
+            "wins": 8,
+            "winPct": 61.54,
+            "PF": 1.882,
+            "netPctSum": 13.671,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 13,
+            "wins": 8,
+            "winPct": 61.54,
+            "PF": 1.6709,
+            "netPctSum": 11.071,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.7,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.1,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.7548,
+            "netPctSum": -3.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.6727,
+            "netPctSum": -5.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 14,
+            "wins": 8,
+            "winPct": 57.14,
+            "PF": 1.6774,
+            "netPctSum": 12.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 14,
+            "wins": 8,
+            "winPct": 57.14,
+            "PF": 1.4949,
+            "netPctSum": 9.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 10,
+            "wins": 3,
+            "winPct": 30.0,
+            "PF": 0.5555,
+            "netPctSum": -9.361,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 10,
+            "wins": 3,
+            "winPct": 30.0,
+            "PF": 0.4942,
+            "netPctSum": -11.361,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 3,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 2.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 3,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 1.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 2.8179,
+            "netPctSum": 16.906,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 2.4855,
+            "netPctSum": 14.706,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 5.1172,
+            "netPctSum": 12.763,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.5041,
+            "netPctSum": 11.563,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 24,
+            "wins": 14,
+            "winPct": 58.33,
+            "PF": 1.6958,
+            "netPctSum": 21.571,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 24,
+            "wins": 14,
+            "winPct": 58.33,
+            "PF": 1.5082,
+            "netPctSum": 16.771,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 30,
+            "wins": 14,
+            "winPct": 46.67,
+            "PF": 1.1152,
+            "netPctSum": 5.639,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 30,
+            "wins": 14,
+            "winPct": 46.67,
+            "PF": 0.9931,
+            "netPctSum": -0.361,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 17,
+            "wins": 13,
+            "winPct": 76.47,
+            "PF": 3.3927,
+            "netPctSum": 29.67,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 17,
+            "wins": 13,
+            "winPct": 76.47,
+            "PF": 2.9901,
+            "netPctSum": 26.27,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P4_SELLER3_MAX0P04": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 9,
+            "wins": 5,
+            "winPct": 55.56,
+            "PF": 1.5726,
+            "netPctSum": 7.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 5,
+            "winPct": 55.56,
+            "PF": 1.4015,
+            "netPctSum": 5.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.7742,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.3636,
+            "netPctSum": 7.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 7,
+            "wins": 2,
+            "winPct": 28.57,
+            "PF": 0.5032,
+            "netPctSum": -7.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 2,
+            "winPct": 28.57,
+            "PF": 0.4485,
+            "netPctSum": -9.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 3.1452,
+            "netPctSum": 13.3,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 2.803,
+            "netPctSum": 11.9,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.7873,
+            "netPctSum": -3.161,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 3,
+            "winPct": 37.5,
+            "PF": 0.6998,
+            "netPctSum": -4.761,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 4,
+            "wins": 1,
+            "winPct": 25.0,
+            "PF": 0.4194,
+            "netPctSum": -5.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 1,
+            "winPct": 25.0,
+            "PF": 0.3737,
+            "netPctSum": -6.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 6,
+            "winPct": 85.71,
+            "PF": 5.9375,
+            "netPctSum": 15.306,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 6,
+            "winPct": 85.71,
+            "PF": 5.214,
+            "netPctSum": 13.906,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 23.7597,
+            "netPctSum": 3.736,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 10.1608,
+            "netPctSum": 3.336,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 20,
+            "wins": 10,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 8.0,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 20,
+            "wins": 10,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 4.0,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 19,
+            "wins": 9,
+            "winPct": 47.37,
+            "PF": 1.1561,
+            "netPctSum": 4.739,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 19,
+            "wins": 9,
+            "winPct": 47.37,
+            "PF": 1.029,
+            "netPctSum": 0.939,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 6.8337,
+            "netPctSum": 19.042,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 5.7056,
+            "netPctSum": 17.242,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P6_SELLER3_MAX0P04": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 8,
+            "wins": 5,
+            "winPct": 62.5,
+            "PF": 2.0968,
+            "netPctSum": 10.2,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 5,
+            "winPct": 62.5,
+            "PF": 1.8687,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.7742,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.3636,
+            "netPctSum": 7.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -4.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -5.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 3.1452,
+            "netPctSum": 13.3,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 5,
+            "winPct": 71.43,
+            "PF": 2.803,
+            "netPctSum": 11.9,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.9948,
+            "netPctSum": -0.061,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.8837,
+            "netPctSum": -1.461,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 3,
+            "wins": 1,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -2.3,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 1,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -2.9,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.6794,
+            "netPctSum": 11.406,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.0928,
+            "netPctSum": 10.206,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 23.7597,
+            "netPctSum": 3.736,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 10.1608,
+            "netPctSum": 3.336,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 18,
+            "wins": 10,
+            "winPct": 55.56,
+            "PF": 1.5726,
+            "netPctSum": 14.2,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 18,
+            "wins": 10,
+            "winPct": 55.56,
+            "PF": 1.4015,
+            "netPctSum": 10.6,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 17,
+            "wins": 9,
+            "winPct": 52.94,
+            "PF": 1.4528,
+            "netPctSum": 10.939,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 17,
+            "wins": 9,
+            "winPct": 52.94,
+            "PF": 1.2927,
+            "netPctSum": 7.539,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 8,
+            "wins": 6,
+            "winPct": 75.0,
+            "PF": 5.6389,
+            "netPctSum": 15.142,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 6,
+            "winPct": 75.0,
+            "PF": 4.6958,
+            "netPctSum": 13.542,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P4_SELLER3_MAX0P02": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 5.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 4.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.7,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.1,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 4.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 4.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 6.2903,
+            "netPctSum": 16.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 5.6061,
+            "netPctSum": 15.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 6,
+            "wins": 3,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 2.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 3,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 1.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 2,
+            "wins": 0,
+            "winPct": 0.0,
+            "PF": 0.0,
+            "netPctSum": -6.2,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 2,
+            "wins": 0,
+            "winPct": 0.0,
+            "PF": 0.0,
+            "netPctSum": -6.6,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 6,
+            "winPct": 85.71,
+            "PF": 5.9375,
+            "netPctSum": 15.306,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 6,
+            "winPct": 85.71,
+            "PF": 5.214,
+            "netPctSum": 13.906,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 23.7597,
+            "netPctSum": 3.736,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 10.1608,
+            "netPctSum": 3.336,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 3.3548,
+            "netPctSum": 21.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 2.9899,
+            "netPctSum": 19.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 14,
+            "wins": 8,
+            "winPct": 57.14,
+            "PF": 1.6774,
+            "netPctSum": 12.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 14,
+            "wins": 8,
+            "winPct": 57.14,
+            "PF": 1.4949,
+            "netPctSum": 9.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 6.8337,
+            "netPctSum": 19.042,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 5.7056,
+            "netPctSum": 17.242,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P6_SELLER3_MAX0P02": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 5.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 4.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.7,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.1,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 4.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 4.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 6.2903,
+            "netPctSum": 16.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 5.6061,
+            "netPctSum": 15.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 5.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 4.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 1,
+            "wins": 0,
+            "winPct": 0.0,
+            "PF": 0.0,
+            "netPctSum": -3.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 1,
+            "wins": 0,
+            "winPct": 0.0,
+            "PF": 0.0,
+            "netPctSum": -3.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.6794,
+            "netPctSum": 11.406,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 4.0928,
+            "netPctSum": 10.206,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 23.7597,
+            "netPctSum": 3.736,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 10.1608,
+            "netPctSum": 3.336,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 3.3548,
+            "netPctSum": 21.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 8,
+            "winPct": 72.73,
+            "PF": 2.9899,
+            "netPctSum": 19.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 12,
+            "wins": 8,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 18.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 12,
+            "wins": 8,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 16.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 8,
+            "wins": 6,
+            "winPct": 75.0,
+            "PF": 5.6389,
+            "netPctSum": 15.142,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 6,
+            "winPct": 75.0,
+            "PF": 4.6958,
+            "netPctSum": 13.542,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P4_SELLER1_MAX0P1": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 10,
+            "wins": 6,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 11.0,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 10,
+            "wins": 6,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 9.0,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 5.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 4.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.9435,
+            "netPctSum": -0.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.8409,
+            "netPctSum": -2.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 4,
+            "wins": 1,
+            "winPct": 25.0,
+            "PF": 0.4194,
+            "netPctSum": -5.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 1,
+            "winPct": 25.0,
+            "PF": 0.3737,
+            "netPctSum": -6.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 8,
+            "wins": 7,
+            "winPct": 87.5,
+            "PF": 7.1955,
+            "netPctSum": 19.206,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 7,
+            "winPct": 87.5,
+            "PF": 6.3352,
+            "netPctSum": 17.606,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 47.5193,
+            "netPctSum": 7.636,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 20.3216,
+            "netPctSum": 7.036,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 17,
+            "wins": 11,
+            "winPct": 64.71,
+            "PF": 2.3065,
+            "netPctSum": 24.3,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 17,
+            "wins": 11,
+            "winPct": 64.71,
+            "PF": 2.0556,
+            "netPctSum": 20.9,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 13,
+            "wins": 6,
+            "winPct": 46.15,
+            "PF": 1.0783,
+            "netPctSum": 1.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 13,
+            "wins": 6,
+            "winPct": 46.15,
+            "PF": 0.961,
+            "netPctSum": -0.9,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 11,
+            "wins": 9,
+            "winPct": 81.82,
+            "PF": 9.2233,
+            "netPctSum": 26.842,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 9,
+            "winPct": 81.82,
+            "PF": 7.7252,
+            "netPctSum": 24.642,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P6_SELLER1_MAX0P1": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 14.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 6,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 12.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 5.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 4.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.9435,
+            "netPctSum": -0.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.8409,
+            "netPctSum": -2.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 3,
+            "wins": 1,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -2.3,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 1,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -2.9,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 6,
+            "wins": 6,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 18.406,
+            "maxLossPct": 0.851
+          },
+          "30": {
+            "n": 6,
+            "wins": 6,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 17.206,
+            "maxLossPct": 0.651
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 47.5193,
+            "netPctSum": 7.636,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 20.3216,
+            "netPctSum": 7.036,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 16,
+            "wins": 11,
+            "winPct": 68.75,
+            "PF": 2.7677,
+            "netPctSum": 27.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 16,
+            "wins": 11,
+            "winPct": 68.75,
+            "PF": 2.4667,
+            "netPctSum": 24.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 12,
+            "wins": 6,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 4.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 12,
+            "wins": 6,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 2.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 9,
+            "wins": 8,
+            "winPct": 88.89,
+            "PF": 159.6539,
+            "netPctSum": 26.042,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 9,
+            "wins": 8,
+            "winPct": 88.89,
+            "PF": 67.5727,
+            "netPctSum": 24.242,
+            "maxLossPct": -0.364
+          }
+        }
+      }
+    },
+    "OI3_MIN0P4_WICK_MAX1P5": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 6,
+            "wins": 4,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 9.4,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 4,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 8.2,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -4.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -5.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 4.4032,
+            "netPctSum": 21.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 3.9242,
+            "netPctSum": 19.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 8,
+            "wins": 2,
+            "winPct": 25.0,
+            "PF": 0.4343,
+            "netPctSum": -10.161,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 2,
+            "winPct": 25.0,
+            "PF": 0.3862,
+            "netPctSum": -11.761,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 7,
+            "wins": 2,
+            "winPct": 28.57,
+            "PF": 0.5032,
+            "netPctSum": -7.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 2,
+            "winPct": 28.57,
+            "PF": 0.4485,
+            "netPctSum": -9.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 3.4213,
+            "netPctSum": 7.506,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 2.9716,
+            "netPctSum": 6.506,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 71.279,
+            "netPctSum": 11.536,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 30.4825,
+            "netPctSum": 10.736,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 14,
+            "wins": 8,
+            "winPct": 57.14,
+            "PF": 1.6774,
+            "netPctSum": 12.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 14,
+            "wins": 8,
+            "winPct": 57.14,
+            "PF": 1.4949,
+            "netPctSum": 9.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 24,
+            "wins": 11,
+            "winPct": 45.83,
+            "PF": 1.0817,
+            "netPctSum": 3.239,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 24,
+            "wins": 11,
+            "winPct": 45.83,
+            "PF": 0.9631,
+            "netPctSum": -1.561,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 6.8337,
+            "netPctSum": 19.042,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 5.7056,
+            "netPctSum": 17.242,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P6_WICK_MAX1P5": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 5.0323,
+            "netPctSum": 12.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 4.4848,
+            "netPctSum": 11.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -4.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -5.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 8,
+            "wins": 7,
+            "winPct": 87.5,
+            "PF": 8.8065,
+            "netPctSum": 24.2,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 7,
+            "winPct": 87.5,
+            "PF": 7.8485,
+            "netPctSum": 22.6,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 7,
+            "wins": 2,
+            "winPct": 28.57,
+            "PF": 0.5249,
+            "netPctSum": -7.061,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 2,
+            "winPct": 28.57,
+            "PF": 0.4666,
+            "netPctSum": -8.461,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -4.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -5.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 6.706,
+            "maxLossPct": 0.851
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 6.106,
+            "maxLossPct": 0.651
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 71.279,
+            "netPctSum": 11.536,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 30.4825,
+            "netPctSum": 10.736,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 13,
+            "wins": 8,
+            "winPct": 61.54,
+            "PF": 2.0129,
+            "netPctSum": 15.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 13,
+            "wins": 8,
+            "winPct": 61.54,
+            "PF": 1.7939,
+            "netPctSum": 13.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 21,
+            "wins": 11,
+            "winPct": 52.38,
+            "PF": 1.413,
+            "netPctSum": 12.539,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 21,
+            "wins": 11,
+            "winPct": 52.38,
+            "PF": 1.2577,
+            "netPctSum": 8.339,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 7,
+            "wins": 6,
+            "winPct": 85.71,
+            "PF": 112.1346,
+            "netPctSum": 18.242,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 7,
+            "wins": 6,
+            "winPct": 85.71,
+            "PF": 47.2511,
+            "netPctSum": 16.842,
+            "maxLossPct": -0.364
+          }
+        }
+      }
+    },
+    "OI3_MIN0P4_REBOUND_MAX4": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.7742,
+            "netPctSum": 8.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 3.3636,
+            "netPctSum": 7.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.8387,
+            "netPctSum": -1.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.7475,
+            "netPctSum": -2.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 4.4032,
+            "netPctSum": 21.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 3.9242,
+            "netPctSum": 19.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 9,
+            "wins": 2,
+            "winPct": 22.22,
+            "PF": 0.3704,
+            "netPctSum": -13.261,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 2,
+            "winPct": 22.22,
+            "PF": 0.3295,
+            "netPctSum": -15.061,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -4.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -5.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 2.7906,
+            "netPctSum": 5.551,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 2.4397,
+            "netPctSum": 4.751,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 71.279,
+            "netPctSum": 11.536,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 30.4825,
+            "netPctSum": 10.736,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 11,
+            "wins": 7,
+            "winPct": 63.64,
+            "PF": 2.2016,
+            "netPctSum": 14.9,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 11,
+            "wins": 7,
+            "winPct": 63.64,
+            "PF": 1.9621,
+            "netPctSum": 12.7,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 24,
+            "wins": 11,
+            "winPct": 45.83,
+            "PF": 1.0817,
+            "netPctSum": 3.239,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 24,
+            "wins": 11,
+            "winPct": 45.83,
+            "PF": 0.9631,
+            "netPctSum": -1.561,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 8,
+            "wins": 6,
+            "winPct": 75.0,
+            "PF": 6.2347,
+            "netPctSum": 17.087,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 6,
+            "winPct": 75.0,
+            "PF": 5.2266,
+            "netPctSum": 15.487,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    },
+    "OI3_MIN0P6_REBOUND_MAX4": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.7,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.1,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.8387,
+            "netPctSum": -1.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.7475,
+            "netPctSum": -2.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 8,
+            "wins": 7,
+            "winPct": 87.5,
+            "PF": 8.8065,
+            "netPctSum": 24.2,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 7,
+            "winPct": 87.5,
+            "PF": 7.8485,
+            "netPctSum": 22.6,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 8,
+            "wins": 2,
+            "winPct": 25.0,
+            "PF": 0.4343,
+            "netPctSum": -10.161,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 2,
+            "winPct": 25.0,
+            "PF": 0.3862,
+            "netPctSum": -11.761,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.8387,
+            "netPctSum": -1.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 2,
+            "winPct": 40.0,
+            "PF": 0.7475,
+            "netPctSum": -2.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 4.751,
+            "maxLossPct": 0.851
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 4.351,
+            "maxLossPct": 0.651
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 71.279,
+            "netPctSum": 11.536,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 30.4825,
+            "netPctSum": 10.736,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 10,
+            "wins": 7,
+            "winPct": 70.0,
+            "PF": 2.9355,
+            "netPctSum": 18.0,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 10,
+            "wins": 7,
+            "winPct": 70.0,
+            "PF": 2.6162,
+            "netPctSum": 16.0,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 21,
+            "wins": 11,
+            "winPct": 52.38,
+            "PF": 1.413,
+            "netPctSum": 12.539,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 21,
+            "wins": 11,
+            "winPct": 52.38,
+            "PF": 1.2577,
+            "netPctSum": 8.339,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 100.2231,
+            "netPctSum": 16.287,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 6,
+            "wins": 5,
+            "winPct": 83.33,
+            "PF": 42.431,
+            "netPctSum": 15.087,
+            "maxLossPct": -0.364
+          }
+        }
+      }
+    },
+    "OI3_MIN0P6_BTC24_UP": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.9435,
+            "netPctSum": -0.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.8409,
+            "netPctSum": -2.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 4.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 4.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.5161,
+            "netPctSum": 4.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 3,
+            "wins": 2,
+            "winPct": 66.67,
+            "PF": 2.2424,
+            "netPctSum": 4.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 5.0323,
+            "netPctSum": 12.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 4,
+            "winPct": 80.0,
+            "PF": 4.4848,
+            "netPctSum": 11.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -4.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -5.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 0.8,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 0.4,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.8,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 2,
+            "wins": 2,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 7.4,
+            "maxLossPct": 3.7
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 23.7597,
+            "netPctSum": 3.736,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 2,
+            "wins": 1,
+            "winPct": 50.0,
+            "PF": 10.1608,
+            "netPctSum": 3.336,
+            "maxLossPct": -0.364
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 13,
+            "wins": 7,
+            "winPct": 53.85,
+            "PF": 1.4677,
+            "netPctSum": 8.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 13,
+            "wins": 7,
+            "winPct": 53.85,
+            "PF": 1.3081,
+            "netPctSum": 6.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 13,
+            "wins": 7,
+            "winPct": 53.85,
+            "PF": 1.4677,
+            "netPctSum": 8.7,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 13,
+            "wins": 7,
+            "winPct": 53.85,
+            "PF": 1.3081,
+            "netPctSum": 6.1,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 71.279,
+            "netPctSum": 11.536,
+            "maxLossPct": -0.164
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "winPct": 75.0,
+            "PF": 30.4825,
+            "netPctSum": 10.736,
+            "maxLossPct": -0.364
+          }
+        }
+      }
+    },
+    "OI3_MIN0P6_R24_LE_NEG4": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 4,
+            "wins": 2,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 1.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 2,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 0.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.7,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 3,
+            "wins": 3,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 11.1,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 8,
+            "wins": 4,
+            "winPct": 50.0,
+            "PF": 1.2581,
+            "netPctSum": 3.2,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 8,
+            "wins": 4,
+            "winPct": 50.0,
+            "PF": 1.1212,
+            "netPctSum": 1.6,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 4.4032,
+            "netPctSum": 21.1,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 9,
+            "wins": 7,
+            "winPct": 77.78,
+            "PF": 3.9242,
+            "netPctSum": 19.3,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.9948,
+            "netPctSum": -0.061,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 7,
+            "wins": 3,
+            "winPct": 42.86,
+            "PF": 0.8837,
+            "netPctSum": -1.461,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.629,
+            "netPctSum": -4.6,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 6,
+            "wins": 2,
+            "winPct": 33.33,
+            "PF": 0.5606,
+            "netPctSum": -5.8,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 4,
+            "wins": 2,
+            "winPct": 50.0,
+            "PF": 0.7663,
+            "netPctSum": -1.449,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 4,
+            "wins": 2,
+            "winPct": 50.0,
+            "PF": 0.6592,
+            "netPctSum": -2.249,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 1,
+            "wins": 1,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 3.9,
+            "maxLossPct": 3.9
+          },
+          "30": {
+            "n": 1,
+            "wins": 1,
+            "winPct": 100.0,
+            "PF": null,
+            "netPctSum": 3.7,
+            "maxLossPct": 3.7
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 15,
+            "wins": 9,
+            "winPct": 60.0,
+            "PF": 1.8871,
+            "netPctSum": 16.5,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 15,
+            "wins": 9,
+            "winPct": 60.0,
+            "PF": 1.6818,
+            "netPctSum": 13.5,
+            "maxLossPct": -3.3
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 22,
+            "wins": 12,
+            "winPct": 54.55,
+            "PF": 1.5415,
+            "netPctSum": 16.439,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 22,
+            "wins": 12,
+            "winPct": 54.55,
+            "PF": 1.372,
+            "netPctSum": 12.039,
+            "maxLossPct": -3.3
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.3953,
+            "netPctSum": 2.451,
+            "maxLossPct": -3.1
+          },
+          "30": {
+            "n": 5,
+            "wins": 3,
+            "winPct": 60.0,
+            "PF": 1.2198,
+            "netPctSum": 1.451,
+            "maxLossPct": -3.3
+          }
+        }
+      }
+    }
+  },
+  "researchThreeYearPositive": [
+    "OI3_CONTRACTION_MIN0P2",
+    "OI3_CONTRACTION_MIN0P4",
+    "OI3_CONTRACTION_MIN0P6"
+  ]
+}

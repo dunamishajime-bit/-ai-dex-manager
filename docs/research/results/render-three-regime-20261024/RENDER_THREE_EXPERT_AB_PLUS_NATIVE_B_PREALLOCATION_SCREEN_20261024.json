@@ -1,0 +1,3736 @@
+{
+  "status": "RESEARCH_ONLY_NATIVE_B_UNCHANGED_THREE_ENTRY_EXPERT_PREALLOCATION",
+  "warnings": [
+    "2024/2025/2026 windows historically explored. Not pristine OOS.",
+    "Third native B line is separate: do NOT sum standalone alpha with wallet native balances",
+    "No changes to native gross/pending/ownership/cooldown; collision hours audit only.",
+    "No live venue order fills; Binance M5 5m stop-first, 10 and 30bps priced"
+  ],
+  "thirdExpertB": "Existing 24 native-shared8 RENDER entries; preserved unchanged, count=24. Temporal conflict comparison only.",
+  "bankN": 263,
+  "configRules": {
+    "A_2024_BTC_TRAP_ONLY": {
+      "oi3Gate": null,
+      "btc7MinimumFor2024Trap": null,
+      "mode": "trap"
+    },
+    "B_BEARFADE_OI3_LE_M0P2_ONLY": {
+      "oi3Gate": -0.2,
+      "btc7MinimumFor2024Trap": null,
+      "mode": "fade"
+    },
+    "B_BEARFADE_OI3_LE_M0P6_ONLY": {
+      "oi3Gate": -0.6,
+      "btc7MinimumFor2024Trap": null,
+      "mode": "fade"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2": {
+      "oi3Gate": -0.2,
+      "btc7MinimumFor2024Trap": null,
+      "mode": "dual"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P4": {
+      "oi3Gate": -0.4,
+      "btc7MinimumFor2024Trap": null,
+      "mode": "dual"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6": {
+      "oi3Gate": -0.6,
+      "btc7MinimumFor2024Trap": null,
+      "mode": "dual"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P8": {
+      "oi3Gate": -0.8,
+      "btc7MinimumFor2024Trap": null,
+      "mode": "dual"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2_NO_BTC7_DEEP5": {
+      "oi3Gate": -0.2,
+      "btc7MinimumFor2024Trap": -5.0,
+      "mode": "dual"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6_NO_BTC7_DEEP5": {
+      "oi3Gate": -0.6,
+      "btc7MinimumFor2024Trap": -5.0,
+      "mode": "dual"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2_NO_BTC7_DEEP3": {
+      "oi3Gate": -0.2,
+      "btc7MinimumFor2024Trap": -3.0,
+      "mode": "dual"
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6_NO_BTC7_DEEP3": {
+      "oi3Gate": -0.6,
+      "btc7MinimumFor2024Trap": -3.0,
+      "mode": "dual"
+    }
+  },
+  "models": {
+    "A_2024_BTC_TRAP_ONLY": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 26,
+            "wins": 13,
+            "wrPct": 50.0,
+            "pf": 1.1556,
+            "sumPct": 6.271,
+            "compoundPct": 4.901,
+            "closeDDPct": -17.217,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26
+            }
+          },
+          "30": {
+            "n": 26,
+            "wins": 13,
+            "wrPct": 50.0,
+            "pf": 1.025,
+            "sumPct": 1.071,
+            "compoundPct": -0.413,
+            "closeDDPct": -18.237,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "sumPct": -3.1,
+            "compoundPct": -3.1,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 1
+            }
+          },
+          "30": {
+            "n": 1,
+            "wins": 0,
+            "wrPct": 0.0,
+            "pf": 0.0,
+            "sumPct": -3.3,
+            "compoundPct": -3.3,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 1
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 23,
+            "wins": 12,
+            "wrPct": 52.17,
+            "pf": 1.209,
+            "sumPct": 7.127,
+            "compoundPct": 6.005,
+            "closeDDPct": -13.988,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          },
+          "30": {
+            "n": 23,
+            "wins": 12,
+            "wrPct": 52.17,
+            "pf": 1.0696,
+            "sumPct": 2.527,
+            "compoundPct": 1.243,
+            "closeDDPct": -15.211,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 16,
+            "wins": 11,
+            "wrPct": 68.75,
+            "pf": 2.4577,
+            "sumPct": 22.595,
+            "compoundPct": 24.164,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 16
+            }
+          },
+          "30": {
+            "n": 16,
+            "wins": 10,
+            "wrPct": 62.5,
+            "pf": 2.1744,
+            "sumPct": 19.395,
+            "compoundPct": 20.3,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 16
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 12,
+            "wins": 7,
+            "wrPct": 58.33,
+            "pf": 1.8144,
+            "sumPct": 10.981,
+            "compoundPct": 10.881,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12
+            }
+          },
+          "30": {
+            "n": 12,
+            "wins": 7,
+            "wrPct": 58.33,
+            "pf": 1.5924,
+            "sumPct": 8.581,
+            "compoundPct": 8.27,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 10,
+            "wins": 6,
+            "wrPct": 60.0,
+            "pf": 1.8871,
+            "sumPct": 11.0,
+            "compoundPct": 10.915,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10
+            }
+          },
+          "30": {
+            "n": 10,
+            "wins": 6,
+            "wrPct": 60.0,
+            "pf": 1.6818,
+            "sumPct": 9.0,
+            "compoundPct": 8.737,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 15,
+            "wins": 7,
+            "wrPct": 46.67,
+            "pf": 0.9779,
+            "sumPct": -0.549,
+            "compoundPct": -1.38,
+            "closeDDPct": -22.27,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15
+            }
+          },
+          "30": {
+            "n": 15,
+            "wins": 7,
+            "wrPct": 46.67,
+            "pf": 0.8656,
+            "sumPct": -3.549,
+            "compoundPct": -4.302,
+            "closeDDPct": -23.544,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 9,
+            "wins": 4,
+            "wrPct": 44.44,
+            "pf": 1.3842,
+            "sumPct": 4.33,
+            "compoundPct": 3.951,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          },
+          "30": {
+            "n": 9,
+            "wins": 4,
+            "wrPct": 44.44,
+            "pf": 1.2062,
+            "sumPct": 2.53,
+            "compoundPct": 2.102,
+            "closeDDPct": -5.317,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 50,
+            "wins": 25,
+            "wrPct": 50.0,
+            "pf": 1.1329,
+            "sumPct": 10.298,
+            "compoundPct": 7.753,
+            "closeDDPct": -17.217,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 50
+            }
+          },
+          "30": {
+            "n": 50,
+            "wins": 25,
+            "wrPct": 50.0,
+            "pf": 1.0036,
+            "sumPct": 0.298,
+            "compoundPct": -2.502,
+            "closeDDPct": -18.237,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 50
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 38,
+            "wins": 24,
+            "wrPct": 63.16,
+            "pf": 2.0771,
+            "sumPct": 44.576,
+            "compoundPct": 52.701,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 38
+            }
+          },
+          "30": {
+            "n": 38,
+            "wins": 23,
+            "wrPct": 60.53,
+            "pf": 1.8366,
+            "sumPct": 36.976,
+            "compoundPct": 41.629,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 38
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 24,
+            "wins": 11,
+            "wrPct": 45.83,
+            "pf": 1.1048,
+            "sumPct": 3.781,
+            "compoundPct": 2.516,
+            "closeDDPct": -24.679,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24
+            }
+          },
+          "30": {
+            "n": 24,
+            "wins": 11,
+            "wrPct": 45.83,
+            "pf": 0.9737,
+            "sumPct": -1.019,
+            "compoundPct": -2.291,
+            "closeDDPct": -26.067,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24
+            }
+          }
+        }
+      },
+      "chosen": 112,
+      "newResearchEntriesWithin24hExistingNative": 6,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 112
+      }
+    },
+    "B_BEARFADE_OI3_LE_M0P2_ONLY": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 13,
+            "wins": 8,
+            "wrPct": 61.54,
+            "pf": 1.882,
+            "sumPct": 13.671,
+            "compoundPct": 13.757,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 13
+            }
+          },
+          "30": {
+            "n": 13,
+            "wins": 8,
+            "wrPct": 61.54,
+            "pf": 1.6709,
+            "sumPct": 11.071,
+            "compoundPct": 10.861,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 13
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 11,
+            "wins": 6,
+            "wrPct": 54.55,
+            "pf": 1.5097,
+            "sumPct": 7.9,
+            "compoundPct": 7.476,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 11,
+            "wins": 6,
+            "wrPct": 54.55,
+            "pf": 1.3455,
+            "sumPct": 5.7,
+            "compoundPct": 5.149,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 12,
+            "wins": 8,
+            "wrPct": 66.67,
+            "pf": 2.5161,
+            "sumPct": 18.8,
+            "compoundPct": 19.735,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          },
+          "30": {
+            "n": 12,
+            "wins": 8,
+            "wrPct": 66.67,
+            "pf": 2.2424,
+            "sumPct": 16.4,
+            "compoundPct": 16.933,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 13,
+            "wins": 5,
+            "wrPct": 38.46,
+            "pf": 0.8071,
+            "sumPct": -4.661,
+            "compoundPct": -5.262,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 13
+            }
+          },
+          "30": {
+            "n": 13,
+            "wins": 5,
+            "wrPct": 38.46,
+            "pf": 0.7182,
+            "sumPct": -7.261,
+            "compoundPct": -7.707,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 13
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 10,
+            "wins": 4,
+            "wrPct": 40.0,
+            "pf": 0.8387,
+            "sumPct": -3.0,
+            "compoundPct": -3.527,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          },
+          "30": {
+            "n": 10,
+            "wins": 4,
+            "wrPct": 40.0,
+            "pf": 0.7475,
+            "sumPct": -5.0,
+            "compoundPct": -5.447,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 11,
+            "wins": 7,
+            "wrPct": 63.64,
+            "pf": 1.7989,
+            "sumPct": 9.906,
+            "compoundPct": 9.765,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 11,
+            "wins": 7,
+            "wrPct": 63.64,
+            "pf": 1.5838,
+            "sumPct": 7.706,
+            "compoundPct": 7.393,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 7,
+            "wins": 5,
+            "wrPct": 71.43,
+            "pf": 4.8599,
+            "sumPct": 12.599,
+            "compoundPct": 13.036,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 7,
+            "wins": 5,
+            "wrPct": 71.43,
+            "pf": 4.0565,
+            "sumPct": 11.199,
+            "compoundPct": 11.489,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 28,
+            "wins": 17,
+            "wrPct": 60.71,
+            "pf": 1.8848,
+            "sumPct": 30.171,
+            "compoundPct": 32.88,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 28
+            }
+          },
+          "30": {
+            "n": 28,
+            "wins": 17,
+            "wrPct": 60.71,
+            "pf": 1.6769,
+            "sumPct": 24.571,
+            "compoundPct": 25.703,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 28
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 35,
+            "wins": 17,
+            "wrPct": 48.57,
+            "pf": 1.2019,
+            "sumPct": 11.139,
+            "compoundPct": 9.433,
+            "closeDDPct": -13.217,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 35
+            }
+          },
+          "30": {
+            "n": 35,
+            "wins": 17,
+            "wrPct": 48.57,
+            "pf": 1.0704,
+            "sumPct": 4.139,
+            "compoundPct": 2.042,
+            "closeDDPct": -16.314,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 35
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 18,
+            "wins": 12,
+            "wrPct": 66.67,
+            "pf": 2.4367,
+            "sumPct": 22.505,
+            "compoundPct": 24.073,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 18
+            }
+          },
+          "30": {
+            "n": 18,
+            "wins": 12,
+            "wrPct": 66.67,
+            "pf": 2.121,
+            "sumPct": 18.905,
+            "compoundPct": 19.731,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 18
+            }
+          }
+        }
+      },
+      "chosen": 81,
+      "newResearchEntriesWithin24hExistingNative": 4,
+      "selectedExpertCounts": {
+        "B_OI3_CONFIRMED_REBOUND_FADE": 81
+      }
+    },
+    "B_BEARFADE_OI3_LE_M0P6_ONLY": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 10,
+            "wins": 6,
+            "wrPct": 60.0,
+            "pf": 1.8871,
+            "sumPct": 11.0,
+            "compoundPct": 10.915,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          },
+          "30": {
+            "n": 10,
+            "wins": 6,
+            "wrPct": 60.0,
+            "pf": 1.6818,
+            "sumPct": 9.0,
+            "compoundPct": 8.737,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 8,
+            "wins": 4,
+            "wrPct": 50.0,
+            "pf": 1.2581,
+            "sumPct": 3.2,
+            "compoundPct": 2.744,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 8,
+            "wins": 4,
+            "wrPct": 50.0,
+            "pf": 1.1212,
+            "sumPct": 1.6,
+            "compoundPct": 1.116,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 11,
+            "wins": 8,
+            "wrPct": 72.73,
+            "pf": 3.3548,
+            "sumPct": 21.9,
+            "compoundPct": 23.565,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 11,
+            "wins": 8,
+            "wrPct": 72.73,
+            "pf": 2.9899,
+            "sumPct": 19.7,
+            "compoundPct": 20.923,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 11,
+            "wins": 4,
+            "wrPct": 36.36,
+            "pf": 0.7407,
+            "sumPct": -5.461,
+            "compoundPct": -5.901,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 11,
+            "wins": 4,
+            "wrPct": 36.36,
+            "pf": 0.6589,
+            "sumPct": -7.661,
+            "compoundPct": -7.963,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 7,
+            "wins": 3,
+            "wrPct": 42.86,
+            "pf": 0.9435,
+            "sumPct": -0.7,
+            "compoundPct": -1.112,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 7,
+            "wins": 3,
+            "wrPct": 42.86,
+            "pf": 0.8409,
+            "sumPct": -2.1,
+            "compoundPct": -2.492,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 7,
+            "wins": 5,
+            "wrPct": 71.43,
+            "pf": 2.3397,
+            "sumPct": 8.306,
+            "compoundPct": 8.289,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 7,
+            "wins": 5,
+            "wrPct": 71.43,
+            "pf": 2.0464,
+            "sumPct": 6.906,
+            "compoundPct": 6.798,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 5,
+            "wins": 4,
+            "wrPct": 80.0,
+            "pf": 95.0387,
+            "sumPct": 15.436,
+            "compoundPct": 16.345,
+            "closeDDPct": -0.164,
+            "maxLossPct": -0.164,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 5,
+            "wins": 4,
+            "wrPct": 80.0,
+            "pf": 40.6433,
+            "sumPct": 14.436,
+            "compoundPct": 15.221,
+            "closeDDPct": -0.364,
+            "maxLossPct": -0.364,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 22,
+            "wins": 13,
+            "wrPct": 59.09,
+            "pf": 1.8172,
+            "sumPct": 22.8,
+            "compoundPct": 23.856,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          },
+          "30": {
+            "n": 22,
+            "wins": 13,
+            "wrPct": 59.09,
+            "pf": 1.6195,
+            "sumPct": 18.4,
+            "compoundPct": 18.567,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 29,
+            "wins": 15,
+            "wrPct": 51.72,
+            "pf": 1.3681,
+            "sumPct": 15.739,
+            "compoundPct": 14.98,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 29
+            }
+          },
+          "30": {
+            "n": 29,
+            "wins": 15,
+            "wrPct": 51.72,
+            "pf": 1.2182,
+            "sumPct": 9.939,
+            "compoundPct": 8.521,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 29
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 12,
+            "wins": 9,
+            "wrPct": 75.0,
+            "pf": 4.7306,
+            "sumPct": 23.742,
+            "compoundPct": 25.989,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          },
+          "30": {
+            "n": 12,
+            "wins": 9,
+            "wrPct": 75.0,
+            "pf": 4.0646,
+            "sumPct": 21.342,
+            "compoundPct": 23.054,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          }
+        }
+      },
+      "chosen": 63,
+      "newResearchEntriesWithin24hExistingNative": 3,
+      "selectedExpertCounts": {
+        "B_OI3_CONFIRMED_REBOUND_FADE": 63
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 32,
+            "wins": 17,
+            "wrPct": 53.12,
+            "pf": 1.337,
+            "sumPct": 15.671,
+            "compoundPct": 14.786,
+            "closeDDPct": -13.404,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          },
+          "30": {
+            "n": 32,
+            "wins": 17,
+            "wrPct": 53.12,
+            "pf": 1.1873,
+            "sumPct": 9.271,
+            "compoundPct": 7.689,
+            "closeDDPct": -14.976,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 33,
+            "wins": 18,
+            "wrPct": 54.55,
+            "pf": 1.3898,
+            "sumPct": 18.127,
+            "compoundPct": 17.575,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          },
+          "30": {
+            "n": 33,
+            "wins": 18,
+            "wrPct": 54.55,
+            "pf": 1.2329,
+            "sumPct": 11.527,
+            "compoundPct": 10.089,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 23,
+            "wins": 13,
+            "wrPct": 56.52,
+            "pf": 1.4805,
+            "sumPct": 14.895,
+            "compoundPct": 14.511,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 23,
+            "wins": 12,
+            "wrPct": 52.17,
+            "pf": 1.3118,
+            "sumPct": 10.295,
+            "compoundPct": 9.384,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 21,
+            "wins": 11,
+            "wrPct": 52.38,
+            "pf": 1.5135,
+            "sumPct": 14.555,
+            "compoundPct": 14.236,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 21,
+            "wins": 11,
+            "wrPct": 52.38,
+            "pf": 1.3412,
+            "sumPct": 10.355,
+            "compoundPct": 9.56,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 19,
+            "wins": 9,
+            "wrPct": 47.37,
+            "pf": 1.1323,
+            "sumPct": 4.1,
+            "compoundPct": 2.986,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          },
+          "30": {
+            "n": 19,
+            "wins": 9,
+            "wrPct": 47.37,
+            "pf": 1.0091,
+            "sumPct": 0.3,
+            "compoundPct": -0.854,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.4547,
+            "sumPct": 15.506,
+            "compoundPct": 15.09,
+            "closeDDPct": -25.082,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          },
+          "30": {
+            "n": 25,
+            "wins": 14,
+            "wrPct": 56.0,
+            "pf": 1.2894,
+            "sumPct": 10.506,
+            "compoundPct": 9.499,
+            "closeDDPct": -27.05,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 16,
+            "wins": 9,
+            "wrPct": 56.25,
+            "pf": 2.1648,
+            "sumPct": 16.929,
+            "compoundPct": 17.502,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 16,
+            "wins": 9,
+            "wrPct": 56.25,
+            "pf": 1.8616,
+            "sumPct": 13.729,
+            "compoundPct": 13.832,
+            "closeDDPct": -5.317,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 69,
+            "wins": 38,
+            "wrPct": 55.07,
+            "pf": 1.4412,
+            "sumPct": 42.398,
+            "compoundPct": 46.681,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 20
+            }
+          },
+          "30": {
+            "n": 69,
+            "wins": 38,
+            "wrPct": 55.07,
+            "pf": 1.2796,
+            "sumPct": 28.598,
+            "compoundPct": 27.843,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 20
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 63,
+            "wins": 33,
+            "wrPct": 52.38,
+            "pf": 1.3713,
+            "sumPct": 33.549,
+            "compoundPct": 34.719,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 28
+            }
+          },
+          "30": {
+            "n": 63,
+            "wins": 32,
+            "wrPct": 50.79,
+            "pf": 1.2174,
+            "sumPct": 20.949,
+            "compoundPct": 18.817,
+            "closeDDPct": -16.068,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 28
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 41,
+            "wins": 23,
+            "wrPct": 56.1,
+            "pf": 1.6669,
+            "sumPct": 32.436,
+            "compoundPct": 35.233,
+            "closeDDPct": -27.404,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          },
+          "30": {
+            "n": 41,
+            "wins": 23,
+            "wrPct": 56.1,
+            "pf": 1.464,
+            "sumPct": 24.236,
+            "compoundPct": 24.645,
+            "closeDDPct": -29.457,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          }
+        }
+      },
+      "chosen": 173,
+      "newResearchEntriesWithin24hExistingNative": 10,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 108,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 65
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P4": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.2531,
+            "sumPct": 11.771,
+            "compoundPct": 10.477,
+            "closeDDPct": -16.655,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.1125,
+            "sumPct": 5.571,
+            "compoundPct": 3.846,
+            "closeDDPct": -18.009,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.2221,
+            "sumPct": 10.327,
+            "compoundPct": 8.914,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          },
+          "30": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.0834,
+            "sumPct": 4.127,
+            "compoundPct": 2.374,
+            "closeDDPct": -15.945,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 23,
+            "wins": 13,
+            "wrPct": 56.52,
+            "pf": 1.4805,
+            "sumPct": 14.895,
+            "compoundPct": 14.511,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 23,
+            "wins": 12,
+            "wrPct": 52.17,
+            "pf": 1.3118,
+            "sumPct": 10.295,
+            "compoundPct": 9.384,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 20,
+            "wins": 10,
+            "wrPct": 50.0,
+            "pf": 1.3759,
+            "sumPct": 10.655,
+            "compoundPct": 9.948,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          },
+          "30": {
+            "n": 20,
+            "wins": 10,
+            "wrPct": 50.0,
+            "pf": 1.2193,
+            "sumPct": 6.655,
+            "compoundPct": 5.651,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 17,
+            "wins": 8,
+            "wrPct": 47.06,
+            "pf": 1.1183,
+            "sumPct": 3.3,
+            "compoundPct": 2.291,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 17,
+            "wins": 8,
+            "wrPct": 47.06,
+            "pf": 0.9966,
+            "sumPct": -0.1,
+            "compoundPct": -1.129,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 23,
+            "wins": 13,
+            "wrPct": 56.52,
+            "pf": 1.4744,
+            "sumPct": 14.706,
+            "compoundPct": 14.314,
+            "closeDDPct": -24.679,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 23,
+            "wins": 13,
+            "wrPct": 56.52,
+            "pf": 1.3062,
+            "sumPct": 10.106,
+            "compoundPct": 9.196,
+            "closeDDPct": -26.067,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.7287,
+            "sumPct": 19.766,
+            "compoundPct": 20.942,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.3429,
+            "sumPct": 16.966,
+            "compoundPct": 17.642,
+            "closeDDPct": -5.317,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 66,
+            "wins": 35,
+            "wrPct": 53.03,
+            "pf": 1.3194,
+            "sumPct": 30.698,
+            "compoundPct": 30.775,
+            "closeDDPct": -16.655,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          },
+          "30": {
+            "n": 66,
+            "wins": 35,
+            "wrPct": 53.03,
+            "pf": 1.171,
+            "sumPct": 17.498,
+            "compoundPct": 14.641,
+            "closeDDPct": -18.009,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 60,
+            "wins": 31,
+            "wrPct": 51.67,
+            "pf": 1.3307,
+            "sumPct": 28.849,
+            "compoundPct": 28.787,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 25
+            }
+          },
+          "30": {
+            "n": 60,
+            "wins": 30,
+            "wrPct": 50.0,
+            "pf": 1.1811,
+            "sumPct": 16.849,
+            "compoundPct": 14.26,
+            "closeDDPct": -13.204,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 25
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 37,
+            "wins": 21,
+            "wrPct": 56.76,
+            "pf": 1.8124,
+            "sumPct": 34.472,
+            "compoundPct": 38.253,
+            "closeDDPct": -25.082,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 13
+            }
+          },
+          "30": {
+            "n": 37,
+            "wins": 21,
+            "wrPct": 56.76,
+            "pf": 1.5932,
+            "sumPct": 27.072,
+            "compoundPct": 28.46,
+            "closeDDPct": -27.05,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 13
+            }
+          }
+        }
+      },
+      "chosen": 163,
+      "newResearchEntriesWithin24hExistingNative": 9,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 108,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 55
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.2531,
+            "sumPct": 11.771,
+            "compoundPct": 10.477,
+            "closeDDPct": -16.655,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.1125,
+            "sumPct": 5.571,
+            "compoundPct": 3.846,
+            "closeDDPct": -18.009,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 30,
+            "wins": 16,
+            "wrPct": 53.33,
+            "pf": 1.3094,
+            "sumPct": 13.427,
+            "compoundPct": 12.398,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          },
+          "30": {
+            "n": 30,
+            "wins": 16,
+            "wrPct": 53.33,
+            "pf": 1.1608,
+            "sumPct": 7.427,
+            "compoundPct": 5.867,
+            "closeDDPct": -13.077,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 22,
+            "wins": 13,
+            "wrPct": 59.09,
+            "pf": 1.645,
+            "sumPct": 17.995,
+            "compoundPct": 18.174,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 22,
+            "wins": 12,
+            "wrPct": 54.55,
+            "pf": 1.4575,
+            "sumPct": 13.595,
+            "compoundPct": 13.117,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.5448,
+            "sumPct": 13.755,
+            "compoundPct": 13.466,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.3681,
+            "sumPct": 9.955,
+            "compoundPct": 9.256,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 16,
+            "wins": 8,
+            "wrPct": 50.0,
+            "pf": 1.2581,
+            "sumPct": 6.4,
+            "compoundPct": 5.564,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          },
+          "30": {
+            "n": 16,
+            "wins": 8,
+            "wrPct": 50.0,
+            "pf": 1.1212,
+            "sumPct": 3.2,
+            "compoundPct": 2.245,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 21,
+            "wins": 12,
+            "wrPct": 57.14,
+            "pf": 1.4984,
+            "sumPct": 13.906,
+            "compoundPct": 13.543,
+            "closeDDPct": -22.27,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          },
+          "30": {
+            "n": 21,
+            "wins": 12,
+            "wrPct": 57.14,
+            "pf": 1.3268,
+            "sumPct": 9.706,
+            "compoundPct": 8.893,
+            "closeDDPct": -23.544,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.7287,
+            "sumPct": 19.766,
+            "compoundPct": 20.942,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.3429,
+            "sumPct": 16.966,
+            "compoundPct": 17.642,
+            "closeDDPct": -5.317,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 65,
+            "wins": 35,
+            "wrPct": 53.85,
+            "pf": 1.3634,
+            "sumPct": 33.798,
+            "compoundPct": 34.959,
+            "closeDDPct": -16.655,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 16
+            }
+          },
+          "30": {
+            "n": 65,
+            "wins": 35,
+            "wrPct": 53.85,
+            "pf": 1.2101,
+            "sumPct": 20.798,
+            "compoundPct": 18.554,
+            "closeDDPct": -18.009,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 16
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 57,
+            "wins": 31,
+            "wrPct": 54.39,
+            "pf": 1.4894,
+            "sumPct": 38.149,
+            "compoundPct": 41.547,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          },
+          "30": {
+            "n": 57,
+            "wins": 30,
+            "wrPct": 52.63,
+            "pf": 1.3217,
+            "sumPct": 26.749,
+            "compoundPct": 26.362,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 35,
+            "wins": 20,
+            "wrPct": 57.14,
+            "pf": 1.8561,
+            "sumPct": 33.672,
+            "compoundPct": 37.321,
+            "closeDDPct": -22.685,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 35,
+            "wins": 20,
+            "wrPct": 57.14,
+            "pf": 1.63,
+            "sumPct": 26.672,
+            "compoundPct": 28.104,
+            "closeDDPct": -24.56,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        }
+      },
+      "chosen": 157,
+      "newResearchEntriesWithin24hExistingNative": 9,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 108,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 49
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P8": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.2531,
+            "sumPct": 11.771,
+            "compoundPct": 10.477,
+            "closeDDPct": -16.655,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 31,
+            "wins": 16,
+            "wrPct": 51.61,
+            "pf": 1.1125,
+            "sumPct": 5.571,
+            "compoundPct": 3.846,
+            "closeDDPct": -18.009,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 30,
+            "wins": 15,
+            "wrPct": 50.0,
+            "pf": 1.1382,
+            "sumPct": 6.427,
+            "compoundPct": 4.825,
+            "closeDDPct": -16.655,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          },
+          "30": {
+            "n": 30,
+            "wins": 15,
+            "wrPct": 50.0,
+            "pf": 1.0086,
+            "sumPct": 0.427,
+            "compoundPct": -1.279,
+            "closeDDPct": -18.944,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 23
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 20,
+            "wins": 11,
+            "wrPct": 55.0,
+            "pf": 1.3654,
+            "sumPct": 10.195,
+            "compoundPct": 9.469,
+            "closeDDPct": -8.397,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 20,
+            "wins": 10,
+            "wrPct": 50.0,
+            "pf": 1.2085,
+            "sumPct": 6.195,
+            "compoundPct": 5.189,
+            "closeDDPct": -9.326,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 17,
+            "wins": 9,
+            "wrPct": 52.94,
+            "pf": 1.585,
+            "sumPct": 12.955,
+            "compoundPct": 12.701,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 17,
+            "wins": 9,
+            "wrPct": 52.94,
+            "pf": 1.4024,
+            "sumPct": 9.555,
+            "compoundPct": 8.953,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 15,
+            "wins": 8,
+            "wrPct": 53.33,
+            "pf": 1.4378,
+            "sumPct": 9.5,
+            "compoundPct": 8.941,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 15,
+            "wins": 8,
+            "wrPct": 53.33,
+            "pf": 1.2814,
+            "sumPct": 6.5,
+            "compoundPct": 5.734,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 10,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.6857,
+            "sumPct": 17.006,
+            "compoundPct": 17.175,
+            "closeDDPct": -19.783,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.4927,
+            "sumPct": 13.006,
+            "compoundPct": 12.609,
+            "closeDDPct": -20.935,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 15,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 12,
+            "wins": 7,
+            "wrPct": 58.33,
+            "pf": 2.4224,
+            "sumPct": 16.03,
+            "compoundPct": 16.594,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 3
+            }
+          },
+          "30": {
+            "n": 12,
+            "wins": 7,
+            "wrPct": 58.33,
+            "pf": 2.1109,
+            "sumPct": 13.63,
+            "compoundPct": 13.86,
+            "closeDDPct": -5.317,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 3
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 65,
+            "wins": 34,
+            "wrPct": 52.31,
+            "pf": 1.2789,
+            "sumPct": 26.798,
+            "compoundPct": 25.867,
+            "closeDDPct": -16.655,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 16
+            }
+          },
+          "30": {
+            "n": 65,
+            "wins": 34,
+            "wrPct": 52.31,
+            "pf": 1.1349,
+            "sumPct": 13.798,
+            "compoundPct": 10.551,
+            "closeDDPct": -18.944,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 49,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 16
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 52,
+            "wins": 28,
+            "wrPct": 53.85,
+            "pf": 1.4551,
+            "sumPct": 32.649,
+            "compoundPct": 34.403,
+            "closeDDPct": -9.39,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          },
+          "30": {
+            "n": 52,
+            "wins": 27,
+            "wrPct": 51.92,
+            "pf": 1.2906,
+            "sumPct": 22.249,
+            "compoundPct": 21.179,
+            "closeDDPct": -10.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 35,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 32,
+            "wins": 19,
+            "wrPct": 59.38,
+            "pf": 1.9159,
+            "sumPct": 33.036,
+            "compoundPct": 36.619,
+            "closeDDPct": -20.212,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 32,
+            "wins": 19,
+            "wrPct": 59.38,
+            "pf": 1.6888,
+            "sumPct": 26.636,
+            "compoundPct": 28.216,
+            "closeDDPct": -21.986,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 24,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        }
+      },
+      "chosen": 149,
+      "newResearchEntriesWithin24hExistingNative": 8,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 108,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 41
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2_NO_BTC7_DEEP5": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 28,
+            "wins": 14,
+            "wrPct": 50.0,
+            "pf": 1.1629,
+            "sumPct": 7.071,
+            "compoundPct": 5.613,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 28,
+            "wins": 14,
+            "wrPct": 50.0,
+            "pf": 1.0318,
+            "sumPct": 1.471,
+            "compoundPct": -0.136,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 31,
+            "wins": 17,
+            "wrPct": 54.84,
+            "pf": 1.3992,
+            "sumPct": 17.327,
+            "compoundPct": 16.782,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 21
+            }
+          },
+          "30": {
+            "n": 31,
+            "wins": 17,
+            "wrPct": 54.84,
+            "pf": 1.2408,
+            "sumPct": 11.127,
+            "compoundPct": 9.784,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 21
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 21,
+            "wins": 12,
+            "wrPct": 57.14,
+            "pf": 1.5052,
+            "sumPct": 14.095,
+            "compoundPct": 13.738,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          },
+          "30": {
+            "n": 21,
+            "wins": 11,
+            "wrPct": 52.38,
+            "pf": 1.333,
+            "sumPct": 9.895,
+            "compoundPct": 9.081,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 21,
+            "wins": 11,
+            "wrPct": 52.38,
+            "pf": 1.5135,
+            "sumPct": 14.555,
+            "compoundPct": 14.236,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          },
+          "30": {
+            "n": 21,
+            "wins": 11,
+            "wrPct": 52.38,
+            "pf": 1.3412,
+            "sumPct": 10.355,
+            "compoundPct": 9.56,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 15,
+            "wins": 7,
+            "wrPct": 46.67,
+            "pf": 1.1008,
+            "sumPct": 2.5,
+            "compoundPct": 1.601,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          },
+          "30": {
+            "n": 15,
+            "wins": 7,
+            "wrPct": 46.67,
+            "pf": 0.9811,
+            "sumPct": -0.5,
+            "compoundPct": -1.403,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 23,
+            "wins": 13,
+            "wrPct": 56.52,
+            "pf": 1.4744,
+            "sumPct": 14.706,
+            "compoundPct": 14.314,
+            "closeDDPct": -22.685,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 23,
+            "wins": 13,
+            "wrPct": 56.52,
+            "pf": 1.3062,
+            "sumPct": 10.106,
+            "compoundPct": 9.196,
+            "closeDDPct": -24.56,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 16,
+            "wins": 9,
+            "wrPct": 56.25,
+            "pf": 2.1648,
+            "sumPct": 16.929,
+            "compoundPct": 17.502,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 16,
+            "wins": 9,
+            "wrPct": 56.25,
+            "pf": 1.8616,
+            "sumPct": 13.729,
+            "compoundPct": 13.832,
+            "closeDDPct": -5.317,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 63,
+            "wins": 34,
+            "wrPct": 53.97,
+            "pf": 1.3671,
+            "sumPct": 32.998,
+            "compoundPct": 34.049,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 41,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          },
+          "30": {
+            "n": 63,
+            "wins": 34,
+            "wrPct": 53.97,
+            "pf": 1.2131,
+            "sumPct": 20.398,
+            "compoundPct": 18.225,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 41,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 57,
+            "wins": 30,
+            "wrPct": 52.63,
+            "pf": 1.3843,
+            "sumPct": 31.149,
+            "compoundPct": 32.011,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 27,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 30
+            }
+          },
+          "30": {
+            "n": 57,
+            "wins": 29,
+            "wrPct": 50.88,
+            "pf": 1.2284,
+            "sumPct": 19.749,
+            "compoundPct": 17.832,
+            "closeDDPct": -16.068,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 27,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 30
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 39,
+            "wins": 22,
+            "wrPct": 56.41,
+            "pf": 1.6948,
+            "sumPct": 31.636,
+            "compoundPct": 34.32,
+            "closeDDPct": -25.082,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 21,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 18
+            }
+          },
+          "30": {
+            "n": 39,
+            "wins": 22,
+            "wrPct": 56.41,
+            "pf": 1.4871,
+            "sumPct": 23.836,
+            "compoundPct": 24.3,
+            "closeDDPct": -27.05,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 21,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 18
+            }
+          }
+        }
+      },
+      "chosen": 159,
+      "newResearchEntriesWithin24hExistingNative": 9,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 89,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 70
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6_NO_BTC7_DEEP5": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 26,
+            "wins": 13,
+            "wrPct": 50.0,
+            "pf": 1.1556,
+            "sumPct": 6.271,
+            "compoundPct": 4.901,
+            "closeDDPct": -13.988,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          },
+          "30": {
+            "n": 26,
+            "wins": 13,
+            "wrPct": 50.0,
+            "pf": 1.025,
+            "sumPct": 1.071,
+            "compoundPct": -0.413,
+            "closeDDPct": -15.211,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 28,
+            "wins": 15,
+            "wrPct": 53.57,
+            "pf": 1.3133,
+            "sumPct": 12.627,
+            "compoundPct": 11.64,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 21
+            }
+          },
+          "30": {
+            "n": 28,
+            "wins": 15,
+            "wrPct": 53.57,
+            "pf": 1.1638,
+            "sumPct": 7.027,
+            "compoundPct": 5.574,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 21
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.6933,
+            "sumPct": 17.195,
+            "compoundPct": 17.377,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 20,
+            "wins": 11,
+            "wrPct": 55.0,
+            "pf": 1.4995,
+            "sumPct": 13.195,
+            "compoundPct": 12.804,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.5448,
+            "sumPct": 13.755,
+            "compoundPct": 13.466,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.3681,
+            "sumPct": 9.955,
+            "compoundPct": 9.256,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 12,
+            "wins": 6,
+            "wrPct": 50.0,
+            "pf": 1.2581,
+            "sumPct": 4.8,
+            "compoundPct": 4.144,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          },
+          "30": {
+            "n": 12,
+            "wins": 6,
+            "wrPct": 50.0,
+            "pf": 1.1212,
+            "sumPct": 2.4,
+            "compoundPct": 1.679,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.5285,
+            "sumPct": 13.106,
+            "compoundPct": 12.777,
+            "closeDDPct": -19.783,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 19,
+            "wins": 11,
+            "wrPct": 57.89,
+            "pf": 1.3525,
+            "sumPct": 9.306,
+            "compoundPct": 8.591,
+            "closeDDPct": -20.935,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 12,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.7287,
+            "sumPct": 19.766,
+            "compoundPct": 20.942,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.3429,
+            "sumPct": 16.966,
+            "compoundPct": 17.642,
+            "closeDDPct": -5.317,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 58,
+            "wins": 31,
+            "wrPct": 53.45,
+            "pf": 1.3285,
+            "sumPct": 27.498,
+            "compoundPct": 27.283,
+            "closeDDPct": -13.988,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 41,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          },
+          "30": {
+            "n": 58,
+            "wins": 31,
+            "wrPct": 53.45,
+            "pf": 1.1784,
+            "sumPct": 15.898,
+            "compoundPct": 13.376,
+            "closeDDPct": -15.211,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 41,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 51,
+            "wins": 28,
+            "wrPct": 54.9,
+            "pf": 1.5208,
+            "sumPct": 35.749,
+            "compoundPct": 38.702,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 27,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 24
+            }
+          },
+          "30": {
+            "n": 51,
+            "wins": 27,
+            "wrPct": 52.94,
+            "pf": 1.3488,
+            "sumPct": 25.549,
+            "compoundPct": 25.314,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 27,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 24
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 33,
+            "wins": 19,
+            "wrPct": 57.58,
+            "pf": 1.9072,
+            "sumPct": 32.872,
+            "compoundPct": 36.395,
+            "closeDDPct": -20.212,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 21,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          },
+          "30": {
+            "n": 33,
+            "wins": 19,
+            "wrPct": 57.58,
+            "pf": 1.6731,
+            "sumPct": 26.272,
+            "compoundPct": 27.749,
+            "closeDDPct": -21.986,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 21,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          }
+        }
+      },
+      "chosen": 142,
+      "newResearchEntriesWithin24hExistingNative": 8,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 89,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 53
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2_NO_BTC7_DEEP3": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 28,
+            "wins": 14,
+            "wrPct": 50.0,
+            "pf": 1.1629,
+            "sumPct": 7.071,
+            "compoundPct": 5.613,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          },
+          "30": {
+            "n": 28,
+            "wins": 14,
+            "wrPct": 50.0,
+            "pf": 1.0318,
+            "sumPct": 1.471,
+            "compoundPct": -0.136,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 8
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 29,
+            "wins": 16,
+            "wrPct": 55.17,
+            "pf": 1.4101,
+            "sumPct": 16.527,
+            "compoundPct": 15.994,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 19
+            }
+          },
+          "30": {
+            "n": 29,
+            "wins": 16,
+            "wrPct": 55.17,
+            "pf": 1.25,
+            "sumPct": 10.727,
+            "compoundPct": 9.48,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 19
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 21,
+            "wins": 13,
+            "wrPct": 61.9,
+            "pf": 1.8506,
+            "sumPct": 21.095,
+            "compoundPct": 21.955,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 11,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          },
+          "30": {
+            "n": 21,
+            "wins": 12,
+            "wrPct": 57.14,
+            "pf": 1.6396,
+            "sumPct": 16.895,
+            "compoundPct": 16.977,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 11,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 21,
+            "wins": 11,
+            "wrPct": 52.38,
+            "pf": 1.5135,
+            "sumPct": 14.555,
+            "compoundPct": 14.236,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          },
+          "30": {
+            "n": 21,
+            "wins": 11,
+            "wrPct": 52.38,
+            "pf": 1.3412,
+            "sumPct": 10.355,
+            "compoundPct": 9.56,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 15,
+            "wins": 7,
+            "wrPct": 46.67,
+            "pf": 1.1008,
+            "sumPct": 2.5,
+            "compoundPct": 1.601,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          },
+          "30": {
+            "n": 15,
+            "wins": 7,
+            "wrPct": 46.67,
+            "pf": 0.9811,
+            "sumPct": -0.5,
+            "compoundPct": -1.403,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.6857,
+            "sumPct": 17.006,
+            "compoundPct": 17.175,
+            "closeDDPct": -19.783,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          },
+          "30": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.4927,
+            "sumPct": 13.006,
+            "compoundPct": 12.609,
+            "closeDDPct": -20.935,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 11
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.4107,
+            "sumPct": 16.129,
+            "compoundPct": 16.709,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 7,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 14,
+            "wins": 8,
+            "wrPct": 57.14,
+            "pf": 2.055,
+            "sumPct": 13.329,
+            "compoundPct": 13.517,
+            "closeDDPct": -4.85,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 7,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 61,
+            "wins": 33,
+            "wrPct": 54.1,
+            "pf": 1.3709,
+            "sumPct": 32.198,
+            "compoundPct": 33.145,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 39,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          },
+          "30": {
+            "n": 61,
+            "wins": 33,
+            "wrPct": 54.1,
+            "pf": 1.2164,
+            "sumPct": 19.998,
+            "compoundPct": 17.898,
+            "closeDDPct": -15.446,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 39,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 22
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 57,
+            "wins": 31,
+            "wrPct": 54.39,
+            "pf": 1.4894,
+            "sumPct": 38.149,
+            "compoundPct": 41.547,
+            "closeDDPct": -14.568,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 31
+            }
+          },
+          "30": {
+            "n": 57,
+            "wins": 30,
+            "wrPct": 52.63,
+            "pf": 1.3217,
+            "sumPct": 26.749,
+            "compoundPct": 26.362,
+            "closeDDPct": -16.068,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 31
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 34,
+            "wins": 20,
+            "wrPct": 58.82,
+            "pf": 1.9145,
+            "sumPct": 33.136,
+            "compoundPct": 36.754,
+            "closeDDPct": -20.212,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 16,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 18
+            }
+          },
+          "30": {
+            "n": 34,
+            "wins": 20,
+            "wrPct": 58.82,
+            "pf": 1.6747,
+            "sumPct": 26.336,
+            "compoundPct": 27.83,
+            "closeDDPct": -21.986,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 16,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 18
+            }
+          }
+        }
+      },
+      "chosen": 152,
+      "newResearchEntriesWithin24hExistingNative": 7,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 81,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 71
+      }
+    },
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6_NO_BTC7_DEEP3": {
+      "periods": {
+        "2024_RNDR_JAN_MAY": {
+          "10": {
+            "n": 26,
+            "wins": 13,
+            "wrPct": 50.0,
+            "pf": 1.1556,
+            "sumPct": 6.271,
+            "compoundPct": 4.901,
+            "closeDDPct": -13.988,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          },
+          "30": {
+            "n": 26,
+            "wins": 13,
+            "wrPct": 50.0,
+            "pf": 1.025,
+            "sumPct": 1.071,
+            "compoundPct": -0.413,
+            "closeDDPct": -15.211,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 20,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          }
+        },
+        "2024_RNDR_JUN_JUL16": {
+          "10": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.7742,
+            "sumPct": 8.6,
+            "compoundPct": 8.685,
+            "closeDDPct": -3.1,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          },
+          "30": {
+            "n": 4,
+            "wins": 3,
+            "wrPct": 75.0,
+            "pf": 3.3636,
+            "sumPct": 7.8,
+            "compoundPct": 7.836,
+            "closeDDPct": -3.3,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 4
+            }
+          }
+        },
+        "2024_RENDER_JUL_DEC": {
+          "10": {
+            "n": 26,
+            "wins": 14,
+            "wrPct": 53.85,
+            "pf": 1.3179,
+            "sumPct": 11.827,
+            "compoundPct": 10.887,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 19
+            }
+          },
+          "30": {
+            "n": 26,
+            "wins": 14,
+            "wrPct": 53.85,
+            "pf": 1.1673,
+            "sumPct": 6.627,
+            "compoundPct": 5.281,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7,
+              "A_2024_BTC_RALLY_FAILURE": 19
+            }
+          }
+        },
+        "2025_RENDER_JAN_MAR": {
+          "10": {
+            "n": 20,
+            "wins": 13,
+            "wrPct": 65.0,
+            "pf": 2.115,
+            "sumPct": 24.195,
+            "compoundPct": 25.856,
+            "closeDDPct": -6.104,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 11,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          },
+          "30": {
+            "n": 20,
+            "wins": 12,
+            "wrPct": 60.0,
+            "pf": 1.8737,
+            "sumPct": 20.195,
+            "compoundPct": 20.969,
+            "closeDDPct": -6.491,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 11,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 9
+            }
+          }
+        },
+        "2025_RENDER_APR_JUL": {
+          "10": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.5448,
+            "sumPct": 13.755,
+            "compoundPct": 13.466,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          },
+          "30": {
+            "n": 19,
+            "wins": 10,
+            "wrPct": 52.63,
+            "pf": 1.3681,
+            "sumPct": 9.955,
+            "compoundPct": 9.256,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "B_OI3_CONFIRMED_REBOUND_FADE": 10,
+              "A_2024_BTC_RALLY_FAILURE": 9
+            }
+          }
+        },
+        "2025_RENDER_AUG_DEC": {
+          "10": {
+            "n": 12,
+            "wins": 6,
+            "wrPct": 50.0,
+            "pf": 1.2581,
+            "sumPct": 4.8,
+            "compoundPct": 4.144,
+            "closeDDPct": -9.015,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          },
+          "30": {
+            "n": 12,
+            "wins": 6,
+            "wrPct": 50.0,
+            "pf": 1.1212,
+            "sumPct": 2.4,
+            "compoundPct": 1.679,
+            "closeDDPct": -9.577,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 6,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 6
+            }
+          }
+        },
+        "2026_RENDER_JAN_MAR": {
+          "10": {
+            "n": 16,
+            "wins": 10,
+            "wrPct": 62.5,
+            "pf": 1.8283,
+            "sumPct": 15.406,
+            "compoundPct": 15.6,
+            "closeDDPct": -17.217,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          },
+          "30": {
+            "n": 16,
+            "wins": 10,
+            "wrPct": 62.5,
+            "pf": 1.6165,
+            "sumPct": 12.206,
+            "compoundPct": 11.986,
+            "closeDDPct": -18.237,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 9,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 7
+            }
+          }
+        },
+        "2026_RENDER_APR_AUG": {
+          "10": {
+            "n": 12,
+            "wins": 7,
+            "wrPct": 58.33,
+            "pf": 3.2757,
+            "sumPct": 18.966,
+            "compoundPct": 20.126,
+            "closeDDPct": -4.459,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 7,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          },
+          "30": {
+            "n": 12,
+            "wins": 7,
+            "wrPct": 58.33,
+            "pf": 2.7748,
+            "sumPct": 16.566,
+            "compoundPct": 17.316,
+            "closeDDPct": -4.85,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 7,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 5
+            }
+          }
+        },
+        "2024": {
+          "10": {
+            "n": 56,
+            "wins": 30,
+            "wrPct": 53.57,
+            "pf": 1.3312,
+            "sumPct": 26.698,
+            "compoundPct": 26.424,
+            "closeDDPct": -13.988,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 39,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          },
+          "30": {
+            "n": 56,
+            "wins": 30,
+            "wrPct": 53.57,
+            "pf": 1.1806,
+            "sumPct": 15.498,
+            "compoundPct": 13.062,
+            "closeDDPct": -15.211,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 39,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 17
+            }
+          }
+        },
+        "2025": {
+          "10": {
+            "n": 51,
+            "wins": 29,
+            "wrPct": 56.86,
+            "pf": 1.6522,
+            "sumPct": 42.749,
+            "compoundPct": 48.722,
+            "closeDDPct": -11.835,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 25
+            }
+          },
+          "30": {
+            "n": 51,
+            "wins": 28,
+            "wrPct": 54.9,
+            "pf": 1.4653,
+            "sumPct": 32.549,
+            "compoundPct": 34.386,
+            "closeDDPct": -12.561,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 26,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 25
+            }
+          }
+        },
+        "2026": {
+          "10": {
+            "n": 28,
+            "wins": 17,
+            "wrPct": 60.71,
+            "pf": 2.2762,
+            "sumPct": 34.372,
+            "compoundPct": 38.866,
+            "closeDDPct": -17.217,
+            "maxLossPct": -3.1,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 16,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          },
+          "30": {
+            "n": 28,
+            "wins": 17,
+            "wrPct": 60.71,
+            "pf": 1.9876,
+            "sumPct": 28.772,
+            "compoundPct": 31.378,
+            "closeDDPct": -18.237,
+            "maxLossPct": -3.3,
+            "byExpert": {
+              "A_2024_BTC_RALLY_FAILURE": 16,
+              "B_OI3_CONFIRMED_REBOUND_FADE": 12
+            }
+          }
+        }
+      },
+      "chosen": 135,
+      "newResearchEntriesWithin24hExistingNative": 6,
+      "selectedExpertCounts": {
+        "A_2024_BTC_RALLY_FAILURE": 81,
+        "B_OI3_CONFIRMED_REBOUND_FADE": 54
+      }
+    }
+  },
+  "threeYearProfitableResearchOnly": [
+    "B_BEARFADE_OI3_LE_M0P2_ONLY",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P4",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P8",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2_NO_BTC7_DEEP5",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6_NO_BTC7_DEEP5",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P2_NO_BTC7_DEEP3",
+    "AB_TRAP_PLUS_FADE_OI3_LE_M0P6_NO_BTC7_DEEP3"
+  ]
+}
