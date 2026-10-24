@@ -169,6 +169,20 @@ function scopedVenueRows<T extends { symbol?: unknown }>(rows: unknown, symbol: 
     }) as T[];
 }
 
+function retainManagedPositionRows(rows: AsterPositionRiskRow[], quoteAsset: string): AsterPositionRiskRow[] {
+    const managedSymbolPattern = new RegExp(`^[A-Z0-9]+${quoteAsset}$`);
+    return rows.filter((row) => {
+        if (!row || typeof row !== "object" || Array.isArray(row)) throw new Error("ASTER_POSITION_ROW_INVALID");
+        if (typeof row.symbol !== "string") throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+        const symbol = row.symbol.trim().toUpperCase();
+        if (!symbol) throw new Error("ASTER_VENUE_SYMBOL_INVALID");
+        const quantity = requiredVenueNumber(row.positionAmt, "POSITION_AMOUNT");
+        if (managedSymbolPattern.test(symbol)) return true;
+        if (quantity === 0) return false;
+        throw new Error(`ASTER_POSITION_UNKNOWN_NONZERO_SYMBOL:${symbol}`);
+    });
+}
+
 function dedupeDirectPositions(rows: DirectPosition[]) {
     const seen = new Set<string>();
     return rows.filter((row) => {
@@ -385,7 +399,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         const rows = await this.client.getPositions(normalizedSymbol);
         if (!Array.isArray(rows)) throw new Error("ASTER_POSITION_ROWS_INVALID");
         const scopedRows = normalizedSymbol ? scopedVenueRows<AsterPositionRiskRow>(rows, normalizedSymbol, "POSITION") : rows;
-        return this.normalizePositionRows(scopedRows);
+        const managedRows = normalizedSymbol ? scopedRows : retainManagedPositionRows(scopedRows, this.quoteAsset);
+        return this.normalizePositionRows(managedRows);
     }
 
     private normalizePositionRows(rows: AsterPositionRiskRow[]): DirectPosition[] {

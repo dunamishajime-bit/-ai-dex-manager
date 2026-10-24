@@ -27,3 +27,49 @@ test("position snapshot freshness uses observation time, not the last position m
   assert.ok(position.updatedAt >= observedBeforeRead);
   assert.ok(position.updatedAt < Date.now() + 1000);
 });
+
+test("position snapshots ignore only verified-flat foreign venue rows", async () => {
+  const client = {
+    getPositions: async () => [
+      {
+        symbol: "AAVEUSDT",
+        positionAmt: "2",
+        entryPrice: "100",
+        markPrice: "101",
+        unRealizedProfit: "2",
+        positionSide: "BOTH" as const,
+        leverage: "5",
+      },
+      {
+        symbol: "SOLUSDC",
+        positionAmt: "0.000",
+        entryPrice: "not-used-for-flat-row",
+        markPrice: "not-used-for-flat-row",
+        positionSide: "BOTH" as const,
+        leverage: "not-used-for-flat-row",
+      },
+    ],
+  } as unknown as AsterV3Client;
+
+  const positions = await new AsterDirectTradeExecutor(client).getPositions();
+
+  assert.deepEqual(positions.map((position) => position.symbol), ["AAVEUSDT"]);
+});
+
+test("position snapshots reject nonzero foreign venue rows instead of dropping exposure", async () => {
+  const client = {
+    getPositions: async () => [{
+      symbol: "SOLUSDC",
+      positionAmt: "1",
+      entryPrice: "100",
+      markPrice: "101",
+      positionSide: "BOTH" as const,
+      leverage: "5",
+    }],
+  } as unknown as AsterV3Client;
+
+  await assert.rejects(
+    () => new AsterDirectTradeExecutor(client).getPositions(),
+    /ASTER_POSITION_UNKNOWN_NONZERO_SYMBOL:SOLUSDC/,
+  );
+});
