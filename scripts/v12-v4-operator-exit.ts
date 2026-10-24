@@ -22,7 +22,7 @@ function value(name:string){
 function values(name:string){
  return process.argv.flatMap((arg,index)=>arg===name&&process.argv[index+1]?[process.argv[index+1]]:[]);
 }
-function qtyMap(raw:string[]){
+function qtyMap(raw:string[],symbols:string[]){
  const result=new Map<string,number>();
  for(const item of raw){
   const [symbol,rawQty]=item.split("=",2),quantity=Number(rawQty);
@@ -30,7 +30,7 @@ function qtyMap(raw:string[]){
    throw Error("V4_OPERATOR_EXIT_EXPECTED_QTY_INVALID");
   result.set(symbol,quantity);
  }
- if(result.size!==TARGET_SYMBOLS.size)throw Error("V4_OPERATOR_EXIT_EXPECTED_QTY_INCOMPLETE");
+ if(result.size!==symbols.length||symbols.some(symbol=>!result.has(symbol)))throw Error("V4_OPERATOR_EXIT_EXPECTED_QTY_INCOMPLETE");
  return result;
 }
 function sameQuantity(actual:number,expected:number){
@@ -81,12 +81,12 @@ async function main(){
   String(process.env.V12_V4_LIVE_ACK??"").toLowerCase()!==expectedSha)
   throw Error("V4_OPERATOR_EXIT_RELEASE_ACK_MISMATCH");
  const ids=values("--leg-id");
- if(ids.length!==2||new Set(ids).size!==2)throw Error("V4_OPERATOR_EXIT_REQUIRES_EXACTLY_TWO_LEGS");
+ if(ids.length<1||ids.length>2||new Set(ids).size!==ids.length)throw Error("V4_OPERATOR_EXIT_REQUIRES_ONE_OR_TWO_LEGS");
  const symbols=ids.map(id=>id.split(":",1)[0].toUpperCase());
- if(new Set(symbols).size!==2||symbols.some(symbol=>!TARGET_SYMBOLS.has(symbol)))
+ if(new Set(symbols).size!==ids.length||symbols.some(symbol=>!TARGET_SYMBOLS.has(symbol)))
   throw Error("V4_OPERATOR_EXIT_TARGET_SYMBOL_SET_INVALID");
  if(value("--ack")!==OPERATOR_ACK)throw Error("V4_OPERATOR_EXIT_ACK_INVALID");
- const expectedQty=qtyMap(values("--expected-qty"));
+ const expectedQty=qtyMap(values("--expected-qty"),symbols);
  const expectedExitTs=Number(value("--expected-aave-exit-ts"));
  const expectedExitPrice=Number(value("--expected-aave-exit-price"));
  if(!Number.isSafeInteger(expectedExitTs)||!(expectedExitPrice>0)||!Number.isFinite(expectedExitPrice))
