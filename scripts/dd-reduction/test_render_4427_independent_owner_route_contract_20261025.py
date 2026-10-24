@@ -75,6 +75,10 @@ class ContractTests(unittest.TestCase):
             c = replace(example_candidate(TS), **kw)
             self.assertIn("ROUTE_OWNER_BINDING_MISMATCH", assess(c, passing_context()).reasons)
 
+    def test_malformed_entry_timestamp_rejected_without_exception(self):
+        c = replace(example_candidate(TS), entry_ts_ms="invalid")
+        self.assertEqual(assess(c, passing_context()).verdict, Verdict.REJECT)
+
     def test_gross_over_nominal_rejected(self):
         c = replace(example_candidate(TS), requested_gross=0.26)
         self.assertIn("INVALID_REQUESTED_GROSS", assess(c, passing_context()).reasons)
