@@ -1,0 +1,165 @@
+{
+  "costs": {
+    "10": {
+      "events": [
+        {
+          "activeAcceptedGrossSum": 0.428483,
+          "allOpenPositionCount": 2,
+          "entryUtc": "2026-05-27T21:00Z",
+          "openIdlePositionCount": 1,
+          "openRenderPositions": [
+            {
+              "entryUtc": "2026-05-27T10:00Z",
+              "exitUtc": "2026-05-27T22:00Z",
+              "route": "IDLE_RENDER_RELATIVE_SHORT",
+              "side": "SHORT"
+            }
+          ],
+          "priorRenderExitHours": 107.417,
+          "rejection": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "sameSymbolAnd12hCooldownClear": false,
+          "sameSymbolPositionCollision": true,
+          "sameTimeOtherCandidates": [
+            {
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "route": "IDLE_RENDER_RELATIVE_SHORT",
+              "strategy": "IDLE",
+              "symbol": "RENDERUSDT"
+            }
+          ]
+        },
+        {
+          "activeAcceptedGrossSum": 0.064414,
+          "allOpenPositionCount": 1,
+          "entryUtc": "2026-06-23T01:00Z",
+          "openIdlePositionCount": 0,
+          "openRenderPositions": [],
+          "priorRenderExitHours": 113.75,
+          "rejection": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "sameSymbolAnd12hCooldownClear": true,
+          "sameSymbolPositionCollision": false,
+          "sameTimeOtherCandidates": [
+            {
+              "decision": "ACCEPTED_MODELED_ENTRY",
+              "reason": "GROSS_ALLOCATED",
+              "route": null,
+              "strategy": "Q102",
+              "symbol": "FETUSDT"
+            }
+          ]
+        },
+        {
+          "activeAcceptedGrossSum": 0.831856,
+          "allOpenPositionCount": 4,
+          "entryUtc": "2026-06-25T07:00Z",
+          "openIdlePositionCount": 0,
+          "openRenderPositions": [],
+          "priorRenderExitHours": 167.75,
+          "rejection": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "sameSymbolAnd12hCooldownClear": true,
+          "sameSymbolPositionCollision": false,
+          "sameTimeOtherCandidates": [
+            {
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "RESIDUAL:CORE_SIGNAL_OR_POSITION",
+              "route": "AVAX_REL_LONG",
+              "strategy": "RESIDUAL",
+              "symbol": "AVAXUSDT"
+            }
+          ]
+        }
+      ],
+      "replayCount": 3,
+      "sameSymbolAnd12hCooldownClearCount": 2,
+      "sameSymbolPositionCollisionCount": 1,
+      "threeReplaySnapshotSha256": "1e8ff398798ba2f5f17e27dde9562fed3d422bf95c5d33d380c1219aa1c0109f"
+    },
+    "30": {
+      "events": [
+        {
+          "activeAcceptedGrossSum": 0.575705,
+          "allOpenPositionCount": 2,
+          "entryUtc": "2026-05-27T21:00Z",
+          "openIdlePositionCount": 1,
+          "openRenderPositions": [
+            {
+              "entryUtc": "2026-05-27T10:00Z",
+              "exitUtc": "2026-05-27T22:00Z",
+              "route": "IDLE_RENDER_RELATIVE_SHORT",
+              "side": "SHORT"
+            }
+          ],
+          "priorRenderExitHours": 107.417,
+          "rejection": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "sameSymbolAnd12hCooldownClear": false,
+          "sameSymbolPositionCollision": true,
+          "sameTimeOtherCandidates": [
+            {
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+              "route": "IDLE_RENDER_RELATIVE_SHORT",
+              "strategy": "IDLE",
+              "symbol": "RENDERUSDT"
+            }
+          ]
+        },
+        {
+          "activeAcceptedGrossSum": 0.109698,
+          "allOpenPositionCount": 1,
+          "entryUtc": "2026-06-23T01:00Z",
+          "openIdlePositionCount": 0,
+          "openRenderPositions": [],
+          "priorRenderExitHours": 113.75,
+          "rejection": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "sameSymbolAnd12hCooldownClear": true,
+          "sameSymbolPositionCollision": false,
+          "sameTimeOtherCandidates": [
+            {
+              "decision": "ACCEPTED_MODELED_ENTRY",
+              "reason": "GROSS_ALLOCATED",
+              "route": null,
+              "strategy": "Q102",
+              "symbol": "FETUSDT"
+            }
+          ]
+        },
+        {
+          "activeAcceptedGrossSum": 0.926647,
+          "allOpenPositionCount": 4,
+          "entryUtc": "2026-06-25T07:00Z",
+          "openIdlePositionCount": 0,
+          "openRenderPositions": [],
+          "priorRenderExitHours": 167.75,
+          "rejection": "IDLE:CORE_SIGNAL_OR_POSITION",
+          "sameSymbolAnd12hCooldownClear": true,
+          "sameSymbolPositionCollision": false,
+          "sameTimeOtherCandidates": [
+            {
+              "decision": "REJECTED_PORTFOLIO",
+              "reason": "RESIDUAL:CORE_SIGNAL_OR_POSITION",
+              "route": "AVAX_REL_LONG",
+              "strategy": "RESIDUAL",
+              "symbol": "AVAXUSDT"
+            }
+          ]
+        }
+      ],
+      "replayCount": 3,
+      "sameSymbolAnd12hCooldownClearCount": 2,
+      "sameSymbolPositionCollisionCount": 1,
+      "threeReplaySnapshotSha256": "045f6e932dbd9a133eb21d46831d7e352b7428c12d30a3cd3cfb0d8c391dfb39"
+    }
+  },
+  "limitations": [
+    "Open-position and elapsed-exit checks do not establish owner registration, global risk/margin/gross approval, or executable fills.",
+    "2025 Aster RENDER H1 mark remains missing; modeled 2026 candidates only.",
+    "Funding and actual Aster 5m execution not authenticated.",
+    "All periods previously researched; not unused OOS.",
+    "No LIVE/VPS/Production/HP/order changes."
+  ],
+  "method": "Inspect frozen accepted trade intervals and candidate decisions at the three independent SHORT timestamps; no candidate promoted.",
+  "sourceBranch": "research/render4427-independent-gates-full8-blocker-20261024",
+  "sourceSha": "173659aef0e28826c4f1c2a2db47a5957eaa5085",
+  "status": "RESEARCH_ONLY_ASOF_NATIVE8_POSITION_COLLISION_AUDIT"
+}
