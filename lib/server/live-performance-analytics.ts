@@ -302,6 +302,7 @@ export function liveTradeFromOfficialHistoryEntry(entry: TradeHistoryEntry): Liv
   const lineage = entry.orderId ? HISTORICAL_FILL_LINEAGE_BY_ORDER_ID[String(entry.orderId)] : undefined;
   const clientOrderId = typeof lineage?.clientOrderId === "string" ? lineage.clientOrderId : null;
   const close = entry.tradeStatus === "closed" || entry.tradeStatus === "unmatched_exit";
+  const exitCause = "exitCause" in entry && typeof entry.exitCause === "string" ? entry.exitCause : null;
 
   return {
     id: entry.id,
@@ -317,7 +318,7 @@ export function liveTradeFromOfficialHistoryEntry(entry: TradeHistoryEntry): Liv
     variant: variantFromOfficialHistory(entry, logic),
     strategyId: logic === "UNATTRIBUTED" ? "UNKNOWN" : String(entry.strategyId || "UNKNOWN"),
     eventType: close ? "EXIT_FILL" : "ENTRY_FILL",
-    reason: entry.exitCause ? `${entry.reason} / ${entry.exitCause}` : entry.reason,
+    reason: exitCause ? `${entry.reason} / ${exitCause}` : entry.reason,
     clientOrderId,
     attributed,
   };
