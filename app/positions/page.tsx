@@ -4,7 +4,7 @@ import { Activity, Layers3, ShieldCheck } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
-import { ProductionRuntimeSummary } from "@/components/features/ProductionRuntimeSummary";
+import Link from "next/link";
 
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return <div className="panel-gold rounded-[24px] p-4"><div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/72">{label}</div><div className="mt-2 text-xl font-black text-white">{value}</div><div className="mt-1 text-[11px] leading-5 text-white/72">{detail}</div></div>;
@@ -21,12 +21,15 @@ export default function PositionsPage() {
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />Current Production Dashboard</div>
           <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">Current Production Dashboard</h1>
           <p className="mt-3 max-w-4xl text-sm leading-7 text-white/82">Asterの読み取り結果を正本として、口座残高、実建玉、未決済注文、保護注文を表示します。データ未取得時は正常稼働と推測表示しません。</p>
-          <p className="mt-2 max-w-4xl rounded-2xl border border-amber-400/25 bg-amber-500/5 px-4 py-3 text-[12px] leading-6 text-amber-100/85">runtime caps・V4 process・entry readinessは、VPSの現在観測から取得できた場合だけ表示します。未取得時はstatic contractにfallbackしません。</p>
         </header>
 
-        <ProductionRuntimeSummary />
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
+        <section className="panel-gold flex flex-wrap items-center justify-between gap-3 rounded-[28px] p-4">
+          <div><div className="text-sm font-bold text-white">対象ランナー</div><p className="mt-1 text-xs text-white/70">V12 V4 / PENGU / Q102 / FET / HYPE / Idle / V52</p></div>
+          <Link href="/decision-status" className="rounded-full border border-gold-400/30 px-3 py-2 text-xs font-semibold text-gold-100 hover:bg-white/10">ロジック詳細・判定状況</Link>
+        </section>
+                <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Metric label="Aster balance" value={snapshot ? formatPrice(snapshot.account.balanceUsd) : "UNAVAILABLE"} detail={snapshot ? `Available ${formatPrice(snapshot.account.availableUsd)}` : error || "Aster state unavailable"} />
           <Metric label="Real positions" value={snapshot ? String(snapshot.positions.length) : "—"} detail={snapshot ? `Unrealized ${formatPrice(snapshot.account.unrealizedPnlUsd)}` : "実建玉取得待ち"} />
           <Metric label="Open orders" value={snapshot ? String(snapshot.orders.count) : "—"} detail={snapshot ? `Protection ${snapshot.orders.protectionCount}` : "未決済注文取得待ち"} />
