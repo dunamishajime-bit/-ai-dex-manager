@@ -37,6 +37,7 @@ import { advancePenguShortV20TimedStops, type PenguShortV20TimedStopAction } fro
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
+import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross, strictIntentForLiveCandidate } from "@/lib/disdex-live-entry-approval";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
@@ -745,13 +746,14 @@ export class PenguDualLsV2PortfolioRunner {
         return this.applyResult(state, pending, result);
     }
 
-    private async executePending(state: PenguDualLsV2RunnerState): Promise<PenguDualLsV2TickResult> {
+    private async executePending(state: PenguDualLsV2RunnerState, ownReservationId?: string): Promise<PenguDualLsV2TickResult> {
         const pending = state.pending;
         if (!pending) return { status: "held", message: "No PENGU Dual LS pending order." };
         let submitted = false;
         try {
             const quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
             let now = this.now();
+            let approvedEntryNotionalUsd: number | undefined;
             if (this.dependencies.config.mode === "LIVE") {
                 const [account, positions, openOrders] = await Promise.all([
                     this.dependencies.executor.getAccountSnapshot(),
@@ -771,6 +773,42 @@ export class PenguDualLsV2PortfolioRunner {
                     }
                 } else if (actual || state.position) {
                     throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_ENTRY_POSITION_ALREADY_ACTIVE");
+                } else {
+                    if (!ownReservationId) throw new Error("PENGU_PRE_SUBMIT_RESERVATION_MISSING");
+                    const equity = account.walletBalance + positions.reduce((sum, position) => sum + finite(position.unrealizedPnl), 0);
+                    if (!(equity > 0)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_EQUITY_INVALID");
+                    const ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                    const qualityPosition = await liveQuality102Position(this.dependencies.executor, positions, ownership, now);
+                    const riskPath = this.dependencies.config.portfolioDailyLossStatePath || process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH;
+                    const risk = riskPath ? await readSharedCryptoDailyRisk(riskPath, now).catch(() => ({ ok: false as const })) : { ok: false as const };
+                    const ddPath = process.env.DISDEX_PORTFOLIO_DD_GOVERNOR_PATH;
+                    const dd = ddPath ? await readPortfolioDdGovernor(ddPath).catch(() => undefined) : undefined;
+                    const liveCandidate = buildLiveEntryCandidate({
+                        idempotencyKey: pending.idempotencyKey, strategy: "PENGU_DUAL_LS_V2", symbol: SYMBOL,
+                        side: pending.side === "BUY" ? "LONG" : "SHORT", signalTs: pending.referenceTs,
+                        score: liveEntryScore("PENGU_DUAL_LS_V2"), targetGross: pending.targetGross,
+                        minGross: PENGU_DUAL_LS_V2.fixedEntryGross, maxGross: this.dependencies.config.maximumGross,
+                    });
+                    const pendingRegistry = await readPendingExposureRegistry();
+                    const ownReservation = pendingRegistry.entries.find((row) => row.reservationId === ownReservationId
+                        && row.strategyId === state.strategyId && row.symbol === SYMBOL
+                        && row.side === (pending.side === "BUY" ? "LONG" : "SHORT")
+                        && Math.abs(row.gross - pending.targetGross) <= 1e-9 && row.status !== "RELEASED");
+                    if (!ownReservation) throw new Error("PENGU_PRE_SUBMIT_RESERVATION_INCOMPATIBLE");
+                    const plan = planStrictPortfolio({ equity, now,
+                        active: strictActivePositions(positions, now, ownership, qualityPosition),
+                        availableBalanceUsd: account.availableBalance,
+                        sharedDailyRisk: risk.ok ? risk.state : undefined,
+                        portfolioDdGovernor: dd,
+                        pendingExposure: aggregatePendingExposure({ ...pendingRegistry,
+                            entries: pendingRegistry.entries.filter((row) => row.reservationId !== ownReservationId) }),
+                        intents: [strictIntentForLiveCandidate(liveCandidate, equity)], maxDataAgeMs: 5 * 60_000 });
+                    const approved = plan.status === "planned" ? plan.accepted.find((row) => row.idempotencyKey === liveCandidate.idempotencyKey) : undefined;
+                    if (!approved || plan.reductions.length > 0) throw new Error(`PENGU_PRE_SUBMIT_APPROVAL_MISSING:${plan.reason || plan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}`);
+                    const approvedGross = requireApprovedLiveGross({ candidate: liveCandidate, approved,
+                        now: this.now(), snapshotAt: account.updatedAt, approvedAt: now, maxAgeMs: 5 * 60_000 });
+                    if (!isPenguFixedEntryAllocation(approvedGross, this.dependencies.config.maximumGross)) throw new Error("PENGU_PRE_SUBMIT_FIXED_GROSS_UNAVAILABLE");
+                    approvedEntryNotionalUsd = approvedGross * equity;
                 }
             }
             if (this.dependencies.config.mode === "LIVE" && !validLiveQuote(quote, SYMBOL, now)) throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_QUOTE_STALE_OR_INVALID");
@@ -779,6 +817,9 @@ export class PenguDualLsV2PortfolioRunner {
             const normalized = await this.dependencies.executor.normalizeMarketQuantity(SYMBOL, pending.quantity, expectedPrice, { allowBelowMinNotional: pending.reduceOnly });
             if (!(normalized.quantity > 0) || !Number.isFinite(normalized.notional) || normalized.notional <= 0 || normalized.quantity > pending.quantity + 1e-9) {
                 throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_NORMALIZED_QUANTITY_INVALID");
+            }
+            if (!pending.reduceOnly && this.dependencies.config.mode === "LIVE" && (!(approvedEntryNotionalUsd && approvedEntryNotionalUsd > 0) || normalized.notional > approvedEntryNotionalUsd * (1 + 1e-9))) {
+                throw new Error("PENGU_DUAL_LS_PRE_SUBMIT_NOTIONAL_OVER_APPROVAL");
             }
             pending.quantity = normalized.quantity;
             pending.expectedPrice = expectedPrice;
@@ -797,6 +838,7 @@ export class PenguDualLsV2PortfolioRunner {
                 expectedPrice,
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
                 reason: `${pending.reason} entryVersion=${pending.entryVersion || state.position?.entryVersion || "UNKNOWN"}`,
+                maxEntryNotionalUsd: pending.reduceOnly ? undefined : approvedEntryNotionalUsd,
             };
             const result = await this.dependencies.executor.executeMarket(command);
             return this.applyResult(state, pending, result);
@@ -1162,6 +1204,13 @@ export class PenguDualLsV2PortfolioRunner {
                     requestedGross = grossContract.requestedGross;
                     targetGross = grossContract.intentGross;
                     targetNotional = grossContract.intentNotionalUsd;
+                    const liveCandidate = buildLiveEntryCandidate({
+                        idempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
+                        strategy: "PENGU_DUAL_LS_V2", symbol: SYMBOL,
+                        side: signal.side > 0 ? "LONG" : "SHORT", signalTs: signal.referenceTs,
+                        score: liveEntryScore("PENGU_DUAL_LS_V2"), targetGross,
+                        minGross: PENGU_DUAL_LS_V2.fixedEntryGross, maxGross: this.dependencies.config.maximumGross,
+                    });
                     const strictPlan = planStrictPortfolio({
                         equity: workingEquity,
                         now: plannerNow,
@@ -1170,16 +1219,7 @@ export class PenguDualLsV2PortfolioRunner {
                         sharedDailyRisk: grossRisk.ok ? grossRisk.state : undefined,
                         portfolioDdGovernor,
                         pendingExposure: aggregatePendingExposure(await readPendingExposureRegistry()),
-                        intents: [{
-                            idempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
-                            strategy: "PENGU_DUAL_LS_V2",
-                            symbol: SYMBOL,
-                            side: signal.side > 0 ? "LONG" : "SHORT",
-                            gross: targetGross,
-                            requestedGross,
-                            notionalUsd: targetNotional,
-                            signalTs: signal.referenceTs,
-                        }],
+                        intents: [strictIntentForLiveCandidate(liveCandidate, workingEquity)],
                         maxDataAgeMs: 5 * 60_000,
                     });
                     if (strictPlan.status !== "planned") {
@@ -1309,11 +1349,19 @@ export class PenguDualLsV2PortfolioRunner {
                         }
                     }
                     requestedGross = accepted.requestedGross ?? requestedGross;
-                    if (!isPenguFixedEntryAllocation(accepted.gross, this.dependencies.config.maximumGross)) {
+                    let approvedGross: number;
+                    try {
+                        approvedGross = requireApprovedLiveGross({ candidate: liveCandidate, approved: accepted,
+                            now: this.now(), snapshotAt: workingAccount.updatedAt, approvedAt: plannerNow, maxAgeMs: 5 * 60_000 });
+                    } catch (error) {
+                        await this.dependencies.stateStore.save(state);
+                        return { status: "held", message: `PENGU_APPROVAL_BLOCKED:${error instanceof Error ? error.message : String(error)}`, signal };
+                    }
+                    if (!isPenguFixedEntryAllocation(approvedGross, this.dependencies.config.maximumGross)) {
                         await this.dependencies.stateStore.save(state);
                         return { status: "held", message: "PENGU_FIXED1_NO_LOT_SHRINK: full1.0 allocation is unavailable.", signal };
                     }
-                    targetGross = PENGU_DUAL_LS_V2.fixedEntryGross;
+                    targetGross = approvedGross;
                     targetNotional = targetGross * workingEquity;
                     break;
                 }
@@ -1398,7 +1446,7 @@ export class PenguDualLsV2PortfolioRunner {
                 remainingPortfolioGross: Math.max(0, this.dependencies.config.portfolioGrossCap - normalizedPositionGross(workingPositions, workingEquity, SYMBOL)),
                 referenceTs: signal.referenceTs,
             });
-            const result = await this.executePending(state);
+            const result = await this.executePending(state, exposureReservation?.reservationId);
             // A durable pending row remains active through UNKNOWN/manual-review
             // outcomes. Release it only after the runner has cleared its pending
             // state, which means the venue result was terminally reconciled.

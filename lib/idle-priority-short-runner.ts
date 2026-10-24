@@ -7,6 +7,7 @@ import { AsterDirectTradeExecutor, type DirectAccountSnapshot, type DirectOpenOr
 import { FileAccountOrderLock, type AccountLockHandle } from "./disdex-account-order-lock";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { FileDynamicEntryIntentRegistry } from "./disdex-dynamic-entry-intent-registry";
+import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross, requireCompatibleExecutionSnapshot } from "./disdex-live-entry-approval";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
@@ -573,6 +574,12 @@ export class IdlePriorityShortRunner {
         } as const;
         const routePolicy = IDLE_PRIORITY_SHORT_POLICY.routes[symbol];
         const cycleId = `IDLE:${signal.features.decisionTs}:${signal.features.signalTs}:${symbol}`;
+        const liveCandidate = buildLiveEntryCandidate({
+            idempotencyKey: cycleId, strategy: IDLE_PRIORITY_SHORT_STRATEGY,
+            symbol, side: "SHORT", signalTs: signal.features.signalTs,
+            score: liveEntryScore(IDLE_PRIORITY_SHORT_STRATEGY, signal.features),
+            targetGross: routePolicy.gross, minGross: routePolicy.minGross, maxGross: routePolicy.gross,
+        });
         const intentPath = `${this.dependencies.runtime.pendingExposurePath}.dynamic-entry-intents.json`;
         const intentRegistry = new FileDynamicEntryIntentRegistry(intentPath);
         const pendingSnapshot = await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath);
@@ -585,16 +592,8 @@ export class IdlePriorityShortRunner {
         let allocation;
         try {
             await intentRegistry.submit({
+                ...liveCandidate,
                 cycleId,
-                id: cycleId,
-                strategy: IDLE_PRIORITY_SHORT_STRATEGY,
-                symbol,
-                side: "SHORT",
-                assetClass: "CRYPTO",
-                marketFitScore: Math.max(0, (Math.abs(signal.features.rel24) + Math.abs(signal.features.ret12)) * 100),
-                targetGross: routePolicy.gross,
-                minGross: routePolicy.minGross,
-                maxGross: routePolicy.gross,
                 concentrationPenalty: exposure.cryptoGross + ownerPending.nonBaselinePendingExposure,
             }, this.now());
             allocation = await intentRegistry.allocateCycle({
@@ -618,11 +617,30 @@ export class IdlePriorityShortRunner {
         const allocated = allocation.allocations.find((row) => row.id === cycleId);
         const allocationReason = allocation.rejected.find((row) => row.id === cycleId)?.reason;
         const reservation = allocated ? (await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath)).entries
-            .filter((row) => row.strategyId === IDLE_PRIORITY_SHORT_STRATEGY && row.symbol === symbol && row.side === "SHORT"
+            .filter((row) => row.reservationId === allocated.reservationId
+                && row.strategyId === IDLE_PRIORITY_SHORT_STRATEGY && row.symbol === symbol && row.side === "SHORT"
                 && Math.abs(row.gross - allocated.allocatedGross) <= EPSILON && ["PENDING", "SUBMITTED", "UNKNOWN"].includes(row.status))
             .sort((a, b) => b.createdAt - a.createdAt)[0] : undefined;
-        const admission = evaluateIdleLiveAdmission({ ...baseInput, allocatedGross: allocated?.allocatedGross ?? 0 });
-        state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.accepted ? admission.reason : allocationReason || admission.reason, finalScore: allocated?.finalScore, allocatedGross: allocated?.allocatedGross, rejectionReason: allocationReason };
+        let approvedGross = 0;
+        if (allocated) {
+            try {
+                approvedGross = requireApprovedLiveGross({ candidate: liveCandidate,
+                    approved: { idempotencyKey: allocated.idempotencyKey || "", strategy: IDLE_PRIORITY_SHORT_STRATEGY,
+                        symbol: allocated.symbol, side: allocated.side, signalTs: allocated.signalTs || 0,
+                        gross: allocated.allocatedGross, notionalUsd: allocated.allocatedGross * equity },
+                    now: this.now(), snapshotAt: account.updatedAt, approvedAt: allocation.decidedAt,
+                    maxAgeMs: MAX_QUOTE_AGE_MS });
+            } catch (error) {
+                if (reservation) await lock.releaseReservation(reservation.reservationId);
+                const reason = `IDLE_APPROVAL_BLOCKED:${error instanceof Error ? error.message : String(error)}`;
+                state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false,
+                    reason, finalScore: allocated.finalScore, rejectionReason: reason, scoreSource: liveCandidate.scoreSource };
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+        }
+        const admission = evaluateIdleLiveAdmission({ ...baseInput, allocatedGross: approvedGross });
+        state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.accepted ? admission.reason : allocationReason || admission.reason, finalScore: allocated?.finalScore, allocatedGross: allocated ? approvedGross : undefined, rejectionReason: allocationReason, scoreSource: liveCandidate.scoreSource };
         await this.dependencies.stateStore.save(state);
         if (!admission.accepted) {
             if (reservation) await lock.releaseReservation(reservation.reservationId);
@@ -635,10 +653,33 @@ export class IdlePriorityShortRunner {
         }
         try {
             await assertOperatorActivation(this.dependencies.runtime);
-            await this.dependencies.executor.getAccountSnapshot();
+            const [freshAccount, freshPositions, freshRegistry] = await Promise.all([
+                this.dependencies.executor.getAccountSnapshot(),
+                this.dependencies.executor.getPositions(),
+                readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath),
+            ]);
+            const freshNow = this.now();
+            if (!(freshAccount.updatedAt > 0 && freshAccount.updatedAt <= freshNow
+                && freshNow - freshAccount.updatedAt <= MAX_QUOTE_AGE_MS)) throw new Error("IDLE_EXECUTION_ACCOUNT_STALE");
+            const freshEquity = freshAccount.walletBalance + freshPositions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
+            const freshExposure = coreAndSidecarExposure(freshPositions, freshEquity, new Set(state.positions.map((row) => row.symbol)));
+            const freshPending = aggregatePendingExposure({ ...freshRegistry,
+                entries: freshRegistry.entries.filter((row) => row.reservationId !== reservation.reservationId) });
+            requireCompatibleExecutionSnapshot({ approvedGross, approvalEquity: equity, currentEquity: freshEquity,
+                approvedAt: allocation.decidedAt, now: freshNow, maxAgeMs: MAX_QUOTE_AGE_MS,
+                approvalPositions: positions.map((row) => ({ symbol: row.symbol, side: row.quantity < 0 ? "SHORT" : "LONG", quantity: row.quantity })),
+                currentPositions: freshPositions.map((row) => ({ symbol: row.symbol, side: row.quantity < 0 ? "SHORT" : "LONG", quantity: row.quantity })),
+                cryptoGrossAvailable: INTEGRATED_CRYPTO_CAP - freshExposure.cryptoGross - freshPending.cryptoGross,
+                totalGrossAvailable: INTEGRATED_TOTAL_CAP - freshExposure.totalGross - freshPending.cryptoGross - freshPending.stockGross });
         } catch (error) {
             await lock.releaseReservation(reservation.reservationId);
-            throw error;
+            const message = error instanceof Error ? error.message : String(error);
+            if (!message.startsWith("IDLE_EXECUTION_ACCOUNT_STALE") && !message.startsWith("LIVE_ENTRY_")) throw error;
+            const reason = `IDLE_EXECUTION_SNAPSHOT_BLOCKED:${message}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route,
+                accepted: false, reason, finalScore: allocated?.finalScore, rejectionReason: reason, scoreSource: liveCandidate.scoreSource };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
         let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
         try {

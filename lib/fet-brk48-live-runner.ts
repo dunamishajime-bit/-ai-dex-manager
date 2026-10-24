@@ -33,7 +33,9 @@ import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
-import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
+import { planStrictPortfolio, type StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
+import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross, strictIntentForLiveCandidate } from "@/lib/disdex-live-entry-approval";
+import { toStrictPosition } from "@/lib/v12-strict-live-adapter";
 import {
   advanceFetBrk48LongTrailingStop,
   FET_BRK48_TRAILING_STOP_POLICY,
@@ -904,14 +906,44 @@ export class FetBrk48LiveRunner {
         return { status: "held", message: "FET_MARGIN_RESIDUAL_BELOW_EXECUTABLE_MINIMUM", ordersSent: 0, signal, gross: targetGross };
       }
 
-      const normalized = await this.deps.executor.normalizeMarketQuantity("FETUSDT", requestedNotional / executablePrice, executablePrice);
+      const plannerNow = this.deps.now ? this.deps.now() : Date.now();
+      const liveCandidate = buildLiveEntryCandidate({
+        idempotencyKey: `FET_BRK48_RESIDUAL|${signal.referenceTs}|ENTRY`,
+        strategy: "FET_RESIDUAL", symbol: "FETUSDT", side: "LONG", signalTs: signal.referenceTs,
+        score: liveEntryScore("FET_RESIDUAL", signal), targetGross,
+        minGross: Math.max(FET_BRK48_RESIDUAL.minimumResidualGross, (this.deps.minimumOrderNotionalUsd ?? 5) / equity),
+        maxGross: FET_BRK48_RESIDUAL.maximumGross,
+      });
+      const strictActive = await Promise.all(positions.filter((position) => Math.abs(position.quantity) > EPS).map(async (position) =>
+        toStrictPosition(position, plannerNow, q102, quality102OwnsPosition(q102, position)
+          ? await this.deps.executor.getMarketQuote(position.symbol) : undefined)));
+      const plan = planStrictPortfolio({ equity, now: plannerNow, active: strictActive,
+        pendingExposure: pending, availableBalanceUsd: account.availableBalance,
+        sharedDailyRisk: sharedRisk.state, intents: [strictIntentForLiveCandidate(liveCandidate, equity)],
+        maxDataAgeMs: 5 * 60_000 });
+      const approved = plan.status === "planned" ? plan.accepted.find((row) => row.idempotencyKey === liveCandidate.idempotencyKey) : undefined;
+      if (!approved || plan.reductions.length > 0) {
+        state.lastReferenceTs = Math.max(state.lastReferenceTs || 0, signal.referenceTs);
+        await writeFetBrk48State(this.deps.statePath, state);
+        return { status: "held", message: `FET_STRICT_PLAN_BLOCKED:${plan.reason || plan.rejected[0]?.reason || "NO_APPROVAL"}`, ordersSent: 0, signal };
+      }
+      let approvedGross: number;
+      try {
+        approvedGross = requireApprovedLiveGross({ candidate: liveCandidate, approved,
+          now: this.deps.now ? this.deps.now() : Date.now(), snapshotAt: account.updatedAt,
+          approvedAt: plannerNow, maxAgeMs: 5 * 60_000 });
+      } catch (error) {
+        return { status: "held", message: `FET_APPROVAL_BLOCKED:${error instanceof Error ? error.message : String(error)}`, ordersSent: 0, signal };
+      }
+
+      const normalized = await this.deps.executor.normalizeMarketQuantity("FETUSDT", approvedGross * equity / executablePrice, executablePrice);
       if (!(normalized.quantity > 0)) return { status: "blocked", message: "FET_ENTRY_QUANTITY_INVALID", ordersSent: 0, signal };
 
       const idempotencyKey = createHash("sha256")
-        .update(`FET|ENTRY|${signal.referenceTs}|${targetGross.toFixed(12)}`)
+        .update(`FET|ENTRY|${signal.referenceTs}|${approvedGross.toFixed(12)}`)
         .digest("hex");
       if (state.lastCompletedIdempotencyKey === idempotencyKey) {
-        return { status: "held", message: "FET_ENTRY_ALREADY_COMPLETED", ordersSent: 0, signal, gross: targetGross };
+        return { status: "held", message: "FET_ENTRY_ALREADY_COMPLETED", ordersSent: 0, signal, gross: approvedGross };
       }
       const clientOrderId = deterministicId("entry", idempotencyKey);
       state.pending = {
@@ -926,7 +958,7 @@ export class FetBrk48LiveRunner {
         updatedAt: now,
         expectedPrice: executablePrice,
         reason: "FET_BRK48_LONG_ENTRY",
-        targetGross,
+        targetGross: approvedGross,
         entryTs: signal.entryTs,
         exitTs: signal.exitTs,
         hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
@@ -936,7 +968,7 @@ export class FetBrk48LiveRunner {
         strategyId: FET_BRK48_RESIDUAL.strategyId,
         symbol: "FETUSDT",
         side: "LONG",
-        gross: targetGross,
+        gross: approvedGross,
         notionalUsd: normalized.notional,
       });
       let releaseExposureReservation = false;
@@ -951,28 +983,29 @@ export class FetBrk48LiveRunner {
           maxSlippageBps: this.deps.maxSlippageBps ?? 20,
           reason: "FET_BRK48_LONG_ENTRY",
           requireVenueMargin5xCross: true,
+          maxEntryNotionalUsd: approvedGross * equity,
         });
         if (result.status === "UNKNOWN" || result.executionUnknown) {
           state.manualReview = "FET_ENTRY_EXECUTION_UNKNOWN";
           await writeFetBrk48State(this.deps.statePath, state);
-          return { status: "manual-review", message: state.manualReview, ordersSent: 1, signal, gross: targetGross };
+          return { status: "manual-review", message: state.manualReview, ordersSent: 1, signal, gross: approvedGross };
         }
         const actual = activePosition(await this.deps.executor.getPositions()).filter((row) => row.quantity > 0);
         if (actual.length !== 1) {
           state.manualReview = "FET_ENTRY_POSITION_READBACK_MISMATCH";
           await writeFetBrk48State(this.deps.statePath, state);
-          return { status: "manual-review", message: state.manualReview, ordersSent: 1, signal, gross: targetGross };
+          return { status: "manual-review", message: state.manualReview, ordersSent: 1, signal, gross: approvedGross };
         }
         try {
           await ensureProtection(this.deps, state, actual[0], {
             entryTs: signal.entryTs,
             exitTs: signal.exitTs,
-            targetGross,
+            targetGross: approvedGross,
             hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
           });
         } catch (error) {
           await emergencyFlattenProtectedFailure(this.deps, state, actual[0], error instanceof Error ? error.message : String(error));
-          return { status: "manual-review", message: state.manualReview || "FET_PROTECTION_FAILURE", ordersSent: 2, signal, gross: targetGross };
+          return { status: "manual-review", message: state.manualReview || "FET_PROTECTION_FAILURE", ordersSent: 2, signal, gross: approvedGross };
         }
         state.pending = undefined;
         state.lastReferenceTs = signal.referenceTs;
@@ -986,7 +1019,7 @@ export class FetBrk48LiveRunner {
           message: state.manualReview || "FET_ENTRY_FILLED_AND_PROTECTED",
           ordersSent: 1,
           signal,
-          gross: targetGross,
+          gross: approvedGross,
         };
       } finally {
         if (releaseExposureReservation) await lock.releaseReservation(reservation.reservationId).catch(() => undefined);

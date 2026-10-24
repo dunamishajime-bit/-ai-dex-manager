@@ -46,6 +46,7 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
   const tradeCalls: any[] = [];
   const orderResults = new Map<string, any>();
   let liveMarkPrice = 110;
+  let accountSnapshotAgeMs = 0;
 
   const oldKill = process.env.DISDEX_SHARED_KILL_SWITCH_FILE;
   const oldLegacy = process.env.DISDEX_V96_KILL_SWITCH_FILE;
@@ -75,7 +76,7 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
         walletBalance: 100,
         availableBalance: 100,
         asset: "USDT",
-        updatedAt: now,
+        updatedAt: now - accountSnapshotAgeMs,
       }),
       getPositions: async () => positions.map((row) => ({ ...row, updatedAt: now, markPrice: liveMarkPrice })),
       getOpenOrders: async () => openOrders.map((row) => ({ ...row })),
@@ -228,12 +229,21 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     await candidateBlocker.release();
 
     now += 1_000;
+    accountSnapshotAgeMs = 6 * 60_000;
+    const staleApproval = await new FetBrk48LiveRunner(deps).tick();
+    assert.equal(staleApproval.status, "held");
+    assert.match(staleApproval.message, /LIVE_ENTRY_SNAPSHOT_STALE/);
+    assert.equal(tradeCalls.length, 0, "stale approval must not reach executeMarket");
+    assert.equal((await readFetBrk48State(statePath, RUNTIME_SHA)).pending, undefined);
+    accountSnapshotAgeMs = 0;
+    now += 1_000;
     const first = await new FetBrk48LiveRunner(deps).tick();
     assert.equal(first.status, "entered");
     assert.equal(first.ordersSent, 1);
     assert.equal(tradeCalls.length, 1);
     assert.equal(tradeCalls[0].side, "BUY");
     assert.equal(tradeCalls[0].requireVenueMargin5xCross, true);
+    assert.equal(tradeCalls[0].maxEntryNotionalUsd, 100);
     assert.equal(openOrders.length, 1);
     assert.equal(openOrders[0].type, "STOP_MARKET");
     assert.equal(openOrders[0].reduceOnly, true);

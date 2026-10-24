@@ -23,6 +23,7 @@ import {
 import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, v12EntryGrossCapForSignal, v12EntryGrossMultiplierForSignal, type V12Bar, type V12DecisionObservation, type V12PositionSizing, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { decideV12ResidualEntry, validateV12EntryGrossReservation, type V12ResidualDecision } from "@/lib/v12-top2-residual";
+import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross } from "@/lib/disdex-live-entry-approval";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
@@ -548,6 +549,7 @@ export class V12LiveExecutionEngine {
         await this.d.stateStore.save(state);
         if(gateReason)return {status:"risk-blocked",reason:gateReason,signal};
         const acceptedGross = decision.acceptedGross;
+        if (!Number.isFinite(acceptedGross) || acceptedGross <= 0) return { status: "capacity-blocked", reason: "V12_APPROVAL_MISSING", signal };
         const symbol = `${signal.symbol}USDT`;
         const quote = await this.d.adapter.executor.getMarketQuote(symbol);
         const expectedPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
@@ -555,6 +557,12 @@ export class V12LiveExecutionEngine {
         const quantity = sizing.quantity * scale;
         if (!(quantity > 0)) return { status: "capacity-blocked", reason: "ZERO_EXECUTABLE_QUANTITY", signal };
         const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
+        const liveCandidate = buildLiveEntryCandidate({
+            idempotencyKey: clientOrderId, strategy: "V12", symbol, side: signal.side,
+            signalTs: signal.referenceTs, score: liveEntryScore("V12", signal),
+            targetGross: Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(signal)),
+            minGross: 1 / equity, maxGross: V12_X1_ALL.perPositionEntryGrossCap,
+        });
         if (state.lastCompletedIdempotencyKey === clientOrderId) return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId };
         try {
             const normalized = await this.d.adapter.executor.normalizeMarketQuantity(symbol, quantity, expectedPrice);
@@ -565,6 +573,18 @@ export class V12LiveExecutionEngine {
             ]);
             const freshEquity = Math.max(0, finite(freshAccount.walletBalance));
             if (!(freshEquity > 0)) return this.fail(state, "V12_ENTRY_GROSS_RESERVATION_EQUITY_INVALID");
+            if (Math.abs(freshEquity - equity) > Math.max(1e-6, equity * 1e-6)) {
+                return { status: "capacity-blocked", reason: "V12_APPROVAL_SNAPSHOT_CHANGED", signal, clientOrderId };
+            }
+            try {
+                requireApprovedLiveGross({ candidate: liveCandidate,
+                    approved: { idempotencyKey: clientOrderId, strategy: "V12", symbol,
+                        side: signal.side, signalTs: signal.referenceTs, gross: acceptedGross,
+                        notionalUsd: acceptedGross * equity },
+                    now: this.now(), snapshotAt: freshAccount.updatedAt, approvedAt: this.now(), maxAgeMs: 5 * 60_000 });
+            } catch (error) {
+                return { status: "capacity-blocked", reason: error instanceof Error ? error.message : String(error), signal, clientOrderId };
+            }
             if (preemptionAttempt === 0) {
                 const residualPreemption = await releaseIdleResidualLongForFormalEntry({
                     executor: this.d.adapter.executor,
@@ -651,14 +671,10 @@ export class V12LiveExecutionEngine {
                 ) {
                     const pendingExposure = aggregatePendingExposure(await readPendingExposureRegistry());
                     const candidate: StrictPortfolioIntent = {
-                        idempotencyKey: clientOrderId,
-                        strategy: "V12",
-                        symbol,
-                        side: signal.side,
+                        ...liveCandidate,
                         gross: worstCaseGross,
                         requestedGross: acceptedGross,
                         notionalUsd: worstCaseGross * freshEquity,
-                        signalTs: signal.referenceTs,
                     };
                     const preemption = await this.releaseHypeZecCapacity(
                         handle,
@@ -732,7 +748,9 @@ export class V12LiveExecutionEngine {
         let result: DirectTradeResult;
         let releaseExposureReservation = false;
         try {
-            result = await this.d.adapter.executeEntry({ signalTs: signal.referenceTs, symbol, side: signal.side, quantity, expectedPrice, clientOrderId });
+            result = await this.d.adapter.executeEntry({ signalTs: signal.referenceTs, symbol, side: signal.side, quantity, expectedPrice, clientOrderId,
+                marketFitScore: liveCandidate.marketFitScore, maxEntryNotionalUsd: acceptedGross * equity,
+                reservationId: reservation.reservationId });
         } catch (error) {
             if (isV12BenignEntryQuantityGateError(error)) {
                 const reason = v12BenignEntryQuantityGateReason(error);

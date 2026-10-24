@@ -46,6 +46,10 @@ export interface HypeZecLongPending {
   createdAt: number;
   updatedAt: number;
   reason: string;
+  reservationId?: string;
+  approvedGross?: number;
+  marketFitScore?: number;
+  scoreSource?: string;
 }
 
 export interface HypeZecLongRunnerState {
@@ -54,7 +58,7 @@ export interface HypeZecLongRunnerState {
   mode: HypeZecLongStateMode;
   updatedAt: number;
   lastDecisionTs?: number;
-  lastDecision?: { strategy: "HYPE_LONG" | "ZEC_LONG"; signalTs: number | null; accepted: boolean; reason: string };
+  lastDecision?: { strategy: "HYPE_LONG" | "ZEC_LONG"; signalTs: number | null; accepted: boolean; reason: string; approvedGross?: number; marketFitScore?: number; scoreSource?: string };
   positions?: HypeZecLongPositionState[];
   pending?: HypeZecLongPending;
   manualReview?: string;

@@ -29,6 +29,7 @@ import {
     type StrictPortfolioPlan,
     type StrictPortfolioIntent,
 } from "@/lib/disdex-strict-portfolio-planner";
+import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross, strictIntentForLiveCandidate } from "@/lib/disdex-live-entry-approval";
 import type { AccountLockHandle } from "@/lib/disdex-account-order-lock";
 import {
     readDisDexV96KillSwitch,
@@ -1071,7 +1072,7 @@ export class Quality102CausalV1Runner {
         state: Quality102CausalV1State,
         pending: Quality102CausalV1PendingOrder,
         allowDynamicTrim = true,
-    ): Promise<{ account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[]; unmanagedOpenOrders: DirectOpenOrder[]; equity: number; quote: DirectMarketQuote; expectedPrice: number }> {
+    ): Promise<{ account: DirectAccountSnapshot; positions: DirectPosition[]; openOrders: DirectOpenOrder[]; unmanagedOpenOrders: DirectOpenOrder[]; equity: number; quote: DirectMarketQuote; expectedPrice: number; approvedGross?: number }> {
         this.validatePendingIdentity(state, pending);
         const live = await this.validateLiveAccount(state);
         const now = this.now();
@@ -1079,24 +1080,24 @@ export class Quality102CausalV1Runner {
         if (!validQuote(quote, pending.symbol, now, this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) throw new Error("Q102_PENDING_QUOTE_STALE_OR_INVALID");
         const expectedPrice = pending.side === "BUY" ? quote.askPrice : quote.bidPrice;
         if (!Number.isFinite(expectedPrice) || expectedPrice <= 0) throw new Error("Q102_PENDING_EXECUTION_PRICE_INVALID");
+        let approvedGross: number | undefined;
         if (!pending.reduceOnly) {
             if (live.unmanagedOpenOrders.length > 0) throw new Error("Q102_BASE_OR_OTHER_OPEN_ORDER_CONFLICT");
             const targetGross = positive(pending.targetGross, "Q102 pending targetGross");
             const grossContext = await this.integratedGrossContext(now, live.account, true);
+            const liveCandidate = buildLiveEntryCandidate({
+                idempotencyKey: pending.idempotencyKey, strategy: STRATEGY_ID, symbol: pending.symbol,
+                side: pending.side === "BUY" ? "LONG" : "SHORT", signalTs: pending.referenceTs,
+                score: liveEntryScore(STRATEGY_ID), targetGross,
+                minGross: this.dependencies.config.minimumOrderNotionalUsd / live.equity,
+                maxGross: this.dependencies.config.maximumGross,
+            });
             const planner = planStrictPortfolio({
                 equity: live.equity,
                 now,
                 active: live.positions.filter(nonZero).map((position) => strictBasePosition(position, now)),
                 ...grossContext,
-                intents: [{
-                    idempotencyKey: pending.idempotencyKey,
-                    strategy: STRATEGY_ID,
-                    symbol: pending.symbol,
-                    side: pending.side === "BUY" ? "LONG" : "SHORT",
-                    gross: targetGross,
-                    notionalUsd: positive(pending.quantity * expectedPrice, "Q102 pending notional"),
-                    signalTs: pending.referenceTs,
-                }],
+                intents: [strictIntentForLiveCandidate(liveCandidate, live.equity)],
                 maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
                 quality102CausalV1Ready: true,
             });
@@ -1115,7 +1116,10 @@ export class Quality102CausalV1Runner {
             if (planner.status !== "planned" || !accepted || accepted.gross + EPSILON < targetGross) {
                 throw new Error(`Q102_PENDING_CAPACITY_CHANGED:${planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason || "NO_ACCEPTED_INTENT"}`);
             }
-            if (pending.quantity * expectedPrice / live.equity > accepted.gross + EPSILON) throw new Error("Q102_PENDING_NOTIONAL_OVER_CAPACITY");
+            approvedGross = requireApprovedLiveGross({ candidate: liveCandidate, approved: accepted,
+                now: this.now(), snapshotAt: live.account.updatedAt, approvedAt: now,
+                maxAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS });
+            if (pending.quantity * expectedPrice / live.equity > approvedGross + EPSILON) throw new Error("Q102_PENDING_NOTIONAL_OVER_CAPACITY");
         } else {
             const actual = live.actualQ102;
             if (!actual || !state.position) throw new Error("Q102_PENDING_EXIT_POSITION_MISSING");
@@ -1135,7 +1139,7 @@ export class Quality102CausalV1Runner {
                 },
             });
         }
-        return { ...live, quote, expectedPrice };
+        return { ...live, quote, expectedPrice, approvedGross };
     }
 
     private async updateTrailingState(state: Quality102CausalV1State, quote: DirectMarketQuote): Promise<void> {
@@ -1225,7 +1229,7 @@ export class Quality102CausalV1Runner {
             if (!(normalized.quantity > 0) || !Number.isFinite(normalized.notional) || normalized.notional <= 0) {
                 return this.manualReview(state, "Q102_PENDING_NORMALIZED_QUANTITY_INVALID", pending.idempotencyKey);
             }
-            if (!pending.reduceOnly && normalized.notional / executionWindow.equity > (pending.targetGross || 0) + EPSILON) {
+            if (!pending.reduceOnly && (!executionWindow.approvedGross || normalized.notional / executionWindow.equity > executionWindow.approvedGross + EPSILON)) {
                 return this.manualReview(state, "Q102_PENDING_NORMALIZED_NOTIONAL_OVER_TARGET", pending.idempotencyKey);
             }
             pending.quantity = normalized.quantity;
@@ -1235,7 +1239,7 @@ export class Quality102CausalV1Runner {
                     strategyId: STRATEGY_ID,
                     symbol: pending.symbol,
                     side: pending.side === "BUY" ? "LONG" : "SHORT",
-                    gross: pending.targetGross || 0,
+                    gross: executionWindow.approvedGross!,
                     notionalUsd: normalized.notional,
                 });
                 reservation = { reservationId: reserved.reservationId };
@@ -1255,6 +1259,7 @@ export class Quality102CausalV1Runner {
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
                 reason: `${pending.reason || STRATEGY_ID} family=${pending.family || state.position?.family || "UNKNOWN"} variant=${pending.variant || state.position?.variant || "UNKNOWN"} layer=${pending.layer || state.position?.layer || "UNKNOWN"}`,
                 requireVenueMargin5xCross: !pending.reduceOnly,
+                maxEntryNotionalUsd: pending.reduceOnly ? undefined : executionWindow.approvedGross! * executionWindow.equity,
             };
             let result: DirectTradeResult;
             try {
@@ -1379,7 +1384,7 @@ export class Quality102CausalV1Runner {
             return { status: "held", message: "Q102 executable notional is below minimum.", signal, ordersSent: 0 };
         }
         const entrySide = signal.side > 0 ? "LONG" : "SHORT";
-        const targetGross = Math.min(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross);
+        const targetGross = Math.min(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross, requestedNotional / equity);
         if (lock && this.dependencies.config.v12DynamicAdapter) {
             const residualPreemption = await releaseIdleResidualLongForFormalEntry({
                 executor: this.dependencies.executor,
@@ -1408,20 +1413,20 @@ export class Quality102CausalV1Runner {
             }
         }
         const grossContext = await this.integratedGrossContext(quote.updatedAt, account);
+        const liveCandidate = buildLiveEntryCandidate({
+            idempotencyKey: `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}`,
+            strategy: STRATEGY_ID, symbol, side: entrySide, signalTs: signal.referenceTs,
+            score: liveEntryScore(STRATEGY_ID), targetGross,
+            minGross: this.dependencies.config.minimumOrderNotionalUsd / equity,
+            maxGross: this.dependencies.config.maximumGross,
+        });
+        const plannerNow = this.now();
         const planner: StrictPortfolioPlan = planStrictPortfolio({
             equity,
-            now: quote.updatedAt,
+            now: plannerNow,
             active: positions.filter(nonZero).map((position) => strictBasePosition(position, quote.updatedAt)),
             ...grossContext,
-            intents: [{
-                idempotencyKey: `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}`,
-                strategy: STRATEGY_ID,
-                symbol,
-                side: entrySide,
-                gross: targetGross,
-                notionalUsd: requestedNotional,
-                signalTs: signal.referenceTs,
-            }],
+            intents: [strictIntentForLiveCandidate(liveCandidate, equity)],
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
             quality102CausalV1Ready: true,
         });
@@ -1491,15 +1496,23 @@ export class Quality102CausalV1Runner {
             await this.dependencies.stateStore.save(state);
             return { status: "held", message: `Q102 entry planner blocked: ${planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason || "NO_ACCEPTED_INTENT"}`, signal, ordersSent: 0 };
         }
+        let approvedGross: number;
+        try {
+            approvedGross = requireApprovedLiveGross({ candidate: liveCandidate, approved: accepted,
+                now: this.now(), snapshotAt: account.updatedAt, approvedAt: plannerNow,
+                maxAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS });
+        } catch (error) {
+            return { status: "held", message: `Q102_APPROVAL_BLOCKED:${error instanceof Error ? error.message : String(error)}`, signal, ordersSent: 0 };
+        }
         const expectedPrice = signal.side > 0 ? quote.askPrice : quote.bidPrice;
-        const requestedQuantity = accepted.notionalUsd / expectedPrice;
+        const requestedQuantity = approvedGross * equity / expectedPrice;
         const normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, requestedQuantity, expectedPrice);
         if (!(normalized.quantity > 0) || normalized.notional < this.dependencies.config.minimumOrderNotionalUsd) {
             state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
             await this.dependencies.stateStore.save(state);
             return { status: "held", message: "Q102 normalized quantity is below executable minimum.", signal, ordersSent: 0 };
         }
-        const idempotencyKey = q102Idempotency(signal, accepted.gross);
+        const idempotencyKey = q102Idempotency(signal, approvedGross);
         if (state.lastCompletedIdempotencyKey === idempotencyKey || state.lastProcessedReferenceTs === signal.referenceTs) {
             return { status: "no-change", message: "Q102 signal already processed.", signal, idempotencyKey, ordersSent: 0 };
         }
@@ -1515,7 +1528,7 @@ export class Quality102CausalV1Runner {
             createdAt: this.now(),
             updatedAt: this.now(),
             expectedPrice,
-            targetGross: accepted.gross,
+            targetGross: approvedGross,
             hardStop: signal.hardStop,
             family: signal.family,
             variant: signal.variant,

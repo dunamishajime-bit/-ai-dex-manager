@@ -14,6 +14,33 @@ function capsFor(...intents: Array<{ strategy: string; symbol: string; side: "LO
     };
 }
 
+test("registry decision retains causal producer identity and score provenance", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-intent-metadata-"));
+    try {
+        const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
+        const intent = { cycleId: "idle-cycle", id: "idle-key", idempotencyKey: "idle-key", signalTs: 10_000,
+            strategy: "IDLE_PRIORITY_SHORT", symbol: "ETHUSDT", side: "SHORT" as const,
+            assetClass: "CRYPTO" as const, marketFitScore: 7, scoreSource: "IDLE_COMPLETED_REL24_RET12_V1",
+            targetGross: 0.3, minGross: 0.1, maxGross: 0.3 };
+        const submitted = await registry.submit(intent, 10_050);
+        assert.equal(submitted.signalTs, 10_000);
+        assert.equal(submitted.idempotencyKey, "idle-key");
+        assert.equal(submitted.scoreSource, "IDLE_COMPLETED_REL24_RET12_V1");
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        const decision = await registry.allocateCycle({ cycleId: intent.cycleId, now: 10_050,
+            cryptoGrossAvailable: 0.3, stockGrossAvailable: 0, totalGrossAvailable: 0.3,
+            equityUsd: 1_000, lock, quality102CausalV1Ready: false, ...capsFor(intent) });
+        assert.equal(decision.allocations[0]?.signalTs, 10_000);
+        assert.equal(decision.allocations[0]?.idempotencyKey, "idle-key");
+        const pending = await readPendingExposureRegistry(join(dir, "pending.json"));
+        assert.equal(decision.allocations[0]?.reservationId, pending.entries[0]?.reservationId);
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
 test("cycle allocation is idempotent and ignores expired intents", async () => {
     const dir = await mkdtemp(join(tmpdir(), "disdex-intent-registry-"));
     try {

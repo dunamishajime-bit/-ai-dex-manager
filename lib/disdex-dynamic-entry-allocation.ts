@@ -16,11 +16,16 @@ export type DynamicEntryCandidate = {
     side: "LONG" | "SHORT";
     assetClass: DynamicAssetClass;
     marketFitScore: number;
+    /** Causal producer provenance; optional for existing research callers. */
+    scoreSource?: string;
+    signalTs?: number;
+    idempotencyKey?: string;
     targetGross: number;
     minGross: number;
     maxGross: number;
     minNotionalUsd?: number;
     btPrior?: DynamicBtPriorMetrics;
+    btPriorVersion?: string;
     correlationPenalty?: number;
     concentrationPenalty?: number;
     stalePenalty?: number;

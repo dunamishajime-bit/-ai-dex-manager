@@ -20,6 +20,23 @@ test("HYPE/ZEC state store writes an exact SHA-owned 0600 regular file", async (
   assert.equal(JSON.parse(await readFile(path, "utf8")).runtimeCommitSha, sha);
 });
 
+test("HYPE pending recovery retains the approved gross, reservation, and score provenance", async () => {
+  const root = await mkdtemp(join(tmpdir(), "hype-zec-approved-"));
+  const path = join(root, "runner.json");
+  const store = new FileHypeZecLongRunnerStateStore(path, "a".repeat(40), "LIVE");
+  const state = await store.load();
+  state.pending = { idempotencyKey: "hype-entry", clientOrderId: "hype-entry", action: "ENTRY",
+    strategy: "HYPE_LONG", symbol: "HYPEUSDT", side: "BUY", quantity: 1, expectedPrice: 10,
+    phase: "submitted", createdAt: 100, updatedAt: 100, reason: "SIGNAL",
+    reservationId: "reserved-1", approvedGross: 0.3, marketFitScore: 50,
+    scoreSource: "NEUTRAL_NO_COMPARABLE_LIVE_SCORE_V1" };
+  await store.save(state);
+  const recovered = await store.load();
+  assert.equal(recovered.pending?.approvedGross, 0.3);
+  assert.equal(recovered.pending?.reservationId, "reserved-1");
+  assert.equal(recovered.pending?.scoreSource, "NEUTRAL_NO_COMPARABLE_LIVE_SCORE_V1");
+});
+
 test("HYPE/ZEC state store rejects a stale runtime SHA", async () => {
   const root = await mkdtemp(join(tmpdir(), "hype-zec-state-"));
   const path = join(root, "runner.json");

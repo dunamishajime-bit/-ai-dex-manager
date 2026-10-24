@@ -12,6 +12,8 @@ import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
+import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross, strictIntentForLiveCandidate, type LiveEntryCandidate } from "@/lib/disdex-live-entry-approval";
+import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 
 const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const EPSILON = 1e-9;
@@ -92,7 +94,7 @@ function strictStrategy(position: DirectPosition, quality102Ownership?: Quality1
     throw new Error(`STRICT_PORTFOLIO_UNKNOWN_STRATEGY_OWNERSHIP:${position.symbol}`);
 }
 
-function toStrictPosition(position: DirectPosition, now: number, quality102Ownership?: Quality102CausalV1OwnershipSnapshot, quality102Quote?: DirectMarketQuote): StrictPortfolioPosition {
+export function toStrictPosition(position: DirectPosition, now: number, quality102Ownership?: Quality102CausalV1OwnershipSnapshot, quality102Quote?: DirectMarketQuote): StrictPortfolioPosition {
     const updatedAt = Number(position.updatedAt);
     const strategy = strictStrategy(position, quality102Ownership);
     if (strategy === "QUALITY102_CAUSAL_V1") {
@@ -143,6 +145,9 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         quantity: number;
         expectedPrice: number;
         clientOrderId?: string;
+        marketFitScore?: number;
+        reservationId?: string;
+        maxEntryNotionalUsd?: number;
     }): Promise<DirectTradeResult> {
         assertV12StrictLiveConfiguration();
         const [account, positions] = await Promise.all([
@@ -181,12 +186,31 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         if (!(requestedNotional > 0)) throw new Error("STRICT_PORTFOLIO_REQUESTED_NOTIONAL_INVALID");
         let accepted: StrictPortfolioIntent | undefined;
         let acceptedNotional = 0;
+        let approvedCandidate: LiveEntryCandidate | undefined;
+        let approvedAt = 0;
         for (let attempt = 0; attempt < 3; attempt += 1) {
             const plannerNow = Date.now();
             const active = await Promise.all(workingPositions.map(async (row) => quality102OwnsPosition(quality102Ownership, row)
                 ? toStrictPosition(row, plannerNow, quality102Ownership, await this.executor.getMarketQuote(row.symbol))
                 : toStrictPosition(row, plannerNow, quality102Ownership)));
-            const pendingExposure = aggregatePendingExposure(await readPendingExposureRegistry());
+            const pendingRegistry = await readPendingExposureRegistry();
+            if (input.reservationId) {
+                const own = pendingRegistry.entries.find((row) => row.reservationId === input.reservationId
+                    && row.strategyId === "V12_X1.00_ALL" && row.symbol === input.symbol.toUpperCase()
+                    && row.side === input.side && row.status !== "RELEASED");
+                if (!own) throw new Error("V12_STRICT_RESERVATION_INCOMPATIBLE");
+            }
+            const pendingExposure = aggregatePendingExposure(input.reservationId
+                ? { ...pendingRegistry, entries: pendingRegistry.entries.filter((row) => row.reservationId !== input.reservationId) }
+                : pendingRegistry);
+            const liveCandidate = buildLiveEntryCandidate({
+                idempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
+                strategy: "V12", symbol: input.symbol, side: input.side, signalTs: input.signalTs,
+                score: liveEntryScore("V12", { score: input.marketFitScore }),
+                targetGross: requestedNotional / workingAccount.walletBalance,
+                minGross: 1 / workingAccount.walletBalance,
+                maxGross: V12_X1_ALL.perPositionEntryGrossCap,
+            });
             const plan = planStrictPortfolio({
                 equity: workingAccount.walletBalance,
                 now: plannerNow,
@@ -195,15 +219,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                 sharedDailyRisk: sharedRisk.ok ? sharedRisk.state : undefined,
                 portfolioDdGovernor,
                 pendingExposure,
-                intents: [{
-                    idempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
-                    strategy: "V12",
-                    symbol: input.symbol,
-                    side: input.side,
-                    gross: requestedNotional / workingAccount.walletBalance,
-                    notionalUsd: requestedNotional,
-                    signalTs: input.signalTs,
-                }],
+                intents: [strictIntentForLiveCandidate(liveCandidate, workingAccount.walletBalance)],
                 maxDataAgeMs,
             });
             if (plan.status !== "planned") throw new Error(`STRICT_PORTFOLIO_PLAN_BLOCKED:${plan.reason || "UNKNOWN"}`);
@@ -258,12 +274,19 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             if (!row || !(row.notionalUsd > 0)) throw new Error(`STRICT_PORTFOLIO_CAPACITY_BLOCKED:${plan.rejected[0]?.reason || "NO_ACCEPTED_V12_INTENT"}`);
             acceptedNotional = row.notionalUsd;
             accepted = row;
+            approvedCandidate = liveCandidate;
+            approvedAt = plannerNow;
             break;
         }
-        if (!accepted || !(acceptedNotional > 0)) throw new Error("STRICT_PORTFOLIO_REDUCTION_RETRY_EXHAUSTED");
+        if (!accepted || !(acceptedNotional > 0) || !approvedCandidate) throw new Error("STRICT_PORTFOLIO_REDUCTION_RETRY_EXHAUSTED");
+        const approvedGross = requireApprovedLiveGross({ candidate: approvedCandidate, approved: accepted,
+            now: Date.now(), snapshotAt: workingAccount.updatedAt, approvedAt, maxAgeMs: maxDataAgeMs });
         const scale = Math.min(1, acceptedNotional / requestedNotional);
         const quantity = input.quantity * scale;
         if (!(quantity > 0)) throw new Error("STRICT_PORTFOLIO_ZERO_EXECUTABLE_QUANTITY");
-        return super.executeEntry({ ...input, quantity });
+        const approvedNotionalCeiling = approvedGross * workingAccount.walletBalance;
+        return super.executeEntry({ ...input, quantity,
+            maxEntryNotionalUsd: input.maxEntryNotionalUsd === undefined
+                ? approvedNotionalCeiling : Math.min(input.maxEntryNotionalUsd, approvedNotionalCeiling) });
     }
 }

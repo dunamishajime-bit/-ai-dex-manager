@@ -6,7 +6,10 @@ import type { AccountLockHandle } from "./disdex-account-order-lock";
 
 export const DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA = "disdex-dynamic-entry-intents/v1" as const;
 export type DynamicEntryIntent = DynamicEntryCandidate & { cycleId: string; submittedAt: number };
-export type DynamicEntryAllocationDecision = DynamicEntryAllocationResult & { cycleId: string; decisionId: string; decidedAt: number };
+export type DynamicEntryAllocationDecision = Omit<DynamicEntryAllocationResult, "allocations"> & {
+    allocations: Array<DynamicEntryAllocation & { reservationId: string }>;
+    cycleId: string; decisionId: string; decidedAt: number;
+};
 type Document = { schema: typeof DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA; intents: DynamicEntryIntent[]; decisions: DynamicEntryAllocationDecision[] };
 
 type AuthoritativeGrossCaps = {
@@ -45,15 +48,24 @@ function assertCandidateCaps(candidates: readonly DynamicEntryIntent[], caps: Au
 }
 
 function sanitizeIntent(input: DynamicEntryCandidate & { cycleId: string }, submittedAt: number): DynamicEntryIntent {
-    const { id, strategy, symbol, side, assetClass, marketFitScore, targetGross, minGross, maxGross, minNotionalUsd, btPrior, correlationPenalty, concentrationPenalty, stalePenalty } = input;
+    const { id, strategy, symbol, side, assetClass, marketFitScore, scoreSource, signalTs, idempotencyKey, targetGross, minGross, maxGross, minNotionalUsd, btPrior, btPriorVersion, correlationPenalty, concentrationPenalty, stalePenalty } = input;
     if (!id.trim() || !strategy.trim() || !symbol.trim() || !input.cycleId.trim() || (side !== "LONG" && side !== "SHORT") || (assetClass !== "CRYPTO" && assetClass !== "STOCK")
         || !Number.isFinite(marketFitScore) || !Number.isFinite(targetGross) || targetGross <= 0 || !Number.isFinite(minGross) || minGross <= 0
         || !Number.isFinite(maxGross) || maxGross < minGross || !Number.isFinite(submittedAt)
         || [minNotionalUsd, correlationPenalty, concentrationPenalty, stalePenalty].some((n) => n !== undefined && (!Number.isFinite(n) || n < 0))) throw new Error("DYNAMIC_ENTRY_INTENT_INVALID");
     if (btPrior && Object.values(btPrior).some((n) => !Number.isFinite(n))) throw new Error("DYNAMIC_ENTRY_INTENT_BT_PRIOR_INVALID");
+    if ((signalTs !== undefined && (!Number.isFinite(signalTs) || signalTs <= 0 || signalTs > submittedAt))
+        || (idempotencyKey !== undefined && !idempotencyKey.trim())
+        || (scoreSource !== undefined && !scoreSource.trim())
+        || (btPrior !== undefined && !btPriorVersion?.trim())
+        || (btPriorVersion !== undefined && (btPrior === undefined || !btPriorVersion.trim()))) throw new Error("DYNAMIC_ENTRY_INTENT_METADATA_INVALID");
     return {
         cycleId: input.cycleId, submittedAt, id, strategy, symbol: symbol.toUpperCase(), side, assetClass,
         marketFitScore, targetGross, minGross, maxGross,
+        ...(scoreSource === undefined ? {} : { scoreSource }),
+        ...(signalTs === undefined ? {} : { signalTs }),
+        ...(idempotencyKey === undefined ? {} : { idempotencyKey }),
+        ...(btPriorVersion === undefined ? {} : { btPriorVersion }),
         ...(minNotionalUsd === undefined ? {} : { minNotionalUsd }),
         ...(btPrior === undefined ? {} : { btPrior: { returnPct: btPrior.returnPct, profitFactor: btPrior.profitFactor, winRatePct: btPrior.winRatePct, maxDrawdownPct: btPrior.maxDrawdownPct, tradeCount: btPrior.tradeCount, observationDays: btPrior.observationDays } }),
         ...(correlationPenalty === undefined ? {} : { correlationPenalty }),
@@ -153,7 +165,9 @@ export class FileDynamicEntryIntentRegistry {
                 }
                 await input.lock.document();
                 const decisionId = createHash("sha256").update(`${input.cycleId}|${allocation.allocations.map((row) => `${row.id}:${row.allocatedGross}`).join("|")}`).digest("hex").slice(0, 24);
-                const decision = { ...allocation, cycleId: input.cycleId, decisionId, decidedAt: input.now };
+                const decision: DynamicEntryAllocationDecision = { ...allocation,
+                    allocations: allocation.allocations.map((row, index) => ({ ...row, reservationId: reservations[index] })),
+                    cycleId: input.cycleId, decisionId, decidedAt: input.now };
                 doc.decisions.push(decision);
                 await write(this.path, doc);
                 return decision;

@@ -18,6 +18,15 @@ test("unknown symbol ownership is rejected",()=>assert.throws(()=>normalizeIdleS
 test("unverified protection is rejected",()=>assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...pos,protectionVerified:false}]} as any,sha),/POSITION_INVALID/));
 test("wrong route or hold contract is rejected",()=>assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...pos,holdHours:24,exitTs:93_600_000}]} as any,sha),/POSITION_INVALID/));
 test("valid protected position survives normalization",()=>assert.equal(normalizeIdleState({...emptyIdleState(sha),positions:[pos]},sha).positions[0].symbol,"TAOUSDT"));
+test("approved partial gross survives pending and protected-position recovery, while subminimum gross fails",()=>{
+ const pending={action:"ENTRY",phase:"submitted",symbol:"TAOUSDT",route:pos.route,clientOrderId:"idle-entry",idempotencyKey:"idle-entry",quantity:1,expectedPrice:100,signalTs:pos.signalTs,decisionTs:pos.entryTs,holdHours:12,createdAt:1,updatedAt:1,reason:"ENTRY",gross:0.3} as const;
+ const state=normalizeIdleState({...emptyIdleState(sha),pending,lastDecision:{decisionTs:pos.entryTs,accepted:true,reason:"APPROVED",finalScore:7,allocatedGross:0.3,scoreSource:"IDLE_COMPLETED_REL24_RET12_V1"}},sha);
+ assert.equal(state.pending?.gross,0.3);
+ assert.equal(state.lastDecision?.scoreSource,"IDLE_COMPLETED_REL24_RET12_V1");
+ assert.equal(normalizeIdleState({...state,pending:null,positions:[{...pos,gross:0.3}]},sha).positions[0].gross,0.3);
+ assert.throws(()=>normalizeIdleState({...state,pending:{...pending,gross:0.05}},sha),/PENDING_INVALID/);
+ assert.throws(()=>normalizeIdleState({...state,pending:null,positions:[{...pos,gross:0.05}]},sha),/POSITION_INVALID/);
+});
 test("DOT trailing protection may move below entry only after the trail is armed",()=>{
  const trailing={...pos,symbol:"DOTUSDT",route:"IDLE_DOT_MOMENTUM_SHORT_BTCREL",holdHours:24,exitTs:93_600_000,gross:0.25,stopPrice:98,trailingStopPrice:98,trailArmed:true,bestConfirmed5mGainPct:0.04,lastConfirmed5mTs:10_800_000};
  assert.equal(normalizeIdleState({...emptyIdleState(sha),positions:[trailing]},sha).positions[0].trailingStopPrice,98);
