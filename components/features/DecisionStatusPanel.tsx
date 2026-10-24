@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Activity, AlertCircle, CheckCircle2, CircleDashed, Clock3, RefreshCw, ServerCog, ShieldCheck } from "lucide-react";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
@@ -9,6 +9,7 @@ import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observabilit
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
 import type { V12V4HpSnapshot } from "@/lib/v12-v4-hp-contract";
 import { applyDecisionStatusFailure, applyDecisionStatusSuccess, DECISION_STATUS_REFRESH_MS, isDecisionRuntimeAvailable } from "@/lib/ui/decision-status-state";
+import { LatestRequestGate } from "@/lib/ui/latest-request";
 
 type DecisionStatusItem = {
   symbol: string;
@@ -404,26 +405,33 @@ export function DecisionStatusPanel() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const requestGate = useRef(new LatestRequestGate()).current;
 
   async function load(force = false) {
+    const request = requestGate.begin();
     setLoading(true);
     try {
-      const response = await fetch(`/api/system/decision-status${force ? "?refresh=1" : ""}`, { cache: "no-store" });
+      const response = await fetch(`/api/system/decision-status${force ? "?refresh=1" : ""}`, { cache: "no-store", signal: request.signal });
       const data = await response.json();
       if (!response.ok || !data?.readOnly) throw new Error(data?.error || "判定データを取得できません。");
+      if (!request.isLatest()) return;
       const next = applyDecisionStatusSuccess(data as Snapshot, data.error || null);
       setSnapshot(next.snapshot);
       setError(next.error);
     } catch (loadError) {
+      if (!request.isLatest()) return;
       const next = applyDecisionStatusFailure({ snapshot, error }, loadError);
       setSnapshot(next.snapshot);
       setError(next.error);
     } finally {
-      setLoading(false);
+      if (request.isLatest()) {
+        requestGate.finish(request);
+        setLoading(false);
+      }
     }
   }
 
-  useEffect(() => { void load(); const timer = window.setInterval(() => void load(true), DECISION_STATUS_REFRESH_MS); return () => window.clearInterval(timer); }, []);
+  useEffect(() => { void load(); const timer = window.setInterval(() => void load(true), DECISION_STATUS_REFRESH_MS); return () => { window.clearInterval(timer); requestGate.cancel(); }; }, [requestGate]);
   if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">判定状況を取得しています…</div>;
   if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "判定データを取得できません。"}</div>;
   const runtimeAvailable = isDecisionRuntimeAvailable(snapshot);

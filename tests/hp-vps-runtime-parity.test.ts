@@ -9,6 +9,7 @@ import { assessRuntimeLineage, type CurrentProductionRuntime } from "../lib/serv
 import { loadDecisionStatus } from "../lib/server/disdex-decision-status";
 import { isHealthyCurrentRuntime, parseProductionRuntimeResponse, productionRuntimeStrategyLabel } from "../lib/ui/production-runtime";
 import { livePortfolioFailureState } from "../lib/ui/live-portfolio-state";
+import { LatestRequestGate } from "../lib/ui/latest-request";
 
 const releaseSha = "a".repeat(40);
 const now = 1_800_000_000_000;
@@ -215,11 +216,45 @@ function healthyRuntime(): CurrentProductionRuntime {
 
 test("runtime response rejects needsReview and invalid SHA instead of exposing a live contract", () => {
   const runtime = healthyRuntime();
-  assert.equal(isHealthyCurrentRuntime(runtime), true);
-  assert.equal(productionRuntimeStrategyLabel(runtime), "V12_RUNTIME / PENGU_RUNTIME / V52_RUNTIME");
+  assert.equal(isHealthyCurrentRuntime(runtime, now), true);
+  assert.equal(productionRuntimeStrategyLabel(runtime, now), "V12_RUNTIME / PENGU_RUNTIME / V52_RUNTIME");
   assert.throws(() => parseProductionRuntimeResponse(true, { ...runtime, needsReview: true }), /manual review/i);
   assert.throws(() => parseProductionRuntimeResponse(true, { ...runtime, releaseSha: "invalid" }), /manual review/i);
   assert.match(productionRuntimeStrategyLabel(null), /未取得|手動確認/);
+});
+
+test("malformed runtime payloads fail closed before consumer formatting", () => {
+  const runtime = healthyRuntime();
+  for (const field of ["caps", "v12", "pengu", "quality102", "v52"] as const) {
+    assert.equal(isHealthyCurrentRuntime({ ...runtime, [field]: undefined }, now), false);
+  }
+  assert.equal(isHealthyCurrentRuntime({ ...runtime, runtimeLineage: { ...runtime.runtimeLineage, units: { ...runtime.runtimeLineage.units, v12: { ...runtime.runtimeLineage.units.v12, updatedAt: 0 } } } }, now), false);
+  assert.equal(isHealthyCurrentRuntime({ ...runtime, runtimeLineage: { ...runtime.runtimeLineage, units: { ...runtime.runtimeLineage.units, v12: { ...runtime.runtimeLineage.units.v12, updatedAt: now - (3 * 60 * 60 * 1000 + 1) } } } }, now), false);
+  assert.equal(isHealthyCurrentRuntime({ ...runtime, runtimeLineage: { ...runtime.runtimeLineage, units: { ...runtime.runtimeLineage.units, v12: { ...runtime.runtimeLineage.units.v12, updatedAt: now + 1 } } } }, now), false);
+  assert.equal(isHealthyCurrentRuntime({ ...runtime, error: "stale" }, now), false);
+  assert.equal(isHealthyCurrentRuntime({ ...runtime, runtimeLineage: { ...runtime.runtimeLineage, units: { ...runtime.runtimeLineage.units, v12: { ...runtime.runtimeLineage.units.v12, error: "stale" } } } }, now), false);
+  assert.throws(() => parseProductionRuntimeResponse(true, { ...runtime, caps: undefined }), /manual review/i);
+  assert.match(productionRuntimeStrategyLabel({ ...runtime, caps: undefined } as unknown as CurrentProductionRuntime), /未取得|手動確認/);
+});
+
+test("latest-request-wins prevents stale decision and portfolio completions", () => {
+  const decisionGate = new LatestRequestGate();
+  const decisionFirst = decisionGate.begin();
+  const decisionLatest = decisionGate.begin();
+  let decisionSnapshot: string | null = "previous-success";
+  if (decisionFirst.isLatest()) decisionSnapshot = "stale-success";
+  if (decisionLatest.isLatest()) decisionSnapshot = null;
+  assert.equal(decisionSnapshot, null);
+
+  const portfolioGate = new LatestRequestGate();
+  const portfolioFirst = portfolioGate.begin();
+  const portfolioLatest = portfolioGate.begin();
+  let portfolioSnapshot: string | null = "previous-aster";
+  if (portfolioFirst.isLatest()) portfolioSnapshot = "stale-success";
+  if (portfolioLatest.isLatest()) portfolioSnapshot = null;
+  assert.equal(portfolioSnapshot, null);
+  assert.equal(decisionFirst.isLatest(), false);
+  assert.equal(portfolioFirst.isLatest(), false);
 });
 
 test("live portfolio failure clears the prior Aster snapshot", () => {
