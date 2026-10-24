@@ -35,6 +35,21 @@ test("source identity and strict caps are immutable", () => {
     assert.equal(STRICT_BT33404708902.totalGrossCap, 3.5);
 });
 
+test("legacy strict intents remain compatible and score metadata honors maxGross", () => {
+    const plan = planStrictPortfolio({
+        equity: 1_000,
+        now: NOW,
+        active: [],
+        intents: [
+            { idempotencyKey: "legacy-v52", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
+            { idempotencyKey: "scored-v12", strategy: "V12", symbol: "ETHUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW, priorityScore: 50, maxGross: 0.2 },
+        ],
+    });
+    assert.equal(plan.status, "planned");
+    assert.equal(plan.accepted.find(({ strategy }) => strategy === "V12")?.gross, 0.2);
+    assert.equal(plan.accepted.find(({ strategy }) => strategy === "V52")?.gross, 0.5);
+});
+
 test("all five simultaneous intents admit base strategies before blocking historical Q102 and preserving causal priority", () => {
     const plan = planStrictPortfolio({
         equity: 1_000,

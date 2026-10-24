@@ -46,6 +46,11 @@ export interface StrictPortfolioIntent {
     requestedGross?: number;
     notionalUsd: number;
     signalTs: number;
+    marketFitScore?: number;
+    btPriorBonus?: number;
+    priorityScore?: number;
+    minGross?: number;
+    maxGross?: number;
 }
 
 export interface MarkToMarketReduction {
@@ -540,6 +545,11 @@ export function planStrictPortfolio(input: {
     const seenIntentTargets = new Set<string>();
     const ordered = [...input.intents].sort((a, b) => {
         const baseRank = (strategy: StrictStrategy) => strategy === "HYPE_LONG" ? 8 : strategy === "ZEC_LONG" ? 9 : strategy === "IDLE_PRIORITY_SHORT" ? 10 : strategy === "FET_RESIDUAL" ? 6 : strategy === "QUALITY102" ? 5 : strategy === "QUALITY102_CAUSAL_V1" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
+        const score = (intent: StrictPortfolioIntent) => intent.priorityScore ?? (intent.marketFitScore === undefined && intent.btPriorBonus === undefined
+            ? undefined
+            : (intent.marketFitScore ?? 0) + (intent.btPriorBonus ?? 0));
+        const scoreA = score(a); const scoreB = score(b);
+        if (scoreA !== undefined || scoreB !== undefined) return (scoreB ?? Number.NEGATIVE_INFINITY) - (scoreA ?? Number.NEGATIVE_INFINITY) || baseRank(a.strategy) - baseRank(b.strategy) || a.signalTs - b.signalTs || a.idempotencyKey.localeCompare(b.idempotencyKey);
         return baseRank(a.strategy) - baseRank(b.strategy) || a.signalTs - b.signalTs || a.idempotencyKey.localeCompare(b.idempotencyKey);
     });
     for (const intent of ordered) {
@@ -555,6 +565,8 @@ export function planStrictPortfolio(input: {
         }
         if (!strategySymbolMatches(intent.strategy, intent.symbol)) { rejected.push({ intent, reason: "UNKNOWN_OR_SLEEVE_MISMATCH" }); continue; }
         if (!intent.idempotencyKey.trim() || !intent.symbol.trim() || (intent.side !== "LONG" && intent.side !== "SHORT") || !Number.isFinite(intent.signalTs) || intent.signalTs <= 0 || intent.signalTs > input.now || !Number.isFinite(intent.gross) || intent.gross <= 0 || !Number.isFinite(intent.notionalUsd) || intent.notionalUsd <= 0) { rejected.push({ intent, reason: "INVALID_INTENT" }); continue; }
+        if ((intent.minGross !== undefined && (!Number.isFinite(intent.minGross) || intent.minGross < 0)) || (intent.maxGross !== undefined && (!Number.isFinite(intent.maxGross) || intent.maxGross < 0)) || (intent.minGross !== undefined && intent.maxGross !== undefined && intent.minGross > intent.maxGross)) { rejected.push({ intent, reason: "INVALID_INTENT_GROSS_BOUNDS" }); continue; }
+        if ([intent.marketFitScore, intent.btPriorBonus, intent.priorityScore].some((score) => score !== undefined && !Number.isFinite(score))) { rejected.push({ intent, reason: "INVALID_INTENT_SCORE" }); continue; }
         const targetKey = `${intent.strategy}|${intent.symbol.toUpperCase()}|${intent.side}`;
         if (seenIntentTargets.has(targetKey)) { rejected.push({ intent, reason: "DUPLICATE_INTENT_TARGET" }); continue; }
         seenIntentTargets.add(targetKey);
@@ -610,8 +622,8 @@ export function planStrictPortfolio(input: {
             ? cryptoEntryCeiling - baseOtherCryptoNotional / workingEquity
             : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap - baseOtherStockNotional / workingEquity;
         const totalResidual = totalEntryCeiling - baseOtherTotalNotional / workingEquity;
-        const targetGross = Math.max(0, Math.min(intent.gross, perStrategyGross, strategyAggregateResidual, classResidual, totalResidual));
-        if (targetGross <= EPSILON) {
+        const targetGross = Math.max(0, Math.min(intent.gross, intent.maxGross ?? Number.POSITIVE_INFINITY, perStrategyGross, strategyAggregateResidual, classResidual, totalResidual));
+        if (targetGross <= EPSILON || (intent.minGross !== undefined && targetGross + EPSILON < intent.minGross)) {
             const reason = intent.strategy === "QUALITY102_CAUSAL_V1"
                 ? classResidual <= EPSILON ? "CRYPTO_GROSS_CAP" : totalResidual <= EPSILON ? "TOTAL_GROSS_CAP" : "CAPACITY_BLOCKED"
                 : "CAPACITY_BLOCKED";
@@ -679,12 +691,13 @@ export function planStrictPortfolio(input: {
                     : Number.POSITIVE_INFINITY;
         const finalGross = Math.max(0, Math.min(
             intent.gross,
+            intent.maxGross ?? Number.POSITIVE_INFINITY,
             perStrategyGross,
             finalStrategyAggregateResidual,
             finalClassCap - finalClassOther / workingEquity,
             totalEntryCeiling - baseOtherTotalNotional / workingEquity,
         ));
-        if (finalGross <= EPSILON) {
+        if (finalGross <= EPSILON || (intent.minGross !== undefined && finalGross + EPSILON < intent.minGross)) {
             rejected.push({ intent, reason: "CAPACITY_BLOCKED_AFTER_MTM" });
             continue;
         }

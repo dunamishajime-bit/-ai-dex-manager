@@ -157,6 +157,37 @@ test("base strategies retain priority when causal-v1 is simultaneous", () => {
     assert.equal(simultaneous.accepted.find(({ strategy }) => strategy === "QUALITY102_CAUSAL_V1")?.gross, 0.5);
 });
 
+test("explicit priority score sorts intents while legacy callers retain strategy ranking", () => {
+    const scored = plan([], [
+        { ...intent("V12", 0.5), priorityScore: 10 },
+        { ...intent("V52", 0.5), priorityScore: 20 },
+    ]);
+    assert.equal(scored.accepted[0]?.strategy, "V52");
+
+    const legacy = plan([], [intent("V12", 0.5), intent("V52", 0.5)]);
+    assert.equal(legacy.accepted[0]?.strategy, "V52");
+});
+
+test("score metadata enforces per-intent gross bounds", () => {
+    const result = plan([], [{ ...intent("V12", 0.5), minGross: 0.6, maxGross: 0.4 }]);
+    assert.equal(result.accepted.length, 0);
+    assert.equal(result.rejected[0]?.reason, "INVALID_INTENT_GROSS_BOUNDS");
+});
+
+test("PENGU score tie-break follows market-fit scoring", () => {
+    const marketFitWins = plan([], [
+        { ...intent("PENGU_DUAL_LS_V2", 0.5), priorityScore: 8 },
+        { ...intent("V12", 0.5), priorityScore: 9 },
+    ]);
+    assert.equal(marketFitWins.accepted[0]?.strategy, "V12");
+
+    const tieBreak = plan([], [
+        { ...intent("V12", 0.5), priorityScore: 9 },
+        { ...intent("PENGU_DUAL_LS_V2", 0.5), priorityScore: 9 },
+    ]);
+    assert.equal(tieBreak.accepted[0]?.strategy, "PENGU_DUAL_LS_V2");
+});
+
 test("causal-v1 owns one planner slot", () => {
     const occupied = plan([
         position({ id: "q102v1", strategy: "QUALITY102_CAUSAL_V1", symbol: "SOLUSDT", quantity: 1, entryPrice: 100, markPrice: 100 }),
