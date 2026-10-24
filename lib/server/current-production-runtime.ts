@@ -5,6 +5,7 @@ const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha"
 const CURRENT_RELEASE_ROOT = "/home/deploy/disdex-trading/current";
 const RUNTIME_ENV_ROOT = "/etc/disdex/current-runtime";
 const SHA_RE = /^[0-9a-f]{40}$/i;
+export const RUNNER_FRESHNESS_MS = 3 * 60 * 60 * 1000;
 const LEGACY_V12_HEARTBEAT_PATH = "/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json";
 const V12_V4_HEARTBEAT_PATH = "/var/lib/disdex/v12-v4/heartbeat.json";
 const HEARTBEAT_PATHS = Object.freeze({
@@ -19,7 +20,10 @@ const HEARTBEAT_PATHS = Object.freeze({
 type EnvMap = Record<string, string>;
 
 export type CurrentProductionRuntime = {
-  ok: true;
+  ok: boolean;
+  status: "LIVE" | "UNAVAILABLE";
+  needsReview: boolean;
+  error?: string;
   readOnly: true;
   tradingMutation: 0;
   checkedAt: string;
@@ -117,6 +121,37 @@ export type CurrentProductionRuntime = {
   };
 };
 
+export type RuntimeLineageUnit = CurrentProductionRuntime["runtimeLineage"]["units"][keyof CurrentProductionRuntime["runtimeLineage"]["units"]];
+
+export function isValidRuntimeSha(value: unknown): value is string {
+  return typeof value === "string" && SHA_RE.test(value.trim());
+}
+
+export function isFreshRuntimeTimestamp(value: unknown, now = Date.now(), maxAgeMs = RUNNER_FRESHNESS_MS): value is number {
+  const timestamp = Number(value);
+  return Number.isFinite(timestamp) && timestamp <= now && now - timestamp <= maxAgeMs;
+}
+
+export function isRuntimeLineageUnitHealthy(unit: Pick<RuntimeLineageUnit, "runtimeSha" | "matchesCurrent" | "updatedAt" | "error"> | undefined, now = Date.now()): boolean {
+  return Boolean(unit && !unit.error && unit.matchesCurrent && isValidRuntimeSha(unit.runtimeSha) && isFreshRuntimeTimestamp(unit.updatedAt, now));
+}
+
+export function assessRuntimeLineage(runtimeLineage: CurrentProductionRuntime["runtimeLineage"], now = Date.now()) {
+  const errors: string[] = [];
+  for (const [unitName, unit] of Object.entries(runtimeLineage.units)) {
+    if (unit.error) errors.push(`${unitName}:HEARTBEAT_UNAVAILABLE`);
+    if (!unit.matchesCurrent || !isValidRuntimeSha(unit.runtimeSha)) errors.push(`${unitName}:RUNTIME_SHA_MISMATCH`);
+    if (unit.updatedAt === undefined || !Number.isFinite(Number(unit.updatedAt))) errors.push(`${unitName}:HEARTBEAT_TIMESTAMP_MISSING`);
+    else if (Number(unit.updatedAt) > now) errors.push(`${unitName}:HEARTBEAT_TIMESTAMP_FUTURE`);
+    else if (now - Number(unit.updatedAt) > RUNNER_FRESHNESS_MS) errors.push(`${unitName}:HEARTBEAT_STALE`);
+  }
+  return { synchronized: errors.length === 0, needsReview: errors.length > 0, errors };
+}
+
+export function isCurrentProductionRuntimeHealthy(runtime: CurrentProductionRuntime | null | undefined): boolean {
+  return Boolean(runtime?.ok === true && runtime.status === "LIVE" && runtime.runtimeLineage.synchronized && !runtime.needsReview);
+}
+
 function parseEnv(text: string): EnvMap {
   const result: EnvMap = {};
   for (const raw of text.split(/\r?\n/)) {
@@ -195,7 +230,7 @@ async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<Curr
             ? Number(raw.updatedAt)
             : undefined,
         healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
-        matchesCurrent: runtimeSha === releaseSha && expectedSha === releaseSha,
+        matchesCurrent: runtimeSha === releaseSha && (expectedSha === undefined || expectedSha === releaseSha),
       };
     } catch (error) {
       units[unit] = {
@@ -227,7 +262,9 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
-  const runtimeLineage = await loadRuntimeLineage(releaseSha, env);
+  const loadedRuntimeLineage = await loadRuntimeLineage(releaseSha, env);
+  const lineageHealth = assessRuntimeLineage(loadedRuntimeLineage, Date.parse(checkedAt));
+  const runtimeLineage = { ...loadedRuntimeLineage, synchronized: lineageHealth.synchronized };
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
     ? v52Raw.windowsNy.map((value) => String(value)).filter(Boolean)
@@ -238,7 +275,10 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const v12PerPositionGross = extractObjectNumber(q102Source, "v12PerPositionGrossCap");
 
   return {
-    ok: true,
+    ok: lineageHealth.synchronized,
+    status: lineageHealth.synchronized ? "LIVE" : "UNAVAILABLE",
+    needsReview: lineageHealth.needsReview,
+    ...(lineageHealth.errors.length ? { error: `CURRENT_RUNTIME_LINEAGE_UNAVAILABLE:${lineageHealth.errors.join(",")}` } : {}),
     readOnly: true,
     tradingMutation: 0,
     checkedAt,

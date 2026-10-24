@@ -5,9 +5,38 @@ import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
 import { loadQuality102RuntimeObservability } from "@/lib/server/quality102-runtime-observability";
 import { loadV12V4HpObservability } from "@/lib/server/v12-v4-hp-observability";
+import { isFreshRuntimeTimestamp, isRuntimeLineageUnitHealthy, RUNNER_FRESHNESS_MS } from "@/lib/server/current-production-runtime";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "private, no-store, max-age=0" };
+
+export type V12RuntimeFreshnessInput = {
+  runtime: {
+    ok: boolean;
+    status?: "LIVE" | "UNAVAILABLE";
+    releaseSha?: string;
+    runtimeLineage?: { synchronized: boolean; units?: { v12?: { runtimeSha?: string; matchesCurrent: boolean; updatedAt?: number; error?: string } } };
+  } | null;
+  runnerState?: { releaseSha?: string; updatedAt?: number; mode?: string; killSwitch?: { active?: boolean } } | null;
+  now?: number;
+};
+
+export function isV12RuntimeFresh({ runtime, runnerState, now = Date.now() }: V12RuntimeFreshnessInput): boolean {
+  const releaseSha = runtime?.releaseSha;
+  const lineageUnit = runtime?.runtimeLineage?.units?.v12;
+  return Boolean(
+    runtime?.ok === true
+    && runtime.status === "LIVE"
+    && runtime.runtimeLineage?.synchronized === true
+    && releaseSha
+    && runnerState?.releaseSha === releaseSha
+    && isRuntimeLineageUnitHealthy(lineageUnit, now)
+    && isFreshRuntimeTimestamp(runnerState.updatedAt, now, RUNNER_FRESHNESS_MS)
+    && runnerState.mode?.toLowerCase() === "live"
+    && runnerState.killSwitch?.active !== true,
+  );
+}
+
 export async function GET(req: NextRequest) {
   if (req.cookies.get("disdex_auth")?.value !== "1") return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, error: "ログインが必要です。" }, { status: 401, headers });
   try {
@@ -46,12 +75,12 @@ export async function GET(req: NextRequest) {
       loadV12V4HpObservability(),
     ]);
     const v12UpdatedAt = v12Observability.runnerState?.updatedAt;
-    const v12Fresh = v12Observability.wiring.runnerStateConfigured && v12UpdatedAt !== undefined && Date.now() - v12UpdatedAt <= 3 * 60 * 60 * 1000 && v12Observability.runnerState?.mode?.toLowerCase() === "live" && v12Observability.runnerState.killSwitch?.active !== true;
-    const v12Status = !v12Observability.wiring.runnerStateConfigured ? "UNAVAILABLE" : v12Fresh ? "LIVE" : "STALE";
+    const v12Fresh = v12Observability.wiring.runnerStateConfigured && isV12RuntimeFresh({ runtime: snapshot.productionRuntime ?? null, runnerState: v12Observability.runnerState, now: Date.now() });
+    const v12Status = !snapshot.productionRuntime || !v12Observability.wiring.runnerStateConfigured ? "UNAVAILABLE" : v12Fresh ? "LIVE" : "STALE";
     const runtime = {
       ...snapshot.runtime,
       units: snapshot.runtime.units.map((unit) => {
-        if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, updatedAt: v12UpdatedAt, reason: v12Fresh ? "V12 runner state更新済み、mode=LIVE、Kill Switch inactiveを確認しました。" : v12Observability.errors[0] || "V12 runner stateが未接続・停止・古いためLIVE確認できません。" };
+        if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, updatedAt: v12UpdatedAt, reason: v12Fresh ? "V12 runner state更新済み、mode=LIVE、Kill Switch inactive、current runtime SHA一致を確認しました。" : snapshot.productionRuntime ? v12Observability.errors[0] || "V12 runner stateが未接続・停止・古い、またはruntime SHA/lineageが不一致のためLIVE確認できません。" : "Current production runtime lineage unavailable; V12は要確認です。" };
         if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
         if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, status: quality102Runtime.status, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };
         if (!snapshot.v52.marketOpen) return { ...unit, status: "UNCONFIRMED" as const, updatedAt: v52Top2Observability.updatedAt, reason: "米国株式市場の対象時間外です。V52は市場時間外のため意図的停止で、新規判定・発注は行いません。" };

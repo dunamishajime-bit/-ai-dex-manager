@@ -7,10 +7,12 @@ import { selectTradeHistorySource } from "@/lib/server/trade-history-source";
 import { loadV12V4HpObservability } from "@/lib/server/v12-v4-hp-observability";
 
 export const dynamic = "force-dynamic";
+const headers = { "Cache-Control": "private, no-store, max-age=0" };
 
 export async function GET(req: NextRequest) {
-  const localEntries = await loadTradeHistoryEntries();
   const authenticated = req.cookies.get("disdex_auth")?.value === "1";
+  if (!authenticated) return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, error: "Authentication required." }, { status: 401, headers });
+  const localEntries = await loadTradeHistoryEntries();
   const [aster, runtime, v12V4] = await Promise.all([
     authenticated ? loadAsterTradeHistory() : Promise.resolve({ entries: [], source: "unavailable" as const, refreshedAt: new Date().toISOString(), error: "Authentication required for Aster account history." }),
     loadCurrentProductionRuntime().catch(() => null),
@@ -50,5 +52,5 @@ export async function GET(req: NextRequest) {
       v12V4Status: v12V4?.displayStatus ?? "UNAVAILABLE",
       checkedAt: runtime?.checkedAt ?? (v12V4 ? new Date(v12V4.timestamps.checkedAt).toISOString() : null),
     },
-  }, { headers: { "Cache-Control": "private, no-store, max-age=0" } });
+  }, { headers });
 }

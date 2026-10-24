@@ -10,5 +10,6 @@ test("判定状況のruntime一覧にFET BRK48 Residualを含める", () => {
   assert.ok(fet, "FET runner must be visible in the HP runtime summary");
   assert.match(fet.label, /FET/);
   assert.match(fet.venue, /Aster/);
-  assert.match(fet.entryPolicy, /BRK48/);
+  assert.equal(fet.status, "UNAVAILABLE");
+  assert.match(fet.entryPolicy, /unavailable|manual review/i);
 });

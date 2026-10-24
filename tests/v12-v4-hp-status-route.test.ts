@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 
 import { createV12V4HpStatusGet } from "../lib/server/v12-v4-hp-status-handler";
 import type { V12V4HpSnapshot } from "../lib/v12-v4-hp-contract";
+import { isV12RuntimeFresh } from "../app/api/system/decision-status/route";
 
 const snapshot = {
   schema: "v12-v4-hp-status/v1",
@@ -52,4 +53,24 @@ test("loader exception returns 503 and remains fail closed", async () => {
   assert.equal(body.readOnly, true);
   assert.equal(body.tradingMutation, 0);
   assert.equal(body.error, "V4_HP_STATUS_UNAVAILABLE");
+});
+
+test("legacy V12 cannot become LIVE without a current matching runtime SHA", () => {
+  const sha = "a".repeat(40);
+  const now = 1_800_000_000_000;
+  const runtime = {
+    ok: true,
+    status: "LIVE" as const,
+    releaseSha: sha,
+    runtimeLineage: {
+      synchronized: true,
+      units: { v12: { runtimeSha: sha, matchesCurrent: true, updatedAt: now } },
+    },
+  };
+  const base = { runtime, runnerState: { releaseSha: sha, updatedAt: now, mode: "LIVE", killSwitch: { active: false } }, now };
+  assert.equal(isV12RuntimeFresh(base), true);
+  assert.equal(isV12RuntimeFresh({ ...base, runnerState: { ...base.runnerState, releaseSha: undefined } }), false);
+  assert.equal(isV12RuntimeFresh({ ...base, runnerState: { ...base.runnerState, releaseSha: "b".repeat(40) } }), false);
+  assert.equal(isV12RuntimeFresh({ ...base, runtime: { ...runtime, runtimeLineage: { ...runtime.runtimeLineage, synchronized: false } } }), false);
+  assert.equal(isV12RuntimeFresh({ ...base, runnerState: { ...base.runnerState, updatedAt: now + 1 } }), false);
 });
