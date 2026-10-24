@@ -408,6 +408,9 @@ function V52Top2Detail({ details, marketOpen, production }: { details?: V52Top2O
   if (!details) return null;
   const marketClosed = marketOpen === false;
   const displayStatus = marketClosed ? "UNCONFIRMED" : details.status;
+  const amznYahoo = details.amznShortYahooGate;
+  const amznYahooStatus = amznYahoo?.status === "PASS" ? "PASS（+1.0%以下）" : amznYahoo?.status === "BLOCK" ? "BLOCK（+1.0%超）" : amznYahoo ? "DATA_UNAVAILABLE（Fail Closed）" : "未取得";
+  const amznYahooStatusClass = amznYahoo?.status === "PASS" ? "text-emerald-100" : amznYahoo?.status === "BLOCK" ? "text-rose-200" : "text-amber-100";
   const telemetryRows: Array<{ window: string; kind: string; row: V52Top2DecisionRow }> = details.windows.flatMap((window) => [
     ...window.entries.map((row) => ({ window: window.window, kind: "結果", row })),
     ...window.rejections.map((row) => ({ window: window.window, kind: "拒否", row })),
@@ -429,6 +432,23 @@ function V52Top2Detail({ details, marketOpen, production }: { details?: V52Top2O
         <div className="text-sm font-bold text-gold-100">V52 Top2の確定仕様</div>
         {v52Contract && caps ? <p className="mt-2 text-xs leading-6 text-white/75">NY {v52Contract.windowsNy.join(" / ")} / Slot {caps.v52V50Gross.toFixed(2)}x / Stock {caps.stockGross.toFixed(2)}x / Total {caps.totalGross.toFixed(2)}x.</p> : <p className="mt-2 text-xs text-amber-100">Production runtime unavailable; no static contract fallback.</p>}
         {v52Contract ? <p className="mt-1 text-xs leading-6 text-white/60">Basis &gt;={bps(v52Contract.minimumEntryBasisBps)} / Convergence {bps(v52Contract.convergenceBps)} / Stop {v52Contract.basisStopMultiple.toFixed(2)}x / Net Edge &gt;={bps(v52Contract.minimumNetEdgeBps)} / Max Cost {bps(v52Contract.maximumRoundTripCostBps)} / Spread {bps(v52Contract.maximumSpreadBps)} / Hold &lt;={v52Contract.maximumHoldingHours}h.</p> : null}
+      </div>
+      <div className="mt-4 rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4">
+        <div className="text-sm font-bold text-cyan-100">AMZN SHORT / Yahoo 前NYSE営業日比 Gate</div>
+        <p className="mt-1 text-xs leading-5 text-white/60">V52のAMZN SHORT新規入口だけに適用。既存建玉・LONG・他銘柄・保護STOPは対象外です。</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["判定", amznYahooStatus],
+            ["前NYSE終値", number(amznYahoo?.previousNySessionLastClose, 4)],
+            ["最新確定Yahoo価格", number(amznYahoo?.latestConfirmedYahooReferencePrice, 4)],
+            ["前日比", amznYahoo?.returnSincePreviousNySessionClosePct === undefined ? "—" : `${number(amznYahoo.returnSincePreviousNySessionClosePct, 6)}%`],
+            ["前NYSE日", amznYahoo?.previousNySessionDate || "—"],
+            ["判定時刻", time(amznYahoo?.decisionTs)],
+            ["最新足の確定時刻", time(amznYahoo?.latestBarCompletedTs)],
+            ["理由", amznYahoo?.reason || "—"],
+          ].map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">{label}</div><div className={`mt-1 break-words text-sm font-semibold ${label === "判定" ? amznYahooStatusClass : "text-white"}`}>{value}</div></div>)}
+        </div>
+        <p className="mt-3 text-xs leading-5 text-white/55">参照足：{time(amznYahoo?.latestBarStartTs)} 開始 / {time(amznYahoo?.latestBarCompletedTs)} 確定。BLOCKコード：AMZN_SHORT_YAHOO_PREV_CLOSE_GT_1PCT。データ欠落・期限切れ・取得不能時はAMZN SHORTだけをFail Closedします。</p>
       </div>
       <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-xs leading-5 text-white/70">V52 runner state更新：{time(details.updatedAt)} / LIVE判定理由：{details.reason || "未取得"} / reference={details.referenceStatus || "未取得"} / reference health={details.referenceHealth ? (details.referenceHealth.ready ? "ready" : "blocked / " + details.referenceHealth.reason) : "未接続"} / orders={details.referenceOrdersAllowed === true ? "許可条件内" : "Fail Closed"}。キー未設定・state stale・reference品質未達のいずれでも実注文へ進みません。</div>
       {details.telemetryState !== "CURRENT_DAY" ? <div className="mt-4 rounded-2xl border border-amber-400/25 bg-amber-500/10 p-4 text-sm leading-6 text-amber-100">{details.telemetryState === "STALE" ? "STALE / 発注不可：V52 daily diagnosticsが当日NY日付へ更新されていません。前日のGate拒否を現在の理由として表示していません。" : "Runner telemetry未取得：当日の判定stateをまだ取得できません。"}</div> : !hasTelemetry ? <div className="mt-4 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-4 text-sm leading-6 text-emerald-100">本日判定済み / 条件適合候補なし：現在NY day {details.currentNyDay} のstateはfreshですが、条件を満たすV50候補はありません。発注は行いません。</div> : <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20"><div className="border-b border-white/10 px-3 py-2 text-sm font-bold text-white">直近Top2 telemetry</div><table className="min-w-[1250px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">窓</th><th className="px-3 py-2">種別</th><th className="px-3 py-2">Rank /候補</th><th className="px-3 py-2">要求/配分</th><th className="px-3 py-2">空き/Global</th><th className="px-3 py-2">Rank2</th><th className="px-3 py-2">送信</th><th className="px-3 py-2">結果/阻止理由</th></tr></thead><tbody>{telemetryRows.map(({ window, kind, row }, index) => <tr key={`${window}-${kind}-${row.symbol || "none"}-${index}`} className="border-t border-white/5"><td className="px-3 py-2 text-white/75">{window} NY</td><td className={`px-3 py-2 font-semibold ${kind === "拒否" ? "text-rose-200" : "text-white"}`}>{kind}</td><td className="px-3 py-2 text-white">R{row.candidateRank ?? "—"} / {row.symbol || "—"}<span className="ml-1 text-white/45">(qualified {row.qualifiedRank ?? "—"})</span></td><td className="px-3 py-2 text-white/75">{gross(row.requestedGross)} → {gross(row.allocatedGross)}</td><td className="px-3 py-2 text-white/75">{gross(row.availableGrossBeforeEntry)} / {gross(row.globalGrossBeforeReservation)} → {gross(row.globalGrossAfterReservation)}</td><td className="px-3 py-2 text-white/75">{row.rank2Accepted === true ? "accepted" : row.rank2RejectedReason || "—"}</td><td className="px-3 py-2 text-white/75">{row.orderSendAttempted === true ? "attempted" : "なし"}</td><td className="px-3 py-2 text-rose-200">{row.orderResult || row.orderBlockedReason || row.rank2RejectedReason || "—"}</td></tr>)}</tbody></table></div>}

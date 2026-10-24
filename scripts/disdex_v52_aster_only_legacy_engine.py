@@ -26,6 +26,7 @@ from disdex_strict_portfolio_planner import (
 from disdex_trade_fill_notification import enqueue_trade_fill_notification
 from disdex_us_equity_calendar import regular_us_equity_session
 from disdex_aster_rate_budget_policy import classify_aster_rate_budget_failure, next_aster_rate_budget_retry_ms
+from v52_amzn_yahoo_gate import fetch_yahoo_h1_bars, evaluate_amzn_short_yahoo_gate
 
 base = legacy.base
 
@@ -191,6 +192,11 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self._rate_budget_defer_attempt = 0
         self._rate_budget_defer_until_ms = 0
         self._last_kill_flatten_key: Optional[str] = None
+        # Yahoo is an AMZN-only reference source.  Cache raw confirmed H1
+        # rows, not a decision, so each candidate is evaluated against its
+        # own decision timestamp without issuing one request per 250ms tick.
+        self._amzn_yahoo_h1_bars_cache: list[dict] = []
+        self._amzn_yahoo_h1_bars_cached_at_ms = 0
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
 
@@ -450,6 +456,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 "v50Attempted": {},
                 "v50CompletedTrades": 0,
                 "v50DailyEntriesDay": ny_day,
+                "amznShortYahooGate": None,
                 "v52GateDiagnostics": empty_v52_gate_diagnostics(ny_day),
                 "v50Top2Telemetry": {
                     "schemaVersion": 1,
@@ -895,6 +902,40 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.save()
         self.log("v50-signal-recorded", window=window, basis=signals[window])
 
+    def _amzn_short_yahoo_gate(self, decision_ms: int) -> dict:
+        """Evaluate the AMZN SHORT Yahoo gate without affecting other paths."""
+
+        cache_ttl_ms = max(15_000, base.int_env("DISDEX_V52_AMZN_YAHOO_CACHE_MS", 60_000))
+        if (
+            self._amzn_yahoo_h1_bars_cached_at_ms <= 0
+            or decision_ms - self._amzn_yahoo_h1_bars_cached_at_ms >= cache_ttl_ms
+        ):
+            try:
+                self._amzn_yahoo_h1_bars_cache = fetch_yahoo_h1_bars(
+                    decision_ms=decision_ms,
+                    timeout_seconds=max(1.0, base.float_env("DISDEX_V52_AMZN_YAHOO_TIMEOUT_SECONDS", 5.0)),
+                )
+            except Exception as error:
+                self._amzn_yahoo_h1_bars_cache = []
+                self._amzn_yahoo_h1_bars_cached_at_ms = decision_ms
+                gate = evaluate_amzn_short_yahoo_gate(decision_ms=decision_ms, bars=[])
+                gate["sourceError"] = type(error).__name__
+            else:
+                self._amzn_yahoo_h1_bars_cached_at_ms = decision_ms
+                gate = evaluate_amzn_short_yahoo_gate(
+                    decision_ms=decision_ms,
+                    bars=self._amzn_yahoo_h1_bars_cache,
+                )
+        else:
+            gate = evaluate_amzn_short_yahoo_gate(
+                decision_ms=decision_ms,
+                bars=self._amzn_yahoo_h1_bars_cache,
+            )
+        gate["cacheFetchedAtTs"] = self._amzn_yahoo_h1_bars_cached_at_ms
+        gate["cacheTtlMs"] = cache_ttl_ms
+        self.state["amznShortYahooGate"] = gate
+        return gate
+
     def v50_candidate(self, window: str, rows: dict, notional: float) -> Tuple[Optional[dict], Dict[str, List[str]]]:
         signal = (self.state.get("v50SignalBasis") or {}).get(window) or {}
         eligible: List[dict] = []
@@ -930,6 +971,14 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             if calculated_net_edge < V50_MIN_NET_EDGE_BPS: reasons.append("NET_EDGE_BELOW_7_5")
             if aster.depth_usd(exit_action) < 2.0 * notional: reasons.append("DEPTH_BELOW_2X")
             if aster.spread_bps > V50_MAX_SPREAD_BPS: reasons.append("SPREAD_OVER_20")
+            amzn_yahoo_gate = None
+            if str(symbol).upper() == "AMZN" and side == "SELL":
+                # This is intentionally scoped to new AMZN SHORT admission.
+                # Position management, AMZN LONG, and every other symbol do
+                # not consult Yahoo and cannot be blocked by its availability.
+                amzn_yahoo_gate = self._amzn_short_yahoo_gate(now)
+                if amzn_yahoo_gate.get("status") != "PASS":
+                    reasons.append(str(amzn_yahoo_gate.get("reason") or "AMZN_SHORT_YAHOO_REFERENCE_DATA_UNAVAILABLE"))
             detail = detail if isinstance(detail, dict) else {}
             accepted = not reasons
             telemetry = {
@@ -961,6 +1010,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 "totalGrossBeforeReservation": total_gross,
                 "totalGrossAfterReservation": total_gross + (requested_gross if accepted else 0.0),
             }
+            if amzn_yahoo_gate is not None:
+                telemetry["amznShortYahooGate"] = amzn_yahoo_gate
             append_v52_diagnostic(self.state, ny_day=ny_day, row=telemetry)
             self.log("v52-cost-telemetry", **telemetry)
             rejections[symbol] = reasons
@@ -1353,6 +1404,25 @@ def self_test() -> None:
     assert V50_MIN_NET_EDGE_BPS == 7.5
     assert V50_MAX_ROUND_TRIP_COST_BPS == 60.0
     assert V50_MAX_SPREAD_BPS == 20.0
+    def _ms(value: str) -> int:
+        return int(dt.datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp() * 1000)
+    exact_gate = evaluate_amzn_short_yahoo_gate(
+        decision_ms=_ms("2026-10-19T16:30:00Z"),
+        bars=[
+            {"start_ms": _ms("2026-10-16T13:30:00Z"), "close": 100.0},
+            {"start_ms": _ms("2026-10-19T15:30:00Z"), "close": 101.0},
+        ],
+    )
+    assert exact_gate["status"] == "PASS"
+    strict_gate = evaluate_amzn_short_yahoo_gate(
+        decision_ms=_ms("2026-10-19T16:30:00Z"),
+        bars=[
+            {"start_ms": _ms("2026-10-16T13:30:00Z"), "close": 100.0},
+            {"start_ms": _ms("2026-10-19T15:30:00Z"), "close": 101.000001},
+        ],
+    )
+    assert strict_gate["status"] == "BLOCK"
+    assert strict_gate["reason"] == "AMZN_SHORT_YAHOO_PREV_CLOSE_GT_1PCT"
     engine = object.__new__(V52AsterOnlyEngine)
     engine.live = True
     engine.crypto_gross_cap = 3.0; engine.stock_gross_cap = 1.5; engine.portfolio_gross_cap = 3.5
