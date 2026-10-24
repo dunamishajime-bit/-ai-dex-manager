@@ -1,0 +1,408 @@
+{
+  "status": "RESEARCH_ONLY_RENDER_4427_SELECTIVE_B30_NATIVE8_ACCOUNTING_VERIFIED",
+  "periodStart": "2025-08-10",
+  "periodEnd": "2026-08-10",
+  "initialCapitalJpy": 10000,
+  "monthlyContributionJpy": 0,
+  "newRenderEntryCoverage": "2026-01-08 through 2026-08-09 only, since Aster verified RENDER H1 mark begins 2026-01-06",
+  "whyNot2025RENDER": "H1 verified mark tape lacks RENDER before 2026-01-06; Fail Closed remained enforced; no interpolated or invented mark bars",
+  "baselineCase": "RENDER_TWO_REGIME_PARITY_BASELINE",
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 284418780.7271706,
+      "portfolioPF": 4.727629118463831,
+      "ddPct": -14.514985270751623,
+      "closedTrades": 1285,
+      "byStrategy": {
+        "V12": 835,
+        "Q102": 183,
+        "PENGU": 68,
+        "IDLE": 68,
+        "RESIDUAL": 19,
+        "V52": 87,
+        "HYPE_LONG": 17,
+        "FET": 8
+      },
+      "ledgerSha256": "8f5bcca9aa591b092e333890085244b9862ce9bfb9801356d41ff4e08706af29",
+      "RENDER_Existing": 24
+    },
+    "30": {
+      "finalEquityJpy": 173611665.16277647,
+      "portfolioPF": 3.839966790525148,
+      "ddPct": -15.014723812726594,
+      "closedTrades": 1284,
+      "byStrategy": {
+        "V12": 834,
+        "Q102": 183,
+        "PENGU": 68,
+        "IDLE": 70,
+        "RESIDUAL": 19,
+        "V52": 86,
+        "HYPE_LONG": 16,
+        "FET": 8
+      },
+      "ledgerSha256": "1ff713d59c903de3f277eba2258529504980dce516fef62105f6dfee8d46d57b",
+      "RENDER_Existing": 24
+    }
+  },
+  "cases": {
+    "RENDER_4427_SELECTIVE_B_30MIN_ASOF_RANGE_NATIVE8": {
+      "10": {
+        "finalEquityJpy": 288585619.68935883,
+        "portfolioPF": 4.740415298020696,
+        "maxMtmDdPct": -14.514985270751623,
+        "closedTrades": 1291,
+        "byStrategy": {
+          "V12": 835,
+          "Q102": 183,
+          "PENGU": 68,
+          "IDLE": 74,
+          "RESIDUAL": 19,
+          "V52": 87,
+          "HYPE_LONG": 17,
+          "FET": 8
+        },
+        "deltaEquityJpy": 4166838.96219,
+        "deltaDdPctPoints": 0.0,
+        "deltaTrades": 6,
+        "deltaPF": 0.012786,
+        "modelLedgerSha256": "23deb2980bbb004b09fbf17b8f2f2f2772b86a9e217d1f4a7aa793b6862e8851",
+        "threeReplayEconomicsEqual": true,
+        "economicLedgerSha256": "a08f24d7dfea557584939b51c3a1be98e3117f9dcea025bb7d4d7dd2505ba6a4",
+        "rawByteLedgersEqual": false,
+        "strategyReallocationCounts": {
+          "FET": 0,
+          "HYPE_LONG": 0,
+          "IDLE": 6,
+          "PENGU": 0,
+          "Q102": 0,
+          "RESIDUAL": 0,
+          "V12": 0,
+          "V52": 0
+        },
+        "newResearchTradesCount": 9,
+        "newResearchTradesByRoute": {
+          "IDLE_RENDER_4427_BTC_TRAP_SHORT": 6,
+          "IDLE_RENDER_4427_BEAR_OI_SHORT": 3
+        },
+        "newResearchMaxGross": 0.24999996,
+        "nativeOtherRoutesRemovedByConflict": {
+          "IDLE": 3
+        },
+        "nativeOtherRoutesAdded": {},
+        "nativeCandidateDecisions": [
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 3
+          },
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 8
+          },
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 4
+          },
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 2
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 14
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FULL_1X_UNAVAILABLE",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_FAILED_RETEST_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_FAILED_RETEST_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          }
+        ],
+        "tradeDetails": [
+          {
+            "utc": "2026-01-14T17:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249978,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 3161.76
+          },
+          {
+            "utc": "2026-01-23T18:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_TIME",
+            "netModeledJpy": 12209.27
+          },
+          {
+            "utc": "2026-03-04T10:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 30624.26
+          },
+          {
+            "utc": "2026-03-13T08:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 54149.01
+          },
+          {
+            "utc": "2026-03-18T19:00",
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_TAKE",
+            "netModeledJpy": 366311.59
+          },
+          {
+            "utc": "2026-04-11T19:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_TAKE",
+            "netModeledJpy": 627170.08
+          },
+          {
+            "utc": "2026-05-01T04:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_TIME",
+            "netModeledJpy": -229429.06
+          },
+          {
+            "utc": "2026-06-08T09:00",
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 378726.33
+          },
+          {
+            "utc": "2026-06-18T03:15",
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 480238.75
+          }
+        ]
+      },
+      "30": {
+        "finalEquityJpy": 174457786.10156083,
+        "portfolioPF": 3.825937230663717,
+        "maxMtmDdPct": -15.014723812726594,
+        "closedTrades": 1290,
+        "byStrategy": {
+          "V12": 834,
+          "Q102": 183,
+          "PENGU": 68,
+          "IDLE": 76,
+          "RESIDUAL": 19,
+          "V52": 86,
+          "HYPE_LONG": 16,
+          "FET": 8
+        },
+        "deltaEquityJpy": 846120.93878,
+        "deltaDdPctPoints": 0.0,
+        "deltaTrades": 6,
+        "deltaPF": -0.01403,
+        "modelLedgerSha256": "d717d62cb167ada6e9745ebb3cfca3bd8aaa38e49101c4f7f9bbf8eed6215f68",
+        "threeReplayEconomicsEqual": true,
+        "economicLedgerSha256": "9efc41e9a945dc7f3d7138c463c56d6c39f2a889aa7e8439fb6cf6ccd88e91f3",
+        "rawByteLedgersEqual": false,
+        "strategyReallocationCounts": {
+          "FET": 0,
+          "HYPE_LONG": 0,
+          "IDLE": 6,
+          "PENGU": 0,
+          "Q102": 0,
+          "RESIDUAL": 0,
+          "V12": 0,
+          "V52": 0
+        },
+        "newResearchTradesCount": 8,
+        "newResearchTradesByRoute": {
+          "IDLE_RENDER_4427_BTC_TRAP_SHORT": 6,
+          "IDLE_RENDER_4427_BEAR_OI_SHORT": 2
+        },
+        "newResearchMaxGross": 0.24999997,
+        "nativeOtherRoutesRemovedByConflict": {
+          "IDLE": 2
+        },
+        "nativeOtherRoutesAdded": {},
+        "nativeCandidateDecisions": [
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 2
+          },
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 8
+          },
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 3
+          },
+          {
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 4
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "ACCEPTED_MODELED_ENTRY",
+            "reason": "GROSS_ALLOCATED",
+            "count": 6
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 14
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FULL_1X_UNAVAILABLE",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_FAILED_RETEST_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:CORE_SIGNAL_OR_POSITION",
+            "count": 1
+          },
+          {
+            "route": "IDLE_RENDER_4427_FAILED_RETEST_SHORT",
+            "status": "REJECTED_PORTFOLIO",
+            "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+            "count": 1
+          }
+        ],
+        "tradeDetails": [
+          {
+            "utc": "2026-01-14T17:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249993,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 1284.83
+          },
+          {
+            "utc": "2026-01-23T18:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_TIME",
+            "netModeledJpy": 5729.35
+          },
+          {
+            "utc": "2026-03-04T10:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 9983.21
+          },
+          {
+            "utc": "2026-03-13T08:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 18031.9
+          },
+          {
+            "utc": "2026-04-11T19:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.249999,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_TAKE",
+            "netModeledJpy": 294529.26
+          },
+          {
+            "utc": "2026-05-01T04:00",
+            "route": "IDLE_RENDER_4427_BTC_TRAP_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_TIME",
+            "netModeledJpy": -132147.15
+          },
+          {
+            "utc": "2026-06-08T09:00",
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 162045.99
+          },
+          {
+            "utc": "2026-06-18T03:15",
+            "route": "IDLE_RENDER_4427_BEAR_OI_SHORT",
+            "gross": 0.25,
+            "exitReason": "RESEARCH_ASOF_SELECTIVE_B30_STOP_OR_TRAIL",
+            "netModeledJpy": 214592.06
+          }
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "This is 8-strategy native H1 model, not L2/live venue certification or current VPS accounting",
+    "2025 RENDER alpha entries intentionally excluded due missing Aster H1 mark evidence",
+    "New entry modeled fills and exits are Binance futures M5 proxy, not actual Aster executions",
+    "2024/2025/2026 thresholds were explored retrospectively; no pristine forward live fills",
+    "Native wallet original IDLE existing route and seven other strategies unchanged",
+    "new route funding_return_per_gross initialized to 0 even though other positions use engine venue funding: residual evidence gap",
+    "No Production/VPS/HP/real trading changes"
+  ]
+}

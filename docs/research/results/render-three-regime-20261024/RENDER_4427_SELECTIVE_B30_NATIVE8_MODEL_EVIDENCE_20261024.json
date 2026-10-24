@@ -1,0 +1,34 @@
+{
+  "status": "RESEARCH_ONLY_SELECTIVE_B30_TRUE_NATIVE_EIGHT_SHADOW",
+  "case": "RENDER_4427_SELECTIVE_B_30MIN_ASOF_RANGE_NATIVE8",
+  "preSignalCondition": "asof 1H rangePos1>=0.35 and OI3Pct<=-0.2",
+  "entry": "Wait at most 30min; completed M5 close below pre-signal 30min low by 0.1%, next M5 open; otherwise 30min fallback",
+  "allOtherEntries": "Original #4427 immediate A/X/B below regime threshold; 0.25x new B IDLE shared wallet unchanged",
+  "modelledPricing": "Aster signal-time H1 quote x Binance M5 delayed-return ratio; NOT actual Aster delayed M5 quote or signed fills",
+  "costRoutes": {
+    "10": {
+      "original_price_route": 114,
+      "SHORT_BEAR_REBOUND_2H_FADE": 51,
+      "SHORT_2024_BTC_RALLY_FAILURE": 69,
+      "b_delay_applied": 12,
+      "SHORT_DEEP_DROP_FAILED_RETEST": 6
+    },
+    "30": {
+      "original_price_route": 114,
+      "SHORT_BEAR_REBOUND_2H_FADE": 51,
+      "SHORT_2024_BTC_RALLY_FAILURE": 69,
+      "b_delay_applied": 12,
+      "SHORT_DEEP_DROP_FAILED_RETEST": 6
+    }
+  },
+  "uniqueCandidates": {
+    "10": 42,
+    "30": 42
+  },
+  "limits": [
+    "Native 2025 RENDER mark absent; only native 2026 JanAug new candidates",
+    "M5 relative entry/exit not venue certified, no funding actual expenses",
+    "historical windows already inspected, no pristine OOS",
+    "No VPS LIVE Production HP changes or orders"
+  ]
+}
