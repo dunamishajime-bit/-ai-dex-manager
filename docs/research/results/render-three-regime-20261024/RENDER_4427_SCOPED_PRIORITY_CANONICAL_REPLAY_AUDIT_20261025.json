@@ -1,0 +1,129 @@
+{
+  "status": "RESEARCH_ONLY_ECONOMIC_REPLAY_CONFIRMED_FORMAL_OWNER_UNPROVEN",
+  "costs": {
+    "10": {
+      "baseline_jpy": 288587378.77052534,
+      "scoped_jpy": 290070131.97157055,
+      "delta_jpy": 1482753.201,
+      "baseline_pf": 4.740434170299948,
+      "scoped_pf": 4.7568879921039064,
+      "scoped_win_rate_pct": 73.085847,
+      "max_mtm_dd_pct": -14.514985270751623,
+      "baseline_trades": 1291,
+      "scoped_trades": 1293,
+      "normalized_ledger_sha": "bbf68dbb6e4d9fcb5ee443bc4d511822045587da411607aa02754b96795600a9",
+      "normalized_events_sha": "3997f1d38dd56765a9545239979b069e698dcdbbfdfbdf5a6dd91f86e32c06ef",
+      "mtm_sha": "58d0eb9a9af8e5d28ebfb92d825fc5e557077ff215574a6e361d616fb6c77fc4",
+      "economic_three_run_match": true,
+      "raw_decisions_three_run_match": false,
+      "decisions_counts": [
+        2543,
+        2523,
+        2523
+      ],
+      "extra_first_run_rejected_v12_cooldown": 20,
+      "modeled_new_trades": [
+        {
+          "candidate_id": "C002213",
+          "entryUTC": "2026-06-23T01:00:00+00:00",
+          "exitUTC": "2026-06-23T06:20:00+00:00",
+          "acceptedGross": 0.22275389599297446,
+          "modeledPnlJpy": 719557.0255335869,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        },
+        {
+          "candidate_id": "C002263",
+          "entryUTC": "2026-06-25T07:00:00+00:00",
+          "exitUTC": "2026-06-25T09:20:00+00:00",
+          "acceptedGross": 0.21255926278847206,
+          "modeledPnlJpy": 711043.1837962997,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        }
+      ],
+      "independent_decisions": [
+        [
+          1779915600000,
+          "REJECTED_PORTFOLIO",
+          "IDLE:CORE_SIGNAL_OR_POSITION"
+        ],
+        [
+          1782176400000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ],
+        [
+          1782370800000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ]
+      ]
+    },
+    "30": {
+      "baseline_jpy": 174459200.2195523,
+      "scoped_jpy": 175324355.2534185,
+      "delta_jpy": 865155.034,
+      "baseline_pf": 3.8259511979311043,
+      "scoped_pf": 3.8351451263116614,
+      "scoped_win_rate_pct": 70.278638,
+      "max_mtm_dd_pct": -15.014723812726594,
+      "baseline_trades": 1290,
+      "scoped_trades": 1292,
+      "normalized_ledger_sha": "e028ad1d4ef45dd5a5b25e600ad87281c8ecaa9bd801d7786b1d8c7a96bedf05",
+      "normalized_events_sha": "95bcc4e37c65bb0eb264708f885c5ae6df7b90ae56de62ee44cc9032ecd6b814",
+      "mtm_sha": "aa9bbbfbb58364ff73b578bb32345eab87932066a3983221e216ec679e67a37d",
+      "economic_three_run_match": true,
+      "raw_decisions_three_run_match": false,
+      "decisions_counts": [
+        2543,
+        2523,
+        2523
+      ],
+      "extra_first_run_rejected_v12_cooldown": 20,
+      "modeled_new_trades": [
+        {
+          "candidate_id": "C002213",
+          "entryUTC": "2026-06-23T01:00:00+00:00",
+          "exitUTC": "2026-06-23T06:20:00+00:00",
+          "acceptedGross": 0.24999985769906155,
+          "modeledPnlJpy": 406086.4119681886,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        },
+        {
+          "candidate_id": "C002263",
+          "entryUTC": "2026-06-25T07:00:00+00:00",
+          "exitUTC": "2026-06-25T09:20:00+00:00",
+          "acceptedGross": 0.24999982448271585,
+          "modeledPnlJpy": 423673.8772727185,
+          "exitReason": "RESEARCH_INDEP_S6_TP1P5_STOP2_H6"
+        }
+      ],
+      "independent_decisions": [
+        [
+          1779915600000,
+          "REJECTED_PORTFOLIO",
+          "IDLE:CORE_SIGNAL_OR_POSITION"
+        ],
+        [
+          1782176400000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ],
+        [
+          1782370800000,
+          "ACCEPTED_MODELED_ENTRY",
+          "GROSS_ALLOCATED"
+        ]
+      ]
+    }
+  },
+  "productionParity": false,
+  "venueFillCertified": false,
+  "limitations": [
+    "In-memory scoped _overlay_block clearing is NOT a formally registered Owner/Route.",
+    "Full Shared Risk/Margin Guard/Kill Switch/pending/account lock/dedup parity is unproven.",
+    "First run has 20 additional rejected V12 cooldown decisions and shifted candidate IDs, so exact decision/raw ledger SHA matching FAILS despite economic and MTM equality.",
+    "Aster 2025 RENDER H1 mark missing; signed Aster M5 fills and funding unverified.",
+    "Historical SELL55 was selected ex post; no untouched OOS.",
+    "No VPS/LIVE/Production/HP/orders changed."
+  ]
+}
