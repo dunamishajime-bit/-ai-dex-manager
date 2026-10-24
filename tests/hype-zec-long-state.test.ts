@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral } from "../lib/hype-zec-long-runner-state";
+import { deterministicHypeZecEntryIdempotencyKey } from "../lib/hype-zec-long-runner";
 
 test("HYPE/ZEC state store writes an exact SHA-owned 0600 regular file", async () => {
   const root = await mkdtemp(join(tmpdir(), "hype-zec-state-"));
@@ -29,12 +30,19 @@ test("HYPE pending recovery retains the approved gross, reservation, and score p
     strategy: "HYPE_LONG", symbol: "HYPEUSDT", side: "BUY", quantity: 1, expectedPrice: 10,
     phase: "submitted", createdAt: 100, updatedAt: 100, reason: "SIGNAL",
     reservationId: "reserved-1", approvedGross: 0.3, marketFitScore: 50,
-    scoreSource: "NEUTRAL_NO_COMPARABLE_LIVE_SCORE_V1" };
+    scoreSource: "NEUTRAL_NO_COMPARABLE_LIVE_SCORE_V1", approvalSource: "STRICT_PLANNER_APPROVAL" };
   await store.save(state);
   const recovered = await store.load();
   assert.equal(recovered.pending?.approvedGross, 0.3);
   assert.equal(recovered.pending?.reservationId, "reserved-1");
   assert.equal(recovered.pending?.scoreSource, "NEUTRAL_NO_COMPARABLE_LIVE_SCORE_V1");
+  assert.equal(recovered.pending?.approvalSource, "STRICT_PLANNER_APPROVAL");
+});
+
+test("HYPE/ZEC entry request identity is independent of approved gross and normalized quantity", () => {
+  const key = deterministicHypeZecEntryIdempotencyKey("HYPE_LONG", 1_700_000_000_000, "HYPEUSDT");
+  assert.equal(key, deterministicHypeZecEntryIdempotencyKey("HYPE_LONG", 1_700_000_000_000, "HYPEUSDT"));
+  assert.notEqual(key, deterministicHypeZecEntryIdempotencyKey("ZEC_LONG", 1_700_000_000_000, "ZECUSDT"));
 });
 
 test("HYPE/ZEC state store rejects a stale runtime SHA", async () => {

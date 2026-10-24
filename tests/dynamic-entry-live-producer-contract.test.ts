@@ -68,6 +68,20 @@ test("strict approval propagates only the accepted gross and rejects missing or 
     assert.throws(() => requireApprovedLiveGross({ ...context, approved: { ...intent, gross: 0.01, notionalUsd: 10 } }), /APPROVAL_BELOW_MINIMUM/);
 });
 
+test("PENGU, Quality102, and V12 entry boundaries reject missing approval", () => {
+    for (const strategy of ["PENGU_DUAL_LS_V2", "QUALITY102_CAUSAL_V1", "V12"] as const) {
+        const row = buildLiveEntryCandidate({
+            idempotencyKey: `${strategy}|entry`, strategy, symbol: "BTCUSDT", side: "LONG", signalTs: NOW,
+            score: { value: 50, source: "NEUTRAL_NO_COMPARABLE_LIVE_SCORE_V1" },
+            targetGross: 0.5, minGross: 0.05, maxGross: 1,
+        });
+        assert.throws(() => requireApprovedLiveGross({
+            candidate: row, approved: undefined, now: NOW + 100, snapshotAt: NOW,
+            approvedAt: NOW, maxAgeMs: 5_000,
+        }), /LIVE_ENTRY_APPROVAL_MISSING/);
+    }
+});
+
 test("approval fails closed when stale or based on a different snapshot", () => {
     const row = candidate();
     const approved = strictIntentForLiveCandidate(row, 1_000);

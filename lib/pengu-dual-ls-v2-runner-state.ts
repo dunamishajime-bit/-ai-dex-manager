@@ -10,6 +10,7 @@ import {
     normalizePenguRiskOverlayState,
     type PenguRiskOverlayState,
 } from "@/lib/pengu-route-quarantine-dd-governor";
+import type { LiveEntryApprovalSource } from "@/lib/disdex-live-entry-approval";
 
 export interface PenguDualLsV2PendingOrder {
     idempotencyKey: string;
@@ -39,6 +40,7 @@ export interface PenguDualLsV2PendingOrder {
         originalGross: number;
         remainingGross: number;
     };
+    approvalSource?: LiveEntryApprovalSource;
 }
 
 export interface PenguDualLsV2RunnerFailure {

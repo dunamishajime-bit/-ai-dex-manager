@@ -2,7 +2,7 @@ import { AsterResidentStopGateway } from "./venue-resident-stop";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition, type StrictStrategy } from "@/lib/disdex-strict-portfolio-planner";
-import { V12AsterLiveAdapter, type V12AsterLiveAdapterOptions } from "@/lib/v12-aster-live-adapter";
+import { requireV12ApprovedEntryNotional, V12AsterLiveAdapter, type V12AsterLiveAdapterOptions } from "@/lib/v12-aster-live-adapter";
 import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
@@ -149,6 +149,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         reservationId?: string;
         maxEntryNotionalUsd?: number;
     }): Promise<DirectTradeResult> {
+        const upstreamApprovedNotionalUsd = requireV12ApprovedEntryNotional(input.maxEntryNotionalUsd);
         assertV12StrictLiveConfiguration();
         const [account, positions] = await Promise.all([
             this.getAccountSnapshot(),
@@ -286,7 +287,6 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
         if (!(quantity > 0)) throw new Error("STRICT_PORTFOLIO_ZERO_EXECUTABLE_QUANTITY");
         const approvedNotionalCeiling = approvedGross * workingAccount.walletBalance;
         return super.executeEntry({ ...input, quantity,
-            maxEntryNotionalUsd: input.maxEntryNotionalUsd === undefined
-                ? approvedNotionalCeiling : Math.min(input.maxEntryNotionalUsd, approvedNotionalCeiling) });
+            maxEntryNotionalUsd: Math.min(upstreamApprovedNotionalUsd, approvedNotionalCeiling) });
     }
 }

@@ -33,6 +33,7 @@ test("registry decision retains causal producer identity and score provenance", 
             equityUsd: 1_000, lock, quality102CausalV1Ready: false, ...capsFor(intent) });
         assert.equal(decision.allocations[0]?.signalTs, 10_000);
         assert.equal(decision.allocations[0]?.idempotencyKey, "idle-key");
+        assert.equal(decision.approvalSource, "REGISTRY_ALLOCATION");
         const pending = await readPendingExposureRegistry(join(dir, "pending.json"));
         assert.equal(decision.allocations[0]?.reservationId, pending.entries[0]?.reservationId);
         await lock.release();

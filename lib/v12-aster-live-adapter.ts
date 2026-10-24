@@ -24,6 +24,10 @@ function normalizeOrder(raw: AsterOrderResponse): V12AsterOrderView {
     return { symbol: String(raw.symbol || "").toUpperCase(), clientOrderId: String(raw.clientOrderId || ""), orderId: raw.orderId, status: String(raw.status || "UNKNOWN").toUpperCase(), side: raw.side, type: raw.type, reduceOnly: raw.reduceOnly, quantity: finite(raw.origQty), executedQuantity: finite(raw.executedQty), averagePrice: finite(raw.avgPrice), quoteQuantity: finite(raw.cumQuote), updatedAt: finite(raw.updateTime) || undefined, stopPrice: finite(raw.stopPrice) || undefined };
 }
 function activeStatus(status: string) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(status.toUpperCase()); }
+export function requireV12ApprovedEntryNotional(value: unknown): number {
+    if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) throw new Error("V12_ENTRY_APPROVED_NOTIONAL_REQUIRED");
+    return value;
+}
 
 export class V12AsterLiveAdapter implements ResidentStopAdapter {
     readonly executor: AsterDirectTradeExecutor;
@@ -78,9 +82,10 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
     }
 
     async executeEntry(input: { signalTs: number; symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string; maxEntryNotionalUsd?: number; marketFitScore?: number; reservationId?: string }): Promise<DirectTradeResult> {
+        const maxEntryNotionalUsd = requireV12ApprovedEntryNotional(input.maxEntryNotionalUsd);
         await assertSharedKillSwitchAllowsNewEntry();
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "ENTRY", signalTs: input.signalTs, symbol: input.symbol, side: input.side });
-        return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY", requireVenueMargin5xCross: true, maxEntryNotionalUsd: input.maxEntryNotionalUsd });
+        return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY", requireVenueMargin5xCross: true, maxEntryNotionalUsd });
     }
     async executeExit(input: { signalTs: number; symbol: string; positionSide: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string; failsafe?: boolean }): Promise<DirectTradeResult> {
         const action = input.failsafe ? "FAILSAFE_CLOSE" : "EXIT";

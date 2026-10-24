@@ -34,6 +34,64 @@ export interface V12ResidualDecision {
         positionResidual: number;
     };
     reason?: "NO_RESIDUAL" | "PER_POSITION_CAP" | "MAX_POSITIONS";
+    /** Immutable provenance attached by the live engine at the earlier decision boundary. */
+    approval?: V12ResidualApproval;
+}
+
+export type V12ResidualApproval = Readonly<{
+    idempotencyKey: string;
+    symbol: string;
+    side: "LONG" | "SHORT";
+    signalTs: number;
+    approvedAt: number;
+    snapshotAt: number;
+    equityUsd: number;
+}>;
+
+export function bindV12ResidualDecision(decision: V12ResidualDecision, approval: V12ResidualApproval): V12ResidualDecision {
+    if (!approval.idempotencyKey.trim() || !approval.symbol.trim()
+        || (approval.side !== "LONG" && approval.side !== "SHORT")
+        || !Number.isFinite(approval.signalTs) || approval.signalTs <= 0
+        || !Number.isFinite(approval.approvedAt) || approval.approvedAt <= 0
+        || !Number.isFinite(approval.snapshotAt) || approval.snapshotAt <= 0
+        || !Number.isFinite(approval.equityUsd) || approval.equityUsd <= 0
+        || approval.snapshotAt > approval.approvedAt) {
+        throw new Error("V12_APPROVAL_METADATA_INVALID");
+    }
+    return Object.freeze({ ...decision, approval: Object.freeze({ ...approval }) });
+}
+
+export function requireBoundV12ResidualApproval(input: {
+    decision: V12ResidualDecision;
+    idempotencyKey: string;
+    symbol: string;
+    side: "LONG" | "SHORT";
+    signalTs: number;
+    currentSnapshotAt: number;
+    equityUsd: number;
+    now: number;
+    maxAgeMs: number;
+}): V12ResidualApproval {
+    const approval = input.decision.approval;
+    if (!approval) throw new Error("V12_APPROVAL_METADATA_MISSING");
+    if (approval.idempotencyKey !== input.idempotencyKey
+        || approval.symbol.toUpperCase() !== input.symbol.toUpperCase()
+        || approval.side !== input.side || approval.signalTs !== input.signalTs) {
+        throw new Error("V12_APPROVAL_CANDIDATE_MISMATCH");
+    }
+    if (!Number.isFinite(input.maxAgeMs) || input.maxAgeMs <= 0 || !Number.isFinite(input.now)
+        || approval.approvedAt > input.now || input.now - approval.approvedAt > input.maxAgeMs
+        || approval.snapshotAt > input.now || input.now - approval.snapshotAt > input.maxAgeMs) {
+        throw new Error("V12_APPROVAL_STALE");
+    }
+    if (!Number.isFinite(input.currentSnapshotAt) || approval.snapshotAt !== input.currentSnapshotAt) {
+        throw new Error("V12_APPROVAL_SNAPSHOT_MISMATCH");
+    }
+    if (!Number.isFinite(input.equityUsd) || input.equityUsd <= 0
+        || Math.abs(approval.equityUsd - input.equityUsd) > Math.max(1e-6, input.equityUsd * 1e-6)) {
+        throw new Error("V12_APPROVAL_EQUITY_MISMATCH");
+    }
+    return approval;
 }
 
 export interface V12EntryGrossReservationInput {

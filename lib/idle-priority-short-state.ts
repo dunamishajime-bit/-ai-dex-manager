@@ -1,6 +1,7 @@
 import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
+import type { LiveEntryApprovalSource } from "./disdex-live-entry-approval";
 
 export const IDLE_STATE_SCHEMA="disdex-idle-priority-state/v2" as const;
 export type IdlePendingPhase="planned"|"submitted"|"manual_review";
@@ -45,6 +46,7 @@ export type IdlePending={
   reason:string;
   reservationId?:string;
   gross?:number;
+  approvalSource?:LiveEntryApprovalSource;
 };
 
 export type IdleDecision={
@@ -57,6 +59,7 @@ export type IdleDecision={
   allocatedGross?:number;
   rejectionReason?:string;
   scoreSource?:string;
+  approvalSource?:LiveEntryApprovalSource;
 };
 
 export type IdleState={
@@ -79,6 +82,7 @@ function validSymbol(v:unknown):v is IdlePrioritySymbol{return SYMBOLS.has(Strin
 function routeFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].route;}
 function holdFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].holdHours;}
 function grossFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;}
+function validApprovalSource(value:unknown):value is LiveEntryApprovalSource{return value===undefined||value==="REGISTRY_ALLOCATION"||value==="STRICT_PLANNER_APPROVAL"||value==="V12_RESIDUAL_APPROVAL";}
 
 export function emptyIdleState(runtimeSha:string,now=Date.now()):IdleState{
  if(!validSha(runtimeSha))throw new Error("IDLE_STATE_RUNTIME_SHA_INVALID");
@@ -106,6 +110,7 @@ function validatePending(p:IdlePending){
  if(!validTs(p.signalTs)||!validTs(p.decisionTs)||!validTs(p.createdAt)||!validTs(p.updatedAt)||!p.reason)throw new Error("IDLE_STATE_PENDING_INVALID");
  if(p.reservationId!=null&&typeof p.reservationId!=="string")throw new Error("IDLE_STATE_PENDING_INVALID");
  if(p.gross!==undefined&&(!Number.isFinite(p.gross)||p.gross+1e-9<IDLE_PRIORITY_SHORT_POLICY.routes[p.symbol].minGross||p.gross>grossFor(p.symbol)+1e-9))throw new Error("IDLE_STATE_PENDING_INVALID");
+ if(!validApprovalSource(p.approvalSource))throw new Error("IDLE_STATE_PENDING_INVALID");
 }
 
 export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{

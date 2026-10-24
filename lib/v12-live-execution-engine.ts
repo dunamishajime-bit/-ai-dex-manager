@@ -22,7 +22,7 @@ import {
 } from "@/lib/v12-resident-stop-lifecycle";
 import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, v12EntryGrossCapForSignal, v12EntryGrossMultiplierForSignal, type V12Bar, type V12DecisionObservation, type V12PositionSizing, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
-import { decideV12ResidualEntry, validateV12EntryGrossReservation, type V12ResidualDecision } from "@/lib/v12-top2-residual";
+import { bindV12ResidualDecision, decideV12ResidualEntry, requireBoundV12ResidualApproval, validateV12EntryGrossReservation, type V12ResidualDecision } from "@/lib/v12-top2-residual";
 import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross } from "@/lib/disdex-live-entry-approval";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
@@ -83,6 +83,16 @@ function positionMatches(state: V12ActivePositionState, actual: DirectPosition) 
 }
 function resultHasExposure(result: DirectTradeResult) { return (result.status === "FILLED" || result.status === "PARTIALLY_FILLED") && result.executedQuantity > 0; }
 function activeOrderStatus(status?: string) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(status || "").toUpperCase()); }
+
+function v12EntryApprovalIdentity(signal: V12Signal) {
+    const symbol = `${signal.symbol}USDT`;
+    return {
+        idempotencyKey: deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side }),
+        symbol,
+        side: signal.side,
+        signalTs: signal.referenceTs,
+    } as const;
+}
 
 const BENIGN_V12_ENTRY_QUANTITY_GATE_PATTERNS = [
     /^Quantity\s+[0-9.+\-eE]+\s+is\s+below\s+Aster\s+minQty\s+[0-9.+\-eE]+\s+for\s+[A-Z0-9]+\.$/,
@@ -577,11 +587,15 @@ export class V12LiveExecutionEngine {
                 return { status: "capacity-blocked", reason: "V12_APPROVAL_SNAPSHOT_CHANGED", signal, clientOrderId };
             }
             try {
+                const approval = requireBoundV12ResidualApproval({ decision, idempotencyKey: clientOrderId,
+                    symbol, side: signal.side, signalTs: signal.referenceTs,
+                    currentSnapshotAt: freshAccount.updatedAt, equityUsd: freshEquity,
+                    now: this.now(), maxAgeMs: 5 * 60_000 });
                 requireApprovedLiveGross({ candidate: liveCandidate,
-                    approved: { idempotencyKey: clientOrderId, strategy: "V12", symbol,
-                        side: signal.side, signalTs: signal.referenceTs, gross: acceptedGross,
-                        notionalUsd: acceptedGross * equity },
-                    now: this.now(), snapshotAt: freshAccount.updatedAt, approvedAt: this.now(), maxAgeMs: 5 * 60_000 });
+                    approved: { idempotencyKey: approval.idempotencyKey, strategy: "V12", symbol: approval.symbol,
+                        side: approval.side, signalTs: approval.signalTs, gross: acceptedGross,
+                        notionalUsd: acceptedGross * approval.equityUsd },
+                    now: this.now(), snapshotAt: approval.snapshotAt, approvedAt: approval.approvedAt, maxAgeMs: 5 * 60_000 });
             } catch (error) {
                 return { status: "capacity-blocked", reason: error instanceof Error ? error.message : String(error), signal, clientOrderId };
             }
@@ -620,7 +634,11 @@ export class V12LiveExecutionEngine {
                         totalGross: afterPortfolio.reduce((sum, row) => sum + row.gross, 0),
                     };
                     const afterRankedRequestGross = Math.min(afterSizing.requestedGross, v12EntryGrossCapForSignal(signal));
-                    const afterDecision = decideV12ResidualEntry(afterRankedRequestGross, afterSnapshot, activePositionsOf(state).length);
+                    const afterDecisionAt = this.now();
+                    const afterDecision = bindV12ResidualDecision(
+                        decideV12ResidualEntry(afterRankedRequestGross, afterSnapshot, activePositionsOf(state).length),
+                        { ...v12EntryApprovalIdentity(signal), approvedAt: afterDecisionAt, snapshotAt: afterAccount.updatedAt, equityUsd: afterEquity },
+                    );
                     return this.executeEntryForSignal(state, handle, signal, afterEquity, afterSizing, afterDecision, quality102Ownership, preemptionAttempt + 1);
                 }
             }
@@ -742,6 +760,7 @@ export class V12LiveExecutionEngine {
             reason: decision.dynamicAcceptedGross > EPS
                 ? (signal.entryQualityClass === "HC175" ? "signal-entry-with-dynamic-residual-hc175" : "signal-entry-with-dynamic-residual")
                 : (signal.entryQualityClass === "HC175" ? "signal-entry-base-hc175" : "signal-entry-base"),
+            approvalSource: "V12_RESIDUAL_APPROVAL",
             createdAt: this.now(),
         };
         state.pending = pending; await this.d.stateStore.save(state);
@@ -955,7 +974,11 @@ export class V12LiveExecutionEngine {
                         totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0),
                     };
                     const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(next));
-                    decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
+                    const decisionAt = this.now();
+                    decision = bindV12ResidualDecision(
+                        decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length),
+                        { ...v12EntryApprovalIdentity(next), approvedAt: decisionAt, snapshotAt: freshAccount.updatedAt, equityUsd: equity },
+                    );
                     const requestedBase = Math.min(
                         rankedRequestGross,
                         v12EntryGrossCapForSignal(next),
@@ -1013,7 +1036,11 @@ export class V12LiveExecutionEngine {
                 const v12Components = v12GrossComponents(state, activePortfolio);
                 const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), v12BaseGross: v12Components.baseGross, v12DynamicGross: v12Components.dynamicGross, cryptoGross: activePortfolio.filter((row) => isCryptoPortfolioSleeve(row.sleeve)).reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
                 const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(signal));
-                const decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
+                const decisionAt = this.now();
+                const decision = bindV12ResidualDecision(
+                    decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length),
+                    { ...v12EntryApprovalIdentity(signal), approvedAt: decisionAt, snapshotAt: freshAccount.updatedAt, equityUsd: entryEquity },
+                );
                 if (!(decision.acceptedGross > 0)) {
                     if (enteredCount === 0) lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal };
                     break;

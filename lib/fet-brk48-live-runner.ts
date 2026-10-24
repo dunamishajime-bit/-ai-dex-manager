@@ -119,6 +119,11 @@ function deterministicId(kind: "entry" | "exit" | "stop" | "failsafe", seed: str
   return `fet-${kind.slice(0, 5)}-${digest.slice(0, 22)}`.slice(0, 36);
 }
 
+export function deterministicFetEntryIdempotencyKey(referenceTs: number) {
+  if (!Number.isFinite(referenceTs) || referenceTs <= 0) throw new Error("FET_ENTRY_REFERENCE_TS_INVALID");
+  return createHash("sha256").update(`FET|ENTRY|${referenceTs}`).digest("hex");
+}
+
 export class FetProtectionReplacementError extends Error {
   constructor(
     message: string,
@@ -907,8 +912,9 @@ export class FetBrk48LiveRunner {
       }
 
       const plannerNow = this.deps.now ? this.deps.now() : Date.now();
+      const idempotencyKey = deterministicFetEntryIdempotencyKey(signal.referenceTs);
       const liveCandidate = buildLiveEntryCandidate({
-        idempotencyKey: `FET_BRK48_RESIDUAL|${signal.referenceTs}|ENTRY`,
+        idempotencyKey,
         strategy: "FET_RESIDUAL", symbol: "FETUSDT", side: "LONG", signalTs: signal.referenceTs,
         score: liveEntryScore("FET_RESIDUAL", signal), targetGross,
         minGross: Math.max(FET_BRK48_RESIDUAL.minimumResidualGross, (this.deps.minimumOrderNotionalUsd ?? 5) / equity),
@@ -939,9 +945,6 @@ export class FetBrk48LiveRunner {
       const normalized = await this.deps.executor.normalizeMarketQuantity("FETUSDT", approvedGross * equity / executablePrice, executablePrice);
       if (!(normalized.quantity > 0)) return { status: "blocked", message: "FET_ENTRY_QUANTITY_INVALID", ordersSent: 0, signal };
 
-      const idempotencyKey = createHash("sha256")
-        .update(`FET|ENTRY|${signal.referenceTs}|${approvedGross.toFixed(12)}`)
-        .digest("hex");
       if (state.lastCompletedIdempotencyKey === idempotencyKey) {
         return { status: "held", message: "FET_ENTRY_ALREADY_COMPLETED", ordersSent: 0, signal, gross: approvedGross };
       }
@@ -962,6 +965,7 @@ export class FetBrk48LiveRunner {
         entryTs: signal.entryTs,
         exitTs: signal.exitTs,
         hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
+        approvalSource: "STRICT_PLANNER_APPROVAL",
       };
       await writeFetBrk48State(this.deps.statePath, state);
       const reservation = await lock.reserve({

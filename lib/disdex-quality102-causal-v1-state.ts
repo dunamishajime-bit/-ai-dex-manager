@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { QUALITY102_CAUSAL_V1, type Quality102CausalV1Mode } from "@/config/disdexQuality102CausalV1Runtime";
+import type { LiveEntryApprovalSource } from "@/lib/disdex-live-entry-approval";
 
 const STRATEGY_ID = "QUALITY102_CAUSAL_V1" as const;
 const STATE_VERSION = 1 as const;
@@ -33,6 +34,7 @@ export interface Quality102CausalV1PendingOrder {
   maxHoldHours?: number;
   reason?: string;
   lastError?: string;
+  approvalSource?: LiveEntryApprovalSource;
 }
 
 export interface Quality102CausalV1State {
@@ -189,6 +191,7 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
     "maxHoldHours",
     "reason",
     "lastError",
+    "approvalSource",
   ], "pending");
   if (raw.phase !== "planned" && raw.phase !== "submitted" && raw.phase !== "manual_review") {
     malformed("pending.phase");
@@ -205,6 +208,7 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
   if (raw.maxHoldHours !== undefined && !(typeof raw.maxHoldHours === "number" && Number.isFinite(raw.maxHoldHours) && raw.maxHoldHours > 0 && raw.maxHoldHours <= 72)) malformed("pending.maxHoldHours");
   const variant = optionalString(raw.variant, "pending.variant");
   const reason = optionalString(raw.reason, "pending.reason");
+  if (raw.approvalSource !== undefined && raw.approvalSource !== "STRICT_PLANNER_APPROVAL") malformed("pending.approvalSource");
   return {
     idempotencyKey: requiredString(raw.idempotencyKey, "pending.idempotencyKey"),
     clientOrderId: requiredString(raw.clientOrderId, "pending.clientOrderId"),
@@ -226,6 +230,7 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
     ...(raw.maxHoldHours === undefined ? {} : { maxHoldHours: raw.maxHoldHours }),
     ...(reason === undefined ? {} : { reason }),
     ...(lastError === undefined ? {} : { lastError }),
+    ...(raw.approvalSource === undefined ? {} : { approvalSource: raw.approvalSource as LiveEntryApprovalSource }),
   };
 }
 

@@ -2,6 +2,7 @@ import { chmod, chown, constants as fsConstants, copyFile, lstat, mkdir, open, r
 import { dirname, resolve } from "node:path";
 
 import type { AccountLockHandle } from "./disdex-account-order-lock";
+import type { LiveEntryApprovalSource } from "./disdex-live-entry-approval";
 
 export const HYPE_ZEC_LONG_STATE_SCHEMA = "disdex-hype-zec-long/v1" as const;
 /** HYPE/ZEC state heartbeat freshness contract used by runtime health. */
@@ -50,6 +51,7 @@ export interface HypeZecLongPending {
   approvedGross?: number;
   marketFitScore?: number;
   scoreSource?: string;
+  approvalSource?: LiveEntryApprovalSource;
 }
 
 export interface HypeZecLongRunnerState {
@@ -58,7 +60,7 @@ export interface HypeZecLongRunnerState {
   mode: HypeZecLongStateMode;
   updatedAt: number;
   lastDecisionTs?: number;
-  lastDecision?: { strategy: "HYPE_LONG" | "ZEC_LONG"; signalTs: number | null; accepted: boolean; reason: string; approvedGross?: number; marketFitScore?: number; scoreSource?: string };
+  lastDecision?: { strategy: "HYPE_LONG" | "ZEC_LONG"; signalTs: number | null; accepted: boolean; reason: string; approvedGross?: number; marketFitScore?: number; scoreSource?: string; approvalSource?: LiveEntryApprovalSource };
   positions?: HypeZecLongPositionState[];
   pending?: HypeZecLongPending;
   manualReview?: string;

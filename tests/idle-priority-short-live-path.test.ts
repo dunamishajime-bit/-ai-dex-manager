@@ -29,6 +29,9 @@ const base: IdleLiveAdmissionInput = {
     venueFiveXCrossConfirmed: true,
     fullCryptoGrossAvailable: 1,
     fullTotalGrossAvailable: 1,
+    allocatedGross: 1,
+    allocationDecidedAt: 1_700_000_000_000,
+    allocationNow: 1_700_000_000_000,
     sameSymbolIdleActive: false,
 };
 
@@ -70,6 +73,20 @@ test("partial allocated gross is accepted only at or above the route minimum", (
     assert.equal(evaluateIdleLiveAdmission({ ...base, symbol: "TAOUSDT", allocatedGross: 0.099 }).accepted, false);
 });
 
+test("allocator approval is mandatory, finite, positive, and fresh", () => {
+    for (const allocatedGross of [undefined, Number.NaN, 0, -0.1]) {
+        const result = evaluateIdleLiveAdmission({ ...base, allocatedGross });
+        assert.equal(result.accepted, false, `allocatedGross=${String(allocatedGross)}`);
+        assert.equal(result.reason, "ALLOCATOR_APPROVAL_MISSING", `allocatedGross=${String(allocatedGross)}`);
+    }
+    const stale = evaluateIdleLiveAdmission({
+        ...base,
+        allocatedGross: 1,
+        allocationDecidedAt: base.allocationNow - 5 * 60_000 - 1,
+    });
+    assert.deepEqual(stale, { accepted: false, reason: "ALLOCATOR_APPROVAL_STALE", gross: 0 });
+});
+
 test("same-symbol Idle occupancy blocks but sidecar exposure alone does not", () => {
     assert.equal(evaluateIdleLiveAdmission({ ...base, sameSymbolIdleActive: true }).reason, "IDLE_SAME_SYMBOL_ACTIVE");
     assert.equal(evaluateIdleLiveAdmission({ ...base, nonBaselineCryptoExposure: 0.01 }).accepted, true);
@@ -80,7 +97,7 @@ test("accepted admission is exactly one gross", () => {
 });
 
 test("DOT and RENDER accept only their fixed 0.25x gross without partial sizing", () => {
-    const dot = evaluateIdleLiveAdmission({ ...base, symbol: "DOTUSDT", fullCryptoGrossAvailable: 0.25, fullTotalGrossAvailable: 0.25 });
+    const dot = evaluateIdleLiveAdmission({ ...base, symbol: "DOTUSDT", allocatedGross: 0.25, fullCryptoGrossAvailable: 0.25, fullTotalGrossAvailable: 0.25 });
     assert.deepEqual(dot, { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: 0.25 });
     const render = evaluateIdleLiveAdmission({ ...base, symbol: "RENDERUSDT", fullCryptoGrossAvailable: 0.249999, fullTotalGrossAvailable: 0.25 });
     assert.equal(render.accepted, false);

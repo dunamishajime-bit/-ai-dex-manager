@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 
 import type { V12StopState } from "@/lib/v12-resident-stop-lifecycle";
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
+import type { LiveEntryApprovalSource } from "@/lib/disdex-live-entry-approval";
 
 export type V12RunnerStateSchema = "v12-x1-all-runner-state/v1" | "v12-x1-all-runner-state/v2";
 
@@ -22,6 +23,7 @@ export interface V12PendingOrderState {
     entryRank?: 1 | 2 | 3;
     atrAtEntry?: number;
     reason?: string;
+    approvalSource?: LiveEntryApprovalSource;
     createdAt: number;
     positionId?: string;
     stopPrice?: number;

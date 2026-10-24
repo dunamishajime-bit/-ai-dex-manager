@@ -1404,6 +1404,7 @@ export class PenguDualLsV2PortfolioRunner {
                 referenceTs: signal.referenceTs,
                 targetGross,
                 requestedGross: reduceOnly ? undefined : requestedGross,
+                approvalSource: reduceOnly ? undefined : "STRICT_PLANNER_APPROVAL",
                 createdAt: this.now(),
                 updatedAt: this.now(),
                 retryCount: 0,

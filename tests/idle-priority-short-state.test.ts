@@ -19,10 +19,11 @@ test("unverified protection is rejected",()=>assert.throws(()=>normalizeIdleStat
 test("wrong route or hold contract is rejected",()=>assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...pos,holdHours:24,exitTs:93_600_000}]} as any,sha),/POSITION_INVALID/));
 test("valid protected position survives normalization",()=>assert.equal(normalizeIdleState({...emptyIdleState(sha),positions:[pos]},sha).positions[0].symbol,"TAOUSDT"));
 test("approved partial gross survives pending and protected-position recovery, while subminimum gross fails",()=>{
- const pending={action:"ENTRY",phase:"submitted",symbol:"TAOUSDT",route:pos.route,clientOrderId:"idle-entry",idempotencyKey:"idle-entry",quantity:1,expectedPrice:100,signalTs:pos.signalTs,decisionTs:pos.entryTs,holdHours:12,createdAt:1,updatedAt:1,reason:"ENTRY",gross:0.3} as const;
- const state=normalizeIdleState({...emptyIdleState(sha),pending,lastDecision:{decisionTs:pos.entryTs,accepted:true,reason:"APPROVED",finalScore:7,allocatedGross:0.3,scoreSource:"IDLE_COMPLETED_REL24_RET12_V1"}},sha);
+ const pending={action:"ENTRY",phase:"submitted",symbol:"TAOUSDT",route:pos.route,clientOrderId:"idle-entry",idempotencyKey:"idle-entry",quantity:1,expectedPrice:100,signalTs:pos.signalTs,decisionTs:pos.entryTs,holdHours:12,createdAt:1,updatedAt:1,reason:"ENTRY",gross:0.3,approvalSource:"REGISTRY_ALLOCATION"} as const;
+ const state=normalizeIdleState({...emptyIdleState(sha),pending,lastDecision:{decisionTs:pos.entryTs,accepted:true,reason:"APPROVED",finalScore:7,allocatedGross:0.3,scoreSource:"IDLE_COMPLETED_REL24_RET12_V1",approvalSource:"REGISTRY_ALLOCATION"}},sha);
  assert.equal(state.pending?.gross,0.3);
  assert.equal(state.lastDecision?.scoreSource,"IDLE_COMPLETED_REL24_RET12_V1");
+ assert.equal(state.lastDecision?.approvalSource,"REGISTRY_ALLOCATION");
  assert.equal(normalizeIdleState({...state,pending:null,positions:[{...pos,gross:0.3}]},sha).positions[0].gross,0.3);
  assert.throws(()=>normalizeIdleState({...state,pending:{...pending,gross:0.05}},sha),/PENDING_INVALID/);
  assert.throws(()=>normalizeIdleState({...state,pending:null,positions:[{...pos,gross:0.05}]},sha),/POSITION_INVALID/);
@@ -33,6 +34,6 @@ test("DOT trailing protection may move below entry only after the trail is armed
  assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...trailing,trailArmed:false}]} as any,sha),/POSITION_INVALID/);
 });
 test("pending entry is explicit and validated",()=>{
- const pending={action:"ENTRY",phase:"planned",symbol:"DOTUSDT",route:"IDLE_DOT_MOMENTUM_SHORT_BTCREL",clientOrderId:"idle-entry",idempotencyKey:"k",quantity:2,expectedPrice:10,signalTs:3_600_000,decisionTs:7_200_000,holdHours:24,createdAt:1,updatedAt:1,reason:"ENTRY"} as const;
+ const pending={action:"ENTRY",phase:"planned",symbol:"DOTUSDT",route:"IDLE_DOT_MOMENTUM_SHORT_BTCREL",clientOrderId:"idle-entry",idempotencyKey:"k",quantity:2,expectedPrice:10,signalTs:3_600_000,decisionTs:7_200_000,holdHours:24,createdAt:1,updatedAt:1,reason:"ENTRY",approvalSource:"REGISTRY_ALLOCATION"} as const;
  assert.equal(normalizeIdleState({...emptyIdleState(sha),pending},sha).pending?.symbol,"DOTUSDT");
 });

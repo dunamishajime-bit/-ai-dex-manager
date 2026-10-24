@@ -515,7 +515,7 @@ export class IdlePriorityShortRunner {
             });
         } catch (error) {
             const reason = `BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`;
-            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason, approvalSource: "REGISTRY_ALLOCATION" };
             await this.dependencies.stateStore.save(state);
             return { status: "held", message: `IDLE_${reason}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
@@ -634,13 +634,17 @@ export class IdlePriorityShortRunner {
                 if (reservation) await lock.releaseReservation(reservation.reservationId);
                 const reason = `IDLE_APPROVAL_BLOCKED:${error instanceof Error ? error.message : String(error)}`;
                 state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false,
-                    reason, finalScore: allocated.finalScore, rejectionReason: reason, scoreSource: liveCandidate.scoreSource };
+                    reason, finalScore: allocated.finalScore, rejectionReason: reason, scoreSource: liveCandidate.scoreSource, approvalSource: "REGISTRY_ALLOCATION" };
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
         }
-        const admission = evaluateIdleLiveAdmission({ ...baseInput, allocatedGross: approvedGross });
-        state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.accepted ? admission.reason : allocationReason || admission.reason, finalScore: allocated?.finalScore, allocatedGross: allocated ? approvedGross : undefined, rejectionReason: allocationReason, scoreSource: liveCandidate.scoreSource };
+        const admission = evaluateIdleLiveAdmission({ ...baseInput,
+            allocatedGross: allocated ? approvedGross : undefined,
+            allocationDecidedAt: allocation.decidedAt,
+            allocationNow: this.now(),
+        });
+        state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.accepted ? admission.reason : allocationReason || admission.reason, finalScore: allocated?.finalScore, allocatedGross: allocated ? approvedGross : undefined, rejectionReason: allocationReason, scoreSource: liveCandidate.scoreSource, approvalSource: "REGISTRY_ALLOCATION" };
         await this.dependencies.stateStore.save(state);
         if (!admission.accepted) {
             if (reservation) await lock.releaseReservation(reservation.reservationId);
@@ -677,7 +681,7 @@ export class IdlePriorityShortRunner {
             if (!message.startsWith("IDLE_EXECUTION_ACCOUNT_STALE") && !message.startsWith("LIVE_ENTRY_")) throw error;
             const reason = `IDLE_EXECUTION_SNAPSHOT_BLOCKED:${message}`;
             state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route,
-                accepted: false, reason, finalScore: allocated?.finalScore, rejectionReason: reason, scoreSource: liveCandidate.scoreSource };
+                accepted: false, reason, finalScore: allocated?.finalScore, rejectionReason: reason, scoreSource: liveCandidate.scoreSource, approvalSource: "REGISTRY_ALLOCATION" };
             await this.dependencies.stateStore.save(state);
             return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
@@ -705,7 +709,7 @@ export class IdlePriorityShortRunner {
             return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
         const clientOrderId = deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
-        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: admission.gross };
+        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: admission.gross, approvalSource: "REGISTRY_ALLOCATION" };
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         try {

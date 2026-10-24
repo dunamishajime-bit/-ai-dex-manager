@@ -1,6 +1,8 @@
 import { scoreDynamicEntryCandidate, type DynamicBtPriorMetrics, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
 import type { StrictPortfolioIntent, StrictStrategy } from "./disdex-strict-portfolio-planner";
 
+export type LiveEntryApprovalSource = "REGISTRY_ALLOCATION" | "STRICT_PLANNER_APPROVAL" | "V12_RESIDUAL_APPROVAL";
+
 export type LiveEntryCandidate = DynamicEntryCandidate & {
     strategy: StrictStrategy;
     idempotencyKey: string;

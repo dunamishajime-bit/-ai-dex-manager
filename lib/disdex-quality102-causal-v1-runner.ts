@@ -1536,6 +1536,7 @@ export class Quality102CausalV1Runner {
             exitPolicy: signal.exitPolicy,
             maxHoldHours: signal.maxHoldHours,
             reason: `${signal.reason}:${signal.family || "UNKNOWN"}`,
+            approvalSource: "STRICT_PLANNER_APPROVAL",
         };
         if (!pending.hardStop) return this.manualReview(state, "Q102 signal has no recovered hard-stop metadata; entry blocked.", idempotencyKey);
         state.pending = pending;

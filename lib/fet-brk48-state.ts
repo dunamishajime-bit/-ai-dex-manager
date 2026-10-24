@@ -1,6 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { FetBrk48TrailingStopState } from "./fet-brk48-trailing-stop";
+import type { LiveEntryApprovalSource } from "./disdex-live-entry-approval";
 
 export const FET_BRK48_STATE_SCHEMA = "fet-brk48-residual-state/v1" as const;
 export type FetPendingAction = "ENTRY" | "EXIT" | "PREEMPT";
@@ -37,6 +38,7 @@ export interface FetBrk48PendingState {
   entryTs?: number;
   exitTs?: number;
   hardStopPct?: number;
+  approvalSource?: LiveEntryApprovalSource;
 }
 
 export interface FetBrk48State {
@@ -100,6 +102,7 @@ function validPending(p: any): p is FetBrk48PendingState {
   if (!["BUY", "SELL"].includes(p.side) || !finitePositive(p.quantity)) return false;
   if (!finitePositive(p.referenceTs) || !finitePositive(p.createdAt) || !finitePositive(p.updatedAt) || !finitePositive(p.expectedPrice)) return false;
   if (typeof p.reason !== "string" || !p.reason) return false;
+  if (p.approvalSource !== undefined && p.approvalSource !== "STRICT_PLANNER_APPROVAL") return false;
   if (p.action === "ENTRY") {
     if (!finitePositive(p.targetGross) || !finitePositive(p.entryTs) || !finitePositive(p.exitTs) || Number(p.exitTs) <= Number(p.entryTs)) return false;
     if (!finitePositive(p.hardStopPct) || Number(p.hardStopPct) >= 1) return false;

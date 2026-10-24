@@ -18,7 +18,7 @@ import { buildHypeZecProtection, calculateHypeZecQuantity, evaluateHypeLongSigna
 import { buildHypeTrendSignal, type HypeTrendCandle } from "./hype-trend-long-signal";
 import { evaluateHypeTrendEntryGate } from "./hype-trend-long-runner";
 import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
-import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
+import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral, type HypeZecLongPending, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
 import { BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW } from "./hype-zec-long-recovery-contract";
 import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
 
@@ -148,6 +148,10 @@ function hasZecResidual(state: HypeZecLongRunnerState, positions: readonly Direc
 function actualQuantity(position: DirectPosition) { return Math.abs(position.quantity); }
 function gross(position: DirectPosition, equity: number) { return equity > 0 ? Math.abs(position.notionalUsd) / equity : Number.POSITIVE_INFINITY; }
 function hashId(parts: readonly unknown[], prefix: string) { return `${prefix}-${createHash("sha256").update(parts.join("|")).digest("hex").slice(0, 27)}`.slice(0, 36); }
+export function deterministicHypeZecEntryIdempotencyKey(strategy: "HYPE_LONG" | "ZEC_LONG", signalTs: number, symbol: string) {
+  if (!Number.isFinite(signalTs) || signalTs <= 0 || !symbol.trim()) throw new Error("HYPE_ZEC_ENTRY_IDENTITY_INVALID");
+  return hashId([strategy, signalTs, symbol.toUpperCase()], "hz-entry");
+}
 function active(order: DirectOpenOrder) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase()); }
 function hasExposure(result: DirectTradeResult) { return ["FILLED", "PARTIALLY_FILLED"].includes(result.status) && result.executedQuantity > EPSILON; }
 
@@ -384,8 +388,9 @@ export class HypeZecLongRunner {
     }
     const candidateGross = Math.min(sizing.gross, this.dependencies.runtime.maximumGross);
     if (candidateGross * equity < 1) return { status: "held", message: `HYPE_ZEC_BELOW_MINIMUM:${symbol}`, strategy: signal.strategy };
+    const idempotencyKey = deterministicHypeZecEntryIdempotencyKey(signal.strategy, signal.signalTs, symbol);
     const liveCandidate = buildLiveEntryCandidate({
-      idempotencyKey: `${signal.strategy}|${signal.signalTs}|ENTRY`, strategy: signal.strategy,
+      idempotencyKey, strategy: signal.strategy,
       symbol, side: "LONG", signalTs: signal.signalTs,
       score: liveEntryScore(signal.strategy), targetGross: candidateGross,
       minGross: 1 / equity, maxGross: this.dependencies.runtime.maximumGross,
@@ -401,7 +406,7 @@ export class HypeZecLongRunner {
       intents: [candidate],
     });
     const accepted = plan.status === "planned" ? plan.accepted.find((intent) => intent.strategy === signal.strategy) : undefined;
-    state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: Boolean(accepted), reason: accepted ? signal.reason : (plan.reason || plan.rejected.find((row) => row.intent.strategy === signal.strategy)?.reason || "CAPACITY_BLOCKED"), marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource };
+    state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: Boolean(accepted), reason: accepted ? signal.reason : (plan.reason || plan.rejected.find((row) => row.intent.strategy === signal.strategy)?.reason || "CAPACITY_BLOCKED"), marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource, approvalSource: "STRICT_PLANNER_APPROVAL" };
     state.lastDecisionTs = this.now();
     if (!accepted) { await this.dependencies.stateStore.save(state); return { status: "held", message: `HYPE_ZEC_ENTRY_CAPACITY_BLOCKED:${state.lastDecision.reason}`, strategy: signal.strategy }; }
     let approvedGross: number;
@@ -410,20 +415,19 @@ export class HypeZecLongRunner {
         snapshotAt: account.updatedAt, approvedAt: plannerNow, maxAgeMs: 5 * 60_000 });
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason, marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource };
+      state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason, marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource, approvalSource: "STRICT_PLANNER_APPROVAL" };
       await this.dependencies.stateStore.save(state);
       return { status: "held", message: `HYPE_ZEC_${reason}`, strategy: signal.strategy };
     }
     state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: true, reason: signal.reason,
-      approvedGross, marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource };
+      approvedGross, marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource, approvalSource: "STRICT_PLANNER_APPROVAL" };
     if (this.dependencies.runtime.mode !== "LIVE") { await this.dependencies.stateStore.save(state); return { status: "shadow", message: `HYPE_ZEC_SHADOW_ENTRY:${symbol}`, strategy: signal.strategy }; }
     const quantity = await this.dependencies.executor.normalizeMarketQuantity(symbol, sizing.quantity * (approvedGross / candidateGross), signal.entryPrice);
     if (!(quantity.quantity > 0) || quantity.notional < 1) { await this.dependencies.stateStore.save(state); return { status: "held", message: `HYPE_ZEC_NORMALIZED_MINIMUM_BLOCKED:${symbol}`, strategy: signal.strategy }; }
-    const idempotencyKey = hashId([signal.strategy, signal.signalTs, symbol, quantity.quantity], "hz-entry");
     const exposureReservation = await lock.reserve({ strategyId: signal.strategy, symbol, side: "LONG",
       gross: approvedGross, notionalUsd: approvedGross * equity });
-    const pendingEntry = { idempotencyKey, clientOrderId: idempotencyKey, action: "ENTRY" as const, strategy: signal.strategy, symbol, side: "BUY" as const, quantity: quantity.quantity, expectedPrice: signal.entryPrice, phase: "planned" as const, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason,
-      reservationId: exposureReservation.reservationId, approvedGross, marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource };
+    const pendingEntry: HypeZecLongPending = { idempotencyKey, clientOrderId: idempotencyKey, action: "ENTRY", strategy: signal.strategy, symbol, side: "BUY", quantity: quantity.quantity, expectedPrice: signal.entryPrice, phase: "planned", createdAt: this.now(), updatedAt: this.now(), reason: signal.reason,
+      reservationId: exposureReservation.reservationId, approvedGross, marketFitScore: liveCandidate.marketFitScore, scoreSource: liveCandidate.scoreSource, approvalSource: "STRICT_PLANNER_APPROVAL" };
     state.pending = pendingEntry;
     try {
       await this.dependencies.stateStore.save(state);
@@ -434,7 +438,7 @@ export class HypeZecLongRunner {
     }
     let result: DirectTradeResult;
     try {
-      state.pending.phase = "submitted";
+      pendingEntry.phase = "submitted";
       await this.dependencies.stateStore.save(state);
       result = await this.dependencies.executor.executeMarket({ requestId: idempotencyKey, clientOrderId: idempotencyKey, symbol, side: "BUY", positionSide: "BOTH", quantity: quantity.quantity, expectedPrice: signal.entryPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `HYPE_ZEC_${signal.strategy}_ENTRY`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: approvedGross * equity });
     } catch (error) {

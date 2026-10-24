@@ -6,7 +6,7 @@ import test from "node:test";
 
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { buildSharedCryptoDailyRiskState, SHARED_CRYPTO_STRATEGIES, writeSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
-import { FetBrk48LiveRunner } from "../lib/fet-brk48-live-runner";
+import { deterministicFetEntryIdempotencyKey, FetBrk48LiveRunner } from "../lib/fet-brk48-live-runner";
 import { readFetBrk48State } from "../lib/fet-brk48-state";
 
 const HOUR = 3_600_000;
@@ -244,12 +244,14 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     assert.equal(tradeCalls[0].side, "BUY");
     assert.equal(tradeCalls[0].requireVenueMargin5xCross, true);
     assert.equal(tradeCalls[0].maxEntryNotionalUsd, 100);
+    assert.equal(tradeCalls[0].requestId, deterministicFetEntryIdempotencyKey(first.signal!.referenceTs));
     assert.equal(openOrders.length, 1);
     assert.equal(openOrders[0].type, "STOP_MARKET");
     assert.equal(openOrders[0].reduceOnly, true);
     assert.ok(openOrders[0].quantity > 0);
 
     const afterEntry = await readFetBrk48State(statePath, RUNTIME_SHA);
+    assert.equal(afterEntry.lastCompletedIdempotencyKey, tradeCalls[0].requestId);
     assert.ok(afterEntry.position);
     assert.equal(afterEntry.position?.quantity, openOrders[0].quantity);
     assert.equal(afterEntry.position?.protectionMode, "INITIAL_HARD_STOP");

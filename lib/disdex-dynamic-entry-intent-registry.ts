@@ -8,7 +8,7 @@ export const DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA = "disdex-dynamic-entry-intent
 export type DynamicEntryIntent = DynamicEntryCandidate & { cycleId: string; submittedAt: number };
 export type DynamicEntryAllocationDecision = Omit<DynamicEntryAllocationResult, "allocations"> & {
     allocations: Array<DynamicEntryAllocation & { reservationId: string }>;
-    cycleId: string; decisionId: string; decidedAt: number;
+    cycleId: string; decisionId: string; decidedAt: number; approvalSource: "REGISTRY_ALLOCATION";
 };
 type Document = { schema: typeof DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA; intents: DynamicEntryIntent[]; decisions: DynamicEntryAllocationDecision[] };
 
@@ -132,7 +132,7 @@ export class FileDynamicEntryIntentRegistry {
         return this.synchronized(async () => {
             const doc = await read(this.path);
             const existing = doc.decisions.find((decision) => decision.cycleId === input.cycleId);
-            if (existing) return existing;
+            if (existing) return existing.approvalSource ? existing : { ...existing, approvalSource: "REGISTRY_ALLOCATION" };
             await input.lock.document(); // Revalidates owner, lease ID, and expiry before claiming the cycle.
             assertCapMap(input.strategyGrossAvailable, "strategy");
             assertCapMap(input.positionGrossAvailable, "position");
@@ -167,7 +167,7 @@ export class FileDynamicEntryIntentRegistry {
                 const decisionId = createHash("sha256").update(`${input.cycleId}|${allocation.allocations.map((row) => `${row.id}:${row.allocatedGross}`).join("|")}`).digest("hex").slice(0, 24);
                 const decision: DynamicEntryAllocationDecision = { ...allocation,
                     allocations: allocation.allocations.map((row, index) => ({ ...row, reservationId: reservations[index] })),
-                    cycleId: input.cycleId, decisionId, decidedAt: input.now };
+                    cycleId: input.cycleId, decisionId, decidedAt: input.now, approvalSource: "REGISTRY_ALLOCATION" };
                 doc.decisions.push(decision);
                 await write(this.path, doc);
                 return decision;

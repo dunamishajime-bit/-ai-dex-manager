@@ -22,7 +22,12 @@ export type IdleLiveAdmissionInput = {
     venueFiveXCrossConfirmed: boolean;
     fullCryptoGrossAvailable: number;
     fullTotalGrossAvailable: number;
-    allocatedGross?: number;
+    /** Gross returned by the allocator; undefined is an explicit no-approval state. */
+    allocatedGross: number | undefined;
+    /** Timestamp on the allocator decision that produced allocatedGross. */
+    allocationDecidedAt: number | undefined;
+    /** Current time at this admission boundary, supplied by the runner for deterministic validation. */
+    allocationNow: number;
     sameSymbolIdleActive: boolean;
 };
 
@@ -71,9 +76,12 @@ export type IdleLiveAdmissionResult = {
 };
 
 const EPSILON = 1e-9;
+const IDLE_ALLOCATOR_APPROVAL_MAX_AGE_MS = 5 * 60_000;
 
 export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLiveAdmissionResult {
-    const requestedGross = input.symbol ? IDLE_PRIORITY_SHORT_POLICY.routes[input.symbol].gross : 1;
+    const route = input.symbol ? IDLE_PRIORITY_SHORT_POLICY.routes[input.symbol] : undefined;
+    const targetGross = route?.gross ?? 1;
+    const minimumGross = route?.minGross ?? 1;
     if (input.runtimeMode !== "LIVE" || !input.operatorArmed) return { accepted: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED", gross: 0 };
     if (!input.baselineFresh || !input.baselineSourceComplete || input.baselineDecisionTs !== input.decisionTs) {
         return { accepted: false, reason: "BASELINE_ADMISSION_UNAVAILABLE", gross: 0 };
@@ -85,9 +93,18 @@ export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLi
     if (input.killSwitchActive) return { accepted: false, reason: "SHARED_KILL_SWITCH_ACTIVE", gross: 0 };
     if (!input.venueFiveXCrossConfirmed) return { accepted: false, reason: "VENUE_5X_CROSS_UNCONFIRMED", gross: 0 };
     if (!input.candidateAccepted || input.candidateSide !== "SHORT") return { accepted: false, reason: "SHORT_SIGNAL_NOT_ACCEPTED", gross: 0 };
-    const allocatedGross = input.allocatedGross ?? requestedGross;
-    const minimumGross = input.symbol ? IDLE_PRIORITY_SHORT_POLICY.routes[input.symbol].minGross : requestedGross;
-    if (allocatedGross < minimumGross - EPSILON || allocatedGross > requestedGross + EPSILON
+    const allocatedGross = input.allocatedGross;
+    const allocationDecidedAt = input.allocationDecidedAt;
+    if (typeof allocatedGross !== "number" || !Number.isFinite(allocatedGross) || allocatedGross <= 0) {
+        return { accepted: false, reason: "ALLOCATOR_APPROVAL_MISSING", gross: 0 };
+    }
+    if (typeof allocationDecidedAt !== "number" || !Number.isFinite(allocationDecidedAt) || !Number.isFinite(input.allocationNow)
+        || allocationDecidedAt <= 0 || input.allocationNow <= 0
+        || allocationDecidedAt > input.allocationNow
+        || input.allocationNow - allocationDecidedAt > IDLE_ALLOCATOR_APPROVAL_MAX_AGE_MS) {
+        return { accepted: false, reason: "ALLOCATOR_APPROVAL_STALE", gross: 0 };
+    }
+    if (allocatedGross < minimumGross - EPSILON || allocatedGross > targetGross + EPSILON
         || allocatedGross > input.fullCryptoGrossAvailable + EPSILON || allocatedGross > input.fullTotalGrossAvailable + EPSILON) {
         return { accepted: false, reason: `GROSS_CAPACITY_UNAVAILABLE:${minimumGross}X_MINIMUM`, gross: 0 };
     }

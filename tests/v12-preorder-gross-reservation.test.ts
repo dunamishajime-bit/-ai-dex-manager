@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { validateV12EntryGrossReservation } from "@/lib/v12-top2-residual";
+import { bindV12ResidualDecision, decideV12ResidualEntry, validateV12EntryGrossReservation, requireBoundV12ResidualApproval } from "@/lib/v12-top2-residual";
 
 const baseSnapshot = {
     v12Gross: 1.25,
@@ -68,4 +68,59 @@ test("invalid/stale gross snapshots fail closed", () => {
         candidateDynamicGross: 0,
         candidateWorstCaseGross: 0,
     }), /V12_DYNAMIC_GROSS_SNAPSHOT_INVALID/);
+});
+
+test("V12 residual approval is bound to the earlier decision timestamp and candidate snapshot identity", () => {
+    const decision = decideV12ResidualEntry(0.5, {
+        v12Gross: 0,
+        v12BaseGross: 0,
+        v12DynamicGross: 0,
+        cryptoGross: 0,
+        stockGross: 0,
+        totalGross: 0,
+    });
+    const bound = bindV12ResidualDecision(decision, {
+        idempotencyKey: "v12-entry-key",
+        symbol: "BTCUSDT",
+        side: "LONG",
+        signalTs: 1_699_999_900_000,
+        approvedAt: 1_700_000_000_000,
+        snapshotAt: 1_700_000_000_000,
+        equityUsd: 1_000,
+    });
+    assert.equal(bound.approval?.approvedAt, 1_700_000_000_000);
+    assert.equal(Object.isFrozen(bound.approval), true);
+    assert.equal(requireBoundV12ResidualApproval({
+        decision: bound,
+        idempotencyKey: "v12-entry-key",
+        symbol: "BTCUSDT",
+        side: "LONG",
+        signalTs: 1_699_999_900_000,
+        currentSnapshotAt: 1_700_000_000_000,
+        equityUsd: 1_000,
+        now: 1_700_000_001_000,
+        maxAgeMs: 5_000,
+    }).approvedAt, 1_700_000_000_000);
+    assert.throws(() => requireBoundV12ResidualApproval({
+        decision: bound,
+        idempotencyKey: "different-key",
+        symbol: "BTCUSDT",
+        side: "LONG",
+        signalTs: 1_699_999_900_000,
+        currentSnapshotAt: 1_700_000_000_000,
+        equityUsd: 1_000,
+        now: 1_700_000_001_000,
+        maxAgeMs: 5_000,
+    }), /V12_APPROVAL_CANDIDATE_MISMATCH/);
+    assert.throws(() => requireBoundV12ResidualApproval({
+        decision,
+        idempotencyKey: "v12-entry-key",
+        symbol: "BTCUSDT",
+        side: "LONG",
+        signalTs: 1_699_999_900_000,
+        currentSnapshotAt: 1_700_000_000_000,
+        equityUsd: 1_000,
+        now: 1_700_000_001_000,
+        maxAgeMs: 5_000,
+    }), /V12_APPROVAL_METADATA_MISSING/);
 });
