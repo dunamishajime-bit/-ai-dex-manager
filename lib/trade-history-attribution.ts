@@ -20,6 +20,10 @@ export type TradeHistoryAttribution = {
 
 export type TradeHistoryAttributionTone =
   | "v12"
+  | "v12-v4"
+  | "fet"
+  | "hype"
+  | "idle"
   | "q102"
   | "pengu"
   | "recovery-v8"
@@ -66,6 +70,10 @@ export function getTradeHistoryAttributionTone(attribution?: TradeHistoryAttribu
   if (labels.includes("SHORT V20")) return "short-v20";
   if (labels.includes("Q102") || labels.includes("QUALITY102")) return "q102";
   if (labels.includes("PENGU")) return "pengu";
+  if (labels.includes("V12 V4")) return "v12-v4";
+  if (labels.includes("FET")) return "fet";
+  if (labels.includes("HYPE")) return "hype";
+  if (labels.includes("IDLE")) return "idle";
   if (labels.includes("V52")) return "v52";
   if (labels.includes("V12")) return "v12";
   return attribution.classification === "alternate-route" ? "alternate-route" : attribution.classification === "logic" ? "logic" : "unknown";
@@ -87,6 +95,10 @@ function logicLabel(strategyId: string, reason: string) {
   if (normalized.includes("QUALITY102") || normalized === "Q102") {
     return reason.toUpperCase().includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
   }
+  if (normalized.includes("V12_V4") || normalized.includes("V12 V4")) return "V12 V4";
+  if (normalized.includes("FET")) return "FET BRK48";
+  if (normalized.includes("HYPE")) return "HYPE LONG";
+  if (normalized.includes("IDLE")) return "Idle SHORT";
   if (normalized.includes("PENGU")) return "PENGU";
   if (normalized.includes("V12")) return "V12";
   if (normalized.includes("V52")) return "V52";
@@ -99,6 +111,10 @@ function explicitLogicId(strategyId: string, reason: string) {
   if (label) return label;
   const upper = reason.toUpperCase();
   if (/QUALITY102|Q102/.test(upper)) return upper.includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
+  if (/V12[_ ]V4/.test(upper)) return "V12 V4";
+  if (/FET/.test(upper)) return "FET BRK48";
+  if (/HYPE/.test(upper)) return "HYPE LONG";
+  if (/IDLE/.test(upper)) return "Idle SHORT";
   if (/PENGU/.test(upper)) return "PENGU";
   if (/V12/.test(upper)) return "V12";
   if (/V52/.test(upper)) return "V52";

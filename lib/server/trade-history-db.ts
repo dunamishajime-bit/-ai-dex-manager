@@ -47,7 +47,7 @@ export interface TradeHistoryEntry {
   tradeStatus?: "open" | "closed" | "unmatched_exit";
   /** Whether an open fill is confirmed by the current venue position snapshot. */
   positionVerified?: boolean;
-  strategyId?: "V12" | "V96" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
+  strategyId?: "V12" | "V12_V4" | "V96" | "V52" | "PENGU" | "QUALITY102" | "Q102" | "FET" | "HYPE" | "IDLE" | "RESIDUAL" | "UNKNOWN";
   netPnlUsd?: number;
   attribution?: TradeHistoryAttribution;
 }

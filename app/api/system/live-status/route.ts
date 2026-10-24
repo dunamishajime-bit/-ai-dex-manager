@@ -1,34 +1,20 @@
-import { readFile } from "node:fs/promises";
-import { isAbsolute } from "node:path";
 import { NextRequest, NextResponse } from "next/server";
+import { loadV12V4HpObservability } from "@/lib/server/v12-v4-hp-observability";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-function finite(value: unknown) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
+const headers = { "Cache-Control": "private, no-store, max-age=0" };
 
 export async function GET(req: NextRequest) {
   if (req.cookies.get("disdex_auth")?.value !== "1") {
-    return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, status: "UNAVAILABLE", error: "Authentication required." }, { status: 401 });
+    return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, status: "UNAVAILABLE", error: "Authentication required." }, { status: 401, headers });
   }
 
   const checkedAt = new Date().toISOString();
-  const configuredPath = String(process.env.V12_X1_ALL_STATE_PATH || "").trim();
-  if (!configuredPath || !isAbsolute(configuredPath)) {
-    return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, status: "UNAVAILABLE", checkedAt, error: "V12_X1_ALL_STATE_PATH is not configured as an absolute path." }, { headers: { "Cache-Control": "private, no-store, max-age=0" }, status: 503 });
-  }
-
   try {
-    const state = JSON.parse(await readFile(configuredPath, "utf8")) as Record<string, unknown>;
-    const mode = typeof state.mode === "string" ? state.mode.toUpperCase() : "";
-    const updatedAt = finite(state.updatedAt);
-    const ageMs = updatedAt == null ? undefined : Math.max(0, Date.now() - updatedAt);
-    const stale = ageMs == null || ageMs > 6 * 60 * 60 * 1000;
-    const status = mode === "LIVE" && !stale ? "LIVE" : mode === "LIVE" ? "STALE" : "UNAVAILABLE";
-    const active = state.active as Record<string, unknown> | undefined;
+    const v4 = await loadV12V4HpObservability();
+    const status = v4.displayStatus === "LIVE_VERIFIED" ? "LIVE" : v4.displayStatus === "STALE" ? "STALE" : "UNAVAILABLE";
+    const updatedAt = v4.timestamps.heartbeatUpdatedAt;
     return NextResponse.json({
       ok: status === "LIVE",
       readOnly: true,
@@ -36,10 +22,13 @@ export async function GET(req: NextRequest) {
       status,
       checkedAt,
       runnerUpdatedAt: updatedAt == null ? undefined : new Date(updatedAt).toISOString(),
-      strategyId: typeof state.strategyId === "string" ? state.strategyId : undefined,
-      activeSymbol: typeof active?.symbol === "string" ? active.symbol : undefined,
-      mode: mode || undefined,
-      reason: status === "LIVE" ? "V12 runner state is LIVE and fresh." : status === "STALE" ? "V12 runner state is LIVE but stale." : "V12 runner state is not LIVE.",
+      strategyId: "V12_V4",
+      activeSymbol: v4.candidates[0]?.symbol,
+      mode: v4.actual.v4RunnerMode,
+      releaseSha: v4.actual.v4ReleaseSha || v4.actual.currentReleaseSha,
+      primaryMode: v4.actual.v12PrimaryMode,
+      orderEnabled: v4.actual.orderEnabled,
+      reason: v4.errors.length ? v4.errors.join(" / ") : status === "LIVE" ? "V12 V4 heartbeat・decision source・primary modeを確認しました。" : status === "STALE" ? "V12 V4 state/decision sourceがSTALEです。" : "V12 V4 runner stateはLIVE確認条件未達です。",
     }, { headers: { "Cache-Control": "private, no-store, max-age=0" } });
   } catch (error) {
     return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, status: "UNAVAILABLE", checkedAt, error: error instanceof Error ? error.message : "V12 runner state could not be read." }, { headers: { "Cache-Control": "private, no-store, max-age=0" }, status: 503 });

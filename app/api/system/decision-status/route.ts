@@ -4,9 +4,12 @@ import { loadV12DecisionObservability } from "@/lib/server/v12-decision-observab
 import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
 import { loadQuality102RuntimeObservability } from "@/lib/server/quality102-runtime-observability";
+import { loadV12V4HpObservability } from "@/lib/server/v12-v4-hp-observability";
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+const headers = { "Cache-Control": "private, no-store, max-age=0" };
 export async function GET(req: NextRequest) {
-  if (req.cookies.get("disdex_auth")?.value !== "1") return NextResponse.json({ ok: false, readOnly: true, error: "ログインが必要です。" }, { status: 401 });
+  if (req.cookies.get("disdex_auth")?.value !== "1") return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, error: "ログインが必要です。" }, { status: 401, headers });
   try {
     const snapshot = await loadDecisionStatus({ force: req.nextUrl.searchParams.get("refresh") === "1" });
     let v12Observability;
@@ -33,12 +36,14 @@ export async function GET(req: NextRequest) {
         recentFills: [],
         wiring: { runnerStateConfigured: false, decisionSnapshotConfigured: false },
         errors: [observabilityError instanceof Error ? observabilityError.message : "V12 observability failed."],
+        warnings: [],
       };
     }
-    const [v52Top2Observability, penguRuntime, quality102Runtime] = await Promise.all([
+    const [v52Top2Observability, penguRuntime, quality102Runtime, v12V4] = await Promise.all([
       loadV52Top2Observability(),
       loadPenguRuntimeObservability(),
       loadQuality102RuntimeObservability(),
+      loadV12V4HpObservability(),
     ]);
     const v12UpdatedAt = v12Observability.runnerState?.updatedAt;
     const v12Fresh = v12Observability.wiring.runnerStateConfigured && v12UpdatedAt !== undefined && Date.now() - v12UpdatedAt <= 3 * 60 * 60 * 1000 && v12Observability.runnerState?.mode?.toLowerCase() === "live" && v12Observability.runnerState.killSwitch?.active !== true;
@@ -53,7 +58,7 @@ export async function GET(req: NextRequest) {
         return { ...unit, status: v52Top2Observability.status === "LIVE" ? "LIVE" : v52Top2Observability.status === "STALE" ? "STALE" : "UNAVAILABLE", updatedAt: v52Top2Observability.updatedAt, reason: v52Top2Observability.errors[0] || v52Top2Observability.reason || (v52Top2Observability.status === "LIVE" ? "V52 runner state更新済み、Kill Switch inactiveを確認しました。" : "V52 runner stateがLIVE確認条件を満たしていません。") };
       }),
     };
-    return NextResponse.json({ ...snapshot, runtime, v12Observability, v52Top2Observability, penguRuntime, quality102Runtime }, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ ...snapshot, runtime, v12V4, v12Observability, v52Top2Observability, penguRuntime, quality102Runtime }, { headers });
   }
-  catch (error) { return NextResponse.json({ ok: false, readOnly: true, error: error instanceof Error ? error.message : "判定データを取得できません。" }, { status: 503 }); }
+  catch (error) { return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, error: error instanceof Error ? error.message : "判定データを取得できません。" }, { headers, status: 503 }); }
 }

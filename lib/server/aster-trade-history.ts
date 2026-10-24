@@ -7,11 +7,17 @@ import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
 import { deriveTradeHistoryAttribution } from "@/lib/trade-history-attribution";
 
+const CACHE_TTL_MS = 5 * 60_000;
+const HISTORY_LOOKBACK_MS = 90 * 24 * 60 * 60 * 1000;
+// Aster rejects a userTrades query whose interval is 7 days or longer.
+const HISTORY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000 - 1_000;
+const HISTORICAL_SYMBOLS = ["FETUSDT", "HYPEUSDT", "DOTUSDT", "ZECUSDT", "PLUMEUSDT"] as const;
+
 const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
   ...liveConfig.cryptoSymbols,
   ...liveConfig.stockSymbols,
+  ...HISTORICAL_SYMBOLS,
 ]));
-const CACHE_TTL_MS = 60_000;
 const STABLE_ASSETS = new Set(["USDT", "USDC", "USDF", "BUSD", "FDUSD"]);
 
 type Direction = "LONG" | "SHORT";
@@ -28,6 +34,22 @@ export type AsterTradeHistoryResult = {
   error?: string;
 };
 
+export type AsterHistoryWindow = { startTime: number; endTime: number };
+
+export function buildAsterHistoryWindows(startTime: number, endTime: number): AsterHistoryWindow[] {
+  const start = Math.max(0, Math.floor(startTime));
+  const end = Math.max(0, Math.floor(endTime));
+  if (start > end) return [];
+  const windows: AsterHistoryWindow[] = [];
+  let cursor = start;
+  while (cursor <= end) {
+    const windowEnd = Math.min(end, cursor + HISTORY_WINDOW_MS);
+    windows.push({ startTime: cursor, endTime: windowEnd });
+    cursor = windowEnd + 1;
+  }
+  return windows;
+}
+
 function finite(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -37,13 +59,16 @@ function baseSymbol(symbol: string) {
   return symbol.endsWith("USDT") ? symbol.slice(0, -4) : symbol;
 }
 
-function strategyForSymbol(symbol: string): "V12" | "V52" | "PENGU" | "QUALITY102" {
+function strategyForSymbol(symbol: string): "V12" | "V52" | "PENGU" | "QUALITY102" | "FET" | "HYPE" | "UNKNOWN" {
   if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
   if (symbol === liveConfig.penguSymbol) return "PENGU";
+  if (symbol === "FETUSDT") return "FET";
+  if (symbol === "HYPEUSDT") return "HYPE";
   if (liveConfig.quality102Runtime.symbols.includes(symbol as (typeof liveConfig.quality102Runtime.symbols)[number])) {
     return "QUALITY102";
   }
-  return "V12";
+  if (liveConfig.v12Symbols.includes(symbol as (typeof liveConfig.v12Symbols)[number])) return "V12";
+  return "UNKNOWN";
 }
 
 function isEntry(direction: Direction, side: "BUY" | "SELL") {
@@ -204,28 +229,31 @@ function toHistoryEntry(
   };
 }
 
+async function fetchTimeRangeTrades(client: AsterDexClient, symbol: string, startTime: number, endTime: number, depth = 0): Promise<AsterDexUserTrade[]> {
+  const rows = await client.getUserTrades(symbol, { limit: 1000, startTime, endTime });
+  if (rows.length < 1000 || depth >= 6 || endTime - startTime < 60 * 60 * 1000) return rows;
+  const midpoint = Math.floor((startTime + endTime) / 2);
+  const [left, right] = await Promise.all([
+    fetchTimeRangeTrades(client, symbol, startTime, midpoint, depth + 1),
+    fetchTimeRangeTrades(client, symbol, midpoint + 1, endTime, depth + 1),
+  ]);
+  return [...left, ...right];
+}
+
 async function fetchSymbolTrades(client: AsterDexClient, symbol: string) {
   const rows: AsterDexUserTrade[] = [];
   const seen = new Set<string>();
-  let fromId: number | undefined;
-
-  for (let page = 0; page < 20; page += 1) {
-    const pageRows = await client.getUserTrades(symbol, { limit: 1000, fromId });
-    if (!Array.isArray(pageRows) || pageRows.length === 0) break;
-    let newRows = 0;
+  const now = Date.now();
+  for (const window of buildAsterHistoryWindows(now - HISTORY_LOOKBACK_MS, now)) {
+    const pageRows = await fetchTimeRangeTrades(client, symbol, window.startTime, window.endTime);
+    if (!Array.isArray(pageRows)) continue;
     for (const row of pageRows) {
       const key = String(row.id ?? String(row.orderId ?? "unknown") + ":" + String(row.time ?? "unknown") + ":" + String(row.qty ?? "unknown"));
       if (!seen.has(key)) {
         seen.add(key);
         rows.push(row);
-        newRows += 1;
       }
     }
-    if (pageRows.length < 1000 || newRows === 0) break;
-    const ids = pageRows.map((row) => Number(row.id)).filter(Number.isFinite);
-    const lastId = ids.length ? Math.max(...ids) : undefined;
-    if (lastId === undefined || fromId === lastId + 1) break;
-    fromId = lastId + 1;
   }
 
   return rows.sort((left, right) => finite(left.time) - finite(right.time));

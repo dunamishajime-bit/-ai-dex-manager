@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { loadCurrentProductionRuntime, type CurrentProductionRuntime } from "@/lib/server/current-production-runtime";
+import type { V12V4HpSnapshot } from "@/lib/v12-v4-hp-contract";
 
 type Sleeve = "V12" | "V52";
 type Status = "発火候補" | "候補に近い" | "条件不足" | "対象時間外" | "取得不能";
@@ -47,11 +49,13 @@ export type DecisionStatusSnapshot = {
   };
   v12: { items: DecisionStatusItem[] };
   v52: { marketOpen: boolean; marketLabel: string; items: DecisionStatusItem[] };
+  productionRuntime?: CurrentProductionRuntime;
+  v12V4?: V12V4HpSnapshot;
   error?: string;
 };
 
 let cache: { expiresAt: number; snapshot: DecisionStatusSnapshot } | null = null;
-const CACHE_TTL_MS = 55 * 60 * 1000;
+const CACHE_TTL_MS = 25_000;
 
 function object(value: unknown): JsonObject | null {
   return value && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
@@ -83,57 +87,71 @@ async function readState(pathValue: string | undefined, label: string): Promise<
   return parsed;
 }
 
-export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runtime"] {
+export function runtimeSnapshot(checkedAt: string, currentRuntime: CurrentProductionRuntime | null = null): DecisionStatusSnapshot["runtime"] {
+  const releaseSha = currentRuntime?.releaseSha || "UNAVAILABLE";
+  const caps = currentRuntime?.caps;
   return {
     checkedAt,
     units: [
       {
         id: "V12_X1.00_ALL",
-        label: "V12 X1.00 ALL Top2",
+        label: currentRuntime?.v12.strategyId || "V12 runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.v12,
+        releaseSha,
         venue: "Aster Futures V3",
-        timeframe: "完成済み1時間足 → 2時間足",
-        entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。合計1.50x / 1件1.00x",
-        protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch。Crypto共有2.00x / Total2.50x",
-        note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
-        reason: "V12 runner stateの実読取結果を待機中です。",
+        timeframe: currentRuntime ? "closed H1 → H2" : "Production runtime unavailable.",
+        entryPolicy: currentRuntime ? `Top2 / Base ${caps?.v12BaseGross.toFixed(2)}x / Dynamic ${caps?.v12DynamicGross.toFixed(2)}x / per-position ${caps?.v12PerPositionGross.toFixed(2)}x` : "Production runtime unavailable; no static contract fallback.",
+        protection: caps ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / shared daily-loss ${caps.sharedCryptoDailyLossPct}%` : "Production runtime unavailable.",
+        note: "VPS runtime contractとstateが読めた場合だけ実効値を表示します。",
+        reason: "V12 legacy unit is displayed separately from V12 V4.",
       },
       {
         id: "PENGU_DUAL_LS_V2_FINAL",
-        label: "PENGU Dual LS V2 / Short V20",
+        label: currentRuntime?.pengu.strategyId || "PENGU runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.pengu,
+        releaseSha,
         venue: "Aster PENGUUSDT",
-        timeframe: "完成済みPENGU/BTC 1時間足",
-        entryPolicy: "Long/Short条件成立後、次の1時間足。Long最大0.9375x（base0.75×1.25）、Short最大0.75x、保有中の追加・反転なし",
-        protection: "Long/Short hard stop・trailing・max hold。新規ShortのみV20 failure/deadline exit。Crypto Gross上限2.00x / Global Gross上限2.50x",
-        note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
-        reason: "PENGU runner stateの実読取結果を待機中です。",
+        timeframe: currentRuntime ? "closed PENGU/BTC H1" : "Production runtime unavailable.",
+        entryPolicy: currentRuntime ? `Gross ${caps?.penguGross.toFixed(2)}x / recovery ${currentRuntime.pengu.recoveryRule}` : "Production runtime unavailable; no static contract fallback.",
+        protection: caps ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x` : "Production runtime unavailable.",
+        note: "VPS runtime contractとstateが読めた場合だけ実効値を表示します。",
+        reason: "PENGU runner state is evaluated separately below.",
       },
       {
         id: "QUALITY102_CAUSAL_V1",
-        label: "Quality102 derived high-vol sleeve",
+        label: currentRuntime ? `Q102 ${currentRuntime.quality102.selectorMode}` : "Q102 runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.quality102,
+        releaseSha,
         venue: "Aster Futures crypto sleeve",
-        timeframe: "LIVE時点の利用可能データのみ",
-        entryPolicy: "Derived HIGH_VOL selector。1 slot / 最大0.50x。V12・PENGU・V52を優先し、残余Crypto/Total Grossだけを使用",
-        protection: "Crypto Gross最大2.00x / Total Gross最大2.50x、shared risk、Kill Switch、reconciliation、stale-data Fail Closed",
-        note: "歴史的102件selector parity未証明部分とBRKはLIVEに流用せずFail Closed。derived sleeveの実state/heartbeatだけを表示します。",
-        reason: "Quality102 runner state/heartbeatの実読取結果を待機中です。",
+        timeframe: currentRuntime ? "causal LIVE data only" : "Production runtime unavailable.",
+        entryPolicy: currentRuntime ? `${currentRuntime.quality102.selectorMode} / max ${caps?.quality102Gross.toFixed(2)}x` : "Production runtime unavailable; no static contract fallback.",
+        protection: caps ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / shared risk` : "Production runtime unavailable.",
+        note: "Causal selector/planner/live-adapter stateのみを表示します。",
+        reason: "Q102 runner state is evaluated separately below.",
+      },
+      {
+        id: "FET_BRK48_RESIDUAL",
+        label: "FET BRK48 Residual",
+        status: "UNCONFIRMED",
+        releaseSha,
+        venue: "Aster Futures FETUSDT",
+        timeframe: "BRK48 residual signal",
+        entryPolicy: "FET BRK48の確定データだけを評価し、Core entryと競合時は残余枠で判定",
+        protection: caps ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / shared risk` : "Production runtime unavailable.",
+        note: "flat / no-signal時もrunner heartbeatを表示し、state stale時はLIVEにしません。",
+        reason: "FET runner state is evaluated separately below.",
       },
       {
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
         label: "V52 Top2 Aster-only",
         status: "UNCONFIRMED",
-        releaseSha: config.vpsObservedReleases.v52,
+        releaseSha,
         venue: "Aster-only stock sleeves",
-        timeframe: "米国株時間・V11_EQ / V50 window",
-        entryPolicy: "固定snapshotのV50候補をRank1通常=1.00x（basis≥65/net≥5）、強=1.25x（100/15）、Rank2=0.25x（85/10）で最大2建玉。各20秒窓（11:30/12:30/13:30 NY）",
-        protection: "V50 max hold4h・basis stop1.75x・adverse10bps、V11 tiers 0.75/1.00/1.25/1.50、日次損失・建玉照合・共有Kill Switch。Stock1.50x / Crypto2.00x / Global2.50x",
-        note: "VPS stateを実読取できた場合のみLIVE表示。一時的なデータ品質・板・spread拒否だけ窓内retryし、最終拒否はFail Closedです。",
-        reason: "V52 runner stateの実読取結果を待機中です。",
+        timeframe: currentRuntime ? "US stock V11_EQ / V50 windows" : "Production runtime unavailable.",
+        entryPolicy: currentRuntime ? `${currentRuntime.v52.policyId}: Basis>=${currentRuntime.v52.minimumEntryBasisBps}bps / Net Edge>=${currentRuntime.v52.minimumNetEdgeBps}bps` : "Production runtime unavailable; no static contract fallback.",
+        protection: caps ? `Stock ${caps.stockGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x` : "Production runtime unavailable.",
+        note: "VPS runtime contractとstateが読めた場合だけ実効値を表示します。",
+        reason: "V52 runner state is evaluated separately below.",
       },
     ],
   };
@@ -148,7 +166,7 @@ function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reas
     scoreMax: 1,
     status: "取得不能",
     side: "WAIT",
-    reason: `${reason} VPSのsanitized snapshotがない場合、過去データから推測表示しません。`,
+    reason,
     checkedAt,
     source: "VPS runner state / sanitized decision snapshot",
   };
@@ -248,6 +266,10 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
 
   const checkedAt = new Date(now).toISOString();
   const errors: string[] = [];
+  const currentRuntime = await loadCurrentProductionRuntime().catch((error) => {
+    errors.push(error instanceof Error ? error.message : "Current production runtime could not be resolved.");
+    return null;
+  });
   let v12State: JsonObject | null = null;
   let v52State: JsonObject | null = null;
 
@@ -289,12 +311,13 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
   const snapshot: DecisionStatusSnapshot = {
     ok: errors.length === 0,
     readOnly: true,
-    refreshIntervalMinutes: 180,
+    refreshIntervalMinutes: 0.5,
     checkedAt,
     source: "VPS runner state / sanitized decision snapshot",
-    runtime: runtimeSnapshot(checkedAt),
+    runtime: runtimeSnapshot(checkedAt, currentRuntime),
     v12: { items: v12Items },
     v52: { marketOpen: market.open, marketLabel: market.label, items: v52Items },
+    productionRuntime: currentRuntime ?? undefined,
     error: errors.length ? errors.join(" / ") : undefined,
   };
   cache = { expiresAt: now + CACHE_TTL_MS, snapshot };
