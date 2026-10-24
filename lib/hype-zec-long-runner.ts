@@ -81,10 +81,10 @@ function actualPosition(positions: readonly DirectPosition[], symbol: string) {
   return positions.find((position) => position.symbol.toUpperCase() === symbol.toUpperCase() && Math.abs(position.quantity) > EPSILON);
 }
 
-function hasLiveZecResidual(state: HypeZecLongRunnerState, positions: readonly DirectPosition[], openOrders: readonly DirectOpenOrder[]) {
+function hasZecResidual(state: HypeZecLongRunnerState, positions: readonly DirectPosition[], openOrders: readonly DirectOpenOrder[]) {
   return (state.positions || []).some((position) => position.symbol === "ZECUSDT")
     || state.pending?.symbol === "ZECUSDT"
-    || positions.some((position) => position.symbol.toUpperCase() === "ZECUSDT" && Math.abs(position.quantity) > EPSILON)
+    || positions.some((position) => position.symbol.toUpperCase() === "ZECUSDT")
     || openOrders.some((order) => order.symbol.toUpperCase() === "ZECUSDT");
 }
 
@@ -445,9 +445,7 @@ export class HypeZecLongRunner {
         return { account, positions, openOrders };
       })();
       const { account, positions, openOrders } = currentVenue;
-      if (this.dependencies.runtime.mode === "LIVE" && hasLiveZecResidual(state, positions, openOrders)) {
-        return this.manualReview(state, "HYPE_LIVE_SCOPE_ZEC_RESIDUAL");
-      }
+      if (hasZecResidual(state, positions, openOrders)) return this.manualReview(state, "HYPE_LIVE_SCOPE_ZEC_RESIDUAL");
       const protectionFill=await this.reconcileVenueProtectionFills(state,positions);if(protectionFill)return protectionFill;
       if(state.pending)return this.manualReview(state,"HYPE_ZEC_PENDING_REQUIRES_RECONCILIATION");
       const ownershipIssue = await this.reconcileOwnership(state, positions, openOrders);

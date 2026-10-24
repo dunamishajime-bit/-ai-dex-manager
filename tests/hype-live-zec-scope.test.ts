@@ -209,3 +209,98 @@ test("HYPE runner never evaluates a ZEC entry signal even in non-LIVE compatibil
   assert.equal(executeCalls, 0);
   assert.equal(saved.lastDecision.strategy, "HYPE_LONG");
 });
+
+for (const mode of ["SHADOW", "PAPER"] as const) {
+  test(`${mode} HYPE runner refuses legacy ZEC protection reconciliation before any mutation`, async () => {
+    const now = Date.now();
+    let reconcileCalls = 0;
+    let cancelCalls = 0;
+    let saveCalls = 0;
+    const state = {
+      schema: "disdex-hype-zec-long/v1" as const,
+      runtimeCommitSha: SHA,
+      mode,
+      updatedAt: now,
+      positions: [{
+        strategy: "ZEC_LONG" as const,
+        symbol: "ZECUSDT" as const,
+        side: "LONG" as const,
+        positionId: `legacy-zec-${mode.toLowerCase()}`,
+        quantity: 1,
+        entryPrice: 100,
+        entryTs: now - 60_000,
+        signalTs: now - 60_000,
+        stopPrice: 90,
+        takeProfitPrice: 120,
+        stopClientOrderId: "hz-stop-zec",
+        takeProfitClientOrderId: "hz-tp-zec",
+        stopReadBackAt: now,
+        peakPrice: 100,
+        updatedAt: now,
+      }],
+      failures: [],
+    };
+    let reconcileStep = 0;
+    const stateStore = {
+      async load() { return state; },
+      async save() { saveCalls += 1; },
+    };
+    const executor = {
+      async getAccountSnapshot() { return { availableBalance: 1_000, walletBalance: 1_000, asset: "USDT", updatedAt: now }; },
+      async getPositions() { return []; },
+      async getOpenOrders() { return []; },
+      async getMarketQuote() { throw new Error("must not read a quote after ZEC scope refusal"); },
+      async normalizeMarketQuantity() { throw new Error("must not normalize after ZEC scope refusal"); },
+      async executeMarket() { throw new Error("must not execute after ZEC scope refusal"); },
+      async reconcileOrder() {
+        reconcileCalls += 1;
+        const step = reconcileStep++;
+        if (step === 0) return { symbol: "ZECUSDT", clientOrderId: "hz-stop-zec", side: "SELL" as const, status: "FILLED" as const, executedQuantity: 1, executionUnknown: false, reconciled: true, requestedQuantity: 1, submittedQuantity: 1, averagePrice: 100, quoteQuantity: 100, reduceOnly: true };
+        if (step === 1) return { symbol: "ZECUSDT", clientOrderId: "hz-tp-zec", side: "SELL" as const, status: "NEW" as const, executedQuantity: 0, executionUnknown: false, reconciled: true, requestedQuantity: 1, submittedQuantity: 1, averagePrice: 0, quoteQuantity: 0, reduceOnly: true };
+        if (step === 2) return { symbol: "ZECUSDT", clientOrderId: "hz-stop-zec", side: "SELL" as const, status: "FILLED" as const, executedQuantity: 1, executionUnknown: false, reconciled: true, requestedQuantity: 1, submittedQuantity: 1, averagePrice: 100, quoteQuantity: 100, reduceOnly: true };
+        if (step === 3) return { symbol: "ZECUSDT", clientOrderId: "hz-tp-zec", side: "SELL" as const, status: "NEW" as const, executedQuantity: 0, executionUnknown: false, reconciled: true, requestedQuantity: 1, submittedQuantity: 1, averagePrice: 0, quoteQuantity: 0, reduceOnly: true };
+        return { symbol: "ZECUSDT", clientOrderId: "hz-tp-zec", side: "SELL" as const, status: "CANCELED" as const, executedQuantity: 0, executionUnknown: false, reconciled: true, requestedQuantity: 1, submittedQuantity: 1, averagePrice: 0, quoteQuantity: 0, reduceOnly: true };
+      },
+    };
+    const runner = new HypeZecLongRunner({
+      marketData: { async load() { throw new Error("must not load market data after ZEC scope refusal"); } },
+      stateStore,
+      executor,
+      adapter: { async cancel() { cancelCalls += 1; }, async placeStopMarket() {}, async placeTakeProfit() {} },
+      lock: { async acquire() { return { async document() {}, async renew() {}, async reserve() {}, async releaseReservation() {}, async release() {} }; } },
+      runtime: {
+        mode,
+        enabled: true,
+        liveExecutionEnabled: false,
+        productionConfigLiveEnabled: false,
+        operatorArmed: false,
+        runtimeSha: SHA,
+        statePath: "runner.json",
+        pendingExposurePath: "pending.json",
+        sharedRiskPath: "risk.json",
+        maximumGross: 1,
+        maximumReductionFraction: 0.5,
+        hypeRiskPct: 5,
+        zecRiskPct: 4.5,
+        maximumEntryDelayMs: 20 * 60_000,
+        maximumSlippageBps: 20,
+        feeBpsPerSide: 4,
+        fundingBps: 2,
+        cryptoGrossCap: 3,
+        totalGrossCap: 4.25,
+        signalMode: "TREND",
+        symbols: ["HYPEUSDT"],
+      },
+      now: () => now,
+      logger: { info() {}, warn() {}, error() {} },
+    } as any);
+
+    const result = await runner.tick();
+
+    assert.equal(result.status, "manual-review");
+    assert.match(result.message, /HYPE_LIVE_SCOPE_ZEC_RESIDUAL/);
+    assert.equal(reconcileCalls, 0);
+    assert.equal(cancelCalls, 0);
+    assert.equal(saveCalls, 1);
+  });
+}
