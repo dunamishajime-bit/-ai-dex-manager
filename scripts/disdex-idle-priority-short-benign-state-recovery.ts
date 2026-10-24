@@ -10,6 +10,7 @@ export const BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES =
 export const BENIGN_IDLE_PENDING_EXPOSURE_EACCES =
   "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/pending-exposure.json'";
 export const BENIGN_IDLE_RATE_BUDGET_REVIEW = /^IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:\d+$/;
+export const BENIGN_IDLE_FLAT_FOREIGN_POSITION_ROWS_REVIEW = "IDLE_RUNNER_FAIL_CLOSED:ASTER_VENUE_SYMBOL_INVALID";
 
 function exactSha(value: unknown, field: string): string {
   const normalized = String(value || "").trim().toLowerCase();
@@ -59,6 +60,8 @@ export async function recoverIdlePriorityShortBenignState(input: {
     ? "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY"
     : checked.x.manualReview === BENIGN_IDLE_PENDING_EXPOSURE_EACCES
       ? "IDLE_BENIGN_PENDING_EXPOSURE_RECOVERY"
+    : checked.x.manualReview === BENIGN_IDLE_FLAT_FOREIGN_POSITION_ROWS_REVIEW
+      ? "IDLE_BENIGN_FLAT_FOREIGN_POSITION_ROWS_RECOVERY"
     : BENIGN_IDLE_RATE_BUDGET_REVIEW.test(review)
       ? "IDLE_BENIGN_RATE_BUDGET_RECOVERY"
       : undefined;
@@ -69,6 +72,8 @@ export async function recoverIdlePriorityShortBenignState(input: {
     ? "rate-budget"
     : recoveryReason === "IDLE_BENIGN_PENDING_EXPOSURE_RECOVERY"
       ? "pending-exposure"
+      : recoveryReason === "IDLE_BENIGN_FLAT_FOREIGN_POSITION_ROWS_RECOVERY"
+        ? "flat-foreign-position-rows"
       : "operator-activation";
   const backupPath = resolve(input.backupPath || `${statePath}.before-benign-${backupSuffix}-recovery-${checked.stateSha}`);
   try {

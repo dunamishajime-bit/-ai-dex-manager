@@ -11,6 +11,7 @@ import {
 } from "../scripts/disdex-idle-priority-short-benign-state-recovery";
 
 const BENIGN_RATE_BUDGET = "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007";
+const BENIGN_FLAT_FOREIGN_POSITION_ROWS = "IDLE_RUNNER_FAIL_CLOSED:ASTER_VENUE_SYMBOL_INVALID";
 
 const SHA = "a".repeat(40);
 
@@ -84,11 +85,30 @@ test("clears the exact flat pending-exposure registry EACCES review and keeps an
   }
 });
 
+test("clears the exact flat foreign-position-row review after the executor quarantine fix", async () => {
+  const root = await mkdtemp(join(tmpdir(), "idle-benign-foreign-position-recovery-"));
+  try {
+    const statePath = join(root, "state.json");
+    const original = flatState(BENIGN_FLAT_FOREIGN_POSITION_ROWS);
+    await writeFile(statePath, `${JSON.stringify(original, null, 2)}\n`, { mode: 0o600 });
+    const result = await recoverIdlePriorityShortBenignState({ statePath, expectedSha: SHA });
+    assert.equal(result.status, "IDLE_BENIGN_STATE_RECOVERY_PASS");
+    assert.equal(result.recoveryReason, "IDLE_BENIGN_FLAT_FOREIGN_POSITION_ROWS_RECOVERY");
+    const after = JSON.parse(await readFile(statePath, "utf8"));
+    assert.equal(after.manualReview, null);
+    assert.equal(after.lastDecision.reason, "IDLE_BENIGN_FLAT_FOREIGN_POSITION_ROWS_RECOVERY");
+    assert.equal(JSON.stringify(JSON.parse(await readFile(result.backupPath, "utf8"))), JSON.stringify(original));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("refuses unknown review and any active or pending exposure", async () => {
   const root = await mkdtemp(join(tmpdir(), "idle-benign-recovery-refuse-"));
   try {
     const cases = [
       flatState("operator review"),
+      { ...flatState(BENIGN_FLAT_FOREIGN_POSITION_ROWS), positions: [{ symbol: "AAVEUSDT" }] },
       { ...flatState(BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES), positions: [{ symbol: "DOTUSDT" }] },
       { ...flatState(BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES), pending: { action: "ENTRY" } },
       { ...flatState(BENIGN_RATE_BUDGET), positions: [{ symbol: "DOTUSDT" }] },
