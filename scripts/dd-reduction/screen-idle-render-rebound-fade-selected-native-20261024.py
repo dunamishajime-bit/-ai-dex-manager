@@ -74,7 +74,8 @@ def main():
    results[name]=d
    print('COST',cost,'RULE',name,'SELECTION',d['selected'],'RETAIN',d['selectedRetainedPct'],
      'REJECTED_SELECTED',d['selectedRejects'],'CANDIDATES',len(allGood),'EARLIER',d['earlierSelected'],'LATER',d['laterSelected'],flush=True)
-  result['costs'][str(cost)]={'ledgerSha256':sha,'selectedCount':len(chosen),'rawCandidates':len(rows),'rules':results}
+  result['costs'][str(cost)]={'ledgerSha256':sha,'selectedCount':len(chosen),'rawCandidates':len(rows),'rules':results,
+    'candidateDetail':sorted(rows,key=lambda z:(z['ts'],z['id']))}
  file=OUT/'IDLE_RENDER_REBOUND_FADE_PREALLOCATION_SCREEN_20261024.json'
  file.write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n',encoding='utf8',newline='\n')
  print('RESULT_SAVED',file,file.stat().st_size)

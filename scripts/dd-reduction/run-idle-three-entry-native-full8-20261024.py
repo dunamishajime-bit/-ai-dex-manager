@@ -11,6 +11,7 @@ def load(n,p):
  x=importlib.util.module_from_spec(sp);sp.loader.exec_module(x);return x
 screen=load('idle_entry_three_families',HERE/'screen-idle-entry-families-after-pengu-20261024.py')
 render_floor=load('idle_render_cost_floor',HERE/'idle-render-profit-floor-upgrade-20261024.py')
+render_initial=load('idle_render_watch_entry_risk',HERE/'screen-idle-next-m5-after-pengu-20261024.py')
 rebound=load('idle_render_rebound_feature',HERE/'research-idle-render-rebound-fade-20261024.py')
 parent=load('idle_combined_pengu_8h',HERE/'research-pengu-combined-normal8-recovery24-full8-20261024.py')
 base=parent.base
@@ -40,14 +41,20 @@ CASE_RULES={
  'RENDER_PROFIT_F05_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
  'RENDER_PROFIT_F075_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
  'RENDER_REBOUND_NO_LATE_DUMP':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
- 'RENDER_REBOUND_NO_SHARP1H_DUMP':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']}
+ 'RENDER_REBOUND_NO_SHARP1H_DUMP':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'RENDER_PROFIT_F035_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'RENDER_PROFIT_F040_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'RENDER_PROFIT_F045_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'RENDER_INITIAL_WATCH1_2H_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']},
+ 'RENDER_INITIAL_WATCH1_2H_F035_JUP_M1P5':{'RENDERUSDT':['btc3h_ge_-1.5'],'DOTUSDT':['ret1h_ge_-1'],'JUPUSDT':['RET12H_GE_MINUS5','ret3h_ge_-1.5']}
 }
 for x in CASE_RULES.values():
  for filters in x.values():
   for rule in filters:assert rule in screen.RULES,(rule,'RULE_UNDEFINED')
 REBOUND_POLICY={'RENDER_REBOUND_NO_LATE_DUMP':'VETO_WEAK_REBOUND_LATE_DUMP',
  'RENDER_REBOUND_NO_SHARP1H_DUMP':'VETO_LAST1H_SHARP_DUMP'}
-PROFIT_FLOOR={'RENDER_PROFIT_F05_JUP_M1P5':.005,'RENDER_PROFIT_F075_JUP_M1P5':.0075,'RENDER_CO_M1P5_FLOOR0P5':.005,'RENDER_CO_M1P5_FLOOR0P75':.0075}
+RENDER_WATCH_CASES={'RENDER_INITIAL_WATCH1_2H_JUP_M1P5','RENDER_INITIAL_WATCH1_2H_F035_JUP_M1P5'}
+PROFIT_FLOOR={'RENDER_INITIAL_WATCH1_2H_F035_JUP_M1P5':.0035,'RENDER_PROFIT_F035_JUP_M1P5':.0035,'RENDER_PROFIT_F040_JUP_M1P5':.004,'RENDER_PROFIT_F045_JUP_M1P5':.0045,'RENDER_PROFIT_F05_JUP_M1P5':.005,'RENDER_PROFIT_F075_JUP_M1P5':.0075,'RENDER_CO_M1P5_FLOOR0P5':.005,'RENDER_CO_M1P5_FLOOR0P75':.0075}
 ACTIVE={'case':None,'evaluated':collections.Counter(),'blocked':collections.Counter(),
         'baselineFeatureMissing':collections.Counter()}
 def causal_entry_filter(rows,overlays,source,cost_bps,obs,baseline_lookup=None):
@@ -79,6 +86,24 @@ def causal_entry_filter(rows,overlays,source,cost_bps,obs,baseline_lookup=None):
      'ts':int(ts),'symbol':sym,'case':ACTIVE['case'],
      'ret1h':features['ret1h'],'btc3h':features['btc3h'],
      'ret6h':features['ret6h'],'rel6h':features['rel6h']})
+ if ACTIVE['case'] in RENDER_WATCH_CASES:
+  checked=[]
+  for row in kept:
+   if row.get('strategy_id')=='IDLE' and row.get('symbol')=='RENDERUSDT' and row.get('side')=='SHORT':
+    ent=int(row['entry_ts_ms'])
+    traj=render_initial.path_short(row,source)
+    rule=render_initial.CASES['TOUCH1_WATCH2_MFE0.25']
+    stop=render_initial.stop(traj,rule,ent)
+    if stop is not None and ent<int(stop['ts'])<int(row['exit_ts_ms']):
+     obs['renderInitialWatch1TwoHTriggers']=obs.get('renderInitialWatch1TwoHTriggers',0)+1
+     obs.setdefault('renderInitialWatch1TwoHEvidence',[]).append({
+        'candidateId':row.get('candidate_id'),'oldExitTs':row['exit_ts_ms'],
+        'earlyExitTs':int(stop['ts']),'priceChangePct':stop['gainFillNext']})
+     row=dict(row,exit_ts_ms=int(stop['ts']),exit_price=float(stop['fillPrice']),
+       unit_price_return=1-float(stop['fillPrice'])/float(row['entry_price']),
+       exit_reason='RESEARCH_RENDER_INIT_MINUS1_AFTER_TOUCH_TWO_HOURS_MFE025')
+   checked.append(row)
+  kept=checked
  if ACTIVE['case'] in PROFIT_FLOOR:
   upgraded=[]
   stat=obs.setdefault('renderProfitFloorUpgrade',collections.Counter())

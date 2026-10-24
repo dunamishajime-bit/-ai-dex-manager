@@ -1,0 +1,1682 @@
+{
+  "status": "HISTORICAL_MULTI_THRESHOLD_COHORT_SCREEN_NOT_FULL8_NOT_OOS",
+  "rulesTested": 25,
+  "predeclaredGrids": {
+    "ret1h": [
+      -2,
+      -1.5,
+      -1,
+      -0.5,
+      0,
+      0.5,
+      1,
+      2
+    ],
+    "ret3h": [
+      -3,
+      -2,
+      -1.5,
+      -1,
+      -0.5,
+      0,
+      0.5,
+      1,
+      2
+    ],
+    "last15": [
+      -0.8,
+      -0.6,
+      -0.4,
+      -0.2,
+      0,
+      0.2,
+      0.4,
+      0.6
+    ],
+    "last30": [
+      -1.5,
+      -1,
+      -0.75,
+      -0.5,
+      -0.25,
+      0,
+      0.25,
+      0.5
+    ],
+    "rebound2to1": [
+      0.3,
+      0.5,
+      0.75,
+      1,
+      1.5,
+      2,
+      3
+    ],
+    "fadefrom1hhigh": [
+      0.15,
+      0.3,
+      0.5,
+      0.75,
+      1,
+      1.5,
+      2
+    ],
+    "fadefrom3hhigh": [
+      0.5,
+      1,
+      1.5,
+      2,
+      3,
+      4
+    ],
+    "rangepos3h": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.75
+    ],
+    "first45": [
+      -2,
+      -1,
+      -0.5,
+      0,
+      0.5,
+      1,
+      2
+    ]
+  },
+  "baseline": {
+    "10": {
+      "n": 24,
+      "wins": 16,
+      "wr": 66.67,
+      "netReturnSumPct": 6.329
+    },
+    "30": {
+      "n": 24,
+      "wins": 12,
+      "wr": 50.0,
+      "netReturnSumPct": 0.731
+    }
+  },
+  "top": [
+    {
+      "rule": "ret1h>=-1.5",
+      "field": "ret1h",
+      "op": ">=",
+      "threshold": -1.5,
+      "score": 1.7125,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 16,
+            "wr": 69.57,
+            "netReturnSumPct": 8.853
+          },
+          "removed": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -2.524
+          },
+          "candidateN": 151,
+          "early": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -7.918
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 12,
+            "wr": 52.17,
+            "netReturnSumPct": 3.455
+          },
+          "removed": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -2.724
+          },
+          "candidateN": 151,
+          "early": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -10.716
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "ret1h>=-2",
+      "field": "ret1h",
+      "op": ">=",
+      "threshold": -2,
+      "score": 1.0578,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.329
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 158,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.731
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 158,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "ret3h<=2",
+      "field": "ret3h",
+      "op": "<=",
+      "threshold": 2,
+      "score": 1.0578,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.329
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.731
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "last30>=-1.5",
+      "field": "last30",
+      "op": ">=",
+      "threshold": -1.5,
+      "score": 1.0578,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.329
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 164,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.731
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 164,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "fadefrom1hhigh<=2",
+      "field": "fadefrom1hhigh",
+      "op": "<=",
+      "threshold": 2,
+      "score": 1.0578,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.329
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 154,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.731
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 154,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "first45<=2",
+      "field": "first45",
+      "op": "<=",
+      "threshold": 2,
+      "score": 1.0578,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 24,
+            "wins": 16,
+            "wr": 66.67,
+            "netReturnSumPct": 6.329
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 159,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 24,
+            "wins": 12,
+            "wr": 50.0,
+            "netReturnSumPct": 0.731
+          },
+          "removed": {
+            "n": 0,
+            "wins": 0,
+            "wr": null,
+            "netReturnSumPct": 0
+          },
+          "candidateN": 159,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "last30>=-1",
+      "field": "last30",
+      "op": ">=",
+      "threshold": -1,
+      "score": 1.0362,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 15,
+            "wr": 65.22,
+            "netReturnSumPct": 6.278
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 0.05
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45,
+            "netReturnSumPct": -10.492
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 12,
+            "wr": 52.17,
+            "netReturnSumPct": 1.08
+          },
+          "removed": {
+            "n": 1,
+            "wins": 0,
+            "wr": 0.0,
+            "netReturnSumPct": -0.349
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -13.091
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "last15<=0.6",
+      "field": "last15",
+      "op": "<=",
+      "threshold": 0.6,
+      "score": 0.3847,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 22,
+            "wins": 15,
+            "wr": 68.18,
+            "netReturnSumPct": 5.977
+          },
+          "removed": {
+            "n": 2,
+            "wins": 1,
+            "wr": 50.0,
+            "netReturnSumPct": 0.352
+          },
+          "candidateN": 148,
+          "early": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45,
+            "netReturnSumPct": -12.712
+          },
+          "late": {
+            "n": 11,
+            "wins": 10,
+            "wr": 90.91,
+            "netReturnSumPct": 18.689
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 22,
+            "wins": 11,
+            "wr": 50.0,
+            "netReturnSumPct": 0.779
+          },
+          "removed": {
+            "n": 2,
+            "wins": 1,
+            "wr": 50.0,
+            "netReturnSumPct": -0.048
+          },
+          "candidateN": 148,
+          "early": {
+            "n": 11,
+            "wins": 2,
+            "wr": 18.18,
+            "netReturnSumPct": -15.51
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 16.289
+          }
+        }
+      }
+    },
+    {
+      "rule": "rebound2to1>=0.3",
+      "field": "rebound2to1",
+      "op": ">=",
+      "threshold": 0.3,
+      "score": -0.2712,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 15,
+            "wr": 65.22,
+            "netReturnSumPct": 4.235
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.094
+          },
+          "candidateN": 162,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.677
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 11,
+            "wr": 47.83,
+            "netReturnSumPct": -1.163
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 1.894
+          },
+          "candidateN": 162,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.277
+          }
+        }
+      }
+    },
+    {
+      "rule": "fadefrom1hhigh>=0.15",
+      "field": "fadefrom1hhigh",
+      "op": ">=",
+      "threshold": 0.15,
+      "score": -0.2723,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 15,
+            "wr": 65.22,
+            "netReturnSumPct": 4.124
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.205
+          },
+          "candidateN": 152,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.566
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 11,
+            "wr": 47.83,
+            "netReturnSumPct": -1.274
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.005
+          },
+          "candidateN": 152,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.166
+          }
+        }
+      }
+    },
+    {
+      "rule": "ret1h<=2",
+      "field": "ret1h",
+      "op": "<=",
+      "threshold": 2,
+      "score": -0.2729,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 15,
+            "wr": 65.22,
+            "netReturnSumPct": 4.059
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.27
+          },
+          "candidateN": 157,
+          "early": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45,
+            "netReturnSumPct": -12.712
+          },
+          "late": {
+            "n": 12,
+            "wins": 10,
+            "wr": 83.33,
+            "netReturnSumPct": 16.77
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 11,
+            "wr": 47.83,
+            "netReturnSumPct": -1.339
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.07
+          },
+          "candidateN": 157,
+          "early": {
+            "n": 11,
+            "wins": 2,
+            "wr": 18.18,
+            "netReturnSumPct": -15.51
+          },
+          "late": {
+            "n": 12,
+            "wins": 9,
+            "wr": 75.0,
+            "netReturnSumPct": 14.171
+          }
+        }
+      }
+    },
+    {
+      "rule": "ret3h>=-3",
+      "field": "ret3h",
+      "op": ">=",
+      "threshold": -3,
+      "score": -0.2734,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 15,
+            "wr": 65.22,
+            "netReturnSumPct": 4.011
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.317
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.453
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 11,
+            "wr": 47.83,
+            "netReturnSumPct": -1.387
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.117
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.054
+          }
+        }
+      }
+    },
+    {
+      "rule": "fadefrom3hhigh<=4",
+      "field": "fadefrom3hhigh",
+      "op": "<=",
+      "threshold": 4,
+      "score": -0.2734,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 15,
+            "wr": 65.22,
+            "netReturnSumPct": 4.011
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.317
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.453
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 11,
+            "wr": 47.83,
+            "netReturnSumPct": -1.387
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.117
+          },
+          "candidateN": 156,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.054
+          }
+        }
+      }
+    },
+    {
+      "rule": "first45>=-2",
+      "field": "first45",
+      "op": ">=",
+      "threshold": -2,
+      "score": -0.2734,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 23,
+            "wins": 15,
+            "wr": 65.22,
+            "netReturnSumPct": 4.011
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.317
+          },
+          "candidateN": 158,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.453
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 23,
+            "wins": 11,
+            "wr": 47.83,
+            "netReturnSumPct": -1.387
+          },
+          "removed": {
+            "n": 1,
+            "wins": 1,
+            "wr": 100.0,
+            "netReturnSumPct": 2.117
+          },
+          "candidateN": 158,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.054
+          }
+        }
+      }
+    },
+    {
+      "rule": "last30>=-0.75",
+      "field": "last30",
+      "op": ">=",
+      "threshold": -0.75,
+      "score": -0.3217,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 22,
+            "wins": 14,
+            "wr": 63.64,
+            "netReturnSumPct": 3.229
+          },
+          "removed": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 3.099
+          },
+          "candidateN": 151,
+          "early": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45,
+            "netReturnSumPct": -10.492
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 13.721
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 22,
+            "wins": 11,
+            "wr": 50.0,
+            "netReturnSumPct": -1.769
+          },
+          "removed": {
+            "n": 2,
+            "wins": 1,
+            "wr": 50.0,
+            "netReturnSumPct": 2.5
+          },
+          "candidateN": 151,
+          "early": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -13.091
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 11.322
+          }
+        }
+      }
+    },
+    {
+      "rule": "rangepos3h<=0.75",
+      "field": "rangepos3h",
+      "op": "<=",
+      "threshold": 0.75,
+      "score": -0.9967,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 14,
+            "wr": 66.67,
+            "netReturnSumPct": 4.783
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 1.546
+          },
+          "candidateN": 138,
+          "early": {
+            "n": 10,
+            "wins": 5,
+            "wr": 50.0,
+            "netReturnSumPct": -9.783
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.566
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -0.215
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 0.946
+          },
+          "candidateN": 138,
+          "early": {
+            "n": 10,
+            "wins": 2,
+            "wr": 20.0,
+            "netReturnSumPct": -12.381
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.166
+          }
+        }
+      }
+    },
+    {
+      "rule": "fadefrom1hhigh>=0.3",
+      "field": "fadefrom1hhigh",
+      "op": ">=",
+      "threshold": 0.3,
+      "score": -0.9995,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 14,
+            "wr": 66.67,
+            "netReturnSumPct": 4.508
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 1.821
+          },
+          "candidateN": 133,
+          "early": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -9.507
+          },
+          "late": {
+            "n": 10,
+            "wins": 8,
+            "wr": 80.0,
+            "netReturnSumPct": 14.015
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -0.49
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 1.221
+          },
+          "candidateN": 133,
+          "early": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -12.306
+          },
+          "late": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "netReturnSumPct": 11.816
+          }
+        }
+      }
+    },
+    {
+      "rule": "rangepos3h>=0.1",
+      "field": "rangepos3h",
+      "op": ">=",
+      "threshold": 0.1,
+      "score": -1.0001,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 14,
+            "wr": 66.67,
+            "netReturnSumPct": 4.442
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 1.887
+          },
+          "candidateN": 157,
+          "early": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -7.918
+          },
+          "late": {
+            "n": 10,
+            "wins": 8,
+            "wr": 80.0,
+            "netReturnSumPct": 12.359
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -0.556
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 1.287
+          },
+          "candidateN": 157,
+          "early": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -10.716
+          },
+          "late": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "netReturnSumPct": 10.16
+          }
+        }
+      }
+    },
+    {
+      "rule": "first45<=1",
+      "field": "first45",
+      "op": "<=",
+      "threshold": 1,
+      "score": -1.0006,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 14,
+            "wr": 66.67,
+            "netReturnSumPct": 4.389
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 1.939
+          },
+          "candidateN": 150,
+          "early": {
+            "n": 10,
+            "wins": 5,
+            "wr": 50.0,
+            "netReturnSumPct": -10.176
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.566
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -0.609
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 1.339
+          },
+          "candidateN": 150,
+          "early": {
+            "n": 10,
+            "wins": 2,
+            "wr": 20.0,
+            "netReturnSumPct": -12.775
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.166
+          }
+        }
+      }
+    },
+    {
+      "rule": "rebound2to1>=0.5",
+      "field": "rebound2to1",
+      "op": ">=",
+      "threshold": 0.5,
+      "score": -1.0096,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 14,
+            "wr": 66.67,
+            "netReturnSumPct": 3.492
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 2.836
+          },
+          "candidateN": 149,
+          "early": {
+            "n": 12,
+            "wins": 6,
+            "wr": 50.0,
+            "netReturnSumPct": -10.442
+          },
+          "late": {
+            "n": 9,
+            "wins": 8,
+            "wr": 88.89,
+            "netReturnSumPct": 13.934
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -1.506
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 2.236
+          },
+          "candidateN": 149,
+          "early": {
+            "n": 12,
+            "wins": 3,
+            "wr": 25.0,
+            "netReturnSumPct": -13.44
+          },
+          "late": {
+            "n": 9,
+            "wins": 7,
+            "wr": 77.78,
+            "netReturnSumPct": 11.934
+          }
+        }
+      }
+    },
+    {
+      "rule": "fadefrom3hhigh<=3",
+      "field": "fadefrom3hhigh",
+      "op": "<=",
+      "threshold": 3,
+      "score": -1.0097,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 14,
+            "wr": 66.67,
+            "netReturnSumPct": 3.486
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 2.842
+          },
+          "candidateN": 140,
+          "early": {
+            "n": 11,
+            "wins": 6,
+            "wr": 54.55,
+            "netReturnSumPct": -7.918
+          },
+          "late": {
+            "n": 10,
+            "wins": 8,
+            "wr": 80.0,
+            "netReturnSumPct": 11.404
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -1.512
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 2.242
+          },
+          "candidateN": 140,
+          "early": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -10.716
+          },
+          "late": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "netReturnSumPct": 9.204
+          }
+        }
+      }
+    },
+    {
+      "rule": "rebound2to1<=3",
+      "field": "rebound2to1",
+      "op": "<=",
+      "threshold": 3,
+      "score": -1.0243,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 14,
+            "wr": 66.67,
+            "netReturnSumPct": 2.026
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 4.303
+          },
+          "candidateN": 140,
+          "early": {
+            "n": 10,
+            "wins": 5,
+            "wr": 50.0,
+            "netReturnSumPct": -9.783
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 11.809
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -2.972
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 3.703
+          },
+          "candidateN": 140,
+          "early": {
+            "n": 10,
+            "wins": 2,
+            "wr": 20.0,
+            "netReturnSumPct": -12.381
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 9.409
+          }
+        }
+      }
+    },
+    {
+      "rule": "fadefrom3hhigh>=0.5",
+      "field": "fadefrom3hhigh",
+      "op": ">=",
+      "threshold": 0.5,
+      "score": -1.675,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 22,
+            "wins": 14,
+            "wr": 63.64,
+            "netReturnSumPct": 1.854
+          },
+          "removed": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 4.475
+          },
+          "candidateN": 142,
+          "early": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45,
+            "netReturnSumPct": -12.712
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 14.566
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 22,
+            "wins": 10,
+            "wr": 45.45,
+            "netReturnSumPct": -3.344
+          },
+          "removed": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 4.075
+          },
+          "candidateN": 142,
+          "early": {
+            "n": 11,
+            "wins": 2,
+            "wr": 18.18,
+            "netReturnSumPct": -15.51
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 12.166
+          }
+        }
+      }
+    },
+    {
+      "rule": "ret3h<=1",
+      "field": "ret3h",
+      "op": "<=",
+      "threshold": 1,
+      "score": -1.7026,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 22,
+            "wins": 14,
+            "wr": 63.64,
+            "netReturnSumPct": -0.903
+          },
+          "removed": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 7.231
+          },
+          "candidateN": 142,
+          "early": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45,
+            "netReturnSumPct": -12.712
+          },
+          "late": {
+            "n": 11,
+            "wins": 9,
+            "wr": 81.82,
+            "netReturnSumPct": 11.809
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 22,
+            "wins": 10,
+            "wr": 45.45,
+            "netReturnSumPct": -6.101
+          },
+          "removed": {
+            "n": 2,
+            "wins": 2,
+            "wr": 100.0,
+            "netReturnSumPct": 6.831
+          },
+          "candidateN": 142,
+          "early": {
+            "n": 11,
+            "wins": 2,
+            "wr": 18.18,
+            "netReturnSumPct": -15.51
+          },
+          "late": {
+            "n": 11,
+            "wins": 8,
+            "wr": 72.73,
+            "netReturnSumPct": 9.409
+          }
+        }
+      }
+    },
+    {
+      "rule": "last15>=-0.8",
+      "field": "last15",
+      "op": ">=",
+      "threshold": -0.8,
+      "score": -1.7754,
+      "cases": {
+        "10": {
+          "kept": {
+            "n": 21,
+            "wins": 13,
+            "wr": 61.9,
+            "netReturnSumPct": -1.732
+          },
+          "removed": {
+            "n": 3,
+            "wins": 3,
+            "wr": 100.0,
+            "netReturnSumPct": 8.061
+          },
+          "candidateN": 157,
+          "early": {
+            "n": 11,
+            "wins": 5,
+            "wr": 45.45,
+            "netReturnSumPct": -10.492
+          },
+          "late": {
+            "n": 10,
+            "wins": 8,
+            "wr": 80.0,
+            "netReturnSumPct": 8.76
+          }
+        },
+        "30": {
+          "kept": {
+            "n": 21,
+            "wins": 10,
+            "wr": 47.62,
+            "netReturnSumPct": -6.531
+          },
+          "removed": {
+            "n": 3,
+            "wins": 2,
+            "wr": 66.67,
+            "netReturnSumPct": 7.262
+          },
+          "candidateN": 157,
+          "early": {
+            "n": 11,
+            "wins": 3,
+            "wr": 27.27,
+            "netReturnSumPct": -13.091
+          },
+          "late": {
+            "n": 10,
+            "wins": 7,
+            "wr": 70.0,
+            "netReturnSumPct": 6.56
+          }
+        }
+      }
+    }
+  ]
+}

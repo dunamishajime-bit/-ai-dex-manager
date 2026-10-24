@@ -1,0 +1,3018 @@
+{
+  "status": "OLDER_DISJOINT_BTC_RENDER_PRICE_WINDOW_ONLY_NOT_WALLET_AND_NOT_PROSPECTIVE_UNSEEN",
+  "olderWindow": "2024-08-01_to_2025-07-31",
+  "sourceManifest": "docs\\research\\results\\idle-entry-three-20261024\\IDLE_RENDER_OLDER_BINANCE_PUBLIC_M5_SOURCE_MANIFEST_20261024.json",
+  "sourceSha256": "f3dcfbca7e829bc77d39cf3572e6786f948d2ee469124d324bc06ae703dd539f",
+  "signalFeaturesArePriorClosedM5": true,
+  "noEntryRetuningBasedOnOlderOutcomes": true,
+  "conditionsFromNewResearchFile": "docs\\research\\results\\idle-entry-three-20261024\\IDLE_RENDER_NEW_RETRACEMENT_SHORT_INDEPENDENT_5M_20261024.json",
+  "hazards": [
+    "No 8-logic shared wallet, gross budget, pending, priority, route cooldown parity, venue fills or funding.",
+    "Backwards chronological older test prevents same-period optimization but is not truly prospective forward OOS.",
+    "No rule/exit cost parameter fitted on older year."
+  ],
+  "costs": {
+    "10": {
+      "RALLY3_FADE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 555,
+        "older": {
+          "n": 265,
+          "wins": 136,
+          "wrPct": 51.32,
+          "pf": 0.727,
+          "netPctSum": -77.263
+        },
+        "olderEarly": {
+          "n": 133,
+          "wins": 69,
+          "wrPct": 51.88,
+          "pf": 0.7557,
+          "netPctSum": -35.572
+        },
+        "olderLate": {
+          "n": 132,
+          "wins": 67,
+          "wrPct": 50.76,
+          "pf": 0.6966,
+          "netPctSum": -41.691
+        },
+        "newer": {
+          "n": 198,
+          "wins": 105,
+          "wrPct": 53.03,
+          "pf": 0.879,
+          "netPctSum": -21.267
+        },
+        "newerEarly": {
+          "n": 105,
+          "wins": 61,
+          "wrPct": 58.1,
+          "pf": 1.0462,
+          "netPctSum": 3.942
+        },
+        "newerLate": {
+          "n": 93,
+          "wins": 44,
+          "wrPct": 47.31,
+          "pf": 0.7212,
+          "netPctSum": -25.209
+        }
+      },
+      "RALLY3_FADE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 555,
+        "older": {
+          "n": 259,
+          "wins": 134,
+          "wrPct": 51.74,
+          "pf": 0.6997,
+          "netPctSum": -93.269
+        },
+        "olderEarly": {
+          "n": 130,
+          "wins": 69,
+          "wrPct": 53.08,
+          "pf": 0.7572,
+          "netPctSum": -36.096
+        },
+        "olderLate": {
+          "n": 129,
+          "wins": 65,
+          "wrPct": 50.39,
+          "pf": 0.6468,
+          "netPctSum": -57.173
+        },
+        "newer": {
+          "n": 194,
+          "wins": 115,
+          "wrPct": 59.28,
+          "pf": 0.9867,
+          "netPctSum": -2.471
+        },
+        "newerEarly": {
+          "n": 103,
+          "wins": 64,
+          "wrPct": 62.14,
+          "pf": 1.1327,
+          "netPctSum": 11.963
+        },
+        "newerLate": {
+          "n": 91,
+          "wins": 51,
+          "wrPct": 56.04,
+          "pf": 0.8486,
+          "netPctSum": -14.434
+        }
+      },
+      "RALLY3_FADE__TP2_SL3_HOLD12": {
+        "hourlySignals": 555,
+        "older": {
+          "n": 249,
+          "wins": 132,
+          "wrPct": 53.01,
+          "pf": 0.7465,
+          "netPctSum": -81.141
+        },
+        "olderEarly": {
+          "n": 127,
+          "wins": 71,
+          "wrPct": 55.91,
+          "pf": 0.8559,
+          "netPctSum": -22.001
+        },
+        "olderLate": {
+          "n": 122,
+          "wins": 61,
+          "wrPct": 50.0,
+          "pf": 0.6467,
+          "netPctSum": -59.141
+        },
+        "newer": {
+          "n": 192,
+          "wins": 113,
+          "wrPct": 58.85,
+          "pf": 0.9818,
+          "netPctSum": -3.739
+        },
+        "newerEarly": {
+          "n": 103,
+          "wins": 65,
+          "wrPct": 63.11,
+          "pf": 1.2799,
+          "netPctSum": 26.017
+        },
+        "newerLate": {
+          "n": 89,
+          "wins": 48,
+          "wrPct": 53.93,
+          "pf": 0.7354,
+          "netPctSum": -29.756
+        }
+      },
+      "RALLY6_FADE_BTC__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 234,
+        "older": {
+          "n": 134,
+          "wins": 79,
+          "wrPct": 58.96,
+          "pf": 1.0162,
+          "netPctSum": 1.848
+        },
+        "olderEarly": {
+          "n": 64,
+          "wins": 39,
+          "wrPct": 60.94,
+          "pf": 1.1618,
+          "netPctSum": 8.869
+        },
+        "olderLate": {
+          "n": 70,
+          "wins": 40,
+          "wrPct": 57.14,
+          "pf": 0.8809,
+          "netPctSum": -7.021
+        },
+        "newer": {
+          "n": 95,
+          "wins": 56,
+          "wrPct": 58.95,
+          "pf": 0.9803,
+          "netPctSum": -1.715
+        },
+        "newerEarly": {
+          "n": 48,
+          "wins": 31,
+          "wrPct": 64.58,
+          "pf": 1.1107,
+          "netPctSum": 4.662
+        },
+        "newerLate": {
+          "n": 47,
+          "wins": 25,
+          "wrPct": 53.19,
+          "pf": 0.8576,
+          "netPctSum": -6.377
+        }
+      },
+      "RALLY6_FADE_BTC__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 234,
+        "older": {
+          "n": 132,
+          "wins": 75,
+          "wrPct": 56.82,
+          "pf": 0.858,
+          "netPctSum": -19.87
+        },
+        "olderEarly": {
+          "n": 64,
+          "wins": 39,
+          "wrPct": 60.94,
+          "pf": 1.0177,
+          "netPctSum": 1.116
+        },
+        "olderLate": {
+          "n": 68,
+          "wins": 36,
+          "wrPct": 52.94,
+          "pf": 0.7264,
+          "netPctSum": -20.986
+        },
+        "newer": {
+          "n": 95,
+          "wins": 54,
+          "wrPct": 56.84,
+          "pf": 0.8707,
+          "netPctSum": -12.989
+        },
+        "newerEarly": {
+          "n": 48,
+          "wins": 29,
+          "wrPct": 60.42,
+          "pf": 1.0267,
+          "netPctSum": 1.243
+        },
+        "newerLate": {
+          "n": 47,
+          "wins": 25,
+          "wrPct": 53.19,
+          "pf": 0.7359,
+          "netPctSum": -14.232
+        }
+      },
+      "RALLY6_FADE_BTC__TP2_SL3_HOLD12": {
+        "hourlySignals": 234,
+        "older": {
+          "n": 130,
+          "wins": 74,
+          "wrPct": 56.92,
+          "pf": 0.8361,
+          "netPctSum": -26.405
+        },
+        "olderEarly": {
+          "n": 64,
+          "wins": 39,
+          "wrPct": 60.94,
+          "pf": 1.0237,
+          "netPctSum": 1.715
+        },
+        "olderLate": {
+          "n": 66,
+          "wins": 35,
+          "wrPct": 53.03,
+          "pf": 0.6831,
+          "netPctSum": -28.12
+        },
+        "newer": {
+          "n": 93,
+          "wins": 57,
+          "wrPct": 61.29,
+          "pf": 1.0127,
+          "netPctSum": 1.296
+        },
+        "newerEarly": {
+          "n": 48,
+          "wins": 31,
+          "wrPct": 64.58,
+          "pf": 1.1748,
+          "netPctSum": 8.549
+        },
+        "newerLate": {
+          "n": 45,
+          "wins": 26,
+          "wrPct": 57.78,
+          "pf": 0.8628,
+          "netPctSum": -7.253
+        }
+      },
+      "DOWNTREND_24_RETRACE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 140,
+        "older": {
+          "n": 84,
+          "wins": 43,
+          "wrPct": 51.19,
+          "pf": 0.7667,
+          "netPctSum": -20.447
+        },
+        "olderEarly": {
+          "n": 39,
+          "wins": 21,
+          "wrPct": 53.85,
+          "pf": 0.8527,
+          "netPctSum": -5.987
+        },
+        "olderLate": {
+          "n": 45,
+          "wins": 22,
+          "wrPct": 48.89,
+          "pf": 0.6924,
+          "netPctSum": -14.46
+        },
+        "newer": {
+          "n": 57,
+          "wins": 26,
+          "wrPct": 45.61,
+          "pf": 0.5215,
+          "netPctSum": -31.692
+        },
+        "newerEarly": {
+          "n": 38,
+          "wins": 17,
+          "wrPct": 44.74,
+          "pf": 0.4532,
+          "netPctSum": -25.773
+        },
+        "newerLate": {
+          "n": 19,
+          "wins": 9,
+          "wrPct": 47.37,
+          "pf": 0.6901,
+          "netPctSum": -5.919
+        }
+      },
+      "DOWNTREND_24_RETRACE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 140,
+        "older": {
+          "n": 83,
+          "wins": 45,
+          "wrPct": 54.22,
+          "pf": 0.7725,
+          "netPctSum": -21.809
+        },
+        "olderEarly": {
+          "n": 38,
+          "wins": 22,
+          "wrPct": 57.89,
+          "pf": 0.8971,
+          "netPctSum": -4.164
+        },
+        "olderLate": {
+          "n": 45,
+          "wins": 23,
+          "wrPct": 51.11,
+          "pf": 0.6816,
+          "netPctSum": -17.644
+        },
+        "newer": {
+          "n": 57,
+          "wins": 28,
+          "wrPct": 49.12,
+          "pf": 0.5677,
+          "netPctSum": -31.677
+        },
+        "newerEarly": {
+          "n": 38,
+          "wins": 17,
+          "wrPct": 44.74,
+          "pf": 0.4712,
+          "netPctSum": -27.747
+        },
+        "newerLate": {
+          "n": 19,
+          "wins": 11,
+          "wrPct": 57.89,
+          "pf": 0.811,
+          "netPctSum": -3.93
+        }
+      },
+      "DOWNTREND_24_RETRACE__TP2_SL3_HOLD12": {
+        "hourlySignals": 140,
+        "older": {
+          "n": 82,
+          "wins": 43,
+          "wrPct": 52.44,
+          "pf": 0.749,
+          "netPctSum": -27.229
+        },
+        "olderEarly": {
+          "n": 38,
+          "wins": 22,
+          "wrPct": 57.89,
+          "pf": 0.9069,
+          "netPctSum": -4.29
+        },
+        "olderLate": {
+          "n": 44,
+          "wins": 21,
+          "wrPct": 47.73,
+          "pf": 0.6324,
+          "netPctSum": -22.939
+        },
+        "newer": {
+          "n": 57,
+          "wins": 29,
+          "wrPct": 50.88,
+          "pf": 0.6578,
+          "netPctSum": -25.745
+        },
+        "newerEarly": {
+          "n": 38,
+          "wins": 19,
+          "wrPct": 50.0,
+          "pf": 0.6409,
+          "netPctSum": -17.943
+        },
+        "newerLate": {
+          "n": 19,
+          "wins": 10,
+          "wrPct": 52.63,
+          "pf": 0.6913,
+          "netPctSum": -7.803
+        }
+      },
+      "DOWNTREND_24_STRICT__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 59,
+        "older": {
+          "n": 39,
+          "wins": 20,
+          "wrPct": 51.28,
+          "pf": 0.6935,
+          "netPctSum": -14.099
+        },
+        "olderEarly": {
+          "n": 22,
+          "wins": 14,
+          "wrPct": 63.64,
+          "pf": 1.1813,
+          "netPctSum": 3.546
+        },
+        "olderLate": {
+          "n": 17,
+          "wins": 6,
+          "wrPct": 35.29,
+          "pf": 0.3329,
+          "netPctSum": -17.645
+        },
+        "newer": {
+          "n": 16,
+          "wins": 9,
+          "wrPct": 56.25,
+          "pf": 0.9807,
+          "netPctSum": -0.263
+        },
+        "newerEarly": {
+          "n": 11,
+          "wins": 6,
+          "wrPct": 54.55,
+          "pf": 0.8644,
+          "netPctSum": -1.324
+        },
+        "newerLate": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 1.2729,
+          "netPctSum": 1.061
+        }
+      },
+      "DOWNTREND_24_STRICT__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 59,
+        "older": {
+          "n": 38,
+          "wins": 20,
+          "wrPct": 52.63,
+          "pf": 0.7051,
+          "netPctSum": -13.8
+        },
+        "olderEarly": {
+          "n": 21,
+          "wins": 14,
+          "wrPct": 66.67,
+          "pf": 1.2692,
+          "netPctSum": 4.9
+        },
+        "olderLate": {
+          "n": 17,
+          "wins": 6,
+          "wrPct": 35.29,
+          "pf": 0.3462,
+          "netPctSum": -18.7
+        },
+        "newer": {
+          "n": 16,
+          "wins": 10,
+          "wrPct": 62.5,
+          "pf": 1.1012,
+          "netPctSum": 1.43
+        },
+        "newerEarly": {
+          "n": 11,
+          "wins": 7,
+          "wrPct": 63.64,
+          "pf": 1.1882,
+          "netPctSum": 1.68
+        },
+        "newerLate": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 0.9519,
+          "netPctSum": -0.25
+        }
+      },
+      "DOWNTREND_24_STRICT__TP2_SL3_HOLD12": {
+        "hourlySignals": 59,
+        "older": {
+          "n": 38,
+          "wins": 21,
+          "wrPct": 55.26,
+          "pf": 0.7571,
+          "netPctSum": -12.8
+        },
+        "olderEarly": {
+          "n": 21,
+          "wins": 16,
+          "wrPct": 76.19,
+          "pf": 1.9613,
+          "netPctSum": 14.9
+        },
+        "olderLate": {
+          "n": 17,
+          "wins": 5,
+          "wrPct": 29.41,
+          "pf": 0.2554,
+          "netPctSum": -27.7
+        },
+        "newer": {
+          "n": 16,
+          "wins": 9,
+          "wrPct": 56.25,
+          "pf": 0.8063,
+          "netPctSum": -3.82
+        },
+        "newerEarly": {
+          "n": 11,
+          "wins": 7,
+          "wrPct": 63.64,
+          "pf": 1.1611,
+          "netPctSum": 1.68
+        },
+        "newerLate": {
+          "n": 5,
+          "wins": 2,
+          "wrPct": 40.0,
+          "pf": 0.4086,
+          "netPctSum": -5.5
+        }
+      },
+      "RELATIVE_OVERBOUGHT__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 116,
+        "older": {
+          "n": 81,
+          "wins": 48,
+          "wrPct": 59.26,
+          "pf": 0.9372,
+          "netPctSum": -4.837
+        },
+        "olderEarly": {
+          "n": 48,
+          "wins": 29,
+          "wrPct": 60.42,
+          "pf": 1.1009,
+          "netPctSum": 4.385
+        },
+        "olderLate": {
+          "n": 33,
+          "wins": 19,
+          "wrPct": 57.58,
+          "pf": 0.7249,
+          "netPctSum": -9.222
+        },
+        "newer": {
+          "n": 53,
+          "wins": 27,
+          "wrPct": 50.94,
+          "pf": 0.7362,
+          "netPctSum": -15.682
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 17,
+          "wrPct": 56.67,
+          "pf": 0.8593,
+          "netPctSum": -4.463
+        },
+        "newerLate": {
+          "n": 23,
+          "wins": 10,
+          "wrPct": 43.48,
+          "pf": 0.5952,
+          "netPctSum": -11.22
+        }
+      },
+      "RELATIVE_OVERBOUGHT__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 116,
+        "older": {
+          "n": 80,
+          "wins": 46,
+          "wrPct": 57.5,
+          "pf": 0.8946,
+          "netPctSum": -8.941
+        },
+        "olderEarly": {
+          "n": 48,
+          "wins": 30,
+          "wrPct": 62.5,
+          "pf": 1.0992,
+          "netPctSum": 4.466
+        },
+        "olderLate": {
+          "n": 32,
+          "wins": 16,
+          "wrPct": 50.0,
+          "pf": 0.6632,
+          "netPctSum": -13.408
+        },
+        "newer": {
+          "n": 53,
+          "wins": 29,
+          "wrPct": 54.72,
+          "pf": 0.7649,
+          "netPctSum": -14.215
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 17,
+          "wrPct": 56.67,
+          "pf": 0.8803,
+          "netPctSum": -3.814
+        },
+        "newerLate": {
+          "n": 23,
+          "wins": 12,
+          "wrPct": 52.17,
+          "pf": 0.6363,
+          "netPctSum": -10.401
+        }
+      },
+      "RELATIVE_OVERBOUGHT__TP2_SL3_HOLD12": {
+        "hourlySignals": 116,
+        "older": {
+          "n": 79,
+          "wins": 46,
+          "wrPct": 58.23,
+          "pf": 0.9314,
+          "netPctSum": -6.442
+        },
+        "olderEarly": {
+          "n": 47,
+          "wins": 29,
+          "wrPct": 61.7,
+          "pf": 1.0871,
+          "netPctSum": 4.415
+        },
+        "olderLate": {
+          "n": 32,
+          "wins": 17,
+          "wrPct": 53.12,
+          "pf": 0.7484,
+          "netPctSum": -10.857
+        },
+        "newer": {
+          "n": 53,
+          "wins": 33,
+          "wrPct": 62.26,
+          "pf": 1.0174,
+          "netPctSum": 1.035
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 20,
+          "wrPct": 66.67,
+          "pf": 1.3303,
+          "netPctSum": 9.436
+        },
+        "newerLate": {
+          "n": 23,
+          "wins": 13,
+          "wrPct": 56.52,
+          "pf": 0.729,
+          "netPctSum": -8.401
+        }
+      },
+      "HIGH_WICK_RESISTANCE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 55,
+        "older": {
+          "n": 49,
+          "wins": 32,
+          "wrPct": 65.31,
+          "pf": 1.2156,
+          "netPctSum": 8.739
+        },
+        "olderEarly": {
+          "n": 24,
+          "wins": 19,
+          "wrPct": 79.17,
+          "pf": 2.1819,
+          "netPctSum": 15.364
+        },
+        "olderLate": {
+          "n": 25,
+          "wins": 13,
+          "wrPct": 52.0,
+          "pf": 0.7594,
+          "netPctSum": -6.626
+        },
+        "newer": {
+          "n": 52,
+          "wins": 30,
+          "wrPct": 57.69,
+          "pf": 0.9653,
+          "netPctSum": -1.707
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 20,
+          "wrPct": 66.67,
+          "pf": 1.5213,
+          "netPctSum": 10.969
+        },
+        "newerLate": {
+          "n": 22,
+          "wins": 10,
+          "wrPct": 45.45,
+          "pf": 0.5492,
+          "netPctSum": -12.676
+        }
+      },
+      "HIGH_WICK_RESISTANCE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 55,
+        "older": {
+          "n": 49,
+          "wins": 33,
+          "wrPct": 67.35,
+          "pf": 1.2823,
+          "netPctSum": 11.744
+        },
+        "olderEarly": {
+          "n": 24,
+          "wins": 19,
+          "wrPct": 79.17,
+          "pf": 2.4115,
+          "netPctSum": 18.35
+        },
+        "olderLate": {
+          "n": 25,
+          "wins": 14,
+          "wrPct": 56.0,
+          "pf": 0.769,
+          "netPctSum": -6.606
+        },
+        "newer": {
+          "n": 52,
+          "wins": 31,
+          "wrPct": 59.62,
+          "pf": 0.9238,
+          "netPctSum": -4.056
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 21,
+          "wrPct": 70.0,
+          "pf": 1.427,
+          "netPctSum": 9.991
+        },
+        "newerLate": {
+          "n": 22,
+          "wins": 10,
+          "wrPct": 45.45,
+          "pf": 0.5296,
+          "netPctSum": -14.047
+        }
+      },
+      "HIGH_WICK_RESISTANCE__TP2_SL3_HOLD12": {
+        "hourlySignals": 55,
+        "older": {
+          "n": 49,
+          "wins": 31,
+          "wrPct": 63.27,
+          "pf": 1.0855,
+          "netPctSum": 4.531
+        },
+        "olderEarly": {
+          "n": 24,
+          "wins": 17,
+          "wrPct": 70.83,
+          "pf": 1.7078,
+          "netPctSum": 13.387
+        },
+        "olderLate": {
+          "n": 25,
+          "wins": 14,
+          "wrPct": 56.0,
+          "pf": 0.7403,
+          "netPctSum": -8.856
+        },
+        "newer": {
+          "n": 52,
+          "wins": 32,
+          "wrPct": 61.54,
+          "pf": 1.0544,
+          "netPctSum": 3.012
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 21,
+          "wrPct": 70.0,
+          "pf": 1.6632,
+          "netPctSum": 15.309
+        },
+        "newerLate": {
+          "n": 22,
+          "wins": 11,
+          "wrPct": 50.0,
+          "pf": 0.6189,
+          "netPctSum": -12.297
+        }
+      },
+      "UPRALLY_VOLUME_SHOCK__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 80,
+        "older": {
+          "n": 62,
+          "wins": 33,
+          "wrPct": 53.23,
+          "pf": 0.7976,
+          "netPctSum": -13.43
+        },
+        "olderEarly": {
+          "n": 33,
+          "wins": 17,
+          "wrPct": 51.52,
+          "pf": 0.7924,
+          "netPctSum": -7.35
+        },
+        "olderLate": {
+          "n": 29,
+          "wins": 16,
+          "wrPct": 55.17,
+          "pf": 0.8035,
+          "netPctSum": -6.08
+        },
+        "newer": {
+          "n": 52,
+          "wins": 30,
+          "wrPct": 57.69,
+          "pf": 1.0017,
+          "netPctSum": 0.084
+        },
+        "newerEarly": {
+          "n": 27,
+          "wins": 18,
+          "wrPct": 66.67,
+          "pf": 1.5189,
+          "netPctSum": 10.146
+        },
+        "newerLate": {
+          "n": 25,
+          "wins": 12,
+          "wrPct": 48.0,
+          "pf": 0.663,
+          "netPctSum": -10.062
+        }
+      },
+      "UPRALLY_VOLUME_SHOCK__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 80,
+        "older": {
+          "n": 61,
+          "wins": 34,
+          "wrPct": 55.74,
+          "pf": 0.7973,
+          "netPctSum": -13.872
+        },
+        "olderEarly": {
+          "n": 32,
+          "wins": 18,
+          "wrPct": 56.25,
+          "pf": 0.8131,
+          "netPctSum": -6.472
+        },
+        "olderLate": {
+          "n": 29,
+          "wins": 16,
+          "wrPct": 55.17,
+          "pf": 0.7811,
+          "netPctSum": -7.4
+        },
+        "newer": {
+          "n": 52,
+          "wins": 30,
+          "wrPct": 57.69,
+          "pf": 0.8965,
+          "netPctSum": -5.714
+        },
+        "newerEarly": {
+          "n": 27,
+          "wins": 18,
+          "wrPct": 66.67,
+          "pf": 1.387,
+          "netPctSum": 8.286
+        },
+        "newerLate": {
+          "n": 25,
+          "wins": 12,
+          "wrPct": 48.0,
+          "pf": 0.5858,
+          "netPctSum": -14.0
+        }
+      },
+      "UPRALLY_VOLUME_SHOCK__TP2_SL3_HOLD12": {
+        "hourlySignals": 80,
+        "older": {
+          "n": 61,
+          "wins": 36,
+          "wrPct": 59.02,
+          "pf": 0.8688,
+          "netPctSum": -9.867
+        },
+        "olderEarly": {
+          "n": 32,
+          "wins": 18,
+          "wrPct": 56.25,
+          "pf": 0.788,
+          "netPctSum": -8.722
+        },
+        "olderLate": {
+          "n": 29,
+          "wins": 18,
+          "wrPct": 62.07,
+          "pf": 0.9664,
+          "netPctSum": -1.145
+        },
+        "newer": {
+          "n": 50,
+          "wins": 29,
+          "wrPct": 58.0,
+          "pf": 0.9347,
+          "netPctSum": -3.85
+        },
+        "newerEarly": {
+          "n": 26,
+          "wins": 17,
+          "wrPct": 65.38,
+          "pf": 1.3998,
+          "netPctSum": 9.226
+        },
+        "newerLate": {
+          "n": 24,
+          "wins": 12,
+          "wrPct": 50.0,
+          "pf": 0.6355,
+          "netPctSum": -13.075
+        }
+      },
+      "BTC_TRAP_REJECTION__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 69,
+        "older": {
+          "n": 51,
+          "wins": 25,
+          "wrPct": 49.02,
+          "pf": 0.7181,
+          "netPctSum": -16.196
+        },
+        "olderEarly": {
+          "n": 29,
+          "wins": 16,
+          "wrPct": 55.17,
+          "pf": 0.9942,
+          "netPctSum": -0.154
+        },
+        "olderLate": {
+          "n": 22,
+          "wins": 9,
+          "wrPct": 40.91,
+          "pf": 0.4807,
+          "netPctSum": -16.042
+        },
+        "newer": {
+          "n": 44,
+          "wins": 30,
+          "wrPct": 68.18,
+          "pf": 1.5552,
+          "netPctSum": 17.309
+        },
+        "newerEarly": {
+          "n": 24,
+          "wins": 19,
+          "wrPct": 79.17,
+          "pf": 2.8785,
+          "netPctSum": 20.459
+        },
+        "newerLate": {
+          "n": 20,
+          "wins": 11,
+          "wrPct": 55.0,
+          "pf": 0.8447,
+          "netPctSum": -3.15
+        }
+      },
+      "BTC_TRAP_REJECTION__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 69,
+        "older": {
+          "n": 50,
+          "wins": 26,
+          "wrPct": 52.0,
+          "pf": 0.7075,
+          "netPctSum": -17.734
+        },
+        "olderEarly": {
+          "n": 28,
+          "wins": 17,
+          "wrPct": 60.71,
+          "pf": 1.0453,
+          "netPctSum": 1.216
+        },
+        "olderLate": {
+          "n": 22,
+          "wins": 9,
+          "wrPct": 40.91,
+          "pf": 0.4393,
+          "netPctSum": -18.95
+        },
+        "newer": {
+          "n": 44,
+          "wins": 31,
+          "wrPct": 70.45,
+          "pf": 1.5133,
+          "netPctSum": 17.35
+        },
+        "newerEarly": {
+          "n": 24,
+          "wins": 20,
+          "wrPct": 83.33,
+          "pf": 3.1731,
+          "netPctSum": 22.6
+        },
+        "newerLate": {
+          "n": 20,
+          "wins": 11,
+          "wrPct": 55.0,
+          "pf": 0.7756,
+          "netPctSum": -5.25
+        }
+      },
+      "BTC_TRAP_REJECTION__TP2_SL3_HOLD12": {
+        "hourlySignals": 69,
+        "older": {
+          "n": 50,
+          "wins": 28,
+          "wrPct": 56.0,
+          "pf": 0.7928,
+          "netPctSum": -13.581
+        },
+        "olderEarly": {
+          "n": 28,
+          "wins": 17,
+          "wrPct": 60.71,
+          "pf": 1.0147,
+          "netPctSum": 0.466
+        },
+        "olderLate": {
+          "n": 22,
+          "wins": 11,
+          "wrPct": 50.0,
+          "pf": 0.5832,
+          "netPctSum": -14.048
+        },
+        "newer": {
+          "n": 43,
+          "wins": 29,
+          "wrPct": 67.44,
+          "pf": 1.4107,
+          "netPctSum": 15.509
+        },
+        "newerEarly": {
+          "n": 23,
+          "wins": 17,
+          "wrPct": 73.91,
+          "pf": 2.4913,
+          "netPctSum": 19.335
+        },
+        "newerLate": {
+          "n": 20,
+          "wins": 12,
+          "wrPct": 60.0,
+          "pf": 0.8457,
+          "netPctSum": -3.826
+        }
+      },
+      "COUNTERTREND_BOUNCE_FADE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 189,
+        "older": {
+          "n": 131,
+          "wins": 67,
+          "wrPct": 51.15,
+          "pf": 0.7022,
+          "netPctSum": -42.683
+        },
+        "olderEarly": {
+          "n": 73,
+          "wins": 36,
+          "wrPct": 49.32,
+          "pf": 0.6809,
+          "netPctSum": -25.002
+        },
+        "olderLate": {
+          "n": 58,
+          "wins": 31,
+          "wrPct": 53.45,
+          "pf": 0.7278,
+          "netPctSum": -17.681
+        },
+        "newer": {
+          "n": 87,
+          "wins": 45,
+          "wrPct": 51.72,
+          "pf": 0.7303,
+          "netPctSum": -24.582
+        },
+        "newerEarly": {
+          "n": 53,
+          "wins": 26,
+          "wrPct": 49.06,
+          "pf": 0.6874,
+          "netPctSum": -18.129
+        },
+        "newerLate": {
+          "n": 34,
+          "wins": 19,
+          "wrPct": 55.88,
+          "pf": 0.8053,
+          "netPctSum": -6.453
+        }
+      },
+      "COUNTERTREND_BOUNCE_FADE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 189,
+        "older": {
+          "n": 130,
+          "wins": 69,
+          "wrPct": 53.08,
+          "pf": 0.7934,
+          "netPctSum": -29.366
+        },
+        "olderEarly": {
+          "n": 72,
+          "wins": 40,
+          "wrPct": 55.56,
+          "pf": 0.9075,
+          "netPctSum": -6.624
+        },
+        "olderLate": {
+          "n": 58,
+          "wins": 29,
+          "wrPct": 50.0,
+          "pf": 0.6778,
+          "netPctSum": -22.742
+        },
+        "newer": {
+          "n": 87,
+          "wins": 45,
+          "wrPct": 51.72,
+          "pf": 0.7055,
+          "netPctSum": -29.443
+        },
+        "newerEarly": {
+          "n": 53,
+          "wins": 27,
+          "wrPct": 50.94,
+          "pf": 0.6764,
+          "netPctSum": -20.256
+        },
+        "newerLate": {
+          "n": 34,
+          "wins": 18,
+          "wrPct": 52.94,
+          "pf": 0.7542,
+          "netPctSum": -9.187
+        }
+      },
+      "COUNTERTREND_BOUNCE_FADE__TP2_SL3_HOLD12": {
+        "hourlySignals": 189,
+        "older": {
+          "n": 126,
+          "wins": 68,
+          "wrPct": 53.97,
+          "pf": 0.807,
+          "netPctSum": -29.926
+        },
+        "olderEarly": {
+          "n": 72,
+          "wins": 41,
+          "wrPct": 56.94,
+          "pf": 0.9228,
+          "netPctSum": -6.293
+        },
+        "olderLate": {
+          "n": 54,
+          "wins": 27,
+          "wrPct": 50.0,
+          "pf": 0.6787,
+          "netPctSum": -23.634
+        },
+        "newer": {
+          "n": 87,
+          "wins": 50,
+          "wrPct": 57.47,
+          "pf": 0.8489,
+          "netPctSum": -15.557
+        },
+        "newerEarly": {
+          "n": 53,
+          "wins": 32,
+          "wrPct": 60.38,
+          "pf": 0.9615,
+          "netPctSum": -2.259
+        },
+        "newerLate": {
+          "n": 34,
+          "wins": 18,
+          "wrPct": 52.94,
+          "pf": 0.7003,
+          "netPctSum": -13.299
+        }
+      },
+      "BROAD_RETRACE_RESISTANCE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 460,
+        "older": {
+          "n": 200,
+          "wins": 109,
+          "wrPct": 54.5,
+          "pf": 0.8625,
+          "netPctSum": -25.69
+        },
+        "olderEarly": {
+          "n": 102,
+          "wins": 54,
+          "wrPct": 52.94,
+          "pf": 0.8911,
+          "netPctSum": -10.513
+        },
+        "olderLate": {
+          "n": 98,
+          "wins": 55,
+          "wrPct": 56.12,
+          "pf": 0.8319,
+          "netPctSum": -15.177
+        },
+        "newer": {
+          "n": 168,
+          "wins": 92,
+          "wrPct": 54.76,
+          "pf": 1.0612,
+          "netPctSum": 8.199
+        },
+        "newerEarly": {
+          "n": 85,
+          "wins": 53,
+          "wrPct": 62.35,
+          "pf": 1.434,
+          "netPctSum": 24.783
+        },
+        "newerLate": {
+          "n": 83,
+          "wins": 39,
+          "wrPct": 46.99,
+          "pf": 0.7843,
+          "netPctSum": -16.584
+        }
+      },
+      "BROAD_RETRACE_RESISTANCE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 460,
+        "older": {
+          "n": 198,
+          "wins": 110,
+          "wrPct": 55.56,
+          "pf": 0.8165,
+          "netPctSum": -40.067
+        },
+        "olderEarly": {
+          "n": 101,
+          "wins": 56,
+          "wrPct": 55.45,
+          "pf": 0.8437,
+          "netPctSum": -17.113
+        },
+        "olderLate": {
+          "n": 97,
+          "wins": 54,
+          "wrPct": 55.67,
+          "pf": 0.7892,
+          "netPctSum": -22.953
+        },
+        "newer": {
+          "n": 163,
+          "wins": 105,
+          "wrPct": 64.42,
+          "pf": 1.2849,
+          "netPctSum": 37.082
+        },
+        "newerEarly": {
+          "n": 84,
+          "wins": 60,
+          "wrPct": 71.43,
+          "pf": 1.8418,
+          "netPctSum": 44.192
+        },
+        "newerLate": {
+          "n": 79,
+          "wins": 45,
+          "wrPct": 56.96,
+          "pf": 0.9084,
+          "netPctSum": -7.11
+        }
+      },
+      "BROAD_RETRACE_RESISTANCE__TP2_SL3_HOLD12": {
+        "hourlySignals": 460,
+        "older": {
+          "n": 194,
+          "wins": 105,
+          "wrPct": 54.12,
+          "pf": 0.7803,
+          "netPctSum": -53.952
+        },
+        "olderEarly": {
+          "n": 99,
+          "wins": 52,
+          "wrPct": 52.53,
+          "pf": 0.7552,
+          "netPctSum": -31.464
+        },
+        "olderLate": {
+          "n": 95,
+          "wins": 53,
+          "wrPct": 55.79,
+          "pf": 0.8078,
+          "netPctSum": -22.488
+        },
+        "newer": {
+          "n": 161,
+          "wins": 102,
+          "wrPct": 63.35,
+          "pf": 1.2123,
+          "netPctSum": 31.506
+        },
+        "newerEarly": {
+          "n": 82,
+          "wins": 56,
+          "wrPct": 68.29,
+          "pf": 1.6877,
+          "netPctSum": 42.209
+        },
+        "newerLate": {
+          "n": 79,
+          "wins": 46,
+          "wrPct": 58.23,
+          "pf": 0.8771,
+          "netPctSum": -10.703
+        }
+      },
+      "WEAK_BTC_STRONG_RENDER_FADE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 85,
+        "older": {
+          "n": 70,
+          "wins": 39,
+          "wrPct": 55.71,
+          "pf": 0.8014,
+          "netPctSum": -14.642
+        },
+        "olderEarly": {
+          "n": 40,
+          "wins": 25,
+          "wrPct": 62.5,
+          "pf": 1.134,
+          "netPctSum": 4.769
+        },
+        "olderLate": {
+          "n": 30,
+          "wins": 14,
+          "wrPct": 46.67,
+          "pf": 0.4907,
+          "netPctSum": -19.41
+        },
+        "newer": {
+          "n": 61,
+          "wins": 31,
+          "wrPct": 50.82,
+          "pf": 0.7217,
+          "netPctSum": -18.605
+        },
+        "newerEarly": {
+          "n": 33,
+          "wins": 19,
+          "wrPct": 57.58,
+          "pf": 1.013,
+          "netPctSum": 0.403
+        },
+        "newerLate": {
+          "n": 28,
+          "wins": 12,
+          "wrPct": 42.86,
+          "pf": 0.4707,
+          "netPctSum": -19.008
+        }
+      },
+      "WEAK_BTC_STRONG_RENDER_FADE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 85,
+        "older": {
+          "n": 70,
+          "wins": 41,
+          "wrPct": 58.57,
+          "pf": 0.8833,
+          "netPctSum": -8.803
+        },
+        "olderEarly": {
+          "n": 40,
+          "wins": 26,
+          "wrPct": 65.0,
+          "pf": 1.1786,
+          "netPctSum": 6.5
+        },
+        "olderLate": {
+          "n": 30,
+          "wins": 15,
+          "wrPct": 50.0,
+          "pf": 0.6076,
+          "netPctSum": -15.303
+        },
+        "newer": {
+          "n": 61,
+          "wins": 33,
+          "wrPct": 54.1,
+          "pf": 0.8042,
+          "netPctSum": -12.802
+        },
+        "newerEarly": {
+          "n": 33,
+          "wins": 20,
+          "wrPct": 60.61,
+          "pf": 1.0922,
+          "netPctSum": 2.72
+        },
+        "newerLate": {
+          "n": 28,
+          "wins": 13,
+          "wrPct": 46.43,
+          "pf": 0.5673,
+          "netPctSum": -15.522
+        }
+      },
+      "WEAK_BTC_STRONG_RENDER_FADE__TP2_SL3_HOLD12": {
+        "hourlySignals": 85,
+        "older": {
+          "n": 70,
+          "wins": 43,
+          "wrPct": 61.43,
+          "pf": 0.9794,
+          "netPctSum": -1.695
+        },
+        "olderEarly": {
+          "n": 40,
+          "wins": 28,
+          "wrPct": 70.0,
+          "pf": 1.4947,
+          "netPctSum": 17.608
+        },
+        "olderLate": {
+          "n": 30,
+          "wins": 15,
+          "wrPct": 50.0,
+          "pf": 0.5849,
+          "netPctSum": -19.303
+        },
+        "newer": {
+          "n": 59,
+          "wins": 32,
+          "wrPct": 54.24,
+          "pf": 0.7828,
+          "netPctSum": -16.207
+        },
+        "newerEarly": {
+          "n": 33,
+          "wins": 19,
+          "wrPct": 57.58,
+          "pf": 0.9205,
+          "netPctSum": -3.03
+        },
+        "newerLate": {
+          "n": 26,
+          "wins": 13,
+          "wrPct": 50.0,
+          "pf": 0.6392,
+          "netPctSum": -13.178
+        }
+      }
+    },
+    "30": {
+      "RALLY3_FADE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 555,
+        "older": {
+          "n": 265,
+          "wins": 134,
+          "wrPct": 50.57,
+          "pf": 0.5783,
+          "netPctSum": -130.263
+        },
+        "olderEarly": {
+          "n": 133,
+          "wins": 68,
+          "wrPct": 51.13,
+          "pf": 0.6075,
+          "netPctSum": -62.172
+        },
+        "olderLate": {
+          "n": 132,
+          "wins": 66,
+          "wrPct": 50.0,
+          "pf": 0.5476,
+          "netPctSum": -68.091
+        },
+        "newer": {
+          "n": 198,
+          "wins": 100,
+          "wrPct": 50.51,
+          "pf": 0.6874,
+          "netPctSum": -60.867
+        },
+        "newerEarly": {
+          "n": 105,
+          "wins": 58,
+          "wrPct": 55.24,
+          "pf": 0.8191,
+          "netPctSum": -17.058
+        },
+        "newerLate": {
+          "n": 93,
+          "wins": 42,
+          "wrPct": 45.16,
+          "pf": 0.5638,
+          "netPctSum": -43.809
+        }
+      },
+      "RALLY3_FADE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 555,
+        "older": {
+          "n": 259,
+          "wins": 134,
+          "wrPct": 51.74,
+          "pf": 0.5677,
+          "netPctSum": -145.069
+        },
+        "olderEarly": {
+          "n": 130,
+          "wins": 69,
+          "wrPct": 53.08,
+          "pf": 0.6141,
+          "netPctSum": -62.096
+        },
+        "olderLate": {
+          "n": 129,
+          "wins": 65,
+          "wrPct": 50.39,
+          "pf": 0.5249,
+          "netPctSum": -82.973
+        },
+        "newer": {
+          "n": 194,
+          "wins": 115,
+          "wrPct": 59.28,
+          "pf": 0.7949,
+          "netPctSum": -41.271
+        },
+        "newerEarly": {
+          "n": 103,
+          "wins": 64,
+          "wrPct": 62.14,
+          "pf": 0.9118,
+          "netPctSum": -8.637
+        },
+        "newerLate": {
+          "n": 91,
+          "wins": 51,
+          "wrPct": 56.04,
+          "pf": 0.6841,
+          "netPctSum": -32.634
+        }
+      },
+      "RALLY3_FADE__TP2_SL3_HOLD12": {
+        "hourlySignals": 555,
+        "older": {
+          "n": 249,
+          "wins": 131,
+          "wrPct": 52.61,
+          "pf": 0.6187,
+          "netPctSum": -130.941
+        },
+        "olderEarly": {
+          "n": 127,
+          "wins": 70,
+          "wrPct": 55.12,
+          "pf": 0.7107,
+          "netPctSum": -47.401
+        },
+        "olderLate": {
+          "n": 122,
+          "wins": 61,
+          "wrPct": 50.0,
+          "pf": 0.5348,
+          "netPctSum": -83.541
+        },
+        "newer": {
+          "n": 192,
+          "wins": 111,
+          "wrPct": 57.81,
+          "pf": 0.8097,
+          "netPctSum": -42.139
+        },
+        "newerEarly": {
+          "n": 103,
+          "wins": 65,
+          "wrPct": 63.11,
+          "pf": 1.0539,
+          "netPctSum": 5.417
+        },
+        "newerLate": {
+          "n": 89,
+          "wins": 46,
+          "wrPct": 51.69,
+          "pf": 0.6065,
+          "netPctSum": -47.556
+        }
+      },
+      "RALLY6_FADE_BTC__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 234,
+        "older": {
+          "n": 134,
+          "wins": 75,
+          "wrPct": 55.97,
+          "pf": 0.8006,
+          "netPctSum": -24.952
+        },
+        "olderEarly": {
+          "n": 64,
+          "wins": 39,
+          "wrPct": 60.94,
+          "pf": 0.9343,
+          "netPctSum": -3.931
+        },
+        "olderLate": {
+          "n": 70,
+          "wins": 36,
+          "wrPct": 51.43,
+          "pf": 0.6783,
+          "netPctSum": -21.021
+        },
+        "newer": {
+          "n": 95,
+          "wins": 55,
+          "wrPct": 57.89,
+          "pf": 0.7814,
+          "netPctSum": -20.715
+        },
+        "newerEarly": {
+          "n": 48,
+          "wins": 30,
+          "wrPct": 62.5,
+          "pf": 0.8916,
+          "netPctSum": -4.938
+        },
+        "newerLate": {
+          "n": 47,
+          "wins": 25,
+          "wrPct": 53.19,
+          "pf": 0.6793,
+          "netPctSum": -15.777
+        }
+      },
+      "RALLY6_FADE_BTC__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 234,
+        "older": {
+          "n": 132,
+          "wins": 74,
+          "wrPct": 56.06,
+          "pf": 0.6945,
+          "netPctSum": -46.27
+        },
+        "olderEarly": {
+          "n": 64,
+          "wins": 39,
+          "wrPct": 60.94,
+          "pf": 0.8288,
+          "netPctSum": -11.684
+        },
+        "olderLate": {
+          "n": 68,
+          "wins": 35,
+          "wrPct": 51.47,
+          "pf": 0.5844,
+          "netPctSum": -34.586
+        },
+        "newer": {
+          "n": 95,
+          "wins": 54,
+          "wrPct": 56.84,
+          "pf": 0.7057,
+          "netPctSum": -31.989
+        },
+        "newerEarly": {
+          "n": 48,
+          "wins": 29,
+          "wrPct": 60.42,
+          "pf": 0.8342,
+          "netPctSum": -8.357
+        },
+        "newerLate": {
+          "n": 47,
+          "wins": 25,
+          "wrPct": 53.19,
+          "pf": 0.5945,
+          "netPctSum": -23.632
+        }
+      },
+      "RALLY6_FADE_BTC__TP2_SL3_HOLD12": {
+        "hourlySignals": 234,
+        "older": {
+          "n": 130,
+          "wins": 73,
+          "wrPct": 56.15,
+          "pf": 0.6961,
+          "netPctSum": -52.405
+        },
+        "olderEarly": {
+          "n": 64,
+          "wins": 39,
+          "wrPct": 60.94,
+          "pf": 0.8568,
+          "netPctSum": -11.085
+        },
+        "olderLate": {
+          "n": 66,
+          "wins": 34,
+          "wrPct": 51.52,
+          "pf": 0.5653,
+          "netPctSum": -41.32
+        },
+        "newer": {
+          "n": 93,
+          "wins": 56,
+          "wrPct": 60.22,
+          "pf": 0.8412,
+          "netPctSum": -17.304
+        },
+        "newerEarly": {
+          "n": 48,
+          "wins": 31,
+          "wrPct": 64.58,
+          "pf": 0.9799,
+          "netPctSum": -1.051
+        },
+        "newerLate": {
+          "n": 45,
+          "wins": 25,
+          "wrPct": 55.56,
+          "pf": 0.7131,
+          "netPctSum": -16.253
+        }
+      },
+      "DOWNTREND_24_RETRACE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 140,
+        "older": {
+          "n": 84,
+          "wins": 43,
+          "wrPct": 51.19,
+          "pf": 0.6114,
+          "netPctSum": -37.247
+        },
+        "olderEarly": {
+          "n": 39,
+          "wins": 21,
+          "wrPct": 53.85,
+          "pf": 0.6883,
+          "netPctSum": -13.787
+        },
+        "olderLate": {
+          "n": 45,
+          "wins": 22,
+          "wrPct": 48.89,
+          "pf": 0.5454,
+          "netPctSum": -23.46
+        },
+        "newer": {
+          "n": 57,
+          "wins": 22,
+          "wrPct": 38.6,
+          "pf": 0.4071,
+          "netPctSum": -43.092
+        },
+        "newerEarly": {
+          "n": 38,
+          "wins": 13,
+          "wrPct": 34.21,
+          "pf": 0.353,
+          "netPctSum": -33.373
+        },
+        "newerLate": {
+          "n": 19,
+          "wins": 9,
+          "wrPct": 47.37,
+          "pf": 0.5394,
+          "netPctSum": -9.719
+        }
+      },
+      "DOWNTREND_24_RETRACE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 140,
+        "older": {
+          "n": 83,
+          "wins": 45,
+          "wrPct": 54.22,
+          "pf": 0.6288,
+          "netPctSum": -38.409
+        },
+        "olderEarly": {
+          "n": 38,
+          "wins": 22,
+          "wrPct": 57.89,
+          "pf": 0.7306,
+          "netPctSum": -11.764
+        },
+        "olderLate": {
+          "n": 45,
+          "wins": 23,
+          "wrPct": 51.11,
+          "pf": 0.5545,
+          "netPctSum": -26.644
+        },
+        "newer": {
+          "n": 57,
+          "wins": 27,
+          "wrPct": 47.37,
+          "pf": 0.4563,
+          "netPctSum": -43.077
+        },
+        "newerEarly": {
+          "n": 38,
+          "wins": 16,
+          "wrPct": 42.11,
+          "pf": 0.378,
+          "netPctSum": -35.347
+        },
+        "newerLate": {
+          "n": 19,
+          "wins": 11,
+          "wrPct": 57.89,
+          "pf": 0.6549,
+          "netPctSum": -7.73
+        }
+      },
+      "DOWNTREND_24_RETRACE__TP2_SL3_HOLD12": {
+        "hourlySignals": 140,
+        "older": {
+          "n": 82,
+          "wins": 43,
+          "wrPct": 52.44,
+          "pf": 0.6248,
+          "netPctSum": -43.629
+        },
+        "olderEarly": {
+          "n": 38,
+          "wins": 22,
+          "wrPct": 57.89,
+          "pf": 0.7588,
+          "netPctSum": -11.89
+        },
+        "olderLate": {
+          "n": 44,
+          "wins": 21,
+          "wrPct": 47.73,
+          "pf": 0.5263,
+          "netPctSum": -31.739
+        },
+        "newer": {
+          "n": 57,
+          "wins": 28,
+          "wrPct": 49.12,
+          "pf": 0.5414,
+          "netPctSum": -37.145
+        },
+        "newerEarly": {
+          "n": 38,
+          "wins": 18,
+          "wrPct": 47.37,
+          "pf": 0.5263,
+          "netPctSum": -25.543
+        },
+        "newerLate": {
+          "n": 19,
+          "wins": 10,
+          "wrPct": 52.63,
+          "pf": 0.5714,
+          "netPctSum": -11.603
+        }
+      },
+      "DOWNTREND_24_STRICT__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 59,
+        "older": {
+          "n": 39,
+          "wins": 20,
+          "wrPct": 51.28,
+          "pf": 0.5603,
+          "netPctSum": -21.899
+        },
+        "olderEarly": {
+          "n": 22,
+          "wins": 14,
+          "wrPct": 63.64,
+          "pf": 0.9596,
+          "netPctSum": -0.854
+        },
+        "olderLate": {
+          "n": 17,
+          "wins": 6,
+          "wrPct": 35.29,
+          "pf": 0.2654,
+          "netPctSum": -21.045
+        },
+        "newer": {
+          "n": 16,
+          "wins": 8,
+          "wrPct": 50.0,
+          "pf": 0.7701,
+          "netPctSum": -3.463
+        },
+        "newerEarly": {
+          "n": 11,
+          "wins": 5,
+          "wrPct": 45.45,
+          "pf": 0.6729,
+          "netPctSum": -3.524
+        },
+        "newerLate": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 1.0143,
+          "netPctSum": 0.061
+        }
+      },
+      "DOWNTREND_24_STRICT__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 59,
+        "older": {
+          "n": 38,
+          "wins": 20,
+          "wrPct": 52.63,
+          "pf": 0.5754,
+          "netPctSum": -21.4
+        },
+        "olderEarly": {
+          "n": 21,
+          "wins": 14,
+          "wrPct": 66.67,
+          "pf": 1.0357,
+          "netPctSum": 0.7
+        },
+        "olderLate": {
+          "n": 17,
+          "wins": 6,
+          "wrPct": 35.29,
+          "pf": 0.2825,
+          "netPctSum": -22.1
+        },
+        "newer": {
+          "n": 16,
+          "wins": 10,
+          "wrPct": 62.5,
+          "pf": 0.8845,
+          "netPctSum": -1.77
+        },
+        "newerEarly": {
+          "n": 11,
+          "wins": 7,
+          "wrPct": 63.64,
+          "pf": 0.9465,
+          "netPctSum": -0.52
+        },
+        "newerLate": {
+          "n": 5,
+          "wins": 3,
+          "wrPct": 60.0,
+          "pf": 0.7768,
+          "netPctSum": -1.25
+        }
+      },
+      "DOWNTREND_24_STRICT__TP2_SL3_HOLD12": {
+        "hourlySignals": 59,
+        "older": {
+          "n": 38,
+          "wins": 21,
+          "wrPct": 55.26,
+          "pf": 0.6364,
+          "netPctSum": -20.4
+        },
+        "olderEarly": {
+          "n": 21,
+          "wins": 16,
+          "wrPct": 76.19,
+          "pf": 1.6485,
+          "netPctSum": 10.7
+        },
+        "olderLate": {
+          "n": 17,
+          "wins": 5,
+          "wrPct": 29.41,
+          "pf": 0.2146,
+          "netPctSum": -31.1
+        },
+        "newer": {
+          "n": 16,
+          "wins": 9,
+          "wrPct": 56.25,
+          "pf": 0.6677,
+          "netPctSum": -7.02
+        },
+        "newerEarly": {
+          "n": 11,
+          "wins": 7,
+          "wrPct": 63.64,
+          "pf": 0.9536,
+          "netPctSum": -0.52
+        },
+        "newerLate": {
+          "n": 5,
+          "wins": 2,
+          "wrPct": 40.0,
+          "pf": 0.3434,
+          "netPctSum": -6.5
+        }
+      },
+      "RELATIVE_OVERBOUGHT__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 116,
+        "older": {
+          "n": 81,
+          "wins": 45,
+          "wrPct": 55.56,
+          "pf": 0.7494,
+          "netPctSum": -21.037
+        },
+        "olderEarly": {
+          "n": 48,
+          "wins": 29,
+          "wrPct": 60.42,
+          "pf": 0.8897,
+          "netPctSum": -5.215
+        },
+        "olderLate": {
+          "n": 33,
+          "wins": 16,
+          "wrPct": 48.48,
+          "pf": 0.5685,
+          "netPctSum": -15.822
+        },
+        "newer": {
+          "n": 53,
+          "wins": 27,
+          "wrPct": 50.94,
+          "pf": 0.5934,
+          "netPctSum": -26.282
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 17,
+          "wrPct": 56.67,
+          "pf": 0.6952,
+          "netPctSum": -10.463
+        },
+        "newerLate": {
+          "n": 23,
+          "wins": 10,
+          "wrPct": 43.48,
+          "pf": 0.4782,
+          "netPctSum": -15.82
+        }
+      },
+      "RELATIVE_OVERBOUGHT__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 116,
+        "older": {
+          "n": 80,
+          "wins": 46,
+          "wrPct": 57.5,
+          "pf": 0.7278,
+          "netPctSum": -24.941
+        },
+        "olderEarly": {
+          "n": 48,
+          "wins": 30,
+          "wrPct": 62.5,
+          "pf": 0.8944,
+          "netPctSum": -5.134
+        },
+        "olderLate": {
+          "n": 32,
+          "wins": 16,
+          "wrPct": 50.0,
+          "pf": 0.5394,
+          "netPctSum": -19.808
+        },
+        "newer": {
+          "n": 53,
+          "wins": 29,
+          "wrPct": 54.72,
+          "pf": 0.6198,
+          "netPctSum": -24.815
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 17,
+          "wrPct": 56.67,
+          "pf": 0.7152,
+          "netPctSum": -9.814
+        },
+        "newerLate": {
+          "n": 23,
+          "wins": 12,
+          "wrPct": 52.17,
+          "pf": 0.513,
+          "netPctSum": -15.001
+        }
+      },
+      "RELATIVE_OVERBOUGHT__TP2_SL3_HOLD12": {
+        "hourlySignals": 116,
+        "older": {
+          "n": 79,
+          "wins": 46,
+          "wrPct": 58.23,
+          "pf": 0.7786,
+          "netPctSum": -22.242
+        },
+        "olderEarly": {
+          "n": 47,
+          "wins": 29,
+          "wrPct": 61.7,
+          "pf": 0.9082,
+          "netPctSum": -4.985
+        },
+        "olderLate": {
+          "n": 32,
+          "wins": 17,
+          "wrPct": 53.12,
+          "pf": 0.6261,
+          "netPctSum": -17.257
+        },
+        "newer": {
+          "n": 53,
+          "wins": 33,
+          "wrPct": 62.26,
+          "pf": 0.8495,
+          "netPctSum": -9.565
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 20,
+          "wrPct": 66.67,
+          "pf": 1.1124,
+          "netPctSum": 3.436
+        },
+        "newerLate": {
+          "n": 23,
+          "wins": 13,
+          "wrPct": 56.52,
+          "pf": 0.606,
+          "netPctSum": -13.001
+        }
+      },
+      "HIGH_WICK_RESISTANCE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 55,
+        "older": {
+          "n": 49,
+          "wins": 31,
+          "wrPct": 63.27,
+          "pf": 0.9759,
+          "netPctSum": -1.061
+        },
+        "olderEarly": {
+          "n": 24,
+          "wins": 18,
+          "wrPct": 75.0,
+          "pf": 1.7462,
+          "netPctSum": 10.564
+        },
+        "olderLate": {
+          "n": 25,
+          "wins": 13,
+          "wrPct": 52.0,
+          "pf": 0.6116,
+          "netPctSum": -11.626
+        },
+        "newer": {
+          "n": 52,
+          "wins": 30,
+          "wrPct": 57.69,
+          "pf": 0.774,
+          "netPctSum": -12.107
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 20,
+          "wrPct": 66.67,
+          "pf": 1.2157,
+          "netPctSum": 4.969
+        },
+        "newerLate": {
+          "n": 22,
+          "wins": 10,
+          "wrPct": 45.45,
+          "pf": 0.4405,
+          "netPctSum": -17.076
+        }
+      },
+      "HIGH_WICK_RESISTANCE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 55,
+        "older": {
+          "n": 49,
+          "wins": 33,
+          "wrPct": 67.35,
+          "pf": 1.0434,
+          "netPctSum": 1.944
+        },
+        "olderEarly": {
+          "n": 24,
+          "wins": 19,
+          "wrPct": 79.17,
+          "pf": 1.9679,
+          "netPctSum": 13.55
+        },
+        "olderLate": {
+          "n": 25,
+          "wins": 14,
+          "wrPct": 56.0,
+          "pf": 0.6232,
+          "netPctSum": -11.606
+        },
+        "newer": {
+          "n": 52,
+          "wins": 31,
+          "wrPct": 59.62,
+          "pf": 0.7484,
+          "netPctSum": -14.456
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 21,
+          "wrPct": 70.0,
+          "pf": 1.1584,
+          "netPctSum": 3.991
+        },
+        "newerLate": {
+          "n": 22,
+          "wins": 10,
+          "wrPct": 45.45,
+          "pf": 0.4282,
+          "netPctSum": -18.447
+        }
+      },
+      "HIGH_WICK_RESISTANCE__TP2_SL3_HOLD12": {
+        "hourlySignals": 55,
+        "older": {
+          "n": 49,
+          "wins": 31,
+          "wrPct": 63.27,
+          "pf": 0.9069,
+          "netPctSum": -5.269
+        },
+        "olderEarly": {
+          "n": 24,
+          "wins": 17,
+          "wrPct": 70.83,
+          "pf": 1.4227,
+          "netPctSum": 8.587
+        },
+        "olderLate": {
+          "n": 25,
+          "wins": 14,
+          "wrPct": 56.0,
+          "pf": 0.6183,
+          "netPctSum": -13.856
+        },
+        "newer": {
+          "n": 52,
+          "wins": 32,
+          "wrPct": 61.54,
+          "pf": 0.8755,
+          "netPctSum": -7.388
+        },
+        "newerEarly": {
+          "n": 30,
+          "wins": 21,
+          "wrPct": 70.0,
+          "pf": 1.3741,
+          "netPctSum": 9.309
+        },
+        "newerLate": {
+          "n": 22,
+          "wins": 11,
+          "wrPct": 50.0,
+          "pf": 0.5155,
+          "netPctSum": -16.697
+        }
+      },
+      "UPRALLY_VOLUME_SHOCK__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 80,
+        "older": {
+          "n": 62,
+          "wins": 32,
+          "wrPct": 51.61,
+          "pf": 0.6424,
+          "netPctSum": -25.83
+        },
+        "olderEarly": {
+          "n": 33,
+          "wins": 17,
+          "wrPct": 51.52,
+          "pf": 0.6386,
+          "netPctSum": -13.95
+        },
+        "olderLate": {
+          "n": 29,
+          "wins": 15,
+          "wrPct": 51.72,
+          "pf": 0.6468,
+          "netPctSum": -11.88
+        },
+        "newer": {
+          "n": 52,
+          "wins": 30,
+          "wrPct": 57.69,
+          "pf": 0.8083,
+          "netPctSum": -10.316
+        },
+        "newerEarly": {
+          "n": 27,
+          "wins": 18,
+          "wrPct": 66.67,
+          "pf": 1.2222,
+          "netPctSum": 4.746
+        },
+        "newerLate": {
+          "n": 25,
+          "wins": 12,
+          "wrPct": 48.0,
+          "pf": 0.536,
+          "netPctSum": -15.062
+        }
+      },
+      "UPRALLY_VOLUME_SHOCK__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 80,
+        "older": {
+          "n": 61,
+          "wins": 33,
+          "wrPct": 54.1,
+          "pf": 0.6473,
+          "netPctSum": -26.072
+        },
+        "olderEarly": {
+          "n": 32,
+          "wins": 17,
+          "wrPct": 53.12,
+          "pf": 0.6569,
+          "netPctSum": -12.872
+        },
+        "olderLate": {
+          "n": 29,
+          "wins": 16,
+          "wrPct": 55.17,
+          "pf": 0.6374,
+          "netPctSum": -13.2
+        },
+        "newer": {
+          "n": 52,
+          "wins": 30,
+          "wrPct": 57.69,
+          "pf": 0.7297,
+          "netPctSum": -16.114
+        },
+        "newerEarly": {
+          "n": 27,
+          "wins": 18,
+          "wrPct": 66.67,
+          "pf": 1.1243,
+          "netPctSum": 2.886
+        },
+        "newerLate": {
+          "n": 25,
+          "wins": 12,
+          "wrPct": 48.0,
+          "pf": 0.478,
+          "netPctSum": -19.0
+        }
+      },
+      "UPRALLY_VOLUME_SHOCK__TP2_SL3_HOLD12": {
+        "hourlySignals": 80,
+        "older": {
+          "n": 61,
+          "wins": 35,
+          "wrPct": 57.38,
+          "pf": 0.7253,
+          "netPctSum": -22.067
+        },
+        "olderEarly": {
+          "n": 32,
+          "wins": 17,
+          "wrPct": 53.12,
+          "pf": 0.6565,
+          "netPctSum": -15.122
+        },
+        "olderLate": {
+          "n": 29,
+          "wins": 18,
+          "wrPct": 62.07,
+          "pf": 0.8087,
+          "netPctSum": -6.945
+        },
+        "newer": {
+          "n": 50,
+          "wins": 29,
+          "wrPct": 58.0,
+          "pf": 0.7807,
+          "netPctSum": -13.85
+        },
+        "newerEarly": {
+          "n": 26,
+          "wins": 17,
+          "wrPct": 65.38,
+          "pf": 1.1618,
+          "netPctSum": 4.026
+        },
+        "newerLate": {
+          "n": 24,
+          "wins": 12,
+          "wrPct": 50.0,
+          "pf": 0.533,
+          "netPctSum": -17.875
+        }
+      },
+      "BTC_TRAP_REJECTION__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 69,
+        "older": {
+          "n": 51,
+          "wins": 25,
+          "wrPct": 49.02,
+          "pf": 0.5786,
+          "netPctSum": -26.396
+        },
+        "olderEarly": {
+          "n": 29,
+          "wins": 16,
+          "wrPct": 55.17,
+          "pf": 0.7958,
+          "netPctSum": -5.954
+        },
+        "olderLate": {
+          "n": 22,
+          "wins": 9,
+          "wrPct": 40.91,
+          "pf": 0.3896,
+          "netPctSum": -20.442
+        },
+        "newer": {
+          "n": 44,
+          "wins": 30,
+          "wrPct": 68.18,
+          "pf": 1.2504,
+          "netPctSum": 8.509
+        },
+        "newerEarly": {
+          "n": 24,
+          "wins": 19,
+          "wrPct": 79.17,
+          "pf": 2.3168,
+          "netPctSum": 15.659
+        },
+        "newerLate": {
+          "n": 20,
+          "wins": 11,
+          "wrPct": 55.0,
+          "pf": 0.6763,
+          "netPctSum": -7.15
+        }
+      },
+      "BTC_TRAP_REJECTION__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 69,
+        "older": {
+          "n": 50,
+          "wins": 26,
+          "wrPct": 52.0,
+          "pf": 0.5762,
+          "netPctSum": -27.734
+        },
+        "olderEarly": {
+          "n": 28,
+          "wins": 17,
+          "wrPct": 60.71,
+          "pf": 0.849,
+          "netPctSum": -4.384
+        },
+        "olderLate": {
+          "n": 22,
+          "wins": 9,
+          "wrPct": 40.91,
+          "pf": 0.3585,
+          "netPctSum": -23.35
+        },
+        "newer": {
+          "n": 44,
+          "wins": 31,
+          "wrPct": 70.45,
+          "pf": 1.2349,
+          "netPctSum": 8.55
+        },
+        "newerEarly": {
+          "n": 24,
+          "wins": 20,
+          "wrPct": 83.33,
+          "pf": 2.5893,
+          "netPctSum": 17.8
+        },
+        "newerLate": {
+          "n": 20,
+          "wins": 11,
+          "wrPct": 55.0,
+          "pf": 0.6329,
+          "netPctSum": -9.25
+        }
+      },
+      "BTC_TRAP_REJECTION__TP2_SL3_HOLD12": {
+        "hourlySignals": 69,
+        "older": {
+          "n": 50,
+          "wins": 28,
+          "wrPct": 56.0,
+          "pf": 0.6628,
+          "netPctSum": -23.581
+        },
+        "olderEarly": {
+          "n": 28,
+          "wins": 17,
+          "wrPct": 60.71,
+          "pf": 0.8492,
+          "netPctSum": -5.134
+        },
+        "olderLate": {
+          "n": 22,
+          "wins": 11,
+          "wrPct": 50.0,
+          "pf": 0.4862,
+          "netPctSum": -18.448
+        },
+        "newer": {
+          "n": 43,
+          "wins": 28,
+          "wrPct": 65.12,
+          "pf": 1.1698,
+          "netPctSum": 6.909
+        },
+        "newerEarly": {
+          "n": 23,
+          "wins": 17,
+          "wrPct": 73.91,
+          "pf": 2.0403,
+          "netPctSum": 14.735
+        },
+        "newerLate": {
+          "n": 20,
+          "wins": 11,
+          "wrPct": 55.0,
+          "pf": 0.705,
+          "netPctSum": -7.826
+        }
+      },
+      "COUNTERTREND_BOUNCE_FADE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 189,
+        "older": {
+          "n": 131,
+          "wins": 64,
+          "wrPct": 48.85,
+          "pf": 0.5599,
+          "netPctSum": -68.883
+        },
+        "olderEarly": {
+          "n": 73,
+          "wins": 34,
+          "wrPct": 46.58,
+          "pf": 0.5402,
+          "netPctSum": -39.602
+        },
+        "olderLate": {
+          "n": 58,
+          "wins": 30,
+          "wrPct": 51.72,
+          "pf": 0.584,
+          "netPctSum": -29.281
+        },
+        "newer": {
+          "n": 87,
+          "wins": 44,
+          "wrPct": 50.57,
+          "pf": 0.5785,
+          "netPctSum": -41.982
+        },
+        "newerEarly": {
+          "n": 53,
+          "wins": 25,
+          "wrPct": 47.17,
+          "pf": 0.5472,
+          "netPctSum": -28.729
+        },
+        "newerLate": {
+          "n": 34,
+          "wins": 19,
+          "wrPct": 55.88,
+          "pf": 0.6334,
+          "netPctSum": -13.253
+        }
+      },
+      "COUNTERTREND_BOUNCE_FADE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 189,
+        "older": {
+          "n": 130,
+          "wins": 69,
+          "wrPct": 53.08,
+          "pf": 0.6413,
+          "netPctSum": -55.366
+        },
+        "olderEarly": {
+          "n": 72,
+          "wins": 40,
+          "wrPct": 55.56,
+          "pf": 0.7304,
+          "netPctSum": -21.024
+        },
+        "olderLate": {
+          "n": 58,
+          "wins": 29,
+          "wrPct": 50.0,
+          "pf": 0.5504,
+          "netPctSum": -34.342
+        },
+        "newer": {
+          "n": 87,
+          "wins": 44,
+          "wrPct": 50.57,
+          "pf": 0.568,
+          "netPctSum": -46.843
+        },
+        "newerEarly": {
+          "n": 53,
+          "wins": 27,
+          "wrPct": 50.94,
+          "pf": 0.5449,
+          "netPctSum": -30.856
+        },
+        "newerLate": {
+          "n": 34,
+          "wins": 17,
+          "wrPct": 50.0,
+          "pf": 0.6066,
+          "netPctSum": -15.987
+        }
+      },
+      "COUNTERTREND_BOUNCE_FADE__TP2_SL3_HOLD12": {
+        "hourlySignals": 189,
+        "older": {
+          "n": 126,
+          "wins": 68,
+          "wrPct": 53.97,
+          "pf": 0.6692,
+          "netPctSum": -55.126
+        },
+        "olderEarly": {
+          "n": 72,
+          "wins": 41,
+          "wrPct": 56.94,
+          "pf": 0.764,
+          "netPctSum": -20.693
+        },
+        "olderLate": {
+          "n": 54,
+          "wins": 27,
+          "wrPct": 50.0,
+          "pf": 0.5639,
+          "netPctSum": -34.434
+        },
+        "newer": {
+          "n": 87,
+          "wins": 48,
+          "wrPct": 55.17,
+          "pf": 0.7017,
+          "netPctSum": -32.957
+        },
+        "newerEarly": {
+          "n": 53,
+          "wins": 31,
+          "wrPct": 58.49,
+          "pf": 0.7954,
+          "netPctSum": -12.859
+        },
+        "newerLate": {
+          "n": 34,
+          "wins": 17,
+          "wrPct": 50.0,
+          "pf": 0.5781,
+          "netPctSum": -20.099
+        }
+      },
+      "BROAD_RETRACE_RESISTANCE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 460,
+        "older": {
+          "n": 200,
+          "wins": 105,
+          "wrPct": 52.5,
+          "pf": 0.6802,
+          "netPctSum": -65.69
+        },
+        "olderEarly": {
+          "n": 102,
+          "wins": 54,
+          "wrPct": 52.94,
+          "pf": 0.7086,
+          "netPctSum": -30.913
+        },
+        "olderLate": {
+          "n": 98,
+          "wins": 51,
+          "wrPct": 52.04,
+          "pf": 0.6498,
+          "netPctSum": -34.777
+        },
+        "newer": {
+          "n": 168,
+          "wins": 92,
+          "wrPct": 54.76,
+          "pf": 0.8297,
+          "netPctSum": -25.401
+        },
+        "newerEarly": {
+          "n": 85,
+          "wins": 53,
+          "wrPct": 62.35,
+          "pf": 1.1226,
+          "netPctSum": 7.783
+        },
+        "newerLate": {
+          "n": 83,
+          "wins": 39,
+          "wrPct": 46.99,
+          "pf": 0.6127,
+          "netPctSum": -33.184
+        }
+      },
+      "BROAD_RETRACE_RESISTANCE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 460,
+        "older": {
+          "n": 198,
+          "wins": 110,
+          "wrPct": 55.56,
+          "pf": 0.6624,
+          "netPctSum": -79.667
+        },
+        "olderEarly": {
+          "n": 101,
+          "wins": 56,
+          "wrPct": 55.45,
+          "pf": 0.6852,
+          "netPctSum": -37.313
+        },
+        "olderLate": {
+          "n": 97,
+          "wins": 54,
+          "wrPct": 55.67,
+          "pf": 0.6395,
+          "netPctSum": -42.353
+        },
+        "newer": {
+          "n": 163,
+          "wins": 105,
+          "wrPct": 64.42,
+          "pf": 1.0316,
+          "netPctSum": 4.482
+        },
+        "newerEarly": {
+          "n": 84,
+          "wins": 60,
+          "wrPct": 71.43,
+          "pf": 1.4781,
+          "netPctSum": 27.392
+        },
+        "newerLate": {
+          "n": 79,
+          "wins": 45,
+          "wrPct": 56.96,
+          "pf": 0.7287,
+          "netPctSum": -22.91
+        }
+      },
+      "BROAD_RETRACE_RESISTANCE__TP2_SL3_HOLD12": {
+        "hourlySignals": 460,
+        "older": {
+          "n": 194,
+          "wins": 104,
+          "wrPct": 53.61,
+          "pf": 0.6478,
+          "netPctSum": -92.752
+        },
+        "olderEarly": {
+          "n": 99,
+          "wins": 51,
+          "wrPct": 51.52,
+          "pf": 0.6284,
+          "netPctSum": -51.264
+        },
+        "olderLate": {
+          "n": 95,
+          "wins": 53,
+          "wrPct": 55.79,
+          "pf": 0.6692,
+          "netPctSum": -41.488
+        },
+        "newer": {
+          "n": 161,
+          "wins": 101,
+          "wrPct": 62.73,
+          "pf": 0.9957,
+          "netPctSum": -0.694
+        },
+        "newerEarly": {
+          "n": 82,
+          "wins": 56,
+          "wrPct": 68.29,
+          "pf": 1.3876,
+          "netPctSum": 25.809
+        },
+        "newerLate": {
+          "n": 79,
+          "wins": 45,
+          "wrPct": 56.96,
+          "pf": 0.7174,
+          "netPctSum": -26.503
+        }
+      },
+      "WEAK_BTC_STRONG_RENDER_FADE__TP1P75_SL2P5_HOLD6": {
+        "hourlySignals": 85,
+        "older": {
+          "n": 70,
+          "wins": 37,
+          "wrPct": 52.86,
+          "pf": 0.6422,
+          "netPctSum": -28.642
+        },
+        "olderEarly": {
+          "n": 40,
+          "wins": 25,
+          "wrPct": 62.5,
+          "pf": 0.9163,
+          "netPctSum": -3.231
+        },
+        "olderLate": {
+          "n": 30,
+          "wins": 12,
+          "wrPct": 40.0,
+          "pf": 0.3869,
+          "netPctSum": -25.41
+        },
+        "newer": {
+          "n": 61,
+          "wins": 30,
+          "wrPct": 49.18,
+          "pf": 0.5775,
+          "netPctSum": -30.805
+        },
+        "newerEarly": {
+          "n": 33,
+          "wins": 19,
+          "wrPct": 57.58,
+          "pf": 0.8164,
+          "netPctSum": -6.197
+        },
+        "newerLate": {
+          "n": 28,
+          "wins": 11,
+          "wrPct": 39.29,
+          "pf": 0.3716,
+          "netPctSum": -24.608
+        }
+      },
+      "WEAK_BTC_STRONG_RENDER_FADE__TP1P75_SL2P5_HOLD12": {
+        "hourlySignals": 85,
+        "older": {
+          "n": 70,
+          "wins": 41,
+          "wrPct": 58.57,
+          "pf": 0.7192,
+          "netPctSum": -22.803
+        },
+        "olderEarly": {
+          "n": 40,
+          "wins": 26,
+          "wrPct": 65.0,
+          "pf": 0.9617,
+          "netPctSum": -1.5
+        },
+        "olderLate": {
+          "n": 30,
+          "wins": 15,
+          "wrPct": 50.0,
+          "pf": 0.4928,
+          "netPctSum": -21.303
+        },
+        "newer": {
+          "n": 61,
+          "wins": 33,
+          "wrPct": 54.1,
+          "pf": 0.6477,
+          "netPctSum": -25.002
+        },
+        "newerEarly": {
+          "n": 33,
+          "wins": 20,
+          "wrPct": 60.61,
+          "pf": 0.8791,
+          "netPctSum": -3.88
+        },
+        "newerLate": {
+          "n": 28,
+          "wins": 13,
+          "wrPct": 46.43,
+          "pf": 0.4566,
+          "netPctSum": -21.122
+        }
+      },
+      "WEAK_BTC_STRONG_RENDER_FADE__TP2_SL3_HOLD12": {
+        "hourlySignals": 85,
+        "older": {
+          "n": 70,
+          "wins": 43,
+          "wrPct": 61.43,
+          "pf": 0.8206,
+          "netPctSum": -15.695
+        },
+        "olderEarly": {
+          "n": 40,
+          "wins": 28,
+          "wrPct": 70.0,
+          "pf": 1.2529,
+          "netPctSum": 9.608
+        },
+        "olderLate": {
+          "n": 30,
+          "wins": 15,
+          "wrPct": 50.0,
+          "pf": 0.4888,
+          "netPctSum": -25.303
+        },
+        "newer": {
+          "n": 59,
+          "wins": 32,
+          "wrPct": 54.24,
+          "pf": 0.65,
+          "netPctSum": -28.007
+        },
+        "newerEarly": {
+          "n": 33,
+          "wins": 19,
+          "wrPct": 57.58,
+          "pf": 0.7646,
+          "netPctSum": -9.63
+        },
+        "newerLate": {
+          "n": 26,
+          "wins": 13,
+          "wrPct": 50.0,
+          "pf": 0.5303,
+          "netPctSum": -18.378
+        }
+      }
+    }
+  },
+  "comparison": {
+    "10": {
+      "bothYearsPFOver1AndAtLeast20Cases": 1,
+      "qualifiedModels": [
+        {
+          "name": "HIGH_WICK_RESISTANCE__TP2_SL3_HOLD12",
+          "older": {
+            "n": 49,
+            "wins": 31,
+            "wrPct": 63.27,
+            "pf": 1.0855,
+            "netPctSum": 4.531
+          },
+          "newer": {
+            "n": 52,
+            "wins": 32,
+            "wrPct": 61.54,
+            "pf": 1.0544,
+            "netPctSum": 3.012
+          }
+        }
+      ]
+    },
+    "30": {
+      "bothYearsPFOver1AndAtLeast20Cases": 0,
+      "qualifiedModels": []
+    }
+  }
+}

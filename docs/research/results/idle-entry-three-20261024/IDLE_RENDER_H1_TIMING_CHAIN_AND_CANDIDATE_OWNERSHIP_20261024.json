@@ -1,0 +1,1758 @@
+{
+  "status": "EX_POST_RESEARCH_ONLY_NOT_ADMISSIBLE_ENTRY_OR_PORTFOLIO",
+  "costs": {
+    "10": {
+      "original": {
+        "n": 24,
+        "wins": 16,
+        "wrPct": 66.67,
+        "netSumPct": 6.329
+      },
+      "decisionReasons": {
+        "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 8,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 81,
+        "IDLE:FILLED_SYMBOL_COOLDOWN": 44,
+        "IDLE:FULL_1X_UNAVAILABLE": 7
+      },
+      "selectedLosses": [
+        {
+          "candidateId": "C001045",
+          "ts": 1768456800000,
+          "dateUTC": "2026-01-15 06:00",
+          "originalWin": false,
+          "originalReturnPct": -0.23636363636362134,
+          "features": {
+            "ret3h": -1.4831460674157304,
+            "ret1h": 0.0,
+            "last15": 0.13704888076748745,
+            "last30": 0.45829514207149646,
+            "first45": -0.4107713372889066,
+            "rebound2to1": 1.0994044892350008,
+            "fadefrom1hhigh": 0.6843065693430406,
+            "fadefrom3hhigh": 2.1897810218978186,
+            "fadefrom15high": 0.31934306569341153,
+            "last1hRangePct": 1.33149678604223,
+            "rangepos3h": 0.225806451612906,
+            "lowprior": 2.183,
+            "highrecent": 2.207
+          },
+          "followUps": [
+            {
+              "withinHours": 1,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 2,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 3,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 3,
+              "positiveCooldownCandidates": 2,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.7589511754068773,
+                "win": true
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001102",
+          "ts": 1769097600000,
+          "dateUTC": "2026-01-22 16:00",
+          "originalWin": false,
+          "originalReturnPct": -4.864292878635905,
+          "features": {
+            "ret3h": -1.0864197530864095,
+            "ret1h": -0.14955134596209563,
+            "last15": 0.049950049950076014,
+            "last30": 1.417721518987336,
+            "first45": -1.5453639082751547,
+            "rebound2to1": 2.5796661608497695,
+            "fadefrom1hhigh": 1.248127808287558,
+            "fadefrom3hhigh": 2.196704942586125,
+            "fadefrom15high": 1.248127808287558,
+            "last1hRangePct": 3.1011692933401003,
+            "rangepos3h": 0.45,
+            "lowprior": 1.977,
+            "highrecent": 2.028
+          },
+          "followUps": []
+        },
+        {
+          "candidateId": "C001159",
+          "ts": 1769893200000,
+          "dateUTC": "2026-01-31 21:00",
+          "originalWin": false,
+          "originalReturnPct": -2.928947368421048,
+          "features": {
+            "ret3h": 0.6756756756756799,
+            "ret1h": 0.20174848688634395,
+            "last15": 0.47201618341199403,
+            "last30": 1.2228260869565188,
+            "first45": -0.06788866259335169,
+            "rebound2to1": 8.411892675852073,
+            "fadefrom1hhigh": 0.3355704697986628,
+            "fadefrom3hhigh": 1.4093959731543482,
+            "fadefrom15high": 0.26845637583892135,
+            "last1hRangePct": 2.257181942544473,
+            "rangepos3h": 0.8409090909090915,
+            "lowprior": 1.379,
+            "highrecent": 1.495
+          },
+          "followUps": []
+        },
+        {
+          "candidateId": "C001268",
+          "ts": 1770638400000,
+          "dateUTC": "2026-02-09 12:00",
+          "originalWin": false,
+          "originalReturnPct": -2.5353120243531224,
+          "features": {
+            "ret3h": -2.3255813953488302,
+            "ret1h": 0.5405405405405572,
+            "last15": 0.0768639508070823,
+            "last30": -0.22988505747125743,
+            "first45": 1.0844306738962084,
+            "rebound2to1": 1.7094017094017033,
+            "fadefrom1hhigh": 0.5376344086021501,
+            "fadefrom3hhigh": 2.5345622119815614,
+            "fadefrom15high": 0.07680491551458335,
+            "last1hRangePct": 1.0030864197530853,
+            "rangepos3h": 0.31250000000000233,
+            "lowprior": 1.287,
+            "highrecent": 1.309
+          },
+          "followUps": [
+            {
+              "withinHours": 3,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.17518796992480373,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001442",
+          "ts": 1772398800000,
+          "dateUTC": "2026-03-01 21:00",
+          "originalWin": false,
+          "originalReturnPct": -2.524242424242426,
+          "features": {
+            "ret3h": -2.0879940343027648,
+            "ret1h": -1.7215568862275599,
+            "last15": 0.0,
+            "last30": -0.3793626707132125,
+            "first45": -1.199400299850073,
+            "rebound2to1": 0.5259203606311047,
+            "fadefrom1hhigh": 1.9040365575019091,
+            "fadefrom3hhigh": 3.960396039603964,
+            "fadefrom15high": 0.4569687738004591,
+            "last1hRangePct": 2.2154316271963514,
+            "rangepos3h": 0.07142857142857142,
+            "lowprior": 1.331,
+            "highrecent": 1.338
+          },
+          "followUps": [
+            {
+              "withinHours": 2,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.227819548872173,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001546",
+          "ts": 1773770400000,
+          "dateUTC": "2026-03-17 18:00",
+          "originalWin": false,
+          "originalReturnPct": -0.9342602892102281,
+          "features": {
+            "ret3h": 0.22246941045607205,
+            "ret1h": 0.22246941045607205,
+            "last15": 0.16675931072818173,
+            "last30": -0.055463117027165776,
+            "first45": 0.670016750418756,
+            "rebound2to1": 1.63104611923508,
+            "fadefrom1hhigh": 0.2774694783573839,
+            "fadefrom3hhigh": 0.8324084350721295,
+            "fadefrom15high": 0.05549389567147678,
+            "last1hRangePct": 0.8370535714285587,
+            "rangepos3h": 0.6153846153846171,
+            "lowprior": 1.778,
+            "highrecent": 1.807
+          },
+          "followUps": [
+            {
+              "withinHours": 1,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 2,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 2,
+              "positiveCooldownCandidates": 2,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 2,
+              "positiveCooldownCandidates": 2,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 2,
+              "positiveCooldownCandidates": 2,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 3,
+              "eligibleIfNoFilledCooldown": 3,
+              "positiveCandidates": 3,
+              "positiveCooldownCandidates": 3,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 6,
+              "eligibleIfNoFilledCooldown": 6,
+              "positiveCandidates": 6,
+              "positiveCooldownCandidates": 6,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": 0.05025000000000923,
+                "win": true
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001734",
+          "ts": 1776560400000,
+          "dateUTC": "2026-04-19 01:00",
+          "originalWin": false,
+          "originalReturnPct": -1.91818181818182,
+          "features": {
+            "ret3h": -1.3415315818893214,
+            "ret1h": -0.3950338600451575,
+            "last15": 0.68454078722191,
+            "last30": 0.17026106696935717,
+            "first45": -1.066816395283543,
+            "rebound2to1": 0.339558573853993,
+            "fadefrom1hhigh": 0.45325779036826663,
+            "fadefrom3hhigh": 1.6997167138810276,
+            "fadefrom15high": 0.0,
+            "last1hRangePct": 1.256424900057107,
+            "rangepos3h": 0.3181818181818182,
+            "lowprior": 1.767,
+            "highrecent": 1.773
+          },
+          "followUps": []
+        },
+        {
+          "candidateId": "C001808",
+          "ts": 1778598000000,
+          "dateUTC": "2026-05-12 15:00",
+          "originalWin": false,
+          "originalReturnPct": -3.509696323921154,
+          "features": {
+            "ret3h": -1.5748031496062964,
+            "ret1h": -0.7411328745367873,
+            "last15": -0.6359300476947549,
+            "last30": -0.5832449628844105,
+            "first45": -0.9453781512605008,
+            "rebound2to1": 0.849707912904929,
+            "fadefrom1hhigh": 1.2799999999999923,
+            "fadefrom3hhigh": 1.866666666666661,
+            "fadefrom15high": 0.6933333333333236,
+            "last1hRangePct": 1.8230563002680888,
+            "rangepos3h": 0.22222222222222276,
+            "lowprior": 1.883,
+            "highrecent": 1.899
+          },
+          "followUps": [
+            {
+              "withinHours": 4,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1778612400000,
+                "ret": -2.6396825396825423,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1778612400000,
+                "ret": -2.6396825396825423,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1778612400000,
+                "ret": -2.6396825396825423,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1778612400000,
+                "ret": -2.6396825396825423,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1778612400000,
+                "ret": -2.6396825396825423,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1778612400000,
+                "ret": -2.6396825396825423,
+                "win": false
+              }
+            }
+          ]
+        }
+      ],
+      "selectedWinDates": [
+        "2026-01-15 18:00",
+        "2026-01-19 12:00",
+        "2026-01-24 05:00",
+        "2026-01-24 17:00",
+        "2026-02-06 02:00",
+        "2026-02-19 15:00",
+        "2026-04-12 23:00",
+        "2026-04-14 12:00",
+        "2026-04-16 18:00",
+        "2026-04-18 12:00",
+        "2026-05-18 12:00",
+        "2026-05-23 06:00",
+        "2026-05-27 10:00",
+        "2026-06-04 09:00",
+        "2026-06-10 14:00",
+        "2026-06-28 08:00"
+      ],
+      "nextCooldownPotential": {
+        "1": {
+          "losersWithNextCooldownWithinHours": 2,
+          "hypotheticalFirstCooldown": {
+            "n": 2,
+            "wins": 2,
+            "wrPct": 100.0,
+            "netSumPct": 0.809
+          }
+        },
+        "2": {
+          "losersWithNextCooldownWithinHours": 3,
+          "hypotheticalFirstCooldown": {
+            "n": 3,
+            "wins": 2,
+            "wrPct": 66.67,
+            "netSumPct": -0.419
+          }
+        },
+        "3": {
+          "losersWithNextCooldownWithinHours": 4,
+          "hypotheticalFirstCooldown": {
+            "n": 4,
+            "wins": 2,
+            "wrPct": 50.0,
+            "netSumPct": -0.594
+          }
+        },
+        "4": {
+          "losersWithNextCooldownWithinHours": 5,
+          "hypotheticalFirstCooldown": {
+            "n": 5,
+            "wins": 2,
+            "wrPct": 40.0,
+            "netSumPct": -3.233
+          }
+        },
+        "6": {
+          "losersWithNextCooldownWithinHours": 5,
+          "hypotheticalFirstCooldown": {
+            "n": 5,
+            "wins": 2,
+            "wrPct": 40.0,
+            "netSumPct": -3.233
+          }
+        },
+        "12": {
+          "losersWithNextCooldownWithinHours": 5,
+          "hypotheticalFirstCooldown": {
+            "n": 5,
+            "wins": 2,
+            "wrPct": 40.0,
+            "netSumPct": -3.233
+          }
+        }
+      }
+    },
+    "30": {
+      "original": {
+        "n": 24,
+        "wins": 12,
+        "wrPct": 50.0,
+        "netSumPct": 0.731
+      },
+      "decisionReasons": {
+        "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 8,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 81,
+        "IDLE:FILLED_SYMBOL_COOLDOWN": 44,
+        "IDLE:FULL_1X_UNAVAILABLE": 7
+      },
+      "selectedLosses": [
+        {
+          "candidateId": "C001045",
+          "ts": 1768456800000,
+          "dateUTC": "2026-01-15 06:00",
+          "originalWin": false,
+          "originalReturnPct": -0.4363636363636213,
+          "features": {
+            "ret3h": -1.4831460674157304,
+            "ret1h": 0.0,
+            "last15": 0.13704888076748745,
+            "last30": 0.45829514207149646,
+            "first45": -0.4107713372889066,
+            "rebound2to1": 1.0994044892350008,
+            "fadefrom1hhigh": 0.6843065693430406,
+            "fadefrom3hhigh": 2.1897810218978186,
+            "fadefrom15high": 0.31934306569341153,
+            "last1hRangePct": 1.33149678604223,
+            "rangepos3h": 0.225806451612906,
+            "lowprior": 2.183,
+            "highrecent": 2.207
+          },
+          "followUps": [
+            {
+              "withinHours": 1,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 2,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "win": true
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 3,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 2,
+              "positiveCooldownCandidates": 2,
+              "earliestNext": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": true
+              },
+              "earliestCooldown": {
+                "ts": 1768460400000,
+                "ret": 0.5589511754068772,
+                "win": true
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001048",
+          "ts": 1768500000000,
+          "dateUTC": "2026-01-15 18:00",
+          "originalWin": false,
+          "originalReturnPct": -0.34925000000000633,
+          "features": {
+            "ret3h": -2.123893805309718,
+            "ret1h": -1.1617515638963294,
+            "last15": -1.4699331848552322,
+            "last30": -1.1617515638963294,
+            "first45": 0.22391401701746805,
+            "rebound2to1": 2.7841168416248285,
+            "fadefrom1hhigh": 1.8083182640144413,
+            "fadefrom3hhigh": 2.6220614828209587,
+            "fadefrom15high": 1.672694394213381,
+            "last1hRangePct": 2.038966923425467,
+            "rangepos3h": 0.26582278481013044,
+            "lowprior": 2.191,
+            "highrecent": 2.252
+          },
+          "followUps": [
+            {
+              "withinHours": 6,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1768518000000,
+                "ret": -3.1117913832199466,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1768518000000,
+                "ret": -3.1117913832199466,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1768518000000,
+                "ret": -3.1117913832199466,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1768518000000,
+                "ret": -3.1117913832199466,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001063",
+          "ts": 1768824000000,
+          "dateUTC": "2026-01-19 12:00",
+          "originalWin": false,
+          "originalReturnPct": -0.3492500000000041,
+          "features": {
+            "ret3h": -0.3370245546461259,
+            "ret1h": -0.7670182166826467,
+            "last15": -0.43290043290045155,
+            "last30": -0.38498556304138454,
+            "first45": -0.5741626794258381,
+            "rebound2to1": 1.3559322033898313,
+            "fadefrom1hhigh": 1.1111111111111072,
+            "fadefrom3hhigh": 1.9323671497584627,
+            "fadefrom15high": 0.5314009661835817,
+            "last1hRangePct": 1.4541929229277661,
+            "rangepos3h": 0.14893617021275993,
+            "lowprior": 2.065,
+            "highrecent": 2.093
+          },
+          "followUps": [
+            {
+              "withinHours": 2,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 4,
+              "eligibleIfNoFilledCooldown": 4,
+              "positiveCandidates": 3,
+              "positiveCooldownCandidates": 3,
+              "earliestNext": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1768831200000,
+                "ret": -1.8763546798029573,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001102",
+          "ts": 1769097600000,
+          "dateUTC": "2026-01-22 16:00",
+          "originalWin": false,
+          "originalReturnPct": -5.064292878635905,
+          "features": {
+            "ret3h": -1.0864197530864095,
+            "ret1h": -0.14955134596209563,
+            "last15": 0.049950049950076014,
+            "last30": 1.417721518987336,
+            "first45": -1.5453639082751547,
+            "rebound2to1": 2.5796661608497695,
+            "fadefrom1hhigh": 1.248127808287558,
+            "fadefrom3hhigh": 2.196704942586125,
+            "fadefrom15high": 1.248127808287558,
+            "last1hRangePct": 3.1011692933401003,
+            "rangepos3h": 0.45,
+            "lowprior": 1.977,
+            "highrecent": 2.028
+          },
+          "followUps": []
+        },
+        {
+          "candidateId": "C001159",
+          "ts": 1769893200000,
+          "dateUTC": "2026-01-31 21:00",
+          "originalWin": false,
+          "originalReturnPct": -3.1289473684210476,
+          "features": {
+            "ret3h": 0.6756756756756799,
+            "ret1h": 0.20174848688634395,
+            "last15": 0.47201618341199403,
+            "last30": 1.2228260869565188,
+            "first45": -0.06788866259335169,
+            "rebound2to1": 8.411892675852073,
+            "fadefrom1hhigh": 0.3355704697986628,
+            "fadefrom3hhigh": 1.4093959731543482,
+            "fadefrom15high": 0.26845637583892135,
+            "last1hRangePct": 2.257181942544473,
+            "rangepos3h": 0.8409090909090915,
+            "lowprior": 1.379,
+            "highrecent": 1.495
+          },
+          "followUps": []
+        },
+        {
+          "candidateId": "C001268",
+          "ts": 1770638400000,
+          "dateUTC": "2026-02-09 12:00",
+          "originalWin": false,
+          "originalReturnPct": -2.735312024353122,
+          "features": {
+            "ret3h": -2.3255813953488302,
+            "ret1h": 0.5405405405405572,
+            "last15": 0.0768639508070823,
+            "last30": -0.22988505747125743,
+            "first45": 1.0844306738962084,
+            "rebound2to1": 1.7094017094017033,
+            "fadefrom1hhigh": 0.5376344086021501,
+            "fadefrom3hhigh": 2.5345622119815614,
+            "fadefrom15high": 0.07680491551458335,
+            "last1hRangePct": 1.0030864197530853,
+            "rangepos3h": 0.31250000000000233,
+            "lowprior": 1.287,
+            "highrecent": 1.309
+          },
+          "followUps": [
+            {
+              "withinHours": 3,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1770649200000,
+                "ret": -0.37518796992480374,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001359",
+          "ts": 1771513200000,
+          "dateUTC": "2026-02-19 15:00",
+          "originalWin": false,
+          "originalReturnPct": -0.3492499999999885,
+          "features": {
+            "ret3h": -1.5647226173541973,
+            "ret1h": 1.9896831245394209,
+            "last15": 0.5083514887436413,
+            "last30": 1.0218978102189524,
+            "first45": 0.14619883040936088,
+            "rebound2to1": 2.4318349299926156,
+            "fadefrom1hhigh": 0.43352601156070314,
+            "fadefrom3hhigh": 1.950867052023142,
+            "fadefrom15high": 0.43352601156070314,
+            "last1hRangePct": 2.6587887740029403,
+            "rangepos3h": 0.5263157894736813,
+            "lowprior": 1.357,
+            "highrecent": 1.39
+          },
+          "followUps": [
+            {
+              "withinHours": 1,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 2,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1771516800000,
+                "ret": -4.912005856515369,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001442",
+          "ts": 1772398800000,
+          "dateUTC": "2026-03-01 21:00",
+          "originalWin": false,
+          "originalReturnPct": -2.724242424242426,
+          "features": {
+            "ret3h": -2.0879940343027648,
+            "ret1h": -1.7215568862275599,
+            "last15": 0.0,
+            "last30": -0.3793626707132125,
+            "first45": -1.199400299850073,
+            "rebound2to1": 0.5259203606311047,
+            "fadefrom1hhigh": 1.9040365575019091,
+            "fadefrom3hhigh": 3.960396039603964,
+            "fadefrom15high": 0.4569687738004591,
+            "last1hRangePct": 2.2154316271963514,
+            "rangepos3h": 0.07142857142857142,
+            "lowprior": 1.331,
+            "highrecent": 1.338
+          },
+          "followUps": [
+            {
+              "withinHours": 2,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1772406000000,
+                "ret": -1.427819548872173,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001546",
+          "ts": 1773770400000,
+          "dateUTC": "2026-03-17 18:00",
+          "originalWin": false,
+          "originalReturnPct": -1.134260289210228,
+          "features": {
+            "ret3h": 0.22246941045607205,
+            "ret1h": 0.22246941045607205,
+            "last15": 0.16675931072818173,
+            "last30": -0.055463117027165776,
+            "first45": 0.670016750418756,
+            "rebound2to1": 1.63104611923508,
+            "fadefrom1hhigh": 0.2774694783573839,
+            "fadefrom3hhigh": 0.8324084350721295,
+            "fadefrom15high": 0.05549389567147678,
+            "last1hRangePct": 0.8370535714285587,
+            "rangepos3h": 0.6153846153846171,
+            "lowprior": 1.778,
+            "highrecent": 1.807
+          },
+          "followUps": [
+            {
+              "withinHours": 1,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 2,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 3,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 4,
+              "availableCandidates": 2,
+              "eligibleIfNoFilledCooldown": 2,
+              "positiveCandidates": 1,
+              "positiveCooldownCandidates": 1,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 3,
+              "eligibleIfNoFilledCooldown": 3,
+              "positiveCandidates": 2,
+              "positiveCooldownCandidates": 2,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 6,
+              "eligibleIfNoFilledCooldown": 6,
+              "positiveCandidates": 5,
+              "positiveCooldownCandidates": 5,
+              "earliestNext": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1773774000000,
+                "ret": -0.34924999999999184,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001734",
+          "ts": 1776560400000,
+          "dateUTC": "2026-04-19 01:00",
+          "originalWin": false,
+          "originalReturnPct": -2.11818181818182,
+          "features": {
+            "ret3h": -1.3415315818893214,
+            "ret1h": -0.3950338600451575,
+            "last15": 0.68454078722191,
+            "last30": 0.17026106696935717,
+            "first45": -1.066816395283543,
+            "rebound2to1": 0.339558573853993,
+            "fadefrom1hhigh": 0.45325779036826663,
+            "fadefrom3hhigh": 1.6997167138810276,
+            "fadefrom15high": 0.0,
+            "last1hRangePct": 1.256424900057107,
+            "rangepos3h": 0.3181818181818182,
+            "lowprior": 1.767,
+            "highrecent": 1.773
+          },
+          "followUps": []
+        },
+        {
+          "candidateId": "C001808",
+          "ts": 1778598000000,
+          "dateUTC": "2026-05-12 15:00",
+          "originalWin": false,
+          "originalReturnPct": -3.7096963239211536,
+          "features": {
+            "ret3h": -1.5748031496062964,
+            "ret1h": -0.7411328745367873,
+            "last15": -0.6359300476947549,
+            "last30": -0.5832449628844105,
+            "first45": -0.9453781512605008,
+            "rebound2to1": 0.849707912904929,
+            "fadefrom1hhigh": 1.2799999999999923,
+            "fadefrom3hhigh": 1.866666666666661,
+            "fadefrom15high": 0.6933333333333236,
+            "last1hRangePct": 1.8230563002680888,
+            "rangepos3h": 0.22222222222222276,
+            "lowprior": 1.883,
+            "highrecent": 1.899
+          },
+          "followUps": [
+            {
+              "withinHours": 4,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1778612400000,
+                "ret": -2.839682539682542,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1778612400000,
+                "ret": -2.839682539682542,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 6,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1778612400000,
+                "ret": -2.839682539682542,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1778612400000,
+                "ret": -2.839682539682542,
+                "win": false
+              }
+            },
+            {
+              "withinHours": 12,
+              "availableCandidates": 1,
+              "eligibleIfNoFilledCooldown": 1,
+              "positiveCandidates": 0,
+              "positiveCooldownCandidates": 0,
+              "earliestNext": {
+                "ts": 1778612400000,
+                "ret": -2.839682539682542,
+                "reason": "IDLE:FILLED_SYMBOL_COOLDOWN",
+                "win": false
+              },
+              "earliestCooldown": {
+                "ts": 1778612400000,
+                "ret": -2.839682539682542,
+                "win": false
+              }
+            }
+          ]
+        },
+        {
+          "candidateId": "C001854",
+          "ts": 1779105600000,
+          "dateUTC": "2026-05-18 12:00",
+          "originalWin": false,
+          "originalReturnPct": -0.3492499999999931,
+          "features": {
+            "ret3h": 0.34149117814457064,
+            "ret1h": 1.1474469305794432,
+            "last15": -0.39548022598870913,
+            "last30": 0.8581235697940448,
+            "first45": 0.17191977077364307,
+            "rebound2to1": 2.0701552616446017,
+            "fadefrom1hhigh": 0.6806579693704018,
+            "fadefrom3hhigh": 0.6806579693704018,
+            "fadefrom15high": 0.39705048213274363,
+            "last1hRangePct": 2.128883774453394,
+            "rangepos3h": 0.6756756756756747,
+            "lowprior": 1.739,
+            "highrecent": 1.775
+          },
+          "followUps": []
+        }
+      ],
+      "selectedWinDates": [
+        "2026-01-24 05:00",
+        "2026-01-24 17:00",
+        "2026-02-06 02:00",
+        "2026-04-12 23:00",
+        "2026-04-14 12:00",
+        "2026-04-16 18:00",
+        "2026-04-18 12:00",
+        "2026-05-23 06:00",
+        "2026-05-27 10:00",
+        "2026-06-04 09:00",
+        "2026-06-10 14:00",
+        "2026-06-28 08:00"
+      ],
+      "nextCooldownPotential": {
+        "1": {
+          "losersWithNextCooldownWithinHours": 3,
+          "hypotheticalFirstCooldown": {
+            "n": 3,
+            "wins": 1,
+            "wrPct": 33.33,
+            "netSumPct": -4.702
+          }
+        },
+        "2": {
+          "losersWithNextCooldownWithinHours": 5,
+          "hypotheticalFirstCooldown": {
+            "n": 5,
+            "wins": 1,
+            "wrPct": 20.0,
+            "netSumPct": -8.006
+          }
+        },
+        "3": {
+          "losersWithNextCooldownWithinHours": 6,
+          "hypotheticalFirstCooldown": {
+            "n": 6,
+            "wins": 1,
+            "wrPct": 16.67,
+            "netSumPct": -8.382
+          }
+        },
+        "4": {
+          "losersWithNextCooldownWithinHours": 7,
+          "hypotheticalFirstCooldown": {
+            "n": 7,
+            "wins": 1,
+            "wrPct": 14.29,
+            "netSumPct": -11.221
+          }
+        },
+        "6": {
+          "losersWithNextCooldownWithinHours": 8,
+          "hypotheticalFirstCooldown": {
+            "n": 8,
+            "wins": 1,
+            "wrPct": 12.5,
+            "netSumPct": -14.333
+          }
+        },
+        "12": {
+          "losersWithNextCooldownWithinHours": 8,
+          "hypotheticalFirstCooldown": {
+            "n": 8,
+            "wins": 1,
+            "wrPct": 12.5,
+            "netSumPct": -14.333
+          }
+        }
+      }
+    }
+  },
+  "dateSplit": "2026-04-01",
+  "notes": [
+    "Alternative candidate exit is future information used to describe possibilities only.",
+    "Additional positions may still be blocked by core strategy ownership, idle gross, HYPE and pending risk.",
+    "Each after-entry H1 candidate must be independently validated in the native allocator before being called a trade."
+  ]
+}
