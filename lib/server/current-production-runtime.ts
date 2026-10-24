@@ -39,6 +39,8 @@ export type CurrentProductionRuntime = {
   };
   runtimeLineage: {
     synchronized: boolean;
+    // The V4 unit can have a release SHA independent of the shared release.
+    independentV4?: boolean;
     units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet" | "hype", {
       runtimeSha?: string;
       expectedSha?: string;
@@ -136,9 +138,10 @@ export function isRuntimeLineageUnitHealthy(unit: Pick<RuntimeLineageUnit, "runt
   return Boolean(unit && !unit.error && unit.matchesCurrent && isValidRuntimeSha(unit.runtimeSha) && isFreshRuntimeTimestamp(unit.updatedAt, now));
 }
 
-export function assessRuntimeLineage(runtimeLineage: CurrentProductionRuntime["runtimeLineage"], now = Date.now()) {
+export function assessRuntimeLineage(runtimeLineage: CurrentProductionRuntime["runtimeLineage"], now = Date.now(), independentlyReleased: readonly string[] = []) {
   const errors: string[] = [];
   for (const [unitName, unit] of Object.entries(runtimeLineage.units)) {
+    if (independentlyReleased.includes(unitName)) continue;
     if (unit.error) errors.push(`${unitName}:HEARTBEAT_UNAVAILABLE`);
     if (!unit.matchesCurrent || !isValidRuntimeSha(unit.runtimeSha)) errors.push(`${unitName}:RUNTIME_SHA_MISMATCH`);
     if (unit.updatedAt === undefined || !Number.isFinite(Number(unit.updatedAt))) errors.push(`${unitName}:HEARTBEAT_TIMESTAMP_MISSING`);
@@ -199,12 +202,26 @@ function v52Number(value: unknown, key: string): number {
 
 type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
 
+export function resolveIndependentV4Sha(raw: Record<string, unknown> | null, commonSha: string): string | null {
+  const sha = typeof raw?.runtimeSha === "string" ? raw.runtimeSha.trim() : "";
+  if (!SHA_RE.test(sha) || sha === commonSha) return null;
+  if (raw?.expectedSha !== sha || raw?.releaseSha !== sha) return null;
+  if (raw?.serviceUnit !== `disdex-v12-v4@${sha}.service`) return null;
+  return sha;
+}
+
 async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<CurrentProductionRuntime["runtimeLineage"]> {
   const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
   const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
+  const v4Heartbeat = await readFile(V12_V4_HEARTBEAT_PATH, "utf8")
+    .then((contents) => JSON.parse(contents) as Record<string, unknown>)
+    .catch(() => null);
+  // Identify an independently pinned V4 only from its matching SHA/unit contract.
+  // Its liveness/order readiness is NOT inferred here; systemd health is separate.
+  const independentlyPinnedV4 = resolveIndependentV4Sha(v4Heartbeat, releaseSha) !== null;
   const heartbeatPaths = {
     ...HEARTBEAT_PATHS,
-    v12: v12PrimaryMode === "V4" ? V12_V4_HEARTBEAT_PATH : LEGACY_V12_HEARTBEAT_PATH,
+    v12: independentlyPinnedV4 || v12PrimaryMode === "V4" ? V12_V4_HEARTBEAT_PATH : LEGACY_V12_HEARTBEAT_PATH,
   };
   for (const [unit, path] of Object.entries(heartbeatPaths) as Array<[RuntimeUnitKey, string]>) {
     try {
@@ -241,6 +258,7 @@ async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<Curr
   }
   return {
     synchronized: Object.values(units).every((unit) => unit.matchesCurrent),
+    independentV4: independentlyPinnedV4,
     units,
   };
 }
@@ -263,7 +281,14 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
   const loadedRuntimeLineage = await loadRuntimeLineage(releaseSha, env);
-  const lineageHealth = assessRuntimeLineage(loadedRuntimeLineage, Date.parse(checkedAt));
+  // V4's separate release must not block the other common-SHA runners;
+  // it remains nonmatching/stale in units.v12 and cannot be promoted to LIVE
+  // without independent evidence. The home systemd API reports V4 FAILED.
+  const lineageHealth = assessRuntimeLineage(
+    loadedRuntimeLineage,
+    Date.parse(checkedAt),
+    loadedRuntimeLineage.independentV4 ? ["v12"] : [],
+  );
   const runtimeLineage = { ...loadedRuntimeLineage, synchronized: lineageHealth.synchronized };
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
@@ -285,7 +310,8 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     source: "VPS_CURRENT_RUNTIME",
     releaseSha,
     productionReleaseShas: {
-      v12: releaseSha,
+      v12: loadedRuntimeLineage.independentV4 && loadedRuntimeLineage.units.v12.runtimeSha
+        ? loadedRuntimeLineage.units.v12.runtimeSha : releaseSha,
       pengu: releaseSha,
       quality102: releaseSha,
       v52: releaseSha,

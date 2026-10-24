@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 
 import { GET as getTradeHistory } from "../app/api/system/trade-history/route";
 import { createDecisionStatusGet, type DecisionStatusRouteDependencies } from "../lib/server/decision-status-route-handler";
-import { assessRuntimeLineage, type CurrentProductionRuntime } from "../lib/server/current-production-runtime";
+import { assessRuntimeLineage, resolveIndependentV4Sha, type CurrentProductionRuntime } from "../lib/server/current-production-runtime";
 import { loadDecisionStatus } from "../lib/server/disdex-decision-status";
 import { isHealthyCurrentRuntime, parseProductionRuntimeResponse, productionRuntimeStrategyLabel } from "../lib/ui/production-runtime";
 import { livePortfolioFailureState } from "../lib/ui/live-portfolio-state";
@@ -262,4 +262,33 @@ test("live portfolio failure clears the prior Aster snapshot", () => {
   const next = livePortfolioFailureState(previous, "503 unavailable");
   assert.equal(next.snapshot, null);
   assert.equal(next.error, "503 unavailable");
+});
+
+
+test("independent V4 is never treated as common-SHA V12 but permits healthy shared release assessment", () => {
+  const independentSha = "f".repeat(40);
+  const v4 = {
+    runtimeSha: independentSha, expectedSha: independentSha, releaseSha: independentSha,
+    serviceUnit: `disdex-v12-v4@${independentSha}.service`,
+  };
+  assert.equal(resolveIndependentV4Sha(v4, releaseSha), independentSha);
+  assert.equal(resolveIndependentV4Sha({ ...v4, expectedSha: releaseSha }, releaseSha), null);
+  assert.equal(resolveIndependentV4Sha({ ...v4, serviceUnit: "disdex-v12-v4@bad.service" }, releaseSha), null);
+  const units = lineage().units;
+  const withSeparateV4 = {
+    synchronized: false,
+    independentV4: true,
+    units: {
+      ...units,
+      v12: { runtimeSha: independentSha, expectedSha: independentSha, matchesCurrent: false, updatedAt: now - 30 * 60 * 60 * 1000 },
+    },
+  };
+  const full = assessRuntimeLineage(withSeparateV4, now);
+  assert.equal(full.synchronized, false);
+  assert.ok(full.errors.includes("v12:RUNTIME_SHA_MISMATCH"));
+  const scoped = assessRuntimeLineage(withSeparateV4, now, ["v12"]);
+  assert.equal(scoped.synchronized, true);
+  assert.equal(withSeparateV4.units.v12.matchesCurrent, false);
+  const stalePeer = { ...withSeparateV4, units: { ...withSeparateV4.units, pengu: { ...units.pengu, updatedAt: now - 30 * 60 * 60 * 1000 } } };
+  assert.equal(assessRuntimeLineage(stalePeer, now, ["v12"]).synchronized, false);
 });
