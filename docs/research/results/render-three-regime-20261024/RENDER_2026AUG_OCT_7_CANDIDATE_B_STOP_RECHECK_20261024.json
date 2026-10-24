@@ -1,0 +1,1703 @@
+{
+  "status": "RESEARCH_ONLY_RETROSPECTIVE_SECOND_LOOK_NO_NATIVE8",
+  "period": "2026-08-10 through 2026-10-22 (previously investigated period)",
+  "costs": [
+    10,
+    30
+  ],
+  "preselectedIndices": [
+    4427,
+    4429,
+    3319,
+    3320,
+    4390,
+    2311,
+    415
+  ],
+  "candidates": {
+    "4427": {
+      "config": {
+        "index": 4427,
+        "priority": [
+          "SHORT_2024_BTC_RALLY_FAILURE",
+          "SHORT_DEEP_DROP_FAILED_RETEST",
+          "SHORT_BEAR_REBOUND_2H_FADE"
+        ],
+        "exits": {
+          "SHORT_DEEP_DROP_FAILED_RETEST": "TAKE15_STOP20_H6",
+          "SHORT_2024_BTC_RALLY_FAILURE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_BEAR_REBOUND_2H_FADE": "BST35_T50M25H24"
+        },
+        "mode": "TRIPLE_B_NEW_STOP",
+        "strict": false,
+        "year30": {
+          "2024": {
+            "n": 70,
+            "wr": 65.714,
+            "pf": 1.1579,
+            "closeDdPct": -13.152
+          },
+          "2025": {
+            "n": 64,
+            "wr": 60.938,
+            "pf": 1.4868,
+            "closeDdPct": -16.422
+          },
+          "2026": {
+            "n": 41,
+            "wr": 78.049,
+            "pf": 2.4013,
+            "closeDdPct": -8.376
+          }
+        },
+        "h230": {
+          "n": 19,
+          "wr": 52.632,
+          "pf": 1.131,
+          "pnlPctSum": 3.882
+        }
+      },
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.3915,
+          "pnlPctSum": 5.637,
+          "compoundPct": 5.126,
+          "closeDdPct": -7.07,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.1998,
+          "pnlPctSum": 3.037,
+          "compoundPct": 2.434,
+          "closeDdPct": -7.456,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 9,
+          "wins": 7,
+          "wr": 77.778,
+          "pf": 2.5329,
+          "pnlPctSum": 11.037,
+          "compoundPct": 11.115,
+          "closeDdPct": -3.6,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 7,
+          "wr": 77.778,
+          "pf": 2.2154,
+          "pnlPctSum": 9.237,
+          "compoundPct": 9.153,
+          "closeDdPct": -3.8,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787297400000
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787499000000
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787664900000
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787876700000
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1789483800000
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1789785300000
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1789959300000
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790090400000
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790646300000
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1791472500000
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1791524100000
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1792030800000
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 0.6371554575523743,
+          "exitTs": 1792461600000
+        }
+      ]
+    },
+    "4429": {
+      "config": {
+        "index": 4429,
+        "priority": [
+          "SHORT_DEEP_DROP_FAILED_RETEST",
+          "SHORT_BEAR_REBOUND_2H_FADE",
+          "SHORT_2024_BTC_RALLY_FAILURE"
+        ],
+        "exits": {
+          "SHORT_DEEP_DROP_FAILED_RETEST": "TAKE15_STOP20_H6",
+          "SHORT_2024_BTC_RALLY_FAILURE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_BEAR_REBOUND_2H_FADE": "BST35_T50M25H24"
+        },
+        "mode": "TRIPLE_B_NEW_STOP",
+        "strict": false,
+        "year30": {
+          "2024": {
+            "n": 70,
+            "wr": 65.714,
+            "pf": 1.1579,
+            "closeDdPct": -13.152
+          },
+          "2025": {
+            "n": 64,
+            "wr": 60.938,
+            "pf": 1.4868,
+            "closeDdPct": -16.422
+          },
+          "2026": {
+            "n": 41,
+            "wr": 78.049,
+            "pf": 2.4013,
+            "closeDdPct": -8.376
+          }
+        },
+        "h230": {
+          "n": 19,
+          "wr": 52.632,
+          "pf": 1.131,
+          "pnlPctSum": 3.882
+        }
+      },
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.3915,
+          "pnlPctSum": 5.637,
+          "compoundPct": 5.126,
+          "closeDdPct": -7.07,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 7,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.1998,
+          "pnlPctSum": 3.037,
+          "compoundPct": 2.434,
+          "closeDdPct": -7.456,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 7,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 9,
+          "wins": 7,
+          "wr": 77.778,
+          "pf": 2.5329,
+          "pnlPctSum": 11.037,
+          "compoundPct": 11.115,
+          "closeDdPct": -3.6,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 7,
+          "wr": 77.778,
+          "pf": 2.2154,
+          "pnlPctSum": 9.237,
+          "compoundPct": 9.153,
+          "closeDdPct": -3.8,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787297400000
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787499000000
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787664900000
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787876700000
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1789483800000
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1789785300000
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1789959300000
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790090400000
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790646300000
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1791472500000
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1791524100000
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1792030800000
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T50M25H24",
+          "return30": 0.6371554575523743,
+          "exitTs": 1792461600000
+        }
+      ]
+    },
+    "3319": {
+      "config": {
+        "index": 3319,
+        "priority": [
+          "SHORT_2024_BTC_RALLY_FAILURE",
+          "SHORT_BEAR_REBOUND_2H_FADE",
+          "SHORT_BTC_RALLY_RENDER_DIVERGENCE"
+        ],
+        "exits": {
+          "SHORT_BTC_RALLY_RENDER_DIVERGENCE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_2024_BTC_RALLY_FAILURE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_BEAR_REBOUND_2H_FADE": "BST35_T40M25H24"
+        },
+        "mode": "TRIPLE_B_NEW_STOP",
+        "strict": false,
+        "year30": {
+          "2024": {
+            "n": 81,
+            "wr": 67.901,
+            "pf": 1.2276,
+            "closeDdPct": -16.452
+          },
+          "2025": {
+            "n": 72,
+            "wr": 62.5,
+            "pf": 1.4351,
+            "closeDdPct": -17.61
+          },
+          "2026": {
+            "n": 47,
+            "wr": 72.34,
+            "pf": 1.6319,
+            "closeDdPct": -18.158
+          }
+        },
+        "h230": {
+          "n": 21,
+          "wr": 52.381,
+          "pf": 1.0798,
+          "pnlPctSum": 2.956
+        }
+      },
+      "all": {
+        "10": {
+          "n": 14,
+          "wins": 9,
+          "wr": 64.286,
+          "pf": 1.0021,
+          "pnlPctSum": 0.037,
+          "compoundPct": -0.581,
+          "closeDdPct": -8.796,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 14,
+          "wins": 9,
+          "wr": 64.286,
+          "pf": 0.8546,
+          "pnlPctSum": -2.763,
+          "compoundPct": -3.331,
+          "closeDdPct": -9.722,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 10,
+          "wins": 7,
+          "wr": 70.0,
+          "pf": 1.5034,
+          "pnlPctSum": 5.437,
+          "compoundPct": 5.083,
+          "closeDdPct": -3.6,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 10,
+          "wins": 7,
+          "wr": 70.0,
+          "pf": 1.3015,
+          "pnlPctSum": 3.437,
+          "compoundPct": 3.009,
+          "closeDdPct": -3.8,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787297400000
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787499000000
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787664900000
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787876700000
+        },
+        {
+          "t": 1788444000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BTC_RALLY_RENDER_DIVERGENCE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1788455700000
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1789483800000
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1789785300000
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1789959300000
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790090400000
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790646300000
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1791472200000
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1791524100000
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1792030800000
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 0.6371554575523743,
+          "exitTs": 1792461600000
+        }
+      ]
+    },
+    "3320": {
+      "config": {
+        "index": 3320,
+        "priority": [
+          "SHORT_BEAR_REBOUND_2H_FADE",
+          "SHORT_2024_BTC_RALLY_FAILURE",
+          "SHORT_BTC_RALLY_RENDER_DIVERGENCE"
+        ],
+        "exits": {
+          "SHORT_BTC_RALLY_RENDER_DIVERGENCE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_2024_BTC_RALLY_FAILURE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_BEAR_REBOUND_2H_FADE": "BST35_T40M25H24"
+        },
+        "mode": "TRIPLE_B_NEW_STOP",
+        "strict": false,
+        "year30": {
+          "2024": {
+            "n": 82,
+            "wr": 67.073,
+            "pf": 1.2017,
+            "closeDdPct": -16.452
+          },
+          "2025": {
+            "n": 72,
+            "wr": 62.5,
+            "pf": 1.4247,
+            "closeDdPct": -17.61
+          },
+          "2026": {
+            "n": 47,
+            "wr": 72.34,
+            "pf": 1.6319,
+            "closeDdPct": -18.158
+          }
+        },
+        "h230": {
+          "n": 21,
+          "wr": 52.381,
+          "pf": 1.0798,
+          "pnlPctSum": 2.956
+        }
+      },
+      "all": {
+        "10": {
+          "n": 14,
+          "wins": 9,
+          "wr": 64.286,
+          "pf": 1.0021,
+          "pnlPctSum": 0.037,
+          "compoundPct": -0.581,
+          "closeDdPct": -8.796,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 7,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1
+          }
+        },
+        "30": {
+          "n": 14,
+          "wins": 9,
+          "wr": 64.286,
+          "pf": 0.8546,
+          "pnlPctSum": -2.763,
+          "compoundPct": -3.331,
+          "closeDdPct": -9.722,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 7,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 10,
+          "wins": 7,
+          "wr": 70.0,
+          "pf": 1.5034,
+          "pnlPctSum": 5.437,
+          "compoundPct": 5.083,
+          "closeDdPct": -3.6,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 10,
+          "wins": 7,
+          "wr": 70.0,
+          "pf": 1.3015,
+          "pnlPctSum": 3.437,
+          "compoundPct": 3.009,
+          "closeDdPct": -3.8,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787297400000
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787499000000
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787664900000
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787876700000
+        },
+        {
+          "t": 1788444000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BTC_RALLY_RENDER_DIVERGENCE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1788455700000
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1789483800000
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1789785300000
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1789959300000
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790090400000
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790646300000
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1791472200000
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1791524100000
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1792030800000
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 0.6371554575523743,
+          "exitTs": 1792461600000
+        }
+      ]
+    },
+    "4390": {
+      "config": {
+        "index": 4390,
+        "priority": [
+          "SHORT_BEAR_REBOUND_2H_FADE",
+          "SHORT_2024_BTC_RALLY_FAILURE",
+          "SHORT_DEEP_DROP_FAILED_RETEST"
+        ],
+        "exits": {
+          "SHORT_DEEP_DROP_FAILED_RETEST": "TAKE15_STOP20_H6",
+          "SHORT_2024_BTC_RALLY_FAILURE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_BEAR_REBOUND_2H_FADE": "BST35_T40M25H24"
+        },
+        "mode": "TRIPLE_B_NEW_STOP",
+        "strict": false,
+        "year30": {
+          "2024": {
+            "n": 70,
+            "wr": 65.714,
+            "pf": 1.1527,
+            "closeDdPct": -13.152
+          },
+          "2025": {
+            "n": 64,
+            "wr": 60.938,
+            "pf": 1.3674,
+            "closeDdPct": -17.61
+          },
+          "2026": {
+            "n": 42,
+            "wr": 76.19,
+            "pf": 2.0439,
+            "closeDdPct": -12.409
+          }
+        },
+        "h230": {
+          "n": 19,
+          "wr": 52.632,
+          "pf": 1.0618,
+          "pnlPctSum": 2.056
+        }
+      },
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.2526,
+          "pnlPctSum": 3.637,
+          "compoundPct": 3.131,
+          "closeDdPct": -7.07,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 7,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.0682,
+          "pnlPctSum": 1.037,
+          "compoundPct": 0.487,
+          "closeDdPct": -7.456,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 7,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 9,
+          "wins": 7,
+          "wr": 77.778,
+          "pf": 2.2552,
+          "pnlPctSum": 9.037,
+          "compoundPct": 9.007,
+          "closeDdPct": -3.6,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 7,
+          "wr": 77.778,
+          "pf": 1.9523,
+          "pnlPctSum": 7.237,
+          "compoundPct": 7.078,
+          "closeDdPct": -3.8,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787297400000
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787499000000
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787664900000
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787876700000
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1789483800000
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1789785300000
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1789959300000
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790090400000
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790646300000
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1791472200000
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1791524100000
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1792030800000
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST35_T40M25H24",
+          "return30": 0.6371554575523743,
+          "exitTs": 1792461600000
+        }
+      ]
+    },
+    "2311": {
+      "config": {
+        "index": 2311,
+        "priority": [
+          "SHORT_2024_BTC_RALLY_FAILURE",
+          "SHORT_BEAR_REBOUND_2H_FADE",
+          "SHORT_BTC_RALLY_RENDER_DIVERGENCE"
+        ],
+        "exits": {
+          "SHORT_BTC_RALLY_RENDER_DIVERGENCE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_2024_BTC_RALLY_FAILURE": "TRAIL_MFE25_FLOOR10_H24",
+          "SHORT_BEAR_REBOUND_2H_FADE": "BST15_T15H6"
+        },
+        "mode": "TRIPLE_B_NEW_STOP",
+        "strict": false,
+        "year30": {
+          "2024": {
+            "n": 81,
+            "wr": 64.198,
+            "pf": 1.027,
+            "closeDdPct": -19.949
+          },
+          "2025": {
+            "n": 72,
+            "wr": 61.111,
+            "pf": 1.5652,
+            "closeDdPct": -9.933
+          },
+          "2026": {
+            "n": 47,
+            "wr": 68.085,
+            "pf": 1.4715,
+            "closeDdPct": -14.821
+          }
+        },
+        "h230": {
+          "n": 21,
+          "wr": 52.381,
+          "pf": 1.3936,
+          "pnlPctSum": 9.322
+        }
+      },
+      "all": {
+        "10": {
+          "n": 14,
+          "wins": 8,
+          "wr": 57.143,
+          "pf": 0.7478,
+          "pnlPctSum": -4.282,
+          "compoundPct": -4.617,
+          "closeDdPct": -8.796,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 14,
+          "wins": 8,
+          "wr": 57.143,
+          "pf": 0.6105,
+          "pnlPctSum": -7.082,
+          "compoundPct": -7.263,
+          "closeDdPct": -9.722,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 10,
+          "wins": 6,
+          "wr": 60.0,
+          "pf": 1.1143,
+          "pnlPctSum": 1.118,
+          "compoundPct": 0.817,
+          "closeDdPct": -3.6,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 10,
+          "wins": 6,
+          "wr": 60.0,
+          "pf": 0.9166,
+          "pnlPctSum": -0.882,
+          "compoundPct": -1.18,
+          "closeDdPct": -3.8,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787297400000
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1787499000000
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787664900000
+        },
+        {
+          "t": 1787824800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1787876700000
+        },
+        {
+          "t": 1788444000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BTC_RALLY_RENDER_DIVERGENCE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1788455700000
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 4.700000000000005,
+          "exitTs": 1789483800000
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": -3.799999999999992,
+          "exitTs": 1789785300000
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1789959300000
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE25_FLOOR10_H24",
+          "return30": 0.7000000000000008,
+          "exitTs": 1790090400000
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST15_T15H6",
+          "return30": 1.2000000000000013,
+          "exitTs": 1790645100000
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST15_T15H6",
+          "return30": 1.2000000000000124,
+          "exitTs": 1791455400000
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST15_T15H6",
+          "return30": -1.7999999999999903,
+          "exitTs": 1791522900000
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST15_T15H6",
+          "return30": 1.2000000000000013,
+          "exitTs": 1792030200000
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST15_T15H6",
+          "return30": -1.1820286659316335,
+          "exitTs": 1792396800000
+        }
+      ]
+    },
+    "415": {
+      "config": {
+        "index": 415,
+        "priority": [
+          "SHORT_BEAR_REBOUND_2H_FADE",
+          "SHORT_2024_BTC_RALLY_FAILURE",
+          "SHORT_RALLY_TOP_BUYER_EXHAUST"
+        ],
+        "exits": {
+          "SHORT_RALLY_TOP_BUYER_EXHAUST": "TAKE15_STOP20_H6",
+          "SHORT_2024_BTC_RALLY_FAILURE": "TRAIL_MFE15_FLOOR05_H18",
+          "SHORT_BEAR_REBOUND_2H_FADE": "BST20_T40H24"
+        },
+        "mode": "TRIPLE_B_NEW_STOP",
+        "strict": false,
+        "year30": {
+          "2024": {
+            "n": 124,
+            "wr": 59.677,
+            "pf": 1.0256,
+            "closeDdPct": -17.192
+          },
+          "2025": {
+            "n": 108,
+            "wr": 60.185,
+            "pf": 1.1137,
+            "closeDdPct": -19.342
+          },
+          "2026": {
+            "n": 67,
+            "wr": 58.209,
+            "pf": 1.0517,
+            "closeDdPct": -18.164
+          }
+        },
+        "h230": {
+          "n": 32,
+          "wr": 68.75,
+          "pf": 1.3644,
+          "pnlPctSum": 9.475
+        }
+      },
+      "all": {
+        "10": {
+          "n": 22,
+          "wins": 13,
+          "wr": 59.091,
+          "pf": 1.2559,
+          "pnlPctSum": 4.569,
+          "compoundPct": 4.152,
+          "closeDdPct": -6.561,
+          "maxLossPct": -3.1,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 6,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6,
+            "SHORT_RALLY_TOP_BUYER_EXHAUST": 10
+          }
+        },
+        "30": {
+          "n": 22,
+          "wins": 12,
+          "wr": 54.545,
+          "pf": 1.0086,
+          "pnlPctSum": 0.169,
+          "compoundPct": -0.329,
+          "closeDdPct": -7.689,
+          "maxLossPct": -3.3,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 6,
+            "SHORT_BEAR_REBOUND_2H_FADE": 6,
+            "SHORT_RALLY_TOP_BUYER_EXHAUST": 10
+          }
+        }
+      },
+      "afterSep1": {
+        "10": {
+          "n": 18,
+          "wins": 11,
+          "wr": 61.111,
+          "pf": 1.4148,
+          "pnlPctSum": 6.046,
+          "compoundPct": 5.743,
+          "closeDdPct": -6.561,
+          "maxLossPct": -3.1,
+          "byEntry": {
+            "SHORT_RALLY_TOP_BUYER_EXHAUST": 9,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 18,
+          "wins": 10,
+          "wr": 55.556,
+          "pf": 1.1522,
+          "pnlPctSum": 2.446,
+          "compoundPct": 2.011,
+          "closeDdPct": -7.689,
+          "maxLossPct": -3.3,
+          "byEntry": {
+            "SHORT_RALLY_TOP_BUYER_EXHAUST": 9,
+            "SHORT_2024_BTC_RALLY_FAILURE": 4,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE15_FLOOR05_H18",
+          "return30": -1.376812634601576,
+          "exitTs": 1787284800000
+        },
+        {
+          "t": 1787486400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST20_T40H24",
+          "return30": -2.3000000000000016,
+          "exitTs": 1787492100000
+        },
+        {
+          "t": 1787626800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE15_FLOOR05_H18",
+          "return30": 0.20000000000000046,
+          "exitTs": 1787646300000
+        },
+        {
+          "t": 1787796000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": 1.2000000000000013,
+          "exitTs": 1787802900000
+        },
+        {
+          "t": 1788735600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": 0.2810200129115484,
+          "exitTs": 1788757200000
+        },
+        {
+          "t": 1789412400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE15_FLOOR05_H18",
+          "return30": 3.199999999999992,
+          "exitTs": 1789458900000
+        },
+        {
+          "t": 1789610400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": -1.175273522975939,
+          "exitTs": 1789632000000
+        },
+        {
+          "t": 1789740000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE15_FLOOR05_H18",
+          "return30": -3.3000000000000025,
+          "exitTs": 1789782300000
+        },
+        {
+          "t": 1789945200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE15_FLOOR05_H18",
+          "return30": 3.2000000000000033,
+          "exitTs": 1789956000000
+        },
+        {
+          "t": 1790085600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_2024_BTC_RALLY_FAILURE",
+          "exitName": "TRAIL_MFE15_FLOOR05_H18",
+          "return30": 0.20000000000000046,
+          "exitTs": 1790091600000
+        },
+        {
+          "t": 1790136000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": 1.2000000000000013,
+          "exitTs": 1790142600000
+        },
+        {
+          "t": 1790262000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": -2.3000000000000016,
+          "exitTs": 1790267100000
+        },
+        {
+          "t": 1790643600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST20_T40H24",
+          "return30": -2.3000000000000016,
+          "exitTs": 1790670000000
+        },
+        {
+          "t": 1791446400000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST20_T40H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1791472200000
+        },
+        {
+          "t": 1791522000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST20_T40H24",
+          "return30": -2.3000000000000016,
+          "exitTs": 1791523500000
+        },
+        {
+          "t": 1791594000000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": -2.3000000000000016,
+          "exitTs": 1791610800000
+        },
+        {
+          "t": 1791741600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": -2.3000000000000016,
+          "exitTs": 1791751500000
+        },
+        {
+          "t": 1791874800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": 1.2000000000000013,
+          "exitTs": 1791875100000
+        },
+        {
+          "t": 1791928800000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": 1.2000000000000124,
+          "exitTs": 1791929400000
+        },
+        {
+          "t": 1792011600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST20_T40H24",
+          "return30": 3.7000000000000037,
+          "exitTs": 1792030800000
+        },
+        {
+          "t": 1792083600000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_RALLY_TOP_BUYER_EXHAUST",
+          "exitName": "TAKE15_STOP20_H6",
+          "return30": -0.09685119349923638,
+          "exitTs": 1792105200000
+        },
+        {
+          "t": 1792375200000,
+          "symbol": "RENDERUSDT",
+          "entry": "SHORT_BEAR_REBOUND_2H_FADE",
+          "exitName": "BST20_T40H24",
+          "return30": 0.6371554575523743,
+          "exitTs": 1792461600000
+        }
+      ]
+    }
+  },
+  "baselines": [
+    {
+      "name": "OLD_A_B_TAKE",
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 7,
+          "wr": 53.846,
+          "pf": 1.3031,
+          "pnlPctSum": 5.637,
+          "compoundPct": 5.016,
+          "closeDdPct": -6.104,
+          "maxLossPct": -3.1,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 7,
+          "wr": 53.846,
+          "pf": 1.1534,
+          "pnlPctSum": 3.037,
+          "compoundPct": 2.327,
+          "closeDdPct": -6.491,
+          "maxLossPct": -3.3,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      }
+    },
+    {
+      "name": "HIGH_WR_A_B",
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.7755,
+          "pnlPctSum": 8.513,
+          "compoundPct": 8.314,
+          "closeDdPct": -4.24,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 9,
+          "wr": 69.231,
+          "pf": 1.5021,
+          "pnlPctSum": 5.913,
+          "compoundPct": 5.547,
+          "closeDdPct": -4.631,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      }
+    },
+    {
+      "name": "HIGH_WR_ADD_DIVERGENCE",
+      "all": {
+        "10": {
+          "n": 14,
+          "wins": 9,
+          "wr": 64.286,
+          "pf": 1.4904,
+          "pnlPctSum": 6.413,
+          "compoundPct": 6.039,
+          "closeDdPct": -5.545,
+          "maxLossPct": -3.6,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        },
+        "30": {
+          "n": 14,
+          "wins": 9,
+          "wr": 64.286,
+          "pf": 1.2567,
+          "pnlPctSum": 3.613,
+          "compoundPct": 3.119,
+          "closeDdPct": -6.688,
+          "maxLossPct": -3.8,
+          "byEntry": {
+            "SHORT_2024_BTC_RALLY_FAILURE": 8,
+            "SHORT_BTC_RALLY_RENDER_DIVERGENCE": 1,
+            "SHORT_BEAR_REBOUND_2H_FADE": 5
+          }
+        }
+      }
+    }
+  ],
+  "warnings": [
+    "Retrospective second look, NOT independent OOS",
+    "B 1.5%-3.5% stop contract differs from venue stop/native wallet",
+    "No rigorous live venue fill/funding/slippage lifecycle",
+    "No adoption / no order allowed"
+  ]
+}
