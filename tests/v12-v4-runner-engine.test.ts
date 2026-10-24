@@ -4,7 +4,7 @@ import {mkdtempSync,rmSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
-import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
+import {V4ExecutionStore,advanceV4Intent,v4OrderIdentity} from "../lib/v12-v4-execution-store";
 import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
@@ -21,6 +21,47 @@ test("terminal V4 entry intents are not reconciled again after restart",()=>{
  assert.equal(isReconciliableV4EntryIntent({action:"ENTRY",stage:"TERMINAL"}),false);
  assert.equal(isReconciliableV4EntryIntent({action:"ENTRY",stage:"UNKNOWN"}),true);
  assert.equal(isReconciliableV4EntryIntent({action:"STOP",stage:"ACKNOWLEDGED"}),false);
+});
+test("terminal V4 intents do not block flat market-data preparation",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-terminal-flat-"));
+ try{
+  const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
+  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  const doc=store.read();
+  const terminalId=v4OrderIdentity(sha,"BTCUSDT:ROUTE:SHORT:1","EXIT",0);
+  store.commit(doc.revision,{...doc,intents:{
+   [terminalId]:{clientOrderId:terminalId,legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,stage:"PREPARED",
+    createdAt:1,updatedAt:1,command:{legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,symbol:"BTCUSDT",
+     positionSide:"SHORT",quantity:1,price:100,signalTs:1}},
+  } as any});
+  const terminalDoc=store.read();
+  store.commit(terminalDoc.revision,advanceV4Intent(terminalDoc,terminalId,"TERMINAL",2));
+  let fetches=0;
+  const engine=new V4RunnerEngine({store,fetchDecision:async()=>{fetches++;return {schema:"v12-v4-live-decision/v1",errors:[],candidateCount:0} as any}} as any);
+  const prepared=await engine.prepareFlatMarketDecision();
+  assert.equal(prepared?.kind,"READY");
+  assert.equal(fetches,1);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test("terminal V4 reduction intents are not re-queried on every tick",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-terminal-reduction-"));
+ try{
+  const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
+  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  const doc=store.read();
+  const terminalId=v4OrderIdentity(sha,"BTCUSDT:ROUTE:SHORT:1","EXIT",0);
+  store.commit(doc.revision,{...doc,intents:{
+   [terminalId]:{clientOrderId:terminalId,legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,stage:"PREPARED",
+    createdAt:1,updatedAt:1,command:{legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,symbol:"BTCUSDT",
+     positionSide:"SHORT",quantity:1,price:100,signalTs:1}},
+  } as any});
+  const terminalDoc=store.read();
+  store.commit(terminalDoc.revision,advanceV4Intent(terminalDoc,terminalId,"TERMINAL",2));
+  let reconciles=0;
+  const engine=new V4RunnerEngine({store} as any);
+  await (engine as any).reconcileReductions({reconcile:async()=>{reconciles++;return null;}},{reconcileExit:async()=>{}});
+  assert.equal(reconciles,0);
+ }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test("stale V4 exit decisions remain blocked review instead of terminating the daemon",()=>{
  const result=classifyV4StaleExitDecisionFailure(

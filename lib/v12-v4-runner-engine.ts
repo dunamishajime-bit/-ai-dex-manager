@@ -112,7 +112,7 @@ export class V4RunnerEngine{
   */
  async prepareFlatMarketDecision():Promise<V4PreparedDecision|undefined>{
   const local=this.deps.store.read();
-  if(Object.keys(local.intents).length>0||
+  if(Object.values(local.intents).some(intent=>intent.stage!=="TERMINAL")||
     Object.values(local.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"))return;
   const preparedAtMs=this.now();
   try{
@@ -251,7 +251,7 @@ export class V4RunnerEngine{
  }
  private async reconcileReductions(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle){
   const d=this.deps;
-  for(const snapshot of Object.values(d.store.read().intents).filter(i=>i.action!=="ENTRY")){
+  for(const snapshot of Object.values(d.store.read().intents).filter(i=>i.action!=="ENTRY"&&i.stage!=="TERMINAL")){
    let intent=d.store.read().intents[snapshot.clientOrderId];
    let proof;
    if(intent.stage==="PREPARED"){await dispatcher.submit(intent.clientOrderId,this.now());proof=await dispatcher.reconcile(intent.clientOrderId,this.now());}
