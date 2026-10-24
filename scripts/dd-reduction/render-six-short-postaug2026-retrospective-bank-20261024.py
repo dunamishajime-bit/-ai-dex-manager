@@ -13,6 +13,7 @@ OUT=ROOT/'docs/research/results/render-three-regime-20261024'
 def load(n,p):
  s=util.spec_from_file_location(n,p);m=util.module_from_spec(s);s.loader.exec_module(m);return m
 hold=load('hold6_secondary_market',HERE/'render-post2026aug-frozen-3expert-holdout-20261024.py')
+model=load('hold6_early_adverse_and_peak_profit_model',HERE/'render-4427-neg-loss-profit-protection-m5-20261024.py')
 orig=hold.orig;base=hold.base;m=hold.m;e=hold.e
 def main():
  j=json.loads((OUT/'RENDER_POST_2026AUG_HELDOUT_PUBLIC_SOURCE_MANIFEST_20261024.json').read_text('utf8'))
@@ -46,6 +47,14 @@ def main():
   if 'SHORT_BEAR_REBOUND_2H_FADE' in short and q['mfeSignals']['oi3Pct']<=-.2:
    exits.update({name:orig.simulate(prices,q['i'],'SHORT',tuple(contract))
     for name,contract in brackets.items()})
+  if (('SHORT_2024_BTC_RALLY_FAILURE' in short) or
+     ('SHORT_BEAR_REBOUND_2H_FADE' in short and q['mfeSignals']['oi3Pct']<=-.2)):
+   check=model.sim(prices,q['i'],'NONE','BASE')
+   orig_base=exits['TRAIL_MFE25_FLOOR10_H24']
+   assert check['exitTs']==orig_base['exitTs'] and abs(check['net30']-orig_base['net30'])<1e-9
+   for early in model.EARLY:
+    for profit in model.PROFIT:
+     exits['E_'+early+'__P_'+profit]=model.sim(prices,q['i'],early,profit)
   rows.append({'t':q['time'],'symbol':'RENDERUSDT','shortSignals':short,
    'causalFeatures':q['mfeSignals'],'exitModels':exits})
  rows.sort(key=lambda x:x['t'])
