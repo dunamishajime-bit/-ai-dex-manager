@@ -1,0 +1,321 @@
+{
+  "status": "RESEARCH_ONLY_REAUDIT_NO_NATIVE8_CERTIFICATION",
+  "sourceBranch": "research/render4427-multifactor-native8-20261024",
+  "sourceSHA": "ea0cf46a358152537188fc8d0d901e549659df38",
+  "replaySha256": "39914a299c24a7d6e5198e6ae7aa3c19bd29d5245da1ddd87327ee16da7700ad",
+  "twoReplaysIdentical": true,
+  "allPeriodsManualAccountingMatches": true,
+  "originalCount188Unchanged": true,
+  "originalTradeTimeSubstitutions": {
+    "lost": [
+      [
+        "RNDRUSDT",
+        1704697200000,
+        "ORIGINAL_A",
+        1704702000000
+      ]
+    ],
+    "gained": [
+      [
+        "RNDRUSDT",
+        1704740400000,
+        "ORIGINAL_A",
+        1704788400000
+      ]
+    ]
+  },
+  "newTrades": [
+    {
+      "utc": "2024-01-07T03:00:00+00:00",
+      "family": "TREND_BREAK",
+      "net30Pct": -2.3,
+      "prior90ShadowClosedN": 16,
+      "prior90ShadowPF": 1.5652
+    },
+    {
+      "utc": "2024-01-08T03:00:00+00:00",
+      "family": "TREND_BREAK",
+      "net30Pct": 1.2,
+      "prior90ShadowClosedN": 18,
+      "prior90ShadowPF": 1.3565
+    },
+    {
+      "utc": "2024-01-10T08:00:00+00:00",
+      "family": "TREND_BREAK",
+      "net30Pct": 1.2,
+      "prior90ShadowClosedN": 19,
+      "prior90ShadowPF": 1.4609
+    },
+    {
+      "utc": "2024-01-12T01:00:00+00:00",
+      "family": "TREND_BREAK",
+      "net30Pct": 1.2,
+      "prior90ShadowClosedN": 20,
+      "prior90ShadowPF": 1.5652
+    },
+    {
+      "utc": "2024-01-13T01:00:00+00:00",
+      "family": "TREND_BREAK",
+      "net30Pct": 1.2,
+      "prior90ShadowClosedN": 25,
+      "prior90ShadowPF": 1.3416
+    },
+    {
+      "utc": "2024-01-15T00:00:00+00:00",
+      "family": "TREND_BREAK",
+      "net30Pct": -2.3,
+      "prior90ShadowClosedN": 26,
+      "prior90ShadowPF": 1.4161
+    },
+    {
+      "utc": "2025-09-14T05:00:00+00:00",
+      "family": "SELL_IMBALANCE",
+      "net30Pct": 2.2,
+      "prior90ShadowClosedN": 17,
+      "prior90ShadowPF": 1.2946
+    },
+    {
+      "utc": "2025-09-17T04:00:00+00:00",
+      "family": "SELL_IMBALANCE",
+      "net30Pct": 0.7444,
+      "prior90ShadowClosedN": 19,
+      "prior90ShadowPF": 1.2162
+    },
+    {
+      "utc": "2025-09-19T04:00:00+00:00",
+      "family": "SELL_IMBALANCE",
+      "net30Pct": 2.2,
+      "prior90ShadowClosedN": 20,
+      "prior90ShadowPF": 1.2572
+    },
+    {
+      "utc": "2025-09-28T12:00:00+00:00",
+      "family": "SELL_IMBALANCE",
+      "net30Pct": -2.8,
+      "prior90ShadowClosedN": 20,
+      "prior90ShadowPF": 1.5357
+    },
+    {
+      "utc": "2025-09-29T11:00:00+00:00",
+      "family": "SELL_IMBALANCE",
+      "net30Pct": -2.8,
+      "prior90ShadowClosedN": 18,
+      "prior90ShadowPF": 1.2496
+    },
+    {
+      "utc": "2025-09-30T08:00:00+00:00",
+      "family": "SELL_IMBALANCE",
+      "net30Pct": 2.2,
+      "prior90ShadowClosedN": 17,
+      "prior90ShadowPF": 1.2023
+    }
+  ],
+  "periods": {
+    "2024": {
+      "10": {
+        "old": {
+          "n": 70,
+          "wins": 46,
+          "wrPct": 65.71,
+          "pf": 1.3349,
+          "compoundPct": 27.513,
+          "closedDdPct": -12.079
+        },
+        "new": {
+          "n": 76,
+          "wins": 50,
+          "wrPct": 65.79,
+          "pf": 1.3348,
+          "compoundPct": 29.202,
+          "closedDdPct": -12.079
+        }
+      },
+      "30": {
+        "old": {
+          "n": 70,
+          "wins": 46,
+          "wrPct": 65.71,
+          "pf": 1.1579,
+          "compoundPct": 10.885,
+          "closedDdPct": -13.152
+        },
+        "new": {
+          "n": 76,
+          "wins": 50,
+          "wrPct": 65.79,
+          "pf": 1.1522,
+          "compoundPct": 11.015,
+          "closedDdPct": -13.152
+        }
+      }
+    },
+    "2025H1": {
+      "10": {
+        "old": {
+          "n": 45,
+          "wins": 30,
+          "wrPct": 66.67,
+          "pf": 1.9061,
+          "compoundPct": 52.913,
+          "closedDdPct": -9.61
+        },
+        "new": {
+          "n": 45,
+          "wins": 30,
+          "wrPct": 66.67,
+          "pf": 1.9061,
+          "compoundPct": 52.913,
+          "closedDdPct": -9.61
+        }
+      },
+      "30": {
+        "old": {
+          "n": 45,
+          "wins": 29,
+          "wrPct": 64.44,
+          "pf": 1.6853,
+          "compoundPct": 39.85,
+          "closedDdPct": -10.349
+        },
+        "new": {
+          "n": 45,
+          "wins": 29,
+          "wrPct": 64.44,
+          "pf": 1.6853,
+          "compoundPct": 39.85,
+          "closedDdPct": -10.349
+        }
+      }
+    },
+    "2025H2": {
+      "10": {
+        "old": {
+          "n": 19,
+          "wins": 11,
+          "wrPct": 57.89,
+          "pf": 1.2758,
+          "compoundPct": 6.63,
+          "closedDdPct": -13.635
+        },
+        "new": {
+          "n": 25,
+          "wins": 15,
+          "wrPct": 60.0,
+          "pf": 1.3215,
+          "compoundPct": 9.642,
+          "closedDdPct": -11.195
+        }
+      },
+      "30": {
+        "old": {
+          "n": 19,
+          "wins": 10,
+          "wrPct": 52.63,
+          "pf": 1.131,
+          "compoundPct": 2.66,
+          "closedDdPct": -14.521
+        },
+        "new": {
+          "n": 25,
+          "wins": 14,
+          "wrPct": 56.0,
+          "pf": 1.1596,
+          "compoundPct": 4.306,
+          "closedDdPct": -13.151
+        }
+      }
+    },
+    "2026JanAug": {
+      "10": {
+        "old": {
+          "n": 41,
+          "wins": 33,
+          "wrPct": 80.49,
+          "pf": 2.8933,
+          "compoundPct": 48.075,
+          "closedDdPct": -7.625
+        },
+        "new": {
+          "n": 41,
+          "wins": 33,
+          "wrPct": 80.49,
+          "pf": 2.8933,
+          "compoundPct": 48.075,
+          "closedDdPct": -7.625
+        }
+      },
+      "30": {
+        "old": {
+          "n": 41,
+          "wins": 32,
+          "wrPct": 78.05,
+          "pf": 2.4013,
+          "compoundPct": 36.51,
+          "closedDdPct": -8.376
+        },
+        "new": {
+          "n": 41,
+          "wins": 32,
+          "wrPct": 78.05,
+          "pf": 2.4013,
+          "compoundPct": 36.51,
+          "closedDdPct": -8.376
+        }
+      }
+    },
+    "2026AugOct": {
+      "10": {
+        "old": {
+          "n": 13,
+          "wins": 9,
+          "wrPct": 69.23,
+          "pf": 1.3915,
+          "compoundPct": 5.126,
+          "closedDdPct": -7.07
+        },
+        "new": {
+          "n": 13,
+          "wins": 9,
+          "wrPct": 69.23,
+          "pf": 1.3915,
+          "compoundPct": 5.126,
+          "closedDdPct": -7.07
+        }
+      },
+      "30": {
+        "old": {
+          "n": 13,
+          "wins": 9,
+          "wrPct": 69.23,
+          "pf": 1.1998,
+          "compoundPct": 2.434,
+          "closedDdPct": -7.456
+        },
+        "new": {
+          "n": 13,
+          "wins": 9,
+          "wrPct": 69.23,
+          "pf": 1.1998,
+          "compoundPct": 2.434,
+          "closedDdPct": -7.456
+        }
+      }
+    }
+  },
+  "stressWithoutBestTwoSeptTrades30bps": {
+    "n": 23,
+    "wins": 12,
+    "wrPct": 52.17,
+    "pf": 1.0348,
+    "compoundPct": -0.136,
+    "closedDdPct": -16.85
+  },
+  "caveats": [
+    "2025 RENDER Aster H1 mark unavailable, Native8 2025H2 unverified",
+    "Aster signed venue 5m execution, funding and slippage unverified",
+    "2025H2 improvements from six new September-only trades, susceptible to overfit",
+    "2026AugOct already seen, not pristine holdout",
+    "Retrospective shadow bank is NOT a new live Forward Shadow feed",
+    "Native8 common wallet final asset and MTM DD unverified"
+  ]
+}
