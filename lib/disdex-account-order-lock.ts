@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { pendingExposurePath, releasePendingExposure, upsertPendingExposure } from "./disdex-pending-exposure-registry";
+import { pendingExposurePath, releasePendingExposure, upsertPendingExposure, type PendingExposureSleeve } from "./disdex-pending-exposure-registry";
 
 export const ACCOUNT_LOCK_SCHEMA = "disdex-account-lock/v1" as const;
 export const DEFAULT_ACCOUNT_SCOPE = "ASTER_FUTURES" as const;
@@ -11,6 +11,8 @@ export interface AccountReservation {
     strategyId: string;
     symbol: string;
     side: "LONG" | "SHORT" | "FLAT";
+    /** Optional for legacy crypto callers; explicit stock reservations carry STOCK. */
+    sleeve?: PendingExposureSleeve;
     gross: number;
     notionalUsd: number;
     createdAt: number;
@@ -149,11 +151,14 @@ export class FileAccountOrderLock {
                         if (!(validNumber(input.gross) && Number(input.gross) >= 0 && validNumber(input.notionalUsd) && Number(input.notionalUsd) >= 0)) {
                             throw new Error("ACCOUNT_RESERVATION_INVALID");
                         }
+                        const sleeve = input.sleeve ?? "CRYPTO";
+                        if (sleeve !== "CRYPTO" && sleeve !== "STOCK") throw new Error("ACCOUNT_RESERVATION_SLEEVE_INVALID");
                         const current = await assertOwner();
                         const reservation: AccountReservation = {
                             ...input,
+                            ...(input.sleeve === undefined ? {} : { sleeve }),
                             reservationId: createHash("sha256")
-                                .update(`${leaseId}|${input.strategyId}|${input.symbol}|${input.side}|${input.gross}|${input.notionalUsd}`)
+                                .update(`${leaseId}|${input.strategyId}|${input.symbol}|${input.side}|${input.gross}|${input.notionalUsd}${sleeve === "STOCK" ? "|STOCK" : ""}`)
                                 .digest("hex")
                                 .slice(0, 24),
                             createdAt: Date.now(),
@@ -171,7 +176,7 @@ export class FileAccountOrderLock {
                             await upsertPendingExposure({
                                 reservationId: reservation.reservationId,
                                 strategyId: reservation.strategyId,
-                                sleeve: "CRYPTO",
+                                sleeve,
                                 symbol: reservation.symbol,
                                 side: reservation.side,
                                 gross: reservation.gross,

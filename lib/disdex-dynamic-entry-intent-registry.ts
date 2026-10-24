@@ -9,6 +9,41 @@ export type DynamicEntryIntent = DynamicEntryCandidate & { cycleId: string; subm
 export type DynamicEntryAllocationDecision = DynamicEntryAllocationResult & { cycleId: string; decisionId: string; decidedAt: number };
 type Document = { schema: typeof DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA; intents: DynamicEntryIntent[]; decisions: DynamicEntryAllocationDecision[] };
 
+type AuthoritativeGrossCaps = {
+    strategyGrossAvailable: Readonly<Record<string, number>>;
+    positionGrossAvailable: Readonly<Record<string, number>>;
+};
+
+function assertCapMap(value: unknown, name: string): asserts value is Readonly<Record<string, number>> {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("DYNAMIC_ENTRY_AUTHORITATIVE_CAPS_REQUIRED");
+    for (const [key, cap] of Object.entries(value)) {
+        if (!key.trim() || !Number.isFinite(cap) || cap < 0) throw new Error(`DYNAMIC_ENTRY_AUTHORITATIVE_CAP_INVALID:${name}:${key}`);
+    }
+}
+
+function positionCapKey(intent: Pick<DynamicEntryCandidate, "strategy" | "symbol" | "side">) {
+    return `${intent.strategy}|${intent.symbol.toUpperCase()}|${intent.side}`;
+}
+
+function assertStrictReservationGates(candidates: readonly DynamicEntryIntent[], quality102CausalV1Ready: boolean) {
+    if (candidates.some((intent) => intent.strategy === "QUALITY102")) throw new Error("QUALITY102_LIVE_BLOCKED_FAIL_CLOSED");
+    if (candidates.some((intent) => intent.strategy === "QUALITY102_CAUSAL_V1") && quality102CausalV1Ready !== true) {
+        throw new Error("QUALITY102_CAUSAL_V1_NOT_READY");
+    }
+}
+
+function assertCandidateCaps(candidates: readonly DynamicEntryIntent[], caps: AuthoritativeGrossCaps) {
+    for (const intent of candidates) {
+        if (!Object.prototype.hasOwnProperty.call(caps.strategyGrossAvailable, intent.strategy)) {
+            throw new Error(`DYNAMIC_ENTRY_AUTHORITATIVE_CAP_MISSING:strategy:${intent.strategy}`);
+        }
+        const key = positionCapKey(intent);
+        if (!Object.prototype.hasOwnProperty.call(caps.positionGrossAvailable, key)) {
+            throw new Error(`DYNAMIC_ENTRY_AUTHORITATIVE_CAP_MISSING:position:${key}`);
+        }
+    }
+}
+
 function sanitizeIntent(input: DynamicEntryCandidate & { cycleId: string }, submittedAt: number): DynamicEntryIntent {
     const { id, strategy, symbol, side, assetClass, marketFitScore, targetGross, minGross, maxGross, minNotionalUsd, btPrior, correlationPenalty, concentrationPenalty, stalePenalty } = input;
     if (!id.trim() || !strategy.trim() || !symbol.trim() || !input.cycleId.trim() || (side !== "LONG" && side !== "SHORT") || (assetClass !== "CRYPTO" && assetClass !== "STOCK")
@@ -78,23 +113,29 @@ export class FileDynamicEntryIntentRegistry {
     async allocateCycle(input: {
         cycleId: string; now: number; cryptoGrossAvailable: number; stockGrossAvailable: number;
         totalGrossAvailable: number; equityUsd: number; lock: AccountLockHandle;
-        strategyGrossAvailable?: Record<string, number>; positionGrossAvailable?: Record<string, number>;
+        quality102CausalV1Ready: boolean;
+        strategyGrossAvailable: Readonly<Record<string, number>>;
+        positionGrossAvailable: Readonly<Record<string, number>>;
     }): Promise<DynamicEntryAllocationDecision> {
         return this.synchronized(async () => {
             const doc = await read(this.path);
             const existing = doc.decisions.find((decision) => decision.cycleId === input.cycleId);
             if (existing) return existing;
             await input.lock.document(); // Revalidates owner, lease ID, and expiry before claiming the cycle.
+            assertCapMap(input.strategyGrossAvailable, "strategy");
+            assertCapMap(input.positionGrossAvailable, "position");
             const candidates = doc.intents.filter((intent) => intent.cycleId === input.cycleId && input.now >= intent.submittedAt && input.now - intent.submittedAt <= this.intentTtlMs).map((intent) => ({
                 ...intent,
-                maxGross: Math.min(intent.maxGross, input.strategyGrossAvailable?.[intent.strategy] ?? Number.POSITIVE_INFINITY, input.positionGrossAvailable?.[`${intent.strategy}|${intent.symbol.toUpperCase()}|${intent.side}`] ?? Number.POSITIVE_INFINITY),
+                maxGross: Math.min(intent.maxGross, input.strategyGrossAvailable[intent.strategy] ?? Number.POSITIVE_INFINITY, input.positionGrossAvailable[positionCapKey(intent)] ?? Number.POSITIVE_INFINITY),
             }));
+            assertStrictReservationGates(candidates, input.quality102CausalV1Ready);
+            assertCandidateCaps(candidates, input);
             const allocation = allocateDynamicEntryGross({ candidates, cryptoGrossAvailable: input.cryptoGrossAvailable, stockGrossAvailable: input.stockGrossAvailable, totalGrossAvailable: input.totalGrossAvailable, equityUsd: input.equityUsd });
-            const strategyRemaining = { ...(input.strategyGrossAvailable || {}) };
-            const positionRemaining = { ...(input.positionGrossAvailable || {}) };
+            const strategyRemaining = { ...input.strategyGrossAvailable };
+            const positionRemaining = { ...input.positionGrossAvailable };
             const bounded = allocation.allocations.flatMap((row) => {
-                const positionKey = `${row.strategy}|${row.symbol.toUpperCase()}|${row.side}`;
-                let allocatedGross = Math.min(row.allocatedGross, strategyRemaining[row.strategy] ?? Number.POSITIVE_INFINITY, positionRemaining[positionKey] ?? Number.POSITIVE_INFINITY);
+                const positionKey = positionCapKey(row);
+                const allocatedGross = Math.min(row.allocatedGross, strategyRemaining[row.strategy], positionRemaining[positionKey]);
                 if (allocatedGross + 1e-12 < Math.max(row.minGross, row.minNotionalUsd ? row.minNotionalUsd / input.equityUsd : 0)) return [];
                 if (strategyRemaining[row.strategy] !== undefined) strategyRemaining[row.strategy] = Math.max(0, strategyRemaining[row.strategy] - allocatedGross);
                 if (positionRemaining[positionKey] !== undefined) positionRemaining[positionKey] = Math.max(0, positionRemaining[positionKey] - allocatedGross);
@@ -107,7 +148,7 @@ export class FileDynamicEntryIntentRegistry {
             const reservations: string[] = [];
             try {
                 for (const row of allocation.allocations) {
-                    const reservation = await input.lock.reserve({ strategyId: row.strategy, symbol: row.symbol, side: row.side, gross: row.allocatedGross, notionalUsd: row.allocatedGross * input.equityUsd });
+                    const reservation = await input.lock.reserve({ strategyId: row.strategy, symbol: row.symbol, side: row.side, sleeve: row.assetClass, gross: row.allocatedGross, notionalUsd: row.allocatedGross * input.equityUsd });
                     reservations.push(reservation.reservationId);
                 }
                 await input.lock.document();
