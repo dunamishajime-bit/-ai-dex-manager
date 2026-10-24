@@ -1,0 +1,379 @@
+{
+  "costs": {
+    "10": {
+      "decision_counts": [
+        2543,
+        2523,
+        2523
+      ],
+      "extra_keys_sha256": "d8d3b44aea9eaeeba4600a3c1e2376c9a0fa77d437718973f8975c2f4ab96e96",
+      "first_only_source_keys": [
+        [
+          "V12",
+          "AAVEUSDT",
+          "SHORT",
+          "REC_G5_SLOW_TREND",
+          1771898400000
+        ],
+        [
+          "V12",
+          "AAVEUSDT",
+          "SHORT",
+          "REC_X12_TIME_12H",
+          1771876800000
+        ],
+        [
+          "V12",
+          "AAVEUSDT",
+          "SHORT",
+          "REC_Y01_REV_D0_T72",
+          1767744000000
+        ],
+        [
+          "V12",
+          "ADAUSDT",
+          "SHORT",
+          "REC_G4_MATURE_REL_RANGE",
+          1763229600000
+        ],
+        [
+          "V12",
+          "BTCUSDT",
+          "SHORT",
+          "REC_X12_TIME_12H",
+          1763661600000
+        ],
+        [
+          "V12",
+          "ETHUSDT",
+          "SHORT",
+          "REC_X13_TP1.5_SL1_H24",
+          1755576000000
+        ],
+        [
+          "V12",
+          "ETHUSDT",
+          "SHORT",
+          "REC_Y01_REV_D0_T72",
+          1765396800000
+        ],
+        [
+          "V12",
+          "ETHUSDT",
+          "SHORT",
+          "REC_Y03_REV_D0_T36",
+          1783303200000
+        ],
+        [
+          "V12",
+          "INJUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764324000000
+        ],
+        [
+          "V12",
+          "LINKUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764784800000
+        ],
+        [
+          "V12",
+          "LINKUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764799200000
+        ],
+        [
+          "V12",
+          "LINKUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764813600000
+        ],
+        [
+          "V12",
+          "LTCUSDT",
+          "SHORT",
+          "FAILED_BREAK_REV_SHORT_6H",
+          1782590400000
+        ],
+        [
+          "V12",
+          "LTCUSDT",
+          "SHORT",
+          "REC_X05_TIME_36H",
+          1763654400000
+        ],
+        [
+          "V12",
+          "NEARUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1768370400000
+        ],
+        [
+          "V12",
+          "NEARUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1775750400000
+        ],
+        [
+          "V12",
+          "NEARUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1775786400000
+        ],
+        [
+          "V12",
+          "SOLUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1759384800000
+        ],
+        [
+          "V12",
+          "SOLUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1759413600000
+        ],
+        [
+          "V12",
+          "SOLUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1771149600000
+        ]
+      ],
+      "first_only_v12_source_rows": 20,
+      "remaining_2424_source_rows_exactly_equal_in_order_and_content": true,
+      "run_ids": [
+        "cmp_5bb26c207eb3",
+        "cmp_88139ccf92bb",
+        "cmp_d112f9aef1ff"
+      ],
+      "source_counts": [
+        2444,
+        2424,
+        2424
+      ],
+      "source_files": [
+        {
+          "candidate_file_sha256": "a173cdb3e9ff5000d280079d26212e32a519759f087850e310d07beaf08cc489",
+          "decision_file_sha256": "7c83e58173ff67c0757e5578a849556e4ec64a3ea8409eda4b41106113128fa0",
+          "run_id": "cmp_5bb26c207eb3"
+        },
+        {
+          "candidate_file_sha256": "de696304d4b281235891daf320362ef72753a89db9e052cd55322477e522f783",
+          "decision_file_sha256": "69d73014f348f9c4ba3a4ff43c4c9c78815d113bd61f3d108b6f2f41477c5879",
+          "run_id": "cmp_88139ccf92bb"
+        },
+        {
+          "candidate_file_sha256": "de696304d4b281235891daf320362ef72753a89db9e052cd55322477e522f783",
+          "decision_file_sha256": "69d73014f348f9c4ba3a4ff43c4c9c78815d113bd61f3d108b6f2f41477c5879",
+          "run_id": "cmp_d112f9aef1ff"
+        }
+      ],
+      "source_rows_are_exactly_20_first_run_cooldown_rejections": true,
+      "warm_source_and_decision_files_byte_identical": true
+    },
+    "30": {
+      "decision_counts": [
+        2543,
+        2523,
+        2523
+      ],
+      "extra_keys_sha256": "d8d3b44aea9eaeeba4600a3c1e2376c9a0fa77d437718973f8975c2f4ab96e96",
+      "first_only_source_keys": [
+        [
+          "V12",
+          "AAVEUSDT",
+          "SHORT",
+          "REC_G5_SLOW_TREND",
+          1771898400000
+        ],
+        [
+          "V12",
+          "AAVEUSDT",
+          "SHORT",
+          "REC_X12_TIME_12H",
+          1771876800000
+        ],
+        [
+          "V12",
+          "AAVEUSDT",
+          "SHORT",
+          "REC_Y01_REV_D0_T72",
+          1767744000000
+        ],
+        [
+          "V12",
+          "ADAUSDT",
+          "SHORT",
+          "REC_G4_MATURE_REL_RANGE",
+          1763229600000
+        ],
+        [
+          "V12",
+          "BTCUSDT",
+          "SHORT",
+          "REC_X12_TIME_12H",
+          1763661600000
+        ],
+        [
+          "V12",
+          "ETHUSDT",
+          "SHORT",
+          "REC_X13_TP1.5_SL1_H24",
+          1755576000000
+        ],
+        [
+          "V12",
+          "ETHUSDT",
+          "SHORT",
+          "REC_Y01_REV_D0_T72",
+          1765396800000
+        ],
+        [
+          "V12",
+          "ETHUSDT",
+          "SHORT",
+          "REC_Y03_REV_D0_T36",
+          1783303200000
+        ],
+        [
+          "V12",
+          "INJUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764324000000
+        ],
+        [
+          "V12",
+          "LINKUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764784800000
+        ],
+        [
+          "V12",
+          "LINKUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764799200000
+        ],
+        [
+          "V12",
+          "LINKUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1764813600000
+        ],
+        [
+          "V12",
+          "LTCUSDT",
+          "SHORT",
+          "FAILED_BREAK_REV_SHORT_6H",
+          1782590400000
+        ],
+        [
+          "V12",
+          "LTCUSDT",
+          "SHORT",
+          "REC_X05_TIME_36H",
+          1763654400000
+        ],
+        [
+          "V12",
+          "NEARUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1768370400000
+        ],
+        [
+          "V12",
+          "NEARUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1775750400000
+        ],
+        [
+          "V12",
+          "NEARUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1775786400000
+        ],
+        [
+          "V12",
+          "SOLUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1759384800000
+        ],
+        [
+          "V12",
+          "SOLUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1759413600000
+        ],
+        [
+          "V12",
+          "SOLUSDT",
+          "SHORT",
+          "REC_Y06_REV_D0_T72",
+          1771149600000
+        ]
+      ],
+      "first_only_v12_source_rows": 20,
+      "remaining_2424_source_rows_exactly_equal_in_order_and_content": true,
+      "run_ids": [
+        "cmp_2104321c587e",
+        "cmp_3a77ec7e46bd",
+        "cmp_433aa2452f5a"
+      ],
+      "source_counts": [
+        2444,
+        2424,
+        2424
+      ],
+      "source_files": [
+        {
+          "candidate_file_sha256": "765784dca61e1dbfce5836634135ccd93f6b213b537aaeb4d63ce4bdb5c0dafe",
+          "decision_file_sha256": "38bc99c5136c166da5a7f5ec8cf498b3c793214ebe44ad501f157964f435b442",
+          "run_id": "cmp_2104321c587e"
+        },
+        {
+          "candidate_file_sha256": "774ea47081758005e4fef56ea2b739b32e383485b4f5bf0dfe32e4666d004d78",
+          "decision_file_sha256": "12b5ba01beaea4cd3543bcc7cea50cbbc1654c9c8218a2dde34b239c10802e7b",
+          "run_id": "cmp_3a77ec7e46bd"
+        },
+        {
+          "candidate_file_sha256": "774ea47081758005e4fef56ea2b739b32e383485b4f5bf0dfe32e4666d004d78",
+          "decision_file_sha256": "12b5ba01beaea4cd3543bcc7cea50cbbc1654c9c8218a2dde34b239c10802e7b",
+          "run_id": "cmp_433aa2452f5a"
+        }
+      ],
+      "source_rows_are_exactly_20_first_run_cooldown_rejections": true,
+      "warm_source_and_decision_files_byte_identical": true
+    }
+  },
+  "finding": "The 20 extra V12 cooldown rejections are present in the FIRST replay's pre-allocation crypto-price-model-candidates.jsonl and absent from both later replays; after removing those 20, all other upstream source rows are exactly identical. Therefore the mismatch already exists before portfolio admission/decision recording, and cannot be fixed by simply renumbering candidate IDs or normalizing the decision ledger.",
+  "limits": [
+    "The exact state/cache or generator mutation that changes the pre-allocation candidate manifest has not been proven.",
+    "These are archived modeled replays, not fresh clean-process cold/warm executions.",
+    "No formal independent Owner/Route registration or full safety gate parity is proven.",
+    "Aster 2025 RENDER H1 mark missing; actual Aster M5 fills and funding not authenticated.",
+    "All historical periods were already explored and are not untouched OOS.",
+    "No VPS/LIVE/Production/HP/real order changes."
+  ],
+  "live_changes": 0,
+  "model_only": true,
+  "production_changes": 0,
+  "status": "RESEARCH_ONLY_UPSTREAM_CANDIDATE_DRIFT_CONFIRMED_ROOT_CAUSE_UNPROVEN"
+}
