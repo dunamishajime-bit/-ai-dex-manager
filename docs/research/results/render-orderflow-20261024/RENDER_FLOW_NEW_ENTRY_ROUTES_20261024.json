@@ -1,0 +1,3113 @@
+{
+  "status": "INDEPENDENT_NEW_H1_FLOW_SOURCE_RESEARCH_ONLY_NOT_NATIVE_FULL8",
+  "warnings": [
+    "Multiple preset structural hypotheses, not 8-strategy integrated executable economics",
+    "Historical periods previously explored, not pristine forward holdout",
+    "5m TP/STOP stop-first, no venue fill latency or funding PnL",
+    "Causal metrics availability +10 minutes; missing snapshots rejected"
+  ],
+  "input": {
+    "sourceManifest": "docs\\research\\results\\render-orderflow-20261024\\RENDER_ORDERFLOW_SOURCE_MANIFEST_20261024.json",
+    "olderSignalEvents": 347,
+    "newerSignalEvents": 272,
+    "metricBadSnapshots": 92,
+    "oldMissingHourlyFeatures": 17,
+    "newMissingHourlyFeatures": 0,
+    "olderCountByTag": {
+      "RELATIVE_SHORT_PRESSURE": 137,
+      "LONGS_EXIT_CONTINUATION": 102,
+      "BEARISH_RETEST_FAIL": 17,
+      "OI_NEW_SHORTS_BEAR": 68,
+      "SQUEEZE_OVERHANG": 37,
+      "OI_STOP_HUNT_FADE": 30,
+      "POSITIVE_FUNDING_CROWDING": 19
+    },
+    "newerCountByTag": {
+      "LONGS_EXIT_CONTINUATION": 49,
+      "SQUEEZE_OVERHANG": 25,
+      "RELATIVE_SHORT_PRESSURE": 131,
+      "OI_NEW_SHORTS_BEAR": 86,
+      "OI_STOP_HUNT_FADE": 21,
+      "BEARISH_RETEST_FAIL": 11,
+      "OI_ABSORPTION_TOP": 3
+    }
+  },
+  "models": {
+    "BEARISH_RETEST_FAIL__6H_TP1P5_SL2": {
+      "case": "BEARISH_RETEST_FAIL__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 11,
+          "wins": 5,
+          "WR": 45.45,
+          "PF": 0.737,
+          "sumPct": -2.497,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 5,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 5,
+          "wins": 2,
+          "WR": 40.0,
+          "PF": 0.6561,
+          "sumPct": -1.467,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TIME": 1,
+            "TARGET": 2
+          }
+        },
+        "newer": {
+          "n": 10,
+          "wins": 6,
+          "WR": 60.0,
+          "PF": 0.8298,
+          "sumPct": -1.43,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 4,
+            "HARD_STOP": 4,
+            "TIME": 2
+          }
+        },
+        "newerFirst": {
+          "n": 3,
+          "wins": 3,
+          "WR": 100.0,
+          "PF": null,
+          "sumPct": 4.2,
+          "maxLossPct": 1.4,
+          "reasons": {
+            "TARGET": 3
+          }
+        },
+        "newerSecond": {
+          "n": 7,
+          "wins": 3,
+          "WR": 42.86,
+          "PF": 0.3298,
+          "sumPct": -5.63,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TIME": 2,
+            "TARGET": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 11,
+          "wins": 5,
+          "WR": 45.45,
+          "PF": 0.5609,
+          "sumPct": -4.697,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 5,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 5,
+          "wins": 2,
+          "WR": 40.0,
+          "PF": 0.4931,
+          "sumPct": -2.467,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TIME": 1,
+            "TARGET": 2
+          }
+        },
+        "newer": {
+          "n": 10,
+          "wins": 6,
+          "WR": 60.0,
+          "PF": 0.6272,
+          "sumPct": -3.43,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 4,
+            "HARD_STOP": 4,
+            "TIME": 2
+          }
+        },
+        "newerFirst": {
+          "n": 3,
+          "wins": 3,
+          "WR": 100.0,
+          "PF": null,
+          "sumPct": 3.6,
+          "maxLossPct": 1.2,
+          "reasons": {
+            "TARGET": 3
+          }
+        },
+        "newerSecond": {
+          "n": 7,
+          "wins": 3,
+          "WR": 42.86,
+          "PF": 0.2359,
+          "sumPct": -7.03,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TIME": 2,
+            "TARGET": 1
+          }
+        }
+      }
+    },
+    "BEARISH_RETEST_FAIL__12H_TP1P75_SL2P5": {
+      "case": "BEARISH_RETEST_FAIL__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 11,
+          "wins": 6,
+          "WR": 54.55,
+          "PF": 0.8813,
+          "sumPct": -1.333,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 6,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 5,
+          "wins": 3,
+          "WR": 60.0,
+          "PF": 0.9161,
+          "sumPct": -0.436,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TIME": 1,
+            "TARGET": 2
+          }
+        },
+        "newer": {
+          "n": 10,
+          "wins": 5,
+          "WR": 50.0,
+          "PF": 0.6346,
+          "sumPct": -4.75,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 5,
+            "HARD_STOP": 5
+          }
+        },
+        "newerFirst": {
+          "n": 3,
+          "wins": 2,
+          "WR": 66.67,
+          "PF": 1.2692,
+          "sumPct": 0.7,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 2,
+            "HARD_STOP": 1
+          }
+        },
+        "newerSecond": {
+          "n": 7,
+          "wins": 3,
+          "WR": 42.86,
+          "PF": 0.476,
+          "sumPct": -5.45,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 3
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 11,
+          "wins": 6,
+          "WR": 54.55,
+          "PF": 0.7112,
+          "sumPct": -3.533,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 6,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 5,
+          "wins": 3,
+          "WR": 60.0,
+          "PF": 0.7435,
+          "sumPct": -1.436,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TIME": 1,
+            "TARGET": 2
+          }
+        },
+        "newer": {
+          "n": 10,
+          "wins": 5,
+          "WR": 50.0,
+          "PF": 0.5179,
+          "sumPct": -6.75,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 5,
+            "HARD_STOP": 5
+          }
+        },
+        "newerFirst": {
+          "n": 3,
+          "wins": 2,
+          "WR": 66.67,
+          "PF": 1.0357,
+          "sumPct": 0.1,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 2,
+            "HARD_STOP": 1
+          }
+        },
+        "newerSecond": {
+          "n": 7,
+          "wins": 3,
+          "WR": 42.86,
+          "PF": 0.3884,
+          "sumPct": -6.85,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 3
+          }
+        }
+      }
+    },
+    "BEARISH_RETEST_FAIL__18H_TP2P5_SL3": {
+      "case": "BEARISH_RETEST_FAIL__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 11,
+          "wins": 6,
+          "WR": 54.55,
+          "PF": 1.0695,
+          "sumPct": 0.936,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 6,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 5,
+          "wins": 2,
+          "WR": 40.0,
+          "PF": 0.5161,
+          "sumPct": -4.5,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 3,
+            "TARGET": 2
+          }
+        },
+        "newer": {
+          "n": 10,
+          "wins": 5,
+          "WR": 50.0,
+          "PF": 0.7742,
+          "sumPct": -3.5,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 5,
+            "HARD_STOP": 5
+          }
+        },
+        "newerFirst": {
+          "n": 3,
+          "wins": 2,
+          "WR": 66.67,
+          "PF": 1.5484,
+          "sumPct": 1.7,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 2,
+            "HARD_STOP": 1
+          }
+        },
+        "newerSecond": {
+          "n": 7,
+          "wins": 3,
+          "WR": 42.86,
+          "PF": 0.5806,
+          "sumPct": -5.2,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 3
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 11,
+          "wins": 6,
+          "WR": 54.55,
+          "PF": 0.9126,
+          "sumPct": -1.264,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 6,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 5,
+          "wins": 2,
+          "WR": 40.0,
+          "PF": 0.4444,
+          "sumPct": -5.5,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 3,
+            "TARGET": 2
+          }
+        },
+        "newer": {
+          "n": 10,
+          "wins": 5,
+          "WR": 50.0,
+          "PF": 0.6667,
+          "sumPct": -5.5,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 5,
+            "HARD_STOP": 5
+          }
+        },
+        "newerFirst": {
+          "n": 3,
+          "wins": 2,
+          "WR": 66.67,
+          "PF": 1.3333,
+          "sumPct": 1.1,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 2,
+            "HARD_STOP": 1
+          }
+        },
+        "newerSecond": {
+          "n": 7,
+          "wins": 3,
+          "WR": 42.86,
+          "PF": 0.5,
+          "sumPct": -6.6,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 3
+          }
+        }
+      }
+    },
+    "LONGS_EXIT_CONTINUATION__6H_TP1P5_SL2": {
+      "case": "LONGS_EXIT_CONTINUATION__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 47,
+          "wins": 26,
+          "WR": 55.32,
+          "PF": 0.7669,
+          "sumPct": -10.258,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 20,
+            "TARGET": 24,
+            "TIME": 3
+          }
+        },
+        "calibration": {
+          "n": 20,
+          "wins": 9,
+          "WR": 45.0,
+          "PF": 0.5618,
+          "sumPct": -9.617,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 8,
+            "HARD_STOP": 10,
+            "TIME": 2
+          }
+        },
+        "newer": {
+          "n": 41,
+          "wins": 20,
+          "WR": 48.78,
+          "PF": 0.6879,
+          "sumPct": -11.181,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TARGET": 17,
+            "TIME": 10
+          }
+        },
+        "newerFirst": {
+          "n": 23,
+          "wins": 13,
+          "WR": 56.52,
+          "PF": 0.9241,
+          "sumPct": -1.326,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 7,
+            "TARGET": 11,
+            "TIME": 5
+          }
+        },
+        "newerSecond": {
+          "n": 18,
+          "wins": 7,
+          "WR": 38.89,
+          "PF": 0.4634,
+          "sumPct": -9.855,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 5,
+            "HARD_STOP": 7,
+            "TARGET": 6
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 47,
+          "wins": 24,
+          "WR": 51.06,
+          "PF": 0.5943,
+          "sumPct": -19.658,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 20,
+            "TARGET": 24,
+            "TIME": 3
+          }
+        },
+        "calibration": {
+          "n": 20,
+          "wins": 9,
+          "WR": 45.0,
+          "PF": 0.4361,
+          "sumPct": -13.617,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 8,
+            "HARD_STOP": 10,
+            "TIME": 2
+          }
+        },
+        "newer": {
+          "n": 41,
+          "wins": 18,
+          "WR": 43.9,
+          "PF": 0.5174,
+          "sumPct": -19.381,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TARGET": 17,
+            "TIME": 10
+          }
+        },
+        "newerFirst": {
+          "n": 23,
+          "wins": 12,
+          "WR": 52.17,
+          "PF": 0.6962,
+          "sumPct": -5.926,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 7,
+            "TARGET": 11,
+            "TIME": 5
+          }
+        },
+        "newerSecond": {
+          "n": 18,
+          "wins": 6,
+          "WR": 33.33,
+          "PF": 0.3486,
+          "sumPct": -13.455,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 5,
+            "HARD_STOP": 7,
+            "TARGET": 6
+          }
+        }
+      }
+    },
+    "LONGS_EXIT_CONTINUATION__12H_TP1P75_SL2P5": {
+      "case": "LONGS_EXIT_CONTINUATION__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 46,
+          "wins": 27,
+          "WR": 58.7,
+          "PF": 0.8524,
+          "sumPct": -7.289,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 19,
+            "TARGET": 25,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 19,
+          "wins": 11,
+          "WR": 57.89,
+          "PF": 0.8939,
+          "sumPct": -2.014,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 10,
+            "HARD_STOP": 7,
+            "TIME": 2
+          }
+        },
+        "newer": {
+          "n": 41,
+          "wins": 21,
+          "WR": 51.22,
+          "PF": 0.7548,
+          "sumPct": -11.255,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 16,
+            "TARGET": 21,
+            "TIME": 4
+          }
+        },
+        "newerFirst": {
+          "n": 23,
+          "wins": 12,
+          "WR": 52.17,
+          "PF": 0.8473,
+          "sumPct": -3.569,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 8,
+            "TARGET": 12,
+            "TIME": 3
+          }
+        },
+        "newerSecond": {
+          "n": 18,
+          "wins": 9,
+          "WR": 50.0,
+          "PF": 0.6589,
+          "sumPct": -7.686,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 9,
+            "HARD_STOP": 8,
+            "TIME": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 46,
+          "wins": 26,
+          "WR": 56.52,
+          "PF": 0.6904,
+          "sumPct": -16.489,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 19,
+            "TARGET": 25,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 19,
+          "wins": 11,
+          "WR": 57.89,
+          "PF": 0.7176,
+          "sumPct": -5.814,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 10,
+            "HARD_STOP": 7,
+            "TIME": 2
+          }
+        },
+        "newer": {
+          "n": 41,
+          "wins": 21,
+          "WR": 51.22,
+          "PF": 0.6102,
+          "sumPct": -19.455,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 16,
+            "TARGET": 21,
+            "TIME": 4
+          }
+        },
+        "newerFirst": {
+          "n": 23,
+          "wins": 12,
+          "WR": 52.17,
+          "PF": 0.6805,
+          "sumPct": -8.169,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 8,
+            "TARGET": 12,
+            "TIME": 3
+          }
+        },
+        "newerSecond": {
+          "n": 18,
+          "wins": 9,
+          "WR": 50.0,
+          "PF": 0.5362,
+          "sumPct": -11.286,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 9,
+            "HARD_STOP": 8,
+            "TIME": 1
+          }
+        }
+      }
+    },
+    "LONGS_EXIT_CONTINUATION__18H_TP2P5_SL3": {
+      "case": "LONGS_EXIT_CONTINUATION__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 43,
+          "wins": 27,
+          "WR": 62.79,
+          "PF": 1.271,
+          "sumPct": 13.443,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 16,
+            "TARGET": 26,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 17,
+          "wins": 12,
+          "WR": 70.59,
+          "PF": 1.8074,
+          "sumPct": 11.594,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 10,
+            "HARD_STOP": 4,
+            "TIME": 3
+          }
+        },
+        "newer": {
+          "n": 40,
+          "wins": 17,
+          "WR": 42.5,
+          "PF": 0.61,
+          "sumPct": -26.083,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 21,
+            "TARGET": 17,
+            "TIME": 2
+          }
+        },
+        "newerFirst": {
+          "n": 22,
+          "wins": 8,
+          "WR": 36.36,
+          "PF": 0.4743,
+          "sumPct": -21.277,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 13,
+            "TARGET": 8,
+            "TIME": 1
+          }
+        },
+        "newerSecond": {
+          "n": 18,
+          "wins": 9,
+          "WR": 50.0,
+          "PF": 0.818,
+          "sumPct": -4.805,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 9,
+            "HARD_STOP": 8,
+            "TIME": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 43,
+          "wins": 27,
+          "WR": 62.79,
+          "PF": 1.0917,
+          "sumPct": 4.843,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 16,
+            "TARGET": 26,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 17,
+          "wins": 12,
+          "WR": 70.59,
+          "PF": 1.5335,
+          "sumPct": 8.194,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 10,
+            "HARD_STOP": 4,
+            "TIME": 3
+          }
+        },
+        "newer": {
+          "n": 40,
+          "wins": 17,
+          "WR": 42.5,
+          "PF": 0.5232,
+          "sumPct": -34.083,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 21,
+            "TARGET": 17,
+            "TIME": 2
+          }
+        },
+        "newerFirst": {
+          "n": 22,
+          "wins": 8,
+          "WR": 36.36,
+          "PF": 0.4067,
+          "sumPct": -25.677,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 13,
+            "TARGET": 8,
+            "TIME": 1
+          }
+        },
+        "newerSecond": {
+          "n": 18,
+          "wins": 9,
+          "WR": 50.0,
+          "PF": 0.702,
+          "sumPct": -8.405,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 9,
+            "HARD_STOP": 8,
+            "TIME": 1
+          }
+        }
+      }
+    },
+    "OI_ABSORPTION_TOP__6H_TP1P5_SL2": {
+      "case": "OI_ABSORPTION_TOP__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 3,
+          "wins": 1,
+          "WR": 33.33,
+          "PF": 0.5998,
+          "sumPct": -0.934,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1,
+            "TARGET": 1
+          }
+        },
+        "newerFirst": {
+          "n": 2,
+          "wins": 0,
+          "WR": 0.0,
+          "PF": 0.0,
+          "sumPct": -2.334,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1
+          }
+        },
+        "newerSecond": {
+          "n": 1,
+          "wins": 1,
+          "WR": 100.0,
+          "PF": null,
+          "sumPct": 1.4,
+          "maxLossPct": 1.4,
+          "reasons": {
+            "TARGET": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 3,
+          "wins": 1,
+          "WR": 33.33,
+          "PF": 0.4389,
+          "sumPct": -1.534,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1,
+            "TARGET": 1
+          }
+        },
+        "newerFirst": {
+          "n": 2,
+          "wins": 0,
+          "WR": 0.0,
+          "PF": 0.0,
+          "sumPct": -2.734,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1
+          }
+        },
+        "newerSecond": {
+          "n": 1,
+          "wins": 1,
+          "WR": 100.0,
+          "PF": null,
+          "sumPct": 1.2,
+          "maxLossPct": 1.2,
+          "reasons": {
+            "TARGET": 1
+          }
+        }
+      }
+    },
+    "OI_ABSORPTION_TOP__12H_TP1P75_SL2P5": {
+      "case": "OI_ABSORPTION_TOP__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 3,
+          "wins": 1,
+          "WR": 33.33,
+          "PF": 0.4536,
+          "sumPct": -1.987,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1,
+            "TARGET": 1
+          }
+        },
+        "newerFirst": {
+          "n": 2,
+          "wins": 0,
+          "WR": 0.0,
+          "PF": 0.0,
+          "sumPct": -3.637,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1
+          }
+        },
+        "newerSecond": {
+          "n": 1,
+          "wins": 1,
+          "WR": 100.0,
+          "PF": null,
+          "sumPct": 1.65,
+          "maxLossPct": 1.65,
+          "reasons": {
+            "TARGET": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 3,
+          "wins": 1,
+          "WR": 33.33,
+          "PF": 0.3591,
+          "sumPct": -2.587,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1,
+            "TARGET": 1
+          }
+        },
+        "newerFirst": {
+          "n": 2,
+          "wins": 0,
+          "WR": 0.0,
+          "PF": 0.0,
+          "sumPct": -4.037,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TIME": 1
+          }
+        },
+        "newerSecond": {
+          "n": 1,
+          "wins": 1,
+          "WR": 100.0,
+          "PF": null,
+          "sumPct": 1.45,
+          "maxLossPct": 1.45,
+          "reasons": {
+            "TARGET": 1
+          }
+        }
+      }
+    },
+    "OI_ABSORPTION_TOP__18H_TP2P5_SL3": {
+      "case": "OI_ABSORPTION_TOP__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 3,
+          "wins": 1,
+          "WR": 33.33,
+          "PF": 0.3871,
+          "sumPct": -3.8,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TARGET": 1
+          }
+        },
+        "newerFirst": {
+          "n": 2,
+          "wins": 1,
+          "WR": 50.0,
+          "PF": 0.7742,
+          "sumPct": -0.7,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TARGET": 1
+          }
+        },
+        "newerSecond": {
+          "n": 1,
+          "wins": 0,
+          "WR": 0.0,
+          "PF": 0.0,
+          "sumPct": -3.1,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 3,
+          "wins": 1,
+          "WR": 33.33,
+          "PF": 0.3333,
+          "sumPct": -4.4,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TARGET": 1
+          }
+        },
+        "newerFirst": {
+          "n": 2,
+          "wins": 1,
+          "WR": 50.0,
+          "PF": 0.6667,
+          "sumPct": -1.1,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 1,
+            "TARGET": 1
+          }
+        },
+        "newerSecond": {
+          "n": 1,
+          "wins": 0,
+          "WR": 0.0,
+          "PF": 0.0,
+          "sumPct": -3.3,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 1
+          }
+        }
+      }
+    },
+    "OI_NEW_SHORTS_BEAR__6H_TP1P5_SL2": {
+      "case": "OI_NEW_SHORTS_BEAR__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 37,
+          "wins": 20,
+          "WR": 54.05,
+          "PF": 0.8781,
+          "sumPct": -3.774,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 12,
+            "TARGET": 19,
+            "TIME": 6
+          }
+        },
+        "calibration": {
+          "n": 11,
+          "wins": 6,
+          "WR": 54.55,
+          "PF": 0.9845,
+          "sumPct": -0.132,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 6,
+            "TIME": 1
+          }
+        },
+        "newer": {
+          "n": 60,
+          "wins": 29,
+          "WR": 48.33,
+          "PF": 0.8246,
+          "sumPct": -8.346,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 15,
+            "HARD_STOP": 17,
+            "TARGET": 28
+          }
+        },
+        "newerFirst": {
+          "n": 30,
+          "wins": 13,
+          "WR": 43.33,
+          "PF": 0.687,
+          "sumPct": -8.293,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 8,
+            "HARD_STOP": 9,
+            "TARGET": 13
+          }
+        },
+        "newerSecond": {
+          "n": 30,
+          "wins": 16,
+          "WR": 53.33,
+          "PF": 0.9975,
+          "sumPct": -0.053,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 15,
+            "HARD_STOP": 8,
+            "TIME": 7
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 37,
+          "wins": 20,
+          "WR": 54.05,
+          "PF": 0.6749,
+          "sumPct": -11.174,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 12,
+            "TARGET": 19,
+            "TIME": 6
+          }
+        },
+        "calibration": {
+          "n": 11,
+          "wins": 6,
+          "WR": 54.55,
+          "PF": 0.7553,
+          "sumPct": -2.332,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 6,
+            "TIME": 1
+          }
+        },
+        "newer": {
+          "n": 60,
+          "wins": 28,
+          "WR": 46.67,
+          "PF": 0.6228,
+          "sumPct": -20.346,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 15,
+            "HARD_STOP": 17,
+            "TARGET": 28
+          }
+        },
+        "newerFirst": {
+          "n": 30,
+          "wins": 13,
+          "WR": 43.33,
+          "PF": 0.5219,
+          "sumPct": -14.293,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 8,
+            "HARD_STOP": 9,
+            "TARGET": 13
+          }
+        },
+        "newerSecond": {
+          "n": 30,
+          "wins": 15,
+          "WR": 50.0,
+          "PF": 0.7484,
+          "sumPct": -6.053,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 15,
+            "HARD_STOP": 8,
+            "TIME": 7
+          }
+        }
+      }
+    },
+    "OI_NEW_SHORTS_BEAR__12H_TP1P75_SL2P5": {
+      "case": "OI_NEW_SHORTS_BEAR__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 37,
+          "wins": 22,
+          "WR": 59.46,
+          "PF": 0.9415,
+          "sumPct": -2.171,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TARGET": 21,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 11,
+          "wins": 7,
+          "WR": 63.64,
+          "PF": 1.1106,
+          "sumPct": 1.15,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 7
+          }
+        },
+        "newer": {
+          "n": 59,
+          "wins": 31,
+          "WR": 52.54,
+          "PF": 0.7588,
+          "sumPct": -15.528,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 23,
+            "TIME": 7,
+            "TARGET": 29
+          }
+        },
+        "newerFirst": {
+          "n": 30,
+          "wins": 13,
+          "WR": 43.33,
+          "PF": 0.5282,
+          "sumPct": -19.159,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 15,
+            "TIME": 2,
+            "TARGET": 13
+          }
+        },
+        "newerSecond": {
+          "n": 29,
+          "wins": 18,
+          "WR": 62.07,
+          "PF": 1.1528,
+          "sumPct": 3.631,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 16,
+            "HARD_STOP": 8,
+            "TIME": 5
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 37,
+          "wins": 22,
+          "WR": 59.46,
+          "PF": 0.7615,
+          "sumPct": -9.571,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TARGET": 21,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 11,
+          "wins": 7,
+          "WR": 63.64,
+          "PF": 0.9063,
+          "sumPct": -1.05,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 4,
+            "TARGET": 7
+          }
+        },
+        "newer": {
+          "n": 59,
+          "wins": 31,
+          "WR": 52.54,
+          "PF": 0.6095,
+          "sumPct": -27.328,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 23,
+            "TIME": 7,
+            "TARGET": 29
+          }
+        },
+        "newerFirst": {
+          "n": 30,
+          "wins": 13,
+          "WR": 43.33,
+          "PF": 0.4283,
+          "sumPct": -25.159,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 15,
+            "TIME": 2,
+            "TARGET": 13
+          }
+        },
+        "newerSecond": {
+          "n": 29,
+          "wins": 18,
+          "WR": 62.07,
+          "PF": 0.9165,
+          "sumPct": -2.169,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 16,
+            "HARD_STOP": 8,
+            "TIME": 5
+          }
+        }
+      }
+    },
+    "OI_NEW_SHORTS_BEAR__18H_TP2P5_SL3": {
+      "case": "OI_NEW_SHORTS_BEAR__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 36,
+          "wins": 20,
+          "WR": 55.56,
+          "PF": 1.0279,
+          "sumPct": 1.244,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TARGET": 19,
+            "TIME": 3
+          }
+        },
+        "calibration": {
+          "n": 11,
+          "wins": 7,
+          "WR": 63.64,
+          "PF": 1.6124,
+          "sumPct": 6.381,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 3,
+            "TARGET": 7,
+            "TIME": 1
+          }
+        },
+        "newer": {
+          "n": 58,
+          "wins": 26,
+          "WR": 44.83,
+          "PF": 0.7199,
+          "sumPct": -23.674,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TIME": 7,
+            "HARD_STOP": 26,
+            "TARGET": 25
+          }
+        },
+        "newerFirst": {
+          "n": 30,
+          "wins": 13,
+          "WR": 43.33,
+          "PF": 0.6996,
+          "sumPct": -13.399,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TIME": 3,
+            "HARD_STOP": 14,
+            "TARGET": 13
+          }
+        },
+        "newerSecond": {
+          "n": 28,
+          "wins": 13,
+          "WR": 46.43,
+          "PF": 0.7427,
+          "sumPct": -10.275,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 12,
+            "TIME": 4
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 36,
+          "wins": 20,
+          "WR": 55.56,
+          "PF": 0.8755,
+          "sumPct": -5.956,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TARGET": 19,
+            "TIME": 3
+          }
+        },
+        "calibration": {
+          "n": 11,
+          "wins": 7,
+          "WR": 63.64,
+          "PF": 1.3727,
+          "sumPct": 4.181,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 3,
+            "TARGET": 7,
+            "TIME": 1
+          }
+        },
+        "newer": {
+          "n": 58,
+          "wins": 26,
+          "WR": 44.83,
+          "PF": 0.6121,
+          "sumPct": -35.274,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TIME": 7,
+            "HARD_STOP": 26,
+            "TARGET": 25
+          }
+        },
+        "newerFirst": {
+          "n": 30,
+          "wins": 13,
+          "WR": 43.33,
+          "PF": 0.5958,
+          "sumPct": -19.399,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TIME": 3,
+            "HARD_STOP": 14,
+            "TARGET": 13
+          }
+        },
+        "newerSecond": {
+          "n": 28,
+          "wins": 13,
+          "WR": 46.43,
+          "PF": 0.6303,
+          "sumPct": -15.875,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 12,
+            "TIME": 4
+          }
+        }
+      }
+    },
+    "OI_STOP_HUNT_FADE__6H_TP1P5_SL2": {
+      "case": "OI_STOP_HUNT_FADE__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 18,
+          "wins": 11,
+          "WR": 61.11,
+          "PF": 0.9709,
+          "sumPct": -0.428,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 10,
+            "HARD_STOP": 7,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 9,
+          "wins": 3,
+          "WR": 33.33,
+          "PF": 0.3333,
+          "sumPct": -8.4,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 3,
+            "HARD_STOP": 6
+          }
+        },
+        "newer": {
+          "n": 18,
+          "wins": 7,
+          "WR": 38.89,
+          "PF": 0.5165,
+          "sumPct": -8.459,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 5,
+            "TARGET": 6,
+            "HARD_STOP": 7
+          }
+        },
+        "newerFirst": {
+          "n": 14,
+          "wins": 5,
+          "WR": 35.71,
+          "PF": 0.4577,
+          "sumPct": -8.295,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 3,
+            "TARGET": 5,
+            "HARD_STOP": 6
+          }
+        },
+        "newerSecond": {
+          "n": 4,
+          "wins": 2,
+          "WR": 50.0,
+          "PF": 0.9256,
+          "sumPct": -0.164,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 2,
+            "HARD_STOP": 1,
+            "TARGET": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 18,
+          "wins": 11,
+          "WR": 61.11,
+          "PF": 0.7498,
+          "sumPct": -4.028,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 10,
+            "HARD_STOP": 7,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 9,
+          "wins": 3,
+          "WR": 33.33,
+          "PF": 0.2609,
+          "sumPct": -10.2,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 3,
+            "HARD_STOP": 6
+          }
+        },
+        "newer": {
+          "n": 18,
+          "wins": 7,
+          "WR": 38.89,
+          "PF": 0.3877,
+          "sumPct": -12.059,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 5,
+            "TARGET": 6,
+            "HARD_STOP": 7
+          }
+        },
+        "newerFirst": {
+          "n": 14,
+          "wins": 5,
+          "WR": 35.71,
+          "PF": 0.351,
+          "sumPct": -11.095,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 3,
+            "TARGET": 5,
+            "HARD_STOP": 6
+          }
+        },
+        "newerSecond": {
+          "n": 4,
+          "wins": 2,
+          "WR": 50.0,
+          "PF": 0.6294,
+          "sumPct": -0.964,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 2,
+            "HARD_STOP": 1,
+            "TARGET": 1
+          }
+        }
+      }
+    },
+    "OI_STOP_HUNT_FADE__12H_TP1P75_SL2P5": {
+      "case": "OI_STOP_HUNT_FADE__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 18,
+          "wins": 12,
+          "WR": 66.67,
+          "PF": 1.2692,
+          "sumPct": 4.2,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 6
+          }
+        },
+        "calibration": {
+          "n": 9,
+          "wins": 4,
+          "WR": 44.44,
+          "PF": 0.5077,
+          "sumPct": -6.4,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 4,
+            "HARD_STOP": 5
+          }
+        },
+        "newer": {
+          "n": 18,
+          "wins": 9,
+          "WR": 50.0,
+          "PF": 0.5808,
+          "sumPct": -9.809,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TIME": 1,
+            "HARD_STOP": 9,
+            "TARGET": 8
+          }
+        },
+        "newerFirst": {
+          "n": 14,
+          "wins": 6,
+          "WR": 42.86,
+          "PF": 0.4154,
+          "sumPct": -12.159,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TIME": 1,
+            "HARD_STOP": 8,
+            "TARGET": 5
+          }
+        },
+        "newerSecond": {
+          "n": 4,
+          "wins": 3,
+          "WR": 75.0,
+          "PF": 1.9038,
+          "sumPct": 2.35,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 3,
+            "HARD_STOP": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 18,
+          "wins": 12,
+          "WR": 66.67,
+          "PF": 1.0357,
+          "sumPct": 0.6,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 6
+          }
+        },
+        "calibration": {
+          "n": 9,
+          "wins": 4,
+          "WR": 44.44,
+          "PF": 0.4143,
+          "sumPct": -8.2,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 4,
+            "HARD_STOP": 5
+          }
+        },
+        "newer": {
+          "n": 18,
+          "wins": 9,
+          "WR": 50.0,
+          "PF": 0.4679,
+          "sumPct": -13.409,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TIME": 1,
+            "HARD_STOP": 9,
+            "TARGET": 8
+          }
+        },
+        "newerFirst": {
+          "n": 14,
+          "wins": 6,
+          "WR": 42.86,
+          "PF": 0.3322,
+          "sumPct": -14.959,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TIME": 1,
+            "HARD_STOP": 8,
+            "TARGET": 5
+          }
+        },
+        "newerSecond": {
+          "n": 4,
+          "wins": 3,
+          "WR": 75.0,
+          "PF": 1.5536,
+          "sumPct": 1.55,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 3,
+            "HARD_STOP": 1
+          }
+        }
+      }
+    },
+    "OI_STOP_HUNT_FADE__18H_TP2P5_SL3": {
+      "case": "OI_STOP_HUNT_FADE__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 18,
+          "wins": 12,
+          "WR": 66.67,
+          "PF": 1.5484,
+          "sumPct": 10.2,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 6
+          }
+        },
+        "calibration": {
+          "n": 9,
+          "wins": 2,
+          "WR": 22.22,
+          "PF": 0.2212,
+          "sumPct": -16.9,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 2,
+            "HARD_STOP": 7
+          }
+        },
+        "newer": {
+          "n": 17,
+          "wins": 7,
+          "WR": 41.18,
+          "PF": 0.5248,
+          "sumPct": -13.713,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TIME": 3,
+            "HARD_STOP": 9,
+            "TARGET": 5
+          }
+        },
+        "newerFirst": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.5036,
+          "sumPct": -11.247,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TIME": 2,
+            "HARD_STOP": 7,
+            "TARGET": 4
+          }
+        },
+        "newerSecond": {
+          "n": 4,
+          "wins": 2,
+          "WR": 50.0,
+          "PF": 0.6024,
+          "sumPct": -2.465,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TIME": 1,
+            "TARGET": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 18,
+          "wins": 12,
+          "WR": 66.67,
+          "PF": 1.3333,
+          "sumPct": 6.6,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 6
+          }
+        },
+        "calibration": {
+          "n": 9,
+          "wins": 2,
+          "WR": 22.22,
+          "PF": 0.1905,
+          "sumPct": -18.7,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 2,
+            "HARD_STOP": 7
+          }
+        },
+        "newer": {
+          "n": 17,
+          "wins": 7,
+          "WR": 41.18,
+          "PF": 0.4454,
+          "sumPct": -17.113,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TIME": 3,
+            "HARD_STOP": 9,
+            "TARGET": 5
+          }
+        },
+        "newerFirst": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.4291,
+          "sumPct": -13.847,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TIME": 2,
+            "HARD_STOP": 7,
+            "TARGET": 4
+          }
+        },
+        "newerSecond": {
+          "n": 4,
+          "wins": 2,
+          "WR": 50.0,
+          "PF": 0.5052,
+          "sumPct": -3.265,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 2,
+            "TIME": 1,
+            "TARGET": 1
+          }
+        }
+      }
+    },
+    "POSITIVE_FUNDING_CROWDING__6H_TP1P5_SL2": {
+      "case": "POSITIVE_FUNDING_CROWDING__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.4383,
+          "sumPct": -8.969,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 5,
+            "HARD_STOP": 7,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerFirst": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerSecond": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        }
+      },
+      "30": {
+        "train": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.3415,
+          "sumPct": -11.569,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 5,
+            "HARD_STOP": 7,
+            "TIME": 1
+          }
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerFirst": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerSecond": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        }
+      }
+    },
+    "POSITIVE_FUNDING_CROWDING__12H_TP1P75_SL2P5": {
+      "case": "POSITIVE_FUNDING_CROWDING__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.3966,
+          "sumPct": -12.55,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 8,
+            "TARGET": 5
+          }
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerFirst": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerSecond": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        }
+      },
+      "30": {
+        "train": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.3237,
+          "sumPct": -15.15,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 8,
+            "TARGET": 5
+          }
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerFirst": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerSecond": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        }
+      }
+    },
+    "POSITIVE_FUNDING_CROWDING__18H_TP2P5_SL3": {
+      "case": "POSITIVE_FUNDING_CROWDING__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.4839,
+          "sumPct": -12.8,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 8,
+            "TARGET": 5
+          }
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerFirst": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerSecond": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        }
+      },
+      "30": {
+        "train": {
+          "n": 13,
+          "wins": 5,
+          "WR": 38.46,
+          "PF": 0.4167,
+          "sumPct": -15.4,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 8,
+            "TARGET": 5
+          }
+        },
+        "calibration": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newer": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerFirst": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        },
+        "newerSecond": {
+          "n": 0,
+          "wins": 0,
+          "WR": null,
+          "PF": null,
+          "sumPct": 0,
+          "maxLossPct": null,
+          "reasons": {}
+        }
+      }
+    },
+    "RELATIVE_SHORT_PRESSURE__6H_TP1P5_SL2": {
+      "case": "RELATIVE_SHORT_PRESSURE__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 62,
+          "wins": 38,
+          "WR": 61.29,
+          "PF": 1.1035,
+          "sumPct": 4.573,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 34,
+            "HARD_STOP": 18,
+            "TIME": 10
+          }
+        },
+        "calibration": {
+          "n": 30,
+          "wins": 14,
+          "WR": 46.67,
+          "PF": 0.6888,
+          "sumPct": -8.857,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "HARD_STOP": 12,
+            "TIME": 4,
+            "TARGET": 14
+          }
+        },
+        "newer": {
+          "n": 80,
+          "wins": 40,
+          "WR": 50.0,
+          "PF": 0.8772,
+          "sumPct": -7.493,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 38,
+            "TIME": 17,
+            "HARD_STOP": 25
+          }
+        },
+        "newerFirst": {
+          "n": 46,
+          "wins": 24,
+          "WR": 52.17,
+          "PF": 0.939,
+          "sumPct": -2.113,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 23,
+            "TIME": 8,
+            "HARD_STOP": 15
+          }
+        },
+        "newerSecond": {
+          "n": 34,
+          "wins": 16,
+          "WR": 47.06,
+          "PF": 0.7963,
+          "sumPct": -5.379,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 9,
+            "TARGET": 15,
+            "HARD_STOP": 10
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 62,
+          "wins": 36,
+          "WR": 58.06,
+          "PF": 0.8412,
+          "sumPct": -7.827,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 34,
+            "HARD_STOP": 18,
+            "TIME": 10
+          }
+        },
+        "calibration": {
+          "n": 30,
+          "wins": 14,
+          "WR": 46.67,
+          "PF": 0.5307,
+          "sumPct": -14.857,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "HARD_STOP": 12,
+            "TIME": 4,
+            "TARGET": 14
+          }
+        },
+        "newer": {
+          "n": 80,
+          "wins": 39,
+          "WR": 48.75,
+          "PF": 0.6605,
+          "sumPct": -23.493,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 38,
+            "TIME": 17,
+            "HARD_STOP": 25
+          }
+        },
+        "newerFirst": {
+          "n": 46,
+          "wins": 24,
+          "WR": 52.17,
+          "PF": 0.71,
+          "sumPct": -11.313,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 23,
+            "TIME": 8,
+            "HARD_STOP": 15
+          }
+        },
+        "newerSecond": {
+          "n": 34,
+          "wins": 15,
+          "WR": 44.12,
+          "PF": 0.5964,
+          "sumPct": -12.179,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 9,
+            "TARGET": 15,
+            "HARD_STOP": 10
+          }
+        }
+      }
+    },
+    "RELATIVE_SHORT_PRESSURE__12H_TP1P75_SL2P5": {
+      "case": "RELATIVE_SHORT_PRESSURE__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 62,
+          "wins": 39,
+          "WR": 62.9,
+          "PF": 1.1193,
+          "sumPct": 6.542,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 37,
+            "HARD_STOP": 20,
+            "TIME": 5
+          }
+        },
+        "calibration": {
+          "n": 28,
+          "wins": 13,
+          "WR": 46.43,
+          "PF": 0.5563,
+          "sumPct": -16.564,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TIME": 2,
+            "TARGET": 12
+          }
+        },
+        "newer": {
+          "n": 79,
+          "wins": 43,
+          "WR": 54.43,
+          "PF": 0.7951,
+          "sumPct": -17.262,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 40,
+            "TIME": 9,
+            "HARD_STOP": 30
+          }
+        },
+        "newerFirst": {
+          "n": 46,
+          "wins": 26,
+          "WR": 56.52,
+          "PF": 0.8572,
+          "sumPct": -6.897,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 25,
+            "TIME": 4,
+            "HARD_STOP": 17
+          }
+        },
+        "newerSecond": {
+          "n": 33,
+          "wins": 17,
+          "WR": 51.52,
+          "PF": 0.7115,
+          "sumPct": -10.365,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TIME": 5,
+            "TARGET": 15,
+            "HARD_STOP": 13
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 62,
+          "wins": 38,
+          "WR": 61.29,
+          "PF": 0.9018,
+          "sumPct": -5.858,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 37,
+            "HARD_STOP": 20,
+            "TIME": 5
+          }
+        },
+        "calibration": {
+          "n": 28,
+          "wins": 13,
+          "WR": 46.43,
+          "PF": 0.4505,
+          "sumPct": -22.164,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TIME": 2,
+            "TARGET": 12
+          }
+        },
+        "newer": {
+          "n": 79,
+          "wins": 42,
+          "WR": 53.16,
+          "PF": 0.6386,
+          "sumPct": -33.062,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 40,
+            "TIME": 9,
+            "HARD_STOP": 30
+          }
+        },
+        "newerFirst": {
+          "n": 46,
+          "wins": 25,
+          "WR": 54.35,
+          "PF": 0.6925,
+          "sumPct": -16.097,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 25,
+            "TIME": 4,
+            "HARD_STOP": 17
+          }
+        },
+        "newerSecond": {
+          "n": 33,
+          "wins": 17,
+          "WR": 51.52,
+          "PF": 0.5664,
+          "sumPct": -16.965,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TIME": 5,
+            "TARGET": 15,
+            "HARD_STOP": 13
+          }
+        }
+      }
+    },
+    "RELATIVE_SHORT_PRESSURE__18H_TP2P5_SL3": {
+      "case": "RELATIVE_SHORT_PRESSURE__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 61,
+          "wins": 37,
+          "WR": 60.66,
+          "PF": 1.1625,
+          "sumPct": 11.856,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 22,
+            "TARGET": 35,
+            "TIME": 4
+          }
+        },
+        "calibration": {
+          "n": 28,
+          "wins": 13,
+          "WR": 46.43,
+          "PF": 0.6384,
+          "sumPct": -15.955,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TIME": 3,
+            "TARGET": 11
+          }
+        },
+        "newer": {
+          "n": 76,
+          "wins": 36,
+          "WR": 47.37,
+          "PF": 0.8323,
+          "sumPct": -16.737,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 33,
+            "TIME": 15,
+            "HARD_STOP": 28
+          }
+        },
+        "newerFirst": {
+          "n": 44,
+          "wins": 23,
+          "WR": 52.27,
+          "PF": 1.0132,
+          "sumPct": 0.717,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 23,
+            "TIME": 5,
+            "HARD_STOP": 16
+          }
+        },
+        "newerSecond": {
+          "n": 32,
+          "wins": 13,
+          "WR": 40.62,
+          "PF": 0.6148,
+          "sumPct": -17.454,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TIME": 10,
+            "HARD_STOP": 12,
+            "TARGET": 10
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 61,
+          "wins": 37,
+          "WR": 60.66,
+          "PF": 0.9956,
+          "sumPct": -0.344,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 22,
+            "TARGET": 35,
+            "TIME": 4
+          }
+        },
+        "calibration": {
+          "n": 28,
+          "wins": 13,
+          "WR": 46.43,
+          "PF": 0.5426,
+          "sumPct": -21.555,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 14,
+            "TIME": 3,
+            "TARGET": 11
+          }
+        },
+        "newer": {
+          "n": 76,
+          "wins": 36,
+          "WR": 47.37,
+          "PF": 0.7037,
+          "sumPct": -31.937,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 33,
+            "TIME": 15,
+            "HARD_STOP": 28
+          }
+        },
+        "newerFirst": {
+          "n": 44,
+          "wins": 23,
+          "WR": 52.27,
+          "PF": 0.8623,
+          "sumPct": -8.083,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 23,
+            "TIME": 5,
+            "HARD_STOP": 16
+          }
+        },
+        "newerSecond": {
+          "n": 32,
+          "wins": 13,
+          "WR": 40.62,
+          "PF": 0.5143,
+          "sumPct": -23.854,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TIME": 10,
+            "HARD_STOP": 12,
+            "TARGET": 10
+          }
+        }
+      }
+    },
+    "SQUEEZE_OVERHANG__6H_TP1P5_SL2": {
+      "case": "SQUEEZE_OVERHANG__6H_TP1P5_SL2",
+      "10": {
+        "train": {
+          "n": 20,
+          "wins": 8,
+          "WR": 40.0,
+          "PF": 0.4444,
+          "sumPct": -14.0,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 8,
+            "HARD_STOP": 12
+          }
+        },
+        "calibration": {
+          "n": 10,
+          "wins": 5,
+          "WR": 50.0,
+          "PF": 0.7206,
+          "sumPct": -2.384,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 4,
+            "HARD_STOP": 4,
+            "TIME": 2
+          }
+        },
+        "newer": {
+          "n": 21,
+          "wins": 12,
+          "WR": 57.14,
+          "PF": 0.8985,
+          "sumPct": -1.826,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 11,
+            "HARD_STOP": 8,
+            "TIME": 2
+          }
+        },
+        "newerFirst": {
+          "n": 10,
+          "wins": 7,
+          "WR": 70.0,
+          "PF": 1.5556,
+          "sumPct": 3.5,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TARGET": 7,
+            "HARD_STOP": 3
+          }
+        },
+        "newerSecond": {
+          "n": 11,
+          "wins": 5,
+          "WR": 45.45,
+          "PF": 0.5446,
+          "sumPct": -5.326,
+          "maxLossPct": -2.1,
+          "reasons": {
+            "TIME": 2,
+            "TARGET": 4,
+            "HARD_STOP": 5
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 20,
+          "wins": 8,
+          "WR": 40.0,
+          "PF": 0.3478,
+          "sumPct": -18.0,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 8,
+            "HARD_STOP": 12
+          }
+        },
+        "calibration": {
+          "n": 10,
+          "wins": 5,
+          "WR": 50.0,
+          "PF": 0.54,
+          "sumPct": -4.384,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 4,
+            "HARD_STOP": 4,
+            "TIME": 2
+          }
+        },
+        "newer": {
+          "n": 21,
+          "wins": 12,
+          "WR": 57.14,
+          "PF": 0.6956,
+          "sumPct": -6.026,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 11,
+            "HARD_STOP": 8,
+            "TIME": 2
+          }
+        },
+        "newerFirst": {
+          "n": 10,
+          "wins": 7,
+          "WR": 70.0,
+          "PF": 1.2174,
+          "sumPct": 1.5,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TARGET": 7,
+            "HARD_STOP": 3
+          }
+        },
+        "newerSecond": {
+          "n": 11,
+          "wins": 5,
+          "WR": 45.45,
+          "PF": 0.4164,
+          "sumPct": -7.526,
+          "maxLossPct": -2.3,
+          "reasons": {
+            "TIME": 2,
+            "TARGET": 4,
+            "HARD_STOP": 5
+          }
+        }
+      }
+    },
+    "SQUEEZE_OVERHANG__12H_TP1P75_SL2P5": {
+      "case": "SQUEEZE_OVERHANG__12H_TP1P75_SL2P5",
+      "10": {
+        "train": {
+          "n": 20,
+          "wins": 7,
+          "WR": 35.0,
+          "PF": 0.3417,
+          "sumPct": -22.25,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 13,
+            "TARGET": 7
+          }
+        },
+        "calibration": {
+          "n": 10,
+          "wins": 4,
+          "WR": 40.0,
+          "PF": 0.4231,
+          "sumPct": -9.0,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 4
+          }
+        },
+        "newer": {
+          "n": 21,
+          "wins": 12,
+          "WR": 57.14,
+          "PF": 0.8462,
+          "sumPct": -3.6,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 9
+          }
+        },
+        "newerFirst": {
+          "n": 10,
+          "wins": 7,
+          "WR": 70.0,
+          "PF": 1.4808,
+          "sumPct": 3.75,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "TARGET": 7,
+            "HARD_STOP": 3
+          }
+        },
+        "newerSecond": {
+          "n": 11,
+          "wins": 5,
+          "WR": 45.45,
+          "PF": 0.5288,
+          "sumPct": -7.35,
+          "maxLossPct": -2.6,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 5
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 20,
+          "wins": 7,
+          "WR": 35.0,
+          "PF": 0.2788,
+          "sumPct": -26.25,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 13,
+            "TARGET": 7
+          }
+        },
+        "calibration": {
+          "n": 10,
+          "wins": 4,
+          "WR": 40.0,
+          "PF": 0.3452,
+          "sumPct": -11.0,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 4
+          }
+        },
+        "newer": {
+          "n": 21,
+          "wins": 12,
+          "WR": 57.14,
+          "PF": 0.6905,
+          "sumPct": -7.8,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 12,
+            "HARD_STOP": 9
+          }
+        },
+        "newerFirst": {
+          "n": 10,
+          "wins": 7,
+          "WR": 70.0,
+          "PF": 1.2083,
+          "sumPct": 1.75,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "TARGET": 7,
+            "HARD_STOP": 3
+          }
+        },
+        "newerSecond": {
+          "n": 11,
+          "wins": 5,
+          "WR": 45.45,
+          "PF": 0.4315,
+          "sumPct": -9.55,
+          "maxLossPct": -2.8,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 5
+          }
+        }
+      }
+    },
+    "SQUEEZE_OVERHANG__18H_TP2P5_SL3": {
+      "case": "SQUEEZE_OVERHANG__18H_TP2P5_SL3",
+      "10": {
+        "train": {
+          "n": 20,
+          "wins": 8,
+          "WR": 40.0,
+          "PF": 0.4621,
+          "sumPct": -20.011,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 12,
+            "TARGET": 6,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 10,
+          "wins": 4,
+          "WR": 40.0,
+          "PF": 0.5161,
+          "sumPct": -9.0,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 4
+          }
+        },
+        "newer": {
+          "n": 21,
+          "wins": 10,
+          "WR": 47.62,
+          "PF": 0.7992,
+          "sumPct": -6.03,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 10,
+            "TIME": 2,
+            "HARD_STOP": 9
+          }
+        },
+        "newerFirst": {
+          "n": 10,
+          "wins": 6,
+          "WR": 60.0,
+          "PF": 1.3022,
+          "sumPct": 3.342,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "TARGET": 6,
+            "TIME": 1,
+            "HARD_STOP": 3
+          }
+        },
+        "newerSecond": {
+          "n": 11,
+          "wins": 4,
+          "WR": 36.36,
+          "PF": 0.506,
+          "sumPct": -9.372,
+          "maxLossPct": -3.1,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 4,
+            "TIME": 1
+          }
+        }
+      },
+      "30": {
+        "train": {
+          "n": 20,
+          "wins": 8,
+          "WR": 40.0,
+          "PF": 0.3937,
+          "sumPct": -24.011,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 12,
+            "TARGET": 6,
+            "TIME": 2
+          }
+        },
+        "calibration": {
+          "n": 10,
+          "wins": 4,
+          "WR": 40.0,
+          "PF": 0.4444,
+          "sumPct": -11.0,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 4
+          }
+        },
+        "newer": {
+          "n": 21,
+          "wins": 10,
+          "WR": 47.62,
+          "PF": 0.6826,
+          "sumPct": -10.23,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 10,
+            "TIME": 2,
+            "HARD_STOP": 9
+          }
+        },
+        "newerFirst": {
+          "n": 10,
+          "wins": 6,
+          "WR": 60.0,
+          "PF": 1.1132,
+          "sumPct": 1.342,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "TARGET": 6,
+            "TIME": 1,
+            "HARD_STOP": 3
+          }
+        },
+        "newerSecond": {
+          "n": 11,
+          "wins": 4,
+          "WR": 36.36,
+          "PF": 0.432,
+          "sumPct": -11.572,
+          "maxLossPct": -3.3,
+          "reasons": {
+            "HARD_STOP": 6,
+            "TARGET": 4,
+            "TIME": 1
+          }
+        }
+      }
+    }
+  },
+  "calibrationQualifiedNames": [
+    "LONGS_EXIT_CONTINUATION__18H_TP2P5_SL3",
+    "OI_NEW_SHORTS_BEAR__18H_TP2P5_SL3"
+  ]
+}

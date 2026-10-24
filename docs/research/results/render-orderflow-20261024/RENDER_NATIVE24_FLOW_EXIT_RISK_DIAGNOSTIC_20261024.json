@@ -1,0 +1,345 @@
+{
+  "status": "DIAGNOSTIC_FROZEN24_SAME_ECONOMIC_COHORT_NOT_NATIVE_REALLOCATOR_BT",
+  "sourceCohortComparison": {
+    "source": "IDLE_RENDER_DOT_JUP_INITIAL_ADVERSE_ENTRY_PATH_20261024.json",
+    "matchedEntryTimestamps": 24,
+    "sourceEntries": 24,
+    "otherNativeScreenEntries": 24,
+    "exactCohortParity": true,
+    "matchingExitReasons": 24,
+    "matchingCandidateIds": 7,
+    "maxAbsReturn30DifferencePct": 0.0,
+    "exactEconomicCohortParity": true
+  },
+  "caveats": [
+    "Hindsight 24 trades; original 8-strategy availability and dynamic account wallet not replayed",
+    "Changes exit timestamp, so actual portfolio impact unknown until common-wallet re-selection",
+    "Original cost modeled 30bps, no venue slippage or funding."
+  ],
+  "cases": {
+    "2H_BUYERS_AFTER_RED": {
+      "n": 24,
+      "triggered": 4,
+      "triggeredWasWinner": 2,
+      "triggeredWasLoser": 2,
+      "baselineNetPctSum": 0.731,
+      "alternativeNetPctSum": -8.199,
+      "deltaPctSum": -8.929,
+      "baselineWins": 12,
+      "alternativeWins": 10,
+      "worstBaselinePct": -5.064,
+      "worstAlternativePct": -5.064,
+      "trades": [
+        {
+          "candidateId": "C001045",
+          "original30": -0.43636,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -1.39091,
+          "signalTime": 1768464000000,
+          "fillTime": 1768464300000,
+          "earlyAdversePct": 1.0909,
+          "seller1": -0.1497,
+          "oi1Pct": -0.3632,
+          "savedPct": -0.95455
+        },
+        {
+          "candidateId": "C001159",
+          "original30": -3.12895,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -1.28684,
+          "signalTime": 1769900400000,
+          "fillTime": 1769900700000,
+          "earlyAdversePct": 0.9868,
+          "seller1": -0.0509,
+          "oi1Pct": 0.4064,
+          "savedPct": 1.84211
+        },
+        {
+          "candidateId": "C001712",
+          "original30": 2.14681,
+          "originalWin": true,
+          "triggered": true,
+          "new30": -1.41702,
+          "signalTime": 1776175200000,
+          "fillTime": 1776175500000,
+          "earlyAdversePct": 1.2766,
+          "seller1": -0.0259,
+          "oi1Pct": 0.6404,
+          "savedPct": -3.56383
+        },
+        {
+          "candidateId": "C001905",
+          "original30": 2.84925,
+          "originalWin": true,
+          "triggered": true,
+          "new30": -3.40361,
+          "signalTime": 1779883200000,
+          "fillTime": 1779883500000,
+          "earlyAdversePct": 3.56,
+          "seller1": -0.0665,
+          "oi1Pct": -1.2864,
+          "savedPct": -6.25285
+        }
+      ]
+    },
+    "2H_OI_CONTRACTION_RED": {
+      "n": 24,
+      "triggered": 2,
+      "triggeredWasWinner": 1,
+      "triggeredWasLoser": 1,
+      "baselineNetPctSum": 0.731,
+      "alternativeNetPctSum": -6.477,
+      "deltaPctSum": -7.207,
+      "baselineWins": 12,
+      "alternativeWins": 11,
+      "worstBaselinePct": -5.064,
+      "worstAlternativePct": -5.064,
+      "trades": [
+        {
+          "candidateId": "C001045",
+          "original30": -0.43636,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -1.39091,
+          "signalTime": 1768464000000,
+          "fillTime": 1768464300000,
+          "earlyAdversePct": 1.0909,
+          "seller1": -0.1497,
+          "oi1Pct": -0.3632,
+          "savedPct": -0.95455
+        },
+        {
+          "candidateId": "C001905",
+          "original30": 2.84925,
+          "originalWin": true,
+          "triggered": true,
+          "new30": -3.40361,
+          "signalTime": 1779883200000,
+          "fillTime": 1779883500000,
+          "earlyAdversePct": 3.56,
+          "seller1": -0.0665,
+          "oi1Pct": -1.2864,
+          "savedPct": -6.25285
+        }
+      ]
+    },
+    "2H_BOTH_BUYER_OI_RED": {
+      "n": 24,
+      "triggered": 2,
+      "triggeredWasWinner": 1,
+      "triggeredWasLoser": 1,
+      "baselineNetPctSum": 0.731,
+      "alternativeNetPctSum": -6.477,
+      "deltaPctSum": -7.207,
+      "baselineWins": 12,
+      "alternativeWins": 11,
+      "worstBaselinePct": -5.064,
+      "worstAlternativePct": -5.064,
+      "trades": [
+        {
+          "candidateId": "C001045",
+          "original30": -0.43636,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -1.39091,
+          "signalTime": 1768464000000,
+          "fillTime": 1768464300000,
+          "earlyAdversePct": 1.0909,
+          "seller1": -0.1497,
+          "oi1Pct": -0.3632,
+          "savedPct": -0.95455
+        },
+        {
+          "candidateId": "C001905",
+          "original30": 2.84925,
+          "originalWin": true,
+          "triggered": true,
+          "new30": -3.40361,
+          "signalTime": 1779883200000,
+          "fillTime": 1779883500000,
+          "earlyAdversePct": 3.56,
+          "seller1": -0.0665,
+          "oi1Pct": -1.2864,
+          "savedPct": -6.25285
+        }
+      ]
+    },
+    "3H_BOTH_BUYER_OI_RED": {
+      "n": 24,
+      "triggered": 2,
+      "triggeredWasWinner": 0,
+      "triggeredWasLoser": 2,
+      "baselineNetPctSum": 0.731,
+      "alternativeNetPctSum": -0.994,
+      "deltaPctSum": -1.725,
+      "baselineWins": 12,
+      "alternativeWins": 12,
+      "worstBaselinePct": -5.064,
+      "worstAlternativePct": -5.064,
+      "trades": [
+        {
+          "candidateId": "C001045",
+          "original30": -0.43636,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -0.84545,
+          "signalTime": 1768467600000,
+          "fillTime": 1768467900000,
+          "earlyAdversePct": 1.0,
+          "seller1": -0.1671,
+          "oi1Pct": -1.0075,
+          "savedPct": -0.40909
+        },
+        {
+          "candidateId": "C001159",
+          "original30": -3.12895,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -4.44474,
+          "signalTime": 1769904000000,
+          "fillTime": 1769904300000,
+          "earlyAdversePct": 1.9079,
+          "seller1": -0.1056,
+          "oi1Pct": -0.5969,
+          "savedPct": -1.31579
+        }
+      ]
+    },
+    "4H_BOTH_BUYER_OI_RED": {
+      "n": 24,
+      "triggered": 5,
+      "triggeredWasWinner": 1,
+      "triggeredWasLoser": 4,
+      "baselineNetPctSum": 0.731,
+      "alternativeNetPctSum": 0.152,
+      "deltaPctSum": -0.579,
+      "baselineWins": 12,
+      "alternativeWins": 11,
+      "worstBaselinePct": -5.064,
+      "worstAlternativePct": -5.064,
+      "trades": [
+        {
+          "candidateId": "C001045",
+          "original30": -0.43636,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -1.52727,
+          "signalTime": 1768471200000,
+          "fillTime": 1768471500000,
+          "earlyAdversePct": 1.0455,
+          "seller1": -0.1506,
+          "oi1Pct": -0.8006,
+          "savedPct": -1.09091
+        },
+        {
+          "candidateId": "C001159",
+          "original30": -3.12895,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -3.85263,
+          "signalTime": 1769907600000,
+          "fillTime": 1769907900000,
+          "earlyAdversePct": 4.0789,
+          "seller1": -0.1853,
+          "oi1Pct": -0.6739,
+          "savedPct": -0.72368
+        },
+        {
+          "candidateId": "C001271",
+          "original30": -2.73531,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -2.05038,
+          "signalTime": 1770652800000,
+          "fillTime": 1770653100000,
+          "earlyAdversePct": 1.9787,
+          "seller1": -0.0416,
+          "oi1Pct": -0.9061,
+          "savedPct": 0.68493
+        },
+        {
+          "candidateId": "C001727",
+          "original30": 0.35041,
+          "originalWin": true,
+          "triggered": true,
+          "new30": -1.70921,
+          "signalTime": 1776376800000,
+          "fillTime": 1776377100000,
+          "earlyAdversePct": 1.084,
+          "seller1": -0.1614,
+          "oi1Pct": -0.4108,
+          "savedPct": -2.05962
+        },
+        {
+          "candidateId": "C001818",
+          "original30": -3.7097,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -1.09915,
+          "signalTime": 1778612400000,
+          "fillTime": 1778612700000,
+          "earlyAdversePct": 0.586,
+          "seller1": -0.1603,
+          "oi1Pct": -0.1546,
+          "savedPct": 2.61055
+        }
+      ]
+    },
+    "2H_BUYER_OR_OI_AFTER1P0": {
+      "n": 24,
+      "triggered": 3,
+      "triggeredWasWinner": 2,
+      "triggeredWasLoser": 1,
+      "baselineNetPctSum": 0.731,
+      "alternativeNetPctSum": -10.041,
+      "deltaPctSum": -10.771,
+      "baselineWins": 12,
+      "alternativeWins": 10,
+      "worstBaselinePct": -5.064,
+      "worstAlternativePct": -5.064,
+      "trades": [
+        {
+          "candidateId": "C001045",
+          "original30": -0.43636,
+          "originalWin": false,
+          "triggered": true,
+          "new30": -1.39091,
+          "signalTime": 1768464000000,
+          "fillTime": 1768464300000,
+          "earlyAdversePct": 1.0909,
+          "seller1": -0.1497,
+          "oi1Pct": -0.3632,
+          "savedPct": -0.95455
+        },
+        {
+          "candidateId": "C001712",
+          "original30": 2.14681,
+          "originalWin": true,
+          "triggered": true,
+          "new30": -1.41702,
+          "signalTime": 1776175200000,
+          "fillTime": 1776175500000,
+          "earlyAdversePct": 1.2766,
+          "seller1": -0.0259,
+          "oi1Pct": 0.6404,
+          "savedPct": -3.56383
+        },
+        {
+          "candidateId": "C001905",
+          "original30": 2.84925,
+          "originalWin": true,
+          "triggered": true,
+          "new30": -3.40361,
+          "signalTime": 1779883200000,
+          "fillTime": 1779883500000,
+          "earlyAdversePct": 3.56,
+          "seller1": -0.0665,
+          "oi1Pct": -1.2864,
+          "savedPct": -6.25285
+        }
+      ]
+    }
+  }
+}
