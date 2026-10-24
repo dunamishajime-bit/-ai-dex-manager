@@ -1,0 +1,98 @@
+{
+  "costs": {
+    "10": {
+      "accepted_count": 1293,
+      "all_retained_decisions_identical_after_identity_fields_removed": true,
+      "extra_v12_rejected_semantic_sha256": "86916ed8af818fe90add5bade5b5ca0b702d6f6a2ba45875c191168921b296d5",
+      "first_only_v12_rejected": 20,
+      "first_only_v12_routes": {
+        "FAILED_BREAK_REV_SHORT_6H": 1,
+        "REC_G4_MATURE_REL_RANGE": 1,
+        "REC_G5_SLOW_TREND": 1,
+        "REC_X05_TIME_36H": 1,
+        "REC_X12_TIME_12H": 2,
+        "REC_X13_TP1.5_SL1_H24": 1,
+        "REC_Y01_REV_D0_T72": 2,
+        "REC_Y03_REV_D0_T36": 1,
+        "REC_Y06_REV_D0_T72": 10
+      },
+      "identity_fields_removed": [
+        "candidate_id",
+        "event_seq",
+        "owner_candidate_id"
+      ],
+      "new_render_accepted_gross": [
+        {
+          "accepted": 0.22275389599297446,
+          "entry_ts_ms": 1782176400000,
+          "requested": 0.25
+        },
+        {
+          "accepted": 0.21255926278847206,
+          "entry_ts_ms": 1782370800000,
+          "requested": 0.25
+        }
+      ],
+      "raw_counts": [
+        2543,
+        2523,
+        2523
+      ],
+      "retained_decisions": 2523,
+      "run_2_3_raw_equal": true,
+      "semantic_decision_sha256": "db776e2080a6fc73a73e29152ef6ff7468e35af714cd3fe65577ceb7ecd040e9"
+    },
+    "30": {
+      "accepted_count": 1292,
+      "all_retained_decisions_identical_after_identity_fields_removed": true,
+      "extra_v12_rejected_semantic_sha256": "f3af9ab2cc89a2bab5f4e9e89d2bf6a038e1f21263ec33d2b498d2bd8eb01ae4",
+      "first_only_v12_rejected": 20,
+      "first_only_v12_routes": {
+        "FAILED_BREAK_REV_SHORT_6H": 1,
+        "REC_G4_MATURE_REL_RANGE": 1,
+        "REC_G5_SLOW_TREND": 1,
+        "REC_X05_TIME_36H": 1,
+        "REC_X12_TIME_12H": 2,
+        "REC_X13_TP1.5_SL1_H24": 1,
+        "REC_Y01_REV_D0_T72": 2,
+        "REC_Y03_REV_D0_T36": 1,
+        "REC_Y06_REV_D0_T72": 10
+      },
+      "identity_fields_removed": [
+        "candidate_id",
+        "event_seq",
+        "owner_candidate_id"
+      ],
+      "new_render_accepted_gross": [
+        {
+          "accepted": 0.24999985769906155,
+          "entry_ts_ms": 1782176400000,
+          "requested": 0.25
+        },
+        {
+          "accepted": 0.24999982448271585,
+          "entry_ts_ms": 1782370800000,
+          "requested": 0.25
+        }
+      ],
+      "raw_counts": [
+        2543,
+        2523,
+        2523
+      ],
+      "retained_decisions": 2523,
+      "run_2_3_raw_equal": true,
+      "semantic_decision_sha256": "89672c8b4221b36f49d74d1d9a635e30d04a9c86985c47b6a8b003e0759c06b3"
+    }
+  },
+  "limitations": [
+    "Exact raw decision and candidate identity reproducibility remains FAIL: 20 rejected V12 candidates are missing from warm runs.",
+    "Root cause of first-run-only V12 candidate generation is not proven by this differential audit.",
+    "Owner/Route is not formally registered; safety gates and live venue fills/funding are not certified.",
+    "All historical windows previously explored; no untouched OOS.",
+    "VPS/LIVE/Production/HP/orders unchanged."
+  ],
+  "owner_route_registered": false,
+  "raw_sha_equal": false,
+  "status": "RESEARCH_ONLY_RAW_DECISION_SEMANTIC_PARITY_PROVEN_IDENTITY_PARITY_FAILED"
+}
