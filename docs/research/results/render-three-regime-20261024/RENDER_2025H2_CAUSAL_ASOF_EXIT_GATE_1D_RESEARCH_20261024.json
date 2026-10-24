@@ -1,0 +1,5445 @@
+{
+  "status": "RESEARCH_ONLY_IN_SAMPLE_H2_CAUSAL_GATE_SEARCH_NOT_LIVE",
+  "features": [
+    "ret1",
+    "ret3",
+    "ret6",
+    "ret24",
+    "btc1",
+    "btc6",
+    "btc24",
+    "rel6",
+    "last15",
+    "last30",
+    "hourWick",
+    "priorRebound",
+    "rangePos1",
+    "rangePos24",
+    "volumeRatio",
+    "seller1",
+    "seller3",
+    "sellerAcceleration",
+    "oi1Pct",
+    "oi3Pct",
+    "fundingBps",
+    "render7",
+    "btc7",
+    "renderRV7"
+  ],
+  "tested": 5184,
+  "acceptedNoFrequencyReductionAll2025QuartersPF1": 138,
+  "baseline": {
+    "years": {
+      "2024": {
+        "n": 70,
+        "wins": 51,
+        "wr": 72.857,
+        "pf": 1.4535,
+        "sumNetPct": 27.363,
+        "byExpert": {
+          "A": 49,
+          "B": 21
+        }
+      },
+      "2025": {
+        "n": 64,
+        "wins": 43,
+        "wr": 67.188,
+        "pf": 1.2239,
+        "sumNetPct": 16.716,
+        "byExpert": {
+          "A": 35,
+          "B": 29
+        }
+      },
+      "2026": {
+        "n": 40,
+        "wins": 30,
+        "wr": 75.0,
+        "pf": 1.3747,
+        "sumNetPct": 10.903,
+        "byExpert": {
+          "A": 23,
+          "B": 17
+        }
+      }
+    },
+    "segments": {
+      "24_RNDR_JAN_MAY": {
+        "n": 33,
+        "wins": 26,
+        "wr": 78.788,
+        "pf": 1.6493,
+        "sumNetPct": 14.251,
+        "byExpert": {
+          "A": 27,
+          "B": 6
+        }
+      },
+      "24_RNDR_JUN_JUL": {
+        "n": 4,
+        "wins": 4,
+        "wr": 100.0,
+        "pf": null,
+        "sumNetPct": 6.8,
+        "byExpert": {
+          "B": 4
+        }
+      },
+      "24_RENDER_JUL_DEC": {
+        "n": 33,
+        "wins": 21,
+        "wr": 63.636,
+        "pf": 1.1644,
+        "sumNetPct": 6.312,
+        "byExpert": {
+          "B": 11,
+          "A": 22
+        }
+      },
+      "25_JAN_MAR": {
+        "n": 24,
+        "wins": 18,
+        "wr": 75.0,
+        "pf": 1.9061,
+        "sumNetPct": 19.3,
+        "byExpert": {
+          "A": 15,
+          "B": 9
+        }
+      },
+      "25_APR_JUL": {
+        "n": 21,
+        "wins": 14,
+        "wr": 66.667,
+        "pf": 1.2592,
+        "sumNetPct": 6.339,
+        "byExpert": {
+          "A": 10,
+          "B": 11
+        }
+      },
+      "25_AUG_DEC": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 0.6912,
+        "sumNetPct": -8.924,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "26_JAN_MAR": {
+        "n": 24,
+        "wins": 18,
+        "wr": 75.0,
+        "pf": 1.5351,
+        "sumNetPct": 9.795,
+        "byExpert": {
+          "A": 14,
+          "B": 10
+        }
+      },
+      "26_APR_AUG": {
+        "n": 16,
+        "wins": 12,
+        "wr": 75.0,
+        "pf": 1.1027,
+        "sumNetPct": 1.108,
+        "byExpert": {
+          "A": 9,
+          "B": 7
+        }
+      }
+    }
+  },
+  "leadingCases": [
+    {
+      "expert": "B",
+      "feature": "rangePos1",
+      "threshold": 0.13333,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.318,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.2632,
+          "sumNetPct": 15.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 45,
+          "wr": 70.312,
+          "pf": 1.7223,
+          "sumNetPct": 37.02,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 28,
+          "wr": 70.0,
+          "pf": 1.1373,
+          "sumNetPct": 4.056,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.3176,
+        "sumNetPct": 4.381,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.6235,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.8969,
+        "25_JAN_MAR": 1.899,
+        "25_APR_JUL": 1.8403,
+        "25_AUG_DEC": 1.3176,
+        "26_JAN_MAR": 1.2703,
+        "26_APR_AUG": 0.9701
+      },
+      "meanAnnual30SumPct": 56.639
+    },
+    {
+      "expert": "B",
+      "feature": "hourWick",
+      "threshold": 1.23403,
+      "direction": "LE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.318,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.1378,
+          "sumNetPct": 8.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3579,
+          "sumNetPct": 18.873,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 29,
+          "wr": 70.732,
+          "pf": 1.1487,
+          "sumNetPct": 4.937,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.3176,
+        "sumNetPct": 4.381,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5126,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.851,
+        "25_JAN_MAR": 1.3303,
+        "25_APR_JUL": 1.4271,
+        "25_AUG_DEC": 1.3176,
+        "26_JAN_MAR": 1.2733,
+        "26_APR_AUG": 0.9574
+      },
+      "meanAnnual30SumPct": 32.373
+    },
+    {
+      "expert": "B",
+      "feature": "hourWick",
+      "threshold": 1.11429,
+      "direction": "LE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.305,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.166,
+          "sumNetPct": 10.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3178,
+          "sumNetPct": 18.113,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 29,
+          "wr": 70.732,
+          "pf": 1.1387,
+          "sumNetPct": 4.603,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.3176,
+        "sumNetPct": 4.381,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5126,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.8204,
+        "25_JAN_MAR": 1.3303,
+        "25_APR_JUL": 1.3048,
+        "25_AUG_DEC": 1.3176,
+        "26_JAN_MAR": 1.2485,
+        "26_APR_AUG": 0.9701
+      },
+      "meanAnnual30SumPct": 33.279
+    },
+    {
+      "expert": "B",
+      "feature": "last30",
+      "threshold": -0.49912,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.281,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.2022,
+          "sumNetPct": 12.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3912,
+          "sumNetPct": 22.881,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 28,
+          "wr": 70.0,
+          "pf": 1.0878,
+          "sumNetPct": 2.672,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.2813,
+        "sumNetPct": 3.881,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5991,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9043,
+        "25_JAN_MAR": 1.4887,
+        "25_APR_JUL": 1.3628,
+        "25_AUG_DEC": 1.2813,
+        "26_JAN_MAR": 1.1768,
+        "26_APR_AUG": 0.9701
+      },
+      "meanAnnual30SumPct": 38.116
+    },
+    {
+      "expert": "B",
+      "feature": "last15",
+      "threshold": -0.65285,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.219,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.2772,
+          "sumNetPct": 15.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3488,
+          "sumNetPct": 17.873,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.2716,
+          "sumNetPct": 8.286,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.3538,
+        "sumNetPct": 4.881,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.648,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9583,
+        "25_JAN_MAR": 1.4515,
+        "25_APR_JUL": 1.2192,
+        "25_AUG_DEC": 1.3538,
+        "26_JAN_MAR": 1.4982,
+        "26_APR_AUG": 0.9701
+      },
+      "meanAnnual30SumPct": 41.722
+    },
+    {
+      "expert": "B",
+      "feature": "last30",
+      "threshold": -0.59524,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.211,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 50,
+          "wr": 70.423,
+          "pf": 1.0863,
+          "sumNetPct": 5.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3476,
+          "sumNetPct": 19.373,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 28,
+          "wr": 70.0,
+          "pf": 1.0662,
+          "sumNetPct": 2.056,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.3176,
+        "sumNetPct": 4.381,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5991,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.7502,
+        "25_JAN_MAR": 1.4887,
+        "25_APR_JUL": 1.2113,
+        "25_AUG_DEC": 1.3176,
+        "26_JAN_MAR": 1.1363,
+        "26_APR_AUG": 0.9701
+      },
+      "meanAnnual30SumPct": 26.992
+    },
+    {
+      "expert": "A",
+      "feature": "ret6",
+      "threshold": 2.13823,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.19,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.2211,
+          "sumNetPct": 17.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.4661,
+          "sumNetPct": 35.502,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.018,
+          "sumNetPct": 25.594,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1897,
+        "sumNetPct": 5.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.2194,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0646,
+        "25_JAN_MAR": 1.8979,
+        "25_APR_JUL": 1.4142,
+        "25_AUG_DEC": 1.1897,
+        "26_JAN_MAR": 2.1211,
+        "26_APR_AUG": 1.8249
+      },
+      "meanAnnual30SumPct": 78.582
+    },
+    {
+      "expert": "A",
+      "feature": "ret6",
+      "threshold": 2.62373,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.19,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 48,
+          "wr": 69.565,
+          "pf": 1.3227,
+          "sumNetPct": 24.3,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.4464,
+          "sumNetPct": 34.002,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.6844,
+          "sumNetPct": 18.521,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1897,
+        "sumNetPct": 5.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.4317,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0835,
+        "25_JAN_MAR": 1.8291,
+        "25_APR_JUL": 1.4142,
+        "25_AUG_DEC": 1.1897,
+        "26_JAN_MAR": 1.8629,
+        "26_APR_AUG": 1.3112
+      },
+      "meanAnnual30SumPct": 76.823
+    },
+    {
+      "expert": "B",
+      "feature": "hourWick",
+      "threshold": 1.01985,
+      "direction": "LE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.188,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.1581,
+          "sumNetPct": 10.063,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3438,
+          "sumNetPct": 20.113,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.4857,
+          "sumNetPct": 13.403,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.1884,
+        "sumNetPct": 2.881,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.4898,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.8204,
+        "25_JAN_MAR": 1.4887,
+        "25_APR_JUL": 1.3048,
+        "25_AUG_DEC": 1.1884,
+        "26_JAN_MAR": 1.6722,
+        "26_APR_AUG": 1.1953
+      },
+      "meanAnnual30SumPct": 43.579
+    },
+    {
+      "expert": "A",
+      "feature": "fundingBps",
+      "threshold": 0.2429,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.174,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 50,
+          "wr": 71.429,
+          "pf": 1.2377,
+          "sumNetPct": 15.363,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 42,
+          "wr": 66.667,
+          "pf": 1.4661,
+          "sumNetPct": 35.263,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.489,
+          "sumNetPct": 13.882,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.2321,
+        "sumNetPct": 6.823,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.301,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0209,
+        "25_JAN_MAR": 2.1315,
+        "25_APR_JUL": 1.1739,
+        "25_AUG_DEC": 1.2321,
+        "26_JAN_MAR": 1.9467,
+        "26_APR_AUG": 0.8172
+      },
+      "meanAnnual30SumPct": 64.508
+    },
+    {
+      "expert": "A",
+      "feature": "rel6",
+      "threshold": -0.35944,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.17,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.0565,
+          "sumNetPct": 4.986,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.3314,
+          "sumNetPct": 27.002,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.8783,
+          "sumNetPct": 23.218,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1698,
+        "sumNetPct": 5.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 0.8945,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0625,
+        "25_JAN_MAR": 1.5394,
+        "25_APR_JUL": 1.3079,
+        "25_AUG_DEC": 1.1698,
+        "26_JAN_MAR": 1.792,
+        "26_APR_AUG": 2.1571
+      },
+      "meanAnnual30SumPct": 55.206
+    },
+    {
+      "expert": "A",
+      "feature": "hourWick",
+      "threshold": 1.15585,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.158,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 48,
+          "wr": 69.565,
+          "pf": 1.3879,
+          "sumNetPct": 29.986,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 40,
+          "wr": 64.516,
+          "pf": 1.5303,
+          "sumNetPct": 39.602,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.2488,
+          "sumNetPct": 25.323,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1584,
+        "sumNetPct": 4.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.4639,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1766,
+        "25_JAN_MAR": 2.0878,
+        "25_APR_JUL": 1.484,
+        "25_AUG_DEC": 1.1584,
+        "26_JAN_MAR": 2.1875,
+        "26_APR_AUG": 2.4478
+      },
+      "meanAnnual30SumPct": 94.911
+    },
+    {
+      "expert": "B",
+      "feature": "hourWick",
+      "threshold": 0.90709,
+      "direction": "LE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.156,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.2131,
+          "sumNetPct": 13.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 44,
+          "wr": 68.75,
+          "pf": 1.4866,
+          "sumNetPct": 28.252,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.4857,
+          "sumNetPct": 13.403,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.1557,
+        "sumNetPct": 2.381,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.4898,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9043,
+        "25_JAN_MAR": 2.0758,
+        "25_APR_JUL": 1.1991,
+        "25_AUG_DEC": 1.1557,
+        "26_JAN_MAR": 1.6722,
+        "26_APR_AUG": 1.1953
+      },
+      "meanAnnual30SumPct": 55.218
+    },
+    {
+      "expert": "A",
+      "feature": "priorRebound",
+      "threshold": 3.26087,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.154,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.2739,
+          "sumNetPct": 22.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 39,
+          "wr": 62.903,
+          "pf": 1.3511,
+          "sumNetPct": 28.602,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.6081,
+          "sumNetPct": 18.605,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1698,
+        "sumNetPct": 5.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.264,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1297,
+        "25_JAN_MAR": 1.7397,
+        "25_APR_JUL": 1.1538,
+        "25_AUG_DEC": 1.1698,
+        "26_JAN_MAR": 1.4606,
+        "26_APR_AUG": 2.0252
+      },
+      "meanAnnual30SumPct": 69.693
+    },
+    {
+      "expert": "A",
+      "feature": "rel6",
+      "threshold": 0.43941,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.154,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.0828,
+          "sumNetPct": 6.986,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.3499,
+          "sumNetPct": 27.002,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.2686,
+          "sumNetPct": 27.812,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1698,
+        "sumNetPct": 5.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 0.9724,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0288,
+        "25_JAN_MAR": 1.8105,
+        "25_APR_JUL": 1.1538,
+        "25_AUG_DEC": 1.1698,
+        "26_JAN_MAR": 2.2127,
+        "26_APR_AUG": 2.4337
+      },
+      "meanAnnual30SumPct": 61.8
+    },
+    {
+      "expert": "A",
+      "feature": "priorRebound",
+      "threshold": 2.99507,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.151,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.214,
+          "sumNetPct": 18.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 39,
+          "wr": 62.903,
+          "pf": 1.4526,
+          "sumNetPct": 37.102,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.1126,
+          "sumNetPct": 27.677,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1505,
+        "sumNetPct": 4.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.155,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1172,
+        "25_JAN_MAR": 1.9088,
+        "25_APR_JUL": 1.3341,
+        "25_AUG_DEC": 1.1505,
+        "26_JAN_MAR": 2.0356,
+        "26_APR_AUG": 2.2754
+      },
+      "meanAnnual30SumPct": 83.265
+    },
+    {
+      "expert": "A",
+      "feature": "ret6",
+      "threshold": 3.2601,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.139,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 49,
+          "wr": 70.0,
+          "pf": 1.2567,
+          "sumNetPct": 18.651,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.361,
+          "sumNetPct": 27.502,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.7411,
+          "sumNetPct": 19.489,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1387,
+        "sumNetPct": 4.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1946,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1415,
+        "25_JAN_MAR": 1.8291,
+        "25_APR_JUL": 1.2139,
+        "25_AUG_DEC": 1.1387,
+        "26_JAN_MAR": 1.8629,
+        "26_APR_AUG": 1.4621
+      },
+      "meanAnnual30SumPct": 65.642
+    },
+    {
+      "expert": "A",
+      "feature": "rel6",
+      "threshold": 1.49653,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.139,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.2086,
+          "sumNetPct": 15.951,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.3456,
+          "sumNetPct": 26.502,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.8322,
+          "sumNetPct": 22.521,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1387,
+        "sumNetPct": 4.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1514,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0951,
+        "25_JAN_MAR": 1.7433,
+        "25_APR_JUL": 1.2339,
+        "25_AUG_DEC": 1.1387,
+        "26_JAN_MAR": 1.8356,
+        "26_APR_AUG": 1.8249
+      },
+      "meanAnnual30SumPct": 64.974
+    },
+    {
+      "expert": "A",
+      "feature": "fundingBps",
+      "threshold": 0.0028,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.134,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 51,
+          "wr": 72.857,
+          "pf": 1.3183,
+          "sumNetPct": 19.363,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.4851,
+          "sumNetPct": 36.463,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.3119,
+          "sumNetPct": 9.882,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.2534,
+        "sumNetPct": 7.323,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5354,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0209,
+        "25_JAN_MAR": 2.2113,
+        "25_APR_JUL": 1.1338,
+        "25_AUG_DEC": 1.2534,
+        "26_JAN_MAR": 1.5938,
+        "26_APR_AUG": 0.8172
+      },
+      "meanAnnual30SumPct": 65.708
+    },
+    {
+      "expert": "A",
+      "feature": "rel6",
+      "threshold": 0.86442,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.134,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.1192,
+          "sumNetPct": 9.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.3326,
+          "sumNetPct": 25.502,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.7626,
+          "sumNetPct": 21.021,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1897,
+        "sumNetPct": 5.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0111,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0524,
+        "25_JAN_MAR": 1.7433,
+        "25_APR_JUL": 1.1338,
+        "25_AUG_DEC": 1.1897,
+        "26_JAN_MAR": 1.8666,
+        "26_APR_AUG": 1.5395
+      },
+      "meanAnnual30SumPct": 56.009
+    },
+    {
+      "expert": "A",
+      "feature": "hourWick",
+      "threshold": 1.07667,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.2633,
+          "sumNetPct": 21.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 40,
+          "wr": 64.516,
+          "pf": 1.533,
+          "sumNetPct": 40.602,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.2488,
+          "sumNetPct": 25.323,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1196,
+        "sumNetPct": 3.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.2373,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1312,
+        "25_JAN_MAR": 2.1316,
+        "25_APR_JUL": 1.5045,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 2.1875,
+        "26_APR_AUG": 2.4478
+      },
+      "meanAnnual30SumPct": 87.411
+    },
+    {
+      "expert": "A",
+      "feature": "renderRV7",
+      "threshold": 4.95998,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.0547,
+          "sumNetPct": 4.986,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 40,
+          "wr": 64.516,
+          "pf": 1.4335,
+          "sumNetPct": 35.316,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.238,
+          "sumNetPct": 30.177,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1196,
+        "sumNetPct": 3.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 0.9649,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9953,
+        "25_JAN_MAR": 2.0115,
+        "25_APR_JUL": 1.2097,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 2.1244,
+        "26_APR_AUG": 2.494
+      },
+      "meanAnnual30SumPct": 70.479
+    },
+    {
+      "expert": "A",
+      "feature": "renderRV7",
+      "threshold": 7.93931,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.339,
+          "sumNetPct": 25.163,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.377,
+          "sumNetPct": 28.716,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.4489,
+          "sumNetPct": 11.976,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1196,
+        "sumNetPct": 3.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.3708,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1439,
+        "25_JAN_MAR": 1.8624,
+        "25_APR_JUL": 1.2592,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 1.6842,
+        "26_APR_AUG": 1.1027
+      },
+      "meanAnnual30SumPct": 65.855
+    },
+    {
+      "expert": "A",
+      "feature": "renderRV7",
+      "threshold": 6.23956,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1156,
+          "sumNetPct": 9.986,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 42,
+          "wr": 66.667,
+          "pf": 1.4307,
+          "sumNetPct": 33.016,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.8282,
+          "sumNetPct": 22.092,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1196,
+        "sumNetPct": 3.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1201,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9624,
+        "25_JAN_MAR": 2.1743,
+        "25_APR_JUL": 1.1538,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 2.0378,
+        "26_APR_AUG": 1.5196
+      },
+      "meanAnnual30SumPct": 65.094
+    },
+    {
+      "expert": "A",
+      "feature": "renderRV7",
+      "threshold": 7.29808,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.2289,
+          "sumNetPct": 18.698,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.4333,
+          "sumNetPct": 33.216,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.4677,
+          "sumNetPct": 12.476,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1196,
+        "sumNetPct": 3.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1464,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1449,
+        "25_JAN_MAR": 2.0917,
+        "25_APR_JUL": 1.2339,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 1.7157,
+        "26_APR_AUG": 1.1027
+      },
+      "meanAnnual30SumPct": 64.39
+    },
+    {
+      "expert": "A",
+      "feature": "renderRV7",
+      "threshold": 6.49892,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1619,
+          "sumNetPct": 13.986,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3746,
+          "sumNetPct": 28.716,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.8051,
+          "sumNetPct": 21.476,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1196,
+        "sumNetPct": 3.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1201,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0501,
+        "25_JAN_MAR": 1.9771,
+        "25_APR_JUL": 1.1538,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 1.999,
+        "26_APR_AUG": 1.5196
+      },
+      "meanAnnual30SumPct": 64.178
+    },
+    {
+      "expert": "A",
+      "feature": "renderRV7",
+      "threshold": 5.58774,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.0719,
+          "sumNetPct": 6.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 41,
+          "wr": 65.079,
+          "pf": 1.3954,
+          "sumNetPct": 32.016,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.6757,
+          "sumNetPct": 20.592,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1196,
+        "sumNetPct": 3.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0314,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9624,
+        "25_JAN_MAR": 1.8659,
+        "25_APR_JUL": 1.2339,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 1.7613,
+        "26_APR_AUG": 1.5196
+      },
+      "meanAnnual30SumPct": 59.094
+    },
+    {
+      "expert": "B",
+      "feature": "seller3",
+      "threshold": 0.0108,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE15_FLOOR05_H18",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.2553,
+          "sumNetPct": 15.607,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 45,
+          "wr": 70.312,
+          "pf": 1.4137,
+          "sumNetPct": 25.831,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.7352,
+          "sumNetPct": 19.786,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.1196,
+        "sumNetPct": 2.69,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.9491,
+        "24_RNDR_JUN_JUL": 1.2424,
+        "24_RENDER_JUL_DEC": 0.9516,
+        "25_JAN_MAR": 1.9754,
+        "25_APR_JUL": 1.17,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 1.7244,
+        "26_APR_AUG": 1.7513
+      },
+      "meanAnnual30SumPct": 61.224
+    },
+    {
+      "expert": "B",
+      "feature": "rangePos24",
+      "threshold": 0.26609,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE15_FLOOR05_H18",
+      "accepted": true,
+      "weak2025PF": 1.12,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.2532,
+          "sumNetPct": 15.607,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 44,
+          "wr": 68.75,
+          "pf": 1.3597,
+          "sumNetPct": 23.83,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 31,
+          "wr": 75.61,
+          "pf": 1.4629,
+          "sumNetPct": 13.986,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.1196,
+        "sumNetPct": 2.69,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.7508,
+        "24_RNDR_JUN_JUL": 2.4545,
+        "24_RENDER_JUL_DEC": 0.9399,
+        "25_JAN_MAR": 1.8276,
+        "25_APR_JUL": 1.185,
+        "25_AUG_DEC": 1.1196,
+        "26_JAN_MAR": 1.3542,
+        "26_APR_AUG": 1.6586
+      },
+      "meanAnnual30SumPct": 53.423
+    },
+    {
+      "expert": "A",
+      "feature": "ret3",
+      "threshold": 1.95705,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.114,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.3457,
+          "sumNetPct": 25.663,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.2796,
+          "sumNetPct": 22.502,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.9236,
+          "sumNetPct": 25.561,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1897,
+        "sumNetPct": 5.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.2344,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.2711,
+        "25_JAN_MAR": 1.5394,
+        "25_APR_JUL": 1.1138,
+        "25_AUG_DEC": 1.1897,
+        "26_JAN_MAR": 1.6538,
+        "26_APR_AUG": 2.5882
+      },
+      "meanAnnual30SumPct": 73.726
+    },
+    {
+      "expert": "A",
+      "feature": "ret3",
+      "threshold": 1.75667,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.114,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.265,
+          "sumNetPct": 21.512,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.2983,
+          "sumNetPct": 24.002,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.1102,
+          "sumNetPct": 27.061,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1897,
+        "sumNetPct": 5.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0956,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.2677,
+        "25_JAN_MAR": 1.5968,
+        "25_APR_JUL": 1.1138,
+        "25_AUG_DEC": 1.1897,
+        "26_JAN_MAR": 2.0296,
+        "26_APR_AUG": 2.2754
+      },
+      "meanAnnual30SumPct": 72.575
+    },
+    {
+      "expert": "A",
+      "feature": "btc24",
+      "threshold": 4.46439,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.109,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1856,
+          "sumNetPct": 15.439,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 39,
+          "wr": 62.903,
+          "pf": 1.465,
+          "sumNetPct": 38.348,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.3062,
+          "sumNetPct": 30.218,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1093,
+        "sumNetPct": 3.323,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0694,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1387,
+        "25_JAN_MAR": 2.0027,
+        "25_APR_JUL": 1.3275,
+        "25_AUG_DEC": 1.1093,
+        "26_JAN_MAR": 2.0948,
+        "26_APR_AUG": 2.8769
+      },
+      "meanAnnual30SumPct": 84.005
+    },
+    {
+      "expert": "A",
+      "feature": "ret3",
+      "threshold": 1.3691,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.105,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.2627,
+          "sumNetPct": 22.3,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 40,
+          "wr": 63.492,
+          "pf": 1.2754,
+          "sumNetPct": 22.302,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.108,
+          "sumNetPct": 27.561,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1046,
+        "sumNetPct": 3.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.2059,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.161,
+        "25_JAN_MAR": 1.5969,
+        "25_APR_JUL": 1.1338,
+        "25_AUG_DEC": 1.1046,
+        "26_JAN_MAR": 2.0287,
+        "26_APR_AUG": 2.2754
+      },
+      "meanAnnual30SumPct": 72.163
+    },
+    {
+      "expert": "A",
+      "feature": "ret3",
+      "threshold": 1.13353,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.105,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.1501,
+          "sumNetPct": 13.541,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 40,
+          "wr": 63.492,
+          "pf": 1.3372,
+          "sumNetPct": 27.302,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.1126,
+          "sumNetPct": 27.677,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1046,
+        "sumNetPct": 3.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0643,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0852,
+        "25_JAN_MAR": 1.5969,
+        "25_APR_JUL": 1.3341,
+        "25_AUG_DEC": 1.1046,
+        "26_JAN_MAR": 2.0356,
+        "26_APR_AUG": 2.2754
+      },
+      "meanAnnual30SumPct": 68.52
+    },
+    {
+      "expert": "A",
+      "feature": "fundingBps",
+      "threshold": 0.0028,
+      "direction": "LE",
+      "alternative": "TAKE40_STOP30_H24",
+      "accepted": true,
+      "weak2025PF": 1.105,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 51,
+          "wr": 72.857,
+          "pf": 1.4784,
+          "sumNetPct": 28.863,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.3804,
+          "sumNetPct": 29.659,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.5374,
+          "sumNetPct": 18.265,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1045,
+        "sumNetPct": 3.019,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.672,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1905,
+        "25_JAN_MAR": 1.8049,
+        "25_APR_JUL": 1.2796,
+        "25_AUG_DEC": 1.1045,
+        "26_JAN_MAR": 1.7725,
+        "26_APR_AUG": 1.078
+      },
+      "meanAnnual30SumPct": 76.787
+    },
+    {
+      "expert": "A",
+      "feature": "fundingBps",
+      "threshold": 0.2429,
+      "direction": "LE",
+      "alternative": "TAKE40_STOP30_H24",
+      "accepted": true,
+      "weak2025PF": 1.105,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 50,
+          "wr": 71.429,
+          "pf": 1.3986,
+          "sumNetPct": 25.363,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.3711,
+          "sumNetPct": 30.159,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.5374,
+          "sumNetPct": 18.265,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1045,
+        "sumNetPct": 3.019,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.4456,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1905,
+        "25_JAN_MAR": 1.8252,
+        "25_APR_JUL": 1.2464,
+        "25_AUG_DEC": 1.1045,
+        "26_JAN_MAR": 1.7725,
+        "26_APR_AUG": 1.078
+      },
+      "meanAnnual30SumPct": 73.787
+    },
+    {
+      "expert": "B",
+      "feature": "btc6",
+      "threshold": -0.1028,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.103,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 49,
+          "wr": 70.0,
+          "pf": 1.1549,
+          "sumNetPct": 9.363,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.2867,
+          "sumNetPct": 17.533,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 28,
+          "wr": 70.0,
+          "pf": 1.1937,
+          "sumNetPct": 6.237,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1032,
+        "sumNetPct": 1.662,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.3531,
+        "24_RNDR_JUN_JUL": 1.3478,
+        "24_RENDER_JUL_DEC": 1.0224,
+        "25_JAN_MAR": 1.3303,
+        "25_APR_JUL": 1.3733,
+        "25_AUG_DEC": 1.1032,
+        "26_JAN_MAR": 1.3034,
+        "26_APR_AUG": 1.0337
+      },
+      "meanAnnual30SumPct": 33.133
+    },
+    {
+      "expert": "A",
+      "feature": "btc7",
+      "threshold": -0.73598,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.101,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 48,
+          "wr": 69.565,
+          "pf": 1.346,
+          "sumNetPct": 23.849,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 42,
+          "wr": 66.667,
+          "pf": 1.4251,
+          "sumNetPct": 33.016,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.867,
+          "sumNetPct": 22.414,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1012,
+        "sumNetPct": 3.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5093,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0507,
+        "25_JAN_MAR": 2.1704,
+        "25_APR_JUL": 1.1538,
+        "25_AUG_DEC": 1.1012,
+        "26_JAN_MAR": 2.451,
+        "26_APR_AUG": 1.2686
+      },
+      "meanAnnual30SumPct": 79.279
+    },
+    {
+      "expert": "A",
+      "feature": "ret24",
+      "threshold": -5.86181,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.1,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.0962,
+          "sumNetPct": 8.727,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 39,
+          "wr": 61.905,
+          "pf": 1.3221,
+          "sumNetPct": 27.001,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 2.0622,
+          "sumNetPct": 27.145,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.1,
+        "sumNetPct": 3.275,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0089,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0335,
+        "25_JAN_MAR": 1.57,
+        "25_APR_JUL": 1.3541,
+        "25_AUG_DEC": 1.1,
+        "26_JAN_MAR": 1.7983,
+        "26_APR_AUG": 2.8769
+      },
+      "meanAnnual30SumPct": 62.873
+    },
+    {
+      "expert": "B",
+      "feature": "rangePos24",
+      "threshold": 0.2912,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE15_FLOOR05_H18",
+      "accepted": true,
+      "weak2025PF": 1.095,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.3012,
+          "sumNetPct": 18.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 44,
+          "wr": 68.75,
+          "pf": 1.3495,
+          "sumNetPct": 23.33,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 31,
+          "wr": 75.61,
+          "pf": 1.4554,
+          "sumNetPct": 13.986,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0953,
+        "sumNetPct": 2.19,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.7791,
+        "24_RNDR_JUN_JUL": 2.4545,
+        "24_RENDER_JUL_DEC": 1.0003,
+        "25_JAN_MAR": 1.8276,
+        "25_APR_JUL": 1.185,
+        "25_AUG_DEC": 1.0953,
+        "26_JAN_MAR": 1.3453,
+        "26_APR_AUG": 1.6586
+      },
+      "meanAnnual30SumPct": 55.879
+    },
+    {
+      "expert": "B",
+      "feature": "ret1",
+      "threshold": -0.2527,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE15_FLOOR05_H18",
+      "accepted": true,
+      "weak2025PF": 1.095,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 51,
+          "wr": 72.857,
+          "pf": 1.2425,
+          "sumNetPct": 13.907,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 45,
+          "wr": 70.312,
+          "pf": 1.2535,
+          "sumNetPct": 15.831,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 30,
+          "wr": 73.171,
+          "pf": 1.3353,
+          "sumNetPct": 10.696,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0953,
+        "sumNetPct": 2.19,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.6658,
+        "24_RNDR_JUN_JUL": 1.0909,
+        "24_RENDER_JUL_DEC": 1.051,
+        "25_JAN_MAR": 1.5813,
+        "25_APR_JUL": 1.0961,
+        "25_AUG_DEC": 1.0953,
+        "26_JAN_MAR": 1.213,
+        "26_APR_AUG": 1.5746
+      },
+      "meanAnnual30SumPct": 40.434
+    },
+    {
+      "expert": "A",
+      "feature": "btc7",
+      "threshold": 0.74925,
+      "direction": "LE",
+      "alternative": "TAKE40_STOP30_H24",
+      "accepted": true,
+      "weak2025PF": 1.089,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.4145,
+          "sumNetPct": 31.849,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 40,
+          "wr": 62.5,
+          "pf": 1.2745,
+          "sumNetPct": 23.216,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 28,
+          "wr": 70.0,
+          "pf": 1.3826,
+          "sumNetPct": 13.298,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0891,
+        "sumNetPct": 2.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.2224,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.4298,
+        "25_JAN_MAR": 1.6201,
+        "25_APR_JUL": 1.1203,
+        "25_AUG_DEC": 1.0891,
+        "26_JAN_MAR": 1.4611,
+        "26_APR_AUG": 1.2388
+      },
+      "meanAnnual30SumPct": 68.363
+    },
+    {
+      "expert": "B",
+      "feature": "last30",
+      "threshold": -0.31771,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.089,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.1861,
+          "sumNetPct": 11.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3766,
+          "sumNetPct": 23.081,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.1408,
+          "sumNetPct": 4.172,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0888,
+        "sumNetPct": 1.442,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5991,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9043,
+        "25_JAN_MAR": 1.6244,
+        "25_APR_JUL": 1.3414,
+        "25_AUG_DEC": 1.0888,
+        "26_JAN_MAR": 1.0831,
+        "26_APR_AUG": 1.2417
+      },
+      "meanAnnual30SumPct": 38.816
+    },
+    {
+      "expert": "A",
+      "feature": "hourWick",
+      "threshold": 0.85,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.086,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1982,
+          "sumNetPct": 17.227,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 39,
+          "wr": 62.903,
+          "pf": 1.4582,
+          "sumNetPct": 37.102,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.1348,
+          "sumNetPct": 27.323,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0862,
+        "sumNetPct": 2.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.177,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0671,
+        "25_JAN_MAR": 2.0418,
+        "25_APR_JUL": 1.3079,
+        "25_AUG_DEC": 1.0862,
+        "26_JAN_MAR": 1.8242,
+        "26_APR_AUG": 3.3904
+      },
+      "meanAnnual30SumPct": 81.652
+    },
+    {
+      "expert": "B",
+      "feature": "seller1",
+      "threshold": 0.1255,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.084,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 49,
+          "wr": 70.0,
+          "pf": 1.2658,
+          "sumNetPct": 16.863,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.2933,
+          "sumNetPct": 19.414,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.348,
+          "sumNetPct": 10.403,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0842,
+        "sumNetPct": 1.683,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5126,
+        "24_RNDR_JUN_JUL": 2.8696,
+        "24_RENDER_JUL_DEC": 1.0335,
+        "25_JAN_MAR": 1.3729,
+        "25_APR_JUL": 1.3952,
+        "25_AUG_DEC": 1.0842,
+        "26_JAN_MAR": 1.6722,
+        "26_APR_AUG": 0.9319
+      },
+      "meanAnnual30SumPct": 46.68
+    },
+    {
+      "expert": "A",
+      "feature": "btc24",
+      "threshold": -2.21355,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.083,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 46,
+          "wr": 65.714,
+          "pf": 1.076,
+          "sumNetPct": 6.927,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 39,
+          "wr": 61.905,
+          "pf": 1.3143,
+          "sumNetPct": 26.501,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 2.0107,
+          "sumNetPct": 26.718,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0835,
+        "sumNetPct": 2.775,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 0.9693,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0335,
+        "25_JAN_MAR": 1.57,
+        "25_APR_JUL": 1.3541,
+        "25_AUG_DEC": 1.0835,
+        "26_JAN_MAR": 1.7424,
+        "26_APR_AUG": 2.8769
+      },
+      "meanAnnual30SumPct": 60.146
+    },
+    {
+      "expert": "A",
+      "feature": "ret6",
+      "threshold": 1.40845,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.078,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.1809,
+          "sumNetPct": 14.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.3704,
+          "sumNetPct": 29.454,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.6338,
+          "sumNetPct": 30.428,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0784,
+        "sumNetPct": 2.529,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1639,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0405,
+        "25_JAN_MAR": 1.7433,
+        "25_APR_JUL": 1.4142,
+        "25_AUG_DEC": 1.0784,
+        "26_JAN_MAR": 2.7186,
+        "26_APR_AUG": 2.4337
+      },
+      "meanAnnual30SumPct": 74.368
+    },
+    {
+      "expert": "A",
+      "feature": "ret24",
+      "threshold": -2.746,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.078,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.1403,
+          "sumNetPct": 12.727,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 39,
+          "wr": 61.905,
+          "pf": 1.3271,
+          "sumNetPct": 27.254,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 2.0834,
+          "sumNetPct": 27.145,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0784,
+        "sumNetPct": 2.529,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0976,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0335,
+        "25_JAN_MAR": 1.5126,
+        "25_APR_JUL": 1.4543,
+        "25_AUG_DEC": 1.0784,
+        "26_JAN_MAR": 1.8196,
+        "26_APR_AUG": 2.8769
+      },
+      "meanAnnual30SumPct": 67.126
+    },
+    {
+      "expert": "A",
+      "feature": "rangePos24",
+      "threshold": 0.28929,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.078,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.0852,
+          "sumNetPct": 7.727,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 38,
+          "wr": 61.29,
+          "pf": 1.3547,
+          "sumNetPct": 29.554,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.2846,
+          "sumNetPct": 29.718,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0784,
+        "sumNetPct": 2.529,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 0.9867,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0335,
+        "25_JAN_MAR": 1.7155,
+        "25_APR_JUL": 1.3341,
+        "25_AUG_DEC": 1.0784,
+        "26_JAN_MAR": 2.0652,
+        "26_APR_AUG": 2.8769
+      },
+      "meanAnnual30SumPct": 66.999
+    },
+    {
+      "expert": "A",
+      "feature": "ret6",
+      "threshold": 0.99164,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.078,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1028,
+          "sumNetPct": 8.727,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.3389,
+          "sumNetPct": 26.954,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.537,
+          "sumNetPct": 29.718,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0784,
+        "sumNetPct": 2.529,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0226,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0228,
+        "25_JAN_MAR": 1.7433,
+        "25_APR_JUL": 1.3141,
+        "25_AUG_DEC": 1.0784,
+        "26_JAN_MAR": 2.7186,
+        "26_APR_AUG": 2.1571
+      },
+      "meanAnnual30SumPct": 65.399
+    },
+    {
+      "expert": "B",
+      "feature": "btc1",
+      "threshold": -0.13859,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE15_FLOOR05_H18",
+      "accepted": true,
+      "weak2025PF": 1.072,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.3019,
+          "sumNetPct": 18.607,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 45,
+          "wr": 70.312,
+          "pf": 1.4387,
+          "sumNetPct": 27.831,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 31,
+          "wr": 75.61,
+          "pf": 1.4298,
+          "sumNetPct": 12.986,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.072,
+        "sumNetPct": 1.69,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 2.0057,
+        "24_RNDR_JUN_JUL": 2.4545,
+        "24_RENDER_JUL_DEC": 0.9031,
+        "25_JAN_MAR": 2.0985,
+        "25_APR_JUL": 1.1954,
+        "25_AUG_DEC": 1.072,
+        "26_JAN_MAR": 1.2769,
+        "26_APR_AUG": 1.705
+      },
+      "meanAnnual30SumPct": 59.424
+    },
+    {
+      "expert": "A",
+      "feature": "btc7",
+      "threshold": 5.34675,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.068,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.2545,
+          "sumNetPct": 19.698,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 40,
+          "wr": 64.516,
+          "pf": 1.5034,
+          "sumNetPct": 39.602,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.2197,
+          "sumNetPct": 28.218,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0683,
+        "sumNetPct": 2.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.227,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1114,
+        "25_JAN_MAR": 2.4108,
+        "25_APR_JUL": 1.2097,
+        "25_AUG_DEC": 1.0683,
+        "26_JAN_MAR": 1.9467,
+        "26_APR_AUG": 2.9569
+      },
+      "meanAnnual30SumPct": 87.518
+    },
+    {
+      "expert": "A",
+      "feature": "btc7",
+      "threshold": 0.74925,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.068,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.2935,
+          "sumNetPct": 21.349,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 42,
+          "wr": 66.667,
+          "pf": 1.4316,
+          "sumNetPct": 33.516,
+          "byExpert": {
+            "A": 34,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.621,
+          "sumNetPct": 18.414,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0683,
+        "sumNetPct": 2.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.2714,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1396,
+        "25_JAN_MAR": 2.2377,
+        "25_APR_JUL": 1.1538,
+        "25_AUG_DEC": 1.0683,
+        "26_JAN_MAR": 1.8875,
+        "26_APR_AUG": 1.2686
+      },
+      "meanAnnual30SumPct": 73.279
+    },
+    {
+      "expert": "A",
+      "feature": "btc7",
+      "threshold": 3.46932,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.068,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.1793,
+          "sumNetPct": 13.698,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 41,
+          "wr": 66.129,
+          "pf": 1.4774,
+          "sumNetPct": 37.316,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.8372,
+          "sumNetPct": 22.132,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0683,
+        "sumNetPct": 2.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1222,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0619,
+        "25_JAN_MAR": 2.4081,
+        "25_APR_JUL": 1.1508,
+        "25_AUG_DEC": 1.0683,
+        "26_JAN_MAR": 1.9171,
+        "26_APR_AUG": 1.696
+      },
+      "meanAnnual30SumPct": 73.146
+    },
+    {
+      "expert": "B",
+      "feature": "last30",
+      "threshold": -0.16967,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.067,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.1861,
+          "sumNetPct": 11.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 44,
+          "wr": 68.75,
+          "pf": 1.4442,
+          "sumNetPct": 28.475,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.1071,
+          "sumNetPct": 3.172,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0673,
+        "sumNetPct": 1.336,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5991,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9043,
+        "25_JAN_MAR": 1.9061,
+        "25_APR_JUL": 1.3414,
+        "25_AUG_DEC": 1.0673,
+        "26_JAN_MAR": 1.0565,
+        "26_APR_AUG": 1.1953
+      },
+      "meanAnnual30SumPct": 43.21
+    },
+    {
+      "expert": "B",
+      "feature": "sellerAcceleration",
+      "threshold": 0.10361,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.067,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 49,
+          "wr": 70.0,
+          "pf": 1.2028,
+          "sumNetPct": 12.863,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.1827,
+          "sumNetPct": 12.068,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.4797,
+          "sumNetPct": 13.237,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0673,
+        "sumNetPct": 1.336,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5126,
+        "24_RNDR_JUN_JUL": 2.6522,
+        "24_RENDER_JUL_DEC": 0.9442,
+        "25_JAN_MAR": 1.2458,
+        "25_APR_JUL": 1.2182,
+        "25_AUG_DEC": 1.0673,
+        "26_JAN_MAR": 1.6722,
+        "26_APR_AUG": 1.1799
+      },
+      "meanAnnual30SumPct": 38.168
+    },
+    {
+      "expert": "A",
+      "feature": "ret6",
+      "threshold": -0.04629,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.062,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 45,
+          "wr": 65.217,
+          "pf": 1.114,
+          "sumNetPct": 10.227,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 40,
+          "wr": 62.5,
+          "pf": 1.2663,
+          "sumNetPct": 22.454,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.1765,
+          "sumNetPct": 27.218,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0619,
+        "sumNetPct": 2.029,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0317,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0444,
+        "25_JAN_MAR": 1.482,
+        "25_APR_JUL": 1.3079,
+        "25_AUG_DEC": 1.0619,
+        "26_JAN_MAR": 2.1837,
+        "26_APR_AUG": 2.1571
+      },
+      "meanAnnual30SumPct": 59.899
+    },
+    {
+      "expert": "A",
+      "feature": "volumeRatio",
+      "threshold": 1.19866,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.061,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 48,
+          "wr": 68.571,
+          "pf": 1.1912,
+          "sumNetPct": 14.29,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 41,
+          "wr": 65.079,
+          "pf": 1.4911,
+          "sumNetPct": 39.763,
+          "byExpert": {
+            "A": 35,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.6699,
+          "sumNetPct": 16.509,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.061,
+        "sumNetPct": 1.823,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 0.9782,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.204,
+        "25_JAN_MAR": 2.2107,
+        "25_APR_JUL": 1.254,
+        "25_AUG_DEC": 1.061,
+        "26_JAN_MAR": 2.1816,
+        "26_APR_AUG": 1.136
+      },
+      "meanAnnual30SumPct": 70.562
+    },
+    {
+      "expert": "A",
+      "feature": "btc7",
+      "threshold": -0.73598,
+      "direction": "LE",
+      "alternative": "TAKE40_STOP30_H24",
+      "accepted": true,
+      "weak2025PF": 1.054,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.4819,
+          "sumNetPct": 33.849,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 40,
+          "wr": 62.5,
+          "pf": 1.2568,
+          "sumNetPct": 21.716,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.5341,
+          "sumNetPct": 16.798,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0545,
+        "sumNetPct": 1.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.4726,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.3126,
+        "25_JAN_MAR": 1.6022,
+        "25_APR_JUL": 1.1203,
+        "25_AUG_DEC": 1.0545,
+        "26_JAN_MAR": 1.7229,
+        "26_APR_AUG": 1.2388
+      },
+      "meanAnnual30SumPct": 72.363
+    },
+    {
+      "expert": "A",
+      "feature": "fundingBps",
+      "threshold": -0.2746,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.054,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 51,
+          "wr": 72.857,
+          "pf": 1.4535,
+          "sumNetPct": 27.363,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.3887,
+          "sumNetPct": 29.216,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.3908,
+          "sumNetPct": 12.382,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0545,
+        "sumNetPct": 1.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.6493,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1644,
+        "25_JAN_MAR": 2.1408,
+        "25_APR_JUL": 1.1338,
+        "25_AUG_DEC": 1.0545,
+        "26_JAN_MAR": 1.7176,
+        "26_APR_AUG": 0.8172
+      },
+      "meanAnnual30SumPct": 68.961
+    },
+    {
+      "expert": "B",
+      "feature": "seller3",
+      "threshold": 0.0108,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.048,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 49,
+          "wr": 69.014,
+          "pf": 1.1574,
+          "sumNetPct": 9.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 44,
+          "wr": 68.75,
+          "pf": 1.5096,
+          "sumNetPct": 28.382,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.3535,
+          "sumNetPct": 10.786,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.2633,
+        "sumNetPct": 4.622,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 2.0662,
+        "24_RNDR_JUN_JUL": 1.3478,
+        "24_RENDER_JUL_DEC": 0.7849,
+        "25_JAN_MAR": 2.2459,
+        "25_APR_JUL": 1.0484,
+        "25_AUG_DEC": 1.2633,
+        "26_JAN_MAR": 1.6417,
+        "26_APR_AUG": 0.9701
+      },
+      "meanAnnual30SumPct": 48.731
+    },
+    {
+      "expert": "B",
+      "feature": "seller1",
+      "threshold": 0.04645,
+      "direction": "GE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.041,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 49,
+          "wr": 69.014,
+          "pf": 1.0855,
+          "sumNetPct": 5.063,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.1951,
+          "sumNetPct": 10.154,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 29,
+          "wr": 70.732,
+          "pf": 1.2111,
+          "sumNetPct": 6.82,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1343,
+        "sumNetPct": 2.162,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.8559,
+        "24_RNDR_JUN_JUL": 1.5652,
+        "24_RENDER_JUL_DEC": 0.7397,
+        "25_JAN_MAR": 1.3822,
+        "25_APR_JUL": 1.0411,
+        "25_AUG_DEC": 1.1343,
+        "26_JAN_MAR": 1.3318,
+        "26_APR_AUG": 1.0337
+      },
+      "meanAnnual30SumPct": 22.037
+    },
+    {
+      "expert": "B",
+      "feature": "renderRV7",
+      "threshold": 6.97717,
+      "direction": "LE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.041,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 51,
+          "wr": 72.857,
+          "pf": 1.4511,
+          "sumNetPct": 25.863,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.1442,
+          "sumNetPct": 8.154,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.3813,
+          "sumNetPct": 10.389,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.1032,
+        "sumNetPct": 1.662,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5354,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1784,
+        "25_JAN_MAR": 1.2458,
+        "25_APR_JUL": 1.0411,
+        "25_AUG_DEC": 1.1032,
+        "26_JAN_MAR": 1.4831,
+        "26_APR_AUG": 1.2263
+      },
+      "meanAnnual30SumPct": 44.406
+    },
+    {
+      "expert": "A",
+      "feature": "priorRebound",
+      "threshold": 5.60023,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.037,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 49,
+          "wr": 71.014,
+          "pf": 1.4751,
+          "sumNetPct": 32.951,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 42,
+          "wr": 66.667,
+          "pf": 1.426,
+          "sumNetPct": 32.016,
+          "byExpert": {
+            "A": 35,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.0268,
+          "sumNetPct": 26.489,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0366,
+        "sumNetPct": 1.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.7639,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.1415,
+        "25_JAN_MAR": 2.0845,
+        "25_APR_JUL": 1.3205,
+        "25_AUG_DEC": 1.0366,
+        "26_JAN_MAR": 1.8356,
+        "26_APR_AUG": 2.494
+      },
+      "meanAnnual30SumPct": 91.456
+    },
+    {
+      "expert": "A",
+      "feature": "priorRebound",
+      "threshold": 4.76845,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.037,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 49,
+          "wr": 71.014,
+          "pf": 1.4463,
+          "sumNetPct": 30.951,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 41,
+          "wr": 65.079,
+          "pf": 1.3148,
+          "sumNetPct": 25.016,
+          "byExpert": {
+            "A": 35,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.0895,
+          "sumNetPct": 28.105,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0366,
+        "sumNetPct": 1.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.7639,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0951,
+        "25_JAN_MAR": 1.761,
+        "25_APR_JUL": 1.1939,
+        "25_AUG_DEC": 1.0366,
+        "26_JAN_MAR": 1.9239,
+        "26_APR_AUG": 2.494
+      },
+      "meanAnnual30SumPct": 84.072
+    },
+    {
+      "expert": "A",
+      "feature": "priorRebound",
+      "threshold": 4.28779,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.037,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 49,
+          "wr": 71.014,
+          "pf": 1.4369,
+          "sumNetPct": 30.951,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 39,
+          "wr": 62.903,
+          "pf": 1.3221,
+          "sumNetPct": 25.602,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.9737,
+          "sumNetPct": 25.605,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0366,
+        "sumNetPct": 1.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.7683,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0816,
+        "25_JAN_MAR": 1.7839,
+        "25_APR_JUL": 1.1939,
+        "25_AUG_DEC": 1.0366,
+        "26_JAN_MAR": 1.8146,
+        "26_APR_AUG": 2.338
+      },
+      "meanAnnual30SumPct": 82.158
+    },
+    {
+      "expert": "A",
+      "feature": "ret3",
+      "threshold": 3.07747,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.037,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 49,
+          "wr": 71.014,
+          "pf": 1.4824,
+          "sumNetPct": 31.663,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.2643,
+          "sumNetPct": 21.002,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.0268,
+          "sumNetPct": 26.489,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0366,
+        "sumNetPct": 1.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5924,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.2364,
+        "25_JAN_MAR": 1.6007,
+        "25_APR_JUL": 1.1939,
+        "25_AUG_DEC": 1.0366,
+        "26_JAN_MAR": 1.8356,
+        "26_APR_AUG": 2.494
+      },
+      "meanAnnual30SumPct": 79.154
+    },
+    {
+      "expert": "A",
+      "feature": "priorRebound",
+      "threshold": 3.72243,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.037,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 47,
+          "wr": 68.116,
+          "pf": 1.2412,
+          "sumNetPct": 19.8,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 39,
+          "wr": 62.903,
+          "pf": 1.3223,
+          "sumNetPct": 26.102,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 1.9369,
+          "sumNetPct": 25.105,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0366,
+        "sumNetPct": 1.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.264,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0695,
+        "25_JAN_MAR": 1.7397,
+        "25_APR_JUL": 1.2139,
+        "25_AUG_DEC": 1.0366,
+        "26_JAN_MAR": 1.7664,
+        "26_APR_AUG": 2.338
+      },
+      "meanAnnual30SumPct": 71.007
+    },
+    {
+      "expert": "A",
+      "feature": "ret3",
+      "threshold": 2.27038,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.037,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 48,
+          "wr": 69.565,
+          "pf": 1.4027,
+          "sumNetPct": 28.163,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.2485,
+          "sumNetPct": 20.002,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.6642,
+          "sumNetPct": 19.989,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.0366,
+        "sumNetPct": 1.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.401,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.2335,
+        "25_JAN_MAR": 1.5394,
+        "25_APR_JUL": 1.1939,
+        "25_AUG_DEC": 1.0366,
+        "26_JAN_MAR": 1.5336,
+        "26_APR_AUG": 2.0252
+      },
+      "meanAnnual30SumPct": 68.154
+    },
+    {
+      "expert": "B",
+      "feature": "btc7",
+      "threshold": -3.14769,
+      "direction": "LE",
+      "alternative": "TAKE15_STOP20_H6",
+      "accepted": true,
+      "weak2025PF": 1.037,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 50,
+          "wr": 71.429,
+          "pf": 1.375,
+          "sumNetPct": 22.363,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 44,
+          "wr": 68.75,
+          "pf": 1.3584,
+          "sumNetPct": 22.975,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 29,
+          "wr": 70.732,
+          "pf": 1.1646,
+          "sumNetPct": 5.32,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0392,
+        "sumNetPct": 0.836,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.7947,
+        "24_RNDR_JUN_JUL": 1.5652,
+        "24_RENDER_JUL_DEC": 1.1305,
+        "25_JAN_MAR": 2.0758,
+        "25_APR_JUL": 1.0366,
+        "25_AUG_DEC": 1.0392,
+        "26_JAN_MAR": 1.3058,
+        "26_APR_AUG": 0.9574
+      },
+      "meanAnnual30SumPct": 50.658
+    },
+    {
+      "expert": "A",
+      "feature": "hourWick",
+      "threshold": 0.97291,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.036,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1512,
+          "sumNetPct": 12.986,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 62,
+          "wins": 39,
+          "wr": 62.903,
+          "pf": 1.4113,
+          "sumNetPct": 33.102,
+          "byExpert": {
+            "A": 34,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 32,
+          "wr": 80.0,
+          "pf": 2.2488,
+          "sumNetPct": 25.323,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.036,
+        "sumNetPct": 1.076,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0574,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.0859,
+        "25_JAN_MAR": 1.9833,
+        "25_APR_JUL": 1.274,
+        "25_AUG_DEC": 1.036,
+        "26_JAN_MAR": 2.1875,
+        "26_APR_AUG": 2.4478
+      },
+      "meanAnnual30SumPct": 71.411
+    },
+    {
+      "expert": "B",
+      "feature": "rangePos1",
+      "threshold": 0.13333,
+      "direction": "GE",
+      "alternative": "TAKE20_STOP20_H12",
+      "accepted": true,
+      "weak2025PF": 1.03,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.3139,
+          "sumNetPct": 18.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 44,
+          "wr": 68.75,
+          "pf": 1.5303,
+          "sumNetPct": 31.216,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 28,
+          "wr": 70.0,
+          "pf": 1.1688,
+          "sumNetPct": 5.286,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0302,
+        "sumNetPct": 0.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.6724,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9486,
+        "25_JAN_MAR": 1.9495,
+        "25_APR_JUL": 1.5931,
+        "25_AUG_DEC": 1.0302,
+        "26_JAN_MAR": 1.2293,
+        "26_APR_AUG": 1.0846
+      },
+      "meanAnnual30SumPct": 55.065
+    },
+    {
+      "expert": "B",
+      "feature": "hourWick",
+      "threshold": 1.11429,
+      "direction": "LE",
+      "alternative": "TAKE20_STOP20_H12",
+      "accepted": true,
+      "weak2025PF": 1.03,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.2053,
+          "sumNetPct": 13.063,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.2581,
+          "sumNetPct": 16.077,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 28,
+          "wr": 68.293,
+          "pf": 1.0874,
+          "sumNetPct": 3.103,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0302,
+        "sumNetPct": 0.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5581,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.8564,
+        "25_JAN_MAR": 1.353,
+        "25_APR_JUL": 1.3649,
+        "25_AUG_DEC": 1.0302,
+        "26_JAN_MAR": 1.0891,
+        "26_APR_AUG": 1.0846
+      },
+      "meanAnnual30SumPct": 32.243
+    },
+    {
+      "expert": "B",
+      "feature": "hourWick",
+      "threshold": 1.23403,
+      "direction": "LE",
+      "alternative": "TAKE20_STOP20_H12",
+      "accepted": true,
+      "weak2025PF": 1.03,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 51,
+          "wr": 71.831,
+          "pf": 1.1861,
+          "sumNetPct": 11.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.1961,
+          "sumNetPct": 12.077,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 28,
+          "wr": 68.293,
+          "pf": 1.1438,
+          "sumNetPct": 5.103,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0302,
+        "sumNetPct": 0.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5581,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.8883,
+        "25_JAN_MAR": 1.353,
+        "25_APR_JUL": 1.1814,
+        "25_AUG_DEC": 1.0302,
+        "26_JAN_MAR": 1.1337,
+        "26_APR_AUG": 1.161
+      },
+      "meanAnnual30SumPct": 28.743
+    },
+    {
+      "expert": "B",
+      "feature": "last30",
+      "threshold": -0.59524,
+      "direction": "GE",
+      "alternative": "TAKE20_STOP20_H12",
+      "accepted": true,
+      "weak2025PF": 1.03,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 50,
+          "wr": 70.423,
+          "pf": 1.1329,
+          "sumNetPct": 8.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.2024,
+          "sumNetPct": 13.076,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.2224,
+          "sumNetPct": 6.786,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0302,
+        "sumNetPct": 0.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.6235,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.7729,
+        "25_JAN_MAR": 1.5339,
+        "25_APR_JUL": 1.0299,
+        "25_AUG_DEC": 1.0302,
+        "26_JAN_MAR": 1.326,
+        "26_APR_AUG": 1.0846
+      },
+      "meanAnnual30SumPct": 28.425
+    },
+    {
+      "expert": "B",
+      "feature": "oi3Pct",
+      "threshold": -1.57841,
+      "direction": "GE",
+      "alternative": "TAKE20_STOP20_H12",
+      "accepted": true,
+      "weak2025PF": 1.03,
+      "year": {
+        "2024": {
+          "n": 71,
+          "wins": 49,
+          "wr": 69.014,
+          "pf": 1.2068,
+          "sumNetPct": 12.563,
+          "byExpert": {
+            "A": 50,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 42,
+          "wr": 65.625,
+          "pf": 1.1561,
+          "sumNetPct": 9.673,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 41,
+          "wins": 28,
+          "wr": 68.293,
+          "pf": 1.1441,
+          "sumNetPct": 4.986,
+          "byExpert": {
+            "A": 24,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0302,
+        "sumNetPct": 0.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5746,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9258,
+        "25_JAN_MAR": 1.2625,
+        "25_APR_JUL": 1.1588,
+        "25_AUG_DEC": 1.0302,
+        "26_JAN_MAR": 1.0873,
+        "26_APR_AUG": 1.2374
+      },
+      "meanAnnual30SumPct": 27.222
+    },
+    {
+      "expert": "A",
+      "feature": "oi3Pct",
+      "threshold": -0.50348,
+      "direction": "GE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.028,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1656,
+          "sumNetPct": 14.227,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 41,
+          "wr": 64.062,
+          "pf": 1.3407,
+          "sumNetPct": 27.248,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 30,
+          "wr": 75.0,
+          "pf": 1.8991,
+          "sumNetPct": 22.529,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 11,
+        "wr": 57.895,
+        "pf": 1.028,
+        "sumNetPct": 0.823,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1201,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 1.056,
+        "25_JAN_MAR": 1.75,
+        "25_APR_JUL": 1.2796,
+        "25_AUG_DEC": 1.028,
+        "26_JAN_MAR": 1.8134,
+        "26_APR_AUG": 2.1571
+      },
+      "meanAnnual30SumPct": 64.004
+    },
+    {
+      "expert": "B",
+      "feature": "seller1",
+      "threshold": 0.1255,
+      "direction": "GE",
+      "alternative": "TAKE20_STOP20_H12",
+      "accepted": true,
+      "weak2025PF": 1.026,
+      "year": {
+        "2024": {
+          "n": 70,
+          "wins": 49,
+          "wr": 70.0,
+          "pf": 1.2973,
+          "sumNetPct": 18.863,
+          "byExpert": {
+            "A": 49,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 64,
+          "wins": 43,
+          "wr": 67.188,
+          "pf": 1.2939,
+          "sumNetPct": 20.076,
+          "byExpert": {
+            "A": 35,
+            "B": 29
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 29,
+          "wr": 72.5,
+          "pf": 1.3814,
+          "sumNetPct": 11.403,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 12,
+        "wr": 63.158,
+        "pf": 1.0261,
+        "sumNetPct": 0.576,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.5581,
+        "24_RNDR_JUN_JUL": 3.087,
+        "24_RENDER_JUL_DEC": 1.0462,
+        "25_JAN_MAR": 1.3941,
+        "25_APR_JUL": 1.4513,
+        "25_AUG_DEC": 1.0261,
+        "26_JAN_MAR": 1.6722,
+        "26_APR_AUG": 1.0082
+      },
+      "meanAnnual30SumPct": 50.342
+    },
+    {
+      "expert": "A",
+      "feature": "seller1",
+      "threshold": 0.09394,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.024,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.1221,
+          "sumNetPct": 10.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 40,
+          "wr": 63.492,
+          "pf": 1.4071,
+          "sumNetPct": 33.715,
+          "byExpert": {
+            "A": 35,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.0792,
+          "sumNetPct": 26.594,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0237,
+        "sumNetPct": 0.775,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.1065,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.984,
+        "25_JAN_MAR": 1.9219,
+        "25_APR_JUL": 1.3818,
+        "25_AUG_DEC": 1.0237,
+        "26_JAN_MAR": 2.0296,
+        "26_APR_AUG": 2.1776
+      },
+      "meanAnnual30SumPct": 70.795
+    },
+    {
+      "expert": "A",
+      "feature": "seller1",
+      "threshold": 0.11822,
+      "direction": "LE",
+      "alternative": "TRAIL_MFE25_FLOOR10_H24",
+      "accepted": true,
+      "weak2025PF": 1.024,
+      "year": {
+        "2024": {
+          "n": 69,
+          "wins": 46,
+          "wr": 66.667,
+          "pf": 1.0977,
+          "sumNetPct": 8.486,
+          "byExpert": {
+            "A": 48,
+            "B": 21
+          }
+        },
+        "2025": {
+          "n": 63,
+          "wins": 40,
+          "wr": 63.492,
+          "pf": 1.4058,
+          "sumNetPct": 34.215,
+          "byExpert": {
+            "A": 35,
+            "B": 28
+          }
+        },
+        "2026": {
+          "n": 40,
+          "wins": 31,
+          "wr": 77.5,
+          "pf": 2.0577,
+          "sumNetPct": 26.594,
+          "byExpert": {
+            "A": 23,
+            "B": 17
+          }
+        }
+      },
+      "h2": {
+        "n": 19,
+        "wins": 10,
+        "wr": 52.632,
+        "pf": 1.0237,
+        "sumNetPct": 0.775,
+        "byExpert": {
+          "A": 10,
+          "B": 9
+        }
+      },
+      "subperiodPF": {
+        "24_RNDR_JAN_MAY": 1.0455,
+        "24_RNDR_JUN_JUL": null,
+        "24_RENDER_JUL_DEC": 0.9953,
+        "25_JAN_MAR": 1.9248,
+        "25_APR_JUL": 1.3541,
+        "25_AUG_DEC": 1.0237,
+        "26_JAN_MAR": 2.0601,
+        "26_APR_AUG": 2.0533
+      },
+      "meanAnnual30SumPct": 69.295
+    }
+  ],
+  "warnings": [
+    "2025-H2 was used for search so IS NOT independent out-of-sample",
+    "No 8-logic wallet/native ownership parity for these exit variants",
+    "Full M5 2024-26 available until Aug10 2026, new dates are not included",
+    "No production/LIVE/no real orders changed"
+  ]
+}

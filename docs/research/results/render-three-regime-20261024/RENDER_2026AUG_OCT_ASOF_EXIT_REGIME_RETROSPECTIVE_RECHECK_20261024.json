@@ -1,0 +1,1037 @@
+{
+  "status": "RESEARCH_ONLY_PREVIEWED_HOLDOUT_REUSE_IS_NOT_INDEPENDENT",
+  "verification": "Publisher SHA verified 99 ZIPs, source continuity and no fill beyond complete M5 evidence",
+  "period": {
+    "from": "2026-08-10",
+    "until": "2026-10-22 complete"
+  },
+  "rules": "BTC TRAP A trailing15 flo05 18h; OI3 fade<=-0.2 B rangePos1 threshold then take15 stop20 6h else trailing25 flo10 H24; 12h cooldown",
+  "results": {
+    "LEGACY": {
+      "cutoff": null,
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 7,
+          "wrPct": 53.85,
+          "pf": 1.3031,
+          "sumPct": 5.6372,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 7,
+          "wrPct": 53.85,
+          "pf": 1.1534,
+          "sumPct": 3.0372,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        }
+      },
+      "sepOct": {
+        "10": {
+          "n": 9,
+          "wins": 5,
+          "wrPct": 55.56,
+          "pf": 1.3256,
+          "sumPct": 4.0372,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 5,
+          "wrPct": 55.56,
+          "pf": 1.1695,
+          "sumPct": 2.2372,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1787296500000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 0.55657,
+          "hourRangePosition": 0.2
+        },
+        {
+          "t": 1787486400000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1787492400000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -1.80948,
+          "hourRangePosition": 0.36842
+        },
+        {
+          "t": 1787626800000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1787691900000,
+          "net30Pct": 3.6999999999999926,
+          "oi3": 0.26004,
+          "hourRangePosition": 0.62857
+        },
+        {
+          "t": 1787824800000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1787906400000,
+          "net30Pct": 3.7000000000000144,
+          "oi3": 1.38607,
+          "hourRangePosition": 0.06452
+        },
+        {
+          "t": 1789412400000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1789479300000,
+          "net30Pct": 3.7000000000000037,
+          "oi3": 3.20709,
+          "hourRangePosition": 0.375
+        },
+        {
+          "t": 1789740000000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1789782300000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 1.49987,
+          "hourRangePosition": 0.32143
+        },
+        {
+          "t": 1789945200000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1789976700000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 4.16553,
+          "hourRangePosition": 0.39535
+        },
+        {
+          "t": 1790085600000,
+          "expert": "A",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1790163300000,
+          "net30Pct": 3.7000000000000037,
+          "oi3": 0.51571,
+          "hourRangePosition": 0.30233
+        },
+        {
+          "t": 1790643600000,
+          "expert": "B",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1790682300000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -0.31687,
+          "hourRangePosition": 0.03448
+        },
+        {
+          "t": 1791446400000,
+          "expert": "B",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1791472200000,
+          "net30Pct": 3.7000000000000037,
+          "oi3": -0.46696,
+          "hourRangePosition": 0.47917
+        },
+        {
+          "t": 1791522000000,
+          "expert": "B",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1791523800000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -0.57961,
+          "hourRangePosition": 0.08571
+        },
+        {
+          "t": 1792011600000,
+          "expert": "B",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1792030800000,
+          "net30Pct": 3.7000000000000037,
+          "oi3": -0.66621,
+          "hourRangePosition": 0.16667
+        },
+        {
+          "t": 1792375200000,
+          "expert": "B",
+          "policy": "TAKE40_STOP30_H24",
+          "exitTs": 1792461600000,
+          "net30Pct": 0.6371554575523743,
+          "oi3": -0.4006,
+          "hourRangePosition": 0.35714
+        }
+      ]
+    },
+    "ALWAYS_FLOOR": {
+      "cutoff": null,
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 9,
+          "wrPct": 69.23,
+          "pf": 1.7755,
+          "sumPct": 8.5128,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 9,
+          "wrPct": 69.23,
+          "pf": 1.5021,
+          "sumPct": 5.9128,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        }
+      },
+      "sepOct": {
+        "10": {
+          "n": 9,
+          "wins": 7,
+          "wrPct": 77.78,
+          "pf": 2.7966,
+          "sumPct": 12.0372,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 7,
+          "wrPct": 77.78,
+          "pf": 2.4419,
+          "sumPct": 10.2372,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787284800000,
+          "net30Pct": -1.376812634601576,
+          "oi3": 0.55657,
+          "hourRangePosition": 0.2
+        },
+        {
+          "t": 1787486400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787492400000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -1.80948,
+          "hourRangePosition": 0.36842
+        },
+        {
+          "t": 1787626800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787646300000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.26004,
+          "hourRangePosition": 0.62857
+        },
+        {
+          "t": 1787824800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787877600000,
+          "net30Pct": 0.15248868778280383,
+          "oi3": 1.38607,
+          "hourRangePosition": 0.06452
+        },
+        {
+          "t": 1789412400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789458900000,
+          "net30Pct": 3.199999999999992,
+          "oi3": 3.20709,
+          "hourRangePosition": 0.375
+        },
+        {
+          "t": 1789740000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789782300000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 1.49987,
+          "hourRangePosition": 0.32143
+        },
+        {
+          "t": 1789945200000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789956000000,
+          "net30Pct": 3.2000000000000033,
+          "oi3": 4.16553,
+          "hourRangePosition": 0.39535
+        },
+        {
+          "t": 1790085600000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1790091600000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.51571,
+          "hourRangePosition": 0.30233
+        },
+        {
+          "t": 1790643600000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1790646300000,
+          "net30Pct": 0.7000000000000008,
+          "oi3": -0.31687,
+          "hourRangePosition": 0.03448
+        },
+        {
+          "t": 1791446400000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1791472500000,
+          "net30Pct": 4.700000000000005,
+          "oi3": -0.46696,
+          "hourRangePosition": 0.47917
+        },
+        {
+          "t": 1791522000000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1791524100000,
+          "net30Pct": -3.799999999999992,
+          "oi3": -0.57961,
+          "hourRangePosition": 0.08571
+        },
+        {
+          "t": 1792011600000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1792030800000,
+          "net30Pct": 4.700000000000005,
+          "oi3": -0.66621,
+          "hourRangePosition": 0.16667
+        },
+        {
+          "t": 1792375200000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1792461600000,
+          "net30Pct": 0.6371554575523743,
+          "oi3": -0.4006,
+          "hourRangePosition": 0.35714
+        }
+      ]
+    },
+    "ASOF_RANGE_GE_0P1": {
+      "cutoff": 0.1,
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 0.9744,
+          "sumPct": -0.3064,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 0.7757,
+          "sumPct": -2.9064,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        }
+      },
+      "sepOct": {
+        "10": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.4189,
+          "sumPct": 3.218,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.1712,
+          "sumPct": 1.418,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787284800000,
+          "net30Pct": -1.376812634601576,
+          "oi3": 0.55657,
+          "hourRangePosition": 0.2
+        },
+        {
+          "t": 1787486400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787492400000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -1.80948,
+          "hourRangePosition": 0.36842
+        },
+        {
+          "t": 1787626800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787646300000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.26004,
+          "hourRangePosition": 0.62857
+        },
+        {
+          "t": 1787824800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787877600000,
+          "net30Pct": 0.15248868778280383,
+          "oi3": 1.38607,
+          "hourRangePosition": 0.06452
+        },
+        {
+          "t": 1789412400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789458900000,
+          "net30Pct": 3.199999999999992,
+          "oi3": 3.20709,
+          "hourRangePosition": 0.375
+        },
+        {
+          "t": 1789740000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789782300000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 1.49987,
+          "hourRangePosition": 0.32143
+        },
+        {
+          "t": 1789945200000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789956000000,
+          "net30Pct": 3.2000000000000033,
+          "oi3": 4.16553,
+          "hourRangePosition": 0.39535
+        },
+        {
+          "t": 1790085600000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1790091600000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.51571,
+          "hourRangePosition": 0.30233
+        },
+        {
+          "t": 1790643600000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1790646300000,
+          "net30Pct": 0.7000000000000008,
+          "oi3": -0.31687,
+          "hourRangePosition": 0.03448
+        },
+        {
+          "t": 1791446400000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1791455400000,
+          "net30Pct": 1.2000000000000124,
+          "oi3": -0.46696,
+          "hourRangePosition": 0.47917
+        },
+        {
+          "t": 1791522000000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1791524100000,
+          "net30Pct": -3.799999999999992,
+          "oi3": -0.57961,
+          "hourRangePosition": 0.08571
+        },
+        {
+          "t": 1792011600000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1792030200000,
+          "net30Pct": 1.2000000000000013,
+          "oi3": -0.66621,
+          "hourRangePosition": 0.16667
+        },
+        {
+          "t": 1792375200000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1792396800000,
+          "net30Pct": -1.1820286659316335,
+          "oi3": -0.4006,
+          "hourRangePosition": 0.35714
+        }
+      ]
+    },
+    "ASOF_RANGE_GE_0P133": {
+      "cutoff": 0.133,
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 0.9744,
+          "sumPct": -0.3064,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 0.7757,
+          "sumPct": -2.9064,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        }
+      },
+      "sepOct": {
+        "10": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.4189,
+          "sumPct": 3.218,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.1712,
+          "sumPct": 1.418,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787284800000,
+          "net30Pct": -1.376812634601576,
+          "oi3": 0.55657,
+          "hourRangePosition": 0.2
+        },
+        {
+          "t": 1787486400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787492400000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -1.80948,
+          "hourRangePosition": 0.36842
+        },
+        {
+          "t": 1787626800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787646300000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.26004,
+          "hourRangePosition": 0.62857
+        },
+        {
+          "t": 1787824800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787877600000,
+          "net30Pct": 0.15248868778280383,
+          "oi3": 1.38607,
+          "hourRangePosition": 0.06452
+        },
+        {
+          "t": 1789412400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789458900000,
+          "net30Pct": 3.199999999999992,
+          "oi3": 3.20709,
+          "hourRangePosition": 0.375
+        },
+        {
+          "t": 1789740000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789782300000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 1.49987,
+          "hourRangePosition": 0.32143
+        },
+        {
+          "t": 1789945200000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789956000000,
+          "net30Pct": 3.2000000000000033,
+          "oi3": 4.16553,
+          "hourRangePosition": 0.39535
+        },
+        {
+          "t": 1790085600000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1790091600000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.51571,
+          "hourRangePosition": 0.30233
+        },
+        {
+          "t": 1790643600000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1790646300000,
+          "net30Pct": 0.7000000000000008,
+          "oi3": -0.31687,
+          "hourRangePosition": 0.03448
+        },
+        {
+          "t": 1791446400000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1791455400000,
+          "net30Pct": 1.2000000000000124,
+          "oi3": -0.46696,
+          "hourRangePosition": 0.47917
+        },
+        {
+          "t": 1791522000000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1791524100000,
+          "net30Pct": -3.799999999999992,
+          "oi3": -0.57961,
+          "hourRangePosition": 0.08571
+        },
+        {
+          "t": 1792011600000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1792030200000,
+          "net30Pct": 1.2000000000000013,
+          "oi3": -0.66621,
+          "hourRangePosition": 0.16667
+        },
+        {
+          "t": 1792375200000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1792396800000,
+          "net30Pct": -1.1820286659316335,
+          "oi3": -0.4006,
+          "hourRangePosition": 0.35714
+        }
+      ]
+    },
+    "ASOF_RANGE_GE_0P15": {
+      "cutoff": 0.15,
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 0.9744,
+          "sumPct": -0.3064,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 0.7757,
+          "sumPct": -2.9064,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        }
+      },
+      "sepOct": {
+        "10": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.4189,
+          "sumPct": 3.218,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.1712,
+          "sumPct": 1.418,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787284800000,
+          "net30Pct": -1.376812634601576,
+          "oi3": 0.55657,
+          "hourRangePosition": 0.2
+        },
+        {
+          "t": 1787486400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787492400000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -1.80948,
+          "hourRangePosition": 0.36842
+        },
+        {
+          "t": 1787626800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787646300000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.26004,
+          "hourRangePosition": 0.62857
+        },
+        {
+          "t": 1787824800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787877600000,
+          "net30Pct": 0.15248868778280383,
+          "oi3": 1.38607,
+          "hourRangePosition": 0.06452
+        },
+        {
+          "t": 1789412400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789458900000,
+          "net30Pct": 3.199999999999992,
+          "oi3": 3.20709,
+          "hourRangePosition": 0.375
+        },
+        {
+          "t": 1789740000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789782300000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 1.49987,
+          "hourRangePosition": 0.32143
+        },
+        {
+          "t": 1789945200000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789956000000,
+          "net30Pct": 3.2000000000000033,
+          "oi3": 4.16553,
+          "hourRangePosition": 0.39535
+        },
+        {
+          "t": 1790085600000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1790091600000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.51571,
+          "hourRangePosition": 0.30233
+        },
+        {
+          "t": 1790643600000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1790646300000,
+          "net30Pct": 0.7000000000000008,
+          "oi3": -0.31687,
+          "hourRangePosition": 0.03448
+        },
+        {
+          "t": 1791446400000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1791455400000,
+          "net30Pct": 1.2000000000000124,
+          "oi3": -0.46696,
+          "hourRangePosition": 0.47917
+        },
+        {
+          "t": 1791522000000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1791524100000,
+          "net30Pct": -3.799999999999992,
+          "oi3": -0.57961,
+          "hourRangePosition": 0.08571
+        },
+        {
+          "t": 1792011600000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1792030200000,
+          "net30Pct": 1.2000000000000013,
+          "oi3": -0.66621,
+          "hourRangePosition": 0.16667
+        },
+        {
+          "t": 1792375200000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1792396800000,
+          "net30Pct": -1.1820286659316335,
+          "oi3": -0.4006,
+          "hourRangePosition": 0.35714
+        }
+      ]
+    },
+    "ASOF_RANGE_GE_0P2": {
+      "cutoff": 0.2,
+      "all": {
+        "10": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 1.2671,
+          "sumPct": 3.1936,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 13,
+          "wins": 8,
+          "wrPct": 61.54,
+          "pf": 1.0458,
+          "sumPct": 0.5936,
+          "byExpert": {
+            "A": 8,
+            "B": 5
+          }
+        }
+      },
+      "sepOct": {
+        "10": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.8745,
+          "sumPct": 6.718,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        },
+        "30": {
+          "n": 9,
+          "wins": 6,
+          "wrPct": 66.67,
+          "pf": 1.5938,
+          "sumPct": 4.918,
+          "byExpert": {
+            "A": 4,
+            "B": 5
+          }
+        }
+      },
+      "events": [
+        {
+          "t": 1787220000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787284800000,
+          "net30Pct": -1.376812634601576,
+          "oi3": 0.55657,
+          "hourRangePosition": 0.2
+        },
+        {
+          "t": 1787486400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787492400000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": -1.80948,
+          "hourRangePosition": 0.36842
+        },
+        {
+          "t": 1787626800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787646300000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.26004,
+          "hourRangePosition": 0.62857
+        },
+        {
+          "t": 1787824800000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1787877600000,
+          "net30Pct": 0.15248868778280383,
+          "oi3": 1.38607,
+          "hourRangePosition": 0.06452
+        },
+        {
+          "t": 1789412400000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789458900000,
+          "net30Pct": 3.199999999999992,
+          "oi3": 3.20709,
+          "hourRangePosition": 0.375
+        },
+        {
+          "t": 1789740000000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789782300000,
+          "net30Pct": -3.3000000000000025,
+          "oi3": 1.49987,
+          "hourRangePosition": 0.32143
+        },
+        {
+          "t": 1789945200000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1789956000000,
+          "net30Pct": 3.2000000000000033,
+          "oi3": 4.16553,
+          "hourRangePosition": 0.39535
+        },
+        {
+          "t": 1790085600000,
+          "expert": "A",
+          "policy": "TRAIL_MFE15_FLOOR05_H18",
+          "exitTs": 1790091600000,
+          "net30Pct": 0.20000000000000046,
+          "oi3": 0.51571,
+          "hourRangePosition": 0.30233
+        },
+        {
+          "t": 1790643600000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1790646300000,
+          "net30Pct": 0.7000000000000008,
+          "oi3": -0.31687,
+          "hourRangePosition": 0.03448
+        },
+        {
+          "t": 1791446400000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1791455400000,
+          "net30Pct": 1.2000000000000124,
+          "oi3": -0.46696,
+          "hourRangePosition": 0.47917
+        },
+        {
+          "t": 1791522000000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1791524100000,
+          "net30Pct": -3.799999999999992,
+          "oi3": -0.57961,
+          "hourRangePosition": 0.08571
+        },
+        {
+          "t": 1792011600000,
+          "expert": "B",
+          "policy": "TRAIL_MFE25_FLOOR10_H24",
+          "exitTs": 1792030800000,
+          "net30Pct": 4.700000000000005,
+          "oi3": -0.66621,
+          "hourRangePosition": 0.16667
+        },
+        {
+          "t": 1792375200000,
+          "expert": "B",
+          "policy": "TAKE15_STOP20_H6",
+          "exitTs": 1792396800000,
+          "net30Pct": -1.1820286659316335,
+          "oi3": -0.4006,
+          "hourRangePosition": 0.35714
+        }
+      ]
+    }
+  },
+  "warnings": [
+    "User period previously used for another model first-look; this is not a pristine holdout or forward trading.",
+    "2025-H2 reused during hyperparameter discovery; multiple testing heavily biased.",
+    "This is stand-alone SHORT sleeve only, not Native8 portfolio, not exchange certified",
+    "LIVE/HP/Production/real trades not changed"
+  ]
+}
