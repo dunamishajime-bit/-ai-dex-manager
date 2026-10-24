@@ -1,0 +1,834 @@
+{
+  "status": "RESEARCH_ONLY_NONNATIVE_STANDALONE_EXITS",
+  "cutoffFrozenOnOldTrain": -0.06330412387977837,
+  "cases": {
+    "original_dynamic_policy": {
+      "oldCal10": {
+        "n": 60,
+        "wins": 33,
+        "WR": 55.0,
+        "PF": 0.7606,
+        "netSumPct": -17.289,
+        "worstLoss": -3.1,
+        "exits": {
+          "STOP": 0,
+          "TARGET": 0,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 0,
+          "ORIGINAL": 60
+        }
+      },
+      "oldCal30": {
+        "n": 60,
+        "wins": 33,
+        "WR": 55.0,
+        "PF": 0.6226,
+        "netSumPct": -29.289,
+        "worstLoss": -3.3,
+        "exits": {
+          "STOP": 0,
+          "TARGET": 0,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 0,
+          "ORIGINAL": 60
+        }
+      },
+      "new10": {
+        "n": 158,
+        "wins": 91,
+        "WR": 57.59,
+        "PF": 0.9223,
+        "netSumPct": -12.747,
+        "worstLoss": -3.1,
+        "exits": {
+          "STOP": 0,
+          "TARGET": 0,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 0,
+          "ORIGINAL": 158
+        }
+      },
+      "new30": {
+        "n": 158,
+        "wins": 89,
+        "WR": 56.33,
+        "PF": 0.7504,
+        "netSumPct": -44.347,
+        "worstLoss": -3.3,
+        "exits": {
+          "STOP": 0,
+          "TARGET": 0,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 0,
+          "ORIGINAL": 158
+        }
+      },
+      "newEarly30": {
+        "n": 81,
+        "wins": 46,
+        "WR": 56.79,
+        "PF": 0.7658,
+        "netSumPct": -21.852,
+        "worstLoss": -3.3,
+        "exits": {
+          "STOP": 0,
+          "TARGET": 0,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 0,
+          "ORIGINAL": 81
+        }
+      },
+      "newLate30": {
+        "n": 77,
+        "wins": 43,
+        "WR": 55.84,
+        "PF": 0.7334,
+        "netSumPct": -22.495,
+        "worstLoss": -3.3,
+        "exits": {
+          "STOP": 0,
+          "TARGET": 0,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 0,
+          "ORIGINAL": 77
+        }
+      }
+    },
+    "tight_equal_1p5_1p5_6h": {
+      "oldCal10": {
+        "n": 65,
+        "wins": 27,
+        "WR": 41.54,
+        "PF": 0.6071,
+        "netSumPct": -22.194,
+        "worstLoss": -1.637,
+        "exits": {
+          "STOP": 34,
+          "TARGET": 24,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 7,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 65,
+        "wins": 25,
+        "WR": 38.46,
+        "PF": 0.453,
+        "netSumPct": -35.194,
+        "worstLoss": -1.837,
+        "exits": {
+          "STOP": 34,
+          "TARGET": 24,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 7,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 164,
+        "wins": 88,
+        "WR": 53.66,
+        "PF": 1.004,
+        "netSumPct": 0.451,
+        "worstLoss": -1.6,
+        "exits": {
+          "STOP": 68,
+          "TARGET": 79,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 17,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 164,
+        "wins": 83,
+        "WR": 50.61,
+        "PF": 0.7479,
+        "netSumPct": -32.349,
+        "worstLoss": -1.8,
+        "exits": {
+          "STOP": 68,
+          "TARGET": 79,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 17,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 84,
+        "wins": 44,
+        "WR": 52.38,
+        "PF": 0.8127,
+        "netSumPct": -11.909,
+        "worstLoss": -1.8,
+        "exits": {
+          "STOP": 34,
+          "TARGET": 43,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 7,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 80,
+        "wins": 39,
+        "WR": 48.75,
+        "PF": 0.6842,
+        "netSumPct": -20.44,
+        "worstLoss": -1.8,
+        "exits": {
+          "STOP": 34,
+          "TARGET": 36,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 10,
+          "ORIGINAL": 0
+        }
+      }
+    },
+    "tight_1p2_1p6_6h": {
+      "oldCal10": {
+        "n": 66,
+        "wins": 34,
+        "WR": 51.52,
+        "PF": 0.6952,
+        "netSumPct": -15.342,
+        "worstLoss": -1.7,
+        "exits": {
+          "STOP": 29,
+          "TARGET": 31,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 6,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 66,
+        "wins": 33,
+        "WR": 50.0,
+        "PF": 0.4983,
+        "netSumPct": -28.542,
+        "worstLoss": -1.9,
+        "exits": {
+          "STOP": 29,
+          "TARGET": 31,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 6,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 164,
+        "wins": 94,
+        "WR": 57.32,
+        "PF": 0.8707,
+        "netSumPct": -14.287,
+        "worstLoss": -1.7,
+        "exits": {
+          "STOP": 61,
+          "TARGET": 86,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 17,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 164,
+        "wins": 89,
+        "WR": 54.27,
+        "PF": 0.6227,
+        "netSumPct": -47.087,
+        "worstLoss": -1.9,
+        "exits": {
+          "STOP": 61,
+          "TARGET": 86,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 17,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 84,
+        "wins": 46,
+        "WR": 54.76,
+        "PF": 0.6312,
+        "netSumPct": -23.704,
+        "worstLoss": -1.9,
+        "exits": {
+          "STOP": 31,
+          "TARGET": 45,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 8,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 80,
+        "wins": 43,
+        "WR": 53.75,
+        "PF": 0.6137,
+        "netSumPct": -23.382,
+        "worstLoss": -1.9,
+        "exits": {
+          "STOP": 30,
+          "TARGET": 41,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 9,
+          "ORIGINAL": 0
+        }
+      }
+    },
+    "tight_1p5_2p0_8h": {
+      "oldCal10": {
+        "n": 63,
+        "wins": 30,
+        "WR": 47.62,
+        "PF": 0.6569,
+        "netSumPct": -20.312,
+        "worstLoss": -2.1,
+        "exits": {
+          "STOP": 26,
+          "TARGET": 27,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 10,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 63,
+        "wins": 30,
+        "WR": 47.62,
+        "PF": 0.4998,
+        "netSumPct": -32.912,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 26,
+          "TARGET": 27,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 10,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 164,
+        "wins": 90,
+        "WR": 54.88,
+        "PF": 0.8894,
+        "netSumPct": -15.188,
+        "worstLoss": -2.1,
+        "exits": {
+          "STOP": 60,
+          "TARGET": 86,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 18,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 164,
+        "wins": 89,
+        "WR": 54.27,
+        "PF": 0.6848,
+        "netSumPct": -47.988,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 60,
+          "TARGET": 86,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 18,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 84,
+        "wins": 48,
+        "WR": 57.14,
+        "PF": 0.7574,
+        "netSumPct": -17.803,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 29,
+          "TARGET": 46,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 9,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 80,
+        "wins": 41,
+        "WR": 51.25,
+        "PF": 0.6174,
+        "netSumPct": -30.185,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 31,
+          "TARGET": 40,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 9,
+          "ORIGINAL": 0
+        }
+      }
+    },
+    "tight_1p75_1p75_8h": {
+      "oldCal10": {
+        "n": 63,
+        "wins": 27,
+        "WR": 42.86,
+        "PF": 0.6532,
+        "netSumPct": -20.928,
+        "worstLoss": -1.85,
+        "exits": {
+          "STOP": 31,
+          "TARGET": 23,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 9,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 63,
+        "wins": 27,
+        "WR": 42.86,
+        "PF": 0.5036,
+        "netSumPct": -33.528,
+        "worstLoss": -2.05,
+        "exits": {
+          "STOP": 31,
+          "TARGET": 23,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 9,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 164,
+        "wins": 84,
+        "WR": 51.22,
+        "PF": 0.9799,
+        "netSumPct": -2.634,
+        "worstLoss": -1.871,
+        "exits": {
+          "STOP": 65,
+          "TARGET": 75,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 24,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 164,
+        "wins": 83,
+        "WR": 50.61,
+        "PF": 0.7591,
+        "netSumPct": -35.434,
+        "worstLoss": -2.071,
+        "exits": {
+          "STOP": 65,
+          "TARGET": 75,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 24,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 84,
+        "wins": 46,
+        "WR": 54.76,
+        "PF": 0.8823,
+        "netSumPct": -8.265,
+        "worstLoss": -2.071,
+        "exits": {
+          "STOP": 31,
+          "TARGET": 42,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 11,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 80,
+        "wins": 37,
+        "WR": 46.25,
+        "PF": 0.6466,
+        "netSumPct": -27.169,
+        "worstLoss": -2.05,
+        "exits": {
+          "STOP": 34,
+          "TARGET": 33,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 13,
+          "ORIGINAL": 0
+        }
+      }
+    },
+    "tactical_1p5_2p5_8h": {
+      "oldCal10": {
+        "n": 65,
+        "wins": 42,
+        "WR": 64.62,
+        "PF": 0.7716,
+        "netSumPct": -11.294,
+        "worstLoss": -2.6,
+        "exits": {
+          "STOP": 32,
+          "TARGET": 23,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 10,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 65,
+        "wins": 42,
+        "WR": 64.62,
+        "PF": 0.5505,
+        "netSumPct": -24.294,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 32,
+          "TARGET": 23,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 10,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 161,
+        "wins": 104,
+        "WR": 64.6,
+        "PF": 0.857,
+        "netSumPct": -17.486,
+        "worstLoss": -2.6,
+        "exits": {
+          "STOP": 75,
+          "TARGET": 67,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 19,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 161,
+        "wins": 103,
+        "WR": 63.98,
+        "PF": 0.6288,
+        "netSumPct": -49.686,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 75,
+          "TARGET": 67,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 19,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 82,
+        "wins": 57,
+        "WR": 69.51,
+        "PF": 0.8271,
+        "netSumPct": -10.195,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 34,
+          "TARGET": 39,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 9,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 79,
+        "wins": 46,
+        "WR": 58.23,
+        "PF": 0.4727,
+        "netSumPct": -39.491,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 41,
+          "TARGET": 28,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 10,
+          "ORIGINAL": 0
+        }
+      }
+    },
+    "staged_profit_1p75_2p5_12h": {
+      "oldCal10": {
+        "n": 64,
+        "wins": 43,
+        "WR": 67.19,
+        "PF": 0.8057,
+        "netSumPct": -10.369,
+        "worstLoss": -2.6,
+        "exits": {
+          "STOP": 42,
+          "TARGET": 20,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 2,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 64,
+        "wins": 43,
+        "WR": 67.19,
+        "PF": 0.5976,
+        "netSumPct": -23.169,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 42,
+          "TARGET": 20,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 2,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 160,
+        "wins": 103,
+        "WR": 64.38,
+        "PF": 0.857,
+        "netSumPct": -18.469,
+        "worstLoss": -2.6,
+        "exits": {
+          "STOP": 93,
+          "TARGET": 56,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 11,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 160,
+        "wins": 103,
+        "WR": 64.38,
+        "PF": 0.641,
+        "netSumPct": -50.469,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 93,
+          "TARGET": 56,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 11,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 82,
+        "wins": 57,
+        "WR": 69.51,
+        "PF": 0.8899,
+        "netSumPct": -6.935,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 42,
+          "TARGET": 36,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 4,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 78,
+        "wins": 46,
+        "WR": 58.97,
+        "PF": 0.4388,
+        "netSumPct": -43.534,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 51,
+          "TARGET": 20,
+          "EARLY_EXIT_NEXT_OPEN": 0,
+          "TIME": 7,
+          "ORIGINAL": 0
+        }
+      }
+    },
+    "timefail_profit_1p75_2p5_12h": {
+      "oldCal10": {
+        "n": 64,
+        "wins": 38,
+        "WR": 59.38,
+        "PF": 0.7736,
+        "netSumPct": -10.857,
+        "worstLoss": -2.6,
+        "exits": {
+          "STOP": 32,
+          "TARGET": 17,
+          "EARLY_EXIT_NEXT_OPEN": 14,
+          "TIME": 1,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 64,
+        "wins": 38,
+        "WR": 59.38,
+        "PF": 0.555,
+        "netSumPct": -23.657,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 32,
+          "TARGET": 17,
+          "EARLY_EXIT_NEXT_OPEN": 14,
+          "TIME": 1,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 161,
+        "wins": 99,
+        "WR": 61.49,
+        "PF": 0.9551,
+        "netSumPct": -5.037,
+        "worstLoss": -2.6,
+        "exits": {
+          "STOP": 74,
+          "TARGET": 54,
+          "EARLY_EXIT_NEXT_OPEN": 27,
+          "TIME": 6,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 161,
+        "wins": 99,
+        "WR": 61.49,
+        "PF": 0.7011,
+        "netSumPct": -37.237,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 74,
+          "TARGET": 54,
+          "EARLY_EXIT_NEXT_OPEN": 27,
+          "TIME": 6,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 83,
+        "wins": 55,
+        "WR": 66.27,
+        "PF": 0.9306,
+        "netSumPct": -3.966,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 35,
+          "TARGET": 34,
+          "EARLY_EXIT_NEXT_OPEN": 12,
+          "TIME": 2,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 78,
+        "wins": 44,
+        "WR": 56.41,
+        "PF": 0.5069,
+        "netSumPct": -33.271,
+        "worstLoss": -2.8,
+        "exits": {
+          "STOP": 39,
+          "TARGET": 20,
+          "EARLY_EXIT_NEXT_OPEN": 15,
+          "TIME": 4,
+          "ORIGINAL": 0
+        }
+      }
+    },
+    "timefail_profit_1p5_2p0_8h": {
+      "oldCal10": {
+        "n": 65,
+        "wins": 35,
+        "WR": 53.85,
+        "PF": 0.6531,
+        "netSumPct": -17.247,
+        "worstLoss": -2.1,
+        "exits": {
+          "STOP": 32,
+          "TARGET": 20,
+          "EARLY_EXIT_NEXT_OPEN": 10,
+          "TIME": 3,
+          "ORIGINAL": 0
+        }
+      },
+      "oldCal30": {
+        "n": 65,
+        "wins": 35,
+        "WR": 53.85,
+        "PF": 0.4572,
+        "netSumPct": -30.247,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 32,
+          "TARGET": 20,
+          "EARLY_EXIT_NEXT_OPEN": 10,
+          "TIME": 3,
+          "ORIGINAL": 0
+        }
+      },
+      "new10": {
+        "n": 164,
+        "wins": 98,
+        "WR": 59.76,
+        "PF": 0.9426,
+        "netSumPct": -6.157,
+        "worstLoss": -2.1,
+        "exits": {
+          "STOP": 68,
+          "TARGET": 65,
+          "EARLY_EXIT_NEXT_OPEN": 23,
+          "TIME": 8,
+          "ORIGINAL": 0
+        }
+      },
+      "new30": {
+        "n": 164,
+        "wins": 98,
+        "WR": 59.76,
+        "PF": 0.6765,
+        "netSumPct": -38.957,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 68,
+          "TARGET": 65,
+          "EARLY_EXIT_NEXT_OPEN": 23,
+          "TIME": 8,
+          "ORIGINAL": 0
+        }
+      },
+      "newEarly30": {
+        "n": 84,
+        "wins": 54,
+        "WR": 64.29,
+        "PF": 0.8058,
+        "netSumPct": -10.885,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 33,
+          "TARGET": 36,
+          "EARLY_EXIT_NEXT_OPEN": 11,
+          "TIME": 4,
+          "ORIGINAL": 0
+        }
+      },
+      "newLate30": {
+        "n": 80,
+        "wins": 44,
+        "WR": 55.0,
+        "PF": 0.5639,
+        "netSumPct": -28.072,
+        "worstLoss": -2.3,
+        "exits": {
+          "STOP": 35,
+          "TARGET": 29,
+          "EARLY_EXIT_NEXT_OPEN": 12,
+          "TIME": 4,
+          "ORIGINAL": 0
+        }
+      }
+    }
+  }
+}
