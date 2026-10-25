@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { FileDynamicEntryIntentRegistry } from "../lib/disdex-dynamic-entry-intent-registry";
-import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
+import { deriveAccountReservationId, FileAccountOrderLock, type AccountReservationInput } from "../lib/disdex-account-order-lock";
 import { readPendingExposureRegistry } from "../lib/disdex-pending-exposure-registry";
 import { createStrictEntryApproval } from "../lib/disdex-strict-entry-approval";
 
@@ -175,16 +175,17 @@ test("normal reservation exception releases acquired rows and closes the journal
         let reservations = 0;
         const lock = {
             document: async () => ({ schema: "disdex-account-lock/v1", accountScope: "ASTER_FUTURES", ownerId: "test-owner", leaseId: "lease", acquiredAt: 50_000, expiresAt: 60_000, reservations: [] }),
-            reserve: async () => {
+            reserve: async (input: AccountReservationInput) => {
                 reservations += 1;
                 if (reservations === 2) throw new Error("TEST_RESERVE_FAILURE");
-                return { reservationId: "reserved-a", strategyId: "V12", symbol: "ETHUSDT", side: "LONG" as const, sleeve: "CRYPTO" as const, gross: 0.3, notionalUsd: 300, createdAt: 50_000, status: "RESERVED" as const };
+                return { ...input, reservationId: deriveAccountReservationId("lease", input), createdAt: 50_000, status: "RESERVED" as const };
             },
             releaseReservation: async (id: string) => { released.push(id); },
         } as any;
         await assert.rejects(() => registry.allocateCycle({ cycleId: "exception", now: 50_000, cryptoGrossAvailable: 0.6, stockGrossAvailable: 0, totalGrossAvailable: 0.6, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capsFor(first, second), strictPlannerApprovals: [approvalFor(first, 50_000), approvalFor(second, 50_000)] }), /TEST_RESERVE_FAILURE/);
-        assert.deepEqual(released, ["reserved-a"]);
+        assert.equal(released.length, 2); // Includes an ID reserved before the call that threw.
         const persisted = JSON.parse(await readFile(path, "utf8"));
+        assert.deepEqual(new Set(released), new Set(persisted.reservations.map((row: { reservationId: string }) => row.reservationId)));
         assert.equal(persisted.reservations.every((row: { status: string }) => row.status === "RELEASED"), true);
     } finally {
         await rm(dir, { recursive: true, force: true });
@@ -309,6 +310,180 @@ test("restart reconciliation releases only an orphan with fresh no-live evidence
         const lockDocument = await lock.document();
         assert.equal(lockDocument.reservations.find((row) => row.reservationId === safe.reservationId)?.status, "RELEASED");
         assert.equal(lockDocument.reservations.find((row) => row.reservationId === live.reservationId)?.status, "RESERVED");
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+test("durable journal records deterministic ID before reserve, and exception after lock write releases it", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-durable-crash-window-"));
+    try {
+        const path = join(dir, "intents.json");
+        const registry = new FileDynamicEntryIntentRegistry(path);
+        const intent = { cycleId: "crash-window", id: "a", strategy: "V12", symbol: "ETHUSDT", side: "LONG" as const,
+            assetClass: "CRYPTO" as const, marketFitScore: 5, targetGross: 0.3, minGross: 0.1, maxGross: 0.3 };
+        await submitIntent(registry, intent, 50_000);
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        let persistedId = "";
+        const interrupted = {
+            ...lock,
+            reserve: async (input: AccountReservationInput) => {
+                const rows = JSON.parse(await readFile(path, "utf8")).reservations;
+                assert.equal(rows.length, 1);
+                persistedId = rows[0].reservationId;
+                assert.equal(persistedId, deriveAccountReservationId(lock.leaseId, input));
+                await lock.reserve(input); // Both account lock and pending exposure have been written.
+                throw new Error("SIMULATED_CRASH_AFTER_RESERVE_WRITE");
+            },
+        };
+        await assert.rejects(() => registry.allocateCycle({
+            cycleId: intent.cycleId, now: 50_000, cryptoGrossAvailable: 0.3, stockGrossAvailable: 0,
+            totalGrossAvailable: 0.3, equityUsd: 1_000, lock: interrupted,
+            quality102CausalV1Ready: true, ...capsFor(intent), strictPlannerApprovals: [approvalFor(intent, 50_000)],
+        }), /SIMULATED_CRASH_AFTER_RESERVE_WRITE/);
+        assert.ok(persistedId);
+        const record = JSON.parse(await readFile(path, "utf8")).reservations[0];
+        assert.equal(record.reservationId, persistedId);
+        assert.equal(record.status, "RELEASED");
+        assert.equal((await lock.document()).reservations.find((row) => row.reservationId === persistedId)?.status, "RELEASED");
+        assert.equal((await readPendingExposureRegistry(join(dir, "pending.json"))).entries.some((row) =>
+            row.reservationId === persistedId && row.status !== "RELEASED"), false);
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+test("legacy unresolved journal without reservation ID remains REQUIRES_REVIEW even with fresh no-live evidence", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-legacy-missing-id-"));
+    try {
+        const path = join(dir, "intents.json");
+        await writeFile(path, JSON.stringify({
+            schema: "disdex-dynamic-entry-intents/v1", intents: [], decisions: [],
+            reservations: [{ reservationKey: "unknown", cycleId: "legacy", intentId: "a",
+                strategy: "V12", symbol: "ETHUSDT", side: "LONG", assetClass: "CRYPTO",
+                gross: 0.3, notionalUsd: 300, status: "RESERVATION_PENDING",
+                createdAt: 30_000, updatedAt: 30_000, strictApprovalToken: "old" }],
+        }));
+        const registry = new FileDynamicEntryIntentRegistry(path);
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        const results = await registry.reconcileReservations({ now: 30_100, lock, evidenceFor: () => ({
+            capturedAt: 30_100, accountSnapshotFresh: true, openOrdersSnapshotFresh: true,
+            pendingExposureSnapshotFresh: true, protectionSnapshotFresh: true,
+            liveOrder: false, livePosition: false, pendingExposure: false,
+            unmanagedOpenOrders: 0, protectiveStopsVerified: true,
+        }) });
+        assert.equal(results[0]?.status, "REQUIRES_REVIEW");
+        assert.equal(results[0]?.reason, "RECONCILIATION_RESERVATION_ID_UNKNOWN");
+        assert.equal(JSON.parse(await readFile(path, "utf8")).reservations[0].status, "REQUIRES_REVIEW");
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+test("reservation identity is distinct between cycles with otherwise identical orders", () => {
+    const request = { reservationKey: "cycleA|intent", strategyId: "V12", symbol: "ETHUSDT",
+        side: "LONG" as const, sleeve: "CRYPTO" as const, gross: 0.3, notionalUsd: 300 };
+    const first = deriveAccountReservationId("lease", request);
+    const second = deriveAccountReservationId("lease", { ...request, reservationKey: "cycleB|intent" });
+    assert.notEqual(first, second);
+});
+
+
+test("restart after a persisted reserve with unfinalized journal releases only confirmed orphan", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-manual-crash-restart-"));
+    try {
+        const path = join(dir, "intents.json");
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        const request: AccountReservationInput = {
+            reservationKey: "crashed-cycle-unique-key", strategyId: "V12", symbol: "ETHUSDT",
+            side: "LONG", sleeve: "CRYPTO", gross: 0.3, notionalUsd: 300,
+        };
+        const id = deriveAccountReservationId(lock.leaseId, request);
+        const journal = {
+            schema: "disdex-dynamic-entry-intents/v1", intents: [], decisions: [],
+            reservations: [{
+                reservationKey: request.reservationKey, reservationId: id, cycleId: "crashed-cycle", intentId: "a",
+                strategy: "V12", symbol: "ETHUSDT", side: "LONG", assetClass: "CRYPTO",
+                gross: 0.3, notionalUsd: 300, status: "RESERVATION_PENDING",
+                createdAt: 50_000, updatedAt: 50_000, strictApprovalToken: "strict",
+            }],
+        };
+        await writeFile(path, JSON.stringify(journal));
+        const reserved = await lock.reserve(request);
+        assert.equal(reserved.reservationId, id);
+        assert.equal((await lock.document()).reservations.find((row) => row.reservationId === id)?.status, "RESERVED");
+        // Restart the registry: the process has lost every in-memory reservationId.
+        const restarted = new FileDynamicEntryIntentRegistry(path);
+        const results = await restarted.reconcileReservations({
+            now: 50_100, lock, evidenceFor: () => ({
+                capturedAt: 50_100, accountSnapshotFresh: true, openOrdersSnapshotFresh: true,
+                pendingExposureSnapshotFresh: true, protectionSnapshotFresh: true,
+                liveOrder: false, livePosition: false, pendingExposure: false,
+                unmanagedOpenOrders: 0, protectiveStopsVerified: true,
+            }),
+        });
+        assert.equal(results[0]?.status, "RELEASED");
+        assert.equal(results[0]?.reservationId, id);
+        assert.equal((await lock.document()).reservations.find((row) => row.reservationId === id)?.status, "RELEASED");
+        assert.equal((await readPendingExposureRegistry(join(dir, "pending.json"))).entries.some((row) =>
+            row.reservationId === id && row.status !== "RELEASED"), false);
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+test("account lock refuses to overwrite a previously reserved deterministic ID", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-replay-prevention-"));
+    try {
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        const request: AccountReservationInput = {
+            reservationKey: "unique-once", strategyId: "V12", symbol: "ETHUSDT",
+            side: "LONG", sleeve: "CRYPTO", gross: 0.3, notionalUsd: 300,
+        };
+        const first = await lock.reserve(request);
+        await assert.rejects(() => lock.reserve(request), /ACCOUNT_RESERVATION_ALREADY_EXISTS_RECONCILIATION_REQUIRED/);
+        assert.equal((await lock.document()).reservations.filter((row) => row.status === "RESERVED").length, 1);
+        assert.equal((await readPendingExposureRegistry(join(dir, "pending.json"))).entries.filter((row) => row.status !== "RELEASED").length, 1);
+        await lock.releaseReservation(first.reservationId);
+        await assert.rejects(() => lock.reserve(request), /ACCOUNT_RESERVATION_ALREADY_EXISTS_RECONCILIATION_REQUIRED/);
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+test("unresolved prior-cycle journal cannot be overwritten by another allocation for that cycle", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-unresolved-guard-"));
+    try {
+        const path = join(dir, "intents.json");
+        const registry = new FileDynamicEntryIntentRegistry(path);
+        const intent = { cycleId: "unsafe-retry", id: "a", strategy: "V12", symbol: "ETHUSDT", side: "LONG" as const,
+            assetClass: "CRYPTO" as const, marketFitScore: 5, targetGross: 0.3, minGross: 0.1, maxGross: 0.3 };
+        await submitIntent(registry, intent, 50_000);
+        const doc = JSON.parse(await readFile(path, "utf8"));
+        doc.reservations.push({
+            reservationKey: "unsafe", cycleId: "unsafe-retry", intentId: "a", strategy: "V12",
+            symbol: "ETHUSDT", side: "LONG", assetClass: "CRYPTO", gross: 0.3, notionalUsd: 300,
+            status: "RESERVATION_PENDING", strictApprovalToken: "old", createdAt: 50_000, updatedAt: 50_000,
+        });
+        await writeFile(path, JSON.stringify(doc));
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        await assert.rejects(() => registry.allocateCycle({
+            cycleId: intent.cycleId, now: 50_000, cryptoGrossAvailable: 0.3, stockGrossAvailable: 0,
+            totalGrossAvailable: 0.3, equityUsd: 1_000, lock, quality102CausalV1Ready: true,
+            ...capsFor(intent), strictPlannerApprovals: [approvalFor(intent, 50_000)],
+        }), /DYNAMIC_ENTRY_CYCLE_RECONCILIATION_REQUIRED/);
+        assert.equal(JSON.parse(await readFile(path, "utf8")).reservations[0]?.status, "RESERVATION_PENDING");
+        assert.equal((await lock.document()).reservations.length, 0);
         await lock.release();
     } finally {
         await rm(dir, { recursive: true, force: true });

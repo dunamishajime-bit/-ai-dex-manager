@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { allocateDynamicEntryGross, type DynamicEntryAllocation, type DynamicEntryAllocationResult, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
-import type { AccountLockHandle } from "./disdex-account-order-lock";
+import { deriveAccountReservationId, type AccountLockHandle, type AccountReservationInput } from "./disdex-account-order-lock";
 import { validateStrictEntryApproval, type StrictEntryApproval } from "./disdex-strict-entry-approval";
 
 export const DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA = "disdex-dynamic-entry-intents/v1" as const;
@@ -194,7 +194,10 @@ export class FileDynamicEntryIntentRegistry {
                 }
                 return existing.approvalSource ? existing : { ...existing, approvalSource: "REGISTRY_ALLOCATION" };
             }
-            await input.lock.document(); // Revalidates owner, lease ID, and expiry before claiming the cycle.
+            if (doc.reservations.some((row) => row.cycleId === input.cycleId && row.status !== "RELEASED")) {
+                throw new Error("DYNAMIC_ENTRY_CYCLE_RECONCILIATION_REQUIRED");
+            }
+            const lockSnapshot = await input.lock.document(); // Capture the lease ID before journaling any reservation.
             assertCapMap(input.strategyGrossAvailable, "strategy");
             assertCapMap(input.positionGrossAvailable, "position");
             const rawCandidates = doc.intents.filter((intent) => intent.cycleId === input.cycleId && input.now >= intent.submittedAt && input.now - intent.submittedAt <= this.intentTtlMs);
@@ -231,8 +234,15 @@ export class FileDynamicEntryIntentRegistry {
             const cryptoAllocated = bounded.filter((row) => row.assetClass === "CRYPTO").reduce((sum, row) => sum + row.allocatedGross, 0);
             const stockAllocated = bounded.filter((row) => row.assetClass === "STOCK").reduce((sum, row) => sum + row.allocatedGross, 0);
             allocation.residual = { cryptoGross: Math.max(0, input.cryptoGrossAvailable - cryptoAllocated), stockGross: Math.max(0, input.stockGrossAvailable - stockAllocated), totalGross: Math.max(0, input.totalGrossAvailable - cryptoAllocated - stockAllocated) };
+            const reservationRequest = (row: DynamicEntryAllocation): AccountReservationInput => ({
+                reservationKey: reservationKey(input.cycleId, row.id),
+                strategyId: row.strategy, symbol: row.symbol, side: row.side,
+                sleeve: row.assetClass, gross: row.allocatedGross, notionalUsd: row.allocatedGross * input.equityUsd,
+            });
             const reservations: string[] = [];
             const journalRows: DynamicEntryReservationRecord[] = allocation.allocations.map((row) => ({
+                // Durable BEFORE calling reserve(). A crash cannot erase the lock's reservation ID.
+                reservationId: deriveAccountReservationId(lockSnapshot.leaseId, reservationRequest(row)),
                 reservationKey: reservationKey(input.cycleId, row.id),
                 cycleId: input.cycleId,
                 intentId: row.id,
@@ -251,31 +261,55 @@ export class FileDynamicEntryIntentRegistry {
             try {
                 doc.reservations = [...doc.reservations.filter((row) => row.cycleId !== input.cycleId), ...journalRows];
                 await write(this.path, doc);
-                for (const row of allocation.allocations) {
-                    const reservation = await input.lock.reserve({ strategyId: row.strategy, symbol: row.symbol, side: row.side, sleeve: row.assetClass, gross: row.allocatedGross, notionalUsd: row.allocatedGross * input.equityUsd });
-                    reservations.push(reservation.reservationId);
+                for (let index = 0; index < allocation.allocations.length; index += 1) {
+                    const row = allocation.allocations[index];
+                    const actual = await input.lock.reserve(reservationRequest(row));
+                    reservations.push(actual.reservationId);
+                    if (actual.reservationId !== journalRows[index].reservationId) {
+                        throw new Error("DYNAMIC_ENTRY_RESERVATION_ID_MISMATCH");
+                    }
                 }
-                await input.lock.document();
+                const persistedLock = await input.lock.document();
+                for (const row of journalRows) {
+                    if (!persistedLock.reservations.some((entry) =>
+                        entry.reservationId === row.reservationId && entry.status === "RESERVED"
+                        && entry.strategyId === row.strategy && entry.symbol === row.symbol
+                        && entry.side === row.side && (entry.sleeve ?? "CRYPTO") === row.assetClass
+                        && entry.gross === row.gross && entry.notionalUsd === row.notionalUsd)) {
+                        throw new Error("DYNAMIC_ENTRY_RESERVATION_LOCK_PARITY_FAILED");
+                    }
+                }
                 const decisionId = createHash("sha256").update(`${input.cycleId}|${allocation.allocations.map((row) => `${row.id}:${row.allocatedGross}`).join("|")}|${input.strictPlannerApprovals.map((approval) => approval.token).sort().join("|")}`).digest("hex").slice(0, 24);
-                const decision: DynamicEntryAllocationDecision = { ...allocation,
-                    allocations: allocation.allocations.map((row, index) => ({ ...row, reservationId: reservations[index] })),
+                const decision: DynamicEntryAllocationDecision = {
+                    ...allocation,
+                    allocations: allocation.allocations.map((row, index) => ({ ...row, reservationId: journalRows[index].reservationId! })),
                     cycleId: input.cycleId, decisionId, decidedAt: input.now, approvalSource: "REGISTRY_ALLOCATION",
-                    strictApprovalTokens: input.strictPlannerApprovals.map((approval) => approval.token).sort(), };
+                    strictApprovalTokens: input.strictPlannerApprovals.map((approval) => approval.token).sort(),
+                };
                 publishedDecisionId = decisionId;
                 doc.reservations = doc.reservations.map((row) => row.cycleId === input.cycleId
-                    ? { ...row, status: "DECISION_PUBLISHED" as const, reservationId: reservations[journalRows.findIndex((entry) => entry.reservationKey === row.reservationKey)], decisionId, updatedAt: input.now }
+                    ? { ...row, status: "DECISION_PUBLISHED" as const, decisionId, updatedAt: input.now }
                     : row);
                 doc.decisions.push(decision);
                 await write(this.path, doc);
                 return decision;
             } catch (error) {
+                // reserve() can persist the lock and pending exposure before throwing.
+                // Always release EVERY pre-journaled ID, not only returned IDs.
                 let releaseFailed = false;
-                for (const id of reservations.reverse()) {
+                const rollbackIds = new Set([...journalRows.map((row) => row.reservationId!).filter(Boolean), ...reservations]);
+                for (const id of rollbackIds) {
                     try { await input.lock.releaseReservation(id); } catch { releaseFailed = true; }
+                }
+                const currentLock = await input.lock.document().catch(() => undefined);
+                if (!currentLock || [...rollbackIds].some((id) =>
+                    currentLock.reservations.some((row) => row.reservationId === id && row.status === "RESERVED"))) {
+                    releaseFailed = true;
                 }
                 doc.decisions = doc.decisions.filter((row) => !(row.cycleId === input.cycleId && row.decisionId === publishedDecisionId));
                 doc.reservations = doc.reservations.map((row) => row.cycleId === input.cycleId
-                    ? { ...row, status: (releaseFailed ? "REQUIRES_REVIEW" : "RELEASED") as DynamicEntryReservationStatus, reservationId: row.reservationId || undefined, updatedAt: input.now, reviewReason: releaseFailed ? "NORMAL_EXCEPTION_RELEASE_FAILED" : "NORMAL_EXCEPTION_RELEASE" }
+                    ? { ...row, status: (releaseFailed ? "REQUIRES_REVIEW" : "RELEASED") as DynamicEntryReservationStatus,
+                        updatedAt: input.now, reviewReason: releaseFailed ? "NORMAL_EXCEPTION_RELEASE_FAILED" : "NORMAL_EXCEPTION_RELEASE" }
                     : row);
                 await write(this.path, doc).catch(() => undefined);
                 throw error;
@@ -305,7 +339,31 @@ export class FileDynamicEntryIntentRegistry {
                     results.push({ reservationKey: record.reservationKey, reservationId: record.reservationId, status: "REQUIRES_REVIEW", reason });
                     continue;
                 }
-                if (record.reservationId) await input.lock.releaseReservation(record.reservationId);
+                if (!record.reservationId) {
+                    const reason = "RECONCILIATION_RESERVATION_ID_UNKNOWN";
+                    doc.reservations = doc.reservations.map((row) => row.reservationKey === record.reservationKey
+                        ? { ...row, status: "REQUIRES_REVIEW" as const, updatedAt: input.now, reviewReason: reason }
+                        : row);
+                    results.push({ reservationKey: record.reservationKey, status: "REQUIRES_REVIEW", reason });
+                    continue;
+                }
+                const before = await input.lock.document();
+                const matching = before.reservations.find((entry) => entry.reservationId === record.reservationId);
+                if (matching && (matching.strategyId !== record.strategy || matching.symbol !== record.symbol
+                    || matching.side !== record.side || (matching.sleeve ?? "CRYPTO") !== record.assetClass
+                    || matching.gross !== record.gross || matching.notionalUsd !== record.notionalUsd)) {
+                    const reason = "RECONCILIATION_RESERVATION_IDENTITY_MISMATCH";
+                    doc.reservations = doc.reservations.map((row) => row.reservationKey === record.reservationKey
+                        ? { ...row, status: "REQUIRES_REVIEW" as const, updatedAt: input.now, reviewReason: reason }
+                        : row);
+                    results.push({ reservationKey: record.reservationKey, reservationId: record.reservationId, status: "REQUIRES_REVIEW", reason });
+                    continue;
+                }
+                await input.lock.releaseReservation(record.reservationId);
+                const after = await input.lock.document();
+                if (after.reservations.some((entry) => entry.reservationId === record.reservationId && entry.status === "RESERVED")) {
+                    throw new Error("DYNAMIC_ENTRY_RECONCILIATION_RELEASE_UNCONFIRMED");
+                }
                 doc.reservations = doc.reservations.map((row) => row.reservationKey === record.reservationKey
                     ? { ...row, status: "RELEASED" as const, updatedAt: input.now, reviewReason: "RECONCILED_NO_LIVE_EVIDENCE" }
                     : row);

@@ -38,9 +38,26 @@ export interface AccountLockHandle {
     document(): Promise<AccountLockDocument>;
     /** Extend the lease only after re-validating the exact owner and lease ID. */
     renew(): Promise<AccountLockDocument>;
-    reserve(input: Omit<AccountReservation, "reservationId" | "createdAt" | "status">): Promise<AccountReservation>;
+    reserve(input: AccountReservationInput): Promise<AccountReservation>;
     releaseReservation(reservationId: string): Promise<void>;
     release(): Promise<void>;
+}
+
+export type AccountReservationInput = Omit<AccountReservation, "reservationId" | "createdAt" | "status"> & {
+    /** A unique, durable per-intent key from the entry journal; never reusable across cycles. */
+    reservationKey?: string;
+};
+
+/** Deterministically pre-compute the ID BEFORE a durable journal is written. */
+export function deriveAccountReservationId(leaseId: string, input: AccountReservationInput): string {
+    const sleeve = input.sleeve ?? "CRYPTO";
+    const legacy = `${leaseId}|${input.strategyId}|${input.symbol}|${input.side}|${input.gross}|${input.notionalUsd}${sleeve === "STOCK" ? "|STOCK" : ""}`;
+    return createHash("sha256")
+        .update(input.reservationKey === undefined ? legacy : JSON.stringify([
+            "DISDEX_INTENT_RESERVATION_V2", leaseId, input.reservationKey,
+            input.strategyId, input.symbol, input.side, input.gross, input.notionalUsd, sleeve,
+        ]))
+        .digest("hex").slice(0, 24);
 }
 
 function validNumber(value: unknown) { return Number.isFinite(Number(value)); }
@@ -153,14 +170,20 @@ export class FileAccountOrderLock {
                         }
                         const sleeve = input.sleeve ?? "CRYPTO";
                         if (sleeve !== "CRYPTO" && sleeve !== "STOCK") throw new Error("ACCOUNT_RESERVATION_SLEEVE_INVALID");
+                        if (input.reservationKey !== undefined && (typeof input.reservationKey !== "string" || !input.reservationKey.trim())) {
+                            throw new Error("ACCOUNT_RESERVATION_KEY_INVALID");
+                        }
                         const current = await assertOwner();
+                        const reservationId = deriveAccountReservationId(leaseId, input);
+                        // An already recorded reservation must never be overwritten or revived by a retry.
+                        if (input.reservationKey !== undefined && current.reservations.some((row) => row.reservationId === reservationId)) {
+                            throw new Error("ACCOUNT_RESERVATION_ALREADY_EXISTS_RECONCILIATION_REQUIRED");
+                        }
+                        const { reservationKey: _journalKey, ...reservationInput } = input;
                         const reservation: AccountReservation = {
-                            ...input,
+                            ...reservationInput,
                             ...(input.sleeve === undefined ? {} : { sleeve }),
-                            reservationId: createHash("sha256")
-                                .update(`${leaseId}|${input.strategyId}|${input.symbol}|${input.side}|${input.gross}|${input.notionalUsd}${sleeve === "STOCK" ? "|STOCK" : ""}`)
-                                .digest("hex")
-                                .slice(0, 24),
+                            reservationId,
                             createdAt: Date.now(),
                             status: "RESERVED",
                         };
@@ -168,7 +191,7 @@ export class FileAccountOrderLock {
                             ...current,
                             expiresAt: Date.now() + this.leaseMs,
                             reservations: [
-                                ...current.reservations.filter((row) => row.reservationId !== reservation.reservationId),
+                                ...current.reservations.filter((row) => input.reservationKey === undefined && row.reservationId === reservationId ? false : true),
                                 reservation,
                             ],
                         });
