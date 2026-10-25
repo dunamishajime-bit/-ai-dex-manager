@@ -1,0 +1,139 @@
+import unittest
+
+from scripts import research_formal_dynamic_score_bt as bt
+
+
+class FormalDynamicScoreBacktestTests(unittest.TestCase):
+    def test_fet_score_uses_completed_h1_72h_return_and_not_trade_outcome(self):
+        entry_ts = 10 * bt.HOUR_MS
+        market_rows = [
+            {"event_time_ms": entry_ts - 73 * bt.HOUR_MS, "close": 100.0},
+            {"event_time_ms": entry_ts - bt.HOUR_MS, "close": 110.0},
+        ]
+        candidate = {
+            "strategy_id": "FET",
+            "symbol": "FETUSDT",
+            "entry_ts_ms": entry_ts,
+            "unit_price_return": -0.99,
+        }
+        signal = {"signal": {"entryTs": entry_ts, "volumeRatio": 2.0}}
+
+        score = bt.market_fit_for_candidate(candidate, [signal], market_rows)
+
+        self.assertAlmostEqual(score["value"], 70.0)
+        self.assertEqual(score["source"], "FET_COMPLETED_BREAKOUT_VOLUME_RETURN_V1")
+        self.assertAlmostEqual(score["return72h"], 0.10)
+
+    def test_rolling_prior_excludes_current_and_future_outcomes(self):
+        rows = [
+            {
+                "strategy_id": "V12",
+                "signal_ts_ms": 1_000,
+                "exit_ts_ms": 900,
+                "unit_price_return": 0.10,
+                "funding_return_per_gross": 0.0,
+            },
+            {
+                "strategy_id": "V12",
+                "signal_ts_ms": 2_000,
+                "exit_ts_ms": 3_000,
+                "unit_price_return": 0.50,
+                "funding_return_per_gross": 0.0,
+            },
+            {
+                "strategy_id": "V12",
+                "signal_ts_ms": 2_500,
+                "exit_ts_ms": 2_400,
+                "unit_price_return": -0.20,
+                "funding_return_per_gross": 0.0,
+            },
+        ]
+
+        table = bt.build_rolling_prior_table(rows, round_trip_cost_bps=10.0)
+
+        self.assertEqual(table["rows"]["V12:2000"]["metrics"]["tradeCount"], 1)
+        self.assertAlmostEqual(table["rows"]["V12:2000"]["metrics"]["returnPct"], 9.9)
+        self.assertEqual(table["rows"]["V12:2500"]["metrics"]["tradeCount"], 1)
+        self.assertIn("V12:1000", table["rows"]["V12:2000"]["priorIds"])
+        self.assertNotIn("V12:2000", table["rows"]["V12:2000"]["priorIds"])
+
+    def test_dynamic_allocation_keeps_pengu_at_point_seventy_five_cap(self):
+        result = bt.allocate_dynamic_candidates(
+            [
+                {
+                    "id": "v12",
+                    "strategy_id": "V12",
+                    "asset_class": "CRYPTO",
+                    "marketFitScore": 60.0,
+                    "targetGross": 2.0,
+                    "minGross": 0.1,
+                    "maxGross": 2.0,
+                },
+                {
+                    "id": "pengu",
+                    "strategy_id": "PENGU",
+                    "asset_class": "CRYPTO",
+                    "marketFitScore": 59.0,
+                    "targetGross": 2.0,
+                    "minGross": 0.1,
+                    "maxGross": 2.0,
+                },
+            ],
+            crypto_available=3.0,
+            stock_available=4.0,
+            total_available=4.25,
+            equity_usd=100.0,
+        )
+
+        pengu = next(row for row in result["allocations"] if row["id"] == "pengu")
+        self.assertLessEqual(pengu["allocatedGross"], 0.75 + 1e-12)
+        self.assertLessEqual(result["totals"]["cryptoGross"], 3.0 + 1e-12)
+        self.assertLessEqual(result["totals"]["totalGross"], 4.25 + 1e-12)
+
+    def test_dynamic_allocation_respects_strategy_aggregate_room(self):
+        result = bt.allocate_dynamic_candidates(
+            [
+                {
+                    "id": "v12-a",
+                    "strategy_id": "V12",
+                    "asset_class": "CRYPTO",
+                    "marketFitScore": 80.0,
+                    "targetGross": 1.0,
+                    "minGross": 0.1,
+                    "maxGross": 1.0,
+                },
+                {
+                    "id": "v12-b",
+                    "strategy_id": "V12",
+                    "asset_class": "CRYPTO",
+                    "marketFitScore": 70.0,
+                    "targetGross": 1.0,
+                    "minGross": 0.1,
+                    "maxGross": 1.0,
+                },
+            ],
+            crypto_available=3.0,
+            stock_available=0.0,
+            total_available=4.25,
+            equity_usd=100.0,
+            strategy_available={"V12": 1.25},
+        )
+
+        self.assertLessEqual(
+            sum(row["allocatedGross"] for row in result["allocations"]),
+            1.25 + 1e-12,
+        )
+
+    def test_research_report_marks_bt_as_not_live(self):
+        report = bt.render_research_report({
+            "status": "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",
+            "scenarios": [],
+        })
+
+        self.assertIn("LIVE=false", report)
+        self.assertIn("DYNAMIC_SCORE", report)
+        self.assertIn("H1", report)
+
+
+if __name__ == "__main__":
+    unittest.main()

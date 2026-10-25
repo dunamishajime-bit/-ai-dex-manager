@@ -1359,7 +1359,7 @@ export class PenguDualLsV2PortfolioRunner {
                     }
                     if (!isPenguFixedEntryAllocation(approvedGross, this.dependencies.config.maximumGross)) {
                         await this.dependencies.stateStore.save(state);
-                        return { status: "held", message: "PENGU_FIXED1_NO_LOT_SHRINK: full1.0 allocation is unavailable.", signal };
+                        return { status: "held", message: "PENGU_FIXED075_NO_LOT_SHRINK: full0.75 allocation is unavailable.", signal };
                     }
                     targetGross = approvedGross;
                     targetNotional = targetGross * workingEquity;

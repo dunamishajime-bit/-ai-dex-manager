@@ -68,8 +68,8 @@ test("V4 primary contract preserves peer safety overrides after V4 env generatio
   assert.match(wiring, /V12_BASE_GROSS_CAP=2\.0/);
   assert.match(wiring, /V12_DYNAMIC_GROSS_CAP=2\.0/);
   assert.match(wiring, /V12_GROSS_CAP=2\.0/);
-  assert.match(wiring, /PENGU_GROSS_CAP=1\.0/);
-  assert.match(wiring, /PENGU_DUAL_LS_V2_MAX_GROSS=1\.0/);
+  assert.match(wiring, /PENGU_GROSS_CAP=0\.75/);
+  assert.match(wiring, /PENGU_DUAL_LS_V2_MAX_GROSS=0\.75/);
   assert.match(wiring, /PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=3\.0/);
   assert.match(wiring, /QUALITY102_CAUSAL_V1_MAX_GROSS=3\.0/);
   assert.match(wiring, /STOCK_GROSS_CAP=4\.0/);

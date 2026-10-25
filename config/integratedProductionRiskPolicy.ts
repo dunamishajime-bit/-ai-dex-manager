@@ -23,7 +23,9 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   v12MaximumPositions: 3,
   fetResidualMaximumGross: 1.0,
   fetResidualMinimumGross: 0.05,
-  penguMaximumGross: 1.0,
+  // PENGU is a hard-capped sleeve.  The cap applies to both directions and
+  // cannot be raised by an environment override or a dynamic allocation.
+  penguMaximumGross: 0.75,
   // HYPE/ZEC are lower-priority, long-only sidecars. These values are risk
   // and per-sleeve ceilings; they never multiply the strategy notional.
   hypeLongRiskPct: 5.0,

@@ -37,7 +37,7 @@ test("M05 candidate records downstream Production block without changing shadow 
   const state = candidateState();
   assert.equal(recordPenguM05ShadowTickOutcome(state, {
     status: "held",
-    message: "PENGU_FIXED1_NO_LOT_SHRINK: full1.0 allocation is unavailable.",
+    message: "PENGU_FIXED075_NO_LOT_SHRINK: full0.75 allocation is unavailable.",
     signal: state.latestSignal,
   }, REF + 10_000), true);
   assert.equal(state.m05ShadowHistory?.length, 1);

@@ -11,6 +11,7 @@ class FinalDynamicGrossStrictCapsTest(unittest.TestCase):
         self.assertEqual(STRICT_CAPS.stock_slot_gross, 2.0)
         self.assertEqual(STRICT_CAPS.crypto_gross, 3.0)
         self.assertEqual(STRICT_CAPS.total_gross, 4.25)
+        self.assertEqual(STRICT_CAPS.pengu_gross, 0.75)
 
     def test_runtime_environment_matches_final_contract(self):
         caps = assert_strict_live_configuration({
@@ -18,7 +19,7 @@ class FinalDynamicGrossStrictCapsTest(unittest.TestCase):
             "V12_BASE_GROSS_CAP": "2.0",
             "V12_DYNAMIC_GROSS_CAP": "2.0",
             "V12_GROSS_CAP": "2.0",
-            "PENGU_GROSS_CAP": "1.0",
+            "PENGU_GROSS_CAP": "0.75",
             "STOCK_GROSS_CAP": "4.0",
             "CRYPTO_GROSS_CAP": "3.0",
             "TOTAL_GROSS_CAP": "4.25",

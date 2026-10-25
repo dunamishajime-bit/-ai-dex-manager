@@ -100,24 +100,24 @@ test("causal-v1 participates in exact crypto and total Gross boundaries", () => 
     const crypto199 = plan([
         cryptoPosition("V12", 1, "ETHUSDT"),
         cryptoPosition("V12", 0.5, "BTCUSDT"),
-        cryptoPosition("PENGU_DUAL_LS_V2", 0.85),
-    ], [intent("QUALITY102_CAUSAL_V1", 0.64)]);
+        cryptoPosition("PENGU_DUAL_LS_V2", 0.75),
+    ], [intent("QUALITY102_CAUSAL_V1", 0.74)]);
     assert.equal(crypto199.totals.cryptoGross, 2.99);
 
     const crypto200 = plan([
         cryptoPosition("V12", 1, "ETHUSDT"),
         cryptoPosition("V12", 0.5, "BTCUSDT"),
-        cryptoPosition("PENGU_DUAL_LS_V2", 0.85),
-    ], [intent("QUALITY102_CAUSAL_V1", 0.66)]);
-    assert.equal(crypto200.accepted[0]?.gross, 0.6499999999999999);
+        cryptoPosition("PENGU_DUAL_LS_V2", 0.75),
+    ], [intent("QUALITY102_CAUSAL_V1", 0.76)]);
+    assert.equal(crypto200.accepted[0]?.gross, 0.75);
     assert.equal(crypto200.totals.cryptoGross, 3);
 
     const crypto201 = plan([
         cryptoPosition("V12", 1, "ETHUSDT"),
         cryptoPosition("V12", 0.5, "BTCUSDT"),
-        cryptoPosition("PENGU_DUAL_LS_V2", 0.85),
-    ], [intent("QUALITY102_CAUSAL_V1", 0.67)]);
-    assert.equal(crypto201.accepted[0]?.gross, 0.6499999999999999);
+        cryptoPosition("PENGU_DUAL_LS_V2", 0.75),
+    ], [intent("QUALITY102_CAUSAL_V1", 0.77)]);
+    assert.equal(crypto201.accepted[0]?.gross, 0.75);
     assert.equal(crypto201.totals.cryptoGross, 3);
 
     const total424 = plan([
@@ -144,7 +144,7 @@ test("causal-v1 participates in exact crypto and total Gross boundaries", () => 
 test("base strategies retain priority when causal-v1 is simultaneous", () => {
     const baseIntents = [
         intent("V12", 1.5),
-        intent("PENGU_DUAL_LS_V2", 0.85),
+        intent("PENGU_DUAL_LS_V2", 0.75),
         intent("V52", 1.5),
     ];
     const baseOnly = plan([], baseIntents);
@@ -368,7 +368,7 @@ test("causal-v1 MTM rejects a live quote whose evidence price differs from the r
     }), /QUALITY102_CAUSAL_V1_MTM_SOURCE_UNVERIFIED/);
 });
 
-test("causal-v1 loss rechecks V12 dynamic 2.0x and PENGU 0.85x strategy caps after equity changes", () => {
+test("causal-v1 loss rechecks V12 dynamic 2.0x and PENGU 0.75x strategy caps after equity changes", () => {
     const v12 = plan([
         cryptoPosition("V12", 1, "ETHUSDT"),
         cryptoPosition("V12", 0.5, "BTCUSDT"),
@@ -391,7 +391,7 @@ test("causal-v1 loss rechecks V12 dynamic 2.0x and PENGU 0.85x strategy caps aft
 
     const pengu = plan([
         cryptoPosition("V12", 1, "ETHUSDT"),
-        position({ id: "base-pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 10, markPrice: 10 }),
+        position({ id: "base-pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 75, entryPrice: 10, markPrice: 10 }),
         position({
             id: "q102v1-loss-pengu",
             strategy: "QUALITY102_CAUSAL_V1",
@@ -420,7 +420,7 @@ test("historical QUALITY102 is never selected for causal conflict reduction", ()
         }),
     ], [
         intent("V12", 1.5),
-        intent("PENGU_DUAL_LS_V2", 0.85),
+        intent("PENGU_DUAL_LS_V2", 0.75),
         intent("V52", 1.5),
     ]);
 
@@ -430,7 +430,7 @@ test("historical QUALITY102 is never selected for causal conflict reduction", ()
     assert.equal(result.activePositions.find((row) => row.strategy === "QUALITY102")?.quantity, 50);
     assert.deepEqual(
         result.accepted.map(({ strategy, gross }) => [strategy, gross]),
-        [["V52", 1.5], ["PENGU_DUAL_LS_V2", 0.85], ["V12", 1]],
+        [["V52", 1.5], ["PENGU_DUAL_LS_V2", 0.75], ["V12", 1]],
     );
     assert.equal(result.rejected.find(({ intent: row }) => row.strategy === "V12"), undefined);
 });
@@ -492,7 +492,7 @@ test("V12 active position over per-position 1.0x fails closed", () => {
 test("Core intents fully preempt FET residual before capacity allocation", () => {
     for (const [strategy, symbol, gross] of [
         ["V12", "ETHUSDT", 1.0],
-        ["PENGU_DUAL_LS_V2", "PENGUUSDT", 0.85],
+        ["PENGU_DUAL_LS_V2", "PENGUUSDT", 0.75],
         ["V52", "NVDAUSDT", 1.0],
         ["QUALITY102_CAUSAL_V1", "SOLUSDT", 1.0],
     ] as const) {

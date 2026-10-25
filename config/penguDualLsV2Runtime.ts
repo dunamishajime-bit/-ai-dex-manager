@@ -14,7 +14,7 @@ export const PENGU_DUAL_LS_V2 = {
     longGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
     shortGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
     maximumGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
-    fixedEntryGross: 1.0,
+    fixedEntryGross: 0.75,
     portfolioGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
     short: {
         regimeReturn72hMaximum: 0,

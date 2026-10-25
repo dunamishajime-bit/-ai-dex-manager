@@ -61,7 +61,8 @@ assert.equal(cooldownHoursForPenguExit("LONG_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("SHORT_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("RECOVERY_V8_HARD_STOP"), 24);
 assert.equal(cooldownHoursForPenguExit("LONG_TRAILING_STOP"), 6);
-assert.equal(PENGU_DUAL_LS_V2.maximumGross, 1.0);
+assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.75);
+assert.equal(PENGU_DUAL_LS_V2.fixedEntryGross, 0.75);
 assert.equal(PENGU_DUAL_LS_V2.logicProfile, "COMBINED_FILTERED_Q60_DD17_H72");
 assert.equal(PENGU_DUAL_LS_V2.routeHardStopQuarantineHours, 60);
 assert.equal(PENGU_DUAL_LS_V2.realizedDrawdownThresholdPct, 17);
@@ -84,7 +85,7 @@ assert.match(
 );
 assert.equal(PENGU_SHORT_V20_CANDIDATE, "COUNTERWIND_VOL_TARGET_FAILURE_EXIT");
 assert.equal(PENGU_SHORT_V20_PRE_REGISTRATION_SHA, "ad7cedb3cafaf9f9680e390112f72375d84b50ac");
-assert.equal(classifyPenguShortV20SizingState(1.0), "CAP");
+assert.equal(classifyPenguShortV20SizingState(0.75), "CAP");
 assert.equal(classifyPenguShortV20SizingState(0.60), "FLOOR");
 assert.equal(classifyPenguShortV20SizingState(0.70), "VOL_TARGET");
 
@@ -101,7 +102,7 @@ const liveRuntime = resolvePenguDualLsV2Runtime({
     PENGU_DUAL_LS_V2_MAX_GROSS: "2.5",
     PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP: "2.5",
 });
-assert.equal(liveRuntime.maximumGross, 1.0);
+assert.equal(liveRuntime.maximumGross, 0.75);
 assert.equal(liveRuntime.portfolioGrossCap, 2.5);
 assert.equal(liveRuntime.maximumEntryDelayMs, 5 * 60_000);
 assert.equal(resolvePenguDualLsV2Runtime({ PENGU_DUAL_LS_V2_MAX_ENTRY_DELAY_MS: "9999999" }).maximumEntryDelayMs, 5 * 60_000);
@@ -159,8 +160,8 @@ assert.equal(invalidated.m05Pass[1], undefined, "M05 is observed only after the 
 const expiredRows = [impulse, ...Array.from({ length: 25 }, (_, index) => features({ referenceTs: (201 + index) * HOUR, close: 100, low: 100, penguReturn24h: 0 }))];
 assert.equal(evaluatePenguDualLsV2ShortSignals(expiredRows).setupActive.at(-1), false);
 
-assert.equal(targetGrossForAtr(0.005), 1.0);
-assert.equal(targetGrossForAtr(0.02), 1.0);
+assert.equal(targetGrossForAtr(0.005), 0.75);
+assert.equal(targetGrossForAtr(0.02), 0.75);
 assert.equal(targetGrossForAtr(0.05), 0.60);
 assert.equal(targetGrossForAtr(0.50), 0.60);
 assert.equal(targetGrossForAtr(0), 0);
@@ -207,7 +208,7 @@ const v20Exit = evaluatePenguDualLsV2Exit(v20Position, features({ referenceTs: 1
 assert.equal(v20Exit?.reason, "SHORT_V20_VOL_TARGET_FAILURE_EXIT");
 assert.equal(v20Exit?.stopPrice, 98.25);
 
-const resumedSeed = createPenguShortV20State({ entryPrice: 100, requestedGross: 1.0, entryAtr24Ratio: 0.03, btcEma168Distance: 0.01, btcReturn24h: 0 });
+const resumedSeed = createPenguShortV20State({ entryPrice: 100, requestedGross: 0.75, entryAtr24Ratio: 0.03, btcEma168Distance: 0.01, btcReturn24h: 0 });
 const resumedFailure = advancePenguShortV20(
     { entryPrice: 100, entryTs: 100 * HOUR, shortV20: resumedSeed },
     features({ referenceTs: 101 * HOUR, low: 97, close: 99, high: 100, btcReturn24h: 0 }),
