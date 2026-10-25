@@ -1,8 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { isAbsolute } from "node:path";
+import { isAbsolute, join } from "node:path";
 
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
+import { loadV12V4HpObservability } from "@/lib/server/v12-v4-hp-observability";
 
 const V12_BASE_SYMBOLS = new Set([
   "BTC", "ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR",
@@ -65,17 +66,59 @@ function baseSymbol(symbol: string) {
   return upper.endsWith("USDT") ? upper.slice(0, -4) : upper;
 }
 
-async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECISION_SNAPSHOT_PATH" | "DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH") {
-  const configuredPath = String(process.env[envName] || "").trim();
-  if (!configuredPath) return { configured: false as const, value: null, error: `${envName} がUIサービスに設定されていません。` };
-  if (!isAbsolute(configuredPath)) return { configured: true as const, value: null, error: `${envName} は絶対パスで設定してください。` };
+type JsonSource = {
+  configured: boolean;
+  value: unknown | null;
+  error?: string;
+};
+
+async function readJsonAtPath(pathValue: string | undefined, label: string): Promise<JsonSource> {
+  const configuredPath = String(pathValue || "").trim();
+  if (!configuredPath) return { configured: false, value: null, error: `${label} がUIサービスに設定されていません。` };
+  if (!isAbsolute(configuredPath)) return { configured: true, value: null, error: `${label} は絶対パスで設定してください。` };
   try {
     const text = await readFile(configuredPath, "utf8");
-    if (Buffer.byteLength(text, "utf8") > MAX_JSON_BYTES) return { configured: true as const, value: null, error: `${envName} が読み取り上限を超えています。` };
-    return { configured: true as const, value: JSON.parse(text) as unknown, error: undefined };
+    if (Buffer.byteLength(text, "utf8") > MAX_JSON_BYTES) return { configured: true, value: null, error: `${label} が読み取り上限を超えています。` };
+    return { configured: true, value: JSON.parse(text) as unknown, error: undefined };
   } catch (error) {
-    return { configured: true as const, value: null, error: error instanceof Error ? error.message : `${envName} を読み取れません。` };
+    return { configured: true, value: null, error: error instanceof Error ? error.message : `${label} を読み取れません。` };
   }
+}
+
+async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECISION_SNAPSHOT_PATH" | "DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH") {
+  return readJsonAtPath(process.env[envName], envName);
+}
+
+export type V12DecisionSourceKind = "V4_PRIMARY" | "LEGACY_ENV";
+
+/**
+ * Select the decision/state files from the certified primary V12 authority.
+ * When V4 is primary, the legacy V12 files remain readable for history but
+ * must not be presented as the current V4 decision source.
+ */
+export async function loadV12DecisionSources(): Promise<{
+  runnerFile: JsonSource;
+  decisionFile: JsonSource;
+  source: V12DecisionSourceKind;
+}> {
+  const [legacyRunnerFile, legacyDecisionFile, v4Hp] = await Promise.all([
+    readJsonFromEnvPath("V12_X1_ALL_STATE_PATH"),
+    readJsonFromEnvPath("V12_DECISION_SNAPSHOT_PATH"),
+    loadV12V4HpObservability().catch(() => null),
+  ]);
+
+  if (v4Hp?.actual.v12PrimaryMode === "V4") {
+    const stateRoot = process.env.V12_V4_HP_STATE_ROOT || "/var/lib/disdex/v12-v4";
+    const heartbeatPath = process.env.V12_V4_HEALTH_STATE_PATH || join(stateRoot, "heartbeat.json");
+    const decisionPath = process.env.V12_V4_REALTIME_DECISION_PATH || join(stateRoot, "realtime-decision.json");
+    const [runnerFile, decisionFile] = await Promise.all([
+      readJsonAtPath(heartbeatPath, "V4 heartbeat source"),
+      readJsonAtPath(decisionPath, "V4 decision source"),
+    ]);
+    return { runnerFile, decisionFile, source: "V4_PRIMARY" };
+  }
+
+  return { runnerFile: legacyRunnerFile, decisionFile: legacyDecisionFile, source: "LEGACY_ENV" };
 }
 
 export function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
@@ -157,7 +200,9 @@ function safeDecisionSnapshot(value: unknown) {
     || candidates.find((candidate) => candidate.signalEligible === true)
     || candidates[0];
   return {
-    strategyId: typeof row.strategyId === "string" ? row.strategyId : "V12_X1.00_ALL",
+    strategyId: row.schema === "v12-v4-live-decision/v1"
+      ? "V12_V4"
+      : typeof row.strategyId === "string" ? row.strategyId : "V12_X1.00_ALL",
     symbol: typeof row.symbol === "string" ? row.symbol : selectedCandidate?.symbol,
     side: typeof row.side === "string" ? row.side : selectedCandidate?.side,
     regime: typeof row.regime === "string" ? row.regime : undefined,
@@ -239,12 +284,20 @@ function buildExecutionTrace(
 ) {
   const steps: Array<{ key: string; label: string; state: StepState; detail: string }> = [];
   if (!decision?.symbol) {
+    const v4NoCandidateCycle = decision?.strategyId === "V12_V4" && decision.candidates.length === 0;
     return {
-      currentStage: "unavailable",
-      currentStageLabel: "候補データ未取得",
-      summary: "V12の実Runner候補スナップショットがないため、発火判定を確定できません。",
+      currentStage: v4NoCandidateCycle ? "no-candidates" : "unavailable",
+      currentStageLabel: v4NoCandidateCycle ? "候補なし・正常待機" : "候補データ未取得",
+      summary: v4NoCandidateCycle
+        ? `V12 V4の最新判定は取得済みですが、今回のcycleは${decision.rationale || "NO_NATIVE_ENTRY_CANDIDATES"}です。新規発注候補はありません。`
+        : "V12の実Runner候補スナップショットがないため、発火判定を確定できません。",
       nextAction: "次回のV12確定足評価を待ちます。",
-      steps: [{ key: "candidate", label: "1. 候補選定", state: "unknown" as const, detail: "候補スナップショット未取得" }],
+      steps: [{
+        key: "candidate",
+        label: "1. 候補選定",
+        state: v4NoCandidateCycle ? "pass" as const : "unknown" as const,
+        detail: v4NoCandidateCycle ? "V4 decision cycleはfreshですが、ネイティブエントリー候補なし（NO_NATIVE_ENTRY_CANDIDATES）" : "候補スナップショット未取得",
+      }],
     };
   }
 
@@ -332,12 +385,12 @@ function buildExecutionTrace(
 
 export async function loadV12DecisionObservability() {
   const errors: string[] = [];
-  const [runnerFile, decisionFile, riskFile, history] = await Promise.all([
-    readJsonFromEnvPath("V12_X1_ALL_STATE_PATH"),
-    readJsonFromEnvPath("V12_DECISION_SNAPSHOT_PATH"),
+  const [v12Sources, riskFile, history] = await Promise.all([
+    loadV12DecisionSources(),
     readJsonFromEnvPath("DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH"),
     loadAsterTradeHistory(),
   ]);
+  const { runnerFile, decisionFile } = v12Sources;
   if (runnerFile.error) errors.push(`runner-state: ${runnerFile.error}`);
   if (decisionFile.error) errors.push(`decision-snapshot: ${decisionFile.error}`);
   if (riskFile.error) errors.push(`shared-risk: ${riskFile.error}`);
@@ -406,7 +459,11 @@ export async function loadV12DecisionObservability() {
     executionTrace,
     v12Positions: positions,
     recentFills,
-    wiring: { runnerStateConfigured: runnerFile.configured, decisionSnapshotConfigured: decisionFile.configured },
+    wiring: {
+      runnerStateConfigured: runnerFile.configured,
+      decisionSnapshotConfigured: decisionFile.configured,
+      source: v12Sources.source,
+    },
     errors,
   };
 }

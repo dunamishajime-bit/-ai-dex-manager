@@ -187,7 +187,7 @@ type V12Observability = {
   };
   v12Positions: Array<{ symbol: string; side: "LONG" | "SHORT"; quantity: number; entryPrice: number; markPrice: number; unrealizedPnlUsd: number }>;
   recentFills: Array<{ id?: string; executedAt?: string; symbol: string; action: string; side?: string; tradeStatus?: string; positionVerified?: boolean; entryPriceUsd?: number; exitPriceUsd?: number; realizedPnlUsd?: number; netPnlUsd?: number; orderId?: string }>;
-  wiring: { runnerStateConfigured: boolean; decisionSnapshotConfigured: boolean };
+  wiring: { runnerStateConfigured: boolean; decisionSnapshotConfigured: boolean; source?: "V4_PRIMARY" | "LEGACY_ENV" };
   errors: string[];
 };
 
@@ -292,6 +292,7 @@ function V12Detail({ details, production }: { details?: V12Observability; produc
   const decision = details.decision;
   const trace = details.executionTrace;
   const runner = details.runnerState;
+  const isV4Primary = details.wiring.source === "V4_PRIMARY";
   const decisionLabel = decision ? (decision.symbol || "候補未取得") + " " + (decision.side || "WAIT") : "候補未取得";
   const eligibleCount = decision?.candidates.filter((candidate) => candidate.signalGate?.status === "pass").length ?? 0;
   const statusLabel = details.errors.length ? "要確認" : details.decisionDetailsAvailable ? "観測済み" : "未取得";
@@ -300,8 +301,8 @@ function V12Detail({ details, production }: { details?: V12Observability; produc
     <section className="panel-gold rounded-[28px] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />V12 X1.00 ALL 発火経路</div>
-          <p className="mt-1 text-xs text-white/55">VPSのV12 runner state / sanitized decision snapshot / 共有riskを読み取り、候補順位から発注・約定までを段階表示</p>
+          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />{isV4Primary ? "V12 V4" : "V12 X1.00 ALL"} 発火経路</div>
+          <p className="mt-1 text-xs text-white/55">{isV4Primary ? "V4 primaryのheartbeat / realtime decision / 共有riskを読み取り、候補順位から発注・約定までを段階表示" : "VPSのV12 runner state / sanitized decision snapshot / 共有riskを読み取り、候補順位から発注・約定までを段階表示"}</p>
         </div>
         <div className="flex flex-wrap gap-2"><span className={"rounded-full border px-3 py-1 text-xs font-semibold " + statusClass}>V12 {statusLabel}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>
       </div>
@@ -332,7 +333,7 @@ function V12Detail({ details, production }: { details?: V12Observability; produc
             <p>mode：{runner?.mode || "未取得"} / 同一足idempotency：{runner?.lastCompletedIdempotencyKey ? "記録あり" : "未取得"}</p>
             <p>共有risk：{details.sharedRisk ? (details.sharedRisk.tripped ? "停止中" : "通過") + " / loss " + number(details.sharedRisk.lossPct, 2) + "% / 上限 " + number(details.sharedRisk.maximumLossPct, 2) + "%" : "未取得（Fail Closed）"}</p>
             <p>Kill Switch：{runner?.killSwitch ? (runner.killSwitch.active ? "ACTIVE" : "inactive") + (runner.killSwitch.reason ? " / " + runner.killSwitch.reason : "") : "未取得"}</p>
-            <p>state接続：{details.wiring.runnerStateConfigured ? "絶対パス設定済み" : "未設定"} / decision snapshot：{details.wiring.decisionSnapshotConfigured ? "絶対パス設定済み" : "未設定"}</p>
+            <p>state接続：{details.wiring.runnerStateConfigured ? "絶対パス設定済み" : "未設定"} / decision snapshot：{details.wiring.decisionSnapshotConfigured ? "絶対パス設定済み" : "未設定"} / source：{isV4Primary ? "V4_PRIMARY" : "LEGACY_ENV"}</p>
             <p>建玉：{runner?.active ? (runner.active.symbol || "—") + " " + (runner.active.side || "—") + " / gross " + number(runner.active.gross, 3) + "x" : "なし"}</p>
             <p>pending：{runner?.pending ? (runner.pending.action || "ORDER") + " " + (runner.pending.symbol || "—") + " / " + (runner.pending.reason || "—") : "なし"}</p>
             <p>観測エラー：{details.errors.length ? details.errors.join(" / ") : "なし"}</p>

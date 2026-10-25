@@ -3,6 +3,7 @@ import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 import { loadCurrentProductionRuntime, type CurrentProductionRuntime } from "@/lib/server/current-production-runtime";
+import { loadV12DecisionSources } from "@/lib/server/v12-decision-observability";
 
 type Sleeve = "V12" | "V52";
 type Status = "発火候補" | "候補に近い" | "条件不足" | "対象時間外" | "取得不能";
@@ -216,7 +217,18 @@ function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reas
 
 function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionStatusItem[] {
   const candidates = Array.isArray(state.candidates) ? state.candidates.map(object).filter((item): item is JsonObject => Boolean(item)) : [];
-  if (!candidates.length) return config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, "V12 decision snapshotに候補がありません。"));
+  const isV4Decision = state.schema === "v12-v4-live-decision/v1" || state.strategyId === "V12_V4";
+  if (!candidates.length) {
+    const reason = text(state.reason) || (isV4Decision ? "NO_NATIVE_ENTRY_CANDIDATES" : "V12 decision snapshotに候補がありません。");
+    return config.v12Symbols.map((symbol) => ({
+      ...unavailableItem(symbol, "V12", checkedAt, reason),
+      status: isV4Decision ? "条件不足" as const : "取得不能" as const,
+      reason: isV4Decision
+        ? `V12 V4の最新decisionは取得済みですが、今回のcycleは${reason}です。候補なしで新規発注は行いません。`
+        : `${reason} VPSのsanitized snapshotがない場合、過去データから推測表示しません。`,
+      source: isV4Decision ? "VPS V12 V4 realtime decision" : "VPS runner state / sanitized decision snapshot",
+    }));
+  }
 
   const btcRegime = text(state.btcRegime ?? state.regime) || "UNKNOWN";
   const referenceTs = finite(state.referenceTs);
@@ -331,7 +343,10 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
   let v52State: JsonObject | null = null;
 
   try {
-    v12State = await readState(process.env.V12_DECISION_SNAPSHOT_PATH || process.env.V12_X1_ALL_STATE_PATH, "V12 decision snapshot");
+    const v12Source = await loadV12DecisionSources();
+    if (v12Source.decisionFile.error) throw new Error(v12Source.decisionFile.error);
+    v12State = object(v12Source.decisionFile.value);
+    if (!v12State) throw new Error("V12 decision snapshotの形式が不正です。");
   } catch (error) {
     errors.push(error instanceof Error ? error.message : "V12 decision snapshotを読み取れません。");
   }

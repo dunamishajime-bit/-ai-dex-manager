@@ -49,6 +49,7 @@ jobs:
           tests/mobile-layout-regression.test.ts
           tests/live-performance-ui-contract.test.ts
           tests/v4-independent-runtime-ui-contract.test.ts
+          tests/v4-primary-decision-status-contract.test.ts
       - name: TypeScript typecheck
         run: npx tsc --noEmit
       - name: Production build with independently verified types
