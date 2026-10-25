@@ -9,7 +9,7 @@ loading the archived replay package.
 from __future__ import annotations
 
 import argparse
-from bisect import bisect_right
+from bisect import bisect_right, insort
 import copy
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -273,7 +273,7 @@ def allocate_dynamic_candidates(
             strategy_remaining[str(strategy)] = max(0.0, _finite(amount))
     rejected: list[dict[str, Any]] = []
     eligible: list[dict[str, Any]] = []
-    strategy_caps = {"V12": 2.0, "PENGU": PENGU_HARD_CAP, "Q102": 3.0, "FET": 1.0, "V52": 4.0}
+    strategy_caps = STRATEGY_CAPS
 
     for candidate in candidates:
         row = dict(candidate)
@@ -283,7 +283,10 @@ def allocate_dynamic_candidates(
             rejected.append({"id": candidate_id, "reason": "INVALID_ASSET_CLASS"})
             continue
         strategy = str(row.get("strategy_id") or row.get("strategy") or "")
-        hard_cap = strategy_caps.get(strategy, float("inf"))
+        hard_cap = strategy_caps.get(strategy, 0.0)
+        if hard_cap <= 0:
+            rejected.append({"id": candidate_id, "reason": "UNREGISTERED_STRATEGY_CAP"})
+            continue
         minimum = max(0.0, _finite(row.get("minGross") if "minGross" in row else row.get("min_gross")))
         target = max(0.0, _finite(row.get("targetGross") if "targetGross" in row else row.get("target_gross")))
         maximum = max(0.0, _finite(row.get("maxGross") if "maxGross" in row else row.get("max_gross")))
@@ -481,6 +484,46 @@ def load_formal_candidates(candidate_ledger: Path, v52_ledger_root: Path) -> tup
     }
 
 
+
+def normalize_v12_causal_score_percentiles(candidates: Sequence[dict[str, Any]], min_history: int = 50) -> dict[str, int]:
+    """Research-only 0..100 causal percentile calibration of archived V12 raw score (~0..4).
+
+    Only scores with strictly earlier signal timestamps enter the reference set.
+    A future event or an event at the same timestamp cannot change today's score.
+    Cold-start candidates receive an explicit neutral score, not false precision.
+    """
+    ordered = sorted(candidates, key=lambda r: (int(r.get("signal_ts_ms") or r.get("entry_ts_ms") or 0), str(r.get("_model_candidate_id") or "")))
+    history: list[float] = []
+    i = 0
+    while i < len(ordered):
+        ts = int(ordered[i].get("signal_ts_ms") or ordered[i].get("entry_ts_ms") or 0)
+        j = i + 1
+        while j < len(ordered) and int(ordered[j].get("signal_ts_ms") or ordered[j].get("entry_ts_ms") or 0) == ts:
+            j += 1
+        batch = ordered[i:j]
+        for row in batch:
+            if row.get("marketFitScoreSource") != "V12_COMPLETED_SIGNAL_SCORE_V1":
+                continue
+            raw = _finite(row.get("marketFitScore"), math.nan)
+            if not math.isfinite(raw) or raw < 0:
+                row["marketFitScore"] = 50.0
+                row["marketFitScoreSource"] = "V12_INVALID_RAW_NEUTRAL_RESEARCH_ONLY"
+                continue
+            row["marketFitScoreRaw"] = raw
+            row["marketFitScoreHistoryCount"] = len(history)
+            if len(history) < min_history:
+                row["marketFitScore"] = 50.0
+                row["marketFitScoreSource"] = "V12_COLD_START_NEUTRAL_RESEARCH_ONLY"
+            else:
+                row["marketFitScore"] = 100.0 * bisect_right(history, raw) / len(history)
+                row["marketFitScoreSource"] = "V12_CAUSAL_PERCENTILE_RESEARCH_ONLY"
+        for row in batch:
+            raw = row.get("marketFitScoreRaw")
+            if isinstance(raw, (int, float)) and math.isfinite(raw):
+                insort(history, float(raw))
+        i = j
+    return dict(Counter(str(row.get("marketFitScoreSource") or "MISSING") for row in ordered))
+
 def attach_causal_scores_and_prior(
     candidates: list[dict[str, Any]],
     *,
@@ -509,13 +552,13 @@ def attach_causal_scores_and_prior(
             row["marketFitReturn72h"] = score["return72h"]
         if "volumeRatio" in score:
             row["marketFitVolumeRatio"] = score["volumeRatio"]
-        score_counts[score["source"]] += 1
         signal_ts = int(row.get("signal_ts_ms") or row.get("entry_ts_ms") or 0)
         prior_key = f"{strategy}:{signal_ts}"
         prior_row = prior_table["rows"].get(prior_key)
         if prior_row and prior_row["metrics"]["tradeCount"] > 0:
             row["btPrior"] = prior_row["metrics"]
             row["btPriorVersion"] = prior_table["version"]
+    score_counts.update(normalize_v12_causal_score_percentiles(candidates))
     return {"priorTable": prior_table, "scoreCounts": dict(score_counts), "signalRows": signal_rows}
 
 
@@ -841,7 +884,7 @@ def _dynamic_portfolio_scenario(
 
         if candidate_i < len(candidate_times) and candidate_times[candidate_i] == ts:
             hard_eligible: list[dict[str, Any]] = []
-            for candidate in sorted(by_entry[ts], key=lambda row: (STRATEGY_PRIORITY.get(str(row["strategy_id"]), 99), str(row.get("symbol") or ""))):
+            for candidate in sorted(by_entry[ts], key=lambda row: (-_candidate_score(row)[1], STRATEGY_PRIORITY.get(str(row["strategy_id"]), 99), str(row.get("symbol") or ""), str(row.get("_model_candidate_id") or ""))):
                 strategy = str(candidate["strategy_id"])
                 cap = _research_cap(candidate)
                 if cap <= 0:

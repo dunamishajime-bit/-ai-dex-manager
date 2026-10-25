@@ -124,6 +124,31 @@ class FormalDynamicScoreBacktestTests(unittest.TestCase):
             1.25 + 1e-12,
         )
 
+    def test_v12_rare_raw_score_is_causally_calibrated_without_future_or_peer_leakage(self):
+        rows = [
+            {"strategy_id": "V12", "signal_ts_ms": i * 1000,
+             "marketFitScore": float(i), "marketFitScoreSource": "V12_COMPLETED_SIGNAL_SCORE_V1"}
+            for i in range(1, 61)
+        ]
+        rows.append({"strategy_id": "V12", "signal_ts_ms": 60000, "marketFitScore": 0.2,
+                     "marketFitScoreSource": "V12_COMPLETED_SIGNAL_SCORE_V1"})
+        bt.normalize_v12_causal_score_percentiles(rows)
+        self.assertEqual(rows[0]["marketFitScore"], 50.0)
+        self.assertEqual(rows[0]["marketFitScoreSource"], "V12_COLD_START_NEUTRAL_RESEARCH_ONLY")
+        self.assertEqual(rows[-2]["marketFitScoreHistoryCount"], 59)
+        self.assertEqual(rows[-1]["marketFitScoreHistoryCount"], 59)
+        self.assertLess(rows[-1]["marketFitScore"], rows[-2]["marketFitScore"])
+        self.assertTrue(all(0 <= row["marketFitScore"] <= 100 for row in rows))
+
+    def test_unregistered_strategy_cannot_bypass_gross_cap(self):
+        rows = [{"id": "unknown", "strategy_id": "UNKNOWN", "asset_class": "CRYPTO",
+                 "marketFitScore": 100.0, "minGross": 0.1, "maxGross": 20.0, "targetGross": 20.0}]
+        result = bt.allocate_dynamic_candidates(
+            rows, crypto_available=10, stock_available=0, total_available=10, equity_usd=100
+        )
+        self.assertEqual(result["allocations"], [])
+        self.assertEqual(result["rejected"][0]["reason"], "UNREGISTERED_STRATEGY_CAP")
+
     def test_research_report_marks_bt_as_not_live(self):
         report = bt.render_research_report({
             "status": "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",

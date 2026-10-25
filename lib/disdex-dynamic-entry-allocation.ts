@@ -69,8 +69,22 @@ export function calculateBtPriorBonus(input: DynamicBtPriorMetrics, maxBonus = D
 }
 
 export function scoreDynamicEntryCandidate(input: DynamicEntryCandidate, maxBonus = DEFAULT_MAX_BT_BONUS): { btPriorBonus: number; finalScore: number } {
+    // A raw archived V12 signal score (~0..4) is NOT a 0..100 market-fit score.
+    // Fail closed rather than ranking it against FET/neutral scores by mistake.
+    if (input.scoreSource === "V12_COMPLETED_SIGNAL_SCORE_V1" && input.marketFitScore <= 4) {
+        // Historical V12 archived unitless raw scores are ~0..4, unlike the
+        // explicitly 0..100 live signal scores. Ambiguous values fail closed.
+        throw new Error("DYNAMIC_ENTRY_UNCALIBRATED_V12_MARKET_FIT_SCORE");
+    }
+    // Raw Idle returns are not calibrated to the same cross-strategy point scale.
+    // Preserve the candidate and reservation path, but rank on a documented
+    // neutral score until a separately versioned causal calibration exists.
+    const comparableMarketFitScore = input.scoreSource === "IDLE_COMPLETED_REL24_RET12_V1" ? 50 : input.marketFitScore;
+    if (!Number.isFinite(input.marketFitScore) || input.marketFitScore < 0 || input.marketFitScore > 100) {
+        throw new Error("DYNAMIC_ENTRY_MARKET_FIT_SCORE_OUT_OF_RANGE");
+    }
     const btPriorBonus = input.btPrior ? calculateBtPriorBonus(input.btPrior, maxBonus) : 0;
-    const finalScore = safe(input.marketFitScore) + btPriorBonus
+    const finalScore = comparableMarketFitScore + btPriorBonus
         - Math.max(0, safe(input.correlationPenalty))
         - Math.max(0, safe(input.concentrationPenalty))
         - Math.max(0, safe(input.stalePenalty));
