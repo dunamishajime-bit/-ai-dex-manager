@@ -1,0 +1,41 @@
+{
+  "status": "RESEARCH_ONLY_FAILCLOSED_GROSS_PATCH_SYNTHETIC_VERIFIED_NOT_AUTHORIZED",
+  "date_local": "2026-10-25",
+  "research_branch": "research/render4427-failclosed-gross-patch-adapter-20261025",
+  "upstream_observed_file": "idle_gross_fractional_isolated_full8_20261016.py",
+  "upstream_verified_from_pc": "read-only source inspection; legacy source was never imported or executed",
+  "adapter": "scripts/dd-reduction/render4427_failclosed_gross_patch_adapter_20261025.py",
+  "test": "scripts/dd-reduction/test_render4427_failclosed_gross_patch_adapter_20261025.py",
+  "independent_processes": 2,
+  "optimization_modes": [
+    0,
+    1,
+    2
+  ],
+  "tests_per_mode": 5,
+  "tests_total": 30,
+  "all_tests_pass": true,
+  "synthetic_case_count": 8,
+  "synthetic_case_verdicts": {
+    "valid": "PASS",
+    "missing_requested": "REJECT_FULL_GROSS_HOOK_NOT_UNIQUE",
+    "duplicate_requested": "REJECT_FULL_GROSS_HOOK_NOT_UNIQUE",
+    "missing_room": "REJECT_ROOM_HOOK_NOT_UNIQUE",
+    "duplicate_room": "REJECT_ROOM_HOOK_NOT_UNIQUE",
+    "prepatched_requested": "REJECT_PREEXISTING_REWRITE",
+    "prepatched_room": "REJECT_PREEXISTING_REWRITE",
+    "crlf": "REJECT_FULL_GROSS_HOOK_NOT_UNIQUE"
+  },
+  "canonical_synthetic_matrix_sha256": "c5996cc59f3b37d00fd2ffc5902cb4a6d126d89a8338ee91e21c8b0091cdcec7",
+  "non_authorization": [
+    "no independent trust root",
+    "no verified dynamic import/patch closure",
+    "no native owner/route",
+    "no 13 GateProof",
+    "no Native8 economic replay",
+    "no real Aster fills or funding",
+    "no LIVE deployment"
+  ],
+  "pc_worktree": "not created; PC only executed in-memory isolated Python test harness",
+  "execution_scope": "synthetic strings only; no Native8 module import or exec"
+}
