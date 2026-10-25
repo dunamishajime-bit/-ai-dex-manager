@@ -7,7 +7,7 @@ import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {executeV4WithContentionAudit} from "../lib/v12-v4-lock-contention-observer";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
 import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
-import {V4RunnerEngine,classifyV4RecoverableExitFeedFailure,classifyV4StaleExitDecisionFailure,type V4OperatorExitAuthorization} from "../lib/v12-v4-runner-engine";
+import {V4RunnerEngine,classifyV4RecoverableExitFeedFailure,classifyV4StaleExitDecisionFailure,classifyV4AccountLeaseRenewalFailure,classifyV4MarketDataReadFailure,type V4OperatorExitAuthorization} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
 import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
@@ -37,6 +37,19 @@ export function classifyV4RateBudgetDefer(error:unknown,doc:V4ExecutionDocument)
  const waitMs=nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5);
  return {reason:"V4_RATE_BUDGET_DEFERRED:"+rate.reason,waitMs};
 }
+// A missing/foreign TIME37 approval is a flat-state configuration block, not a
+// process crash. Never defer it when signed state may require STOP reconciliation.
+export function classifyV4DaemonTimeStopApprovalBlock(error:unknown,doc:V4ExecutionDocument):
+ {status:"blocked";reason:string;waitMs:number}|undefined{
+ const message=error instanceof Error?error.message:String(error);
+ const missing=error instanceof Error&&"code" in error&&error.code==="ENOENT";
+ if(message!=="V4_TIME_STOP_OPERATOR_APPROVAL_REQUIRED"&&!missing)return;
+ const activeIntent=Object.values(doc.intents).some(intent=>intent.stage!=="TERMINAL");
+ const activeLeg=Object.values(doc.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"||leg.status==="OPEN");
+ const activeProtection=Object.values(doc.protections).some(protection=>protection.phase!=="CLOSED");
+ if(activeIntent||activeLeg||activeProtection)return;
+ return {status:"blocked",reason:"V4_TIME37_APPROVAL_SHA_MISSING_OR_MISMATCH",waitMs:60000};
+}
 export async function retryV4FlatBootstrapRateBudget<T>(input:{
  operation:()=>Promise<T>;store:V4ExecutionStore;attempts?:number;wait?:(ms:number)=>Promise<void>;
 }):Promise<T>{
@@ -51,6 +64,34 @@ export async function retryV4FlatBootstrapRateBudget<T>(input:{
    await wait(delay);
   }
  }
+}
+export async function retryV4StartupExchangeInfo<T>(input:{
+ operation:()=>Promise<T>;store:V4ExecutionStore;attempts?:number;wait?:(ms:number)=>Promise<void>;
+}):Promise<T>{
+ const attempts=Math.max(1,Math.min(3,Math.trunc(input.attempts??3)));
+ const wait=input.wait??((ms:number)=>new Promise<void>(done=>setTimeout(done,ms)));
+ for(let attempt=0;;attempt++){
+  try{return await input.operation();}
+  catch(error){
+   const failure=classifyV4MarketDataReadFailure(error,Date.now(),input.store.read());
+   if(!failure||attempt+1>=attempts)throw error;
+   await wait(Math.max(1000,Math.min(15000,failure.retryAfterMs??15000)));
+  }
+ }
+}
+export function classifyV4StartupExchangeInfoFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+ const message=error instanceof Error?error.message:String(error);
+ const prefix="V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE:";
+ if(!message.startsWith(prefix))return;
+ const inner=message.slice(prefix.length);
+ if(inner.startsWith("V4_RATE_BUDGET_RECONCILIATION_BLOCKED:"))
+  return {status:"blocked",reason:inner,eventTs,candidateCount:0,orderEnabled:false,retryAfterMs:15000};
+ if(inner.startsWith("V4_RATE_BUDGET_DEFERRED:"))
+  return {status:"observing",reason:inner,eventTs,candidateCount:0,orderEnabled:false,retryAfterMs:15000};
+ const reason=inner.startsWith("V4_MARKET_DATA_UNAVAILABLE:")?inner.slice("V4_MARKET_DATA_UNAVAILABLE:".length):inner;
+ const failure=classifyV4MarketDataReadFailure(new Error(reason),eventTs);
+ if(!failure)return;
+ return failure;
 }
 // Keep the daemon alive during precisely classified local rate-budget
 // contention. With an unresolved intent, owned leg, or resident protection,
@@ -67,6 +108,12 @@ export function classifyV4DaemonRateBudgetOutcome(
  if(flat)return {...flat,status:"observing"};
  return {status:"blocked",reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:"+rate.reason,
   waitMs:Math.max(15000,nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5))};
+}
+export type V4HealthSafetyState="HEALTHY"|"BLOCKED"|"DEFERRED_FAIL_CLOSED";
+export function classifyV4HealthSafetyState(result:{status:string;reason:string}):V4HealthSafetyState{
+ if(result.status==="blocked"||/^(?:V4_PREPARE_NOT_AVAILABLE|V4_MARKET_DATA_UNAVAILABLE|V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE|V4_EXIT_FEED_GAP_RETRY|V4_STALE_EXIT_REVIEW_REQUIRED|V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY)(?::|$)/.test(result.reason))return "BLOCKED";
+ if(result.reason.startsWith("V4_RATE_BUDGET_"))return "DEFERRED_FAIL_CLOSED";
+ return "HEALTHY";
 }
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
@@ -162,7 +209,7 @@ async function writeV4Health(releaseSha:string,operationMode:string,result:{
  const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
  const payload={
   schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
-  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState:failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":"HEALTHY",
+  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState:failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":classifyV4HealthSafetyState(result),
   heartbeatAt:now,mainPid:process.pid,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
   operationMode,mode:"LIVE",updatedAt:now,lastTickAt:result.eventTs,
   status:result.status,reason:result.reason,candidateCount:result.candidateCount,
@@ -217,15 +264,18 @@ function requireReleaseSha(){
  if(env("V12_V4_LIVE_ACK").toLowerCase()!==sha)throw Error("V4_RELEASE_ACK_MISMATCH");
  return sha;
 }
+function requireV4OperationMode():"CERTIFIED"|"CANARY"{
+ const operationModeRaw=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
+ if(operationModeRaw!=="CERTIFIED"&&operationModeRaw!=="CANARY")throw Error("V4_OPERATION_MODE_INVALID");
+ return operationModeRaw;
+}
 export type V4ProductionRuntimeOptions={
  operatorExitLegIds?:ReadonlySet<string>;
  authorizeOperatorExit?:V4OperatorExitAuthorization;
 };
 export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOptions={}){
  const releaseSha=requireReleaseSha();
- const operationModeRaw=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
- if(operationModeRaw!=="CERTIFIED"&&operationModeRaw!=="CANARY")throw Error("V4_OPERATION_MODE_INVALID");
- const operationMode: "CERTIFIED"|"CANARY"=operationModeRaw;
+ const operationMode=requireV4OperationMode();
  const canaryPermit=operationMode==="CANARY"?await readV4CanaryPermit(releaseSha):undefined;
  // Existing PENGU, FET, Q102, V52, HYPE and Idle remain on independently observed exact SHA releases.
  const peerLineageMode=liveV4PeerLineageMode(operationMode);
@@ -243,7 +293,14 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
  store.read();
  const lock=new FileAccountOrderLock(env("DISDEX_ACCOUNT_LOCK_PATH"),120000);
  const pendingRegistryPath=env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH");
- const info=await retryV4FlatBootstrapRateBudget({operation:()=>client.getExchangeInfo(),store});
+ let info:Awaited<ReturnType<AsterV3Client["getExchangeInfo"]>>;
+ try{
+  info=await retryV4StartupExchangeInfo({operation:()=>client.getExchangeInfo(),store});
+ }catch(error){
+  const failure=classifyV4MarketDataReadFailure(error,Date.now(),store.read());
+  if(!failure)throw error;
+  throw Error("V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE:"+failure.reason);
+ }
  const symbols=new Map(info.symbols.map(row=>[row.symbol,row]));
  let cache:{boundary:number;value:ReturnType<typeof buildV4LiveDecisionBatch>}|undefined;
  const fetchDecision=async()=>{
@@ -335,11 +392,31 @@ async function main(){
   return;
  }
  if(!once&&!daemon&&!initialize)throw Error("V4_RUNNER_REQUIRES_MODE");
- const {engine,store,releaseSha,operationMode}=await buildV4ProductionRuntime();
- if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  let stopping=false;
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
+ let runtime:Awaited<ReturnType<typeof buildV4ProductionRuntime>>|undefined;
+ for(;;){
+  try{
+   runtime=await buildV4ProductionRuntime();
+   break;
+  }catch(error){
+   const startup=classifyV4StartupExchangeInfoFailure(error,Date.now());
+   if(!startup)throw error;
+   const releaseSha=requireReleaseSha(),operationMode=requireV4OperationMode();
+   try{await writeV4DecisionTelemetry(releaseSha,operationMode,undefined,startup);}catch(telemetryError){
+    console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:telemetryError instanceof Error?telemetryError.message:String(telemetryError)}));
+   }
+   await writeV4Health(releaseSha,operationMode,startup);
+   const retryAfterMs=startup.retryAfterMs??15000;
+   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...startup,retryAfterMs,startup:true}));
+   if(!daemon||stopping)return;
+   await new Promise<void>(done=>setTimeout(done,retryAfterMs));
+  }
+ }
+ if(!runtime)return;
+ const {engine,store,releaseSha,operationMode}=runtime;
+ if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  do{
   let result:V4TickResult;
   let prepared:V4PreparedDecision|undefined;
@@ -349,15 +426,36 @@ async function main(){
    // Complete H1/H2 market-data reads outside the account mutex when V4 has
    // no unresolved order or owned leg. Signed account and STOP recovery always
    // remain inside engine.tick() under the original exclusive lease.
-   prepared=await engine.prepareFlatMarketDecision();
-   await writeV4IdleBaselineSnapshot(releaseSha,prepared);
-   result=await executeV4WithContentionAudit({
-    operation:()=>engine.tick(prepared),releaseSha,operationMode,
-    accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
-    attempts:10,retryMs:750,shouldStop:()=>stopping,
-    onContention:()=>{hadLockContention=true;},
-   });
+   // Check exact-SHA TIME37 authority *before* any possible flat ENTRY.
+   // When the signed store is flat, publish a fail-closed BLOCKED heartbeat and
+   // keep the process alive for an explicitly approved root-owned artifact.
+   // Existing exposure is never treated as a benign approval deferral.
+   let approvalBlock:ReturnType<typeof classifyV4DaemonTimeStopApprovalBlock>;
+   try{await readV4TimeStopApproval(releaseSha);}
+   catch(error){
+    approvalBlock=classifyV4DaemonTimeStopApprovalBlock(error,store.read());
+    if(!approvalBlock)throw error;
+   }
+   if(approvalBlock){
+    result={status:"blocked",reason:approvalBlock.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+    deferredWaitMs=approvalBlock.waitMs;
+   }else{
+    prepared=await engine.prepareFlatMarketDecision();
+    await writeV4IdleBaselineSnapshot(releaseSha,prepared);
+    result=await executeV4WithContentionAudit({
+     operation:()=>engine.tick(prepared),releaseSha,operationMode,
+     accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
+     attempts:10,retryMs:750,shouldStop:()=>stopping,
+     onContention:()=>{hadLockContention=true;},
+    });
+    deferredWaitMs=Math.max(deferredWaitMs,result.retryAfterMs??0);
+   }
   }catch(error){
+   const leaseRenewal=classifyV4AccountLeaseRenewalFailure(error,Date.now());
+   if(leaseRenewal){
+    result=leaseRenewal;
+    deferredWaitMs=leaseRenewal.retryAfterMs??15000;
+   }else{
    const staleExitReview=classifyV4StaleExitDecisionFailure(error,Date.now());
    if(staleExitReview){
     result=staleExitReview;
@@ -373,6 +471,7 @@ async function main(){
     deferredWaitMs=budget.waitMs;
     result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
     }
+   }
    }
   }
   try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result);}catch(error){

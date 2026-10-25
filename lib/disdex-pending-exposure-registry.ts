@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { lstat, mkdir, open, readFile, rename, unlink } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const PENDING_EXPOSURE_SCHEMA = "disdex-pending-exposure/v1" as const;
@@ -161,7 +161,13 @@ async function atomicWrite(path: string, registry: PendingExposureRegistry) {
     await mkdir(dirname(path), { recursive: true });
     const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
     try {
-        await writeFile(temporary, `${JSON.stringify(registry, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        const fd = await open(temporary, "w", 0o600);
+        try {
+            await fd.writeFile(`${JSON.stringify(registry, null, 2)}\n`, "utf8");
+            await fd.sync();
+        } finally {
+            await fd.close();
+        }
         await rename(temporary, path);
     } catch (error) {
         await unlink(temporary).catch(() => undefined);

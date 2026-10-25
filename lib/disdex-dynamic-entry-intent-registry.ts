@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rename, unlink } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { allocateDynamicEntryGross, type DynamicEntryAllocation, type DynamicEntryAllocationResult, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
 import { deriveAccountReservationId, type AccountLockHandle, type AccountReservationInput } from "./disdex-account-order-lock";
@@ -13,6 +13,28 @@ export type DynamicEntryAllocationDecision = Omit<DynamicEntryAllocationResult, 
     strictApprovalTokens: string[];
 };
 export type DynamicEntryReservationStatus = "RESERVATION_PENDING" | "DECISION_PUBLISHED" | "RELEASED" | "REQUIRES_REVIEW";
+export type DynamicEntryCrashPoint =
+    | "RESERVATION_BEFORE_JOURNAL"
+    | "RESERVE_PROCESSING"
+    | "RESERVE_SUCCESS"
+    | "JOURNAL_UPDATE_BEFORE"
+    | "DECISION_PUBLISH_BEFORE"
+    | "ATOMIC_WRITE_BEFORE_RENAME";
+export type DynamicEntryCrashProbe = (point: DynamicEntryCrashPoint) => void | Promise<void>;
+
+let crashProbe: DynamicEntryCrashProbe | undefined;
+
+/**
+ * Test-only process interruption seam. It is inert unless a test installs a
+ * callback in the current process; production callers never install one.
+ */
+export function setDynamicEntryCrashProbe(probe?: DynamicEntryCrashProbe) {
+    crashProbe = probe;
+}
+
+async function observeCrashPoint(point: DynamicEntryCrashPoint) {
+    await crashProbe?.(point);
+}
 export type DynamicEntryReservationRecord = {
     reservationKey: string;
     cycleId: string;
@@ -32,6 +54,15 @@ export type DynamicEntryReservationRecord = {
     reviewReason?: string;
 };
 type Document = { schema: typeof DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA; intents: DynamicEntryIntent[]; decisions: DynamicEntryAllocationDecision[]; reservations: DynamicEntryReservationRecord[] };
+
+const DYNAMIC_ENTRY_MUTEX_SCHEMA = "disdex-dynamic-entry-intent-mutex/v1" as const;
+type RegistryMutexDocument = {
+    schema: typeof DYNAMIC_ENTRY_MUTEX_SCHEMA;
+    ownerId: string;
+    pid: number;
+    createdAt: number;
+    expiresAt: number;
+};
 
 type AuthoritativeGrossCaps = {
     strategyGrossAvailable: Readonly<Record<string, number>>;
@@ -133,27 +164,125 @@ export type DynamicEntryReconciliationResult = {
 async function write(path: string, doc: Document) {
     await mkdir(dirname(path), { recursive: true });
     const temp = `${path}.${process.pid}.${randomUUID()}.tmp`;
-    try { await writeFile(temp, `${JSON.stringify(doc, null, 2)}\n`, { encoding: "utf8", mode: 0o600 }); await rename(temp, path); }
+    try {
+        const fd = await open(temp, "w", 0o600);
+        try {
+            await fd.writeFile(`${JSON.stringify(doc, null, 2)}\n`, "utf8");
+            await fd.sync();
+        } finally {
+            await fd.close();
+        }
+        await observeCrashPoint("ATOMIC_WRITE_BEFORE_RENAME");
+        await rename(temp, path);
+    }
     catch (error) { await unlink(temp).catch(() => undefined); throw error; }
+}
+
+function errorCode(error: unknown) {
+    return error && typeof error === "object" && "code" in error
+        ? String((error as { code?: unknown }).code)
+        : "";
+}
+
+function processAlive(pid: number) {
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch (error) {
+        // EPERM means the process exists but cannot be inspected; only ESRCH
+        // is proof that the old mutex owner is gone.
+        return errorCode(error) !== "ESRCH";
+    }
+}
+
+function parseMutex(raw: unknown): RegistryMutexDocument {
+    if (!raw || typeof raw !== "object") throw new Error("DYNAMIC_ENTRY_INTENT_MUTEX_MALFORMED");
+    const value = raw as Partial<RegistryMutexDocument>;
+    const pid = Number(value.pid);
+    const createdAt = Number(value.createdAt);
+    const expiresAt = Number(value.expiresAt);
+    if (value.schema !== DYNAMIC_ENTRY_MUTEX_SCHEMA || typeof value.ownerId !== "string" || !value.ownerId.trim()
+        || !Number.isSafeInteger(pid) || pid <= 0 || !Number.isFinite(createdAt)
+        || !Number.isFinite(expiresAt) || expiresAt <= createdAt) {
+        throw new Error("DYNAMIC_ENTRY_INTENT_MUTEX_MALFORMED");
+    }
+    return {
+        schema: DYNAMIC_ENTRY_MUTEX_SCHEMA,
+        ownerId: value.ownerId,
+        pid,
+        createdAt,
+        expiresAt,
+    };
+}
+
+async function readMutex(path: string) {
+    try {
+        return parseMutex(JSON.parse(await readFile(path, "utf8")));
+    } catch (error) {
+        if (errorCode(error) === "ENOENT") return undefined;
+        throw error;
+    }
 }
 
 export class FileDynamicEntryIntentRegistry {
     private readonly path: string;
-    constructor(path: string, private readonly intentTtlMs = 30_000) {
+    constructor(path: string, private readonly intentTtlMs = 30_000, private readonly mutexTtlMs = Math.max(5_000, intentTtlMs)) {
         if (!Number.isFinite(intentTtlMs) || intentTtlMs <= 0) throw new Error("DYNAMIC_ENTRY_INTENT_TTL_INVALID");
+        if (!Number.isFinite(mutexTtlMs) || mutexTtlMs <= 0) throw new Error("DYNAMIC_ENTRY_MUTEX_TTL_INVALID");
         this.path = resolve(path);
     }
 
-    private async synchronized<T>(work: () => Promise<T>): Promise<T> {
+    private async acquireMutex() {
         const lockPath = `${this.path}.mutex`;
+        const ownerId = `${process.pid}:${randomUUID()}`;
         await mkdir(dirname(this.path), { recursive: true });
-        let fd;
         for (let tries = 0; tries < 500; tries += 1) {
-            try { fd = await open(lockPath, "wx", 0o600); break; }
-            catch (error) { if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error; await new Promise((resolveWait) => setTimeout(resolveWait, 10)); }
+            try {
+                const fd = await open(lockPath, "wx", 0o600);
+                const createdAt = Date.now();
+                try {
+                    await fd.writeFile(`${JSON.stringify({
+                        schema: DYNAMIC_ENTRY_MUTEX_SCHEMA,
+                        ownerId,
+                        pid: process.pid,
+                        createdAt,
+                        expiresAt: createdAt + this.mutexTtlMs,
+                    } satisfies RegistryMutexDocument)}\n`, "utf8");
+                    await fd.sync();
+                } catch (error) {
+                    await fd.close();
+                    await unlink(lockPath).catch(() => undefined);
+                    throw error;
+                }
+                await fd.close();
+                return { lockPath, ownerId };
+            } catch (error) {
+                if (errorCode(error) !== "EEXIST") throw error;
+                const current = await readMutex(lockPath);
+                if (current && current.expiresAt <= Date.now() && !processAlive(current.pid)) {
+                    await unlink(lockPath).catch((unlinkError) => {
+                        if (errorCode(unlinkError) !== "ENOENT") throw unlinkError;
+                    });
+                    continue;
+                }
+                await new Promise((resolveWait) => setTimeout(resolveWait, 10));
+            }
         }
-        if (!fd) throw new Error("DYNAMIC_ENTRY_INTENT_REGISTRY_BUSY");
-        try { return await work(); } finally { await fd.close(); await unlink(lockPath).catch(() => undefined); }
+        throw new Error("DYNAMIC_ENTRY_INTENT_REGISTRY_BUSY");
+    }
+
+    private async releaseMutex(mutex: { lockPath: string; ownerId: string }) {
+        try {
+            const current = await readMutex(mutex.lockPath);
+            if (current?.ownerId === mutex.ownerId) await unlink(mutex.lockPath);
+        } catch (error) {
+            if (errorCode(error) !== "ENOENT") throw error;
+        }
+    }
+
+    private async synchronized<T>(work: () => Promise<T>): Promise<T> {
+        const mutex = await this.acquireMutex();
+        try { return await work(); } finally { await this.releaseMutex(mutex); }
     }
 
     async submit(intent: DynamicEntryCandidate & { cycleId: string }, submittedAt = Date.now()): Promise<DynamicEntryIntent> {
@@ -259,12 +388,15 @@ export class FileDynamicEntryIntentRegistry {
             }));
             let publishedDecisionId: string | undefined;
             try {
+                await observeCrashPoint("RESERVATION_BEFORE_JOURNAL");
                 doc.reservations = [...doc.reservations.filter((row) => row.cycleId !== input.cycleId), ...journalRows];
                 await write(this.path, doc);
                 for (let index = 0; index < allocation.allocations.length; index += 1) {
                     const row = allocation.allocations[index];
+                    await observeCrashPoint("RESERVE_PROCESSING");
                     const actual = await input.lock.reserve(reservationRequest(row));
                     reservations.push(actual.reservationId);
+                    await observeCrashPoint("RESERVE_SUCCESS");
                     if (actual.reservationId !== journalRows[index].reservationId) {
                         throw new Error("DYNAMIC_ENTRY_RESERVATION_ID_MISMATCH");
                     }
@@ -279,6 +411,7 @@ export class FileDynamicEntryIntentRegistry {
                         throw new Error("DYNAMIC_ENTRY_RESERVATION_LOCK_PARITY_FAILED");
                     }
                 }
+                await observeCrashPoint("JOURNAL_UPDATE_BEFORE");
                 const decisionId = createHash("sha256").update(`${input.cycleId}|${allocation.allocations.map((row) => `${row.id}:${row.allocatedGross}`).join("|")}|${input.strictPlannerApprovals.map((approval) => approval.token).sort().join("|")}`).digest("hex").slice(0, 24);
                 const decision: DynamicEntryAllocationDecision = {
                     ...allocation,
@@ -291,6 +424,7 @@ export class FileDynamicEntryIntentRegistry {
                     ? { ...row, status: "DECISION_PUBLISHED" as const, decisionId, updatedAt: input.now }
                     : row);
                 doc.decisions.push(decision);
+                await observeCrashPoint("DECISION_PUBLISH_BEFORE");
                 await write(this.path, doc);
                 return decision;
             } catch (error) {

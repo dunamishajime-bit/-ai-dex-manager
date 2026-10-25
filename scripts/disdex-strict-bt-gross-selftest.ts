@@ -67,6 +67,7 @@ assert.equal(at200.totals.cryptoGross, 2);
 const overCrypto = planStrictPortfolio({
     equity: 1000,
     now: NOW,
+    entryGrossCaps: { cryptoGrossCap: 3, totalGrossCap: 3.5 },
     active: [
         position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
         position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
@@ -105,6 +106,7 @@ assert.equal(at250.totals.totalGross, 2.5);
 const overTotal = planStrictPortfolio({
     equity: 1000,
     now: NOW,
+    entryGrossCaps: { cryptoGrossCap: 3, totalGrossCap: 3.5 },
     active: [
         position({ id: "v12-1", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
         position({ id: "v12-2", strategy: "V12", symbol: "BTCUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
@@ -164,6 +166,7 @@ const residual = planStrictPortfolio({
     equity: 1000,
     now: NOW,
     researchMode: true,
+    entryGrossCaps: { cryptoGrossCap: 3, totalGrossCap: 3.5 },
     active: qualityActive,
     intents: [{ idempotencyKey: "v52-1", strategy: "V52", symbol: "NVDAUSDT", side: "LONG", gross: 1, notionalUsd: 1000, signalTs: NOW }],
 });

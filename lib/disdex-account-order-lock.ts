@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rename, unlink } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { pendingExposurePath, releasePendingExposure, upsertPendingExposure, type PendingExposureSleeve } from "./disdex-pending-exposure-registry";
 
@@ -74,7 +74,13 @@ async function atomicWrite(path: string, document: AccountLockDocument) {
     await mkdir(dirname(path), { recursive: true });
     const temp = `${path}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`;
     try {
-        await writeFile(temp, `${JSON.stringify(document, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        const fd = await open(temp, "w", 0o600);
+        try {
+            await fd.writeFile(`${JSON.stringify(document, null, 2)}\n`, "utf8");
+            await fd.sync();
+        } finally {
+            await fd.close();
+        }
         await rename(temp, path);
     } catch (error) {
         await unlink(temp).catch(() => undefined);
@@ -126,6 +132,7 @@ export class FileAccountOrderLock {
                 const fd = await open(this.path, "wx", 0o600);
                 try {
                     await fd.writeFile(`${JSON.stringify(document, null, 2)}\n`, "utf8");
+                    await fd.sync();
                 } finally {
                     await fd.close();
                 }
