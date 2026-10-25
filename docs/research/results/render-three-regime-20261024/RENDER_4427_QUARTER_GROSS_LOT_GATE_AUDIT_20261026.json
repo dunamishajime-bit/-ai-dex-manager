@@ -1,0 +1,64 @@
+{
+  "schema": "render4427-quarter-gross-lot-audit-evidence/v1",
+  "date": "2026-10-26",
+  "source_ref": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "source_sha256": {
+    "lib/idle-quantity-feasibility.ts": "4d87b6456f75077aabb1db2422c960d95386ae6ffbb924b878d40a8eeeef664d",
+    "lib/idle-priority-short-runner.ts": "0a5682f30add54b7f03714c8b40596af80f6b80cd04b360c6009f62f3cb22f33",
+    "lib/idle-priority-short-live.ts": "185e0991cb810bba903dfa299df70f5a1e805fe6d9b76242247e672bcd30889c",
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8"
+  },
+  "audit_script_pc_fetched_sha256": "396c06eea05d3a4de52098d98901dcb947caf27cd69c812dea551a677908ea0d",
+  "canonical_result_sha256": "78b84911d01381fe2eb95ce36ae1024454cbb140e1a75bfe5b5e9f70f79c4e40",
+  "processes": 2,
+  "python_modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "total_case_checks": 36,
+  "all_identical": true,
+  "cases": [
+    {
+      "name": "RENDER_025",
+      "gross": 0.25,
+      "accepted": false,
+      "code": "QUANTITY_NOT_ONE_STEP_FLOOR"
+    },
+    {
+      "name": "DOT_025",
+      "gross": 0.25,
+      "accepted": false,
+      "code": "QUANTITY_NOT_ONE_STEP_FLOOR"
+    },
+    {
+      "name": "RENDER_025_ALT_PRICE",
+      "gross": 0.25,
+      "accepted": false,
+      "code": "QUANTITY_NOT_ONE_STEP_FLOOR"
+    },
+    {
+      "name": "RENDER_0125",
+      "gross": 0.125,
+      "accepted": false,
+      "code": "QUANTITY_NOT_ONE_STEP_FLOOR"
+    },
+    {
+      "name": "ONE_X_CONTROL",
+      "gross": 1,
+      "accepted": true,
+      "code": "FULL_1X_EXACT"
+    },
+    {
+      "name": "ONE_X_FLOOR",
+      "gross": 1,
+      "accepted": true,
+      "code": "VENUE_STEP_ROUNDING_OK"
+    }
+  ],
+  "execution": "Pinned pure TypeScript feasibility source loaded in-memory via Node stripTypeScriptTypes, no Native8 import",
+  "actual_venue_test": false,
+  "production_parity": false,
+  "order_authorized": false,
+  "economic_bt": false
+}
