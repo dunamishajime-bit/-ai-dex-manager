@@ -69,3 +69,67 @@ The repository-wide TypeScript check was also run. It exited `2` on pre-existing
 ## Explicit safety statement
 
 No VPS or approval artifact was changed. No deployment, order, cancel, position, STOP, durable production-state, or operator-approval mutation was performed.
+
+## Fix round 1 — review findings
+
+### Files changed
+
+- `lib/v12-v4-runner-engine.ts`
+  - Made rate-budget classification inspect the durable execution document. Any non-terminal intent, owned/open or pending leg, or resident protection now produces `BLOCKED` with `V4_RATE_BUDGET_RECONCILIATION_BLOCKED`, `orderEnabled=false`, and a 15,000 ms retry bound in the in-lease decision-read path.
+  - Removed the broad `temporary`/`temporarily`/`transient` wording matcher. Only the explicit network error codes and HTTP 429/5xx forms remain recoverable market-data classifications.
+  - Passed the current durable document into the in-lease decision-read classifier.
+- `scripts/v12-v4-production-runner.ts`
+  - Added a bounded three-attempt `exchangeInfo` startup retry for the existing classified network/HTTP/rate-budget failures.
+  - Wrapped exhausted classified startup failures as observable, order-disabled results and handled them before the normal daemon tick loop; daemon mode retries after the bounded delay, while once/init modes emit the result and stop without entering the order path.
+  - Preserved fatal behavior for configuration, credentials, approval-integrity, state-integrity, risk, and unknown failures.
+  - Kept startup failures out of `HEALTHY` health classification.
+- `tests/v12-v4-runner-engine.test.ts`
+  - Added negative tests for misleading transient wording, a non-flat classifier contract, and an actual protected non-flat second-tick `fetchDecision()` rate-budget failure.
+  - Extended the existing recovery fixture only to inject the decision-read failure and to settle its partial fill before exercising that path.
+- `tests/v12-v4-rate-budget-resilience.test.ts`
+  - Added bounded startup `exchangeInfo` retry, exhausted-startup blocked-result, and production-wiring regression tests.
+- `.superpowers/sdd/2026-10-25-v4-live-recovery/task-1-report.md`
+  - Appended this fix-round evidence.
+
+### RED evidence
+
+Command:
+
+```text
+node node_modules/tsx/dist/cli.mjs --test tests/v12-v4-runner-engine.test.ts tests/v12-v4-rate-budget-resilience.test.ts
+```
+
+The sandbox-only run stopped at the Windows Node test-worker `EPERM` before executing tests. The same local command run with the required Windows test-worker permission reached the intended RED: `33` tests ran, `30` passed, and `3` failed. The failures were the missing `retryV4StartupExchangeInfo` export, missing startup production wiring, and the new non-flat rate-budget assertion receiving the old observing result.
+
+### Implementation decisions
+
+1. Startup `exchangeInfo` recovery is limited to the already explicit market-data/rate-budget classifier and three total attempts. It does not broaden recovery to configuration, credential, approval, integrity, risk, or unknown exceptions.
+2. An exhausted classified startup failure is published through the existing V4 telemetry/heartbeat paths with `orderEnabled=false`; daemon mode remains alive and retries, while no order mutation is reachable from the startup-failure branch.
+3. Durable non-flat state is checked at the point where the in-lease `fetchDecision()` failure is classified, so flat rate-budget deferral remains observing but unresolved intents, owned legs, and resident protection remain blocked fail-closed.
+4. Exact-SHA TIME37 validation, shared risk/margin checks, account-lock ownership, resident STOP verification, and order mutation guards were not changed.
+
+### Focused GREEN evidence
+
+Command:
+
+```text
+node node_modules/tsx/dist/cli.mjs --test tests/v12-v4-runner-engine.test.ts tests/v12-v4-rate-budget-resilience.test.ts
+```
+
+Result: `35` tests passed, `0` failed. This includes the production-wiring startup retry test and the actual non-flat in-lease decision-read regression.
+
+The complete local V4 suite was also run:
+
+```text
+node node_modules/tsx/dist/cli.mjs --test tests/v12-v4-*.test.ts
+```
+
+Result: `242` tests passed, `0` failed.
+
+The repository-wide TypeScript check was run and remains red only on the known baseline dependency/project diagnostics (`lucide-react` resolution and `viem` `Timer`/type diagnostics); it emitted no diagnostics for the changed V4 engine, production runner, or V4 test files.
+
+### Fix-round concerns
+
+- The startup retry is intentionally bounded and fail-closed. If the exchange metadata remains unavailable, the daemon continues to emit the blocked order-disabled heartbeat and retries; it does not claim market-data or LIVE recovery.
+- The repository-wide TypeScript baseline remains unresolved outside this fix scope.
+- No VPS, LIVE process, production symlink, durable production state, operator approval, or approval artifact was inspected or changed.

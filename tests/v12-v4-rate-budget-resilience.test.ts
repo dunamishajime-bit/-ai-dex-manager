@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,classifyV4DaemonTimeStopApprovalBlock,retryV4FlatBootstrapRateBudget,classifyV4HealthSafetyState} from "../scripts/v12-v4-production-runner";
+import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,classifyV4DaemonTimeStopApprovalBlock,retryV4FlatBootstrapRateBudget,retryV4StartupExchangeInfo,classifyV4StartupExchangeInfoFailure,classifyV4HealthSafetyState} from "../scripts/v12-v4-production-runner";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 
 function doc(overrides:Record<string,unknown>={}):V4ExecutionDocument{
@@ -56,6 +56,42 @@ test("flat bootstrap waits through bounded local budget saturation and then succ
  assert.equal(calls,3);
  assert.equal(waits.length,2);
  assert.ok(waits.every(ms=>ms>=4000&&ms<=15000));
+});
+
+test("initial exchangeInfo retries bounded transient HTTP failures before succeeding",async()=>{
+ let calls=0;const waits:number[]=[];
+ const result=await retryV4StartupExchangeInfo({
+  store:{read:()=>doc()} as any,
+  attempts:3,
+  wait:async(ms)=>{waits.push(ms);},
+  operation:async()=>{calls++;if(calls<3)throw new Error("HTTP 503 /fapi/v3/exchangeInfo");return {symbols:[]};},
+ });
+ assert.deepEqual(result,{symbols:[]});
+ assert.equal(calls,3);
+ assert.deepEqual(waits,[15000,15000]);
+});
+
+test("exhausted startup exchangeInfo failure becomes an observable blocked result",()=>{
+ const result=classifyV4StartupExchangeInfoFailure(
+  new Error("V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE:V4_MARKET_DATA_UNAVAILABLE:HTTP 503 /fapi/v3/exchangeInfo"),
+  1792859642887,
+ );
+ assert.deepEqual(result,{
+  status:"blocked",
+  reason:"V4_MARKET_DATA_UNAVAILABLE:HTTP 503 /fapi/v3/exchangeInfo",
+  eventTs:1792859642887,
+  candidateCount:0,
+  orderEnabled:false,
+  retryAfterMs:15000,
+ });
+ assert.equal(classifyV4HealthSafetyState(result!),"BLOCKED");
+});
+
+test("production startup wiring retries exchangeInfo before the daemon loop and publishes bounded failure",()=>{
+ const src=require("node:fs").readFileSync("scripts/v12-v4-production-runner.ts","utf8");
+ assert.match(src,/retryV4StartupExchangeInfo\(\{operation:\(\)=>client\.getExchangeInfo\(\),store/);
+ assert.match(src,/classifyV4StartupExchangeInfoFailure\(error,Date\.now\(\)/);
+ assert.match(src,/V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE/);
 });
 
 test("bootstrap never waits when durable state requires immediate reconciliation",async()=>{

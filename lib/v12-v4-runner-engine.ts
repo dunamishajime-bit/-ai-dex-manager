@@ -43,22 +43,31 @@ function safeDecisionFailureReason(error:unknown){
   .replace(/(secret|private.?key|signature|token|api.?key)=?[^\s,;]+/ig,"$1=[REDACTED]")
   .replace(/[\r\n\t]+/g," ").replace(/\s{2,}/g," ").slice(0,180)||"DECISION_SOURCE_UNAVAILABLE";
 }
+function hasV4DurableRecoveryState(doc?:V4ExecutionDocument){
+ if(!doc)return false;
+ return Object.values(doc.intents).some(intent=>intent.stage!=="TERMINAL")||
+  Object.values(doc.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"||leg.status==="OPEN")||
+  Object.values(doc.protections).some(protection=>protection.phase!=="CLOSED");
+}
 export function classifyV4AccountLeaseRenewalFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
  const reason=safeDecisionFailureReason(error);
  if(reason!=="V4_ACCOUNT_LEASE_RENEWAL_FAILED")return;
  return {status:"blocked",reason:"V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY:"+reason,eventTs,
   candidateCount:0,orderEnabled:false,retryAfterMs:15000};
 }
-export function classifyV4MarketDataReadFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+export function classifyV4MarketDataReadFailure(error:unknown,eventTs=Date.now(),doc?:V4ExecutionDocument):V4TickResult|undefined{
  const reason=safeDecisionFailureReason(error);
  const rate=classifyAsterRateBudgetFailure(error);
- if(rate)return {status:"observing",reason:"V4_RATE_BUDGET_DEFERRED:"+rate.reason,eventTs,
-  candidateCount:0,orderEnabled:false,retryAfterMs:Math.max(1000,Math.min(15000,rate.waitMs??1000))};
+ if(rate){
+  if(hasV4DurableRecoveryState(doc))return {status:"blocked",reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:"+rate.reason,eventTs,
+   candidateCount:0,orderEnabled:false,retryAfterMs:15000};
+  return {status:"observing",reason:"V4_RATE_BUDGET_DEFERRED:"+rate.reason,eventTs,
+   candidateCount:0,orderEnabled:false,retryAfterMs:Math.max(1000,Math.min(15000,rate.waitMs??1000))};
+ }
  if(/^V4_H\d+_WARMUP_INSUFFICIENT:/.test(reason)||reason==="MARKET_NETWORK_FAILURE")
   return {status:"observing",reason:"V4_MARKET_DATA_UNAVAILABLE:"+reason,eventTs,candidateCount:0,orderEnabled:false};
  if(/(?:^|[\s:/])(?:ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|ECONNREFUSED)(?:$|[\s:/])/.test(reason)||
-    /\bHTTP\s+(?:429|5\d\d)\b/i.test(reason)||/\b(?:status|code)[=: ](?:429|5\d\d)\b/i.test(reason)||
-    /\b(?:temporary|temporarily|transient)\b/i.test(reason))
+    /\bHTTP\s+(?:429|5\d\d)\b/i.test(reason)||/\b(?:status|code)[=: ](?:429|5\d\d)\b/i.test(reason))
   return {status:"blocked",reason:"V4_MARKET_DATA_UNAVAILABLE:"+reason,eventTs,candidateCount:0,orderEnabled:false,retryAfterMs:15000};
  return;
 }
@@ -375,7 +384,7 @@ export class V4RunnerEngine{
   try{
    decision=reusable&&prepared?.kind==="READY"?prepared.decision:await d.fetchDecision();
   }catch(error){
-   const readFailure=classifyV4MarketDataReadFailure(error,this.now());
+   const readFailure=classifyV4MarketDataReadFailure(error,this.now(),d.store.read());
    if(readFailure)return readFailure;
    throw error;
   }

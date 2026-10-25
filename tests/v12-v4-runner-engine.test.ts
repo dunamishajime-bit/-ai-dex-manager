@@ -110,6 +110,31 @@ test("startup exchange-read failures distinguish bounded transient retries from 
   "UNKNOWN_INFRASTRUCTURE_FAILURE",
  ]) assert.equal(classifyV4MarketDataReadFailure(new Error(message),eventTs),undefined,message);
 });
+test("transient wording alone never downgrades integrity, credential, approval, or risk failures",()=>{
+ for(const message of [
+  "V4_RISK_TEMPORARY_APPROVAL_REQUIRED",
+  "V4_CREDENTIAL_TRANSIENT_FAILURE",
+  "V4_STATE_INTEGRITY_TEMPORARY_MISMATCH",
+  "UNKNOWN_TRANSIENT_INFRASTRUCTURE_FAILURE",
+ ]) assert.equal(classifyV4MarketDataReadFailure(new Error(message)),undefined,message);
+});
+test("in-lease rate-budget saturation is BLOCKED when durable state is non-flat",()=>{
+ const eventTs=1792859642887;
+ const active={
+  schema:2,releaseSha:sha,revision:0,
+  state:{legs:{leg:{qty:1,status:"OPEN"}},journal:[],initial:{}},
+  intents:{},protections:{},
+ } as any;
+ assert.deepEqual(classifyV4MarketDataReadFailure(
+  new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"),eventTs,active),{
+  status:"blocked",
+  reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200",
+  eventTs,
+  candidateCount:0,
+  orderEnabled:false,
+  retryAfterMs:15000,
+ });
+});
 function peers(now:number){return families.map(kind=>({kind,programSha:sha,raw:{
  updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
  kind==="V52"?{positions:{}}:kind==="IDLE"||kind==="HYPE_LONG"?{positions:[]}:kind==="PENGU"?{version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE",position:null}:{position:null})
@@ -358,7 +383,7 @@ async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH
  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
  const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
  const orders=new Map<string,any>(),fills:any[]=[];
- let entrySends=0,stopSends=0,cancels=0,positionQty=0,firstStop=true;
+ let entrySends=0,stopSends=0,cancels=0,positionQty=0,firstStop=true,decisionFailure:Error|undefined;
  const adapter:any={
   client:{getOrder:async(_s:string,cid:string)=>orders.get(cid)},
   executor:{},
@@ -395,11 +420,11 @@ async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH
  const engine=new V4RunnerEngine({store,accountLock:lock,adapter,client,
   pendingRegistryPath:join(dir,"pending.json"),fetchPeers:async()=>peers(time),
   fetchExitFeed:async()=>({closed:[]}),
-  fetchDecision:async()=>({schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
+  fetchDecision:async()=>{if(decisionFailure)throw decisionFailure;return {schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
    decisionTs:candidate.eligibleEntryTs,capturedAtMs:time,sourceFingerprint:"recovery-fixture",
    candidateCount:1,filteredCount:0,sourceCount:1,nativeCoreEvents:[],
    entryAtrByCandidate:{[atrKey]:1},errors:[],candidates:[candidate],filtered:[],
-   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0}),
+   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0};},
   assertAuthority:async()=>{},assertEntrySafety:async()=>{},assertSourceParity:async()=>{},
   requiredResidentStop:async({entryPrice}:any)=>candidate.effectiveSide==="LONG"?entryPrice*.92:entryPrice*1.08,
   quantityNormalizer:{normalizeMarketQuantity:async(_s:string,q:number,p:number)=>({quantity:q,notional:q*p})} as any,
@@ -407,9 +432,32 @@ async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH
  });
  return {dir,store,engine,orders,fills,candidate,
   get time(){return time},set time(v:number){time=v},
+  failDecision(error:Error){decisionFailure=error},
   get entrySends(){return entrySends},get stopSends(){return stopSends},get cancels(){return cancels},
   get positionQty(){return positionQty},set positionQty(v:number){positionQty=v}};
 }
+
+test("in-lease decision read keeps a protected non-flat store BLOCKED on rate saturation",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const first=await h.engine.tick();
+  assert.equal(first.status,"submitted");
+  let doc=h.store.read(),leg=Object.values(doc.state.legs)[0];
+  const entry=Object.values(doc.intents).find(i=>i.legId===leg.id&&i.action==="ENTRY")!;
+  const entryOrder=h.orders.get(entry.clientOrderId),extra=leg.requestedQty-leg.qty;
+  entryOrder.status="FILLED";entryOrder.executedQty=String(leg.requestedQty);
+  entryOrder.cumQuote=String(leg.requestedQty*99);entryOrder.avgPrice="99";
+  h.fills.push({symbol:h.candidate.symbol,id:803,orderId:entryOrder.orderId,side:entryOrder.side,
+   price:"99",qty:String(extra),commission:"0",commissionAsset:"USDT",time:h.time+500});
+  h.positionQty=leg.requestedQty*(h.candidate.effectiveSide==="LONG"?1:-1);
+  h.failDecision(new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"));
+  h.time+=1000;
+  const result=await h.engine.tick();
+  assert.equal(result.status,"blocked");
+  assert.equal(result.reason,"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200");
+  assert.equal(result.orderEnabled,false);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
 
 test("restart recovers venue-accepted STOP after response loss without duplicate ENTRY or STOP",async()=>{
  const h=await protectionRecoveryHarness("UNKNOWN_STOP_ACK");
