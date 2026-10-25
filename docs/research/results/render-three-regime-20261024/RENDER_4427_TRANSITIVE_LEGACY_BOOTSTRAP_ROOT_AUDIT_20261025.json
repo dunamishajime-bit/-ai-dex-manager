@@ -1,0 +1,71 @@
+{
+  "audit_id": "RENDER_4427_TRANSITIVE_LEGACY_BOOTSTRAP_ROOT_AUDIT_20261025",
+  "status": "BLOCKED_UNTRACKED_TRANSITIVE_BOOTSTRAP_AND_INDEPENDENT_TRUST_ROOT",
+  "date_jst": "2026-10-25",
+  "research_only": true,
+  "native_order_authorized": false,
+  "source_repository": "dunamishajime-bit/-ai-dex-manager",
+  "source_ref": "4e367621338ef1a120f46d727e65c48200b445d6",
+  "git_source_blobs": {
+    "scripts/dd-reduction/task9_initial_adverse_stop_20261020.py": "3a5e60577caab87a8eebb0aff22dbd6be7207255",
+    "scripts/dd-reduction/run-q102-adopted2-plus-hvlong-h1-2h-20261022.py": "bbfa393348869a0227897bf0c4785df501cc1229"
+  },
+  "static_source_evidence": {
+    "caller_task9_import_line": 13,
+    "task9_sys_path_insert_line": 87,
+    "task9_external_task8_import_line": 88,
+    "task9_bootstrap_calls": [
+      1080,
+      1082
+    ],
+    "task9_path_write_text_patches": [
+      85,
+      90
+    ],
+    "task9_posthoc_hash_lines": [
+      1210,
+      1212
+    ],
+    "external_legacy_dir": "C:/Users/dis/.codex/worktrees/dd-reduction-sequential-20261019/-ai-dex-manager/scripts/dd-reduction"
+  },
+  "observed_owner_pc": {
+    "legacy_root_head": "05756e588766a6eb7f1863a1dad64b984233601d",
+    "legacy_untracked_files": [
+      "task8_v12_long_noncanonical_20261020.py",
+      "task8_v12_long_compound_20261020.py"
+    ],
+    "legacy_file_sha256": {
+      "task8_v12_long_noncanonical_20261020.py": "834747c00ea20c87a86d8f53028d3b451d4e8642b3bd83d0f9d034ca6144bbc0",
+      "task8_v12_long_compound_20261020.py": "445e915a9b494158ddb501e7c8aaf7248bc87d2c5a72cbc79ee1e2fe8b0d88d7"
+    },
+    "transitive_external_root": "C:/Users/dis/Desktop/disdex-idle-basket-bt-20261019",
+    "transitive_root_head": "44c840dba6224c4f51ad618c03ada047de642224",
+    "transitive_target_status_clean": true,
+    "transitive_sha256": {
+      "long_two_axis_latest_full8_20261019.py": "f861140de0a123aef0e4ce93f21e6b0b83ec9f9594921c4bca0439fc65f56108",
+      "long_short_sequential_full8_bt_20261019.py": "fa2eb742a6ec9cdec9c8e0ade8a3dd9b1bf417e15472ca498390242b42a1f350"
+    }
+  },
+  "independent_process_audit": {
+    "processes": 2,
+    "each_assertion_pass": true,
+    "canonical_json_sha256": "2e82b88c72b4f6c9ad743244e1afeac744be62a9a7e4a2c9dad1ff0b92a2daa4",
+    "identical": true
+  },
+  "interpretation": [
+    "The task9 import chain resolves an untracked task8 module outside the GitHub research branch; a GitHub commit alone does not attest that module.",
+    "The task8 module adds another transitive source root under Desktop/disdex-idle-basket-bt-20261019; a clean local checkout is not an independent trust anchor.",
+    "Observed hashes are post-hoc measurements, not candidate-independent pinned manifests.",
+    "This is a research execution closure and source-authenticity gap, not evidence of LIVE bypass or future exit priority use."
+  ],
+  "missing": [
+    "independently pinned authenticated legacy root and file byte manifest",
+    "complete dynamic import/patch closure",
+    "authoritative Native8 inventory and 13 GateProof",
+    "research-only native Owner/Route integration",
+    "signed Aster fills and funding"
+  ],
+  "live_modified": false,
+  "economic_bt_run": false,
+  "pc_c_tmp_worktree_created": false
+}
