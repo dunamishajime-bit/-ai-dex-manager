@@ -60,3 +60,25 @@ run identity mode at precisely native 10bps and 30bps for all fields,
 then apply the common dynamic allocator ONLY inside that hook.
 Do not deploy to VPS until strict production code-source parity and
 original native baseline are both proven.
+
+## Native GROSS-only locked-cohort counterfactual result
+
+An additional experimental quantity-only replayer is included:
+scripts/research_native_full8_frozen_cohort_gross_shadow.py .
+It copies all 1298/1286 native selected entry and exit timestamps and
+uses only already closed strategies for causal prior ranking, then sizes
+these entries using research gross limits. This is a NON-FORMAL shadow:
+no original native postgate re-selection is performed. The replayer
+correctly FAILS CLOSED rather than reporting invalid equity:
+- 10bps: 35 original accepted entries have no remaining executable
+  gross after alternative prior sizes.
+- 30bps: 34 such accepted entries.
+A shadow process retaining their old exits/accepted status would
+manufacture economically impossible trades, so the output final-equity
+field is null, with status:
+BLOCKED_NATIVE_LOCKED_COHORT_INFEASIBLE_AFTER_GROSS_CHANGE.
+This is NOT proof that dynamic distribution decreases equity:
+it proves native gate/owner/margin state must be rerun after every
+modified gross allocation while ENTRY SIGNAL RULES stay unchanged.
+A gross-only sensitivity with a frozen cohort cannot replace the
+full native event loop when capacity allocation affects later eligibility.

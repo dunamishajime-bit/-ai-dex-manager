@@ -17,6 +17,16 @@ class NativeFull8BaselineIdentityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"UNKNOWN_NATIVE_EVENT_TYPE"):
             event_cashflow({"event_type":"UNRECOGNIZED"})
 
+    def test_rolling_strategy_score_favors_only_past_wins(self):
+        from collections import deque
+        from scripts.research_native_full8_frozen_cohort_gross_shadow import causal_multiplier
+        self.assertEqual(causal_multiplier(deque()),(1.,50.))
+        wins=deque([.01]*30)
+        losses=deque([-.01]*30)
+        self.assertGreater(causal_multiplier(wins)[0],1.)
+        self.assertLess(causal_multiplier(losses)[0],1.)
+        self.assertLessEqual(causal_multiplier(wins)[0],1.15)
+
     def test_native_8_family_reconciliation_and_fail_closed_accounting(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d)
