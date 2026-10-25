@@ -665,6 +665,7 @@ export class IdlePriorityShortRunner {
             normalizedQuantity: normalized.quantity, normalizedNotional: normalized.notional,
             minQuantity: normalized.minQuantity, maxQuantity: normalized.maxQuantity,
             quantityStep: normalized.stepSize, minNotional: normalized.minNotional,
+            requiredGross: admission.gross,
         });
         if (!lot.accepted) {
             const reason = `IDLE_QUANTITY_REJECTED:${symbol}:${lot.code}:actualGross=${lot.actualGross ?? "UNKNOWN"}:minQty=${normalized.minQuantity}:minNotional=${normalized.minNotional}:step=${normalized.stepSize}`;

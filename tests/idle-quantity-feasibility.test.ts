@@ -34,3 +34,26 @@ test("inconsistent notional and non-finite inputs fail closed",()=>{
   assert.equal(evaluateIdleOneStepFloor({...render,normalizedNotional:50}).code,"QUANTITY_NOT_ONE_STEP_FLOOR");
   assert.equal(evaluateIdleOneStepFloor({...render,referencePrice:NaN}).code,"INPUT_INVALID");
 });
+
+test("route-sized 0.25x, capacity-limited 0.63x and 0.75x use their own venue step",()=>{
+  for(const target of [0.25,0.63,0.75]){
+    const qty=target*500;
+    const out=evaluateIdleOneStepFloor({
+      symbol:"RENDERUSDT",equityUsd:1000,referencePrice:2,
+      normalizedQuantity:qty,normalizedNotional:qty*2,
+      minQuantity:0.1,maxQuantity:100000,quantityStep:0.1,minNotional:5,requiredGross:target
+    });
+    assert.equal(out.accepted,true,JSON.stringify(out));
+    assert.equal(out.requiredGross,target);
+    assert.ok(Math.abs((out.actualGross??0)-target)<1e-8);
+    const fake=evaluateIdleOneStepFloor({
+      symbol:"RENDERUSDT",equityUsd:1000,referencePrice:2,
+      normalizedQuantity:qty+0.1,normalizedNotional:(qty+0.1)*2,
+      minQuantity:0.1,maxQuantity:100000,quantityStep:0.1,minNotional:5,requiredGross:target
+    });
+    assert.equal(fake.accepted,false);
+  }
+});
+test("unsupported greater-than-1x authorization does not silently bypass order cap",()=>{
+  assert.equal(evaluateIdleOneStepFloor({...render,requiredGross:5}).code,"INPUT_INVALID");
+});
