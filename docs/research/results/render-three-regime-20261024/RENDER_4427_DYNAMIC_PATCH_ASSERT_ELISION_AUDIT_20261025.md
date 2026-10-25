@@ -16,7 +16,7 @@ Compiling this exact source under Python `optimize=0` retains one assertion opco
 
 ## Verification
 
-An isolated analysis environment reconstructed the exact GitHub blob, confirmed the raw SHA256, and passed **15/15 unit tests in each of two independent Python processes**. Two independent static/synthetic audit runs produced identical canonical JSON SHA256: `417175eb2868759fd90716dd593a7e2b593e87e3967dada2c2b4206b3773e550`. A compact, reproducible static audit is included in `scripts/dd-reduction/audit_render_4427_dynamic_patch_assert_elision_20261025.py`.
+An isolated analysis environment reconstructed the exact GitHub blob, confirmed the raw SHA256, and passed **15/15 unit tests in each of two independent Python processes**. Two independent static/synthetic audit runs produced identical canonical JSON SHA256: `417175eb2868759fd90716dd593a7e2b593e87e3967dada2c2b4206b3773e550`. A compact, reproducible static audit is included in `scripts/dd-reduction/audit_render_4427_dynamic_patch_assert_elision_20261025.py`. The exact committed audit script was also reproduced in an isolated Python environment (Git blob `a378933ca3244e8348c6b2e8c182f7eb3dec86b9`), producing the committed JSON with SHA256 `55d06704c2e184338e3850a2bcba61d95ced75c27a58c91b3440f5ed94c8e084`.
 
 The owner PC's `C:/tmp` could **not** be accessed in this run: the connected command interface returned `PATH_OUTSIDE_USER_ROOT` and the separate desktop connector reported offline. No owner-PC worktree or remote-PC test is claimed. The GitHub branch is an isolated research branch only.
 
