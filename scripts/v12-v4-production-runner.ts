@@ -37,6 +37,19 @@ export function classifyV4RateBudgetDefer(error:unknown,doc:V4ExecutionDocument)
  const waitMs=nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5);
  return {reason:"V4_RATE_BUDGET_DEFERRED:"+rate.reason,waitMs};
 }
+// A missing/foreign TIME37 approval is a flat-state configuration block, not a
+// process crash. Never defer it when signed state may require STOP reconciliation.
+export function classifyV4DaemonTimeStopApprovalBlock(error:unknown,doc:V4ExecutionDocument):
+ {status:"blocked";reason:string;waitMs:number}|undefined{
+ const message=error instanceof Error?error.message:String(error);
+ const missing=error instanceof Error&&"code" in error&&error.code==="ENOENT";
+ if(message!=="V4_TIME_STOP_OPERATOR_APPROVAL_REQUIRED"&&!missing)return;
+ const activeIntent=Object.values(doc.intents).some(intent=>intent.stage!=="TERMINAL");
+ const activeLeg=Object.values(doc.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"||leg.status==="OPEN");
+ const activeProtection=Object.values(doc.protections).some(protection=>protection.phase!=="CLOSED");
+ if(activeIntent||activeLeg||activeProtection)return;
+ return {status:"blocked",reason:"V4_TIME37_APPROVAL_SHA_MISSING_OR_MISMATCH",waitMs:60000};
+}
 export async function retryV4FlatBootstrapRateBudget<T>(input:{
  operation:()=>Promise<T>;store:V4ExecutionStore;attempts?:number;wait?:(ms:number)=>Promise<void>;
 }):Promise<T>{
@@ -349,14 +362,29 @@ async function main(){
    // Complete H1/H2 market-data reads outside the account mutex when V4 has
    // no unresolved order or owned leg. Signed account and STOP recovery always
    // remain inside engine.tick() under the original exclusive lease.
-   prepared=await engine.prepareFlatMarketDecision();
-   await writeV4IdleBaselineSnapshot(releaseSha,prepared);
-   result=await executeV4WithContentionAudit({
-    operation:()=>engine.tick(prepared),releaseSha,operationMode,
-    accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
-    attempts:10,retryMs:750,shouldStop:()=>stopping,
-    onContention:()=>{hadLockContention=true;},
-   });
+   // Check exact-SHA TIME37 authority *before* any possible flat ENTRY.
+   // When the signed store is flat, publish a fail-closed BLOCKED heartbeat and
+   // keep the process alive for an explicitly approved root-owned artifact.
+   // Existing exposure is never treated as a benign approval deferral.
+   let approvalBlock:ReturnType<typeof classifyV4DaemonTimeStopApprovalBlock>;
+   try{await readV4TimeStopApproval(releaseSha);}
+   catch(error){
+    approvalBlock=classifyV4DaemonTimeStopApprovalBlock(error,store.read());
+    if(!approvalBlock)throw error;
+   }
+   if(approvalBlock){
+    result={status:"blocked",reason:approvalBlock.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+    deferredWaitMs=approvalBlock.waitMs;
+   }else{
+    prepared=await engine.prepareFlatMarketDecision();
+    await writeV4IdleBaselineSnapshot(releaseSha,prepared);
+    result=await executeV4WithContentionAudit({
+     operation:()=>engine.tick(prepared),releaseSha,operationMode,
+     accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
+     attempts:10,retryMs:750,shouldStop:()=>stopping,
+     onContention:()=>{hadLockContention=true;},
+    });
+   }
   }catch(error){
    const staleExitReview=classifyV4StaleExitDecisionFailure(error,Date.now());
    if(staleExitReview){
