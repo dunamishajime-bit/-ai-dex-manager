@@ -1,0 +1,66 @@
+{
+  "candidateProducer": {
+    "explicitOwnerIdInProducedRow": false,
+    "selfAssertedAcceptanceFlags": true,
+    "sourceRuntimeShaField": "RESEARCH_ONLY_RENDER_4427_INDEPENDENT_CAUSAL_SCORE_20261024",
+    "sourceRuntimeShaIsCryptographicDigest": false
+  },
+  "economicBtRun": false,
+  "liveChanges": 0,
+  "nativeLiveProof": false,
+  "productionChanges": 0,
+  "runtimePatch": {
+    "isDifferentFromCheckedInMain": true,
+    "originalMainSourceSha256": "d662f92a0d0e1afb8b1be1245681024dd0c800bab71e7db514a389faa7d6620d",
+    "replacementOccurrences": 1,
+    "sourceModule": "research-pengu-combined-normal8-recovery24-full8-20261024.py",
+    "transformedCompiles": true,
+    "transformedMainSourceSha256": "6eb3008a7f40bd1577d22f8daf8baa94f2a8ae0b87f1f58f81c6cf739860677b"
+  },
+  "status": "PASS_STATIC_RUNTIME_SOURCE_REWRITE_PROVEN_RESEARCH_ONLY",
+  "thirteenGateProofsCertified": false,
+  "upstreamChain": [
+    {
+      "fileSha256": "3c5166a74f1de564335fe96196bc4be37f885c52897495fd1e53f8165ad85e91",
+      "path": "run-render-4427-independent-profit-sell55-native8-20261024.py"
+    },
+    {
+      "fileSha256": "0a41f062981e20426f15c4927aa317fd65940c502c4e8b145a26c5fbd3a359e7",
+      "path": "run-render-4427-native8-shared-wallet-20261024.py"
+    },
+    {
+      "fileSha256": "8523dd1f6a06cafb881c7a5f1138a32156a8ffb3dc0f4fc9f03e380476fe2418",
+      "path": "run-render-2024-triple-native-full8-20261024.py"
+    },
+    {
+      "fileSha256": "54ad43dd26806f9e151052e5fa6fcac6ca312e383736a97a2882fa16f2aebfc3",
+      "path": "run-render-two-regime-native-full8-20261024.py"
+    },
+    {
+      "fileSha256": "40ccbf8d041ce79f64692cdf69982fc5db27251347a26042ad2a2ddf0ce9df64",
+      "path": "run-idle-three-entry-native-full8-20261024.py"
+    },
+    {
+      "fileSha256": "58d6405064746faa7098d3c906757e38b4faede2b898ccede970d0e05c85b9df",
+      "path": "research-pengu-combined-normal8-recovery24-full8-20261024.py"
+    },
+    {
+      "fileSha256": "e99763d9216a42d13dd0a2511f5f22303e8f281b1f4565c25be123f23f15c1b7",
+      "path": "research-pengu-recovery-initial-native-full8-20261024.py"
+    },
+    {
+      "fileSha256": "0031ef3f01f3489ccc1ea21c6f98e095ba89cc7056ec2a204e3c75e271e81bd5",
+      "path": "research-pengu-initial-negative-native-full8-20261024.py"
+    },
+    {
+      "fileSha256": "4dc87f1f480b7e0bac7b95bf91dadbaee2f02de247bead398159f4ef1a6d0249",
+      "path": "research-pengu-long-native-full8-after-short-dual-20261024.py"
+    },
+    {
+      "fileSha256": "7dd230539edcd865182e9826d401bfbba4b82aa37964a7b224c732e1bf77091a",
+      "path": "research-pengu-timed-negative-native-full8-20261023.py"
+    }
+  ],
+  "upstreamChainFiles": 10,
+  "venueFillVerified": false
+}
