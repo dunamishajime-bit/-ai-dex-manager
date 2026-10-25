@@ -1,0 +1,25 @@
+{
+  "schema": "render4427-proof-bound-gross-lot-audit/v1",
+  "date": "2026-10-26",
+  "branch": "research/render4427-proof-bound-gross-lot-20261026-0833",
+  "primary_commit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "adapter_sha256": "13b86ba498d61a00fcdbf6bd55b7ed110f2ab2e4c1fcbd7045d6051f6e5c78d6",
+  "audit_sha256": "936500d0da4e6e2f36c4a79618473a69cfb1df6b46395cc4225f12dbbf4accad",
+  "canonical_audit_sha256": "37bd0120398fca3ff68777914123f1a2606904d03fc2600934fe03a7261905d2",
+  "independent_processes": 6,
+  "python_modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "cases_per_process": 30,
+  "total_checks": 180,
+  "all_pass": true,
+  "source_type": "synthetic_research",
+  "native8_certified": false,
+  "trust_root_certified": false,
+  "gateproof_certified": false,
+  "order_authorized": false,
+  "economic_bt": false,
+  "production_changed": false
+}
