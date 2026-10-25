@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-26",
+  "status": "PARTIAL_SIGNED_SOURCE_PIN_RESEARCH_ONLY",
+  "scope": "synthetic signed source/patch verification; no actual Native8 attestation",
+  "branch": "research/render4427-preimport-signed-source-pins-20261026",
+  "parent_sha": "8aa91bac84f11d17e0532111fda46b4af3f04e84",
+  "pc_research_folder": "C:/Users/dis/render4427-research-only/signed-closure-20261026",
+  "pc_files_sha256": {
+    "render4427_preimport_signed_closure_20261026.py": "546e8ad5c86e57ddda00b6d5983f8df2c259b7c2628c46ff5a8761e317281ac2",
+    "test_render4427_preimport_signed_closure_20261026.py": "5dfd94378cf1f3705501ee41efdf48eb5e8fcff636a49978eb47f2a03602e251"
+  },
+  "pc_test": {
+    "modes": [
+      "normal",
+      "-O",
+      "-OO"
+    ],
+    "independent_processes_per_mode": 2,
+    "tests_per_process": 12,
+    "total_tests": 72,
+    "failed": 0,
+    "six_run_result_sha256": "a65833017f52751a20011a64608f712d4a1256e13df72508a65ea0900ced81a6"
+  },
+  "controls_verified": [
+    "synthetic detached Ed25519 signature",
+    "externally supplied public-key fingerprint comparison",
+    "signed manifest canonicalization",
+    "component set exactness",
+    "source byte SHA256 drift rejection",
+    "output path containment",
+    "single-occurrence deterministic patch reconstruction"
+  ],
+  "real_trust_root_authenticated": false,
+  "real_dynamic_import_closure_authenticated": false,
+  "native_13_gateproof_authenticated": 0,
+  "real_owner_route_registered": false,
+  "real_native8_replay": false,
+  "order_authorized": false,
+  "real_private_signing_key_generated": false,
+  "note": "Synthetic test keys are not genuine trust roots. The caller-supplied independent policy's provenance is not verified by this adapter. Never infer order authorization."
+}
