@@ -1,0 +1,29 @@
+{
+  "auditCheckoutGitHead": "b1adbc018c31096c943adaff040968fc4d8a7dca",
+  "entryRunnerBaseLoadPath": "C:/tmp/render-multiregime-study-20261024/scripts/dd-reduction/run-render-4427-native8-shared-wallet-20261024.py",
+  "entryRunnerBindings": {
+    "DD": "C:/tmp/render-multiregime-study-20261024/scripts/dd-reduction",
+    "HERE": "C:/tmp/render-mtf-study-20261024",
+    "REPO": "C:/tmp/render-multiregime-study-20261024",
+    "ROOT": "C:/tmp"
+  },
+  "entryRunnerBrainLoadPath": "C:/tmp/render-mtf-study-20261024/render_4427_independent_rolling_profit_gate_20261024.py",
+  "externalBankSha256": "d5234a91155afa2e232b0c2372b4a929a875ee79ef23d085a6417ecfab334c07",
+  "externalBrainSha256": "2ffb72b8707a3f32e68270b7e89c2ee01d2c2484922057f0037cefdc17c2d230",
+  "independentTrustRootAvailable": false,
+  "literalGraphNotRuntimeClosure": true,
+  "literalLinkedFilesByteParity": 47,
+  "literalLinkedFilesCompared": 47,
+  "literalLinkedFilesDifferent": [],
+  "literalLinkedFilesMissing": [],
+  "literalLinkedGitObjectBytesVerified": 47,
+  "literalReferenceEdgesOverapprox": 69,
+  "liveChanges": 0,
+  "nativeOwnerRegistered": false,
+  "newEconomicBt": false,
+  "runnerExecutionCheckoutGitHead": "173659aef0e28826c4f1c2a2db47a5957eaa5085",
+  "runtimeRootIsAuditedCheckout": false,
+  "status": "BLOCKED_HARDCODED_UNPINNED_EXECUTION_ROOT_RESEARCH_ONLY",
+  "strictRootGuard": "REJECT_EXECUTION_ROOT_NOT_PINNED",
+  "thirteenGateProofsCertified": false
+}
