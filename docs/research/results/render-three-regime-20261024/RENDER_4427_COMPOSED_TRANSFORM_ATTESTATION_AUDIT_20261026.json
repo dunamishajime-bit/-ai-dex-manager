@@ -1,0 +1,42 @@
+{
+  "status": "RESEARCH_SYNTHETIC_COMPOSED_TRANSFORM_GAP_CONFIRMED",
+  "date": "2026-10-26",
+  "original_verifier_sha256": "546e8ad5c86e57ddda00b6d5983f8df2c259b7c2628c46ff5a8761e317281ac2",
+  "reproduction_script_sha256": "8cbcd83b7e40e68f8e4aa8d5328c569a5f6796af2ab753ba9e0ca72b3cfbdcab",
+  "new_composed_adapter_sha256": "4f69396dae93f6d5cec04ad1d7a3a846de085dd3b8244721ea3d1eb9307bdd3d",
+  "new_test_sha256": "1dad73c5981436e1af363ce30f33c6507060e1be2956f4eba4e535bec775372d",
+  "original_verifier_synthetic_reproduction": {
+    "independent_processes": 2,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "identical_canonical_json_sha256": "469a2706b1956df0b23d0debed519daa2f3012cfeea95bdc93212c301b8bcd70",
+    "accepted_two_individually_signed_transforms": true,
+    "final_sequential_sha256": "16b6caecad5b0525b3702706a7f580923f3844b131cbc8a042aa1024ee3a07dd",
+    "final_sequential_hash_in_signed_manifest": false,
+    "prior_verifier_status": "PARTIAL_SIGNED_SOURCE_PIN_RESEARCH_ONLY"
+  },
+  "new_composed_adapter_synthetic_tests": {
+    "tests_per_process": 14,
+    "processes_per_mode": 2,
+    "modes": [
+      "normal",
+      "-O",
+      "-OO"
+    ],
+    "total_tests_passed": 84,
+    "failed": 0
+  },
+  "scope": {
+    "synthetic_signer": true,
+    "operator_root_authenticated": false,
+    "native8_dynamic_closure_authenticated": false,
+    "native8_owner_registered": false,
+    "gateproofs_authenticated": 0,
+    "native8_economic_backtest": false,
+    "order_authorized": false,
+    "vps_live_production_hp_changed": false,
+    "existing_eight_strategies_changed": false
+  }
+}
