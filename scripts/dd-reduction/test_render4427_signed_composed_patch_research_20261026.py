@@ -90,7 +90,7 @@ class SignedComposedSynthetic(unittest.TestCase):
 
     def test_duplicate_old(self):
         p = copy.deepcopy(self.manifest)
-        p["steps"][1]["old"] = "A=2"
+        p["steps"][1]["old"] = "A=1"
         self.rejects("REJECT_STEP_NOT_UNIQUE:1", p)
 
     def test_duplicate_name(self):
