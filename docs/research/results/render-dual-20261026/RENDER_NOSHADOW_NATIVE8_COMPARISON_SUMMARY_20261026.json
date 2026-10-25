@@ -1,0 +1,778 @@
+{
+  "schema": "render-no-shadow-6-route-native8-research/v1",
+  "status": "RESEARCH_ONLY_NOT_LIVE_NOT_CURRENT_PRODUCTION_PARITY",
+  "periodUTC": "2025-08-10/2026-08-10",
+  "sharedWalletStrategies": [
+    "V12",
+    "Q102",
+    "PENGU",
+    "IDLE",
+    "RESIDUAL",
+    "V52",
+    "HYPE_LONG",
+    "FET"
+  ],
+  "shaSource": "23ddd4b01fcff38cd10d4d4614221f93dc6b44e5 research lineage, not signed LIVE equivalent",
+  "existingRenderStop": "TOUCH1_WATCH2_MFE0P25",
+  "initialGrossJpy": 10000,
+  "inputRaw12MonthSignals": 11,
+  "newEntryShadowQualityGateEnabled": false,
+  "marketEntryGate": "BTC H1 >= +0.15%, RENDER H1 <= -0.50%, last completed H4 <= -0.15%, taker-seller >= 53%, upper wick H1-open >= 0.35%",
+  "sharedRules": "Native8 owner/wallet/gross and same-symbol owner preserved; experimental exception only for independent route with empty active account; no same-timestamp higher-ranked signal, 12-hour independent cooldown",
+  "modelCaveats": [
+    "Binance public M5 mark entry return mapped onto native Aster H1 mark; cannot prove signed Aster venue fills, L2 stop slippage, funding, or runtime SHA parity",
+    "Public historical backtest selected 18 TP/hold configurations after observing data; future out-of-sample required",
+    "Actual LIVE activation remains disabled and requires venue evidence",
+    "No max-duration variant retains exchange STOP -2% and TP; must never run without resident reduce-only protective reconciliation"
+  ],
+  "baselineLegacyStopOnlyFinalEquityJpy": {
+    "10bps": 279087048.0747037,
+    "30bps": 169095335.52909872
+  },
+  "cases": {
+    "TP1p5_SL2_H55M": {
+      "singleRouteResearch": {
+        "tpPct": 1.5,
+        "stopPct": 2,
+        "maxHoldMinutes": 55,
+        "rawMarketSignalCount12m": 11,
+        "10bps": {
+          "n": 11,
+          "wr": 0.7272727272727273,
+          "pf": 2.42542144747662,
+          "mean": 0.36242354019893247,
+          "netTotalPct": 3.986659,
+          "compoundPct": 4.0042,
+          "closedTradeDdPct": -2.269464,
+          "netPerTrade": [
+            1.4,
+            0.4872,
+            -0.5237,
+            0.2567,
+            1.4,
+            1.2026,
+            1.0749,
+            -2.1,
+            -0.1731,
+            0.2537,
+            0.7084
+          ],
+          "stops": 1,
+          "takeProfits": 2,
+          "timeExits": 8
+        },
+        "30bps": {
+          "n": 11,
+          "wr": 0.7272727272727273,
+          "pf": 1.5259785958733527,
+          "mean": 0.1624235401989325,
+          "netTotalPct": 1.786659,
+          "compoundPct": 1.746733,
+          "closedTradeDdPct": -2.664518,
+          "netPerTrade": [
+            1.2,
+            0.2872,
+            -0.7237,
+            0.0567,
+            1.2,
+            1.0026,
+            0.8749,
+            -2.3,
+            -0.3731,
+            0.0537,
+            0.5084
+          ],
+          "stops": 1,
+          "takeProfits": 2,
+          "timeExits": 8
+        }
+      },
+      "portfolio": {
+        "10bps": {
+          "finalEquityJpy": 279073204.48410445,
+          "deltaVsLegacyStopOnlyJpy": -13843.590599238873,
+          "pf": 4.698878834750336,
+          "maxMtMDdPct": -14.514985270751623,
+          "winRate": 0.7271317829457364,
+          "closedTrades": 1290,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 1253.8708136798873,
+          "repeats": 3,
+          "ledgerSha256": [
+            "dcec6528e07fa0525342705b806d730a424c3e242d360cdb73069e537e5cf240",
+            "e48300349b71bee32a1ce3d03bb9c7ebb21d0fd0094623d30e394abcc8f71667",
+            "e48300349b71bee32a1ce3d03bb9c7ebb21d0fd0094623d30e394abcc8f71667"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 72,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "accounting": "PASS"
+        },
+        "30bps": {
+          "finalEquityJpy": 169563875.9686733,
+          "deltaVsLegacyStopOnlyJpy": 468540.43957456946,
+          "pf": 3.8265467175220054,
+          "maxMtMDdPct": -15.014723812726594,
+          "winRate": 0.6993006993006993,
+          "closedTrades": 1287,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 501.3562041082453,
+          "repeats": 3,
+          "ledgerSha256": [
+            "5a49eb18d0623a33b70f4b01bc2682048cb2041affed14a54dd8fab15f8f1536",
+            "062c9f894512a808d9fa9fe210c1e8baae80e4843bdb58f7778c602c61a2a103",
+            "062c9f894512a808d9fa9fe210c1e8baae80e4843bdb58f7778c602c61a2a103"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 74,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "TP1p5_SL2_H360M": {
+      "singleRouteResearch": {
+        "tpPct": 1.5,
+        "stopPct": 2,
+        "maxHoldMinutes": 360,
+        "rawMarketSignalCount12m": 11,
+        "10bps": {
+          "n": 11,
+          "wr": 0.9090909090909091,
+          "pf": 6.2752219531880495,
+          "mean": 1.0070878274268102,
+          "netTotalPct": 11.077966,
+          "compoundPct": 11.590477,
+          "closedTradeDdPct": -2.1,
+          "netPerTrade": [
+            1.4,
+            1.4,
+            0.578,
+            1.4,
+            1.4,
+            1.4,
+            1.4,
+            -2.1,
+            1.4,
+            1.4,
+            1.4
+          ],
+          "stops": 1,
+          "takeProfits": 9,
+          "timeExits": 1
+        },
+        "30bps": {
+          "n": 11,
+          "wr": 0.9090909090909091,
+          "pf": 4.859985261606481,
+          "mean": 0.8070878274268104,
+          "netTotalPct": 8.877966,
+          "compoundPct": 9.18364,
+          "closedTradeDdPct": -2.3,
+          "netPerTrade": [
+            1.2,
+            1.2,
+            0.378,
+            1.2,
+            1.2,
+            1.2,
+            1.2,
+            -2.3,
+            1.2,
+            1.2,
+            1.2
+          ],
+          "stops": 1,
+          "takeProfits": 9,
+          "timeExits": 1
+        }
+      },
+      "portfolio": {
+        "10bps": {
+          "finalEquityJpy": 278093396.70486623,
+          "deltaVsLegacyStopOnlyJpy": -993651.3698374629,
+          "pf": 4.700260182811503,
+          "maxMtMDdPct": -14.514985270751623,
+          "winRate": 0.726568551510457,
+          "closedTrades": 1291,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 2401.145303538493,
+          "repeats": 3,
+          "ledgerSha256": [
+            "f8eb9b1822fc2dd42774920c8adec7b54ba16c6426dcd9a2f21c5f81ba85fb11",
+            "82147953c35e9bb234d8e3df39971bf91b9babacaa3c4d0ddef2a308d15224e0",
+            "82147953c35e9bb234d8e3df39971bf91b9babacaa3c4d0ddef2a308d15224e0"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 73,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "accounting": "PASS"
+        },
+        "30bps": {
+          "finalEquityJpy": 167203193.78931403,
+          "deltaVsLegacyStopOnlyJpy": -1892141.7397846878,
+          "pf": 3.818586671373489,
+          "maxMtMDdPct": -15.014723812726594,
+          "winRate": 0.6979813664596274,
+          "closedTrades": 1288,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 1131.1054676413892,
+          "repeats": 3,
+          "ledgerSha256": [
+            "c1a673658e5dfc56d7a0f5953d8112c58af78f0a0c4b6af4b259af7f47668c32",
+            "5967de7b218e42d6bbb08ce6f1de098cbf774191c9d3842ba0f1eb75fa25a364",
+            "5967de7b218e42d6bbb08ce6f1de098cbf774191c9d3842ba0f1eb75fa25a364"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 75,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "TP1p5_SL2_NO_TIME": {
+      "singleRouteResearch": {
+        "tpPct": 1.5,
+        "stopPct": 2,
+        "maxHoldMinutes": null,
+        "rawMarketSignalCount12m": 11,
+        "10bps": {
+          "n": 11,
+          "wr": 0.8181818181818182,
+          "pf": 2.9999999999999973,
+          "mean": 0.7636363636363632,
+          "netTotalPct": 8.4,
+          "compoundPct": 8.619295,
+          "closedTradeDdPct": -2.1,
+          "netPerTrade": [
+            1.4,
+            1.4,
+            -2.1,
+            1.4,
+            1.4,
+            1.4,
+            1.4,
+            -2.1,
+            1.4,
+            1.4,
+            1.4
+          ],
+          "stops": 2,
+          "takeProfits": 9,
+          "timeExits": 0
+        },
+        "30bps": {
+          "n": 11,
+          "wr": 0.8181818181818182,
+          "pf": 2.3478260869565197,
+          "mean": 0.5636363636363634,
+          "netTotalPct": 6.2,
+          "compoundPct": 6.270749,
+          "closedTradeDdPct": -2.3,
+          "netPerTrade": [
+            1.2,
+            1.2,
+            -2.3,
+            1.2,
+            1.2,
+            1.2,
+            1.2,
+            -2.3,
+            1.2,
+            1.2,
+            1.2
+          ],
+          "stops": 2,
+          "takeProfits": 9,
+          "timeExits": 0
+        }
+      },
+      "portfolio": {
+        "10bps": {
+          "finalEquityJpy": 278093396.70486623,
+          "deltaVsLegacyStopOnlyJpy": -993651.3698374629,
+          "pf": 4.700260182811503,
+          "maxMtMDdPct": -14.514985270751623,
+          "winRate": 0.726568551510457,
+          "closedTrades": 1291,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 2401.145303538493,
+          "repeats": 3,
+          "ledgerSha256": [
+            "ca6e6273179c4cd2018f5975acca9d2f47c58daced6ed171a984d7f0944fa30e",
+            "5e5e8a6ec4c21decd3de0063198fb831ddffdb0843899fba3b83b0de82f828b1",
+            "5e5e8a6ec4c21decd3de0063198fb831ddffdb0843899fba3b83b0de82f828b1"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 73,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "accounting": "PASS"
+        },
+        "30bps": {
+          "finalEquityJpy": 167203193.78931403,
+          "deltaVsLegacyStopOnlyJpy": -1892141.7397846878,
+          "pf": 3.818586671373489,
+          "maxMtMDdPct": -15.014723812726594,
+          "winRate": 0.6979813664596274,
+          "closedTrades": 1288,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 1131.1054676413892,
+          "repeats": 3,
+          "ledgerSha256": [
+            "18dbd6aa1eaff71bd574b0e7be3cbf7b44699fadc70d73545681bae1a0d39333",
+            "db1c6023ee1fe83cf578a1003371e12a8311dbdbafd6e0f1987a40a218051b96",
+            "db1c6023ee1fe83cf578a1003371e12a8311dbdbafd6e0f1987a40a218051b96"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 75,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "TP3p0_SL2_H360M": {
+      "singleRouteResearch": {
+        "tpPct": 3.0,
+        "stopPct": 2,
+        "maxHoldMinutes": 360,
+        "rawMarketSignalCount12m": 11,
+        "10bps": {
+          "n": 11,
+          "wr": 0.9090909090909091,
+          "pf": 10.199978998108417,
+          "mean": 1.7563596269116084,
+          "netTotalPct": 19.319956,
+          "compoundPct": 20.957498,
+          "closedTradeDdPct": -2.1,
+          "netPerTrade": [
+            2.9,
+            1.6616,
+            0.578,
+            2.9,
+            0.3935,
+            2.7056,
+            2.9,
+            -2.1,
+            1.5813,
+            2.9,
+            2.9
+          ],
+          "stops": 1,
+          "takeProfits": 5,
+          "timeExits": 5
+        },
+        "30bps": {
+          "n": 11,
+          "wr": 0.9090909090909091,
+          "pf": 8.443459085229428,
+          "mean": 1.556359626911609,
+          "netTotalPct": 17.119956,
+          "compoundPct": 18.367324,
+          "closedTradeDdPct": -2.3,
+          "netPerTrade": [
+            2.7,
+            1.4616,
+            0.378,
+            2.7,
+            0.1935,
+            2.5056,
+            2.7,
+            -2.3,
+            1.3813,
+            2.7,
+            2.7
+          ],
+          "stops": 1,
+          "takeProfits": 5,
+          "timeExits": 5
+        }
+      },
+      "portfolio": {
+        "10bps": {
+          "finalEquityJpy": 278831222.93976057,
+          "deltaVsLegacyStopOnlyJpy": -255825.13494312763,
+          "pf": 4.706105512140596,
+          "maxMtMDdPct": -14.514985270751623,
+          "winRate": 0.726568551510457,
+          "closedTrades": 1291,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 4902.757434015379,
+          "repeats": 3,
+          "ledgerSha256": [
+            "9df65c51f2e93bf9565724f0beb5fd395dd35f7a98ee39a261f259450c88f2e6",
+            "bf0309f4300b8e47dc6fe4edef4c626e1541701366a8113b3bddabda6505f837",
+            "bf0309f4300b8e47dc6fe4edef4c626e1541701366a8113b3bddabda6505f837"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 73,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "accounting": "PASS"
+        },
+        "30bps": {
+          "finalEquityJpy": 167598670.91091666,
+          "deltaVsLegacyStopOnlyJpy": -1496664.618182063,
+          "pf": 3.8196545537667137,
+          "maxMtMDdPct": -15.014723812726594,
+          "winRate": 0.6979813664596274,
+          "closedTrades": 1288,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 2512.44204087378,
+          "repeats": 3,
+          "ledgerSha256": [
+            "a410966f8c58f215e1fc3eee73df00ad6965b1ce5a1dda115c4cb16f36f9c3fa",
+            "3c85972d15ab54e91cfefaeb2f7606badf095a5bbd227092c9969b8cc04b3809",
+            "3c85972d15ab54e91cfefaeb2f7606badf095a5bbd227092c9969b8cc04b3809"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 75,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "TP3p0_SL2_H1440M": {
+      "singleRouteResearch": {
+        "tpPct": 3.0,
+        "stopPct": 2,
+        "maxHoldMinutes": 1440,
+        "rawMarketSignalCount12m": 11,
+        "10bps": {
+          "n": 11,
+          "wr": 0.8181818181818182,
+          "pf": 5.948631673396139,
+          "mean": 1.889477548023982,
+          "netTotalPct": 20.784253,
+          "compoundPct": 22.622164,
+          "closedTradeDdPct": -2.1,
+          "netPerTrade": [
+            2.9,
+            2.9,
+            -2.1,
+            2.9,
+            1.7843,
+            2.9,
+            2.9,
+            -2.1,
+            2.9,
+            2.9,
+            2.9
+          ],
+          "stops": 2,
+          "takeProfits": 8,
+          "timeExits": 1
+        },
+        "30bps": {
+          "n": 11,
+          "wr": 0.8181818181818182,
+          "pf": 5.040055006144303,
+          "mean": 1.689477548023982,
+          "netTotalPct": 18.584253,
+          "compoundPct": 19.999398,
+          "closedTradeDdPct": -2.3,
+          "netPerTrade": [
+            2.7,
+            2.7,
+            -2.3,
+            2.7,
+            1.5843,
+            2.7,
+            2.7,
+            -2.3,
+            2.7,
+            2.7,
+            2.7
+          ],
+          "stops": 2,
+          "takeProfits": 8,
+          "timeExits": 1
+        }
+      },
+      "portfolio": {
+        "10bps": {
+          "finalEquityJpy": 279299135.7118464,
+          "deltaVsLegacyStopOnlyJpy": 212087.63714271784,
+          "pf": 4.706683243745979,
+          "maxMtMDdPct": -14.514985270751623,
+          "winRate": 0.726568551510457,
+          "closedTrades": 1291,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 4955.802978789514,
+          "repeats": 3,
+          "ledgerSha256": [
+            "84eb8624cc63dad4eb912c81aa7ba9a77ed8157dee73b755965ad622c8eed30a",
+            "25b5ad0648258115629fef3fa10f0902dea01ce1e47477bb49662f20e1ef9711",
+            "25b5ad0648258115629fef3fa10f0902dea01ce1e47477bb49662f20e1ef9711"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 73,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "accounting": "PASS"
+        },
+        "30bps": {
+          "finalEquityJpy": 168089435.07062578,
+          "deltaVsLegacyStopOnlyJpy": -1005900.4584729373,
+          "pf": 3.820007597682912,
+          "maxMtMDdPct": -15.014723812726594,
+          "winRate": 0.6979813664596274,
+          "closedTrades": 1288,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 2544.3505649215604,
+          "repeats": 3,
+          "ledgerSha256": [
+            "3b208c42782d54d6970b4666aeae4bb740a95bca4ac24d985842124c0bf5031c",
+            "b46b65fcc322a0ef8e35478a846ab8925efd2af0d44e25de30976cdd694fc68e",
+            "b46b65fcc322a0ef8e35478a846ab8925efd2af0d44e25de30976cdd694fc68e"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 75,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "TP3p0_SL2_NO_TIME": {
+      "singleRouteResearch": {
+        "tpPct": 3.0,
+        "stopPct": 2,
+        "maxHoldMinutes": null,
+        "rawMarketSignalCount12m": 11,
+        "10bps": {
+          "n": 11,
+          "wr": 0.8181818181818182,
+          "pf": 6.214285714285708,
+          "mean": 1.9909090909090905,
+          "netTotalPct": 21.9,
+          "compoundPct": 23.966334,
+          "closedTradeDdPct": -2.1,
+          "netPerTrade": [
+            2.9,
+            2.9,
+            -2.1,
+            2.9,
+            2.9,
+            2.9,
+            2.9,
+            -2.1,
+            2.9,
+            2.9,
+            2.9
+          ],
+          "stops": 2,
+          "takeProfits": 9,
+          "timeExits": 0
+        },
+        "30bps": {
+          "n": 11,
+          "wr": 0.8181818181818182,
+          "pf": 5.28260869565217,
+          "mean": 1.7909090909090908,
+          "netTotalPct": 19.7,
+          "compoundPct": 21.317407,
+          "closedTradeDdPct": -2.3,
+          "netPerTrade": [
+            2.7,
+            2.7,
+            -2.3,
+            2.7,
+            2.7,
+            2.7,
+            2.7,
+            -2.3,
+            2.7,
+            2.7,
+            2.7
+          ],
+          "stops": 2,
+          "takeProfits": 9,
+          "timeExits": 0
+        }
+      },
+      "portfolio": {
+        "10bps": {
+          "finalEquityJpy": 279495544.4406983,
+          "deltaVsLegacyStopOnlyJpy": 408496.36599463224,
+          "pf": 4.706808331122772,
+          "maxMtMDdPct": -14.514985270751623,
+          "winRate": 0.726568551510457,
+          "closedTrades": 1291,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 4988.998514308843,
+          "repeats": 3,
+          "ledgerSha256": [
+            "861f213ad5656f638ac6815ae3fd378b3679235d12e3d89d65f831114f773e38",
+            "39ad41ed5a92af759475125dc5e64634bc072fe791f2fed39bbb8ea334c704e6",
+            "39ad41ed5a92af759475125dc5e64634bc072fe791f2fed39bbb8ea334c704e6"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 73,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "accounting": "PASS"
+        },
+        "30bps": {
+          "finalEquityJpy": 168332698.54917267,
+          "deltaVsLegacyStopOnlyJpy": -762636.9799260497,
+          "pf": 3.8200879882785785,
+          "maxMtMDdPct": -15.014723812726594,
+          "winRate": 0.6979813664596274,
+          "closedTrades": 1288,
+          "independentAcceptedTrades": 3,
+          "independentAcceptedEntryTs": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "independentModelPnlJpy": 2564.2895373623724,
+          "repeats": 3,
+          "ledgerSha256": [
+            "48b42671325dc6561b1f77c255b8d384ef1daed7b7d65a7aaf2865c74ea8384f",
+            "f792bd5f58023ec135b085f9ef922292dc9f88e6ad0540473d9735d3806a8c30",
+            "f792bd5f58023ec135b085f9ef922292dc9f88e6ad0540473d9735d3806a8c30"
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 75,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "accounting": "PASS"
+        }
+      }
+    }
+  }
+}

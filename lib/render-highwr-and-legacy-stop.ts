@@ -249,6 +249,8 @@ export function evaluateIndependentPriority(input:{
   gate:IndependentGateDecision;
   /** All hypothetical S6 outcomes, including those not entered into real wallet. */
   fullySettledSixHourShadows:readonly ShadowSixHourResult[];
+  /** When false, shadow WR/PF/sample count are diagnostic only, not entry gates. */
+  requireShadowQuality?:boolean;
   /** Optional incumbent candidate; passed in by existing owner after own gate. */
   incumbent?:{route:string;score?:number};
   /** All source/owner/margin/venue safety gates still must be satisfied by Codex. */
@@ -276,7 +278,7 @@ export function evaluateIndependentPriority(input:{
   const scores=known.map(v=>v.net30Pct);
   const p365=known.filter(v=>v.settledAt>=t-365*24*RENDER_H1_MS).map(v=>v.net30Pct);
   const lifetime=historicalQuality(scores),year=historicalQuality(p365);
-  if (!(lifetime.n>=24 && lifetime.winRate>=.75 && lifetime.profitFactor>=1.35 &&
+  if (input.requireShadowQuality!==false && !(lifetime.n>=24 && lifetime.winRate>=.75 && lifetime.profitFactor>=1.35 &&
       lifetime.meanNetPct>=.10 && year.n>=3 && year.winRate>=.60 && year.meanNetPct>=0)) {
     return {...reject("RENDER_INDEPENDENT_SIX_HOUR_SHADOW_QUALITY_NOT_MET"),qualityLifetime:lifetime,quality365:year};
   }

@@ -79,3 +79,53 @@ Local Windows model research can be found under C:/tmp/render-mtf-study-20261024
 - run-render-4427-independent-profit-sell55-native8-20261024.py models an older six-hour independent Gate but does not reproduce the new 55-minute live exit; do not reuse those results as the combined 55m answer.
 - RENDER_4427_INDEPENDENT_SELL55_NATIVE8_AUDIT_20261024.json includes economic Native8 ledgers for other separate cases; data already viewed and potentially overfit.
 - Historical Aster 2025 H1 mark gaps and real funding/venue limits must be represented explicitly. Demand source provenance and certify all eight sleeves at current model SHA.
+
+## Second-stage preparation: exact 5m source and explicit venue gate (2026-10-25)
+
+Reproducible non-production research source, full monthly SHA-256 and ZIP-CRC
+manifest are now included in these repository files:
+
+- scripts/research/render-independent-exact-public-m5-20261025.py
+- scripts/research/render-dual-native8-model-replay-20261025.py
+- docs/research/results/render-dual-20261025/RENDER_INDEPENDENT_EXACT_CAUSAL_M5_55M_10_30_RESEARCH_20261025.json
+
+Official archive coverage for both BTCUSDT and RENDERUSDT comprises August 2024
+through August 2026, 25 monthly M5 archives per symbol. Source validation rejects
+conflicting duplicates, missing candles, bad prices or volume, and ZIP-CRC failures.
+The new entry Gate examines the previously closed H1, last FULLY completed H4/D1,
+a six-hour historical volume median, RENDER taker-sell share, and wick as a percent
+of H1 open. New independent route does not require OI.
+
+In the economic test interval 2025-08-10 to 2026-08-10, 26 raw qualified H1 signals
+existed over the longer M5 source history, but only ONE 55-minute candidate was
+eligible within the 12-month period after the >=24 fully settled six-hour shadow
+quality Gate. That event was 2026-05-28 01:00 UTC, modeled 55-minute SHORT return
++0.7083689967% at 10bps and +0.5083689967% at 30bps. One trade cannot establish
+a forward win rate. Older approximate candidate-bank results are not exact proof.
+
+### Staged execution contracts (not activated on VPS)
+
+- New separate pure execution contract with deterministic independent order IDs,
+  nominal 0.25x, resident STOP2% and TP1.5%, conservative pending.createdAt plus
+  55-minute deadline, and a near-deadline wake-up for the existing runner.
+- Original IDLE and shared risk/margin/capacity/owner/pending safety checks remain
+  authoritative; same-symbol incumbent is kept unless a comparable causal
+  score and the independent journal prove superiority.
+- An independent certificate at a root-owned and SHA-bound path is mandatory,
+  confirming order protection readback, real partial fill, 55m deadline, and
+  verified simultaneous integrated 10bps/30bps economics. A mere environment
+  variable is insufficient to authorize the independent order.
+- The original RENDER initial-loss stop remains separately default-OFF pending
+  verified live entry and first complete M5-price excursion data.
+- The actual Production release and running systemd units are unchanged.
+
+### Conditions still required before safe LIVE-only handoff
+
+No actual signed Aster order partial-fill/STOP/TP/restart lifecycle proof
+is on file. Public Binance M5 results are not L2 Aster execution certification.
+No untouched out-of-sample signal-quality outcome has been collected. The
+runtime with newest V4 and all other owner sleeves needs one exact merged
+candidate SHA, verifiable rollback and matched risk/margin/pending states.
+A simultaneous eight-wallet Native8 replay must show an actually injected
+independent row, its accepted/rejected owner decision, and portfolio results;
+an unchanged baseline with an accidentally inactive research hook is invalid.

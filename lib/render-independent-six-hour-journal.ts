@@ -73,6 +73,7 @@ export function advanceRenderShadow(input:{
  renderM5:readonly ClosedM5[];btcM5:readonly ClosedM5[];
  incumbentAt:(t:number)=>{route:string;score?:number}|undefined;
  sameSymbolPositionOrPending:boolean;cooldownUntil:number;
+ requireShadowQuality?:boolean;
 }):{state:RenderIndependentShadowState;decision:RenderShadowDecision}{
  const {asOfDecisionTs:t}=input;const old=input.state;validate(old,old.runtimeSha);
  if(!Number.isSafeInteger(t)||t%RENDER_H1_MS!==0||(old.lastDecisionTs!==null&&t<old.lastDecisionTs))throw Error("RENDER_SHADOW_TIME_REWIND");
@@ -93,7 +94,7 @@ export function advanceRenderShadow(input:{
    decisionTs:ts,gate,fullySettledSixHourShadows:state.settled,
    incumbent:input.incumbentAt(ts),
    sameSymbolPositionOrPending:input.sameSymbolPositionOrPending,
-   cooldownUntil:input.cooldownUntil
+   cooldownUntil:input.cooldownUntil,requireShadowQuality:input.requireShadowQuality
   });
   // The hypothetical quality ledger is independent of account capacity,
   // incumbent preference, cooldown, and whether any real trade was entered.
@@ -108,7 +109,7 @@ export function advanceRenderShadow(input:{
   final={decisionTs:t,rawAccepted:gate.accepted,rawReason:gate.reason,
    priority:evaluateIndependentPriority({decisionTs:t,gate,fullySettledSixHourShadows:state.settled,
     incumbent:input.incumbentAt(t),sameSymbolPositionOrPending:input.sameSymbolPositionOrPending,
-    cooldownUntil:input.cooldownUntil}),
+    cooldownUntil:input.cooldownUntil,requireShadowQuality:input.requireShadowQuality}),
    pendingCount:state.pendingSignalTs.length,settledCount:state.settled.length};
  }
  validate(state,state.runtimeSha);

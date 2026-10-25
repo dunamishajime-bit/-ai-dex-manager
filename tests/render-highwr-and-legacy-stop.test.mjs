@@ -77,6 +77,20 @@ test("no entry when quality history too short",()=>{
   assert.equal(z.accepted,false);
   assert.match(z.reason,/QUALITY_NOT_MET/);
 });
+test("no-shadow-quality mode admits raw signal without 24 historical samples",()=>{
+  const x=rank({requireShadowQuality:false,fullySettledSixHourShadows:[]});
+  assert.equal(x.accepted,true,x.reason);
+  assert.equal(x.qualityLifetime.n,0);
+  assert.equal(x.chosenRoute,RENDER_INDEPENDENT_ROUTE);
+  const guarded=rank({requireShadowQuality:true,fullySettledSixHourShadows:[]});
+  assert.equal(guarded.accepted,false);
+});
+test("no-shadow-quality cannot bypass same-symbol owner, incumbent score, cooldown, raw gate",()=>{
+  assert.match(rank({requireShadowQuality:false,fullySettledSixHourShadows:[],sameSymbolPositionOrPending:true}).reason,/SYMBOL_OWNED/);
+  assert.match(rank({requireShadowQuality:false,fullySettledSixHourShadows:[],cooldownUntil:at+H}).reason,/COOLDOWN/);
+  assert.equal(rank({requireShadowQuality:false,fullySettledSixHourShadows:[],incumbent:{route:"LEGACY_RENDER"}}).accepted,false);
+  assert.equal(rank({requireShadowQuality:false,fullySettledSixHourShadows:[],gate:{accepted:false,reason:"RAW_REJECT"}}).accepted,false);
+});
 test("quality history cannot use future shadow outcomes",()=>{
   const before=rank();
   const after=rank({fullySettledSixHourShadows:[...qualityHistory(),
