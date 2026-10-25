@@ -1,0 +1,56 @@
+{
+  "assert_ops": {
+    "0": 1,
+    "1": 0,
+    "2": 0
+  },
+  "git_blob_observed_not_trust_root": "1917333c76d8cbe79783d4e32a6951b6419ef3c1",
+  "native8_executed": false,
+  "order_authorized": false,
+  "raw_sha256_observed_not_trust_root": "b783432853c48df5cb744308adaf3d4468ebefc38577ca4ad660d7f383b90384",
+  "status": "BLOCKED_OPTIMIZED_DYNAMIC_PATCH_GUARD_ELISION_RESEARCH_ONLY",
+  "synthetic_cases": {
+    "0": {
+      "0": {
+        "assert_guard": "REJECT",
+        "explicit_guard": "REJECT"
+      },
+      "1": {
+        "assert_guard": "NO_OP",
+        "explicit_guard": "REJECT"
+      },
+      "2": {
+        "assert_guard": "NO_OP",
+        "explicit_guard": "REJECT"
+      }
+    },
+    "1": {
+      "0": {
+        "assert_guard": "PATCH_1",
+        "explicit_guard": "PATCH_1"
+      },
+      "1": {
+        "assert_guard": "PATCH_1",
+        "explicit_guard": "PATCH_1"
+      },
+      "2": {
+        "assert_guard": "PATCH_1",
+        "explicit_guard": "PATCH_1"
+      }
+    },
+    "2": {
+      "0": {
+        "assert_guard": "REJECT",
+        "explicit_guard": "REJECT"
+      },
+      "1": {
+        "assert_guard": "PATCH_2",
+        "explicit_guard": "REJECT"
+      },
+      "2": {
+        "assert_guard": "PATCH_2",
+        "explicit_guard": "REJECT"
+      }
+    }
+  }
+}
