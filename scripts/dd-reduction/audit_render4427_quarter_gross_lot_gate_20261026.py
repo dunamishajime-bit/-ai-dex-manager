@@ -90,9 +90,14 @@ def main():
         "const reservation = await lock.reserve(",
         "this.dependencies.executor.executeMarket({"
     ]
-    positions = [runner.index(s) for s in needles]
-    if positions != sorted(positions):
-        raise RuntimeError("RUNNER_ORDER_CHANGED")
+    positions = []
+    cursor = 0
+    for needle in needles:
+        position = runner.find(needle, cursor)
+        if position < 0:
+            raise RuntimeError("RUNNER_ORDER_CHANGED:" + needle)
+        positions.append(position)
+        cursor = position + len(needle)
     process = subprocess.run(
         ["node", "--no-warnings", "-e", NODE],
         input=lot.encode("utf-8"), stdout=subprocess.PIPE,
