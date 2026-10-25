@@ -142,5 +142,5 @@ test("daemon preflights TIME37 approval before flat market preparation or any EN
  const gate=src.indexOf("try{await readV4TimeStopApproval(releaseSha);}");
  const prepare=src.indexOf("prepared=await engine.prepareFlatMarketDecision();");
  assert.ok(gate>0&&prepare>gate);
- assert.match(src,/result=\\{status:"blocked",reason:approvalBlock\\.reason,eventTs:Date\\.now\\(\\),candidateCount:0,orderEnabled:false\\}/);
+ assert.ok(src.includes('result={status:"blocked",reason:approvalBlock.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false}'));
 });
