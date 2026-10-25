@@ -321,7 +321,9 @@ def allocate_dynamic_candidates(
     admitted: list[dict[str, Any]] = []
     for row in eligible:
         minimum = _finite(row.get("minGross"))
-        if minimum > class_remaining[row["asset_class"]] + 1e-12 or minimum > total_remaining + 1e-12:
+        if (minimum > class_remaining[row["asset_class"]] + 1e-12
+                or minimum > total_remaining + 1e-12
+                or minimum > strategy_remaining[row["strategy_id"]] + 1e-12):
             rejected.append({"id": row["id"], "reason": "MIN_GROSS_NOT_MET"})
             continue
         row["allocatedGross"] = minimum

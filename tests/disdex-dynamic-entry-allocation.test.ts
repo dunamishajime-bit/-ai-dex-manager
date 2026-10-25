@@ -36,6 +36,7 @@ function allocationInput(candidates: DynamicEntryCandidate[], limits: Partial<{
     stockGrossAvailable: number;
     totalGrossAvailable: number;
     equityUsd: number;
+    strategyGrossAvailable: Readonly<Record<string, number>>;
 }> = {}) {
     return {
         candidates,
@@ -157,4 +158,57 @@ test("explicit 0..100 V12 score remains eligible, but raw Idle return magnitude 
         id: "idle-raw", strategy: "IDLE_PRIORITY_SHORT", scoreSource: "IDLE_COMPLETED_REL24_RET12_V1",
         marketFitScore: 7,
     })).finalScore, 50);
+});
+
+test("same-strategy simultaneous minimum orders cannot exceed residual strategy gross", () => {
+    const result = allocateDynamicEntryGross(allocationInput([
+        candidate({ id: "a", strategy: "IDLE", marketFitScore: 95, minGross: 0.6, targetGross: 0.8 }),
+        candidate({ id: "b", strategy: "IDLE", marketFitScore: 80, minGross: 0.6, targetGross: 0.8 }),
+        candidate({ id: "c", strategy: "Q102", marketFitScore: 75, minGross: 0.1, targetGross: 0.5 }),
+    ], {
+        cryptoGrossAvailable: 1.6, totalGrossAvailable: 1.6,
+        strategyGrossAvailable: { IDLE: 0.75, Q102: 0.5 },
+    }));
+    assert.equal(result.allocations.filter((x) => x.strategy === "IDLE").length, 1);
+    assert.ok(result.allocations.filter((x) => x.strategy === "IDLE").reduce((a, b) => a + b.allocatedGross, 0) <= 0.75 + 1e-9);
+    assert.ok(result.allocations.some((x) => x.strategy === "Q102"));
+    assert.ok(result.rejected.some((x) => x.id === "b"));
+});
+test("water-fill redistributes bounded same-strategy headroom into other eligible strategies", () => {
+    const result = allocateDynamicEntryGross(allocationInput([
+        candidate({ id: "a", strategy: "IDLE", marketFitScore: 90, minGross: 0.2, targetGross: 0.9 }),
+        candidate({ id: "b", strategy: "IDLE", marketFitScore: 80, minGross: 0.2, targetGross: 0.9 }),
+        candidate({ id: "c", strategy: "Q102", marketFitScore: 70, minGross: 0.1, targetGross: 0.9 }),
+    ], { cryptoGrossAvailable: 1.6, totalGrossAvailable: 1.6,
+        strategyGrossAvailable: { IDLE: 0.5, Q102: 0.9 } }));
+    assert.ok(result.allocations.filter((x) => x.strategy === "IDLE").reduce((a, b) => a + b.allocatedGross, 0) <= 0.5 + 1e-9);
+    assert.ok(result.allocations.find((x) => x.id === "c")!.allocatedGross > 0.5);
+    assert.ok(result.allocations.reduce((a, b) => a + b.allocatedGross, 0) <= 1.4 + 1e-9);
+    assert.ok(result.residual.totalGross >= -1e-9);
+});
+test("registry-bound gross calculation rejects a strategy absent from the snapshot", () => {
+    const result = allocateDynamicEntryGross(allocationInput([
+        candidate({ id: "unknown", strategy: "RENDER", marketFitScore: 90 }),
+    ], { strategyGrossAvailable: { IDLE: 0.5 } }));
+    assert.equal(result.allocations.length, 0);
+    assert.deepEqual(result.rejected, [{ id: "unknown", reason: "STRATEGY_GROSS_UNAVAILABLE" }]);
+});
+
+test("same-position score candidates share one hard position cap and release surplus to other symbols", () => {
+    const result = allocateDynamicEntryGross({
+        candidates: [
+            candidate({ id: "a", strategy: "V12", symbol: "ETHUSDT", marketFitScore: 95, minGross: 0.2, targetGross: 0.6 }),
+            candidate({ id: "b", strategy: "V12", symbol: "ETHUSDT", marketFitScore: 90, minGross: 0.2, targetGross: 0.6 }),
+            candidate({ id: "c", strategy: "Q102", symbol: "AVAXUSDT", marketFitScore: 80, minGross: 0.2, targetGross: 0.8 }),
+        ],
+        cryptoGrossAvailable: 1.1, stockGrossAvailable: 0, totalGrossAvailable: 1.1,
+        equityUsd: 1000,
+        strategyGrossAvailable: { V12: 0.8, Q102: 0.8 },
+        positionGrossAvailable: { "V12|ETHUSDT|LONG": 0.3, "Q102|AVAXUSDT|LONG": 0.8 },
+    });
+    assert.ok(result.allocations.filter((row) => row.symbol === "ETHUSDT")
+        .reduce((sum, row) => sum + row.allocatedGross, 0) <= 0.3 + 1e-9);
+    assert.equal(result.allocations.some((row) => row.id === "b"), false);
+    assert.ok(result.allocations.find((row) => row.id === "c")!.allocatedGross >= 0.7);
+    assert.ok(result.allocations.reduce((sum, row) => sum + row.allocatedGross, 0) <= 1.1 + 1e-9);
 });

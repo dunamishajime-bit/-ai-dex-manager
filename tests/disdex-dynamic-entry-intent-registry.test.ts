@@ -23,7 +23,7 @@ async function submitIntent(registry: FileDynamicEntryIntentRegistry, intent: an
     return registry.submit(withTestMetadata(intent, submittedAt), submittedAt);
 }
 
-function approvalFor(intent: any, now: number) {
+function approvalFor(intent: any, now: number, activePositions: any[] = []) {
     const candidate = withTestMetadata(intent, now);
     const accepted = {
         idempotencyKey: candidate.idempotencyKey,
@@ -41,7 +41,7 @@ function approvalFor(intent: any, now: number) {
         accepted: [accepted],
         rejected: [],
         reductions: [],
-        activePositions: [],
+        activePositions,
         equityAfterReductions: 1_000,
         totals: { totalGross: candidate.targetGross, cryptoGross: candidate.assetClass === "CRYPTO" ? candidate.targetGross : 0, stockGross: candidate.assetClass === "STOCK" ? candidate.targetGross : 0 },
     };
@@ -54,7 +54,7 @@ function approvalFor(intent: any, now: number) {
         snapshot: {
             capturedAt: now,
             account: { equityUsd: 1_000, availableBalanceUsd: 1_000, updatedAt: now },
-            positions: [], openOrders: [], pendingReservationIds: [],
+            positions: activePositions, openOrders: [], pendingReservationIds: [],
             entryCeiling: { cryptoGrossCap: 3, totalGrossCap: 4.25 },
             sharedDailyRisk: { schema: "disdex-shared-crypto-daily-risk/v1", accountScope: "ASTER_FUTURES", updatedAt: now, tripped: false, sourceComplete: true },
             portfolioDdGovernor: { schema: "disdex-portfolio-dd-governor/v1", updatedAt: now, currentDrawdownPct: 0, twrIndex: 1, twrPeak: 1 },
@@ -484,6 +484,44 @@ test("unresolved prior-cycle journal cannot be overwritten by another allocation
         }), /DYNAMIC_ENTRY_CYCLE_RECONCILIATION_REQUIRED/);
         assert.equal(JSON.parse(await readFile(path, "utf8")).reservations[0]?.status, "RESERVATION_PENDING");
         assert.equal((await lock.document()).reservations.length, 0);
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+test("real strict approval snapshots enable score residual only when another strategy is already held", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-overlap-strict-integration-"));
+    try {
+        const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
+        const low = { cycleId: "overlap-score", id: "low", strategy: "V12", symbol: "ETHUSDT",
+            side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 5,
+            targetGross: 0.5, maxGross: 0.5, minGross: 0.2 };
+        const high = { cycleId: "overlap-score", id: "high", strategy: "QUALITY102_CAUSAL_V1", symbol: "AVAXUSDT",
+            side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 98,
+            targetGross: 0.5, maxGross: 0.5, minGross: 0.2 };
+        await submitIntent(registry, low, 50_000);
+        await submitIntent(registry, high, 50_000);
+        const held = { id: "live-fet-id", strategy: "FET_RESIDUAL" as const,
+            symbol: "FETUSDT", side: "LONG" as const, quantity: 7,
+            entryPrice: 1, markPrice: 1, entryTs: 10_000, updatedAt: 40_000 };
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000,
+            join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        const result = await registry.allocateCycle({
+            cycleId: low.cycleId, now: 50_000, cryptoGrossAvailable: 0.6,
+            stockGrossAvailable: 0, totalGrossAvailable: 0.6, equityUsd: 1_000,
+            lock, quality102CausalV1Ready: true, ...capsFor(low, high),
+            strictPlannerApprovals: [
+                approvalFor(low, 50_000, [held]),
+                approvalFor(high, 50_000, [held]),
+            ],
+        });
+        assert.equal(result.allocations.length, 2);
+        assert.ok(result.allocations.find((row) => row.id === "high")!.allocatedGross >
+            result.allocations.find((row) => row.id === "low")!.allocatedGross);
+        assert.ok(result.allocations.reduce((sum, row) => sum + row.allocatedGross, 0) <= 0.6 + 1e-9);
+        assert.ok(result.allocations.every((row) => row.reservationId.length > 0));
         await lock.release();
     } finally {
         await rm(dir, { recursive: true, force: true });

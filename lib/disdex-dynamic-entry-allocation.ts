@@ -110,6 +110,10 @@ export function allocateDynamicEntryGross(input: {
     stockGrossAvailable: number;
     totalGrossAvailable: number;
     equityUsd: number;
+    /** Residual per-strategy gross, net of positions and pending. */
+    strategyGrossAvailable?: Readonly<Record<string, number>>;
+    /** Position-specific residual headroom, aggregated across same-symbol signals. */
+    positionGrossAvailable?: Readonly<Record<string, number>>;
     maxBtBonus?: number;
 }): DynamicEntryAllocationResult {
     const cryptoCapacity = Math.max(0, safe(input.cryptoGrossAvailable));
@@ -118,8 +122,34 @@ export function allocateDynamicEntryGross(input: {
     const classCapacity: Record<DynamicAssetClass, number> = { CRYPTO: cryptoCapacity, STOCK: stockCapacity };
     const rejected: DynamicEntryAllocationResult["rejected"] = [];
     const eligible: ScoredCandidate[] = [];
+    const strategyRemaining: Record<string, number> = {};
+    if (input.strategyGrossAvailable) {
+        for (const [strategy, available] of Object.entries(input.strategyGrossAvailable)) {
+            strategyRemaining[strategy] = Math.max(0, safe(available));
+        }
+    }
+    const strategyRoom = (strategy: string): number =>
+        input.strategyGrossAvailable === undefined ? Number.POSITIVE_INFINITY : (strategyRemaining[strategy] ?? 0);
+    const positionRemaining: Record<string, number> = {};
+    if (input.positionGrossAvailable) {
+        for (const [key, available] of Object.entries(input.positionGrossAvailable)) {
+            positionRemaining[key] = Math.max(0, safe(available));
+        }
+    }
+    const positionKey = (candidate: DynamicEntryCandidate) =>
+        candidate.strategy + "|" + candidate.symbol.toUpperCase() + "|" + candidate.side;
+    const positionRoom = (candidate: DynamicEntryCandidate): number =>
+        input.positionGrossAvailable === undefined ? Number.POSITIVE_INFINITY : (positionRemaining[positionKey(candidate)] ?? 0);
 
     for (const candidate of input.candidates) {
+        if (input.strategyGrossAvailable !== undefined && !Object.prototype.hasOwnProperty.call(input.strategyGrossAvailable, candidate.strategy)) {
+            rejected.push({ id: candidate.id, reason: "STRATEGY_GROSS_UNAVAILABLE" });
+            continue;
+        }
+        if (input.positionGrossAvailable !== undefined && !Object.prototype.hasOwnProperty.call(input.positionGrossAvailable, positionKey(candidate))) {
+            rejected.push({ id: candidate.id, reason: "POSITION_GROSS_UNAVAILABLE" });
+            continue;
+        }
         const score = scoreDynamicEntryCandidate(candidate, input.maxBtBonus);
         const invalidNotional = candidate.minNotionalUsd !== undefined
             && (!Number.isFinite(candidate.minNotionalUsd) || candidate.minNotionalUsd < 0
@@ -134,7 +164,7 @@ export function allocateDynamicEntryGross(input: {
             ? "MIN_NOTIONAL_NOT_MET"
             : "MIN_GROSS_NOT_MET";
 
-        if (!Number.isFinite(minimumGross) || minimumGross <= 0 || safe(candidate.maxGross) < minimumGross || classCapacity[candidate.assetClass] <= 0 || totalCapacity <= 0) {
+        if (!Number.isFinite(minimumGross) || minimumGross <= 0 || safe(candidate.maxGross) < minimumGross || classCapacity[candidate.assetClass] <= 0 || totalCapacity <= 0 || minimumGross > strategyRoom(candidate.strategy) + 1e-12 || minimumGross > positionRoom(candidate) + 1e-12) {
             rejected.push({ id: candidate.id, reason });
             continue;
         }
@@ -154,13 +184,15 @@ export function allocateDynamicEntryGross(input: {
 
     for (const item of eligible) {
         const { assetClass } = item.candidate;
-        if (item.minimumGross > totalRemaining + 1e-12 || item.minimumGross > classRemaining[assetClass] + 1e-12) {
+        if (item.minimumGross > totalRemaining + 1e-12 || item.minimumGross > classRemaining[assetClass] + 1e-12 || item.minimumGross > strategyRoom(item.candidate.strategy) + 1e-12 || item.minimumGross > positionRoom(item.candidate) + 1e-12) {
             rejected.push({ id: item.candidate.id, reason: item.minimumGross > safe(item.candidate.minGross) ? "MIN_NOTIONAL_NOT_MET" : "MIN_GROSS_NOT_MET" });
             continue;
         }
         item.allocatedGross = item.minimumGross;
         totalRemaining -= item.minimumGross;
         classRemaining[assetClass] -= item.minimumGross;
+        if (input.strategyGrossAvailable !== undefined) strategyRemaining[item.candidate.strategy] -= item.minimumGross;
+        if (input.positionGrossAvailable !== undefined) positionRemaining[positionKey(item.candidate)] -= item.minimumGross;
         admitted.push(item);
     }
 
@@ -169,6 +201,8 @@ export function allocateDynamicEntryGross(input: {
     for (let pass = 0; pass < admitted.length && totalRemaining > 1e-12; pass += 1) {
         const open = admitted.filter((item) => item.allocatedGross < Math.min(item.targetGross, safe(item.candidate.maxGross)) - 1e-12
             && classRemaining[item.candidate.assetClass] > 1e-12
+            && strategyRoom(item.candidate.strategy) > 1e-12
+            && positionRoom(item.candidate) > 1e-12
             && item.finalScore > 0);
         const weightSum = open.reduce((sum, item) => sum + item.finalScore * Math.max(0, item.targetGross - item.allocatedGross), 0);
         if (open.length === 0 || weightSum <= 0) break;
@@ -178,7 +212,20 @@ export function allocateDynamicEntryGross(input: {
             gross: totalRemaining * item.finalScore * Math.max(0, item.targetGross - item.allocatedGross) / weightSum,
         }));
         const classProposals: Record<DynamicAssetClass, number> = { CRYPTO: 0, STOCK: 0 };
-        for (const proposal of proposals) classProposals[proposal.item.candidate.assetClass] += proposal.gross;
+        const strategyProposals: Record<string, number> = {};
+        const positionProposals: Record<string, number> = {};
+        for (const proposal of proposals) {
+            classProposals[proposal.item.candidate.assetClass] += proposal.gross;
+            strategyProposals[proposal.item.candidate.strategy] = (strategyProposals[proposal.item.candidate.strategy] ?? 0) + proposal.gross;
+            const key = positionKey(proposal.item.candidate);
+            positionProposals[key] = (positionProposals[key] ?? 0) + proposal.gross;
+        }
+        const positionScale = (candidate: DynamicEntryCandidate): number =>
+            positionProposals[positionKey(candidate)] > positionRoom(candidate)
+                ? positionRoom(candidate) / positionProposals[positionKey(candidate)] : 1;
+        const strategyScale = (strategy: string): number =>
+            strategyProposals[strategy] > strategyRoom(strategy)
+                ? strategyRoom(strategy) / strategyProposals[strategy] : 1;
 
         const classScale: Record<DynamicAssetClass, number> = {
             CRYPTO: classProposals.CRYPTO > classRemaining.CRYPTO ? classRemaining.CRYPTO / classProposals.CRYPTO : 1,
@@ -187,11 +234,15 @@ export function allocateDynamicEntryGross(input: {
         let distributed = 0;
         for (const { item, gross } of proposals) {
             const amount = Math.min(
-                gross * classScale[item.candidate.assetClass],
+                gross * classScale[item.candidate.assetClass] * strategyScale(item.candidate.strategy) * positionScale(item.candidate),
                 Math.max(0, Math.min(item.targetGross, safe(item.candidate.maxGross)) - item.allocatedGross),
+                strategyRoom(item.candidate.strategy),
+                positionRoom(item.candidate),
             );
             item.allocatedGross += amount;
             classRemaining[item.candidate.assetClass] -= amount;
+            if (input.strategyGrossAvailable !== undefined) strategyRemaining[item.candidate.strategy] -= amount;
+            if (input.positionGrossAvailable !== undefined) positionRemaining[positionKey(item.candidate)] -= amount;
             distributed += amount;
         }
         totalRemaining -= distributed;

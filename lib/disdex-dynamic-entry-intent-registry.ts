@@ -1,8 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, open, readFile, rename, unlink } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { allocateDynamicEntryGross, type DynamicEntryAllocation, type DynamicEntryAllocationResult, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
+import { type DynamicEntryAllocation, type DynamicEntryAllocationResult, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
 import { deriveAccountReservationId, type AccountLockHandle, type AccountReservationInput } from "./disdex-account-order-lock";
+import { allocateOverlapConditionalGross } from "./disdex-overlap-residual-allocation";
 import { validateStrictEntryApproval, type StrictEntryApproval } from "./disdex-strict-entry-approval";
 
 export const DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA = "disdex-dynamic-entry-intents/v1" as const;
@@ -348,7 +349,21 @@ export class FileDynamicEntryIntentRegistry {
                 const approvedGross = approval.accepted.gross;
                 return { ...candidate, targetGross: Math.min(candidate.targetGross, approvedGross), maxGross: Math.min(candidate.maxGross, approvedGross) };
             });
-            const allocation = allocateDynamicEntryGross({ candidates: approvedCandidates, cryptoGrossAvailable: input.cryptoGrossAvailable, stockGrossAvailable: input.stockGrossAvailable, totalGrossAvailable: input.totalGrossAvailable, equityUsd: input.equityUsd });
+            // Existing native strict approvals determine normal sizing. Only a
+            // different, already-held strategy in this candidate's fresh,
+            // validated account snapshot permits score-based residual sharing.
+            const allocation = allocateOverlapConditionalGross({
+                candidates: approvedCandidates,
+                strictPlannerApprovals: input.strictPlannerApprovals,
+                cryptoGrossAvailable: input.cryptoGrossAvailable,
+                stockGrossAvailable: input.stockGrossAvailable,
+                totalGrossAvailable: input.totalGrossAvailable,
+                equityUsd: input.equityUsd,
+                strategyGrossAvailable: input.strategyGrossAvailable,
+                positionGrossAvailable: input.positionGrossAvailable,
+                now: input.now,
+                snapshotMaxAgeMs: this.intentTtlMs,
+            });
             const strategyRemaining = { ...input.strategyGrossAvailable };
             const positionRemaining = { ...input.positionGrossAvailable };
             const bounded = allocation.allocations.flatMap((row) => {

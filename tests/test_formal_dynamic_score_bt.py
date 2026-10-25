@@ -165,6 +165,24 @@ class FormalDynamicScoreBacktestTests(unittest.TestCase):
         self.assertEqual(
             bt.archived_owner_exclusion("IDLE", {}, []), None)
 
+    def test_strategy_minimums_are_rechecked_at_admission_not_only_eligibility(self):
+        rows = [
+            {"id": "alpha", "strategy_id": "PENGU", "asset_class": "CRYPTO",
+             "marketFitScore": 90, "minGross": 0.6, "targetGross": 0.75, "maxGross": 0.75},
+            {"id": "beta", "strategy_id": "PENGU", "asset_class": "CRYPTO",
+             "marketFitScore": 70, "minGross": 0.6, "targetGross": 0.75, "maxGross": 0.75},
+            {"id": "gamma", "strategy_id": "FET", "asset_class": "CRYPTO",
+             "marketFitScore": 60, "minGross": 0.2, "targetGross": 0.3, "maxGross": 0.3},
+        ]
+        result = bt.allocate_dynamic_candidates(
+            rows, crypto_available=2, stock_available=0, total_available=2,
+            equity_usd=1000, strategy_available={"PENGU": .75, "FET": .3},
+        )
+        admitted = result["allocations"]
+        self.assertLessEqual(sum(x["allocatedGross"] for x in admitted if x["strategy_id"] == "PENGU"), .75 + 1e-10)
+        self.assertTrue(any(x["strategy_id"] == "FET" for x in admitted))
+        self.assertTrue(any(x["id"] == "beta" for x in result["rejected"]))
+
     def test_research_report_marks_bt_as_not_live(self):
         report = bt.render_research_report({
             "status": "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",
