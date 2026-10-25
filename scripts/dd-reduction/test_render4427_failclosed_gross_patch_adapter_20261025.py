@@ -36,7 +36,8 @@ def synthetic_matrix():
             rewritten = rewrite_gross_source_research_only(source)
             verdict = "PASS"
             if name == "valid":
-                if rewritten != NEW_REQUESTED + NEW_ROOM:\n                    raise AssertionError("BAD_REWRITE")
+                if rewritten != NEW_REQUESTED + NEW_ROOM:
+                    raise AssertionError("BAD_REWRITE")
         except ResearchPatchRejected as exc:
             verdict = str(exc).split(":")[0]
         result[name] = verdict
