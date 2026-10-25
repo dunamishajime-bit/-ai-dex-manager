@@ -1,9 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, open, readFile, rename, unlink } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { type DynamicEntryAllocation, type DynamicEntryAllocationResult, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
+import { type DynamicEntryAllocation, type DynamicEntryAllocationResult, type DynamicEntryCandidate } from "./disdex-entry-intent-types";
 import { deriveAccountReservationId, type AccountLockHandle, type AccountReservationInput } from "./disdex-account-order-lock";
-import { allocateOverlapConditionalGross } from "./disdex-overlap-residual-allocation";
 import { validateStrictEntryApproval, type StrictEntryApproval } from "./disdex-strict-entry-approval";
 
 export const DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA = "disdex-dynamic-entry-intents/v1" as const;
@@ -349,27 +348,52 @@ export class FileDynamicEntryIntentRegistry {
                 const approvedGross = approval.accepted.gross;
                 return { ...candidate, targetGross: Math.min(candidate.targetGross, approvedGross), maxGross: Math.min(candidate.maxGross, approvedGross) };
             });
-            // Existing native strict approvals determine normal sizing. Only a
-            // different, already-held strategy in this candidate's fresh,
-            // validated account snapshot permits score-based residual sharing.
-            const allocation = allocateOverlapConditionalGross({
-                candidates: approvedCandidates,
-                strictPlannerApprovals: input.strictPlannerApprovals,
-                cryptoGrossAvailable: input.cryptoGrossAvailable,
-                stockGrossAvailable: input.stockGrossAvailable,
-                totalGrossAvailable: input.totalGrossAvailable,
-                equityUsd: input.equityUsd,
-                strategyGrossAvailable: input.strategyGrossAvailable,
-                positionGrossAvailable: input.positionGrossAvailable,
-                now: input.now,
-                snapshotMaxAgeMs: this.intentTtlMs,
-            });
+            // Non-adopted Score/GROSS redistributor removed. Preserve only
+            // the pre-existing strict planner's approved quantity, bounded by
+            // the hard strategy, position and shared account limits. The
+            // original producer/native planner controls entry ordering.
+            const strategyRoom = { ...input.strategyGrossAvailable };
+            const positionRoom = { ...input.positionGrossAvailable };
+            let cryptoRoom = Math.max(0, input.cryptoGrossAvailable);
+            let stockRoom = Math.max(0, input.stockGrossAvailable);
+            let totalRoom = Math.max(0, input.totalGrossAvailable);
+            const allocation: DynamicEntryAllocationResult = {
+                allocations: [], rejected: [],
+                residual: { cryptoGross: cryptoRoom, stockGross: stockRoom, totalGross: totalRoom },
+            };
+            for (const approval of input.strictPlannerApprovals) {
+                const candidate = approvedCandidates.find((row) => row.id === approval.candidateId)!;
+                const key = positionCapKey(candidate);
+                const classRoom = candidate.assetClass === "CRYPTO" ? cryptoRoom : stockRoom;
+                // Only the native strict planner may decide a smaller lot.
+                // Never implicitly downsize it again at the reservation layer.
+                const gross = approval.accepted.gross;
+                const hardRoom = Math.min(candidate.targetGross, candidate.maxGross,
+                    strategyRoom[candidate.strategy] ?? 0, positionRoom[key] ?? 0,
+                    classRoom, totalRoom);
+                const minGross = Math.max(candidate.minGross,
+                    (candidate.minNotionalUsd ?? 0) / input.equityUsd);
+                if (!Number.isFinite(gross) || gross + 1e-12 < minGross || gross > hardRoom + 1e-12) {
+                    allocation.rejected.push({ id: candidate.id, reason: "NATIVE_STRICT_APPROVED_GROSS_UNAVAILABLE" });
+                    continue;
+                }
+                allocation.allocations.push({ ...candidate, allocatedGross: gross, finalScore: 0, btPriorBonus: 0 });
+                strategyRoom[candidate.strategy] = Math.max(0, (strategyRoom[candidate.strategy] ?? 0) - gross);
+                positionRoom[key] = Math.max(0, (positionRoom[key] ?? 0) - gross);
+                if (candidate.assetClass === "CRYPTO") cryptoRoom = Math.max(0, cryptoRoom - gross);
+                else stockRoom = Math.max(0, stockRoom - gross);
+                totalRoom = Math.max(0, totalRoom - gross);
+            }
+            allocation.residual = { cryptoGross: cryptoRoom, stockGross: stockRoom, totalGross: totalRoom };
             const strategyRemaining = { ...input.strategyGrossAvailable };
             const positionRemaining = { ...input.positionGrossAvailable };
             const bounded = allocation.allocations.flatMap((row) => {
                 const positionKey = positionCapKey(row);
-                const allocatedGross = Math.min(row.allocatedGross, strategyRemaining[row.strategy], positionRemaining[positionKey]);
-                if (allocatedGross + 1e-12 < Math.max(row.minGross, row.minNotionalUsd ? row.minNotionalUsd / input.equityUsd : 0)) return [];
+                const allocatedGross = row.allocatedGross;
+                // The final pending exposure may invalidate approval, but not
+                // authorize a new quantity: drop it rather than resize.
+                if (allocatedGross > (strategyRemaining[row.strategy] ?? 0) + 1e-12
+                    || allocatedGross > (positionRemaining[positionKey] ?? 0) + 1e-12) return [];
                 if (strategyRemaining[row.strategy] !== undefined) strategyRemaining[row.strategy] = Math.max(0, strategyRemaining[row.strategy] - allocatedGross);
                 if (positionRemaining[positionKey] !== undefined) positionRemaining[positionKey] = Math.max(0, positionRemaining[positionKey] - allocatedGross);
                 return [{ ...row, allocatedGross }];

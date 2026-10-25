@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
+import type { DynamicEntryCandidate } from "./disdex-entry-intent-types";
 import type { PortfolioDdGovernorState } from "./disdex-portfolio-dd-governor";
 import type { SharedCryptoDailyRiskState } from "./disdex-shared-crypto-daily-risk";
 import type { StrictPortfolioIntent, StrictPortfolioPlan } from "./disdex-strict-portfolio-planner";

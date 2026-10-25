@@ -134,7 +134,7 @@ test("cycle allocation is idempotent and ignores expired intents", async () => {
     }
 });
 
-test("competing allocator claims publish only one bounded decision", async () => {
+test("competing native strict approvals are never resized at reservation time", async () => {
     const dir = await mkdtemp(join(tmpdir(), "disdex-intent-claim-"));
     try {
         const path = join(dir, "intents.json");
@@ -155,7 +155,8 @@ test("competing allocator claims publish only one bounded decision", async () =>
         assert.deepEqual(left, right);
         assert.ok(left.allocations.reduce((n, row) => n + row.allocatedGross, 0) <= 0.6 + 1e-9);
         assert.ok(left.allocations.reduce((n, row) => n + row.allocatedGross, 0) <= 0.3 + 1e-9);
-        assert.equal((await lock.document()).reservations.filter((row) => row.status === "RESERVED").length, 1);
+        assert.equal(left.allocations.length, 0);
+        assert.equal((await lock.document()).reservations.filter((row) => row.status === "RESERVED").length, 0);
         await lock.release();
     } finally {
         await rm(dir, { recursive: true, force: true });
@@ -490,7 +491,7 @@ test("unresolved prior-cycle journal cannot be overwritten by another allocation
     }
 });
 
-test("real strict approval snapshots enable score residual only when another strategy is already held", async () => {
+test("another strategy holding does not activate rejected Score distribution; strict native order remains", async () => {
     const dir = await mkdtemp(join(tmpdir(), "disdex-overlap-strict-integration-"));
     try {
         const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
@@ -517,10 +518,12 @@ test("real strict approval snapshots enable score residual only when another str
                 approvalFor(high, 50_000, [held]),
             ],
         });
-        assert.equal(result.allocations.length, 2);
-        assert.ok(result.allocations.find((row) => row.id === "high")!.allocatedGross >
-            result.allocations.find((row) => row.id === "low")!.allocatedGross);
-        assert.ok(result.allocations.reduce((sum, row) => sum + row.allocatedGross, 0) <= 0.6 + 1e-9);
+        assert.equal(result.allocations.length, 1);
+        assert.equal(result.allocations[0].id, "low");
+        assert.ok(Math.abs(result.allocations[0].allocatedGross - 0.5) < 1e-9);
+        assert.equal(result.allocations[0].finalScore, 0);
+        assert.equal(result.allocations[0].btPriorBonus, 0);
+        assert.ok(result.rejected.some((row) => row.id === "high"));
         assert.ok(result.allocations.every((row) => row.reservationId.length > 0));
         await lock.release();
     } finally {

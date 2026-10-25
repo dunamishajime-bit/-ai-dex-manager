@@ -1,4 +1,4 @@
-import { scoreDynamicEntryCandidate, type DynamicBtPriorMetrics, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
+import type { DynamicBtPriorMetrics, DynamicEntryCandidate } from "./disdex-entry-intent-types";
 import type { StrictPortfolioIntent, StrictStrategy } from "./disdex-strict-portfolio-planner";
 
 export type LiveEntryApprovalSource = "REGISTRY_ALLOCATION" | "STRICT_PLANNER_APPROVAL" | "V12_RESIDUAL_APPROVAL";
@@ -76,7 +76,7 @@ export function strictIntentForLiveCandidate(candidate: LiveEntryCandidate, equi
         gross: candidate.targetGross,
         requestedGross: candidate.targetGross,
         notionalUsd: candidate.targetGross * equityUsd,
-        btPriorBonus: scoreDynamicEntryCandidate(candidate).btPriorBonus,
+        btPriorBonus: 0, // The rejected Score-based capital bonus must not affect entry priority.
     };
 }
 

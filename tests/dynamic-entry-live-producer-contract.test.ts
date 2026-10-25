@@ -46,7 +46,7 @@ test("live candidate retains signal score and complete gross and identity metada
     assert.deepEqual([intent.gross, intent.notionalUsd, intent.minGross, intent.maxGross], [0.8, 800, 0.05, 1]);
 });
 
-test("versioned BT prior is optional and changes score only when supplied", () => {
+test("versioned research prior cannot modify strict native entry priority or GROSS", () => {
     const without = candidate();
     assert.equal(without.btPrior, undefined);
     const withPrior = buildLiveEntryCandidate({
@@ -55,7 +55,8 @@ test("versioned BT prior is optional and changes score only when supplied", () =
         btPrior: { version: "frozen-bt/v1", metrics: { returnPct: 40, profitFactor: 2, winRatePct: 60, maxDrawdownPct: 20, tradeCount: 100, observationDays: 180 } },
     });
     assert.equal(withPrior.btPriorVersion, "frozen-bt/v1");
-    assert.ok(strictIntentForLiveCandidate(withPrior, 1_000).btPriorBonus! > 0);
+    assert.equal(strictIntentForLiveCandidate(withPrior, 1_000).btPriorBonus, 0);
+    assert.equal(strictIntentForLiveCandidate(withPrior, 1_000).gross, strictIntentForLiveCandidate(without, 1_000).gross);
 });
 
 test("strict approval propagates only the accepted gross and rejects missing or changed approval", () => {
