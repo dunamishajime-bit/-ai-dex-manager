@@ -1,0 +1,14 @@
+{
+  "actual_native_proof_authenticated": false,
+  "economic_bt_performed": false,
+  "live_modified": false,
+  "native_order_authorized": false,
+  "new_attested_open": "REJECT",
+  "new_clean_synthetic": "NEED_NATIVE_ALLOCATOR",
+  "new_false_empty": "REJECT_CONTEXT_NOT_BOUND",
+  "new_missing_root": "REJECT_UNPINNED_INVENTORY",
+  "old_empty": "NEED_NATIVE_ALLOCATOR",
+  "old_open": "REJECT",
+  "old_same_proof_bytes": true,
+  "status": "RESEARCH_ONLY_INVENTORY_CONTEXT_BINDING_GAP"
+}
