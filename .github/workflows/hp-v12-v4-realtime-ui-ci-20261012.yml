@@ -48,6 +48,7 @@ jobs:
           tests/decision-status-layout-regression.test.ts
           tests/mobile-layout-regression.test.ts
           tests/live-performance-ui-contract.test.ts
+          tests/v4-independent-runtime-ui-contract.test.ts
       - name: TypeScript typecheck
         run: npx tsc --noEmit
       - name: Production build with independently verified types
@@ -68,6 +69,9 @@ jobs:
             '/decision-status/v12/page',
             '/api/system/v12-v4-hp-status/route',
             '/api/system/realtime-ranking/route',
+            '/api/system/runner-health/route',
+            '/api/system/live-runtime/route',
+            '/api/system/auto-trade/refresh-live-decision-cache/route',
           ];
           const missing = required.filter((route) => !manifest[route]);
           if (missing.length) throw new Error(`HP_ROUTE_MISSING:${missing.join(',')}`);

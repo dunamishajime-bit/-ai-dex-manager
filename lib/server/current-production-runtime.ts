@@ -164,9 +164,14 @@ function v52Number(value: unknown, key: string): number {
 
 type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
 
-async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<CurrentProductionRuntime["runtimeLineage"]> {
+async function loadRuntimeLineage(
+  releaseSha: string,
+  env: EnvMap,
+  v4PrimarySha?: string,
+): Promise<CurrentProductionRuntime["runtimeLineage"]> {
   const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
   const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
+  const v12ExpectedSha = v12PrimaryMode === "V4" ? (v4PrimarySha ?? releaseSha) : releaseSha;
   const heartbeatPaths = {
     ...HEARTBEAT_PATHS,
     v12: v12PrimaryMode === "V4" ? V12_V4_HEARTBEAT_PATH : LEGACY_V12_HEARTBEAT_PATH,
@@ -177,7 +182,7 @@ async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<Curr
       const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
         : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
       const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim()
-        : unit === "fet" || (unit === "v12" && v12PrimaryMode === "V4") ? releaseSha : undefined;
+        : unit === "fet" || (unit === "v12" && v12PrimaryMode === "V4") ? (unit === "v12" ? v12ExpectedSha : releaseSha) : undefined;
       units[unit] = {
         runtimeSha,
         expectedSha,
@@ -195,7 +200,9 @@ async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<Curr
             ? Number(raw.updatedAt)
             : undefined,
         healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
-        matchesCurrent: runtimeSha === releaseSha && expectedSha === releaseSha,
+        matchesCurrent: unit === "v12" && v12PrimaryMode === "V4"
+          ? runtimeSha === v12ExpectedSha && expectedSha === v12ExpectedSha
+          : runtimeSha === releaseSha && expectedSha === releaseSha,
       };
     } catch (error) {
       units[unit] = {
@@ -232,15 +239,23 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     throw new Error(`CURRENT_RUNTIME_SHA_MISMATCH:MARKER_${releaseSha}:ENV_${envRelease}:RUNTIME_${runtimeCommit}`);
   }
   const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
-  if (v12PrimaryMode === "V4" && env.DISDEX_V12_V4_PRIMARY_SHA !== releaseSha) {
-    throw new Error(`CURRENT_V12_PRIMARY_SHA_MISMATCH:RELEASE_${releaseSha}:PRIMARY_${env.DISDEX_V12_V4_PRIMARY_SHA ?? "MISSING"}`);
+  const v4PrimarySha = (env.DISDEX_V12_V4_PRIMARY_SHA ?? "").trim();
+  const v4PeerSha = (env.DISDEX_V12_V4_PEER_SHA ?? "").trim();
+  if (v12PrimaryMode === "V4") {
+    if (!SHA_RE.test(v4PrimarySha) || !SHA_RE.test(v4PeerSha) || v4PeerSha !== releaseSha) {
+      throw new Error(`CURRENT_V12_PRIMARY_LINEAGE_MISMATCH:RELEASE_${releaseSha}:PRIMARY_${v4PrimarySha || "MISSING"}:PEER_${v4PeerSha || "MISSING"}`);
+    }
   }
 
   const q102Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "integratedProductionRiskPolicy.ts"), "utf8");
   const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
-  const runtimeLineage = await loadRuntimeLineage(releaseSha, env);
+  const runtimeLineage = await loadRuntimeLineage(
+    releaseSha,
+    env,
+    v12PrimaryMode === "V4" ? v4PrimarySha : undefined,
+  );
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
     ? v52Raw.windowsNy.map((value) => String(value)).filter(Boolean)
