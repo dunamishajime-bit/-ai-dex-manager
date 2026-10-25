@@ -46,8 +46,14 @@ MIN_CONFIDENT_TRADES = 50.0
 FULL_OBSERVATION_DAYS = 90.0
 BT_PRIOR_TABLE_VERSION = "explicit-input-only/v1"
 BT_PRIOR_TRAINING_PERIOD = None
+PENGU_STRATEGIES = frozenset(("PENGU", "PENGU_DUAL_LS_V2"))
 NEUTRAL_MARKET_FIT_SCORE = 0.0
 NEUTRAL_MARKET_FIT_SOURCE = "neutral_fallback:ledger_missing_causal_market_fit"
+MISSING_MARKET_FIT_FIELD_BLOCKER = (
+    "No causal signal-time marketFitScore is present in the current ledger contract; "
+    "entries without an explicit whitelisted field use the neutral fallback. "
+    "Exit/future PnL is never used for market fit."
+)
 SCENARIOS = {
     "NORMAL": {"ledgerMode": "normal", "stockCostBps": float(stock.SCENARIOS["NORMAL"])},
     "SEVERE": {"ledgerMode": "stress", "stockCostBps": float(stock.SCENARIOS["SEVERE"])},
@@ -76,16 +82,61 @@ def normalized(value: Any) -> float:
     return min(1.0, max(0.0, finite(value)))
 
 
+def _is_finite_json_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))
+
+
+def _finite_prior_metric(value: Any) -> float | None:
+    return float(value) if _is_finite_json_number(value) else None
+
+
+def _is_pengu_strategy(strategy: Any) -> bool:
+    return str(strategy) in PENGU_STRATEGIES
+
+
+def _clamp_dynamic_bounds(strategy: Any, min_gross: float, target_gross: float, max_gross: float) -> tuple[float, float, float]:
+    hard_max = PENGU_MAX_GROSS if _is_pengu_strategy(strategy) else math.inf
+    return (
+        min(min_gross, hard_max),
+        min(target_gross, hard_max),
+        min(max_gross, hard_max),
+    )
+
+
+def _prior_table_metadata(prior_table: dict | None) -> dict:
+    if not isinstance(prior_table, dict):
+        return {
+            "version": BT_PRIOR_TABLE_VERSION,
+            "trainingPeriod": BT_PRIOR_TRAINING_PERIOD,
+            "sourceShas": {},
+        }
+    return {
+        "version": prior_table.get("version", BT_PRIOR_TABLE_VERSION),
+        "trainingPeriod": prior_table.get("trainingPeriod", BT_PRIOR_TRAINING_PERIOD),
+        "sourceShas": prior_table.get("sourceShas", {}),
+    }
+
+
+def _safe_signal_ts(value: Any) -> int | None:
+    return int(value) if _is_finite_json_number(value) else None
+
+
 def calculate_bt_prior_bonus(prior: dict, max_bonus: float = DEFAULT_MAX_BT_BONUS) -> float:
     """Port Task 1's bounded prior formula without using the current trade PnL."""
+    return_pct = _finite_prior_metric(prior.get("returnPct"))
+    profit_factor = _finite_prior_metric(prior.get("profitFactor"))
+    win_rate_pct = _finite_prior_metric(prior.get("winRatePct"))
+    max_drawdown_pct = _finite_prior_metric(prior.get("maxDrawdownPct"))
+    trade_count = _finite_prior_metric(prior.get("tradeCount"))
+    observation_days = _finite_prior_metric(prior.get("observationDays"))
     performance = (
-        0.30 * normalized(finite(prior.get("returnPct")) / 50.0)
-        + 0.25 * normalized((finite(prior.get("profitFactor")) - 1.0) / 2.0)
-        + 0.20 * normalized((finite(prior.get("winRatePct")) - 50.0) / 30.0)
-        + 0.25 * normalized(1.0 - finite(prior.get("maxDrawdownPct")) / 50.0)
+        0.30 * normalized(return_pct / 50.0 if return_pct is not None else math.nan)
+        + 0.25 * normalized((profit_factor - 1.0) / 2.0 if profit_factor is not None else math.nan)
+        + 0.20 * normalized((win_rate_pct - 50.0) / 30.0 if win_rate_pct is not None else math.nan)
+        + 0.25 * normalized(1.0 - max_drawdown_pct / 50.0 if max_drawdown_pct is not None else math.nan)
     )
-    trade_confidence = normalized(finite(prior.get("tradeCount")) / MIN_CONFIDENT_TRADES)
-    observation_confidence = normalized(finite(prior.get("observationDays")) / FULL_OBSERVATION_DAYS)
+    trade_confidence = normalized(trade_count / MIN_CONFIDENT_TRADES if trade_count is not None else math.nan)
+    observation_confidence = normalized(observation_days / FULL_OBSERVATION_DAYS if observation_days is not None else math.nan)
     return max(0.0, finite(max_bonus, 0.0)) * performance * trade_confidence * observation_confidence
 
 
@@ -126,24 +177,24 @@ def allocate_dynamic_gross(
             rejected.append({"id": str(candidate.get("id")), "reason": "INVALID_ASSET_CLASS"})
             continue
         min_gross = max(0.0, finite(candidate.get("minGross")))
+        target_gross = max(0.0, finite(candidate.get("targetGross")))
         max_gross = max(0.0, finite(candidate.get("maxGross")))
+        min_gross, target_gross, max_gross = _clamp_dynamic_bounds(
+            candidate.get("strategy"), min_gross, target_gross, max_gross
+        )
         min_notional = candidate.get("minNotionalUsd")
-        try:
-            parsed_notional = None if min_notional is None else float(min_notional)
-        except (TypeError, ValueError):
-            parsed_notional = math.nan
-        if parsed_notional is None or parsed_notional == 0:
+        if min_notional is None:
             notional_gross = 0.0
-        elif not math.isfinite(parsed_notional) or parsed_notional < 0 or not math.isfinite(equity_usd) or equity_usd <= 0:
+        elif not _is_finite_json_number(min_notional) or min_notional < 0 or not _is_finite_json_number(equity_usd) or equity_usd <= 0:
             notional_gross = math.inf
         else:
-            notional_gross = parsed_notional / equity_usd
+            notional_gross = float(min_notional) / float(equity_usd) if min_notional != 0 else 0.0
         minimum = max(min_gross, notional_gross)
         reason = "MIN_NOTIONAL_NOT_MET" if notional_gross > min_gross else "MIN_GROSS_NOT_MET"
         if not math.isfinite(minimum) or minimum <= 0 or max_gross < minimum or class_capacity[asset_class] <= 0 or total_capacity <= 0:
             rejected.append({"id": str(candidate.get("id")), "reason": reason})
             continue
-        target = max(minimum, min(max_gross, max(0.0, finite(candidate.get("targetGross")))))
+        target = max(minimum, min(max_gross, target_gross))
         eligible.append({
             **candidate,
             **score,
@@ -270,6 +321,12 @@ def _dynamic_candidate(kind: str, trade: dict, v12_multiplier: float, active_sto
         symbol = str(trade["symbol"])
     if requested <= 0:
         return None
+    min_gross, target_gross, max_gross = _clamp_dynamic_bounds(
+        strategy,
+        max(0.0, finite(trade.get("minGross"), default_minimum)),
+        max(0.0, finite(trade.get("targetGross"), requested)),
+        max(0.0, finite(trade.get("maxGross"), default_maximum)),
+    )
     return {
         "id": str(trade.get("dynamicId") or f"{strategy}:{symbol}"),
         "strategy": strategy,
@@ -277,9 +334,10 @@ def _dynamic_candidate(kind: str, trade: dict, v12_multiplier: float, active_sto
         "assetClass": asset_class,
         "marketFitScore": market_fit_score,
         "scoreSource": score_source,
-        "targetGross": finite(trade.get("targetGross"), requested),
-        "minGross": finite(trade.get("minGross"), default_minimum),
-        "maxGross": finite(trade.get("maxGross"), default_maximum),
+        "signalTs": _safe_signal_ts(trade.get("signalTs")),
+        "targetGross": target_gross,
+        "minGross": min_gross,
+        "maxGross": max_gross,
         "minNotionalUsd": trade.get("minNotionalUsd"),
         "btPrior": _prior_for(strategy, trade, prior_table),
         "correlationPenalty": trade.get("correlationPenalty"),
@@ -331,6 +389,7 @@ def simulate_dynamic_score(
     candidate_snapshots: List[dict] = []
     allocation_snapshots: List[dict] = []
     rejection_snapshots: List[dict] = []
+    candidate_trades: Dict[str, dict] = {}
     sleeve_totals = {
         "V12": {"candidates": 0, "accepted": 0, "allocatedGross": 0.0, "requestedGross": 0.0, "btPriorBonus": 0.0, "capacityBlocks": 0},
         "PENGU": {"candidates": 0, "accepted": 0, "allocatedGross": 0.0, "requestedGross": 0.0, "btPriorBonus": 0.0, "capacityBlocks": 0},
@@ -447,7 +506,6 @@ def simulate_dynamic_score(
             continue
 
         candidates: List[dict] = []
-        candidate_trades: Dict[str, dict] = {}
         for item in entries:
             kind = str(item["kind"])
             trade = item["trade"]
@@ -462,6 +520,7 @@ def simulate_dynamic_score(
             if kind == "PENGU_ENTRY" and active_pengu is not None:
                 stats["PENGU_SLOT_OCCUPIED"] += 1
                 continue
+            unit_return = None
             if kind == "STOCK_ENTRY":
                 if stock_latched:
                     stats["STOCK_ENTRY_DAILY_LOSS_BLOCKED"] += 1
@@ -472,7 +531,8 @@ def simulate_dynamic_score(
                 if any(str(position["symbol"]) == str(trade["symbol"]) for position in active_stock.values()):
                     stats["SAME_STOCK_SYMBOL_BLOCKED"] += 1
                     continue
-                if stock.unit_trade_value(trade, stock_cost_bps) is None:
+                unit_return = stock.unit_trade_value(trade, stock_cost_bps)
+                if unit_return is None:
                     stats[f"{strategy}_COST_EDGE_REJECTED"] += 1
                     continue
             candidate = _dynamic_candidate(kind, trade, v12_multiplier, len(active_stock), prior_table)
@@ -482,7 +542,7 @@ def simulate_dynamic_score(
             candidate["_kind"] = kind
             candidate["_trade"] = trade
             candidates.append(candidate)
-            candidate_trades[str(candidate["id"])] = trade
+            candidate_trades[str(candidate["id"])] = {"trade": trade, "unitReturn": unit_return}
             sleeve_totals[sleeve]["candidates"] += 1
             sleeve_totals[sleeve]["requestedGross"] += finite(candidate.get("requestedGross"))
 
@@ -495,6 +555,7 @@ def simulate_dynamic_score(
                 "symbol": candidate["symbol"],
                 "marketFitScore": candidate["marketFitScore"],
                 "scoreSource": candidate["scoreSource"],
+                "signalTs": candidate.get("signalTs"),
                 "btPriorBonus": score["btPriorBonus"],
                 "finalScore": score["finalScore"],
                 "minGross": candidate["minGross"],
@@ -527,10 +588,14 @@ def simulate_dynamic_score(
         for allocated in allocation["allocations"]:
             candidate_id = str(allocated["id"])
             candidate = next(row for row in candidates if str(row["id"]) == candidate_id)
-            trade = candidate_trades[candidate_id]
+            trade_record = candidate_trades[candidate_id]
+            trade = trade_record["trade"]
+            unit_return = trade_record.get("unitReturn")
             strategy = str(candidate["strategy"])
             sleeve = per_sleeve(strategy)
             amount = finite(allocated.get("allocatedGross"))
+            if _is_pengu_strategy(strategy):
+                amount = min(amount, PENGU_MAX_GROSS)
             if amount <= 1e-12:
                 sleeve_totals[sleeve]["capacityBlocks"] += 1
                 stats["DYNAMIC_SCORE_CAPACITY_BLOCKED"] += 1
@@ -559,7 +624,7 @@ def simulate_dynamic_score(
                 "allocatedGross": amount,
                 "requestedGross": finite(candidate.get("requestedGross")),
                 "entryNotional": equity * amount,
-                "netUnitReturn": finite(trade.get("netUnitReturn")),
+                "netUnitReturn": finite(trade.get("netUnitReturn") if unit_return is None else unit_return),
                 "exitReason": trade.get("exitReason"),
             }
             if strategy == "V12":
@@ -586,6 +651,7 @@ def simulate_dynamic_score(
                 "symbol": candidate["symbol"],
                 "marketFitScore": finite(candidate.get("marketFitScore")),
                 "scoreSource": candidate.get("scoreSource"),
+                "signalTs": candidate.get("signalTs"),
                 "btPriorBonus": finite(allocated.get("btPriorBonus")),
                 "finalScore": finite(allocated.get("finalScore")),
                 "minGross": finite(allocated.get("minGross")),
@@ -602,6 +668,7 @@ def simulate_dynamic_score(
             observe()
 
     metrics = event_metrics(events, equity_path, equity)
+    prior_metadata = _prior_table_metadata(prior_table)
     per_sleeve = {
         "V12": {**sleeve_totals["V12"]},
         "PENGU": {**sleeve_totals["PENGU"]},
@@ -635,8 +702,13 @@ def simulate_dynamic_score(
                 "stockGross": max(0.0, STOCK_GROSS_CAP - per_sleeve["STOCK"]["allocatedGross"]),
                 "totalGross": max(0.0, TOTAL_GROSS_CAP - per_sleeve["V12"]["allocatedGross"] - per_sleeve["PENGU"]["allocatedGross"] - per_sleeve["STOCK"]["allocatedGross"]),
             },
-            "marketFit": {"field": "marketFitScore", "neutralFallback": NEUTRAL_MARKET_FIT_SOURCE},
-            "btPrior": {"version": BT_PRIOR_TABLE_VERSION, "trainingPeriod": BT_PRIOR_TRAINING_PERIOD},
+            "marketFit": {
+                "field": "marketFitScore",
+                "neutralFallback": NEUTRAL_MARKET_FIT_SOURCE,
+                "missingFieldBlocker": MISSING_MARKET_FIT_FIELD_BLOCKER,
+                "futurePnlUsed": False,
+            },
+            "btPrior": prior_metadata,
         },
         "routingDiagnostics": dict(stats),
     })
@@ -1143,7 +1215,7 @@ def analyze(stock_cache: Path, v12_path: Path, pengu_path: Path, output: Path, b
         raise RuntimeError("V12 ledger period mismatch")
     if pengu["period"] != v12["period"]:
         raise RuntimeError("PENGU/V12 period mismatch")
-    prior_table = bt_prior_table or load_bt_prior_table()
+    prior_table = bt_prior_table if bt_prior_table is not None else load_bt_prior_table()
     v11_rows, v50_rows, target_days, stock_diagnostics = build_stock(stock_cache)
     variants = [{"variantId": "BASELINE_PENGU_STOCK", "v12Multiplier": 0.0, "entryPolicy": "NONE"}]
     variants.extend(
@@ -1198,6 +1270,7 @@ def analyze(stock_cache: Path, v12_path: Path, pengu_path: Path, output: Path, b
         "schema": "v12-v52-pengu-v2-combined-bt/v1",
         "strategyId": "V12_PLUS_PENGU_DUAL_LS_V2_PLUS_V52_STOCKS",
         "status": "PASS_RESEARCH_ONLY" if all(checks.values()) else "DIAGNOSTIC_RESEARCH_ONLY",
+        "live": False,
         "generatedAt": dt.datetime.now(tz=UTC).isoformat(),
         "period": {"startInclusive": START.isoformat(), "endExclusive": END.isoformat(), "calendarDays": (END - START).days},
         "sourceLineage": {
@@ -1233,7 +1306,12 @@ def analyze(stock_cache: Path, v12_path: Path, pengu_path: Path, output: Path, b
         "dynamicAllocation": {
             "mode": "RESEARCH_ONLY",
             "routingVariant": "DYNAMIC_SCORE",
-            "marketFit": {"field": "marketFitScore", "fallback": NEUTRAL_MARKET_FIT_SOURCE, "futurePnlUsed": False},
+            "marketFit": {
+                "field": "marketFitScore",
+                "fallback": NEUTRAL_MARKET_FIT_SOURCE,
+                "missingFieldBlocker": MISSING_MARKET_FIT_FIELD_BLOCKER,
+                "futurePnlUsed": False,
+            },
             "btPrior": {
                 "version": prior_table.get("version", BT_PRIOR_TABLE_VERSION),
                 "trainingPeriod": prior_table.get("trainingPeriod"),
@@ -1266,6 +1344,7 @@ def analyze(stock_cache: Path, v12_path: Path, pengu_path: Path, output: Path, b
             "US_RTH_OFF uses New York weekday/time boundaries; US exchange holidays are not separately removed from the V12 time gate.",
             "The crypto 5% daily latch is modeled conservatively. The deployed PENGU runner only consumes a portfolio daily-loss file when that VPS environment path is configured.",
             "The shared kill switch and exogenous operational failures cannot be reconstructed from market history.",
+            MISSING_MARKET_FIT_FIELD_BLOCKER,
         ],
         "dataQualityWarnings": [
             {
@@ -1276,7 +1355,7 @@ def analyze(stock_cache: Path, v12_path: Path, pengu_path: Path, output: Path, b
                 "currentProductionReplay": pengu["modes"]["normal"]["metrics"],
             }
         ],
-        "safety": {"mode": "RESEARCH_ONLY", "ordersSent": False, "liveChanged": False, "vpsChanged": False, "productionChanged": False, "liveEligible": False},
+        "safety": {"mode": "RESEARCH_ONLY", "live": False, "ordersSent": False, "liveChanged": False, "vpsChanged": False, "productionChanged": False, "liveEligible": False},
     })
     output.mkdir(parents=True, exist_ok=True)
     output.joinpath("result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
