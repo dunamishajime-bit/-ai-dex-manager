@@ -38,6 +38,7 @@ type PrimaryModeEvidence = {
   mode: "V4" | "LEGACY";
   primarySha: string | null;
   peerSha: string | null;
+  operationMode: "CERTIFIED" | "CANARY" | "SHADOW" | null;
 };
 export type V12V4HpObservabilityOptions = {
   now?: number;
@@ -151,7 +152,12 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
     throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
   }
   const lines = contents.split(/\r?\n/).map(line => line.trim()).filter(line => line && !line.startsWith("#"));
-  const allowed = new Set(["DISDEX_PRIMARY_V12_RUNNER", "DISDEX_V12_V4_PRIMARY_SHA", "DISDEX_V12_V4_PEER_SHA"]);
+  const allowed = new Set([
+    "DISDEX_PRIMARY_V12_RUNNER",
+    "DISDEX_V12_V4_PRIMARY_SHA",
+    "DISDEX_V12_V4_PEER_SHA",
+    "DISDEX_V12_V4_OPERATION_MODE",
+  ]);
   const entries = new Map<string, string>();
   for (const line of lines) {
     const match = /^([A-Z0-9_]+)=(.*)$/.exec(line);
@@ -162,6 +168,12 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
   if (mode !== "V4" && mode !== "LEGACY") throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
   const primarySha = normalizeSha(entries.get("DISDEX_V12_V4_PRIMARY_SHA"));
   const peerSha = normalizeSha(entries.get("DISDEX_V12_V4_PEER_SHA"));
+  const operationModeText = entries.get("DISDEX_V12_V4_OPERATION_MODE");
+  const operationMode = operationModeText === undefined ? null :
+    operationModeText === "CERTIFIED" || operationModeText === "CANARY" || operationModeText === "SHADOW"
+      ? operationModeText
+      : null;
+  if (operationModeText !== undefined && operationMode === null) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
   if (mode === "V4") {
     // The V4 runner is an independently versioned primary. The current
     // production release remains the peer lineage, so only the peer SHA is
@@ -172,7 +184,7 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
       if (value !== null && value !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
     }
   }
-  return { mode, primarySha, peerSha };
+  return { mode, primarySha, peerSha, operationMode };
 }
 
 async function readLegacyV12Active(): Promise<boolean> {
@@ -444,7 +456,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
     currentSha === runnerSha && activeRunnerSha === runnerSha && activeRunnerId === productionV4Unit &&
     activeRunnerState === "active/running" && v4RunnerMode === "CERTIFIED" && legacyV12RunnerActive === false) {
     v12PrimaryMode = "V4";
-    primaryModeEvidence = { mode: "V4", primarySha: runnerSha, peerSha: currentSha };
+    primaryModeEvidence = { mode: "V4", primarySha: runnerSha, peerSha: currentSha, operationMode: v4RunnerMode };
     errors.splice(primaryPermissionIndex, 1);
   }
 

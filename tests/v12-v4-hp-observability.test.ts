@@ -38,6 +38,7 @@ async function fixture(options: {
     "DISDEX_PRIMARY_V12_RUNNER=" + options.primaryMode,
     "DISDEX_V12_V4_PRIMARY_SHA=" + (options.primarySha ?? options.currentSha ?? SHA),
     "DISDEX_V12_V4_PEER_SHA=" + (options.peerSha ?? options.currentSha ?? SHA),
+    "DISDEX_V12_V4_OPERATION_MODE=" + (options.operationMode ?? "CANARY"),
     "",
   ].join("\n"));
   await writeFile(join(stateRoot, "heartbeat.json"), JSON.stringify({
