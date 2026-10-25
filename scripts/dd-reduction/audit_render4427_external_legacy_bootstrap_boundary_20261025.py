@@ -34,7 +34,7 @@ def git_bytes(repo: Path, ref: str, path: str) -> bytes:
 
 def git_blob_sha(data: bytes) -> str:
     import hashlib as _hashlib
-    return _hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\0" + data).hexdigest()
+    return _hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
 
 
 def audit(task9_source: str, caller_source: str) -> dict:
@@ -89,7 +89,7 @@ def audit(task9_source: str, caller_source: str) -> dict:
     structural = (
         len(task8_import) == len(caller_import) == len(legacy_assign) == 1
         and len(path_insert) == 1
-        and bool(legacy_path) and ".codex/worktrees/" in legacy_path.replace("\\\\", "/")
+        and bool(legacy_path) and ".codex/worktrees/" in legacy_path.replace("\\", "/")
         and len(patch_assign) >= 2
         and len(bootstrap_calls) >= 2
         and len(legacy_sha_calls) >= 2
