@@ -1,0 +1,167 @@
+{
+  "actual_orders": 0,
+  "interpreter_probe": {
+    "with_PYTHONOPTIMIZE_1": "1",
+    "with_dash_O": "1",
+    "without_optimize": "0"
+  },
+  "live_or_production_changes": false,
+  "native8_economic_bt": false,
+  "native8_owner_registered": false,
+  "prelaunch_policy": {
+    "no_independent_root": "REJECT_NO_INDEPENDENT_TRUST_ROOT",
+    "optimized_env": "REJECT_PYTHONOPTIMIZE_ENV",
+    "optimized_flag": "REJECT_OPTIMIZED_INTERPRETER",
+    "synthetic_interpreter_only": "RESEARCH_PRELAUNCH_INTERPRETER_ONLY_NOT_AUTHORIZED",
+    "untrusted_pythonpath": "REJECT_UNPINNED_IMPORT_ENVIRONMENT"
+  },
+  "python": "3.13.14",
+  "runner_imported_or_executed": false,
+  "source_files": [
+    {
+      "assert_count": 9,
+      "assertions": [
+        {
+          "expression": "result['selectedTrades'] == 224 and result['addedIndependents'] == 38",
+          "line": 44
+        },
+        {
+          "expression": "len(forward_new) == 3",
+          "line": 49
+        },
+        {
+          "expression": "len({r['t'] for r in forward_new}) == 3",
+          "line": 50
+        },
+        {
+          "expression": "all((r['family'] == 'BTC_RENDER_DIVERGE' and r['exit'] == 'S6' for r in forward_new))",
+          "line": 51
+        },
+        {
+          "expression": "math.isfinite(price) and price > 0",
+          "line": 64
+        },
+        {
+          "expression": "t < exit_ts <= t + 6 * 3600000 + 300000",
+          "line": 66
+        },
+        {
+          "expression": "exitpx > 0 and math.isfinite(exitpx)",
+          "line": 69
+        },
+        {
+          "expression": "(t, route) not in origkeys",
+          "line": 71
+        },
+        {
+          "expression": "args.output.resolve().as_posix().lower().startswith('c:/tmp/')",
+          "line": 96
+        }
+      ],
+      "bytecode_assertion_counts": {
+        "0": 9,
+        "1": 0,
+        "2": 0
+      },
+      "path": "scripts/dd-reduction/run-render-4427-independent-profit-sell55-native8-20261024.py",
+      "sha256_observed_not_trust_root": "3c5166a74f1de564335fe96196bc4be37f885c52897495fd1e53f8165ad85e91"
+    },
+    {
+      "assert_count": 9,
+      "assertions": [
+        {
+          "expression": "candidate['priority'] == ['SHORT_2024_BTC_RALLY_FAILURE', 'SHORT_DEEP_DROP_FAILED_RETEST', 'SHORT_BEAR_REBOUND_2H_FADE']",
+          "line": 21
+        },
+        {
+          "expression": "candidate['exits']['SHORT_DEEP_DROP_FAILED_RETEST'] == 'TAKE15_STOP20_H6'",
+          "line": 23
+        },
+        {
+          "expression": "candidate['exits']['SHORT_BEAR_REBOUND_2H_FADE'] == 'BST35_T50M25H24'",
+          "line": 24
+        },
+        {
+          "expression": "tuple(bank['BVariants']['BST35_T50M25H24']) == tuple(native.study.previous.CASE_RULES.get('NOT_A_ROUTE', {}).get('missing', [])) or bank['BVariants']['BST35_T50M25H24'] == [0.05, 0.035, 24, 0.025, 0.01]",
+          "line": 25
+        },
+        {
+          "expression": "len(REC) >= 50",
+          "line": 34
+        },
+        {
+          "expression": "entry > 0 and math.isfinite(entry)",
+          "line": 55
+        },
+        {
+          "expression": "t < exit_ts <= t + 24 * 3600000 + 300000",
+          "line": 56
+        },
+        {
+          "expression": "exit_px > 0 and math.isfinite(exit_px)",
+          "line": 59
+        },
+        {
+          "expression": "a.output.resolve().as_posix().lower().startswith('c:/tmp/')",
+          "line": 85
+        }
+      ],
+      "bytecode_assertion_counts": {
+        "0": 9,
+        "1": 0,
+        "2": 0
+      },
+      "path": "scripts/dd-reduction/run-render-4427-native8-shared-wallet-20261024.py",
+      "sha256_observed_not_trust_root": "0a41f062981e20426f15c4927aa317fd65940c502c4e8b145a26c5fbd3a359e7"
+    },
+    {
+      "assert_count": 8,
+      "assertions": [
+        {
+          "expression": "kernel.entry_filter is study.dual_filter",
+          "line": 25
+        },
+        {
+          "expression": "bank['status'].startswith('RESEARCH_ONLY') and len(bank['dualShortResearchSignalEvents']) == 263",
+          "line": 37
+        },
+        {
+          "expression": "len(records) > 40 and len({r['t'] for r in records}) == len(records)",
+          "line": 44
+        },
+        {
+          "expression": "px > 0 and math.isfinite(px)",
+          "line": 66
+        },
+        {
+          "expression": "t < exit_ts <= t + 24 * 3600000 + 300000",
+          "line": 69
+        },
+        {
+          "expression": "exit_px > 0 and math.isfinite(exit_px)",
+          "line": 75
+        },
+        {
+          "expression": "R not in (args.output.resolve(), *args.output.resolve().parents)",
+          "line": 125
+        },
+        {
+          "expression": "args.output.resolve().as_posix().lower().startswith('c:/tmp/')",
+          "line": 126
+        }
+      ],
+      "bytecode_assertion_counts": {
+        "0": 8,
+        "1": 0,
+        "2": 0
+      },
+      "path": "scripts/dd-reduction/run-render-2024-triple-native-full8-20261024.py",
+      "sha256_observed_not_trust_root": "8523dd1f6a06cafb881c7a5f1138a32156a8ffb3dc0f4fc9f03e380476fe2418"
+    }
+  ],
+  "status": "BLOCKED_OPTIMIZED_PYTHON_ELIDES_RESEARCH_INVARIANTS",
+  "synthetic_assert_normal": "REJECT_ASSERTION",
+  "synthetic_assert_optimized": "PASSED",
+  "total_assertions": 26,
+  "trusted_root_available": false
+}
