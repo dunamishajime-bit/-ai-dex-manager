@@ -39,6 +39,7 @@ DAILY_LOSS_LIMIT = 0.075
 FET_MIN = 0.05
 MIN_ORDER_NOTIONAL_USD = 5.0
 STRATEGY_PRIORITY = {"V52": 0, "PENGU": 1, "V12": 2, "Q102": 3, "FET": 4}
+ARCHIVED_EIGHT_OWNER_POLICY_RESEARCH_ONLY = False
 STRATEGY_CAPS = {"V12": 2.0, "PENGU": PENGU_HARD_CAP, "Q102": 3.0, "FET": 1.0, "V52": 4.0}
 Q102_FAMILY_CAPS = {"HIGH_VOL": 1.0, "MR": 0.75, "BRK": 0.75, "REV": 1.5, "PB": 2.0}
 
@@ -574,6 +575,31 @@ def _research_cap(candidate: dict[str, Any]) -> float:
     return STRATEGY_CAPS.get(strategy, 0.0)
 
 
+def archived_owner_exclusion(
+    strategy: str, active: dict[int, dict[str, Any]], current_candidates: Sequence[dict[str, Any]],
+) -> str | None:
+    """Conservative causal owner-risk exclusions; NOT parity with native full8 engine."""
+    if strategy not in {"IDLE", "RESIDUAL"}:
+        return None
+    core = {"V12", "PENGU", "Q102", "FET"}
+    if any(str(row.get("strategy_id")) in core for row in current_candidates) or any(
+        str(pos.get("strategy_id")) in core for pos in active.values()
+    ):
+        return f"{strategy}:CORE_SIGNAL_OR_POSITION"
+    if any(str(pos.get("strategy_id")) == "HYPE_LONG" for pos in active.values()) or any(
+        str(row.get("strategy_id")) == "HYPE_LONG" for row in current_candidates
+    ):
+        return f"{strategy}:HYPE_SIDECAR_ACTIVE"
+    if strategy == "RESIDUAL" and (
+        any(str(pos.get("strategy_id")) == "IDLE" for pos in active.values())
+        or any(str(row.get("strategy_id")) == "IDLE" for row in current_candidates)
+    ):
+        return "RESIDUAL:IDLE_PRIORITY"
+    if any(str(pos.get("strategy_id")) == strategy for pos in active.values()):
+        return f"{strategy}:SLOT_OCCUPIED"
+    return None
+
+
 def _asset_class(candidate: dict[str, Any]) -> str:
     return "STOCK" if str(candidate.get("strategy_id") or "") == "V52" else "CRYPTO"
 
@@ -886,6 +912,12 @@ def _dynamic_portfolio_scenario(
             hard_eligible: list[dict[str, Any]] = []
             for candidate in sorted(by_entry[ts], key=lambda row: (-_candidate_score(row)[1], STRATEGY_PRIORITY.get(str(row["strategy_id"]), 99), str(row.get("symbol") or ""), str(row.get("_model_candidate_id") or ""))):
                 strategy = str(candidate["strategy_id"])
+                if ARCHIVED_EIGHT_OWNER_POLICY_RESEARCH_ONLY:
+                    reason = archived_owner_exclusion(strategy, active, by_entry[ts])
+                    if reason:
+                        record_decision(candidate, "REJECTED_PORTFOLIO", reason, ts)
+                        rejected[reason] += 1
+                        continue
                 cap = _research_cap(candidate)
                 if cap <= 0:
                     record_decision(candidate, "REJECTED_RESEARCH_POLICY", f"{strategy}:CAP_ZERO", ts)

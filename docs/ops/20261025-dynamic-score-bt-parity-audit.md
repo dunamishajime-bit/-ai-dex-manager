@@ -40,7 +40,7 @@ The corrected dynamic allocator still loses material final equity and remains UN
 Source coverage audit fails:
 - Canonical annual HYPE candidate/exit tape is missing.
 - Canonical annual Idle candidate/exit tape is missing.
-- ZEC is conservatively required as an eighth owner until current owner roster verifies its activation; no corresponding annual candidate tape is present.
+- The archived 8-family integrated tape identifies RESIDUAL as the eighth modeled strategy, not ZEC. No ZEC owner is inferred without a matching production roster.
 - All 1,071 accepted V12 modeled trades have no V4 route identity.
 - All 1,071 V12 modeled trades cite old source dbf84542311c15f69508f91a0e7311ff7e686d96,
   not current V4 service 23ddd4b01fcff38cd10d4d4614221f93dc6b44e5.

@@ -149,6 +149,22 @@ class FormalDynamicScoreBacktestTests(unittest.TestCase):
         self.assertEqual(result["allocations"], [])
         self.assertEqual(result["rejected"][0]["reason"], "UNREGISTERED_STRATEGY_CAP")
 
+    def test_archived_eight_owner_core_priority_is_causal_and_conservative(self):
+        active = {1: {"strategy_id": "V12", "symbol": "BTCUSDT"}}
+        self.assertEqual(
+            bt.archived_owner_exclusion("IDLE", active, []),
+            "IDLE:CORE_SIGNAL_OR_POSITION")
+        self.assertEqual(
+            bt.archived_owner_exclusion("RESIDUAL", {}, [{"strategy_id": "Q102"}]),
+            "RESIDUAL:CORE_SIGNAL_OR_POSITION")
+        self.assertEqual(
+            bt.archived_owner_exclusion("RESIDUAL", {}, [{"strategy_id": "IDLE"}]),
+            "RESIDUAL:IDLE_PRIORITY")
+        self.assertEqual(
+            bt.archived_owner_exclusion("HYPE_LONG", active, []), None)
+        self.assertEqual(
+            bt.archived_owner_exclusion("IDLE", {}, []), None)
+
     def test_research_report_marks_bt_as_not_live(self):
         report = bt.render_research_report({
             "status": "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",
