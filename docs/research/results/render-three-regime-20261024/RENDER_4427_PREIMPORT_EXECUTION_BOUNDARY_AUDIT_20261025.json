@@ -1,0 +1,75 @@
+{
+  "actualRuntimeRoot": "C:/tmp/render-multiregime-study-20261024",
+  "auditedWorktree": "C:/tmp/render4427-preimport-execution-guard-20261025",
+  "liveOrders": 0,
+  "native8EconomicBt": false,
+  "observedDigestsNotTrustedRoot": {
+    "bank_sha256": "d5234a91155afa2e232b0c2372b4a929a875ee79ef23d085a6417ecfab334c07",
+    "brain_sha256": "2ffb72b8707a3f32e68270b7e89c2ee01d2c2484922057f0037cefdc17c2d230",
+    "git_head": "0c1581e9df211a56aad0a412a94ceebac8a6a8f1",
+    "runner_sha256": "3c5166a74f1de564335fe96196bc4be37f885c52897495fd1e53f8165ad85e91"
+  },
+  "ownerRouteRegistered": false,
+  "preimportLocalRunnerDeclaredRoot": "REJECT_PREIMPORT_DECLARED_ROOT_NOT_PINNED",
+  "preimportWithSyntheticPostHocRoot": "REJECT_PREIMPORT_EXECUTION_ROOT_NOT_PINNED",
+  "preimportWithoutIndependentRoot": "REJECT_NO_INDEPENDENT_TRUST_ROOT",
+  "productionChanges": 0,
+  "runnerExecuted": false,
+  "staticModuleScope": {
+    "loadCallsAtModuleScope": [
+      {
+        "index": 9,
+        "line": 21,
+        "targets": [
+          "base"
+        ]
+      },
+      {
+        "index": 10,
+        "line": 22,
+        "targets": [
+          "brain"
+        ]
+      }
+    ],
+    "mainGuard": {
+      "index": 36,
+      "line": 123
+    },
+    "moduleEffectsBeforeMain": true,
+    "mutationsAtModuleScope": [
+      {
+        "index": 14,
+        "line": 25,
+        "target": "previous.CASE_RULES[case]"
+      },
+      {
+        "index": 15,
+        "line": 26,
+        "target": "previous.PROFIT_FLOOR[case]"
+      },
+      {
+        "index": 16,
+        "line": 27,
+        "target": "native.NEW_CASES[case]"
+      },
+      {
+        "index": 34,
+        "line": 92,
+        "target": "native.research_new_rows"
+      }
+    ],
+    "replayCallsAtModuleScope": [
+      {
+        "index": 22,
+        "line": 43,
+        "save": true,
+        "targets": [
+          "result"
+        ]
+      }
+    ]
+  },
+  "status": "BLOCKED_PREIMPORT_SIDE_EFFECT_AND_ROOT_MISMATCH_RESEARCH_ONLY",
+  "thirteenGateProofsCertified": false
+}
