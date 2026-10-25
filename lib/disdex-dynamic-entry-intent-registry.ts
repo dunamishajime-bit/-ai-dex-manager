@@ -3,14 +3,35 @@ import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promis
 import { dirname, resolve } from "node:path";
 import { allocateDynamicEntryGross, type DynamicEntryAllocation, type DynamicEntryAllocationResult, type DynamicEntryCandidate } from "./disdex-dynamic-entry-allocation";
 import type { AccountLockHandle } from "./disdex-account-order-lock";
+import { validateStrictEntryApproval, type StrictEntryApproval } from "./disdex-strict-entry-approval";
 
 export const DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA = "disdex-dynamic-entry-intents/v1" as const;
 export type DynamicEntryIntent = DynamicEntryCandidate & { cycleId: string; submittedAt: number };
 export type DynamicEntryAllocationDecision = Omit<DynamicEntryAllocationResult, "allocations"> & {
     allocations: Array<DynamicEntryAllocation & { reservationId: string }>;
     cycleId: string; decisionId: string; decidedAt: number; approvalSource: "REGISTRY_ALLOCATION";
+    strictApprovalTokens: string[];
 };
-type Document = { schema: typeof DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA; intents: DynamicEntryIntent[]; decisions: DynamicEntryAllocationDecision[] };
+export type DynamicEntryReservationStatus = "RESERVATION_PENDING" | "DECISION_PUBLISHED" | "RELEASED" | "REQUIRES_REVIEW";
+export type DynamicEntryReservationRecord = {
+    reservationKey: string;
+    cycleId: string;
+    intentId: string;
+    strategy: string;
+    symbol: string;
+    side: "LONG" | "SHORT";
+    assetClass: "CRYPTO" | "STOCK";
+    gross: number;
+    notionalUsd: number;
+    status: DynamicEntryReservationStatus;
+    createdAt: number;
+    updatedAt: number;
+    reservationId?: string;
+    decisionId?: string;
+    strictApprovalToken: string;
+    reviewReason?: string;
+};
+type Document = { schema: typeof DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA; intents: DynamicEntryIntent[]; decisions: DynamicEntryAllocationDecision[]; reservations: DynamicEntryReservationRecord[] };
 
 type AuthoritativeGrossCaps = {
     strategyGrossAvailable: Readonly<Record<string, number>>;
@@ -64,7 +85,7 @@ function sanitizeIntent(input: DynamicEntryCandidate & { cycleId: string }, subm
         marketFitScore, targetGross, minGross, maxGross,
         ...(scoreSource === undefined ? {} : { scoreSource }),
         ...(signalTs === undefined ? {} : { signalTs }),
-        ...(idempotencyKey === undefined ? {} : { idempotencyKey }),
+        idempotencyKey: idempotencyKey ?? id,
         ...(btPriorVersion === undefined ? {} : { btPriorVersion }),
         ...(minNotionalUsd === undefined ? {} : { minNotionalUsd }),
         ...(btPrior === undefined ? {} : { btPrior: { returnPct: btPrior.returnPct, profitFactor: btPrior.profitFactor, winRatePct: btPrior.winRatePct, maxDrawdownPct: btPrior.maxDrawdownPct, tradeCount: btPrior.tradeCount, observationDays: btPrior.observationDays } }),
@@ -78,12 +99,36 @@ async function read(path: string): Promise<Document> {
     try {
         const value = JSON.parse(await readFile(path, "utf8")) as Document;
         if (value.schema !== DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA || !Array.isArray(value.intents) || !Array.isArray(value.decisions)) throw new Error("DYNAMIC_ENTRY_INTENT_REGISTRY_MALFORMED");
-        return value;
+        return { ...value, reservations: Array.isArray(value.reservations) ? value.reservations : [] };
     } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") return { schema: DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA, intents: [], decisions: [] };
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return { schema: DYNAMIC_ENTRY_INTENT_REGISTRY_SCHEMA, intents: [], decisions: [], reservations: [] };
         throw error;
     }
 }
+
+function reservationKey(cycleId: string, intentId: string) {
+    return createHash("sha256").update(`${cycleId}|${intentId}`).digest("hex").slice(0, 24);
+}
+
+export type DynamicEntryReconciliationEvidence = {
+    capturedAt: number;
+    accountSnapshotFresh: boolean;
+    openOrdersSnapshotFresh: boolean;
+    pendingExposureSnapshotFresh: boolean;
+    protectionSnapshotFresh: boolean;
+    liveOrder: boolean;
+    livePosition: boolean;
+    pendingExposure: boolean;
+    unmanagedOpenOrders: number;
+    protectiveStopsVerified: boolean;
+};
+
+export type DynamicEntryReconciliationResult = {
+    reservationKey: string;
+    status: DynamicEntryReservationStatus;
+    reservationId?: string;
+    reason?: string;
+};
 
 async function write(path: string, doc: Document) {
     await mkdir(dirname(path), { recursive: true });
@@ -128,21 +173,50 @@ export class FileDynamicEntryIntentRegistry {
         quality102CausalV1Ready: boolean;
         strategyGrossAvailable: Readonly<Record<string, number>>;
         positionGrossAvailable: Readonly<Record<string, number>>;
+        strictPlannerApprovals: readonly StrictEntryApproval[];
     }): Promise<DynamicEntryAllocationDecision> {
         return this.synchronized(async () => {
             const doc = await read(this.path);
             const existing = doc.decisions.find((decision) => decision.cycleId === input.cycleId);
-            if (existing) return existing.approvalSource ? existing : { ...existing, approvalSource: "REGISTRY_ALLOCATION" };
+            if (existing) {
+                if (!existing.strictApprovalTokens?.length) {
+                    if (existing.allocations.length === 0) return existing;
+                    throw new Error("DYNAMIC_ENTRY_STRICT_APPROVAL_REQUIRED");
+                }
+                if (input.strictPlannerApprovals.length !== existing.strictApprovalTokens.length
+                    || input.strictPlannerApprovals.some((approval) => !existing.strictApprovalTokens.includes(approval.token))) {
+                    throw new Error("DYNAMIC_ENTRY_STRICT_APPROVAL_INCOMPATIBLE");
+                }
+                for (const approval of input.strictPlannerApprovals) {
+                    const candidate = doc.intents.find((intent) => intent.cycleId === input.cycleId && intent.id === approval.candidateId);
+                    if (!candidate) throw new Error("DYNAMIC_ENTRY_STRICT_APPROVAL_CANDIDATE_MISSING");
+                    validateStrictEntryApproval({ approval, cycleId: input.cycleId, candidate, now: input.now, maxAgeMs: this.intentTtlMs });
+                }
+                return existing.approvalSource ? existing : { ...existing, approvalSource: "REGISTRY_ALLOCATION" };
+            }
             await input.lock.document(); // Revalidates owner, lease ID, and expiry before claiming the cycle.
             assertCapMap(input.strategyGrossAvailable, "strategy");
             assertCapMap(input.positionGrossAvailable, "position");
-            const candidates = doc.intents.filter((intent) => intent.cycleId === input.cycleId && input.now >= intent.submittedAt && input.now - intent.submittedAt <= this.intentTtlMs).map((intent) => ({
+            const rawCandidates = doc.intents.filter((intent) => intent.cycleId === input.cycleId && input.now >= intent.submittedAt && input.now - intent.submittedAt <= this.intentTtlMs);
+            assertStrictReservationGates(rawCandidates, input.quality102CausalV1Ready);
+            assertCandidateCaps(rawCandidates, input);
+            const approvals = new Map(input.strictPlannerApprovals.map((approval) => [approval.candidateId, approval]));
+            if (rawCandidates.length !== approvals.size || rawCandidates.some((candidate) => !approvals.has(candidate.id))) throw new Error("DYNAMIC_ENTRY_STRICT_APPROVAL_REQUIRED");
+            for (const candidate of rawCandidates) {
+                const approval = approvals.get(candidate.id);
+                if (!approval) throw new Error("DYNAMIC_ENTRY_STRICT_APPROVAL_REQUIRED");
+                validateStrictEntryApproval({ approval, cycleId: input.cycleId, candidate, now: input.now, maxAgeMs: this.intentTtlMs });
+            }
+            const candidates = rawCandidates.map((intent) => ({
                 ...intent,
                 maxGross: Math.min(intent.maxGross, input.strategyGrossAvailable[intent.strategy] ?? Number.POSITIVE_INFINITY, input.positionGrossAvailable[positionCapKey(intent)] ?? Number.POSITIVE_INFINITY),
             }));
-            assertStrictReservationGates(candidates, input.quality102CausalV1Ready);
-            assertCandidateCaps(candidates, input);
-            const allocation = allocateDynamicEntryGross({ candidates, cryptoGrossAvailable: input.cryptoGrossAvailable, stockGrossAvailable: input.stockGrossAvailable, totalGrossAvailable: input.totalGrossAvailable, equityUsd: input.equityUsd });
+            const approvedCandidates = candidates.map((candidate) => {
+                const approval = approvals.get(candidate.id)!;
+                const approvedGross = approval.accepted.gross;
+                return { ...candidate, targetGross: Math.min(candidate.targetGross, approvedGross), maxGross: Math.min(candidate.maxGross, approvedGross) };
+            });
+            const allocation = allocateDynamicEntryGross({ candidates: approvedCandidates, cryptoGrossAvailable: input.cryptoGrossAvailable, stockGrossAvailable: input.stockGrossAvailable, totalGrossAvailable: input.totalGrossAvailable, equityUsd: input.equityUsd });
             const strategyRemaining = { ...input.strategyGrossAvailable };
             const positionRemaining = { ...input.positionGrossAvailable };
             const bounded = allocation.allocations.flatMap((row) => {
@@ -158,23 +232,87 @@ export class FileDynamicEntryIntentRegistry {
             const stockAllocated = bounded.filter((row) => row.assetClass === "STOCK").reduce((sum, row) => sum + row.allocatedGross, 0);
             allocation.residual = { cryptoGross: Math.max(0, input.cryptoGrossAvailable - cryptoAllocated), stockGross: Math.max(0, input.stockGrossAvailable - stockAllocated), totalGross: Math.max(0, input.totalGrossAvailable - cryptoAllocated - stockAllocated) };
             const reservations: string[] = [];
+            const journalRows: DynamicEntryReservationRecord[] = allocation.allocations.map((row) => ({
+                reservationKey: reservationKey(input.cycleId, row.id),
+                cycleId: input.cycleId,
+                intentId: row.id,
+                strategy: row.strategy,
+                symbol: row.symbol,
+                side: row.side,
+                assetClass: row.assetClass,
+                gross: row.allocatedGross,
+                notionalUsd: row.allocatedGross * input.equityUsd,
+                status: "RESERVATION_PENDING",
+                createdAt: input.now,
+                updatedAt: input.now,
+                strictApprovalToken: approvals.get(row.id)!.token,
+            }));
+            let publishedDecisionId: string | undefined;
             try {
+                doc.reservations = [...doc.reservations.filter((row) => row.cycleId !== input.cycleId), ...journalRows];
+                await write(this.path, doc);
                 for (const row of allocation.allocations) {
                     const reservation = await input.lock.reserve({ strategyId: row.strategy, symbol: row.symbol, side: row.side, sleeve: row.assetClass, gross: row.allocatedGross, notionalUsd: row.allocatedGross * input.equityUsd });
                     reservations.push(reservation.reservationId);
                 }
                 await input.lock.document();
-                const decisionId = createHash("sha256").update(`${input.cycleId}|${allocation.allocations.map((row) => `${row.id}:${row.allocatedGross}`).join("|")}`).digest("hex").slice(0, 24);
+                const decisionId = createHash("sha256").update(`${input.cycleId}|${allocation.allocations.map((row) => `${row.id}:${row.allocatedGross}`).join("|")}|${input.strictPlannerApprovals.map((approval) => approval.token).sort().join("|")}`).digest("hex").slice(0, 24);
                 const decision: DynamicEntryAllocationDecision = { ...allocation,
                     allocations: allocation.allocations.map((row, index) => ({ ...row, reservationId: reservations[index] })),
-                    cycleId: input.cycleId, decisionId, decidedAt: input.now, approvalSource: "REGISTRY_ALLOCATION" };
+                    cycleId: input.cycleId, decisionId, decidedAt: input.now, approvalSource: "REGISTRY_ALLOCATION",
+                    strictApprovalTokens: input.strictPlannerApprovals.map((approval) => approval.token).sort(), };
+                publishedDecisionId = decisionId;
+                doc.reservations = doc.reservations.map((row) => row.cycleId === input.cycleId
+                    ? { ...row, status: "DECISION_PUBLISHED" as const, reservationId: reservations[journalRows.findIndex((entry) => entry.reservationKey === row.reservationKey)], decisionId, updatedAt: input.now }
+                    : row);
                 doc.decisions.push(decision);
                 await write(this.path, doc);
                 return decision;
             } catch (error) {
-                for (const id of reservations.reverse()) await input.lock.releaseReservation(id).catch(() => undefined);
+                let releaseFailed = false;
+                for (const id of reservations.reverse()) {
+                    try { await input.lock.releaseReservation(id); } catch { releaseFailed = true; }
+                }
+                doc.decisions = doc.decisions.filter((row) => !(row.cycleId === input.cycleId && row.decisionId === publishedDecisionId));
+                doc.reservations = doc.reservations.map((row) => row.cycleId === input.cycleId
+                    ? { ...row, status: (releaseFailed ? "REQUIRES_REVIEW" : "RELEASED") as DynamicEntryReservationStatus, reservationId: row.reservationId || undefined, updatedAt: input.now, reviewReason: releaseFailed ? "NORMAL_EXCEPTION_RELEASE_FAILED" : "NORMAL_EXCEPTION_RELEASE" }
+                    : row);
+                await write(this.path, doc).catch(() => undefined);
                 throw error;
             }
+        });
+    }
+
+    async reconcileReservations(input: {
+        now: number;
+        lock: AccountLockHandle;
+        evidenceFor: (record: DynamicEntryReservationRecord) => Promise<DynamicEntryReconciliationEvidence> | DynamicEntryReconciliationEvidence;
+    }): Promise<DynamicEntryReconciliationResult[]> {
+        return this.synchronized(async () => {
+            const doc = await read(this.path);
+            const results: DynamicEntryReconciliationResult[] = [];
+            for (const record of doc.reservations.filter((row) => row.status === "RESERVATION_PENDING")) {
+                const evidence = await input.evidenceFor(record);
+                const fresh = evidence.accountSnapshotFresh && evidence.openOrdersSnapshotFresh && evidence.pendingExposureSnapshotFresh && evidence.protectionSnapshotFresh
+                    && Number.isFinite(evidence.capturedAt) && evidence.capturedAt > 0 && evidence.capturedAt <= input.now;
+                const potentialLive = evidence.liveOrder || evidence.livePosition || evidence.pendingExposure || evidence.unmanagedOpenOrders > 0
+                    || !evidence.protectiveStopsVerified;
+                if (!fresh || potentialLive) {
+                    const reason = !fresh ? "RECONCILIATION_EVIDENCE_STALE_OR_INCOMPLETE" : "RECONCILIATION_POTENTIAL_LIVE_ORDER_OR_POSITION";
+                    doc.reservations = doc.reservations.map((row) => row.reservationKey === record.reservationKey
+                        ? { ...row, status: "REQUIRES_REVIEW" as const, updatedAt: input.now, reviewReason: reason }
+                        : row);
+                    results.push({ reservationKey: record.reservationKey, reservationId: record.reservationId, status: "REQUIRES_REVIEW", reason });
+                    continue;
+                }
+                if (record.reservationId) await input.lock.releaseReservation(record.reservationId);
+                doc.reservations = doc.reservations.map((row) => row.reservationKey === record.reservationKey
+                    ? { ...row, status: "RELEASED" as const, updatedAt: input.now, reviewReason: "RECONCILED_NO_LIVE_EVIDENCE" }
+                    : row);
+                results.push({ reservationKey: record.reservationKey, reservationId: record.reservationId, status: "RELEASED", reason: "RECONCILED_NO_LIVE_EVIDENCE" });
+            }
+            await write(this.path, doc);
+            return results;
         });
     }
 }

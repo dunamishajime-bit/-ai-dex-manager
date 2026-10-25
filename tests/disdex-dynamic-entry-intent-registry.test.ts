@@ -1,17 +1,68 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { FileDynamicEntryIntentRegistry } from "../lib/disdex-dynamic-entry-intent-registry";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { readPendingExposureRegistry } from "../lib/disdex-pending-exposure-registry";
+import { createStrictEntryApproval } from "../lib/disdex-strict-entry-approval";
 
 function capsFor(...intents: Array<{ strategy: string; symbol: string; side: "LONG" | "SHORT" }>) {
     return {
         strategyGrossAvailable: Object.fromEntries([...new Set(intents.map((intent) => intent.strategy))].map((strategy) => [strategy, 1])),
         positionGrossAvailable: Object.fromEntries(intents.map((intent) => [`${intent.strategy}|${intent.symbol.toUpperCase()}|${intent.side}`, 1])),
     };
+}
+
+function withTestMetadata(intent: any, submittedAt: number) {
+    return { ...intent, signalTs: intent.signalTs ?? submittedAt, idempotencyKey: intent.idempotencyKey ?? intent.id };
+}
+
+async function submitIntent(registry: FileDynamicEntryIntentRegistry, intent: any, submittedAt: number) {
+    return registry.submit(withTestMetadata(intent, submittedAt), submittedAt);
+}
+
+function approvalFor(intent: any, now: number) {
+    const candidate = withTestMetadata(intent, now);
+    const accepted = {
+        idempotencyKey: candidate.idempotencyKey,
+        strategy: candidate.strategy,
+        symbol: candidate.symbol,
+        side: candidate.side,
+        signalTs: candidate.signalTs,
+        gross: candidate.targetGross,
+        notionalUsd: candidate.targetGross * 1_000,
+        minGross: candidate.minGross,
+        maxGross: candidate.maxGross,
+    } as any;
+    const plan = {
+        status: "planned" as const,
+        accepted: [accepted],
+        rejected: [],
+        reductions: [],
+        activePositions: [],
+        equityAfterReductions: 1_000,
+        totals: { totalGross: candidate.targetGross, cryptoGross: candidate.assetClass === "CRYPTO" ? candidate.targetGross : 0, stockGross: candidate.assetClass === "STOCK" ? candidate.targetGross : 0 },
+    };
+    return createStrictEntryApproval({
+        cycleId: candidate.cycleId,
+        candidate,
+        plan,
+        now,
+        maxAgeMs: 30_000,
+        snapshot: {
+            capturedAt: now,
+            account: { equityUsd: 1_000, availableBalanceUsd: 1_000, updatedAt: now },
+            positions: [], openOrders: [], pendingReservationIds: [],
+            entryCeiling: { cryptoGrossCap: 3, totalGrossCap: 4.25 },
+            sharedDailyRisk: { schema: "disdex-shared-crypto-daily-risk/v1", accountScope: "ASTER_FUTURES", updatedAt: now, tripped: false, sourceComplete: true },
+            portfolioDdGovernor: { schema: "disdex-portfolio-dd-governor/v1", updatedAt: now, currentDrawdownPct: 0, twrIndex: 1, twrPeak: 1 },
+            unmanagedOpenOrders: { checkedAt: now, count: 0 },
+            marginGuard: { checkedAt: now, healthy: true },
+            protectiveStops: { checkedAt: now, requiredPositionIds: [], verifiedPositionIds: [] },
+        },
+    });
 }
 
 test("registry decision retains causal producer identity and score provenance", async () => {
@@ -22,7 +73,7 @@ test("registry decision retains causal producer identity and score provenance", 
             strategy: "IDLE_PRIORITY_SHORT", symbol: "ETHUSDT", side: "SHORT" as const,
             assetClass: "CRYPTO" as const, marketFitScore: 7, scoreSource: "IDLE_COMPLETED_REL24_RET12_V1",
             targetGross: 0.3, minGross: 0.1, maxGross: 0.3 };
-        const submitted = await registry.submit(intent, 10_050);
+        const submitted = await submitIntent(registry, intent, 10_050);
         assert.equal(submitted.signalTs, 10_000);
         assert.equal(submitted.idempotencyKey, "idle-key");
         assert.equal(submitted.scoreSource, "IDLE_COMPLETED_REL24_RET12_V1");
@@ -30,7 +81,7 @@ test("registry decision retains causal producer identity and score provenance", 
         assert.ok(lock);
         const decision = await registry.allocateCycle({ cycleId: intent.cycleId, now: 10_050,
             cryptoGrossAvailable: 0.3, stockGrossAvailable: 0, totalGrossAvailable: 0.3,
-            equityUsd: 1_000, lock, quality102CausalV1Ready: false, ...capsFor(intent) });
+            equityUsd: 1_000, lock, quality102CausalV1Ready: false, ...capsFor(intent), strictPlannerApprovals: [approvalFor(intent, 10_050)] });
         assert.equal(decision.allocations[0]?.signalTs, 10_000);
         assert.equal(decision.allocations[0]?.idempotencyKey, "idle-key");
         assert.equal(decision.approvalSource, "REGISTRY_ALLOCATION");
@@ -42,18 +93,39 @@ test("registry decision retains causal producer identity and score provenance", 
     }
 });
 
+test("registry refuses reservation without a current strict planner approval", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-strict-approval-required-"));
+    try {
+        const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
+        const intent = { cycleId: "strict-required", id: "idle-key", strategy: "IDLE_PRIORITY_SHORT", symbol: "ETHUSDT", side: "SHORT" as const,
+            assetClass: "CRYPTO" as const, marketFitScore: 7, targetGross: 0.3, minGross: 0.1, maxGross: 0.3 };
+        await submitIntent(registry, intent, 10_050);
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        await assert.rejects(() => registry.allocateCycle({ cycleId: intent.cycleId, now: 10_050,
+            cryptoGrossAvailable: 0.3, stockGrossAvailable: 0, totalGrossAvailable: 0.3,
+            equityUsd: 1_000, lock, quality102CausalV1Ready: false, ...capsFor(intent), strictPlannerApprovals: [] }), /DYNAMIC_ENTRY_STRICT_APPROVAL_REQUIRED/);
+        assert.equal((await lock.document()).reservations.length, 0);
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
 test("cycle allocation is idempotent and ignores expired intents", async () => {
     const dir = await mkdtemp(join(tmpdir(), "disdex-intent-registry-"));
     try {
         const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"), 1_000);
-        await registry.submit({ cycleId: "cycle-1", id: "fresh", strategy: "V12", symbol: "ETHUSDT", side: "LONG", assetClass: "CRYPTO", marketFitScore: 4, targetGross: 0.2, minGross: 0.1, maxGross: 0.2, apiKey: "must-not-persist" } as never, 10_000);
+        const freshIntent = { cycleId: "cycle-1", id: "fresh", strategy: "V12", symbol: "ETHUSDT", side: "LONG", assetClass: "CRYPTO", marketFitScore: 4, targetGross: 0.2, minGross: 0.1, maxGross: 0.2, apiKey: "must-not-persist" } as never;
+        await submitIntent(registry, freshIntent, 10_000);
         assert.equal((await readFile(join(dir, "intents.json"), "utf8")).includes("must-not-persist"), false);
-        await registry.submit({ cycleId: "cycle-1", id: "expired", strategy: "V12", symbol: "BTCUSDT", side: "LONG", assetClass: "CRYPTO", marketFitScore: 9, targetGross: 0.2, minGross: 0.1, maxGross: 0.2 }, 8_000);
+        const expiredIntent = { cycleId: "cycle-1", id: "expired", strategy: "V12", symbol: "BTCUSDT", side: "LONG", assetClass: "CRYPTO", marketFitScore: 9, targetGross: 0.2, minGross: 0.1, maxGross: 0.2 };
+        await submitIntent(registry, expiredIntent, 8_000);
         const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
         assert.ok(lock);
         const capInputs = capsFor({ strategy: "V12", symbol: "ETHUSDT", side: "LONG" });
-        const first = await registry.allocateCycle({ cycleId: "cycle-1", now: 10_000, cryptoGrossAvailable: 0.2, stockGrossAvailable: 0, totalGrossAvailable: 0.2, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs });
-        const again = await registry.allocateCycle({ cycleId: "cycle-1", now: 10_000, cryptoGrossAvailable: 0, stockGrossAvailable: 0, totalGrossAvailable: 0, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs });
+        const first = await registry.allocateCycle({ cycleId: "cycle-1", now: 10_000, cryptoGrossAvailable: 0.2, stockGrossAvailable: 0, totalGrossAvailable: 0.2, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs, strictPlannerApprovals: [approvalFor(freshIntent, 10_000)] });
+        const again = await registry.allocateCycle({ cycleId: "cycle-1", now: 10_000, cryptoGrossAvailable: 0, stockGrossAvailable: 0, totalGrossAvailable: 0, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs, strictPlannerApprovals: [approvalFor(freshIntent, 10_000)] });
         assert.deepEqual(again, first);
         assert.deepEqual(first.allocations.map(({ id }) => id), ["fresh"]);
         await lock.release();
@@ -71,13 +143,13 @@ test("competing allocator claims publish only one bounded decision", async () =>
         const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
         assert.ok(lock);
         const intent = (id: string) => ({ cycleId: "same", id, strategy: "V12", symbol: `${id}USDT`, side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 3, targetGross: 0.8, minGross: 0.2, maxGross: 0.8 });
-        await a.submit(intent("a"), 20_000);
-        await b.submit(intent("b"), 20_000);
+        await submitIntent(a, intent("a"), 20_000);
+        await submitIntent(b, intent("b"), 20_000);
         const capInputs = capsFor({ strategy: "V12", symbol: "aUSDT", side: "LONG" }, { strategy: "V12", symbol: "bUSDT", side: "LONG" });
         capInputs.strategyGrossAvailable.V12 = 0.3;
         const [left, right] = await Promise.all([
-            a.allocateCycle({ cycleId: "same", now: 20_000, cryptoGrossAvailable: 0.5, stockGrossAvailable: 0.2, totalGrossAvailable: 0.6, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs }),
-            b.allocateCycle({ cycleId: "same", now: 20_000, cryptoGrossAvailable: 0.5, stockGrossAvailable: 0.2, totalGrossAvailable: 0.6, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs }),
+            a.allocateCycle({ cycleId: "same", now: 20_000, cryptoGrossAvailable: 0.5, stockGrossAvailable: 0.2, totalGrossAvailable: 0.6, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs, strictPlannerApprovals: [approvalFor(intent("a"), 20_000), approvalFor(intent("b"), 20_000)] }),
+            b.allocateCycle({ cycleId: "same", now: 20_000, cryptoGrossAvailable: 0.5, stockGrossAvailable: 0.2, totalGrossAvailable: 0.6, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capInputs, strictPlannerApprovals: [approvalFor(intent("a"), 20_000), approvalFor(intent("b"), 20_000)] }),
         ]);
         assert.equal(left.decisionId, right.decisionId);
         assert.deepEqual(left, right);
@@ -90,15 +162,44 @@ test("competing allocator claims publish only one bounded decision", async () =>
     }
 });
 
+test("normal reservation exception releases acquired rows and closes the journal", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-reservation-exception-"));
+    try {
+        const path = join(dir, "intents.json");
+        const registry = new FileDynamicEntryIntentRegistry(path);
+        const first = { cycleId: "exception", id: "a", strategy: "V12", symbol: "ETHUSDT", side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 3, targetGross: 0.3, minGross: 0.1, maxGross: 0.3 };
+        const second = { cycleId: "exception", id: "b", strategy: "V12", symbol: "BTCUSDT", side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 2, targetGross: 0.3, minGross: 0.1, maxGross: 0.3 };
+        await submitIntent(registry, first, 50_000);
+        await submitIntent(registry, second, 50_000);
+        const released: string[] = [];
+        let reservations = 0;
+        const lock = {
+            document: async () => ({ schema: "disdex-account-lock/v1", accountScope: "ASTER_FUTURES", ownerId: "test-owner", leaseId: "lease", acquiredAt: 50_000, expiresAt: 60_000, reservations: [] }),
+            reserve: async () => {
+                reservations += 1;
+                if (reservations === 2) throw new Error("TEST_RESERVE_FAILURE");
+                return { reservationId: "reserved-a", strategyId: "V12", symbol: "ETHUSDT", side: "LONG" as const, sleeve: "CRYPTO" as const, gross: 0.3, notionalUsd: 300, createdAt: 50_000, status: "RESERVED" as const };
+            },
+            releaseReservation: async (id: string) => { released.push(id); },
+        } as any;
+        await assert.rejects(() => registry.allocateCycle({ cycleId: "exception", now: 50_000, cryptoGrossAvailable: 0.6, stockGrossAvailable: 0, totalGrossAvailable: 0.6, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capsFor(first, second), strictPlannerApprovals: [approvalFor(first, 50_000), approvalFor(second, 50_000)] }), /TEST_RESERVE_FAILURE/);
+        assert.deepEqual(released, ["reserved-a"]);
+        const persisted = JSON.parse(await readFile(path, "utf8"));
+        assert.equal(persisted.reservations.every((row: { status: string }) => row.status === "RELEASED"), true);
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
 test("historical QUALITY102 is rejected before reservation", async () => {
     const dir = await mkdtemp(join(tmpdir(), "disdex-quality102-block-"));
     try {
         const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
         const intent = { cycleId: "quality102", id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 8, targetGross: 0.5, minGross: 0.1, maxGross: 0.5 };
-        await registry.submit(intent, 30_000);
+        await submitIntent(registry, intent, 30_000);
         const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
         assert.ok(lock);
-        await assert.rejects(() => registry.allocateCycle({ cycleId: "quality102", now: 30_000, cryptoGrossAvailable: 1, stockGrossAvailable: 0, totalGrossAvailable: 1, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capsFor(intent) }), /QUALITY102_LIVE_BLOCKED_FAIL_CLOSED/);
+        await assert.rejects(() => registry.allocateCycle({ cycleId: "quality102", now: 30_000, cryptoGrossAvailable: 1, stockGrossAvailable: 0, totalGrossAvailable: 1, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capsFor(intent), strictPlannerApprovals: [] }), /QUALITY102_LIVE_BLOCKED_FAIL_CLOSED/);
         assert.equal((await lock.document()).reservations.length, 0);
         assert.equal((await readPendingExposureRegistry(join(dir, "pending.json"))).entries.length, 0);
         await lock.release();
@@ -112,10 +213,10 @@ test("causal-v1 is rejected before reservation when readiness is absent", async 
     try {
         const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
         const intent = { cycleId: "causal-not-ready", id: "causal", strategy: "QUALITY102_CAUSAL_V1", symbol: "SOLUSDT", side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 8, targetGross: 0.5, minGross: 0.1, maxGross: 0.5 };
-        await registry.submit(intent, 30_000);
+        await submitIntent(registry, intent, 30_000);
         const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
         assert.ok(lock);
-        await assert.rejects(() => registry.allocateCycle({ cycleId: "causal-not-ready", now: 30_000, cryptoGrossAvailable: 1, stockGrossAvailable: 0, totalGrossAvailable: 1, equityUsd: 1_000, lock, quality102CausalV1Ready: false, ...capsFor(intent) }), /QUALITY102_CAUSAL_V1_NOT_READY/);
+        await assert.rejects(() => registry.allocateCycle({ cycleId: "causal-not-ready", now: 30_000, cryptoGrossAvailable: 1, stockGrossAvailable: 0, totalGrossAvailable: 1, equityUsd: 1_000, lock, quality102CausalV1Ready: false, ...capsFor(intent), strictPlannerApprovals: [] }), /QUALITY102_CAUSAL_V1_NOT_READY/);
         assert.equal((await lock.document()).reservations.length, 0);
         assert.equal((await readPendingExposureRegistry(join(dir, "pending.json"))).entries.length, 0);
         await lock.release();
@@ -129,7 +230,7 @@ test("registry fails closed when authoritative strategy and position caps are om
     try {
         const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
         const intent = { cycleId: "missing-caps", id: "v12", strategy: "V12", symbol: "ETHUSDT", side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 4, targetGross: 0.5, minGross: 0.1, maxGross: 0.5 };
-        await registry.submit(intent, 30_000);
+        await submitIntent(registry, intent, 30_000);
         const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
         assert.ok(lock);
         await assert.rejects(() => registry.allocateCycle({ cycleId: "missing-caps", now: 30_000, cryptoGrossAvailable: 1, stockGrossAvailable: 0, totalGrossAvailable: 1, equityUsd: 1_000, lock, quality102CausalV1Ready: true } as never), /DYNAMIC_ENTRY_AUTHORITATIVE_CAPS_REQUIRED/);
@@ -145,10 +246,10 @@ test("registry fails closed when a candidate cap entry is missing", async () => 
     try {
         const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
         const intent = { cycleId: "missing-cap-entry", id: "v12", strategy: "V12", symbol: "ETHUSDT", side: "LONG" as const, assetClass: "CRYPTO" as const, marketFitScore: 4, targetGross: 0.5, minGross: 0.1, maxGross: 0.5 };
-        await registry.submit(intent, 30_000);
+        await submitIntent(registry, intent, 30_000);
         const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
         assert.ok(lock);
-        await assert.rejects(() => registry.allocateCycle({ cycleId: "missing-cap-entry", now: 30_000, cryptoGrossAvailable: 1, stockGrossAvailable: 0, totalGrossAvailable: 1, equityUsd: 1_000, lock, quality102CausalV1Ready: true, strategyGrossAvailable: {}, positionGrossAvailable: {} }), /DYNAMIC_ENTRY_AUTHORITATIVE_CAP_MISSING/);
+        await assert.rejects(() => registry.allocateCycle({ cycleId: "missing-cap-entry", now: 30_000, cryptoGrossAvailable: 1, stockGrossAvailable: 0, totalGrossAvailable: 1, equityUsd: 1_000, lock, quality102CausalV1Ready: true, strategyGrossAvailable: {}, positionGrossAvailable: {}, strictPlannerApprovals: [] }), /DYNAMIC_ENTRY_AUTHORITATIVE_CAP_MISSING/);
         assert.equal((await lock.document()).reservations.length, 0);
         await lock.release();
     } finally {
@@ -161,13 +262,53 @@ test("stock allocation records STOCK in the account reservation and pending expo
     try {
         const registry = new FileDynamicEntryIntentRegistry(join(dir, "intents.json"));
         const intent = { cycleId: "stock-cycle", id: "v52", strategy: "V52", symbol: "NVDAUSDT", side: "LONG" as const, assetClass: "STOCK" as const, marketFitScore: 6, targetGross: 0.4, minGross: 0.1, maxGross: 0.4 };
-        await registry.submit(intent, 30_000);
+        await submitIntent(registry, intent, 30_000);
         const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
         assert.ok(lock);
-        const decision = await registry.allocateCycle({ cycleId: "stock-cycle", now: 30_000, cryptoGrossAvailable: 0, stockGrossAvailable: 0.4, totalGrossAvailable: 0.4, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capsFor(intent) });
+        const decision = await registry.allocateCycle({ cycleId: "stock-cycle", now: 30_000, cryptoGrossAvailable: 0, stockGrossAvailable: 0.4, totalGrossAvailable: 0.4, equityUsd: 1_000, lock, quality102CausalV1Ready: true, ...capsFor(intent), strictPlannerApprovals: [approvalFor(intent, 30_000)] });
         assert.equal(decision.allocations[0]?.assetClass, "STOCK");
         assert.equal((await lock.document()).reservations[0]?.sleeve, "STOCK");
         assert.equal((await readPendingExposureRegistry(join(dir, "pending.json"))).entries[0]?.sleeve, "STOCK");
+        await lock.release();
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+test("restart reconciliation releases only an orphan with fresh no-live evidence and preserves a potentially live reservation", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "disdex-reservation-reconcile-"));
+    try {
+        const registryPath = join(dir, "intents.json");
+        const lock = await new FileAccountOrderLock(join(dir, "account.lock"), 60_000, join(dir, "pending.json")).acquire("test-owner");
+        assert.ok(lock);
+        const safe = await lock.reserve({ strategyId: "V12", symbol: "ETHUSDT", side: "LONG", sleeve: "CRYPTO", gross: 0.1, notionalUsd: 100 });
+        const live = await lock.reserve({ strategyId: "V12", symbol: "BTCUSDT", side: "LONG", sleeve: "CRYPTO", gross: 0.1, notionalUsd: 100 });
+        await writeFile(registryPath, JSON.stringify({
+            schema: "disdex-dynamic-entry-intents/v1", intents: [], decisions: [], reservations: [
+                { reservationKey: "safe-key", cycleId: "safe-cycle", intentId: "safe", strategy: "V12", symbol: "ETHUSDT", side: "LONG", assetClass: "CRYPTO", gross: 0.1, notionalUsd: 100, status: "RESERVATION_PENDING", createdAt: 40_000, updatedAt: 40_000, reservationId: safe.reservationId, strictApprovalToken: "safe-token" },
+                { reservationKey: "live-key", cycleId: "live-cycle", intentId: "live", strategy: "V12", symbol: "BTCUSDT", side: "LONG", assetClass: "CRYPTO", gross: 0.1, notionalUsd: 100, status: "RESERVATION_PENDING", createdAt: 40_000, updatedAt: 40_000, reservationId: live.reservationId, strictApprovalToken: "live-token" },
+            ],
+        }), "utf8");
+        const result = await new FileDynamicEntryIntentRegistry(registryPath).reconcileReservations({
+            now: 40_100,
+            lock,
+            evidenceFor: (record) => ({
+                capturedAt: 40_100,
+                accountSnapshotFresh: true,
+                openOrdersSnapshotFresh: true,
+                pendingExposureSnapshotFresh: true,
+                protectionSnapshotFresh: true,
+                liveOrder: record.symbol === "BTCUSDT",
+                livePosition: false,
+                pendingExposure: record.symbol === "BTCUSDT",
+                unmanagedOpenOrders: 0,
+                protectiveStopsVerified: true,
+            }),
+        });
+        assert.deepEqual(result.map((row) => row.status), ["RELEASED", "REQUIRES_REVIEW"]);
+        const lockDocument = await lock.document();
+        assert.equal(lockDocument.reservations.find((row) => row.reservationId === safe.reservationId)?.status, "RELEASED");
+        assert.equal(lockDocument.reservations.find((row) => row.reservationId === live.reservationId)?.status, "RESERVED");
         await lock.release();
     } finally {
         await rm(dir, { recursive: true, force: true });

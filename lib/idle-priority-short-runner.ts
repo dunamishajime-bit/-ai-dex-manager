@@ -7,7 +7,7 @@ import { AsterDirectTradeExecutor, type DirectAccountSnapshot, type DirectOpenOr
 import { FileAccountOrderLock, type AccountLockHandle } from "./disdex-account-order-lock";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { FileDynamicEntryIntentRegistry } from "./disdex-dynamic-entry-intent-registry";
-import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross, requireCompatibleExecutionSnapshot } from "./disdex-live-entry-approval";
+import { buildLiveEntryCandidate, liveEntryScore, requireApprovedLiveGross, requireCompatibleExecutionSnapshot, strictIntentForLiveCandidate } from "./disdex-live-entry-approval";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
@@ -26,6 +26,12 @@ import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-da
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { planStrictPortfolio } from "./disdex-strict-portfolio-planner";
+import { createStrictEntryApproval } from "./disdex-strict-entry-approval";
+import { readPortfolioDdGovernor } from "./disdex-portfolio-dd-governor";
+import { readQuality102CausalV1Ownership, quality102OwnsPosition } from "./disdex-quality102-causal-v1-ownership";
+import { toStrictPosition } from "./v12-strict-live-adapter";
+import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders, findManagedV12V4ProtectiveOrders } from "./disdex-managed-protective-orders";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -108,6 +114,24 @@ function quoteFresh(quote: { updatedAt: number }, now: number) { return Number.i
 function sameQuantity(actual: number, expected: number) { return Math.abs(actual - expected) <= Math.max(1e-9, Math.abs(expected) * 0.01); }
 
 function safeNumber(value: unknown) { const n = Number(value); return Number.isFinite(n) ? n : 0; }
+
+function managedProtectiveOrderSet(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
+    return new Set([
+        ...findManagedOrdinaryResidentStops(openOrders, positions),
+        ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
+        ...findManagedV12ProtectiveOrders(openOrders, positions),
+        ...findManagedV12V4ProtectiveOrders(openOrders, positions),
+        ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
+        ...findManagedHypeZecProtectiveOrders(openOrders, positions),
+        ...findManagedIdlePriorityShortProtectiveOrders(openOrders, positions),
+    ]);
+}
+
+function hasManagedProtectiveStop(position: DirectPosition, managed: ReadonlySet<DirectOpenOrder>) {
+    return [...managed].some((order) => order.symbol.toUpperCase() === position.symbol.toUpperCase()
+        && order.reduceOnly === true && String(order.type || "").toUpperCase() === "STOP_MARKET"
+        && activeOrder(order));
+}
 
 function isOperatorActivationBlock(error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
@@ -490,7 +514,7 @@ export class IdlePriorityShortRunner {
         return { status: "completed", message: `IDLE_EXIT_COMPLETED:${owned.symbol}`, symbol: owned.symbol, ordersSent: 1, cancelsSent: 2, positionChangesSent: 1 };
     }
 
-    private async enter(state: IdleState, signal: IdleSignal, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle, pendingAggregate: ReturnType<typeof aggregatePendingExposure>): Promise<IdlePriorityShortTickResult> {
+    private async enter(state: IdleState, signal: IdleSignal, account: DirectAccountSnapshot, positions: DirectPosition[], openOrders: DirectOpenOrder[], lock: AccountLockHandle, pendingAggregate: ReturnType<typeof aggregatePendingExposure>): Promise<IdlePriorityShortTickResult> {
         const symbol = signal.symbol;
         const quote = await this.dependencies.executor.getMarketQuote(symbol);
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_ENTRY_QUOTE_STALE:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
@@ -589,6 +613,56 @@ export class IdlePriorityShortRunner {
         const positionGrossAvailable = Math.max(0, routePolicy.gross
             - positions.filter((position) => position.symbol.toUpperCase() === symbol).reduce((sum, position) => sum + Math.abs(position.notionalUsd) / equity, 0)
             - pendingSnapshot.entries.filter((entry) => entry.symbol === symbol && ["PENDING", "SUBMITTED", "UNKNOWN"].includes(entry.status)).reduce((sum, entry) => sum + entry.gross, 0));
+        const plannerNow = this.now();
+        const quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
+        const strictActivePositions = await Promise.all(positions.map(async (position) => {
+            const isQ102 = quality102OwnsPosition(quality102Ownership, position);
+            return toStrictPosition(position, plannerNow, quality102Ownership, isQ102 ? await this.dependencies.executor.getMarketQuote(position.symbol) : undefined);
+        }));
+        const managedProtectiveOrders = managedProtectiveOrderSet(openOrders, positions);
+        const strictUnmanagedOpenOrders = openOrders.filter((order) => !managedProtectiveOrders.has(order)).length;
+        const strictProtectedPositionIds = strictActivePositions.filter((position) => {
+            const source = positions.find((row) => row.symbol.toUpperCase() === position.symbol.toUpperCase());
+            return source ? hasManagedProtectiveStop(source, managedProtectiveOrders) : false;
+        }).map((position) => position.id);
+        const ddGovernorPath = process.env.DISDEX_PORTFOLIO_DD_GOVERNOR_PATH;
+        const portfolioDdGovernor = ddGovernorPath ? await readPortfolioDdGovernor(ddGovernorPath) : undefined;
+        if (!risk.ok || !risk.state) throw new Error("DYNAMIC_ENTRY_STRICT_DAILY_RISK_INVALID");
+        if (!portfolioDdGovernor) throw new Error("DYNAMIC_ENTRY_STRICT_DD_GOVERNOR_INVALID");
+        if (!marginHealthy) throw new Error("DYNAMIC_ENTRY_STRICT_MARGIN_STATE_INVALID");
+        const strictIntent = strictIntentForLiveCandidate(liveCandidate, equity);
+        const strictPlan = planStrictPortfolio({
+            equity,
+            now: plannerNow,
+            active: strictActivePositions,
+            intents: [strictIntent],
+            availableBalanceUsd: account.availableBalance,
+            sharedDailyRisk: risk.state,
+            portfolioDdGovernor,
+            entryGrossCaps: { cryptoGrossCap: INTEGRATED_CRYPTO_CAP, totalGrossCap: INTEGRATED_TOTAL_CAP },
+            pendingExposure: aggregatePendingExposure(pendingSnapshot),
+            quality102CausalV1Ready: false,
+        });
+        const strictApproval = createStrictEntryApproval({
+            cycleId,
+            candidate: liveCandidate,
+            plan: strictPlan,
+            now: plannerNow,
+            maxAgeMs: MAX_QUOTE_AGE_MS,
+            snapshot: {
+                capturedAt: plannerNow,
+                account: { equityUsd: equity, availableBalanceUsd: account.availableBalance, updatedAt: account.updatedAt },
+                positions: strictActivePositions.map((position) => ({ id: position.id, strategy: position.strategy, symbol: position.symbol, side: position.side, quantity: position.quantity, entryPrice: position.entryPrice, markPrice: position.markPrice, updatedAt: position.updatedAt })),
+                openOrders: openOrders.map((order) => ({ symbol: order.symbol, clientOrderId: order.clientOrderId, status: String(order.status || "UNKNOWN"), type: String(order.type || "UNKNOWN"), side: String(order.side || "UNKNOWN"), reduceOnly: order.reduceOnly === true })),
+                pendingReservationIds: pendingSnapshot.entries.filter((entry) => ["PENDING", "SUBMITTED", "UNKNOWN"].includes(entry.status)).map((entry) => entry.reservationId),
+                entryCeiling: { cryptoGrossCap: INTEGRATED_CRYPTO_CAP, totalGrossCap: INTEGRATED_TOTAL_CAP },
+                sharedDailyRisk: risk.state,
+                portfolioDdGovernor,
+                unmanagedOpenOrders: { checkedAt: plannerNow, count: strictUnmanagedOpenOrders },
+                marginGuard: { checkedAt: plannerNow, healthy: true },
+                protectiveStops: { checkedAt: plannerNow, requiredPositionIds: strictActivePositions.map((position) => position.id), verifiedPositionIds: strictProtectedPositionIds },
+            },
+        });
         let allocation;
         try {
             await intentRegistry.submit({
@@ -607,6 +681,7 @@ export class IdlePriorityShortRunner {
                 quality102CausalV1Ready: false,
                 strategyGrossAvailable: { [IDLE_PRIORITY_SHORT_STRATEGY]: strategyGrossAvailable },
                 positionGrossAvailable: { [`${IDLE_PRIORITY_SHORT_STRATEGY}|${symbol}|SHORT`]: positionGrossAvailable },
+                strictPlannerApprovals: [strictApproval],
             });
         } catch (error) {
             const reason = `IDLE_ALLOCATION_FAILED:${error instanceof Error ? error.message : String(error)}`;
@@ -800,6 +875,34 @@ export class IdlePriorityShortRunner {
             const ownershipIssue = await this.reconcileOwnership(state, positions, ownershipOrders);
             if (ownershipIssue) return this.manualReview(state, ownershipIssue);
             const pendingRegistry = await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath);
+            const dynamicRegistry = new FileDynamicEntryIntentRegistry(`${this.dependencies.runtime.pendingExposurePath}.dynamic-entry-intents.json`);
+            const managedForReconciliation = managedProtectiveOrderSet(ownershipOrders, positions);
+            const reconciliation = await dynamicRegistry.reconcileReservations({
+                now: this.now(),
+                lock,
+                evidenceFor: (record) => {
+                    const symbol = record.symbol.toUpperCase();
+                    const symbolPositions = positions.filter((position) => position.symbol.toUpperCase() === symbol && Math.abs(position.quantity) > EPSILON);
+                    const activeSymbolOrders = ownershipOrders.filter((order) => order.symbol.toUpperCase() === symbol && activeOrder(order));
+                    const unmanagedActiveOrders = ownershipOrders.filter((order) => activeOrder(order) && !managedForReconciliation.has(order));
+                    const pending = pendingRegistry.entries.find((entry) => entry.reservationId === record.reservationId && ["PENDING", "SUBMITTED", "UNKNOWN"].includes(entry.status));
+                    return {
+                        capturedAt: this.now(),
+                        accountSnapshotFresh: account.updatedAt > 0 && account.updatedAt <= this.now() && this.now() - account.updatedAt <= MAX_QUOTE_AGE_MS,
+                        openOrdersSnapshotFresh: true,
+                        pendingExposureSnapshotFresh: pendingRegistry.updatedAt > 0 && pendingRegistry.updatedAt <= this.now() && this.now() - pendingRegistry.updatedAt <= MAX_QUOTE_AGE_MS,
+                        protectionSnapshotFresh: true,
+                        liveOrder: activeSymbolOrders.some((order) => !managedForReconciliation.has(order)),
+                        livePosition: symbolPositions.length > 0,
+                        pendingExposure: Boolean(pending),
+                        unmanagedOpenOrders: unmanagedActiveOrders.length,
+                        protectiveStopsVerified: symbolPositions.every((position) => hasManagedProtectiveStop(position, managedForReconciliation)),
+                    };
+                },
+            });
+            if (reconciliation.some((row) => row.status === "REQUIRES_REVIEW")) {
+                return this.manualReview(state, `IDLE_DYNAMIC_RESERVATION_RECONCILIATION_REQUIRED:${reconciliation.filter((row) => row.status === "REQUIRES_REVIEW").map((row) => row.reason).join(",")}`);
+            }
             let pendingAggregate = aggregatePendingExposure(pendingRegistry);
             for (const owned of state.positions) {
                 const actual = activePosition(positions, owned.symbol);
@@ -944,10 +1047,11 @@ export class IdlePriorityShortRunner {
             for (const signal of signals) {
                 const accountNow = aggregateResult?.status === "completed" ? await this.dependencies.executor.getAccountSnapshot() : account;
                 const positionsNow = aggregateResult?.status === "completed" ? await this.dependencies.executor.getPositions() : positions;
+                const openOrdersNow = aggregateResult?.status === "completed" ? await this.dependencies.executor.getOpenOrders() : openOrders;
                 if (aggregateResult?.status === "completed") {
                     pendingAggregate = aggregatePendingExposure(await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath));
                 }
-                const result = await this.enter(state, signal, accountNow, positionsNow, lock, pendingAggregate);
+                const result = await this.enter(state, signal, accountNow, positionsNow, openOrdersNow, lock, pendingAggregate);
                 if (result.status === "manual-review") return result;
                 if (result.status === "completed" || result.status === "shadow") {
                     aggregateResult = aggregateResult
