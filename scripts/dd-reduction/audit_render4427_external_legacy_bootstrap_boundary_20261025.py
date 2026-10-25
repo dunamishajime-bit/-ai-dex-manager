@@ -105,7 +105,7 @@ def audit(task9_source: str, caller_source: str) -> dict:
         "path_write_text_assignment_lines": patch_assign,
         "task8_bootstrap_call_lines": sorted(bootstrap_calls),
         "legacy_hash_observation_lines": sorted(legacy_sha_calls),
-        "independent_legacy_bytes_available": False,
+        "independent_legacy_bytes_authenticated": False,
         "independent_trust_root_available": False,
         "native_order_authorized": False,
         "research_only": True,
