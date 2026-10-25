@@ -18,21 +18,26 @@ async function fixture(options: {
   orderEnabled?: boolean;
   activeService?: "canary" | "production" | "none";
   primaryMode?: "V4" | "LEGACY";
+  primarySha?: string;
+  peerSha?: string;
   legacyRunnerActive?: boolean | null;
   primaryModePermissionDenied?: boolean;
 } = {}) {
   const root = await mkdtemp(join(tmpdir(), "v12-v4-hp-"));
   const releases = join(root, "releases");
   const release = join(releases, options.currentSha ?? SHA);
+  const heartbeatRelease = join(releases, options.heartbeatSha ?? SHA);
   const stateRoot = join(root, "state");
   await mkdir(release, { recursive: true });
+  await mkdir(heartbeatRelease, { recursive: true });
   await mkdir(stateRoot, { recursive: true });
   await writeFile(join(release, ".disdex-release-sha"), `${options.currentSha ?? SHA}\n`);
+  await writeFile(join(heartbeatRelease, ".disdex-release-sha"), `${options.heartbeatSha ?? SHA}\n`);
   const primaryModePath = join(root, `${options.currentSha ?? SHA}.v12-primary.env`);
   if (options.primaryMode) await writeFile(primaryModePath, [
     "DISDEX_PRIMARY_V12_RUNNER=" + options.primaryMode,
-    "DISDEX_V12_V4_PRIMARY_SHA=" + (options.currentSha ?? SHA),
-    "DISDEX_V12_V4_PEER_SHA=" + (options.currentSha ?? SHA),
+    "DISDEX_V12_V4_PRIMARY_SHA=" + (options.primarySha ?? options.currentSha ?? SHA),
+    "DISDEX_V12_V4_PEER_SHA=" + (options.peerSha ?? options.currentSha ?? SHA),
     "",
   ].join("\n"));
   await writeFile(join(stateRoot, "heartbeat.json"), JSON.stringify({
@@ -48,7 +53,7 @@ async function fixture(options: {
     orderEnabled: options.orderEnabled ?? false,
     updatedAt: options.updatedAt ?? NOW,
   }));
-  await writeFile(join(stateRoot, "decision.json"), JSON.stringify({
+  const decision = {
     schema: "v12-v4-live-decision/v1",
     policyId: "V2_M150_D05_CORE_NATIVE",
     decisionTs: NOW - 60_000,
@@ -65,7 +70,9 @@ async function fixture(options: {
     tradingMutation: 0,
     candidates: [{ route: "CONT_SHORT_MID_AGE24_48", family: "CONTINUATION", symbol: "BTCUSDT", effectiveSide: "SHORT", rank: 8, eligibleEntryTs: NOW, features: { rel24: 0.02 } }],
     filtered: [{ route: "FAILED_BREAK_REV_SHORT_6H", symbol: "ETHUSDT", effectiveSide: "SHORT", eligibleEntryTs: NOW, reason: "FIRST_PASS_REPAIR_FILTER" }],
-  }));
+  };
+  await writeFile(join(stateRoot, "decision.json"), JSON.stringify(decision));
+  await writeFile(join(stateRoot, "realtime-decision.json"), JSON.stringify(decision));
   const systemd = async (unit: string) => {
     const active = options.activeService === "none" ? false : options.activeService === "production"
       ? unit.includes("disdex-v12-v4@") && !unit.includes("canary@")
@@ -170,6 +177,49 @@ test("LIVE_VERIFIED requires exact primary V4 mode, certified active unit, and n
     await rm(f.root, { recursive: true, force: true });
     await rm(legacy.root, { recursive: true, force: true });
     await rm(unknownMode.root, { recursive: true, force: true });
+  }
+});
+
+test("independent V4 primary SHA is accepted when the peer SHA remains bound to current production", async () => {
+  const f = await fixture({
+    operationMode: "CERTIFIED",
+    orderEnabled: false,
+    activeService: "production",
+    primaryMode: "V4",
+    primarySha: OTHER_SHA,
+    peerSha: SHA,
+    heartbeatSha: OTHER_SHA,
+    legacyRunnerActive: false,
+  });
+  try {
+    const result = await loadV12V4HpObservability(f.options);
+    assert.equal(result.displayStatus, "LIVE_VERIFIED");
+    assert.equal(result.actual.currentReleaseSha, SHA);
+    assert.equal(result.actual.v4ReleaseSha, OTHER_SHA);
+    assert.equal(result.actual.v12PrimaryMode, "V4");
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
+
+test("decision telemetry defaults to the V4 state root when no environment override is supplied", async () => {
+  const f = await fixture({
+    operationMode: "CERTIFIED",
+    orderEnabled: false,
+    activeService: "production",
+    primaryMode: "V4",
+    legacyRunnerActive: false,
+  });
+  try {
+    const result = await loadV12V4HpObservability({
+      ...f.options,
+      paths: { ...f.options.paths, decisionPath: undefined },
+    });
+    assert.equal(result.freshness.decision, true);
+    assert.equal(result.candidates.length, 1);
+    assert.doesNotMatch(result.errors.join(" "), /V4_DECISION_PATH_UNCONFIGURED/);
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
   }
 });
 

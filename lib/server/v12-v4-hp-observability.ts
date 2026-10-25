@@ -34,13 +34,18 @@ type SourcePaths = {
   primaryModeRoot: string;
   primaryModePath?: string;
 };
+type PrimaryModeEvidence = {
+  mode: "V4" | "LEGACY";
+  primarySha: string | null;
+  peerSha: string | null;
+};
 export type V12V4HpObservabilityOptions = {
   now?: number;
   /** Dependency/path seams for deterministic tests. Production callers use fixed VPS defaults. */
   paths?: Partial<SourcePaths>;
   readSystemd?: (unit: string) => Promise<string>;
   readLegacyV12Active?: () => Promise<boolean>;
-  readPrimaryMode?: (currentSha: string) => Promise<"V4" | "LEGACY">;
+  readPrimaryMode?: (currentSha: string) => Promise<PrimaryModeEvidence>;
 };
 
 const isObj = (value: unknown): value is Obj => value !== null && typeof value === "object" && !Array.isArray(value);
@@ -62,7 +67,7 @@ function pathsFor(options: V12V4HpObservabilityOptions): SourcePaths {
     releasesRoot: options.paths?.releasesRoot ?? process.env.DISDEX_RELEASES_ROOT ?? "/home/deploy/disdex-trading/releases",
     stateRoot,
     heartbeatPath: options.paths?.heartbeatPath ?? process.env.V12_V4_HEALTH_STATE_PATH ?? join(stateRoot, "heartbeat.json"),
-    decisionPath: options.paths?.decisionPath ?? process.env.V12_V4_REALTIME_DECISION_PATH,
+    decisionPath: options.paths?.decisionPath ?? process.env.V12_V4_REALTIME_DECISION_PATH ?? join(stateRoot, "realtime-decision.json"),
     primaryModeRoot: options.paths?.primaryModeRoot ?? process.env.DISDEX_RUNTIME_CONTRACT_ENV_DIR ?? "/etc/disdex/current-runtime",
     primaryModePath: options.paths?.primaryModePath,
   };
@@ -129,7 +134,7 @@ async function readSystemd(unit: string): Promise<string> {
   return stdout;
 }
 
-async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<"V4" | "LEGACY"> {
+async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<PrimaryModeEvidence> {
   const expectedPath = join(paths.primaryModeRoot, `${currentSha}.v12-primary.env`);
   const path = paths.primaryModePath ?? expectedPath;
   if (resolve(path) !== resolve(expectedPath)) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
@@ -155,11 +160,19 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
   }
   const mode = entries.get("DISDEX_PRIMARY_V12_RUNNER");
   if (mode !== "V4" && mode !== "LEGACY") throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
-  for (const key of ["DISDEX_V12_V4_PRIMARY_SHA", "DISDEX_V12_V4_PEER_SHA"]) {
-    const value = entries.get(key);
-    if (value !== undefined && normalizeSha(value) !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+  const primarySha = normalizeSha(entries.get("DISDEX_V12_V4_PRIMARY_SHA"));
+  const peerSha = normalizeSha(entries.get("DISDEX_V12_V4_PEER_SHA"));
+  if (mode === "V4") {
+    // The V4 runner is an independently versioned primary. The current
+    // production release remains the peer lineage, so only the peer SHA is
+    // required to match the SHA-bound contract filename/current symlink.
+    if (!primarySha || peerSha !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+  } else {
+    for (const value of [primarySha, peerSha]) {
+      if (value !== null && value !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+    }
   }
-  return mode;
+  return { mode, primarySha, peerSha };
 }
 
 async function readLegacyV12Active(): Promise<boolean> {
@@ -310,8 +323,12 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   const orderEnabled = typeof heartbeat?.orderEnabled === "boolean" ? heartbeat.orderEnabled : null;
 
   let v12PrimaryMode: V12V4HpSnapshot["actual"]["v12PrimaryMode"] = "UNKNOWN";
+  let primaryModeEvidence: PrimaryModeEvidence | null = null;
   if (currentSha) {
-    try { v12PrimaryMode = await (options.readPrimaryMode ? options.readPrimaryMode(currentSha) : readPrimaryMode(paths, currentSha)); }
+    try {
+      primaryModeEvidence = await (options.readPrimaryMode ? options.readPrimaryMode(currentSha) : readPrimaryMode(paths, currentSha));
+      v12PrimaryMode = primaryModeEvidence.mode;
+    }
     catch (error) { errors.push(error instanceof Error ? error.message : "V12_PRIMARY_MODE_SOURCE_UNAVAILABLE"); }
   }
   let legacyV12RunnerActive: boolean | null = null;
@@ -427,10 +444,19 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
     currentSha === runnerSha && activeRunnerSha === runnerSha && activeRunnerId === productionV4Unit &&
     activeRunnerState === "active/running" && v4RunnerMode === "CERTIFIED" && legacyV12RunnerActive === false) {
     v12PrimaryMode = "V4";
+    primaryModeEvidence = { mode: "V4", primarySha: runnerSha, peerSha: currentSha };
     errors.splice(primaryPermissionIndex, 1);
   }
 
-  const shaMismatch = !!(currentSha && runnerSha && currentSha !== runnerSha);
+  const shaLineageVerified = !!(currentSha && runnerSha && primaryModeEvidence && (
+    primaryModeEvidence.mode === "V4"
+      ? primaryModeEvidence.primarySha === runnerSha && primaryModeEvidence.peerSha === currentSha
+      : primaryModeEvidence.primarySha === currentSha && primaryModeEvidence.peerSha === currentSha
+  ));
+  const shaMismatch = !!(currentSha && runnerSha && (
+    v12PrimaryMode === "V4" ? !shaLineageVerified :
+      v12PrimaryMode === "LEGACY" ? !shaLineageVerified : currentSha !== runnerSha
+  ));
   const runtimeErrors = errors.filter(error => !/^(V4_DECISION_|V4_CANDIDATE_|V4_FILTERED_)/.test(error));
   const sourceIntegrityError = runtimeErrors.some(error =>
     /SCHEMA|POLICY|SAFETY|CONFLICTED|MISMATCH|INCOMPLETE|UNSAFE|OUTSIDE|ROW_INVALID|IDENTITY_INVALID|JSON_SOURCE_INVALID|DUPLICATE/.test(error));
@@ -447,7 +473,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   else if (runtimeEvidenceUnavailable) displayStatus = "UNAVAILABLE";
   else if (v4RunnerMode === "CANARY" || v12PrimaryMode === "LEGACY") displayStatus = "STAGED_NOT_LIVE";
   else if (v4RunnerMode === "UNKNOWN" || v12PrimaryMode === "UNKNOWN") displayStatus = "UNAVAILABLE";
-  else if (currentSha === runnerSha && activeRunnerSha === runnerSha && heartbeatFresh &&
+  else if (shaLineageVerified && activeRunnerSha === runnerSha && heartbeatFresh &&
     v4RunnerMode === "CERTIFIED" && v12PrimaryMode === "V4" && legacyV12RunnerActive === false) displayStatus = "LIVE_VERIFIED";
   else displayStatus = "STAGED_NOT_LIVE";
 
