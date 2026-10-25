@@ -7,7 +7,7 @@ import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {executeV4WithContentionAudit} from "../lib/v12-v4-lock-contention-observer";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
 import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
-import {V4RunnerEngine,classifyV4RecoverableExitFeedFailure,classifyV4StaleExitDecisionFailure,type V4OperatorExitAuthorization} from "../lib/v12-v4-runner-engine";
+import {V4RunnerEngine,classifyV4RecoverableExitFeedFailure,classifyV4StaleExitDecisionFailure,classifyV4AccountLeaseRenewalFailure,type V4OperatorExitAuthorization} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
 import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
@@ -80,6 +80,12 @@ export function classifyV4DaemonRateBudgetOutcome(
  if(flat)return {...flat,status:"observing"};
  return {status:"blocked",reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:"+rate.reason,
   waitMs:Math.max(15000,nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5))};
+}
+export type V4HealthSafetyState="HEALTHY"|"BLOCKED"|"DEFERRED_FAIL_CLOSED";
+export function classifyV4HealthSafetyState(result:{status:string;reason:string}):V4HealthSafetyState{
+ if(result.status==="blocked"||/^(?:V4_PREPARE_NOT_AVAILABLE|V4_MARKET_DATA_UNAVAILABLE|V4_EXIT_FEED_GAP_RETRY|V4_STALE_EXIT_REVIEW_REQUIRED|V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY)(?::|$)/.test(result.reason))return "BLOCKED";
+ if(result.reason.startsWith("V4_RATE_BUDGET_"))return "DEFERRED_FAIL_CLOSED";
+ return "HEALTHY";
 }
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
@@ -175,7 +181,7 @@ async function writeV4Health(releaseSha:string,operationMode:string,result:{
  const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
  const payload={
   schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
-  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState:failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":"HEALTHY",
+  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState:failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":classifyV4HealthSafetyState(result),
   heartbeatAt:now,mainPid:process.pid,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
   operationMode,mode:"LIVE",updatedAt:now,lastTickAt:result.eventTs,
   status:result.status,reason:result.reason,candidateCount:result.candidateCount,
@@ -384,8 +390,14 @@ async function main(){
      attempts:10,retryMs:750,shouldStop:()=>stopping,
      onContention:()=>{hadLockContention=true;},
     });
+    deferredWaitMs=Math.max(deferredWaitMs,result.retryAfterMs??0);
    }
   }catch(error){
+   const leaseRenewal=classifyV4AccountLeaseRenewalFailure(error,Date.now());
+   if(leaseRenewal){
+    result=leaseRenewal;
+    deferredWaitMs=leaseRenewal.retryAfterMs??15000;
+   }else{
    const staleExitReview=classifyV4StaleExitDecisionFailure(error,Date.now());
    if(staleExitReview){
     result=staleExitReview;
@@ -401,6 +413,7 @@ async function main(){
     deferredWaitMs=budget.waitMs;
     result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
     }
+   }
    }
   }
   try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result);}catch(error){

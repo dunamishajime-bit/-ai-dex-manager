@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,classifyV4DaemonTimeStopApprovalBlock,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
+import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,classifyV4DaemonTimeStopApprovalBlock,retryV4FlatBootstrapRateBudget,classifyV4HealthSafetyState} from "../scripts/v12-v4-production-runner";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 
 function doc(overrides:Record<string,unknown>={}):V4ExecutionDocument{
@@ -143,4 +143,21 @@ test("daemon preflights TIME37 approval before flat market preparation or any EN
  const prepare=src.indexOf("prepared=await engine.prepareFlatMarketDecision();");
  assert.ok(gate>0&&prepare>gate);
  assert.ok(src.includes('result={status:"blocked",reason:approvalBlock.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false}'));
+});
+
+test("explicit V4 blocked or degraded reasons never publish HEALTHY safety state",()=>{
+ const base={eventTs:1792859642887,candidateCount:0,orderEnabled:false} as const;
+ for(const reason of [
+  "V4_PREPARE_NOT_AVAILABLE",
+  "V4_MARKET_DATA_UNAVAILABLE",
+  "V4_MARKET_DATA_UNAVAILABLE:ECONNRESET",
+  "V4_EXIT_FEED_GAP_RETRY",
+  "V4_EXIT_FEED_GAP_RETRY:V4_EXIT_FEED_M5_GAP:1792689300000",
+  "V4_STALE_EXIT_REVIEW_REQUIRED:V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:leg",
+ ]){
+  assert.equal(classifyV4HealthSafetyState({...base,status:"observing",reason}),"BLOCKED",reason);
+ }
+ assert.equal(classifyV4HealthSafetyState({...base,status:"observing",reason:"V4_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"}),"DEFERRED_FAIL_CLOSED");
+ assert.equal(classifyV4HealthSafetyState({...base,status:"observing",reason:"NO_NATIVE_ENTRY_CANDIDATES"}),"HEALTHY");
+ assert.equal(classifyV4HealthSafetyState({...base,status:"blocked",reason:"V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY"}),"BLOCKED");
 });

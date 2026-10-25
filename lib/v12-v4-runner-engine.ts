@@ -19,12 +19,13 @@ import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEviden
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
+import {classifyAsterRateBudgetFailure} from "./disdex-aster-rate-budget-policy";
 export type V4PreparedDecision =
  | {kind:"READY";preparedAtMs:number;decision:V4LiveDecisionSnapshot}
  | {kind:"FAILED";preparedAtMs:number;reason:string};
 
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
- eventTs:number;candidateCount:number;orderEnabled:boolean};
+ eventTs:number;candidateCount:number;orderEnabled:boolean;retryAfterMs?:number};
 export type V4OperatorExitAuthorizationInput={
  legId:string;symbol:string;positionSide:"LONG"|"SHORT";quantity:number;plannedExit?:ExitDecision;
 };
@@ -41,6 +42,25 @@ function safeDecisionFailureReason(error:unknown){
  return raw.replace(/\b(0x[a-fA-F0-9]{40,64})\b/g,"[REDACTED]")
   .replace(/(secret|private.?key|signature|token|api.?key)=?[^\s,;]+/ig,"$1=[REDACTED]")
   .replace(/[\r\n\t]+/g," ").replace(/\s{2,}/g," ").slice(0,180)||"DECISION_SOURCE_UNAVAILABLE";
+}
+export function classifyV4AccountLeaseRenewalFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+ const reason=safeDecisionFailureReason(error);
+ if(reason!=="V4_ACCOUNT_LEASE_RENEWAL_FAILED")return;
+ return {status:"blocked",reason:"V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY:"+reason,eventTs,
+  candidateCount:0,orderEnabled:false,retryAfterMs:15000};
+}
+export function classifyV4MarketDataReadFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+ const reason=safeDecisionFailureReason(error);
+ const rate=classifyAsterRateBudgetFailure(error);
+ if(rate)return {status:"observing",reason:"V4_RATE_BUDGET_DEFERRED:"+rate.reason,eventTs,
+  candidateCount:0,orderEnabled:false,retryAfterMs:Math.max(1000,Math.min(15000,rate.waitMs??1000))};
+ if(/^V4_H\d+_WARMUP_INSUFFICIENT:/.test(reason)||reason==="MARKET_NETWORK_FAILURE")
+  return {status:"observing",reason:"V4_MARKET_DATA_UNAVAILABLE:"+reason,eventTs,candidateCount:0,orderEnabled:false};
+ if(/(?:^|[\s:/])(?:ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|ECONNREFUSED)(?:$|[\s:/])/.test(reason)||
+    /\bHTTP\s+(?:429|5\d\d)\b/i.test(reason)||/\b(?:status|code)[=: ](?:429|5\d\d)\b/i.test(reason)||
+    /\b(?:temporary|temporarily|transient)\b/i.test(reason))
+  return {status:"blocked",reason:"V4_MARKET_DATA_UNAVAILABLE:"+reason,eventTs,candidateCount:0,orderEnabled:false,retryAfterMs:15000};
+ return;
 }
 export function classifyV4RecoverableExitFeedFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
  const reason=safeDecisionFailureReason(error);
@@ -345,14 +365,19 @@ export class V4RunnerEngine{
    Object.values(d.store.read().state.legs).every(leg=>leg.qty<=0&&leg.status!=="PENDING_ENTRY");
   const reusable=Boolean(prepared&&stillFlat&&prepared.preparedAtMs<=this.now()&&
    boundary(prepared.preparedAtMs)===boundary(this.now()));
-  if(reusable&&prepared?.kind==="FAILED")return {status:"observing",
-   reason:"V4_MARKET_DATA_UNAVAILABLE:"+prepared.reason,eventTs:this.now(),candidateCount:0,orderEnabled:false};
+  if(reusable&&prepared?.kind==="FAILED"){
+   const readFailure=classifyV4MarketDataReadFailure(new Error(prepared.reason),this.now());
+   if(readFailure)return readFailure;
+   return {status:"observing",reason:"V4_MARKET_DATA_UNAVAILABLE:"+prepared.reason,
+    eventTs:this.now(),candidateCount:0,orderEnabled:false};
+  }
   let decision:V4LiveDecisionSnapshot;
   try{
    decision=reusable&&prepared?.kind==="READY"?prepared.decision:await d.fetchDecision();
   }catch(error){
-   return {status:"observing",reason:"V4_MARKET_DATA_UNAVAILABLE:"+safeDecisionFailureReason(error),
-    eventTs:this.now(),candidateCount:0,orderEnabled:false};
+   const readFailure=classifyV4MarketDataReadFailure(error,this.now());
+   if(readFailure)return readFailure;
+   throw error;
   }
   if(decision.orderEnabled!==false||decision.tradingMutation!==0||
    decision.realOrderEnabledV4!==0)

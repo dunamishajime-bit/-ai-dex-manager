@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {V4ExecutionStore,advanceV4Intent,v4OrderIdentity} from "../lib/v12-v4-execution-store";
-import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure} from "../lib/v12-v4-runner-engine";
+import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure,classifyV4AccountLeaseRenewalFailure,classifyV4MarketDataReadFailure} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
 
@@ -76,6 +76,39 @@ test("stale V4 exit decisions remain blocked review instead of terminating the d
   orderEnabled:false,
  });
  assert.equal(classifyV4StaleExitDecisionFailure(new Error("OTHER_FAILURE")),undefined);
+});
+test("account lease renewal failure is a bounded blocked retry, never an order-enabled heartbeat",()=>{
+ const eventTs=1792859642887;
+ assert.deepEqual(classifyV4AccountLeaseRenewalFailure(new Error("V4_ACCOUNT_LEASE_RENEWAL_FAILED"),eventTs),{
+  status:"blocked",
+  reason:"V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY:V4_ACCOUNT_LEASE_RENEWAL_FAILED",
+  eventTs,
+  candidateCount:0,
+  orderEnabled:false,
+  retryAfterMs:15000,
+ });
+ assert.equal(classifyV4AccountLeaseRenewalFailure(new Error("ACCOUNT_LOCK_NOT_OWNER"),eventTs),undefined);
+});
+test("startup exchange-read failures distinguish bounded transient retries from fatal integrity errors",()=>{
+ const eventTs=1792859642887;
+ for(const message of ["ECONNRESET","ETIMEDOUT","EAI_AGAIN","HTTP 503 /fapi/v3/exchangeInfo","HTTP 429 /fapi/v3/exchangeInfo"]){
+  const result=classifyV4MarketDataReadFailure(new Error(message),eventTs);
+  assert.equal(result?.status,"blocked",message);
+  assert.equal(result?.reason,"V4_MARKET_DATA_UNAVAILABLE:"+message,message);
+  assert.equal(result?.eventTs,eventTs,message);
+  assert.equal(result?.candidateCount,0,message);
+  assert.equal(result?.orderEnabled,false,message);
+  assert.equal(result?.retryAfterMs,15000,message);
+ }
+ assert.equal(classifyV4MarketDataReadFailure(new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"),eventTs)?.status,"observing");
+ for(const message of [
+  "V4_MISSING_CONFIGURATION:ASTER_USER_ADDRESS",
+  "V4_SIGNED_VENUE_CREDENTIALS_REQUIRED",
+  "V4_TIME37_APPROVAL_SHA_MISSING_OR_MISMATCH",
+  "V4_STATE_INTEGRITY_MISMATCH",
+  "V4_SHARED_RISK_FATAL",
+  "UNKNOWN_INFRASTRUCTURE_FAILURE",
+ ]) assert.equal(classifyV4MarketDataReadFailure(new Error(message),eventTs),undefined,message);
 });
 function peers(now:number){return families.map(kind=>({kind,programSha:sha,raw:{
  updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
