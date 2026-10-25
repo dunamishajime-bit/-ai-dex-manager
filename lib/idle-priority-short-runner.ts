@@ -356,7 +356,7 @@ export class IdlePriorityShortRunner {
             protectionVerified: true,
             trailArmed: false,
             bestConfirmed5mGainPct: 0,
-            ...(symbol === "RENDERUSDT" && pending.route === "IDLE_RENDER_RELATIVE_SHORT" ? {
+            ...(symbol === "RENDERUSDT" && pending.route === "IDLE_RENDER_RELATIVE_SHORT" && this.dependencies.runtime.renderLegacyAdverseLiveAuthorized ? {
                 legacyRenderAdverse: startLegacyRenderAdverse({ originalRoute: pending.route,
                     entryTs: Math.ceil(this.now() / RENDER_M5_MS) * RENDER_M5_MS, entryPrice: actual.entryPrice }),
             } : {}),
@@ -785,7 +785,7 @@ export class IdlePriorityShortRunner {
                 // Pre-upgrade live positions do not have a proven full M5/MFE
                 // history; their pre-existing venue protections stay authoritative.
                 let legacyAdverseExit = false;
-                if (owned.symbol === "RENDERUSDT" && owned.route === "IDLE_RENDER_RELATIVE_SHORT" && owned.legacyRenderAdverse) {
+                if (owned.symbol === "RENDERUSDT" && owned.route === "IDLE_RENDER_RELATIVE_SHORT" && owned.legacyRenderAdverse && this.dependencies.runtime.renderLegacyAdverseLiveAuthorized) {
                     legacyAdverseExit = owned.legacyRenderAdverse.completed;
                     const loader = this.dependencies.marketData.loadFiveMinuteSince;
                     if (!loader) return this.manualReview(state, "IDLE_RENDER_ADVERSE_CONTIGUOUS_M5_SOURCE_MISSING");

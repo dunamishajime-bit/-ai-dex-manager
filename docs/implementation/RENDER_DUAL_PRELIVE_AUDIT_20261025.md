@@ -15,7 +15,7 @@ This document must not be used as a LIVE-activation certificate.
 
 - Original RENDER-only initial adverse monitor: -1% confirmed M5 close, monitor 120 min,
   still at/below -1%, entry-to-date MFE strictly < +0.25%. State is persisted
-  alongside owned existing IDLE position. Market source gaps do not create exits.
+  alongside owned existing IDLE position, only when explicitly gated with DISDEX_RENDER_LEGACY_ADVERSE_LIVE_CERTIFIED after signed venue/first-M5 certification. Default false. Market source gaps do not create exits.
   The existing venue owner/reduce-only position-close path is reused.
 - Standalone six-hour RENDER virtual-shadow journal with atomic writes,
   SHA validation, replay-duplicate prevention, forward-only H1 decisions,
@@ -70,4 +70,12 @@ This document must not be used as a LIVE-activation certificate.
    a **single merged candidate SHA** and rollback for all runners.
 
 Unmet blocking conditions MUST keep the new independent RENDER route
-in Shadow-only mode. Do not report FULLY_VERIFIED_LIVE.
+in Shadow-only mode. Legacy stop must also retain default-off gating until fill/MFE proof. Do not report FULLY_VERIFIED_LIVE.
+
+## Verified historical material locator (not a completed combined BT)
+
+Local Windows model research can be found under C:/tmp/render-mtf-study-20261024 and C:/tmp/render-multiregime-study-20261024/scripts/dd-reduction.
+- run-idle-render-after-pengu-full8-20261024.py contains the approved original stop research case RENDER_TOUCH1_WATCH2_MFE0P25 using screen-idle-next-m5-after-pengu-20261024.py with cumulative PENGU/AVAX eight-wallet baseline.
+- run-render-4427-independent-profit-sell55-native8-20261024.py models an older six-hour independent Gate but does not reproduce the new 55-minute live exit; do not reuse those results as the combined 55m answer.
+- RENDER_4427_INDEPENDENT_SELL55_NATIVE8_AUDIT_20261024.json includes economic Native8 ledgers for other separate cases; data already viewed and potentially overfit.
+- Historical Aster 2025 H1 mark gaps and real funding/venue limits must be represented explicitly. Demand source provenance and certify all eight sleeves at current model SHA.

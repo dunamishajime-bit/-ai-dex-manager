@@ -20,6 +20,7 @@ export function resolveIdlePriorityShortRuntime(){
   statePath:resolve(process.env.DISDEX_IDLE_PRIORITY_STATE_PATH||"/var/lib/disdex/idle-priority/state.json"),
   renderShadowPath:resolve(process.env.DISDEX_RENDER_INDEPENDENT_SHADOW_PATH||"/var/lib/disdex/idle-priority/render-independent-shadow.json"),
   renderIndependentLiveAuthorized:bool(process.env.DISDEX_RENDER_INDEPENDENT_LIVE_CERTIFIED,false),
+  renderLegacyAdverseLiveAuthorized:bool(process.env.DISDEX_RENDER_LEGACY_ADVERSE_LIVE_CERTIFIED,false),
   decisionPath:resolve(process.env.DISDEX_IDLE_PRIORITY_DECISION_PATH||"/var/lib/disdex/idle-priority/decision.json"),
   decisionDetailsPath:resolve(process.env.DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH||"/var/lib/disdex/idle-priority/decision-details.json"),
   v12DecisionPath,
