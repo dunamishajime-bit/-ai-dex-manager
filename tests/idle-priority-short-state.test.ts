@@ -27,3 +27,27 @@ test("pending entry is explicit and validated",()=>{
  const pending={action:"ENTRY",phase:"planned",symbol:"DOTUSDT",route:"IDLE_DOT_MOMENTUM_SHORT_BTCREL",clientOrderId:"idle-entry",idempotencyKey:"k",quantity:2,expectedPrice:10,signalTs:3_600_000,decisionTs:7_200_000,holdHours:24,createdAt:1,updatedAt:1,reason:"ENTRY"} as const;
  assert.equal(normalizeIdleState({...emptyIdleState(sha),pending},sha).pending?.symbol,"DOTUSDT");
 });
+
+test("legacy RENDER keeps SHA-bound adverse watch across state normalization",()=>{
+ const adverse={originalRoute:"IDLE_RENDER_RELATIVE_SHORT",entryTs:7_200_000,entryPrice:100,
+  lastClosedM5Ts:7_500_000,watchStartedAt:7_500_000,maxFavorableExcursionPct:0.1,completed:false};
+ const legacy={...pos,symbol:"RENDERUSDT",route:"IDLE_RENDER_RELATIVE_SHORT",gross:.25,
+  legacyRenderAdverse:adverse};
+ const restored=normalizeIdleState({...emptyIdleState(sha),positions:[legacy]},sha);
+ assert.deepEqual(restored.positions[0].legacyRenderAdverse,adverse);
+ assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{
+   ...legacy,legacyRenderAdverse:{...adverse,originalRoute:"INDEPENDENT_BAD_ROUTE"}
+ }]},sha),/IDLE_RENDER_ADVERSE_STATE_INVALID/);
+});
+test("independent bracket/55m state cannot inherit legacy emergency STOP or adverse watch",()=>{
+ const route="IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT";
+ const base={...pos,symbol:"RENDERUSDT",route,holdHours:55/60,
+  exitTs:7_200_000+55*60_000,gross:.25,stopPrice:102,takeProfitPrice:98.5};
+ assert.equal(normalizeIdleState({...emptyIdleState(sha),positions:[base]},sha).positions[0].route,route);
+ assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...base,stopPrice:110}]},sha),
+  /IDLE_RENDER_INDEPENDENT_BRACKET_INVALID/);
+ assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...base,
+   legacyRenderAdverse:{originalRoute:route,entryTs:7_200_000,entryPrice:100,lastClosedM5Ts:null,
+    watchStartedAt:null,maxFavorableExcursionPct:0,completed:false}}]},sha),
+  /IDLE_RENDER_ADVERSE_STATE_INVALID/);
+});

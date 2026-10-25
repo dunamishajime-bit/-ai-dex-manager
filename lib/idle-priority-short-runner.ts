@@ -24,6 +24,9 @@ import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-da
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { startLegacyRenderAdverse, advanceLegacyRenderAdverse, RENDER_M5_MS } from "./render-highwr-and-legacy-stop";
+import { RENDER_INDEPENDENT_ROUTE, RENDER_ENTRY_POLICY, type ClosedM5 } from "./render-highwr-and-legacy-stop";
+import { loadRenderShadow, saveRenderShadow, advanceRenderShadow, type RenderShadowDecision } from "./render-independent-six-hour-journal";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -77,7 +80,7 @@ export type IdlePriorityShortTickResult = {
 };
 
 export type IdlePriorityShortRunnerDependencies = {
-    marketData: { load(): Promise<IdlePriorityMarketSnapshot>; loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar> };
+    marketData: { load(): Promise<IdlePriorityMarketSnapshot>; loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar>; loadFiveMinuteSince?(symbol: string, startTs: number, endTs?: number): Promise<ConfirmedFiveMinuteBar[]>; loadRenderIndependentM5?(decisionTs: number): Promise<{btcM5: ClosedM5[]; renderM5: ClosedM5[]}> };
     executor: AsterDirectTradeExecutor;
     adapter: V12AsterLiveAdapter;
     client: AsterV3Client;
@@ -353,6 +356,10 @@ export class IdlePriorityShortRunner {
             protectionVerified: true,
             trailArmed: false,
             bestConfirmed5mGainPct: 0,
+            ...(symbol === "RENDERUSDT" && pending.route === "IDLE_RENDER_RELATIVE_SHORT" ? {
+                legacyRenderAdverse: startLegacyRenderAdverse({ originalRoute: pending.route,
+                    entryTs: Math.ceil(this.now() / RENDER_M5_MS) * RENDER_M5_MS, entryPrice: actual.entryPrice }),
+            } : {}),
         };
     }
 
@@ -693,6 +700,44 @@ export class IdlePriorityShortRunner {
                 residual: diagnosticResidual,
                 finalReason: state.lastDecision?.reason,
             });
+            // The six-hour hypothetical ledger is independent of real account
+            // capacity and of the real 55m lifetime. Never order from this
+            // observation alone; source gaps fail closed for the new route only.
+            let renderShadowDecision: RenderShadowDecision | undefined;
+            if (this.dependencies.marketData.loadRenderIndependentM5) {
+                try {
+                    const journal = await loadRenderShadow(this.dependencies.runtime.renderShadowPath, this.dependencies.runtime.runtimeSha);
+                    if (journal.lastDecisionTs !== market.decisionTs) {
+                    const source = await this.dependencies.marketData.loadRenderIndependentM5(market.decisionTs);
+                    const oldSignal = diagnosticSymbols.find(row => row.symbol === "RENDERUSDT");
+                    const incumbent = oldSignal?.routeDecision.accepted ? {route:oldSignal.route} : undefined;
+                    const result = advanceRenderShadow({
+                        state:journal,asOfDecisionTs:market.decisionTs,
+                        btcM5:source.btcM5,renderM5:source.renderM5,
+                        incumbentAt:()=>incumbent,
+                        sameSymbolPositionOrPending:Boolean(positions.some(row => row.symbol === "RENDERUSDT" && Math.abs(row.quantity)>EPSILON)
+                            || openOrders.some(row => row.symbol === "RENDERUSDT" && activeOrder(row))
+                            || state.pending?.symbol === "RENDERUSDT"),
+                        cooldownUntil:Number(state.lastAcceptedBySymbol.RENDERUSDT||0)+RENDER_ENTRY_POLICY.newIndependentCooldownHours*3_600_000
+                    });
+                    await saveRenderShadow(this.dependencies.runtime.renderShadowPath,result.state);
+                    renderShadowDecision=result.decision;
+                    this.log.info("RENDER_INDEPENDENT_FORWARD_SHADOW",{
+                        decisionTs:renderShadowDecision.decisionTs,
+                        raw:renderShadowDecision.rawReason,
+                        quality:renderShadowDecision.priority.reason,
+                        pending:renderShadowDecision.pendingCount,
+                        settled:renderShadowDecision.settledCount,
+                        canSendOrders:false
+                    });
+                    }
+                }catch(error){
+                    this.log.warn("RENDER_INDEPENDENT_FORWARD_SHADOW_FAIL_CLOSED",{
+                        decisionTs:market.decisionTs,
+                        reason:error instanceof Error?error.message:String(error)
+                    });
+                }
+            }
             const protectionReconciled = await this.reconcileVenueProtectiveFills(state, positions, openOrders);
             const ownershipOrders = protectionReconciled ? await this.dependencies.executor.getOpenOrders() : openOrders;
             const ownershipIssue = await this.reconcileOwnership(state, positions, ownershipOrders);
@@ -736,7 +781,37 @@ export class IdlePriorityShortRunner {
                     owned.lastConfirmed5mTs = trail.state.lastConfirmedBarTs;
                     await this.dependencies.stateStore.save(state);
                 }
-                const exitReason = trailExit ? "PROFIT_TRAIL_3_GIVEBACK_1P5" : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
+                // Only a known, newly filled legacy RENDER receives this watch.
+                // Pre-upgrade live positions do not have a proven full M5/MFE
+                // history; their pre-existing venue protections stay authoritative.
+                let legacyAdverseExit = false;
+                if (owned.symbol === "RENDERUSDT" && owned.route === "IDLE_RENDER_RELATIVE_SHORT" && owned.legacyRenderAdverse) {
+                    legacyAdverseExit = owned.legacyRenderAdverse.completed;
+                    const loader = this.dependencies.marketData.loadFiveMinuteSince;
+                    if (!loader) return this.manualReview(state, "IDLE_RENDER_ADVERSE_CONTIGUOUS_M5_SOURCE_MISSING");
+                    const initialTs = owned.legacyRenderAdverse.lastClosedM5Ts ?? owned.legacyRenderAdverse.entryTs;
+                    let bars: ConfirmedFiveMinuteBar[];
+                    try {
+                        bars = await loader(owned.symbol, initialTs, this.now());
+                    } catch (error) {
+                        // Keep the resident protective orders; never substitute
+                        // synthetic bars or trigger an early exit on a source gap.
+                        return { status: "held", message: `IDLE_RENDER_ADVERSE_M5_FAIL_CLOSED:${error instanceof Error ? error.message : String(error)}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                    }
+                    for (const bar of bars) {
+                        const next = advanceLegacyRenderAdverse(owned.legacyRenderAdverse, { ts: bar.timestampMs,
+                            open: bar.open, high: bar.high, low: bar.low, close: bar.close });
+                        owned.legacyRenderAdverse = next.state;
+                        // Save before any order: restart must not repeat an
+                        // already observed eligible close without reconciliation.
+                        await this.dependencies.stateStore.save(state);
+                        if (next.requestProtectedReduceOnlyClose) {
+                            legacyAdverseExit = true;
+                            break;
+                        }
+                    }
+                }
+                const exitReason = legacyAdverseExit ? "RENDER_LEGACY_NEGATIVE1_WATCH2H_MFE_LT_025" : trailExit ? "PROFIT_TRAIL_3_GIVEBACK_1P5" : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
                 if (exitReason && this.dependencies.runtime.mode === "LIVE") return await this.exitPosition(state, owned, actual, lock, exitReason);
                 if (exitReason) return { status: "shadow", message: `IDLE_SHADOW_EXIT:${owned.symbol}:${exitReason}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }

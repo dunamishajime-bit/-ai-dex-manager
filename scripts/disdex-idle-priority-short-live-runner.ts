@@ -74,6 +74,7 @@ async function main() {
         },
         loadFiveMinute: (symbol: Parameters<typeof provider.loadFiveMinute>[0]) => provider.loadFiveMinute(symbol),
         loadFiveMinuteSince: (symbol: string, startTs: number, endTs?: number) => provider.loadFiveMinuteSince(symbol, startTs, endTs),
+        loadRenderIndependentM5: (decisionTs: number) => provider.loadRenderIndependentM5(decisionTs),
     };
     const coreStateStore = new FileIdlePriorityShortStateStore(runtime.statePath, runtime.runtimeSha);
     const residualStateStore = new FileIdleResidualLongStateStore(residualRuntime.statePath, residualRuntime.runtimeSha);
