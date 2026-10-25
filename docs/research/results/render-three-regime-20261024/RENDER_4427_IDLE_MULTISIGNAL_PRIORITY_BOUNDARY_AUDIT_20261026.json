@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-26",
+  "scope": "legacy_idle_runner_static_and_synthetic_only",
+  "source_ref": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "audit_script_sha256": "7ee32d02a2d22f0a127c4d950bbc613e7595e46236f18dd6a69d222e0cb773e1",
+  "canonical_json_sha256": "32d1c971c5370e4676f3e01c10d9fb7e1e9d4ee217a68e7af87ea4ed1e72ced0",
+  "independent_pc_processes": 2,
+  "exit_codes": [
+    0,
+    0
+  ],
+  "synthetic_cases": 7,
+  "source_sha256": {
+    "lib/idle-priority-short-runner.ts": "0a5682f30add54b7f03714c8b40596af80f6b80cd04b360c6009f62f3cb22f33",
+    "lib/idle-priority-short-live.ts": "185e0991cb810bba903dfa299df70f5a1e805fe6d9b76242247e672bcd30889c",
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8"
+  },
+  "findings": {
+    "aggregate_capacity_rejects_all_even_if_one_fits": true,
+    "explicit_score_priority_sort": false,
+    "independent_route_registered": false,
+    "strict_proof_call_in_this_runner": false
+  },
+  "native8_certified": false,
+  "orders_authorized": false,
+  "economic_bt_performed": false,
+  "production_modified": false
+}
