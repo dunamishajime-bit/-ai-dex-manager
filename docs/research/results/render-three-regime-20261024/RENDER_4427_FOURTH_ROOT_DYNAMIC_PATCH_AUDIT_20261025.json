@@ -1,0 +1,33 @@
+{
+  "status": "BLOCKED_TRANSITIVE_DYNAMIC_PATCH_ROOT_NOT_INDEPENDENTLY_ATTESTED",
+  "observed_at_jst": "2026-10-25",
+  "scope": "owner-PC read-only third/fourth root static source audit; no runtime import/exec",
+  "third_root_adapter_sha256": "f861140de0a123aef0e4ce93f21e6b0b83ec9f9594921c4bca0439fc65f56108",
+  "fourth_root_git_head": "6c9b9d032a18c44c82fcfd2f5a74226d71d68160",
+  "fourth_root_target_sha256": "6fd448cc4dae0feb336c349ca1debdc7d74e22499650bdc65739cbf6ab12ca53",
+  "fourth_root_helper_sha256": "61b2f1e7167231e68ba9cb764cb2695511cfc246d0c99c9a9c86aa514839501d",
+  "fourth_root_targeted_git_status": "clean",
+  "patch_target_occurrences": [
+    1,
+    1
+  ],
+  "patch_assert_lines": [
+    28,
+    31
+  ],
+  "patch_exec_compile_line": 37,
+  "patched_source_sha256": "56dc1efc8add5f8c82767089b4410daa8e98f33de5fc98ebad3d8d2654a57f92",
+  "compile_optimize_0_1_2": "PASS",
+  "bootstrap_assert_bytecode_counts": {
+    "0": 2,
+    "1": 0,
+    "2": 0
+  },
+  "independent_python_processes": 2,
+  "independent_process_canonical_json_sha256": "15072cf85586b888ea8839c95803dba03665cc8f517e80e2298b160befef6be9",
+  "independent_trust_root": false,
+  "native8_authorized": false,
+  "new_economic_bt": false,
+  "owner_route_registered": false,
+  "gateproof13_authenticated": false
+}
