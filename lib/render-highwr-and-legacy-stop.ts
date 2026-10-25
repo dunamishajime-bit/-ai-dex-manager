@@ -7,7 +7,7 @@
  *
  * Historical model: BTC_RENDER_DIVERGE / S6 shadow TP+1.5%, STOP-2%, max6h;
  * high-WR entry quality from exited SIX-HOUR hypothetical shadows, and
- * independent trade max55m (with the same resident protective bracket).
+ * independent trade max6h (live TP2.5%, STOP2%; shadow TP1.5%, STOP2%).
  *
  * Upper wick threshold is 0.35% OF H1 OPEN (not 35% of candle range).
  * No OI requirement. Existing RENDER #4427/OI filters are unaffected.
@@ -26,8 +26,11 @@ export const RENDER_ENTRY_POLICY = Object.freeze({
   shadowTakeProfitPct: 1.5,
   shadowStopLossPct: 2,
   shadowMaxMinutes: 360,
-  independentRealMaxMinutes: 55,
-  independentRequestedGross: 0.25,
+  independentRealMaxMinutes: 360,
+  independentRequestedGross: 0.75,
+  independentRealTakeProfitPct: 2.5,
+  independentRealStopLossPct: 2,
+  independentVenueLeverage: 5,
   shadowCostRoundTripBps: 30,
   newIndependentCooldownHours: 12,
   incumbentBonusScore: 8,
@@ -366,8 +369,8 @@ export function independentProtectiveLevels(entryPrice:number,entryTs:number){
     throw new Error("RENDER_INDEPENDENT_PRICE_OR_ENTRY_TS_INVALID");
   }
   return {side:"SHORT" as const,
-    stopLossPrice:entryPrice*(1+RENDER_ENTRY_POLICY.shadowStopLossPct/100),
-    takeProfitPrice:entryPrice*(1-RENDER_ENTRY_POLICY.shadowTakeProfitPct/100),
+    stopLossPrice:entryPrice*(1+RENDER_ENTRY_POLICY.independentRealStopLossPct/100),
+    takeProfitPrice:entryPrice*(1-RENDER_ENTRY_POLICY.independentRealTakeProfitPct/100),
     maxHoldExitTs:entryTs+RENDER_ENTRY_POLICY.independentRealMaxMinutes*60_000,
     requestedGross:RENDER_ENTRY_POLICY.independentRequestedGross};
 }

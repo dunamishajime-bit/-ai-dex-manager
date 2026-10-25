@@ -1,6 +1,6 @@
 /**
  * Independent RENDER read-only 6h shadow journal. This is a separate
- * causal data product: virtual exits are NOT 55m real position exits.
+ * causal data product: hypothetical TP1.5% exits are NOT the real TP2.5% venue exits.
  * All source data is signed off by the caller as complete venue M5 data.
  */
 import {readFile, lstat, mkdir, writeFile, rename, chmod} from "node:fs/promises";

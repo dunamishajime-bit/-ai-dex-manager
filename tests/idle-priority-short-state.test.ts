@@ -39,10 +39,10 @@ test("legacy RENDER keeps SHA-bound adverse watch across state normalization",()
    ...legacy,legacyRenderAdverse:{...adverse,originalRoute:"INDEPENDENT_BAD_ROUTE"}
  }]},sha),/IDLE_RENDER_ADVERSE_STATE_INVALID/);
 });
-test("independent bracket/55m state cannot inherit legacy emergency STOP or adverse watch",()=>{
+test("independent bracket/6h state cannot inherit legacy emergency STOP or adverse watch",()=>{
  const route="IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT";
- const base={...pos,symbol:"RENDERUSDT",route,holdHours:55/60,
-  exitTs:7_200_000+55*60_000,gross:.25,stopPrice:102,takeProfitPrice:98.5};
+ const base={...pos,symbol:"RENDERUSDT",route,holdHours:6,
+  exitTs:7_200_000+6*3_600_000,gross:.75,stopPrice:102,takeProfitPrice:97.5};
  assert.equal(normalizeIdleState({...emptyIdleState(sha),positions:[base]},sha).positions[0].route,route);
  assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...base,stopPrice:110}]},sha),
   /IDLE_RENDER_INDEPENDENT_BRACKET_INVALID/);

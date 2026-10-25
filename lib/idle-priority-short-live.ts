@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
+import {RENDER_ENTRY_POLICY,RENDER_INDEPENDENT_ROUTE} from "./render-highwr-and-legacy-stop";
 
 export type IdleLiveAdmissionInput = {
     symbol?: IdlePrioritySymbol;
+    route?: string;
     runtimeMode: "SHADOW" | "LIVE";
     operatorArmed: boolean;
     candidateAccepted: boolean;
@@ -70,9 +72,16 @@ export type IdleLiveAdmissionResult = {
 };
 
 const EPSILON = 1e-9;
+/** Select gross by the actual owned route; never inherit legacy 0.25x for independent RENDER. */
+export function idleRouteRequestedGross(symbol?:IdlePrioritySymbol,route?:string):number {
+    if(symbol==="RENDERUSDT" && route===RENDER_INDEPENDENT_ROUTE)
+        return RENDER_ENTRY_POLICY.independentRequestedGross;
+    return symbol ? IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross : 1;
+}
+
 
 export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLiveAdmissionResult {
-    const requestedGross = input.symbol ? IDLE_PRIORITY_SHORT_POLICY.routes[input.symbol].gross : 1;
+    const requestedGross = idleRouteRequestedGross(input.symbol,input.route);
     if (input.runtimeMode !== "LIVE" || !input.operatorArmed) return { accepted: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED", gross: 0 };
     if (!input.baselineFresh || !input.baselineSourceComplete || input.baselineDecisionTs !== input.decisionTs) {
         return { accepted: false, reason: "BASELINE_ADMISSION_UNAVAILABLE", gross: 0 };

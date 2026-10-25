@@ -1,0 +1,82 @@
+{
+  "schema": "render-dual-research-adoption-handoff/v1",
+  "status": "CODE_PREPARED_NOT_VENUE_CERTIFIED_NOT_LIVE",
+  "branch": "research/render-dual-production-prep-20261025",
+  "requestedWork": "Existing IDLE RENDER SHORT adverse early exit + independent RENDER OI-free SHORT",
+  "legacy": {
+    "route": "IDLE_RENDER_RELATIVE_SHORT",
+    "entry": "UNMODIFIED",
+    "gross": 0.25,
+    "maxHoldHours": 12,
+    "originalProtectiveStopPct": 10,
+    "originalTakeProfitPct": 25,
+    "addedAdverseWatch": {
+      "firstCompletedM5LossPctAtOrBelow": -1,
+      "watchMinutes": 120,
+      "atCheckLossPctAtOrBelow": -1,
+      "maxFavorableExcursionPctStrictlyBelow": 0.25,
+      "usesCompletedM5": true,
+      "exit": "existing protected reduce-only close"
+    },
+    "activation": "DISDEX_RENDER_LEGACY_ADVERSE_LIVE_CERTIFIED default false; separate root-owned SHA-bound cert required"
+  },
+  "independent": {
+    "route": "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT",
+    "requiresOI": false,
+    "marketGate": {
+      "btcCompletedH1ReturnPctMin": 0.15,
+      "renderCompletedH1ReturnPctMax": -0.5,
+      "renderLastFullyCompletedH4ReturnPctMax": -0.15,
+      "renderH1TakerSellerFractionMin": 0.53,
+      "renderH1UpperWickPctOfOpenMin": 0.35
+    },
+    "historicalShadowQualityGateEnabled": false,
+    "shadowJournalMonitoringOptional": true,
+    "grossNotionalMaxAccountEquity": 0.75,
+    "venueLeverage": 5,
+    "venueMarginType": "cross",
+    "realTakeProfitPct": 2.5,
+    "realStopLossPct": 2,
+    "realMaxHoldMinutes": 360,
+    "cooldownHours": 12,
+    "sameSymbolExclusivity": true,
+    "absolutePriorityOverOtherStrategies": false,
+    "incumbentPriority": "keep legacy RENDER and other score-selected owners; do not force-close existing positions",
+    "sharedRiskGrossMarginPendingOwner": "MUST_PASS",
+    "activation": "DISDEX_RENDER_INDEPENDENT_LIVE_CERTIFIED default false; separate root-owned SHA-bound cert required"
+  },
+  "research": {
+    "windowUTC": [
+      "2025-08-10",
+      "2026-08-10"
+    ],
+    "gross025Native8Jpy": {
+      "10bps": 278549500,
+      "30bps": 167477399
+    },
+    "gross075DefaultOwnerNative8Jpy": {
+      "10bps": 281254554,
+      "30bps": 169494414
+    },
+    "gross075AbsolutePriorityNative8Jpy": {
+      "10bps": 281150307,
+      "30bps": 167935780
+    },
+    "gross075DefaultOwnerTradeCount": 3,
+    "gross075AbsolutePriorityTradeCount": 4,
+    "maxDrawdown10bpsPct": -14.515,
+    "maxDrawdown30bpsPct": -15.015,
+    "notAuthenticVenueParity": true,
+    "notUntouchedForward": true
+  },
+  "proofBeforeActivation": [
+    "Current VPS Production/V4/all other strategy SHA/release parity",
+    "Artifact-bound operator approval and exact V4 route reconciliation",
+    "Actual Aster signed market-order and protection-order readback under 5x cross",
+    "Partial fill, restart, venue STOP/TP, 6h time exit, and repeated H1 idempotency",
+    "Legacy first-fill M5/MFE evidence with exact timeframe and partial-fill coverage",
+    "Shared gross, margin guard, shared risk, kill switch, and pending exposure with live orders",
+    "CI and test green bound to candidate HEAD SHA, rollback plan",
+    "Watch new and legacy route separately during forward-shadow monitoring"
+  ]
+}

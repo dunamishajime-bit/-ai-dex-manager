@@ -1,0 +1,25 @@
+{
+  "schema": "disdex-render-dual-live-prep-status/v1",
+  "status": "NOT_CERTIFIED_NOT_DEPLOYED",
+  "stageSourceBranch": "research/render-dual-production-prep-20261025",
+  "codeImplemented": true,
+  "localTargetedTestsPass": true,
+  "bothLiveCertsPresent": false,
+  "venuePartialFillAndProtectionVerified": false,
+  "legacyFirstFillM5ParityVerified": false,
+  "currentProductionSHAParityVerified": false,
+  "native8HistoricalModelReported": true,
+  "signedFundingAndVenueL2Native8Verified": false,
+  "forwardShadowCertified": false,
+  "cutoverPermitted": false,
+  "enableIndependentNewOrders": false,
+  "enableLegacyNewAdverseExit": false,
+  "blocks": [
+    "VENUE_LIFECYCLE_PROOF",
+    "CORE_OWNER_AND_SHARED_GROSS_PARITY",
+    "LEGACY_REAL_FILL_M5_MFE",
+    "EIGHT_STRATEGY_CURRENT_RUNTIME_RECONCILIATION",
+    "CI_AND_BOUND_OPERATOR_APPROVAL"
+  ],
+  "requirementsDoNotForgeCertificates": true
+}

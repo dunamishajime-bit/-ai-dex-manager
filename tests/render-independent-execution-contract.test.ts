@@ -12,16 +12,16 @@ test("independent is a distinct RENDER route with unique stable ids",()=>{
  assert.notEqual(independentRenderOrderId("STOP",ts),independentRenderOrderId("ENTRY",ts));
  assert.equal(independentRenderOrderId("STOP",ts),independentRenderOrderId("STOP",ts));
 });
-test("independent bracket is TP1.5% STOP2% and never inherits legacy 10/25%",()=>{
+test("independent bracket is TP2.5% STOP2% and never inherits legacy 10/25%",()=>{
  const p=independentRenderProtectionPlan({
   symbol:"RENDERUSDT",route:RENDER_INDEPENDENT_ROUTE,signalTs:ts,entryPrice:100,quantity:2});
- assert.equal(p.stopPrice,102);assert.equal(p.takeProfitPrice,98.5);
+ assert.equal(p.stopPrice,102);assert.equal(p.takeProfitPrice,97.5);
  assert.equal(p.side,"SHORT");assert.equal(p.quantity,2);
  assert.throws(()=>independentRenderProtectionPlan({...p,route:"IDLE_RENDER_RELATIVE_SHORT",
   signalTs:ts,entryPrice:100}),/INVALID/);
 });
-test("55-minute hold is bounded using pre-submission durable timestamp",()=>{
- assert.equal(independentRenderExitAt(ts)-ts,3_300_000);
+test("6-hour hold is bounded using pre-submission durable timestamp",()=>{
+ assert.equal(independentRenderExitAt(ts)-ts,21_600_000);
  assert.throws(()=>independentRenderExitAt(NaN),/UNVERIFIED/);
 });
 test("exit wake is earlier than expiry and never extends ordinary wait",()=>{

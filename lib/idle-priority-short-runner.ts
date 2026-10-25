@@ -13,7 +13,7 @@ import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-polic
 import { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
 import { IDLE_PRIORITY_SHORT_POLICY, IDLE_PRIORITY_SHORT_STRATEGY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 import type { IdlePriorityShortRuntime } from "../config/idlePriorityShortRuntime";
-import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLiveAdmission, type IdleBaselineAdmission } from "./idle-priority-short-live";
+import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLiveAdmission, idleRouteRequestedGross, type IdleBaselineAdmission } from "./idle-priority-short-live";
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
@@ -28,6 +28,7 @@ import { startLegacyRenderAdverse, advanceLegacyRenderAdverse, RENDER_M5_MS } fr
 import { RENDER_INDEPENDENT_ROUTE, RENDER_ENTRY_POLICY, type ClosedM5 } from "./render-highwr-and-legacy-stop";
 import { loadRenderShadow, saveRenderShadow, advanceRenderShadow, type RenderShadowDecision } from "./render-independent-six-hour-journal";
 import {isIndependentRenderRoute, independentRenderOrderId, independentRenderProtectionPlan, independentRenderExitAt} from "./render-independent-execution-contract";
+import {assertRenderLegacyAdverseCert} from "./render-legacy-adverse-cert";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -504,6 +505,21 @@ export class IdlePriorityShortRunner {
         return { status: "completed", message: `IDLE_EXIT_COMPLETED:${owned.symbol}`, symbol: owned.symbol, ordersSent: 1, cancelsSent: 2, positionChangesSent: 1 };
     }
 
+    private async assertLegacyAdverseCertified() {
+        const runtime=this.dependencies.runtime;
+        const path=runtime.renderLegacyAdverseCertPath;
+        let stats;
+        try { stats=await lstat(path); }
+        catch { throw Error("RENDER_LEGACY_ADVERSE_CERT_MISSING"); }
+        if(!stats.isFile()||stats.isSymbolicLink()||
+           (typeof stats.uid==="number"&&(stats.uid!==0||stats.gid!==0))||
+           (stats.mode&0o022)!==0)throw Error("RENDER_LEGACY_ADVERSE_CERT_UNTRUSTED");
+        let cert:unknown;
+        try {cert=JSON.parse(await readFile(path,"utf8"));}
+        catch{throw Error("RENDER_LEGACY_ADVERSE_CERT_INVALID");}
+        assertRenderLegacyAdverseCert(cert,runtime.runtimeSha);
+    }
+
     private async assertRenderIndependentCertified() {
         const runtime=this.dependencies.runtime;
         if (!runtime.renderIndependentLiveAuthorized) throw Error("RENDER_INDEPENDENT_LIVE_CERT_REQUIRED");
@@ -523,8 +539,8 @@ export class IdlePriorityShortRunner {
         if(cert.schema!=="disdex-render-independent-venue-certificate/v1" ||
           cert.approvedSha!==runtime.runtimeSha ||
           cert.route!==RENDER_INDEPENDENT_ROUTE ||
-          cert.gross!==0.25 || cert.holdMinutes!==55 ||
-          cert.stopPct!==2 || cert.takeProfitPct!==1.5 ||
+          cert.gross!==RENDER_ENTRY_POLICY.independentRequestedGross || cert.holdMinutes!==RENDER_ENTRY_POLICY.independentRealMaxMinutes ||
+          cert.stopPct!==RENDER_ENTRY_POLICY.independentRealStopLossPct || cert.takeProfitPct!==RENDER_ENTRY_POLICY.independentRealTakeProfitPct ||
           cert.venueStopReadback!==true || cert.partialFillVerified!==true ||
           cert.timeoutExitVerified!==true || cert.integrated10And30BpsVerified!==true ||
           cert.operatorApproval!=="APPROVE_RENDER_INDEPENDENT_SHORT_AT_BOUND_SHA") {
@@ -538,6 +554,9 @@ export class IdlePriorityShortRunner {
             return {status:"shadow",message:"RENDER_INDEPENDENT_LIVE_CERT_REQUIRED",
                 symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
         if(isIndependentRenderRoute(symbol,signal.route)) await this.assertRenderIndependentCertified();
+        if(symbol==="RENDERUSDT" && signal.route==="IDLE_RENDER_RELATIVE_SHORT" &&
+           this.dependencies.runtime.renderLegacyAdverseLiveAuthorized)
+            await this.assertLegacyAdverseCertified();
         const quote = await this.dependencies.executor.getMarketQuote(symbol);
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_ENTRY_QUOTE_STALE:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
@@ -598,6 +617,7 @@ export class IdlePriorityShortRunner {
         try { marginHealthy = await readMarginHealthy(this.dependencies.runtime.marginPath, this.now(), marginMaxAgeMs); } catch { marginHealthy = false; }
         const baseInput = {
             symbol,
+            route:signal.route,
             runtimeMode: this.dependencies.runtime.mode,
             operatorArmed: true,
             candidateAccepted: signal.accepted,
@@ -632,7 +652,7 @@ export class IdlePriorityShortRunner {
         await this.dependencies.executor.getAccountSnapshot();
         let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
         try {
-            const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
+            const requestedGross = idleRouteRequestedGross(symbol,signal.route);
             normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * requestedGross / quote.bidPrice, quote.bidPrice);
         } catch (error) {
             const reason = `IDLE_VENUE_QUANTITY_REJECTED:${symbol}:${error instanceof Error ? error.message : String(error)}`;
@@ -655,7 +675,7 @@ export class IdlePriorityShortRunner {
         const clientOrderId = isIndependentRenderRoute(symbol,signal.route)
             ? independentRenderOrderId("ENTRY",signal.features.decisionTs)
             : deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
-        const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
+        const requestedGross = idleRouteRequestedGross(symbol,signal.route);
         const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: admission.gross, notionalUsd: equity * admission.gross });
         const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: requestedGross };
         state.pending = pending;
@@ -744,13 +764,13 @@ export class IdlePriorityShortRunner {
                 finalReason: state.lastDecision?.reason,
             });
             // The six-hour hypothetical ledger is independent of real account
-            // capacity and of the real 55m lifetime. Never order from this
+            // capacity and of the independent real 6h TP2.5% exit. Never order from this
             // observation alone; source gaps fail closed for the new route only.
             let renderShadowDecision: RenderShadowDecision | undefined;
             if (this.dependencies.marketData.loadRenderIndependentM5) {
                 try {
                     const journal = await loadRenderShadow(this.dependencies.runtime.renderShadowPath, this.dependencies.runtime.runtimeSha);
-                    if (journal.lastDecisionTs !== market.decisionTs) {
+                    if (journal.lastDecisionTs !== market.decisionTs || this.dependencies.runtime.renderIndependentLiveAuthorized) {
                     const source = await this.dependencies.marketData.loadRenderIndependentM5(market.decisionTs);
                     const oldSignal = diagnosticSymbols.find(row => row.symbol === "RENDERUSDT");
                     const incumbent = oldSignal?.routeDecision.accepted ? {route:oldSignal.route} : undefined;
@@ -772,7 +792,7 @@ export class IdlePriorityShortRunner {
                         quality:renderShadowDecision.priority.reason,
                         pending:renderShadowDecision.pendingCount,
                         settled:renderShadowDecision.settledCount,
-                        canSendOrders:false
+                        diagnosticOnly:true
                     });
                     }
                 }catch(error){
@@ -880,8 +900,8 @@ export class IdlePriorityShortRunner {
                 independentFeatures?.decisionTs===market.decisionTs &&
                 this.candidateLifecycleAllows(state,{symbol:"RENDERUSDT",features:independentFeatures})
                 ? {accepted:true,symbol:"RENDERUSDT",route:RENDER_INDEPENDENT_ROUTE,side:"SHORT",
-                    holdHours:55/60,features:independentFeatures,
-                    reason:"RENDER_INDEPENDENT_SIX_HOUR_HIGH_WR_PASS"} : undefined;
+                    holdHours:RENDER_ENTRY_POLICY.independentRealMaxMinutes/60,features:independentFeatures,
+                    reason:"RENDER_INDEPENDENT_NO_SHADOW_QUALITY_GATE_PASS"} : undefined;
             if (!lifecycleCandidates.length && !independentCandidate) {
                 await this.dependencies.stateStore.save({
                     ...state,
@@ -977,7 +997,7 @@ export class IdlePriorityShortRunner {
                 const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
                 const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
                 const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
-                const requestedGross = signals.reduce((sum, signal) => sum + IDLE_PRIORITY_SHORT_POLICY.routes[signal.symbol].gross, 0);
+                const requestedGross = signals.reduce((sum, signal) => sum + idleRouteRequestedGross(signal.symbol,signal.route), 0);
                 if (fullCryptoGrossAvailable + EPSILON < requestedGross || fullTotalGrossAvailable + EPSILON < requestedGross) {
                     state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "IDLE_MULTI_SIGNAL_CAPACITY_AMBIGUOUS" };
                     await this.dependencies.stateStore.save(state);

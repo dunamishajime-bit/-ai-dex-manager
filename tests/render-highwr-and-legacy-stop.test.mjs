@@ -118,7 +118,7 @@ test("duplicated shadow outcome ledger fails closed",()=>{
   const h=qualityHistory();
   assert.match(rank({fullySettledSixHourShadows:[...h,h[0]]}).reason,/DUPLICATE/);
 });
-test("6h shadow has resident STOP priority, 30bps and is independent of real 55m",()=>{
+test("6h shadow has resident STOP priority, 30bps and is independent of real 6h",()=>{
   const t=at,bars=Array.from({length:73},(_,i)=>m5(t+i*M));
   bars[6]=m5(t+6*M,{open:100,high:103,low:98.4,close:99.5});
   assert.equal(settleSixHourShadow({signalTs:t,asOfTs:t+6*M,renderM5:bars}),null);
@@ -135,12 +135,12 @@ test("without target/stop shadow closes at 6h expiry open after expiry M5 comple
   assert.equal(r.exitTs,t+6*H);
   assert.equal(r.settledAt,t+6*H+M);
 });
-test("new independent REAL hold 55m, TP1.5%, hard STOP2%, nominal .25 gross",()=>{
+test("new independent REAL hold 6h, TP2.5%, hard STOP2%, nominal .75 gross",()=>{
   const p=independentProtectiveLevels(100,at);
   assert.ok(Math.abs(p.stopLossPrice-102)<1e-8);
-  assert.ok(Math.abs(p.takeProfitPrice-98.5)<1e-8);
-  assert.equal(p.maxHoldExitTs,at+55*60_000);
-  assert.equal(p.requestedGross,.25);
+  assert.ok(Math.abs(p.takeProfitPrice-97.5)<1e-8);
+  assert.equal(p.maxHoldExitTs,at+360*60_000);
+  assert.equal(p.requestedGross,.75);
 });
 test("original RENDER: -1% confirmed close touch, after 2h still <=-1% and MFE<.25 triggers",()=>{
   let state=startLegacyRenderAdverse({originalRoute:"IDLE_RENDER_RELATIVE_SHORT",entryTs:at,entryPrice:100});

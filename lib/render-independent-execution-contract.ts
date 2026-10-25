@@ -6,7 +6,7 @@ import {createHash} from "node:crypto";
 import {RENDER_INDEPENDENT_ROUTE, RENDER_ENTRY_POLICY} from "./render-highwr-and-legacy-stop";
 import type {IdleProtectionPlan} from "./idle-priority-short-live";
 
-export const RENDER_INDEPENDENT_MAX_HOLD_MS=55*60_000;
+export const RENDER_INDEPENDENT_MAX_HOLD_MS=RENDER_ENTRY_POLICY.independentRealMaxMinutes*60_000;
 export function isIndependentRenderRoute(symbol:string, route:string):boolean {
  return symbol==="RENDERUSDT"&&route===RENDER_INDEPENDENT_ROUTE;
 }
@@ -24,8 +24,8 @@ export function independentRenderProtectionPlan(input:{
    throw Error("RENDER_IND_PROTECTION_INPUT_INVALID");
  return {
   symbol:"RENDERUSDT",side:"SHORT",quantity,
-  stopPrice:Number((entryPrice*(1+RENDER_ENTRY_POLICY.shadowStopLossPct/100)).toFixed(12)),
-  takeProfitPrice:Number((entryPrice*(1-RENDER_ENTRY_POLICY.shadowTakeProfitPct/100)).toFixed(12)),
+  stopPrice:Number((entryPrice*(1+RENDER_ENTRY_POLICY.independentRealStopLossPct/100)).toFixed(12)),
+  takeProfitPrice:Number((entryPrice*(1-RENDER_ENTRY_POLICY.independentRealTakeProfitPct/100)).toFixed(12)),
   stopClientOrderId:independentRenderOrderId("STOP",signalTs),
   takeProfitClientOrderId:independentRenderOrderId("TP",signalTs),
  };
