@@ -1,0 +1,79 @@
+{
+  "atomicity": {
+    "changedPayload": "REJECT_RECEIPT_CONFLICT",
+    "database": "SQLite WAL, BEGIN IMMEDIATE, synchronous FULL, unique constraints",
+    "restart": "persisted receipt rejected",
+    "sameReceiptEightSubprocesses": "one recorded; seven replay rejected",
+    "sequence": "strict contiguous per source; out of order and gap rejected"
+  },
+  "branch": "research/render4427-durable-receipt-audit-20261025",
+  "date": "2026-10-25",
+  "independentProcessRuns": [
+    [
+      {
+        "script": "test_render_4427_atomic_receipt_research_20261025.py",
+        "status": "PASS",
+        "tests": 14
+      },
+      {
+        "script": "test_render_4427_independent_owner_route_contract_20261025.py",
+        "status": "PASS",
+        "tests": 14
+      },
+      {
+        "script": "test_render_4427_native_preallocation_asof_proof_20261025.py",
+        "status": "PASS",
+        "tests": 13
+      },
+      {
+        "script": "test_render_4427_native_proof_authenticity_20261025.py",
+        "status": "PASS",
+        "tests": 15
+      }
+    ],
+    [
+      {
+        "script": "test_render_4427_atomic_receipt_research_20261025.py",
+        "status": "PASS",
+        "tests": 14
+      },
+      {
+        "script": "test_render_4427_independent_owner_route_contract_20261025.py",
+        "status": "PASS",
+        "tests": 14
+      },
+      {
+        "script": "test_render_4427_native_preallocation_asof_proof_20261025.py",
+        "status": "PASS",
+        "tests": 13
+      },
+      {
+        "script": "test_render_4427_native_proof_authenticity_20261025.py",
+        "status": "PASS",
+        "tests": 15
+      }
+    ]
+  ],
+  "limitations": [
+    "Synthetic local SQLite journal only; no Native8 pipeline integration",
+    "No trusted receipt producer, independently pinned manifest root, or 13 authoritative GateProofs",
+    "No production cross-host dedup, power-loss fault injection, or exchange execution proof",
+    "June 23/25 cannot be certified from synthetic receipts; May 27 same-symbol conflict remains rejected",
+    "2025 Aster RENDER H1 mark missing; Aster actual M5 fills/funding unverified",
+    "Historical 2025H2 is explored, not untouched OOS",
+    "No new Forward Shadow primary evidence verified",
+    "VPS/LIVE/Production/HP/orders and existing 8 strategies unchanged"
+  ],
+  "liveOrderAuthorized": false,
+  "moduleSha256": "ca380fd7171164651830989cd954e72a45a39bbd6e6d80ecc5520329a0279940",
+  "native8EconomicBacktestPerformed": false,
+  "native8OwnerRegistered": false,
+  "native8PrimaryGateProofsVerified": 0,
+  "newTestsSha256": "8fb7056c775efce7e5c953c1b089ea330d7c4a78c7927620aec6f74959d213a5",
+  "parentSha": "ccb99fb6293b30406cf7ed9b6b63b60c698e6aa3",
+  "producerResearchAssertionsVerified": true,
+  "producerSha256": "3c5166a74f1de564335fe96196bc4be37f885c52897495fd1e53f8165ad85e91",
+  "status": "RESEARCH_ONLY_LOCAL_SQLITE_RECEIPT_ATOMICITY_TESTED_NOT_NATIVE_AUTHENTICATION",
+  "testsPerProcess": 56,
+  "venueEvidenceCertified": false
+}
