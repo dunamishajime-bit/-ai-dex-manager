@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
-import { useAuth } from "@/context/AuthContext";
+import { useV12V4HpStatus } from "@/hooks/useV12V4HpStatus";
+import { v12V4LiveStatus } from "@/lib/v12-v4-hp-ui";
 
 export type LiveStatusSnapshot = {
   ok: boolean;
@@ -19,35 +18,32 @@ export type LiveStatusSnapshot = {
 };
 
 export function useLiveStatus() {
-  const [snapshot, setSnapshot] = useState<LiveStatusSnapshot | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-
-  const refresh = useCallback(async () => {
-    if (!isAuthenticated) {
-      setSnapshot(null);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/system/live-status?refresh=${Date.now()}`, { cache: "no-store" });
-      const data = await response.json() as LiveStatusSnapshot;
-      setSnapshot(data);
-    } catch {
-      setSnapshot(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (authLoading) return;
-    void refresh();
-    const timer = window.setInterval(() => void refresh(), 30_000);
-    return () => window.clearInterval(timer);
-  }, [authLoading, refresh]);
-
+  const { snapshot: v4Snapshot, loading, error } = useV12V4HpStatus();
+  const status = v12V4LiveStatus(v4Snapshot);
+  const snapshot: LiveStatusSnapshot | null = v4Snapshot ? {
+    ok: status === "LIVE",
+    readOnly: true,
+    tradingMutation: 0,
+    status,
+    checkedAt: new Date(v4Snapshot.timestamps.checkedAt).toISOString(),
+    runnerUpdatedAt: v4Snapshot.timestamps.heartbeatUpdatedAt === null
+      ? undefined
+      : new Date(v4Snapshot.timestamps.heartbeatUpdatedAt).toISOString(),
+    strategyId: "V12_V4",
+    mode: v4Snapshot.actual.v4RunnerMode,
+    reason: status === "LIVE"
+      ? "V12 V4 primary runtime is LIVE_VERIFIED."
+      : status === "STALE"
+        ? "V12 V4 primary heartbeat is stale."
+        : `V12 V4 primary is not verified (${v4Snapshot.displayStatus}).`,
+  } : error ? {
+    ok: false,
+    readOnly: true,
+    tradingMutation: 0,
+    status: "UNAVAILABLE",
+    checkedAt: new Date().toISOString(),
+    reason: error,
+    error,
+  } : null;
   return { snapshot, loading };
 }

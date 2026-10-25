@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
-import { buildV12V4HpPresentation } from "../lib/v12-v4-hp-ui";
+import { buildV12V4HpPresentation, v12V4LiveStatus } from "../lib/v12-v4-hp-ui";
 import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "../lib/server/historical-fill-lineage";
 import {
   deriveTradeHistoryAttribution,
@@ -13,6 +13,7 @@ import type { V12V4HpSnapshot } from "../lib/v12-v4-hp-contract";
 
 const shaA = "a".repeat(40);
 const shaB = "b".repeat(40);
+const shaC = "c".repeat(40);
 const now = Date.UTC(2026, 9, 12, 6);
 
 function snapshot(overrides: Partial<V12V4HpSnapshot> = {}): V12V4HpSnapshot {
@@ -59,8 +60,30 @@ test("target V4 contract is separated from actual staged legacy runtime", () => 
   assert.match(presentation.actualSummary, /LEGACY/);
 });
 
-test("claimed LIVE is downgraded if any actual release/heartbeat/primary-mode evidence disagrees", () => {
+test("claimed LIVE is downgraded if V4 release/heartbeat evidence disagrees", () => {
   const inconsistent = snapshot({
+    displayStatus: "LIVE_VERIFIED",
+    actual: {
+      currentReleaseSha: shaA,
+      activeRunnerId: `disdex-v12-v4@${shaB}.service`,
+      activeRunnerState: "active/running",
+      activeRunnerSha: shaB,
+      v4RunnerMode: "CERTIFIED",
+      v12PrimaryMode: "V4",
+      legacyV12RunnerActive: false,
+      v4ReleaseSha: shaC,
+      heartbeatSha: shaB,
+      orderEnabled: true,
+    },
+  });
+  const presentation = buildV12V4HpPresentation(inconsistent);
+  assert.equal(presentation.runtimeStatus, "SHA_MISMATCH");
+  assert.equal(presentation.isLiveVerified, false);
+  assert.match(presentation.runtimeLabel, /SHA不一致/);
+});
+
+test("independent V4 release may differ from shared Production release when its V4 lineage agrees", () => {
+  const independentV4 = snapshot({
     displayStatus: "LIVE_VERIFIED",
     actual: {
       currentReleaseSha: shaA,
@@ -72,13 +95,18 @@ test("claimed LIVE is downgraded if any actual release/heartbeat/primary-mode ev
       legacyV12RunnerActive: false,
       v4ReleaseSha: shaB,
       heartbeatSha: shaB,
-      orderEnabled: true,
+      orderEnabled: false,
     },
   });
-  const presentation = buildV12V4HpPresentation(inconsistent);
-  assert.equal(presentation.runtimeStatus, "SHA_MISMATCH");
-  assert.equal(presentation.isLiveVerified, false);
-  assert.match(presentation.runtimeLabel, /SHA不一致/);
+  const presentation = buildV12V4HpPresentation(independentV4);
+  assert.equal(presentation.runtimeStatus, "LIVE_VERIFIED");
+  assert.equal(presentation.isLiveVerified, true);
+});
+
+test("global LIVE badge follows V4 primary status instead of stale Legacy V12 state", () => {
+  assert.equal(v12V4LiveStatus(snapshot({ displayStatus: "LIVE_VERIFIED" })), "LIVE");
+  assert.equal(v12V4LiveStatus(snapshot({ displayStatus: "STALE" })), "STALE");
+  assert.equal(v12V4LiveStatus(snapshot({ displayStatus: "SHA_MISMATCH" })), "UNAVAILABLE");
 });
 
 test("LIVE presentation does not require a current-tick order candidate or optional decision telemetry", () => {
@@ -114,7 +142,7 @@ test("runtime freshness, source errors and unavailable evidence remain distinct"
 });
 
 test("current HP surfaces use the V4 status panel and do not label legacy V12 snapshot as V4", async () => {
-  const [home, positions, overview, v12Page, banner, badge, sidebar, decisionPanel] = await Promise.all([
+  const [home, positions, overview, v12Page, banner, badge, sidebar, decisionPanel, liveStatusHook] = await Promise.all([
     readFile("app/page.tsx", "utf8"),
     readFile("app/positions/page.tsx", "utf8"),
     readFile("app/decision-status/page.tsx", "utf8"),
@@ -123,6 +151,7 @@ test("current HP surfaces use the V4 status panel and do not label legacy V12 sn
     readFile("components/layout/LiveRuntimeBadge.tsx", "utf8"),
     readFile("components/layout/Sidebar.tsx", "utf8"),
     readFile("components/features/DecisionStatusPanel.tsx", "utf8"),
+    readFile("hooks/useLiveStatus.ts", "utf8"),
   ]);
   for (const source of [home, positions, overview, v12Page]) assert.match(source, /V12V4RuntimePanel/);
   assert.match(v12Page, /V12 V4/);
@@ -131,6 +160,9 @@ test("current HP surfaces use the V4 status panel and do not label legacy V12 sn
   assert.doesNotMatch(positions, /productionRuntime\?\.v12|V12 Base|Dynamic Residual/);
   assert.match(banner, /V12V4RuntimePanel|useV12V4HpStatus/);
   assert.match(badge, /Legacy V12/);
+  assert.match(liveStatusHook, /useV12V4HpStatus/);
+  assert.match(liveStatusHook, /v12V4LiveStatus/);
+  assert.doesNotMatch(liveStatusHook, /\/api\/system\/live-status/);
   assert.match(sidebar, /V12 V4/);
   assert.match(decisionPanel, /Legacy V12/);
 });

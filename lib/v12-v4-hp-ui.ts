@@ -10,6 +10,8 @@ export type V12V4HpPresentation = {
 
 export type V12V4HpPresentationOptions = { loading?: boolean; error?: string | null };
 
+export type V12V4LiveStatus = "LIVE" | "STALE" | "UNAVAILABLE";
+
 const SHA_RE = /^[a-f0-9]{40}$/i;
 
 function statusLabel(status: V12V4HpDisplayStatus): string {
@@ -32,14 +34,26 @@ function actualSummary(snapshot: V12V4HpSnapshot | null): string {
   return `${actual.v4RunnerMode} / primary ${actual.v12PrimaryMode} / ${runner} / ${sha}`;
 }
 
+export function v12V4LiveStatus(snapshot: V12V4HpSnapshot | null): V12V4LiveStatus {
+  if (snapshot?.displayStatus === "LIVE_VERIFIED") return "LIVE";
+  if (snapshot?.displayStatus === "STALE") return "STALE";
+  return "UNAVAILABLE";
+}
+
 function exactLiveEvidence(snapshot: V12V4HpSnapshot): boolean {
   const actual = snapshot.actual;
-  const shaValues = [actual.currentReleaseSha, actual.activeRunnerSha, actual.v4ReleaseSha, actual.heartbeatSha];
+  // The V4 runner has an independent release lineage. currentReleaseSha is the
+  // shared Production parent used by the other runners, while the three V4
+  // fields must agree with one another and identify the active V4 unit.
   const currentSha = actual.currentReleaseSha?.toLowerCase();
+  const v4Sha = actual.activeRunnerSha?.toLowerCase();
+  const v4ShaValues = [actual.activeRunnerSha, actual.v4ReleaseSha, actual.heartbeatSha];
   return snapshot.displayStatus === "LIVE_VERIFIED" &&
-    shaValues.every((sha) => typeof sha === "string" && SHA_RE.test(sha) && sha.toLowerCase() === currentSha) &&
+    typeof currentSha === "string" && SHA_RE.test(currentSha) &&
+    typeof v4Sha === "string" && SHA_RE.test(v4Sha) &&
+    v4ShaValues.every((sha) => typeof sha === "string" && SHA_RE.test(sha) && sha.toLowerCase() === v4Sha) &&
     actual.activeRunnerState === "active/running" &&
-    actual.activeRunnerId?.includes(currentSha ?? "") === true &&
+    actual.activeRunnerId?.includes(v4Sha) === true &&
     actual.v4RunnerMode === "CERTIFIED" &&
     actual.v12PrimaryMode === "V4" &&
     actual.legacyV12RunnerActive === false &&
