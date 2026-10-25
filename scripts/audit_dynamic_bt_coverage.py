@@ -9,7 +9,7 @@ from collections import Counter
 import json
 from pathlib import Path
 
-REQUIRED_FAMILIES = ("V12", "PENGU", "Q102", "FET", "V52", "HYPE", "IDLE")
+REQUIRED_FAMILIES = ("V12", "PENGU", "Q102", "FET", "V52", "HYPE", "IDLE", "ZEC")
 
 
 def load_jsonl(path: Path):

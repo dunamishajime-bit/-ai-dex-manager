@@ -17,7 +17,7 @@ class DynamicBtCoverageAuditTests(unittest.TestCase):
             (output / "portfolio-trades.jsonl").write_text(
                 json.dumps({"strategy_id": "V12", "route": None, "source_runtime_sha": "old"}) + "\n", encoding="utf-8")
             result = audit(root, "new")
-            self.assertEqual(result["missingFamilies"], ["HYPE", "IDLE"])
+            self.assertEqual(result["missingFamilies"], ["HYPE", "IDLE", "ZEC"])
             self.assertFalse(result["fullIntegratedSourceParity"])
             self.assertEqual(result["v12WrongSourceSha"], 1)
             self.assertEqual(result["v12MissingRouteIdentity"], 1)
