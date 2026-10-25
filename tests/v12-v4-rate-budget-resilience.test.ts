@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
+import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,classifyV4DaemonTimeStopApprovalBlock,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 
 function doc(overrides:Record<string,unknown>={}):V4ExecutionDocument{
@@ -113,4 +113,34 @@ test("daemon blocked budget branch is wired to status-dependent BLOCKED health, 
  assert.match(src,/result=\{status:budget\.status,reason:budget\.reason,eventTs:Date\.now\(\),candidateCount:0,orderEnabled:false\}/);
  assert.match(src,/const failed=result\.status==="blocked"\|\|result\.status\.toLowerCase\(\)==="failed"/);
  assert.match(src,/safetyState:failed\?"BLOCKED"/);
+});
+
+test("missing or foreign TIME37 SHA leaves flat V4 alive but BLOCKED, never order-enabled",()=>{
+ const absent=Object.assign(new Error("ENOENT: no TIME37 approval"),{code:"ENOENT"});
+ for(const error of [new Error("V4_TIME_STOP_OPERATOR_APPROVAL_REQUIRED"),absent]){
+  assert.deepEqual(classifyV4DaemonTimeStopApprovalBlock(error,doc()),{
+   status:"blocked",reason:"V4_TIME37_APPROVAL_SHA_MISSING_OR_MISMATCH",waitMs:60000,
+  });
+ }
+});
+
+test("unresolved V4 orders, legs and STOPs must never mask TIME37 approval mismatch",()=>{
+ for(const active of [
+  doc({intents:{cid:{clientOrderId:"cid",legId:"leg",action:"ENTRY",stage:"SUBMITTING"}}}),
+  doc({state:{legs:{leg:{qty:1,status:"OPEN"}},journal:[],initial:{}} as any}),
+  doc({protections:{leg:{legId:"leg",phase:"STOP_CONFIRMED",protectedQty:1,stopClientOrderId:"stop"}}}),
+ ]){
+  assert.equal(classifyV4DaemonTimeStopApprovalBlock(new Error("V4_TIME_STOP_OPERATOR_APPROVAL_REQUIRED"),active),undefined);
+ }
+ for(const message of ["V4_TIME_STOP_APPROVAL_NOT_ROOT_SECURE","V4_PROTECTION_RECOVERY_STOP_INVALID","ECONNRESET"]){
+  assert.equal(classifyV4DaemonTimeStopApprovalBlock(new Error(message),doc()),undefined);
+ }
+});
+
+test("daemon preflights TIME37 approval before flat market preparation or any ENTRY",()=>{
+ const src=require("node:fs").readFileSync("scripts/v12-v4-production-runner.ts","utf8");
+ const gate=src.indexOf("try{await readV4TimeStopApproval(releaseSha);}");
+ const prepare=src.indexOf("prepared=await engine.prepareFlatMarketDecision();");
+ assert.ok(gate>0&&prepare>gate);
+ assert.match(src,/result=\\{status:"blocked",reason:approvalBlock\\.reason,eventTs:Date\\.now\\(\\),candidateCount:0,orderEnabled:false\\}/);
 });
