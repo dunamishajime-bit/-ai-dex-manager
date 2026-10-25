@@ -652,8 +652,8 @@ export class IdlePriorityShortRunner {
         await this.dependencies.executor.getAccountSnapshot();
         let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
         try {
-            const requestedGross = idleRouteRequestedGross(symbol,signal.route);
-            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * requestedGross / quote.bidPrice, quote.bidPrice);
+
+            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * admission.gross / quote.bidPrice, quote.bidPrice);
         } catch (error) {
             const reason = `IDLE_VENUE_QUANTITY_REJECTED:${symbol}:${error instanceof Error ? error.message : String(error)}`;
             state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
@@ -675,9 +675,9 @@ export class IdlePriorityShortRunner {
         const clientOrderId = isIndependentRenderRoute(symbol,signal.route)
             ? independentRenderOrderId("ENTRY",signal.features.decisionTs)
             : deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
-        const requestedGross = idleRouteRequestedGross(symbol,signal.route);
+
         const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: admission.gross, notionalUsd: equity * admission.gross });
-        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: requestedGross };
+        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: admission.gross };
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         try {

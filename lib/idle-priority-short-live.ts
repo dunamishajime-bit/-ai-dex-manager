@@ -99,10 +99,21 @@ export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLi
     if (input.killSwitchActive) return { accepted: false, reason: "SHARED_KILL_SWITCH_ACTIVE", gross: 0 };
     if (!input.venueFiveXCrossConfirmed) return { accepted: false, reason: "VENUE_5X_CROSS_UNCONFIRMED", gross: 0 };
     if (!input.candidateAccepted || input.candidateSide !== "SHORT") return { accepted: false, reason: "SHORT_SIGNAL_NOT_ACCEPTED", gross: 0 };
-    if (input.fullCryptoGrossAvailable < requestedGross - EPSILON || input.fullTotalGrossAvailable < requestedGross - EPSILON) {
-        return { accepted: false, reason: requestedGross === 1 ? "FULL_1X_CAPACITY_UNAVAILABLE" : `GROSS_CAPACITY_UNAVAILABLE:${requestedGross}X`, gross: 0 };
+    // Independent RENDER gross is a maximum, never an entitlement to
+    // unavailable wallet collateral. Legacy routes retain their full-size rule.
+    const independent = input.symbol === "RENDERUSDT" && input.route === RENDER_INDEPENDENT_ROUTE;
+    const alloc = independent
+        ? Math.min(requestedGross, input.fullCryptoGrossAvailable, input.fullTotalGrossAvailable)
+        : requestedGross;
+    const minAllowed = independent ? 0.25 : requestedGross;
+    if (!Number.isFinite(alloc) || alloc < minAllowed - EPSILON ||
+        input.fullCryptoGrossAvailable < alloc - EPSILON ||
+        input.fullTotalGrossAvailable < alloc - EPSILON) {
+        return {accepted:false,reason:requestedGross===1 ? "FULL_1X_CAPACITY_UNAVAILABLE" : "GROSS_CAPACITY_UNAVAILABLE:"+requestedGross+"X",gross:0};
     }
-    return { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: requestedGross };
+    return {accepted:true,reason:independent && alloc < requestedGross-EPSILON
+        ? "IDLE_RENDER_INDEPENDENT_CAPACITY_REDUCED" : "IDLE_LIVE_ADMISSION_ACCEPTED",gross:alloc};
+
 }
 
 export function deterministicIdleClientOrderId(input: { action: "ENTRY" | "EXIT" | "STOP" | "TP"; symbol: string; signalTs: number }) {

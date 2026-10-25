@@ -43,7 +43,9 @@
     "absolutePriorityOverOtherStrategies": false,
     "incumbentPriority": "keep legacy RENDER and other score-selected owners; do not force-close existing positions",
     "sharedRiskGrossMarginPendingOwner": "MUST_PASS",
-    "activation": "DISDEX_RENDER_INDEPENDENT_LIVE_CERTIFIED default false; separate root-owned SHA-bound cert required"
+    "activation": "DISDEX_RENDER_INDEPENDENT_LIVE_CERTIFIED default false; separate root-owned SHA-bound cert required",
+    "grossNotionalMinForCapacityReducedEntry": 0.25,
+    "grossAllocationWhenCapacityLimited": "min(0.75x, cryptogrossAvailable, totalgrossAvailable), but only when >=0.25x"
   },
   "research": {
     "windowUTC": [
@@ -67,7 +69,13 @@
     "maxDrawdown10bpsPct": -14.515,
     "maxDrawdown30bpsPct": -15.015,
     "notAuthenticVenueParity": true,
-    "notUntouchedForward": true
+    "notUntouchedForward": true,
+    "strictCoreFlatGateNative8Jpy": {
+      "10bps": 281029648,
+      "30bps": 169522781
+    },
+    "strictCoreFlatAcceptedTrades": 1,
+    "native8HasUnprovenCurrentVPSParity": true
   },
   "proofBeforeActivation": [
     "Current VPS Production/V4/all other strategy SHA/release parity",

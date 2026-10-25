@@ -21,5 +21,9 @@
     "EIGHT_STRATEGY_CURRENT_RUNTIME_RECONCILIATION",
     "CI_AND_BOUND_OPERATOR_APPROVAL"
   ],
-  "requirementsDoNotForgeCertificates": true
+  "requirementsDoNotForgeCertificates": true,
+  "capacityAwareIndependentGrossModelStaged": true,
+  "strictCoreFlatPortfolioReplayReported": true,
+  "historicalFlatCoreAcceptedIndependentCount": 1,
+  "noCurrentProductionParityClaim": true
 }

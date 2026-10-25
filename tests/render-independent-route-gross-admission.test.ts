@@ -25,7 +25,9 @@ test("independent admission requires 0.75 free capacity, while legacy stays 0.25
  assert.equal(idleRouteRequestedGross("RENDERUSDT",RENDER_INDEPENDENT_ROUTE),.75);
  assert.equal(idleRouteRequestedGross("RENDERUSDT","IDLE_RENDER_RELATIVE_SHORT"),.25);
  assert.deepEqual(evaluateIdleLiveAdmission(input()),{accepted:true,reason:"IDLE_LIVE_ADMISSION_ACCEPTED",gross:.75});
- const noRoom=evaluateIdleLiveAdmission({...input(),fullCryptoGrossAvailable:.74});
+ const reduced=evaluateIdleLiveAdmission({...input(),fullCryptoGrossAvailable:.63});
+ assert.deepEqual(reduced,{accepted:true,reason:"IDLE_RENDER_INDEPENDENT_CAPACITY_REDUCED",gross:.63});
+ const noRoom=evaluateIdleLiveAdmission({...input(),fullCryptoGrossAvailable:.24});
  assert.equal(noRoom.accepted,false);assert.match(noRoom.reason,/GROSS_CAPACITY_UNAVAILABLE/);
  assert.equal(evaluateIdleLiveAdmission({...input(),route:"IDLE_RENDER_RELATIVE_SHORT",fullCryptoGrossAvailable:.30}).accepted,true);
 });

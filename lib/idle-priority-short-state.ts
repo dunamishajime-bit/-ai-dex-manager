@@ -90,7 +90,7 @@ export function emptyIdleState(runtimeSha:string,now=Date.now()):IdleState{
 function validatePosition(p:IdleOwnedPosition){
  if(!p||!validSymbol(p.symbol)||p.side!=="SHORT"||!routeValid(p.symbol,p.route))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.entryTs)||!validTs(p.exitTs)||p.exitTs<=p.entryTs)throw new Error("IDLE_STATE_POSITION_INVALID");
- if(!finitePositive(p.entryPrice)||!finitePositive(p.quantity)||Math.abs(p.gross-(independentFor(p.symbol,p.route)?RENDER_ENTRY_POLICY.independentRequestedGross:grossFor(p.symbol)))>1e-9||!holdValid(p.symbol,p.route,p.holdHours))throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(!finitePositive(p.entryPrice)||!finitePositive(p.quantity)||(independentFor(p.symbol,p.route) ? (p.gross < 0.25-1e-9 || p.gross > RENDER_ENTRY_POLICY.independentRequestedGross+1e-9) : Math.abs(p.gross-grossFor(p.symbol))>1e-9)||!holdValid(p.symbol,p.route,p.holdHours))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(p.exitTs!==p.entryTs+p.holdHours*3_600_000)throw new Error("IDLE_STATE_POSITION_INVALID");
  const trailingStop = p.trailArmed === true && p.trailingStopPrice !== undefined;
  if(!finitePositive(p.stopPrice)||!finitePositive(p.takeProfitPrice)||(!trailingStop && p.stopPrice<=p.entryPrice)||(trailingStop && p.stopPrice>p.entryPrice)||p.takeProfitPrice>=p.entryPrice)throw new Error("IDLE_STATE_POSITION_INVALID");
@@ -118,7 +118,7 @@ function validatePending(p:IdlePending){
  if(!p.clientOrderId||!p.idempotencyKey||!finitePositive(p.quantity)||!finitePositive(p.expectedPrice))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.decisionTs)||!validTs(p.createdAt)||!validTs(p.updatedAt)||!p.reason)throw new Error("IDLE_STATE_PENDING_INVALID");
  if(p.reservationId!=null&&typeof p.reservationId!=="string")throw new Error("IDLE_STATE_PENDING_INVALID");
- if(p.gross!==undefined&&(!Number.isFinite(p.gross)||p.gross<=0||Math.abs(p.gross-(independentFor(p.symbol,p.route)?RENDER_ENTRY_POLICY.independentRequestedGross:grossFor(p.symbol)))>1e-9))throw new Error("IDLE_STATE_PENDING_INVALID");
+ if(p.gross!==undefined&&(!Number.isFinite(p.gross)||p.gross<=0||(independentFor(p.symbol,p.route) ? (p.gross < 0.25-1e-9 || p.gross > RENDER_ENTRY_POLICY.independentRequestedGross+1e-9) : Math.abs(p.gross-grossFor(p.symbol))>1e-9)))throw new Error("IDLE_STATE_PENDING_INVALID");
 }
 
 export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{
