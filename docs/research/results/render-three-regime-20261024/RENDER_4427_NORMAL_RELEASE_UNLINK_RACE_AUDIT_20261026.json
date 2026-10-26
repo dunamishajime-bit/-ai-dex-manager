@@ -1,0 +1,100 @@
+{
+  "audit": "RENDER_4427_NORMAL_RELEASE_UNLINK_RACE_AUDIT_20261026",
+  "source_commit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "source_path": "lib/disdex-account-order-lock.ts",
+  "source_sha256": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
+  "audit_script_path": "scripts/dd-reduction/audit_render4427_normal_release_unlink_race_20261026.py",
+  "audit_script_sha256": "d87c46606941c1b08b9dc2572445748753fe3cd3c543a53ebdfde6ca4e36aedd",
+  "launchers": 2,
+  "modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "cases_per_process": 8,
+  "total_cases": 48,
+  "process_exit_codes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "canonical_payload_sha256": "3699c6db65139f1ed811a24d2dd0f11b5fa9c0232209950aef1ce39bae61bf1a",
+  "results": [
+    {
+      "mode": "normal",
+      "remaining": null,
+      "unlinked": true,
+      "released": true,
+      "reads": 1,
+      "error": null
+    },
+    {
+      "mode": "pre_owner_mismatch",
+      "remaining": "ownerB:200|leaseB",
+      "unlinked": false,
+      "released": true,
+      "reads": 1,
+      "error": null
+    },
+    {
+      "mode": "pre_lease_mismatch",
+      "remaining": "ownerA:100|leaseB",
+      "unlinked": false,
+      "released": true,
+      "reads": 1,
+      "error": null
+    },
+    {
+      "mode": "swap_owner",
+      "remaining": null,
+      "unlinked": true,
+      "released": true,
+      "reads": 1,
+      "error": null
+    },
+    {
+      "mode": "swap_lease",
+      "remaining": null,
+      "unlinked": true,
+      "released": true,
+      "reads": 1,
+      "error": null
+    },
+    {
+      "mode": "disappear",
+      "remaining": null,
+      "unlinked": false,
+      "released": true,
+      "reads": 1,
+      "error": null
+    },
+    {
+      "mode": "missing_before_read",
+      "remaining": null,
+      "unlinked": false,
+      "released": true,
+      "reads": 1,
+      "error": null
+    },
+    {
+      "mode": "unlink_eacces",
+      "remaining": "ownerA:100|leaseA",
+      "unlinked": false,
+      "released": false,
+      "reads": 1,
+      "error": "permission denied"
+    }
+  ],
+  "finding": "A normal release() handle can unlink a newly replaced lock after checking the old owner's identity in an in-memory deterministic interleaving.",
+  "scope": "fixed source expression, mocked filesystem only; no production/native8/venue certification",
+  "research_owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "research_route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "gross": 0.25,
+  "decision": "NEED_NATIVE_ALLOCATOR",
+  "order_authorized": false,
+  "production_changed": false,
+  "pc_research_files_written": false
+}
