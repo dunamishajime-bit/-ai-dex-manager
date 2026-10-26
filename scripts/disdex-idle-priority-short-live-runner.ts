@@ -154,7 +154,7 @@ async function main() {
         const budgetRetryMs = Math.max(30_000, Math.min(120_000,
             numberEnv("DISDEX_IDLE_PRIORITY_RATE_BUDGET_RETRY_MS", 60_000)));
         const baseWait = rateBudgetDeferred ? budgetRetryMs :
-            nextAccountLockAwareWaitMs(result.status,normalWaitMs,lockRetryMs);
+            nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs);
         // A newly admitted independent 6h position needs expiry-aware observation beyond
         // normal 5m idle polling. Venue stops remain the primary protection.
         let waitMs=baseWait;
