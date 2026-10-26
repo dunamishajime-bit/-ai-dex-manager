@@ -73,9 +73,10 @@ def main():
         raise RuntimeError("UNAUTHORIZED_PC_CWD")
     recovery = fetch("lib/disdex-expired-account-lock-recovery.ts")
     lock = fetch("lib/disdex-account-order-lock.ts")
-    assert "if (reservations.length > 0) throw new Error(\"ACCOUNT_LOCK_RESERVATIONS_PRESENT\")" in recovery
-    assert "status: \"RELEASED\" as const" in lock
-    assert "await unlink(this.path)" in lock
+    if "if (reservations.length > 0) throw new Error(\"ACCOUNT_LOCK_RESERVATIONS_PRESENT\")" not in recovery:
+        raise RuntimeError("RECOVERY_RESERVATION_GUARD_MISSING")
+    if "status: \"RELEASED\" as const" not in lock or "await unlink(this.path)" not in lock:
+        raise RuntimeError("LOCK_RELEASE_CONTRACT_MISSING")
     start = recovery.index("function object(")
     end = recovery.index("function safeRequestId(")
     pure = recovery[start:end]
