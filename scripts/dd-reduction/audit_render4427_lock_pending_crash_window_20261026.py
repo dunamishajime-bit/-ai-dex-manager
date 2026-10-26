@@ -110,6 +110,15 @@ let chunks=[];process.stdin.on('data',c=>chunks.push(c));process.stdin.on('end',
  const runner=input.runner;
  check(/finally\s*\{\s*await lock\.release\(\)/.test(runner),'runner_finally_release');
  results.runner_finally_release={pass:true};
+ const entryStart=runner.indexOf('const reservation = await lock.reserve(');
+ const tickStart=runner.indexOf('async tick()');
+ check(entryStart>0&&tickStart>entryStart,'runner_entry_region');
+ const entryWindow=runner.slice(entryStart,tickStart);
+ check(/const reservation = await lock\.reserve\([\s\S]*?state\.pending = pending;[\s\S]*?await this\.dependencies\.stateStore\.save\(state\);\s*try\s*\{/.test(entryWindow),'state_save_outside_entry_try');
+ results.runner_pretry_state_save={pass:true};
+ check(/ACTIVE_STATUSES = new Set<PendingExposureStatus>\(\["PENDING", "SUBMITTED", "UNKNOWN"\]\)/.test(input.registry),'registry_active_statuses');
+ check(/if \(!ACTIVE_STATUSES\.has\(entry\.status\)\) continue;/.test(input.registry),'registry_counts_pending');
+ results.registry_orphan_remains_active={pass:true};
  check(/await atomicWrite\(this\.path,[\s\S]*?await upsertPendingExposure\(/.test(source),'lock_before_pending');
  check(/await atomicWrite\(this\.path,[\s\S]*?await releasePendingExposure\(/.test(source),'release_lock_before_pending');
  results.nonatomic_cross_file_order={pass:true};
@@ -136,11 +145,11 @@ def main():
         sources[path], digests[path] = fetch(path)
     require("upsertPendingExposure" in sources["lib/disdex-pending-exposure-registry.ts"], "REGISTRY_SOURCE_MISSING")
     payload = json.dumps({"lock": sources["lib/disdex-account-order-lock.ts"],
-                          "runner": sources["lib/idle-priority-short-runner.ts"]})
+                          "runner": sources["lib/idle-priority-short-runner.ts"], "registry": sources["lib/disdex-pending-exposure-registry.ts"]})
     p = subprocess.run(["node", "-e", JS], input=payload, text=True, capture_output=True, timeout=45)
     require(p.returncode == 0, "NODE_REPLAY_FAILED:" + p.stderr[-2500:])
     cases = json.loads(p.stdout)
-    require(len(cases) == 7 and all(x["pass"] for x in cases.values()), "CASE_MATRIX_INCOMPLETE")
+    require(len(cases) == 9 and all(x["pass"] for x in cases.values()), "CASE_MATRIX_INCOMPLETE")
     summary = {
         "scope": "research-only synthetic virtual filesystem; original pinned TS class executed; no real orders",
         "source_ref": SOURCE_REF, "source_sha256": digests,
