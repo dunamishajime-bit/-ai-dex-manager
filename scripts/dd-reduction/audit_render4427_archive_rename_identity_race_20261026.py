@@ -66,7 +66,7 @@ async function runCase(mode) {
     });
     outcome = r.status;
   } catch(e) {outcome = String(e.message);}
-  const archived = [...store.entries()].filter(([p])=>p.startsWith(archiveDir+"/"));
+  const archived = [...store.entries()].filter(([p])=>p !== lockPath);
   const archivedOwner = archived.length ? JSON.parse(archived[0][1].toString("utf8")).ownerId : null;
   return {case:mode, outcome, lock_exists:store.has(lockPath),
           archived_count:archived.length, archived_owner:archivedOwner};
