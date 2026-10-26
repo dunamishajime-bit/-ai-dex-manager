@@ -172,21 +172,27 @@ function referenceSignals(rows: ReferenceRow[]) {
     let active = false;
     let armed = false;
     let low = 0;
+    let armedLow = 0;
     let expiry = -1;
     for (let index = 180; index < rows.length; index += 1) {
         const row = rows[index];
-        if (active && index > expiry) { active = false; armed = false; low = 0; }
+        if (active && index > expiry) { active = false; armed = false; low = 0; armedLow = 0; }
         if (Number.isFinite(row.p24) && row.p24 <= FROZEN.short.impulse) {
-            if (!active) { active = true; armed = false; low = row.low; expiry = index + FROZEN.short.expiry; }
+            if (!active) { active = true; armed = false; low = row.low; armedLow = 0; expiry = index + FROZEN.short.expiry; }
             else { low = Math.min(low, row.low); expiry = Math.max(expiry, index + 1); }
         }
         if (!active) continue;
         low = Math.min(low, row.low);
         const bounce = row.close / low - 1;
-        if (bounce > FROZEN.short.bounceMax) { active = false; armed = false; low = 0; continue; }
-        if (bounce >= FROZEN.short.bounceMin) armed = true;
-        if (armed && row.p72 <= FROZEN.short.ret72Max && row.close < rows[index - 1].low && row.close < row.ema72 && row.ema72 < row.ema168 && row.rel24 <= FROZEN.short.relMax && row.volRatio >= FROZEN.short.volMin && row.volRatio <= FROZEN.short.volMax && row.btc24 <= FROZEN.short.btc24Max && row.p24 >= FROZEN.short.p24Floor && row.btcEmaDistance >= FROZEN.short.btcEmaFloor && row.rsi >= FROZEN.short.rsiMin) {
-            short[index] = true; active = false; armed = false; low = 0;
+        if (bounce > FROZEN.short.bounceMax) { active = false; armed = false; low = 0; armedLow = 0; continue; }
+        if (!armed && bounce + 1e-12 >= FROZEN.short.bounceMin) { armed = true; armedLow = low; }
+        // Frozen replay includes the adopted 2026-10-07 SHORT limited 2% structural
+        // re-break rule. This independent reference must match the approved
+        // Production signal contract without modifying live entry behavior.
+        const requiresRebreak = row.btcEmaDistance >= 0 && row.btc24 < 0;
+        const rebreakPassed = !requiresRebreak || row.close <= armedLow * 1.02 + 1e-12;
+        if (armed && rebreakPassed && row.p72 <= FROZEN.short.ret72Max && row.close < rows[index - 1].low && row.close < row.ema72 && row.ema72 < row.ema168 && row.rel24 <= FROZEN.short.relMax && row.volRatio >= FROZEN.short.volMin && row.volRatio <= FROZEN.short.volMax && row.btc24 <= FROZEN.short.btc24Max && row.p24 >= FROZEN.short.p24Floor && row.btcEmaDistance >= FROZEN.short.btcEmaFloor && row.rsi >= FROZEN.short.rsiMin) {
+            short[index] = true; active = false; armed = false; low = 0; armedLow = 0;
         }
     }
     const rawLong = rows.map((row) => row.p72 >= FROZEN.long.ret72Min && row.close > row.high18 && row.p24 >= FROZEN.long.p24Min && row.rel24 >= FROZEN.long.relMin && row.btc24 >= FROZEN.long.btc24Min && row.rsi >= FROZEN.long.rsiMin && row.rsi <= FROZEN.long.rsiMax && row.volRatio >= FROZEN.long.volMin && row.volRatio <= FROZEN.long.volMax && row.atrRatio <= FROZEN.long.atrMax && row.close > row.ema168);
