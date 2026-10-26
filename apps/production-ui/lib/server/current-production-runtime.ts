@@ -301,7 +301,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       pengu: runtimeLineage.units.pengu.expectedSha || runtimeLineage.units.pengu.runtimeSha || releaseSha,
       quality102: runtimeLineage.units.quality102.expectedSha || runtimeLineage.units.quality102.runtimeSha || releaseSha,
       v52: runtimeLineage.units.v52.expectedSha || runtimeLineage.units.v52.runtimeSha || releaseSha,
-      fet: runtimeLineage.units.fet.expectedSha || runtimeLineage.units.fet.runtimeSha || releaseSha,
+      fet: releaseSha,
       hype: runtimeLineage.units.hype.expectedSha || runtimeLineage.units.hype.runtimeSha || releaseSha,
       idle: runtimeLineage.units.idle.expectedSha || runtimeLineage.units.idle.runtimeSha || releaseSha,
     },

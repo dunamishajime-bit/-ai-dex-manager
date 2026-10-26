@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
   }
   try {
     const current = await loadCurrentProductionRuntime();
-    const expectedRuntimeSha = current.productionReleaseShas.fet;
-    const fet = await loadFetRuntimeObservability({expectedReleaseSha:expectedRuntimeSha});
+    const expectedRuntimeSha = current.releaseSha;
+    const fet = await loadFetRuntimeObservability({expectedReleaseSha:current.releaseSha});
     return NextResponse.json({ok:true,readOnly:true,tradingMutation:0,
       expectedRuntimeSha,...fet},
       {headers:{"Cache-Control":"private, no-store, max-age=0"}});
