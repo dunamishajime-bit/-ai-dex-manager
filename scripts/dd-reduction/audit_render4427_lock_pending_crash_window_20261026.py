@@ -12,7 +12,7 @@ REPO = "dunamishajime-bit/-ai-dex-manager"
 SOURCE_REF = "939b59da49ce7960485a2004b0068dc63417ae82"
 PINS = {
     "lib/disdex-account-order-lock.ts": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
-    "lib/disdex-pending-exposure-registry.ts": None,
+    "lib/disdex-pending-exposure-registry.ts": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
     "lib/idle-priority-short-runner.ts": "0a5682f30add54b7f03714c8b40596af80f6b80cd04b360c6009f62f3cb22f33",
 }
 JS = r"""
