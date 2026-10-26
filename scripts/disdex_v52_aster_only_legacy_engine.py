@@ -164,6 +164,19 @@ def transient_reference_error(error: BaseException | str) -> bool:
     ))
 
 
+def is_brief_local_stock_quote_staleness(error: BaseException | str) -> bool:
+    """Only the exact local stock quote freshness 503 is eligible for a scoped retry.
+
+    Never classify missing venue state, network authentication, dislocated
+    references, partial fills or account/order uncertainty as local-only.
+    """
+    message = str(error).lower()
+    return (
+        "http 503 http://127.0.0.1:8797/quote?symbol=" in message
+        and '"error":"stale_quote"' in message
+    )
+
+
 class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def __init__(self, mode: str):
         super().__init__(mode)
@@ -189,6 +202,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.minimum_entry_usd = base.float_env("DISDEX_V52_MIN_ENTRY_USD", 5.0)
         self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
         self._upstream_fail_closed_hold = False
+        self._stock_quote_stale_since_ms = 0
         self._rate_budget_defer_attempt = 0
         self._rate_budget_defer_until_ms = 0
         self._last_kill_flatten_key: Optional[str] = None
@@ -199,6 +213,35 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self._amzn_yahoo_h1_bars_cached_at_ms = 0
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
+
+    def _local_quote_stale_retry(self, error: BaseException | str, phase: str) -> bool:
+        """Pause only V52 on a brief local quote staleness while keeping all fills
+        and protected stock positions untouched. Sustained outages still trip
+        the original account-level protected hold for manual review.
+        """
+        if not is_brief_local_stock_quote_staleness(error):
+            return False
+        now = base.now_ms()
+        if not self._stock_quote_stale_since_ms:
+            self._stock_quote_stale_since_ms = now
+        duration = max(0, now - self._stock_quote_stale_since_ms)
+        stock_open = bool(self.positions())
+        maximum_local_ms = 15 * 60_000
+        if stock_open and duration >= maximum_local_ms:
+            self.log(
+                "v52-local-quote-stale-escalate-account-hold",
+                phase=phase, staleDurationMs=duration,
+                newOrdersAllowed=False, existingPositionsRetained=True,
+            )
+            return False
+        self._upstream_fail_closed_hold = True
+        self.log(
+            "v52-local-quote-stale-retry",
+            phase=phase, staleDurationMs=duration,
+            existingPositionsRetained=stock_open, newOrdersAllowed=False,
+            marketReferenceValid=False,
+        )
+        return True
 
     def _recovery_grace_ms(self) -> int:
         return max(60_000, base.int_env("DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS", 10 * 60_000))
@@ -1345,6 +1388,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 elif upstream_fail_closed_error(error):
                     self._hold_upstream_fail_closed(error, "PRELOCK")
                     prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "upstreamHold": True}
+                elif self._local_quote_stale_retry(error, "PRELOCK"):
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True, "quoteStaleLocalHold": True}
                 elif transient_reference_error(error) and not self.positions():
                     self.log("v52-entry-held-reference-validation", error=str(error), phase="PRELOCK")
                     prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True}
@@ -1364,12 +1409,15 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                         self.log("v52-runner-start", strategyId=STRATEGY_ID, caps={"crypto": self.crypto_gross_cap, "stock": self.stock_gross_cap, "portfolio": self.portfolio_gross_cap, "v11": self.v11_gross_cap, "v50": self.v50_gross_cap})
                         started_once = True
                     self.tick(prepared)
+                    self._stock_quote_stale_since_ms = 0
                 except Exception as error:
                     self.log("v52-tick-error", error=str(error))
                     if rate_budget_deferred_error(error):
                         self._defer_rate_budget(error, "TICK")
                     elif upstream_fail_closed_error(error):
                         self._hold_upstream_fail_closed(error, "TICK")
+                    elif self._local_quote_stale_retry(error, "TICK"):
+                        pass
                     elif transient_reference_error(error) and not self.positions():
                         self.log("v52-entry-held-reference-validation", error=str(error))
                     elif self.live:
@@ -1431,6 +1479,10 @@ def self_test() -> None:
     engine.gross_snapshot = lambda: {"equityUsd": 100.0, "cryptoGross": 1.0, "stockGross": 1.0, "totalGross": 2.0}
     gross, _ = engine.available_slot_gross(V50_SLOT)
     assert gross == 0.5
+    assert is_brief_local_stock_quote_staleness('HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote","ageMs":32000,"maximumAgeMs":30000}')
+    assert not is_brief_local_stock_quote_staleness('HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"quote_unavailable"}')
+    assert not is_brief_local_stock_quote_staleness('ASTER_GLOBAL_RATE_BUDGET_SATURATED:5000')
+    assert not is_brief_local_stock_quote_staleness('V52 managed Stock quantity reconciliation mismatch')
     assert transient_reference_error("iex_quote_stale META")
     assert transient_reference_error("cross_source_divergence TSLA")
     assert not transient_reference_error("Managed Stock position reconciliation mismatch")
