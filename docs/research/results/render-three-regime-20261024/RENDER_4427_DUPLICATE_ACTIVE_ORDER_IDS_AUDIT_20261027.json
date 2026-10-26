@@ -1,0 +1,373 @@
+{
+  "actualAsterDuplicateClientOrderIdProven": false,
+  "audit": "render4427_duplicate_active_order_ids",
+  "canonicalSha256": "56ba93c3d95575d1515d5ff680b85546215ca9137201b3bb1aeba3d23f517b81",
+  "caseCountPerLauncher": 16,
+  "caseResults": [
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "baseline",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-stop",
+          2001
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_stop_second_bad_type",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-stop",
+          2001
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_stop_second_bad_side",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-stop",
+          2001
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_stop_second_bad_qty",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-stop",
+          2001
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_stop_second_bad_reduce_only",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-tp",
+          2002
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_tp_second_bad_type",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-tp",
+          2002
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_tp_second_bad_price",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-stop",
+          2001
+        ],
+        [
+          "audit-tp",
+          2002
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_both_second_bad",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "audit-stop",
+          2001
+        ]
+      ],
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "duplicate_stop_two_valid",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          2001
+        ],
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ]
+      ],
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "duplicate_stop_first_bad",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-tp",
+          2002
+        ],
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ]
+      ],
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "duplicate_tp_first_bad",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ],
+        [
+          "foreign-stop",
+          2001
+        ]
+      ],
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "foreign_active_order",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_UNMANAGED_ORDER:RENDERUSDT",
+      "status": "rejected"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-tp",
+          1002
+        ]
+      ],
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "missing_stop",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ]
+      ],
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_stop_price",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-stop",
+          1001
+        ],
+        [
+          "audit-tp",
+          1002
+        ]
+      ],
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "pending_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PENDING_PRESENT",
+      "status": "rejected"
+    },
+    {
+      "activeOrderIds": [
+        [
+          "audit-tp",
+          1002
+        ]
+      ],
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "stop_unknown_status",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected"
+    }
+  ],
+  "independentLaunchers": 6,
+  "launchers": [
+    {
+      "canonicalSha256": "56ba93c3d95575d1515d5ff680b85546215ca9137201b3bb1aeba3d23f517b81",
+      "cases": 16,
+      "exit": 0,
+      "launcher": "normal1",
+      "optimize": 0
+    },
+    {
+      "canonicalSha256": "56ba93c3d95575d1515d5ff680b85546215ca9137201b3bb1aeba3d23f517b81",
+      "cases": 16,
+      "exit": 0,
+      "launcher": "normal2",
+      "optimize": 0
+    },
+    {
+      "canonicalSha256": "56ba93c3d95575d1515d5ff680b85546215ca9137201b3bb1aeba3d23f517b81",
+      "cases": 16,
+      "exit": 0,
+      "launcher": "O1",
+      "optimize": 1
+    },
+    {
+      "canonicalSha256": "56ba93c3d95575d1515d5ff680b85546215ca9137201b3bb1aeba3d23f517b81",
+      "cases": 16,
+      "exit": 0,
+      "launcher": "O2",
+      "optimize": 1
+    },
+    {
+      "canonicalSha256": "56ba93c3d95575d1515d5ff680b85546215ca9137201b3bb1aeba3d23f517b81",
+      "cases": 16,
+      "exit": 0,
+      "launcher": "OO1",
+      "optimize": 2
+    },
+    {
+      "canonicalSha256": "56ba93c3d95575d1515d5ff680b85546215ca9137201b3bb1aeba3d23f517b81",
+      "cases": 16,
+      "exit": 0,
+      "launcher": "OO2",
+      "optimize": 2
+    }
+  ],
+  "orderAuthorized": false,
+  "primarySourceRef": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "productionEvidence": false,
+  "proofKind": "Original pinned TypeScript method via Node stripTypeScriptTypes+VM, synthetic venue, Windows filesystem",
+  "scope": "SYNTHETIC_VENUE_READBACK_ONLY",
+  "sourceBytePinsVerifiedFromGithub": true,
+  "status": "NEED_NATIVE_ALLOCATOR",
+  "totalCases": 96
+}
