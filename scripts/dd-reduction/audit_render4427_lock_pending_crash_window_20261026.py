@@ -22,7 +22,7 @@ let chunks=[];process.stdin.on('data',c=>chunks.push(c));process.stdin.on('end',
  const input=JSON.parse(Buffer.concat(chunks).toString('utf8'));
  const source=input.lock;
  const ts=mod.stripTypeScriptTypes(source,{mode:'transform'});
- const transformed=ts.replace(/^import .*;\\s*$/gm,'').replace(/^export /gm,'');
+ const transformed=ts.replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'');
  if (/^import /m.test(transformed)) throw Error('UNREMOVED_IMPORT');
  const results={};
  const check=(x,label)=>{if(!x)throw Error('CASE_FAILED:'+label)};
@@ -60,7 +60,7 @@ let chunks=[];process.stdin.on('data',c=>chunks.push(c));process.stdin.on('end',
       upsertPendingExposure,releasePendingExposure,
       process:{pid:4427,env:{}},Date,Number,String,Math,JSON,Promise,Error,Set,
    };
-   vm.runInNewContext(transformed+'\\nglobalThis.__lockClass=FileAccountOrderLock;',sandbox,{timeout:1000});
+   vm.runInNewContext(transformed+'\nglobalThis.__lockClass=FileAccountOrderLock;',sandbox,{timeout:1000});
    const instance=new sandbox.__lockClass(lockPath,120000,'/virtual/pending.json');
    const handle=await instance.acquire('RESEARCH_ONLY');
    check(Boolean(handle),'acquired');
@@ -108,10 +108,10 @@ let chunks=[];process.stdin.on('data',c=>chunks.push(c));process.stdin.on('end',
  await run('upsert_failure_intermediate','upsert_failure');
  await run('new_lease_with_orphan','new_lease_with_orphan');
  const runner=input.runner;
- check(/finally\\s*\\{\\s*await lock\\.release\\(\\)/.test(runner),'runner_finally_release');
+ check(/finally\s*\{\s*await lock\.release\(\)/.test(runner),'runner_finally_release');
  results.runner_finally_release={pass:true};
- check(/await atomicWrite\\(this\\.path,[\\s\\S]*?await upsertPendingExposure\\(/.test(source),'lock_before_pending');
- check(/await atomicWrite\\(this\\.path,[\\s\\S]*?await releasePendingExposure\\(/.test(source),'release_lock_before_pending');
+ check(/await atomicWrite\(this\.path,[\s\S]*?await upsertPendingExposure\(/.test(source),'lock_before_pending');
+ check(/await atomicWrite\(this\.path,[\s\S]*?await releasePendingExposure\(/.test(source),'release_lock_before_pending');
  results.nonatomic_cross_file_order={pass:true};
  process.stdout.write(JSON.stringify(results));
 }).catch(e=>{process.stderr.write(String(e.stack||e));process.exitCode=1});
