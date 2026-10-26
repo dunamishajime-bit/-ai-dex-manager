@@ -1,0 +1,267 @@
+{
+  "audit_script_sha256": "bdf10e6c7477de60b263c33431e5e1a222d9dd0493f69e70c91673524b59a4e5",
+  "canonical_sha256": "f79e311b017328ba4aecca265f794bbcddda6c278cd406b61289f7fd5515501a",
+  "case_count_per_launcher": 16,
+  "caveats": [
+    "synthetic venue only",
+    "orders NEW and not partially filled",
+    "no native allocator or 13 GateProof",
+    "no real execution or funding evidence"
+  ],
+  "date": "2026-10-27",
+  "finding": "PROTECTED_RECOVERY_COMPOUNDED_QUANTITY_TOLERANCE",
+  "gross": 0.25,
+  "new_conclusion": "Each independent +/-1% expected-quantity tolerance for venue position, STOP and TP can jointly accept an actual 1.0099 SHORT with STOP/TP 0.9901, leaving 0.0198 quantity uncovered (1.96059% of actual) while manualReview clears.",
+  "order_authorized": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "safety": "No VPS/LIVE/Production/HP/orders/current-eight/legacy-overlay/worktree changes. All research writes restricted to owner PC allowed folder.",
+  "scope": "Original TypeScript via Node stripTypeScriptTypes+VM, synthetic venue, real Windows FS; no actual Aster/Production/Native8 incident evidence",
+  "six_launchers": [
+    {
+      "canonicalSha256": "f79e311b017328ba4aecca265f794bbcddda6c278cd406b61289f7fd5515501a",
+      "cases": 16,
+      "exitCode": 0,
+      "launcher": 1,
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "f79e311b017328ba4aecca265f794bbcddda6c278cd406b61289f7fd5515501a",
+      "cases": 16,
+      "exitCode": 0,
+      "launcher": 2,
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "f79e311b017328ba4aecca265f794bbcddda6c278cd406b61289f7fd5515501a",
+      "cases": 16,
+      "exitCode": 0,
+      "launcher": 1,
+      "mode": "-O"
+    },
+    {
+      "canonicalSha256": "f79e311b017328ba4aecca265f794bbcddda6c278cd406b61289f7fd5515501a",
+      "cases": 16,
+      "exitCode": 0,
+      "launcher": 2,
+      "mode": "-O"
+    },
+    {
+      "canonicalSha256": "f79e311b017328ba4aecca265f794bbcddda6c278cd406b61289f7fd5515501a",
+      "cases": 16,
+      "exitCode": 0,
+      "launcher": 1,
+      "mode": "-OO"
+    },
+    {
+      "canonicalSha256": "f79e311b017328ba4aecca265f794bbcddda6c278cd406b61289f7fd5515501a",
+      "cases": 16,
+      "exitCode": 0,
+      "launcher": 2,
+      "mode": "-OO"
+    }
+  ],
+  "six_process_total_cases": 96,
+  "source_commit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "source_raw_sha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09"
+  },
+  "status": "NEED_NATIVE_ALLOCATOR",
+  "test_results": [
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "baseline",
+      "positionQty": 1,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "position_10099_stop_09901",
+      "positionQty": 1.0099,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0.0198,
+      "stopQty": 0.9901,
+      "tpGap": 0.0099,
+      "tpQty": 1
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "position_10099_both_09901",
+      "positionQty": 1.0099,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0.0198,
+      "stopQty": 0.9901,
+      "tpGap": 0.0198,
+      "tpQty": 0.9901
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "position_10099_stop_09901_tp_10099",
+      "positionQty": 1.0099,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0.0198,
+      "stopQty": 0.9901,
+      "tpGap": 0,
+      "tpQty": 1.0099
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "position_10099_stop_1_tp_09901",
+      "positionQty": 1.0099,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0.0099,
+      "stopQty": 1,
+      "tpGap": 0.0198,
+      "tpQty": 0.9901
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "position_09901_stop_10099",
+      "positionQty": 0.9901,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0,
+      "stopQty": 1.0099,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "stop_09901",
+      "positionQty": 1,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0.0099,
+      "stopQty": 0.9901,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "tp_09901",
+      "positionQty": 1,
+      "reason": "",
+      "status": "pass",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0.0099,
+      "tpQty": 0.9901
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "position_10101_reject",
+      "positionQty": 1.0101,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_POSITION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopGap": 0.0101,
+      "stopQty": 1,
+      "tpGap": 0.0101,
+      "tpQty": 1
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "stop_09899_reject",
+      "positionQty": 1,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopGap": 0.0101,
+      "stopQty": 0.9899,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "tp_09899_reject",
+      "positionQty": 1,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0.0101,
+      "tpQty": 0.9899
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "position_09899_reject",
+      "positionQty": 0.9899,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_POSITION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_stop_price",
+      "positionQty": 1,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "missing_stop",
+      "positionQty": 1,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "pending_reject",
+      "positionQty": 1,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PENDING_PRESENT",
+      "status": "rejected",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0,
+      "tpQty": 1
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_side",
+      "positionQty": 1,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_POSITION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopGap": 0,
+      "stopQty": 1,
+      "tpGap": 0,
+      "tpQty": 1
+    }
+  ]
+}
