@@ -1,0 +1,176 @@
+{
+  "canonical_sha256": "1d3cf93ff6630103735a22c91185760af382f97d85f7b7191397ef200d5e5476",
+  "case_results": [
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "fresh",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "state_updated_zero",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 0
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "state_updated_negative",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": -1
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "state_updated_future",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793106400000
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "pending_created_old",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "pending_updated_future",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793106400000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "pending_created_after_updated",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "pending_decision_future",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 1,
+      "cooldown": true,
+      "error": null,
+      "kind": "pending_signal_after_decision",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 1,
+      "cooldown": false,
+      "error": null,
+      "kind": "future_cooldown",
+      "outcome": "manual-review",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 0,
+      "cooldown": null,
+      "error": "IDLE_STATE_RUNTIME_SHA_MISMATCH",
+      "kind": "runtime_mismatch",
+      "outcome": "NOT_RUN",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 0,
+      "cooldown": null,
+      "error": "IDLE_STATE_PENDING_INVALID",
+      "kind": "invalid_route",
+      "outcome": "NOT_RUN",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 0,
+      "cooldown": null,
+      "error": "IDLE_STATE_PENDING_INVALID",
+      "kind": "invalid_quantity",
+      "outcome": "NOT_RUN",
+      "pass": true,
+      "storedPendingUpdatedAt": 1793019960000,
+      "storedStateUpdatedAt": 1793019999000
+    },
+    {
+      "calls": 0,
+      "cooldown": true,
+      "error": null,
+      "kind": "no_pending",
+      "outcome": "UNDEFINED",
+      "pass": true,
+      "storedPendingUpdatedAt": null,
+      "storedStateUpdatedAt": 1793019999000
+    }
+  ],
+  "cases_per_process": 14,
+  "checks_passed": 84,
+  "checks_total": 84,
+  "gate": "NEED_NATIVE_ALLOCATOR",
+  "gross": 0.25,
+  "independent_python_processes": 6,
+  "launchers_per_mode": 2,
+  "limitations": [
+    "synthetic persisted state",
+    "mock venue reconcileOrder returns UNKNOWN",
+    "no real venue or production execution",
+    "no Native8 preallocation or operator root certification",
+    "no proof of naturally stale or tampered state"
+  ],
+  "modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "order_authorized": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "schema": "render4427-state-asof-audit/v1",
+  "script_raw_sha256": "ea9a240e6c815e3a2a4115059511c7a8708bf2eda5a0d7a1f912bc5bc8e5b89a",
+  "source_commit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "source_raw_sha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/idle-priority-short-runner.ts": "0a5682f30add54b7f03714c8b40596af80f6b80cd04b360c6009f62f3cb22f33",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07"
+  },
+  "status": "RESEARCH_ONLY_NOT_NATIVE8"
+}
