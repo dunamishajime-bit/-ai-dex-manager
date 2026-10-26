@@ -1,0 +1,72 @@
+{
+  "audit": "pending_concurrent_read_modify_write",
+  "fixed_source_commit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "source_sha256": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+  "audit_script_sha256": "1cd988ad6a3f15734b9c1939d11f717b9e6943b9f0face8545152b58c30d6ecf",
+  "canonical_sha256": "e332a19e4b37cbffc635455161d24644ae64fa09d28d2190201b1d354742d0f6",
+  "independent_processes": 6,
+  "modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "cases_per_process": 5,
+  "cases": {
+    "sequential": {
+      "gross": 0.5,
+      "rows": [
+        [
+          "A",
+          "PENDING"
+        ],
+        [
+          "B",
+          "PENDING"
+        ]
+      ]
+    },
+    "upserts_ab": {
+      "gross": 0.25,
+      "rows": [
+        [
+          "B",
+          "PENDING"
+        ]
+      ]
+    },
+    "upserts_ba": {
+      "gross": 0.25,
+      "rows": [
+        [
+          "A",
+          "PENDING"
+        ]
+      ]
+    },
+    "release_upsert": {
+      "gross": 0.5,
+      "rows": [
+        [
+          "A",
+          "PENDING"
+        ],
+        [
+          "B",
+          "PENDING"
+        ]
+      ]
+    },
+    "upsert_release": {
+      "gross": 0,
+      "rows": [
+        [
+          "A",
+          "RELEASED"
+        ]
+      ]
+    }
+  },
+  "native8_attested": false,
+  "order_authorized": false,
+  "economic_bt": false
+}
