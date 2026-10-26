@@ -19,9 +19,28 @@ type ResidualRow = {
   symbol: string; route: string; features: Row["features"];
   decision: { accepted: boolean; side: string; reason: string; holdHours: number; priority: number };
 };
+type RenderRoute = {
+  route: string;
+  role: string;
+  liveAuthorized: boolean;
+  certificate: { status: string; reason: string };
+  status: string;
+  orderPermission: string;
+  policy: Record<string, string | number | boolean>;
+  reason: string;
+  position?: { present: boolean; protectionVerified: boolean; watchStartedAt: number | null; lastClosedM5Ts: number | null; maxFavorableExcursionPct: number | null };
+  gate?: { accepted: boolean; reason: string; holdHours: number } | null;
+  sameSymbolPositionOrPending?: boolean;
+  decision?: { rawAccepted: boolean; rawReason: string; priorityAccepted: boolean; priorityReason: string; pendingCount: number; settledCount: number; features?: { btcH1Pct?: number; renderH1Pct?: number; renderCompletedH4Pct?: number; sellerShare?: number; upperWickPctOfOpen?: number } } | null;
+};
+type RenderTelemetry = {
+  schema: string; runtimeSha: string; decisionTs: number; updatedAt: number;
+  legacy: RenderRoute; independent: RenderRoute;
+};
 type Payload = {
   ok: boolean; status?: string; releaseSha?: string; heartbeat?: any; baseline?: any; state?: any; residualState?: any;
-  details?: { decisionTs: number; updatedAt: number; symbols: Row[]; residual: ResidualRow[]; finalReason?: string };
+  detailsFresh?: boolean; detailsStatus?: string; observedDetailsUpdatedAt?: number | null;
+  details?: { decisionTs: number; updatedAt: number; symbols: Row[]; residual: ResidualRow[]; render?: RenderTelemetry; finalReason?: string } | null;
 };
 
 const pct=(v:number|undefined)=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(2)}%`:"—";
@@ -50,19 +69,20 @@ export default function IdlePriorityDecisionPage(){
 
   const details=data?.details;
   const baseline=data?.baseline;
+  const render=details?.render;
   return <main className="space-y-4 p-4 text-white">
     <header className="panel-gold rounded-[28px] p-5">
       <div className="text-[10px] uppercase tracking-[0.28em] text-gold-100/70">Idle Priority + Residual LONG</div>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
         <div><h1 className="text-2xl font-black">Idle Priority 判定状況</h1>
-        <p className="mt-2 text-sm text-white/75">Formal → Idle SHORT → DOGE → AVAX の順で評価。上位シグナルを下位ルートが押し退けることはありません。</p></div>
+        <p className="mt-2 text-sm text-white/75">Formal → Idle SHORT → RENDER dual route → residual の順で評価。RENDERの既存Exit overlayと独立Entryを別々に表示します。</p></div>
         <button onClick={()=>void load()} className="rounded-xl border border-white/15 px-3 py-2 text-xs">更新</button>
       </div>
       <div className="mt-3 grid gap-2 text-xs md:grid-cols-4">
         <Gate label="Runtime" value={data?.status||"LOADING"} />
         <Gate label="Release SHA" value={data?.releaseSha?.slice(0,12)||"—"} />
         <Gate label="Decision JST" value={ts(details?.decisionTs)} />
-        <Gate label="Snapshot JST" value={ts(details?.updatedAt)} />
+        <Gate label="Snapshot JST" value={ts(details?.updatedAt||data?.observedDetailsUpdatedAt)} />
       </div>
       {error&&<div className="mt-3 rounded-xl border border-rose-400/30 bg-rose-400/10 p-3 text-xs text-rose-200">{error}</div>}
     </header>
@@ -75,7 +95,47 @@ export default function IdlePriorityDecisionPage(){
         <Gate label="Formal Pending" ok={Number(baseline?.baselinePendingExposure||0)===0} value={num(baseline?.baselinePendingExposure,3)} />
         <Gate label="Same Timestamp" ok={Number(baseline?.baselineAcceptedThisTimestamp||0)===0} value={String(baseline?.baselineAcceptedThisTimestamp??"—")} />
       </div>
-      <div className="mt-2 text-[11px] text-white/55">最終理由: {details?.finalReason||data?.state?.lastDecision?.reason||"—"}</div>
+      <div className="mt-2 text-[11px] text-white/55">判定詳細: <span className={data?.detailsFresh?"text-emerald-300":"text-rose-300"}>{data?.detailsFresh?"FRESH":"未取得 / 古い / SHA不一致"}</span></div>
+      <div className="mt-2 text-[11px] text-white/55">最終理由: {details?.finalReason||data?.state?.lastDecision?.reason||data?.detailsStatus||"—"}</div>
+    </section>
+
+    <section className="panel-gold rounded-[24px] p-4">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+        <div><h2 className="text-lg font-black">RENDER SHORT Dual Route</h2><p className="text-[11px] text-white/55">既存RENDERは保有建玉のExit overlayのみ。独立RENDERは同一通貨の二重保有を禁止し、Shared Risk／Margin／Operator認証を別途要求。</p></div>
+        <div className="text-[10px] text-white/55">telemetry: {render?.runtimeSha?.slice(0,12)||"未取得"}</div>
+      </div>
+      {!render&&<div className="rounded-xl border border-rose-400/30 bg-rose-400/10 p-3 text-xs text-rose-200">RENDER判定情報は未取得です。Heartbeatだけでは発注可能とは判定しません。詳細状態: {data?.detailsStatus||"UNAVAILABLE"}</div>}
+      {render&&<div className="grid gap-3 lg:grid-cols-2">
+        <article className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+          <div className="flex items-center justify-between gap-2"><div><div className="text-lg font-black">既存 RENDER SHORT</div><div className="text-[9px] text-gold-100/65">{render.legacy.route}</div></div><div className="rounded-full bg-white/8 px-2 py-1 text-[10px] font-black">{render.legacy.status}</div></div>
+          <div className="mt-3 grid gap-1.5 md:grid-cols-2">
+            <Gate label="Live flag" ok={render.legacy.liveAuthorized} value={render.legacy.liveAuthorized?"ON":"OFF"} />
+            <Gate label="Certificate" ok={render.legacy.certificate.status==="VALID"} value={render.legacy.certificate.status} />
+            <Gate label="Order permission" ok={render.legacy.orderPermission==="EXIT_ONLY"} value={render.legacy.orderPermission} />
+            <Gate label="Position" ok={render.legacy.position?.protectionVerified} value={render.legacy.position?.present?(render.legacy.position.protectionVerified?"PROTECTED":"UNVERIFIED"):"NONE"} />
+            <Gate label="Gross / STOP / TP" value={`${render.legacy.policy.gross}x / -${render.legacy.policy.stopPct}% / +${render.legacy.policy.takeProfitPct}%`} />
+            <Gate label="Adverse watch" value={`≤${render.legacy.policy.adverseTouchPct}% / ${render.legacy.policy.watchMinutes}m / MFE<${render.legacy.policy.maxFavorableExcursionPct}%`} />
+          </div>
+          <div className="mt-2 text-[10px] text-white/70">理由: {render.legacy.reason}</div>
+        </article>
+        <article className="rounded-[20px] border border-white/10 bg-black/20 p-4">
+          <div className="flex items-center justify-between gap-2"><div><div className="text-lg font-black">独立 RENDER SHORT</div><div className="text-[9px] text-gold-100/65">{render.independent.route}</div></div><div className="rounded-full bg-white/8 px-2 py-1 text-[10px] font-black">{render.independent.status}</div></div>
+          <div className="mt-3 grid gap-1.5 md:grid-cols-2">
+            <Gate label="Live flag" ok={render.independent.liveAuthorized} value={render.independent.liveAuthorized?"ON":"OFF"} />
+            <Gate label="Certificate" ok={render.independent.certificate.status==="VALID"} value={render.independent.certificate.status} />
+            <Gate label="Order permission" value={render.independent.orderPermission} />
+            <Gate label="Same-symbol owner" ok={!render.independent.sameSymbolPositionOrPending} value={render.independent.sameSymbolPositionOrPending?"BLOCK":"CLEAR"} />
+            <Gate label="Gross / Leverage" value={`${render.independent.policy.grossMax}x / ${render.independent.policy.venueLeverage}x`} />
+            <Gate label="Cross / TP / STOP / Hold" value={`${render.independent.policy.marginType} / +${render.independent.policy.takeProfitPct}% / -${render.independent.policy.stopPct}% / ${render.independent.policy.maxHoldMinutes}m`} />
+            <Gate label="OI / Shadow quality" value={`${render.independent.policy.requiresOpenInterest?"REQUIRED":"NOT REQUIRED"} / ${render.independent.policy.requiresShadowQuality?"REQUIRED":"NOT REQUIRED"}`} />
+            {render.independent.decision?.features&&<>
+              <Gate label="BTC H1 / RENDER H1" value={`${pct(render.independent.decision.features.btcH1Pct)} / ${pct(render.independent.decision.features.renderH1Pct)}`} />
+              <Gate label="H4 / Seller / Wick" value={`${pct(render.independent.decision.features.renderCompletedH4Pct)} / ${pct(render.independent.decision.features.sellerShare)} / ${pct(render.independent.decision.features.upperWickPctOfOpen)}`} />
+            </>}
+          </div>
+          <div className="mt-2 text-[10px] text-white/70">理由: {render.independent.reason}</div>
+        </article>
+      </div>}
     </section>
 
     <section>

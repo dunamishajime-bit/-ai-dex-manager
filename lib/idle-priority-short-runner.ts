@@ -29,6 +29,8 @@ import { RENDER_INDEPENDENT_ROUTE, RENDER_ENTRY_POLICY, type ClosedM5 } from "./
 import { loadRenderShadow, saveRenderShadow, advanceRenderShadow, type RenderShadowDecision } from "./render-independent-six-hour-journal";
 import {isIndependentRenderRoute, independentRenderOrderId, independentRenderProtectionPlan, independentRenderExitAt} from "./render-independent-execution-contract";
 import {assertRenderLegacyAdverseCert} from "./render-legacy-adverse-cert";
+import {inspectRenderIndependentCertificate, inspectRenderLegacyAdverseCertificate} from "./render-route-certification";
+import {buildRenderDualDecisionTelemetry} from "./render-dual-decision-telemetry";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -523,29 +525,12 @@ export class IdlePriorityShortRunner {
     private async assertRenderIndependentCertified() {
         const runtime=this.dependencies.runtime;
         if (!runtime.renderIndependentLiveAuthorized) throw Error("RENDER_INDEPENDENT_LIVE_CERT_REQUIRED");
-        let stat;
-        try { stat=await lstat(runtime.renderIndependentCertPath); }
-        catch { throw Error("RENDER_INDEPENDENT_CERT_MISSING"); }
-        if (!stat.isFile() || stat.isSymbolicLink() ||
-            (typeof stat.uid==="number"&&(stat.uid!==0||stat.gid!==0)) ||
-            (stat.mode & 0o022)!==0) throw Error("RENDER_INDEPENDENT_CERT_UNTRUSTED");
-        let cert:{schema?:string;approvedSha?:string;route?:string;
-          gross?:number;holdMinutes?:number;stopPct?:number;takeProfitPct?:number;
-          venueStopReadback?:boolean;partialFillVerified?:boolean;
-          timeoutExitVerified?:boolean;integrated10And30BpsVerified?:boolean;
-          operatorApproval?:string};
-        try { cert=JSON.parse(await readFile(runtime.renderIndependentCertPath,"utf8")); }
-        catch { throw Error("RENDER_INDEPENDENT_CERT_INVALID"); }
-        if(cert.schema!=="disdex-render-independent-venue-certificate/v1" ||
-          cert.approvedSha!==runtime.runtimeSha ||
-          cert.route!==RENDER_INDEPENDENT_ROUTE ||
-          cert.gross!==RENDER_ENTRY_POLICY.independentRequestedGross || cert.holdMinutes!==RENDER_ENTRY_POLICY.independentRealMaxMinutes ||
-          cert.stopPct!==RENDER_ENTRY_POLICY.independentRealStopLossPct || cert.takeProfitPct!==RENDER_ENTRY_POLICY.independentRealTakeProfitPct ||
-          cert.venueStopReadback!==true || cert.partialFillVerified!==true ||
-          cert.timeoutExitVerified!==true || cert.integrated10And30BpsVerified!==true ||
-          cert.operatorApproval!=="APPROVE_RENDER_INDEPENDENT_SHORT_AT_BOUND_SHA") {
-          throw Error("RENDER_INDEPENDENT_CERT_UNPROVEN");
-        }
+        const inspection = await inspectRenderIndependentCertificate(runtime.renderIndependentCertPath, runtime.runtimeSha);
+        if (inspection.status === "VALID") return;
+        if (inspection.status === "MISSING") throw Error("RENDER_INDEPENDENT_CERT_MISSING");
+        if (inspection.status === "UNTRUSTED") throw Error("RENDER_INDEPENDENT_CERT_UNTRUSTED");
+        if (inspection.status === "INVALID") throw Error("RENDER_INDEPENDENT_CERT_INVALID");
+        throw Error("RENDER_INDEPENDENT_CERT_UNPROVEN");
     }
 
     private async enter(state: IdleState, signal: IdleSignal, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle, pendingAggregate: ReturnType<typeof aggregatePendingExposure>): Promise<IdlePriorityShortTickResult> {
@@ -755,19 +740,15 @@ export class IdlePriorityShortRunner {
                     decision: { accepted: decision.accepted, side: decision.side, reason: decision.reason, holdHours: decision.holdHours, priority: decision.priority },
                 };
             });
-            await writeIdleDecisionDetails(this.dependencies.runtime.decisionDetailsPath, {
-                schema: IDLE_DECISION_DETAILS_SCHEMA,
-                runtimeSha: this.dependencies.runtime.runtimeSha,
-                decisionTs: market.decisionTs,
-                updatedAt: this.now(),
-                symbols: diagnosticSymbols,
-                residual: diagnosticResidual,
-                finalReason: state.lastDecision?.reason,
-            });
             // The six-hour hypothetical ledger is independent of real account
             // capacity and of the independent real 6h TP2.5% exit. Never order from this
             // observation alone; source gaps fail closed for the new route only.
             let renderShadowDecision: RenderShadowDecision | undefined;
+            const renderSameSymbolPositionOrPending = Boolean(
+                positions.some(row => row.symbol === "RENDERUSDT" && Math.abs(row.quantity) > EPSILON)
+                || openOrders.some(row => row.symbol === "RENDERUSDT" && activeOrder(row))
+                || state.pending?.symbol === "RENDERUSDT",
+            );
             if (this.dependencies.marketData.loadRenderIndependentM5) {
                 try {
                     const journal = await loadRenderShadow(this.dependencies.runtime.renderShadowPath, this.dependencies.runtime.runtimeSha);
@@ -779,9 +760,7 @@ export class IdlePriorityShortRunner {
                         state:journal,asOfDecisionTs:market.decisionTs,
                         btcM5:source.btcM5,renderM5:source.renderM5,
                         incumbentAt:()=>incumbent,
-                        sameSymbolPositionOrPending:Boolean(positions.some(row => row.symbol === "RENDERUSDT" && Math.abs(row.quantity)>EPSILON)
-                            || openOrders.some(row => row.symbol === "RENDERUSDT" && activeOrder(row))
-                            || state.pending?.symbol === "RENDERUSDT"),
+                        sameSymbolPositionOrPending:renderSameSymbolPositionOrPending,
                         cooldownUntil:Number(state.lastAcceptedBySymbol.RENDERUSDT||0)+RENDER_ENTRY_POLICY.newIndependentCooldownHours*3_600_000,
                         requireShadowQuality:false
                     });
@@ -803,6 +782,34 @@ export class IdlePriorityShortRunner {
                     });
                 }
             }
+            const [legacyCertificate, independentCertificate] = await Promise.all([
+                inspectRenderLegacyAdverseCertificate(this.dependencies.runtime.renderLegacyAdverseCertPath, this.dependencies.runtime.runtimeSha),
+                inspectRenderIndependentCertificate(this.dependencies.runtime.renderIndependentCertPath, this.dependencies.runtime.runtimeSha),
+            ]);
+            const legacyPosition = state.positions.find((row) => row.symbol === "RENDERUSDT" && row.route === "IDLE_RENDER_RELATIVE_SHORT");
+            const renderTelemetry = buildRenderDualDecisionTelemetry({
+                runtimeSha: this.dependencies.runtime.runtimeSha,
+                decisionTs: market.decisionTs,
+                updatedAt: this.now(),
+                legacyAuthorized: this.dependencies.runtime.renderLegacyAdverseLiveAuthorized,
+                legacyCertificate,
+                legacyPosition,
+                legacyGate: diagnosticSymbols.find((row) => row.symbol === "RENDERUSDT")?.routeDecision,
+                independentAuthorized: this.dependencies.runtime.renderIndependentLiveAuthorized,
+                independentCertificate,
+                independentDecision: renderShadowDecision,
+                sameSymbolPositionOrPending: renderSameSymbolPositionOrPending,
+            });
+            await writeIdleDecisionDetails(this.dependencies.runtime.decisionDetailsPath, {
+                schema: IDLE_DECISION_DETAILS_SCHEMA,
+                runtimeSha: this.dependencies.runtime.runtimeSha,
+                decisionTs: market.decisionTs,
+                updatedAt: this.now(),
+                symbols: diagnosticSymbols,
+                residual: diagnosticResidual,
+                render: renderTelemetry,
+                finalReason: state.lastDecision?.reason,
+            });
             const protectionReconciled = await this.reconcileVenueProtectiveFills(state, positions, openOrders);
             const ownershipOrders = protectionReconciled ? await this.dependencies.executor.getOpenOrders() : openOrders;
             const ownershipIssue = await this.reconcileOwnership(state, positions, ownershipOrders);

@@ -8,7 +8,7 @@ import {dirname} from "node:path";
 import {
  RENDER_H1_MS, RENDER_INDEPENDENT_ROUTE, RENDER_SHADOW_VERSION,
  evaluateRenderIndependentGate, evaluateIndependentPriority, settleSixHourShadow,
- type ClosedM5, type ShadowSixHourResult
+ type ClosedM5, type ShadowSixHourResult, type IndependentFeatures
 } from "./render-highwr-and-legacy-stop";
 
 export type RenderIndependentShadowState = {
@@ -20,6 +20,7 @@ export type RenderIndependentShadowState = {
 };
 export type RenderShadowDecision = {
  decisionTs:number;rawAccepted:boolean;rawReason:string;
+ features?:IndependentFeatures;
  priority:ReturnType<typeof evaluateIndependentPriority>;
  pendingCount:number;settledCount:number;
 };
@@ -100,13 +101,13 @@ export function advanceRenderShadow(input:{
   // incumbent preference, cooldown, and whether any real trade was entered.
   if(gate.accepted)state.pendingSignalTs.push(ts);
   state.lastDecisionTs=ts;
-  final={decisionTs:ts,rawAccepted:gate.accepted,rawReason:gate.reason,priority,
+  final={decisionTs:ts,rawAccepted:gate.accepted,rawReason:gate.reason,features:gate.features,priority,
    pendingCount:state.pendingSignalTs.length,settledCount:state.settled.length};
  }
  // A repeated H1 must still return an as-of decision without duplicating signals.
  if(!final){
   const gate=evaluateRenderIndependentGate({decisionTs:t,renderM5:input.renderM5,btcM5:input.btcM5});
-  final={decisionTs:t,rawAccepted:gate.accepted,rawReason:gate.reason,
+  final={decisionTs:t,rawAccepted:gate.accepted,rawReason:gate.reason,features:gate.features,
    priority:evaluateIndependentPriority({decisionTs:t,gate,fullySettledSixHourShadows:state.settled,
     incumbent:input.incumbentAt(t),sameSymbolPositionOrPending:input.sameSymbolPositionOrPending,
     cooldownUntil:input.cooldownUntil,requireShadowQuality:input.requireShadowQuality}),

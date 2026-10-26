@@ -12,11 +12,18 @@
  * explicit failure reason, never an implied authorization to trade.
  */
 import {readFile} from "node:fs/promises";
-import {
-  RENDER_INDEPENDENT_ROUTE,RENDER_SHADOW_VERSION,
+import * as renderModule from "../lib/render-highwr-and-legacy-stop.ts";
+
+// With the repository's current tsx/Node interop, a TypeScript module can be
+// exposed as a CommonJS namespace whose named exports live under `default`.
+// Resolve that shape explicitly so the read-only auditor works in both ESM and
+// CJS loader modes without changing the underlying contract.
+const renderContract=renderModule.default??renderModule;
+const {
+  RENDER_ENTRY_POLICY,RENDER_INDEPENDENT_ROUTE,RENDER_SHADOW_VERSION,
   evaluateRenderIndependentGate,evaluateIndependentPriority,settleSixHourShadow,
-  startLegacyRenderAdverse,advanceLegacyRenderAdverse,independentProtectiveLevels,
-} from "../lib/render-highwr-and-legacy-stop.ts";
+  startLegacyRenderAdverse,advanceLegacyRenderAdverse,
+}=renderContract;
 
 function decide(snapshot) {
   const output={schema:RENDER_SHADOW_VERSION,readOnly:true,canSendOrders:false,
@@ -35,7 +42,7 @@ function decide(snapshot) {
   let outstanding=[];
   try{
     // Shadow journal is generated independent of any LIVE admission/positions.
-    // Always retain 6h simulated results after a REAL 55m exit.
+    // Always retain the 6h simulated result independently of any real-route exit.
     if(snapshot.pendingSixHourShadowSignals!==undefined && !Array.isArray(snapshot.pendingSixHourShadowSignals)) throw new Error("SHADOW_PENDING_LIST_INVALID");
     for (const t of snapshot.pendingSixHourShadowSignals??[]) {
       const result=settleSixHourShadow({
@@ -62,8 +69,16 @@ function decide(snapshot) {
     output.status="MODEL_SIGNAL_PASS_NOT_VENUE_AUTHORIZED";
     output.reason="REQUIRES_NATIVE_OWNER_MARGIN_STOP_VENUE_OPERATOR_ADMISSION";
     // No price is inferred. Venue must provide a signed fill and protection.
-    output.entryModel={requestedGross:0.25,maxHoldMinutes:55,
-      protectiveStopPct:2,takeProfitPct:1.5};
+    output.entryModel={
+      route:RENDER_INDEPENDENT_ROUTE,
+      requestedGross:RENDER_ENTRY_POLICY.independentRequestedGross,
+      maxHoldMinutes:RENDER_ENTRY_POLICY.independentRealMaxMinutes,
+      venueLeverage:RENDER_ENTRY_POLICY.independentVenueLeverage,
+      marginType:"CROSS",
+      protectiveStopPct:RENDER_ENTRY_POLICY.independentRealStopLossPct,
+      takeProfitPct:RENDER_ENTRY_POLICY.independentRealTakeProfitPct,
+      cooldownHours:RENDER_ENTRY_POLICY.newIndependentCooldownHours,
+    };
   }
   if(snapshot.legacyRenderPosition){
     try {

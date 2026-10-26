@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import { evaluateIdleRuntimeHealth } from "@/lib/server/idle-runtime-observability";
+import { assessIdleDecisionDetails } from "@/lib/server/idle-decision-details";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -37,8 +38,10 @@ export async function GET(req: NextRequest) {
   ]);
 
   const expectedSha = releaseSha.trim().toLowerCase();
+  const now = Date.now();
+  const detailsAssessment = assessIdleDecisionDetails(details, expectedSha, now);
   const health = evaluateIdleRuntimeHealth({
-    now: Date.now(),
+    now,
     expectedSha,
     heartbeat,
     coreState: state,
@@ -60,7 +63,10 @@ export async function GET(req: NextRequest) {
     residualState,
     // Core and residual are evaluated independently. A stale residual state
     // must not make the core Idle runner (or HYPE) appear stopped.
-    details,
+    details: detailsAssessment.fresh ? details : null,
+    detailsFresh: detailsAssessment.fresh,
+    detailsStatus: detailsAssessment.status,
+    observedDetailsUpdatedAt: detailsAssessment.updatedAt,
     visibleSidecars: ["HYPE"],
     updatedAt: Date.now(),
   });

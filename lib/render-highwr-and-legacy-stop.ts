@@ -171,13 +171,13 @@ export type ShadowSixHourResult = Readonly<{
   entryPrice:number;
   exitPrice:number;
   result:"TAKE"|"STOP"|"TIME";
-  /** Historical round-trip 30bps net result, independent of actual 55m fill. */
+  /** Historical round-trip 30bps net result, independent of any real-route fill. */
   net30Pct:number;
 }>;
 
 /**
  * Reprice a *hypothetical*, independent 6h shadow from complete historical M5.
- * Does not require/assume a real trade. It remains alive after real 55m close.
+ * Does not require/assume a real trade. It remains independent of any real-route close.
  * Stops conservatively win same-bar ambiguities; M5 gaps do not pass.
  * TIME is marked only after the 6h expiry candle itself is complete.
  */

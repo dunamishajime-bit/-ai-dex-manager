@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
+import * as renderModule from "../lib/render-highwr-and-legacy-stop.ts";
+const {
   RENDER_ENTRY_POLICY,RENDER_INDEPENDENT_ROUTE,RENDER_M5_MS,RENDER_H1_MS,
   evaluateRenderIndependentGate,evaluateIndependentPriority,settleSixHourShadow,
-  startLegacyRenderAdverse,advanceLegacyRenderAdverse,independentProtectiveLevels
-} from "../lib/render-highwr-and-legacy-stop.ts";
+  startLegacyRenderAdverse,advanceLegacyRenderAdverse,independentProtectiveLevels,
+}=renderModule.default??renderModule;
 const M=RENDER_M5_MS,H=RENDER_H1_MS;
 const at=Date.UTC(2026,9,25,0,0,0);
 function series(extra=[]){
@@ -188,7 +189,14 @@ test("review CLI is always read-only even when candidate high-WR passes",()=>{
   assert.equal(model.canSendOrders,false);
   assert.equal(model.priority.accepted,true);
   assert.equal(model.status,"MODEL_SIGNAL_PASS_NOT_VENUE_AUTHORIZED");
-  assert.equal(model.entryModel.maxHoldMinutes,55);
+  assert.equal(model.entryModel.route,RENDER_INDEPENDENT_ROUTE);
+  assert.equal(model.entryModel.requestedGross,RENDER_ENTRY_POLICY.independentRequestedGross);
+  assert.equal(model.entryModel.maxHoldMinutes,RENDER_ENTRY_POLICY.independentRealMaxMinutes);
+  assert.equal(model.entryModel.venueLeverage,RENDER_ENTRY_POLICY.independentVenueLeverage);
+  assert.equal(model.entryModel.marginType,"CROSS");
+  assert.equal(model.entryModel.protectiveStopPct,RENDER_ENTRY_POLICY.independentRealStopLossPct);
+  assert.equal(model.entryModel.takeProfitPct,RENDER_ENTRY_POLICY.independentRealTakeProfitPct);
+  assert.equal(model.entryModel.cooldownHours,RENDER_ENTRY_POLICY.newIndependentCooldownHours);
 });
 test("review CLI fails closed if owner/pending state is absent",()=>{
   const model=decide({...series(),fullySettledSixHourShadows:qualityHistory()});

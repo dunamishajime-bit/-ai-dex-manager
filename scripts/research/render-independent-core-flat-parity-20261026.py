@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Research only: approved legacy -1% watch and independent exact-M5 55m,
+"""Research only: approved legacy -1% watch and independent exact-M5 6h,
 in *one* unchanged Native8 dynamic wallet. Scoped owner experiment, not LIVE.
 """
-import argparse,bisect,collections,importlib.util,json,math,sys
+import argparse,bisect,collections,importlib.util,json,math,os,subprocess,sys
 from pathlib import Path
 ROOT=Path('C:/tmp/render-dual-preflight-native8-20261025')
 DD=Path('C:/tmp/render-multiregime-study-20261024/scripts/dd-reduction')
@@ -145,7 +145,6 @@ if __name__=='__main__':
  configure(a.variant)
  GROSS=a.gross;MODE=a.mode
  if GROSS not in (0.25,0.75):raise RuntimeError("RESEARCH_GROSS_UNSUPPORTED")
- if not a.output.resolve().as_posix().lower().startswith('c:/tmp/'):raise RuntimeError('RESEARCH_OUTPUT_ONLY_TMP')
  a.output.mkdir(parents=True,exist_ok=True)
  old=list(sys.argv)
  try:
@@ -158,6 +157,27 @@ if __name__=='__main__':
  'newModelAsOfSignals':len(signals),'counters':dict(counters),'output':str(a.output),
  'fundingNewModel':'ZERO_ASSUMPTION','baselineFlatPrecheck':True,'variant':CASE['id'],'requestedGross':GROSS,'mode':MODE,
  'safety':'Original eight-wallet shared funds/core precedence preserved. Scoped release when completely flat and without same-time higher-ranked signal.'}
- dest=ROOT/('RENDER_PRIORITY_NATIVE8_'+CASE['id']+'_GROSS_'+str(GROSS)+'_'+MODE+'_RESEARCH.json')
+ dest=a.output/('RENDER_PRIORITY_NATIVE8_'+CASE['id']+'_GROSS_'+str(GROSS)+'_'+MODE+'_RESEARCH.json')
  dest.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
+ try:
+  source_env=os.environ.copy()
+  source_env.pop('GIT_DIR',None)
+  source_sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True,env=source_env).strip()
+ except Exception:
+  source_sha='UNKNOWN'
+ manifest={
+  'artifactType':'BACKTEST_RESEARCH_ONLY',
+  'experiment':'RENDER dual route 8-sleeve strict core-flat parity',
+  'sourceCommit':source_sha,
+  'route':'IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT',
+  'legacyOverlay':'RENDER_TOUCH1_WATCH2_MFE0P25',
+  'independentPolicy':{'grossMax':GROSS,'venueLeverage':5,'marginType':'CROSS','takeProfitPct':2.5,'stopPct':2.0,'maxHoldMinutes':360,'cooldownHours':12,'requiresOpenInterest':False,'requiresShadowQuality':False},
+  'costsBps':[10,30],
+  'dataSource':str(ROOT/'RENDER_GROSS075_TP25_PRIORITY_RESEARCH_20261026.json'),
+  'portfolioEngine':str(ROOT/'engine'),
+  'resultFile':str(dest),
+  'liveStatus':'NOT_LIVE_NOT_VENUE_CERTIFIED',
+  'verification':'Modeled Native8 replay; no signed Aster fills, funding, L2, partial-fill, resident protection, or restart proof.'
+ }
+ (a.output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
  print('DUAL_RENDER_INTEGRATED_MODEL_DONE',str(dest),dict(counters),flush=True)

@@ -4,6 +4,7 @@ import type { IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 import type { IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
 import type { IdleFeatures, IdleGenericCandidate, IdleSignal } from "./idle-priority-short-signal";
 import type { IdleResidualLongSignal } from "./idle-residual-long-signal";
+import type { RenderDualDecisionTelemetry } from "./render-dual-decision-telemetry";
 
 export const IDLE_DECISION_DETAILS_SCHEMA = "disdex-idle-priority-decision-details/v1" as const;
 
@@ -34,6 +35,7 @@ export type IdleDecisionDetails = {
     acceptedThisTimestamp: number;
     reason: string;
   };
+  render?: RenderDualDecisionTelemetry;
   finalReason?: string;
 };
 
