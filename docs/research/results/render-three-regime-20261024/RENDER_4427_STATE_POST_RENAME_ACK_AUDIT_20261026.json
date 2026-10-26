@@ -1,0 +1,95 @@
+{
+  "audit": "RENDER_4427_STATE_POST_RENAME_ACK",
+  "finding": "writeIdleState() renames temp to state path before chmod; injected chmod EACCES rejects save after new state is already committed. Pre-rename injected write/rename failures leave old state intact.",
+  "limits": [
+    "No LIVE, venue, Production, Native8, or natural chmod failure evidence",
+    "No change to live strategy or existing worktree",
+    "Research files only under C:/Users/dis/render4427-research-only/"
+  ],
+  "order_authorized": false,
+  "results": [
+    {
+      "committed": false,
+      "events": "write",
+      "name": "manual_review__write_fail",
+      "reportedError": true,
+      "tmpClean": true
+    },
+    {
+      "committed": false,
+      "events": "write,rename",
+      "name": "manual_review__rename_fail",
+      "reportedError": true,
+      "tmpClean": true
+    },
+    {
+      "committed": true,
+      "events": "write,rename,chmod",
+      "name": "manual_review__chmod_fail",
+      "reportedError": true,
+      "tmpClean": true
+    },
+    {
+      "committed": true,
+      "events": "write,rename,chmod",
+      "name": "manual_review__success",
+      "reportedError": false,
+      "tmpClean": true
+    },
+    {
+      "committed": false,
+      "events": "write",
+      "name": "cooldown__write_fail",
+      "reportedError": true,
+      "tmpClean": true
+    },
+    {
+      "committed": false,
+      "events": "write,rename",
+      "name": "cooldown__rename_fail",
+      "reportedError": true,
+      "tmpClean": true
+    },
+    {
+      "committed": true,
+      "events": "write,rename,chmod",
+      "name": "cooldown__chmod_fail",
+      "reportedError": true,
+      "tmpClean": true
+    },
+    {
+      "committed": true,
+      "events": "write,rename,chmod",
+      "name": "cooldown__success",
+      "reportedError": false,
+      "tmpClean": true
+    }
+  ],
+  "scope": "Original pinned TS transformed in-memory by Node stripTypeScriptTypes + VM; actual Windows file writes and rename; chmod EACCES is deliberately injected, not observed from native OS or Production.",
+  "scriptSha256": "0a4be46c35d177cfe0d76acdb2e4e3df5b249fe97902d19b64992cfd0d5fc182",
+  "sourceRef": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07"
+  },
+  "status": "NEED_NATIVE_ALLOCATOR",
+  "verification": {
+    "canonicalSha256": "f56e69f1943f7e0a1a015128d89fc11c7b40e14e7d1c7ec192370ff7147937ec",
+    "casesPerLauncher": 8,
+    "childProcessExitCodes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "independentLaunchersPerMode": 2,
+    "pythonModes": [
+      "normal",
+      "-O",
+      "-OO"
+    ],
+    "totalPassed": 48
+  }
+}
