@@ -9,6 +9,7 @@ import {
   V12_V4_V2_PRIORITY,
   V12_V4_V2_STATUS,
   V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS,
+  V12_V4_D_APPROVED_GROSS_BY_ROUTE,
   resolveV12V4V2RequestedGross,
   V12_V4_FIRST_PASS_REPAIRS,
   V12_V4_SECOND_PASS_REPAIRS,
@@ -46,13 +47,13 @@ test("V2_M150 case reproduces exact four caps and frozen 41 full-year ranked rou
   assert.deepEqual([V12_V4_CAPS.recoveryFamilyGross, V12_V4_CAPS.v12Gross], [1, 2]);
 });
 
-test("all 41 V4 route Gross values preserve existing tiers except nine adopted C Recovery routes", () => {
+test("all 41 V4 route Gross values preserve unaffected tiers, adopt C9 and D3", () => {
   const counts = { S: 0, A: 0, B: 0, C: 0, D: 0, core: 0 };
   const raised: string[] = [];
   assert.equal(V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS, 0.25);
   for (const route of V12_V4_V2_PRIORITY) {
     const expected = route.route === "FAILED_BREAK_REV_SHORT_6H" ? 0.81 :
-      route.tier === "D" ? 0.05 :
+      route.tier === "D" ? (V12_V4_D_APPROVED_GROSS_BY_ROUTE[route.route] ?? 0.05) :
       route.tier === "C" ? 0.25 : Math.min(1, route.gross * 1.5);
     const actual = resolveV12V4V2RequestedGross(route.route, 0.81);
     assert.ok(Math.abs(actual - expected) < 1e-12, route.route);
@@ -64,6 +65,15 @@ test("all 41 V4 route Gross values preserve existing tiers except nine adopted C
     if (route.tier === "C") raised.push(route.route);
   }
   assert.deepEqual(counts, { S: 9, A: 5, B: 10, C: 9, D: 7, core: 1 });
+  assert.deepEqual(Object.keys(V12_V4_D_APPROVED_GROSS_BY_ROUTE).sort(),
+    ["REC_G3_LATE_BTC_REL", "REC_X13_TP1.5_SL1_H24", "CONT_SHORT_MID_AGE24_48"].sort());
+  assert.equal(resolveV12V4V2RequestedGross("REC_G3_LATE_BTC_REL", .5), .25);
+  assert.equal(resolveV12V4V2RequestedGross("REC_X13_TP1.5_SL1_H24", .5), .15);
+  assert.equal(resolveV12V4V2RequestedGross("CONT_SHORT_MID_AGE24_48", .5), .15);
+  assert.equal(resolveV12V4V2RequestedGross("REC_X14_TIME_48H", .5), .05);
+  assert.equal(resolveV12V4V2RequestedGross("REC_Y15_REV_D0_T3", .5), .05);
+  assert.equal(resolveV12V4V2RequestedGross("REC_Y18_REV_D2_T18", .5), .05);
+  assert.equal(resolveV12V4V2RequestedGross("REC_X07_TIME_6H", .5), .05);
   assert.deepEqual(raised.sort(), [
     "REC_X02_TIME_36H", "REC_X04_TIME_24H", "REC_X06_TIME_12H",
     "REC_X09_TIME_48H", "REC_G1_MID_REL_LOWVOL",

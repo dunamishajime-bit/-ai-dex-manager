@@ -58,13 +58,28 @@ const rankByRoute = new Map(RANKED.map((r) => [r.route, r]));
  */
 export const V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS = 0.25;
 
+/**
+ * Operator-approved STATIC research selection (2026-10-26), not
+ * an authorization for an existing-position top-up or forced close.
+ * All other D routes retain 0.05x.
+ */
+export const V12_V4_D_APPROVED_GROSS_BY_ROUTE: Readonly<Record<string, number>> =
+  Object.freeze({
+    REC_G3_LATE_BTC_REL: 0.25,
+    "REC_X13_TP1.5_SL1_H24": 0.15,
+    CONT_SHORT_MID_AGE24_48: 0.15,
+  });
+
+
 const familyByRoute = new Map(V12_V4_ROUTE_CATALOG.map((r) => [r.route, r.family]));
 
 export function resolveV12V4V2RequestedGross(routeName: string, nativeGross: number): number {
   const rank = rankByRoute.get(routeName);
   if (!rank) throw new Error("V12_V4_V2_UNKNOWN_ROUTE:" + routeName);
   if (routeName === "FAILED_BREAK_REV_SHORT_6H") return nativeGross;
-  if (rank.tier === "D") return 0.05;
+  if (rank.tier === "D") {
+    return V12_V4_D_APPROVED_GROSS_BY_ROUTE[routeName] ?? 0.05;
+  }
   if (rank.tier === "C" && familyByRoute.get(routeName)?.startsWith("RECOVERY_")) {
     return V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS;
   }
@@ -78,6 +93,13 @@ function verifyFrozenPolicy() {
   if (RANKED.length !== 41 || catalog.size !== 41 || ranks.size !== 41 || rankByRoute.size !== 41) {
     throw new Error("V12_V4_V2_PRIORITY_COUNT_MISMATCH");
   }
+  const approvedD = Object.keys(V12_V4_D_APPROVED_GROSS_BY_ROUTE);
+  if (approvedD.length !== 3 || approvedD.some(route => {
+    const item = rankByRoute.get(route);
+    const gross = V12_V4_D_APPROVED_GROSS_BY_ROUTE[route];
+    return item?.tier !== "D" || !familyByRoute.has(route) ||
+      !Number.isFinite(gross) || gross <= 0.05 || gross > 0.25;
+  })) throw new Error("V12_V4_D_GROSS_ROUTE_POLICY_MISMATCH");
   for (const record of RANKED) {
     if (!catalog.has(record.route) || (record.route !== "FAILED_BREAK_REV_SHORT_6H" && record.priority_rank !== record.priority_order + 3) ||
         !Number.isFinite(record.gross) || !Number.isFinite(record.n30) ||
