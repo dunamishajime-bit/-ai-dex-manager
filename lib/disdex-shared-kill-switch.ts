@@ -5,8 +5,29 @@ export interface SharedKillSwitchView {
     configuredPaths: string[];
     active: boolean;
     action?: "HOLD_PROTECTED" | "FLATTEN_MANAGED";
+    scope?: "GLOBAL" | "V52_REFERENCE_ONLY";
+    operator?: string;
+    recoverable?: boolean;
     reason?: string;
     sourcePath?: string;
+}
+
+export type SharedKillSwitchConsumer = "GLOBAL" | "V4_CRYPTO";
+
+/**
+ * A stale US-equity reference quote is a V52 stock-sleeve hold.  It must be
+ * explicitly scoped and attributable; an unscoped or malformed hold remains
+ * global fail-closed.
+ */
+export function isV52ReferenceOnlyHold(value: Pick<SharedKillSwitchView, "active" | "action" | "scope" | "operator" | "recoverable" | "reason">) {
+    const reason = String(value.reason || "");
+    return value.active === true
+        && value.action === "HOLD_PROTECTED"
+        && value.scope === "V52_REFERENCE_ONLY"
+        && value.operator === "disdex-v52-aster-only"
+        && value.recoverable === true
+        && reason.startsWith("V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=")
+        && reason.includes('{"error":"stale_quote"');
 }
 
 const ENV_NAMES = [
@@ -27,19 +48,29 @@ export async function readSharedKillSwitch(env: NodeJS.ProcessEnv = process.env)
     if (!paths.length) return { configuredPaths: [], active: false };
     const path = paths[0];
     try {
-        const parsed = JSON.parse(await readFile(path, "utf8")) as { active?: unknown; action?: unknown; reason?: unknown };
+        const parsed = JSON.parse(await readFile(path, "utf8")) as { active?: unknown; action?: unknown; scope?: unknown; operator?: unknown; recoverable?: unknown; reason?: unknown };
         if (!parsed || typeof parsed !== "object" || typeof parsed.active !== "boolean") throw new Error("SHARED_KILL_SWITCH_MALFORMED");
-        const action = parsed.action === "HOLD_PROTECTED" || parsed.action === "FLATTEN_MANAGED"
+        const action: SharedKillSwitchView["action"] = parsed.action === "HOLD_PROTECTED" || parsed.action === "FLATTEN_MANAGED"
             ? parsed.action
             : undefined;
+        const scope: SharedKillSwitchView["scope"] = parsed.scope === "GLOBAL" || parsed.scope === "V52_REFERENCE_ONLY"
+            ? parsed.scope
+            : undefined;
         if (parsed.active && !action) throw new Error("SHARED_KILL_SWITCH_MALFORMED");
-        return {
+        const view: SharedKillSwitchView = {
             configuredPaths: paths,
             active: parsed.active,
             action,
+            scope,
+            operator: typeof parsed.operator === "string" ? parsed.operator : undefined,
+            recoverable: parsed.recoverable === true ? true : undefined,
             reason: typeof parsed.reason === "string" ? parsed.reason : undefined,
             sourcePath: path,
         };
+        if (view.active && view.scope === "V52_REFERENCE_ONLY" && !isV52ReferenceOnlyHold(view)) {
+            throw new Error("SHARED_KILL_SWITCH_MALFORMED");
+        }
+        return view;
     } catch (error) {
         const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
         // Existing production semantics treat an absent kill-switch file as inactive.
@@ -50,8 +81,12 @@ export async function readSharedKillSwitch(env: NodeJS.ProcessEnv = process.env)
     }
 }
 
-export async function assertSharedKillSwitchAllowsNewEntry(env: NodeJS.ProcessEnv = process.env) {
+export async function assertSharedKillSwitchAllowsNewEntry(
+    env: NodeJS.ProcessEnv = process.env,
+    options: { consumer?: SharedKillSwitchConsumer } = {},
+) {
     const state = await readSharedKillSwitch(env);
-    if (state.active) throw new Error(`SHARED_KILL_SWITCH_ACTIVE:${state.reason || "UNSPECIFIED"}`);
+    const scopedV52Hold = options.consumer === "V4_CRYPTO" && isV52ReferenceOnlyHold(state);
+    if (state.active && !scopedV52Hold) throw new Error(`SHARED_KILL_SWITCH_ACTIVE:${state.reason || "UNSPECIFIED"}`);
     return state;
 }

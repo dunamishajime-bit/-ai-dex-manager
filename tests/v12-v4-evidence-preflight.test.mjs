@@ -54,3 +54,32 @@ test("runtime health preflight preserves fail-closed risk and pending gates", ()
     pendingExposure: { activeCount: 1 },
   }), /PENDING/);
 });
+
+test("runtime health preflight accepts only an allowlisted V52 reference-only hold", () => {
+  assert.doesNotThrow(() => validateRuntimeHealth({
+    sharedRisk: { sourceComplete: true, tripped: false },
+    marginGuard: { stage: "HEALTHY", ordersAllowed: true },
+    killSwitch: {
+      active: true,
+      scope: "V52_REFERENCE_ONLY",
+      operator: "disdex-v52-aster-only",
+      action: "HOLD_PROTECTED",
+      recoverable: true,
+      reason: 'V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote"}',
+    },
+    pendingExposure: { activeCount: 0 },
+  }));
+  assert.throws(() => validateRuntimeHealth({
+    sharedRisk: { sourceComplete: true, tripped: false },
+    marginGuard: { stage: "HEALTHY", ordersAllowed: true },
+    killSwitch: {
+      active: true,
+      scope: "V52_REFERENCE_ONLY",
+      operator: "other",
+      action: "HOLD_PROTECTED",
+      recoverable: true,
+      reason: 'V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote"}',
+    },
+    pendingExposure: { activeCount: 0 },
+  }), /KILL_SWITCH/);
+});

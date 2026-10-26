@@ -232,9 +232,18 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         *,
         action: str = "FLATTEN_MANAGED",
         recoverable: bool = False,
+        scope: Optional[str] = None,
     ) -> None:
         if action not in {"HOLD_PROTECTED", "FLATTEN_MANAGED"}:
             raise RuntimeError(f"Unsupported V52 Kill Switch action: {action}")
+        if scope not in {None, "GLOBAL", "V52_REFERENCE_ONLY"}:
+            raise RuntimeError(f"Unsupported V52 Kill Switch scope: {scope}")
+        if scope == "V52_REFERENCE_ONLY" and (
+            action != "HOLD_PROTECTED"
+            or not recoverable
+            or not transient_reference_error(reason)
+        ):
+            raise RuntimeError("V52_REFERENCE_ONLY scope requires a recoverable local reference-data hold")
         existing = base.read_json(self.kill_switch_path, {}) or {}
         if existing.get("active"):
             if existing.get("action") == "FLATTEN_MANAGED":
@@ -251,6 +260,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             "activatedAt": str(existing.get("activatedAt") or now.isoformat()),
             "recoverable": bool(recoverable and action == "HOLD_PROTECTED"),
         }
+        if scope is not None:
+            payload["scope"] = scope
         if action == "HOLD_PROTECTED":
             started = str(existing.get("graceStartedAt") or now.isoformat())
             started_ms = self._kill_iso_ms(started) or int(now.timestamp() * 1000)
@@ -1279,7 +1290,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     attempted[window] = False; self.save()
 
     def _loop_interval_ms(self, prepared: dict) -> int:
-        idle_ms = max(15_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 15_000))
+        # Protected/market-closed holds remain order-blocked; keep the retry
+        # cadence configurable down to the documented 5s floor so recovery
+        # does not wait longer than the live health contract permits.
+        idle_ms = max(5_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 15_000))
         if prepared.get("skipWithoutLock") or prepared.get("killHold") or prepared.get("upstreamHold") or prepared.get("marketClosed"):
             return idle_ms
         active = regular_us_equity_session() or bool(self.positions())
@@ -1379,6 +1393,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                                 f"V52 recoverable tick error: {error}",
                                 action="HOLD_PROTECTED",
                                 recoverable=True,
+                                scope="V52_REFERENCE_ONLY" if transient_reference_error(error) else "GLOBAL",
                             )
                             self.log(
                                 "v52-recoverable-error-hold",
