@@ -1,0 +1,112 @@
+{
+  "schema": "render4427-reserve-lease-overwrite-audit/v1",
+  "date": "2026-10-26",
+  "source_commit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "source_path": "lib/disdex-account-order-lock.ts",
+  "source_sha256": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
+  "audit_script_path": "scripts/dd-reduction/audit_render4427_reserve_lease_overwrite_20261026.py",
+  "audit_script_sha256": "b130b3443f52f883d39a2394c688cdaf08babf5ce1944ac68a3e8a6927bed033",
+  "canonical_sha256": "27a00af76e1d6e8e1a19c7707bfd6884c176a918dc6b08abb3a9958bb7fdf7ea",
+  "independent_launchers": 2,
+  "optimize_modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "cases_per_process": 9,
+  "case_outcomes": 54,
+  "processes_exit_zero": 6,
+  "all_canonical_digests_identical": true,
+  "results": [
+    {
+      "mode": "normal",
+      "owner": "ownerA:100",
+      "lease": "leaseA",
+      "reservations": 1,
+      "writes": 1,
+      "pending": 1,
+      "error": null
+    },
+    {
+      "mode": "pre_owner_mismatch",
+      "owner": "ownerB:200",
+      "lease": "leaseB",
+      "reservations": 0,
+      "writes": 0,
+      "pending": 0,
+      "error": "ACCOUNT_LOCK_NOT_OWNER"
+    },
+    {
+      "mode": "pre_lease_mismatch",
+      "owner": "ownerA:100",
+      "lease": "leaseB",
+      "reservations": 0,
+      "writes": 0,
+      "pending": 0,
+      "error": "ACCOUNT_LOCK_NOT_OWNER"
+    },
+    {
+      "mode": "pre_expired",
+      "owner": "ownerA:100",
+      "lease": "leaseA",
+      "reservations": 0,
+      "writes": 0,
+      "pending": 0,
+      "error": "ACCOUNT_LOCK_NOT_OWNER"
+    },
+    {
+      "mode": "swap_owner",
+      "owner": "ownerA:100",
+      "lease": "leaseA",
+      "reservations": 1,
+      "writes": 1,
+      "pending": 1,
+      "error": null
+    },
+    {
+      "mode": "swap_lease",
+      "owner": "ownerA:100",
+      "lease": "leaseA",
+      "reservations": 1,
+      "writes": 1,
+      "pending": 1,
+      "error": null
+    },
+    {
+      "mode": "swap_missing",
+      "owner": "ownerA:100",
+      "lease": "leaseA",
+      "reservations": 1,
+      "writes": 1,
+      "pending": 1,
+      "error": null
+    },
+    {
+      "mode": "normal_pending_failure",
+      "owner": "ownerA:100",
+      "lease": "leaseA",
+      "reservations": 0,
+      "writes": 2,
+      "pending": 0,
+      "error": "PENDING_WRITE_FAILURE"
+    },
+    {
+      "mode": "swap_owner_pending_failure",
+      "owner": "ownerA:100",
+      "lease": "leaseA",
+      "reservations": 0,
+      "writes": 2,
+      "pending": 0,
+      "error": "PENDING_WRITE_FAILURE"
+    }
+  ],
+  "finding": "Original TS reserve() verifies owner before an unconditional atomicWrite(path); synthetic intervening replacement or absence can be overwritten/recreated by stale lease, including rollback on pending failure.",
+  "evidence_scope": "in-memory synthetic state interleaving; actual source functions compiled with Node stripTypeScriptTypes",
+  "actual_os_tested": false,
+  "native8_verified": false,
+  "venue_tested": false,
+  "order_authorized": false,
+  "decision": "NEED_NATIVE_ALLOCATOR",
+  "pc_research_file_writes": false,
+  "c_tmp_access": false
+}
