@@ -1,0 +1,42 @@
+{
+  "schema": "render4427-expired-lock-released-row-audit/v1",
+  "date": "2026-10-26",
+  "fixed_source_ref": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "source_raw_sha256": {
+    "lib/disdex-expired-account-lock-recovery.ts": "a16dd16a0aeaaf7cd8c1873ad0c9dbe994560ebbf87f7933d29a9f7cf4a65395",
+    "lib/disdex-account-order-lock.ts": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b"
+  },
+  "audit_script": "scripts/dd-reduction/audit_render4427_expired_lock_released_row_20261026.py",
+  "audit_script_raw_sha256": "7df4c900e720ec696d7e1984c97fb5c0b3ed17bfbe8bca83dfbfbfa13d2068c4",
+  "canonical_case_result_sha256": "410f77c1fab861e48e18f1c639c16a6f0495ca9db31e9e234935431d37cf07a7",
+  "independent_launcher_processes": 2,
+  "python_modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "cases_per_process_mode": 15,
+  "total_expected_outcomes": 90,
+  "total_pass": 90,
+  "process_exit_codes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "new_conclusion": "Expired lock recovery rejects nonempty reservation arrays even if all rows are RELEASED; this may prevent conservative recovery after a crash between releaseReservation and release.",
+  "risk_class": "synthetic fail-closed liveness boundary; not a demonstrated live crash or authorization bypass",
+  "order_authorized": false,
+  "adoption": "NEED_NATIVE_ALLOCATOR",
+  "production_modified": false,
+  "owner_pc_research_files_written": false,
+  "c_tmp_accessed": false,
+  "gaps": [
+    "No current Production SHA parity",
+    "No actual disk crash/recovery evidence",
+    "No authenticated Native8/13 GateProof/operator trust root",
+    "No independent pending/venue reconciliation receipt"
+  ]
+}
