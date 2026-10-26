@@ -50,6 +50,28 @@ const RANKED: readonly RankedRow[] = priorityJson as RankedRow[];
 export const V12_V4_V2_PRIORITY = Object.freeze(RANKED.map((r) => ({ ...r })));
 const rankByRoute = new Map(RANKED.map((r) => [r.route, r]));
 
+/**
+ * Operator-approved 2026-10-26 static size change. Applies ONLY to nine
+ * Recovery-family C tier routes, formerly requested 0.18x.
+ * This is not a D-tier override, dynamic reallocation, or forced top-up.
+ * S/A/B tiers and native-core Gross retain their historical contract.
+ */
+export const V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS = 0.25;
+
+const familyByRoute = new Map(V12_V4_ROUTE_CATALOG.map((r) => [r.route, r.family]));
+
+export function resolveV12V4V2RequestedGross(routeName: string, nativeGross: number): number {
+  const rank = rankByRoute.get(routeName);
+  if (!rank) throw new Error("V12_V4_V2_UNKNOWN_ROUTE:" + routeName);
+  if (routeName === "FAILED_BREAK_REV_SHORT_6H") return nativeGross;
+  if (rank.tier === "D") return 0.05;
+  if (rank.tier === "C" && familyByRoute.get(routeName)?.startsWith("RECOVERY_")) {
+    return V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS;
+  }
+  return Math.min(1, rank.gross * 1.5);
+}
+
+
 function verifyFrozenPolicy() {
   const catalog = new Set(V12_V4_ROUTE_CATALOG.map((r) => r.route));
   const ranks = new Set(RANKED.map((r) => r.priority_order));
@@ -156,12 +178,11 @@ export function evaluateV12V4V2Routes(features: readonly V12V4V2Features[]) {
       }
       const tr = rankByRoute.get(candidate.route);
       if (!tr) throw new Error("V12_V4_V2_UNKNOWN_ROUTE:" + candidate.route);
-      // The BT gives native core priority 1 and native gross; every other route
-      // receives full-year in-sample priority +3 and tier gross *1.5 (capped at 1.0).
-      // D tier stays fixed 0.05x rather than scaling to 0.075x.
+      // Static 2026-10-26 adoption: only the nine C-tier RECOVERY routes
+      // move 0.18x -> 0.25x. Core keeps its native Gross, D=0.05x,
+      // and S/A/B tiers keep 0.60/0.45/0.30x respectively.
       const isCore = candidate.route === "FAILED_BREAK_REV_SHORT_6H";
-      const gross = isCore ? candidate.requestedGross :
-        tr.tier === "D" ? 0.05 : Math.min(1, tr.gross * 1.5);
+      const gross = resolveV12V4V2RequestedGross(candidate.route, candidate.requestedGross);
       const hours = second?.hours ?? first?.hours;
       candidates.push({
         ...candidate,

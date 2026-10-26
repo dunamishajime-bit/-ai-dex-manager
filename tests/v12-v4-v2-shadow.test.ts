@@ -8,6 +8,8 @@ import {
   V12_V4_V2_POLICY,
   V12_V4_V2_PRIORITY,
   V12_V4_V2_STATUS,
+  V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS,
+  resolveV12V4V2RequestedGross,
   V12_V4_FIRST_PASS_REPAIRS,
   V12_V4_SECOND_PASS_REPAIRS,
   type V12V4V2Features,
@@ -42,6 +44,34 @@ test("V2_M150 case reproduces exact four caps and frozen 41 full-year ranked rou
   assert.equal(Object.keys(V12_V4_FIRST_PASS_REPAIRS).length, 8);
   assert.equal(Object.keys(V12_V4_SECOND_PASS_REPAIRS).length, 6);
   assert.deepEqual([V12_V4_CAPS.recoveryFamilyGross, V12_V4_CAPS.v12Gross], [1, 2]);
+});
+
+test("all 41 V4 route Gross values preserve existing tiers except nine adopted C Recovery routes", () => {
+  const counts = { S: 0, A: 0, B: 0, C: 0, D: 0, core: 0 };
+  const raised: string[] = [];
+  assert.equal(V12_V4_RECOVERY_C_APPROVED_REQUESTED_GROSS, 0.25);
+  for (const route of V12_V4_V2_PRIORITY) {
+    const expected = route.route === "FAILED_BREAK_REV_SHORT_6H" ? 0.81 :
+      route.tier === "D" ? 0.05 :
+      route.tier === "C" ? 0.25 : Math.min(1, route.gross * 1.5);
+    const actual = resolveV12V4V2RequestedGross(route.route, 0.81);
+    assert.ok(Math.abs(actual - expected) < 1e-12, route.route);
+    if (route.route === "FAILED_BREAK_REV_SHORT_6H") {
+      counts.core += 1;
+      continue;
+    }
+    counts[route.tier] += 1;
+    if (route.tier === "C") raised.push(route.route);
+  }
+  assert.deepEqual(counts, { S: 9, A: 5, B: 10, C: 9, D: 7, core: 1 });
+  assert.deepEqual(raised.sort(), [
+    "REC_X02_TIME_36H", "REC_X04_TIME_24H", "REC_X06_TIME_12H",
+    "REC_X09_TIME_48H", "REC_G1_MID_REL_LOWVOL",
+    "REC_G2_EARLY_BTC_OPPOSE_VOL", "REC_Y08_REV_D0_T6",
+    "REC_Y17_REV_D1_T3", "REC_Y19_REV_D1_TP2_SL1_H36",
+  ].sort());
+  assert.equal(resolveV12V4V2RequestedGross("FAILED_BREAK_REV_SHORT_6H", 0.63), 0.63);
+  assert.throws(() => resolveV12V4V2RequestedGross("ROUTE_DOES_NOT_EXIST", 0.81), /UNKNOWN_ROUTE/);
 });
 
 test("G5 uses same frozen fixed48 exit but full-year hindsight rank/tier sizing", () => {
