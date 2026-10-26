@@ -1,0 +1,130 @@
+{
+  "allPass": true,
+  "auditScriptRawSha256": "804b0a78024f49974d36577cb9dd60c3559f5234c818d4b3c0db3a090c40814d",
+  "canonicalJsonSha256": "9d1c6f60dbb68a6e108bcd47e1aa007b756200563f54eaffc60c9218557cfc3d",
+  "caseResults": [
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": null,
+      "kind": "operator_flat",
+      "reason": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": null,
+      "kind": "pending_eacces_flat",
+      "reason": "IDLE_BENIGN_PENDING_EXPOSURE_RECOVERY",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": null,
+      "kind": "rate_budget_flat",
+      "reason": "IDLE_BENIGN_RATE_BUDGET_RECOVERY",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": null,
+      "kind": "peer_pending",
+      "reason": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": null,
+      "kind": "peer_position",
+      "reason": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": null,
+      "kind": "peer_manual_review",
+      "reason": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": null,
+      "kind": "peer_cooldown",
+      "reason": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "status": "pass"
+    },
+    {
+      "backupExists": false,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 0,
+      "finalReview": "IDLE_UNRECOGNIZED_CRITICAL_REVIEW",
+      "kind": "unknown_review_reject",
+      "reason": "IDLE_BENIGN_STATE_RECOVERY_UNKNOWN_REVIEW",
+      "status": "rejected"
+    },
+    {
+      "backupExists": false,
+      "finalCooldown": false,
+      "finalPending": true,
+      "finalPositions": 0,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'",
+      "kind": "existing_pending_reject",
+      "reason": "IDLE_BENIGN_STATE_RECOVERY_PENDING_PRESENT",
+      "status": "rejected"
+    },
+    {
+      "backupExists": false,
+      "finalCooldown": false,
+      "finalPending": false,
+      "finalPositions": 1,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'",
+      "kind": "existing_position_reject",
+      "reason": "IDLE_BENIGN_STATE_RECOVERY_POSITIONS_PRESENT",
+      "status": "rejected"
+    }
+  ],
+  "casesPerChild": 10,
+  "childProcesses": 6,
+  "independentPythonLaunchers": 2,
+  "limitations": [
+    "Controlled interleaving using a second Node OS process and the original pinned TypeScript writeIdleState(); no natural Production race evidence.",
+    "No venue receipt, no Native8 execution, no authorized orders, no operator trust root or genuine GateProof.",
+    "Recovery script does not read venue or acquire account-order lock; simulated peer writes do not establish normal runner scheduling."
+  ],
+  "order_authorized": false,
+  "pythonModes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "schema": "render4427-benign-recovery-state-writer-race-audit/v1",
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceRawSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "scripts/disdex-idle-priority-short-benign-state-recovery.ts": "da57b0a8f4439ca3a0faeef166ffdc1c91fb29f428cd96fffa1f4d43e4a2d865"
+  },
+  "status": "NEED_NATIVE_ALLOCATOR",
+  "totalCases": 60
+}
