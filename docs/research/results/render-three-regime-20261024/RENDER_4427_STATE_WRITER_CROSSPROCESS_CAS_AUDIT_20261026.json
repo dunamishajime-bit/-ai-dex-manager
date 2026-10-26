@@ -1,0 +1,144 @@
+{
+  "schema": "render4427-state-writer-crossprocess-cas-audit/v1",
+  "date": "2026-10-26",
+  "scope": "isolated-research-only",
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceSha256": {
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8"
+  },
+  "auditScriptSha256": "362d8ea0dfd09f19386c0f15de0c6c51034b2b1be3acbf6cd097b8237b4ff8e9",
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "gross": 0.25,
+  "auditMethod": "Original TypeScript FileIdlePriorityShortStateStore.load/save through Node stripTypeScriptTypes + VM, actual Windows filesystem; two distinct Node OS processes loaded identical snapshot before first write; controlled save ordering; six independent Python launchers (2 each of normal/-O/-OO).",
+  "caseCountPerLauncher": 12,
+  "totalCases": 72,
+  "allPassed": true,
+  "canonicalResultSha256": "c6d786abf61a1b74f1463d02c54aa1aaa4b4c90fd655b3ba5fa8d4e7787b7186",
+  "launcherResults": [
+    {
+      "name": "normal1",
+      "optimize": 0,
+      "exitCode": 0,
+      "cases": 12,
+      "canonicalSha256": "c6d786abf61a1b74f1463d02c54aa1aaa4b4c90fd655b3ba5fa8d4e7787b7186"
+    },
+    {
+      "name": "normal2",
+      "optimize": 0,
+      "exitCode": 0,
+      "cases": 12,
+      "canonicalSha256": "c6d786abf61a1b74f1463d02c54aa1aaa4b4c90fd655b3ba5fa8d4e7787b7186"
+    },
+    {
+      "name": "O1",
+      "optimize": 1,
+      "exitCode": 0,
+      "cases": 12,
+      "canonicalSha256": "c6d786abf61a1b74f1463d02c54aa1aaa4b4c90fd655b3ba5fa8d4e7787b7186"
+    },
+    {
+      "name": "O2",
+      "optimize": 1,
+      "exitCode": 0,
+      "cases": 12,
+      "canonicalSha256": "c6d786abf61a1b74f1463d02c54aa1aaa4b4c90fd655b3ba5fa8d4e7787b7186"
+    },
+    {
+      "name": "OO1",
+      "optimize": 2,
+      "exitCode": 0,
+      "cases": 12,
+      "canonicalSha256": "c6d786abf61a1b74f1463d02c54aa1aaa4b4c90fd655b3ba5fa8d4e7787b7186"
+    },
+    {
+      "name": "OO2",
+      "optimize": 2,
+      "exitCode": 0,
+      "cases": 12,
+      "canonicalSha256": "c6d786abf61a1b74f1463d02c54aa1aaa4b4c90fd655b3ba5fa8d4e7787b7186"
+    }
+  ],
+  "cases": [
+    {
+      "kind": "pending_entry",
+      "order": "AB",
+      "pass": true,
+      "observation": "pending removed by stale decision writer"
+    },
+    {
+      "kind": "pending_entry",
+      "order": "BA",
+      "pass": true,
+      "observation": "decision removed by stale pending writer"
+    },
+    {
+      "kind": "pending_release",
+      "order": "AB",
+      "pass": true,
+      "observation": "released pending resurrected by stale decision writer"
+    },
+    {
+      "kind": "pending_release",
+      "order": "BA",
+      "pass": true,
+      "observation": "decision removed by pending release writer"
+    },
+    {
+      "kind": "cooldown_entry",
+      "order": "AB",
+      "pass": true,
+      "observation": "new cooldown removed by stale decision writer"
+    },
+    {
+      "kind": "cooldown_entry",
+      "order": "BA",
+      "pass": true,
+      "observation": "decision removed by cooldown writer"
+    },
+    {
+      "kind": "cooldown_release",
+      "order": "AB",
+      "pass": true,
+      "observation": "cleared cooldown resurrected by stale decision writer"
+    },
+    {
+      "kind": "cooldown_release",
+      "order": "BA",
+      "pass": true,
+      "observation": "decision removed by cooldown clearing writer"
+    },
+    {
+      "kind": "manual_review",
+      "order": "AB",
+      "pass": true,
+      "observation": "manual review removed by stale decision writer"
+    },
+    {
+      "kind": "manual_review",
+      "order": "BA",
+      "pass": true,
+      "observation": "decision removed by manual review writer"
+    },
+    {
+      "kind": "manual_review_release",
+      "order": "AB",
+      "pass": true,
+      "observation": "cleared manual review resurrected by stale decision writer"
+    },
+    {
+      "kind": "manual_review_release",
+      "order": "BA",
+      "pass": true,
+      "observation": "decision removed by manual review clearing writer"
+    }
+  ],
+  "evidenceLimitations": [
+    "Controlled synthetic state and two deliberately concurrent writers; no evidence that normal production tick permits this concurrency.",
+    "No real venue orders, Native8 path, live operator root, 13 GateProof, or external pending reconciliation certified.",
+    "No edits to production or existing worktrees."
+  ],
+  "decision": "NEED_NATIVE_ALLOCATOR",
+  "order_authorized": false
+}
