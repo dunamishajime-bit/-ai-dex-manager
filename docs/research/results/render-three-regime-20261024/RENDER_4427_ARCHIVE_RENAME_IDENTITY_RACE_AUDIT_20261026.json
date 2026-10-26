@@ -1,0 +1,81 @@
+{
+  "audit": {
+    "case_count": 8,
+    "cases": [
+      {
+        "case": "baseline",
+        "outcome": "EXPIRED_ACCOUNT_LOCK_ARCHIVED",
+        "lock_exists": false,
+        "archived_count": 1,
+        "archived_owner": "RUNNER:101"
+      },
+      {
+        "case": "replace_active",
+        "outcome": "ACCOUNT_LOCK_ARCHIVE_BYTES_MISMATCH",
+        "lock_exists": false,
+        "archived_count": 1,
+        "archived_owner": "RUNNER:202"
+      },
+      {
+        "case": "unlink_reacquire",
+        "outcome": "ACCOUNT_LOCK_ARCHIVE_BYTES_MISMATCH",
+        "lock_exists": false,
+        "archived_count": 1,
+        "archived_owner": "RUNNER:202"
+      },
+      {
+        "case": "unlink_only",
+        "outcome": "ENOENT",
+        "lock_exists": false,
+        "archived_count": 0,
+        "archived_owner": null
+      },
+      {
+        "case": "reserved_old",
+        "outcome": "ACCOUNT_LOCK_RESERVATIONS_PRESENT",
+        "lock_exists": true,
+        "archived_count": 0,
+        "archived_owner": null
+      },
+      {
+        "case": "not_expired",
+        "outcome": "ACCOUNT_LOCK_NOT_EXPIRED",
+        "lock_exists": true,
+        "archived_count": 0,
+        "archived_owner": null
+      },
+      {
+        "case": "wrong_owner",
+        "outcome": "ACCOUNT_LOCK_OWNER_MISMATCH",
+        "lock_exists": true,
+        "archived_count": 0,
+        "archived_owner": null
+      },
+      {
+        "case": "owner_alive",
+        "outcome": "ACCOUNT_LOCK_OWNER_STILL_ALIVE",
+        "lock_exists": true,
+        "archived_count": 0,
+        "archived_owner": null
+      }
+    ],
+    "live_order_authorized": false,
+    "native8_certified": false,
+    "research_only": true,
+    "source_path": "lib/disdex-expired-account-lock-recovery.ts",
+    "source_ref": "939b59da49ce7960485a2004b0068dc63417ae82",
+    "source_sha256": "a16dd16a0aeaaf7cd8c1873ad0c9dbe994560ebbf87f7933d29a9f7cf4a65395"
+  },
+  "canonical_sha256": "ffbaaf1b41fe012c33a9c441994528e5548e7d08bbd0bf117f56184188e9929b",
+  "audit_script_sha256": "cce833548ccf517f3cdc76a3542e1f6becfa1aa56640dacdcbe92f6d2e452c1a",
+  "independent_launchers": 2,
+  "python_modes": [
+    "normal",
+    "-O",
+    "-OO"
+  ],
+  "checks": 48,
+  "all_exit_zero": true,
+  "pc_research_cwd": "C:/Users/dis/render4427-research-only/",
+  "real_filesystem_race_tested": false
+}
