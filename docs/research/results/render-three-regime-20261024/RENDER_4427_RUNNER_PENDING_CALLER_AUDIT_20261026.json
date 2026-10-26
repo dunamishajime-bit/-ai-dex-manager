@@ -1,0 +1,136 @@
+{
+  "schema": "render4427-runner-pending-caller-audit/v1",
+  "date": "2026-10-26",
+  "branch": "research/render4427-release-caller-provenance-20261026-2044",
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceSha256": {
+    "lib/disdex-account-order-lock.ts": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
+    "lib/disdex-pending-exposure-registry.ts": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "lib/idle-priority-short-runner.ts": "0a5682f30add54b7f03714c8b40596af80f6b80cd04b360c6009f62f3cb22f33",
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/v12-v4-shared-reservations.ts": "76c26cd72af578f93b2c18fc9b81c3327e10dc018925ee1377a677def93d59c8"
+  },
+  "auditScriptSha256": "a73aecb69bf4829329f86be9c3ccb1643a29972490856446b8478b7ca48c8925",
+  "canonicalResultSha256": "90323c16b3f8b92210895f14d0f157fbbea000fe89df294b5907a15fef639e07",
+  "pythonModes": [
+    0,
+    1,
+    2
+  ],
+  "independentLaunchesPerMode": 2,
+  "casesPerLaunch": 12,
+  "totalChecks": 72,
+  "exitCodes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "results": [
+    {
+      "case": "foreign_pending",
+      "beforeGross": 0.25,
+      "afterGross": 0,
+      "afterStatus": "RELEASED",
+      "lockMembership": false
+    },
+    {
+      "case": "foreign_submitted",
+      "beforeGross": 0.25,
+      "afterGross": 0,
+      "afterStatus": "RELEASED",
+      "lockMembership": false
+    },
+    {
+      "case": "foreign_unknown",
+      "beforeGross": 0.25,
+      "afterGross": 0,
+      "afterStatus": "RELEASED",
+      "lockMembership": false
+    },
+    {
+      "case": "foreign_symbol",
+      "beforeGross": 0.25,
+      "afterGross": 0,
+      "afterStatus": "RELEASED",
+      "lockMembership": false
+    },
+    {
+      "case": "foreign_side",
+      "beforeGross": 0.25,
+      "afterGross": 0,
+      "afterStatus": "RELEASED",
+      "lockMembership": false
+    },
+    {
+      "case": "foreign_gross",
+      "beforeGross": 1,
+      "afterGross": 0,
+      "afterStatus": "RELEASED",
+      "lockMembership": false
+    },
+    {
+      "case": "own",
+      "beforeGross": 0.25,
+      "afterGross": 0,
+      "afterStatus": "RELEASED",
+      "lockMembership": true
+    },
+    {
+      "case": "no_id",
+      "beforeGross": 0.25,
+      "afterGross": 0.25,
+      "afterStatus": "PENDING",
+      "manualReview": true
+    },
+    {
+      "case": "venue_unknown",
+      "beforeGross": 0.25,
+      "afterGross": 0.25,
+      "afterStatus": "PENDING",
+      "manualReview": true
+    },
+    {
+      "case": "no_registry",
+      "beforeGross": 0,
+      "afterGross": 0,
+      "afterStatus": "ABSENT"
+    },
+    {
+      "case": "invalid_route",
+      "beforeGross": 0.25,
+      "afterGross": 0.25,
+      "afterStatus": "PENDING",
+      "stateRejected": true
+    },
+    {
+      "case": "invalid_gross",
+      "beforeGross": 0.25,
+      "afterGross": 0.25,
+      "afterStatus": "PENDING",
+      "stateRejected": true
+    }
+  ],
+  "limits": {
+    "originalRunnerTickExecuted": false,
+    "originalMethodsExecuted": [
+      "normalizeIdleState",
+      "FileIdlePriorityShortStateStore.save/load",
+      "IdlePriorityShortRunner.reconcilePending",
+      "IdlePriorityShortRunner.finalizeEntry",
+      "FileAccountOrderLock.releaseReservation",
+      "releasePendingExposure"
+    ],
+    "syntheticPersistedState": true,
+    "syntheticVenueReconcile": true,
+    "productionObserved": false,
+    "actualForeignIdCallerObserved": false,
+    "native8Certified": false,
+    "orderAuthorized": false,
+    "operatorTrustRootVerified": false
+  },
+  "status": "NEED_NATIVE_ALLOCATOR"
+}
