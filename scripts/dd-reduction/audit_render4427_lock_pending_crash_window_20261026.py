@@ -18,7 +18,7 @@ PINS = {
 JS = r"""
 'use strict';
 const vm=require('node:vm'), mod=require('node:module'), crypto=require('node:crypto'), path=require('node:path');
-let chunks=[];process.stdin.on('data',c=>chunks.push(c));process.stdin.on('end',async()=>{
+let chunks=[];process.stdin.on('data',c=>chunks.push(c));process.stdin.on('end',()=>{(async()=>{
  const input=JSON.parse(Buffer.concat(chunks).toString('utf8'));
  const source=input.lock;
  const ts=mod.stripTypeScriptTypes(source,{mode:'transform'});
@@ -114,7 +114,7 @@ let chunks=[];process.stdin.on('data',c=>chunks.push(c));process.stdin.on('end',
  check(/await atomicWrite\(this\.path,[\s\S]*?await releasePendingExposure\(/.test(source),'release_lock_before_pending');
  results.nonatomic_cross_file_order={pass:true};
  process.stdout.write(JSON.stringify(results));
-}).catch(e=>{process.stderr.write(String(e.stack||e));process.exitCode=1});
+})().catch(e=>{process.stderr.write(String(e.stack||e));process.exitCode=1});});
 """
 
 def require(condition, message):
