@@ -1,0 +1,177 @@
+{
+  "status": "RESEARCH_ONLY_NEW_FINDING_PROTECTED_RECOVERY_WRITER_RACE",
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "gross": 0.25,
+  "order_authorized": false,
+  "decision": "NEED_NATIVE_ALLOCATOR",
+  "sourceRawSha256": {
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf"
+  },
+  "auditScriptSha256": "50bdf328abd2329c2057353324e3b34b20662ed0782e12d86957279128cbdc77",
+  "independentPythonLaunchers": [
+    {
+      "optimize": "normal",
+      "instance": 1,
+      "exitCode": 0,
+      "canonicalSha256": "1b3940ad53c7db84cfc2cd94585f8e1bf6e993f68feb2b6d21fbfbe2195189ad"
+    },
+    {
+      "optimize": "normal",
+      "instance": 2,
+      "exitCode": 0,
+      "canonicalSha256": "1b3940ad53c7db84cfc2cd94585f8e1bf6e993f68feb2b6d21fbfbe2195189ad"
+    },
+    {
+      "optimize": "O",
+      "instance": 1,
+      "exitCode": 0,
+      "canonicalSha256": "1b3940ad53c7db84cfc2cd94585f8e1bf6e993f68feb2b6d21fbfbe2195189ad"
+    },
+    {
+      "optimize": "O",
+      "instance": 2,
+      "exitCode": 0,
+      "canonicalSha256": "1b3940ad53c7db84cfc2cd94585f8e1bf6e993f68feb2b6d21fbfbe2195189ad"
+    },
+    {
+      "optimize": "OO",
+      "instance": 1,
+      "exitCode": 0,
+      "canonicalSha256": "1b3940ad53c7db84cfc2cd94585f8e1bf6e993f68feb2b6d21fbfbe2195189ad"
+    },
+    {
+      "optimize": "OO",
+      "instance": 2,
+      "exitCode": 0,
+      "canonicalSha256": "1b3940ad53c7db84cfc2cd94585f8e1bf6e993f68feb2b6d21fbfbe2195189ad"
+    }
+  ],
+  "caseCountPerLauncher": 10,
+  "totalCaseExecutions": 60,
+  "canonicalSha256": "1b3940ad53c7db84cfc2cd94585f8e1bf6e993f68feb2b6d21fbfbe2195189ad",
+  "cases": [
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalLastDecision": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY",
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": null,
+      "kind": "baseline",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalLastDecision": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY",
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": null,
+      "kind": "peer_pending",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalLastDecision": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY",
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": null,
+      "kind": "peer_manual_review",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalLastDecision": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY",
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": null,
+      "kind": "peer_cooldown",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalLastDecision": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY",
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": null,
+      "kind": "peer_position_qty",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "backupExists": true,
+      "finalCooldown": false,
+      "finalLastDecision": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY",
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": null,
+      "kind": "peer_last_decision",
+      "reason": "",
+      "status": "pass"
+    },
+    {
+      "backupExists": false,
+      "finalCooldown": false,
+      "finalLastDecision": null,
+      "finalPending": true,
+      "finalQuantity": 1,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "pending_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PENDING_PRESENT",
+      "status": "rejected"
+    },
+    {
+      "backupExists": false,
+      "finalCooldown": false,
+      "finalLastDecision": null,
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_stop_price",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected"
+    },
+    {
+      "backupExists": false,
+      "finalCooldown": false,
+      "finalLastDecision": null,
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "missing_stop",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected"
+    },
+    {
+      "backupExists": false,
+      "finalCooldown": false,
+      "finalLastDecision": null,
+      "finalPending": false,
+      "finalQuantity": 1,
+      "finalReview": "IDLE_OTHER_CRITICAL_REVIEW",
+      "kind": "unknown_review_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_REVIEW_INVALID",
+      "status": "rejected"
+    }
+  ],
+  "limits": [
+    "Controlled synthetic venue readback",
+    "Peer state writer is original TS executed as a separate Node OS process",
+    "Peer saved state verified before recovery rename",
+    "No natural concurrent Production execution proven",
+    "No genuine Aster receipt, Native8, or GateProof evidence",
+    "No LIVE/Production/HP/VPS/order changes"
+  ]
+}
