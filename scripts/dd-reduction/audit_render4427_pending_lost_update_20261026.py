@@ -10,13 +10,13 @@ const src=JSON.parse(fs.readFileSync(0,'utf8')).src;
 const extract=n=>{
  const m=new RegExp('^(?:export )?(?:async )?function '+n+'\\(','m').exec(src);
  if(!m)throw Error('SOURCE_MISSING:'+n);
- const end=src.indexOf('\\n}',m.index);
+ const end=src.indexOf('\n}',m.index);
  if(end<0)throw Error('END_MISSING:'+n);
  return stripTypeScriptTypes(src.slice(m.index,end+2).replace(/^export /,''),{mode:'strip'});
 };
 if(!src.includes('const ACTIVE_STATUSES = new Set<PendingExposureStatus>(["PENDING", "SUBMITTED", "UNKNOWN"]);'))throw Error('STATUS_DRIFT');
 const names=['finiteNonNegative','finitePositive','expectedSleeve','normalizeEntry','normalizePendingExposureRegistry','emptyPendingExposureRegistry','upsertPendingExposure','releasePendingExposure','aggregatePendingExposure'];
-const body='const PENDING_EXPOSURE_SCHEMA="disdex-pending-exposure/v1";\\nconst ACTIVE_STATUSES=new Set(["PENDING","SUBMITTED","UNKNOWN"]);\\nconst pendingExposurePath=()=> "MEMORY_ONLY";\\nconst readPendingExposureRegistry=mock.read;\\nconst atomicWrite=mock.write;\\n'+names.map(extract).join('\\n')+'\\nreturn {upsertPendingExposure,releasePendingExposure,aggregatePendingExposure};';
+const body='const PENDING_EXPOSURE_SCHEMA="disdex-pending-exposure/v1";\nconst ACTIVE_STATUSES=new Set(["PENDING","SUBMITTED","UNKNOWN"]);\nconst pendingExposurePath=()=> "MEMORY_ONLY";\nconst readPendingExposureRegistry=mock.read;\nconst atomicWrite=mock.write;\n'+names.map(extract).join('\n')+'\nreturn {upsertPendingExposure,releasePendingExposure,aggregatePendingExposure};';
 const make=new Function('mock',body);
 const clone=x=>JSON.parse(JSON.stringify(x));
 const entry=id=>({reservationId:id,strategyId:'IDLE_PRIORITY_SHORT',sleeve:'CRYPTO',symbol:'RENDER',side:'SHORT',gross:0.25,notionalUsd:250,createdAt:1000});
