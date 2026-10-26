@@ -1,0 +1,58 @@
+{
+  "native8Proven": false,
+  "orderAuthorized": false,
+  "osSemantics": "actual Windows filesystem, separate Node process performs replacement via fs.renameSync",
+  "productionProven": false,
+  "records": [
+    {
+      "canonicalSha256": "3ec5bfa2b56a923e56bc16a6806748ab58e4570a7f4cb7060518dbe13a56b425",
+      "caseCount": 12,
+      "lane": 1,
+      "mode": "normal",
+      "optimize": 0
+    },
+    {
+      "canonicalSha256": "3ec5bfa2b56a923e56bc16a6806748ab58e4570a7f4cb7060518dbe13a56b425",
+      "caseCount": 12,
+      "lane": 2,
+      "mode": "normal",
+      "optimize": 0
+    },
+    {
+      "canonicalSha256": "3ec5bfa2b56a923e56bc16a6806748ab58e4570a7f4cb7060518dbe13a56b425",
+      "caseCount": 12,
+      "lane": 1,
+      "mode": "O",
+      "optimize": 1
+    },
+    {
+      "canonicalSha256": "3ec5bfa2b56a923e56bc16a6806748ab58e4570a7f4cb7060518dbe13a56b425",
+      "caseCount": 12,
+      "lane": 2,
+      "mode": "O",
+      "optimize": 1
+    },
+    {
+      "canonicalSha256": "3ec5bfa2b56a923e56bc16a6806748ab58e4570a7f4cb7060518dbe13a56b425",
+      "caseCount": 12,
+      "lane": 1,
+      "mode": "OO",
+      "optimize": 2
+    },
+    {
+      "canonicalSha256": "3ec5bfa2b56a923e56bc16a6806748ab58e4570a7f4cb7060518dbe13a56b425",
+      "caseCount": 12,
+      "lane": 2,
+      "mode": "OO",
+      "optimize": 2
+    }
+  ],
+  "schema": "render4427-real-os-lease-identity-audit/v1",
+  "scope": "owner-pc-authorized-research-only",
+  "scriptSha256": "33cea544a815886470a4abc04a33458f2b2aa37048065fe1ab73f90efda98545",
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourcePath": "lib/disdex-account-order-lock.ts",
+  "sourceSha256": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
+  "status": "NEED_NATIVE_ALLOCATOR",
+  "totalChecks": 72
+}
