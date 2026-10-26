@@ -1,7 +1,7 @@
 {
-  "canonical_sha256": "d4a13f7a63351532bc633a960d10f9df925804a22c7fff347c5a10d0f52ffab5",
+  "canonical_sha256": "01dd2ab9f6f971cf01be3ba1f75de499fb762f86c6305e58c702b1ff571e01c2",
   "summary": {
-    "case_count": 7,
+    "case_count": 9,
     "cases": {
       "new_lease_with_orphan": {
         "observed": [
@@ -59,6 +59,9 @@
         "pass": true,
         "pending_status": "PENDING"
       },
+      "registry_orphan_remains_active": {
+        "pass": true
+      },
       "release_without_cleanup": {
         "observed": [
           {
@@ -73,6 +76,9 @@
         "pending_status": "PENDING"
       },
       "runner_finally_release": {
+        "pass": true
+      },
+      "runner_pretry_state_save": {
         "pass": true
       },
       "upsert_failure_intermediate": {
