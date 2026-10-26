@@ -26,7 +26,9 @@ const classStart = ts.indexOf('export class FileAccountOrderLock');
 const end = ts.indexOf('export function activeReservedGross');
 if (start < 0 || classStart < 0 || end < 0) throw Error('SOURCE_BOUNDARY_NOT_FOUND');
 const extracted = (ts.slice(start,classStart) + ts.slice(classStart,end))
- .replace(/\\bexport\\s+(?=(const|interface|type|function|class)\\b)/g,'');
+ .replace(/\bexport\s+(?=(const|interface|type|function|class)\b)/g,'')
+ .replace('private readonly leaseMs = 120_000,','leaseMs = 120_000,')
+ .replace('this.path = resolve(path);','this.leaseMs = leaseMs; this.path = resolve(path);');
 const js = stripTypeScriptTypes(extracted);
 const lockPath = path.resolve('C:/Users/dis/render4427-research-only/virtual-account.lock');
 const pendingPath = path.resolve('C:/Users/dis/render4427-research-only/virtual-pending.json');
@@ -60,7 +62,7 @@ function world(mode='success'){
     process:{pid:1234,env:{}},
   };
   const ctx=vm.createContext(api);
-  vm.runInContext(js+'\\n;globalThis.LockClass=FileAccountOrderLock;',ctx,{timeout:2000});
+  vm.runInContext(js+'\n;globalThis.LockClass=FileAccountOrderLock;',ctx,{timeout:2000});
   return {files,lockPath,pendingPath,LockClass:ctx.LockClass,setDisappear:()=>{disappearOnRead=true;},setMode:(m)=>{mode=m;}};
 }
 async function outcome(p){try{return {value:await p,error:null};}catch(e){return {value:null,error:e.code||e.message};}}
