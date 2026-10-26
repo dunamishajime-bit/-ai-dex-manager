@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
+import renderHighwrAndLegacyStop from "../lib/render-highwr-and-legacy-stop.ts";
+const {
   RENDER_ENTRY_POLICY,RENDER_INDEPENDENT_ROUTE,RENDER_M5_MS,RENDER_H1_MS,
   evaluateRenderIndependentGate,evaluateIndependentPriority,settleSixHourShadow,
   startLegacyRenderAdverse,advanceLegacyRenderAdverse,independentProtectiveLevels
-} from "../lib/render-highwr-and-legacy-stop.ts";
+}=renderHighwrAndLegacyStop;
 const M=RENDER_M5_MS,H=RENDER_H1_MS;
 const at=Date.UTC(2026,9,25,0,0,0);
 function series(extra=[]){

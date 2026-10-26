@@ -12,11 +12,13 @@
  * explicit failure reason, never an implied authorization to trade.
  */
 import {readFile} from "node:fs/promises";
-import {
+import renderHighwrAndLegacyStop from "../lib/render-highwr-and-legacy-stop.ts";
+
+const {
   RENDER_INDEPENDENT_ROUTE,RENDER_SHADOW_VERSION,
   evaluateRenderIndependentGate,evaluateIndependentPriority,settleSixHourShadow,
   startLegacyRenderAdverse,advanceLegacyRenderAdverse,independentProtectiveLevels,
-} from "../lib/render-highwr-and-legacy-stop.ts";
+}=renderHighwrAndLegacyStop;
 
 function decide(snapshot) {
   const output={schema:RENDER_SHADOW_VERSION,readOnly:true,canSendOrders:false,
