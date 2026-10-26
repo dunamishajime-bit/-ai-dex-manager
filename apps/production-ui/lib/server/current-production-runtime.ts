@@ -278,6 +278,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
   const v12V4Source = await loadV12V4LiveSource();
   const runtimeLineage = await loadRuntimeLineage(releaseSha, v12V4Source);
+  const legacyFetLineage = { fet: releaseSha } as const;
   const target = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT,"docs/implementation/FINAL_PRODUCTION_TARGET_DD1296_20261005.json"),"utf8"));
   const hypeSource = await readFile(join(CURRENT_RELEASE_ROOT,"config/hypeTrendLongPolicy.ts"),"utf8");
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
@@ -301,7 +302,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       pengu: runtimeLineage.units.pengu.expectedSha || runtimeLineage.units.pengu.runtimeSha || releaseSha,
       quality102: runtimeLineage.units.quality102.expectedSha || runtimeLineage.units.quality102.runtimeSha || releaseSha,
       v52: runtimeLineage.units.v52.expectedSha || runtimeLineage.units.v52.runtimeSha || releaseSha,
-      fet: runtimeLineage.units.fet.expectedSha || runtimeLineage.units.fet.runtimeSha || releaseSha,
+      fet: runtimeLineage.units.fet.expectedSha || runtimeLineage.units.fet.runtimeSha || legacyFetLineage.fet,
       hype: runtimeLineage.units.hype.expectedSha || runtimeLineage.units.hype.runtimeSha || releaseSha,
       idle: runtimeLineage.units.idle.expectedSha || runtimeLineage.units.idle.runtimeSha || releaseSha,
     },
