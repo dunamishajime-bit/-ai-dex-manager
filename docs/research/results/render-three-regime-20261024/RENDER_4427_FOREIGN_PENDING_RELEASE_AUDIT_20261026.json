@@ -1,0 +1,136 @@
+{
+  "canonicalSha256": "878a721b2560656372a697ac7c6b16204d848c571023ddd92e820d2734366382",
+  "cases": [
+    {
+      "afterGross": 0,
+      "beforeGross": 0.25,
+      "error": null,
+      "kind": "peer_pending",
+      "matchingLockRow": false,
+      "name": "peer_pending",
+      "ownAfter": "ABSENT",
+      "pass": true,
+      "peerAfter": "RELEASED"
+    },
+    {
+      "afterGross": 0,
+      "beforeGross": 0.25,
+      "error": null,
+      "kind": "peer_submitted",
+      "matchingLockRow": false,
+      "name": "peer_submitted",
+      "ownAfter": "ABSENT",
+      "pass": true,
+      "peerAfter": "RELEASED"
+    },
+    {
+      "afterGross": 0,
+      "beforeGross": 0.25,
+      "error": null,
+      "kind": "peer_unknown",
+      "matchingLockRow": false,
+      "name": "peer_unknown",
+      "ownAfter": "ABSENT",
+      "pass": true,
+      "peerAfter": "RELEASED"
+    },
+    {
+      "afterGross": 0,
+      "beforeGross": 0.25,
+      "error": null,
+      "kind": "own",
+      "matchingLockRow": true,
+      "name": "own",
+      "ownAfter": "RELEASED",
+      "pass": true,
+      "peerAfter": "ABSENT"
+    },
+    {
+      "afterGross": 0,
+      "beforeGross": 0,
+      "error": null,
+      "kind": "missing",
+      "matchingLockRow": false,
+      "name": "missing",
+      "ownAfter": "ABSENT",
+      "pass": true,
+      "peerAfter": "ABSENT"
+    },
+    {
+      "afterGross": 0.25,
+      "beforeGross": 0.25,
+      "error": null,
+      "kind": "other",
+      "matchingLockRow": false,
+      "name": "other",
+      "ownAfter": "ABSENT",
+      "pass": true,
+      "peerAfter": "PENDING"
+    },
+    {
+      "afterGross": 0.25,
+      "beforeGross": 0.25,
+      "error": "PENDING_EXPOSURE_RESERVATION_ID_INVALID",
+      "kind": "empty",
+      "matchingLockRow": false,
+      "name": "empty",
+      "ownAfter": "ABSENT",
+      "pass": true,
+      "peerAfter": "PENDING"
+    }
+  ],
+  "casesPerLaunch": 7,
+  "independentPythonLaunches": 6,
+  "launches": [
+    {
+      "canonicalSha256": "878a721b2560656372a697ac7c6b16204d848c571023ddd92e820d2734366382",
+      "exit": 0,
+      "launcher": 1,
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "878a721b2560656372a697ac7c6b16204d848c571023ddd92e820d2734366382",
+      "exit": 0,
+      "launcher": 2,
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "878a721b2560656372a697ac7c6b16204d848c571023ddd92e820d2734366382",
+      "exit": 0,
+      "launcher": 1,
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "878a721b2560656372a697ac7c6b16204d848c571023ddd92e820d2734366382",
+      "exit": 0,
+      "launcher": 2,
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "878a721b2560656372a697ac7c6b16204d848c571023ddd92e820d2734366382",
+      "exit": 0,
+      "launcher": 1,
+      "mode": "OO"
+    },
+    {
+      "canonicalSha256": "878a721b2560656372a697ac7c6b16204d848c571023ddd92e820d2734366382",
+      "exit": 0,
+      "launcher": 2,
+      "mode": "OO"
+    }
+  ],
+  "limitations": [
+    "synthetic V4-shaped pending row",
+    "not a real V4 caller or venue execution",
+    "not Production or Native8 certification"
+  ],
+  "order_authorized": false,
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceSha256": {
+    "lib/disdex-account-order-lock.ts": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
+    "lib/disdex-pending-exposure-registry.ts": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+    "lib/v12-v4-shared-reservations.ts": "76c26cd72af578f93b2c18fc9b81c3327e10dc018925ee1377a677def93d59c8"
+  },
+  "status": "RESEARCH_ONLY_NEED_NATIVE_ALLOCATOR",
+  "totalCases": 42
+}
