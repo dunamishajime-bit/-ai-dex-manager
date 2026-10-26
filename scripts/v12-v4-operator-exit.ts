@@ -10,7 +10,7 @@
 import {buildV4ProductionRuntime} from "./v12-v4-production-runner";
 import type {V4OperatorExitAuthorizationInput} from "../lib/v12-v4-runner-engine";
 
-const OPERATOR_ACK="I_AUTHORIZE_V4_OPERATOR_EXIT_AAVE_NEAR";
+const OPERATOR_ACK="I_AUTHORIZE_V4_OPERATOR_EXIT_AAVE_ONLY";
 const TARGET_SYMBOLS=new Set(["AAVEUSDT"]);
 const AAVE_LEG_ID="AAVEUSDT:REC_X06_TIME_12H:SHORT:1792980000000";
 const NEAR_LEG_ID="NEARUSDT:REC_X02_TIME_36H:SHORT:1792980000000";
