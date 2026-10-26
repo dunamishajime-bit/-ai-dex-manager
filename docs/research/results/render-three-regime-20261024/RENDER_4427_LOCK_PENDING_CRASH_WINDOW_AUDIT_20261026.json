@@ -1,0 +1,104 @@
+{
+  "canonical_sha256": "d4a13f7a63351532bc633a960d10f9df925804a22c7fff347c5a10d0f52ffab5",
+  "summary": {
+    "case_count": 7,
+    "cases": {
+      "new_lease_with_orphan": {
+        "observed": [
+          {
+            "lock_statuses": [
+              "RESERVED"
+            ],
+            "pending_count": 0,
+            "point": "before_pending_upsert"
+          }
+        ],
+        "pass": true,
+        "pending_status": "PENDING"
+      },
+      "nonatomic_cross_file_order": {
+        "pass": true
+      },
+      "normal_release": {
+        "observed": [
+          {
+            "lock_statuses": [
+              "RESERVED"
+            ],
+            "pending_count": 0,
+            "point": "before_pending_upsert"
+          },
+          {
+            "lock_statuses": [
+              "RELEASED"
+            ],
+            "pending_status": "PENDING",
+            "point": "before_pending_release"
+          }
+        ],
+        "pass": true,
+        "pending_status": "RELEASED"
+      },
+      "pending_release_failure": {
+        "observed": [
+          {
+            "lock_statuses": [
+              "RESERVED"
+            ],
+            "pending_count": 0,
+            "point": "before_pending_upsert"
+          },
+          {
+            "lock_statuses": [
+              "RELEASED"
+            ],
+            "pending_status": "PENDING",
+            "point": "before_pending_release"
+          }
+        ],
+        "pass": true,
+        "pending_status": "PENDING"
+      },
+      "release_without_cleanup": {
+        "observed": [
+          {
+            "lock_statuses": [
+              "RESERVED"
+            ],
+            "pending_count": 0,
+            "point": "before_pending_upsert"
+          }
+        ],
+        "pass": true,
+        "pending_status": "PENDING"
+      },
+      "runner_finally_release": {
+        "pass": true
+      },
+      "upsert_failure_intermediate": {
+        "observed": [
+          {
+            "lock_statuses": [
+              "RESERVED"
+            ],
+            "pending_count": 0,
+            "point": "before_pending_upsert"
+          }
+        ],
+        "pass": true,
+        "pending_status": null
+      }
+    },
+    "gateproof_verified": 0,
+    "native8_verified": false,
+    "operator_trust_root_verified": false,
+    "order_authorized": false,
+    "scope": "research-only synthetic virtual filesystem; original pinned TS class executed; no real orders",
+    "source_ref": "939b59da49ce7960485a2004b0068dc63417ae82",
+    "source_sha256": {
+      "lib/disdex-account-order-lock.ts": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
+      "lib/disdex-pending-exposure-registry.ts": "09aafb62fe408600452c1fbcbba2158c02b8b99eedaef70c187e4f8677df4100",
+      "lib/idle-priority-short-runner.ts": "0a5682f30add54b7f03714c8b40596af80f6b80cd04b360c6009f62f3cb22f33"
+    }
+  }
+}
