@@ -34,7 +34,7 @@ async function scenario(mode,reverse=false){
   await new Promise(resolve=>{
    writes.push({doc:clone(doc),resolve});
    if(writes.length===2){
-    const ordered=reverse?[...writes].reverse():writes;
+    let ordered=[...writes]; if(mode==='release')ordered.sort((a,b)=>Number(a.doc.entries.some(e=>e.reservationId==='B'))-Number(b.doc.entries.some(e=>e.reservationId==='B')));else ordered.sort((a,b)=>Number(a.doc.entries[0]?.reservationId==='B')-Number(b.doc.entries[0]?.reservationId==='B'));if(reverse)ordered.reverse();
     for(const x of ordered){store=clone(x.doc);x.resolve();}
    }
   });
