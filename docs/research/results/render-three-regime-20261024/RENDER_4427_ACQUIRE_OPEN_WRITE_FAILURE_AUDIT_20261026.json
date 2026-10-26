@@ -1,0 +1,70 @@
+{
+  "schema": "render4427-research-acquire-write-failure/v1",
+  "observed_at_jst": "2026-10-26 16:18",
+  "source_commit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "primary_source": "lib/disdex-account-order-lock.ts",
+  "primary_source_raw_sha256": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b",
+  "audit_script": "scripts/dd-reduction/audit_render4427_acquire_open_write_failure_20261026.py",
+  "audit_script_raw_sha256": "509304f4d7747167fe91fd2d071d3924c5515050950b8670d1dc96767e2537e3",
+  "verification": {
+    "host": "authorized_owner_PC",
+    "scope": "C:/Users/dis/render4427-research-only/",
+    "python_modes": [
+      "normal",
+      "-O",
+      "-OO"
+    ],
+    "independent_processes_per_mode": 2,
+    "checks_per_process": 8,
+    "total_checks": 48,
+    "all_pass": true,
+    "all_exit_zero": true,
+    "canonical_json_sha256": "8fa75df697b7bc444464b12166a19b1b98846fd2420d955ab13f62cc3d5caec9"
+  },
+  "cases": [
+    [
+      "normal_exclusive_open",
+      true
+    ],
+    [
+      "write_failure_empty",
+      "STRANDED_LOCK"
+    ],
+    [
+      "write_failure_partial",
+      "STRANDED_LOCK"
+    ],
+    [
+      "permission_failure_no_lock",
+      "EACCES"
+    ],
+    [
+      "valid_lock_conflict",
+      "REFUSED"
+    ],
+    [
+      "malformed_lock_conflict",
+      "REFUSED"
+    ],
+    [
+      "disappeared_path_retry",
+      "ACQUIRED"
+    ],
+    [
+      "explicit_reconciliation_control",
+      "ACQUIRED"
+    ]
+  ],
+  "conclusion": "The original acquire() opens the lock path exclusively with wx before writing JSON. A writeFile failure after successful open leaves an empty or partial lock file because the failure path closes but does not unlink it. Later acquire() attempts encounter EEXIST, cannot parse the malformed file, and return null (fail-closed); this is a persistent liveness boundary until independent reconciliation.",
+  "limitations": [
+    "Node VM memory-only filesystem with injected EIO; not an observed actual OS crash or disk error",
+    "No real venue, Native8, Production, pending/venue reconciliation, or operator trust-root evidence",
+    "No permission to auto-delete malformed lock; never bypass account lock, shared risk, pending or dedup"
+  ],
+  "research_owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "gross": 0.25,
+  "decision": "NEED_NATIVE_ALLOCATOR",
+  "order_authorized": false,
+  "production_changed": false
+}
