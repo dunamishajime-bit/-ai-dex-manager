@@ -1,0 +1,223 @@
+{
+  "audit": "RENDER_4427_VENUE_TIMESTAMP_ASOF_AUDIT_20261027",
+  "status": "RESEARCH_ONLY_NOT_NATIVE8",
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "gross": 0.25,
+  "order_authorized": false,
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceSha256": {
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf"
+  },
+  "launcherCount": 6,
+  "totalCases": 72,
+  "canonicalSha256": "88cdf343e2a344595d431e3aea9d61b4c2e07d9414ed9daf8e5aaf029a0e7528",
+  "launchers": [
+    {
+      "label": "normal1",
+      "flags": [],
+      "optimize": 0,
+      "exit": 0,
+      "caseCount": 12,
+      "canonicalSha256": "88cdf343e2a344595d431e3aea9d61b4c2e07d9414ed9daf8e5aaf029a0e7528"
+    },
+    {
+      "label": "normal2",
+      "flags": [],
+      "optimize": 0,
+      "exit": 0,
+      "caseCount": 12,
+      "canonicalSha256": "88cdf343e2a344595d431e3aea9d61b4c2e07d9414ed9daf8e5aaf029a0e7528"
+    },
+    {
+      "label": "O1",
+      "flags": [
+        "-O"
+      ],
+      "optimize": 1,
+      "exit": 0,
+      "caseCount": 12,
+      "canonicalSha256": "88cdf343e2a344595d431e3aea9d61b4c2e07d9414ed9daf8e5aaf029a0e7528"
+    },
+    {
+      "label": "O2",
+      "flags": [
+        "-O"
+      ],
+      "optimize": 1,
+      "exit": 0,
+      "caseCount": 12,
+      "canonicalSha256": "88cdf343e2a344595d431e3aea9d61b4c2e07d9414ed9daf8e5aaf029a0e7528"
+    },
+    {
+      "label": "OO1",
+      "flags": [
+        "-OO"
+      ],
+      "optimize": 2,
+      "exit": 0,
+      "caseCount": 12,
+      "canonicalSha256": "88cdf343e2a344595d431e3aea9d61b4c2e07d9414ed9daf8e5aaf029a0e7528"
+    },
+    {
+      "label": "OO2",
+      "flags": [
+        "-OO"
+      ],
+      "optimize": 2,
+      "exit": 0,
+      "caseCount": 12,
+      "canonicalSha256": "88cdf343e2a344595d431e3aea9d61b4c2e07d9414ed9daf8e5aaf029a0e7528"
+    }
+  ],
+  "results": [
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "baseline",
+      "positionUpdateTime": 1699999999000,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1699999999000
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "stale_position",
+      "positionUpdateTime": 1,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1699999999000
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "stale_stop",
+      "positionUpdateTime": 1699999999000,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1,
+      "tpUpdateTime": 1699999999000
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "stale_tp",
+      "positionUpdateTime": 1699999999000,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "future_position",
+      "positionUpdateTime": 1731536000000,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1699999999000
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "future_stop",
+      "positionUpdateTime": 1699999999000,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1731536000000,
+      "tpUpdateTime": 1699999999000
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "future_tp",
+      "positionUpdateTime": 1699999999000,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1731536000000
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "stop_before_entry",
+      "positionUpdateTime": 2000,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1000,
+      "tpUpdateTime": 3000
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "missing_all_times",
+      "positionUpdateTime": null,
+      "reason": "",
+      "status": "pass",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": null,
+      "tpUpdateTime": null
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_stop_price",
+      "positionUpdateTime": 1699999999000,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopPresent": true,
+      "stopPrice": 111,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1699999999000
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "missing_stop",
+      "positionUpdateTime": 1699999999000,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopPresent": false,
+      "stopPrice": 110,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1699999999000
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "pending_reject",
+      "positionUpdateTime": 1699999999000,
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PENDING_PRESENT",
+      "status": "rejected",
+      "stopPresent": true,
+      "stopPrice": 110,
+      "stopUpdateTime": 1699999999000,
+      "tpUpdateTime": 1699999999000
+    }
+  ],
+  "evidenceKind": "controlled synthetic venue response executing pinned original TypeScript in Node VM on Windows FS; not actual Aster venue receipt"
+}
