@@ -1,0 +1,621 @@
+{
+  "allPassed": true,
+  "audit": "RENDER_4427_STATE_TEMP_FILENAME_COLLISION",
+  "canonicalSha256": "9988610e859adc2b59f1dba93d3f49bd905612041c474b208cf170595aac2f2e",
+  "caseCountTotal": 36,
+  "date": "2026-10-27",
+  "limits": [
+    "Controlled same-process same-millisecond collision and write/rename interleaving on actual Windows filesystem",
+    "No evidence natural collision in production",
+    "No live orders or venue calls",
+    "No Native8 authorization"
+  ],
+  "results": [
+    {
+      "canonicalSha256": "9988610e859adc2b59f1dba93d3f49bd905612041c474b208cf170595aac2f2e",
+      "caseCount": 6,
+      "exit": 0,
+      "launcher": 1,
+      "mode": "normal",
+      "optimize": 0,
+      "results": [
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "serial",
+          "name": "serial_same_millisecond",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "unique",
+          "name": "serial_unique_milliseconds",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalSha256": "9988610e859adc2b59f1dba93d3f49bd905612041c474b208cf170595aac2f2e",
+      "caseCount": 6,
+      "exit": 0,
+      "launcher": 2,
+      "mode": "normal",
+      "optimize": 0,
+      "results": [
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "serial",
+          "name": "serial_same_millisecond",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "unique",
+          "name": "serial_unique_milliseconds",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalSha256": "9988610e859adc2b59f1dba93d3f49bd905612041c474b208cf170595aac2f2e",
+      "caseCount": 6,
+      "exit": 0,
+      "launcher": 1,
+      "mode": "-O",
+      "optimize": 1,
+      "results": [
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "serial",
+          "name": "serial_same_millisecond",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "unique",
+          "name": "serial_unique_milliseconds",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalSha256": "9988610e859adc2b59f1dba93d3f49bd905612041c474b208cf170595aac2f2e",
+      "caseCount": 6,
+      "exit": 0,
+      "launcher": 2,
+      "mode": "-O",
+      "optimize": 1,
+      "results": [
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "serial",
+          "name": "serial_same_millisecond",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "unique",
+          "name": "serial_unique_milliseconds",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalSha256": "9988610e859adc2b59f1dba93d3f49bd905612041c474b208cf170595aac2f2e",
+      "caseCount": 6,
+      "exit": 0,
+      "launcher": 1,
+      "mode": "-OO",
+      "optimize": 2,
+      "results": [
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "serial",
+          "name": "serial_same_millisecond",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "unique",
+          "name": "serial_unique_milliseconds",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalSha256": "9988610e859adc2b59f1dba93d3f49bd905612041c474b208cf170595aac2f2e",
+      "caseCount": 6,
+      "exit": 0,
+      "launcher": 2,
+      "mode": "-OO",
+      "optimize": 2,
+      "results": [
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_1",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "collision",
+          "name": "collision_A_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            "ENOENT"
+          ],
+          "finalWriter": "A",
+          "first": "B",
+          "kind": "collision",
+          "name": "collision_B_first_2",
+          "status": [
+            "fulfilled",
+            "rejected"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "serial",
+          "name": "serial_same_millisecond",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        },
+        {
+          "cleanTmp": true,
+          "errors": [
+            "",
+            ""
+          ],
+          "finalWriter": "B",
+          "first": "A",
+          "kind": "unique",
+          "name": "serial_unique_milliseconds",
+          "status": [
+            "fulfilled",
+            "fulfilled"
+          ]
+        }
+      ]
+    }
+  ],
+  "scriptRawSha256": "abbb55241ff9f272d1cbef0cc97aab92aa53f36d3e476a7fda4f78f94fecb46f",
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceRawSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07"
+  }
+}
