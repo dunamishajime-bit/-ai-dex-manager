@@ -1665,7 +1665,9 @@ export class Quality102CausalV1Runner {
                 await this.dependencies.stateStore.save(state);
                 return { status: "blocked-local", message: sharedRisk.reason, ordersSent: 0 };
             }
-            const baseSignal = this.buildSignal(history, this.now(), false, false, live.positions.some(nonZero));
+            // Other runners' positions are assessed by the strict portfolio
+            // admission planner below; they do not invalidate the Q102 signal.
+            const baseSignal = this.buildSignal(history, this.now(), false, false);
             let signal = baseSignal;
             if (baseSignal.side !== 0 && baseSignal.symbol) {
                 const governor = this.dependencies.config.portfolioDdGovernorPath
