@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { nextQuality102DaemonWaitMs } from "../lib/quality102-live-scheduling";
 
 import { AsterV3Client } from "../lib/aster-v3-client";
 import type { DirectOpenOrder, DirectPosition } from "../lib/direct-trade-executor";
@@ -12,6 +13,12 @@ import {
     resolveQuality102CausalV1LiveConfig,
     shouldRunQuality102CausalV1PreflightHistoryCheck,
 } from "./disdex-quality102-causal-v1-live-runner";
+
+// Transient Aster rate saturation should not cause rapid expensive re-reads.
+assert.equal(nextQuality102DaemonWaitMs("blocked-local", 0, 5000, 15000, "ASTER_GLOBAL_RATE_BUDGET_SATURATED:3335"), 45000);
+assert.equal(nextQuality102DaemonWaitMs("blocked-local", 0, 5000, 15000, "ASTER_GLOBAL_RATE_BUDGET_SATURATED:90000"), 91000);
+assert.equal(nextQuality102DaemonWaitMs("locked", 0, 5000, 15000), 15000);
+assert.equal(nextQuality102DaemonWaitMs("no-change", 0, 5000, 15000), 3605000);
 
 const SHA = "a".repeat(40);
 
