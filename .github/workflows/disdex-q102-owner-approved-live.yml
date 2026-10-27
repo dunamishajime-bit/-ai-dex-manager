@@ -94,7 +94,7 @@ jobs:
       - name: Verify dedicated SSH identity and pinned host fingerprint
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          USER: ${{ 'deploy' }}
+          USER: deploy
           KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
           HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
           SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
@@ -115,7 +115,7 @@ jobs:
       - name: Invoke separately installed Q102 exact-SHA operator promoter
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          USER: ${{ 'deploy' }}
+          USER: deploy
           TARGET_SHA: ${{ inputs.target_sha }}
           EXPECTED_LIVE_SHA: ${{ inputs.expected_live_sha }}
           SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
