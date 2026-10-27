@@ -17,6 +17,13 @@ const stopId="v12-v4-50ef46933e7018db365535fa70fd";
 function assert(ok:unknown,msg:string): asserts ok {if(!ok)throw Error("V52_SCOPE_RECOVERY_"+msg);}
 const read=async(path:string)=>JSON.parse(await readFile(path,"utf8"));
 const same=(a:unknown,b:number)=>Number.isFinite(Number(a))&&Math.abs(Number(a)-b)<=1e-6*Math.max(1,Math.abs(b));
+// Retry ONLY local scheduler saturation. Never retry venue/auth, bad
+// signatures, unknown execution, order mismatch, or any trading mutation.
+export function isTemporaryReadBudgetDeferral(error:unknown):boolean {
+ const message=error instanceof Error?error.message:String(error);
+ return /^ASTER_GLOBAL_RATE_BUDGET_SATURATED:\\d+$/.test(message);
+}
+const sleep=(milliseconds:number)=>new Promise<void>(resolve=>setTimeout(resolve,milliseconds));
 function eligible(k:any){
  return k?.active===true&&k.scope==="V52_REFERENCE_ONLY"&&k.action==="HOLD_PROTECTED"
    &&k.operator==="disdex-v52-aster-only"&&k.recoverable===true
@@ -72,8 +79,20 @@ function venue(v:{positions:AsterPositionRiskRow[];orders:AsterOrderResponse[]})
  stop:[o.symbol,o.clientOrderId,o.side,o.type,o.status,o.origQty,o.stopPrice]});
 }
 async function signed(client:AsterV3Client){
- const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
- return venue({positions,orders});
+ const maxAttempts=5;
+ for(let attempt=0;attempt<maxAttempts;attempt++){
+  try {
+   // Venue identity and STOP invariants are still checked on every read.
+   const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
+   return venue({positions,orders});
+  } catch(error){
+   if(!isTemporaryReadBudgetDeferral(error)||attempt===maxAttempts-1)throw error;
+   // Allow regular writers their own priority. No queue limit, slot weight,
+   // account lock, or protective-order policy is changed by this retry.
+   await sleep(1000+attempt*750);
+  }
+ }
+ throw Error("V52_SCOPE_RECOVERY_UNREACHABLE");
 }
 async function writeKill(value:unknown,ownership:{uid:number;gid:number;mode:number}){
  const temp=killPath+"."+randomUUID()+".tmp";
@@ -89,6 +108,12 @@ async function run(){
   scopeMigrationSha:"a".repeat(40),
   reason:'V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote","ageMs":32286}'};
   assert(eligible(k)&&!eligible({...k,scope:"GLOBAL"})&&!eligible({...k,action:"FLATTEN_MANAGED"}),"SELFTEST_SCOPE");
+  assert(isTemporaryReadBudgetDeferral(new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4215")),"SELFTEST_BUDGET");
+  for(const invalid of ["ASTER_GLOBAL_RATE_BUDGET_MALFORMED","ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT",
+   "ASTER_GLOBAL_RATE_BUDGET_SATURATED:bogus","ASTER_GLOBAL_RATE_BUDGET_SATURATED:4215:OTHER",
+   "ASTER_AUTH_INVALID","STOP_MISMATCH"]){
+   assert(!isTemporaryReadBudgetDeferral(new Error(invalid)),"SELFTEST_MUST_FAIL_CLOSED:"+invalid);
+  }
   console.log("V52_SCOPED_REFERENCE_RECOVERY_SELFTEST_PASS");return;
  }
  const apply=process.argv.includes("--apply"),verify=process.argv.includes("--verify-only");
@@ -107,7 +132,7 @@ async function run(){
   const value=await signed(client);
   assert(i===0||value===fingerprint,"SIGNED_GETS_NOT_STABLE");
   fingerprint=value;
-  if(i<2)await new Promise(ok=>setTimeout(ok,2000));
+  if(i<2)await sleep(2000);
  }
  if(verify){
   console.log(JSON.stringify({status:"V52_REFERENCE_RECOVERY_VERIFY_PASS",signedReadOnlyGets:3,
@@ -115,7 +140,14 @@ async function run(){
  }
  const lock=new FileAccountOrderLock(root+"/shared/account-order.lock",120000,root+"/shared/pending-exposure.json");
  const req="v52-ref-"+Date.now()+"-"+randomUUID();
- const held=await lock.acquire("V52_REFERENCE_RECOVERY:"+req);
+ let held=await lock.acquire("V52_REFERENCE_RECOVERY:"+req);
+ // Ordinary runners temporarily own the lock. Bounded voluntary deferral;
+ // never remove an owner's lock, stop a runner, or shorten a lease.
+ for(let attempt=0;!held&&attempt<5;attempt++){
+  await sleep(1000+attempt*500);
+  assert(JSON.stringify(await safety())===JSON.stringify(start),"HOLD_CHANGED_WHILE_WAITING_FOR_LOCK");
+  held=await lock.acquire("V52_REFERENCE_RECOVERY:"+req);
+ }
  assert(held,"ACCOUNT_LOCK_BUSY");
  let cleared=false;
  const owner=await stat(killPath);
@@ -124,6 +156,7 @@ async function run(){
   assert(JSON.stringify(await safety())===JSON.stringify(start),"HOLD_CHANGED_UNDER_LOCK");
   assert((await readFile(killPath)).equals(before),"HOLD_BYTES_CHANGED");
   assert(await signed(client)===fingerprint,"SIGNED_VENUE_DRIFT_UNDER_LOCK");
+  await held.renew();
   const directory=dirname(killPath)+"/operator-recovery-evidence";
   await mkdir(directory,{recursive:true,mode:0o750});
   const backup=directory+"/"+req+"-kill-before.json";
