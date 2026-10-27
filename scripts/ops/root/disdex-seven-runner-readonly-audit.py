@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from urllib.request import urlopen
 from zoneinfo import ZoneInfo
 
 BASE = Path("/var/lib/disdex")
@@ -93,6 +94,20 @@ def v52_event():
         pass
     return {}
 
+def quote_health_issues(data):
+    if data.get("marketOpen") is not True:
+        return []
+    faults = []
+    if data.get("status") != "ok" or data.get("connected") is not True or data.get("freshnessReady") is not True:
+        faults.append("STOCK_REFERENCE_NOT_READY")
+    rows = data.get("symbols") or {}
+    threshold = data.get("maximumQuoteAgeMs", 30_000)
+    for symbol in ("AMZN", "META", "MSFT", "NVDA", "TSLA"):
+        quote = rows.get(symbol)
+        if not isinstance(quote, dict) or not isinstance(quote.get("ageMs"), (int, float)) or quote["ageMs"] > threshold:
+            faults.append("STOCK_REFERENCE_STALE_OR_MISSING:" + symbol)
+    return faults
+
 def audit(now=None):
     now = int(now if now is not None else time.time() * 1000)
     issues = []
@@ -150,6 +165,26 @@ def audit(now=None):
         except (ValueError, TypeError, subprocess.TimeoutExpired):
             issues.append("SUPPORT_SERVICE_UNVERIFIED:" + service)
     try:
+        # /health reads the localhost quote cache; no provider API call or order.
+        with urlopen("http://127.0.0.1:8797/health", timeout=4) as reply:
+            quote_state = json.loads(reply.read(100_000))
+        if not isinstance(quote_state, dict):
+            raise ValueError("bad-reference-health")
+        issues.extend(quote_health_issues(quote_state))
+        rows = quote_state.get("symbols") or {}
+        out["stockReference"] = {
+            "connected": quote_state.get("connected"),
+            "marketOpen": quote_state.get("marketOpen"),
+            "freshnessReady": quote_state.get("freshnessReady"),
+            "healthReason": quote_state.get("healthReason"),
+            "quoteAgeMs": {k: v.get("ageMs") for k, v in rows.items()
+                            if k in ("AMZN", "META", "MSFT", "NVDA", "TSLA")
+                            and isinstance(v, dict)},
+        }
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as e:
+        issues.append("STOCK_REFERENCE_CACHE_UNAVAILABLE:" + type(e).__name__)
+        out["stockReference"] = {"freshnessReady": False}
+    try:
         risk = get_json(BASE / "shared/crypto-daily-risk.json")
         kill = get_json(BASE / "shared/kill-switch.json")
         if kill.get("active") is not False:
@@ -190,6 +225,12 @@ def selftest():
     assert "PID_MISMATCH" in assert_health(dict(base, mainPid=13), unit, 1_001_000)
     assert "HEALTH_GATE" in assert_health(dict(base, safetyState="BLOCKED"), unit, 1_001_000)
     assert GUARD.fullmatch("disdex-v12-v52-margin-guard@" + "b"*40 + ".service")
+    good = {"status":"ok","connected":True,"freshnessReady":True,"marketOpen":True,
+            "maximumQuoteAgeMs":30000,"symbols":{s:{"ageMs":100} for s in ("AMZN","META","MSFT","NVDA","TSLA")}}
+    assert quote_health_issues(good) == []
+    assert "STOCK_REFERENCE_NOT_READY" in quote_health_issues(dict(good, freshnessReady=False))
+    assert "STOCK_REFERENCE_STALE_OR_MISSING:NVDA" in quote_health_issues(
+           dict(good, symbols=dict(good["symbols"], NVDA={"ageMs":30001})))
     print("DISDEX_READONLY_SEVEN_RUNNER_AUDIT_SELFTEST_PASS")
 
 def main():
@@ -223,6 +264,7 @@ def main():
     print(json.dumps({"status": value["status"], "asOf": value["asOf"],
         "runnerCount": len(value["runners"]), "issues": value["issues"],
         "marginDependency": value["marginDependency"],
+        "stockReference": value.get("stockReference"),
         "v52Market": value["v52Market"]}, ensure_ascii=False))
     return 0 if value["status"] == "PASS" else 2
 
