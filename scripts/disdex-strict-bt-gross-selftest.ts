@@ -75,9 +75,8 @@ const overCrypto = planStrictPortfolio({
     ],
     intents: [],
 });
-// Existing gross 3.01 is slightly over the ordinary 3.0 entry target.
-// MTM/reconciliation must remain available; do not promote the observed
-// overshoot into additional crypto entry capacity.
+// Existing Crypto Gross above the normal target is retained for management;
+// only a new-risk intent is blocked by the boundary policy.
 assert.equal(overCrypto.status, "planned");
 assert.equal(overCrypto.accepted.length, 0);
 assert.ok(Math.abs(overCrypto.totals.cryptoGross - 3.01) < 1e-9);
@@ -172,9 +171,10 @@ const overTotal = planStrictPortfolio({
     ],
     intents: [],
 });
-// The historical 3.5 *total* hard-stop expectation is obsolete:
-// current total target is 4.25, with a distinct profit-only hard cap.
+// 3.51x combined Gross is still below the approved 4.25x normal
+// portfolio target; existing exposure is not force-trimmed by planning.
 assert.equal(overTotal.status, "planned");
+assert.equal(overTotal.accepted.length, 0);
 assert.ok(Math.abs(overTotal.totals.totalGross - 3.51) < 1e-9);
 
 const overQualityCap = planStrictPortfolio({

@@ -1,0 +1,40 @@
+name: DisDex Crypto Gross Existing Exposure CI
+on:
+  pull_request:
+    paths:
+      - 'config/integratedProductionRiskPolicy.ts'
+      - 'lib/disdex-strict-portfolio-planner.ts'
+      - 'lib/v12-v4-production-lifecycle.ts'
+      - 'scripts/disdex-strict-bt-gross-selftest.ts'
+      - 'scripts/disdex_strict_portfolio_planner.py'
+      - 'tests/crypto-gross-existing-exposure.test.ts'
+      - 'tests/integrated_gross_governor.test.ts'
+      - 'tests/test_crypto_gross_existing_exposure_20261027.py'
+      - '.github/workflows/disdex-crypto-gross-existing-exposure-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gross-3p0-3p5-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify Gross 3.0 / 3.5 TS entry-exit tests
+        run: |
+          ./node_modules/.bin/tsx --test tests/crypto-gross-existing-exposure.test.ts tests/integrated_gross_governor.test.ts
+          ./node_modules/.bin/tsx scripts/disdex-strict-bt-gross-selftest.ts
+      - name: Python strict Gross and protective exit tests
+        run: |
+          python3 scripts/disdex_strict_portfolio_planner.py
+          python3 -m unittest discover -s tests -p test_crypto_gross_existing_exposure_20261027.py -v
+      - name: TypeScript production typecheck
+        run: ./node_modules/.bin/tsc --noEmit --pretty false

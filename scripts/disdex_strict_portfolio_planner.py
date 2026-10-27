@@ -29,6 +29,7 @@ class StrictPortfolioCaps:
     stock_gross: float = 4.00
     stock_slot_gross: float = 2.00
     crypto_gross: float = 3.00
+    crypto_gross_existing_max: float = 3.50
     total_gross: float = 4.25
 
 
@@ -442,6 +443,32 @@ def _finite(value: object, label: str) -> float:
     return number
 
 
+
+def classify_crypto_gross(current_crypto_gross: float, caps: StrictPortfolioCaps = STRICT_CAPS) -> dict:
+    current = _finite(current_crypto_gross, "CRYPTO_GROSS")
+    if current < -EPSILON:
+        raise RuntimeError("STRICT_PORTFOLIO_NEGATIVE_GROSS")
+    normal = caps.crypto_gross
+    existing_max = caps.crypto_gross_existing_max
+    if current <= normal + EPSILON:
+        band = "WITHIN_NORMAL"
+    elif current <= existing_max + EPSILON:
+        band = "EXISTING_EXCESS_ALLOWED"
+    else:
+        band = "ABOVE_EXISTING_ALLOWANCE"
+    return {
+        "currentCryptoGross": current,
+        "normalEntryCap": normal,
+        "existingExposureMax": existing_max,
+        "entryCapForNewRisk": max(current, normal),
+        "existingExposureManaged": True,
+        "protectedExitAllowed": True,
+        "newRiskAllowed": current < normal - EPSILON,
+        "existingExposureBand": band,
+        "reason": "CRYPTO_GROSS_NORMAL_ENTRY_CAPACITY" if current < normal - EPSILON else "CRYPTO_GROSS_EXISTING_EXCESS_NO_NEW_RISK",
+    }
+
+
 def _assert_cap_env(env: Mapping[str, str], name: str, expected: float) -> None:
     raw = env.get(name)
     if raw is None or str(raw).strip() == "":
@@ -466,6 +493,8 @@ def assert_strict_live_configuration(env: Mapping[str, str] | None = None) -> St
     _assert_cap_env(source, "DISDEX_V52_V11_GROSS_CAP", STRICT_CAPS.stock_slot_gross)
     _assert_cap_env(source, "DISDEX_V52_V50_GROSS_CAP", STRICT_CAPS.stock_slot_gross)
     _assert_cap_env(source, "DISDEX_V52_CRYPTO_GROSS_CAP", STRICT_CAPS.crypto_gross)
+    _assert_cap_env(source, "CRYPTO_GROSS_EXISTING_MAX", STRICT_CAPS.crypto_gross_existing_max)
+    _assert_cap_env(source, "DISDEX_V52_CRYPTO_GROSS_EXISTING_MAX", STRICT_CAPS.crypto_gross_existing_max)
     _assert_cap_env(source, "DISDEX_V52_PORTFOLIO_GROSS_CAP", STRICT_CAPS.total_gross)
     if _enabled(source.get("QUALITY102_LIVE_ENABLED")) or _enabled(source.get("QUALITY102_LIVE_SELECTOR_PARITY")):
         raise RuntimeError("QUALITY102_LIVE_BLOCKED_FAIL_CLOSED")
@@ -481,22 +510,56 @@ def validate_gross_snapshot(snapshot: Mapping[str, object], caps: StrictPortfoli
         raise RuntimeError("STRICT_PORTFOLIO_EQUITY_NOT_POSITIVE")
     if min(crypto, stock, total) < -EPSILON:
         raise RuntimeError("STRICT_PORTFOLIO_NEGATIVE_GROSS")
-    # Passive overhang is not a new order. Keep the strict normal entry cap
-    # separate from the observed-position tolerance; hard/stale/total/stock
-    # checks below remain fail-closed.
-    passive_crypto_limit = (
-        CRYPTO_GROSS_PASSIVE_DRIFT_TOLERANCE
-        if caps == STRICT_CAPS else caps.crypto_gross
-    )
-    if crypto > passive_crypto_limit + EPSILON:
-        raise RuntimeError(f"CRYPTO_GROSS_OVER_CAP:{crypto:.9f}>{passive_crypto_limit:.9f}")
+    # This is OBSERVATION / existing position reconciliation, not new-risk
+    # admission. Even a price-only spike beyond 3.5 must not block protected
+    # exits. All NEW risk is separately denied above the passive tolerance.
     if stock > caps.stock_gross + EPSILON:
         raise RuntimeError(f"STOCK_GROSS_OVER_CAP:{stock:.9f}>{caps.stock_gross:.9f}")
     if total > caps.total_gross + EPSILON:
         raise RuntimeError(f"TOTAL_GROSS_OVER_CAP:{total:.9f}>{caps.total_gross:.9f}")
     if abs((crypto + stock) - total) > 1e-6:
         raise RuntimeError("STRICT_PORTFOLIO_GROSS_SNAPSHOT_INCONSISTENT")
-    return {"equityUsd": equity, "cryptoGross": crypto, "stockGross": stock, "totalGross": total}
+    return {
+        "equityUsd": equity,
+        "cryptoGross": crypto,
+        "stockGross": stock,
+        "totalGross": total,
+        "cryptoGrossControl": classify_crypto_gross(crypto, caps),
+    }
+
+
+def plan_crypto_entry_capacity(
+    snapshot: Mapping[str, object],
+    requested_gross: float,
+    caps: StrictPortfolioCaps = STRICT_CAPS,
+    *,
+    candidate_worst_case_gross: float | None = None,
+) -> dict:
+    current = validate_gross_snapshot(snapshot, caps)
+    requested = _finite(requested_gross, "REQUESTED_CRYPTO_GROSS")
+    if requested < 0:
+        raise RuntimeError("STRICT_PORTFOLIO_NEGATIVE_REQUEST")
+    worst_case = requested if candidate_worst_case_gross is None else _finite(candidate_worst_case_gross, "CRYPTO_CANDIDATE_WORST_CASE_GROSS")
+    if worst_case < requested - EPSILON:
+        raise RuntimeError("STRICT_PORTFOLIO_WORST_CASE_BELOW_NOMINAL")
+    ratio = worst_case / requested if requested > EPSILON else 1.0
+    control = current["cryptoGrossControl"]
+    crypto_residual = max(0.0, control["entryCapForNewRisk"] - current["cryptoGross"])
+    total_residual = max(0.0, caps.total_gross - current["totalGross"])
+    accepted = max(0.0, min(requested, crypto_residual, total_residual / ratio))
+    return {
+        "status": "planned" if accepted > EPSILON else "blocked",
+        "requestedGross": requested,
+        "candidateWorstCaseGross": worst_case,
+        "worstCaseRatio": ratio,
+        "acceptedGross": accepted,
+        "entryCapForNewRisk": control["entryCapForNewRisk"],
+        "newRiskAllowed": accepted > EPSILON,
+        "existingExposureManaged": True,
+        "protectedExitAllowed": True,
+        "existingExposureBand": control["existingExposureBand"],
+        "reason": "CRYPTO_GROSS_NORMAL_ENTRY_CAPACITY" if accepted > EPSILON else "CRYPTO_GROSS_EXISTING_EXCESS_NO_NEW_RISK",
+    }
 
 
 def plan_v52_stock_capacity(
@@ -524,6 +587,10 @@ def plan_v52_stock_capacity(
         stock_residual / worst_case_ratio,
         total_residual / worst_case_ratio,
     ))
+    # Beyond the passive 3.5x crypto band no NEW stock exposure is admitted.
+    # Existing positions and protective closes must remain reconcilable.
+    if current["cryptoGross"] > caps.crypto_gross_existing_max + EPSILON:
+        accepted = 0.0
     return {
         "status": "planned" if accepted > EPSILON else "blocked",
         "requestedGross": requested,
@@ -538,6 +605,9 @@ def plan_v52_stock_capacity(
         "totalGrossCap": caps.total_gross,
         "quality102LiveSelectorParity": False,
         "quality102LiveBlockedFailClosed": True,
+        "existingExposureManaged": current["cryptoGrossControl"]["existingExposureManaged"],
+        "protectedExitAllowed": current["cryptoGrossControl"]["protectedExitAllowed"],
+        "cryptoGrossControl": current["cryptoGrossControl"],
     }
 
 
@@ -575,17 +645,23 @@ def self_test() -> None:
     assert drift_stock["status"] == "planned"
     assert abs(drift_stock["acceptedGross"] - 0.75) < EPSILON
     assert drift_stock["cryptoGrossCap"] == 3.0
-    for invalid_crypto in (3.50001, 5.00001):
+    above_passive = validate_gross_snapshot({
+        "equityUsd": 1000, "cryptoGross": 3.51,
+        "stockGross": 0.0, "totalGross": 3.51,
+    })
+    assert above_passive["cryptoGrossControl"]["protectedExitAllowed"] is True
+    stock_blocked = plan_v52_stock_capacity(above_passive, 0.1, 0.1)
+    assert stock_blocked["status"] == "blocked"
+    assert stock_blocked["acceptedGross"] == 0
+    for invalid_crypto in (5.00001,):
         try:
             validate_gross_snapshot({
-                "equityUsd": 1000,
-                "cryptoGross": invalid_crypto,
-                "stockGross": 0.0,
-                "totalGross": invalid_crypto,
+                "equityUsd": 1000, "cryptoGross": invalid_crypto,
+                "stockGross": 0.0, "totalGross": invalid_crypto,
             })
-            raise AssertionError("Gross above passive 3.5 tolerance must not pass")
+            raise AssertionError("Total Gross above 4.25 still must fail")
         except RuntimeError as error:
-            assert "CRYPTO_GROSS_OVER_CAP" in str(error)
+            assert "TOTAL_GROSS_OVER_CAP" in str(error)
     try:
         validate_gross_snapshot({
             "equityUsd": 1000,
@@ -596,6 +672,19 @@ def self_test() -> None:
         raise AssertionError("Total 4.25 cap remains independent")
     except RuntimeError as error:
         assert "TOTAL_GROSS_OVER_CAP" in str(error)
+    for current_crypto in (2.99, 3.00, 3.01, 3.25, 3.50, 3.51):
+        snapshot = {
+            "equityUsd": 1000,
+            "cryptoGross": current_crypto,
+            "stockGross": 0,
+            "totalGross": current_crypto,
+        }
+        plan = plan_crypto_entry_capacity(snapshot, 0.25)
+        expected = max(0.0, min(0.25, caps.crypto_gross - current_crypto))
+        assert abs(plan["acceptedGross"] - expected) < EPSILON
+        assert plan["existingExposureManaged"] is True
+        assert plan["protectedExitAllowed"] is True
+        assert plan["newRiskAllowed"] is (expected > EPSILON)
     at_limit = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 3.0, "stockGross": 1.25, "totalGross": 4.25}, 1.0, 1.0)
     assert at_limit["status"] == "blocked"
     residual = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 2.25, "stockGross": 0.5, "totalGross": 2.75}, 1.0, 1.0)
