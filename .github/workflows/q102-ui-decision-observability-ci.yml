@@ -1,0 +1,32 @@
+name: Q102 UI decision observability typecheck
+on:
+  pull_request:
+    paths:
+      - 'apps/production-ui/components/features/DecisionStatusPanel.tsx'
+      - 'apps/production-ui/lib/server/quality102-runtime-observability.ts'
+      - '.github/workflows/q102-ui-decision-observability-ci.yml'
+  push:
+    branches:
+      - 'fix/q102-portfolio-admission-retry-current-20261028'
+  workflow_dispatch:
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/production-ui/package-lock.json
+      - name: Install UI dependencies
+        working-directory: apps/production-ui
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck Q102 production UI
+        working-directory: apps/production-ui
+        run: npx tsc --noEmit -p tsconfig.json
