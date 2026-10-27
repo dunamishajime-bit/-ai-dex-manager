@@ -1,0 +1,67 @@
+{
+  "canonicalSha256": "fb9c3d594ad68955f084618037d9a4c0e81a8453e7deb4558c7794fb66d3c96f",
+  "caseCount": 16,
+  "gross": 0.25,
+  "limitations": "No real Aster mode response or receipt, no Production/Native8/13 GateProof.",
+  "modeReads": 0,
+  "nativeAllocator": "NEED_NATIVE_ALLOCATOR",
+  "orderAuthorized": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "productionModified": false,
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "sixProcesses": [
+    {
+      "canonicalSha256": "fb9c3d594ad68955f084618037d9a4c0e81a8453e7deb4558c7794fb66d3c96f",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "fb9c3d594ad68955f084618037d9a4c0e81a8453e7deb4558c7794fb66d3c96f",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "fb9c3d594ad68955f084618037d9a4c0e81a8453e7deb4558c7794fb66d3c96f",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "fb9c3d594ad68955f084618037d9a4c0e81a8453e7deb4558c7794fb66d3c96f",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "fb9c3d594ad68955f084618037d9a4c0e81a8453e7deb4558c7794fb66d3c96f",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "OO"
+    },
+    {
+      "canonicalSha256": "fb9c3d594ad68955f084618037d9a4c0e81a8453e7deb4558c7794fb66d3c96f",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "OO"
+    }
+  ],
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceRawSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09"
+  },
+  "sourceScriptSha256": "b0fbac3c3f224b8e888fb04feb0e0cbe2ef8c87fb928a88b7a99a77cae047ff1",
+  "status": "PASS",
+  "totalCases": 96,
+  "venueResponse": "synthetic"
+}
