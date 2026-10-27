@@ -11,6 +11,7 @@ import { protectiveLevels, nextTrailingStop } from "./v12-x1-all";
 import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { normalizeDisDexV96OrderQuantity } from "./disdex-v96-order-quantity";
 import { V12_V4_ROUTE_CATALOG, type V12V4ShadowCandidate } from "./v12-multilogic-v4-shadow";
+import { resolveCryptoGrossEntryControl } from "./disdex-strict-portfolio-planner";
 import { V12_V4_V2_CAPS, V12_V4_FIRST_PASS_REPAIRS, V12_V4_SECOND_PASS_REPAIRS } from "./v12-v4-v2-shadow";
 
 export const HOUR = 3600000;
@@ -170,7 +171,8 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   const g=productionGross(state), worst=notional/equity;
   if (c.family.startsWith("RECOVERY_")&&g.recovery+worst>V12_V4_V2_CAPS.recoveryFamilyGross+1e-12) throw Error("RECOVERY_FAMILY_GROSS_CAP");
   if (g.v12+worst>3+1e-12) throw Error("V12_GROSS_CAP");
-  if (g.crypto+worst>3.5+1e-12) throw Error("CRYPTO_GROSS_CAP");
+  const cryptoControl = resolveCryptoGrossEntryControl({ currentCryptoGross: g.crypto, requestedEntryCap: 3.0 });
+  if (g.crypto+worst>cryptoControl.entryCapForNewRisk+1e-12) throw Error("CRYPTO_GROSS_CAP");
   if (g.total+worst>4.75+1e-12) throw Error("TOTAL_GROSS_CAP");
   return { type:"RESERVE", eventId:input.eventId, ts:observedAtMs, leg:{
     id:key(c), candidate:structuredClone(c), qty:0, entryNotional:0, requestedQty:p.normalized.quantity,
