@@ -85,8 +85,11 @@ jobs:
           bash scripts/ops/disdex-v96-v52-live-policy-selftest.sh
 
           grep -Fq 'export DISDEX_V96_MAX_GROSS=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Fq 'export DISDEX_V52_STOCK_GROSS_CAP=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          # Assert the actual integrated Production contract; V96's 1.5x
+          # crypto legacy contract above is a separate scope.
+          grep -Fq 'export DISDEX_V52_CRYPTO_GROSS_CAP=3.0' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_STOCK_GROSS_CAP=4.0' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25' scripts/ops/disdex-v96-v52-live-policy.sh
           grep -Fq 'export DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5' scripts/ops/disdex-v96-v52-live-policy.sh
           grep -Fq 'export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true' scripts/ops/disdex-v96-v52-live-policy.sh
           grep -Fq 'export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-live-policy.sh
