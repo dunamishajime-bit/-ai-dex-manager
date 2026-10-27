@@ -1,0 +1,81 @@
+{
+  "auditScriptSha256": "c65976f04c474197f89c900901ed892c0a81a2a9937259bb70007871ff9ff86b",
+  "canonicalSha256": "a5799e99dc8d86e4e2deaac644011d82cef2815904c148e50fbefb126b224d72",
+  "caseCount": 17,
+  "controlCases": [
+    "wrong_stop_price",
+    "missing_stop",
+    "pending_reject",
+    "wrong_side"
+  ],
+  "existingResearchChecked": [
+    "RENDER_4427_PROTECTED_RECOVERY_MARGIN_LEVERAGE_AUDIT_20261027.md",
+    "RENDER_4427_VENUE_POST_READBACK_COMMIT_RACE_AUDIT_20261027.md",
+    "RENDER_4427_PENDING_NEW_PROTECTION_AUDIT_20261027.md"
+  ],
+  "gross": 0.25,
+  "limitation": "Aster average entry price may change legitimately with fills. A mismatch alone does not prove wrong ownership, and this test does not establish a production failure.",
+  "liveEvidence": false,
+  "native8Certified": false,
+  "native_allocator": "NEED_NATIVE_ALLOCATOR",
+  "newFinding": "Aster positionRisk entryPrice is discarded by protected recovery adapter; the original TypeScript accepts synthetic venue entryPrice changes, absent and invalid values when symbol, side, quantity and STOP/TP are otherwise valid.",
+  "order_authorized": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "productionModified": false,
+  "realAsterReceipt": false,
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "sixProcesses": [
+    {
+      "canonicalSha256": "a5799e99dc8d86e4e2deaac644011d82cef2815904c148e50fbefb126b224d72",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "a5799e99dc8d86e4e2deaac644011d82cef2815904c148e50fbefb126b224d72",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "a5799e99dc8d86e4e2deaac644011d82cef2815904c148e50fbefb126b224d72",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "a5799e99dc8d86e4e2deaac644011d82cef2815904c148e50fbefb126b224d72",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "a5799e99dc8d86e4e2deaac644011d82cef2815904c148e50fbefb126b224d72",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "OO"
+    },
+    {
+      "canonicalSha256": "a5799e99dc8d86e4e2deaac644011d82cef2815904c148e50fbefb126b224d72",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "OO"
+    }
+  ],
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceRawSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09"
+  },
+  "status": "RESEARCH_ONLY_NEW_FINDING_VENUE_ENTRY_PRICE_NOT_BOUND",
+  "totalCases": 102,
+  "venueResponse": "SYNTHETIC"
+}
