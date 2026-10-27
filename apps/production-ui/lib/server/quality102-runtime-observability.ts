@@ -9,6 +9,8 @@ type JsonObject = Record<string, unknown>;
 const MAX_JSON_BYTES = 256 * 1024;
 const STALE_AFTER_MS = 6 * 60 * 60 * 1000;
 const DEFAULT_HEARTBEAT_PATH = "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json";
+const DEFAULT_LAST_TICK_PATH = "/var/lib/disdex/quality102-causal-v1/last-tick.json";
+const LAST_TICK_FRESH_MS = 3 * 60 * 60 * 1000;
 
 export const quality102Policy = Object.freeze({
   strategyGrossCap: config.quality102Runtime.strategyGrossCap,
@@ -54,6 +56,16 @@ export type Quality102RuntimeStatus = {
   symbols: string[];
   position?: Quality102Position;
   pending?: { phase?: string; symbol?: string; side?: string; reason?: string };
+  lastDecision?: {
+    checkedAt?: string;
+    status?: string;
+    reason?: string;
+    symbol?: string;
+    family?: string;
+    side?: number;
+    ordersSent?: number;
+    current: boolean;
+  };
   reason: string;
   errors: string[];
 };
@@ -153,6 +165,33 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
     const safetyState = text(heartbeat?.safetyState);
     const runtimeSha = text(heartbeat?.runtimeSha ?? state.runtimeCommitSha);
     const expectedReleaseSha = text(heartbeat?.expectedSha) ?? currentRuntime?.productionReleaseShas.quality102 ?? config.quality102Runtime.expectedReleaseSha;
+    // A healthy systemd service does not imply that an entry signal was
+    // admitted. Expose the final runner tick independently from ranking data.
+    const lastTickPath = String(process.env.QUALITY102_CAUSAL_V1_LAST_TICK_PATH || DEFAULT_LAST_TICK_PATH).trim();
+    let lastDecision: Quality102RuntimeStatus["lastDecision"];
+    if (isAbsolute(lastTickPath)) {
+      try {
+        const tick = await readJson(lastTickPath, "Quality102 last decision");
+        const checkedAt = text(tick.timestamp);
+        const checkedMs = checkedAt ? Date.parse(checkedAt) : NaN;
+        const signal = object(tick.signal);
+        lastDecision = {
+          checkedAt,
+          status: text(tick.status),
+          reason: text(tick.message),
+          symbol: text(signal?.symbol),
+          family: text(signal?.family),
+          side: finite(signal?.side),
+          ordersSent: finite(tick.ordersSent),
+          current: Number.isFinite(checkedMs)
+            && checkedMs <= Date.now()
+            && Date.now() - checkedMs <= LAST_TICK_FRESH_MS
+            && text(tick.runtimeCommitSha) === runtimeSha,
+        };
+      } catch {
+        // Older releases do not write this optional observation yet.
+      }
+    }
     const selector = object(heartbeat?.quality102);
     const selectorMode = text(selector?.selectorMode) ?? config.quality102Runtime.selectorMode;
     const historicalSelectorParity = bool(selector?.historicalSelectorParity) ?? false;
@@ -221,6 +260,7 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
         side: text(pendingObject.side),
         reason: text(pendingObject.reason),
       } : undefined,
+      lastDecision,
       reason: heartbeatError ? `${reason} heartbeat注意: ${heartbeatError}` : reason,
       errors: heartbeatError ? [heartbeatError] : [],
     };
