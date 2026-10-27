@@ -80,6 +80,14 @@ def assert_health(hb, unit, now):
         faults.append("RELEASE_MISSING")
     return faults
 
+def margin_guard_unit(requires, after):
+    req = set(requires.split())
+    aft = set(after.split())
+    matches = sorted(x for x in req if GUARD.fullmatch(x))
+    if len(matches) != 1 or matches[0] not in aft:
+        raise ValueError("guard-requires-after-mismatch")
+    return matches[0]
+
 def v52_event():
     p = BASE / "v52-aster-only/audit-live.jsonl"
     try:
@@ -133,12 +141,7 @@ def audit(now=None):
     try:
         if not v52:
             raise ValueError("v52-unavailable")
-        req = set(v52.get("Requires", "").split())
-        aft = set(v52.get("After", "").split())
-        targets = sorted(x for x in req if GUARD.fullmatch(x))
-        if len(targets) != 1 or targets[0] not in aft:
-            raise ValueError("guard-requires-after-mismatch")
-        unit_name = targets[0]
+        unit_name = margin_guard_unit(v52.get("Requires", ""), v52.get("After", ""))
         shared_sha = GUARD.fullmatch(unit_name).group(1)
         guard = systemd(unit_name)
         if guard.get("ActiveState") != "active" or int(guard.get("MainPID") or 0) < 1:
@@ -164,6 +167,23 @@ def audit(now=None):
                 issues.append("SUPPORT_SERVICE_DOWN:" + service)
         except (ValueError, TypeError, subprocess.TimeoutExpired):
             issues.append("SUPPORT_SERVICE_UNVERIFIED:" + service)
+    # Guard against duplicate old/new versions running at once.
+    try:
+        run = subprocess.run(["systemctl", "list-units", "--type=service",
+                     "--state=running", "--no-legend", "--plain"], capture_output=True,
+                     text=True, timeout=8, check=True)
+        active = [line.split()[0] for line in run.stdout.splitlines() if line.strip()]
+        prefixes = {"V12_V4":"disdex-v12-v4@", "PENGU":"disdex-pengu-dual-ls-v2@",
+                    "Q102":"disdex-quality102-causal-v1@", "V52":"disdex-v52-aster-only@",
+                    "FET":"disdex-fet-brk48@", "HYPE":"disdex-hype-long@",
+                    "IDLE":"disdex-idle-priority-short@"}
+        for label, prefix in prefixes.items():
+            units = [unit for unit in active if unit.startswith(prefix)]
+            expected = out["runners"].get(label, {}).get("unit")
+            if len(units) != 1 or units[0] != expected:
+                issues.append("DUPLICATE_OR_MISSING_LIVE_UNIT:" + label)
+    except (OSError, ValueError, subprocess.TimeoutExpired, subprocess.CalledProcessError):
+        issues.append("ACTIVE_UNIT_INVENTORY_UNAVAILABLE")
     try:
         # /health reads the localhost quote cache; no provider API call or order.
         with urlopen("http://127.0.0.1:8797/health", timeout=4) as reply:
@@ -224,7 +244,14 @@ def selftest():
     assert "STALE_HEARTBEAT" in assert_health(dict(base, heartbeatAt=1), unit, 1_001_000)
     assert "PID_MISMATCH" in assert_health(dict(base, mainPid=13), unit, 1_001_000)
     assert "HEALTH_GATE" in assert_health(dict(base, safetyState="BLOCKED"), unit, 1_001_000)
-    assert GUARD.fullmatch("disdex-v12-v52-margin-guard@" + "b"*40 + ".service")
+    guard_name = "disdex-v12-v52-margin-guard@" + "b"*40 + ".service"
+    assert GUARD.fullmatch(guard_name)
+    assert margin_guard_unit(guard_name, guard_name) == guard_name
+    try:
+        margin_guard_unit(guard_name, "")
+        assert False
+    except ValueError:
+        pass
     good = {"status":"ok","connected":True,"freshnessReady":True,"marketOpen":True,
             "maximumQuoteAgeMs":30000,"symbols":{s:{"ageMs":100} for s in ("AMZN","META","MSFT","NVDA","TSLA")}}
     assert quote_health_issues(good) == []
