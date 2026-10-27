@@ -93,13 +93,16 @@ jobs:
           PY
       - name: Verify dedicated SSH identity and pinned host fingerprint
         env:
-          HOST: ${{ secrets.Q102_DEPLOY_HOST }}
-          USER: ${{ secrets.Q102_DEPLOY_USER }}
-          KEY: ${{ secrets.Q102_DEPLOY_SSH_KEY }}
-          HOST_KEYS: ${{ secrets.Q102_DEPLOY_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          USER: ${{ 'deploy' }}
+          KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         shell: bash
         run: |
           set -Eeuo pipefail
+          : "${SSH_PORT:=22}"
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]] || exit 3
           test -n "$HOST" && test -n "$USER" && test -n "$KEY" && test -n "$HOST_KEYS" || {
             echo 'FAIL_CLOSED: Q102 environment deploy credentials missing'; exit 3;
           }
@@ -111,18 +114,20 @@ jobs:
           ssh-keygen -y -f "$HOME/.ssh/q102_deploy_key" >/dev/null
       - name: Invoke separately installed Q102 exact-SHA operator promoter
         env:
-          HOST: ${{ secrets.Q102_DEPLOY_HOST }}
-          USER: ${{ secrets.Q102_DEPLOY_USER }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          USER: ${{ 'deploy' }}
           TARGET_SHA: ${{ inputs.target_sha }}
           EXPECTED_LIVE_SHA: ${{ inputs.expected_live_sha }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         shell: bash
         run: |
           set -Eeuo pipefail
+          : "${SSH_PORT:=22}"
           # The VPS-side reviewed promoter independently certifies new release,
           # operator activation SHA, economics, STOPs, pending orders, shared
           # risk and rollback. This workflow NEVER writes approval artifacts or
           # changes units/symlinks itself. No promoter installed -> FAIL CLOSED.
           ssh -i "$HOME/.ssh/q102_deploy_key" \
             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
-            -o ConnectTimeout=15 "$USER@$HOST" \
+            -o ConnectTimeout=15 -p "$SSH_PORT" "$USER@$HOST" \
             "sudo -n /usr/local/sbin/disdex-q102-owner-approved-promote '$TARGET_SHA' '$EXPECTED_LIVE_SHA'"
