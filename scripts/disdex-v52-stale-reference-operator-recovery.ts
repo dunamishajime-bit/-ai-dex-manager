@@ -21,7 +21,7 @@ const same=(a:unknown,b:number)=>Number.isFinite(Number(a))&&Math.abs(Number(a)-
 // signatures, unknown execution, order mismatch, or any trading mutation.
 export function isTemporaryReadBudgetDeferral(error:unknown):boolean {
  const message=error instanceof Error?error.message:String(error);
- return /^ASTER_GLOBAL_RATE_BUDGET_SATURATED:\\d+$/.test(message);
+ return /^ASTER_GLOBAL_RATE_BUDGET_SATURATED:[0-9]+$/.test(message);
 }
 const sleep=(milliseconds:number)=>new Promise<void>(resolve=>setTimeout(resolve,milliseconds));
 function eligible(k:any){
