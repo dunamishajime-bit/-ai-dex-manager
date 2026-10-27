@@ -97,3 +97,15 @@ test("unknown protective result queries first and retries only the same determin
   assert.deepEqual([...new Set(seen)],[cid],"every retry must reuse one deterministic client ID");
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+test("operator-scoped ambiguous reduction never resubmits after a missing readback",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-near-no-retry-"));
+ try{
+  const store=new V4ExecutionStore(join(dir,"state.json"),"a".repeat(40));store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  let sends=0;const gateway:any={executeExit:async()=>{sends++;throw Error("transport disconnected")},queryOrderSameId:async()=>null};
+  const bridge=new V4DurableOrderDispatcher(store,gateway,{assertAuthority:async()=>{},assertAccountLease:async()=>{},reserveShared:async()=>{}});
+  const cid=bridge.prepare({legId:"NEARUSDT:r:SHORT:1",action:"EXIT",sequence:0,symbol:"NEARUSDT",positionSide:"SHORT",quantity:2,price:4.5,signalTs:1,noAmbiguousRetry:true},2);
+  await assert.rejects(()=>bridge.submit(cid,3),/transport disconnected/);
+  await assert.rejects(()=>bridge.recoverReductionSameId(cid,4),/V4_AMBIGUOUS_REDUCTION_REQUIRES_SIGNED_READBACK/);
+  assert.equal(sends,1);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});

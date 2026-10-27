@@ -10,7 +10,7 @@ import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4ExecutionStore,v4OrderIdentity,advanceV4Intent,type V4OrderAction,type V4OrderIntent} from "./v12-v4-execution-store";
 export type V4DurableOrderCommand={
  legId:string;action:V4OrderAction;sequence:number;symbol:string;positionSide:"LONG"|"SHORT";
- quantity:number;price:number;signalTs:number;
+ quantity:number;price:number;signalTs:number;noAmbiguousRetry?:true;
 };
 type Gateway=Pick<V12AsterLiveAdapter,"executeEntry"|"executeExit"|"placeStopMarket"|"placeTakeProfit"|"queryOrderSameId">;
 export type V4DispatchGuards={
@@ -24,7 +24,8 @@ function commandOf(intent:V4OrderIntent):V4DurableOrderCommand{
  const c=intent.command as V4DurableOrderCommand;
  if(c.legId!==intent.legId||c.action!==intent.action||c.sequence!==intent.sequence||
    !/^[A-Z0-9]+$/.test(c.symbol)||!["LONG","SHORT"].includes(c.positionSide)||
-   ![c.quantity,c.price].every(n=>Number.isFinite(n)&&n>0)||!Number.isFinite(c.signalTs))throw Error("INVALID_DURABLE_ORDER_COMMAND");
+   ![c.quantity,c.price].every(n=>Number.isFinite(n)&&n>0)||!Number.isFinite(c.signalTs)||
+   (c.noAmbiguousRetry!==undefined&&c.noAmbiguousRetry!==true))throw Error("INVALID_DURABLE_ORDER_COMMAND");
  return structuredClone(c);
 }
 export class V4DurableOrderDispatcher{
@@ -80,6 +81,7 @@ export class V4DurableOrderDispatcher{
   const command=commandOf(intent);
   const existing=await this.gateway.queryOrderSameId(command.symbol,cid);
   if(existing)return await this.reconcile(cid,ts);
+  if(command.noAmbiguousRetry===true)throw Error("V4_AMBIGUOUS_REDUCTION_REQUIRES_SIGNED_READBACK");
   // A missing readback is checked before any retry. Reusing the exact client
   // order ID makes a delayed first submission collide rather than duplicate.
   await this.guards.assertAuthority(command);

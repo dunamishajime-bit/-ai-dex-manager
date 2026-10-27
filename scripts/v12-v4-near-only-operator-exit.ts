@@ -19,10 +19,11 @@ function requireRelease(){
 }
 async function main(){
  const operatorSha=requireRelease();
- const [{buildV4ProductionRuntime},{assertV4EntrySafety},{readPendingExposureRegistry},{readV4ProductionCertificate},{readV4TimeStopApproval}]=await Promise.all([
+ const [{buildV4ProductionRuntime},{assertV4EntrySafety},{readPendingExposureRegistry},{readV4ProductionCertificate},{readV4TimeStopApproval},{advanceV4Protection}]=await Promise.all([
   import(root+'/scripts/v12-v4-production-runner.ts'),import(root+'/lib/v12-v4-entry-safety.ts'),
   import(root+'/lib/disdex-pending-exposure-registry.ts'),
   import(root+'/lib/v12-v4-certified-gates.ts'),import(root+'/lib/v12-v4-time-stop-approval.ts'),
+  import(root+'/lib/v12-v4-execution-store.ts'),
  ]);
  let runtime:any;
  const authorize=async(input:any)=>{
@@ -55,13 +56,21 @@ async function main(){
  await lease.release();
  console.log(JSON.stringify({status:'V4_NEAR_OPERATOR_DRY_RUN_PASS',operatorSha,v4Sha:V4_SHA,signedRounds:3,ordersSent:0,cancelsSent:0}));
  if(!process.argv.includes('--apply'))return;
+ const wasClosed=nearClosed(runtime.store.read());
  const result=await runtime.engine.tick();
- if(result.status!=='exited')throw Error('V4_NEAR_OPERATOR_EXIT_INCOMPLETE:'+result.reason);
- const doc=runtime.store.read(),leg=doc.state.legs[NEAR_LEG],protection=doc.protections[NEAR_LEG];
+ if((!wasClosed&&result.status!=='exited')||(wasClosed&&!['exited','observing'].includes(result.status)))throw Error('V4_NEAR_OPERATOR_EXIT_INCOMPLETE:'+result.reason);
+ let doc=runtime.store.read(),leg=doc.state.legs[NEAR_LEG],protection=doc.protections[NEAR_LEG];
  const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
  assertNearVenue(positions,orders,'CLOSED');
  assertNearState(doc);
- if(Number(leg?.qty)!==0||leg?.status!=='CLOSED'||protection?.phase!=='CLOSED')
+ if(protection?.phase!=='CLOSED'){
+  if(orders.some((o:any)=>o.symbol==='NEARUSDT'))throw Error('V4_NEAR_OPERATOR_STOP_STILL_OPEN');
+  const next=advanceV4Protection(doc,NEAR_LEG,'CLOSED',Date.now(),0);
+  runtime.store.commit(doc.revision,next);
+  doc=runtime.store.read();leg=doc.state.legs[NEAR_LEG];protection=doc.protections[NEAR_LEG];
+ }
+ assertNearState(doc);
+ if(orders.some((o:any)=>o.symbol==='NEARUSDT')||Number(leg?.qty)!==0||leg?.status!=='CLOSED'||protection?.phase!=='CLOSED')
   throw Error('V4_NEAR_OPERATOR_POST_EXIT_RECONCILIATION_FAILED');
  const exits=Object.values(doc.intents).filter((i:any)=>i.legId===NEAR_LEG&&i.action==='EXIT') as any[];
  console.log(JSON.stringify({status:'V4_NEAR_OPERATOR_EXIT_SUCCESS',operatorSha,v4Sha:V4_SHA,
