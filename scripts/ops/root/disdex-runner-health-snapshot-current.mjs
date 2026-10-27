@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
 import { resolveQuality102OperatorGateReason } from "../../../lib/disdex-q102-health-gate.mjs";
+import { resolveV4RunnerStateBlockReason } from "../../../lib/disdex-v4-runner-state-gate.mjs";
 
 const execFile = promisify(execFileCallback);
 const SYSTEMCTL = "/usr/bin/systemctl";
@@ -539,6 +540,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
     const operatorGateReason = await runnerOperatorGateReason(runner);
+    const runnerStateBlockReason = resolveV4RunnerStateBlockReason(runner, state);
     const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
         ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
         : manualReviewReason
@@ -551,7 +553,9 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
                     ? `${runner.key} state identity is invalid`
                     : !stateFresh
                         ? `${runner.key} state is stale`
-                        : "";
+                            : runnerStateBlockReason
+                                ? runnerStateBlockReason
+                                : "";
     const heartbeat = {
         schema: "disdex-runner-heartbeat/v1",
         runnerId: runner.runnerId,
