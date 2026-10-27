@@ -1,0 +1,18 @@
+[Unit]
+Description=DisDex seven-runner and shared Margin Guard read-only dependency audit
+After=network-online.target
+Wants=network-online.target
+Documentation=https://github.com/dunamishajime-bit/-ai-dex-manager
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /opt/disdex-readonly-ops/disdex-seven-runner-readonly-audit.py
+TimeoutStartSec=35s
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/disdex/ops-audit
+PrivateTmp=yes
+UMask=0077
