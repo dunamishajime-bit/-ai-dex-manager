@@ -1,7 +1,7 @@
 /** One-shot NEAR reduction; imports the already-certified 53a V4 runtime unchanged. */
 import {readFileSync,realpathSync} from 'node:fs';
 import {dirname,join} from 'node:path';
-import {assertNearState,assertNearVenue,installNearOnlyGuards,NEAR_LEG,NEAR_STOP,V4_SHA} from '../lib/v12-v4-near-only-guard.mjs';
+import {assertNearState,assertNearVenue,installNearOnlyGuards,nearClosed,NEAR_LEG,NEAR_STOP,V4_SHA} from '../lib/v12-v4-near-only-guard.mjs';
 
 const root='/home/deploy/disdex-trading/releases/'+V4_SHA;
 const ack='I_AUTHORIZE_V4_OPERATOR_EXIT_NEAR_ONLY';
@@ -39,10 +39,11 @@ async function main(){
   const registry=await readPendingExposureRegistry(String(process.env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH));
   if(registry.entries.some((x:any)=>['PENDING','SUBMITTED','UNKNOWN'].includes(x.status)))
    throw Error('V4_NEAR_OPERATOR_PENDING_EXPOSURE');
+  const phase=nearClosed(runtime.store.read())?'CLOSED':'OPEN';
   for(let i=0;i<3;i++){
    await lease.renew();
    const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
-   assertNearVenue(positions,orders);
+   assertNearVenue(positions,orders,phase);
   }
   await lease.renew();
  };
@@ -58,10 +59,9 @@ async function main(){
  if(result.status!=='exited')throw Error('V4_NEAR_OPERATOR_EXIT_INCOMPLETE:'+result.reason);
  const doc=runtime.store.read(),leg=doc.state.legs[NEAR_LEG],protection=doc.protections[NEAR_LEG];
  const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
- const nearRows=positions.filter((p:any)=>p.symbol==='NEARUSDT');
- if(!nearRows.length||nearRows.some((p:any)=>!Number.isFinite(Number(p.positionAmt)))||
-  Math.abs(nearRows.reduce((n:number,p:any)=>n+Number(p.positionAmt),0))>1e-8||
-  orders.some((o:any)=>o.symbol==='NEARUSDT')||Number(leg?.qty)!==0||leg?.status!=='CLOSED'||protection?.phase!=='CLOSED')
+ assertNearVenue(positions,orders,'CLOSED');
+ assertNearState(doc);
+ if(Number(leg?.qty)!==0||leg?.status!=='CLOSED'||protection?.phase!=='CLOSED')
   throw Error('V4_NEAR_OPERATOR_POST_EXIT_RECONCILIATION_FAILED');
  const exits=Object.values(doc.intents).filter((i:any)=>i.legId===NEAR_LEG&&i.action==='EXIT') as any[];
  console.log(JSON.stringify({status:'V4_NEAR_OPERATOR_EXIT_SUCCESS',operatorSha,v4Sha:V4_SHA,
