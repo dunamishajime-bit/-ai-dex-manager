@@ -1,0 +1,11 @@
+[Unit]
+Description=DisDex seven-runner read-only audit every two minutes
+
+[Timer]
+OnCalendar=*:0/2
+AccuracySec=10s
+Persistent=true
+Unit=disdex-seven-runner-readonly-audit.service
+
+[Install]
+WantedBy=timers.target
