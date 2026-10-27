@@ -19,6 +19,15 @@ test("unrelated failures remain fatal and are not reclassified as exit-feed gaps
   new Error("V4_PROTECTION_RECOVERY_VENUE_QTY_DRIFT:NEARUSDT"),100),undefined);
 });
 
+test("missing terminal next-open proof stays blocked and retries without fabricating a price",()=>{
+ for(const error of ["EXIT_NEXT_OPEN_MISSING","NATIVE_NEXT_OPEN_REQUIRED"]){
+  assert.deepEqual(classifyV4RecoverableExitFeedFailure(new Error(error),200),{
+   status:"blocked",reason:"V4_EXIT_FEED_NEXT_OPEN_RETRY:"+error,eventTs:200,
+   candidateCount:0,orderEnabled:false,retryAfterMs:15000,
+  });
+ }
+});
+
 test("exit-feed requests are bounded to the causal lifetime of the open leg",()=>{
  assert.deepEqual(v4ExitFeedWindow(1792605600000,72,1792740000000),{
   fromTs:1792605600000,untilTs:1792740000000,

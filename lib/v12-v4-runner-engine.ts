@@ -73,9 +73,13 @@ export function classifyV4MarketDataReadFailure(error:unknown,eventTs=Date.now()
 }
 export function classifyV4RecoverableExitFeedFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
  const reason=safeDecisionFailureReason(error);
- if(!/^V4_EXIT_FEED_(?:M5_)?GAP:/.test(reason))return;
- return {status:"blocked",reason:"V4_EXIT_FEED_GAP_RETRY:"+reason,eventTs,
-  candidateCount:0,orderEnabled:false};
+ if(/^V4_EXIT_FEED_(?:M5_)?GAP:/.test(reason))
+  return {status:"blocked",reason:"V4_EXIT_FEED_GAP_RETRY:"+reason,eventTs,
+   candidateCount:0,orderEnabled:false};
+ if(reason==="EXIT_NEXT_OPEN_MISSING"||reason==="NATIVE_NEXT_OPEN_REQUIRED")
+  return {status:"blocked",reason:"V4_EXIT_FEED_NEXT_OPEN_RETRY:"+reason,eventTs,
+   candidateCount:0,orderEnabled:false,retryAfterMs:15000};
+ return;
 }
 /**
  * A planned exit that is older than the bounded execution window requires an

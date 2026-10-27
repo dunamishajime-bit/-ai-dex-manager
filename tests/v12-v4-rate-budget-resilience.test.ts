@@ -189,6 +189,7 @@ test("explicit V4 blocked or degraded reasons never publish HEALTHY safety state
   "V4_MARKET_DATA_UNAVAILABLE:ECONNRESET",
   "V4_EXIT_FEED_GAP_RETRY",
   "V4_EXIT_FEED_GAP_RETRY:V4_EXIT_FEED_M5_GAP:1792689300000",
+  "V4_EXIT_FEED_NEXT_OPEN_RETRY:EXIT_NEXT_OPEN_MISSING",
   "V4_STALE_EXIT_REVIEW_REQUIRED:V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:leg",
  ]){
   assert.equal(classifyV4HealthSafetyState({...base,status:"observing",reason}),"BLOCKED",reason);
@@ -196,4 +197,11 @@ test("explicit V4 blocked or degraded reasons never publish HEALTHY safety state
  assert.equal(classifyV4HealthSafetyState({...base,status:"observing",reason:"V4_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"}),"DEFERRED_FAIL_CLOSED");
  assert.equal(classifyV4HealthSafetyState({...base,status:"observing",reason:"NO_NATIVE_ENTRY_CANDIDATES"}),"HEALTHY");
  assert.equal(classifyV4HealthSafetyState({...base,status:"blocked",reason:"V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY"}),"BLOCKED");
+});
+
+test("terminal next-open recovery is targeted and remains fail-closed when absent",()=>{
+ const src=require("node:fs").readFileSync("scripts/v12-v4-production-runner.ts","utf8");
+ assert.match(src,/const exactBoundary=Number\(untilTs\)/);
+ assert.match(src,/startTime:exactBoundary,endTime:exactBoundary\+3600000-1/);
+ assert.match(src,/V4_EXIT_FEED_NEXT_OPEN_RETRY/);
 });
