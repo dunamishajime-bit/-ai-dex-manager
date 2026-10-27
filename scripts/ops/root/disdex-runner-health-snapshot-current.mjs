@@ -397,6 +397,22 @@ function stateIdentityMatches(runner, state) {
         || (runner.key === "IDLE_PRIORITY_SHORT" && state?.schema === "disdex-idle-priority-state/v2" && String(state?.runtimeSha || "").toLowerCase() === runner.expectedSha);
 }
 
+async function runnerOperatorGateReason(runner) {
+    if (runner.key !== "QUALITY102_CAUSAL_V1") return "";
+    try {
+        // Reads ONLY the named runtime-enable flag; do not log or publish the
+        // Environment payload, which can also contain sensitive configuration.
+        const { stdout } = await execFile(SYSTEMCTL, [
+            "show", runner.unit, "--property=Environment", "--value", "--no-pager",
+        ], { timeout: 5_000, maxBuffer: 128 * 1024 });
+        const match = stdout.match(/(?:^|\s)QUALITY102_LIVE_ENABLED=([^\s]+)/);
+        return match && match[1].toLowerCase() === "true"
+            ? "" : "QUALITY102_LIVE_ENABLED=false_or_missing";
+    } catch {
+        return "QUALITY102_OPERATOR_ENABLE_STATE_UNAVAILABLE";
+    }
+}
+
 async function buildHeartbeat(runner, now, globalBlockReason) {
     if (runner.disabled) {
         const reason = runner.disabledReason || `${runner.key} is intentionally disabled`;
@@ -512,11 +528,14 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
     const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
+    const operatorGateReason = await runnerOperatorGateReason(runner);
     const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
         ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
         : manualReviewReason
             ? manualReviewReason
-            : !identityOk
+            : operatorGateReason
+                ? operatorGateReason
+                : !identityOk
                 ? `${runner.key} service identity is not current`
                 : !stateIdentityMatches(runner, state)
                     ? `${runner.key} state identity is invalid`
@@ -550,6 +569,8 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if(runner.key === "V12_V4") heartbeat.v12v4={operationMode:String(state?.operationMode||""),status:String(state?.status||""),candidateCount:Number(state?.candidateCount||0)};
     if (runner.key === "QUALITY102_CAUSAL_V1") {
         heartbeat.quality102 = {
+            operatorLiveEnabled: !operatorGateReason,
+            operatorGateReason: operatorGateReason || null,
             selectorMode: "CAUSAL_V4",
             historicalSelectorParity: false,
             brkLiveEnabled: true,
@@ -559,6 +580,13 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         heartbeat.idle = {
             parityCertificatePath: runner.parityCertificatePath,
             parityVerified: !parityReason,
+        };
+    }
+    if (runner.key === "HYPE_TREND_LONG" && state?.lastDecision) {
+        heartbeat.latestDecision = {
+            accepted: state.lastDecision.accepted === true,
+            reason: String(state.lastDecision.reason || "").slice(0, 200),
+            signalTs: state.lastDecision.signalTs ?? null,
         };
     }
     if (blockedReason) heartbeat.healthReason = blockedReason;
