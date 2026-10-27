@@ -489,6 +489,14 @@ function Quality102Detail({ details, production }: { details?: Quality102Runtime
           <p>release：{details.runtimeSha ? `${shortSha(details.runtimeSha)}… / ${details.releaseShaVerified === true ? "一致" : "要確認"}` : "未取得"}</p>
           <p>建玉：{details.position ? `${details.position.symbol || "—"} ${details.position.side || "—"} / gross ${number(details.position.gross, 3)}x` : "なし"}</p>
           <p>pending：{details.pending ? `${details.pending.phase || "ORDER"} / ${details.pending.symbol || "—"} / ${details.pending.reason || "—"}` : "なし"}</p>
+          {details.lastDecision ? (
+            <div className="mt-2 rounded-xl border border-amber-400/20 bg-amber-400/5 p-2">
+              <p className="font-semibold text-amber-100">最終発火判定：{details.lastDecision.status || "不明"}{details.lastDecision.current ? "" : "（旧データ・要確認）"}</p>
+              <p className="mt-1 break-all">理由：{details.lastDecision.reason || "未取得"}</p>
+              <p>候補：{details.lastDecision.symbol || "なし"} / {details.lastDecision.family || "—"} / {details.lastDecision.side === 1 ? "LONG" : details.lastDecision.side === -1 ? "SHORT" : "WAIT"} / 発注 {details.lastDecision.ordersSent ?? "—"} 件</p>
+              <p>判定時刻：{details.lastDecision.checkedAt || "不明"}</p>
+            </div>
+          ) : <p className="mt-2 text-amber-100/85">最終発火判定：未取得（Runner稼働と発注可否は別です）</p>}
           <p className="mt-2 text-amber-100/85">状態根拠：{details.reason}</p>
           {details.errors.length ? <p className="mt-2 text-amber-100/75">観測注意：{details.errors.join(" / ")}</p> : null}
         </div>
