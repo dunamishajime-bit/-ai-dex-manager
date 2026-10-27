@@ -32,7 +32,7 @@ export interface Quality102CausalV1History {
 export interface Quality102CausalV1SleeveOccupancy {
     activePosition: boolean;
     unresolvedPendingEntry: boolean;
-    /** V4 enters only while every base sleeve is idle. Legacy HIGH_VOL ignores this field. */
+    /** Deprecated advisory occupancy: shared exposure is validated by the live portfolio admission planner. */
     basePositionActive?: boolean;
 }
 

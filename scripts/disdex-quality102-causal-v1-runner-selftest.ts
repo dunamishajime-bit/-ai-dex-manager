@@ -177,6 +177,11 @@ async function run(): Promise<void> {
         /unmanagedOpenOrders/,
         "Q102 entry must distinguish managed protective orders from conflicting orders",
     );
+    assert.match(
+        runnerSource,
+        /Q102_ONLY_FREE_GROSS_NO_CROSS_RUNNER_REDUCTION/,
+        "Q102 must not displace other active runner exposure for a new entry",
+    );
     {
         const fake = new FakeExecutor();
         assert.doesNotThrow(() => deps(fake, state(), { symbols: ["AVAXUSDT"] }, () => signal({ symbol: "AVAXUSDT" })));
@@ -308,6 +313,39 @@ async function run(): Promise<void> {
         const result = await built.runner.tick();
         assert.equal(result.status, "completed");
         assert.equal(fake.calls.execute, 1);
+    }
+
+    {
+        const fake = new FakeExecutor();
+        // A foreign runner already uses nearly all normal Crypto Gross. A new
+        // Q102 signal may be evaluated, but it may not evict that exposure.
+        fake.positions = [{
+            symbol: "PENGUUSDT",
+            quantity: 29,
+            entryPrice: 100,
+            markPrice: 100,
+            unrealizedPnl: 0,
+            pnlPct: 0,
+            notionalUsd: 2900,
+            positionSide: "BOTH",
+            leverage: 5,
+            updatedAt: NOW - 1000,
+        }];
+        fake.openOrders = [{
+            symbol: "PENGUUSDT",
+            clientOrderId: "recv8-cccccccccccccccc",
+            side: "SELL",
+            status: "NEW",
+            type: "STOP_MARKET",
+            reduceOnly: true,
+            quantity: 29,
+            executedQuantity: 0,
+        }];
+        const built = deps(fake, state());
+        const result = await built.runner.tick();
+        assert.notEqual(result.status, "completed", "Q102 must not use foreign reserved gross");
+        assert.equal(fake.calls.execute, 0);
+        assert.equal(fake.positions[0]?.quantity, 29);
     }
 
     {
