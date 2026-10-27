@@ -111,7 +111,7 @@ export function classifyV4DaemonRateBudgetOutcome(
 }
 export type V4HealthSafetyState="HEALTHY"|"BLOCKED"|"DEFERRED_FAIL_CLOSED";
 export function classifyV4HealthSafetyState(result:{status:string;reason:string}):V4HealthSafetyState{
- if(result.status==="blocked"||/^(?:V4_PREPARE_NOT_AVAILABLE|V4_MARKET_DATA_UNAVAILABLE|V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE|V4_EXIT_FEED_GAP_RETRY|V4_STALE_EXIT_REVIEW_REQUIRED|V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY)(?::|$)/.test(result.reason))return "BLOCKED";
+ if(result.status==="blocked"||/^(?:V4_PREPARE_NOT_AVAILABLE|V4_MARKET_DATA_UNAVAILABLE|V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE|V4_EXIT_FEED_GAP_RETRY|V4_EXIT_FEED_NEXT_OPEN_RETRY|V4_STALE_EXIT_REVIEW_REQUIRED|V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY)(?::|$)/.test(result.reason))return "BLOCKED";
  if(result.reason.startsWith("V4_RATE_BUDGET_"))return "DEFERRED_FAIL_CLOSED";
  return "HEALTHY";
 }
@@ -333,12 +333,25 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
     client.getKlines(symbol,"1h",500,{startTime:start,endTime:end}),
     client.getKlines(symbol,"5m",1000,{startTime:start,endTime:end}),
    ]);
+   const nextOpens=rows.filter(x=>Number(x[0])<=now).map(x=>({ts:Number(x[0]),price:Number(x[1])}));
+   // Some venue responses exclude the candle whose open time equals the
+   // requested endTime. At a terminal TIME/native boundary, re-read only
+   // that exact H1 open; never substitute a close or fabricate a price.
+   const exactBoundary=Number(untilTs);
+   if(Number.isFinite(exactBoundary)&&exactBoundary%3600000===0&&exactBoundary<=now&&
+      !nextOpens.some(x=>x.ts===exactBoundary)){
+    const targeted=await client.getKlines(symbol,"1h",3,{startTime:exactBoundary,endTime:exactBoundary+3600000-1});
+    for(const row of targeted){
+     const ts=Number(row[0]),price=Number(row[1]);
+     if(ts===exactBoundary&&price>0&&Number(row[6])<now)nextOpens.push({ts,price});
+    }
+   }
    return {
     closed:rows.filter(x=>Number(x[0])+3600000<=now&&Number(x[6])<now)
      .map(x=>({openTs:Number(x[0]),open:Number(x[1]),high:Number(x[2]),low:Number(x[3]),close:Number(x[4])})),
     closedM5:m5rows.filter(x=>Number(x[0])+300000<=now&&Number(x[6])<now)
      .map(x=>({openTs:Number(x[0]),open:Number(x[1]),high:Number(x[2]),low:Number(x[3]),close:Number(x[4]),observedAt:now})),
-    nextOpens:rows.filter(x=>Number(x[0])<=now).map(x=>({ts:Number(x[0]),price:Number(x[1])})),
+    nextOpens,
    };
   },
   quantityNormalizer:adapter.executor,
