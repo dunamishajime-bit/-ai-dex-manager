@@ -44,7 +44,13 @@ function flat(symbol:string, entryOpen:number, lastClose=100, close24=100){
 {
   const {history}=flat("FETUSDT",125,94,100);
   const s=buildQuality102CausalV4Signal({history,decisionTs:NOW,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:true}});
-  assert.equal(s.side,0); assert.equal(s.reason,"QUALITY102_CAUSAL_V4_BASE_NOT_IDLE");
+  // Existing exposure in another runner no longer hides a valid Q102 entry.
+  // The actual entry must still pass the shared portfolio planner.
+  const withoutOtherPositions=buildQuality102CausalV4Signal({history,decisionTs:NOW,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false,basePositionActive:false}});
+  assert.equal(s.side,withoutOtherPositions.side);
+  assert.equal(s.symbol,withoutOtherPositions.symbol);
+  assert.equal(s.family,withoutOtherPositions.family);
+  assert.equal(s.reason,withoutOtherPositions.reason);
 }
 
 {
