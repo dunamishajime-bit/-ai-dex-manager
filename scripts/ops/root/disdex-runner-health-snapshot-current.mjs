@@ -3,6 +3,7 @@ import { mkdir, readFile, readlink, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
+import { resolveQuality102OperatorGateReason } from "../../../lib/disdex-q102-health-gate.mjs";
 
 const execFile = promisify(execFileCallback);
 const SYSTEMCTL = "/usr/bin/systemctl";
@@ -400,14 +401,23 @@ function stateIdentityMatches(runner, state) {
 async function runnerOperatorGateReason(runner) {
     if (runner.key !== "QUALITY102_CAUSAL_V1") return "";
     try {
-        // Reads ONLY the named runtime-enable flag; do not log or publish the
-        // Environment payload, which can also contain sensitive configuration.
-        const { stdout } = await execFile(SYSTEMCTL, [
-            "show", runner.unit, "--property=Environment", "--value", "--no-pager",
-        ], { timeout: 5_000, maxBuffer: 128 * 1024 });
-        const match = stdout.match(/(?:^|\s)QUALITY102_LIVE_ENABLED=([^\s]+)/);
-        return match && match[1].toLowerCase() === "true"
-            ? "" : "QUALITY102_LIVE_ENABLED=false_or_missing";
+        // Read the effective environment of the already-running runner. This
+        // includes EnvironmentFile values and Environment= overrides without
+        // printing or persisting any secret values. Historical selector flags
+        // remain fail-closed in the fixed resolver.
+        const { stdout: pidText } = await execFile(SYSTEMCTL, [
+            "show", runner.unit, "--property=MainPID", "--value", "--no-pager",
+        ], { timeout: 5_000, maxBuffer: 16 * 1024 });
+        const pid = Number(pidText.trim());
+        if (!Number.isInteger(pid) || pid <= 0) {
+            return "QUALITY102_OPERATOR_ENABLE_STATE_UNAVAILABLE";
+        }
+        const rawEnvironment = await readFile("/proc/" + pid + "/environ");
+        const environment = rawEnvironment.toString("utf8")
+            .split(String.fromCharCode(0))
+            .filter(Boolean)
+            .join(" ");
+        return resolveQuality102OperatorGateReason(environment);
     } catch {
         return "QUALITY102_OPERATOR_ENABLE_STATE_UNAVAILABLE";
     }
