@@ -42,8 +42,8 @@ test('order authority permits only the exact reduce-only NEAR exit and denies en
  await assert.rejects(engine.deps.fetchDecision());
 });
 test('STOP cancellation is restricted to the NEAR stop after signed flat confirmation',async()=>{
- let positions=[{symbol:'NEARUSDT',positionAmt:'-2'}], canceled=[];
- const engine={deps:{store:{read:makeDoc},accountLock:{acquire:async()=>null},adapter:{cancel:async id=>canceled.push(id)},client:{getPositions:async()=>positions},assertAuthority:async()=>{},fetchDecision:async()=>({})}};
+ let positions=[{symbol:'NEARUSDT',positionAmt:'-2'}], orders=[{symbol:'NEARUSDT',clientOrderId:stopId}], canceled=[];
+ const engine={deps:{store:{read:makeDoc},accountLock:{acquire:async()=>null},adapter:{cancel:async id=>canceled.push(id)},client:{getPositions:async()=>positions,getOpenOrders:async()=>orders},assertAuthority:async()=>{},fetchDecision:async()=>({})}};
  installNearOnlyGuards(engine);
  await assert.rejects(engine.deps.adapter.cancel(stopId));
  positions=[{symbol:'NEARUSDT',positionAmt:'0'}];
