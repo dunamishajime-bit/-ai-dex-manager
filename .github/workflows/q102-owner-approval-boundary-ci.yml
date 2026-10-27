@@ -1,0 +1,41 @@
+name: Q102 owner-authorized deployment boundary CI
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/disdex-q102-owner-approved-live.yml'
+      - '.github/workflows/q102-owner-approval-boundary-ci.yml'
+      - 'scripts/ops/q102-owner-manual-approval-*.py'
+      - 'docs/ops/Q102_GITHUB_OWNER_APPROVAL_20261028.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-owner-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert manual-only approval path and negative tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/ops/q102-owner-manual-approval-check.py scripts/ops/q102-owner-manual-approval-selftest.py
+          python3 scripts/ops/q102-owner-manual-approval-selftest.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          w = Path('.github/workflows/disdex-q102-owner-approved-live.yml').read_text()
+          assert re.search(r'^on:\s*\n\s+workflow_dispatch:', w, re.M)
+          assert not re.search(r'^\s+(push|pull_request|schedule|workflow_run):', w, re.M)
+          assert "github.actor == 'dunamishajime-bit'" in w
+          assert "github.ref == 'refs/heads/master'" in w
+          assert 'environment: q102-production-manual' in w
+          assert 'required_reviewers' in w
+          assert 'StrictHostKeyChecking=yes' in w
+          assert 'disdex-q102-owner-approved-promote' in w
+          assert 'sudo -n /usr/local/sbin/disdex-q102-owner-approved-promote' in w
+          assert 'needs: verify-exact-release' in w
+          print('Q102_OWNER_ONLY_GITHUB_DEPLOY_BOUNDARY_PASS')
+          PY
