@@ -75,8 +75,40 @@ const overCrypto = planStrictPortfolio({
     ],
     intents: [],
 });
-assert.equal(overCrypto.status, "blocked");
-assert.match(overCrypto.reason || "", /CRYPTO_GROSS/);
+// Existing gross 3.01 is slightly over the ordinary 3.0 entry target.
+// MTM/reconciliation must remain available; do not promote the observed
+// overshoot into additional crypto entry capacity.
+assert.equal(overCrypto.status, "planned");
+assert.equal(overCrypto.accepted.length, 0);
+assert.ok(Math.abs(overCrypto.totals.cryptoGross - 3.01) < 1e-9);
+
+const toleratedAt350 = planStrictPortfolio({
+    equity: 1000, now: NOW,
+    active: [
+        position({ id: "v12-a", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-b", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
+        position({ id: "pengu-a", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 1, markPrice: 10 }),
+        position({ id: "q102-a", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 115, entryPrice: 1, markPrice: 10 }),
+    ],
+    intents: [],
+});
+assert.equal(toleratedAt350.status, "planned");
+assert.ok(Math.abs(toleratedAt350.totals.cryptoGross - 3.5) < 1e-9);
+
+const noExtraCryptoRiskAboveTarget = planStrictPortfolio({
+    equity: 1000, now: NOW,
+    active: [
+        position({ id: "v12-a", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-b", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
+        position({ id: "pengu-a", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 1, markPrice: 10 }),
+        position({ id: "q102-a", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 115, entryPrice: 1, markPrice: 10 }),
+    ],
+    intents: [{ idempotencyKey: "above-target", strategy: "V12", symbol: "BNBUSDT", side: "LONG", gross: 0.1, notionalUsd: 100, signalTs: NOW }],
+});
+assert.equal(noExtraCryptoRiskAboveTarget.status, "planned");
+assert.equal(noExtraCryptoRiskAboveTarget.accepted.length, 0);
+assert.equal(noExtraCryptoRiskAboveTarget.rejected.length, 1);
+assert.ok(Math.abs(noExtraCryptoRiskAboveTarget.totals.cryptoGross - 3.5) < 1e-9);
 
 const at249 = planStrictPortfolio({
     equity: 1000,
@@ -112,8 +144,10 @@ const overTotal = planStrictPortfolio({
     ],
     intents: [],
 });
-assert.equal(overTotal.status, "blocked");
-assert.match(overTotal.reason || "", /TOTAL_GROSS/);
+// The historical 3.5 *total* hard-stop expectation is obsolete:
+// current total target is 4.25, with a distinct profit-only hard cap.
+assert.equal(overTotal.status, "planned");
+assert.ok(Math.abs(overTotal.totals.totalGross - 3.51) < 1e-9);
 
 const overQualityCap = planStrictPortfolio({
     equity: 1000,
