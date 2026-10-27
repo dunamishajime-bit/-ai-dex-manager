@@ -29,3 +29,11 @@ This workflow currently supports only Q102-scoped changes, including its indepen
 The global operator activation artifact remains mandatory. GitHub environment approval is an additional human authorization gate; it does not replace actual signed operator artifacts, live STOP evidence, or economic certification.
 
 The historical 2026-10-22 integrated backtest does **not** certify the latest Q102 admission patch. Do not claim LIVE until exact release, operator and systemd/venue evidence all pass. No automatic retries of failed real-money promotion.
+
+## Verified GitHub configuration (2026-10-28 JST)
+
+- Merged manual-only workflow into default branch: merge SHA `6babde57663ba9125f3b592ae08eec97562e86cc`.
+- GitHub Actions workflow was verified **active** on master.
+- Protected environment `q102-production-manual` was created and its **Required reviewer** verified as GitHub user `dunamishajime-bit` (self-review permitted for owner-initiated runs).
+- Existing **secret names** `DISDEX_VPS_SSH_HOST`, `DISDEX_VPS_DEPLOY_PRIVATE_KEY`, `DISDEX_VPS_KNOWN_HOSTS` confirmed registered. This does NOT prove secret values are valid.
+- **Outstanding**: owner-only VPS-side Q102 promotion controller is not confirmed installed, nor has current integrated economic BT or signed operator gate for the target release been certified. No LIVE cutover or real order was performed.
