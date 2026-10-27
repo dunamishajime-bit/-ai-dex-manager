@@ -2,7 +2,7 @@
 import {readFile,writeFile,rename,stat,chown,chmod,mkdir} from "node:fs/promises";
 import {randomUUID} from "node:crypto";
 import {dirname} from "node:path";
-import {AsterV3Client} from "../lib/aster-v3-client";
+import {AsterV3Client, type AsterPositionRiskRow, type AsterOrderResponse} from "../lib/aster-v3-client";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {readSharedCryptoDailyRisk} from "../lib/disdex-shared-crypto-daily-risk";
 import {readSharedKillSwitch,isV52ReferenceOnlyHold} from "../lib/disdex-shared-kill-switch";
@@ -14,10 +14,10 @@ const killPath=root+"/shared/kill-switch.json";
 const nearId="NEARUSDT:REC_X02_TIME_36H:SHORT:1792980000000";
 const aaveId="AAVEUSDT:REC_X06_TIME_12H:SHORT:1792980000000";
 const stopId="v12-v4-50ef46933e7018db365535fa70fd";
-const assert=(ok,msg)=>{if(!ok)throw Error("V52_SCOPE_RECOVERY_"+msg);};
-const read=async(path)=>JSON.parse(await readFile(path,"utf8"));
-const same=(a,b)=>Number.isFinite(Number(a))&&Math.abs(Number(a)-b)<=1e-6*Math.max(1,Math.abs(b));
-function eligible(k){
+function assert(ok:unknown,msg:string): asserts ok {if(!ok)throw Error("V52_SCOPE_RECOVERY_"+msg);}
+const read=async(path:string)=>JSON.parse(await readFile(path,"utf8"));
+const same=(a:unknown,b:number)=>Number.isFinite(Number(a))&&Math.abs(Number(a)-b)<=1e-6*Math.max(1,Math.abs(b));
+function eligible(k:any){
  return k?.active===true&&k.scope==="V52_REFERENCE_ONLY"&&k.action==="HOLD_PROTECTED"
    &&k.operator==="disdex-v52-aster-only"&&k.recoverable===true
    &&k.strategyId==="DISDEX_V35_STRONG_RESERVED_PENGU_V96"
@@ -38,14 +38,14 @@ async function safety(){
  const legs=v4.state?.legs||{},a=legs[aaveId],n=legs[nearId],p=v4.protections?.[nearId];
  assert(a?.status==="CLOSED"&&same(a.qty,0),"AAVE_NOT_CLOSED");
  assert(n?.status==="OPEN"&&same(n.qty,2)&&n.plannedExit==null,"NEAR_DRIFT");
- assert(Object.values(legs).filter(x=>x.status==="OPEN"&&Number(x.qty)>0).length===1,"OTHER_ACTIVE_LEGS");
+ assert(Object.values(legs).filter((x:any)=>x.status==="OPEN"&&Number(x.qty)>0).length===1,"OTHER_ACTIVE_LEGS");
  assert(p?.phase==="STOP_CONFIRMED"&&p.stopClientOrderId===stopId
    &&same(p.protectedQty,2),"NEAR_PROTECTION_DRIFT");
  const inStop=v4.intents?.[stopId];
  assert(inStop?.action==="STOP"&&inStop.stage==="ACKNOWLEDGED"&&same(inStop.command?.quantity,2),"STOP_INTENT_DRIFT");
  const pending=await read(root+"/shared/pending-exposure.json");
  const entries=Array.isArray(pending)?pending:Array.isArray(pending.entries)?pending.entries:Object.values(pending.entries||{});
- assert(entries.every(x=>x.status==="RELEASED"),"PENDING_NOT_ZERO");
+ assert(entries.every((x:any)=>x.status==="RELEASED"),"PENDING_NOT_ZERO");
  const risk=await readSharedCryptoDailyRisk(root+"/shared/crypto-daily-risk.json");
  assert(risk.ok&&risk.state?.sourceComplete&&risk.state?.tripped===false,"SHARED_RISK_NOT_HEALTHY_"+risk.reason);
  const margin=await read(root+"/shared/margin-risk/guard-live.json");
@@ -59,8 +59,8 @@ async function safety(){
   ||(q.marketOpen===true&&q.status==="ok"&&q.freshnessReady===true)),"STOCK_REFERENCE_UNSAFE");
  return k;
 }
-function venue(v){
- const p=v.positions.filter(x=>Math.abs(Number(x.positionAmt))>1e-10);
+function venue(v:{positions:AsterPositionRiskRow[];orders:AsterOrderResponse[]}){
+ const p=v.positions.filter((x:AsterPositionRiskRow)=>Math.abs(Number(x.positionAmt))>1e-10);
  assert(p.length===1&&p[0].symbol==="NEARUSDT"&&same(p[0].positionAmt,-2)
  &&same(p[0].entryPrice,4.513),"ASTER_POSITION_DRIFT");
  assert(v.orders.length===1,"ASTER_ORDER_SET_DRIFT");
@@ -71,11 +71,11 @@ function venue(v){
  return JSON.stringify({pos:[p[0].symbol,p[0].positionAmt,p[0].entryPrice],
  stop:[o.symbol,o.clientOrderId,o.side,o.type,o.status,o.origQty,o.stopPrice]});
 }
-async function signed(client){
+async function signed(client:AsterV3Client){
  const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
  return venue({positions,orders});
 }
-async function writeKill(value,ownership){
+async function writeKill(value:unknown,ownership:{uid:number;gid:number;mode:number}){
  const temp=killPath+"."+randomUUID()+".tmp";
  await writeFile(temp,JSON.stringify(value,null,2)+"\n",{mode:0o600,flag:"wx"});
  await chown(temp,ownership.uid,ownership.gid);
@@ -97,7 +97,7 @@ async function run(){
  if(apply)assert(process.argv[process.argv.indexOf("--ack")+1]===ACK,"OPERATOR_ACK_REQUIRED");
  const start=await safety(),before=await readFile(killPath);
  const client=new AsterV3Client({baseUrl:process.env.ASTER_FUTURES_BASE_URL,
- userAddress:process.env.ASTER_USER_ADDRESS,privateKey:process.env.ASTER_API_PRIVATE_KEY,
+ userAddress:process.env.ASTER_USER_ADDRESS,privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
  readOnlyRateLimitMaxRetries:0,requestTimeoutMs:10000,recvWindowMs:5000,
  userAgent:"DisDex-V52-ScopedQuoteRecovery/1"});
  assert(client.hasTradingCredentials(),"ASTER_SIGNED_CREDENTIALS_REQUIRED");
