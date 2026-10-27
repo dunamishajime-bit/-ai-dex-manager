@@ -1,0 +1,197 @@
+{
+  "canonicalSha256": "373151e21d129a8d42d5bd04b7279ad978e0eee179ae6428bac3d9ff260b7dfc",
+  "caseCount": 17,
+  "caseOutcomes": [
+    {
+      "backupCreated": true,
+      "case": "baseline_cross_5x",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "isolated_5x",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "isolated_20x",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "isolated_50x",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "cross_20x",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "cross_50x",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "missing_margin_type",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "missing_leverage",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "invalid_margin_type",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "invalid_leverage_string",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "leverage_zero",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "leverage_negative",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": true,
+      "case": "leverage_500",
+      "expected": "pass",
+      "manualReviewCleared": true,
+      "observed": "pass"
+    },
+    {
+      "backupCreated": false,
+      "case": "wrong_stop_price",
+      "expected": "rejected",
+      "manualReviewCleared": false,
+      "observed": "rejected"
+    },
+    {
+      "backupCreated": false,
+      "case": "missing_stop",
+      "expected": "rejected",
+      "manualReviewCleared": false,
+      "observed": "rejected"
+    },
+    {
+      "backupCreated": false,
+      "case": "pending_reject",
+      "expected": "rejected",
+      "manualReviewCleared": false,
+      "observed": "rejected"
+    },
+    {
+      "backupCreated": false,
+      "case": "wrong_side",
+      "expected": "rejected",
+      "manualReviewCleared": false,
+      "observed": "rejected"
+    }
+  ],
+  "controlCases": [
+    "wrong_stop_price",
+    "missing_stop",
+    "pending_reject",
+    "wrong_side"
+  ],
+  "finding": "Protected-rate-budget recovery does not verify Aster position marginType/leverage against cross/5x policy; CLI adapter drops both fields.",
+  "gross": 0.25,
+  "limits": "Synthetic venue only; no proof of actual Aster mismatches, Native8 wiring, Production occurrence, or other Margin Guard absence.",
+  "nativeAllocator": "NEED_NATIVE_ALLOCATOR",
+  "orderAuthorized": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "priorNotifiedCheckedThrough": "2026-10-27 10:22 venue-postreadback-commit; earlier known SHA/branches checked",
+  "productionModified": false,
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "sixProcesses": [
+    {
+      "canonicalSha256": "373151e21d129a8d42d5bd04b7279ad978e0eee179ae6428bac3d9ff260b7dfc",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "373151e21d129a8d42d5bd04b7279ad978e0eee179ae6428bac3d9ff260b7dfc",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "373151e21d129a8d42d5bd04b7279ad978e0eee179ae6428bac3d9ff260b7dfc",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "373151e21d129a8d42d5bd04b7279ad978e0eee179ae6428bac3d9ff260b7dfc",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "373151e21d129a8d42d5bd04b7279ad978e0eee179ae6428bac3d9ff260b7dfc",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "OO"
+    },
+    {
+      "canonicalSha256": "373151e21d129a8d42d5bd04b7279ad978e0eee179ae6428bac3d9ff260b7dfc",
+      "caseCount": 17,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "OO"
+    }
+  ],
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceEvidence": "GitHub raw byte pin via gh api; original TypeScript via Node stripTypeScriptTypes + VM; real Windows filesystem; synthetic Aster position/order arrays",
+  "sourceRawSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09"
+  },
+  "sourceScriptSha256": "3338639adea1172780ce47fdc30e43915e08309a92a30376595c7e7278fa9d4c",
+  "status": "PASS",
+  "totalCases": 102,
+  "venueResponse": "synthetic",
+  "workScope": "C:/Users/dis/render4427-research-only only; no C:/tmp; no VPS/LIVE/Production/HP/order mutation"
+}
