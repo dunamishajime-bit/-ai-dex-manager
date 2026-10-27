@@ -1100,15 +1100,18 @@ export class Quality102CausalV1Runner {
                 maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
                 quality102CausalV1Ready: true,
             });
+            if (live.positions.some(nonZero) && planner.reductions.length > 0) {
+                throw new Error("Q102_PENDING_CANNOT_DISPLACE_EXISTING_RUNNER_EXPOSURE");
+            }
             const fetReduction = planner.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
-            if (fetReduction && await this.preemptFetForCoreEntry(pending.idempotencyKey)) {
+            if (!live.positions.some(nonZero) && fetReduction && await this.preemptFetForCoreEntry(pending.idempotencyKey)) {
                 return this.validatePendingExecutionWindow(state, pending, allowDynamicTrim);
             }
             const accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
             const capacityShortfall = planner.status !== "planned"
                 || !accepted
                 || accepted.gross + EPSILON < targetGross;
-            if (capacityShortfall && allowDynamicTrim
+            if (capacityShortfall && allowDynamicTrim && !live.positions.some(nonZero)
                 && await this.trimDynamicForCoreEntry(live.positions, live.equity, targetGross, pending.idempotencyKey)) {
                 return this.validatePendingExecutionWindow(state, pending, false);
             }
@@ -1380,7 +1383,7 @@ export class Quality102CausalV1Runner {
         }
         const entrySide = signal.side > 0 ? "LONG" : "SHORT";
         const targetGross = Math.min(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross);
-        if (lock && this.dependencies.config.v12DynamicAdapter) {
+        if (lock && this.dependencies.config.v12DynamicAdapter && !positions.some(nonZero)) {
             const residualPreemption = await releaseIdleResidualLongForFormalEntry({
                 executor: this.dependencies.executor,
                 adapter: this.dependencies.config.v12DynamicAdapter,
@@ -1425,8 +1428,16 @@ export class Quality102CausalV1Runner {
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
             quality102CausalV1Ready: true,
         });
+        // Q102 uses uncommitted gross only. Never displace another runner
+        // merely because the signal is now evaluated while the account is occupied.
+        const otherRunnerExposurePresent = positions.some(nonZero);
+        if (otherRunnerExposurePresent && planner.reductions.length > 0) {
+            state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: "Q102_ONLY_FREE_GROSS_NO_CROSS_RUNNER_REDUCTION", signal, ordersSent: 0 };
+        }
         const fetReduction = planner.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
-        if (fetReduction && await this.preemptFetForCoreEntry(`${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`)) {
+        if (!otherRunnerExposurePresent && fetReduction && await this.preemptFetForCoreEntry(`${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`)) {
             const [freshAccount, freshPositions] = await Promise.all([
                 this.dependencies.executor.getAccountSnapshot(),
                 this.dependencies.executor.getPositions(),
@@ -1438,7 +1449,7 @@ export class Quality102CausalV1Runner {
         const capacityShortfall = planner.status !== "planned"
             || !accepted
             || accepted.gross + EPSILON < targetGross;
-        if (capacityShortfall && allowDynamicTrim
+        if (capacityShortfall && allowDynamicTrim && !otherRunnerExposurePresent
             && await this.trimDynamicForCoreEntry(
                 positions,
                 equity,
@@ -1454,7 +1465,7 @@ export class Quality102CausalV1Runner {
         }
         const plannerReason = planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason;
         const explicitSharedCapacityBlock = !accepted && isSharedCapacityBlock(plannerReason);
-        const sidecarCausesCapacity = lock && allowHypeZecPreemption && explicitSharedCapacityBlock
+        const sidecarCausesCapacity = lock && !otherRunnerExposurePresent && allowHypeZecPreemption && explicitSharedCapacityBlock
             ? isHypeZecSoleSharedCapacityCause({
                 positions,
                 equityUsd: equity,
