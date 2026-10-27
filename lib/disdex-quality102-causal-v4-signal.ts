@@ -98,7 +98,10 @@ export function buildQuality102CausalV4Signal(
     const occupied = input.sleeveOccupancy.activePosition || input.sleeveOccupancy.unresolvedPendingEntry;
     if (occupied) return { ...legacy, brkEnabled: true };
     const entryTs = currentHour(input.decisionTs);
-    if (input.sleeveOccupancy.basePositionActive) return idleSignal(legacy, "QUALITY102_CAUSAL_V4_BASE_NOT_IDLE", entryTs);
+    // Other runners' exposure must not veto the Q102 signal. Selection is
+    // independent; the live entry path subsequently checks same-symbol ownership,
+    // open-order conflicts and the strict shared gross/risk portfolio planner.
+    // Keep Q102's own active/pending occupancy gate above unchanged.
 
     if (legacy.side !== 0 && legacy.symbol) {
         const entryOpen = input.history.entryOpenBySymbol?.[legacy.symbol];
