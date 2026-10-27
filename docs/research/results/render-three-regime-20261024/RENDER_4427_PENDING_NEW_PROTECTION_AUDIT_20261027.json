@@ -1,0 +1,345 @@
+{
+  "allMatch": true,
+  "canonicalSha256": "ff228d9546ee9885d51014bd61040f2f6f79dbe7b5a2c4f3756a1ce881e1002f",
+  "casesDetail": [
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "baseline",
+      "reason": "",
+      "status": "pass",
+      "stopStatus": "NEW",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "stop_pending_new",
+      "reason": "",
+      "status": "pass",
+      "stopStatus": "PENDING_NEW",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "tp_pending_new",
+      "reason": "",
+      "status": "pass",
+      "stopStatus": "NEW",
+      "tpStatus": "PENDING_NEW"
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "both_pending_new",
+      "reason": "",
+      "status": "pass",
+      "stopStatus": "PENDING_NEW",
+      "tpStatus": "PENDING_NEW"
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "stop_partially_filled",
+      "reason": "",
+      "status": "pass",
+      "stopStatus": "PARTIALLY_FILLED",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": true,
+      "finalReview": null,
+      "kind": "tp_partially_filled",
+      "reason": "",
+      "status": "pass",
+      "stopStatus": "NEW",
+      "tpStatus": "PARTIALLY_FILLED"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "stop_pending_cancel_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "PENDING_CANCEL",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "tp_pending_cancel_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "PENDING_CANCEL"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "stop_canceled_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "CANCELED",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "tp_expired_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "EXPIRED"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "stop_filled_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "FILLED",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "tp_filled_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "FILLED"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_stop_price",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "missing_stop",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "pending_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PENDING_PRESENT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_side",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_POSITION_INVALID:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "NEW"
+    },
+    {
+      "backupExists": false,
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "unmanaged_new_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_UNMANAGED_ORDER:RENDERUSDT",
+      "status": "rejected",
+      "stopStatus": "NEW",
+      "tpStatus": "NEW"
+    }
+  ],
+  "conclusion": "Original TypeScript accepts PENDING_NEW STOP_MARKET and/or TAKE_PROFIT_MARKET as active protection and clears manualReview on synthetic venue readback, without separate venue acceptance/fill proof.",
+  "gross": 0.25,
+  "launchers": [
+    {
+      "accepted": [
+        "baseline",
+        "stop_pending_new",
+        "tp_pending_new",
+        "both_pending_new",
+        "stop_partially_filled",
+        "tp_partially_filled"
+      ],
+      "cases": 17,
+      "exit": 0,
+      "launcher": 1,
+      "mode": "normal",
+      "rejected": [
+        "stop_pending_cancel_reject",
+        "tp_pending_cancel_reject",
+        "stop_canceled_reject",
+        "tp_expired_reject",
+        "stop_filled_reject",
+        "tp_filled_reject",
+        "wrong_stop_price",
+        "missing_stop",
+        "pending_reject",
+        "wrong_side",
+        "unmanaged_new_reject"
+      ],
+      "sha256": "ff228d9546ee9885d51014bd61040f2f6f79dbe7b5a2c4f3756a1ce881e1002f"
+    },
+    {
+      "accepted": [
+        "baseline",
+        "stop_pending_new",
+        "tp_pending_new",
+        "both_pending_new",
+        "stop_partially_filled",
+        "tp_partially_filled"
+      ],
+      "cases": 17,
+      "exit": 0,
+      "launcher": 2,
+      "mode": "normal",
+      "rejected": [
+        "stop_pending_cancel_reject",
+        "tp_pending_cancel_reject",
+        "stop_canceled_reject",
+        "tp_expired_reject",
+        "stop_filled_reject",
+        "tp_filled_reject",
+        "wrong_stop_price",
+        "missing_stop",
+        "pending_reject",
+        "wrong_side",
+        "unmanaged_new_reject"
+      ],
+      "sha256": "ff228d9546ee9885d51014bd61040f2f6f79dbe7b5a2c4f3756a1ce881e1002f"
+    },
+    {
+      "accepted": [
+        "baseline",
+        "stop_pending_new",
+        "tp_pending_new",
+        "both_pending_new",
+        "stop_partially_filled",
+        "tp_partially_filled"
+      ],
+      "cases": 17,
+      "exit": 0,
+      "launcher": 1,
+      "mode": "O",
+      "rejected": [
+        "stop_pending_cancel_reject",
+        "tp_pending_cancel_reject",
+        "stop_canceled_reject",
+        "tp_expired_reject",
+        "stop_filled_reject",
+        "tp_filled_reject",
+        "wrong_stop_price",
+        "missing_stop",
+        "pending_reject",
+        "wrong_side",
+        "unmanaged_new_reject"
+      ],
+      "sha256": "ff228d9546ee9885d51014bd61040f2f6f79dbe7b5a2c4f3756a1ce881e1002f"
+    },
+    {
+      "accepted": [
+        "baseline",
+        "stop_pending_new",
+        "tp_pending_new",
+        "both_pending_new",
+        "stop_partially_filled",
+        "tp_partially_filled"
+      ],
+      "cases": 17,
+      "exit": 0,
+      "launcher": 2,
+      "mode": "O",
+      "rejected": [
+        "stop_pending_cancel_reject",
+        "tp_pending_cancel_reject",
+        "stop_canceled_reject",
+        "tp_expired_reject",
+        "stop_filled_reject",
+        "tp_filled_reject",
+        "wrong_stop_price",
+        "missing_stop",
+        "pending_reject",
+        "wrong_side",
+        "unmanaged_new_reject"
+      ],
+      "sha256": "ff228d9546ee9885d51014bd61040f2f6f79dbe7b5a2c4f3756a1ce881e1002f"
+    },
+    {
+      "accepted": [
+        "baseline",
+        "stop_pending_new",
+        "tp_pending_new",
+        "both_pending_new",
+        "stop_partially_filled",
+        "tp_partially_filled"
+      ],
+      "cases": 17,
+      "exit": 0,
+      "launcher": 1,
+      "mode": "OO",
+      "rejected": [
+        "stop_pending_cancel_reject",
+        "tp_pending_cancel_reject",
+        "stop_canceled_reject",
+        "tp_expired_reject",
+        "stop_filled_reject",
+        "tp_filled_reject",
+        "wrong_stop_price",
+        "missing_stop",
+        "pending_reject",
+        "wrong_side",
+        "unmanaged_new_reject"
+      ],
+      "sha256": "ff228d9546ee9885d51014bd61040f2f6f79dbe7b5a2c4f3756a1ce881e1002f"
+    },
+    {
+      "accepted": [
+        "baseline",
+        "stop_pending_new",
+        "tp_pending_new",
+        "both_pending_new",
+        "stop_partially_filled",
+        "tp_partially_filled"
+      ],
+      "cases": 17,
+      "exit": 0,
+      "launcher": 2,
+      "mode": "OO",
+      "rejected": [
+        "stop_pending_cancel_reject",
+        "tp_pending_cancel_reject",
+        "stop_canceled_reject",
+        "tp_expired_reject",
+        "stop_filled_reject",
+        "tp_filled_reject",
+        "wrong_stop_price",
+        "missing_stop",
+        "pending_reject",
+        "wrong_side",
+        "unmanaged_new_reject"
+      ],
+      "sha256": "ff228d9546ee9885d51014bd61040f2f6f79dbe7b5a2c4f3756a1ce881e1002f"
+    }
+  ],
+  "limitations": "Synthetic venue adapter and state only. No authentic Aster status occurrence, native8 wiring, production execution, real order, or OOS economic validation.",
+  "next": "Verify real operator caller, Aster response status semantics and authoritative order acknowledgement, then account lock, native allocator and 13 GateProof.",
+  "order_authorized": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "sourceRawSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09"
+  },
+  "sourceRef": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "status": "RESEARCH_ONLY_NEED_NATIVE_ALLOCATOR_ORDER_AUTHORIZED_FALSE",
+  "totalCases": 102
+}
