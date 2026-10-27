@@ -1,0 +1,209 @@
+{
+  "auditScriptSha256": "f8f91ca0eec4832ae8a66b7fa0f70df89629b068265b03670d63846d1e012a6c",
+  "canonicalSha256": "be098169b8f86866964f855d8719f7dae32035693d0f76289878b45e980db38e",
+  "caseMatrix": [
+    {
+      "finalReview": null,
+      "kind": "baseline_same_sha",
+      "reason": "",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "pass"
+    },
+    {
+      "finalReview": null,
+      "kind": "relabel_b",
+      "reason": "",
+      "secondBackupExists": false,
+      "stateSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "status": "pass"
+    },
+    {
+      "finalReview": null,
+      "kind": "relabel_c",
+      "reason": "",
+      "secondBackupExists": false,
+      "stateSha": "cccccccccccccccccccccccccccccccccccccccc",
+      "status": "pass"
+    },
+    {
+      "finalReview": null,
+      "kind": "relabel_zero",
+      "reason": "",
+      "secondBackupExists": false,
+      "stateSha": "0000000000000000000000000000000000000000",
+      "status": "pass"
+    },
+    {
+      "finalReview": null,
+      "kind": "relabel_f",
+      "reason": "",
+      "secondBackupExists": false,
+      "stateSha": "ffffffffffffffffffffffffffffffffffffffff",
+      "status": "pass"
+    },
+    {
+      "finalReview": null,
+      "kind": "relabel_chain_b_c",
+      "reason": "",
+      "secondBackupExists": true,
+      "stateSha": "cccccccccccccccccccccccccccccccccccccccc",
+      "status": "pass"
+    },
+    {
+      "finalReview": null,
+      "kind": "relabel_already_reconciled",
+      "reason": "",
+      "secondBackupExists": false,
+      "stateSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "status": "pass"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "relabel_missing_source_reject",
+      "reason": "IDLE_STATE_RUNTIME_SHA_MISMATCH",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "relabel_wrong_source_reject",
+      "reason": "IDLE_STATE_RUNTIME_SHA_MISMATCH",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "invalid_expected_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_EXPECTED_SHA_INVALID",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "invalid_source_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_SOURCE_SHA_INVALID",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_stop_price",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "missing_stop",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID:RENDERUSDT",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "pending_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PENDING_PRESENT",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "wrong_side",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_POSITION_INVALID:RENDERUSDT",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    },
+    {
+      "finalReview": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:500",
+      "kind": "empty_positions_reject",
+      "reason": "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_STATE_INVALID",
+      "secondBackupExists": false,
+      "stateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "rejected"
+    }
+  ],
+  "existingWorktreeModified": false,
+  "gross": 0.25,
+  "knownPriorCommitCountCheckedViaGitHub": 35,
+  "limitations": [
+    "Standalone protected recovery function; caller authorization and production operator gate not certified",
+    "Synthetic venue readback; no genuine Aster receipt",
+    "No proof that arbitrary expectedSha is reachable through production operator",
+    "No Native8 allocator or 13 GateProof; no OOS economic validation"
+  ],
+  "nativeAllocator": "NEED_NATIVE_ALLOCATOR",
+  "orderAuthorized": false,
+  "owner": "IDLE_RENDER_INDEPENDENT_SHORT_RESEARCH",
+  "productionModified": false,
+  "route": "IDLE_RENDER_IND_BTC_DIVERGENCE_SELL55_SHORT",
+  "sixProcesses": [
+    {
+      "canonicalSha256": "be098169b8f86866964f855d8719f7dae32035693d0f76289878b45e980db38e",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "be098169b8f86866964f855d8719f7dae32035693d0f76289878b45e980db38e",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "normal"
+    },
+    {
+      "canonicalSha256": "be098169b8f86866964f855d8719f7dae32035693d0f76289878b45e980db38e",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "be098169b8f86866964f855d8719f7dae32035693d0f76289878b45e980db38e",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "O"
+    },
+    {
+      "canonicalSha256": "be098169b8f86866964f855d8719f7dae32035693d0f76289878b45e980db38e",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "a",
+      "mode": "OO"
+    },
+    {
+      "canonicalSha256": "be098169b8f86866964f855d8719f7dae32035693d0f76289878b45e980db38e",
+      "caseCount": 16,
+      "exitCode": 0,
+      "launcher": "b",
+      "mode": "OO"
+    }
+  ],
+  "sourceBehavior": {
+    "externalCommitAttestationInsideRecovery": false,
+    "inputExpectedShaCheckedOnlyAs40Hex": true,
+    "inputSourceShaValidatesOldState": true,
+    "newStateRuntimeShaAssignedFromInputExpectedSha": true,
+    "repeatedRelabelAccepted": true
+  },
+  "sourceCommit": "939b59da49ce7960485a2004b0068dc63417ae82",
+  "sourceRawSha256": {
+    "config/idlePriorityShortPolicy.ts": "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8",
+    "lib/aster-v3-client.ts": "4c245ed0e9bbcdeac4796f19596928d36647fb6f1b0008fdb102a2d2f16b0baf",
+    "lib/idle-priority-short-state.ts": "4f09cb0c7f430ffde65c993b7ac57af8284605eefa89df2d11973bb77ec09f07",
+    "scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts": "70f319371e39e22d0df3b355b079c8336e5d205f022fe6ee752e218f60a4fc09"
+  },
+  "status": "RESEARCH_ONLY_NEW_FINDING_SHA_LINEAGE_REBIND",
+  "syntheticVenue": true,
+  "totalCases": 96
+}
