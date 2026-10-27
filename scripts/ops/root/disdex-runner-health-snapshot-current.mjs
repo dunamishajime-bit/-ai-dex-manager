@@ -315,13 +315,28 @@ async function sharedRiskStatus(now) {
     }
 }
 
+// The only scoped exception is the authenticated V52 quote-staleness
+// HOLD_PROTECTED incident. Unknown scope/action/owner/reason stays GLOBAL.
+// This classification affects monitoring only; it NEVER writes risk state.
+export function classifySharedKillSwitch(value) {
+    if (!value || value.active !== true) return { active: false, globalReason: "", scopedReason: "", scope: null };
+    const reason = String(value.reason || "shared kill switch active");
+    const v52ReferenceOnly = value.scope === "V52_REFERENCE_ONLY"
+        && value.action === "HOLD_PROTECTED"
+        && value.recoverable === true
+        && value.operator === "disdex-v52-aster-only"
+        && value.strategyId === "DISDEX_V35_STRONG_RESERVED_PENGU_V96"
+        && /^V52 recoverable tick error: HTTP 503 http:\/\/127\.0\.0\.1:8797\/quote\?symbol=[A-Z0-9]+: /.test(reason)
+        && reason.includes('"error":"stale_quote"');
+    return v52ReferenceOnly
+        ? { active: true, globalReason: "", scopedReason: reason, scope: "V52_REFERENCE_ONLY" }
+        : { active: true, globalReason: reason, scopedReason: "", scope: "GLOBAL" };
+}
 async function sharedKillSwitch() {
-    try {
-        const value = await json(KILL_SWITCH_PATH);
-        return value && value.active === true ? String(value.reason || "shared kill switch active") : "";
-    } catch (error) {
-        if (error?.code === "ENOENT") return "";
-        return "shared kill switch could not be read";
+    try { return classifySharedKillSwitch(await json(KILL_SWITCH_PATH)); }
+    catch (error) {
+        if (error?.code === "ENOENT") return classifySharedKillSwitch(null);
+        return { active: true, globalReason: "shared kill switch could not be read", scopedReason: "", scope: "GLOBAL" };
     }
 }
 async function marginGuardStatus(now) {
@@ -380,6 +395,22 @@ function stateIdentityMatches(runner, state) {
         || (runner.key === "V52" && strategyId === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96")
         || (runner.key === "HYPE_TREND_LONG" && state?.schema === "disdex-hype-zec-long/v1" && state?.mode === "LIVE" && String(state?.runtimeCommitSha || "").toLowerCase() === runner.expectedSha)
         || (runner.key === "IDLE_PRIORITY_SHORT" && state?.schema === "disdex-idle-priority-state/v2" && String(state?.runtimeSha || "").toLowerCase() === runner.expectedSha);
+}
+
+async function runnerOperatorGateReason(runner) {
+    if (runner.key !== "QUALITY102_CAUSAL_V1") return "";
+    try {
+        // Reads ONLY the named runtime-enable flag; do not log or publish the
+        // Environment payload, which can also contain sensitive configuration.
+        const { stdout } = await execFile(SYSTEMCTL, [
+            "show", runner.unit, "--property=Environment", "--value", "--no-pager",
+        ], { timeout: 5_000, maxBuffer: 128 * 1024 });
+        const match = stdout.match(/(?:^|\s)QUALITY102_LIVE_ENABLED=([^\s]+)/);
+        return match && match[1].toLowerCase() === "true"
+            ? "" : "QUALITY102_LIVE_ENABLED=false_or_missing";
+    } catch {
+        return "QUALITY102_OPERATOR_ENABLE_STATE_UNAVAILABLE";
+    }
 }
 
 async function buildHeartbeat(runner, now, globalBlockReason) {
@@ -497,11 +528,14 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
     const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
+    const operatorGateReason = await runnerOperatorGateReason(runner);
     const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
         ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
         : manualReviewReason
             ? manualReviewReason
-            : !identityOk
+            : operatorGateReason
+                ? operatorGateReason
+                : !identityOk
                 ? `${runner.key} service identity is not current`
                 : !stateIdentityMatches(runner, state)
                     ? `${runner.key} state identity is invalid`
@@ -535,6 +569,8 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if(runner.key === "V12_V4") heartbeat.v12v4={operationMode:String(state?.operationMode||""),status:String(state?.status||""),candidateCount:Number(state?.candidateCount||0)};
     if (runner.key === "QUALITY102_CAUSAL_V1") {
         heartbeat.quality102 = {
+            operatorLiveEnabled: !operatorGateReason,
+            operatorGateReason: operatorGateReason || null,
             selectorMode: "CAUSAL_V4",
             historicalSelectorParity: false,
             brkLiveEnabled: true,
@@ -544,6 +580,13 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         heartbeat.idle = {
             parityCertificatePath: runner.parityCertificatePath,
             parityVerified: !parityReason,
+        };
+    }
+    if (runner.key === "HYPE_TREND_LONG" && state?.lastDecision) {
+        heartbeat.latestDecision = {
+            accepted: state.lastDecision.accepted === true,
+            reason: String(state.lastDecision.reason || "").slice(0, 200),
+            signalTs: state.lastDecision.signalTs ?? null,
         };
     }
     if (blockedReason) heartbeat.healthReason = blockedReason;
@@ -573,17 +616,18 @@ function summarizeOverallSafety(globalReasons, results) {
 
 async function main() {
     const now = Date.now();
-    const killReason = await sharedKillSwitch();
+    const kill = await sharedKillSwitch();
     const sharedRisk = await sharedRiskStatus(now);
     const sharedRiskService = await safetyServiceStatus("Shared Risk", SHARED_RISK_UNIT, SHARED_RISK_RELEASE_ROOT, "scripts/disdex-shared-crypto-risk-writer.ts");
     const marginGuard = await marginGuardStatus(now);
     const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, MARGIN_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
     const asterRateBudget = await sharedAsterRateBudgetStatus(now);
-    const globalReasons = [killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
+    const globalReasons = [kill.globalReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
     const globalBlockReason = globalReasons.join("; ");
     const results = [];
     for (const runner of RUNNERS) {
-        const { heartbeat, diagnostics } = await buildHeartbeat(runner, now, globalBlockReason);
+        const runnerBlockReason = [globalBlockReason, runner.key === "V52" ? kill.scopedReason : ""].filter(Boolean).join("; ");
+        const { heartbeat, diagnostics } = await buildHeartbeat(runner, now, runnerBlockReason);
         await atomicJson(`${HEALTH_ROOT}/heartbeats/${runner.heartbeatFile}`, heartbeat);
         results.push({ runner: runner.key, safetyState: heartbeat.safetyState, stateAt: heartbeat.lastTickAt, ...diagnostics });
     }
@@ -608,7 +652,10 @@ async function main() {
         disabledRunners: overall.disabledRunners,
         enabledRunnerBlocks: overall.enabledRunnerBlocks,
         blockReasons: overall.blockReasons,
-        sharedKillSwitchActive: Boolean(killReason),
+        sharedKillSwitchActive: kill.active,
+        sharedKillSwitchScope: kill.scope,
+        sharedKillSwitchGlobalBlock: Boolean(kill.globalReason),
+        v52ReferenceHoldReason: kill.scopedReason || null,
         sharedRisk,
         sharedRiskService,
         marginGuard,
@@ -622,6 +669,29 @@ async function main() {
 }
 
 function selfTest() {
+    const scoped = classifySharedKillSwitch({
+        active: true, action: "HOLD_PROTECTED", recoverable: true,
+        operator: "disdex-v52-aster-only", strategyId: "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+        scope: "V52_REFERENCE_ONLY",
+        reason: 'V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote","ageMs":32286}',
+    });
+    if (!scoped.active || scoped.globalReason || scoped.scope !== "V52_REFERENCE_ONLY" || !scoped.scopedReason)
+        throw new Error("V52 scoped quote hold was not isolated");
+    for (const changed of [
+        { scope: "GLOBAL" }, { operator: "different-operator" }, { action: "FLATTEN_MANAGED" },
+        { recoverable: false }, { reason: "V52 recoverable tick error: unexpected risk failure" },
+        { reason: 'V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"quote_unavailable"}' },
+    ]) {
+        const candidate = classifySharedKillSwitch({
+            active: true, action: "HOLD_PROTECTED", recoverable: true,
+            operator: "disdex-v52-aster-only", strategyId: "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+            scope: "V52_REFERENCE_ONLY",
+            reason: 'V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote"}',
+            ...changed,
+        });
+        if (candidate.scope !== "GLOBAL" || !candidate.globalReason || candidate.scopedReason)
+            throw new Error("Unexpected shared kill scope must fail closed");
+    }
     const healthyBudget = classifySharedAsterRateBudget({ schema: "disdex-aster-rate-budget/v1", nextAllowedAt: 11_000 }, 10_000);
     const degradedBudget = classifySharedAsterRateBudget({ schema: "disdex-aster-rate-budget/v1", nextAllowedAt: 25_001 }, 10_000);
     const invalidBudget = classifySharedAsterRateBudget({ schema: "unexpected", nextAllowedAt: 10_000 }, 10_000);
