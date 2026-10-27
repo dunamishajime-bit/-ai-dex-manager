@@ -11,6 +11,11 @@ from pathlib import Path
 from typing import Mapping
 
 EPSILON = 1e-9
+# 3.0x remains the normal crypto *entry* target. Price/mark-to-market
+# movements in EXISTING crypto positions are tolerated up to 3.5x
+# without disabling V52's risk snapshots or existing protective exits.
+# This value must never be used as a fresh crypto entry budget.
+CRYPTO_GROSS_PASSIVE_DRIFT_TOLERANCE = 3.5
 
 
 @dataclass(frozen=True)
@@ -476,8 +481,15 @@ def validate_gross_snapshot(snapshot: Mapping[str, object], caps: StrictPortfoli
         raise RuntimeError("STRICT_PORTFOLIO_EQUITY_NOT_POSITIVE")
     if min(crypto, stock, total) < -EPSILON:
         raise RuntimeError("STRICT_PORTFOLIO_NEGATIVE_GROSS")
-    if crypto > caps.crypto_gross + EPSILON:
-        raise RuntimeError(f"CRYPTO_GROSS_OVER_CAP:{crypto:.9f}>{caps.crypto_gross:.9f}")
+    # Passive overhang is not a new order. Keep the strict normal entry cap
+    # separate from the observed-position tolerance; hard/stale/total/stock
+    # checks below remain fail-closed.
+    passive_crypto_limit = (
+        CRYPTO_GROSS_PASSIVE_DRIFT_TOLERANCE
+        if caps == STRICT_CAPS else caps.crypto_gross
+    )
+    if crypto > passive_crypto_limit + EPSILON:
+        raise RuntimeError(f"CRYPTO_GROSS_OVER_CAP:{crypto:.9f}>{passive_crypto_limit:.9f}")
     if stock > caps.stock_gross + EPSILON:
         raise RuntimeError(f"STOCK_GROSS_OVER_CAP:{stock:.9f}>{caps.stock_gross:.9f}")
     if total > caps.total_gross + EPSILON:
@@ -545,6 +557,45 @@ def self_test() -> None:
         "DISDEX_V52_PORTFOLIO_GROSS_CAP": "4.25",
     })
     assert caps.crypto_gross == 3.0
+    assert CRYPTO_GROSS_PASSIVE_DRIFT_TOLERANCE == 3.5
+    # No new crypto budget is ever granted: only V52's existing book
+    # reconciliation and stock capacity may proceed within the total cap.
+    for observed in (3.01, 3.25, 3.50):
+        snap = validate_gross_snapshot({
+            "equityUsd": 1000,
+            "cryptoGross": observed,
+            "stockGross": 0.25,
+            "totalGross": observed + 0.25,
+        })
+        assert abs(snap["cryptoGross"] - observed) < EPSILON
+    drift_stock = plan_v52_stock_capacity({
+        "equityUsd": 1000, "cryptoGross": 3.5,
+        "stockGross": 0.0, "totalGross": 3.5,
+    }, 1.0, 1.0)
+    assert drift_stock["status"] == "planned"
+    assert abs(drift_stock["acceptedGross"] - 0.75) < EPSILON
+    assert drift_stock["cryptoGrossCap"] == 3.0
+    for invalid_crypto in (3.50001, 5.00001):
+        try:
+            validate_gross_snapshot({
+                "equityUsd": 1000,
+                "cryptoGross": invalid_crypto,
+                "stockGross": 0.0,
+                "totalGross": invalid_crypto,
+            })
+            raise AssertionError("Gross above passive 3.5 tolerance must not pass")
+        except RuntimeError as error:
+            assert "CRYPTO_GROSS_OVER_CAP" in str(error)
+    try:
+        validate_gross_snapshot({
+            "equityUsd": 1000,
+            "cryptoGross": 3.5,
+            "stockGross": 1.0,
+            "totalGross": 4.5,
+        })
+        raise AssertionError("Total 4.25 cap remains independent")
+    except RuntimeError as error:
+        assert "TOTAL_GROSS_OVER_CAP" in str(error)
     at_limit = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 3.0, "stockGross": 1.25, "totalGross": 4.25}, 1.0, 1.0)
     assert at_limit["status"] == "blocked"
     residual = plan_v52_stock_capacity({"equityUsd": 1000, "cryptoGross": 2.25, "stockGross": 0.5, "totalGross": 2.75}, 1.0, 1.0)
