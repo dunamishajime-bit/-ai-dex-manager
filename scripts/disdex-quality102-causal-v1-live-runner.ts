@@ -621,7 +621,36 @@ async function main(): Promise<void> {
     process.on("SIGTERM", stop);
     do {
         const result = await built.runner.tick();
-        console.log(JSON.stringify({ timestamp: new Date().toISOString(), ...result }));
+        const tickTimestamp = new Date().toISOString();
+        console.log(JSON.stringify({ timestamp: tickTimestamp, ...result }));
+        // Read-only decision evidence for HP. A write failure never changes
+        // order eligibility, broker state or the safety-gate decision.
+        try {
+            const target = resolve(built.config.stateRoot, "last-tick.json");
+            const temporary = `${target}.${process.pid}.tmp`;
+            const evidence = {
+                schemaVersion: 1,
+                timestamp: tickTimestamp,
+                runtimeCommitSha: built.config.runtimeCommitSha,
+                mode: built.config.mode,
+                status: result.status,
+                message: result.message,
+                ordersSent: result.ordersSent,
+                signal: result.signal ? {
+                    symbol: result.signal.symbol,
+                    family: result.signal.family,
+                    side: result.signal.side,
+                    requestedGross: result.signal.requestedGross,
+                    reason: result.signal.reason,
+                } : undefined,
+            };
+            await writeFile(temporary, JSON.stringify(evidence) + "\n", { encoding: "utf8", mode: 0o600 });
+            await rename(temporary, target);
+        } catch (error) {
+            console.warn(JSON.stringify({ level: "warn", strategyId: QUALITY102_CAUSAL_V1.strategyId,
+                message: "Q102_LAST_TICK_OBSERVABILITY_WRITE_FAILED",
+                detail: error instanceof Error ? error.message : String(error) }));
+        }
         if (!daemon || stopping || result.status === "manual-review") {
             if (result.status === "manual-review") process.exitCode = 2;
             break;
