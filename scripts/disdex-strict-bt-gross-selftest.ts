@@ -110,6 +110,34 @@ assert.equal(noExtraCryptoRiskAboveTarget.accepted.length, 0);
 assert.equal(noExtraCryptoRiskAboveTarget.rejected.length, 1);
 assert.ok(Math.abs(noExtraCryptoRiskAboveTarget.totals.cryptoGross - 3.5) < 1e-9);
 
+const stopsExactlyAtOrdinaryCryptoEntryTarget = planStrictPortfolio({
+    equity: 1000, now: NOW,
+    active: [
+        position({ id: "v12-a", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-b", strategy: "V12", symbol: "BTCUSDT", quantity: 99, entryPrice: 1, markPrice: 10 }),
+        position({ id: "pengu-a", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+    ],
+    intents: [{ idempotencyKey: "limit-to-normal-3", strategy: "V12", symbol: "BNBUSDT", side: "LONG", gross: 0.05, notionalUsd: 50, signalTs: NOW }],
+});
+assert.equal(stopsExactlyAtOrdinaryCryptoEntryTarget.status, "planned");
+assert.equal(stopsExactlyAtOrdinaryCryptoEntryTarget.accepted.length, 1);
+assert.ok(Math.abs(stopsExactlyAtOrdinaryCryptoEntryTarget.accepted[0].gross - 0.01) < 1e-9);
+assert.ok(stopsExactlyAtOrdinaryCryptoEntryTarget.totals.cryptoGross <= 3 + 1e-9);
+
+const noNewCryptoAboveTolerance = planStrictPortfolio({
+    equity: 1000, now: NOW,
+    active: [
+        position({ id: "v12-a", strategy: "V12", symbol: "ETHUSDT", quantity: 100, entryPrice: 1, markPrice: 10 }),
+        position({ id: "v12-b", strategy: "V12", symbol: "BTCUSDT", quantity: 50, entryPrice: 1, markPrice: 10 }),
+        position({ id: "pengu-a", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 1, markPrice: 10 }),
+        position({ id: "q102-a", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 116, entryPrice: 1, markPrice: 10 }),
+    ],
+    intents: [{ idempotencyKey: "above-tolerance", strategy: "V12", symbol: "BNBUSDT", side: "LONG", gross: 0.1, notionalUsd: 100, signalTs: NOW }],
+});
+assert.equal(noNewCryptoAboveTolerance.accepted.length, 0);
+assert.equal(noNewCryptoAboveTolerance.rejected.length, 1);
+
+
 const at249 = planStrictPortfolio({
     equity: 1000,
     now: NOW,
