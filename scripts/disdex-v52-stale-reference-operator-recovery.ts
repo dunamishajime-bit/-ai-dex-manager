@@ -78,21 +78,37 @@ function venue(v:{positions:AsterPositionRiskRow[];orders:AsterOrderResponse[]})
  return JSON.stringify({pos:[p[0].symbol,p[0].positionAmt,p[0].entryPrice],
  stop:[o.symbol,o.clientOrderId,o.side,o.type,o.status,o.origQty,o.stopPrice]});
 }
-async function signed(client:AsterV3Client){
+export async function withBoundedReadBudgetRetry<T>(
+ operation:()=>Promise<T>, pause:(ms:number)=>Promise<void>=sleep
+):Promise<T> {
  const maxAttempts=5;
  for(let attempt=0;attempt<maxAttempts;attempt++){
-  try {
-   // Venue identity and STOP invariants are still checked on every read.
-   const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
-   return venue({positions,orders});
-  } catch(error){
+  try{return await operation();}
+  catch(error){
    if(!isTemporaryReadBudgetDeferral(error)||attempt===maxAttempts-1)throw error;
-   // Allow regular writers their own priority. No queue limit, slot weight,
-   // account lock, or protective-order policy is changed by this retry.
-   await sleep(1000+attempt*750);
+   // Give ordinary runners their existing rate priority; no capacity increase.
+   await pause(1000+attempt*750);
   }
  }
  throw Error("V52_SCOPE_RECOVERY_UNREACHABLE");
+}
+async function signed(client:AsterV3Client){
+ return withBoundedReadBudgetRetry(async()=>{
+  // Every successful read still proves the exact NEAR quantity/STOP.
+  const [positions,orders]=await Promise.all([client.getPositions(),client.getOpenOrders()]);
+  return venue({positions,orders});
+ });
+}
+export async function acquireWithBoundedNaturalLockDeferral<T>(
+ acquire:()=>Promise<T|null>, revalidate:()=>Promise<void>, pause:(ms:number)=>Promise<void>=sleep
+):Promise<T|null> {
+ let handle=await acquire();
+ for(let attempt=0;!handle&&attempt<5;attempt++){
+  await pause(1000+attempt*500);
+  await revalidate();
+  handle=await acquire();
+ }
+ return handle;
 }
 async function writeKill(value:unknown,ownership:{uid:number;gid:number;mode:number}){
  const temp=killPath+"."+randomUUID()+".tmp";
@@ -114,6 +130,26 @@ async function run(){
    "ASTER_AUTH_INVALID","STOP_MISMATCH"]){
    assert(!isTemporaryReadBudgetDeferral(new Error(invalid)),"SELFTEST_MUST_FAIL_CLOSED:"+invalid);
   }
+  let budgetAttempts=0,backoffs:number[]=[];
+  const ok=await withBoundedReadBudgetRetry(async()=>{
+   budgetAttempts++;if(budgetAttempts<3)throw Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4215");
+   return "PASS";
+  },async(ms)=>{backoffs.push(ms);});
+  assert(ok==="PASS"&&budgetAttempts===3&&backoffs.length===2,"SELFTEST_RATE_RETRY");
+  let otherAttempts=0;
+  try {
+   await withBoundedReadBudgetRetry(async()=>{
+    otherAttempts++;throw Error("ASTER_AUTH_INVALID");
+   },async()=>{throw Error("MUST_NOT_DEFER_AUTH");});
+   throw Error("SELFTEST_AUTH_FAIL_OPEN");
+  } catch(error){
+   assert(otherAttempts===1&&String(error).includes("ASTER_AUTH_INVALID"),"SELFTEST_AUTH_FAIL_OPEN");
+  }
+  let locked=0,rechecks=0;
+  const handle=await acquireWithBoundedNaturalLockDeferral(async()=>{
+   locked++;return locked>=3?{owned:true}:null;
+  },async()=>{rechecks++;},async()=>{});
+  assert(handle?.owned===true&&locked===3&&rechecks===2,"SELFTEST_LOCK_BACKOFF");
   console.log("V52_SCOPED_REFERENCE_RECOVERY_SELFTEST_PASS");return;
  }
  const apply=process.argv.includes("--apply"),verify=process.argv.includes("--verify-only");
@@ -140,14 +176,13 @@ async function run(){
  }
  const lock=new FileAccountOrderLock(root+"/shared/account-order.lock",120000,root+"/shared/pending-exposure.json");
  const req="v52-ref-"+Date.now()+"-"+randomUUID();
- let held=await lock.acquire("V52_REFERENCE_RECOVERY:"+req);
  // Ordinary runners temporarily own the lock. Bounded voluntary deferral;
  // never remove an owner's lock, stop a runner, or shorten a lease.
- for(let attempt=0;!held&&attempt<5;attempt++){
-  await sleep(1000+attempt*500);
-  assert(JSON.stringify(await safety())===JSON.stringify(start),"HOLD_CHANGED_WHILE_WAITING_FOR_LOCK");
-  held=await lock.acquire("V52_REFERENCE_RECOVERY:"+req);
- }
+ const held=await acquireWithBoundedNaturalLockDeferral(
+  ()=>lock.acquire("V52_REFERENCE_RECOVERY:"+req),
+  async()=>assert(JSON.stringify(await safety())===JSON.stringify(start),
+   "HOLD_CHANGED_WHILE_WAITING_FOR_LOCK")
+ );
  assert(held,"ACCOUNT_LOCK_BUSY");
  let cleared=false;
  const owner=await stat(killPath);
