@@ -23,7 +23,11 @@ export function nextQuality102DaemonWaitMs(
   lockRetryMs: number,
   message = "",
 ) {
-  if (status === "locked"
-    || (status === "blocked-local" && (Boolean(classifyAsterRateBudgetFailure(message)) || isRetryableQuality102NoOrderBlock(message)))) return lockRetryMs;
+  // Repeated market-data/account reads at an Aster budget boundary can
+  // otherwise starve other runners. Honour the shared budget's wait and use a
+  // bounded quiet period while retaining the same hourly signal reference.
+  const rateBudget = status === "blocked-local" ? classifyAsterRateBudgetFailure(message) : undefined;
+  if (rateBudget) return Math.min(120_000, Math.max(45_000, lockRetryMs, (rateBudget.waitMs ?? 0) + 1_000));
+  if (status === "locked" || (status === "blocked-local" && isRetryableQuality102NoOrderBlock(message))) return lockRetryMs;
   return QUALITY102_HOUR_MS - (nowMs % QUALITY102_HOUR_MS) + boundaryDelayMs;
 }
