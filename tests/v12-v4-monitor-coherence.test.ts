@@ -11,6 +11,7 @@ const watchdog=readFileSync("scripts/ops/root/disdex-runner-watchdog-current.mjs
 const wiring=readFileSync("scripts/ops/root/disdex-current-runtime-wiring","utf8");
 const coherence=readFileSync("scripts/ops/root/disdex-current-runtime-coherence-guard","utf8");
 const q102Pin=readFileSync("scripts/ops/root/disdex-q102-coherence-pin","utf8");
+const v52Pin=readFileSync("scripts/ops/root/disdex-v52-coherence-pin","utf8");
 const alert=readFileSync("scripts/ops/root/disdex-runner-health-alert.ts","utf8");
 
 test("V4 daemon emits an exact-release heartbeat after each successful tick",()=>{
@@ -188,6 +189,26 @@ test("coherence guard accepts an explicit Q102-only pin while peers remain on cu
   assert.match(output,/Q102_MIXED_SHA_COHERENCE_SELFTEST_PASS/);
   assert.match(coherence,/Q102_PIN_ENV/);
   assert.match(coherence,/DISDEX_Q102_RUNTIME_SHA/);
+});
+
+test("coherence guard accepts the existing scoped V52 release alongside the Q102 pin",()=>{
+  const bash=process.platform==="win32"?"C:/Program Files/Git/bin/bash.exe":"/usr/bin/bash";
+  const guard=resolve("scripts/ops/root/disdex-current-runtime-coherence-guard");
+  const output=execFileSync(bash,[guard,"--self-test-q102-mixed-sha"],{encoding:"utf8"});
+  assert.match(output,/Q102_MIXED_SHA_COHERENCE_SELFTEST_PASS/);
+  assert.match(coherence,/V52_PIN_ENV/);
+  assert.match(coherence,/DISDEX_V52_RUNTIME_SHA/);
+  assert.match(coherence,/V52_RUNTIME_ROOT/);
+});
+
+test("V52 coherence pin validates the release, monitor overlays, and active unit before writing",()=>{
+  assert.match(v52Pin,/validate_release/);
+  assert.match(v52Pin,/\.disdex-release-sha/);
+  assert.match(v52Pin,/DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA/);
+  assert.match(v52Pin,/DISDEX_WATCHDOG_V52_SERVICE_UNIT/);
+  assert.match(v52Pin,/systemctl show.*ActiveState/);
+  assert.match(v52Pin,/systemctl is-enabled/);
+  assert.match(v52Pin,/V52_COHERENCE_PIN_APPLIED/);
 });
 
 test("Q102 coherence pin validates release, monitor overlays, and active unit before writing",()=>{
