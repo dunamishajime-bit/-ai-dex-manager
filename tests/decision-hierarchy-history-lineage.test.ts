@@ -45,7 +45,7 @@ test("decision status is split into four logic pages and Q102 has per-symbol obs
     readFile("lib/server/quality102-symbol-observability.ts", "utf8"),
   ]);
   assert.match(files[0], /logic="overview"/);
-  assert.match(files[1], /logic="v12"/);
+  assert.match(files[1], /V12V4RuntimePanel/);
   assert.match(files[2], /logic="pengu"/);
   assert.match(files[3], /logic="q102"/);
   assert.match(files[4], /logic="v52"/);

@@ -1,10 +1,25 @@
 import { readFile } from "node:fs/promises";
 
-import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
+import {
+  loadQuality102RuntimeObservability,
+  type Quality102RuntimeStatus,
+} from "@/lib/server/quality102-runtime-observability";
 
 const DEFAULT_DECISION_SNAPSHOT_PATH = "/var/lib/disdex/quality102-causal-v1/decision-snapshot.json";
 const DEFAULT_RANKING_SNAPSHOT_PATH = "/var/lib/disdex/quality102-causal-v1/decision-ranking-snapshot.json";
 const MAX_AGE_MS = 2 * 60 * 60_000;
+const SHA_RE = /^[0-9a-f]{40}$/i;
+
+type Quality102RuntimeIdentity = Pick<
+  Quality102RuntimeStatus,
+  "status" | "runtimeSha" | "expectedReleaseSha" | "releaseShaVerified"
+>;
+
+export type Quality102SymbolObservabilityOptions = {
+  rankingPath?: string;
+  decisionPath?: string;
+  loadRuntime?: () => Promise<Quality102RuntimeIdentity>;
+};
 
 export type Quality102SymbolDecision = {
   symbol: string;
@@ -122,17 +137,33 @@ async function readSnapshot(path: string): Promise<PersistedSnapshot> {
   return JSON.parse(await readFile(path, "utf8")) as PersistedSnapshot;
 }
 
-export async function loadQuality102SymbolObservability(): Promise<Quality102SymbolSnapshot> {
-  const runtime = await loadCurrentProductionRuntime();
-  const rankingPath = process.env.QUALITY102_RANKING_SNAPSHOT_PATH || DEFAULT_RANKING_SNAPSHOT_PATH;
-  const decisionPath = process.env.QUALITY102_DECISION_SNAPSHOT_PATH || DEFAULT_DECISION_SNAPSHOT_PATH;
+export function resolveQuality102RuntimeSha(runtime: Quality102RuntimeIdentity): string {
+  if (runtime.status !== "LIVE") throw new Error(`Q102_RUNTIME_STATUS_${runtime.status}`);
+  const runtimeSha = String(runtime.runtimeSha || "").trim();
+  const expectedReleaseSha = String(runtime.expectedReleaseSha || "").trim();
+  if (!SHA_RE.test(runtimeSha) || !SHA_RE.test(expectedReleaseSha)) {
+    throw new Error("Q102_RUNTIME_SHA_INVALID");
+  }
+  if (runtime.releaseShaVerified !== true || runtimeSha.toLowerCase() !== expectedReleaseSha.toLowerCase()) {
+    throw new Error("Q102_RUNTIME_SHA_UNVERIFIED");
+  }
+  return runtimeSha;
+}
+
+export async function loadQuality102SymbolObservability(
+  options: Quality102SymbolObservabilityOptions = {},
+): Promise<Quality102SymbolSnapshot> {
+  const runtime = await (options.loadRuntime ?? loadQuality102RuntimeObservability)();
+  const productionSha = resolveQuality102RuntimeSha(runtime);
+  const rankingPath = options.rankingPath || process.env.QUALITY102_RANKING_SNAPSHOT_PATH || DEFAULT_RANKING_SNAPSHOT_PATH;
+  const decisionPath = options.decisionPath || process.env.QUALITY102_DECISION_SNAPSHOT_PATH || DEFAULT_DECISION_SNAPSHOT_PATH;
 
   let parsed: PersistedSnapshot | undefined;
   let source: Quality102SymbolSnapshot["snapshotSource"] = "decision";
   let rankingError: unknown;
   try {
     const candidate = await readSnapshot(rankingPath);
-    validateSnapshot(candidate, runtime.releaseSha);
+    validateSnapshot(candidate, productionSha);
     parsed = candidate;
     source = "ranking";
   } catch (error) {
@@ -141,7 +172,7 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
   if (!parsed) {
     try {
       const candidate = await readSnapshot(decisionPath);
-      validateSnapshot(candidate, runtime.releaseSha);
+      validateSnapshot(candidate, productionSha);
       parsed = candidate;
       source = "decision";
     } catch (decisionError) {
@@ -149,7 +180,7 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
     }
   }
 
-  const { capturedAt, items } = validateSnapshot(parsed, runtime.releaseSha);
+  const { capturedAt, items } = validateSnapshot(parsed, productionSha);
   const rankingAvailable = source === "ranking"
     && parsed.schemaVersion === 2
     && parsed.rankingModelVersion === "Q102_PROXIMITY_V1"
@@ -165,7 +196,7 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
     ...(parsed.rankingModelVersion ? { rankingModelVersion: String(parsed.rankingModelVersion) } : {}),
     rankingAvailable,
     snapshotSource: source,
-    productionSha: runtime.releaseSha,
+    productionSha,
     selectorMode: parsed.selectorMode || "CAUSAL_V4",
     referenceTs: Number(parsed.referenceTs || 0),
     ...(parsed.selectedSymbol ? { selectedSymbol: String(parsed.selectedSymbol).toUpperCase() } : {}),
