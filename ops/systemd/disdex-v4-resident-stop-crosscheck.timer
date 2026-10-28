@@ -1,0 +1,10 @@
+[Unit]
+Description=Verify V4 managed STOPs against exchange every minute
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=60s
+AccuracySec=5s
+Persistent=true
+Unit=disdex-v4-resident-stop-crosscheck.service
+[Install]
+WantedBy=timers.target

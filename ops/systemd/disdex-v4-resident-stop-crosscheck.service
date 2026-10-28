@@ -1,0 +1,16 @@
+[Unit]
+Description=Read-only V12 V4 exchange STOP and owner-ledger verification
+After=disdex-shared-crypto-risk@7688ed7c93a1918d8b44837339b7da5584a868f5.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /usr/local/libexec/disdex-v4-resident-stop-crosscheck.py
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/disdex/shared
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+UMask=0077
