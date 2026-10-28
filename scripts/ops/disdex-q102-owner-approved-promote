@@ -135,6 +135,24 @@ def validate(root: bool, target: str, expected: str) -> tuple[Path, dict, str]:
                 and isinstance(r.get("maxMtmDdPct"), (float, int))
                 and r.get("targetSha") == target,
                 "ECONOMIC_INVALID:" + cost)
+    # A release marker by itself is insufficient because the VPS stage is
+    # deploy-owned. Compare the actual audited source files to root-controlled
+    # hashes carried by the exact-SHA economic certification.
+    hashes = economics.get("sourceFileSha256")
+    required_paths = {
+        "lib/disdex-quality102-causal-v4-signal.ts",
+        "lib/disdex-quality102-causal-v1-runner.ts",
+        "scripts/disdex-quality102-causal-v1-live-runner.ts",
+    }
+    require(isinstance(hashes, dict) and required_paths <= set(hashes), "SOURCE_HASH_MANIFEST_REQUIRED")
+    for name, digest in hashes.items():
+        require(isinstance(name, str) and name and ".." not in Path(name).parts
+                and not Path(name).is_absolute(), "SOURCE_HASH_PATH_INVALID")
+        source = stage / name
+        require(source.is_file() and not source.is_symlink()
+                and isinstance(digest, str) and bool(re.fullmatch(r"[a-f0-9]{64}", digest))
+                and hashlib.sha256(source.read_bytes()).hexdigest() == digest,
+                "EXACT_STAGED_SOURCE_HASH_MISMATCH")
     global_hash = hashlib.sha256(GLOBAL_APPROVAL.read_bytes()).hexdigest()
     return stage, before, global_hash
 
@@ -260,7 +278,13 @@ def promote(target: str, old: str, check_only: bool) -> dict:
     run("systemctl", "stop", service(old))
     require(not active(service(old)), "OLD_Q102_STILL_ACTIVE")
     shutil.copy2(STATE, old_backup)
-    new_state = dict(before)
+    # Use the durable state read AFTER the old service was actually stopped.
+    # Preflight's earlier snapshot may have changed during its last daemon tick.
+    stopped_state = json_file(STATE)
+    require(stopped_state.get("runtimeCommitSha") == old
+            and not stopped_state.get("position") and not stopped_state.get("pending"),
+            "OLD_STATE_NOT_FLAT_AFTER_STOP")
+    new_state = dict(stopped_state)
     new_state["runtimeCommitSha"] = target
     new_state.pop("initialDaemonReconciliation", None)
     write_atomic(STATE, (json.dumps(new_state, separators=(",", ":")) + "\n").encode(), owner="deploy")
@@ -279,15 +303,14 @@ def promote(target: str, old: str, check_only: bool) -> dict:
         return {"status": "Q102_SCOPED_NEW_SHA_ACTIVE_REQUIRES_OPERATOR_POST_VENUE_MONITORING",
                 "targetSha": target, "oldSha": old}
     except Exception:
+        # After a real-money daemon has started, an unknown fill/STOP/pending
+        # window is possible even when local state appears flat. Do NOT restart
+        # the old runner or overwrite the new state without fresh signed venue
+        # reconciliation. Keep both Q102 instances stopped for operator recovery.
         run("systemctl", "stop", service(target), check=False)
-        newest = json_file(STATE)
-        # Do not restart the former Q102 if a new signal might have placed an
-        # order. Manual readback is essential whenever any pending/position exists.
-        if newest.get("position") or newest.get("pending"):
-            raise RuntimeError("Q102_FAIL_CLOSED:MANUAL_RECOVERY_NEW_EXPOSURE_PRESENT")
-        write_atomic(STATE, old_backup.read_bytes(), owner="deploy")
-        run("systemctl", "start", service(old))
-        raise
+        raise RuntimeError(
+            "Q102_FAIL_CLOSED:MANUAL_VENUE_RECONCILIATION_REQUIRED_OLD_Q102_NOT_RESTARTED"
+        )
 
 
 def main() -> int:
