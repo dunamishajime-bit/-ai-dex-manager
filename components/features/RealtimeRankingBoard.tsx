@@ -120,16 +120,16 @@ export function RealtimeRankingBoard() {
   const [search, setSearch] = useState('');
   const [remaining, setRemaining] = useState(30);
   const [changes, setChanges] = useState<Record<string, number>>({});
-  const [flash, setFlash] = useState<Record<string, number>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const previous = useRef<Record<string, string[]>>({});
   const prepareFeedback = useRef<() => void>(() => {});
+  const showingFeedback = useRef<() => boolean>(() => false);
   const hasData = useRef(false);
   const requesting = useRef(false);
   const alive = useRef(true);
   const next = useRef(nextRealtimeRankingAt(Date.now()));
-  const flashTimer = useRef<ReturnType<typeof setTimeout>>();
+  const publishTimer = useRef<ReturnType<typeof setTimeout>>();
   const dialog = useRef<HTMLDialogElement>(null);
 
   const load = useCallback(async () => {
@@ -154,20 +154,30 @@ export function RealtimeRankingBoard() {
         }
       }
 
-      if (hasData.current) prepareFeedback.current();
-      previous.current = nextByScope;
-      setChanges(movement);
-      setFlash(movement);
-      if (flashTimer.current) clearTimeout(flashTimer.current);
-      flashTimer.current = setTimeout(() => setFlash({}), 2200);
-      setData(result as Snapshot);
-      setRevision((value) => value + 1);
-      hasData.current = true;
-      setError('');
+      if (publishTimer.current) clearTimeout(publishTimer.current);
+      const publish = () => {
+        if (!alive.current) return;
+        if (showingFeedback.current()) {
+          publishTimer.current = setTimeout(publish, 250);
+          return;
+        }
+        publishTimer.current = undefined;
+        if (hasData.current) prepareFeedback.current();
+        previous.current = nextByScope;
+        setChanges(movement);
+        setData(result as Snapshot);
+        setRevision((value) => value + 1);
+        hasData.current = true;
+        setError('');
+      };
+      publish();
     } catch (caught) {
       if (alive.current) {
+        if (publishTimer.current) {
+          clearTimeout(publishTimer.current);
+          publishTimer.current = undefined;
+        }
         setError(caught instanceof Error ? caught.message : '取得失敗');
-        setFlash({});
       }
     } finally {
       requesting.current = false;
@@ -189,7 +199,7 @@ export function RealtimeRankingBoard() {
     return () => {
       alive.current = false;
       clearInterval(timer);
-      if (flashTimer.current) clearTimeout(flashTimer.current);
+      if (publishTimer.current) clearTimeout(publishTimer.current);
     };
   }, [load]);
 
@@ -221,6 +231,7 @@ export function RealtimeRankingBoard() {
   const selected = all.find((row) => row.id === selectedId);
   const feedback = useRealtimeRankingFeedback(feedbackRows, revision, logic + '|' + side + '|' + search, error);
   prepareFeedback.current = feedback.prepare;
+  showingFeedback.current = feedback.isShowing;
 
   useEffect(() => {
     if (selected && dialog.current && !dialog.current.open) dialog.current.showModal();
@@ -282,7 +293,7 @@ export function RealtimeRankingBoard() {
       ref={(node) => feedback.register('row:' + movementId, node)}
       onClick={() => setSelectedId(row.id)}
       title={`${row.symbol} / ${strategySummary} / ${rankExplanation(row)} / ${reason}`}
-      className={'rank-cell ' + (flash[movementId] !== undefined ? 'rank-flash ' : '') +
+      className={'rank-cell ' +
         (row.score === 0 ? 'rank-score-zero ' : '') +
         (!row.fresh || error ? 'rank-unknown ' : executionBlocked(row) ? 'rank-blocked' : 'rank-observed')}
     >
@@ -324,7 +335,7 @@ export function RealtimeRankingBoard() {
       data-top-slot={slot.slot}
       data-slot-status={slot.status}
       aria-label={`${panel.title} 上位3の${slot.slot}位: ${row.symbol}, ${status}`}
-      className={'radar-leader ' + (flash[movementId] !== undefined ? 'rank-flash' : '')}
+      className="radar-leader"
     >
       <button
         type="button"
@@ -387,7 +398,6 @@ export function RealtimeRankingBoard() {
       .radar-panel-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:7px;min-width:0;flex-shrink:0}.radar-panel{min-width:0;overflow:hidden;border:1px solid #a78b4635;border-radius:11px;background:#080d15}.radar-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0;padding:8px 10px;border-bottom:1px solid #ffffff10}.radar-panel-heading h2{font-size:12px;font-weight:700;color:#ead7a4}.radar-panel-heading p,.radar-panel-heading>span{font-size:9px;color:#aab3c0;overflow-wrap:anywhere}.radar-panel-heading>span{flex-shrink:0;color:#d5bd79}.panel-source-note{display:flex;flex-wrap:wrap;gap:3px 10px;padding:6px 9px;color:#acb6c3;font-size:9px;overflow-wrap:anywhere}.radar-leaders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;min-width:0;padding:0 7px 7px}.radar-leader{min-width:0;overflow:hidden;text-align:left;padding:0;border:1px solid #a78b4645;border-radius:10px;background:linear-gradient(140deg,#262116,#090e16 80%)}.radar-leader-button{display:block;width:100%;min-width:0;height:100%;text-align:left;padding:8px;color:white}.radar-leader-heading,.radar-leader-identity{display:flex;align-items:center;min-width:0;gap:6px}.radar-leader-heading{justify-content:space-between}.radar-leader-identity strong{min-width:0;overflow-wrap:anywhere;color:#fff;font-size:14px}.radar-leader-identity span:not(.slot-number){font-size:9px;color:#c6c9cf}.slot-number{flex-shrink:0;color:#d8bd75;font-size:10px}.radar-score-line{display:flex;align-items:flex-start;gap:6px;min-width:0;margin-top:8px}.radar-score-line b{flex-shrink:0;color:#ead7a4;font-family:monospace;font-size:16px}.radar-score-line span{min-width:0;color:#aeb6c0;font-size:9px;overflow-wrap:anywhere}.radar-source-route,.radar-slot-warning,.radar-slot-note,.radar-slot-reason,.radar-leader time{display:block;margin-top:5px;min-width:0;color:#aab3c0;font-size:9px;line-height:1.35;overflow-wrap:anywhere;word-break:break-word}.radar-slot-warning{color:#fda4af}.radar-slot-note{color:#d3c58f}.radar-slot-reason{max-height:3.9em;overflow:hidden}.radar-leader time{color:#7f8998}.radar-leader-placeholder{min-height:134px;border-style:dashed;background:#ffffff03}.radar-leader-placeholder strong{display:block;color:#c8cbd1;font-size:11px;overflow-wrap:anywhere}.radar-leader-placeholder p{margin-top:5px;color:#828d9b;font-size:9px;overflow-wrap:anywhere}
       .radar-ranking{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;border:1px solid #ffffff16;border-radius:10px;background:#080d15;overflow:hidden}.radar-inventory-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0;padding:6px 8px}.radar-inventory-heading h2{font-size:11px;font-weight:600;color:#fff;overflow-wrap:anywhere}.radar-inventory-heading span,.radar-inventory-note{font-size:9px;color:#aab3c0;overflow-wrap:anywhere}.radar-inventory-note{padding:0 8px 5px;color:#dbc787}.radar-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:1;min-width:0;min-height:0;padding:0 5px 5px}.radar-column{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #ffffff0d;border-radius:6px;overflow:hidden}.rank-column-heading,.rank-cell{display:grid;grid-template-columns:22px minmax(54px,.72fr) minmax(132px,1.65fr) minmax(56px,.72fr);align-items:center;gap:4px;padding:3px 5px}.rank-column-heading{white-space:nowrap;min-height:23px;flex-shrink:0;color:#ffffff75;background:#ffffff05;font-size:8px}.rank-column-body{display:grid;grid-template-rows:repeat(15,minmax(32px,auto));min-width:0;min-height:0;overflow-y:auto}.rank-cell{min-width:0;min-height:32px;width:100%;text-align:left;border-bottom:1px solid #ffffff0b;border-left:2px solid #a78b4640;font-size:clamp(9px,1.2vh,11px);line-height:1.15;overflow:hidden;background:#ffffff01}.rank-cell:hover{background:#d6b66212}.rank-cell:focus-visible{outline:1px solid #d6b662;outline-offset:-2px}.rank-blocked{border-left-color:#fb718560}.rank-unknown{border-left-color:#ffffff30;opacity:.72}.rank-score-zero{border-left-color:#ffffff18}.rank-symbol{overflow-wrap:anywhere}.rank-order-block{max-width:72px}.rank-score-cell small{font-size:8px}.rank-strategy-badges{display:flex;min-width:0;flex-wrap:wrap;gap:2px}.rank-strategy-badge{display:inline-flex;min-width:0;align-items:center;gap:3px;border:1px solid #ffffff20;border-radius:5px;padding:2px 4px;font-size:8px;line-height:1.05;white-space:nowrap}.rank-strategy-badge b{max-width:86px;overflow:hidden;text-overflow:ellipsis;font-weight:700}.rank-strategy-badge em{font-style:normal;font-weight:800}.rank-strategy-badge small{font-size:6px;opacity:.7}.rank-strategy-long{border-color:#34d39955;background:#10b98112;color:#86efac}.rank-strategy-short{border-color:#fb718555;background:#f43f5e12;color:#fda4af}.rank-strategy-wait{border-color:#ffffff22;background:#ffffff08;color:#cbd5e1}.rank-strategy-stale{opacity:.72}.rank-strategy-empty{font-size:8px;color:#ffffff50}.rank-strategy-badges-compact{margin-top:1px}.radar-leader-strategies{margin-top:6px;min-width:0}.radar-tail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex-shrink:0;padding:0 5px 5px}.radar-tail .rank-cell{min-height:34px;border:1px solid #ffffff12;border-radius:5px;font-size:9px}
       .rank-dialog{width:min(720px,calc(100vw - 24px));max-height:85dvh;padding:0;border:1px solid #a78b4660;border-radius:18px;background:#080d15;color:white}.rank-dialog[open]{display:flex;flex-direction:column}.rank-dialog::backdrop{background:#000a;backdrop-filter:blur(3px)}
-      @keyframes radar-gold-flash{0%{background-color:rgba(244,211,125,.04)}25%{background-color:rgba(255,223,133,.30);box-shadow:inset 0 0 35px rgba(255,216,116,.15)}100%{background-color:transparent}}.rank-flash{animation:radar-gold-flash 1.1s ease-out}@media(prefers-reduced-motion:reduce){.rank-flash{animation:none;outline:1px solid #f2d27e88}}
       @media(min-width:768px) and (max-width:1000px){.radar-columns{grid-template-columns:repeat(2,minmax(0,1fr))}.radar-tail{grid-template-columns:repeat(2,minmax(0,1fr))}}
       @media(max-width:767px){.compact-radar{height:auto;min-height:100%;overflow-x:hidden}.radar-heading{align-items:flex-start}.radar-heading h1{white-space:normal;font-size:12px}.radar-panel-list{grid-template-columns:minmax(0,1fr)}.radar-leaders{grid-template-columns:minmax(0,1fr)}.radar-leader-placeholder{min-height:78px}.radar-feedback{align-items:flex-start}.feedback-notice{flex-basis:100%}.radar-filters{flex-wrap:wrap}.radar-filters input{flex-basis:100%}.radar-filters select{flex:1}.radar-columns{grid-template-columns:minmax(0,1fr)}.rank-column-body{display:block;max-height:none;overflow:visible}.rank-cell{min-height:48px;grid-template-columns:28px minmax(54px,.75fr) minmax(132px,1.65fr) minmax(72px,.8fr);font-size:10px}.rank-column-heading{grid-template-columns:28px minmax(54px,.75fr) minmax(132px,1.65fr) minmax(72px,.8fr)}.rank-score-cell{overflow-wrap:anywhere}.radar-tail{grid-template-columns:minmax(0,1fr)}.radar-ranking{flex:none;overflow:visible}.radar-inventory-heading{flex-wrap:wrap}.rank-dialog{max-height:80dvh}}
     `}</style>

@@ -104,9 +104,11 @@ test("ranking motion remains currency-scoped and is not a board-wide refresh pul
   assert.doesNotMatch(board, /realtime-refresh-pulse/);
   assert.doesNotMatch(board, /realtime-frame-travel/);
   assert.doesNotMatch(board, /setRefreshPulse\(/);
+  assert.doesNotMatch(board, /rank-flash|radar-gold-flash/);
   assert.match(feedback, /ranking-flyer/);
   assert.match(feedback, /rankingMoving/);
   assert.match(feedback, /rankingCompleted/);
+  assert.match(feedback, /isShowing/);
 });
 
 test("currency motion uses a colored foreground frame and serial groups", async () => {
@@ -115,6 +117,7 @@ test("currency motion uses a colored foreground frame and serial groups", async 
   assert.match(feedback, /borderColor/);
   assert.match(feedback, /outline.*color|outline.*\+\s*color/);
   assert.match(feedback, /playRankingSequence\(\s*coloredGroups/);
+  assert.match(feedback, /Number\(b\.rising\)\s*-\s*Number\(a\.rising\)/);
   assert.match(feedback, /scale\(\$\{scale\}\)/);
   assert.match(feedback, /foregroundY/);
   assert.match(motionGroups, /for\s*\(const item of items\)/);

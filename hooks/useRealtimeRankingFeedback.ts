@@ -214,15 +214,24 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
     const oldRows = new Map(before.rows.map((row) => [row.id, row]));
     const newRows = new Map(after.rows.map((row) => [row.id, row]));
     const groups: Omit<MotionGroup, 'color'>[] = [];
+    const phaseOrder: Record<RankingSoundRole, number> = { top3: 0, rise: 1, fall: 2 };
+    const movementPlans = phases
+      .flatMap((phase) => phase.changes.map((change) => ({
+        phase,
+        change,
+        rising: phase.role === 'rise' || (phase.role === 'top3' && change.to < change.from),
+      })))
+      .sort((a, b) => Number(b.rising) - Number(a.rising)
+        || phaseOrder[a.phase.role] - phaseOrder[b.phase.role]
+        || a.change.to - b.change.to);
 
-    for (const phase of phases) {
-      for (const change of phase.changes) {
-        const oldRow = oldRows.get(change.id);
-        const newRow = newRows.get(change.id);
-        if (!oldRow?.fresh || !newRow?.fresh || oldRow.score === null || newRow.score === null) continue;
+    for (const { phase, change, rising } of movementPlans) {
+      const oldRow = oldRows.get(change.id);
+      const newRow = newRows.get(change.id);
+      if (!oldRow?.fresh || !newRow?.fresh || oldRow.score === null || newRow.score === null) continue;
 
-        const items: MotionItem[] = [];
-        for (const key of ['row:' + change.id, 'leader:' + change.id]) {
+      const items: MotionItem[] = [];
+      for (const key of ['row:' + change.id, 'leader:' + change.id]) {
           const node = nodes.current.get(key);
           const old = before.rects.get(key);
           const end = node?.getBoundingClientRect();
@@ -263,7 +272,7 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
 
           const dx = startX - end.left;
           const dy = startY - end.top;
-          const isRising = phase.role === 'rise' || (phase.role === 'top3' && change.to < change.from);
+          const isRising = rising;
           const scale = Math.max(1, Math.min(1.8, (innerWidth - 32) / end.width));
           const marginX = (scale - 1) * end.width / 2;
           const marginY = (scale - 1) * end.height / 2;
@@ -284,9 +293,8 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
           ];
           clone.style.transform = `translate(${dx}px, ${dy}px) scale(1)`;
           items.push({ clone, frames });
-        }
-        if (items.length) groups.push({ id: change.id, role: phase.role, items });
       }
+      if (items.length) groups.push({ id: change.id, role: phase.role, items });
     }
 
     if (!groups.length) return;
@@ -362,6 +370,7 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
     testSound,
     register,
     prepare,
+    isShowing: () => running.current,
     rankingSoundsForRole,
   };
 }
