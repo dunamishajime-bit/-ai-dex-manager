@@ -1,0 +1,62 @@
+{
+  "schema": "disdex-quality102-native-aster-h1-coverage-audit/v1",
+  "targetSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+  "status": "DATA_RESTORED_PARTIAL_CAUSAL_SOURCE_REPLAY_NOT_EIGHT_NATIVE_ECONOMIC_CERTIFIED",
+  "publicNativeAsterH1": {
+    "symbols": 23,
+    "rowsPerSymbol": 5112,
+    "bars": 117576,
+    "holes": 0,
+    "rangeStartUtc": "2026-01-10T00:00:00Z",
+    "rangeEndExclusiveUtc": "2026-08-11T00:00:00Z",
+    "rawProviderDataStorage": "owner PC local only; not included in public Git"
+  },
+  "firstUniversallyEligibleCausalDate": "2026-07-10 or later; each symbol needs 181 preceding days",
+  "annualHistoricalSimulation": "NOT_REPRODUCIBLE_WITH_EXACT_23_SYMBOLS_AND_181_DAY_WARMUP",
+  "candidateNewShaPureSourceCheck": {
+    "dateUtc": "2026-08-10T00:00:00Z",
+    "result": "Q102_REAL_NATIVE_ASTER_H1_EXACT_SOURCE_SIGNAL_PARITY_PASS",
+    "historySymbols": 23,
+    "minHistoryHours": 5088,
+    "otherRunnerOccupancyOnlyFlagHasNoSignalEffect": true,
+    "signal": {
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL"
+    },
+    "orders": 0
+  },
+  "dailyStridedOnly": {
+    "sampledUtcDates": 10,
+    "strideHours": 72,
+    "countNonzero": 0,
+    "notAnHourlyReplay": true
+  },
+  "missingFull8Economics": [
+    "2025-08 to 2026-08 cannot be evaluated in all 23 symbols with 181-day prehistory before native listings",
+    "new SHA every-hour Q102 signal / exit and same-symbol planner admission replay not completed",
+    "eight-sleeve 10bps and 30bps PnL/PF/DD capital contention not generated from exact current source",
+    "Q102 root-only certified economics and owner activation artifacts not present"
+  ],
+  "productionCutoverAuthorized": false,
+  "realOrders": 0,
+  "testOrders": 0,
+  "productionModified": false,
+  "sources": {
+    "aster-availability-screen.json": {
+      "sha256": "f20fa25bad219b7230332dafe468609283ed821676f489e721c0917d0c0aa73d",
+      "bytes": 14783
+    },
+    "aster-earliest-available-bar.json": {
+      "sha256": "901ad2e15d7cf4260a87d9ff49f9301fef47f0294298e5534323a2c2122a591b",
+      "bytes": 3749
+    },
+    "aster-native-h1-acquisition-manifest.json": {
+      "sha256": "5fa60e0591fe0a9d931cffe2394b26401872b2d5602b54b79a14ff975e3bbf38",
+      "bytes": 28369
+    },
+    "q102-exact-source-native-h1-sampled-signals.json": {
+      "sha256": "a6822b989418654cfec421227f883bab236a6857cd94754cb7077121fd49b795",
+      "bytes": 2357
+    }
+  }
+}

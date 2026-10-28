@@ -1,0 +1,95 @@
+{
+  "status": "RESEARCH_DAILY_SAMPLING_NOT_FULL_BT",
+  "targetSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+  "costsBps": [
+    10,
+    30
+  ],
+  "strategy": "QUALITY102_CAUSAL_V1",
+  "tested": 10,
+  "nonzero": 0,
+  "historySymbols": 23,
+  "ordersSent": 0,
+  "results": [
+    {
+      "ts": 1783900800000,
+      "date": "2026-07-13T00:00:00.000Z",
+      "computeMs": 71,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1784160000000,
+      "date": "2026-07-16T00:00:00.000Z",
+      "computeMs": 3,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1784419200000,
+      "date": "2026-07-19T00:00:00.000Z",
+      "computeMs": 3,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1784678400000,
+      "date": "2026-07-22T00:00:00.000Z",
+      "computeMs": 4,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1784937600000,
+      "date": "2026-07-25T00:00:00.000Z",
+      "computeMs": 13,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1785196800000,
+      "date": "2026-07-28T00:00:00.000Z",
+      "computeMs": 3,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1785456000000,
+      "date": "2026-07-31T00:00:00.000Z",
+      "computeMs": 4,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1785715200000,
+      "date": "2026-08-03T00:00:00.000Z",
+      "computeMs": 5530,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1785974400000,
+      "date": "2026-08-06T00:00:00.000Z",
+      "computeMs": 5665,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    },
+    {
+      "ts": 1786233600000,
+      "date": "2026-08-09T00:00:00.000Z",
+      "computeMs": 5377,
+      "side": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "requestedGross": 0
+    }
+  ]
+}
