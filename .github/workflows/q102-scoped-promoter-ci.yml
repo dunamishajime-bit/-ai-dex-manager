@@ -1,0 +1,38 @@
+name: Q102 scoped operator promoter safety tests
+on:
+  push:
+    paths:
+      - 'scripts/ops/disdex-q102-owner-approved-promote'
+      - 'scripts/ops/disdex-q102-owner-approved-promote-selftest.py'
+      - '.github/workflows/q102-scoped-promoter-ci.yml'
+  pull_request:
+    paths:
+      - 'scripts/ops/disdex-q102-owner-approved-promote'
+      - 'scripts/ops/disdex-q102-owner-approved-promote-selftest.py'
+      - '.github/workflows/q102-scoped-promoter-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  q102-promoter-no-order-selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Parse both scripts without executing promoter
+        run: |
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for file in (
+              "scripts/ops/disdex-q102-owner-approved-promote",
+              "scripts/ops/disdex-q102-owner-approved-promote-selftest.py",
+          ):
+              ast.parse(Path(file).read_text())
+          print("Q102_PROMOTER_SYNTAX_PASS")
+          PY
+      - name: Run isolated mock fixtures (no network or LIVE access)
+        run: python3 scripts/ops/disdex-q102-owner-approved-promote-selftest.py
