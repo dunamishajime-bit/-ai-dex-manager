@@ -1,0 +1,197 @@
+{
+  "status": "RESEARCH_ONLY_COMBINED_C_D_RENDER_NATIVE8_NOT_CURRENT_L2_SOURCE_PARITY",
+  "candidateSha": "1b23f70ff03612625cf7dbb5fcb0e5d505f0ab0e",
+  "candidateRepo": "C:\\Users\\dis\\render-live-prep-20261025",
+  "engineClass": "historical Native8 dynamic wallet / price-model replay",
+  "notLive": true,
+  "renderCase": "TP2p5_SL2_H360M",
+  "renderRequestedGross": 0.75,
+  "renderContract": {
+    "tpPct": 2.5,
+    "stopPct": 2.0,
+    "maxHoldMinutes": 360
+  },
+  "cdPolicy": {
+    "cRoutes": [
+      "REC_G1_MID_REL_LOWVOL",
+      "REC_G2_EARLY_BTC_OPPOSE_VOL",
+      "REC_X02_TIME_36H",
+      "REC_X04_TIME_24H",
+      "REC_X06_TIME_12H",
+      "REC_X09_TIME_48H",
+      "REC_Y08_REV_D0_T6",
+      "REC_Y17_REV_D1_T3",
+      "REC_Y19_REV_D1_TP2_SL1_H36"
+    ],
+    "cRequestedGross": 0.25,
+    "dRoutes": [
+      "CONT_SHORT_MID_AGE24_48",
+      "REC_G3_LATE_BTC_REL",
+      "REC_X07_TIME_6H",
+      "REC_X13_TP1.5_SL1_H24",
+      "REC_X14_TIME_48H",
+      "REC_Y15_REV_D0_T3",
+      "REC_Y18_REV_D2_T18"
+    ],
+    "dRequestedGrossByRoute": {
+      "CONT_SHORT_MID_AGE24_48": 0.15,
+      "REC_G3_LATE_BTC_REL": 0.25,
+      "REC_X07_TIME_6H": 0.05,
+      "REC_X13_TP1.5_SL1_H24": 0.15,
+      "REC_X14_TIME_48H": 0.05,
+      "REC_Y15_REV_D0_T3": 0.05,
+      "REC_Y18_REV_D2_T18": 0.05
+    },
+    "coreRouteUntouched": "FAILED_BREAK_REV_SHORT_6H",
+    "dynamicYieldEnabled": false
+  },
+  "routePolicySha256": "30f89625860c027c7ecb96da182263ca9d7c19a91e20504302dea6048e8bb4d5",
+  "renderEvidenceSha256": "7208652d182cee4e5c29ba62891775a47b0998fa68c0a343a4eb3d73a6ffd5bf",
+  "sourceReferences": {
+    "candidateRepository": "C:\\Users\\dis\\render-live-prep-20261025",
+    "candidateCommit": "1b23f70ff03612625cf7dbb5fcb0e5d505f0ab0e",
+    "routePolicy": "C:\\Users\\dis\\render-live-prep-20261025\\docs\\implementation\\v12-v4-v2-full-year-priority.json",
+    "renderEvidence": "C:\\tmp\\render-dual-preflight-native8-20261025\\RENDER_GROSS075_TP25_PRIORITY_RESEARCH_20261026.json",
+    "native8EngineRoot": "C:\\tmp\\render-multiregime-study-20261024\\scripts\\dd-reduction",
+    "wrapper": "C:\\Users\\dis\\-ai-dex-manager\\bt_v12_v4_cd_render_wrapper.py"
+  },
+  "renderSignalCount": 11,
+  "costsBps": [
+    10,
+    30
+  ],
+  "results": {
+    "10bps": {
+      "scenarioId": "PRICE_MODEL_10BPS",
+      "initialJpy": 10000.0,
+      "roundTripCostBps": 10.0,
+      "finalEquityJpy": 294927901.12782454,
+      "netProfitJpy": 294917901.12782454,
+      "closedTrades": 1286,
+      "winRate": 0.7262830482115086,
+      "profitFactor": 4.637752705491006,
+      "maximumMtmDrawdown": -0.14844216499653728,
+      "accounting": "PASS",
+      "ledgerSha256": "195b4763d2f6ef3ded91f99b07c5611b25d4de6c698c1d4ab3872cd53c7572f7",
+      "canonicalLedgerSha256": "a0555813b6819c23935f6ea894a39500815293d99824da0007ddad41295d5057",
+      "totalRows": 1286,
+      "positivePnlRows": 934,
+      "negativePnlRows": 352,
+      "v12Rows": 831,
+      "cAndDRows": 301,
+      "renderRows": 3,
+      "renderGrosses": [
+        0.75
+      ],
+      "cGrosses": [
+        0.25
+      ],
+      "dGrossesByRoute": {
+        "CONT_SHORT_MID_AGE24_48": [
+          0.15
+        ],
+        "REC_G3_LATE_BTC_REL": [
+          0.25
+        ],
+        "REC_X07_TIME_6H": [
+          0.05
+        ],
+        "REC_X13_TP1.5_SL1_H24": [
+          0.15
+        ],
+        "REC_X14_TIME_48H": [
+          0.05
+        ],
+        "REC_Y15_REV_D0_T3": [
+          0.05
+        ],
+        "REC_Y18_REV_D2_T18": [
+          0.05
+        ]
+      },
+      "strategyTradeCounts": {
+        "V12": 831,
+        "Q102": 183,
+        "PENGU": 68,
+        "IDLE": 73,
+        "RESIDUAL": 18,
+        "V52": 87,
+        "HYPE_LONG": 18,
+        "FET": 8
+      },
+      "firstEntryTsMs": 1754798400000,
+      "lastExitTsMs": 1786284000000
+    },
+    "30bps": {
+      "scenarioId": "PRICE_MODEL_30BPS",
+      "initialJpy": 10000.0,
+      "roundTripCostBps": 30.0,
+      "finalEquityJpy": 175582530.85649258,
+      "netProfitJpy": 175572530.85649258,
+      "closedTrades": 1283,
+      "winRate": 0.6968043647700701,
+      "profitFactor": 3.7182471622315014,
+      "maximumMtmDrawdown": -0.14748408505096222,
+      "accounting": "PASS",
+      "ledgerSha256": "9810678ea1b454c0e9a0c6662b0c91747f1b5067bb60dd141fdadc419031760b",
+      "canonicalLedgerSha256": "8febc28350267191aed28f00040aff8617d51523edbe2acfe500e98eccd07e53",
+      "totalRows": 1283,
+      "positivePnlRows": 894,
+      "negativePnlRows": 389,
+      "v12Rows": 828,
+      "cAndDRows": 303,
+      "renderRows": 3,
+      "renderGrosses": [
+        0.75
+      ],
+      "cGrosses": [
+        0.25
+      ],
+      "dGrossesByRoute": {
+        "CONT_SHORT_MID_AGE24_48": [
+          0.15
+        ],
+        "REC_G3_LATE_BTC_REL": [
+          0.25
+        ],
+        "REC_X07_TIME_6H": [
+          0.05
+        ],
+        "REC_X13_TP1.5_SL1_H24": [
+          0.15
+        ],
+        "REC_X14_TIME_48H": [
+          0.05
+        ],
+        "REC_Y15_REV_D0_T3": [
+          0.05
+        ],
+        "REC_Y18_REV_D2_T18": [
+          0.05
+        ]
+      },
+      "strategyTradeCounts": {
+        "V12": 828,
+        "Q102": 183,
+        "PENGU": 68,
+        "IDLE": 75,
+        "RESIDUAL": 18,
+        "V52": 86,
+        "HYPE_LONG": 17,
+        "FET": 8
+      },
+      "firstEntryTsMs": 1754798400000,
+      "lastExitTsMs": 1786284000000
+    }
+  },
+  "injectionCounters": {
+    "summary_only_existing_output": 1
+  },
+  "reproducibility": "RESEARCH_REPLAY_REPRODUCED; NOT_PRODUCTION_SOURCE_OR_L2_PARITY",
+  "limitations": [
+    "The portfolio engine is the existing historical Native8 research runner, not the candidate TypeScript production runtime.",
+    "RENDER signals are from the signed research tape/evidence JSON and are not exchange L2 fills.",
+    "Funding, live margin, lot rounding, partial fills, protective order lifecycle, and current-source route feature parity are not certified by this replay.",
+    "This result must not be used as a substitute for CI, signed LIVE approval, or a VPS cutover audit."
+  ]
+}

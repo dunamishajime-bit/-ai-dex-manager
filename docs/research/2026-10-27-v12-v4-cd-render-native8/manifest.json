@@ -1,0 +1,190 @@
+{
+  "schema": "disdex-research-evidence-20261027/v1",
+  "researchOnly": true,
+  "notProductionCertified": true,
+  "date": "2026-10-27",
+  "created": "2026-10-28",
+  "candidateSha": "1b23f70ff03612625cf7dbb5fcb0e5d505f0ab0e",
+  "8Strategies": [
+    "V12",
+    "Q102",
+    "PENGU",
+    "IDLE",
+    "RESIDUAL",
+    "V52",
+    "HYPE_LONG",
+    "FET"
+  ],
+  "costsBps": [
+    10,
+    30
+  ],
+  "reportRawLedgerHashes": {
+    "10bps": "195b4763d2f6ef3ded91f99b07c5611b25d4de6c698c1d4ab3872cd53c7572f7",
+    "30bps": "9810678ea1b454c0e9a0c6662b0c91747f1b5067bb60dd141fdadc419031760b"
+  },
+  "reportCanonicalLedgerHashes": {
+    "10bps": "a0555813b6819c23935f6ea894a39500815293d99824da0007ddad41295d5057",
+    "30bps": "8febc28350267191aed28f00040aff8617d51523edbe2acfe500e98eccd07e53"
+  },
+  "sourceWrapperMissing": "C:/Users/dis/-ai-dex-manager/bt_v12_v4_cd_render_wrapper.py not found during audit",
+  "engineSourceCommit": "173659aef0e28826c4f1c2a2db47a5957eaa5085",
+  "limitations": [
+    "The portfolio engine is the existing historical Native8 research runner, not the candidate TypeScript production runtime.",
+    "RENDER signals are from the signed research tape/evidence JSON and are not exchange L2 fills.",
+    "Funding, live margin, lot rounding, partial fills, protective order lifecycle, and current-source route feature parity are not certified by this replay.",
+    "This result must not be used as a substitute for CI, signed LIVE approval, or a VPS cutover audit."
+  ],
+  "files": {
+    "10bps/trades.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+      "rawBytes": 1442689,
+      "compressedBytes": 208372,
+      "rawSha256": "195b4763d2f6ef3ded91f99b07c5611b25d4de6c698c1d4ab3872cd53c7572f7",
+      "gitSha256": "428b0108acbf26cc1db3827b056048286040dbb627f5807ec7277a222a8eabd0",
+      "rowCount": 1286
+    },
+    "10bps/candidate-decisions.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\candidate-decisions.jsonl",
+      "rawBytes": 3332138,
+      "compressedBytes": 274583,
+      "rawSha256": "78e0801659b575395df9c226b613a820fab78a05024f15804867565ebeeae0d5",
+      "gitSha256": "7faf473256c171b2ab4f10b26bed0c150115d641581ac3cbe1671cc953030443",
+      "rowCount": 2597
+    },
+    "10bps/portfolio-events.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-events.jsonl",
+      "rawBytes": 2861830,
+      "compressedBytes": 321132,
+      "rawSha256": "10c4142f71d23759f492d1994c03767e3bd40cbd9c2577f235b91722f9bf5810",
+      "gitSha256": "160f56b4b70872400df59d6d780568d761143ecc174c2197e15c789d92b8a23e",
+      "rowCount": 7371
+    },
+    "10bps/mtm.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\task9-mtm.jsonl",
+      "rawBytes": 2094414,
+      "compressedBytes": 334307,
+      "rawSha256": "56a9aedc1812d545ac6b0072cad1d6db7ac3550e7a457007af9422e10c950ca4",
+      "gitSha256": "836f835175055559ad72c739ad3be357941cc78df43886e069ad0ed1f2e82956",
+      "rowCount": 8761
+    },
+    "10bps/crypto-candidates.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\candidates\\crypto-price-model-candidates.jsonl",
+      "rawBytes": 1472438,
+      "compressedBytes": 122686,
+      "rawSha256": "25f78ea1e6c822830334d478f9a63c943897e1ae5dc4362aceaea4e11aaf87ed",
+      "gitSha256": "73175a3605fbd07b0c9cee18a721cd2c391f2d57cd8f1620514bf1e792d3aa82",
+      "rowCount": 2498
+    },
+    "10bps/integrated-summary.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\integrated-summary.json",
+      "rawBytes": 1563,
+      "rawSha256": "ef340d03437275b5048578cebfd83e0437f52fd214861c43ad4d9d312065ca72"
+    },
+    "10bps/result.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\result.json",
+      "rawBytes": 176387,
+      "rawSha256": "1e4873395911a63e0731c0f32172f01fc381f9157bd3e47e9ce2cb93cd46aa74"
+    },
+    "10bps/metrics.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\metrics.json",
+      "rawBytes": 24937,
+      "rawSha256": "788e2fa31849768cbea143c6473ec5584ffff97959535c1620d1b6d8e842e748"
+    },
+    "10bps/quantity-production-vectors.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\quantity-production-vectors.json",
+      "rawBytes": 147182,
+      "rawSha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea"
+    },
+    "10bps/portfolio-price-model-summary.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_3a489e43d227\\cmp_3a489e43d227\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\portfolio-price-model-summary.json",
+      "rawBytes": 29110,
+      "rawSha256": "2ef0d31504e62e1ba797ed9db5b202530f1838abf61048d40e3cfd09c74d93ad"
+    },
+    "30bps/trades.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+      "rawBytes": 1440034,
+      "compressedBytes": 209757,
+      "rawSha256": "9810678ea1b454c0e9a0c6662b0c91747f1b5067bb60dd141fdadc419031760b",
+      "gitSha256": "0dee5bf33904c5af7c1f8bf3db2ef358980c8246790a76887e1c096876d032c8",
+      "rowCount": 1283
+    },
+    "30bps/candidate-decisions.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\candidate-decisions.jsonl",
+      "rawBytes": 3331517,
+      "compressedBytes": 275737,
+      "rawSha256": "b91144f145cfaf376b71d493ba7a468179e0784efa4668a72e6b8ee04aa5360c",
+      "gitSha256": "aed823fb53694eafeeb7082e2dec18e127e2bdd0ff76b8298c1dbb19855b830a",
+      "rowCount": 2597
+    },
+    "30bps/portfolio-events.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-events.jsonl",
+      "rawBytes": 2866176,
+      "compressedBytes": 324144,
+      "rawSha256": "131f82634e36fdaabbd3722a9b5edfc628628d8bc874e28ab9b92554013aa60a",
+      "gitSha256": "65c0c287325e3af890d1a457c9f67816f05ae84fa1dffb64ede9a5ec263fbbd1",
+      "rowCount": 7380
+    },
+    "30bps/mtm.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\task9-mtm.jsonl",
+      "rawBytes": 2096698,
+      "compressedBytes": 336038,
+      "rawSha256": "271b10a044b736e027247fdd852d723d441139e9a66450c8668fb59be8635c9f",
+      "gitSha256": "ec3762e2eb1abce3a5138634f7182f0ac0da2ebd5667afc103080915e3421d9f",
+      "rowCount": 8761
+    },
+    "30bps/crypto-candidates.jsonl.gz": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\candidates\\crypto-price-model-candidates.jsonl",
+      "rawBytes": 1472401,
+      "compressedBytes": 122671,
+      "rawSha256": "d80b1c7448a4314a4e2d5318d9d4dbcc6ad2cbbff104b2a60cd7eeede8e7e523",
+      "gitSha256": "b7fd22d83ee122ca3cc327fd28b4b217fdafeba99decf621c4b336b8116d0fce",
+      "rowCount": 2498
+    },
+    "30bps/integrated-summary.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\integrated-summary.json",
+      "rawBytes": 1567,
+      "rawSha256": "d6dd72557e558e73a52331ac42bdb03c6f5903da115fd49172dcc46f9783dd1d"
+    },
+    "30bps/result.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\result.json",
+      "rawBytes": 176313,
+      "rawSha256": "ec3cdd4103cd809229832a08829a8bb299d5eeef5f62bb43395f054870911ea7"
+    },
+    "30bps/metrics.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\metrics.json",
+      "rawBytes": 25068,
+      "rawSha256": "fb87b6964a34a0ba1e5c2697bd2317253e4cfa13fb3d7a0d13a2e0529296beaa"
+    },
+    "30bps/quantity-production-vectors.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\quantity-production-vectors.json",
+      "rawBytes": 147182,
+      "rawSha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea"
+    },
+    "30bps/portfolio-price-model-summary.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\engine\\cmp_90e7ff77b58d\\cmp_90e7ff77b58d\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\portfolio-price-model-summary.json",
+      "rawBytes": 29257,
+      "rawSha256": "70230a44a780d6e00b936c1125a3019ab1b486bf7022c37fe5b07e7c5ed4c51d"
+    },
+    "combined-cd-render-native8-report.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\combined-cd-render-native8-report.json",
+      "rawBytes": 6028,
+      "rawSha256": "c4a0780535b033e57fbdb4461bc9f5d5195b2f62d18a436534d3a26fdffcdfdc"
+    },
+    "PENGU_TIMED_NEGATIVE_NATIVE_FULL8_20261023.json": {
+      "upstream": "C:\\tmp\\v12-v4-cd-render-combined-20261027\\PENGU_TIMED_NEGATIVE_NATIVE_FULL8_20261023.json",
+      "rawBytes": 7324,
+      "rawSha256": "dd9e266329d5ca0e6b0965430693b8d744a54f21064de8583bc77745265a76bd"
+    },
+    "render-independent-research-evidence.json": {
+      "upstream": "C:\\tmp\\render-dual-preflight-native8-20261025\\RENDER_GROSS075_TP25_PRIORITY_RESEARCH_20261026.json",
+      "rawBytes": 80905,
+      "rawSha256": "7208652d182cee4e5c29ba62891775a47b0998fa68c0a343a4eb3d73a6ffd5bf"
+    },
+    "v12-v4-priority-route-policy.json": {
+      "upstream": "git show 1b23f70ff03612625cf7dbb5fcb0e5d505f0ab0e:docs/implementation/v12-v4-v2-full-year-priority.json",
+      "rawSha256": "bae4573f6ff516bec2b27e7e10d35e5027c7265c67bbdb101c1038066b5f7c27",
+      "rawBytes": 21629
+    }
+  }
+}
