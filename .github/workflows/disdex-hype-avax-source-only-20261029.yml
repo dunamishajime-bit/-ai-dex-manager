@@ -14,5 +14,6 @@ jobs:
       - run: python3 tests/test_avax_legacy_native8_source_evidence_20261029.py
       - run: ./node_modules/.bin/tsx --test tests/quality102_causal_v1_portfolio.test.ts
       - run: python3 tests/test_v52_no_unnecessary_preemption_20261029.py
+      - run: python3 tests/test_q102_native_annual_coverage_gate_20261029.py
       - run: ./node_modules/.bin/tsx --test tests/hype-zec-preemption.test.ts tests/hype-zec-priority-capacity.test.ts tests/idle-residual-long-preemption.test.ts tests/fet-core-preemption.test.ts
       - run: ./node_modules/.bin/tsc --noEmit -p tsconfig.json --pretty false --incremental false

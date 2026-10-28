@@ -137,3 +137,25 @@ and formal operator certification before any Production activation.
 This research affects economic selection, so it remains DRAFT PR #296
 and must NOT be silently merged into Codex's already separately handled
 PR #295. No LIVE service, order, STOP, or position changed.
+
+
+## 新Q102 SHAのAster H1早期ウォームアップ不足（証明）
+2026-10-28に取得したAsterネイティブ23銘柄の最古取得時刻の
+原本（SHA256 901ad2e15d7cf4260a87d9ff49f9301fef47f0294298e5534323a2c2122a591b）
+を docs/research/evidence/Q102_ASTER_NATIVE_H1_EARLIEST_23_SYMBOLS_20261028.json
+に凍結保存した。年間2025-08-10〜2026-08-10の181日分
+ウォームアップは2025-02-10 00:00UTCから連続したAster1h足が必要。
+以下8銘柄では今回のAster取得経路において最古の取得時刻が
+この条件よりも遅く、指定年次Q102 SHA完全再生を認証できない:
+ENA, FET, FIL, JUP, LDO, RENDER, TAO, TIA (すべてUSDT)。
+全23銘柄の最も遅い先頭時刻は2026-01-09 18:00 UTC。
+空白の無い1h履歴が追加認証できた場合に限り、
+23銘柄共通の181日ウォームアップが成立する最初の時刻は
+2026-07-09 18:00UTC（これは単なる最古時刻の下限であり、
+経済BT、日足の連続性、他Runnerとの一致の証明ではない）。
+scripts/research/validate-q102-native-annual-coverage-20261029.py
+はsource-onlyで不足数と最初に可能になる時刻を証明し、
+指定年次が欠損する限りプロセスをexit2 (Fail Closed)にする。
+tests/test_q102_native_annual_coverage_gate_20261029.py 1件PASS。
+他取引所/Binance OHLCVで不足Aster履歴を補って
+正式同一BTとする行為は禁止。
