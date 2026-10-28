@@ -105,18 +105,18 @@ async function writeAtomicJson(path:string,payload:Record<string,unknown>){
  await writeFile(tmp,JSON.stringify(payload)+"\n",{encoding:"utf8",mode:0o600});
  await rename(tmp,path);
 }
-export function buildV4RealtimeDecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,updatedAt=Date.now()):Record<string,unknown>{
+export function buildV4RealtimeDecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,updatedAt=Date.now(),lastCompletedTickAt:number|null=result.status==="locked"?null:result.eventTs):Record<string,unknown>{
  const base={releaseSha,runtimeSha:releaseSha,sourceRuntimeSha:releaseSha,source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",operationMode,
-  status:result.status,reason:result.reason,orderEnabled:result.orderEnabled,updatedAt,lastTickAt:result.eventTs};
+  status:result.status,reason:result.reason,orderEnabled:result.orderEnabled,updatedAt,lastTickAt:lastCompletedTickAt};
  if(!prepared||prepared.kind!=="READY")return {schema:V4_REALTIME_DECISION_SCHEMA,policyId:"V2_M150_D05_CORE_NATIVE",decisionTs:null,capturedAtMs:null,
   sourceFingerprint:null,candidateCount:0,filteredCount:0,sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[prepared&&prepared.kind==="FAILED"?prepared.reason:"V4_PREPARE_NOT_AVAILABLE"],
   candidates:[],filtered:[],realOrderEnabledV4:0,tradingMutation:0,stale:true,staleReason:prepared&&prepared.kind==="FAILED"?prepared.reason:"V4_PREPARE_NOT_AVAILABLE",...base};
  const decision=prepared.decision;
  return {...decision,...base,schema:V4_REALTIME_DECISION_SCHEMA,stale:false,staleReason:null};
 }
-export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,computedAtMs=Date.now()):Record<string,unknown>{
+export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,computedAtMs=Date.now(),lastCompletedTickAt:number|null=result.status==="locked"?null:result.eventTs):Record<string,unknown>{
  const base={schema:V4_GATE_TELEMETRY_SCHEMA,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,activeRunnerSha:releaseSha,operationMode,
-  source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",computedAtMs,updatedAt:computedAtMs,lastTickAt:result.eventTs,status:result.status,reason:result.reason,
+  source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",computedAtMs,updatedAt:computedAtMs,lastTickAt:lastCompletedTickAt,status:result.status,reason:result.reason,
   stale:true,telemetryFresh:false};
  if(!prepared||prepared.kind!=="READY")return {...base,decisionTs:null,capturedAtMs:null,sourceFingerprint:null,sourceCount:0,candidateCount:0,filteredCount:0,btcRegime:"UNKNOWN",symbolCount:0,symbols:[]};
  const decision=prepared.decision;
@@ -144,30 +144,38 @@ export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prep
   sourceCount:decision.sourceCount,candidateCount:decision.candidateCount,filteredCount:decision.filteredCount,btcRegime:decision.btcRegime??"UNKNOWN",
   symbolCount:symbols.length,symbols,stale:false,telemetryFresh:true};
 }
-async function writeV4DecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">){
+async function writeV4DecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,lastCompletedTickAt:number|null){
  const now=Date.now();
- await writeAtomicJson(telemetryPath("V12_V4_REALTIME_DECISION_PATH","/var/lib/disdex/v12-v4/realtime-decision.json"),buildV4RealtimeDecisionTelemetry(releaseSha,operationMode,prepared,result,now));
- await writeAtomicJson(telemetryPath("V12_V4_GATE_TELEMETRY_PATH","/var/lib/disdex/v12-v4/gate-telemetry.json"),buildV4GateTelemetry(releaseSha,operationMode,prepared,result,now));
+ await writeAtomicJson(telemetryPath("V12_V4_REALTIME_DECISION_PATH","/var/lib/disdex/v12-v4/realtime-decision.json"),buildV4RealtimeDecisionTelemetry(releaseSha,operationMode,prepared,result,now,lastCompletedTickAt));
+ await writeAtomicJson(telemetryPath("V12_V4_GATE_TELEMETRY_PATH","/var/lib/disdex/v12-v4/gate-telemetry.json"),buildV4GateTelemetry(releaseSha,operationMode,prepared,result,now,lastCompletedTickAt));
+}
+export function buildV4HealthPayload(releaseSha:string,operationMode:string,result:{
+ status:string;reason:string;eventTs:number;candidateCount:number;orderEnabled:boolean;
+},lastCompletedTickAt:number|null,heartbeatAt=Date.now()):Record<string,unknown>{
+ const serviceUnit=String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim();
+ const workingDirectory=String(process.env.DISDEX_RELEASE_ROOT??process.cwd()).trim();
+ const failed=result.status==="locked"||result.status==="blocked"||result.status.toLowerCase()==="failed";
+ const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
+ const safetyState=failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":"HEALTHY";
+ const payload={
+  schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
+  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState,
+  heartbeatAt,mainPid:process.pid,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
+  operationMode,mode:"LIVE",updatedAt:heartbeatAt,lastTickAt:lastCompletedTickAt,
+  status:result.status,reason:result.reason,candidateCount:result.candidateCount,
+  orderEnabled:result.orderEnabled,
+  healthReason:safetyState==="HEALTHY"?null:result.reason,
+ };
+ return payload;
 }
 async function writeV4Health(releaseSha:string,operationMode:string,result:{
  status:string;reason:string;eventTs:number;candidateCount:number;orderEnabled:boolean;
-}){
+},lastCompletedTickAt:number|null){
  const path=v4HealthPath();
  if(!path.startsWith("/var/lib/disdex/v12-v4/"))throw Error("V4_HEALTH_PATH_INVALID");
  await mkdir(dirname(path),{recursive:true,mode:0o700});
  const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
- const serviceUnit=String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim();
- const workingDirectory=String(process.env.DISDEX_RELEASE_ROOT??process.cwd()).trim();
- const failed=result.status==="blocked"||result.status.toLowerCase()==="failed";
- const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
- const payload={
-  schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
-  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState:failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":"HEALTHY",
-  heartbeatAt:now,mainPid:process.pid,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
-  operationMode,mode:"LIVE",updatedAt:now,lastTickAt:result.eventTs,
-  status:result.status,reason:result.reason,candidateCount:result.candidateCount,
-  orderEnabled:result.orderEnabled,
- };
+ const payload=buildV4HealthPayload(releaseSha,operationMode,result,lastCompletedTickAt,now);
  await writeFile(tmp,JSON.stringify(payload)+"\n",{encoding:"utf8",mode:0o600});
  await rename(tmp,path);
 }
@@ -332,6 +340,7 @@ async function main(){
  const {engine,store,releaseSha,operationMode}=await buildV4ProductionRuntime();
  if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  let stopping=false;
+ let lastCompletedTickAt:number|null=null;
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
  do{
@@ -345,12 +354,13 @@ async function main(){
    // remain inside engine.tick() under the original exclusive lease.
    prepared=await engine.prepareFlatMarketDecision();
    await writeV4IdleBaselineSnapshot(releaseSha,prepared);
-   result=await executeV4WithContentionAudit({
+    result=await executeV4WithContentionAudit({
     operation:()=>engine.tick(prepared),releaseSha,operationMode,
     accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
     attempts:10,retryMs:750,shouldStop:()=>stopping,
     onContention:()=>{hadLockContention=true;},
    });
+   if(result.status!=="locked")lastCompletedTickAt=result.eventTs;
   }catch(error){
    const recoverableExitGap=classifyV4RecoverableExitFeedFailure(error,Date.now());
    if(recoverableExitGap){
@@ -363,10 +373,10 @@ async function main(){
     result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
    }
   }
-  try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result);}catch(error){
+  try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result,lastCompletedTickAt);}catch(error){
    console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:error instanceof Error?error.message:String(error)}));
   }
-  await writeV4Health(releaseSha,operationMode,result);
+  await writeV4Health(releaseSha,operationMode,result,lastCompletedTickAt);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result,
    ...(deferredWaitMs?{retryAfterMs:deferredWaitMs}:{}),hadLockContention}));
   if(!daemon||stopping)break;
