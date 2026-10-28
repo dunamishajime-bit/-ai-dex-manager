@@ -1,0 +1,489 @@
+{
+  "status": "PUBLIC_ASTER_1H_COVERAGE_SCREEN",
+  "targetSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+  "data": [
+    {
+      "symbol": "AAVEUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "773e8722b430153951be7d86c68ceae955289a848baec3d1288a758282c202d6"
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "3a1a92c3747159f210a0f7c49d9082d645a4478fae5f32e88024c292cfb3c195"
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "7a977b7b3fcfd50203fc4a2b77586a1c69991cb8fbe2f1c61e6ac41b574af640"
+    },
+    {
+      "symbol": "APTUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "8f189497956075aa6897c7ee510af15a0862563acd1638a7e191f2cff13622f1"
+    },
+    {
+      "symbol": "APTUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "8747476b3dd24731e64e6ea9dcc867d068521141ce4f621c5c4ddce9f242d19d"
+    },
+    {
+      "symbol": "APTUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "f2ee17923af0f2683b5d6a37394b7c26c1e8dd05bb8cf52a1fb185dcd91bda91"
+    },
+    {
+      "symbol": "ARBUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "f0fdd7d28f80c73d6aeff29d0647bc9a5ac3a1936effbbcdab1ddcd6f631eca3"
+    },
+    {
+      "symbol": "ARBUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "2b07381fcead1dba4537bebc2222586d23c719b5fe6448bd82cacb1275f4006f"
+    },
+    {
+      "symbol": "ARBUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "1357004ab294da9688bf92e76a5fedd9d5b95a09a8f97049f4bf07820d5a8458"
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "7155aae869a163af96ecc2860954f7b4bffda4727d75a3924b0d45bbdd84375e"
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "92d9068883a891224467e0078e0af21ee6492ed78d7fb87d5f0d368b06e19771"
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "c58a99b896fdeb659b3241b10e6c43ce9339e5c45cd42c98227a3467adc0f61d"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "fcaa4a7388e716407da1e06d9759d31733d52791627b1a27e2b18ac45db0e565"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "165e51fcd163c3f226933ed7d7719ce1c51368b16afb6d25dd6f5bba67f3e4ce"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "cebac000361c222620204198166b6648e47cbe05bb216ae3ceb1e341cffc3dc6"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "ac4bb273f3db3d1fcbba75de3605cbd7d595998ffef6e1e0bfae9e1180921553"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "684c6c9764fc88ea64cb9a1c4cf62fb070358c520294dd64164840be375294a3"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "e0bfcdc23b4a6963122f54f6215178c3e07bc868723a6c42601c7c623b214431"
+    },
+    {
+      "symbol": "DOTUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "3a93c4bb7afb3ba82f0196ce7e9c8a14ba9a9b4527c487d86264dcb6da672650"
+    },
+    {
+      "symbol": "DOTUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "34135cdedf4e4348707919d8f4eeaab42061406678acf52120d3dc2793061ab7"
+    },
+    {
+      "symbol": "DOTUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "c755d6e12e0f446ada676b51d9fe8bf533f23db789976ba48e274f6d8c2afff0"
+    },
+    {
+      "symbol": "ENAUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "ENAUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "5f668862731ef1fa933d3296d9c0c27b2239af680cb35cf3d303e4558391adab"
+    },
+    {
+      "symbol": "ENAUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "8aece4db7042e038d9654606d4f9cdf0db39aacc9438412c6769b78c3b180ad6"
+    },
+    {
+      "symbol": "FETUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "FETUSDT",
+      "date": "2025-08-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "FETUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "25f62ea4983c0ae7969989cf994989edd9f7638d1dcf4c06679e10218ba60b08"
+    },
+    {
+      "symbol": "FILUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "FILUSDT",
+      "date": "2025-08-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "FILUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "e0ace8b00104b73ad8c6d6a5ffaa2f44a28b43c5f06f4a85aa22c1250e3ae24c"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "date": "2025-08-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "ce8e617d2b6969cef474cc16361558f845a8e9517983dd6a6bac4a32a52e7448"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "0736028054f23447639120ac54e0ef26dc9dbd898c89e7a2645742b51b2b8a1f"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "2e4743d72934f078db6f9802fcf8f4b310fa0514e3593e9e8a3fbf5b4ecf4fd2"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "4cef1e680f9caab4f1ce2e4cf0a5e532df567e541021126140ac0a8a3529979e"
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "f3c2961a81101f2f589a6a2ee9dac190c85de7e29cefac1b9d6c2d4f0a2060f3"
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "5d1af6c94edd418350e484b035ea07e8050c9d435bbf294542aca95116ec55ce"
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "e9be28e77172ca588027c74b0ebd7cfee79adb26f2c30fe0c026d02db4ea5d98"
+    },
+    {
+      "symbol": "OPUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "195cf3f56cbe8adee911c3ce0a5e14136b46de6fbd7f8da2e1d5950975ed1478"
+    },
+    {
+      "symbol": "OPUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "1869a1ce07777601cd8ce68323c100c0be6bc03dbc1f5abe0ad9c83a84f04ea1"
+    },
+    {
+      "symbol": "OPUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "43175fb1ea30749fdefb359f3f1959aa63572294eb4a06fd3a3ca323573ece9e"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "date": "2025-08-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "f99384802e9c43c1be7da101f50d841a93482b180da9754a2f3f49d7c993eefe"
+    },
+    {
+      "symbol": "SEIUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "79e35d1bca8856a6bc93f195cd7b84e1981b834b4ac80672a2005c50ea7f9f9a"
+    },
+    {
+      "symbol": "SEIUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "9e37ad46ca571627004e1f860eb4a0819054635b0f0f333fa458f2b92f0cdc0c"
+    },
+    {
+      "symbol": "SEIUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "c957ca2359a4183762fee1b482482d24f92878d1cd7485f219e5c880627f7d83"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "00e533931b1193aa385c79825ffdec06eb1a9459c4c99758f57b351e1822a1da"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "231052141599c4b1c44c6e41e988f1f4a605c8bf24a9804ce15dd1e56317bd14"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "8078e3c2cd9cd260c31462d268ce3ac37d6c95196711cb6550823dd7003950c3"
+    },
+    {
+      "symbol": "SUIUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "06cf640f1fb6c3b74373e997e7aab64a04065c8213b1f064af0b3504d07ba4e0"
+    },
+    {
+      "symbol": "SUIUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "ddca7566e8bab88a74d832d1133ff47f4e0d4c95e3e4cb2f4ecbcf40be2c12dd"
+    },
+    {
+      "symbol": "SUIUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "808a49ad0b7ca258be6298a0f4bdd7459b288c53132e8057b481d082b1811fe9"
+    },
+    {
+      "symbol": "TRXUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "cf402b4685836f27967cad8131634c9d59df9f560f20ca3e28e76297fe160aef"
+    },
+    {
+      "symbol": "TRXUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "2b20d26b3c806e50341b69fb2ae11deb04ee3ba187c938ca5914f0ddc019bcd4"
+    },
+    {
+      "symbol": "TRXUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "f7dae32f92c3088a9480741000e872833788770e90cc31acb83de95dd4d48aa3"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "date": "2025-02-10",
+      "count": 3,
+      "startTs": 1739145600000,
+      "sourceSha256": "1c8f087d472936c448a67cffc43667f65852c3e8b6d152ce9c871b7a3f80e35e"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "date": "2025-08-10",
+      "count": 3,
+      "startTs": 1754784000000,
+      "sourceSha256": "9360ddc374786461fe9cee1e92f566d41411806dc7bfa8956bc7f71a29dc14b8"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "45f245faae89cde6a52915d684938890605c3b0f6e9c428e19a50941c1997b28"
+    },
+    {
+      "symbol": "JUPUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "JUPUSDT",
+      "date": "2025-08-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "JUPUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "f5c86045493d78782ded31b10caf1c168beed7efaa1867219921083f33210826"
+    },
+    {
+      "symbol": "TAOUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "TAOUSDT",
+      "date": "2025-08-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "TAOUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "3d740f77b8a53c90209934b55189def1c2a51e314d226ef7fc9b5750f3ebea1f"
+    },
+    {
+      "symbol": "TIAUSDT",
+      "date": "2025-02-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "TIAUSDT",
+      "date": "2025-08-10",
+      "count": 0,
+      "startTs": null,
+      "sourceSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "symbol": "TIAUSDT",
+      "date": "2026-08-09",
+      "count": 3,
+      "startTs": 1786233600000,
+      "sourceSha256": "a38d15190bb676e84fe4d91b66b2523f0520a96297c7f9df3bd4fe7bae0c88c2"
+    }
+  ]
+}

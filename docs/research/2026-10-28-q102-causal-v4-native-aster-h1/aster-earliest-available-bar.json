@@ -1,0 +1,144 @@
+{
+  "queryStartUtc": "2025-02-10T00:00:00Z",
+  "limit": 1,
+  "results": [
+    {
+      "symbol": "AAVEUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "APTUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "ARBUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "BTCUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "DOTUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "ENAUSDT",
+      "earliestReturnTs": 1748350800000,
+      "earliestReturnUtc": "2025-05-27T13:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "FETUSDT",
+      "earliestReturnTs": 1767981600000,
+      "earliestReturnUtc": "2026-01-09T18:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "FILUSDT",
+      "earliestReturnTs": 1762527600000,
+      "earliestReturnUtc": "2025-11-07T15:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "JUPUSDT",
+      "earliestReturnTs": 1767967200000,
+      "earliestReturnUtc": "2026-01-09T14:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "LDOUSDT",
+      "earliestReturnTs": 1767981600000,
+      "earliestReturnUtc": "2026-01-09T18:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "NEARUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "OPUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "earliestReturnTs": 1767704400000,
+      "earliestReturnUtc": "2026-01-06T13:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "SEIUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "SOLUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "SUIUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "TAOUSDT",
+      "earliestReturnTs": 1767967200000,
+      "earliestReturnUtc": "2026-01-09T14:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "TIAUSDT",
+      "earliestReturnTs": 1767981600000,
+      "earliestReturnUtc": "2026-01-09T18:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "TRXUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    },
+    {
+      "symbol": "UNIUSDT",
+      "earliestReturnTs": 1739145600000,
+      "earliestReturnUtc": "2025-02-10T00:00:00+00:00",
+      "rows": 1
+    }
+  ]
+}

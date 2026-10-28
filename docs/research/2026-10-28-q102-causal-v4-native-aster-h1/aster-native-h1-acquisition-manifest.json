@@ -1,0 +1,841 @@
+{
+  "schema": "disdex-aster-public-native-h1-research/v1",
+  "venue": "Aster Futures v1 REST klines unauthenticated",
+  "source": "https://fapi.asterdex.com/fapi/v1/klines",
+  "targetSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+  "requestedFromTs": 1768003200000,
+  "requestedToExclusiveTs": 1786406400000,
+  "sourceIsAster": true,
+  "isProductionL2": false,
+  "tradeOrders": 0,
+  "symbols": [
+    {
+      "symbol": "AAVEUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "8f919c583069ba5c4dfd261d7b17e0e6c98b213141ee2a51e92180f77f3c199b",
+      "compressedSha256": "f2f8d30d8d336506e51764b05e28fe92b0dac93f2680ad980b3cc110678c77c4",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "7f84a8cf4c43119c53e6dfe34b8847b8bdcf4568ea668646981a60f22a106661"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "f6fd35ce90c4a064c5bfc3c4555ff14b5dc21861996a8bd03c5e7e5ebb7c1fda"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "ddcb2350407ee889cbff44157b7af53a255321384c889e844e217360999c30ca"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "87c96380b8a16b32dc3722caae8369596adbb8d3fca633eb256dca11fbc7295d"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "APTUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "6519084ca2a509205dfdc86b2dc4c3ac355f3667e8a6abe2b3972a367f49f68e",
+      "compressedSha256": "11dc4ea3dd2d219ee88bea922b3850a3b24cbefcf9573846d4dc7d343a01aa69",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "e59e31df9c88a1eef07b256ae2f28461f654e8c67657d2f93043f838e6284412"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "29930d15ab6ce74da05e04356bb6c287f8ff0ecad3b0666841902da37bb25ce2"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "8fdfed09f4219d5812ed3ad8028c5b27a1b4aff930798db836fe6d68ad6f0b87"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "cb7c59ad98314b3e49887cc895d385a53d18eff92e678a7959b317af9145ebbb"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "ARBUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "5faba103c2e1c49560a4c6614659f12fd4831c78a652cc9aaf12bb1186e17df0",
+      "compressedSha256": "516bffe246cc5a9baacf004d8e1d21e53e7acbd946f82161555bfa3b2a477021",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "02b0bd465d004ef82a4bf5bcedd11e643d9f0b2050e628ca837b88b9dcaff114"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "d7e46adf5035607e9d013ce86102b4655899b9cc9a2314065824ad6af7ad31c7"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "909e3aea08f5e8eda5ddc8f1b884065cdc0605ff33e49972b381e0b97b337436"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "b0414fdb3054f16630b4c62d491caee6fbe86e751dc249866c19df3d2efbfa39"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "fc0f52ee6d0105a0d053633c0fd507b85626ea11219bb6d7c97a05476014d200",
+      "compressedSha256": "ba2d5d980af03ade459c3625d6066370d94d545e41560dcc52d4ac812e87a9f2",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "eb4b804126a00391e48a3a432adba218b24b2401e3470044ce76800809eb920c"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "e95ebbc1b4906f47216ffe00c65218e6e537c5692909f28b3e11847321172f21"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "ca84ada89caf2a0a316054ed9f085d1dc7d9fe0db1e5adbf10328bc17add6cc6"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "c2a4a22c3e5c3b515f9e46df501a24323aa805622254559f8e63c16d21184b19"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "BTCUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "ecb73c0abb53a5a5ad73ce670b06a070ea3541983d9ecdf66591c4e3475bba33",
+      "compressedSha256": "40f17553350949f6746105d9c646c5e20c5d1047826d0cc96800d3e6cadfc2df",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "d3c49cda77bcc91223e492d88fd664c3030c438f2640a33b1e58ccd3f13bdd3e"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "05c29495d14ceb6f5f90d60b44d33a74542439c01009904289ec58491e2a0147"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "688b66a0465679672567d2521d05c4e2ceee327740e5fbd2b25db5bbf978a69e"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "aba49a3512f54f4d9fb80d392907c53f3554b49ea32896160be79bae62ea1164"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "871bfef7ebb4e854121f6defb4d254fcc2501842e9ee6a80d6a2d6d80626d3e2",
+      "compressedSha256": "aec8186b3c0e0d808a5d18431a270ba85c52fb821db15556777938bbd3f5cbfd",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "eee0c40e1afd0c58cb5d9ca1b4a2cbba89144e676187357cee1e47216c66bb5f"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "ab3c1a263debff18c1aa27b642a8cdea73b055608e52b747341460c62a3b8f27"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "d164a79afbb30563eb4437458710be46d23a44e818e20daa92bfeeaabcfea06b"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "c31a479073371ff5e857406fd5d29d5e3c6ca7b1388549fbca27bef3b5853832"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "DOTUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "bd367081740b3f1a1d68f9d123020e63db076225b13f370ceb90d33e029f7e03",
+      "compressedSha256": "4fbb7428b29639b1768bd6330df6e2ab646c9b07e1c2c4cc22b643fe9c42d064",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "db9e240ad65fe9bbb6e4290aa98a5b65a86bb7cb8641b4e25233456047757c04"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "82d479ca0f3b2b7382fa916a143a4e6d67e466bfa86432760b5ec68750fa9699"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "9811bb8e5a11708ff45f3f6a95559655695c32205a01afeb4367ede7a2e5751a"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "95e01ae7603c9f73bac491459d4066cc64e23abdafc52cb286b7f173777c1ef6"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "ENAUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "89dde702da9b23ed318b88dedaa154c528c2f5c696e191a64b000bbbaa98d04b",
+      "compressedSha256": "411c17429c6a7a4b62640e15d7e117025aea1643786535b197aa5485f000aa54",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "ee44c19d5bdcf49ab312cd8bfcac5b9be53d647f02b75d419d5b0e7845fe17b7"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "87f4bac2deca3cf5aaed6cd9c06b03d364833e40787b721b23d881f175f6c33d"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "e2aa5004465d065feb2c64f8730c1e4ec2dadc50b3aac3f8b152387209175a40"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "9603d92c33a3b35821ca35575b7d752adbc18b54a35a992cb60280c68d22fd74"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "FETUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "efacac56a5d44f5a34255716736f6b8c8833ec178424bbb9212a09247f580baa",
+      "compressedSha256": "4839de89dd806609dc403779fc624d26c6f9f5f2eb52b4cd2164945266703e73",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "61d3fdcba5fb36d76d76c3a18222d1ecf71b969ee7a6e67ce2e7ee86a42607e3"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "66dffd8c660081f452b9d08e5c01585a86bd8ec7410aeddbd8010e2dd772d69b"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "60138842417087b806b8cfecf592ae8f16fa215ea74c88775e350c7cb6cd74ba"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "0db3a5eaf645479f56bcf468dd7e77b782e7982cb4193d7c06b5682e7414d070"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "FILUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "97a42832ee0650b450347a11ebfcb2e0e63ef4bca0c364a11103db62607a7b6d",
+      "compressedSha256": "4dc391832add5d271c0c492f72304be5689593a333015109de71becc1baab42a",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "143153fce20671bfd29d0fb504d8a8005dc2808e58653fc26d067785a31fbe9e"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "c4187059e2f2d9de39f463573d044081320c4a835260e62a45d3eba3c9be15b1"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "73b904695b8a3b2749f8563ad52c227954e304b77a3e95d0403cb88d1a3aff39"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "7d01c12b32260b15ddc27c7f3a2c4ba35ed039beff81853e475a5eb299e45ab7"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "JUPUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "997e72caea0ed79c77cc5ebb3c7acf376ab53b3f9f5c5d69088ef8870827059c",
+      "compressedSha256": "3994b3b01eaa5cffe0f329c8170fc3e93eb9938b8295f922d1aa80088513e836",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "65e679968ce9962ab1420ec93b06ec363c9b76eb910f252bdbbfadc6be716261"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "fe3755492bff0cb2ef143e92905edc65b9fdc134bbde740fcc39fab158a90c63"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "f0189c1fc614852fe489603c15f4df8b7555cc733f1931ed1d77688d884ce19c"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "3e32a6f060100e3b634e554b28dcc83389a790f7af33357502a6b62fb0c4b0d7"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "LDOUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "2d72bfcf4acce24c0f0a3a6f42a415f1598d3e5d451cf47364a922b5be30fd42",
+      "compressedSha256": "ec27213ba407b13201f7c7e1178d7087586ec39f4d4e45aaecd4ce52900c4af8",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "9ff79eaeee02aeab005d298bd1e3c3ce080a3061e6f8ada27c29c9d0972b3253"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "357ffb30a943590f6f5da566baa9864a10a2bcf1680bd3cad71d4eb18b6bbc1f"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "033a43edd389515e844d83a5916295bdadb3b562901118648de3d87c399ad634"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "d9593c7c6cd0027e25e8129c46943e8a5e264d50195f94cc95d6ad05eb52c78b"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "NEARUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "7c32bfd25d2c12c861da7f347f216a37fe768c2b1a886a00b356d997b8142519",
+      "compressedSha256": "5fa157421c7a201ca298b54b80495f6f036e597400da91e3e18b174f64cfe634",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "54f2cefd9e8bb1ab688fb07be46e25166f4a74e50925b8a91490d39a6c4e78bf"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "d3f6361491e2fd58f0d269d526b5319465ae0f209ce1ad7d52408a1e9081a812"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "e66f72b80678886a8fb24fccc4f6ebe511a43858ced94f030ebbef9bb0936e4f"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "e9555dd1cb71fde0ea86ccca76523d097a89c94c76e108e1a733079b4644147e"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "c76bf840a8f74b55af2289c25e9e4710af8b83f5fcbe335d3dbac0175bba87e9",
+      "compressedSha256": "aef99c867a26eac0e4ff9b261c8d68d5fc2b1713f733ec256fb8d645374dd73f",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "eb98665ab607809322ad80ecd8e653bb0b76ffaaf927890e03615287df06a4b5"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "de7cb884df198fc4ff8e6efe1d4a72d149857af61f87aad2069ef8941b98bbdd"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "72c4efec065734c6881e5ec650e01c9c389d5ef01a4adf35e0dd155a110e6405"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "6e7e08cc8856c208bf4b1b98415c0e41601c1199245b0978ff88a4d3275f3711"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "OPUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "8059503faadff93afae04fde01533f8793be76ba3b6856477d993f494c15495e",
+      "compressedSha256": "7f3dd2740a3b3e3decc06a818e5724f5b4ea72f3ed97922049ebf69629003b5f",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "c4ce533d021323533be83d28c033828a7a0922d2b18391acfff8094ca4a5c0ea"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "fa57663f52d8ff170cee28cd9ecb14e160a567d21d4eb60efd2c3f7e6ea56094"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "612d1d25a94b166fdce5a90fa4b0c595a05f1640e99d1190f9cc5132af459de9"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "1ef03ec15eb1defe9eee1b82e8d78f4b185e0cac72aafb2f42a18b3fb8f10871"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "8a911192251d0f2f143d9bd78d788465c7e6e987debb9e991f345de0e2428c09",
+      "compressedSha256": "91b69425070f04033b1c506fd26678a17a442eee6b661f0400df7f8275a04198",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "0647d313ddbbe53c6a03cf5344844e96109e7f2b9e6d35ac1cc09e9ea3584967"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "deb0aec70c1d187b4847a6572bbc2b5ac51a176c7179dbdf16ba0a33956f9395"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "0805989c37583980171ea17cbefbbed6a3ca7cdb1b901a7bc56080abbf4e32e8"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "dd10a4e069d3a86b0d62eeb3080b7ee18a8132ea95fa5880c4c7e8e033955018"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "SEIUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "bf64453bf26d0598eb492cce66e21d00c4fb6563218ad138218e12aa3d5e1c78",
+      "compressedSha256": "f607817cbb1563c929436c87c0c37946b21841d8cab825cef5218e48ffda655a",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "6eba6960363b3a2f2d94ccd1c7e7662b0e3ee9bc9165707fb21a6bb87cfda547"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "edc489630ab76a64db00d08f1744ed1cd09f73a03193587c2c835233cceca98a"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "817550b9dee84eb1b1835183c1405f9810c180340dcd898c74e0b451e02e7d96"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "743a08fcd02a3042ed6d7a3cbfadc3e181d0521cc15045b9014e8f0024e56d6f"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "SOLUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "b4cc5b1776ba2019b765a51d3a813dcbfcb461bf7f96359cde8b79bf04339843",
+      "compressedSha256": "f49e18730f6b50b8cdc8725810567e780e5b1526b04dc2b1f526f54b8dca0dbf",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "f8b344d0ae20010b42ee733c59d05749506ce02a910305e8a9beaad4a5e767ac"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "f745386c029abccffc8a2328bbc22af4b33c939c60c7e9d4888d0d5e7080b634"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "abea7d7ddfc0428558c25eb36aa8dfeb7c2b6c5c77fb33280235683d83ebbfec"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "81150b7abf0fbb107dfecbefac27ee7f503d8277da507c11a933cc6c74b8438a"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "SUIUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "a72c0abf052977d562ef2fe59dc8e3889af9d54fc25793ffed84dc0a8f09aaac",
+      "compressedSha256": "bd32a060fb62a490b348f602eb76f4ff910fad24c4bb9cb8ce862c5cfe5c1f7c",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "0b1ae850f9cd23f7bc21f4dea1d1122b9be7dbf87917df04af68079a513ffd5c"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "490b886f4d328c61cf5d1e876c40cb9cb4308c62c46f6f10642ee529aba602a1"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "cda6b117a7df0544ff797447c5b6c6252c350d438474d4da5d4089c8cf38512f"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "b7ef29d77d586f62c647b68622f6f3dabebfa81835a241d5677bdd30349ad040"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "TAOUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "14459dc440d8fe8b925950f66887f771ce893402260e3331cadc41c01343c403",
+      "compressedSha256": "4cd2d265d0276bcb61ad9fc34e1ef8cefcfa77ea046588b01edec56773106dc5",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "68af63361d85f8961388feb611b0945ac14a52bb2f67ef8fecfe166334af3578"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "c6bb3ba8d5cc09ee8bdf2af06ecc08837ad958e8a2c7685e4f9abe34028a0ef2"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "fd5d9ced728f7bcacdafd0124ca8765f05a2048b7298f22f72bba59c8fcb035b"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "254885ac1a39991843bc84cf255206f5ca7067fdf97baae915c9882e4e2bdd7e"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "TIAUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "658d9f4265b84c8ad40315ed6ef2cffc4b6439628595c4e5afbfb0481f4d175c",
+      "compressedSha256": "3ec9dbd12faa6f25c5fc3e05ba2108b364ad3308c06fab9de3c1e803069f73b9",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "398a8c449cfe6019a6a3ba596ca6c3ab81a8d8801228215f27cb88ac4a704a6d"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "1256ba5fdff4dc97e738cc6151e90ab51642e184f14ad41f1abf53e71d6df685"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "def5ab435e386963fef2aee08c4685e633fcee7f4a852826c3c6cc7a165aeb53"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "39290f19323fa06009284a50f751e0c7970a1c509dfbc81e69cb676e6448f1dd"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "TRXUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "e7d09ef074a1923a397e96aad02d9cb15d9a9d52e47a828f6bfd4e7d222523b3",
+      "compressedSha256": "0d05c8663802f0b00ccab3b3af109587c91cb16dad8c948cbcd52118b2a773d4",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "8bce691bedc869ff1e1300df417eab5b6f5154b47dfb1099492886d990b74f72"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "26075f33fd02deb0b70616af21382ea7087284d501ad52a6a7c88ec6db359327"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "d8af309cc327b17bd0e85c9957656904d6d79ad5a93718a42b8a557938983ac1"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "11d9075982a58aa4dd70056e86c07e9afdfa606a83e2f3ae1c970594f679279f"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    },
+    {
+      "symbol": "UNIUSDT",
+      "count": 5112,
+      "firstTs": 1768003200000,
+      "lastTs": 1786402800000,
+      "rawSha256": "74f4a23ba399cd9944a7ef3bf09392201ab53a63883b4452a452402e0075e92e",
+      "compressedSha256": "afd62a9092d44c3193270aa48eb08a93c8e9ce2fae9e992e91b069061b9246df",
+      "pages": [
+        {
+          "startTs": 1768003200000,
+          "endTs": 1773399600000,
+          "count": 1500,
+          "sha256": "6aa4c04042ec4d1207a6006f7d60aaa8823b5792c15e00f7a0bcdcc4b001512d"
+        },
+        {
+          "startTs": 1773403200000,
+          "endTs": 1778799600000,
+          "count": 1500,
+          "sha256": "a856c719f4f09deeaff63ad0a6d3b08488c20e67c76ed98256bd163b87cf00f1"
+        },
+        {
+          "startTs": 1778803200000,
+          "endTs": 1784199600000,
+          "count": 1500,
+          "sha256": "1f2187df7ff0295e9475e4b7e63fa55f5cc2c652e7ae6ea481dab4af12562626"
+        },
+        {
+          "startTs": 1784203200000,
+          "endTs": 1786402800000,
+          "count": 612,
+          "sha256": "543cff01a983fc12e4853a00f58e12a598f3c31f317c7a42489d45c3e787c6af"
+        }
+      ],
+      "gaps": [],
+      "error": null
+    }
+  ]
+}
