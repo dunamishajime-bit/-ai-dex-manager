@@ -161,6 +161,18 @@ test('positive score movement is grouped into a bounded rise animation',async()=
  assert.ok(mod);
  assert.deepEqual(mod.createRankingMovementPhases([{id:'a',rank:5,score:70}],[{id:'a',rank:2,score:80}]),[{role:'top3',durationMs:1900,changes:[{id:'a',from:5,to:2,role:'top3'}]}]);
 });
+test('currency foreground motion groups complete serially before the next currency starts',async()=>{
+ const mod=await import('../lib/ranking-motion-groups') as typeof import('../lib/ranking-motion-groups');
+ const started:string[]=[],finished:string[]=[],release:Array<()=>void>=[];let completed=0;
+ const work=mod.playRankingSequence(['BTC','ETH','SOL'],async id=>{started.push(id);await new Promise<void>(resolve=>release.push(resolve));finished.push(id);},()=>true,()=>{completed++;});
+ assert.deepEqual(started,['BTC']);assert.deepEqual(finished,[]);assert.equal(completed,0);
+ release.shift()!();await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(started,['BTC','ETH']);assert.deepEqual(finished,['BTC']);
+ release.shift()!();await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(started,['BTC','ETH','SOL']);assert.deepEqual(finished,['BTC','ETH']);
+ release.shift()!();await work;
+ assert.deepEqual(finished,['BTC','ETH','SOL']);assert.equal(completed,1);
+});
 test('ranking sounds are separately selectable for rise, fall, and top three',async()=>{
  const mod=await import('../lib/ranking-sounds').catch(()=>null) as null|typeof import('../lib/ranking-sounds');
  assert.ok(mod);
