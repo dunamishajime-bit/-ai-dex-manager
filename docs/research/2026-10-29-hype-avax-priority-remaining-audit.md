@@ -99,3 +99,14 @@ This branch now rejects missing/non-finite/negative exposure and invalid caps as
 CAPACITY_SNAPSHOT_INVALID, before any preemption plan can be generated.
 Eight invalid-input contract cases are covered by the test suite. This change is
 NOT LIVE and remains independent from the Codex-cutover branch.
+
+
+## FET/PENGU destructive sidecar-release precondition hardening
+Source review found a second unverified-capacity path in
+isHypeZecSoleSharedCapacityCause: absent/NaN position notional could silently
+fall back to quantity times mark price and still authorize HYPE/ZEC reduction.
+The new proof refuses invalid nonzero active position notionals, nonfinite mark
+prices/quantities, poisoned pending Gross, and invalid hard caps. Ten further
+corruption cases were added to tests/hype-zec-priority-capacity.test.ts.
+No actual position reduction, LIVE deployment, stop change or reservation
+release is executed by these pure tests. This branch remains DRAFT only.
