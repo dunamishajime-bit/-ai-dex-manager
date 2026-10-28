@@ -111,14 +111,20 @@ test("ranking motion remains currency-scoped and is not a board-wide refresh pul
   assert.match(feedback, /isShowing/);
 });
 
-test("currency motion uses a colored foreground frame and serial groups", async () => {
+test("currency motion uses colored foreground frames in two direction batches", async () => {
   const feedback = await readFile("hooks/useRealtimeRankingFeedback.ts", "utf8");
   const motionGroups = await readFile("lib/ranking-motion-groups.ts", "utf8");
   assert.match(feedback, /borderColor/);
   assert.match(feedback, /outline.*color|outline.*\+\s*color/);
-  assert.match(feedback, /playRankingSequence\(\s*coloredGroups/);
-  assert.match(feedback, /Number\(b\.rising\)\s*-\s*Number\(a\.rising\)/);
+  assert.match(feedback, /createRankingMotionBatches\(phases\)/);
+  assert.match(feedback, /playRankingSequence\(\s*groups/);
+  assert.match(feedback, /colorByCurrency/);
+  assert.match(feedback, /Promise\.all\(group\.items\.map/);
+  assert.doesNotMatch(feedback, /coloredGroups/);
+  assert.doesNotMatch(feedback, /groups\.push\(\{ id: change\.id/);
   assert.match(feedback, /scale\(\$\{scale\}\)/);
   assert.match(feedback, /foregroundY/);
+  assert.match(motionGroups, /RankingMotionBatch/);
+  assert.match(motionGroups, /\['rise','fall'\]/);
   assert.match(motionGroups, /for\s*\(const item of items\)/);
 });

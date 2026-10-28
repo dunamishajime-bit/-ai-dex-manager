@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { createRankingMovementPhases, playRankingSequence } from '@/lib/ranking-motion-groups';
+import { createRankingMotionBatches, createRankingMovementPhases, playRankingSequence } from '@/lib/ranking-motion-groups';
 import {
   canReuseRankingAudioContext,
   chooseRankingSound,
@@ -25,12 +25,12 @@ type Frame = {
 type MotionItem = {
   clone: HTMLElement;
   frames: Keyframe[];
+  color: string;
 };
 
 type MotionGroup = {
   id: string;
-  role: RankingSoundRole;
-  color: string;
+  role: 'rise' | 'fall';
   items: MotionItem[];
 };
 
@@ -42,7 +42,8 @@ const CURRENCY_FRAME_PALETTE = ['#67e8f9', '#c4b5fd', '#fbbf24', '#6ee7b7', '#fd
  * The foreground clone is the historical UI behavior: a rising currency is
  * lifted above its neighbors, travels across the board, and lands in its new
  * authoritative position. Multiple visible nodes for one currency (the full
- * row and a Top-3 card) share one color and move together.
+ * row and a Top-3 card) share one color and move together. All rising
+ * currencies move in one batch, followed by one falling batch.
  */
 export function useRealtimeRankingFeedback(rows: RankRow[], version: number, viewKey: string, error: string) {
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -213,25 +214,20 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
 
     const oldRows = new Map(before.rows.map((row) => [row.id, row]));
     const newRows = new Map(after.rows.map((row) => [row.id, row]));
-    const groups: Omit<MotionGroup, 'color'>[] = [];
-    const phaseOrder: Record<RankingSoundRole, number> = { top3: 0, rise: 1, fall: 2 };
-    const movementPlans = phases
-      .flatMap((phase) => phase.changes.map((change) => ({
-        phase,
-        change,
-        rising: phase.role === 'rise' || (phase.role === 'top3' && change.to < change.from),
-      })))
-      .sort((a, b) => Number(b.rising) - Number(a.rising)
-        || phaseOrder[a.phase.role] - phaseOrder[b.phase.role]
-        || a.change.to - b.change.to);
+    const groups: MotionGroup[] = [];
+    const colorByCurrency = new Map<string, string>();
+    const batches = createRankingMotionBatches(phases);
 
-    for (const { phase, change, rising } of movementPlans) {
-      const oldRow = oldRows.get(change.id);
-      const newRow = newRows.get(change.id);
-      if (!oldRow?.fresh || !newRow?.fresh || oldRow.score === null || newRow.score === null) continue;
-
+    for (const batch of batches) {
       const items: MotionItem[] = [];
-      for (const key of ['row:' + change.id, 'leader:' + change.id]) {
+      for (const change of batch.changes) {
+        const oldRow = oldRows.get(change.id);
+        const newRow = newRows.get(change.id);
+        if (!oldRow?.fresh || !newRow?.fresh || oldRow.score === null || newRow.score === null) continue;
+
+        const color = colorByCurrency.get(change.id) || CURRENCY_FRAME_PALETTE[colorByCurrency.size % CURRENCY_FRAME_PALETTE.length];
+        colorByCurrency.set(change.id, color);
+        for (const key of ['row:' + change.id, 'leader:' + change.id]) {
           const node = nodes.current.get(key);
           const old = before.rects.get(key);
           const end = node?.getBoundingClientRect();
@@ -264,7 +260,7 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
             willChange: 'transform, box-shadow',
           });
           clone.dataset.rankingCurrency = change.id;
-          clone.dataset.rankingRole = phase.role;
+          clone.dataset.rankingRole = batch.direction;
           document.body.appendChild(clone);
           clones.current.push(clone);
           node.style.opacity = '0';
@@ -272,7 +268,7 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
 
           const dx = startX - end.left;
           const dy = startY - end.top;
-          const isRising = rising;
+          const isRising = batch.direction === 'rise';
           const scale = Math.max(1, Math.min(1.8, (innerWidth - 32) / end.width));
           const marginX = (scale - 1) * end.width / 2;
           const marginY = (scale - 1) * end.height / 2;
@@ -292,27 +288,24 @@ export function useRealtimeRankingFeedback(rows: RankRow[], version: number, vie
             { transform: 'translate(0, 0) scale(1)', offset: 1 },
           ];
           clone.style.transform = `translate(${dx}px, ${dy}px) scale(1)`;
-          items.push({ clone, frames });
+          items.push({ clone, frames, color });
+        }
       }
-      if (items.length) groups.push({ id: change.id, role: phase.role, items });
+      if (items.length) groups.push({ id: batch.direction, role: batch.direction, items });
     }
 
     if (!groups.length) return;
-    const coloredGroups: MotionGroup[] = groups.map((group, index) => ({
-      ...group,
-      color: CURRENCY_FRAME_PALETTE[index % CURRENCY_FRAME_PALETTE.length],
-    }));
     const run = generation.current;
     running.current = true;
     void playRankingSequence(
-      coloredGroups,
+      groups,
       async (group) => {
         if (generation.current !== run) return;
         void playEffect(group.role);
-        await Promise.all(group.items.map(({ clone, frames }) => {
+        await Promise.all(group.items.map(({ clone, frames, color }) => {
           clone.style.zIndex = '150';
-          clone.style.borderColor = group.color;
-          clone.style.outline = '2px solid ' + group.color;
+          clone.style.borderColor = color;
+          clone.style.outline = '2px solid ' + color;
           clone.style.outlineOffset = '-2px';
           clone.dataset.rankingMoving = 'true';
           const animation = clone.animate(frames, {
