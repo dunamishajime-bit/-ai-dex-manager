@@ -103,5 +103,4 @@
 - [ ] **Step 4: Run the fresh Aster signed read-only reconciliation three times with safe pacing, proving DOGE SHORT 226, its exact V4 STOP, zero order/cancel/position mutations, Shared Risk, Margin Guard, pending exposure, and no API-budget bypass.
 - [ ] **Step 5: Push a new PR, wait for all required CI, merge only the final verified head, and create a new immutable VPS release; keep the current symlink/systemd units unchanged until the fresh SHA-bound operator gate is present.
 - [ ] **Step 6: Ask the fresh reviewer to review the final diff and address only actionable findings.
-- [ ] **Step 7: Report the new SHA, test/CI evidence, Aster evidence, and any remaining activation blockers without claiming Production cutover unless every formal gate passes.
-
+- [ ] **Step 7: Report the new SHA, test/CI evidence, Aster evidence, and any remaining activation blockers without claiming Production cutover unless every formal gate passes.**
