@@ -1,0 +1,164 @@
+{
+  "schema": "disdex-q102-exact-native-annual-eight-sleeve-readiness/v1",
+  "targetSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+  "economicsPeriodStartUtc": "2025-08-10T00:00:00+00:00",
+  "economicsPeriodEndExclusiveUtc": "2026-08-10T00:00:00+00:00",
+  "candleRequiredFromUtc": "2025-02-10T00:00:00+00:00",
+  "historyWarmupDays": 181,
+  "venue": "Aster native 1h public historical market data",
+  "symbolsProbed": 23,
+  "missingNativeStartCoverageSymbols": [
+    "ENAUSDT",
+    "FETUSDT",
+    "FILUSDT",
+    "JUPUSDT",
+    "LDOUSDT",
+    "RENDERUSDT",
+    "TAOUSDT",
+    "TIAUSDT"
+  ],
+  "fullAnnualNativeEightSleeveCertification": "BLOCKED_SOURCE_DATA_GAPS",
+  "rule": "Do not extrapolate, splice Binance candles, invent trades or reinterpret 2026-10-27 older-Q102 BT as target Q102 SHA certified economics",
+  "rawEvidenceFile": "Q102_ASTER_H1_EARLIEST_RETURNED_20261028.json",
+  "rows": [
+    {
+      "symbol": "AAVEUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "APTUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "ARBUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "DOTUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "ENAUSDT",
+      "firstVenueCandleUtc": "2025-05-27T13:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2025-11-24T13:00:00+00:00"
+    },
+    {
+      "symbol": "FETUSDT",
+      "firstVenueCandleUtc": "2026-01-09T18:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2026-07-09T18:00:00+00:00"
+    },
+    {
+      "symbol": "FILUSDT",
+      "firstVenueCandleUtc": "2025-11-07T15:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2026-05-07T15:00:00+00:00"
+    },
+    {
+      "symbol": "JUPUSDT",
+      "firstVenueCandleUtc": "2026-01-09T14:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2026-07-09T14:00:00+00:00"
+    },
+    {
+      "symbol": "LDOUSDT",
+      "firstVenueCandleUtc": "2026-01-09T18:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2026-07-09T18:00:00+00:00"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "OPUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "firstVenueCandleUtc": "2026-01-06T13:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2026-07-06T13:00:00+00:00"
+    },
+    {
+      "symbol": "SEIUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "SUIUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "TAOUSDT",
+      "firstVenueCandleUtc": "2026-01-09T14:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2026-07-09T14:00:00+00:00"
+    },
+    {
+      "symbol": "TIAUSDT",
+      "firstVenueCandleUtc": "2026-01-09T18:00:00+00:00",
+      "atOrBeforeStart181dWarmup": false,
+      "firstFullWarmupEligibleUtc": "2026-07-09T18:00:00+00:00"
+    },
+    {
+      "symbol": "TRXUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "UNIUSDT",
+      "firstVenueCandleUtc": "2025-02-10T00:00:00+00:00",
+      "atOrBeforeStart181dWarmup": true,
+      "firstFullWarmupEligibleUtc": "2025-08-10T00:00:00+00:00"
+    }
+  ],
+  "ordersSent": 0
+}
