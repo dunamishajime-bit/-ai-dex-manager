@@ -7,6 +7,7 @@ import importlib.util
 import json
 import os
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -107,6 +108,7 @@ class PromoterSafetyTests(unittest.TestCase):
                 for x in patches:x.start()
                 with patch.object(mod,"protected_root_file",side_effect=root_file),\
                      patch.object(mod,"active",side_effect=lambda unit: OLD in unit),\
+                     patch.object(mod,"run",side_effect=lambda *args, **kw: types.SimpleNamespace(stdout=f"disdex-quality102-causal-v1@{OLD}.service loaded active running\\n")),\
                      patch.object(mod.os,"geteuid",return_value=0):
                     with self.assertRaisesRegex(RuntimeError,"SOURCE_HASH_MANIFEST_REQUIRED"):
                         mod.validate(True,NEW,OLD)
