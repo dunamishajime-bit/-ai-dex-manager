@@ -100,6 +100,14 @@ def validate(root: bool, target: str, expected: str) -> tuple[Path, dict, str]:
     require(glob.get("ordersEnabled") is True, "GLOBAL_ORDERS_NOT_ENABLED")
     require(active(service(expected)), "OLD_Q102_NOT_ACTIVE")
     require(not active(service(target)), "TARGET_ALREADY_ACTIVE")
+    # Reject any competing Q102 instance, including unexpected SHA variants.
+    units = run("systemctl", "list-units", "disdex-quality102-causal-v1@*.service",
+                "--all", "--plain", "--no-legend").stdout
+    for line in units.splitlines():
+        fields = line.lstrip("● ").split()
+        if len(fields) >= 4 and fields[0].startswith("disdex-quality102-causal-v1@"):
+            require(fields[2] not in ("active", "activating") or fields[0] == service(expected),
+                    "UNEXPECTED_ACTIVE_Q102_INSTANCE")
     require(not json_file(KILL).get("active", True), "KILL_SWITCH_ACTIVE")
     risk = json_file(RISK)
     require(risk.get("tripped") is False and risk.get("sourceComplete") is True, "SHARED_RISK_BLOCKED")
@@ -238,12 +246,26 @@ def signed_preflight(stage: Path, target: str, old_state: dict, env_path: Path) 
             cwd=stage, env=env, capture_output=True, text=True, timeout=150, preexec_fn=drop,
         )
         require(result.returncode == 0, "SIGNED_VENUE_PREFLIGHT_FAILED")
-        require("QUALITY102_CAUSAL_V1_READ_ONLY_PREFLIGHT_PASS" in result.stdout,
+        responses = []
+        for line in result.stdout.splitlines():
+            if line.lstrip().startswith("{"):
+                try:
+                    item = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(item, dict) and "status" in item:
+                    responses.append(item)
+        require(len(responses) == 1, "PREFLIGHT_JSON_RESULT_NOT_UNIQUE")
+        venue = responses[0]
+        require(venue.get("status") == "QUALITY102_CAUSAL_V1_READ_ONLY_PREFLIGHT_PASS",
                 "SIGNED_VENUE_EVIDENCE_MISSING")
-        require('"ordersSent":0' in result.stdout or '"ordersSent": 0' in result.stdout,
+        require(all(venue.get(k) == 0 for k in
+                    ("ordersSent", "cancelSent", "positionChangesSent", "syntheticOrders", "testOrders")),
                 "VENUE_ORDER_COUNTER_NOT_ZERO")
-        require('"stateChanged":false' in result.stdout or '"stateChanged": false' in result.stdout,
-                "PREFLIGHT_STATE_MUTATED")
+        require(venue.get("stateChanged") is False and venue.get("quality102Pending") is False,
+                "PREFLIGHT_STATE_MUTATED_OR_PENDING")
+        require(venue.get("openOrderCount") == venue.get("managedProtectiveOrderCount"),
+                "UNMANAGED_VENUE_ORDERS_PRESENT")
     finally:
         temp.unlink(missing_ok=True)
 
@@ -266,6 +288,12 @@ def promote(target: str, old: str, check_only: bool) -> dict:
     run("cp", "-a", "--", str(stage), str(release), timeout=240)
     require(release.is_dir() and not release.is_symlink(), "NEW_RELEASE_NOT_DIRECTORY")
     require((release / ".disdex-release-sha").read_text().strip() == target, "RELEASE_SHA_MISMATCH")
+    hashes = protected_root_file(ECONOMICS)["sourceFileSha256"]
+    for rel, digest in hashes.items():
+        path = release / rel
+        require(path.is_file() and not path.is_symlink()
+                and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
+                "RELEASE_FILES_CHANGED_FROM_CERTIFIED_SOURCE")
     write_atomic(env_path, env_bytes)
     signed_preflight(release, target, before, env_path)
     write_atomic(dropin, (f"[Service]\nEnvironmentFile={env_path}\n").encode(), mode=0o644)
