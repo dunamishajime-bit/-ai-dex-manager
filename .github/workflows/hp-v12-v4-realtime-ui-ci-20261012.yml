@@ -44,6 +44,7 @@ jobs:
           tests/realtime-universe-score.test.ts
           tests/realtime-ranking-observability.test.ts
           tests/realtime-ranking-ui-contract.test.ts
+          tests/runtime-lineage-display.test.ts
           tests/v12-v4-hp-ui-contract.test.ts
           tests/decision-status-layout-regression.test.ts
           tests/mobile-layout-regression.test.ts

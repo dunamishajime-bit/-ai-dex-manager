@@ -166,8 +166,8 @@ async function observe(){
  }
  // Public-market-only ranking with one shared formula; no trading state or order mutation.
  const marketRows=await loadMarketUniverseRanking(rows,now);
- const checkedAt=Date.now(),freshRows=expireRealtimeRankingRows(rows,checkedAt,sourceExpiryByLogic);
- const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows([...(v12V4Snapshot?mergeV12V4RealtimeRows(freshRows,v12V4Snapshot,now):freshRows),...marketRows]),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'全通貨順位はAster公開相場を同一算式で評価した共通市場Score（0-100、参考）で降順。ロジック固有Scoreとは独立で、実発注・発火確率・期待利益には使いません。'};
+ const checkedAt=Date.now(),mergedRows=v12V4Snapshot?mergeV12V4RealtimeRows(rows,v12V4Snapshot,now):rows,freshRows=expireRealtimeRankingRows(mergedRows,checkedAt,sourceExpiryByLogic);
+ const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows([...freshRows,...marketRows]),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'全通貨順位はAster公開相場を同一算式で評価した共通市場Score（0-100、参考）で降順。ロジック固有Scoreとは独立で、実発注・発火確率・期待利益には使いません。'};
  return {snapshot,expires:realtimeRankingCacheExpiry(now,sourceExpiries,snapshot.rows)};
 }
 type Observation=Awaited<ReturnType<typeof observe>>;

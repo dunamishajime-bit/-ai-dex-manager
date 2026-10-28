@@ -63,7 +63,7 @@ export default function HomePage() {
   const { snapshot: productionRuntime, error: productionRuntimeError } = useProductionRuntime();
   const { formatPrice } = useCurrency();
   const caps = productionRuntime?.caps;
-  const v12 = productionRuntime?.v12;
+  const v12 = productionRuntime?.["v12"];
   const q102 = productionRuntime?.quality102;
   const pengu = productionRuntime?.pengu;
   const v52 = productionRuntime?.v52;

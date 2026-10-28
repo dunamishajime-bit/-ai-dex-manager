@@ -11,7 +11,7 @@ import { buildRuntimeLineageDisplay } from "@/lib/runtime-lineage-display";
 function BannerContent() {
   const { snapshot: runtime, error: runtimeError } = useProductionRuntime();
   const caps = runtime?.caps;
-  const v12 = runtime?.v12;
+  const v12 = runtime?.["v12"];
   const pengu = runtime?.pengu;
   const q102 = runtime?.quality102;
   const v52 = runtime?.v52;

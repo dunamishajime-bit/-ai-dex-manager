@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { V12_V4_HP_ROUTE_IDS, V12_V4_HP_TARGET, type V12V4HpSnapshot } from "@/lib/v12-v4-hp-contract";
 import { mergeV12V4RealtimeRows, v12V4SnapshotToRankRows } from "@/lib/server/realtime-ranking-observability";
 import { normalizeQuality102SymbolItems } from "@/lib/server/quality102-symbol-observability";
-import { topRankedSymbols, type RankRow } from "@/lib/realtime-ranking";
+import { expireRealtimeRankingRows, topRankedSymbols, type RankRow } from "@/lib/realtime-ranking";
 
 const now = Date.UTC(2026, 9, 12, 4, 0, 0);
 const routeA = V12_V4_HP_ROUTE_IDS[0];
@@ -115,6 +115,18 @@ test("empty but fresh V4 batch is an explicit no-candidate wait state, not a man
   assert.equal(row.score, null);
   assert.match(row.reason, /NO_NATIVE_ENTRY_CANDIDATES/);
   assert.deepEqual(topRankedSymbols([row], "V12_V4").map((slot) => slot.status), ["NO_CANDIDATE", "NO_CANDIDATE", "NO_CANDIDATE"]);
+});
+
+test("fresh V4 no-candidate rows expire into STALE after a failed refresh window", () => {
+  const empty = snapshot({ candidates: [], filtered: [], routeCoverage: { ...snapshot().routeCoverage, candidateCount: 0, filteredCount: 0, observed: 0 } });
+  const [row] = mergeV12V4RealtimeRows([], empty, now);
+  const expiredAt = now + 3 * 60 * 60 * 1000 + 1;
+  const [expired] = expireRealtimeRankingRows([row], expiredAt, { V12_V4: now + 3 * 60 * 60 * 1000 });
+  assert.equal(expired.freshUntil, now + 3 * 60 * 60 * 1000);
+  assert.equal(expired.fresh, false);
+  assert.equal(expired.sourceStatus, "STALE");
+  assert.match(expired.reason, /NO_NATIVE_ENTRY_CANDIDATES/);
+  assert.deepEqual(topRankedSymbols([expired], "V12_V4").map((slot) => slot.status), ["STALE", "STALE", "STALE"]);
 });
 
 test("Q102 score normalization preserves numeric zero but does not turn null or absent values into zero", () => {
