@@ -12,6 +12,15 @@ export type RealtimeRankingPanel = {
   rankingContractAvailable: boolean;
 };
 
+export type V4NoCandidatePanelState = "FRESH_NO_CANDIDATE" | "STALE" | "OTHER";
+
+export function v4NoCandidatePanelState(panel: Pick<RealtimeRankingPanel, "scope" | "slots">): V4NoCandidatePanelState {
+  if (panel.scope !== "V12_V4" || panel.slots.length === 0) return "OTHER";
+  if (panel.slots.every((slot) => slot.status === "NO_CANDIDATE")) return "FRESH_NO_CANDIDATE";
+  if (panel.slots.every((slot) => slot.status === "STALE")) return "STALE";
+  return "OTHER";
+}
+
 const LOGIC_TITLES: Record<string, string> = {
   MARKET: "全取り扱い通貨",
   V12_V4: "V12 V4",

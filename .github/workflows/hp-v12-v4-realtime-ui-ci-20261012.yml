@@ -1,6 +1,7 @@
 name: HP V12 V4 Realtime UI CI 20261012
 
 on:
+  pull_request:
   push:
     branches:
       - codex/hp-v12-v4-realtime-ui-20261012

@@ -20,6 +20,7 @@ import {
   scoreKindLabel,
   scoreValueLabel,
   topSlotStatusLabel,
+  v4NoCandidatePanelState,
   type RealtimeRankingPanel,
 } from '@/lib/realtime-ranking-ui';
 import type { V12V4HpSnapshot } from '@/lib/v12-v4-hp-contract';
@@ -92,14 +93,19 @@ function v4PanelSummary(panel: RealtimeRankingPanel, data?: Snapshot | null) {
   if (panel.scope !== 'V12_V4') return null;
   const summary = data?.v12V4;
   if (!summary) return <p className="panel-source-note">V4 runtime / decision source 未取得。41 routesの評価完了とは表示しません。</p>;
+  const noCandidateSource = summary.routeCoverage.candidateCount === 0 && summary.routeCoverage.filteredCount === 0 && summary.errors.length === 0;
+  const noCandidateState = v4NoCandidatePanelState(panel);
+  const effectiveDecisionFresh = noCandidateSource ? noCandidateState === 'FRESH_NO_CANDIDATE' : summary.freshness.decision;
   return <div className="panel-source-note" data-v4-summary>
     <span>Target {summary.target.policyId} · Runtime {summary.displayStatus}</span>
     <span>出力route {summary.routeCoverage.observed}/{summary.routeCoverage.expected}（route出現数。全41 route評価完了を意味しません）</span>
-    <span>Decision {summary.timestamps.decisionTs ? new Date(summary.timestamps.decisionTs).toLocaleString('ja-JP') : '未取得'} · fresh {summary.freshness.decision ? 'yes' : 'no'}</span>
+    <span>Decision {summary.timestamps.decisionTs ? new Date(summary.timestamps.decisionTs).toLocaleString('ja-JP') : '未取得'} · fresh {effectiveDecisionFresh ? 'yes' : 'no'}</span>
     {summary.actual.activeRunnerSha && <span>Runner SHA {summary.actual.activeRunnerSha.slice(0, 12)}… · {summary.actual.activeRunnerState}</span>}
     {summary.errors.length > 0 && <span className="text-amber-200">{summary.errors.join(' / ')}</span>}
-    {summary.freshness.decision && summary.routeCoverage.candidateCount === 0 && summary.routeCoverage.filteredCount === 0 && summary.errors.length === 0
+    {noCandidateSource && noCandidateState === 'FRESH_NO_CANDIDATE'
       ? <span className="text-cyan-100">判定済み・候補なし（V4 fresh） / NO_NATIVE_ENTRY_CANDIDATES。新規発注候補はありません。</span>
+      : noCandidateSource && noCandidateState === 'STALE'
+        ? <span className="text-amber-200">前回の候補なし観測は鮮度期限切れ（V4 stale）。新しい判定取得まで発注不可です。</span>
       : <span>V4 decision sourceにはLIVE順位・native scoreがないため、順位未評価です。</span>}
   </div>;
 }
