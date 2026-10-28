@@ -89,3 +89,13 @@ on 429, and fails closed on gaps, stale/invalid values or missing data.
 tests/hype-adopted-native-m5-readonly-evidence.test.ts adds five positive and
 negative tests, all PASS on Node 24 native TS stripping. No LIVE Runner imports
 or invokes this collector; no extra API requests in Production.
+
+
+## Additional shared Gross NaN corruption bug fix
+A pure HYPE/ZEC preemption planner used Math.max(0, NaN) in the current / pending
+gross arithmetic. Without an explicit guard this became NaN, which triggered the
+CAPACITY_AVAILABLE no-deficit result instead of a safe BLOCKED decision.
+This branch now rejects missing/non-finite/negative exposure and invalid caps as
+CAPACITY_SNAPSHOT_INVALID, before any preemption plan can be generated.
+Eight invalid-input contract cases are covered by the test suite. This change is
+NOT LIVE and remains independent from the Codex-cutover branch.

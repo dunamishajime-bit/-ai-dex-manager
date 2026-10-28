@@ -118,3 +118,36 @@ test("strict planner accepts sidecars only with explicit preemption support and 
   assert.equal(result.status, "planned");
   assert.ok(result.totals.cryptoGross <= 3 + 1e-9);
 });
+
+// Independent risk-budget poisoning regression: never authorize capacity
+// based on NaN, Infinity, or a negative reserved amount.
+test("invalid shared Gross snapshots fail closed instead of CAPACITY_AVAILABLE", () => {
+  const base = {
+    equityUsd: 1_000,
+    now: NOW,
+    currentCryptoGross: 1,
+    currentTotalGross: 1,
+    pendingCryptoGross: 0,
+    pendingTotalGross: 0,
+    cryptoEntryCap: 3,
+    totalEntryCap: 4.25,
+    active: [sidecar("HYPE_LONG", "hype-poisoning")],
+    candidate: priorityIntent("V12", 0.5),
+  };
+  const poisoned = [
+    { currentCryptoGross: Number.NaN },
+    { currentTotalGross: Number.NaN },
+    { pendingCryptoGross: Number.NaN },
+    { pendingTotalGross: Number.POSITIVE_INFINITY },
+    { pendingTotalGross: -0.01 },
+    { cryptoEntryCap: Number.POSITIVE_INFINITY },
+    { totalEntryCap: 0 },
+    { now: Number.NaN },
+  ];
+  for (const mutation of poisoned) {
+    const result = planHypeZecPreemption({ ...base, ...mutation });
+    assert.equal(result.status, "blocked", JSON.stringify(mutation));
+    assert.equal(result.reason, "CAPACITY_SNAPSHOT_INVALID");
+    assert.deepEqual(result.reductions, []);
+  }
+});
