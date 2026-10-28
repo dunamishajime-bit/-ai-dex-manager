@@ -1,7 +1,10 @@
+import { classifyAsterRateBudgetFailure, nextAsterRateBudgetRetryMs } from "./disdex-aster-rate-budget-policy";
+
 export type SharedRiskRefreshFailureContext = {
   consecutiveFailures: number;
   lastSuccessAt: number | null;
   observedAt: number;
+  scheduledRetryMs: number;
 };
 
 export type SharedRiskRefreshLoopResult = {
@@ -10,6 +13,30 @@ export type SharedRiskRefreshLoopResult = {
   consecutiveFailures: number;
   lastSuccessAt: number | null;
 };
+
+/**
+ * On shared venue-budget pressure, repeated immediate RISK_READ requests amplify
+ * contention with protective STOP reconciliation. Delay and jitter the writer
+ * retry, without changing the shared 7.5% loss latch or writing a false risk
+ * snapshot. A stale risk snapshot continues to block every entry fail-closed.
+ * Ordinary network/read failures keep their established retry cadence.
+ */
+export function nextSharedRiskRefreshRetryMs(
+  error: unknown,
+  consecutiveFailures: number,
+  retryMs: number,
+  random: () => number = Math.random,
+): number {
+  const budget = classifyAsterRateBudgetFailure(error);
+  if (!budget) return retryMs;
+  return nextAsterRateBudgetRetryMs(
+    Math.min(6, Math.max(0, consecutiveFailures - 1)),
+    retryMs,
+    60_000,
+    Math.max(0, budget.waitMs ?? 0),
+    random,
+  );
+}
 
 export async function runSharedRiskRefreshLoop<T>(input: {
   refresh: () => Promise<T>;
@@ -40,14 +67,16 @@ export async function runSharedRiskRefreshLoop<T>(input: {
     } catch (error) {
       failures += 1;
       consecutiveFailures += 1;
+      const scheduledRetryMs = nextSharedRiskRefreshRetryMs(error, consecutiveFailures, retryMs);
       await input.onFailure(error, {
         consecutiveFailures,
         lastSuccessAt,
         observedAt: now(),
+        scheduledRetryMs,
       });
       if (!input.daemon) throw error;
       if (input.shouldStop()) break;
-      await input.wait(retryMs);
+      await input.wait(scheduledRetryMs);
       continue;
     }
 

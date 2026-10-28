@@ -4,6 +4,7 @@ import {execFileSync} from "node:child_process";
 import {resolve} from "node:path";
 import {readFileSync} from "node:fs";
 import {resolveRunnerServiceUnit} from "../lib/server/runner-service-resolution";
+import {buildV4GateTelemetry,buildV4HealthPayload,buildV4RealtimeDecisionTelemetry} from "../scripts/v12-v4-production-runner";
 
 const runner=readFileSync("scripts/v12-v4-production-runner.ts","utf8");
 const snapshot=readFileSync("scripts/ops/root/disdex-runner-health-snapshot-current.mjs","utf8");
@@ -12,11 +13,39 @@ const wiring=readFileSync("scripts/ops/root/disdex-current-runtime-wiring","utf8
 const coherence=readFileSync("scripts/ops/root/disdex-current-runtime-coherence-guard","utf8");
 const alert=readFileSync("scripts/ops/root/disdex-runner-health-alert.ts","utf8");
 
+test("V4 heartbeat separates supervisor writes from completed ticks and fails closed on lock contention",()=>{
+ const payload=buildV4HealthPayload("a".repeat(40),"CERTIFIED",{
+  status:"locked",reason:"SHARED_ACCOUNT_LOCK_BUSY",eventTs:2_000,candidateCount:0,orderEnabled:false,
+ },1_000,3_000);
+ assert.equal(payload.heartbeatAt,3_000);
+ assert.equal(payload.lastTickAt,1_000);
+ assert.equal(payload.safetyState,"BLOCKED");
+ assert.equal(payload.healthReason,"SHARED_ACCOUNT_LOCK_BUSY");
+});
+
+test("V4 heartbeat records the completed engine tick rather than the preflight timestamp",()=>{
+ const payload=buildV4HealthPayload("b".repeat(40),"CERTIFIED",{
+  status:"observing",reason:"NO_NATIVE_ENTRY_CANDIDATES",eventTs:4_000,candidateCount:0,orderEnabled:false,
+ },3_500,5_000);
+ assert.equal(payload.heartbeatAt,5_000);
+ assert.equal(payload.lastTickAt,3_500);
+ assert.notEqual(payload.heartbeatAt,payload.lastTickAt);
+ assert.equal(payload.safetyState,"HEALTHY");
+});
+
+test("V4 decision telemetry keeps the last completed tick during lock contention",()=>{
+ const result={status:"locked",reason:"SHARED_ACCOUNT_LOCK_BUSY",eventTs:9_000,candidateCount:0,orderEnabled:false} as any;
+ const realtime=buildV4RealtimeDecisionTelemetry("c".repeat(40),"CERTIFIED",undefined,result,3_000,1_000);
+ const gate=buildV4GateTelemetry("c".repeat(40),"CERTIFIED",undefined,result,3_000,1_000);
+ assert.equal(realtime.lastTickAt,1_000);
+ assert.equal(gate.lastTickAt,1_000);
+});
+
 test("V4 daemon emits an exact-release heartbeat after each successful tick",()=>{
  assert.match(runner,/disdex-v12-v4-runner-heartbeat\/v1/);
  assert.match(runner,/V12_V4_HEALTH_STATE_PATH/);
  assert.match(runner,/\/var\/lib\/disdex\/v12-v4\/heartbeat\.json/);
- assert.match(runner,/await writeV4Health\(releaseSha,operationMode,result\)/);
+ assert.match(runner,/await writeV4Health\(releaseSha,operationMode,result,lastCompletedTickAt\)/);
 });
 
 test("V4 heartbeat includes the fields required by the release-pinned watchdog",()=>{
@@ -26,7 +55,8 @@ test("V4 heartbeat includes the fields required by the release-pinned watchdog",
  assert.match(runner,/workingDirectory/);
  assert.match(runner,/liveEnabled/);
  assert.match(runner,/safetyState/);
- assert.match(runner,/heartbeatAt:now/);
+ assert.match(runner,/heartbeatAt/);
+ assert.match(runner,/lastTickAt:lastCompletedTickAt/);
  assert.match(runner,/mainPid:process\.pid/);
 });
 

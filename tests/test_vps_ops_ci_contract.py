@@ -8,7 +8,7 @@ Q102_RUNNER = ROOT / "scripts" / "disdex-quality102-causal-v1-live-runner.ts"
 
 
 class VpsOpsCiContractTest(unittest.TestCase):
-    def test_current_gate_does_not_block_on_legacy_v52_margin_engine(self):
+    def test_legacy_compatibility_check_tracks_current_v52_contract(self):
         source = WORKFLOW.read_text(encoding="utf-8")
         current, legacy = source.split("  legacy-v96-compatibility:", 1)
         self.assertNotIn("scripts/disdex_v52_margin_aware_live_engine.py --self-test", current)
@@ -17,8 +17,10 @@ class VpsOpsCiContractTest(unittest.TestCase):
         self.assertNotIn("DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5", current)
         self.assertIn("scripts/disdex_v52_margin_aware_live_engine.py --self-test", legacy)
         self.assertIn("DISDEX_V96_MAX_GROSS=1.5", legacy)
-        self.assertIn("DISDEX_V52_STOCK_GROSS_CAP=1.5", legacy)
-        self.assertIn("DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5", legacy)
+        self.assertIn("DISDEX_V52_CRYPTO_GROSS_CAP=3.0", legacy)
+        self.assertIn("DISDEX_V52_STOCK_GROSS_CAP=4.0", legacy)
+        self.assertIn("DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25", legacy)
+        self.assertIn("! grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5'", legacy)
         self.assertIn("continue-on-error: true", legacy)
 
     def test_current_gate_keeps_current_runtime_safety_checks(self):

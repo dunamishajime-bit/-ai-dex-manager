@@ -7,7 +7,7 @@ import { calculateWalletRiskStop, moreProtectiveStop } from "./disdex-exit-overl
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
-import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "./disdex-managed-protective-orders";
+import { findManagedV12V4ProtectiveOrders, findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "./disdex-managed-protective-orders";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition } from "./disdex-quality102-causal-v1-ownership";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "./disdex-strict-portfolio-planner";
 import type { AccountLockHandle, FileAccountOrderLock } from "./disdex-account-order-lock";
@@ -156,6 +156,7 @@ export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions:
     ...findManagedOrdinaryResidentStops(openOrders, positions),
     ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
     ...findManagedV12ProtectiveOrders(openOrders, positions),
+    ...findManagedV12V4ProtectiveOrders(openOrders, positions),
     ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
     ...findManagedIdlePriorityShortProtectiveOrders(openOrders, positions),
   ]);
