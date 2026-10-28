@@ -352,8 +352,8 @@ async function main() {
     const result = metrics(production);
     console.log(`PENGU current-contract parity metrics ${JSON.stringify(result)}`);
     assert.equal(result.trades, 33);
-    assert.ok(Math.abs(result.returnPct - 224.02) <= 0.25, `Return mismatch ${result.returnPct}`);
-    assert.ok(Math.abs(result.profitFactor - 2.990) <= 0.01, `PF mismatch ${result.profitFactor}`);
+    assert.ok(Math.abs(result.returnPct - 215.94) <= 0.25, `Return mismatch ${result.returnPct}`);
+    assert.ok(Math.abs(result.profitFactor - 2.946) <= 0.01, `PF mismatch ${result.profitFactor}`);
     assert.ok(Math.abs(result.maxDrawdownPct - (-15.18)) <= 0.10, `DD mismatch ${result.maxDrawdownPct}`);
     console.log("PENGU_DUAL_LS_V2_FINAL_PRODUCTION_RESEARCH_PARITY_PASS");
     console.log(JSON.stringify({ source: "Bitget USDT perpetual untouched external validation", rows: { pengu: pengu.length, btc: btc.length }, ...result, ledgerParity: true, ordersSent: false, cancelSent: false, positionChangesSent: false }));

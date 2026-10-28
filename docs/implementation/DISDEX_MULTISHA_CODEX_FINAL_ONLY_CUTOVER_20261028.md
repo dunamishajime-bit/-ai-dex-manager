@@ -69,3 +69,6 @@ STATUS: SOURCE_IMPLEMENTED_AND_TESTED / LIVE_SIGNED_PRECONDITIONS_AND_EXACT_NATI
 旧Margin CIに残る V52 stock1.5/total2.5、root release-readiness のtotal2.5 は現在の正式VPSリスク設定 stock4.0/total4.25 と不一致の歴史的テスト期待値だった。現在のLIVE設定に合わせたCIとreadiness側の文字列契約だけを更新し、実トレード閾値は変更していない。
 
 旧PENGU独立Bitget Parityではtrade9のSHORTが参照側1時間早く成立。Frozen reference SHORTに現ProductionのBTC EMA168連動2% limited structural re-breakが欠落していたため、reference側に独立armedLowと該当Gateを追加。Productionシグナルを参照の代用にせず、全量/parity assertionと差分診断を維持。GitHub CI全てSUCCESSとなるまでProduction認証は宣言しない。
+
+## PENGU外部独立BT参照 — 最新2%Gate込みの再計算値
+GitHubの実行済み2026-10-28 Final CI（Bitgetの2025-08-10〜2026-08-10外部データ、独立参照とProduction実装の全件トレード一致を厳密assert）から、33件、return+215.94065339210525%、PF2.945893501109601、最大DD-15.179442895906892%と確認。旧参照のreturn224.02%、PF2.990は旧SHORT 2%限定re-breakを反映しない古い期待値であり更新した。**条件や本番入口そのものは一切変更せず、実際の独立計算と一致したリファレンス結果にテスト期待値を更新した。** 統合8ロジックBTの代替ではない。
