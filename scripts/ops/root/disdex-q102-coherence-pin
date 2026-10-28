@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+TRADING_ROOT="${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}"
+TRADING_RELEASES="${TRADING_ROOT}/releases"
+RUNTIME_ENV_DIR="/etc/disdex/current-runtime"
+PIN_ENV="${DISDEX_Q102_PIN_ENV:-${RUNTIME_ENV_DIR}/q102-current.env}"
+HEALTH_DROPIN_ROOT="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
+WATCHDOG_DROPIN_ROOT="/etc/systemd/system/disdex-runner-watchdog.service.d"
+
+usage() {
+  printf '%s\n' \
+    'Usage: disdex-q102-coherence-pin --verify' \
+    '       disdex-q102-coherence-pin --apply --sha SHA --release-root PATH --health-env PATH --watchdog-env PATH --health-dropin PATH --watchdog-dropin PATH'
+}
+
+require_root() {
+  [[ "$(id -u)" == "0" ]] || {
+    printf 'Q102 coherence pin requires root\n' >&2
+    exit 1
+  }
+}
+
+read_pin_value() {
+  local key="$1"
+  sed -n "s/^${key}=//p" "$PIN_ENV" | tail -n1
+}
+
+require_sha() {
+  [[ "$1" =~ ^[0-9a-f]{40}$ ]] || {
+    printf 'invalid Q102 SHA\n' >&2
+    return 1
+  }
+}
+
+require_regular_under() {
+  local path="$1" root="$2"
+  [[ "$path" == "$root"/* ]] || return 1
+  [[ -f "$path" && ! -L "$path" ]] || return 1
+}
+
+validate_release() {
+  local sha="$1" root="$2" marker
+  require_sha "$sha"
+  [[ "$root" == "$TRADING_RELEASES/$sha" ]] || {
+    printf 'Q102 release root is not SHA-bound\n' >&2
+    return 1
+  }
+  [[ -d "$root" && ! -L "$root" ]] || {
+    printf 'Q102 release root is missing or unsafe\n' >&2
+    return 1
+  }
+  [[ -f "$root/.disdex-release-sha" && ! -L "$root/.disdex-release-sha" ]] || {
+    printf 'Q102 release marker is missing or unsafe\n' >&2
+    return 1
+  }
+  marker="$(tr -d '[:space:]' < "$root/.disdex-release-sha")"
+  [[ "$marker" == "$sha" ]] || {
+    printf 'Q102 release marker mismatch\n' >&2
+    return 1
+  }
+}
+
+validate_pin_values() {
+  local sha="$1" root="$2" health_env="$3" watchdog_env="$4" health_dropin="$5" watchdog_dropin="$6"
+  local service="disdex-quality102-causal-v1@${sha}.service"
+  validate_release "$sha" "$root"
+  require_regular_under "$health_env" "$RUNTIME_ENV_DIR" || { printf 'Q102 health env is missing or unsafe\n' >&2; return 1; }
+  require_regular_under "$watchdog_env" "$RUNTIME_ENV_DIR" || { printf 'Q102 watchdog env is missing or unsafe\n' >&2; return 1; }
+  require_regular_under "$health_dropin" "$HEALTH_DROPIN_ROOT" || { printf 'Q102 health drop-in is missing or unsafe\n' >&2; return 1; }
+  require_regular_under "$watchdog_dropin" "$WATCHDOG_DROPIN_ROOT" || { printf 'Q102 watchdog drop-in is missing or unsafe\n' >&2; return 1; }
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=$sha" "$health_env" || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=$root" "$health_env" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_Q102_EXPECTED_SHA=$sha" "$watchdog_env" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_Q102_RELEASE_ROOT=$root" "$watchdog_env" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_Q102_SERVICE_UNIT=$service" "$watchdog_env" || return 1
+  grep -Fq "EnvironmentFile=$health_env" "$health_dropin" || return 1
+  grep -Fq "EnvironmentFile=$watchdog_env" "$watchdog_dropin" || return 1
+  [[ "$(systemctl show "$service" -p LoadState --value 2>/dev/null || true)" == "loaded" ]] || return 1
+  [[ "$(systemctl show "$service" -p ActiveState --value 2>/dev/null || true)" == "active" ]] || return 1
+  [[ "$(systemctl show "$service" -p SubState --value 2>/dev/null || true)" == "running" ]] || return 1
+  [[ "$(systemctl is-enabled "$service" 2>/dev/null || true)" == "enabled" ]] || return 1
+  [[ "$(systemctl show "$service" -p WorkingDirectory --value 2>/dev/null || true)" == "$root" ]] || return 1
+}
+
+verify_pin_file() {
+  [[ -f "$PIN_ENV" && ! -L "$PIN_ENV" ]] || {
+    printf 'Q102 coherence pin is missing or unsafe\n' >&2
+    return 1
+  }
+  local sha root health_env watchdog_env health_dropin watchdog_dropin
+  sha="$(read_pin_value DISDEX_Q102_RUNTIME_SHA)"
+  root="$(read_pin_value DISDEX_Q102_RUNTIME_ROOT)"
+  health_env="$(read_pin_value DISDEX_Q102_HEALTH_ENV)"
+  watchdog_env="$(read_pin_value DISDEX_Q102_WATCHDOG_ENV)"
+  health_dropin="$(read_pin_value DISDEX_Q102_HEALTH_DROPIN)"
+  watchdog_dropin="$(read_pin_value DISDEX_Q102_WATCHDOG_DROPIN)"
+  validate_pin_values "$sha" "$root" "$health_env" "$watchdog_env" "$health_dropin" "$watchdog_dropin"
+  printf 'Q102_COHERENCE_PIN_PASS sha=%s service=disdex-quality102-causal-v1@%s.service\n' "$sha" "$sha"
+}
+
+write_pin_file() {
+  local sha="$1" root="$2" health_env="$3" watchdog_env="$4" health_dropin="$5" watchdog_dropin="$6"
+  local directory temporary backup
+  directory="$(dirname -- "$PIN_ENV")"
+  install -d -o root -g root -m 0755 "$directory"
+  [[ ! -L "$PIN_ENV" ]] || { printf 'refusing symlink Q102 coherence pin\n' >&2; return 1; }
+  temporary="$(mktemp "${directory}/.q102-coherence-pin.XXXXXX")"
+  trap 'rm -f -- "$temporary"' RETURN
+  printf '%s\n' \
+    "DISDEX_Q102_RUNTIME_SHA=$sha" \
+    "DISDEX_Q102_RUNTIME_ROOT=$root" \
+    "DISDEX_Q102_HEALTH_ENV=$health_env" \
+    "DISDEX_Q102_WATCHDOG_ENV=$watchdog_env" \
+    "DISDEX_Q102_HEALTH_DROPIN=$health_dropin" \
+    "DISDEX_Q102_WATCHDOG_DROPIN=$watchdog_dropin" > "$temporary"
+  chmod 0644 "$temporary"
+  chown root:root "$temporary"
+  if [[ -e "$PIN_ENV" ]]; then
+    [[ -f "$PIN_ENV" ]] || { printf 'Q102 coherence pin is not a regular file\n' >&2; return 1; }
+    backup="${PIN_ENV}.before-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+    cp -a -- "$PIN_ENV" "$backup"
+    printf 'Q102_COHERENCE_PIN_BACKUP path=%s\n' "$backup"
+  fi
+  mv -f -- "$temporary" "$PIN_ENV"
+  trap - RETURN
+}
+
+main() {
+  local mode=""
+  local sha="" root="" health_env="" watchdog_env="" health_dropin="" watchdog_dropin=""
+  while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+      --verify) mode="verify"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --sha) sha="${2:-}"; shift 2 ;;
+      --release-root) root="${2:-}"; shift 2 ;;
+      --health-env) health_env="${2:-}"; shift 2 ;;
+      --watchdog-env) watchdog_env="${2:-}"; shift 2 ;;
+      --health-dropin) health_dropin="${2:-}"; shift 2 ;;
+      --watchdog-dropin) watchdog_dropin="${2:-}"; shift 2 ;;
+      -h|--help) usage; return 0 ;;
+      *) usage >&2; return 2 ;;
+    esac
+  done
+  require_root
+  if [[ "$mode" == "verify" ]]; then
+    verify_pin_file
+    return 0
+  fi
+  [[ "$mode" == "apply" && -n "$sha" && -n "$root" && -n "$health_env" && -n "$watchdog_env" && -n "$health_dropin" && -n "$watchdog_dropin" ]] || {
+    usage >&2
+    return 2
+  }
+  validate_pin_values "$sha" "$root" "$health_env" "$watchdog_env" "$health_dropin" "$watchdog_dropin"
+  write_pin_file "$sha" "$root" "$health_env" "$watchdog_env" "$health_dropin" "$watchdog_dropin"
+  verify_pin_file
+  printf 'Q102_COHERENCE_PIN_APPLIED sha=%s\n' "$sha"
+}
+
+main "$@"

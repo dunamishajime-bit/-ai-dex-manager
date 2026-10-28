@@ -12,9 +12,17 @@ HEALTH_DROPIN="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzz
 WATCHDOG_DROPIN="/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 ALERT_DROPIN="/etc/systemd/system/disdex-runner-health-alert.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 V4_OPERATOR_ACTIVATION_PATH="/var/lib/disdex/shared/operator-activation/v12-v4-full.json"
+Q102_PIN_ENV="${DISDEX_Q102_PIN_ENV:-${RUNTIME_ENV_DIR}/q102-current.env}"
 COHERENCE_LOCK_PATH="${DISDEX_CURRENT_RUNTIME_COHERENCE_LOCK_PATH:-/var/lib/disdex/runner-health/private/current-runtime-coherence.lock}"
 MONITOR_RUNTIME_SHA=""
 MONITOR_RUNTIME_ROOT=""
+Q102_RUNTIME_SHA=""
+Q102_RUNTIME_ROOT=""
+Q102_EXPECTED_UNIT=""
+Q102_HEALTH_ENV=""
+Q102_WATCHDOG_ENV=""
+Q102_HEALTH_DROPIN=""
+Q102_WATCHDOG_DROPIN=""
 
 FAMILIES=(
   "disdex-v12-x1-all"
@@ -111,7 +119,60 @@ resolve_current() {
     V12_EXPECTED_UNIT="disdex-v12-x1-all@$DEPLOYED_SHA.service"
     V12_OPERATOR_RUNNER="V12_X1_ALL"
   fi
+  resolve_q102_pin
   build_current_units
+}
+
+pin_value() {
+  local key="$1"
+  sed -n "s/^${key}=//p" "$Q102_PIN_ENV" | tail -n1
+}
+
+validate_regular_path_under() {
+  local path="$1" root="$2"
+  [[ "$path" == "$root"/* ]] || return 1
+  [[ -f "$path" && ! -L "$path" ]] || return 1
+}
+
+resolve_q102_pin() {
+  local configured_sha configured_root configured_health_env configured_watchdog_env
+  local configured_health_dropin configured_watchdog_dropin marker
+  configured_sha="${DISDEX_Q102_RUNTIME_SHA:-}"
+  configured_root="${DISDEX_Q102_RUNTIME_ROOT:-}"
+  configured_health_env="${DISDEX_Q102_HEALTH_ENV:-}"
+  configured_watchdog_env="${DISDEX_Q102_WATCHDOG_ENV:-}"
+  configured_health_dropin="${DISDEX_Q102_HEALTH_DROPIN:-}"
+  configured_watchdog_dropin="${DISDEX_Q102_WATCHDOG_DROPIN:-}"
+
+  if [[ -f "$Q102_PIN_ENV" ]]; then
+    configured_sha="${configured_sha:-$(pin_value DISDEX_Q102_RUNTIME_SHA)}"
+    configured_root="${configured_root:-$(pin_value DISDEX_Q102_RUNTIME_ROOT)}"
+    configured_health_env="${configured_health_env:-$(pin_value DISDEX_Q102_HEALTH_ENV)}"
+    configured_watchdog_env="${configured_watchdog_env:-$(pin_value DISDEX_Q102_WATCHDOG_ENV)}"
+    configured_health_dropin="${configured_health_dropin:-$(pin_value DISDEX_Q102_HEALTH_DROPIN)}"
+    configured_watchdog_dropin="${configured_watchdog_dropin:-$(pin_value DISDEX_Q102_WATCHDOG_DROPIN)}"
+  fi
+
+  Q102_RUNTIME_SHA="${configured_sha:-$DEPLOYED_SHA}"
+  Q102_RUNTIME_ROOT="${configured_root:-$TRADING_RELEASES/$Q102_RUNTIME_SHA}"
+  Q102_EXPECTED_UNIT="disdex-quality102-causal-v1@${Q102_RUNTIME_SHA}.service"
+  Q102_HEALTH_ENV="${configured_health_env:-$HEALTH_ENV}"
+  Q102_WATCHDOG_ENV="${configured_watchdog_env:-$WATCHDOG_ENV}"
+  Q102_HEALTH_DROPIN="${configured_health_dropin:-$HEALTH_DROPIN}"
+  Q102_WATCHDOG_DROPIN="${configured_watchdog_dropin:-$WATCHDOG_DROPIN}"
+
+  [[ "$Q102_RUNTIME_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "Q102 runtime SHA is missing or invalid" >&2; return 1; }
+  [[ "$Q102_RUNTIME_ROOT" == "$TRADING_RELEASES/$Q102_RUNTIME_SHA" ]] || { echo "Q102 runtime root is not SHA-bound" >&2; return 1; }
+  [[ -d "$Q102_RUNTIME_ROOT" && ! -L "$Q102_RUNTIME_ROOT" ]] || { echo "Q102 runtime release is missing or unsafe" >&2; return 1; }
+  [[ -f "$Q102_RUNTIME_ROOT/.disdex-release-sha" && ! -L "$Q102_RUNTIME_ROOT/.disdex-release-sha" ]] || { echo "Q102 runtime marker is missing or unsafe" >&2; return 1; }
+  marker="$(tr -d '[:space:]' < "$Q102_RUNTIME_ROOT/.disdex-release-sha")"
+  [[ "$marker" == "$Q102_RUNTIME_SHA" ]] || { echo "Q102 runtime marker mismatch" >&2; return 1; }
+  if [[ "$Q102_RUNTIME_SHA" != "$DEPLOYED_SHA" || -f "$Q102_PIN_ENV" || -n "${DISDEX_Q102_RUNTIME_SHA:-}" ]]; then
+    validate_regular_path_under "$Q102_HEALTH_ENV" "$RUNTIME_ENV_DIR" || { echo "Q102 health env is missing or unsafe" >&2; return 1; }
+    validate_regular_path_under "$Q102_WATCHDOG_ENV" "$RUNTIME_ENV_DIR" || { echo "Q102 watchdog env is missing or unsafe" >&2; return 1; }
+    validate_regular_path_under "$Q102_HEALTH_DROPIN" "/etc/systemd/system/disdex-runner-health-snapshot.service.d" || { echo "Q102 health drop-in is missing or unsafe" >&2; return 1; }
+    validate_regular_path_under "$Q102_WATCHDOG_DROPIN" "/etc/systemd/system/disdex-runner-watchdog.service.d" || { echo "Q102 watchdog drop-in is missing or unsafe" >&2; return 1; }
+  fi
 }
 
 build_current_units() {
@@ -128,6 +189,9 @@ build_current_units() {
     if [[ "$PRIMARY_V12_MODE" == "V4" && "$index" -eq 0 ]]; then
       sha="$V4_PRIMARY_SHA"
       root="$V4_PRIMARY_RELEASE"
+    elif [[ "$family" == "disdex-quality102-causal-v1" ]]; then
+      sha="$Q102_RUNTIME_SHA"
+      root="$Q102_RUNTIME_ROOT"
     fi
     unit="${family}@${sha}.service"
     CURRENT_UNITS+=("$unit")
@@ -226,9 +290,16 @@ monitor_pins_current() {
   local sleeve
   for sleeve in V12 PENGU V52 Q102 FET HYPE IDLE; do
     local expected_sha="$DEPLOYED_SHA"
+    local health_env="$HEALTH_ENV"
+    local watchdog_env="$WATCHDOG_ENV"
     if [[ "$PRIMARY_V12_MODE" == "V4" && "$sleeve" == "V12" ]]; then expected_sha="$V4_PRIMARY_SHA"; fi
-    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_${sleeve}_EXPECTED_SHA=$expected_sha" "$HEALTH_ENV" || return 1
-    grep -Fxq "DISDEX_WATCHDOG_${sleeve}_EXPECTED_SHA=$expected_sha" "$WATCHDOG_ENV" || return 1
+    if [[ "$sleeve" == "Q102" ]]; then
+      expected_sha="$Q102_RUNTIME_SHA"
+      health_env="$Q102_HEALTH_ENV"
+      watchdog_env="$Q102_WATCHDOG_ENV"
+    fi
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_${sleeve}_EXPECTED_SHA=$expected_sha" "$health_env" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_${sleeve}_EXPECTED_SHA=$expected_sha" "$watchdog_env" || return 1
   done
   grep -Fq "EnvironmentFile=$HEALTH_ENV" "$HEALTH_DROPIN" || return 1
   grep -Fq "WorkingDirectory=$MONITOR_RUNTIME_ROOT" "$HEALTH_DROPIN" || return 1
@@ -238,6 +309,13 @@ monitor_pins_current() {
   grep -Fq "ExecStart=/usr/bin/node $MONITOR_RUNTIME_ROOT/scripts/ops/root/disdex-runner-health-snapshot-current.mjs" "$HEALTH_DROPIN" || return 1
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=disdex-shared-crypto-risk@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=disdex-v12-v52-margin-guard@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
+  if [[ "$Q102_RUNTIME_SHA" != "$DEPLOYED_SHA" || -f "$Q102_PIN_ENV" ]]; then
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=$Q102_RUNTIME_ROOT" "$Q102_HEALTH_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_Q102_RELEASE_ROOT=$Q102_RUNTIME_ROOT" "$Q102_WATCHDOG_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_Q102_SERVICE_UNIT=$Q102_EXPECTED_UNIT" "$Q102_WATCHDOG_ENV" || return 1
+    grep -Fq "EnvironmentFile=$Q102_HEALTH_ENV" "$Q102_HEALTH_DROPIN" || return 1
+    grep -Fq "EnvironmentFile=$Q102_WATCHDOG_ENV" "$Q102_WATCHDOG_DROPIN" || return 1
+  fi
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_MODE=$PRIMARY_V12_MODE" "$HEALTH_ENV" || return 1
   grep -Fxq "DISDEX_WATCHDOG_V12_MODE=$PRIMARY_V12_MODE" "$WATCHDOG_ENV" || return 1
   grep -Fxq "DISDEX_WATCHDOG_V12_SERVICE_UNIT=$V12_EXPECTED_UNIT" "$WATCHDOG_ENV" || return 1
@@ -305,8 +383,13 @@ operator_ready() {
     /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$DEPLOYED_SHA" --runner "$V12_OPERATOR_RUNNER" --activation-path /var/lib/disdex/shared/operator-activation/current.json >/dev/null 2>&1 || return 1
   fi
   for runner in PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
-    gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
-    /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$DEPLOYED_SHA" --runner "$runner" --activation-path /var/lib/disdex/shared/operator-activation/current.json >/dev/null 2>&1 || return 1
+    local release_root="$CURRENT_RELEASE" sha="$DEPLOYED_SHA"
+    if [[ "$runner" == "QUALITY102_CAUSAL_V1" ]]; then
+      release_root="$Q102_RUNTIME_ROOT"
+      sha="$Q102_RUNTIME_SHA"
+    fi
+    gate="$release_root/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+    /usr/bin/node "$gate" --release-root "$release_root" --sha "$sha" --runner "$runner" --activation-path /var/lib/disdex/shared/operator-activation/current.json >/dev/null 2>&1 || return 1
   done
   return 0
 }
@@ -423,6 +506,8 @@ main() {
     PRIMARY_V12_MODE="V4"
     V4_PRIMARY_SHA="428ddfae4df7bcecdab46604013855bea746262b"
     V4_PRIMARY_RELEASE="/home/deploy/disdex-trading/releases/$V4_PRIMARY_SHA"
+    Q102_RUNTIME_SHA="$DEPLOYED_SHA"
+    Q102_RUNTIME_ROOT="$CURRENT_RELEASE"
     FAMILIES[0]="disdex-v12-v4"
     build_current_units
     [[ "${CURRENT_UNITS[0]}" == "disdex-v12-v4@$V4_PRIMARY_SHA.service" ]]
@@ -452,6 +537,25 @@ main() {
     ! exec_start_matches_expected_root "$test_unit" "$test_root" "$invalid_exec"
     ! exec_start_matches_expected_root "disdex-v12-v4@$test_sha.service" "$test_root" "$valid_exec"
     printf 'MARGIN_GUARD_EXECSTART_COHERENCE_SELFTEST_PASS\n'
+    exit 0
+  fi
+  if [[ "$mode" == "--self-test-q102-mixed-sha" ]]; then
+    DEPLOYED_SHA="7688ed7c93a1918d8b44837339b7da5584a868f5"
+    CURRENT_RELEASE="/home/deploy/disdex-trading/releases/$DEPLOYED_SHA"
+    PRIMARY_V12_MODE="V4"
+    V4_PRIMARY_SHA="53a0be396719f0284af4e11b35c66a4ac7d58f79"
+    V4_PRIMARY_RELEASE="/home/deploy/disdex-trading/releases/$V4_PRIMARY_SHA"
+    Q102_RUNTIME_SHA="ef1ab178e26a7bf5bddb6473467765edba242e1d"
+    Q102_RUNTIME_ROOT="/home/deploy/disdex-trading/releases/$Q102_RUNTIME_SHA"
+    FAMILIES[0]="disdex-v12-v4"
+    build_current_units
+    [[ "${CURRENT_UNITS[0]}" == "disdex-v12-v4@$V4_PRIMARY_SHA.service" ]]
+    [[ "${CURRENT_UNITS[2]}" == "disdex-quality102-causal-v1@$Q102_RUNTIME_SHA.service" ]]
+    [[ "${EXPECTED_ROOT_BY_UNIT[${CURRENT_UNITS[2]}]}" == "$Q102_RUNTIME_ROOT" ]]
+    [[ "${CURRENT_UNITS[1]}" == "disdex-pengu-dual-ls-v2@$DEPLOYED_SHA.service" ]]
+    [[ "${CURRENT_UNITS[3]}" == "disdex-v52-aster-only@$DEPLOYED_SHA.service" ]]
+    [[ "${HEARTBEAT_EXPECTED_SHAS[2]}" == "$Q102_RUNTIME_SHA" ]]
+    printf 'Q102_MIXED_SHA_COHERENCE_SELFTEST_PASS\n'
     exit 0
   fi
   resolve_current
