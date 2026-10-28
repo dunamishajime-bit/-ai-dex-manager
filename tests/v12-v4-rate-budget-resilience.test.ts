@@ -111,6 +111,6 @@ test("daemon blocked budget branch is wired to status-dependent BLOCKED health, 
  const src=require("node:fs").readFileSync("scripts/v12-v4-production-runner.ts","utf8");
  assert.match(src,/classifyV4DaemonRateBudgetOutcome\(error,store\.read\(\)/);
  assert.match(src,/result=\{status:budget\.status,reason:budget\.reason,eventTs:Date\.now\(\),candidateCount:0,orderEnabled:false\}/);
- assert.match(src,/const failed=result\.status==="blocked"\|\|result\.status\.toLowerCase\(\)==="failed"/);
+ assert.match(src,/const failed=result\.status==="locked"\|\|result\.status==="blocked"\|\|result\.status\.toLowerCase\(\)==="failed"/);
  assert.match(src,/safetyState:failed\?"BLOCKED"/);
 });
