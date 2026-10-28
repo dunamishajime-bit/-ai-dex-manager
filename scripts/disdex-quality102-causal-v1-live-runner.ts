@@ -34,6 +34,7 @@ import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
 import { findManagedV12ProtectiveOrders, findManagedV12V4ProtectiveOrders, findManagedFetBrk48ProtectiveOrders, findManagedIdlePriorityShortProtectiveOrders } from "../lib/disdex-managed-protective-orders";
+import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEFAULT_STATE_ROOT = "/var/lib/disdex/quality102-causal-v1";
@@ -620,7 +621,24 @@ async function main(): Promise<void> {
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
     do {
+        const tickStartedAt = Date.now();
         const result = await built.runner.tick();
+        const runtimeSha = built.config.runtimeCommitSha.toLowerCase();
+        if (/^[0-9a-f]{40}$/.test(runtimeSha)) {
+            const record = result as unknown as Record<string, unknown>;
+            await writeRunnerTickHeartbeat({
+                runnerId: "QUALITY102_CAUSAL_V1",
+                runtimeSha,
+                serviceUnit: `disdex-quality102-causal-v1@${runtimeSha}.service`,
+                tickStartedAt,
+                tickCompletedAt: Date.now(),
+                status: String(result.status),
+                reason: String(result.message || ""),
+                ordersSent: Number(record.ordersSent ?? 0),
+                cancelsSent: Number(record.cancelsSent ?? 0),
+                positionChangesSent: Number(record.positionChangesSent ?? 0),
+            });
+        }
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), ...result }));
         if (!daemon || stopping || result.status === "manual-review") {
             if (result.status === "manual-review") process.exitCode = 2;

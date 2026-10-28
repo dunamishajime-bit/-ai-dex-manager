@@ -7,6 +7,7 @@ import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { classifyAsterRateBudgetFailure, nextAsterRateBudgetRetryMs } from "../lib/disdex-aster-rate-budget-policy";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 import { FET_BRK48_TRAILING_STOP_POLICY } from "../lib/fet-brk48-trailing-stop";
+import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -14,7 +15,7 @@ function numberEnv(name: string, fallback: number) {
 }
 
 async function main() {
-  const runtimeSha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "").trim();
+    const runtimeSha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "").trim().toLowerCase();
   if (!/^[0-9a-f]{40}$/i.test(runtimeSha)) throw new Error("FET_RUNTIME_SHA_REQUIRED");
   if (!/^(1|true|yes|on)$/i.test(String(process.env.FET_BRK48_LIVE_ENABLED || ""))) {
     throw new Error("FET_BRK48_LIVE_NOT_ENABLED");
@@ -93,6 +94,7 @@ async function main() {
   process.on("SIGTERM", shutdown);
 
   do {
+    const tickStartedAt = Date.now();
     let result;
     try {
       result = await runner.tick();
@@ -115,10 +117,35 @@ async function main() {
         cancelsSent: 0,
         positionChangesSent: 0,
       }));
+      await writeRunnerTickHeartbeat({
+        runnerId: "FET_BRK48_RESIDUAL",
+        runtimeSha,
+        serviceUnit: `disdex-fet-brk48@${runtimeSha}.service`,
+        tickStartedAt,
+        tickCompletedAt: Date.now(),
+        status: "held",
+        reason: deferred.reason,
+        ordersSent: 0,
+        cancelsSent: 0,
+        positionChangesSent: 0,
+      });
       if (!daemon || stop) break;
       await delay.wait(retryMs);
       continue;
     }
+    const record = result as unknown as Record<string, unknown>;
+    await writeRunnerTickHeartbeat({
+      runnerId: "FET_BRK48_RESIDUAL",
+      runtimeSha,
+      serviceUnit: `disdex-fet-brk48@${runtimeSha}.service`,
+      tickStartedAt,
+      tickCompletedAt: Date.now(),
+      status: String(result.status),
+      reason: String(result.message || ""),
+      ordersSent: Number(record.ordersSent ?? 0),
+      cancelsSent: Number(record.cancelsSent ?? 0),
+      positionChangesSent: Number(record.positionChangesSent ?? 0),
+    });
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: "FET_BRK48_RESIDUAL", runtimeSha, ...result }));
     if (!daemon || stop) break;
     const normalWaitMs = numberEnv("FET_BRK48_POLL_MS", 30_000);

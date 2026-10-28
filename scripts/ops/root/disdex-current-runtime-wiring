@@ -234,6 +234,9 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
     "$CURRENT_RELEASE/scripts/generated/disdex-quality102-ranking-observer.cjs"
     "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts"
+    "$CURRENT_RELEASE/lib/disdex-runner-tick-heartbeat.ts"
+    "$CURRENT_RELEASE/scripts/disdex_runner_tick_heartbeat.py"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-runner-tick-heartbeat.mjs"
     "$CURRENT_RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
@@ -286,6 +289,7 @@ validate_release_artifacts() {
   )
   local -a v4_required_files=(
     "$v4_release/scripts/v12-v4-production-runner.ts"
+    "$v4_release/lib/disdex-runner-tick-heartbeat.ts"
     "$v4_release/deploy/systemd/disdex-v12-v4@.service"
   )
   for required_file in "${required_files[@]}"; do
@@ -2578,6 +2582,9 @@ self_test() {
     scripts/disdex-quality102-causal-v1-live-runner.ts \
     scripts/generated/disdex-quality102-ranking-observer.cjs \
     scripts/disdex-current-live-target-readiness.ts \
+    lib/disdex-runner-tick-heartbeat.ts \
+    scripts/disdex_runner_tick_heartbeat.py \
+    scripts/ops/root/disdex-runner-tick-heartbeat.mjs \
     scripts/disdex-v12-active-state-sha-migrate.ts \
     scripts/disdex-fet-brk48-live-runner.ts \
     scripts/disdex-hype-trend-live-runner.ts \

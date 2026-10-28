@@ -17,6 +17,7 @@ import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-
 import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
 import { nextPenguDaemonWaitMs } from "../lib/pengu-live-scheduling";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
+import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -146,7 +147,24 @@ async function main() {
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
     do {
+        const tickStartedAt = Date.now();
         const result = await runner.tick();
+        const runtimeSha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "").trim().toLowerCase();
+        if (/^[0-9a-f]{40}$/.test(runtimeSha)) {
+            const record = result as unknown as Record<string, unknown>;
+            await writeRunnerTickHeartbeat({
+                runnerId: "PENGU_V8",
+                runtimeSha,
+                serviceUnit: `disdex-pengu-dual-ls-v2@${runtimeSha}.service`,
+                tickStartedAt,
+                tickCompletedAt: Date.now(),
+                status: String(result.status),
+                reason: String(result.message || ""),
+                ordersSent: Number(record.ordersSent ?? 0),
+                cancelsSent: Number(record.cancelsSent ?? 0),
+                positionChangesSent: Number(record.positionChangesSent ?? 0),
+            });
+        }
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
         const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs, result.message);

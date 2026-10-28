@@ -17,6 +17,7 @@ import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource,type V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
+import {writeRunnerTickHeartbeat} from "../lib/disdex-runner-tick-heartbeat";
 import {classifyAsterRateBudgetFailure,nextAsterRateBudgetRetryMs} from "../lib/disdex-aster-rate-budget-policy";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 import type {V4PreparedDecision,V4TickResult} from "../lib/v12-v4-runner-engine";
@@ -344,6 +345,7 @@ async function main(){
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
  do{
+  const tickStartedAt=Date.now();
   let result:V4TickResult;
   let prepared:V4PreparedDecision|undefined;
   let deferredWaitMs=0;
@@ -373,6 +375,13 @@ async function main(){
     result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
    }
   }
+  const resultRecord=result as unknown as Record<string,unknown>;
+  await writeRunnerTickHeartbeat({
+   runnerId:"V12_V4",runtimeSha:releaseSha,serviceUnit:`disdex-v12-v4@${releaseSha}.service`,
+   tickStartedAt,tickCompletedAt:Date.now(),status:String(result.status),reason:String(result.reason||""),
+   ordersSent:Number(resultRecord.ordersSent??0),cancelsSent:Number(resultRecord.cancelsSent??0),
+   positionChangesSent:Number(resultRecord.positionChangesSent??0),
+  });
   try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result,lastCompletedTickAt);}catch(error){
    console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:error instanceof Error?error.message:String(error)}));
   }

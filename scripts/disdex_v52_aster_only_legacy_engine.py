@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import disdex_v11eq_aster_only_live_engine as legacy
+from disdex_runner_tick_heartbeat import write_runner_tick_heartbeat
 from disdex_v52_daily_loss import update_v52_strategy_daily_latch
 from disdex_account_order_lock import AccountOrderLock
 from disdex_pending_exposure_registry import release_pending, upsert_pending
@@ -199,6 +200,21 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self._amzn_yahoo_h1_bars_cached_at_ms = 0
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
+
+    def _write_tick_heartbeat(self, tick_started_at: int, status: str, reason: str) -> None:
+        runtime_sha = str(os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+        if len(runtime_sha) != 40 or any(char not in "0123456789abcdef" for char in runtime_sha):
+            return
+        write_runner_tick_heartbeat(
+            runner_id="V52",
+            runtime_sha=runtime_sha,
+            service_unit=f"disdex-v52-aster-only@{runtime_sha}.service",
+            tick_started_at=tick_started_at,
+            tick_completed_at=base.now_ms(),
+            status=status,
+            reason=reason,
+            counters={"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0},
+        )
 
     def _recovery_grace_ms(self) -> int:
         return max(60_000, base.int_env("DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS", 10 * 60_000))
@@ -1336,6 +1352,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 self._upstream_fail_closed_hold = False
                 continue
             started = base.now_ms()
+            tick_started_at = started
             try:
                 prepared = self.prepare_tick_inputs()
             except Exception as error:
@@ -1351,13 +1368,22 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 else:
                     prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "preloadError": error}
             if prepared.get("upstreamHold"):
+                self._write_tick_heartbeat(tick_started_at, "held", "V52_UPSTREAM_FAIL_CLOSED_HOLD")
                 if not daemon:
                     break
             elif prepared.get("skipWithoutLock"):
                 self.idle_tick(prepared)
+                self._write_tick_heartbeat(
+                    tick_started_at,
+                    "held" if prepared.get("rateBudgetDeferred") or prepared.get("preloadError") else "no-change",
+                    "V52_PRELOCK_DEFERRED" if prepared.get("rateBudgetDeferred") else "V52_PRELOCK_IDLE_TICK",
+                )
             elif not self.lock.acquire():
                 self.log("v52-account-lock-busy", accountLockPath=str(self.lock.path))
+                self._write_tick_heartbeat(tick_started_at, "locked", "V52_ACCOUNT_LOCK_BUSY")
             else:
+                tick_status = "completed"
+                tick_reason = "V52_TICK_COMPLETED"
                 try:
                     if not started_once:
                         self.reset_days(); self.reconcile()
@@ -1365,6 +1391,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                         started_once = True
                     self.tick(prepared)
                 except Exception as error:
+                    tick_status = "held"
+                    tick_reason = str(error)
                     self.log("v52-tick-error", error=str(error))
                     if rate_budget_deferred_error(error):
                         self._defer_rate_budget(error, "TICK")
@@ -1389,6 +1417,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                             )
                 finally:
                     self.lock.release()
+                self._write_tick_heartbeat(tick_started_at, tick_status, tick_reason)
             if not daemon: break
             interval = self._loop_interval_ms(prepared)
             time.sleep(max(0, interval - (base.now_ms() - started)) / 1000.0)
