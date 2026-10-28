@@ -79,3 +79,13 @@ Synthetic replay smoke PASS in Node 24. Historical raw candidate ledger
 is retained on owner PC under
 C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research/2026-10-22_hype_entry_plus_exit_full8/
 but its original HYPE75 economics cannot certify new HYPE TREND.
+
+
+## Native M5 public market-data adapter
+lib/hype-adopted-m5-native-evidence.ts contains a dependency-injected read-only
+market-data collector for BTCUSDT and HYPEUSDT 5m native candles. It makes at
+most two public getKlines reads (72 bars each) when invoked, never auto-retries
+on 429, and fails closed on gaps, stale/invalid values or missing data.
+tests/hype-adopted-native-m5-readonly-evidence.test.ts adds five positive and
+negative tests, all PASS on Node 24 native TS stripping. No LIVE Runner imports
+or invokes this collector; no extra API requests in Production.

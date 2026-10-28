@@ -10,6 +10,7 @@ jobs:
         with: {node-version: 24, cache: npm}
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: ./node_modules/.bin/tsx --test tests/hype-trend-adopted-overlay-contract.test.ts
+      - run: ./node_modules/.bin/tsx --test tests/hype-adopted-native-m5-readonly-evidence.test.ts
       - run: python3 tests/test_avax_legacy_native8_source_evidence_20261029.py
       - run: ./node_modules/.bin/tsx --test tests/hype-zec-priority-capacity.test.ts tests/idle-residual-long-preemption.test.ts tests/fet-core-preemption.test.ts
       - run: ./node_modules/.bin/tsc --noEmit -p tsconfig.json --pretty false --incremental false
