@@ -69,6 +69,7 @@ export type V52Top2Observability = {
   status: "LIVE" | "STALE" | "UNAVAILABLE";
   capturedAt: string;
   updatedAt?: number;
+  runtimeSha?: string;
   mode?: string;
   reason?: string;
   referenceHealth?: { ready: boolean; reason: string };
@@ -266,6 +267,7 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
     if (!state) return unavailable(capturedAt, true, "V52 runner state の形式が不正です。", thresholds, windowsNy);
 
     const updatedAt = finite(state.updatedAt);
+    const runtimeSha = text(state.runtimeSha ?? state.runtimeCommitSha);
     const ageMs = updatedAt === undefined ? undefined : Math.max(0, Date.now() - updatedAt);
     const killSwitch = object(state.killSwitch);
     const killSwitchActive = Boolean(killSwitch?.active ?? state.killSwitchActive);
@@ -320,6 +322,7 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       status,
       capturedAt,
       updatedAt,
+      runtimeSha,
       mode: text(state.mode),
       reason,
       referenceHealth,
