@@ -3,12 +3,14 @@ import { mkdir, readFile, readlink, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
+import { validateRunnerTickHeartbeat } from "./disdex-runner-tick-heartbeat.mjs";
 
 const execFile = promisify(execFileCallback);
 const SYSTEMCTL = "/usr/bin/systemctl";
 const DEFAULT_EXPECTED_SHA = String(process.env.DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA || "").trim().toLowerCase();
 const DEFAULT_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT || "").trim();
 const HEALTH_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT || "/var/lib/disdex/runner-health").trim();
+const TICK_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_TICK_ROOT || `${HEALTH_ROOT}/ticks`).trim();
 const KILL_SWITCH_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json").trim();
 const MARGIN_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH || "/var/lib/disdex/shared/margin-risk/guard-live.json").trim();
 const SHARED_RISK_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json").trim();
@@ -86,6 +88,7 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-v4/heartbeat.json"),
     heartbeatFile: "v12-v4.json",
     maxStateAgeMs: 5 * 60_000,
+    tickMaxAgeMs: 5 * 60_000,
 } : {
     key: "V12_X1_ALL",
     runnerId: "V12_X1_ALL",
@@ -96,6 +99,7 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"),
     heartbeatFile: "v12-x1-all.json",
     maxStateAgeMs: 3 * 60 * 60_000,
+    tickMaxAgeMs: 2 * 60 * 60_000,
 };
 const RUNNERS = [
     V12_RUNNER,
@@ -120,6 +124,7 @@ const RUNNERS = [
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH", "/var/lib/disdex/v52-aster-only/runner-live.json"),
         heartbeatFile: "v52.json",
         maxStateAgeMs: 6 * 60 * 60_000,
+        tickMaxAgeMs: 2 * 60_000,
     },
     {
         key: "QUALITY102_CAUSAL_V1",
@@ -131,6 +136,7 @@ const RUNNERS = [
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", "/var/lib/disdex/quality102-causal-v1/state.json"),
         heartbeatFile: "quality102-causal-v1.json",
         maxStateAgeMs: 3 * 60 * 60_000,
+        tickMaxAgeMs: 15 * 60_000,
     },
     {
         key: "FET_BRK48_RESIDUAL",
@@ -142,6 +148,7 @@ const RUNNERS = [
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH", "/var/lib/disdex/fet-brk48-residual/state.json"),
         heartbeatFile: "fet-brk48-residual.json",
         maxStateAgeMs: 3 * 60 * 60_000,
+        tickMaxAgeMs: 5 * 60_000,
     },
     {
         key: "HYPE_TREND_LONG",
@@ -153,6 +160,7 @@ const RUNNERS = [
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH", "/var/lib/disdex/hype-zec-long/runner.json"),
         heartbeatFile: "hype-trend-long.json",
         maxStateAgeMs: 3 * 60 * 60_000,
+        tickMaxAgeMs: 35 * 60_000,
     },
     {
         key: "IDLE_PRIORITY_SHORT",
@@ -165,11 +173,34 @@ const RUNNERS = [
         parityCertificatePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_PARITY_CERT_PATH", "/var/lib/disdex/shared/idle-priority-parity-cert.json"),
         heartbeatFile: "idle-priority-short.json",
         maxStateAgeMs: 20 * 60_000,
+        tickMaxAgeMs: 20 * 60_000,
     },
 ];
 
 function json(path) {
     return readFile(path, "utf8").then((raw) => JSON.parse(raw));
+}
+
+export async function readRunnerTickHeartbeat(runner, now) {
+    const path = `${TICK_ROOT}/${runner.runnerId}.json`;
+    let raw;
+    try {
+        raw = await readFile(path, "utf8");
+    } catch (error) {
+        return {
+            present: false,
+            path,
+            ...validateRunnerTickHeartbeat(runner, undefined, now),
+            reason: error?.code === "ENOENT" ? "RUNNER_TICK_HEARTBEAT_MISSING" : "RUNNER_TICK_HEARTBEAT_UNAVAILABLE",
+        };
+    }
+    let marker;
+    try {
+        marker = JSON.parse(raw);
+    } catch {
+        return { present: true, path, ...validateRunnerTickHeartbeat(runner, null, now), reason: "RUNNER_TICK_HEARTBEAT_MALFORMED" };
+    }
+    return { present: true, path, ...validateRunnerTickHeartbeat(runner, marker, now) };
 }
 
 function near(actual, expected, tolerance) {
@@ -489,6 +520,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         Number(state?.initialDaemonReconciliation?.completedAt || 0),
     );
     const stateFresh = updatedAt > 0 && now - updatedAt <= runner.maxStateAgeMs;
+    const tick = await readRunnerTickHeartbeat(runner, now);
     const serviceActive = Boolean(service?.active);
     const processPresent = Boolean(service?.pid > 0);
     const cwdCurrent = Boolean(service?.cwd === runner.releaseRoot);
@@ -505,8 +537,8 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
                 ? `${runner.key} service identity is not current`
                 : !stateIdentityMatches(runner, state)
                     ? `${runner.key} state identity is invalid`
-                    : !stateFresh
-                        ? `${runner.key} state is stale`
+                    : !tick.fresh
+                        ? `${runner.key} tick heartbeat is not fresh: ${tick.reason}`
                         : "";
     const heartbeat = {
         schema: "disdex-runner-heartbeat/v1",
@@ -523,7 +555,10 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED",
         newOrdersAllowed: !blockedReason,
         heartbeatAt: now,
-        lastTickAt: updatedAt > 0 ? updatedAt : now,
+        lastTickAt: tick.marker?.tickCompletedAt > 0 ? tick.marker.tickCompletedAt : 0,
+        tickStatus: tick.marker?.status || null,
+        tickReason: tick.marker?.reason || tick.reason,
+        tickAgeMs: tick.ageMs,
         mainPid: Number(service?.pid || 0),
         nRestarts: Number(service?.nRestarts || 0),
         serviceResult: String(service?.result || ""),
@@ -549,7 +584,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
-        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
+        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: tick.marker?.status || null, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
     };
 }
 
@@ -648,16 +683,19 @@ function selfTest() {
     console.log("DISDEX_RUNNER_HEALTH_SNAPSHOT_SELFTEST_PASS");
 }
 
-if (process.argv.includes("--self-test")) {
-    selfTest();
-} else {
-    main().catch((error) => {
-        console.error(JSON.stringify({
-            status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_FAIL_CLOSED",
-            reason: String(error?.message || error).slice(0, 240),
-            tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
-            ordersSent: 0,
-        }));
-        process.exitCode = 1;
-    });
+const directInvocation = process.argv[1]?.endsWith("disdex-runner-health-snapshot-current.mjs");
+if (directInvocation) {
+    if (process.argv.includes("--self-test")) {
+        selfTest();
+    } else {
+        main().catch((error) => {
+            console.error(JSON.stringify({
+                status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_FAIL_CLOSED",
+                reason: String(error?.message || error).slice(0, 240),
+                tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
+                ordersSent: 0,
+            }));
+            process.exitCode = 1;
+        });
+    }
 }
