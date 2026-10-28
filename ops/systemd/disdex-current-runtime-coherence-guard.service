@@ -7,5 +7,6 @@ Type=oneshot
 User=root
 Group=root
 WorkingDirectory=/home/deploy/disdex-trading/current
+EnvironmentFile=-/etc/disdex/current-runtime/q102-current.env
 ExecStart=/usr/local/sbin/disdex-current-runtime-coherence-guard --auto
 Nice=10
