@@ -27,8 +27,21 @@ function main(){
   let state:HypeAdoptedProfitState=data.ownedPosition.initialState??{maxFavorablePct:0,profitArmReached:false};
   const trace=[];
   let last=Number.NEGATIVE_INFINITY;
-  for(const bar of data.hypeM5){
-   if(bar.openTime<data.ownedPosition.entryTs||bar.openTime+300000>data.decisionTs)continue;
+  const entryTs=data.ownedPosition.entryTs;
+  if(!Number.isFinite(entryTs)||entryTs<=0||entryTs>data.decisionTs)
+   throw Error("INCOMPLETE_M5_EXIT_REPLAY:INVALID_ENTRY_TS");
+  const eligible=data.hypeM5.filter(bar=>bar.openTime>=entryTs&&bar.openTime+300000<=data.decisionTs);
+  // Never reset an open position's prior MFE or arm state to zero when
+  // missing earlier bars. A snapshot with only recent bars is not a
+  // complete position-exit replay. A persisted initialState may bridge
+  // the period, but only with a contiguous lastCompletedM5Ts marker.
+  const first=eligible[0];
+  if(!first||!Number.isFinite(first.openTime)
+   ||(state.lastCompletedM5Ts!==undefined
+      ? first.openTime!==state.lastCompletedM5Ts+300000
+      : first.openTime>entryTs+300000))
+   throw Error("INCOMPLETE_M5_EXIT_REPLAY:ENTRY_HISTORY_MISSING");
+  for(const bar of eligible){
    const evalResult=advanceHypeAdoptedM5Exit({entryTs:data.ownedPosition.entryTs,
     entryPrice:data.ownedPosition.entryPrice,now:bar.openTime+300000,bar,state});
    if(!evalResult.accepted)throw Error("INCOMPLETE_M5_EXIT_REPLAY:"+evalResult.reason);
@@ -37,6 +50,8 @@ function main(){
    trace.push({completedAt:bar.openTime+300000,exit:evalResult.exit,reason:evalResult.reason});
    if(evalResult.exit)break;
   }
+  if(!trace.some(x=>x.exit)&&last+300000!==Math.floor(data.decisionTs/300000)*300000)
+   throw Error("INCOMPLETE_M5_EXIT_REPLAY:TAIL_CANDLES_MISSING");
   result.firstExit=trace.find(x=>x.exit)??null;
   result.completedBars=trace.length;
   result.finalState=state;

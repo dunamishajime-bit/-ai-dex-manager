@@ -73,3 +73,14 @@ reference prices use the actual open (no optimistic fill). Node24 19/19
 unit tests PASS. This branch does not wire a HYPE TREND LIVE execution
 route; exact current eight-runner economics and signed STOP lifecycles
 remain mandatory before any activation.
+
+
+## HYPE read-only replay historical coverage fail-closed improvement
+Research replay now refuses to return an apparent no-exit result when
+M5 history is missing at the position entry or the decision-tail boundary.
+If a persisted state is provided, its lastCompletedM5Ts must be contiguous
+with the first supplied new candle; otherwise the replay fails.
+19 HYPE M5 unit tests, 3 CLI source-coverage tests, full-project TypeScript
+noEmit and V52 six mocked Python tests all passed on isolated VPS.
+This remains NOT LIVE and is NOT authorization to wire HYPE75 into
+independent HYPE TREND or to claim new-Q102 8-runner economic parity.

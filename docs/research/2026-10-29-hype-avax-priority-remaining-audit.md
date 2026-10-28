@@ -198,3 +198,18 @@ The pure research overlay now matches these causal rules, validates OHLC
 and has four additional regression tests: Node24 19/19 PASS. Reference
 exit prices are not signed venue executions or cost-adjusted BT fills.
 LIVE HYPE TREND remains disconnected.
+
+
+## HYPE M5 replay must prove full entry-to-decision source continuity
+The standalone research snapshot replay previously returned firstExit=null
+when an open position had missing M5 candles at entry or at the most
+recent completed candle. It could therefore be misread as an economic
+hold decision despite missing maximum favorable excursion or loss data.
+Now replay-hype-adopted-m5-readonly-20261029.ts requires an initial M5
+bar at the entry boundary, or a persisted initialState with an exactly
+contiguous lastCompletedM5Ts; it also requires the last completed bar
+to reach decisionTs unless an earlier exit is already proven.
+Missing entry and tail histories throw INCOMPLETE_M5_EXIT_REPLAY
+rather than inventing a HOLD. The three Python/tsx CLI regression cases
+and 19 causal HYPE tests PASS on isolated VPS, and full project TypeScript
+--noEmit PASS. These are source-only proofs, not a current annual BT.
