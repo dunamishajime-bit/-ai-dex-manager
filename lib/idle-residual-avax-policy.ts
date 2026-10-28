@@ -45,6 +45,12 @@ export function advanceAvaxSoftWatch(input: {
     if (!Number.isFinite(input.firstTouchAtTs) || !Number.isFinite(input.watchDeadlineTs) || input.watchDeadlineTs < input.firstTouchAtTs) {
         throw new Error("IDLE_RESIDUAL_AVAX_SOFT_WATCH_STATE_INVALID");
     }
+    // Once the adverse threshold is first touched, retain the two-hour
+    // observation window even if price temporarily recovers. The final
+    // adverse condition is evaluated at/after the original deadline.
+    if (!touched && input.now < input.watchDeadlineTs) {
+        return { firstTouchAtTs: input.firstTouchAtTs, watchDeadlineTs: input.watchDeadlineTs };
+    }
     if (!touched) return {};
     if (input.now >= input.watchDeadlineTs) return {
         firstTouchAtTs: input.firstTouchAtTs,

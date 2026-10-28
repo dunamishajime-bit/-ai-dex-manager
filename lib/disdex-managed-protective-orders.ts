@@ -155,7 +155,7 @@ function v12V4ProtectionCandidate(
     if (order.side !== expectedSide) return undefined;
 
     const remainingQuantity = order.quantity - order.executedQuantity;
-    const tolerance = Math.max(1e-8, Math.abs(position.quantity) * PROTECTION_TOLERANCE_PCT);
+    const tolerance = Math.max(1e-8, Math.abs(position.quantity) * 1e-9); // V4 resident STOP must cover the full one-way position
     if (remainingQuantity <= MIN_REMAINING_QUANTITY || Math.abs(remainingQuantity - Math.abs(position.quantity)) > tolerance) return undefined;
     return { order, position, leg, remainingQuantity };
 }

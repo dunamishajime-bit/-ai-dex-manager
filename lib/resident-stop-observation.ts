@@ -51,11 +51,98 @@ export async function readV4OwnerProofs(orders:any[],now:number):Promise<V4Owner
   return v4ProofsFromIndependentEvidence(orders,JSON.parse(ledger),JSON.parse(hb),marker,now);
  }catch{return [];}
 }
-export function observeResidentProtection(positions:any[],orders:any[],states:Record<string,any>,runtimeSha:string,now:number,v4Proofs:readonly V4OwnerProof[]=[]){
+/**
+ * Q102 is a separately pinned LIVE release. A matching q102-stop order
+ * prefix is insufficient proof: require live exact-SHA health, state,
+ * resident ledger and venue readback. Failure remains UNVERIFIED.
+ */
+export const Q102_PRIMARY_OWNER_SHA="ef1ab178e26a7bf5bddb6473467765edba242e1d";
+export function q102ProofsFromIndependentEvidence(
+ orders:any[],state:any,heartbeat:any,marker:string,now:number
+):V4OwnerProof[]{
+ const sha=Q102_PRIMARY_OWNER_SHA;
+ if(marker.trim()!==sha||state?.runtimeCommitSha!==sha||state?.mode!=="LIVE"
+  ||state?.strategyId!=="QUALITY102_CAUSAL_V1"
+  ||heartbeat?.runtimeSha!==sha||heartbeat?.expectedSha!==sha
+  ||heartbeat?.serviceUnit!=="disdex-quality102-causal-v1@"+sha+".service"
+  ||heartbeat?.mode!=="LIVE"||heartbeat?.safetyState!=="HEALTHY"
+  ||!Number.isFinite(Number(heartbeat?.lastTickAt))
+  ||Number(heartbeat.lastTickAt)>now+5000||now-Number(heartbeat.lastTickAt)>180000
+  ||!Number.isFinite(Number(state?.updatedAt))
+  ||Number(state.updatedAt)>now+5000||now-Number(state.updatedAt)>300000
+  ||state?.pending)return [];
+ const p=state.position;
+ if(!p)return [];
+ const side=p.side===1?"LONG":p.side===-1?"SHORT":undefined;
+ const symbol=String(p.symbol||"").trim();
+ const qty=Number(p.quantity),entry=Number(p.entryPrice),hard=Number(p.hardStop);
+ const resident=p.residentStop;
+ const id=String(resident?.clientOrderId||"");
+ if(!side||!/^[A-Z0-9]+USDT$/.test(symbol)
+   ||!Number.isFinite(qty)||qty<=0||!Number.isFinite(entry)||entry<=0
+   ||!Number.isFinite(hard)||hard<=0||hard>0.15
+   ||resident?.protected!==true||resident?.readBackStatus!=="VERIFIED"
+   ||!/^q102-stop-[0-9a-f]{22}$/.test(id)
+   ||!p.stopLedger||!Array.isArray(p.stopLedger.plans)
+   ||!p.stopLedger.plans.some((plan:any)=>plan.clientOrderId===id)
+   ||resident?.symbol!==symbol||resident?.side!==(side==="LONG"?"SELL":"BUY")
+   ||Math.abs(Number(resident?.quantity)-qty)>Math.max(1e-8,qty*1e-9)
+   ||!Number.isFinite(Number(resident?.lastReconciledAt))
+   ||now-Number(resident.lastReconciledAt)>300000)return [];
+ const matches=orders.filter((o:any)=>o.clientOrderId===id&&o.symbol===symbol);
+ if(matches.length!==1)return [];
+ const o=matches[0];
+ const price=Number(o.stopPrice),remain=Number(o.origQty)-Number(o.executedQty);
+ const tol=Math.max(1e-8,entry*0.0002);
+ if(o.type!=="STOP_MARKET"||o.side!==(side==="LONG"?"SELL":"BUY")
+   ||o.reduceOnly!==true||!["NEW","PARTIALLY_FILLED"].includes(o.status)
+   ||!Number.isFinite(remain)||Math.abs(remain-qty)>Math.max(1e-8,qty*1e-9)
+   ||!Number.isFinite(price)||price<=0
+   ||Math.abs(price-Number(resident.stopPrice))>Math.max(1e-8,price*1e-9)
+   ||(side==="LONG"&&price<entry*(1-hard)-tol)
+   ||(side==="SHORT"&&price>entry*(1+hard)+tol))return [];
+ return [{symbol,side,quantity:qty,price,stopClientOrderId:id}];
+}
+export async function readQ102OwnerProofs(orders:any[],now:number):Promise<V4OwnerProof[]>{
+ const sha=Q102_PRIMARY_OWNER_SHA;
+ try{
+  const [state,hb,marker]=await Promise.all([
+   readFile("/var/lib/disdex/quality102-causal-v1/state.json","utf8"),
+   readFile("/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json","utf8"),
+   readFile("/home/deploy/disdex-trading/releases/"+sha+"/.disdex-release-sha","utf8")
+  ]);
+  return q102ProofsFromIndependentEvidence(orders,JSON.parse(state),JSON.parse(hb),marker,now);
+ }catch{return [];}
+}
+export function observeResidentProtection(positions:any[],orders:any[],states:Record<string,any>,runtimeSha:string,now:number,v4Proofs:readonly V4OwnerProof[]=[],q102Proofs:readonly V4OwnerProof[]=[],ownerShaOverrides:Record<string,string>={}){
  const owners=new Map<string,{strategy:string;symbol:string;side:string;quantity:number;price?:number}[]>();
  function add(strategy:string,p:any){if(!p)return;const ids=[p.stopClientOrderId,p.protection?.stopClientOrderId,p.residentStop?.clientOrderId,p.recoveryV8?.fullHardStopClientOrderId,p.recoveryV8?.partialStopClientOrderId,p.recoveryV8?.remainingHardStopClientOrderId].filter(Boolean);for(const id of ids){const rows=owners.get(id)||[];rows.push({strategy,symbol:String(p.symbol||(strategy==='PENGU'?'PENGUUSDT':'')).toUpperCase(),side:p.side===1||p.side==='LONG'?'SELL':p.side===-1||p.side==='SHORT'?'BUY':'UNKNOWN',quantity:Number(p.quantity),price:p.residentStop?.stopPrice??p.hardStop??p.stopPrice??p.protection?.lastAckStop??p.lastAckStop??(p.recoveryV8?(p.recoveryV8.logicalEntryPrice??p.entryPrice)*(1-(id===p.recoveryV8.partialStopClientOrderId?PENGU_RECOVERY_V8.partial.stopPct:PENGU_RECOVERY_V8.exit.hardStopPct)):undefined)});owners.set(id,rows);}}
  for(const p of v4Proofs)add("V12_V4",{symbol:p.symbol,side:p.side,quantity:p.quantity,stopClientOrderId:p.stopClientOrderId,stopPrice:p.price});
- for(const [strategy,s] of Object.entries(states)){if(!(Number(s.updatedAt)>0)||now-Number(s.updatedAt)>300000||Number(s.updatedAt)>now+5000)continue;if((s.runtimeCommitSha&&s.runtimeCommitSha!==runtimeSha)||(s.runtimeSha&&s.runtimeSha!==runtimeSha))continue;add(strategy,s.position);for(const p of s.positions||s.activePositions||[])add(strategy,p);}
+ for(const p of q102Proofs)add("Q102",{symbol:p.symbol,side:p.side,quantity:p.quantity,stopClientOrderId:p.stopClientOrderId,stopPrice:p.price});
+ // The shared risk writer has its own new immutable release; all other LIVE
+ // sleeves remain independently pinned. Never require their state SHA to equal
+ // the writer's candidate SHA, and never accept an arbitrary unpinned SHA.
+ // Q102 uses the stricter independent heartbeat+ledger+venue proof above.
+ const scopedLiveSha:Record<string,string>={
+  V12:"7f10f3f3001563af8b32dbd403452733d23a0185",
+  PENGU:"7688ed7c93a1918d8b44837339b7da5584a868f5",
+  FET:"7688ed7c93a1918d8b44837339b7da5584a868f5",
+  HYPE:"7688ed7c93a1918d8b44837339b7da5584a868f5",
+  IDLE:"7688ed7c93a1918d8b44837339b7da5584a868f5",
+  RESIDUAL:"7688ed7c93a1918d8b44837339b7da5584a868f5",
+ };
+ for(const [strategy,s] of Object.entries(states)){
+  // Candidate runner promotions are signed/root-controlled operations. The
+  // shared observer consumes the operator-pinned new SHA only when present;
+  // it never trusts an unbounded self-reported SHA from the state file.
+  const override=ownerShaOverrides[strategy]??process.env["DISDEX_SHARED_STOP_"+strategy+"_OWNER_SHA"];
+  const expected=override===undefined ? scopedLiveSha[strategy] : override;
+  if(!expected||!/^[a-f0-9]{40}$/.test(expected)||!(Number(s.updatedAt)>0)||now-Number(s.updatedAt)>300000||Number(s.updatedAt)>now+5000)continue;
+  const ownerSha=String(s.runtimeCommitSha||s.runtimeSha||"");
+  if(ownerSha!==expected||(s.runtimeSha&&s.runtimeSha!==expected)||(s.runtimeCommitSha&&s.runtimeCommitSha!==expected))continue;
+  add(strategy,s.position);
+  for(const p of s.positions||s.activePositions||[])add(strategy,p);
+ }
  const active=positions.filter(p=>Math.abs(Number(p.positionAmt))>1e-12);
  const rows=active.map(p=>{
   const quantity=Math.abs(Number(p.positionAmt)),side=Number(p.positionAmt)>0?'SELL':'BUY';
@@ -74,8 +161,8 @@ export async function refreshResidentProtectionObservation(client:AsterV3Client,
  const paths:Record<string,string>={V12:'/var/lib/disdex/v12-x1-all/runner.json',PENGU:'/var/lib/disdex/pengu-dual-ls-v2/runner-live.json',Q102:'/var/lib/disdex/quality102-causal-v1/state.json',FET:'/var/lib/disdex/fet-brk48-residual/state.json',HYPE:'/var/lib/disdex/hype-zec-long/runner.json',IDLE:'/var/lib/disdex/idle-priority/state.json',RESIDUAL:'/var/lib/disdex/idle-priority/residual-long-state.json'};
  let snapshot:any;
  try{const entries=await Promise.all(Object.entries(paths).map(async([s,p])=>[s,JSON.parse(await readFile(p,'utf8').catch(()=>'{"unavailable":true}'))]));const openOrders=await client.getOpenOrders();const now=Date.now();
-  const v4Proofs=await readV4OwnerProofs(openOrders,now);
-  snapshot=observeResidentProtection(positions,openOrders,Object.fromEntries(entries),runtimeSha,now,v4Proofs);}
+  const [v4Proofs,q102Proofs]=await Promise.all([readV4OwnerProofs(openOrders,now),readQ102OwnerProofs(openOrders,now)]);
+  snapshot=observeResidentProtection(positions,openOrders,Object.fromEntries(entries),runtimeSha,now,v4Proofs,q102Proofs);}
  catch(error){snapshot={schema:'resident-stop-observation/v1',runtimeSha,checkedAt:Date.now(),ok:false,readOnly:true,error:error instanceof Error?error.message:String(error),positions:[]};}
  const temp=`${path}.${process.pid}.tmp`;await writeFile(temp,JSON.stringify(snapshot)+'\n',{mode:0o644});await rename(temp,path);lastObservationAt=Date.now();lastObservationSha=runtimeSha;
 }

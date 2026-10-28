@@ -76,7 +76,7 @@ async function main(): Promise<void> {
                 message: error instanceof Error ? error.message : String(error),
                 consecutiveFailures: context.consecutiveFailures,
                 lastSuccessAt: context.lastSuccessAt,
-                retryMs,
+                retryMs: context.scheduledRetryMs,
                 processRetained: daemon,
                 failClosedOnStaleSnapshot: true,
             }));

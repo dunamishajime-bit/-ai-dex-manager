@@ -1,0 +1,66 @@
+name: DisDex Multi-SHA Risk and API Pre-Release Source Certification
+on:
+  pull_request:
+    paths:
+      - 'lib/resident-stop-observation.ts'
+      - 'lib/disdex-managed-protective-orders.ts'
+      - 'lib/disdex-shared-crypto-risk-refresh-loop.ts'
+      - 'lib/hype-zec-long-runner.ts'
+      - 'lib/pengu-dual-ls-v2-portfolio-runner.ts'
+      - 'lib/idle-residual-avax-policy.ts'
+      - 'scripts/disdex-shared-crypto-risk-writer.ts'
+      - 'tests/*resident-stop*'
+      - 'tests/shared-risk-*'
+      - 'tests/hype-pengu-v4-stop-crossrunner-owner-audit.test.ts'
+      - 'tests/hype-trend-btc3h-gate-audit.test.ts'
+      - 'tests/idle-residual-avax-*.test.ts'
+      - '.github/workflows/disdex-multisha-risk-api-release-cert-20261028.yml'
+  push:
+    branches:
+      - 'fix/full-risk-api-priority-release-prep-20261028'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    name: Source-only fail-closed STOP / priority / API regression gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Contract test matrix (no trading credentials, no venue mutations)
+        run: |
+          ./node_modules/.bin/tsx --test             tests/resident-stop-observation.test.ts             tests/resident-stop-v4-multisha.test.ts             tests/resident-stop-q102-multisha.test.ts             tests/resident-stop-cross-sha-writer-rollout.test.ts             tests/shared-risk-transient-refresh-retry.test.ts             tests/shared-risk-rate-budget-contention-retry.test.ts             tests/aster-global-rate-budget.test.ts             tests/hype-pengu-v4-stop-crossrunner-owner-audit.test.ts             tests/hype-trend-btc3h-gate-audit.test.ts             tests/idle-residual-avax-policy.test.ts             tests/idle-residual-avax-sticky-watch-contract.test.ts             tests/pengu-short-v20-timed-stop.test.ts
+      - name: TypeScript compile contract
+        run: ./node_modules/.bin/tsc --noEmit -p tsconfig.json --pretty false --incremental false
+      - name: Root read-only preflight self-test
+        run: |
+          python3 -m py_compile scripts/ops/root/disdex-risk-api-final-preflight-20261028.py
+          python3 scripts/ops/root/disdex-risk-api-final-preflight-20261028.py --self-test
+      - name: Regression boundary — no permission bypass and no test orders
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          risk=Path("lib/resident-stop-observation.ts").read_text()
+          assert "q102ProofsFromIndependentEvidence" in risk
+          assert "v4ProofsFromIndependentEvidence" in risk
+          assert "V4_PRIMARY_OWNER_SHA" in risk
+          assert "Q102_PRIMARY_OWNER_SHA" in risk
+          assert "SHARED_STOP_" in risk
+          policy=Path("lib/disdex-shared-crypto-risk-refresh-loop.ts").read_text()
+          assert "nextSharedRiskRefreshRetryMs" in policy
+          assert "nextAsterRateBudgetRetryMs" in policy
+          assert "onFailure" in policy
+          assert "onSuccess" in policy
+          assert Path("docs/implementation/DISDEX_MULTISHA_CODEX_FINAL_ONLY_CUTOVER_20261028.md").is_file()
+          print("SOURCE_SAFETY_BOUNDARY_PASS")
+          PY
+      - name: Fail on whitespace errors
+        run: git diff --check HEAD^ HEAD

@@ -22,15 +22,19 @@ test("AVAX residual entry veto implements the adopted dual causal gate", () => {
     assert.equal(evaluateAvaxResidualEntryVeto({ avax3hPct: -0.49, btc3hPct: -0.01, avax6hPct: 1.99, btc6hPct: -0.01 }), undefined);
 });
 
-test("AVAX soft -3.5% watch starts, cancels on recovery, and exits at the 2h deadline", () => {
+test("AVAX soft -3.5% watch survives interim recovery and exits only if still adverse at 2h deadline", () => {
     const started = advanceAvaxSoftWatch({ entryPrice, bidPrice: 96.5, now: 1_000, firstTouchAtTs: undefined, watchDeadlineTs: undefined });
     assert.equal(started.firstTouchAtTs, 1_000);
     assert.equal(started.watchDeadlineTs, 1_000 + 2 * 3_600_000);
     assert.equal(started.action, undefined);
 
     const recovered = advanceAvaxSoftWatch({ entryPrice, bidPrice: 99, now: 2_000, firstTouchAtTs: started.firstTouchAtTs, watchDeadlineTs: started.watchDeadlineTs });
-    assert.equal(recovered.firstTouchAtTs, undefined);
-    assert.equal(recovered.watchDeadlineTs, undefined);
+    assert.equal(recovered.firstTouchAtTs, started.firstTouchAtTs);
+    assert.equal(recovered.watchDeadlineTs, started.watchDeadlineTs);
+
+    const cleared = advanceAvaxSoftWatch({ entryPrice, bidPrice: 99, now: started.watchDeadlineTs!, firstTouchAtTs: recovered.firstTouchAtTs, watchDeadlineTs: recovered.watchDeadlineTs });
+    assert.equal(cleared.firstTouchAtTs, undefined);
+    assert.equal(cleared.watchDeadlineTs, undefined);
 
     const matured = advanceAvaxSoftWatch({ entryPrice, bidPrice: 96, now: started.watchDeadlineTs!, firstTouchAtTs: started.firstTouchAtTs, watchDeadlineTs: started.watchDeadlineTs });
     assert.equal(matured.action, "SOFT_MINUS3P5_WATCH2H");
