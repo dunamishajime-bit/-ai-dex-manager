@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, readdir } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -100,4 +101,21 @@ test("rejects invalid identity, timestamps, and mutation counters", async () => 
     cancelsSent: 0,
     positionChangesSent: 0,
   }));
+});
+
+test("all TypeScript production Runner loops record their completed tick", () => {
+  const entrypoints = [
+    "scripts/v12-v4-production-runner.ts",
+    "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
+    "scripts/disdex-quality102-causal-v1-live-runner.ts",
+    "scripts/disdex-fet-brk48-live-runner.ts",
+    "scripts/disdex-hype-zec-long-live-runner.ts",
+    "scripts/disdex-idle-priority-short-live-runner.ts",
+  ];
+  for (const entrypoint of entrypoints) {
+    const source = readFileSync(entrypoint, "utf8");
+    assert.match(source, /writeRunnerTickHeartbeat/);
+    assert.match(source, /tickStartedAt/);
+    assert.match(source, /tickCompletedAt/);
+  }
 });

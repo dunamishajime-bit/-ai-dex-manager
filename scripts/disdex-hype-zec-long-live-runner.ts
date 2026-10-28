@@ -11,6 +11,7 @@ import { resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
+import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 function numberEnv(name: string, fallback: number) {
   const parsed = Number(process.env[name]);
@@ -87,7 +88,24 @@ async function main() {
   process.on("SIGINT", stop);
   process.on("SIGTERM", stop);
   do {
+    const tickStartedAt = Date.now();
     const result = await runner.tick();
+    const markerSha = runtimeSha(runtime.runtimeSha);
+    if (/^[0-9a-f]{40}$/.test(markerSha)) {
+      const record = result as unknown as Record<string, unknown>;
+      await writeRunnerTickHeartbeat({
+        runnerId: "HYPE_TREND_LONG",
+        runtimeSha: markerSha,
+        serviceUnit: `disdex-hype-long@${markerSha}.service`,
+        tickStartedAt,
+        tickCompletedAt: Date.now(),
+        status: String(result.status),
+        reason: String(result.message || ""),
+        ordersSent: Number(record.ordersSent ?? 0),
+        cancelsSent: Number(record.cancelsSent ?? 0),
+        positionChangesSent: Number(record.positionChangesSent ?? 0),
+      });
+    }
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "hype-zec-runner-tick", mode: runtime.mode, ...result, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
     if (!daemon || stopping || result.status === "manual-review") break;
     const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs));

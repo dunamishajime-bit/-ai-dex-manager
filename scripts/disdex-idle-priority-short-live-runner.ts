@@ -14,6 +14,7 @@ import { resolveIdlePriorityShortRuntime } from "../config/idlePriorityShortRunt
 import { resolveIdleResidualLongRuntime } from "../config/idleResidualLongRuntime";
 import { IdleResidualLongRunner } from "../lib/idle-residual-long-runner";
 import { FileIdleResidualLongStateStore } from "../lib/idle-residual-long-state";
+import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 function numberEnv(name: string, fallback: number) {
     const value = Number(process.env[name]);
@@ -114,6 +115,7 @@ async function main() {
         shouldStop: () => stopping,
     });
     do {
+        const tickStartedAt = Date.now();
         marketCache = undefined;
         const residualState = residualRuntime.enabled ? await residualStateStore.load() : undefined;
         let result;
@@ -137,6 +139,22 @@ async function main() {
                 console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-residual-long-tick", strategyId: "IDLE_RESIDUAL_LONG", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...residualResult }));
                 if (residualResult.status === "manual-review" || residualResult.status === "completed" || residualResult.status === "locked") result = residualResult;
             }
+        }
+        const markerSha = runtime.runtimeSha.toLowerCase();
+        if (/^[0-9a-f]{40}$/.test(markerSha)) {
+            const record = result as unknown as Record<string, unknown>;
+            await writeRunnerTickHeartbeat({
+                runnerId: "IDLE_PRIORITY_SHORT",
+                runtimeSha: markerSha,
+                serviceUnit: `disdex-idle-priority-short@${markerSha}.service`,
+                tickStartedAt,
+                tickCompletedAt: Date.now(),
+                status: String(result.status),
+                reason: String(record.message || ""),
+                ordersSent: Number(record.ordersSent ?? 0),
+                cancelsSent: Number(record.cancelsSent ?? 0),
+                positionChangesSent: Number(record.positionChangesSent ?? 0),
+            });
         }
         if (!daemon || stopping || result.status === "manual-review") break;
         const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.pollMs));

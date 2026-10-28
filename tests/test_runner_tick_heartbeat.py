@@ -41,6 +41,12 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
                     root=Path(root),
                 )
 
+    def test_v52_live_entrypoint_records_completed_cycles(self):
+        source = (Path(__file__).resolve().parents[1] / "scripts" / "disdex_v52_aster_only_legacy_engine.py").read_text(encoding="utf-8")
+        self.assertIn("write_runner_tick_heartbeat", source)
+        self.assertIn("tick_started_at", source)
+        self.assertIn("tick_completed_at", source)
+
 
 if __name__ == "__main__":
     unittest.main()
