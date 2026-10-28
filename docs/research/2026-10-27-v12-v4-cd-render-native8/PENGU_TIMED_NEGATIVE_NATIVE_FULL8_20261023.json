@@ -1,0 +1,204 @@
+{
+  "status": "RESEARCH_ONLY_PENGU_TIMED_NEGATIVE_EXIT_AFTER_ADOPTED_AVAX_NATIVE_FULL8_NOT_LIVE",
+  "referenceSha": "84e45e4b045bf7de066a46975525baa577130c4cefbd2f7675f8240cbbcb7f18",
+  "reference": "RESIDUAL_AVAX_WATCH35_HARD5_NATIVE_FULL8_20261023.json",
+  "scope": "Only PENGU time-underwater exits; existing hard STOP and AVAX six adopted rules preserved.",
+  "exitBaseline": "COMBO_TIME6_TRAIL3_GIVE1P5",
+  "costsBps": [
+    10,
+    30
+  ],
+  "penguTimedStopCases": {
+    "RENDER_TOUCH1_WATCH2_MFE0P25": {
+      "longRules": [],
+      "longScope": "BOTH"
+    }
+  },
+  "cases": {
+    "RENDER_TOUCH1_WATCH2_MFE0P25": {
+      "timeStopRule": {
+        "longRules": [],
+        "longScope": "BOTH"
+      },
+      "costs": {
+        "10": {
+          "costBps": 10,
+          "finalEquityJpy": 294927901.12782454,
+          "deltaVsDualJpy": 26617104.687512904,
+          "portfolioPF": 4.637752705491006,
+          "ddPct": -14.84421649965373,
+          "ddDeltaVsDualPctPoints": -0.3292312289021062,
+          "closedTrades": 1286,
+          "deltaTradesVsDual": -1,
+          "totalWinners": 934,
+          "avaxCount": 18,
+          "avaxWins": 13,
+          "avaxModeledPnLJpy": 53014.19913574071,
+          "initialStopCount": 0,
+          "hard5Count": 0,
+          "watch35Count": 0,
+          "initialStopTimes": [],
+          "penguN": 68,
+          "penguWins": 50,
+          "penguLongN": 47,
+          "penguLongWins": 35,
+          "penguShortN": 21,
+          "penguShortWins": 15,
+          "penguModeledPnLJpy": 22508941.634273972,
+          "penguTimedStops": 6,
+          "penguTimedShortStops": 3,
+          "penguTimedRecoveryStops": 1,
+          "penguTimedStopEntries": [
+            {
+              "entryTsMs": 1762682400000,
+              "side": "SHORT",
+              "route": "SHORT_V20",
+              "exitTsMs": 1762693200000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_SHORT"
+            },
+            {
+              "entryTsMs": 1765029600000,
+              "side": "SHORT",
+              "route": "SHORT_V20",
+              "exitTsMs": 1765040400000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_SHORT"
+            },
+            {
+              "entryTsMs": 1765299600000,
+              "side": "LONG",
+              "route": "LONG_V2_FINAL",
+              "exitTsMs": 1765366500000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_LONG"
+            },
+            {
+              "entryTsMs": 1767110400000,
+              "side": "LONG",
+              "route": "RECOVERY_V8",
+              "exitTsMs": 1767196800000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_LONG"
+            },
+            {
+              "entryTsMs": 1777982400000,
+              "side": "LONG",
+              "route": "LONG_V2_FINAL",
+              "exitTsMs": 1778114400000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_LONG"
+            },
+            {
+              "entryTsMs": 1784318400000,
+              "side": "SHORT",
+              "route": "SHORT_V20",
+              "exitTsMs": 1784347200000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_SHORT"
+            }
+          ],
+          "byStrategy": {
+            "V12": 831,
+            "Q102": 183,
+            "PENGU": 68,
+            "IDLE": 73,
+            "RESIDUAL": 18,
+            "V52": 87,
+            "HYPE_LONG": 18,
+            "FET": 8
+          },
+          "ledgerSha256": "195b4763d2f6ef3ded91f99b07c5611b25d4de6c698c1d4ab3872cd53c7572f7",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        },
+        "30": {
+          "costBps": 30,
+          "finalEquityJpy": 175582530.85649258,
+          "deltaVsDualJpy": 17359553.326815367,
+          "portfolioPF": 3.7182471622315014,
+          "ddPct": -14.748408505096222,
+          "ddDeltaVsDualPctPoints": 1.0372862584512745,
+          "closedTrades": 1283,
+          "deltaTradesVsDual": 1,
+          "totalWinners": 894,
+          "avaxCount": 18,
+          "avaxWins": 12,
+          "avaxModeledPnLJpy": 8794.907369364837,
+          "initialStopCount": 0,
+          "hard5Count": 0,
+          "watch35Count": 0,
+          "initialStopTimes": [],
+          "penguN": 68,
+          "penguWins": 50,
+          "penguLongN": 47,
+          "penguLongWins": 35,
+          "penguShortN": 21,
+          "penguShortWins": 15,
+          "penguModeledPnLJpy": 17640926.091426652,
+          "penguTimedStops": 6,
+          "penguTimedShortStops": 3,
+          "penguTimedRecoveryStops": 1,
+          "penguTimedStopEntries": [
+            {
+              "entryTsMs": 1762682400000,
+              "side": "SHORT",
+              "route": "SHORT_V20",
+              "exitTsMs": 1762693200000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_SHORT"
+            },
+            {
+              "entryTsMs": 1765029600000,
+              "side": "SHORT",
+              "route": "SHORT_V20",
+              "exitTsMs": 1765040400000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_SHORT"
+            },
+            {
+              "entryTsMs": 1765299600000,
+              "side": "LONG",
+              "route": "LONG_V2_FINAL",
+              "exitTsMs": 1765366500000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_LONG"
+            },
+            {
+              "entryTsMs": 1767110400000,
+              "side": "LONG",
+              "route": "RECOVERY_V8",
+              "exitTsMs": 1767196800000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_LONG"
+            },
+            {
+              "entryTsMs": 1777982400000,
+              "side": "LONG",
+              "route": "LONG_V2_FINAL",
+              "exitTsMs": 1778114400000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_LONG"
+            },
+            {
+              "entryTsMs": 1784318400000,
+              "side": "SHORT",
+              "route": "SHORT_V20",
+              "exitTsMs": 1784347200000,
+              "reason": "RESEARCH_PENGU_TIMED_NEGATIVE_RENDER_TOUCH1_WATCH2_MFE0P25_SHORT"
+            }
+          ],
+          "byStrategy": {
+            "V12": 828,
+            "Q102": 183,
+            "PENGU": 68,
+            "IDLE": 75,
+            "RESIDUAL": 18,
+            "V52": 86,
+            "HYPE_LONG": 17,
+            "FET": 8
+          },
+          "ledgerSha256": "9810678ea1b454c0e9a0c6662b0c91747f1b5067bb60dd141fdadc419031760b",
+          "reselectionPasses": 3,
+          "accounting": "PASS"
+        }
+      }
+    }
+  },
+  "limitations": [
+    "-5% historical STOP uses M5 low and floor/worse opening gap; immediate LIVE STOP requires verified native venue protective order",
+    "Already explored 2025-08-10..2026-08-10 in-sample window, only 18 AVAX DUAL entries at baseline",
+    "STOP on confirmed M5 close and next M5 open; intrabar under-water path may be worse",
+    "Frozen V52 selected tape lacks 11 originally suppressed candidates and unrealized new raw signals",
+    "No LIVE Production SHA parity or real venue order book, margin/funding/slippage parity"
+  ]
+}

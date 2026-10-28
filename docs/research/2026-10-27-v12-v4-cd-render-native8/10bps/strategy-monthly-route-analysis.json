@@ -1,0 +1,223 @@
+{
+  "costBps": 10,
+  "model": "historical Native8 replay, not venue L2",
+  "period": "2025-08-10 to 2026-08-10",
+  "sourceReport": "RESEARCH_ONLY_COMBINED_C_D_RENDER_NATIVE8_NOT_CURRENT_L2_SOURCE_PARITY",
+  "sourceCandidateCommit": "1b23f70ff03612625cf7dbb5fcb0e5d505f0ab0e",
+  "ledgerHashSha256": "195b4763d2f6ef3ded91f99b07c5611b25d4de6c698c1d4ab3872cd53c7572f7",
+  "canonicalLedgerHashSha256": "a0555813b6819c23935f6ea894a39500815293d99824da0007ddad41295d5057",
+  "metrics": {
+    "scenarioId": "PRICE_MODEL_10BPS",
+    "initialJpy": 10000.0,
+    "roundTripCostBps": 10.0,
+    "finalEquityJpy": 294927901.12782454,
+    "netProfitJpy": 294917901.12782454,
+    "closedTrades": 1286,
+    "winRate": 0.7262830482115086,
+    "profitFactor": 4.637752705491006,
+    "maximumMtmDrawdown": -0.14844216499653728,
+    "accounting": "PASS",
+    "ledgerSha256": "195b4763d2f6ef3ded91f99b07c5611b25d4de6c698c1d4ab3872cd53c7572f7",
+    "canonicalLedgerSha256": "a0555813b6819c23935f6ea894a39500815293d99824da0007ddad41295d5057",
+    "totalRows": 1286,
+    "positivePnlRows": 934,
+    "negativePnlRows": 352,
+    "v12Rows": 831,
+    "cAndDRows": 301,
+    "renderRows": 3,
+    "renderGrosses": [
+      0.75
+    ],
+    "cGrosses": [
+      0.25
+    ],
+    "dGrossesByRoute": {
+      "CONT_SHORT_MID_AGE24_48": [
+        0.15
+      ],
+      "REC_G3_LATE_BTC_REL": [
+        0.25
+      ],
+      "REC_X07_TIME_6H": [
+        0.05
+      ],
+      "REC_X13_TP1.5_SL1_H24": [
+        0.15
+      ],
+      "REC_X14_TIME_48H": [
+        0.05
+      ],
+      "REC_Y15_REV_D0_T3": [
+        0.05
+      ],
+      "REC_Y18_REV_D2_T18": [
+        0.05
+      ]
+    },
+    "strategyTradeCounts": {
+      "V12": 831,
+      "Q102": 183,
+      "PENGU": 68,
+      "IDLE": 73,
+      "RESIDUAL": 18,
+      "V52": 87,
+      "HYPE_LONG": 18,
+      "FET": 8
+    },
+    "firstEntryTsMs": 1754798400000,
+    "lastExitTsMs": 1786284000000
+  },
+  "strategyBreakdown": {
+    "FET": {
+      "count": 8,
+      "wins": 7,
+      "losses": 1,
+      "winRate": 0.875,
+      "routes": {
+        "UNSPECIFIED": 8
+      },
+      "firstEntryTs": 1773349200000,
+      "lastExitTs": 1785877200000
+    },
+    "HYPE_LONG": {
+      "count": 18,
+      "wins": 12,
+      "losses": 6,
+      "winRate": 0.6666666666666666,
+      "routes": {
+        "UNSPECIFIED": 18
+      },
+      "firstEntryTs": 1761418800000,
+      "lastExitTs": 1783303200000
+    },
+    "IDLE": {
+      "count": 73,
+      "wins": 49,
+      "losses": 24,
+      "winRate": 0.6712328767123288,
+      "routes": {
+        "IDLE_DOT_MOMENTUM_SHORT_BTCREL": 30,
+        "IDLE_RENDER_RELATIVE_SHORT": 24,
+        "IDLE_JUP_RELATIVE_SHORT": 7,
+        "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2": 6,
+        "IDLE_RENDER_INDEPENDENT_HIGHWR_WICK_SHARP_S6_SHORT": 3,
+        "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100": 3
+      },
+      "firstEntryTs": 1755277200000,
+      "lastExitTs": 1785304800000
+    },
+    "PENGU": {
+      "count": 68,
+      "wins": 50,
+      "losses": 18,
+      "winRate": 0.7352941176470589,
+      "routes": {
+        "RECOVERY_V8": 37,
+        "SHORT_V20": 21,
+        "BASE_V64_LONG": 10
+      },
+      "firstEntryTs": 1755003600000,
+      "lastExitTs": 1786215600000
+    },
+    "Q102": {
+      "count": 183,
+      "wins": 141,
+      "losses": 42,
+      "winRate": 0.7704918032786885,
+      "routes": {
+        "UNSPECIFIED": 183
+      },
+      "firstEntryTs": 1754816400000,
+      "lastExitTs": 1785474000000
+    },
+    "RESIDUAL": {
+      "count": 18,
+      "wins": 13,
+      "losses": 5,
+      "winRate": 0.7222222222222222,
+      "routes": {
+        "AVAX_REL_LONG": 18
+      },
+      "firstEntryTs": 1756242000000,
+      "lastExitTs": 1770969600000
+    },
+    "V12": {
+      "count": 831,
+      "wins": 590,
+      "losses": 241,
+      "winRate": 0.7099879663056559,
+      "routes": {
+        "REC_Y06_REV_D0_T72": 159,
+        "REC_G2_EARLY_BTC_OPPOSE_VOL": 40,
+        "REC_X06_TIME_12H": 37,
+        "REC_G3_LATE_BTC_REL": 36,
+        "FAILED_BREAK_REV_SHORT_6H": 34,
+        "REC_X02_TIME_36H": 33,
+        "REC_X03_TIME_12H": 32,
+        "REC_X05_TIME_36H": 30,
+        "REC_G5_SLOW_TREND": 27,
+        "REC_X13_TP1.5_SL1_H24": 21,
+        "REC_X04_TIME_24H": 20,
+        "REC_X01_TIME_24H": 19,
+        "REC_Y03_REV_D0_T36": 17,
+        "REC_G1_MID_REL_LOWVOL": 16,
+        "REC_G4_MATURE_REL_RANGE": 15,
+        "REC_X10_TIME_48H": 15,
+        "REC_X11_TIME_48H": 15,
+        "REC_Y02_REV_D0_T12": 15,
+        "CONT_SHORT_MID_AGE24_48": 14,
+        "REC_X07_TIME_6H": 14,
+        "REC_X12_TIME_12H": 13,
+        "REC_Y01_REV_D0_T72": 13,
+        "REC_Y13_REV_D2_T36": 13,
+        "REC_Y08_REV_D0_T6": 12,
+        "REC_Y10_REV_D2_T24": 12,
+        "REC_Y12_REV_D0_T24": 12,
+        "REC_X08_TIME_48H": 11,
+        "REC_Y04_REV_D2_T36": 11,
+        "REC_Y11_REV_D0_T36": 11,
+        "REC_Y17_REV_D1_T3": 11,
+        "REC_Y19_REV_D1_TP2_SL1_H36": 11,
+        "REC_Z21_ORIG_D2_TP1_SL1_H24": 11,
+        "REC_Y15_REV_D0_T3": 10,
+        "REC_Y18_REV_D2_T18": 10,
+        "REC_Z14_ORIG_D2_T6": 10,
+        "REC_Y05_REV_D2_T9": 9,
+        "REC_Y07_REV_D0_T72": 9,
+        "REC_Y16_REV_D0_T6": 9,
+        "REC_X09_TIME_48H": 8,
+        "REC_X14_TIME_48H": 8,
+        "REC_Y09_REV_D2_T24": 8
+      },
+      "firstEntryTs": 1754798400000,
+      "lastExitTs": 1786284000000
+    },
+    "V52": {
+      "count": 87,
+      "wins": 72,
+      "losses": 15,
+      "winRate": 0.8275862068965517,
+      "routes": {
+        "V50_POST_OPEN_BASIS": 87
+      },
+      "firstEntryTs": 1759167000000,
+      "lastExitTs": 1786033800000
+    }
+  },
+  "entryCountByMonthUtc": {
+    "2025-08": 68,
+    "2025-09": 88,
+    "2025-10": 151,
+    "2025-11": 145,
+    "2025-12": 81,
+    "2026-01": 121,
+    "2026-02": 149,
+    "2026-03": 100,
+    "2026-04": 76,
+    "2026-05": 77,
+    "2026-06": 142,
+    "2026-07": 81,
+    "2026-08": 7
+  },
+  "fullArtifactPath": "see manifest.json and compressed JSONL files"
+}

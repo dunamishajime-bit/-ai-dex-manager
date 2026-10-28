@@ -1,0 +1,54 @@
+{
+  "policy": "cmp_3a489e43d227",
+  "cost_bps": 10,
+  "engine_seconds": 18.78,
+  "base_original": {
+    "final_equity_jpy": 291326102.6203428,
+    "maximum_mtm_drawdown": -0.2042001379546361,
+    "profit_factor": 4.0489917790238845,
+    "win_rate": 0.7160392798690671,
+    "closed_trades": 1222
+  },
+  "output": {
+    "final_equity_jpy": 294927901.12782454,
+    "maximum_mtm_drawdown": -0.14844216499653728,
+    "profit_factor": 4.637752705491006,
+    "win_rate": 0.7262830482115086,
+    "closed_trades": 1286,
+    "strategy_trades": {
+      "FET": 8,
+      "HYPE_LONG": 18,
+      "IDLE": 73,
+      "PENGU": 68,
+      "Q102": 183,
+      "RESIDUAL": 18,
+      "V12": 831,
+      "V52": 87
+    },
+    "strategy_pnl_jpy": {
+      "FET": 6461150.852256523,
+      "HYPE_LONG": 37781600.99968989,
+      "IDLE": 19674274.080067728,
+      "PENGU": 22508941.63427397,
+      "Q102": 11351822.637179844,
+      "RESIDUAL": 53014.19913574072,
+      "V12": 161299741.88309762,
+      "V52": 38813233.5218326
+    },
+    "accounting": "PASS"
+  },
+  "observations": {
+    "changed": 29,
+    "byStrategy": {
+      "Q102": 10,
+      "V12": 19
+    },
+    "byReason": {
+      "FLOOR_combined_no_residual": 29
+    },
+    "h1gap": 0,
+    "noATR": 0,
+    "grossCandidateN": 344
+  },
+  "caveats": "In-sample full8 portfolio H1 modeled rerun. Candidate-time stop and trailing fills are H1 adverse-open modeling, not signed venue trades. HYPE replacement disables original take profit. PENGU unchanged. Untouched later holdout required."
+}
