@@ -27,16 +27,26 @@ async function stopIsActive(adapter: V12AsterLiveAdapter, clientOrderId: string)
 export async function reduceFetBrk48ForCoreConflict(input: FetCoreReductionInput) {
     const now = input.now || Date.now;
     const path = input.statePath || process.env.FET_BRK48_STATE_PATH || "/var/lib/disdex/fet-brk48-residual/state.json";
+    const fetSha = String(input.expectedRuntimeSha || process.env.FET_BRK48_RUNTIME_SHA || "").trim();
+    const q102Sha = String(process.env.DISDEX_Q102_RUNTIME_SHA || "").trim();
+    // Cross-runner liquidation is forbidden if either independent owner
+    // lacks an operator-pinned exact release SHA.
+    if (!/^[a-f0-9]{40}$/i.test(fetSha)) {
+        return { status: "blocked" as const, message: "FET_CORE_PREEMPT_FET_OWNER_SHA_PIN_REQUIRED" };
+    }
+    if (!/^[a-f0-9]{40}$/i.test(q102Sha)) {
+        return { status: "blocked" as const, message: "FET_CORE_PREEMPT_Q102_OWNER_SHA_PIN_REQUIRED" };
+    }
     let state;
     try {
-        state = await readFetBrk48State(path, input.expectedRuntimeSha);
+        state = await readFetBrk48State(path, fetSha);
     } catch (error) {
         return { status: "blocked" as const, message: error instanceof Error ? error.message : String(error) };
     }
     if (state.manualReview) return { status: "blocked" as const, message: `FET_RESIDUAL_MANUAL_REVIEW:${state.manualReview}` };
 
     const q102 = await readQuality102CausalV1Ownership({
-        expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || input.expectedRuntimeSha,
+        expectedRuntimeSha: q102Sha,
     });
     const allFet = (await input.executor.getPositions()).filter(
         (position) => position.symbol.toUpperCase() === "FETUSDT" && Math.abs(position.quantity) > EPS,

@@ -45,3 +45,20 @@
 - Codex本人が最後のProduction反映をする。ChatGPTの研究側では注文・取消・STOP・ポジション・systemdを触らない。
 
 STATUS: NON_LIVE_RESEARCH_SOURCE_COMPLETE_AND_TESTED; EXACT_ANNUAL_ECONOMIC_AND_SIGNED_VENUE_CERTIFICATION_PENDING; LIVE_CHANGE_ONLY_CODEX.
+
+
+## Newly found FET / Q102 independent owner-SHA defect
+The older Core FET preemption callers sometimes provided their own release
+SHA or Q102 release SHA to readFetBrk48State. Correct source changes in
+lib/fet-brk48-live-reduction.ts, lib/v12-strict-live-adapter.ts,
+lib/pengu-dual-ls-v2-portfolio-runner.ts,
+lib/disdex-quality102-causal-v1-runner.ts, and
+scripts/disdex-fet-brk48-core-preempt.ts now REQUIRE BOTH explicit
+FET_BRK48_RUNTIME_SHA and DISDEX_Q102_RUNTIME_SHA operator pins
+before any FET reduce-only liquidation / protection cancellation.
+These are different real owner commits; never substitute the caller's SHA.
+The pins must be written as root-only independent operator evidence
+only by Codex in the final authenticated deployment and match signed
+venue state, source release markers and LIVE heartbeat.
+Missing pin is a mandatory fail-closed status, not permission to relax
+the operator/venue gate. Source tests 36 PASS, TS full typecheck PASS.

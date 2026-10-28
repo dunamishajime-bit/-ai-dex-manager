@@ -36,6 +36,11 @@ test("FET Core preemption is wired through all four Core families", async () => 
   const callV12 = v52.indexOf("self._prepare_v12_dynamic_for_stock_entry", open);
   assert.ok(fet >= 0 && callFet > open && callQ102 > callFet && callV12 > callQ102, "V52 must preempt FET before Q102/V12 residual preparation");
   assert.match(v52, /scripts\/disdex-fet-brk48-core-preempt\.ts/);
+  // Every runner must use FET's independent operator-pinned immutable release,
+  // not its own (or Q102's) SHA to authorize a protective-stop cancellation.
+  for (const src of [v12,pengu,q102]) {
+    assert.match(src, /expectedRuntimeSha: process\.env\.FET_BRK48_RUNTIME_SHA/);
+  }
 
   // The root guard derives readiness from exact-SHA external approval.
   // A fixed false assertion belonged to the pre-activation implementation.

@@ -53,7 +53,7 @@ async function main() {
     // caller's release SHA is not the FET runner's state-owner SHA.  Keep the
     // old fallback for existing deployments, but allow the production wiring
     // to pin the independently running FET release explicitly.
-    expectedRuntimeSha: process.env.FET_BRK48_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
+    expectedRuntimeSha: process.env.FET_BRK48_RUNTIME_SHA,
   });
   console.log(JSON.stringify({ caller, cause, ...result }));
   if (result.status === "blocked") process.exitCode = 2;

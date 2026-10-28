@@ -159,3 +159,25 @@ scripts/research/validate-q102-native-annual-coverage-20261029.py
 tests/test_q102_native_annual_coverage_gate_20261029.py 1件PASS。
 他取引所/Binance OHLCVで不足Aster履歴を補って
 正式同一BTとする行為は禁止。
+
+
+## FET actual cross-runner reduction: wrong release SHA fixed
+Exact source review found another ownership mismatch across V12, PENGU,
+and Q102 callers. When reducing FET for a Core entry, each caller supplied
+its own SHA or Q102's SHA as the FET expected runtime SHA, despite FET
+being independently pinned to its own immutable 7688ed7c.. release.
+This made FET reduction unavailable even on legitimate capacity shortage,
+and created confusing Q102/FET ownership diagnostics.
+The shared reducer now refuses to execute any venue read/order/STOP cancel
+unless independent FET_BRK48_RUNTIME_SHA and DISDEX_Q102_RUNTIME_SHA
+are explicit, syntactically valid operator pins.
+FET's state is checked against FET's pin; the Q102 ownership exclusion
+is checked against Q102's separate pin; no pin is inferred from a caller.
+V12/PENGU/Q102 and the V52 external FET helper pass only the FET pin.
+Test cases prove absence of either pin blocks before any venue operation.
+Isolated VPS FET+priority test matrix: 36/36 PASS,
+full-project TypeScript --noEmit PASS.
+Root/operator must configure both independent exact SHA values before
+Codex formally activates new source; if absent, keep existing position
+and STOP and report fail-closed BLOCKED. No live file, STOP, or order was
+mutated by this source-only change.
