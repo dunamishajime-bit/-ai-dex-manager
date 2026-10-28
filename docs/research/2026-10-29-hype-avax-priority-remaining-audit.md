@@ -181,3 +181,20 @@ Root/operator must configure both independent exact SHA values before
 Codex formally activates new source; if absent, keep existing position
 and STOP and report fail-closed BLOCKED. No live file, STOP, or order was
 mutated by this source-only change.
+
+
+## 2026-10-29 HYPE75 frozen M5 exit parity repair
+Re-reading the exact archived 2026-10-22 source in
+scripts/dd-reduction/run-hype-profit-loss-after-accepted-v4-q102-20261022.py
+and analyze-hype-profit-initial-risk-after-q102v4-20261022.py
+revealed two discrepancies in the first research overlay:
+initial adverse loss must test PRIOR maximum favorable excursion (not
+the current bar's high), with M5 OPEN/LOW touching -1% after one hour;
+and the +1.5% profit floor must test the subsequent confirmed M5 OPEN/LOW,
+not CLOSE only. The +3% profit arm remains a COMPLETED M5 CLOSE and can
+protect only the following bar. A gap through the profit floor yields
+the lower open as the reference price, not an optimistic exact floor.
+The pure research overlay now matches these causal rules, validates OHLC
+and has four additional regression tests: Node24 19/19 PASS. Reference
+exit prices are not signed venue executions or cost-adjusted BT fills.
+LIVE HYPE TREND remains disconnected.

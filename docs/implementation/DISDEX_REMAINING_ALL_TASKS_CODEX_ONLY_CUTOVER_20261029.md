@@ -62,3 +62,14 @@ only by Codex in the final authenticated deployment and match signed
 venue state, source release markers and LIVE heartbeat.
 Missing pin is a mandatory fail-closed status, not permission to relax
 the operator/venue gate. Source tests 36 PASS, TS full typecheck PASS.
+
+
+## HYPE75 exact historical 5m exit source corrected (RESEARCH ONLY)
+Cross-check of the exact adopted 2026-10-22 reference corrected the M5
+loss/stop semantics. The early -1% stop uses PRIOR MFE < +0.3% and the
+current confirmed M5 OPEN/LOW. The completed M5 CLOSE >=+3% arms the
++1.5% floor on the next bar, whose OPEN/LOW may trigger it. Gap-through
+reference prices use the actual open (no optimistic fill). Node24 19/19
+unit tests PASS. This branch does not wire a HYPE TREND LIVE execution
+route; exact current eight-runner economics and signed STOP lifecycles
+remain mandatory before any activation.

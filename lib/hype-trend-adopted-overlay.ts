@@ -73,8 +73,9 @@ export function advanceHypeAdoptedM5Exit(input:{
 }){
  const {entryTs,entryPrice,now,bar,state}=input;
  if(!Number.isFinite(entryTs)||!Number.isFinite(now)||now<=0
-  ||!finitePositive(entryPrice)||!finitePositive(bar.close)||!finitePositive(bar.high)
+  ||!finitePositive(entryPrice)||!finitePositive(bar.open)||!finitePositive(bar.close)||!finitePositive(bar.high)
   ||!finitePositive(bar.low)||!Number.isFinite(bar.openTime)||bar.low>bar.high
+  ||bar.open>bar.high||bar.open<bar.low||bar.close>bar.high||bar.close<bar.low
   ||bar.openTime+HYPE_ADOPTED_M5_INTERVAL_MS>now)
   return {accepted:false,exit:false,reason:"HYPE_ADOPTED_M5_EXIT_INVALID_INPUT",state} as const;
  if(bar.openTime<entryTs)
@@ -90,13 +91,20 @@ export function advanceHypeAdoptedM5Exit(input:{
  const newMfe=Math.max(state.maxFavorablePct,(bar.high/entryPrice-1)*100,0);
  const armed=state.profitArmReached||pnlPct>=HYPE_ADOPTED_ARM_PROFIT_PCT;
  const next:HypeAdoptedProfitState={lastCompletedM5Ts:bar.openTime,maxFavorablePct:newMfe,profitArmReached:armed};
- // If the +3% arm is first achieved on the current completed bar, don't
- // protect against an earlier intra-bar low: avoid an impossible time order.
- if(state.profitArmReached&&pnlPct<=HYPE_ADOPTED_PROTECTED_PROFIT_PCT)
-  return {accepted:true,exit:true,reason:"HYPE_ADOPTED_PROFIT_3P0_TO_1P5",state:next} as const;
- if(now-entryTs>=HYPE_ADOPTED_INITIAL_HOURS*3_600_000
-   &&newMfe<HYPE_ADOPTED_INITIAL_MAX_MFE_PCT
-   &&pnlPct<=HYPE_ADOPTED_INITIAL_LOSS_PCT)
-  return {accepted:true,exit:true,reason:"HYPE_ADOPTED_INITIAL_1H_MINUS1P0",state:next} as const;
+ // 2026-10-22 frozen HYPE75: a PREVIOUS completed M5 close arms the floor;
+ // next bar open OR intrabar low triggers, including gap-through at open.
+ const profitFloorPrice=entryPrice*(1+HYPE_ADOPTED_PROTECTED_PROFIT_PCT/100);
+ if(state.profitArmReached&&(bar.open<=profitFloorPrice||bar.low<=profitFloorPrice))
+  return {accepted:true,exit:true,reason:"HYPE_ADOPTED_PROFIT_3P0_TO_1P5",
+   exitReferencePrice:Math.min(bar.open,profitFloorPrice),state:next} as const;
+ // PRIOR MFE is the adopted early-loss gate: current high cannot erase an
+ // earlier -1% hit on this same completed M5 bar. The original checks
+ // the open/low, not the bar's close.
+ const initialStopPrice=entryPrice*(1+HYPE_ADOPTED_INITIAL_LOSS_PCT/100);
+ if(bar.openTime>=entryTs+HYPE_ADOPTED_INITIAL_HOURS*3_600_000
+   &&state.maxFavorablePct<HYPE_ADOPTED_INITIAL_MAX_MFE_PCT
+   &&(bar.open<=initialStopPrice||bar.low<=initialStopPrice))
+  return {accepted:true,exit:true,reason:"HYPE_ADOPTED_INITIAL_1H_MINUS1P0",
+   exitReferencePrice:Math.min(bar.open,initialStopPrice),state:next} as const;
  return {accepted:true,exit:false,reason:"HYPE_ADOPTED_M5_HOLD",state:next} as const;
 }

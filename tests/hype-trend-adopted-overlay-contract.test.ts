@@ -37,7 +37,7 @@ test("the active incomplete close cannot masquerade as prior completed candle",(
  assert.equal(evaluateHypeAdoptedM5Entry({btc,hype:bars(103.2),decisionTs:T+37*M5}).accepted,false);
 });
 const s=()=>({maxFavorablePct:0,profitArmReached:false});
-const bar=(n:number,cl:number,high=cl)=>({openTime:T+n*M5,open:100,high,low:Math.min(cl,100)-0.01,close:cl});
+const bar=(n:number,cl:number,high=Math.max(cl,100))=>({openTime:T+n*M5,open:100,high,low:Math.min(cl,100)-0.01,close:cl});
 test("MFE<0.3 and loss below -1 after >=1h closes initial exit",()=>{
  const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+13*M5,bar:bar(12,98.9,100.1),state:s()});
  assert.equal(v.exit,true);assert.equal(v.reason,"HYPE_ADOPTED_INITIAL_1H_MINUS1P0");
@@ -46,8 +46,8 @@ test("no early stop before one hour",()=>{
  const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+8*M5,bar:bar(7,98.8,100.1),state:s()});
  assert.equal(v.exit,false);
 });
-test("positive MFE >=0.3 avoids early loss stop",()=>{
- const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+13*M5,bar:bar(12,98.8,100.4),state:s()});
+test("prior MFE >=0.3 avoids early loss stop",()=>{
+ const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+13*M5,bar:bar(12,98.8,100.4),state:{...s(),maxFavorablePct:0.4}});
  assert.equal(v.exit,false);
 });
 test("profit arm occurs at +3% completed close but no same-bar retroactive exit",()=>{
@@ -73,4 +73,28 @@ test("pre-entry bar does not contaminate favorable excursion",()=>{
 test("improperly low MFE state and invalid high/low fail",()=>{
  const a=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+2*M5,bar:bar(1,103),state:{maxFavorablePct:-1,profitArmReached:false}});
  assert.equal(a.accepted,false);
+});
+
+test("same-bar later high cannot cancel an initial -1% loss touched after 1h",()=>{
+ const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+13*M5,
+ bar:{openTime:T+12*M5,open:100,high:100.5,low:98.8,close:100.2},state:s()});
+ assert.equal(v.exit,true);assert.equal(v.reason,"HYPE_ADOPTED_INITIAL_1H_MINUS1P0");
+ assert.equal(v.exitReferencePrice,99);
+});
+test("after prior completed close arms +3, intrabar +1.5 floor triggers even if close recovers",()=>{
+ const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+3*M5,
+ bar:{openTime:T+2*M5,open:102,high:103.2,low:101.4,close:102.8},
+ state:{lastCompletedM5Ts:T+M5,maxFavorablePct:3.1,profitArmReached:true}});
+ assert.equal(v.exit,true);assert.ok(Math.abs((v.exitReferencePrice??0)-101.5)<1e-8);
+});
+test("gap below +1.5 floor uses actual open rather than optimistic target",()=>{
+ const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+3*M5,
+ bar:{openTime:T+2*M5,open:100.8,high:102.1,low:100.5,close:102},
+ state:{lastCompletedM5Ts:T+M5,maxFavorablePct:3.1,profitArmReached:true}});
+ assert.equal(v.exit,true);assert.equal(v.exitReferencePrice,100.8);
+});
+test("intrabar high +3% never arms unless completed M5 CLOSE reached +3%",()=>{
+ const v=advanceHypeAdoptedM5Exit({entryTs:T,entryPrice:100,now:T+2*M5,
+ bar:{openTime:T+M5,open:100,high:104,low:99.9,close:102},state:s()});
+ assert.equal(v.exit,false);assert.equal(v.state.profitArmReached,false);
 });
