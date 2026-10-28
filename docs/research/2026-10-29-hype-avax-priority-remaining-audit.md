@@ -66,3 +66,16 @@ LIVE/Production/建玉/STOP/発注/共通リスク/HPはいずれも未変更。
 STATUS: HYPE_ADOPTED_M5_CONTRACT_IMPLEMENTED_15_TESTS_PASS;
 NOT_WIRED_TO_LIVE; AVAX_OLD_8STRATEGY_ECONOMICS_VERIFIED;
 CURRENT_FULL8_NATIVE_CERT_BLOCKED.
+
+
+## 2026-10-29 source-only replay CLI
+A standalone read-only causal HYPE M5 evaluator is available in
+scripts/research/replay-hype-adopted-m5-readonly-20261029.ts.
+It takes a JSON snapshot with decisionTs, btcM5, hypeM5 and optionally
+ownedPosition {entryTs,entryPrice,initialState}. It outputs entry decision
+and the first M5 exit decision; venueConnected=false,
+liveActivationAllowed=false, ordersSent=0.
+Synthetic replay smoke PASS in Node 24. Historical raw candidate ledger
+is retained on owner PC under
+C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research/2026-10-22_hype_entry_plus_exit_full8/
+but its original HYPE75 economics cannot certify new HYPE TREND.
