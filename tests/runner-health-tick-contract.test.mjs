@@ -55,6 +55,12 @@ test("does not treat a no-signal or held status as stale when the marker is fres
   }
 });
 
+test("rejects a fresh marker with invalid mutation counters", () => {
+  const result = validateRunnerTickHeartbeat(runner, marker({ ordersSent: -1 }), 10_000);
+  assert.equal(result.valid, false);
+  assert.equal(result.reason, "RUNNER_TICK_HEARTBEAT_COUNTER_INVALID");
+});
+
 test("read-only snapshot reader distinguishes missing and fresh marker files", async () => {
   const root = await mkdtemp(join(tmpdir(), "disdex-health-tick-"));
   process.env.DISDEX_HEALTH_SNAPSHOT_TICK_ROOT = root;

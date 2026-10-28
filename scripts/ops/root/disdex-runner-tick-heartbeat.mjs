@@ -15,6 +15,11 @@ export function validateRunnerTickHeartbeat(runner, marker, now) {
   if (String(marker.runtimeSha || "").toLowerCase() !== String(runner.expectedSha || "").toLowerCase()) return result("RUNNER_TICK_HEARTBEAT_RUNTIME_SHA_MISMATCH", null, marker);
   if (String(marker.serviceUnit || "") !== String(runner.unit || "")) return result("RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_MISMATCH", null, marker);
   if (!validSha(marker.runtimeSha) || !validSha(runner.expectedSha)) return result("RUNNER_TICK_HEARTBEAT_SHA_INVALID", null, marker);
+  for (const counter of ["ordersSent", "cancelsSent", "positionChangesSent"]) {
+    if (!Number.isSafeInteger(marker[counter]) || marker[counter] < 0) {
+      return result("RUNNER_TICK_HEARTBEAT_COUNTER_INVALID", null, marker);
+    }
+  }
   const started = Number(marker.tickStartedAt);
   const completed = Number(marker.tickCompletedAt);
   if (!Number.isSafeInteger(started) || !Number.isSafeInteger(completed) || completed < started) return result("RUNNER_TICK_HEARTBEAT_TIMESTAMP_INVALID", null, marker);
