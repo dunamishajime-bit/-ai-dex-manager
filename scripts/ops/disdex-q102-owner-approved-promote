@@ -1,0 +1,361 @@
+#!/usr/bin/env python3
+"""Q102-only exact-SHA owner promotion. Fail closed; never changes peer runners.
+
+Invoked only by the protected GitHub owner workflow via scoped sudo.
+A missing exact-SHA full-eight economics certificate is a hard error, never a
+request to regenerate, assume, or bypass evidence.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import pwd
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+
+SHA = re.compile(r"^[a-f0-9]{40}$")
+STRATEGY = "QUALITY102_CAUSAL_V1"
+STATE = Path("/var/lib/disdex/quality102-causal-v1/state.json")
+GLOBAL_APPROVAL = Path("/var/lib/disdex/shared/operator-activation/current.json")
+SCOPED_APPROVAL = Path("/var/lib/disdex/quality102-causal-v1/operator-activation/current.json")
+ECONOMICS = Path("/var/lib/disdex/quality102-causal-v1/economics/exact-eight-native.json")
+RISK = Path("/var/lib/disdex/shared/crypto-daily-risk.json")
+KILL = Path("/var/lib/disdex/shared/kill-switch.json")
+RELEASES = Path("/home/deploy/disdex-trading/releases")
+STAGING = Path("/home/deploy/disdex-trading/staging")
+ENVROOT = Path("/etc/disdex/current-runtime")
+DROPIN_ROOT = Path("/etc/systemd/system")
+BASE_ENV = [
+    Path("/etc/disdex/disdex-v13d-v11eq-v96.env"),
+    Path("/etc/disdex/disdex-v12-pengu-v2-v52.env"),
+    Path("/etc/disdex/disdex-quality102-causal-v1.env"),
+]
+OVERRIDE_KEYS = {
+    "DISDEX_RELEASE_SHA", "DISDEX_RUNTIME_COMMIT_SHA", "DISDEX_RUNTIME_SHA",
+    "QUALITY102_CAUSAL_V1_LIVE_ACK", "QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK",
+    "DISDEX_OPERATOR_ACTIVATION_PATH", "QUALITY102_CAUSAL_V1_STATE_PATH",
+}
+STAGE_TAG = "-20261028"
+
+
+def require(condition: bool, code: str) -> None:
+    if not condition:
+        raise RuntimeError("Q102_FAIL_CLOSED:" + code)
+
+
+def json_file(path: Path) -> dict:
+    require(path.is_file() and not path.is_symlink(), "JSON_MISSING_OR_SYMLINK:" + path.name)
+    value = json.loads(path.read_text(encoding="utf-8"))
+    require(isinstance(value, dict), "JSON_NOT_OBJECT:" + path.name)
+    return value
+
+
+def protected_root_file(path: Path) -> dict:
+    data = json_file(path)
+    st = path.stat()
+    require(st.st_uid == 0 and (st.st_mode & 0o077) == 0, "ROOT_0600_REQUIRED:" + path.name)
+    return data
+
+
+def run(*command: str, timeout: int = 40, check: bool = True, env: dict | None = None) -> subprocess.CompletedProcess:
+    result = subprocess.run(command, capture_output=True, text=True, timeout=timeout, env=env)
+    if check:
+        require(result.returncode == 0, "COMMAND_FAILED:" + command[0].split("/")[-1])
+    return result
+
+
+def service(sha: str) -> str:
+    return f"disdex-quality102-causal-v1@{sha}.service"
+
+
+def active(unit: str) -> bool:
+    return run("systemctl", "is-active", "--quiet", unit, check=False).returncode == 0
+
+
+def validate(root: bool, target: str, expected: str) -> tuple[Path, dict, str]:
+    require(bool(SHA.fullmatch(target)) and bool(SHA.fullmatch(expected)) and target != expected, "SHA_INVALID")
+    if root:
+        require(os.geteuid() == 0, "ROOT_REQUIRED")
+    stage = STAGING / f"q102-{target}{STAGE_TAG}"
+    require(stage.is_dir() and not stage.is_symlink(), "EXACT_STAGE_MISSING")
+    require((stage / ".disdex-release-sha").read_text().strip() == target, "STAGE_MARKER_MISMATCH")
+    ready = json_file(stage / "docs/production/current-implementation-readiness.json")
+    require(ready.get("schema") == "disdex-current-implementation-readiness/v1", "READINESS_SCHEMA")
+    require(ready.get("implementationStatus") == "READY", "IMPLEMENTATION_NOT_READY")
+    require(set(ready.get("blockers") or []) <= {"OPERATOR_LIVE_ACTIVATION_REQUIRED"}, "SOURCE_BLOCKERS")
+    require((stage / "node_modules/.bin/tsx").exists(), "STAGE_TSX_MISSING")
+
+    before = json_file(STATE)
+    require(before.get("runtimeCommitSha") == expected and before.get("mode") == "LIVE", "STATE_NOT_OLD_LIVE")
+    require(not before.get("position") and not before.get("pending"), "Q102_POSITION_OR_PENDING")
+    glob = protected_root_file(GLOBAL_APPROVAL)
+    require(glob.get("approvedSha") == expected and STRATEGY in (glob.get("approvedRunners") or []), "GLOBAL_APPROVAL_DRIFT")
+    require(glob.get("ordersEnabled") is True, "GLOBAL_ORDERS_NOT_ENABLED")
+    require(active(service(expected)), "OLD_Q102_NOT_ACTIVE")
+    require(not active(service(target)), "TARGET_ALREADY_ACTIVE")
+    # Reject any competing Q102 instance, including unexpected SHA variants.
+    units = run("systemctl", "list-units", "disdex-quality102-causal-v1@*.service",
+                "--all", "--plain", "--no-legend").stdout
+    for line in units.splitlines():
+        fields = line.lstrip("● ").split()
+        if len(fields) >= 4 and fields[0].startswith("disdex-quality102-causal-v1@"):
+            require(fields[2] not in ("active", "activating") or fields[0] == service(expected),
+                    "UNEXPECTED_ACTIVE_Q102_INSTANCE")
+    require(not json_file(KILL).get("active", True), "KILL_SWITCH_ACTIVE")
+    risk = json_file(RISK)
+    require(risk.get("tripped") is False and risk.get("sourceComplete") is True, "SHARED_RISK_BLOCKED")
+    require(0 <= float(risk["lossPct"]) < float(risk["maximumLossPct"]) <= 7.5, "SHARED_DAILY_LOSS_LIMIT")
+
+    approval = protected_root_file(SCOPED_APPROVAL)
+    require(approval.get("schema") == "disdex-live-operator-activation/v1", "Q102_APPROVAL_SCHEMA")
+    require(approval.get("approvedSha") == target and approval.get("approvedRunners") == [STRATEGY],
+            "Q102_APPROVAL_SCOPE")
+    require(approval.get("ordersEnabled") is True and approval.get("target") == ready.get("target"),
+            "Q102_APPROVAL_TARGET")
+    require(approval.get("operatorAcknowledgement") == "I_ACK_REAL_MONEY_LIVE_ACTIVATION",
+            "Q102_OWNER_ACK_MISSING")
+
+    economics = protected_root_file(ECONOMICS)
+    require(economics.get("schema") == "q102-exact-eight-native-economics/v1"
+            and economics.get("status") == "CERTIFIED_NEW_Q102_CONCURRENCY_NATIVE8",
+            "EXACT_ECONOMIC_CERTIFICATION_REQUIRED")
+    require(economics.get("targetSha") == target and economics.get("oldQ102Sha") == expected,
+            "ECONOMIC_SHA_MISMATCH")
+    require(economics.get("sourceParity") is True and economics.get("accounting") == "PASS"
+            and economics.get("deterministic") is True,
+            "ECONOMIC_MODEL_PARITY_UNPROVEN")
+    require(set(economics.get("strategies") or []) ==
+            {"V12", "Q102", "PENGU", "IDLE", "RESIDUAL", "V52", "HYPE_LONG", "FET"},
+            "EIGHT_STRATEGIES_REQUIRED")
+    results = economics.get("results")
+    require(isinstance(results, dict) and set(results) == {"10bps", "30bps"}, "BOTH_COSTS_REQUIRED")
+    for cost in ("10bps", "30bps"):
+        r = results[cost]
+        require(isinstance(r, dict) and r.get("accounting") == "PASS"
+                and isinstance(r.get("finalEquityJpy"), (float, int))
+                and isinstance(r.get("maxMtmDdPct"), (float, int))
+                and r.get("targetSha") == target,
+                "ECONOMIC_INVALID:" + cost)
+    # A release marker by itself is insufficient because the VPS stage is
+    # deploy-owned. Compare the actual audited source files to root-controlled
+    # hashes carried by the exact-SHA economic certification.
+    hashes = economics.get("sourceFileSha256")
+    required_paths = {
+        "lib/disdex-quality102-causal-v4-signal.ts",
+        "lib/disdex-quality102-causal-v1-runner.ts",
+        "scripts/disdex-quality102-causal-v1-live-runner.ts",
+    }
+    require(isinstance(hashes, dict) and required_paths <= set(hashes), "SOURCE_HASH_MANIFEST_REQUIRED")
+    for name, digest in hashes.items():
+        require(isinstance(name, str) and name and ".." not in Path(name).parts
+                and not Path(name).is_absolute(), "SOURCE_HASH_PATH_INVALID")
+        source = stage / name
+        require(source.is_file() and not source.is_symlink()
+                and isinstance(digest, str) and bool(re.fullmatch(r"[a-f0-9]{64}", digest))
+                and hashlib.sha256(source.read_bytes()).hexdigest() == digest,
+                "EXACT_STAGED_SOURCE_HASH_MISMATCH")
+    global_hash = hashlib.sha256(GLOBAL_APPROVAL.read_bytes()).hexdigest()
+    return stage, before, global_hash
+
+
+def systemd_env(path: Path) -> dict:
+    """Read systemd EnvironmentFile subset; reject expansions and unexpected syntax."""
+    require(path.is_file() and not path.is_symlink(), "ENV_FILE_MISSING:" + path.name)
+    result = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        require("=" in line and not line.startswith("export "), "ENV_FORMAT_UNSUPPORTED")
+        key, val = line.split("=", 1)
+        require(bool(re.fullmatch(r"[A-Z_][A-Z0-9_]*", key)), "ENV_KEY_INVALID")
+        val = val.strip()
+        if val.startswith(("'", '"')):
+            require(len(val) >= 2 and val[-1] == val[0], "ENV_QUOTES")
+            val = val[1:-1]
+        require("\n" not in val and "\r" not in val, "ENV_CONTROL")
+        result[key] = val
+    return result
+
+
+def write_atomic(path: Path, data: bytes, mode: int = 0o600, owner: str | None = None) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".q102.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "wb") as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+        os.chmod(tmp, mode)
+        if owner:
+            pw = pwd.getpwnam(owner)
+            os.chown(tmp, pw.pw_uid, pw.pw_gid)
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+
+
+def override_env(old: str, target: str) -> bytes:
+    current = ENVROOT / f"{old}.env"
+    values = systemd_env(current)
+    require(values.get("QUALITY102_CAUSAL_V1_SELECTOR_MODE") == "CAUSAL_V4", "NOT_CAUSAL_V4")
+    require(values.get("QUALITY102_LIVE_ENABLED", "false").lower() in ("false", "0", "no", "off"),
+            "LEGACY_SELECTOR_MUST_REMAIN_DISABLED")
+    values.update({
+        "DISDEX_RELEASE_SHA": target,
+        "DISDEX_RUNTIME_COMMIT_SHA": target,
+        "DISDEX_RUNTIME_SHA": target,
+        "QUALITY102_CAUSAL_V1_LIVE_ACK": target,
+        "QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK": target,
+        "DISDEX_OPERATOR_ACTIVATION_PATH": str(SCOPED_APPROVAL),
+        "QUALITY102_CAUSAL_V1_STATE_PATH": str(STATE),
+    })
+    require(all(k in values for k in OVERRIDE_KEYS), "OVERRIDE_KEYS_INCOMPLETE")
+    # Other environment variables retain exactly their previous values.
+    return ("".join(f"{k}={json.dumps(v)}\n" for k, v in sorted(values.items()))).encode("utf-8")
+
+
+def signed_preflight(stage: Path, target: str, old_state: dict, env_path: Path) -> None:
+    copied = dict(old_state)
+    copied["runtimeCommitSha"] = target
+    temp = STATE.parent / f".preflight-{target}.json"
+    require(not temp.exists(), "PREFLIGHT_STATE_COLLISION")
+    write_atomic(temp, (json.dumps(copied, separators=(",", ":")) + "\n").encode(), owner="deploy")
+    try:
+        env = dict(os.environ)
+        for f in BASE_ENV + [env_path]:
+            env.update(systemd_env(f))
+        env["QUALITY102_CAUSAL_V1_STATE_PATH"] = str(temp)
+        # Root reads credentials from already installed root-controlled files.
+        # Drop privileges to the normal trading service identity.
+        pw = pwd.getpwnam("deploy")
+        def drop() -> None:
+            os.setgroups([])
+            os.setgid(pw.pw_gid)
+            os.setuid(pw.pw_uid)
+        result = subprocess.run(
+            [str(stage / "node_modules/.bin/tsx"), "scripts/disdex-quality102-causal-v1-live-runner.ts", "--preflight"],
+            cwd=stage, env=env, capture_output=True, text=True, timeout=150, preexec_fn=drop,
+        )
+        require(result.returncode == 0, "SIGNED_VENUE_PREFLIGHT_FAILED")
+        responses = []
+        for line in result.stdout.splitlines():
+            if line.lstrip().startswith("{"):
+                try:
+                    item = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(item, dict) and "status" in item:
+                    responses.append(item)
+        require(len(responses) == 1, "PREFLIGHT_JSON_RESULT_NOT_UNIQUE")
+        venue = responses[0]
+        require(venue.get("status") == "QUALITY102_CAUSAL_V1_READ_ONLY_PREFLIGHT_PASS",
+                "SIGNED_VENUE_EVIDENCE_MISSING")
+        require(all(venue.get(k) == 0 for k in
+                    ("ordersSent", "cancelSent", "positionChangesSent", "syntheticOrders", "testOrders")),
+                "VENUE_ORDER_COUNTER_NOT_ZERO")
+        require(venue.get("stateChanged") is False and venue.get("quality102Pending") is False,
+                "PREFLIGHT_STATE_MUTATED_OR_PENDING")
+        require(venue.get("openOrderCount") == venue.get("managedProtectiveOrderCount"),
+                "UNMANAGED_VENUE_ORDERS_PRESENT")
+    finally:
+        temp.unlink(missing_ok=True)
+
+
+def promote(target: str, old: str, check_only: bool) -> dict:
+    stage, before, original_global_hash = validate(True, target, old)
+    env_path = ENVROOT / f"{target}.env"
+    env_bytes = override_env(old, target)
+    if check_only:
+        return {"status": "Q102_READINESS_ECONOMICS_AND_AUTH_PASS_NO_CHANGES", "targetSha": target, "oldSha": old}
+    require(not env_path.exists(), "TARGET_ENV_ALREADY_PRESENT")
+    release = RELEASES / target
+    require(not release.exists(), "TARGET_RELEASE_ALREADY_PRESENT")
+    dropin = DROPIN_ROOT / f"disdex-quality102-causal-v1@{target}.service.d" / "zzzzzzzzzzzz-scoped-q102-approval.conf"
+    require(not dropin.exists(), "TARGET_DROPIN_ALREADY_PRESENT")
+    old_backup = STATE.parent / f"state.pre-q102-{target}.json"
+    require(not old_backup.exists(), "MIGRATION_BACKUP_ALREADY_PRESENT")
+    # Pre-stage only the Q102 immutable release and environment; peers and global
+    # approval are never edited.
+    run("cp", "-a", "--", str(stage), str(release), timeout=240)
+    require(release.is_dir() and not release.is_symlink(), "NEW_RELEASE_NOT_DIRECTORY")
+    require((release / ".disdex-release-sha").read_text().strip() == target, "RELEASE_SHA_MISMATCH")
+    hashes = protected_root_file(ECONOMICS)["sourceFileSha256"]
+    for rel, digest in hashes.items():
+        path = release / rel
+        require(path.is_file() and not path.is_symlink()
+                and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
+                "RELEASE_FILES_CHANGED_FROM_CERTIFIED_SOURCE")
+    write_atomic(env_path, env_bytes)
+    signed_preflight(release, target, before, env_path)
+    write_atomic(dropin, (f"[Service]\nEnvironmentFile={env_path}\n").encode(), mode=0o644)
+    run("systemctl", "daemon-reload")
+    require(hashlib.sha256(GLOBAL_APPROVAL.read_bytes()).hexdigest() == original_global_hash,
+            "GLOBAL_APPROVAL_CHANGED_BEFORE_CUTOVER")
+    require(active(service(old)) and not active(service(target)), "Q102_UNIT_CHANGED_DURING_PREFLIGHT")
+    require(not json_file(STATE).get("position") and not json_file(STATE).get("pending"), "Q102_NOT_FLAT_AT_CUTOVER")
+    # Actual cutover: stop old first; never allow double running.
+    run("systemctl", "stop", service(old))
+    require(not active(service(old)), "OLD_Q102_STILL_ACTIVE")
+    shutil.copy2(STATE, old_backup)
+    # Use the durable state read AFTER the old service was actually stopped.
+    # Preflight's earlier snapshot may have changed during its last daemon tick.
+    stopped_state = json_file(STATE)
+    require(stopped_state.get("runtimeCommitSha") == old
+            and not stopped_state.get("position") and not stopped_state.get("pending"),
+            "OLD_STATE_NOT_FLAT_AFTER_STOP")
+    new_state = dict(stopped_state)
+    new_state["runtimeCommitSha"] = target
+    new_state.pop("initialDaemonReconciliation", None)
+    write_atomic(STATE, (json.dumps(new_state, separators=(",", ":")) + "\n").encode(), owner="deploy")
+    try:
+        run("systemctl", "start", service(target), timeout=35)
+        time.sleep(6)
+        require(active(service(target)), "NEW_Q102_NOT_RUNNING")
+        require(not active(service(old)), "DOUBLE_RUNNER")
+        check = run("systemctl", "show", service(target), "--property=MainPID,NRestarts", "--no-pager").stdout
+        require("MainPID=0" not in check and "NRestarts=0" in check, "TARGET_RUNNER_NOT_HEALTHY")
+        require(json_file(STATE).get("runtimeCommitSha") == target, "MIGRATED_STATE_SHA_REVERTED")
+        require(hashlib.sha256(GLOBAL_APPROVAL.read_bytes()).hexdigest() == original_global_hash,
+                "GLOBAL_APPROVAL_MUTATED")
+        run("systemctl", "disable", service(old))
+        run("systemctl", "enable", service(target))
+        return {"status": "Q102_SCOPED_NEW_SHA_ACTIVE_REQUIRES_OPERATOR_POST_VENUE_MONITORING",
+                "targetSha": target, "oldSha": old}
+    except Exception:
+        # After a real-money daemon has started, an unknown fill/STOP/pending
+        # window is possible even when local state appears flat. Do NOT restart
+        # the old runner or overwrite the new state without fresh signed venue
+        # reconciliation. Keep both Q102 instances stopped for operator recovery.
+        run("systemctl", "stop", service(target), check=False)
+        raise RuntimeError(
+            "Q102_FAIL_CLOSED:MANUAL_VENUE_RECONCILIATION_REQUIRED_OLD_Q102_NOT_RESTARTED"
+        )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("target_sha")
+    parser.add_argument("expected_live_sha")
+    parser.add_argument("--check", action="store_true")
+    a = parser.parse_args()
+    try:
+        outcome = promote(a.target_sha, a.expected_live_sha, a.check)
+        print(json.dumps(outcome, sort_keys=True))
+        return 0
+    except Exception as e:
+        # Never print source environment, credentials, order data, or stack traces.
+        print(json.dumps({"status": "BLOCKED", "reason": str(e).split(":")[-1]}), file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
