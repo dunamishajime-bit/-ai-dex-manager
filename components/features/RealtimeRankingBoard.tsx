@@ -121,7 +121,6 @@ export function RealtimeRankingBoard() {
   const [remaining, setRemaining] = useState(30);
   const [changes, setChanges] = useState<Record<string, number>>({});
   const [flash, setFlash] = useState<Record<string, number>>({});
-  const [refreshPulse, setRefreshPulse] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const previous = useRef<Record<string, string[]>>({});
@@ -131,7 +130,6 @@ export function RealtimeRankingBoard() {
   const alive = useRef(true);
   const next = useRef(nextRealtimeRankingAt(Date.now()));
   const flashTimer = useRef<ReturnType<typeof setTimeout>>();
-  const refreshPulseTimer = useRef<ReturnType<typeof setTimeout>>();
   const dialog = useRef<HTMLDialogElement>(null);
 
   const load = useCallback(async () => {
@@ -162,18 +160,12 @@ export function RealtimeRankingBoard() {
       setFlash(movement);
       if (flashTimer.current) clearTimeout(flashTimer.current);
       flashTimer.current = setTimeout(() => setFlash({}), 2200);
-      setRefreshPulse(true);
-      if (refreshPulseTimer.current) clearTimeout(refreshPulseTimer.current);
-      refreshPulseTimer.current = setTimeout(() => setRefreshPulse(false), 1200);
       setData(result as Snapshot);
       setRevision((value) => value + 1);
       hasData.current = true;
       setError('');
     } catch (caught) {
       if (alive.current) {
-        if (refreshPulseTimer.current) clearTimeout(refreshPulseTimer.current);
-        refreshPulseTimer.current = undefined;
-        setRefreshPulse(false);
         setError(caught instanceof Error ? caught.message : '取得失敗');
         setFlash({});
       }
@@ -198,7 +190,6 @@ export function RealtimeRankingBoard() {
       alive.current = false;
       clearInterval(timer);
       if (flashTimer.current) clearTimeout(flashTimer.current);
-      if (refreshPulseTimer.current) clearTimeout(refreshPulseTimer.current);
     };
   }, [load]);
 
@@ -357,7 +348,7 @@ export function RealtimeRankingBoard() {
     </div>;
   };
 
-  return <div className={'compact-radar ' + (refreshPulse && feedback.motionEnabled ? 'realtime-refresh-pulse' : '')}>
+  return <div className="compact-radar">
     <header className="radar-heading"><div className="flex min-w-0 items-center gap-3"><h1 className="shrink-0 text-sm font-bold text-[#e9d9a0]">リアルタイム判定 Ranking</h1><span className="hidden truncate text-[10px] text-white/40 sm:block">{data ? new Date(data.checkedAt).toLocaleTimeString('ja-JP') : '取得中'} · {data?.rows.length ?? '—'}観測行 · 30秒更新</span></div><button disabled={busy} onClick={() => void load()} className="flex shrink-0 items-center gap-1 rounded-lg border border-[#a68948]/30 px-2 py-1 text-[10px] text-[#efdda7] disabled:opacity-50"><RefreshCw size={11} className={busy ? 'animate-spin' : ''}/>{busy ? '更新中' : '更新'} · {remaining}秒</button></header>
     {error && <p role="alert" className="rounded-lg bg-rose-400/10 px-2 py-1 text-xs text-rose-200">{error}。前回成功観測を表示しています。順位は発注許可を意味しません。</p>}
     {!!data && Object.keys(data.errors).length > 0 && <p role="status" className="text-[10px] text-amber-200">未確認：{Object.keys(data.errors).join(' / ')}</p>}
@@ -389,12 +380,7 @@ export function RealtimeRankingBoard() {
     <dialog ref={dialog} aria-labelledby="rank-detail-title" onCancel={() => setSelectedId(null)} className="rank-dialog">{selected && <><div className="flex items-center justify-between gap-3 border-b border-white/10 p-4"><h2 id="rank-detail-title" className="text-lg font-bold text-[#ead7a4]">{selected.symbol.replace(/USDT$/, '')} · {selected.logic} · {selected.side}</h2><button autoFocus type="button" aria-label="詳細を閉じる" onClick={() => setSelectedId(null)} className="rounded-lg border border-white/15 p-2 text-white"><X size={16}/></button></div><div className="overflow-y-auto p-4"><p className="mb-3 text-xs text-white/60">観測 {new Date(selected.checkedAt).toLocaleString('ja-JP')} ／ 順位 {selected.rankingEligible ? selected.rank ?? '—' : '対象外'} ／ Score {scoreValueLabel(selected, !!error)} · {scoreKindLabel(selected)}</p><p className="mb-3 rounded-lg border border-[#a68948]/30 bg-[#d6b662]/5 p-3 text-xs leading-relaxed text-[#ead7a4]">{rankExplanation(selected)}</p><p className="mb-3 text-xs text-[#dbc787]">{constraints(selected) || missing(selected)}</p>{selected.sourceRoute && <p className="mb-2 break-words text-xs text-white/60">Source route: {selected.sourceRoute} {selected.sourceRank ? `· Research順位 ${selected.sourceRank}（LIVE順位ではありません）` : ''}</p>}{selected.sourceFeatures && <pre className="mb-3 whitespace-pre-wrap break-words text-[10px] text-white/55">{JSON.stringify(selected.sourceFeatures, null, 2)}</pre>}<SignalGateList gates={error ? selected.gates.map((gate) => ({ ...gate, state: 'UNKNOWN', detail: '更新失敗：前回観測' })) : selected.gates}/>{selected.href && <Link href={selected.href} className="mt-4 inline-block text-xs text-[#dbc787]">{selected.logic} 詳細ページ →</Link>}</div></>}</dialog>
 
     <style jsx global>{`
-      .compact-radar{position:relative;isolation:isolate;min-height:560px;min-width:0;display:flex;flex-direction:column;gap:6px;overflow-x:hidden}
-      @keyframes realtime-refresh-pulse{0%{filter:brightness(1);transform:translateY(0)}35%{filter:brightness(1.12);transform:translateY(-1px)}100%{filter:brightness(1);transform:translateY(0)}}
-      .realtime-refresh-pulse .radar-heading,.realtime-refresh-pulse .radar-panel-list,.realtime-refresh-pulse .radar-ranking{animation:realtime-refresh-pulse 1200ms ease-out}
-      @keyframes realtime-frame-travel{0%{top:0;transform:translateY(-4px) scale(1.012);opacity:0}10%{opacity:.96}76%{opacity:.72}100%{top:calc(100% - 48px);transform:translateY(3px) scale(1);opacity:0}}
-      .realtime-refresh-pulse::after{content:"";position:absolute;left:1px;right:1px;top:0;height:44px;box-sizing:border-box;border:2px solid #f2d27e;border-radius:10px;pointer-events:none;z-index:30;box-shadow:0 0 10px #f2d27ecc,0 0 24px #53e6c188,inset 0 0 12px #f2d27e55;background:linear-gradient(90deg,#f2d27e22,#53e6c122,#f2d27e22);animation:realtime-frame-travel 1200ms cubic-bezier(.22,.61,.36,1) both}
-      @media(prefers-reduced-motion:reduce){.realtime-refresh-pulse .radar-heading,.realtime-refresh-pulse .radar-panel-list,.realtime-refresh-pulse .radar-ranking{animation:none;outline:1px solid #f2d27e88}.realtime-refresh-pulse::after{animation:none;top:0;opacity:.72}}
+      .compact-radar{min-height:560px;min-width:0;display:flex;flex-direction:column;gap:6px;overflow-x:hidden}
       .radar-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;flex-shrink:0;padding:5px 8px;border:1px solid #a6894833;border-radius:10px;background:#13140f}
       .radar-feedback{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0;flex-shrink:0;padding:5px 7px;border:1px solid #ffffff13;border-radius:9px;background:#080d15;color:#d8d2be;font-size:10px}.radar-feedback>button,.feedback-select button{border:1px solid #ffffff25;border-radius:6px;padding:3px 6px;background:#ffffff06;color:#c7cbd1;white-space:nowrap}.radar-feedback .feedback-on{border-color:#c7ab5c88;background:#c7ab5c12;color:#f3e3ac}.feedback-select{display:flex;align-items:center;gap:3px;border:1px solid #b99c5040;border-radius:6px;padding:2px 4px;color:#e7cf8b;white-space:nowrap}.feedback-select select{max-width:min(145px,28vw);min-width:0;border-radius:4px;padding:3px 2px;background:#20291c;color:white;font-size:10px}.feedback-notice{min-width:0;flex:1;color:#9aa6b5;font-size:9px;overflow-wrap:anywhere}
       .radar-filters{display:flex;gap:5px;min-width:0;flex-shrink:0}.radar-filters input,.radar-filters select{min-width:0;height:28px;padding:2px 7px;border:1px solid #ffffff18;border-radius:7px;background:#090e16;color:#eee;font-size:10px}

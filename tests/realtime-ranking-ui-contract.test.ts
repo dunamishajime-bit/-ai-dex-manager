@@ -98,24 +98,24 @@ test("ranking board exposes score meaning and placeholder slot semantics accessi
   assert.match(source, /V4 stale/);
 });
 
-test("successful refreshes expose a visible pulse even when rank order is unchanged", async () => {
-  const source = await readFile("components/features/RealtimeRankingBoard.tsx", "utf8");
-  assert.match(source, /setRefreshPulse\(true\)/);
-  assert.match(source, /realtime-refresh-pulse/);
-  assert.match(source, /setRefreshPulse\(false\)/);
+test("ranking motion remains currency-scoped and is not a board-wide refresh pulse", async () => {
+  const board = await readFile("components/features/RealtimeRankingBoard.tsx", "utf8");
+  const feedback = await readFile("hooks/useRealtimeRankingFeedback.ts", "utf8");
+  assert.doesNotMatch(board, /realtime-refresh-pulse/);
+  assert.doesNotMatch(board, /realtime-frame-travel/);
+  assert.doesNotMatch(board, /setRefreshPulse\(/);
+  assert.match(feedback, /ranking-flyer/);
+  assert.match(feedback, /rankingMoving/);
+  assert.match(feedback, /rankingCompleted/);
 });
 
-test("successful refreshes draw a colored travelling frame over the currency rows", async () => {
-  const source = await readFile("components/features/RealtimeRankingBoard.tsx", "utf8");
-  assert.match(source, /realtime-refresh-pulse::after/);
-  assert.match(source, /realtime-frame-travel/);
-  assert.match(source, /pointer-events:none/);
-  assert.match(source, /z-index:30/);
-});
-
-test("failed refreshes clear any in-flight success frame", async () => {
-  const source = await readFile("components/features/RealtimeRankingBoard.tsx", "utf8");
-  const failurePath = source.slice(source.indexOf("    } catch (caught) {"));
-  assert.match(failurePath, /clearTimeout\(refreshPulseTimer\.current\)/);
-  assert.match(failurePath, /setRefreshPulse\(false\)/);
+test("currency motion uses a colored foreground frame and serial groups", async () => {
+  const feedback = await readFile("hooks/useRealtimeRankingFeedback.ts", "utf8");
+  const motionGroups = await readFile("lib/ranking-motion-groups.ts", "utf8");
+  assert.match(feedback, /borderColor/);
+  assert.match(feedback, /outline.*color|outline.*\+\s*color/);
+  assert.match(feedback, /playRankingSequence\(\s*coloredGroups/);
+  assert.match(feedback, /scale\(\$\{scale\}\)/);
+  assert.match(feedback, /foregroundY/);
+  assert.match(motionGroups, /for\s*\(const item of items\)/);
 });
