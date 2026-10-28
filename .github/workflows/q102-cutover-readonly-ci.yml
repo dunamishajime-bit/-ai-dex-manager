@@ -1,0 +1,24 @@
+name: Q102 scoped cutover read-only gate CI
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/q102-cutover-readiness-audit*.py'
+      - '.github/workflows/q102-cutover-readonly-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate read-only audit and fail-closed fixture selftests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/ops/q102-cutover-readiness-audit.py scripts/ops/q102-cutover-readiness-audit-selftest.py
+          python3 scripts/ops/q102-cutover-readiness-audit-selftest.py
+          ! grep -Eq 'systemctl (start|stop|restart)|\b(POST|DELETE|PATCH)\b|reduceOnly|createOrder\(' scripts/ops/q102-cutover-readiness-audit.py
