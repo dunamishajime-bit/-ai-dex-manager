@@ -289,6 +289,7 @@ validate_release_artifacts() {
   )
   local -a v4_required_files=(
     "$v4_release/scripts/v12-v4-production-runner.ts"
+    "$v4_release/lib/disdex-runner-tick-heartbeat.ts"
     "$v4_release/deploy/systemd/disdex-v12-v4@.service"
   )
   for required_file in "${required_files[@]}"; do

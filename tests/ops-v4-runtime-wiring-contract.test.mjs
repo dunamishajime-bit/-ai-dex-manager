@@ -57,6 +57,7 @@ test("mixed-SHA wiring validates V4 runner artifacts from the pinned V4 release"
   assert.match(validation, /local required_file v4_release="\$CURRENT_RELEASE"/);
   assert.match(validation, /if \[\[ "\$PRIMARY_V12_MODE" == "V4" \]\]; then\s+v4_release="\$V4_PRIMARY_RELEASE"/);
   assert.match(validation, /"\$v4_release\/scripts\/v12-v4-production-runner\.ts"/);
+  assert.match(validation, /"\$v4_release\/lib\/disdex-runner-tick-heartbeat\.ts"/);
   assert.match(validation, /"\$v4_release\/deploy\/systemd\/disdex-v12-v4@\.service"/);
   assert.match(validation, /"\$CURRENT_RELEASE\/lib\/disdex-runner-tick-heartbeat\.ts"/);
   assert.match(validation, /"\$CURRENT_RELEASE\/scripts\/disdex_runner_tick_heartbeat\.py"/);

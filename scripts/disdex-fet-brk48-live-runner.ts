@@ -15,7 +15,7 @@ function numberEnv(name: string, fallback: number) {
 }
 
 async function main() {
-  const runtimeSha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "").trim();
+    const runtimeSha = String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "").trim().toLowerCase();
   if (!/^[0-9a-f]{40}$/i.test(runtimeSha)) throw new Error("FET_RUNTIME_SHA_REQUIRED");
   if (!/^(1|true|yes|on)$/i.test(String(process.env.FET_BRK48_LIVE_ENABLED || ""))) {
     throw new Error("FET_BRK48_LIVE_NOT_ENABLED");
