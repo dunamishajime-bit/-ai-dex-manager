@@ -570,17 +570,47 @@ export function planStrictPortfolio(input: {
                 if (!evidence || !fetLiveMarkIsFresh(currentFet, input.now, maxDataAgeMs)) {
                     return rejectPlan("FET_RESIDUAL_MTM_SOURCE_UNVERIFIED", input.active, equity);
                 }
-                const reduction = markToMarketReducePosition({
-                    position: currentFet,
-                    reduceQuantity: currentFet.quantity,
-                    markPrice: evidence.price,
-                    markTs: evidence.timestamp,
-                    markSource: "LIVE_MARKET_QUOTE",
-                    markSourceEvidence: evidence,
-                });
-                reductions.push(reduction);
-                workingEquity = Math.max(0.001, workingEquity + reduction.realizedPnl);
-                active = active.filter((row) => row.id !== currentFet.id);
+                // Do not preempt a protective FET position while free
+                // capacity exists. The planner permits partial entry, so
+                // even a positive residual Gross is used BEFORE preemption.
+                const availableFor = (positions: StrictPortfolioPosition[], eq: number) => {
+                    const totals = planTotals(positions, accepted, eq, pendingExposure);
+                    const classHeadroom = isCrypto(intent.strategy)
+                        ? cryptoEntryCeiling - totals.cryptoGross
+                        : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap - totals.stockGross;
+                    const totalHeadroom = totalEntryCeiling - totals.totalGross;
+                    const existingStrategyGross = grossForNotional(
+                        sumNotional(positions, (row) => row.strategy === intent.strategy)
+                        + accepted.filter((row) => row.strategy === intent.strategy)
+                            .reduce((sum, row) => sum + row.notionalUsd, 0), eq)
+                        + pendingGrossForStrategy(pendingExposure, intent.strategy);
+                    const strategyHeadroom = (intent.strategy === "V12"
+                        ? INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap
+                        : intent.strategy === "PENGU_DUAL_LS_V2"
+                            ? INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross
+                            : strategyCap(intent.strategy)) - existingStrategyGross;
+                    return Math.min(classHeadroom, totalHeadroom, strategyHeadroom, strategyCap(intent.strategy), intent.gross);
+                };
+                if (availableFor(active, workingEquity) <= EPSILON) {
+                    const reduction = markToMarketReducePosition({
+                        position: currentFet,
+                        reduceQuantity: currentFet.quantity,
+                        markPrice: evidence.price,
+                        markTs: evidence.timestamp,
+                        markSource: "LIVE_MARKET_QUOTE",
+                        markSourceEvidence: evidence,
+                    });
+                    const afterEquity = Math.max(0.001, workingEquity + reduction.realizedPnl);
+                    const withoutFet = active.filter((row) => row.id !== currentFet.id);
+                    // The FET reduction must be the sole reason an accepted
+                    // core entry becomes possible. If no new entry can fit
+                    // even after a full reduction, preserve the FET STOP.
+                    if (availableFor(withoutFet, afterEquity) > EPSILON) {
+                        reductions.push(reduction);
+                        workingEquity = afterEquity;
+                        active = withoutFet;
+                    }
+                }
             }
         }
         const baseOtherTotalNotional = (pendingExposure.cryptoGross + pendingExposure.stockGross) * workingEquity + sumNotional(active, (row) => !isCausalQuality102Strategy(row.strategy)) + accepted.filter((row) => !isCausalQuality102Strategy(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);

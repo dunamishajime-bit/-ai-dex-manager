@@ -62,6 +62,21 @@ export function planHypeZecPreemption(input: {
   if (!(equity > 0)) return { status: "blocked", reason: "EQUITY_UNAVAILABLE", requiredGross: 0, releasedGross: 0, reductions: [] };
   if (!input.candidate) return { status: "not-needed", reason: "NO_PRIORITY_CANDIDATE", requiredGross: 0, releasedGross: 0, reductions: [] };
   if (!isPriorityCandidate(input.candidate)) return { status: "not-needed", reason: "SIDECAR_CANNOT_PREEMPT_SIDECAR", requiredGross: 0, releasedGross: 0, reductions: [] };
+  // A corrupted/stale shared capacity snapshot must never be interpreted as
+  // zero deficit (Math.max(0, NaN) is NaN, which otherwise passes the
+  // "no preemption needed" branch below). Fail closed before planning.
+  const grossInputs = [
+    input.currentCryptoGross,
+    input.currentTotalGross,
+    input.pendingCryptoGross ?? 0,
+    input.pendingTotalGross ?? 0,
+  ];
+  const caps = [input.cryptoEntryCap, input.totalEntryCap];
+  if (!Number.isFinite(input.now)
+    || grossInputs.some((value) => !Number.isFinite(value) || value < 0)
+    || caps.some((value) => !Number.isFinite(value) || value <= 0)) {
+    return { status: "blocked", reason: "CAPACITY_SNAPSHOT_INVALID", requiredGross: 0, releasedGross: 0, reductions: [] };
+  }
   const candidateGross = Math.max(0, Number(input.candidate.gross));
   if (!(candidateGross > EPSILON)) return { status: "blocked", reason: "CANDIDATE_GROSS_INVALID", requiredGross: 0, releasedGross: 0, reductions: [] };
   const requestedSleeve = input.candidate.strategy === "V52"

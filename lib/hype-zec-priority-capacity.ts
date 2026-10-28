@@ -29,13 +29,25 @@ export function isHypeZecSoleSharedCapacityCause(input: {
     totalEntryCap: number;
 }) {
     const equity = Number(input.equityUsd);
-    if (!(equity > 0) || !(input.candidateGross > 0)) return false;
+    // A preemption is destructive to an existing owner's position. Treat any
+    // missing/invalid capacity evidence as a refusal, not as an opportunity
+    // to reconstruct or guess exposure from alternative prices.
+    const budgets = [input.pendingCryptoGross, input.pendingTotalGross];
+    const caps = [input.cryptoEntryCap, input.totalEntryCap];
+    if (!Number.isFinite(equity) || !(equity > 0)
+        || !Number.isFinite(input.candidateGross) || !(input.candidateGross > 0)
+        || budgets.some(value => !Number.isFinite(value) || value < 0)
+        || caps.some(value => !Number.isFinite(value) || value <= 0)) return false;
     let sidecarCryptoGross = 0;
     let sidecarTotalGross = 0;
     let otherCryptoGross = 0;
     let otherTotalGross = 0;
     for (const position of input.positions.filter((row) => Math.abs(row.quantity) > EPSILON)) {
-        const gross = Math.abs(Number(position.notionalUsd) || position.quantity * position.markPrice) / equity;
+        if (!Number.isFinite(position.quantity) || !Number.isFinite(position.markPrice)
+            || !(position.markPrice > 0) || !Number.isFinite(position.notionalUsd)
+            || !(Math.abs(position.notionalUsd) > EPSILON)) return false;
+        const gross = Math.abs(position.notionalUsd) / equity;
+        if (!Number.isFinite(gross)) return false;
         const sidecar = position.symbol.toUpperCase() === "HYPEUSDT" || position.symbol.toUpperCase() === "ZECUSDT";
         const classification = classifyAsterSymbol(position.symbol);
         if (classification.assetClass === "UNKNOWN") return false;
