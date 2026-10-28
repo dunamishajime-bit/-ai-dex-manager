@@ -291,6 +291,15 @@ function assertTradeParity(reference: Trade[], production: Trade[]) {
         const expected = reference[index];
         const actual = production[index];
         assert.equal(actual.side, expected.side, `side mismatch trade ${index + 1}`);
+        if (actual.entryTime !== expected.entryTime) {
+            const window = (trades: Trade[]) => trades.slice(Math.max(0, index - 3), Math.min(trades.length, index + 3));
+            console.error("PENGU_PARITY_FIRST_MISMATCH_READONLY_DIAGNOSTIC", JSON.stringify({
+                firstMismatchTrade: index + 1,
+                expectedWindow: window(reference),
+                actualWindow: window(production),
+                note: "Frozen parity assertion remains mandatory; no order mutations.",
+            }));
+        }
         assert.equal(actual.entryTime, expected.entryTime, `entry time mismatch trade ${index + 1}`);
         assert.equal(actual.exitTime, expected.exitTime, `exit time mismatch trade ${index + 1}`);
         assert.equal(actual.reason, expected.reason, `exit reason mismatch trade ${index + 1}`);
