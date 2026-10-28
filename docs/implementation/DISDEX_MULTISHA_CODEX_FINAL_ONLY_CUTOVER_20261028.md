@@ -64,3 +64,8 @@ GitHub CI: .github/workflows/disdex-multisha-risk-api-release-cert-20261028.yml
 6. 全体API queue cooldown / private HP判定状況 / Risk writer status / V4-Q102保護 / OpenOrders / pending / source hash / Gross planner / restart recoveryを切替後に照合し、100%一致の根拠を証明する。いかなる未成立GateでもBLOCKEDで現行LIVEを維持。
 
 STATUS: SOURCE_IMPLEMENTED_AND_TESTED / LIVE_SIGNED_PRECONDITIONS_AND_EXACT_NATIVE_ECONOMIC_CERTS_NOT_PROVEN / CODEX_CUTOVER_ONLY
+
+## 追加のCI回復診断 (ソースのみ)
+旧Margin CIに残る V52 stock1.5/total2.5、root release-readiness のtotal2.5 は現在の正式VPSリスク設定 stock4.0/total4.25 と不一致の歴史的テスト期待値だった。現在のLIVE設定に合わせたCIとreadiness側の文字列契約だけを更新し、実トレード閾値は変更していない。
+
+旧PENGU独立Bitget Parityではtrade9のSHORTが参照側1時間早く成立。Frozen reference SHORTに現ProductionのBTC EMA168連動2% limited structural re-breakが欠落していたため、reference側に独立armedLowと該当Gateを追加。Productionシグナルを参照の代用にせず、全量/parity assertionと差分診断を維持。GitHub CI全てSUCCESSとなるまでProduction認証は宣言しない。

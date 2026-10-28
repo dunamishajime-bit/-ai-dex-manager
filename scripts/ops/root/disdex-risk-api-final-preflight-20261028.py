@@ -58,7 +58,15 @@ def validate_risk_and_protection(d: dict, v4: dict, old: dict, now_ms: int) -> l
         blockers.append("LEGACY_V4_STOP_DIAGNOSTICS_INCOHERENT")
     # Source preflight allows old diagnostic false positives ONLY when the
     # independent signed venue audit accounts for every one of them.
-    if old.get("unprotectedCount") != len(v4.get("v4Verified") or []):
+    # Before promotion the old writer may list the independently proven V4
+    # position as UNKNOWN; after promotion the corrected writer must mark it
+    # protected, so the legacy count legitimately becomes zero while the
+    # independent companion still lists one successfully verified V4 STOP.
+    # Distinguish the two valid phases without allowing unexplained exposure.
+    original = old.get("unprotectedCount")
+    independently_verified = len(v4.get("v4Verified") or [])
+    if (not isinstance(original, int) or original < 0
+        or original not in (0, independently_verified)):
         blockers.append("UNEXPLAINED_UNPROTECTED_EXPOSURE")
     if v4.get("unresolved"):
         blockers.append("VENUE_UNRESOLVED_PROTECTION")
@@ -116,6 +124,7 @@ def selftest() -> None:
           "originalUnprotectedCount": 1, "v4Verified": [{"symbol": "DOGEUSDT"}], "unresolved": []}
     old = {"ok": True, "readOnly": True, "unprotectedCount": 1}
     assert validate_risk_and_protection(base, v4, old, now) == []
+    assert validate_risk_and_protection(base, {**v4, "originalUnprotectedCount": 0}, {**old, "unprotectedCount": 0}, now) == []
     assert "RISK_TRIPPED_OR_UNKNOWN" in validate_risk_and_protection({**base, "tripped": True}, v4, old, now)
     assert "UNEXPLAINED_UNPROTECTED_EXPOSURE" in validate_risk_and_protection(base, {**v4, "v4Verified": []}, old, now)
     assert "V4_STOP_COMPANION_STALE" in validate_risk_and_protection(base, {**v4, "checkedAt": now - 200000}, old, now)
