@@ -161,6 +161,22 @@ test('positive score movement is grouped into a bounded rise animation',async()=
  assert.ok(mod);
  assert.deepEqual(mod.createRankingMovementPhases([{id:'a',rank:5,score:70}],[{id:'a',rank:2,score:80}]),[{role:'top3',durationMs:1900,changes:[{id:'a',from:5,to:2,role:'top3'}]}]);
 });
+test('ranking motion combines every rise and every fall into two ordered batches',async()=>{
+ const mod=await import('../lib/ranking-motion-groups') as typeof import('../lib/ranking-motion-groups');
+ const phases=[
+  {role:'top3' as const,durationMs:1900,changes:[
+   {id:'top-rise',from:4,to:2,role:'top3' as const},
+   {id:'top-fall',from:2,to:4,role:'top3' as const},
+  ]},
+  {role:'rise' as const,durationMs:1500,changes:[{id:'rise',from:8,to:5,role:'rise' as const}]},
+  {role:'fall' as const,durationMs:1500,changes:[{id:'fall',from:5,to:8,role:'fall' as const}]},
+ ];
+ const batches=mod.createRankingMotionBatches(phases);
+ assert.deepEqual(batches.map(batch=>({direction:batch.direction,ids:batch.changes.map(change=>change.id)})),[
+  {direction:'rise',ids:['top-rise','rise']},
+  {direction:'fall',ids:['top-fall','fall']},
+ ]);
+});
 test('currency foreground motion groups complete serially before the next currency starts',async()=>{
  const mod=await import('../lib/ranking-motion-groups') as typeof import('../lib/ranking-motion-groups');
  const started:string[]=[],finished:string[]=[],release:Array<()=>void>=[];let completed=0;

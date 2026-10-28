@@ -2,6 +2,7 @@ import type {RankingSoundRole} from './ranking-sounds';
 export type MovementRow={id:string;rank?:number;score?:number|null};
 export type Movement={id:string;from:number;to:number;role:RankingSoundRole};
 export type MovementPhase={role:RankingSoundRole;changes:Movement[];durationMs:number};
+export type RankingMotionBatch={direction:'rise'|'fall';changes:Movement[]};
 export function classifyRankingMove(from:number|undefined,to:number|undefined):RankingSoundRole|null{
  if(!Number.isInteger(from)||!Number.isInteger(to)||!from||!to||from===to)return null;
  if(from<=3||to<=3)return 'top3';
@@ -17,6 +18,18 @@ export function createRankingMovementPhases(previous:readonly MovementRow[],next
   groups[role].push({id:now.id,from:old.rank,to:now.rank,role});
  }
  return (['top3','rise','fall'] as const).filter(role=>groups[role].length>0).map(role=>({role,changes:groups[role].sort((a,b)=>a.to-b.to),durationMs:role==='top3'?1900:1500}));
+}
+export function createRankingMotionBatches(phases:readonly MovementPhase[]):RankingMotionBatch[]{
+ const groups:Record<'rise'|'fall',Movement[]>={rise:[],fall:[]};
+ for(const phase of phases){
+  for(const change of phase.changes){
+   groups[change.to<change.from?'rise':'fall'].push(change);
+  }
+ }
+ return (['rise','fall'] as const).filter(direction=>groups[direction].length>0).map(direction=>({
+  direction,
+  changes:[...groups[direction]].sort((a,b)=>a.to-b.to||a.id.localeCompare(b.id)),
+ }));
 }
 export const RANKING_MOTION_MS=1500;
 export async function playRankingSequence<T>(items:readonly T[],play:(item:T)=>Promise<void>,isCurrent:()=>boolean,complete:()=>void):Promise<void>{
