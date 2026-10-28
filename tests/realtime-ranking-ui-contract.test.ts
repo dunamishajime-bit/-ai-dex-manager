@@ -97,3 +97,10 @@ test("ranking board exposes score meaning and placeholder slot semantics accessi
   assert.match(source, /候補なし（V4 fresh）/);
   assert.match(source, /V4 stale/);
 });
+
+test("successful refreshes expose a visible pulse even when rank order is unchanged", async () => {
+  const source = await readFile("components/features/RealtimeRankingBoard.tsx", "utf8");
+  assert.match(source, /setRefreshPulse\(true\)/);
+  assert.match(source, /realtime-refresh-pulse/);
+  assert.match(source, /setRefreshPulse\(false\)/);
+});

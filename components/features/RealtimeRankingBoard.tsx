@@ -121,6 +121,7 @@ export function RealtimeRankingBoard() {
   const [remaining, setRemaining] = useState(30);
   const [changes, setChanges] = useState<Record<string, number>>({});
   const [flash, setFlash] = useState<Record<string, number>>({});
+  const [refreshPulse, setRefreshPulse] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const previous = useRef<Record<string, string[]>>({});
@@ -130,6 +131,7 @@ export function RealtimeRankingBoard() {
   const alive = useRef(true);
   const next = useRef(nextRealtimeRankingAt(Date.now()));
   const flashTimer = useRef<ReturnType<typeof setTimeout>>();
+  const refreshPulseTimer = useRef<ReturnType<typeof setTimeout>>();
   const dialog = useRef<HTMLDialogElement>(null);
 
   const load = useCallback(async () => {
@@ -160,6 +162,9 @@ export function RealtimeRankingBoard() {
       setFlash(movement);
       if (flashTimer.current) clearTimeout(flashTimer.current);
       flashTimer.current = setTimeout(() => setFlash({}), 2200);
+      setRefreshPulse(true);
+      if (refreshPulseTimer.current) clearTimeout(refreshPulseTimer.current);
+      refreshPulseTimer.current = setTimeout(() => setRefreshPulse(false), 850);
       setData(result as Snapshot);
       setRevision((value) => value + 1);
       hasData.current = true;
@@ -190,6 +195,7 @@ export function RealtimeRankingBoard() {
       alive.current = false;
       clearInterval(timer);
       if (flashTimer.current) clearTimeout(flashTimer.current);
+      if (refreshPulseTimer.current) clearTimeout(refreshPulseTimer.current);
     };
   }, [load]);
 
@@ -348,7 +354,7 @@ export function RealtimeRankingBoard() {
     </div>;
   };
 
-  return <div className="compact-radar">
+  return <div className={'compact-radar ' + (refreshPulse && feedback.motionEnabled ? 'realtime-refresh-pulse' : '')}>
     <header className="radar-heading"><div className="flex min-w-0 items-center gap-3"><h1 className="shrink-0 text-sm font-bold text-[#e9d9a0]">リアルタイム判定 Ranking</h1><span className="hidden truncate text-[10px] text-white/40 sm:block">{data ? new Date(data.checkedAt).toLocaleTimeString('ja-JP') : '取得中'} · {data?.rows.length ?? '—'}観測行 · 30秒更新</span></div><button disabled={busy} onClick={() => void load()} className="flex shrink-0 items-center gap-1 rounded-lg border border-[#a68948]/30 px-2 py-1 text-[10px] text-[#efdda7] disabled:opacity-50"><RefreshCw size={11} className={busy ? 'animate-spin' : ''}/>{busy ? '更新中' : '更新'} · {remaining}秒</button></header>
     {error && <p role="alert" className="rounded-lg bg-rose-400/10 px-2 py-1 text-xs text-rose-200">{error}。前回成功観測を表示しています。順位は発注許可を意味しません。</p>}
     {!!data && Object.keys(data.errors).length > 0 && <p role="status" className="text-[10px] text-amber-200">未確認：{Object.keys(data.errors).join(' / ')}</p>}
@@ -381,6 +387,9 @@ export function RealtimeRankingBoard() {
 
     <style jsx global>{`
       .compact-radar{min-height:560px;min-width:0;display:flex;flex-direction:column;gap:6px;overflow-x:hidden}
+      @keyframes realtime-refresh-pulse{0%{filter:brightness(1);transform:translateY(0)}35%{filter:brightness(1.12);transform:translateY(-1px)}100%{filter:brightness(1);transform:translateY(0)}}
+      .realtime-refresh-pulse .radar-heading,.realtime-refresh-pulse .radar-panel-list,.realtime-refresh-pulse .radar-ranking{animation:realtime-refresh-pulse 850ms ease-out}
+      @media(prefers-reduced-motion:reduce){.realtime-refresh-pulse .radar-heading,.realtime-refresh-pulse .radar-panel-list,.realtime-refresh-pulse .radar-ranking{animation:none;outline:1px solid #f2d27e88}}
       .radar-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;flex-shrink:0;padding:5px 8px;border:1px solid #a6894833;border-radius:10px;background:#13140f}
       .radar-feedback{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0;flex-shrink:0;padding:5px 7px;border:1px solid #ffffff13;border-radius:9px;background:#080d15;color:#d8d2be;font-size:10px}.radar-feedback>button,.feedback-select button{border:1px solid #ffffff25;border-radius:6px;padding:3px 6px;background:#ffffff06;color:#c7cbd1;white-space:nowrap}.radar-feedback .feedback-on{border-color:#c7ab5c88;background:#c7ab5c12;color:#f3e3ac}.feedback-select{display:flex;align-items:center;gap:3px;border:1px solid #b99c5040;border-radius:6px;padding:2px 4px;color:#e7cf8b;white-space:nowrap}.feedback-select select{max-width:min(145px,28vw);min-width:0;border-radius:4px;padding:3px 2px;background:#20291c;color:white;font-size:10px}.feedback-notice{min-width:0;flex:1;color:#9aa6b5;font-size:9px;overflow-wrap:anywhere}
       .radar-filters{display:flex;gap:5px;min-width:0;flex-shrink:0}.radar-filters input,.radar-filters select{min-width:0;height:28px;padding:2px 7px;border:1px solid #ffffff18;border-radius:7px;background:#090e16;color:#eee;font-size:10px}
