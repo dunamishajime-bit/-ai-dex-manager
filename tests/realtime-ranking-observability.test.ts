@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { V12_V4_HP_ROUTE_IDS, V12_V4_HP_TARGET, type V12V4HpSnapshot } from "@/lib/v12-v4-hp-contract";
-import { mergeV12V4RealtimeRows, v12V4SnapshotToRankRows } from "@/lib/server/realtime-ranking-observability";
+import { mergeAndExpireV12V4RealtimeRows, mergeV12V4RealtimeRows, v12V4SnapshotToRankRows } from "@/lib/server/realtime-ranking-observability";
 import { normalizeQuality102SymbolItems } from "@/lib/server/quality102-symbol-observability";
 import { topRankedSymbols, type RankRow } from "@/lib/realtime-ranking";
 
@@ -107,13 +107,25 @@ test("stale and failed V4 decision sources are represented explicitly, never as 
   assert.deepEqual(topRankedSymbols(errorRows, "V12_V4").map((slot) => slot.status), ["SOURCE_ERROR", "SOURCE_ERROR", "SOURCE_ERROR"]);
 });
 
-test("empty but fresh V4 batch is NOT_EVALUATED rather than a manufactured no-signal row", () => {
-  const empty = snapshot({ candidates: [], filtered: [] });
+test("empty but fresh V4 batch is an explicit no-candidate wait state, not a manufactured no-signal row", () => {
+  const empty = snapshot({ candidates: [], filtered: [], routeCoverage: { ...snapshot().routeCoverage, candidateCount: 0, filteredCount: 0, observed: 0 } });
   const [row] = v12V4SnapshotToRankRows(empty, now);
   assert.equal(row.sourceStatus, "NOT_EVALUATED");
+  assert.equal(row.fresh, true);
   assert.equal(row.score, null);
-  assert.match(row.reason, /source row/i);
-  assert.deepEqual(topRankedSymbols([row], "V12_V4").map((slot) => slot.status), ["NOT_EVALUATED", "NOT_EVALUATED", "NOT_EVALUATED"]);
+  assert.match(row.reason, /NO_NATIVE_ENTRY_CANDIDATES/);
+  assert.deepEqual(topRankedSymbols([row], "V12_V4").map((slot) => slot.status), ["NO_CANDIDATE", "NO_CANDIDATE", "NO_CANDIDATE"]);
+});
+
+test("fresh V4 no-candidate rows expire into STALE after a failed refresh window", () => {
+  const empty = snapshot({ candidates: [], filtered: [], routeCoverage: { ...snapshot().routeCoverage, candidateCount: 0, filteredCount: 0, observed: 0 } });
+  const expiredAt = now + 3 * 60 * 60 * 1000 + 1;
+  const [expired] = mergeAndExpireV12V4RealtimeRows([], empty, now, { V12_V4: now + 3 * 60 * 60 * 1000 }, now, expiredAt);
+  assert.equal(expired.freshUntil, now + 3 * 60 * 60 * 1000);
+  assert.equal(expired.fresh, false);
+  assert.equal(expired.sourceStatus, "STALE");
+  assert.match(expired.reason, /NO_NATIVE_ENTRY_CANDIDATES/);
+  assert.deepEqual(topRankedSymbols([expired], "V12_V4").map((slot) => slot.status), ["STALE", "STALE", "STALE"]);
 });
 
 test("Q102 score normalization preserves numeric zero but does not turn null or absent values into zero", () => {

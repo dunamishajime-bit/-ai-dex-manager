@@ -48,8 +48,9 @@ export function v12V4SnapshotToRankRows(snapshot:V12V4HpSnapshot,now=Date.now())
   })),
  ];
  if(!rows.length){
-  const sentinelStatus=sourceStatus==='FRESH'?'NOT_EVALUATED':sourceStatus;
-  rows.push(make('—','V12_V4','WAIT',[{key:'source',label:'V4 decision rows',state:'UNKNOWN',detail:sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':sentinelStatus==='STALE'?'V4 decision source stale':'このcycleにV4 candidate/filtered rowなし',kind:'signal'},runtimeGate],false,checkedAt,sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':'V4 source row未出力',{
+  const noNativeEntryCandidates=sourceStatus==='FRESH' && snapshot.freshness.decision && snapshot.routeCoverage.candidateCount===0 && snapshot.routeCoverage.filteredCount===0 && snapshot.errors.length===0;
+  const sentinelStatus=noNativeEntryCandidates||sourceStatus==='FRESH'?'NOT_EVALUATED':sourceStatus;
+  rows.push(make('—','V12_V4','WAIT',[{key:'source',label:'V4 decision rows',state:'UNKNOWN',detail:sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':sentinelStatus==='STALE'?'V4 decision source stale':noNativeEntryCandidates?'判定済み・ネイティブエントリー候補なし':'このcycleにV4 candidate/filtered rowなし',kind:'signal'},runtimeGate],noNativeEntryCandidates,checkedAt,noNativeEntryCandidates?'NO_NATIVE_ENTRY_CANDIDATES':sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':'V4 source row未出力',{
     metric:nativeMetric(undefined,'V4 decision source has no verified native score',false),rankingScope:'V12_V4',rankingEligible:false,rankingContractAvailable:false,sourceStatus:sentinelStatus,
   }));
  }
@@ -57,6 +58,10 @@ export function v12V4SnapshotToRankRows(snapshot:V12V4HpSnapshot,now=Date.now())
 }
 export function mergeV12V4RealtimeRows(existing:RankRow[],snapshot:V12V4HpSnapshot,now=Date.now()):RankRow[]{
  return [...existing.filter(row=>row.logic!=='V12'&&row.logic!=='V12_V4'),...v12V4SnapshotToRankRows(snapshot,now)];
+}
+export function mergeAndExpireV12V4RealtimeRows(existing:RankRow[],snapshot:V12V4HpSnapshot,checkedAt:number,sourceExpiryByLogic:Record<string,number>,snapshotAt=checkedAt,now=Date.now()):RankRow[]{
+ const mergedRows=mergeV12V4RealtimeRows(existing,snapshot,snapshotAt);
+ return expireRealtimeRankingRows(mergedRows,now,sourceExpiryByLogic);
 }
 export function v12V4RealtimeSummary(snapshot:V12V4HpSnapshot){
  return {displayStatus:snapshot.displayStatus,target:snapshot.target,actual:snapshot.actual,routeCoverage:snapshot.routeCoverage,timestamps:snapshot.timestamps,freshness:snapshot.freshness,errors:snapshot.errors,readOnly:true as const,tradingMutation:0 as const};
@@ -165,8 +170,8 @@ async function observe(){
  }
  // Public-market-only ranking with one shared formula; no trading state or order mutation.
  const marketRows=await loadMarketUniverseRanking(rows,now);
- const checkedAt=Date.now(),freshRows=expireRealtimeRankingRows(rows,checkedAt,sourceExpiryByLogic);
- const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows([...(v12V4Snapshot?mergeV12V4RealtimeRows(freshRows,v12V4Snapshot,now):freshRows),...marketRows]),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'全通貨順位はAster公開相場を同一算式で評価した共通市場Score（0-100、参考）で降順。ロジック固有Scoreとは独立で、実発注・発火確率・期待利益には使いません。'};
+ const checkedAt=Date.now(),freshRows=v12V4Snapshot?mergeAndExpireV12V4RealtimeRows(rows,v12V4Snapshot,checkedAt,sourceExpiryByLogic,now):expireRealtimeRankingRows(rows,checkedAt,sourceExpiryByLogic);
+ const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows([...freshRows,...marketRows]),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'全通貨順位はAster公開相場を同一算式で評価した共通市場Score（0-100、参考）で降順。ロジック固有Scoreとは独立で、実発注・発火確率・期待利益には使いません。'};
  return {snapshot,expires:realtimeRankingCacheExpiry(now,sourceExpiries,snapshot.rows)};
 }
 type Observation=Awaited<ReturnType<typeof observe>>;

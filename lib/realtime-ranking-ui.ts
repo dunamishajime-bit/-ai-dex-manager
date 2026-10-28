@@ -12,6 +12,15 @@ export type RealtimeRankingPanel = {
   rankingContractAvailable: boolean;
 };
 
+export type V4NoCandidatePanelState = "FRESH_NO_CANDIDATE" | "STALE" | "OTHER";
+
+export function v4NoCandidatePanelState(panel: Pick<RealtimeRankingPanel, "scope" | "slots">): V4NoCandidatePanelState {
+  if (panel.scope !== "V12_V4" || panel.slots.length === 0) return "OTHER";
+  if (panel.slots.every((slot) => slot.status === "NO_CANDIDATE")) return "FRESH_NO_CANDIDATE";
+  if (panel.slots.every((slot) => slot.status === "STALE")) return "STALE";
+  return "OTHER";
+}
+
 const LOGIC_TITLES: Record<string, string> = {
   MARKET: "全取り扱い通貨",
   V12_V4: "V12 V4",
@@ -83,6 +92,9 @@ export function scoreKindLabel(row: RankRow): string {
   if (row.scoreKind === "MARKET") return row.scoreLabel || "Aster共通市場Score（参考・非発注）";
   if (row.scoreKind === "NATIVE") return row.scoreLabel || "実測スコア";
   if (row.scoreKind === "GATE_COMPLETION") return row.scoreLabel || "Gate充足度（発火確率ではありません）";
+  if (row.logic === "V12_V4" && row.fresh && row.sourceStatus === "NOT_EVALUATED" && row.reason.includes("NO_NATIVE_ENTRY_CANDIDATES")) {
+    return "判定済み（候補なし / native score未提供）";
+  }
   if (row.sourceStatus === "STALE" || !row.fresh) return "未評価（STALE / 発注不可）";
   if (row.sourceStatus === "SOURCE_ERROR") return "未評価（観測取得エラー）";
   return row.scoreLabel && !/native score has no verified/i.test(row.scoreLabel)

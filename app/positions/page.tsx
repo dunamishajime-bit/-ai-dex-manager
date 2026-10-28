@@ -6,6 +6,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { V12V4RuntimePanel } from "@/components/features/V12V4RuntimePanel";
+import { buildRuntimeLineageDisplay } from "@/lib/runtime-lineage-display";
 
 function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
   return <div className="panel-gold rounded-[24px] p-4"><div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/72">{label}</div><div className="mt-2 text-xl font-black text-white">{value}</div><div className="mt-1 text-[11px] leading-5 text-white/72">{detail}</div></div>;
@@ -16,10 +17,11 @@ export default function PositionsPage() {
   const { snapshot: productionRuntime, error: productionRuntimeError } = useProductionRuntime();
   const { formatPrice } = useCurrency();
   const caps = productionRuntime?.caps;
+  const v12 = productionRuntime?.["v12"];
   const pengu = productionRuntime?.pengu;
   const q102 = productionRuntime?.quality102;
   const v52 = productionRuntime?.v52;
-  const lineage = productionRuntime?.runtimeLineage;
+  const lineageDisplay = productionRuntime ? buildRuntimeLineageDisplay(productionRuntime) : null;
   const totalNotionalUsd = snapshot?.positions.reduce((sum, position) => sum + position.notionalUsd, 0) ?? 0;
   const equityUsd = snapshot?.account.balanceUsd ?? 0;
   const usedMarginUsd = snapshot ? Math.max(0, snapshot.account.balanceUsd - snapshot.account.availableUsd) : 0;
@@ -40,7 +42,7 @@ export default function PositionsPage() {
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />Current Production Dashboard</div>
           <h1 className="gold-heading mt-3 break-words text-2xl font-black leading-tight tracking-tight sm:text-3xl md:text-5xl">{productionRuntime && pengu && v52 ? `V12 V4 / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
           <p className="mt-3 max-w-4xl text-sm leading-7 text-white/82">Asterの読み取り結果を正本として、口座残高、実建玉、未決済注文、保護注文を表示します。データ未取得時は正常稼働と推測表示しません。</p>
-          <p className={`mt-2 max-w-4xl rounded-2xl border px-4 py-3 text-[12px] leading-6 ${productionRuntime && lineage?.synchronized ? "border-emerald-400/25 bg-emerald-500/5 text-emerald-100/85" : "border-amber-400/25 bg-amber-500/5 text-amber-100/85"}`}>{productionRuntime && caps && q102 ? `${lineage?.synchronized ? "Runtime SHA同期" : "RUNTIME MISMATCH"} / Production ${productionRuntime.releaseSha.slice(0, 12)} / Q102 ${q102.selectorMode} ${caps.quality102Gross.toFixed(2)}x / Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x` : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : "。旧固定値は表示しません。"}`}</p>
+          <p className={`mt-2 max-w-4xl rounded-2xl border px-4 py-3 text-[12px] leading-6 ${lineageDisplay?.tone === "healthy" ? "border-emerald-400/25 bg-emerald-500/5 text-emerald-100/85" : lineageDisplay?.tone === "scoped" ? "border-cyan-400/25 bg-cyan-500/5 text-cyan-100/85" : "border-amber-400/25 bg-amber-500/5 text-amber-100/85"}`}>{productionRuntime && caps && q102 ? `${lineageDisplay?.label ?? "Production runtime未接続"} / Q102 ${q102.selectorMode} ${caps.quality102Gross.toFixed(2)}x / Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / ${v12 ? `V12 Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 contract runtime未取得"}` : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : "。旧固定値は表示しません。"}`}</p>
         </header>
 
         <V12V4RuntimePanel />

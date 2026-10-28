@@ -6,6 +6,7 @@ import {
   buildRealtimeRankingPanels,
   rankingFeedbackRows,
   scoreKindLabel,
+  v4NoCandidatePanelState,
 } from "../lib/realtime-ranking-ui";
 import type { RankRow } from "../lib/realtime-ranking";
 
@@ -56,6 +57,18 @@ test("score labels distinguish native, gate completion, unavailable and numeric 
   assert.equal(scoreKindLabel(row({ id: "native", logic: "Q102", symbol: "BTCUSDT", score: 0, scoreKind: "NATIVE", scoreLabel: "Proximity model units" })), "Proximity model units");
   assert.match(scoreKindLabel(row({ id: "gate", logic: "PENGU", symbol: "PENGUUSDT", score: 72, scoreKind: "GATE_COMPLETION", scoreLabel: "Gate充足度（発火確率ではありません）" })), /Gate充足度/);
   assert.match(scoreKindLabel(row({ id: "na", logic: "V12_V4", symbol: "BTCUSDT", score: null, scoreKind: "UNAVAILABLE", sourceRank: 1 })), /未評価/);
+  assert.match(scoreKindLabel(row({ id: "empty-v4", logic: "V12_V4", symbol: "—", score: null, scoreKind: "UNAVAILABLE", sourceStatus: "NOT_EVALUATED", reason: "NO_NATIVE_ENTRY_CANDIDATES", rankingScope: "V12_V4" })), /候補なし/);
+});
+
+test("V4 no-candidate summary follows the current panel freshness state", () => {
+  const fresh = buildRealtimeRankingPanels([
+    row({ id: "v4-empty", logic: "V12_V4", symbol: "—", sourceStatus: "NOT_EVALUATED", reason: "NO_NATIVE_ENTRY_CANDIDATES", rankingScope: "V12_V4", fresh: true }),
+  ], "V12_V4")[0];
+  const stale = buildRealtimeRankingPanels([
+    row({ id: "v4-stale", logic: "V12_V4", symbol: "—", sourceStatus: "STALE", reason: "観測鮮度期限切れ / NO_NATIVE_ENTRY_CANDIDATES", rankingScope: "V12_V4", fresh: false }),
+  ], "V12_V4")[0];
+  assert.equal(v4NoCandidatePanelState(fresh), "FRESH_NO_CANDIDATE");
+  assert.equal(v4NoCandidatePanelState(stale), "STALE");
 });
 
 test("movement snapshots include every ranked shared-market currency in ALL view", () => {
@@ -80,4 +93,7 @@ test("ranking board exposes score meaning and placeholder slot semantics accessi
   assert.match(source, /発火確率.*ありません/);
   assert.match(source, /順位未評価/);
   assert.match(source, /発注不可/);
+  assert.match(source, /NO_NATIVE_ENTRY_CANDIDATES/);
+  assert.match(source, /候補なし（V4 fresh）/);
+  assert.match(source, /V4 stale/);
 });

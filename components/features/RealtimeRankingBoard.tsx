@@ -20,6 +20,7 @@ import {
   scoreKindLabel,
   scoreValueLabel,
   topSlotStatusLabel,
+  v4NoCandidatePanelState,
   type RealtimeRankingPanel,
 } from '@/lib/realtime-ranking-ui';
 import type { V12V4HpSnapshot } from '@/lib/v12-v4-hp-contract';
@@ -58,10 +59,15 @@ function blockReason(row: RankRow) {
     .join(' / ');
 }
 
+function v4NoCandidateCycle(row: RankRow) {
+  return row.logic === 'V12_V4' && row.fresh && row.sourceStatus === 'NOT_EVALUATED' && row.reason.includes('NO_NATIVE_ENTRY_CANDIDATES');
+}
+
 function rankExplanation(row: RankRow) {
   if (row.logic === 'MARKET') return row.score === null ? 'Asterの価格・確定足が不足し共通市場Score未評価です。' : '全取扱通貨を同じ市場指標・重みで評価した表示専用Scoreによる順位です。注文・売買ロジックの発火条件とは異なります。';
   if (!row.fresh || row.sourceStatus === 'STALE') return '観測がSTALEのため現在の順位・判定は未評価です。発注不可です。';
   if (row.sourceStatus === 'SOURCE_ERROR') return '観測取得に失敗しました。Scoreや順位を推測していません。';
+  if (v4NoCandidateCycle(row)) return 'V4のfreshな今回cycleは判定済みですが、NO_NATIVE_ENTRY_CANDIDATES（候補なし・正常待機）です。native scoreや通貨別候補を補完していません。';
   if (row.score === null) return '必要なデータまたは実測スコアが未取得のため順位対象外です。';
   if (row.score === 0) return 'Score 0は実測値として一覧に表示しますが、Top3順位対象外です。';
   if (row.rankingEligible && row.rankingScope) return `${row.rankingScope}内の順位契約による順位です。他ロジックとは尺度・順位を比較しません。`;
@@ -87,13 +93,20 @@ function v4PanelSummary(panel: RealtimeRankingPanel, data?: Snapshot | null) {
   if (panel.scope !== 'V12_V4') return null;
   const summary = data?.v12V4;
   if (!summary) return <p className="panel-source-note">V4 runtime / decision source 未取得。41 routesの評価完了とは表示しません。</p>;
+  const noCandidateSource = summary.routeCoverage.candidateCount === 0 && summary.routeCoverage.filteredCount === 0 && summary.errors.length === 0;
+  const noCandidateState = v4NoCandidatePanelState(panel);
+  const effectiveDecisionFresh = noCandidateSource ? noCandidateState === 'FRESH_NO_CANDIDATE' : summary.freshness.decision;
   return <div className="panel-source-note" data-v4-summary>
     <span>Target {summary.target.policyId} · Runtime {summary.displayStatus}</span>
     <span>出力route {summary.routeCoverage.observed}/{summary.routeCoverage.expected}（route出現数。全41 route評価完了を意味しません）</span>
-    <span>Decision {summary.timestamps.decisionTs ? new Date(summary.timestamps.decisionTs).toLocaleString('ja-JP') : '未取得'} · fresh {summary.freshness.decision ? 'yes' : 'no'}</span>
+    <span>Decision {summary.timestamps.decisionTs ? new Date(summary.timestamps.decisionTs).toLocaleString('ja-JP') : '未取得'} · fresh {effectiveDecisionFresh ? 'yes' : 'no'}</span>
     {summary.actual.activeRunnerSha && <span>Runner SHA {summary.actual.activeRunnerSha.slice(0, 12)}… · {summary.actual.activeRunnerState}</span>}
     {summary.errors.length > 0 && <span className="text-amber-200">{summary.errors.join(' / ')}</span>}
-    <span>V4 decision sourceにはLIVE順位・native scoreがないため、順位未評価です。</span>
+    {noCandidateSource && noCandidateState === 'FRESH_NO_CANDIDATE'
+      ? <span className="text-cyan-100">判定済み・候補なし（V4 fresh） / NO_NATIVE_ENTRY_CANDIDATES。新規発注候補はありません。</span>
+      : noCandidateSource && noCandidateState === 'STALE'
+        ? <span className="text-amber-200">前回の候補なし観測は鮮度期限切れ（V4 stale）。新しい判定取得まで発注不可です。</span>
+      : <span>V4 decision sourceにはLIVE順位・native scoreがないため、順位未評価です。</span>}
   </div>;
 }
 
@@ -216,16 +229,21 @@ export function RealtimeRankingBoard() {
 
   const renderStrategyBadges = (row: RankRow, compact = false) => {
     const linked = strategyBadgesFor(row);
+    const noV4CandidateCycle = Boolean(data?.v12V4 && data.v12V4.freshness.decision && data.v12V4.routeCoverage.candidateCount === 0 && data.v12V4.routeCoverage.filteredCount === 0 && data.v12V4.errors.length === 0);
     if (!linked.length) {
       return <span className="rank-strategy-empty" title="取引ロジックの紐付けが現在の判定・設定資料から確認できません">ロジック未確認</span>;
     }
     return <span className={'rank-strategy-badges ' + (compact ? 'rank-strategy-badges-compact' : '')}>
       {linked.map((candidate) => {
         const configOnly = candidate.source === 'CONFIG_ONLY';
-        const direction = configOnly ? '未判定' : candidate.side === 'UNKNOWN' ? '方向未取得' : candidate.side;
+        const direction = configOnly
+          ? candidate.logic === 'V12_V4' && noV4CandidateCycle ? '候補なし' : '未判定'
+          : candidate.side === 'UNKNOWN' ? '方向未取得' : candidate.side;
         const tone = configOnly || !candidate.fresh ? 'rank-strategy-wait' : direction === 'LONG' ? 'rank-strategy-long' : direction === 'SHORT' ? 'rank-strategy-short' : 'rank-strategy-wait';
         const description = configOnly
-          ? '監視設定上の候補。現行Productionでの登録・方向は未照合'
+          ? candidate.logic === 'V12_V4' && noV4CandidateCycle
+            ? 'V4のfreshな今回cycleはNO_NATIVE_ENTRY_CANDIDATES。設定候補を現在判定として扱っていません'
+            : '監視設定上の候補。現行Productionでの登録・方向は未照合'
           : candidate.fresh ? '最新のロジック観測（発注条件成立を意味しません）' : '古いロジック観測。現在の方向は未確認';
         return <span
           key={row.id + ':' + candidate.logic + ':' + candidate.side}
@@ -245,7 +263,10 @@ export function RealtimeRankingBoard() {
 
   const cell = (row: RankRow) => {
     const movementId = rankingMovementId(row.rankingScope ?? row.logic, row);
-    const strategySummary = strategyBadgesFor(row).map((candidate) => logicLabel(candidate.logic) + ' ' + (candidate.source === 'CONFIG_ONLY' ? '未判定（設定候補）' : candidate.side)).join(' / ') || 'ロジック紐付け未確認';
+    const noV4CandidateCycle = Boolean(data?.v12V4 && data.v12V4.freshness.decision && data.v12V4.routeCoverage.candidateCount === 0 && data.v12V4.routeCoverage.filteredCount === 0 && data.v12V4.errors.length === 0);
+    const strategySummary = strategyBadgesFor(row).map((candidate) => logicLabel(candidate.logic) + ' ' + (candidate.source === 'CONFIG_ONLY'
+      ? candidate.logic === 'V12_V4' && noV4CandidateCycle ? '候補なし（V4 fresh）' : '未判定（設定候補）'
+      : candidate.side)).join(' / ') || 'ロジック紐付け未確認';
     const sourceDetails = [
       row.sourceRoute ? `Route ${row.sourceRoute}` : '',
       row.sourceRank && row.logic !== 'MARKET' ? `Source rank ${row.sourceRank}（LIVE順位ではありません）` : '',
