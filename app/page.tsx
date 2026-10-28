@@ -9,6 +9,7 @@ import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { V12V4RuntimePanel } from "@/components/features/V12V4RuntimePanel";
 import { V12RouteInventoryPanel } from "@/components/features/V12RouteInventoryPanel";
+import { buildRuntimeLineageDisplay } from "@/lib/runtime-lineage-display";
 
 function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
   return (
@@ -62,10 +63,11 @@ export default function HomePage() {
   const { snapshot: productionRuntime, error: productionRuntimeError } = useProductionRuntime();
   const { formatPrice } = useCurrency();
   const caps = productionRuntime?.caps;
+  const v12 = productionRuntime?.v12;
   const q102 = productionRuntime?.quality102;
   const pengu = productionRuntime?.pengu;
   const v52 = productionRuntime?.v52;
-  const lineage = productionRuntime?.runtimeLineage;
+  const lineageDisplay = productionRuntime ? buildRuntimeLineageDisplay(productionRuntime) : null;
   const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
   const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
   const positions = snapshot?.positions ?? [];
@@ -81,10 +83,11 @@ export default function HomePage() {
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">V12はV4 target仕様とVPS実runtimeを別々に表示します。PENGU Short V20 / Recovery V8、FET BRK48、Q102 Causal V4、V52 Stock、HYPEサイドカーも本番Runtimeの読取値とともに表示します。取得できない状態をLIVEと推測しません。</p>
             <div className="mt-5 flex min-w-0 flex-wrap gap-2 text-[11px] font-semibold [overflow-wrap:anywhere]">
               <span className="min-w-0 break-words rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{pengu?.strategyId ?? "PENGU runtime未取得"}</span>
-              <span className={`min-w-0 break-words rounded-full border px-3 py-1.5 ${productionRuntime && lineage?.synchronized ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>{productionRuntime ? (lineage?.synchronized ? `Production ${productionRuntime.releaseSha.slice(0, 12)} / runtime SHA同期` : `Production ${productionRuntime.releaseSha.slice(0, 12)} / RUNTIME MISMATCH`) : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : ""}`}</span>
+              <span className={`min-w-0 break-words rounded-full border px-3 py-1.5 ${lineageDisplay?.tone === "healthy" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : lineageDisplay?.tone === "scoped" ? "border-cyan-400/25 bg-cyan-500/10 text-cyan-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`} title={lineageDisplay?.detail}>{lineageDisplay?.label ?? `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : ""}`}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `Crypto共有損失上限 ${caps.sharedCryptoDailyLossPct}%` : "Crypto risk runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `V52損失上限 ${caps.stockDailyLossPct}%` : "V52 risk runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `Portfolio Gross上限 ≤ ${caps.totalGross.toFixed(1)}x` : "Portfolio runtime未取得"}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{v12 ? `V12 Score≥${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} / ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 contract runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps && v52 ? `V52 ${v52.policyId} / Stock ${caps.stockGross.toFixed(2)}x / Slot ${caps.v52V50Gross.toFixed(2)}x` : "V52 runtime未取得"}</span>
               <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">{q102 && caps ? `Q102 ${q102.selectorMode}: 1 Slot / ${caps.quality102Gross.toFixed(2)}x / HV ${q102.familyGross.HIGH_VOL.toFixed(3)}x` : "Q102 runtime未取得"}</span>
             </div>

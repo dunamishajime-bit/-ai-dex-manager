@@ -83,6 +83,9 @@ export function scoreKindLabel(row: RankRow): string {
   if (row.scoreKind === "MARKET") return row.scoreLabel || "Aster共通市場Score（参考・非発注）";
   if (row.scoreKind === "NATIVE") return row.scoreLabel || "実測スコア";
   if (row.scoreKind === "GATE_COMPLETION") return row.scoreLabel || "Gate充足度（発火確率ではありません）";
+  if (row.logic === "V12_V4" && row.fresh && row.sourceStatus === "NOT_EVALUATED" && row.reason.includes("NO_NATIVE_ENTRY_CANDIDATES")) {
+    return "判定済み（候補なし / native score未提供）";
+  }
   if (row.sourceStatus === "STALE" || !row.fresh) return "未評価（STALE / 発注不可）";
   if (row.sourceStatus === "SOURCE_ERROR") return "未評価（観測取得エラー）";
   return row.scoreLabel && !/native score has no verified/i.test(row.scoreLabel)

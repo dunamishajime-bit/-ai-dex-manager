@@ -6,14 +6,16 @@ import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-conf
 import { LiveRuntimeBadge } from "@/components/layout/LiveRuntimeBadge";
 import { V12V4RuntimePanel } from "@/components/features/V12V4RuntimePanel";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
+import { buildRuntimeLineageDisplay } from "@/lib/runtime-lineage-display";
 
 function BannerContent() {
   const { snapshot: runtime, error: runtimeError } = useProductionRuntime();
   const caps = runtime?.caps;
+  const v12 = runtime?.v12;
   const pengu = runtime?.pengu;
   const q102 = runtime?.quality102;
   const v52 = runtime?.v52;
-  const lineage = runtime?.runtimeLineage;
+  const lineageDisplay = runtime ? buildRuntimeLineageDisplay(runtime) : null;
   return (
     <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-white/80">
       <span className="inline-flex items-center gap-1.5 font-bold text-emerald-200">
@@ -21,11 +23,12 @@ function BannerContent() {
         {runtime && pengu && v52 ? `V12 V4 / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}
       </span>
       <span>{config.executionVenue}</span>
-      <span className={runtime && lineage?.synchronized ? "text-emerald-200" : "text-amber-200"}>
-        {runtime ? (lineage?.synchronized ? `Production ${runtime.releaseSha.slice(0, 12)} / runtime SHA同期` : `Production ${runtime.releaseSha.slice(0, 12)} / RUNTIME MISMATCH`) : `Production runtime未接続${runtimeError ? `: ${runtimeError}` : ""}`}
+      <span className={lineageDisplay?.tone === "healthy" ? "text-emerald-200" : lineageDisplay?.tone === "scoped" ? "text-cyan-200" : "text-amber-200"} title={lineageDisplay?.detail}>
+        {lineageDisplay?.label ?? `Production runtime未接続${runtimeError ? `: ${runtimeError}` : ""}`}
       </span>
       <span>{caps ? `Crypto共有損失上限 ${caps.sharedCryptoDailyLossPct}% / V52 ${caps.stockDailyLossPct}%` : "Risk contract runtime未取得"}</span>
       <span>{caps ? `Portfolio Gross上限 ${caps.totalGross.toFixed(1)}x` : "Gross runtime未取得"}</span>
+      <span>{v12 ? `V12 Score≥${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} / ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 contract runtime未取得"}</span>
       <V12V4RuntimePanel compact />
       <span>{pengu && caps ? `PENGU ${pengu.strategyId} / ${caps.penguGross.toFixed(2)}x / Recovery ${pengu.recoveryRule} ${pengu.recoveryInitialGross.toFixed(2)}x / hard-stop後${pengu.hardStopCooldownHours}h` : "PENGU runtime未取得"}</span>
       <span>{v52 && caps ? `V52 ${v52.policyId} / Slot ${caps.v52V50Gross.toFixed(2)}x / Stock ${caps.stockGross.toFixed(2)}x / Hold≤${v52.maximumHoldingHours}h` : "V52 runtime未取得"}</span>

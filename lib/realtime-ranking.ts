@@ -66,6 +66,7 @@ export function topRankedSymbols(rows:RankRow[],scope:string):RealtimeTopSlot[]{
  let placeholder:RealtimeTopSlot['status']='NOT_EVALUATED';
  if(scoped.some(row=>row.sourceStatus==='SOURCE_ERROR'))placeholder='SOURCE_ERROR';
  else if(scoped.some(row=>row.fresh&&row.rankingContractAvailable===true))placeholder='NO_CANDIDATE';
+ else if(scoped.some(row=>row.fresh&&row.sourceStatus==='NOT_EVALUATED'&&row.reason.includes('NO_NATIVE_ENTRY_CANDIDATES')))placeholder='NO_CANDIDATE';
  else if(scoped.some(row=>row.sourceStatus==='STALE'))placeholder='STALE';
  while(slots.length<3)slots.push({slot:(slots.length+1) as 1|2|3,status:placeholder});
  return slots;

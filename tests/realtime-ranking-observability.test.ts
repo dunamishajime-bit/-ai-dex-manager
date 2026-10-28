@@ -107,13 +107,14 @@ test("stale and failed V4 decision sources are represented explicitly, never as 
   assert.deepEqual(topRankedSymbols(errorRows, "V12_V4").map((slot) => slot.status), ["SOURCE_ERROR", "SOURCE_ERROR", "SOURCE_ERROR"]);
 });
 
-test("empty but fresh V4 batch is NOT_EVALUATED rather than a manufactured no-signal row", () => {
-  const empty = snapshot({ candidates: [], filtered: [] });
+test("empty but fresh V4 batch is an explicit no-candidate wait state, not a manufactured no-signal row", () => {
+  const empty = snapshot({ candidates: [], filtered: [], routeCoverage: { ...snapshot().routeCoverage, candidateCount: 0, filteredCount: 0, observed: 0 } });
   const [row] = v12V4SnapshotToRankRows(empty, now);
   assert.equal(row.sourceStatus, "NOT_EVALUATED");
+  assert.equal(row.fresh, true);
   assert.equal(row.score, null);
-  assert.match(row.reason, /source row/i);
-  assert.deepEqual(topRankedSymbols([row], "V12_V4").map((slot) => slot.status), ["NOT_EVALUATED", "NOT_EVALUATED", "NOT_EVALUATED"]);
+  assert.match(row.reason, /NO_NATIVE_ENTRY_CANDIDATES/);
+  assert.deepEqual(topRankedSymbols([row], "V12_V4").map((slot) => slot.status), ["NO_CANDIDATE", "NO_CANDIDATE", "NO_CANDIDATE"]);
 });
 
 test("Q102 score normalization preserves numeric zero but does not turn null or absent values into zero", () => {

@@ -48,8 +48,9 @@ export function v12V4SnapshotToRankRows(snapshot:V12V4HpSnapshot,now=Date.now())
   })),
  ];
  if(!rows.length){
-  const sentinelStatus=sourceStatus==='FRESH'?'NOT_EVALUATED':sourceStatus;
-  rows.push(make('—','V12_V4','WAIT',[{key:'source',label:'V4 decision rows',state:'UNKNOWN',detail:sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':sentinelStatus==='STALE'?'V4 decision source stale':'このcycleにV4 candidate/filtered rowなし',kind:'signal'},runtimeGate],false,checkedAt,sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':'V4 source row未出力',{
+  const noNativeEntryCandidates=sourceStatus==='FRESH' && snapshot.freshness.decision && snapshot.routeCoverage.candidateCount===0 && snapshot.routeCoverage.filteredCount===0 && snapshot.errors.length===0;
+  const sentinelStatus=noNativeEntryCandidates||sourceStatus==='FRESH'?'NOT_EVALUATED':sourceStatus;
+  rows.push(make('—','V12_V4','WAIT',[{key:'source',label:'V4 decision rows',state:'UNKNOWN',detail:sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':sentinelStatus==='STALE'?'V4 decision source stale':noNativeEntryCandidates?'判定済み・ネイティブエントリー候補なし':'このcycleにV4 candidate/filtered rowなし',kind:'signal'},runtimeGate],noNativeEntryCandidates,checkedAt,noNativeEntryCandidates?'NO_NATIVE_ENTRY_CANDIDATES':sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':'V4 source row未出力',{
     metric:nativeMetric(undefined,'V4 decision source has no verified native score',false),rankingScope:'V12_V4',rankingEligible:false,rankingContractAvailable:false,sourceStatus:sentinelStatus,
   }));
  }

@@ -56,6 +56,7 @@ test("score labels distinguish native, gate completion, unavailable and numeric 
   assert.equal(scoreKindLabel(row({ id: "native", logic: "Q102", symbol: "BTCUSDT", score: 0, scoreKind: "NATIVE", scoreLabel: "Proximity model units" })), "Proximity model units");
   assert.match(scoreKindLabel(row({ id: "gate", logic: "PENGU", symbol: "PENGUUSDT", score: 72, scoreKind: "GATE_COMPLETION", scoreLabel: "Gate充足度（発火確率ではありません）" })), /Gate充足度/);
   assert.match(scoreKindLabel(row({ id: "na", logic: "V12_V4", symbol: "BTCUSDT", score: null, scoreKind: "UNAVAILABLE", sourceRank: 1 })), /未評価/);
+  assert.match(scoreKindLabel(row({ id: "empty-v4", logic: "V12_V4", symbol: "—", score: null, scoreKind: "UNAVAILABLE", sourceStatus: "NOT_EVALUATED", reason: "NO_NATIVE_ENTRY_CANDIDATES", rankingScope: "V12_V4" })), /候補なし/);
 });
 
 test("movement snapshots include every ranked shared-market currency in ALL view", () => {
@@ -80,4 +81,6 @@ test("ranking board exposes score meaning and placeholder slot semantics accessi
   assert.match(source, /発火確率.*ありません/);
   assert.match(source, /順位未評価/);
   assert.match(source, /発注不可/);
+  assert.match(source, /NO_NATIVE_ENTRY_CANDIDATES/);
+  assert.match(source, /候補なし（V4 fresh）/);
 });
