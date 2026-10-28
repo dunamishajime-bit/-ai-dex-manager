@@ -297,7 +297,7 @@ function assertTradeParity(reference: Trade[], production: Trade[]) {
     assert.equal(production.length, reference.length, "Trade count differs from frozen reference");
     const diagnosticMismatches = reference.flatMap((expected, index) => {
         const actual = production[index];
-        if (!actual) return [{trade:index+1,reason:"MISSING_PRODUCTION_TRADE"}];
+        if (!actual) throw new Error("PENGU_PARITY_MISSING_PRODUCTION_TRADE:" + (index + 1));
         const fields = (["side","entryTime","exitTime","reason","entryPrice","exitPrice","gross","pnl"] as const)
             .filter(key => key === "side" || key === "reason" || key === "entryTime" || key === "exitTime"
                 ? actual[key] !== expected[key]
