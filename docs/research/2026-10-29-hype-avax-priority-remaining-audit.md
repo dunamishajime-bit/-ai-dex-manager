@@ -110,3 +110,30 @@ prices/quantities, poisoned pending Gross, and invalid hard caps. Ten further
 corruption cases were added to tests/hype-zec-priority-capacity.test.ts.
 No actual position reduction, LIVE deployment, stop change or reservation
 release is executed by these pure tests. This branch remains DRAFT only.
+
+
+## FET conditional Gross priority: unnecessary full liquidation prevented
+In lib/disdex-strict-portfolio-planner.ts, old core-admission behavior scheduled
+a full FET residual reduction whenever any V12/PENGU/V52/Q102 intent arrived,
+even when enough Gross was still free. The pure planner now preserves FET
+and its protection if any positive class+total+strategy Gross can accept the
+priority intent. If Gross is fully exhausted, FET is preempted ONLY when
+removing it actually makes an accepted core entry possible. Invalid owner
+mark evidence is still blocked. Regression: 32/32 isolated tests PASS.
+
+## V52 chained preemptions: recheck capacity before every owner reduction
+The V52 stock engine previously ran IDLE_RESIDUAL, FET, Q102, V12 and
+HYPE_ZEC reduction helpers before checking whether capacity was already
+available. New code reads fresh gross plus reservations before every stage,
+skips every reduction if full requested stock exposure fits, refuses to
+liquidate owners on partial spare Gross, and blocks stock-cap violations
+that a crypto closure cannot fix. If IDLE already freed enough Gross,
+FET/Q102 will not be reduced. A read failure blocks ordering.
+Six no-venue-order mocked Python tests PASS. Existing V52 source self-test
+and full TypeScript project typecheck PASS on isolated VPS.
+Extra reads under a genuine capacity shortage need API-budget evidence
+and formal operator certification before any Production activation.
+
+This research affects economic selection, so it remains DRAFT PR #296
+and must NOT be silently merged into Codex's already separately handled
+PR #295. No LIVE service, order, STOP, or position changed.
