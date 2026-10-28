@@ -40,6 +40,9 @@ test("accepts a fresh marker and exposes its completed tick", () => {
 
 test("rejects marker lineage, service, future, and stale mismatches", () => {
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ runtimeSha: "d".repeat(40) }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_RUNTIME_SHA_MISMATCH");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ runnerId: [runner.runnerId] }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_RUNNER_ID_INVALID");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ runtimeSha: [sha] }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_SHA_INVALID");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ serviceUnit: [runner.unit] }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_INVALID");
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ runnerId: "PENGU_V8" }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_RUNNER_ID_MISMATCH");
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ serviceUnit: "wrong.service" }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_MISMATCH");
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ tickCompletedAt: 10_001 }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_FUTURE");
@@ -75,10 +78,20 @@ test("read-only snapshot reader distinguishes missing and fresh marker files", a
   const root = await mkdtemp(join(tmpdir(), "disdex-health-tick-"));
   process.env.DISDEX_HEALTH_SNAPSHOT_TICK_ROOT = root;
   process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE = "LEGACY";
-  const { readRunnerTickHeartbeat, RUNNER_DEFINITIONS } = await import("../scripts/ops/root/disdex-runner-health-snapshot-current.mjs");
+  const { readRunnerTickHeartbeat, projectValidatedTickEvidence, RUNNER_DEFINITIONS } = await import("../scripts/ops/root/disdex-runner-health-snapshot-current.mjs");
   assert.ok(RUNNER_DEFINITIONS.every((entry) => Number.isFinite(entry.tickMaxAgeMs) && entry.tickMaxAgeMs > 0));
   assert.equal(RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "PENGU_V8")?.tickMaxAgeMs, 3 * 60 * 60_000);
-  assert.equal(RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "V12_X1_ALL")?.tickMaxAgeMs, 2 * 60 * 60_000);
+  assert.equal(RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "V12_X1_ALL")?.tickMaxAgeMs, 3 * 60 * 60_000);
+  const q102Window = RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "QUALITY102_CAUSAL_V1")?.tickMaxAgeMs;
+  assert.ok(q102Window >= 60 * 60_000 + 30_000);
+  const { nextQuality102DaemonWaitMs, QUALITY102_HOUR_MS } = await import("../lib/quality102-live-scheduling.ts");
+  assert.ok(nextQuality102DaemonWaitMs("no-signal", 5 * 60_000, 30_000, 5_000) <= q102Window);
+  assert.ok(q102Window >= QUALITY102_HOUR_MS + 30_000);
+  assert.deepEqual(projectValidatedTickEvidence({ valid: false, reason: "RUNNER_TICK_HEARTBEAT_FUTURE", marker: { tickCompletedAt: 70_000, status: "fake", reason: "fake" } }), {
+    lastTickAt: 0,
+    tickStatus: null,
+    tickReason: "RUNNER_TICK_HEARTBEAT_FUTURE",
+  });
   const missing = await readRunnerTickHeartbeat(runner, 10_000);
   assert.equal(missing.present, false);
   assert.equal(missing.reason, "RUNNER_TICK_HEARTBEAT_MISSING");

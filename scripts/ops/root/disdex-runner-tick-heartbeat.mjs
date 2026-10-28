@@ -1,7 +1,7 @@
 export const RUNNER_TICK_HEARTBEAT_SCHEMA = "disdex-runner-tick-heartbeat/v1";
 
 function validSha(value) {
-  return /^[0-9a-f]{40}$/i.test(String(value || ""));
+  return typeof value === "string" && /^[0-9a-f]{40}$/i.test(value);
 }
 
 function result(reason, ageMs = null, marker = null) {
@@ -11,9 +11,12 @@ function result(reason, ageMs = null, marker = null) {
 export function validateRunnerTickHeartbeat(runner, marker, now) {
   if (!marker || typeof marker !== "object" || Array.isArray(marker)) return result("RUNNER_TICK_HEARTBEAT_MISSING");
   if (marker.schema !== RUNNER_TICK_HEARTBEAT_SCHEMA) return result("RUNNER_TICK_HEARTBEAT_SCHEMA_MISMATCH", null, marker);
-  if (String(marker.runnerId || "") !== String(runner.runnerId || "")) return result("RUNNER_TICK_HEARTBEAT_RUNNER_ID_MISMATCH", null, marker);
-  if (String(marker.runtimeSha || "").toLowerCase() !== String(runner.expectedSha || "").toLowerCase()) return result("RUNNER_TICK_HEARTBEAT_RUNTIME_SHA_MISMATCH", null, marker);
-  if (String(marker.serviceUnit || "") !== String(runner.unit || "")) return result("RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_MISMATCH", null, marker);
+  if (typeof marker.runnerId !== "string" || typeof runner.runnerId !== "string") return result("RUNNER_TICK_HEARTBEAT_RUNNER_ID_INVALID", null, marker);
+  if (marker.runnerId !== runner.runnerId) return result("RUNNER_TICK_HEARTBEAT_RUNNER_ID_MISMATCH", null, marker);
+  if (typeof marker.runtimeSha !== "string" || typeof runner.expectedSha !== "string") return result("RUNNER_TICK_HEARTBEAT_SHA_INVALID", null, marker);
+  if (marker.runtimeSha.toLowerCase() !== runner.expectedSha.toLowerCase()) return result("RUNNER_TICK_HEARTBEAT_RUNTIME_SHA_MISMATCH", null, marker);
+  if (typeof marker.serviceUnit !== "string" || typeof runner.unit !== "string") return result("RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_INVALID", null, marker);
+  if (marker.serviceUnit !== runner.unit) return result("RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_MISMATCH", null, marker);
   if (!validSha(marker.runtimeSha) || !validSha(runner.expectedSha)) return result("RUNNER_TICK_HEARTBEAT_SHA_INVALID", null, marker);
   for (const counter of ["ordersSent", "cancelsSent", "positionChangesSent"]) {
     if (!Number.isSafeInteger(marker[counter]) || marker[counter] < 0) {

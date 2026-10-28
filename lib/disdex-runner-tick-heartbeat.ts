@@ -23,18 +23,22 @@ export type RunnerTickHeartbeat = Omit<RunnerTickHeartbeatInput, "root"> & {
   reason: string;
 };
 
-function assertFiniteInteger(value: number, label: string) {
+function assertNonnegativeInteger(value: number, label: string) {
   if (!Number.isSafeInteger(value) || value < 0) throw new Error(`RUNNER_TICK_HEARTBEAT_${label}_INVALID`);
 }
 
+function assertPositiveInteger(value: number, label: string) {
+  if (!Number.isSafeInteger(value) || value <= 0) throw new Error(`RUNNER_TICK_HEARTBEAT_${label}_INVALID`);
+}
+
 function assertSha(value: string) {
-  if (!/^[0-9a-f]{40}$/i.test(value)) throw new Error("RUNNER_TICK_HEARTBEAT_SHA_INVALID");
+  if (typeof value !== "string" || !/^[0-9a-f]{40}$/i.test(value)) throw new Error("RUNNER_TICK_HEARTBEAT_SHA_INVALID");
 }
 
 function assertIdentity(input: RunnerTickHeartbeatInput) {
-  if (!/^[A-Za-z0-9_]+$/.test(input.runnerId)) throw new Error("RUNNER_TICK_HEARTBEAT_RUNNER_ID_INVALID");
+  if (typeof input.runnerId !== "string" || !/^[A-Za-z0-9_]+$/.test(input.runnerId)) throw new Error("RUNNER_TICK_HEARTBEAT_RUNNER_ID_INVALID");
   assertSha(input.runtimeSha);
-  if (input.serviceUnit !== input.serviceUnit.trim() || !input.serviceUnit.endsWith(`@${input.runtimeSha.toLowerCase()}.service`)) {
+  if (typeof input.serviceUnit !== "string" || input.serviceUnit !== input.serviceUnit.trim() || !input.serviceUnit.endsWith(`@${input.runtimeSha.toLowerCase()}.service`)) {
     throw new Error("RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_INVALID");
   }
   if (typeof input.status !== "string" || !input.status.trim()) throw new Error("RUNNER_TICK_HEARTBEAT_STATUS_INVALID");
@@ -48,12 +52,12 @@ export function runnerTickHeartbeatPath(root: string, runnerId: string): string 
 
 export async function writeRunnerTickHeartbeat(input: RunnerTickHeartbeatInput): Promise<RunnerTickHeartbeat> {
   assertIdentity(input);
-  assertFiniteInteger(input.tickStartedAt, "STARTED_AT");
-  assertFiniteInteger(input.tickCompletedAt, "COMPLETED_AT");
+  assertPositiveInteger(input.tickStartedAt, "STARTED_AT");
+  assertPositiveInteger(input.tickCompletedAt, "COMPLETED_AT");
   if (input.tickCompletedAt < input.tickStartedAt) throw new Error("RUNNER_TICK_HEARTBEAT_TIME_ORDER_INVALID");
-  assertFiniteInteger(input.ordersSent, "ORDERS_SENT");
-  assertFiniteInteger(input.cancelsSent, "CANCELS_SENT");
-  assertFiniteInteger(input.positionChangesSent, "POSITION_CHANGES_SENT");
+  assertNonnegativeInteger(input.ordersSent, "ORDERS_SENT");
+  assertNonnegativeInteger(input.cancelsSent, "CANCELS_SENT");
+  assertNonnegativeInteger(input.positionChangesSent, "POSITION_CHANGES_SENT");
   const marker: RunnerTickHeartbeat = {
     schema: RUNNER_TICK_HEARTBEAT_SCHEMA,
     runnerId: input.runnerId,

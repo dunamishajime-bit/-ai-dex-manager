@@ -20,6 +20,12 @@ def _nonnegative_int(value: Any, label: str) -> int:
     return value
 
 
+def _positive_int(value: Any, label: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError(f"RUNNER_TICK_HEARTBEAT_{label}_INVALID")
+    return value
+
+
 def runner_tick_heartbeat_path(root: Path | str, runner_id: str) -> Path:
     if not RUNNER_RE.fullmatch(runner_id):
         raise ValueError("RUNNER_TICK_HEARTBEAT_RUNNER_ID_INVALID")
@@ -48,8 +54,8 @@ def write_runner_tick_heartbeat(
         raise ValueError("RUNNER_TICK_HEARTBEAT_STATUS_INVALID")
     if not isinstance(reason, str):
         raise ValueError("RUNNER_TICK_HEARTBEAT_REASON_INVALID")
-    started = _nonnegative_int(tick_started_at, "STARTED_AT")
-    completed = _nonnegative_int(tick_completed_at, "COMPLETED_AT")
+    started = _positive_int(tick_started_at, "STARTED_AT")
+    completed = _positive_int(tick_completed_at, "COMPLETED_AT")
     if completed < started:
         raise ValueError("RUNNER_TICK_HEARTBEAT_TIME_ORDER_INVALID")
     counters = counters or {}

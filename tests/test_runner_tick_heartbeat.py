@@ -40,6 +40,18 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
                     counters={"ordersSent": 0, "cancelsSent": -1, "positionChangesSent": 0},
                     root=Path(root),
                 )
+            with self.assertRaises(ValueError):
+                write_runner_tick_heartbeat(
+                    runner_id="V52",
+                    runtime_sha="b" * 40,
+                    service_unit=f"disdex-v52-aster-only@{'b' * 40}.service",
+                    tick_started_at=0,
+                    tick_completed_at=1250,
+                    status="held",
+                    reason="x",
+                    counters={"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0},
+                    root=Path(root),
+                )
 
     def test_v52_live_entrypoint_records_completed_cycles(self):
         source = (Path(__file__).resolve().parents[1] / "scripts" / "disdex_v52_aster_only_legacy_engine.py").read_text(encoding="utf-8")

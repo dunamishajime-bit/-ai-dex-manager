@@ -101,6 +101,32 @@ test("rejects invalid identity, timestamps, and mutation counters", async () => 
     cancelsSent: 0,
     positionChangesSent: 0,
   }));
+  await assert.rejects(() => writeRunnerTickHeartbeat({
+    root,
+    runnerId: "V12_V4",
+    runtimeSha: SHA,
+    serviceUnit: UNIT,
+    tickStartedAt: 0,
+    tickCompletedAt: 1_250,
+    status: "locked",
+    reason: "LOCK_BUSY",
+    ordersSent: 0,
+    cancelsSent: 0,
+    positionChangesSent: 0,
+  }));
+  await assert.rejects(() => writeRunnerTickHeartbeat({
+    root,
+    runnerId: [] as any,
+    runtimeSha: SHA,
+    serviceUnit: UNIT,
+    tickStartedAt: 1_000,
+    tickCompletedAt: 1_250,
+    status: "locked",
+    reason: "LOCK_BUSY",
+    ordersSent: 0,
+    cancelsSent: 0,
+    positionChangesSent: 0,
+    } as any));
 });
 
 test("all TypeScript production Runner loops record their completed tick", () => {

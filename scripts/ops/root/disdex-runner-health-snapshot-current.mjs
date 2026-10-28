@@ -99,7 +99,7 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"),
     heartbeatFile: "v12-x1-all.json",
     maxStateAgeMs: 3 * 60 * 60_000,
-    tickMaxAgeMs: 2 * 60 * 60_000,
+    tickMaxAgeMs: 3 * 60 * 60_000,
 };
 const RUNNERS = [
     V12_RUNNER,
@@ -137,7 +137,7 @@ const RUNNERS = [
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", "/var/lib/disdex/quality102-causal-v1/state.json"),
         heartbeatFile: "quality102-causal-v1.json",
         maxStateAgeMs: 3 * 60 * 60_000,
-        tickMaxAgeMs: 15 * 60_000,
+        tickMaxAgeMs: 2 * 60 * 60_000,
     },
     {
         key: "FET_BRK48_RESIDUAL",
@@ -178,6 +178,15 @@ const RUNNERS = [
     },
 ];
 export const RUNNER_DEFINITIONS = RUNNERS;
+
+export function projectValidatedTickEvidence(tick) {
+    const marker = tick?.valid ? tick.marker : null;
+    return {
+        lastTickAt: Number.isSafeInteger(marker?.tickCompletedAt) && marker.tickCompletedAt > 0 ? marker.tickCompletedAt : 0,
+        tickStatus: typeof marker?.status === "string" ? marker.status : null,
+        tickReason: typeof marker?.reason === "string" ? marker.reason : tick?.reason || null,
+    };
+}
 
 function json(path) {
     return readFile(path, "utf8").then((raw) => JSON.parse(raw));
@@ -531,6 +540,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
     const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
+    const tickEvidence = projectValidatedTickEvidence(tick);
     const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
         ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
         : manualReviewReason
@@ -557,9 +567,9 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED",
         newOrdersAllowed: !blockedReason,
         heartbeatAt: now,
-        lastTickAt: tick.marker?.tickCompletedAt > 0 ? tick.marker.tickCompletedAt : 0,
-        tickStatus: tick.marker?.status || null,
-        tickReason: tick.marker?.reason || tick.reason,
+        lastTickAt: tickEvidence.lastTickAt,
+        tickStatus: tickEvidence.tickStatus,
+        tickReason: tickEvidence.tickReason,
         tickAgeMs: tick.ageMs,
         mainPid: Number(service?.pid || 0),
         nRestarts: Number(service?.nRestarts || 0),
@@ -586,7 +596,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
-        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: tick.marker?.status || null, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
+        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: tickEvidence.tickStatus, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
     };
 }
 
