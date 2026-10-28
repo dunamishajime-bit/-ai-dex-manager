@@ -1,0 +1,190 @@
+{
+  "schema": "q102-causal-v4-exact-source-aster-native-h1-stdout-receipt/v1",
+  "sourceSha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+  "execution": "actual TypeScript buildQuality102CausalV4Signal; signal-only no trading runner",
+  "venue": "Aster public futures 1h native",
+  "sourceManifestSha256": "5fa60e0591fe0a9d931cffe2394b26401872b2d5602b54b79a14ff975e3bbf38",
+  "symbolCount": 23,
+  "candleHoursPerSymbol": 5112,
+  "hoursTested": 24,
+  "start": "2026-08-09T00:00:00Z",
+  "endExclusive": "2026-08-10T00:00:00Z",
+  "candidateSideNonzeroCount": 0,
+  "ordersSent": 0,
+  "testOrdersSent": 0,
+  "sourceExecutionCompleted24Hours": true,
+  "finalProgramExitCode": 1,
+  "finalProgramExitReason": "EACCES while saving report to root-owned /tmp/q102-native-aster-h1-source-20261028 after all 24 source evaluations",
+  "evidenceMethod": "transcribed from checked stdout lines of completed VPS isolated exact-source command, not independently saved by replay process",
+  "notFullYearEconomicCertification": true,
+  "results": [
+    {
+      "decisionTs": "2026-08-09T00:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5541
+    },
+    {
+      "decisionTs": "2026-08-09T01:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5419
+    },
+    {
+      "decisionTs": "2026-08-09T02:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5504
+    },
+    {
+      "decisionTs": "2026-08-09T03:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5439
+    },
+    {
+      "decisionTs": "2026-08-09T04:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5476
+    },
+    {
+      "decisionTs": "2026-08-09T05:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5456
+    },
+    {
+      "decisionTs": "2026-08-09T06:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5409
+    },
+    {
+      "decisionTs": "2026-08-09T07:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5432
+    },
+    {
+      "decisionTs": "2026-08-09T08:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5425
+    },
+    {
+      "decisionTs": "2026-08-09T09:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5426
+    },
+    {
+      "decisionTs": "2026-08-09T10:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5415
+    },
+    {
+      "decisionTs": "2026-08-09T11:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5447
+    },
+    {
+      "decisionTs": "2026-08-09T12:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5413
+    },
+    {
+      "decisionTs": "2026-08-09T13:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5519
+    },
+    {
+      "decisionTs": "2026-08-09T14:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5387
+    },
+    {
+      "decisionTs": "2026-08-09T15:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5407
+    },
+    {
+      "decisionTs": "2026-08-09T16:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5415
+    },
+    {
+      "decisionTs": "2026-08-09T17:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5533
+    },
+    {
+      "decisionTs": "2026-08-09T18:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5348
+    },
+    {
+      "decisionTs": "2026-08-09T19:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5464
+    },
+    {
+      "decisionTs": "2026-08-09T20:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5430
+    },
+    {
+      "decisionTs": "2026-08-09T21:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5378
+    },
+    {
+      "decisionTs": "2026-08-09T22:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5369
+    },
+    {
+      "decisionTs": "2026-08-09T23:00:00Z",
+      "side": 0,
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "observedRuntimeMs": 5439
+    }
+  ]
+}
