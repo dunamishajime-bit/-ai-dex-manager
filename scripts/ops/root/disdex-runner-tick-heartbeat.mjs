@@ -20,10 +20,14 @@ export function validateRunnerTickHeartbeat(runner, marker, now) {
       return result("RUNNER_TICK_HEARTBEAT_COUNTER_INVALID", null, marker);
     }
   }
-  const started = Number(marker.tickStartedAt);
-  const completed = Number(marker.tickCompletedAt);
-  if (!Number.isSafeInteger(started) || !Number.isSafeInteger(completed) || completed < started) return result("RUNNER_TICK_HEARTBEAT_TIMESTAMP_INVALID", null, marker);
-  if (completed > now + 60_000) return result("RUNNER_TICK_HEARTBEAT_FUTURE", completed - now, marker);
+  if (typeof marker.status !== "string" || !marker.status.trim()) return result("RUNNER_TICK_HEARTBEAT_STATUS_INVALID", null, marker);
+  if (typeof marker.reason !== "string") return result("RUNNER_TICK_HEARTBEAT_REASON_INVALID", null, marker);
+  const started = marker.tickStartedAt;
+  const completed = marker.tickCompletedAt;
+  if (!Number.isSafeInteger(started) || started <= 0 || !Number.isSafeInteger(completed) || completed <= 0 || completed < started) {
+    return result("RUNNER_TICK_HEARTBEAT_TIMESTAMP_INVALID", null, marker);
+  }
+  if (started > now || completed > now) return result("RUNNER_TICK_HEARTBEAT_FUTURE", Math.max(started, completed) - now, marker);
   const ageMs = Math.max(0, now - completed);
   const maxAgeMs = Number(runner.tickMaxAgeMs);
   if (!Number.isFinite(maxAgeMs) || maxAgeMs <= 0) return result("RUNNER_TICK_HEARTBEAT_MAX_AGE_INVALID", ageMs, marker);

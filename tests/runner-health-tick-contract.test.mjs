@@ -42,9 +42,19 @@ test("rejects marker lineage, service, future, and stale mismatches", () => {
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ runtimeSha: "d".repeat(40) }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_RUNTIME_SHA_MISMATCH");
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ runnerId: "PENGU_V8" }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_RUNNER_ID_MISMATCH");
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ serviceUnit: "wrong.service" }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_MISMATCH");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ tickCompletedAt: 10_001 }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_FUTURE");
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ tickCompletedAt: 70_001 }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_FUTURE");
   assert.equal(validateRunnerTickHeartbeat(runner, marker({ tickStartedAt: 3_000, tickCompletedAt: 4_000 }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_STALE");
   assert.equal(validateRunnerTickHeartbeat(runner, undefined, 10_000).reason, "RUNNER_TICK_HEARTBEAT_MISSING");
+});
+
+test("rejects malformed marker field types and non-positive timestamps", () => {
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ tickStartedAt: "9_000" }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_TIMESTAMP_INVALID");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ tickCompletedAt: null }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_TIMESTAMP_INVALID");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ tickStartedAt: 0, tickCompletedAt: 0 }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_TIMESTAMP_INVALID");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ status: {} }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_STATUS_INVALID");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ reason: null }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_REASON_INVALID");
+  assert.equal(validateRunnerTickHeartbeat(runner, marker({ reason: undefined }), 10_000).reason, "RUNNER_TICK_HEARTBEAT_REASON_INVALID");
 });
 
 test("does not treat a no-signal or held status as stale when the marker is fresh", () => {
@@ -64,7 +74,11 @@ test("rejects a fresh marker with invalid mutation counters", () => {
 test("read-only snapshot reader distinguishes missing and fresh marker files", async () => {
   const root = await mkdtemp(join(tmpdir(), "disdex-health-tick-"));
   process.env.DISDEX_HEALTH_SNAPSHOT_TICK_ROOT = root;
-  const { readRunnerTickHeartbeat } = await import("../scripts/ops/root/disdex-runner-health-snapshot-current.mjs");
+  process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE = "LEGACY";
+  const { readRunnerTickHeartbeat, RUNNER_DEFINITIONS } = await import("../scripts/ops/root/disdex-runner-health-snapshot-current.mjs");
+  assert.ok(RUNNER_DEFINITIONS.every((entry) => Number.isFinite(entry.tickMaxAgeMs) && entry.tickMaxAgeMs > 0));
+  assert.equal(RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "PENGU_V8")?.tickMaxAgeMs, 3 * 60 * 60_000);
+  assert.equal(RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "V12_X1_ALL")?.tickMaxAgeMs, 2 * 60 * 60_000);
   const missing = await readRunnerTickHeartbeat(runner, 10_000);
   assert.equal(missing.present, false);
   assert.equal(missing.reason, "RUNNER_TICK_HEARTBEAT_MISSING");

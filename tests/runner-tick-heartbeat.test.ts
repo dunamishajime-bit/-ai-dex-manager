@@ -106,6 +106,7 @@ test("rejects invalid identity, timestamps, and mutation counters", async () => 
 test("all TypeScript production Runner loops record their completed tick", () => {
   const entrypoints = [
     "scripts/v12-v4-production-runner.ts",
+    "scripts/disdex-v12-x1-all-live-runner.ts",
     "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
     "scripts/disdex-quality102-causal-v1-live-runner.ts",
     "scripts/disdex-fet-brk48-live-runner.ts",

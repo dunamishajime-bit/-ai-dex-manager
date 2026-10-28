@@ -113,6 +113,7 @@ const RUNNERS = [
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH", "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"),
         heartbeatFile: "pengu-v8.json",
         maxStateAgeMs: 3 * 60 * 60_000,
+        tickMaxAgeMs: 3 * 60 * 60_000,
     },
     {
         key: "V52",
@@ -176,6 +177,7 @@ const RUNNERS = [
         tickMaxAgeMs: 20 * 60_000,
     },
 ];
+export const RUNNER_DEFINITIONS = RUNNERS;
 
 function json(path) {
     return readFile(path, "utf8").then((raw) => JSON.parse(raw));

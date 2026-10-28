@@ -9,6 +9,7 @@ import { FileV12DecisionObservationStore } from "../lib/v12-decision-observation
 import { V12LiveExecutionEngine } from "../lib/v12-live-execution-engine";
 import { FileV12X1AllRunnerStateStore, type V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
 import { assertV12StrictLiveConfiguration, V12StrictAsterLiveAdapter } from "../lib/v12-strict-live-adapter";
+import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 const TWO_HOURS_MS = 2 * 60 * 60_000;
 
@@ -115,7 +116,21 @@ async function main() {
     process.on("SIGTERM", stop);
 
     do {
+        const tickStartedAt = Date.now();
         const result = await built.engine.tick();
+        const resultRecord = result as unknown as Record<string, unknown>;
+        await writeRunnerTickHeartbeat({
+            runnerId: "V12_X1_ALL",
+            runtimeSha: built.releaseSha,
+            serviceUnit: `disdex-v12-x1-all@${built.releaseSha}.service`,
+            tickStartedAt,
+            tickCompletedAt: Date.now(),
+            status: String(result.status),
+            reason: String(result.reason || ""),
+            ordersSent: Number(resultRecord.ordersSent ?? 0),
+            cancelsSent: Number(resultRecord.cancelsSent ?? 0),
+            positionChangesSent: Number(resultRecord.positionChangesSent ?? 0),
+        });
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: built.runtime.strategyId, mode: built.runtime.mode, ...result }));
         if (result.status === "manual-review") process.exitCode = 2;
         if (!daemon || stopping || result.status === "manual-review") break;
