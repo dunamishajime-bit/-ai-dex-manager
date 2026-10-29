@@ -1,5 +1,6 @@
 import { mkdir, rename, unlink, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
+import { randomUUID } from "node:crypto";
 
 export const RUNNER_TICK_HEARTBEAT_SCHEMA = "disdex-runner-tick-heartbeat/v1" as const;
 export const DEFAULT_RUNNER_TICK_HEARTBEAT_ROOT = "/var/lib/disdex/runner-health";
@@ -50,6 +51,10 @@ export function runnerTickHeartbeatPath(root: string, runnerId: string): string 
   return join(root, "ticks", `${runnerId}.json`);
 }
 
+export function runnerTickHeartbeatTemporaryPath(path: string): string {
+  return join(dirname(path), `.${basename(path)}.${randomUUID()}.tmp`);
+}
+
 export async function writeRunnerTickHeartbeat(input: RunnerTickHeartbeatInput): Promise<RunnerTickHeartbeat> {
   assertIdentity(input);
   assertPositiveInteger(input.tickStartedAt, "STARTED_AT");
@@ -74,9 +79,9 @@ export async function writeRunnerTickHeartbeat(input: RunnerTickHeartbeatInput):
   const root = String(input.root || process.env.DISDEX_RUNNER_TICK_HEARTBEAT_ROOT || DEFAULT_RUNNER_TICK_HEARTBEAT_ROOT).trim();
   const path = runnerTickHeartbeatPath(root, input.runnerId);
   await mkdir(dirname(path), { recursive: true, mode: 0o750 });
-  const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+  const temporary = runnerTickHeartbeatTemporaryPath(path);
   try {
-    await writeFile(temporary, `${JSON.stringify(marker, null, 2)}\n`, { encoding: "utf8", mode: 0o640 });
+    await writeFile(temporary, `${JSON.stringify(marker, null, 2)}\n`, { encoding: "utf8", mode: 0o640, flag: "wx" });
     await rename(temporary, path);
   } catch (error) {
     await unlink(temporary).catch(() => undefined);

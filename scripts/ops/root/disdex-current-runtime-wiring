@@ -20,6 +20,7 @@ V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
 PENGU_STATE_ROOT="/var/lib/disdex/pengu-dual-ls-v2"
 HYPE_ZEC_STATE_ROOT="/var/lib/disdex/hype-zec-long"
 IDLE_PRIORITY_STATE_ROOT="/var/lib/disdex/idle-priority"
+RUNNER_TICK_HEARTBEAT_DIR="/var/lib/disdex/runner-health/ticks"
 LIVE_STATE_FILES=(
   "/var/lib/disdex/v12-x1-all/runner.json"
   "/var/lib/disdex/v12-v4/orders.json"
@@ -1973,6 +1974,42 @@ persistently_disable_v12() {
   done
 }
 
+ensure_runner_tick_storage() {
+  local parent="${RUNNER_TICK_HEARTBEAT_DIR%/*}" directory parent_metadata parent_mode
+  [[ -d "$parent" && ! -L "$parent" ]] || {
+    printf 'RUNNER_TICK_PARENT_INVALID path=%s\n' "$parent" >&2
+    return 1
+  }
+  parent_metadata="$(stat -c '%u:%g:%a' -- "$parent")"
+  [[ "$parent_metadata" =~ ^0:0:([0-7]{3,4})$ ]] || {
+    printf 'RUNNER_TICK_PARENT_OWNERSHIP_INVALID path=%s metadata=%s\n' "$parent" "$parent_metadata" >&2
+    return 1
+  }
+  parent_mode="${BASH_REMATCH[1]}"
+  [[ "$((8#${parent_mode} & 8#0022))" == "0" ]] || {
+    printf 'RUNNER_TICK_PARENT_MODE_INVALID path=%s metadata=%s\n' "$parent" "$parent_metadata" >&2
+    return 1
+  }
+  if [[ -e "$RUNNER_TICK_HEARTBEAT_DIR" || -L "$RUNNER_TICK_HEARTBEAT_DIR" ]]; then
+    [[ -d "$RUNNER_TICK_HEARTBEAT_DIR" && ! -L "$RUNNER_TICK_HEARTBEAT_DIR" ]] || {
+      printf 'RUNNER_TICK_PATH_INVALID path=%s\n' "$RUNNER_TICK_HEARTBEAT_DIR" >&2
+      return 1
+    }
+  fi
+  install -d -o deploy -g deploy -m 0700 "$RUNNER_TICK_HEARTBEAT_DIR"
+  [[ "$(stat -c '%U:%G:%a' -- "$RUNNER_TICK_HEARTBEAT_DIR")" == 'deploy:deploy:700' ]] || {
+    printf 'RUNNER_TICK_PERMISSIONS_INVALID path=%s metadata=%s\n' "$RUNNER_TICK_HEARTBEAT_DIR" "$(stat -c '%U:%G:%a' -- "$RUNNER_TICK_HEARTBEAT_DIR")" >&2
+    return 1
+  }
+  for directory in "$V12_DROPIN_DIR" "$PENGU_DROPIN_DIR" "$Q102_DROPIN_DIR" "$FET_DROPIN_DIR" "$V52_DROPIN_DIR" "$HYPE_DROPIN_DIR" "$IDLE_DROPIN_DIR"; do
+    [[ -n "$directory" ]] || continue
+    write_atomic "${directory}/zzzzzzzzzzzzzzzzzz-tick-heartbeat-write.conf" "[Service]
+ProtectSystem=strict
+ReadWritePaths=${RUNNER_TICK_HEARTBEAT_DIR}"
+  done
+  printf 'DISDEX_RUNNER_TICK_STORAGE_READY path=%s\n' "$RUNNER_TICK_HEARTBEAT_DIR"
+}
+
 apply_wiring() {
   require_root_for_apply
   assert_no_legacy_live_units
@@ -2006,6 +2043,7 @@ apply_wiring() {
     fet_core_preemption_ready="$(/usr/bin/python3 "$fet_readiness_guard" --approved-ready --sha "$DEPLOYED_SHA" --activation-path "$OPERATOR_ACTIVATION_PATH")"
   fi
   install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
+  ensure_runner_tick_storage
   install -d -o root -g root -m 0755 "${SHARED_ROOT}/operator-activation"
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
     printf 'V52 legacy crypto state path exists but is not a directory: %s\n' "$V52_LEGACY_CRYPTO_ROOT" >&2

@@ -1,0 +1,58 @@
+name: DisDex runner tick storage contracts
+
+on:
+  pull_request:
+    paths:
+      - lib/disdex-runner-tick-heartbeat.ts
+      - scripts/disdex_runner_tick_heartbeat.py
+      - scripts/ops/root/disdex-current-runtime-wiring
+      - scripts/ops/root/disdex-runner-tick-heartbeat.mjs
+      - scripts/ops/root/disdex-runner-health-snapshot-current.mjs
+      - scripts/ops/root/disdex-runner-watchdog-current.mjs
+      - tests/runner-tick-heartbeat.test.ts
+      - tests/runner-health-tick-contract.test.mjs
+      - tests/runner-tick-storage-contract.test.mjs
+      - tests/test_runner_tick_heartbeat.py
+      - package.json
+      - package-lock.json
+      - .github/workflows/disdex-runner-tick-storage-ci-20261029.yml
+  push:
+    branches:
+      - codex/disdex-production-safety-20261029
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-and-runtime-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: bash -n scripts/ops/root/disdex-current-runtime-wiring
+      - run: npx --no-install tsx --test tests/runner-tick-heartbeat.test.ts tests/runner-health-tick-contract.test.mjs tests/runner-tick-storage-contract.test.mjs
+      - run: python -m unittest tests.test_runner_tick_heartbeat -v
+      - name: Enforce read-only source boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          wiring = Path('scripts/ops/root/disdex-current-runtime-wiring').read_text(encoding='utf-8')
+          assert 'ensure_runner_tick_storage' in wiring
+          assert 'install -d -o deploy -g deploy -m 0700 "$RUNNER_TICK_HEARTBEAT_DIR"' in wiring
+          assert 'ReadWritePaths=${RUNNER_TICK_HEARTBEAT_DIR}' in wiring
+          assert 'chown -R deploy:deploy /var/lib/disdex/runner-health' not in wiring
+          assert 'DISDEX_API_KEY' not in wiring
+          assert 'ASTER_API_SECRET' not in wiring
+          assert 'curl ' not in wiring
+          print('DISDEX_RUNNER_TICK_STORAGE_SOURCE_GATE_PASS')
+          PY
