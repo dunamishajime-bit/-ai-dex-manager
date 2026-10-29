@@ -1,6 +1,6 @@
 # DisDex route-neutral owner-approved deployment - staged (2026-10-30)
 
-**State:** SOURCE READY FOR VPS STAGING. LIVE CUTOVER NOT AUTHORIZED.
+**State:** VPS HELPER STAGED ON NON-CURRENT RELEASE. LIVE CUTOVER NOT AUTHORIZED.
 
 This PR unifies the deployment approval rules, safety gates, and audit
 contract. It does **not** require every deployment to run through GitHub
@@ -9,11 +9,13 @@ direct SSH/operator-helper adapter. Both adapters must submit the same
 route-neutral approval contract to the same root-owned VPS helper.
 
 The source now contains an explicit root-only execution boundary for the
-first-stage `SHARED_CRYPTO_RISK_ONLY` scope. This source change does not by
-itself install the helper, create a root-owned activation artifact, move a
-release symlink, change a position or protective order, change Gross, change
-the Shared Risk limit, operate the Kill Switch, submit an order, or claim
-`LIVE_VERIFIED`.
+first-stage `SHARED_CRYPTO_RISK_ONLY` scope. The verified PR head
+`7f67c467a4606fd2476a0e5b556f880b2151ab0b` has been staged on the VPS as a
+root-owned immutable non-current release and its helper has been installed
+under `/usr/local`. This staging does not create a root-owned activation
+artifact, move a release symlink, change a position or protective order,
+change Gross, change the Shared Risk limit, operate the Kill Switch, submit
+an order, or claim `LIVE_VERIFIED`.
 
 ## 1. Common authorization contract
 
@@ -211,10 +213,11 @@ complete:
 3. Generate a new password-encrypted Ed25519 key on the owner's device and
    install only its public key in the protected Environment and the forced
    root helper.
-4. Install and certify the root-owned forced-command helper with exact scope,
-   plan reconstruction, nonce replay protection, venue/STOP/risk checks,
-   mutual exclusion, immutable release/runner pins, audit cycles, and safe
-   rollback. The source executor is mutation-capable only for
+4. The root-owned forced-command helper is now staged from the exact
+   `7f67c467...` release. Before any execution, the owner/operator must still
+   provision and independently certify the exact activation artifact, current
+   plan, runner-pin manifest, owner public key, signed venue evidence, and
+   rollback baseline. The source executor is mutation-capable only for
    `SHARED_CRYPTO_RISK_ONLY`; all other scopes remain fail-closed until their
    own transaction and audit implementation is certified.
 5. Verify the Codex adapter and Actions adapter against the same helper in a
@@ -229,7 +232,26 @@ never in repository files or logs: SSH private key, owner password, venue
 credentials, or token values. The repository may contain only the verifier,
 fixed adapters, public policy, and tests.
 
-## 7. Legacy path retirement
+## 7. Current VPS boundary
+
+The staging audit confirmed that the live `current` symlink remains pinned to
+the existing old common release and that V4, Q102, V52, and Shared Risk keep
+their existing active/enabled units and SHAs. The root-owned helper is
+available, but the following root-owned execution inputs are not yet
+provisioned on the VPS: `/etc/disdex/runner-pins.json`,
+`/var/lib/disdex/unified-deploy/current-plan.json`, the owner public key,
+nonce directory, scoped activation artifact, and before/after signed
+read-only venue evidence. The old live release directories are deploy-owned
+and therefore are not accepted as immutable root execution lineage. The
+existing root-owned `c9beb...` release was not modified because it does not
+contain the helper source.
+
+Until those genuine operator artifacts and accepted venue evidence exist, the
+helper must remain a staging/read-only installation. No token, approval date,
+nonce, runner map, or venue proof may be copied or synthesized to make the
+gate pass.
+
+## 8. Legacy path retirement
 
 `audit_legacy_deploy_paths.py` remains a read-only inventory. The current
 legacy write-capable workflows and broad SSH references are not silently

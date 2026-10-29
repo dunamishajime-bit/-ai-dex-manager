@@ -68,11 +68,15 @@ shell or apply flags outside the fixed contract.
 
 ### Task 3 — Scope matrix and adapter integration
 
-Extend contract validation and tests for all requested scopes. Implement
-explicitly safe no-order handling for Shared Risk, Margin Guard, monitors, HP,
-and rollback; individual runner scopes may not modify peers. Update both
-Actions and Codex adapters to invoke the same execute/preflight boundary and
-add source-contract checks for secret and command safety.
+Extend contract validation and tests for all requested scopes. Keep the
+scope matrix and both adapters route-neutral, but implement mutation only for
+the first certified `SHARED_CRYPTO_RISK_ONLY` transaction. Margin Guard,
+monitor, HP, individual runner, full-project, and rollback scopes must remain
+explicitly fail-closed until each has its own transaction, rollback, and
+three-cycle audit implementation. Individual runner scopes may not modify
+peers. Update both Actions and Codex adapters to invoke the same
+execute/preflight boundary and add source-contract checks for secret and
+command safety.
 
 ### Task 4 — VPS staging/read-only certification
 
