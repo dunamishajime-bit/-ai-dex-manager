@@ -33,7 +33,7 @@ ExecStartPre=+/usr/bin/chmod 0640 /etc/disdex/v12-v4-production-canary-permit.js
 ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json ]; then chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json && chmod 600 /var/lib/disdex/fet-brk48-residual/state.json; fi'
 # Separate V4 operator approval; never use existing X1-only acknowledgement.
-ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/%i --sha %i --runner V12_V4 --activation-path /var/lib/disdex/shared/operator-activation/v12-v4-full.json
+ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/%i --sha %i --runner V12_V4 --require-runner-sha-map --activation-path /var/lib/disdex/shared/operator-activation/v12-v4-full.json
 ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --daemon
 Restart=on-failure
 RestartPreventExitStatus=2

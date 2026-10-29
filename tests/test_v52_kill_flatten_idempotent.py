@@ -51,14 +51,16 @@ class V52KillFlattenIdempotencyTests(unittest.TestCase):
         self.assertTrue(prepared["killHold"])
 
 class V52KillHoldCadenceTests(unittest.TestCase):
-    def test_completed_kill_hold_uses_idle_cadence(self):
+    def test_completed_kill_hold_enforces_safe_idle_floor(self):
         engine = object.__new__(v52.V52AsterOnlyEngine)
         engine._upstream_fail_closed_hold = False
         engine.positions = lambda: {}
         original = v52.os.environ.get("DISDEX_STOCK_IDLE_INTERVAL_MS")
         try:
             v52.os.environ["DISDEX_STOCK_IDLE_INTERVAL_MS"] = "5000"
-            self.assertEqual(engine._loop_interval_ms({"killHold": True}), 5000)
+            self.assertEqual(engine._loop_interval_ms({"killHold": True}), 15_000)
+            v52.os.environ["DISDEX_STOCK_IDLE_INTERVAL_MS"] = "30000"
+            self.assertEqual(engine._loop_interval_ms({"killHold": True}), 30_000)
         finally:
             if original is None:
                 v52.os.environ.pop("DISDEX_STOCK_IDLE_INTERVAL_MS", None)

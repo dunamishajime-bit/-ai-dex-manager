@@ -7,6 +7,7 @@ import { join } from "node:path";
 
 import {
   runnerTickHeartbeatPath,
+  runnerTickHeartbeatTemporaryPath,
   writeRunnerTickHeartbeat,
 } from "../lib/disdex-runner-tick-heartbeat";
 
@@ -58,6 +59,14 @@ test("replaces an existing marker without leaving temporary files", async () => 
   assert.equal(second.tickCompletedAt, 2_500);
   assert.deepEqual(await readdir(join(root, "ticks")), ["PENGU_V8.json"]);
   assert.match(await readFile(join(root, "ticks", "PENGU_V8.json"), "utf8"), /PENGU_RATE_BUDGET_DEFERRED/);
+});
+
+test("same-PID same-millisecond writers use independent temporary inodes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "disdex-runner-tick-collision-"));
+  const finalPath = runnerTickHeartbeatPath(root, "V52");
+  const temporaryPaths = Array.from({ length: 80 }, () => runnerTickHeartbeatTemporaryPath(finalPath));
+  assert.equal(new Set(temporaryPaths).size, temporaryPaths.length);
+  assert.ok(temporaryPaths.every((temporaryPath) => temporaryPath.endsWith(".tmp")));
 });
 
 test("rejects invalid identity, timestamps, and mutation counters", async () => {

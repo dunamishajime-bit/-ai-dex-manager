@@ -1,7 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const PENDING_EXPOSURE_SCHEMA = "disdex-pending-exposure/v1" as const;
+export const PENDING_EXPOSURE_MAX_AGE_MS = 5 * 60_000;
 export type PendingExposureSleeve = "CRYPTO" | "STOCK";
 export type PendingExposureStatus = "PENDING" | "SUBMITTED" | "UNKNOWN" | "RELEASED";
 
@@ -135,6 +137,14 @@ export function pendingExposurePath(path = process.env.DISDEX_PENDING_EXPOSURE_R
     return resolve(path || "/var/lib/disdex/shared/pending-exposure.json");
 }
 
+function assertFreshActivePendingExposure(registry: PendingExposureRegistry, now = Date.now()) {
+    for (const entry of registry.entries) {
+        if (!ACTIVE_STATUSES.has(entry.status)) continue;
+        if (entry.updatedAt > now + 5_000) throw new Error(`PENDING_EXPOSURE_FUTURE:${entry.reservationId}`);
+        if (now - entry.updatedAt > PENDING_EXPOSURE_MAX_AGE_MS) throw new Error(`PENDING_EXPOSURE_STALE:${entry.reservationId}`);
+    }
+}
+
 async function assertSafePath(path: string, allowMissing = true) {
     try {
         const stats = await lstat(path);
@@ -146,10 +156,12 @@ async function assertSafePath(path: string, allowMissing = true) {
     }
 }
 
-export async function readPendingExposureRegistry(path = pendingExposurePath()): Promise<PendingExposureRegistry> {
+export async function readPendingExposureRegistry(path = pendingExposurePath(), now = Date.now()): Promise<PendingExposureRegistry> {
     await assertSafePath(path);
     try {
-        return normalizePendingExposureRegistry(JSON.parse(await readFile(path, "utf8")));
+        const registry = normalizePendingExposureRegistry(JSON.parse(await readFile(path, "utf8")));
+        assertFreshActivePendingExposure(registry, now);
+        return registry;
     } catch (error) {
         if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return emptyPendingExposureRegistry();
         throw error;
@@ -159,9 +171,9 @@ export async function readPendingExposureRegistry(path = pendingExposurePath()):
 async function atomicWrite(path: string, registry: PendingExposureRegistry) {
     await assertSafePath(path);
     await mkdir(dirname(path), { recursive: true });
-    const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+    const temporary = `${path}.${randomUUID()}.tmp`;
     try {
-        await writeFile(temporary, `${JSON.stringify(registry, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        await writeFile(temporary, `${JSON.stringify(registry, null, 2)}\n`, { encoding: "utf8", mode: 0o600, flag: "wx" });
         await rename(temporary, path);
     } catch (error) {
         await unlink(temporary).catch(() => undefined);
@@ -172,28 +184,29 @@ async function atomicWrite(path: string, registry: PendingExposureRegistry) {
 export async function upsertPendingExposure(
     entry: Omit<PendingExposureEntry, "status" | "updatedAt"> & { status?: PendingExposureStatus; updatedAt?: number },
     path = pendingExposurePath(),
+    now = Date.now(),
 ) {
-    const current = await readPendingExposureRegistry(path);
-    const normalized = normalizeEntry({ ...entry, status: entry.status || "PENDING", updatedAt: entry.updatedAt || Date.now() });
+    const current = await readPendingExposureRegistry(path, now);
+    const normalized = normalizeEntry({ ...entry, status: entry.status || "PENDING", updatedAt: entry.updatedAt ?? now });
     const next = normalizePendingExposureRegistry({
         ...current,
-        updatedAt: Date.now(),
+        updatedAt: now,
         entries: [...current.entries.filter((row) => row.reservationId !== normalized.reservationId), normalized],
     });
     await atomicWrite(path, next);
     return normalized;
 }
 
-export async function releasePendingExposure(reservationId: string, path = pendingExposurePath()) {
-    const current = await readPendingExposureRegistry(path);
+export async function releasePendingExposure(reservationId: string, path = pendingExposurePath(), now = Date.now()) {
+    const current = await readPendingExposureRegistry(path, now);
     const id = String(reservationId || "").trim();
     if (!id) throw new Error("PENDING_EXPOSURE_RESERVATION_ID_INVALID");
     const found = current.entries.some((row) => row.reservationId === id);
     if (!found) return false;
     const next = normalizePendingExposureRegistry({
         ...current,
-        updatedAt: Date.now(),
-        entries: current.entries.map((row) => row.reservationId === id ? { ...row, status: "RELEASED", updatedAt: Date.now() } : row),
+        updatedAt: now,
+        entries: current.entries.map((row) => row.reservationId === id ? { ...row, status: "RELEASED", updatedAt: now } : row),
     });
     await atomicWrite(path, next);
     return true;

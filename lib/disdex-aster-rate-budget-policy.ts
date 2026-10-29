@@ -37,6 +37,8 @@ export function nextAsterRateBudgetRetryMs(
   if (!Number.isInteger(attempt) || attempt < 0) throw new Error("ASTER_GLOBAL_RATE_BUDGET_RETRY_CONFIG_INVALID");
   if (!Number.isFinite(baseMs) || baseMs < 0 || !Number.isFinite(maxMs) || maxMs < 0) throw new Error("ASTER_GLOBAL_RATE_BUDGET_RETRY_CONFIG_INVALID");
   const exponential = Math.min(maxMs, baseMs * (2 ** attempt));
-  const jitter = Math.min(maxMs, exponential * (0.5 + Math.min(1, Math.max(0, random())) * 0.5));
+  const randomValue = Number(random());
+  const boundedRandom = Number.isFinite(randomValue) ? Math.min(1, Math.max(0, randomValue)) : 0;
+  const jitter = Math.min(maxMs, exponential * (0.5 + boundedRandom * 0.5));
   return Math.min(maxMs, Math.max(0, waitMs, Math.ceil(jitter)));
 }

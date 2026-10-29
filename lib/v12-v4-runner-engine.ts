@@ -267,7 +267,7 @@ export class V4RunnerEngine{
   await this.reconcileEntriesAndProtection(dispatcher,cycle);
   let [positions,openOrders,balances,peers,registry]=await Promise.all([
    d.client.getPositions(),d.client.getOpenOrders(),d.client.getBalances(),
-   d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
+   d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath,this.now()),
   ]);
   // After a crash between signed EXIT fill and STOP cancellation, retire only
   // the proven CLOSED leg's reduce-only STOP while preserving all surviving
@@ -278,7 +278,7 @@ export class V4RunnerEngine{
    for(const cid of toRetire)await d.adapter.cancel(cid);
    const refreshed=await Promise.all([
     d.client.getPositions(),d.client.getOpenOrders(),d.client.getBalances(),
-    d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
+    d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath,this.now()),
    ]);
    [positions,openOrders,balances,peers,registry]=refreshed;
    if(toRetire.some(cid=>openOrders.some(o=>o.clientOrderId===cid)))

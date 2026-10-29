@@ -2,6 +2,8 @@
   "schema": "disdex-current-live-target/v1",
   "date": "2026-10-05",
   "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
+  "deploymentTarget": "professional-dismanager.net",
+  "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
   "productionBaseSha": "b9a0c86d6cf72b0209e44edc8883e45e6d241c5b",
   "strategy": {
     "v12": {
@@ -112,41 +114,10 @@
       "cryptoGrossHardCap": 5,
       "totalGrossHardCap": 8,
       "grossGovernor": {
+        "mode": "FIXED_BASE_CAPS_ONLY",
+        "dynamicAllocationEnabled": false,
         "baseAvailableBalanceReservePct": 15,
-        "tiers": [
-          {
-            "name": "PROFIT_1",
-            "minimumTwrIndex": 1.05,
-            "maximumDrawdownPct": 3,
-            "cryptoGrossCap": 3.25,
-            "desiredTotalGrossCap": 5,
-            "availableBalanceReservePct": 12.5
-          },
-          {
-            "name": "PROFIT_2",
-            "minimumTwrIndex": 1.1,
-            "maximumDrawdownPct": 2,
-            "cryptoGrossCap": 3.5,
-            "desiredTotalGrossCap": 6,
-            "availableBalanceReservePct": 10
-          },
-          {
-            "name": "PROFIT_3",
-            "minimumTwrIndex": 1.2,
-            "maximumDrawdownPct": 1,
-            "cryptoGrossCap": 4,
-            "desiredTotalGrossCap": 7,
-            "availableBalanceReservePct": 5
-          },
-          {
-            "name": "PROFIT_4",
-            "minimumTwrIndex": 1.3,
-            "maximumDrawdownPct": 0.5,
-            "cryptoGrossCap": 5,
-            "desiredTotalGrossCap": 8,
-            "availableBalanceReservePct": 0
-          }
-        ]
+        "researchTiersDisabled": ["PROFIT_1", "PROFIT_2", "PROFIT_3", "PROFIT_4"]
       }
     },
     "idlePriorityShort": {

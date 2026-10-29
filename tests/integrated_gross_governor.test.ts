@@ -57,7 +57,7 @@ test("missing profit/DD evidence fail-closes to normal entry caps", () => {
   assert.equal(out.cryptoHardCap, 5);
   assert.equal(out.totalHardCap, 8);
 });
-test("profit tier expands only with fresh profit/DD evidence", () => {
+test("profit/DD evidence does not expand formal production Gross caps", () => {
   const out = resolveIntegratedGrossGovernor({
     now: NOW,
     equityUsd: 100,
@@ -67,13 +67,14 @@ test("profit tier expands only with fresh profit/DD evidence", () => {
     sharedDailyRisk: risk(2),
     portfolioDdGovernor: dd(1.10, 2),
   });
-  assert.equal(out.tier, "PROFIT_2");
-  assert.equal(out.cryptoEntryCap, 3.5);
-  assert.equal(out.totalEntryCap, 4.5);
-  assert.equal(out.availableBalanceReservePct, 10);
+  assert.equal(out.tier, "BASE");
+  assert.equal(out.cryptoEntryCap, 3);
+  assert.equal(out.totalEntryCap, 4.25);
+  assert.equal(out.availableBalanceReservePct, 15);
+  assert.equal(out.reason, "BASE_CAPS_DYNAMIC_GROSS_DISABLED");
 });
 
-test("5x Cross margin capacity prevents an 8x hard ceiling from becoming 8x exposure", () => {
+test("5x Cross margin capacity cannot bypass the fixed formal caps", () => {
   const out = resolveIntegratedGrossGovernor({
     now: NOW,
     equityUsd: 100,
@@ -83,9 +84,9 @@ test("5x Cross margin capacity prevents an 8x hard ceiling from becoming 8x expo
     sharedDailyRisk: risk(5),
     portfolioDdGovernor: dd(1.30, 0.5),
   });
-  assert.equal(out.tier, "PROFIT_4");
-  assert.equal(out.cryptoEntryCap, 5);
-  assert.equal(out.totalEntryCap, 5);
+  assert.equal(out.tier, "BASE");
+  assert.equal(out.cryptoEntryCap, 3);
+  assert.equal(out.totalEntryCap, 4.25);
   assert.equal(out.totalHardCap, 8);
 });
 test("existing exposure above a reduced effective cap is preserved, not force-trimmed", () => {

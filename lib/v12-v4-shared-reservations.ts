@@ -62,7 +62,7 @@ export class V4SharedReservations{
   const mark=[...doc.state.journal].reverse().find(x=>x.type==="ACCOUNT_MARK");
   if(!mark||mark.ts>now||now-mark.ts>30000)throw Error("FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED");
   if(doc.state.initial.holdProtected||doc.state.executionReview||doc.state.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12)throw Error("V4_SHARED_RESERVATION_HOLD");
-  const registry=await readPendingExposureRegistry(this.path);
+  const registry=await readPendingExposureRegistry(this.path,now);
   if(registry.accountScope!=="ASTER_FUTURES")throw Error("V4_SHARED_ACCOUNT_SCOPE_CONFLICT");
   const peers=new Map<string,number>(),covered=new Map<string,number>();
   for(const row of registry.entries.filter(active)){
@@ -89,14 +89,15 @@ export class V4SharedReservations{
   }
   const row=await upsertPendingExposure({reservationId:cid,idempotencyKey:cid,strategyId:V4_SHARED_OWNER,
    sleeve:"CRYPTO",symbol:command.symbol,side:command.positionSide,notionalUsd:leg.reservationUsd,
-   gross:leg.reservationUsd/doc.state.equityUsd,createdAt:now,runtimeSha:doc.releaseSha},this.path);
+   gross:leg.reservationUsd/doc.state.equityUsd,createdAt:now,runtimeSha:doc.releaseSha},this.path,now);
   await this.flush();return row;
  }
  async synchronize(cid:string){return underLease(this.lease,()=>this.synchronizeUnderLease(cid));}
  private async synchronizeUnderLease(cid:string){
   await this.assertAccountLease();
+  const now=this.now();
   const doc=this.store.read(),{intent,leg}=this.identity(doc,cid);
-  const registry=await readPendingExposureRegistry(this.path);
+  const registry=await readPendingExposureRegistry(this.path,now);
   if(registry.accountScope!=="ASTER_FUTURES")throw Error("V4_SHARED_ACCOUNT_SCOPE_CONFLICT");
   const row=registry.entries.find(x=>x.reservationId===cid);
   if(!row)throw Error("V4_SHARED_RESERVATION_MISSING");this.verifyRow(row,doc,cid);
@@ -104,7 +105,7 @@ export class V4SharedReservations{
    const terminal=doc.state.journal.find(x=>x.type==="ENTRY_TERMINAL"&&x.id===leg.id&&
     x.eventId==="venue-terminal:"+leg.candidate.symbol+":"+intent.venueOrderId);
    if(!intent.venueOrderId||!terminal||leg.status==="PENDING_ENTRY"||leg.reservationUsd!==0)throw Error("VERIFIED_TERMINAL_FILL_JOURNAL_REQUIRED");
-   if(row.status!=="RELEASED"){await releasePendingExposure(cid,this.path);await this.flush();}
+   if(row.status!=="RELEASED"){await releasePendingExposure(cid,this.path,now);await this.flush();}
    return;
   }
   if(row.status==="RELEASED")throw Error("V4_SHARED_RESERVATION_RELEASED_BEFORE_TERMINAL");
@@ -112,7 +113,7 @@ export class V4SharedReservations{
   const unknown=intent.stage==="UNKNOWN"||intent.stage==="SUBMITTING";
   const notional=unknown?Math.max(row.notionalUsd,leg.reservationUsd):leg.reservationUsd;
   await upsertPendingExposure({...row,notionalUsd:notional,gross:notional/doc.state.equityUsd,
-   status:unknown?"UNKNOWN":intent.stage==="PREPARED"?"PENDING":"SUBMITTED",updatedAt:this.now()},this.path);
+   status:unknown?"UNKNOWN":intent.stage==="PREPARED"?"PENDING":"SUBMITTED",updatedAt:now},this.path,now);
   await this.flush();
  }
 }

@@ -59,6 +59,13 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
         self.assertIn("tick_started_at", source)
         self.assertIn("tick_completed_at", source)
 
+    def test_python_writer_uses_exclusive_random_temp_and_atomic_replace(self):
+        source = (Path(__file__).resolve().parents[1] / "scripts" / "disdex_runner_tick_heartbeat.py").read_text(encoding="utf-8")
+        self.assertIn("tempfile.mkstemp", source)
+        self.assertIn("os.replace", source)
+        self.assertNotIn("process.pid", source)
+        self.assertNotIn("Date.now", source)
+
 
 if __name__ == "__main__":
     unittest.main()

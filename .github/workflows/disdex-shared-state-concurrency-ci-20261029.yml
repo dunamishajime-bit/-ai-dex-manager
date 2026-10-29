@@ -1,0 +1,49 @@
+name: DisDex shared state and API concurrency contracts
+
+on:
+  pull_request:
+    paths:
+      - lib/aster-v3-client.ts
+      - lib/disdex-account-order-lock.ts
+      - lib/disdex-aster-global-rate-budget.ts
+      - lib/disdex-aster-rate-budget-policy.ts
+      - lib/hype-zec-long-runner-state.ts
+      - lib/idle-priority-short-state.ts
+      - lib/idle-residual-long-state.ts
+      - tests/aster-global-rate-budget.test.ts
+      - tests/aster-418-fail-closed.test.ts
+      - tests/aster-rate-limit-cooldown.test.ts
+      - tests/idle-priority-short-state.test.ts
+      - tests/idle-residual-long-state.test.ts
+      - tests/hype-zec-long-state.test.ts
+      - tests/account-lock-renew.test.ts
+      - tests/shared-state-concurrency.test.ts
+      - package.json
+      - package-lock.json
+      - .github/workflows/disdex-shared-state-concurrency-ci-20261029.yml
+  push:
+    branches:
+      - codex/disdex-production-safety-20261029
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shared-state-and-api-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx --no-install tsx --test tests/shared-state-concurrency.test.ts tests/aster-global-rate-budget.test.ts tests/aster-418-fail-closed.test.ts tests/aster-rate-limit-cooldown.test.ts tests/idle-priority-short-state.test.ts tests/idle-residual-long-state.test.ts tests/hype-zec-long-state.test.ts tests/account-lock-renew.test.ts
+      - run: npx --no-install tsc --noEmit --pretty false
+      - name: Enforce non-live source boundary
+        shell: bash
+        run: |
+          ! grep -R -n -E 'curl .*aster|DISDEX_API_KEY|ASTER_API_SECRET|place(Market|Conditional|Stop)|cancelOrder' tests/shared-state-concurrency.test.ts
+          ! grep -R -n -E 'dynamic.?gross|DYNAMIC_GROSS' lib/disdex-aster-global-rate-budget.ts lib/disdex-aster-rate-budget-policy.ts

@@ -1,0 +1,66 @@
+name: DisDex Multi-SHA Release Evidence
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/production/current-live-target.json"
+      - "scripts/ops/root/disdex-multisha-release-evidence.mjs"
+      - "scripts/ops/root/disdex-runner-pin-manifest.mjs"
+      - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+      - "scripts/ops/root/disdex-runner-watchdog-current.mjs"
+      - "scripts/ops/root/disdex-runner-health-alert.ts"
+      - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+      - "scripts/ops/root/disdex-risk-api-final-preflight-20261028.py"
+      - "lib/disdex-account-order-lock.ts"
+      - "lib/disdex-pending-exposure-registry.ts"
+      - "lib/disdex-integrated-gross-governor.ts"
+      - "lib/disdex-strict-portfolio-planner.ts"
+      - "tests/disdex-production-safety-release-evidence.test.ts"
+      - ".github/workflows/disdex-multisha-release-evidence-ci-20261029.yml"
+  pull_request:
+    paths:
+      - "docs/production/current-live-target.json"
+      - "scripts/ops/root/disdex-multisha-release-evidence.mjs"
+      - "scripts/ops/root/disdex-runner-pin-manifest.mjs"
+      - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+      - "scripts/ops/root/disdex-runner-watchdog-current.mjs"
+      - "scripts/ops/root/disdex-runner-health-alert.ts"
+      - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+      - "scripts/ops/root/disdex-risk-api-final-preflight-20261028.py"
+      - "lib/disdex-account-order-lock.ts"
+      - "lib/disdex-pending-exposure-registry.ts"
+      - "lib/disdex-integrated-gross-governor.ts"
+      - "lib/disdex-strict-portfolio-planner.ts"
+      - "tests/disdex-production-safety-release-evidence.test.ts"
+      - ".github/workflows/disdex-multisha-release-evidence-ci-20261029.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  source-safety-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run release evidence contract tests
+        run: npx --no-install tsx --test tests/disdex-production-safety-release-evidence.test.ts
+
+      - name: Run release evidence self-test
+        run: node scripts/ops/root/disdex-multisha-release-evidence.mjs --self-test
+
+      - name: Typecheck source boundary
+        run: npx --no-install tsc --noEmit

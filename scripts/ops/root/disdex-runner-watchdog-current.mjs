@@ -42,6 +42,7 @@ const LEGACY_V12_RUNNER = {
     key: "V12_X1_ALL",
     expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
     releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    evidenceModeEnv: "DISDEX_WATCHDOG_V12_EVIDENCE_MODE",
     heartbeatFile: "v12-x1-all.json",
     unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
     expectedUnit: (sha) => `disdex-v12-x1-all@${sha}.service`,
@@ -55,6 +56,7 @@ const V4_V12_RUNNER = {
     key: "V12_V4",
     expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
     releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    evidenceModeEnv: "DISDEX_WATCHDOG_V12_EVIDENCE_MODE",
     operatorActivationPathEnv: "DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH",
     heartbeatFile: "v12-v4.json",
     unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
@@ -70,6 +72,7 @@ const OTHER_RUNNERS = [
         key: "PENGU_V8",
         expectedShaEnv: "DISDEX_WATCHDOG_PENGU_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_PENGU_RELEASE_ROOT",
+        evidenceModeEnv: "DISDEX_WATCHDOG_PENGU_EVIDENCE_MODE",
         heartbeatFile: "pengu-v8.json",
         unitEnv: "DISDEX_WATCHDOG_PENGU_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-pengu-dual-ls-v2@${sha}.service`,
@@ -83,6 +86,7 @@ const OTHER_RUNNERS = [
         key: "V52",
         expectedShaEnv: "DISDEX_WATCHDOG_V52_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_V52_RELEASE_ROOT",
+        evidenceModeEnv: "DISDEX_WATCHDOG_V52_EVIDENCE_MODE",
         heartbeatFile: "v52.json",
         unitEnv: "DISDEX_WATCHDOG_V52_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-v52-aster-only@${sha}.service`,
@@ -101,6 +105,7 @@ const OTHER_RUNNERS = [
         key: "QUALITY102_CAUSAL_V1",
         expectedShaEnv: "DISDEX_WATCHDOG_Q102_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_Q102_RELEASE_ROOT",
+        evidenceModeEnv: "DISDEX_WATCHDOG_Q102_EVIDENCE_MODE",
         heartbeatFile: "quality102-causal-v1.json",
         unitEnv: "DISDEX_WATCHDOG_Q102_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-quality102-causal-v1@${sha}.service`,
@@ -114,6 +119,7 @@ const OTHER_RUNNERS = [
         key: "FET_BRK48_RESIDUAL",
         expectedShaEnv: "DISDEX_WATCHDOG_FET_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_FET_RELEASE_ROOT",
+        evidenceModeEnv: "DISDEX_WATCHDOG_FET_EVIDENCE_MODE",
         heartbeatFile: "fet-brk48-residual.json",
         unitEnv: "DISDEX_WATCHDOG_FET_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-fet-brk48@${sha}.service`,
@@ -127,6 +133,7 @@ const OTHER_RUNNERS = [
         key: "HYPE_TREND_LONG",
         expectedShaEnv: "DISDEX_WATCHDOG_HYPE_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_HYPE_RELEASE_ROOT",
+        evidenceModeEnv: "DISDEX_WATCHDOG_HYPE_EVIDENCE_MODE",
         heartbeatFile: "hype-trend-long.json",
         unitEnv: "DISDEX_WATCHDOG_HYPE_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-hype-long@${sha}.service`,
@@ -140,6 +147,7 @@ const OTHER_RUNNERS = [
         key: "IDLE_PRIORITY_SHORT",
         expectedShaEnv: "DISDEX_WATCHDOG_IDLE_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_IDLE_RELEASE_ROOT",
+        evidenceModeEnv: "DISDEX_WATCHDOG_IDLE_EVIDENCE_MODE",
         heartbeatFile: "idle-priority-short.json",
         unitEnv: "DISDEX_WATCHDOG_IDLE_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-idle-priority-short@${sha}.service`,
@@ -354,6 +362,8 @@ function buildConfig(env) {
     for (const runner of runnersForEnv(env)) {
         const runnerExpectedSha = String(env[runner.expectedShaEnv] || expectedSha).trim().toLowerCase();
         const runnerReleaseRoot = String(env[runner.releaseRootEnv] || (runnerExpectedSha === expectedSha ? releaseRoot : `/home/deploy/disdex-trading/releases/${runnerExpectedSha}`)).trim();
+        const evidenceMode = String(env[runner.evidenceModeEnv] || "legacy").trim().toLowerCase();
+        if (!["legacy", "tick-v1"].includes(evidenceMode)) throw new Error(`${runner.key} evidence mode is invalid`);
         if (!exactSha(runnerExpectedSha) || !isAbsoluteCanonicalPath(runnerReleaseRoot)) {
             throw new Error(`${runner.key} release pin is incomplete or non-canonical`);
         }
@@ -364,6 +374,7 @@ function buildConfig(env) {
             unit,
             expectedSha: runnerExpectedSha,
             expectedCwd: runnerReleaseRoot,
+            evidenceMode,
             operatorActivationPath: operatorActivationPathForRunner(runner, env, operatorActivationPath),
             ...runnerPaths({ healthRoot }, runner),
         };
@@ -447,14 +458,18 @@ async function readHeartbeat(config, runner, now) {
     try { value = JSON.parse(raw); } catch { throw new Error(`${runner.key} heartbeat JSON is malformed`); }
     if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${runner.key} heartbeat is not an object`);
     value = normalizeV4Heartbeat(value, runner);
+    if (!("evidenceMode" in value) && runner.evidenceMode === "legacy") {
+        value = { ...value, evidenceMode: "legacy" };
+    }
     validateRunnerOwnedHeartbeat(value, runner.key);
-    const required = ["schema", "runnerId", "serviceUnit", "runtimeSha", "expectedSha", "workingDirectory", "mode", "liveEnabled", "safetyState", "heartbeatAt", "lastTickAt"];
+    const required = ["schema", "runnerId", "serviceUnit", "runtimeSha", "expectedSha", "workingDirectory", "evidenceMode", "mode", "liveEnabled", "safetyState", "heartbeatAt", "lastTickAt"];
     for (const key of required) if (!(key in value)) throw new Error(`${runner.key} heartbeat.${key} is missing`);
     const v4Schema = runner.key === "V12_V4" && value.schema === "disdex-v12-v4-runner-heartbeat/v1";
     if ((value.schema !== "disdex-runner-heartbeat/v1" && !v4Schema) || value.runnerId !== runner.key) throw new Error(`${runner.key} heartbeat identity is invalid`);
     if (!serviceAllowed(runner, value.serviceUnit, runner.expectedSha) || value.serviceUnit !== runner.unit) throw new Error(`${runner.key} heartbeat service unit is invalid`);
     if (value.runtimeSha !== runner.expectedSha || value.expectedSha !== runner.expectedSha) throw new Error(`${runner.key} heartbeat SHA does not match release`);
     if (value.workingDirectory !== runner.expectedCwd) throw new Error(`${runner.key} heartbeat cwd does not match release`);
+    if (value.evidenceMode !== runner.evidenceMode) throw new Error(`${runner.key} heartbeat evidence mode does not match release`);
     if (!heartbeatModeAllowed(value, runner.key)) throw new Error(`${runner.key} heartbeat mode is not LIVE or approved limited CANARY`);
     const healthReason = safeReason(value.healthReason || value.reason || "");
     if (value.liveEnabled !== true) return { present: true, valid: true, value, safeState: false, reason: healthReason || `${runner.key} service identity is not current` };
@@ -982,6 +997,7 @@ function selfTest() {
         runtimeSha: sha,
         expectedSha: sha,
         workingDirectory: config.releaseRoot,
+        evidenceMode: "legacy",
         mode: "LIVE",
         liveEnabled: true,
         safetyState: "HEALTHY",

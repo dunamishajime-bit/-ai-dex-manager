@@ -520,6 +520,8 @@ export function planStrictPortfolio(input: {
     const requestedTotalEntryCap = Number(input.entryGrossCaps?.totalGrossCap ?? governor.totalEntryCap);
     if (!Number.isFinite(requestedCryptoEntryCap) || requestedCryptoEntryCap <= 0 || requestedCryptoEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap + EPSILON) return rejectPlan("CRYPTO_ENTRY_GROSS_CAP_INVALID", input.active, equity);
     if (!Number.isFinite(requestedTotalEntryCap) || requestedTotalEntryCap <= 0 || requestedTotalEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap + EPSILON) return rejectPlan("TOTAL_ENTRY_GROSS_CAP_INVALID", input.active, equity);
+    if (requestedCryptoEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap + EPSILON) return rejectPlan("CRYPTO_ENTRY_GROSS_CAP_DYNAMIC_DISALLOWED", input.active, equity);
+    if (requestedTotalEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap + EPSILON) return rejectPlan("TOTAL_ENTRY_GROSS_CAP_DYNAMIC_DISALLOWED", input.active, equity);
     const cryptoEntryCeiling = Math.max(initialTotals.cryptoGross, requestedCryptoEntryCap);
     const totalEntryCeiling = Math.max(initialTotals.totalGross, requestedTotalEntryCap);
     if (initialTotals.cryptoGross > requestedCryptoEntryCap + EPSILON) return rejectPlan("PENDING_CRYPTO_GROSS_OVER_ENTRY_CAP", input.active, equity, pendingExposure);
