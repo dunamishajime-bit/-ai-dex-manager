@@ -21,6 +21,10 @@ class UnifiedHelperInstallerContractTests(unittest.TestCase):
         self.assertIn("(( (0$release_mode & 022) == 0 ))", installer)
         self.assertIn("(( (0$marker_mode & 0222) == 0 ))", installer)
 
+    def test_deployed_python_entrypoints_use_unix_line_endings(self):
+        for path in sorted((ROOT / "scripts/ops/deploy").glob("*.py")):
+            self.assertNotIn(b"\r\n", path.read_bytes(), path.as_posix())
+
     def test_authorized_keys_example_is_forced_command_only(self):
         example = (ROOT / "deploy/ssh/disdex-unified-forced-command.authorized_keys.example").read_text()
         self.assertIn("command=\"/usr/local/libexec/disdex-unified/disdex_unified_forced_command.py\"", example)
