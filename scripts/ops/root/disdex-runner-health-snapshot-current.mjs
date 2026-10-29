@@ -1,5 +1,6 @@
 import { execFile as execFileCallback } from "node:child_process";
-import { mkdir, readFile, readlink, rename, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, readlink, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
@@ -21,7 +22,10 @@ const MARGIN_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_REL
 const MARGIN_FRESHNESS_GRACE_MS = 120_000;
 const SHARED_RISK_FRESHNESS_GRACE_MS = 120_000;
 const ASTER_RATE_BUDGET_PATH = configuredPath("DISDEX_HEALTH_SNAPSHOT_RATE_BUDGET_PATH", "/var/lib/disdex/shared/aster-rate-budget.json");
+const PENDING_EXPOSURE_PATH = configuredPath("DISDEX_HEALTH_SNAPSHOT_PENDING_EXPOSURE_PATH", "/var/lib/disdex/shared/pending-exposure.json");
+const CANONICAL_SNAPSHOT_PATH = configuredPath("DISDEX_HEALTH_SNAPSHOT_CANONICAL_PATH", `${HEALTH_ROOT}/current.json`);
 const RATE_BACKLOG_DEGRADED_MS = 10_000;
+const PENDING_EXPOSURE_MAX_AGE_MS = 5 * 60_000;
 function classifySharedAsterRateBudget(raw, now) {
     if (!raw || raw.schema !== "disdex-aster-rate-budget/v1"
         || !Number.isFinite(raw.nextAllowedAt) || raw.nextAllowedAt < 0) {
@@ -197,6 +201,101 @@ export function projectValidatedTickEvidence(tick) {
         lastTickAt: Number.isSafeInteger(marker?.tickCompletedAt) && marker.tickCompletedAt > 0 ? marker.tickCompletedAt : 0,
         tickStatus: typeof marker?.status === "string" ? marker.status : null,
         tickReason: typeof marker?.reason === "string" ? marker.reason : tick?.reason || null,
+    };
+}
+
+function finiteOrNull(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+}
+
+async function pendingExposureStatus(now) {
+    try {
+        const raw = await json(PENDING_EXPOSURE_PATH);
+        if (!raw || raw.schema !== "disdex-pending-exposure/v1" || raw.accountScope !== "ASTER_FUTURES" || !Array.isArray(raw.entries)) {
+            return { status: "BLOCKED", reason: "PENDING_EXPOSURE_STATE_INVALID", activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
+        }
+        let cryptoGross = 0;
+        let stockGross = 0;
+        let activeCount = 0;
+        for (const entry of raw.entries) {
+            if (!["PENDING", "SUBMITTED", "UNKNOWN"].includes(String(entry?.status || ""))) continue;
+            const gross = Number(entry?.gross);
+            const updatedAt = Number(entry?.updatedAt);
+            if (!Number.isFinite(gross) || gross < 0 || !Number.isFinite(Number(entry?.notionalUsd)) || Number(entry.notionalUsd) < 0) {
+                return { status: "BLOCKED", reason: `PENDING_EXPOSURE_VALUE_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
+            }
+            if (!Number.isFinite(updatedAt) || updatedAt > now + 5_000 || now - updatedAt > PENDING_EXPOSURE_MAX_AGE_MS) {
+                return { status: "BLOCKED", reason: `PENDING_EXPOSURE_FRESHNESS_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
+            }
+            activeCount += 1;
+            if (String(entry?.sleeve || "") === "CRYPTO") cryptoGross += gross;
+            else if (String(entry?.sleeve || "") === "STOCK") stockGross += gross;
+            else return { status: "BLOCKED", reason: `PENDING_EXPOSURE_SLEEVE_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
+        }
+        return {
+            status: "HEALTHY",
+            reason: "",
+            updatedAt: finiteOrNull(raw.updatedAt),
+            activeCount,
+            cryptoGross,
+            stockGross,
+            totalGross: cryptoGross + stockGross,
+        };
+    } catch (error) {
+        return {
+            status: error?.code === "ENOENT" ? "UNAVAILABLE" : "BLOCKED",
+            reason: error?.code === "ENOENT" ? "PENDING_EXPOSURE_STATE_UNAVAILABLE" : "PENDING_EXPOSURE_STATE_READ_FAILED",
+            activeCount: null,
+            cryptoGross: null,
+            stockGross: null,
+            totalGross: null,
+        };
+    }
+}
+
+function stopProjection(state) {
+    const stop = state?.position?.residentStop || state?.residentStop || state?.protection || null;
+    const verified = stop?.protected === true && String(stop?.readBackStatus || "").toUpperCase() === "VERIFIED";
+    return {
+        status: verified ? "PROTECTED" : state?.pending ? "PENDING_RECONCILIATION" : "UNKNOWN",
+        protected: verified,
+        quantity: finiteOrNull(stop?.quantity),
+        lastReconciledAt: finiteOrNull(stop?.lastReconciledAt),
+    };
+}
+
+function rankingProjection(state) {
+    const raw = Array.isArray(state?.ranking) ? state.ranking : Array.isArray(state?.rankingTop3) ? state.rankingTop3 : [];
+    const items = raw.slice(0, 20).map((row) => ({
+        symbol: String(row?.symbol || "UNKNOWN"),
+        direction: String(row?.direction || row?.side || "UNKNOWN"),
+        logic: String(row?.logic || row?.route || row?.strategyId || "UNKNOWN"),
+        score: finiteOrNull(row?.score),
+    }));
+    return items.length > 0
+        ? { status: "AVAILABLE", items }
+        : { status: "UNAVAILABLE", reason: "RUNNER_RANKING_NOT_PUBLISHED", items: [] };
+}
+
+function runnerObservability(runner, state, heartbeat) {
+    const q102Source = state?.pending || state?.position || {};
+    return {
+        orderPermission: heartbeat.orderPermission,
+        stop: stopProjection(state),
+        ranking: rankingProjection(state),
+        q102: runner.key === "QUALITY102_CAUSAL_V1" ? {
+            family: q102Source.family || null,
+            layer: q102Source.layer || null,
+            score: finiteOrNull(q102Source.score || q102Source.quality102Score),
+            variant: q102Source.variant || null,
+            finalDecision: state?.lastDecision?.reason || state?.reason || heartbeat.tickReason || null,
+        } : null,
+        v4: runner.key === "V12_V4" ? {
+            routeCount: 41,
+            candidateCount: finiteOrNull(heartbeat.v12v4?.candidateCount),
+            status: heartbeat.v12v4?.status || null,
+        } : null,
     };
 }
 
@@ -415,12 +514,12 @@ async function marginGuardStatus(now) {
 
 async function atomicJson(path, value) {
     await mkdir(dirname(path), { recursive: true, mode: 0o750 });
-    const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
-    await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o640 });
+    const temporary = `${path}.${randomUUID()}.tmp`;
     try {
+        await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o640, flag: "wx" });
         await rename(temporary, path);
     } catch (error) {
-        await writeFile(temporary, "", { encoding: "utf8" }).catch(() => undefined);
+        await unlink(temporary).catch(() => undefined);
         throw error;
     }
 }
@@ -486,6 +585,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
                 nRestarts: 0,
                 serviceResult: "disabled",
             },
+            observability: runnerObservability(runner, null, heartbeat),
         };
     }
     let state;
@@ -548,6 +648,10 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
                 nRestarts: Number(service.nRestarts || 0),
                 serviceResult: String(service.result || "disabled"),
             },
+            observability: runnerObservability(runner, state, {
+                orderPermission: "DENIED_DISABLED",
+                tickReason: "V52_INTENTIONALLY_DISABLED",
+            }),
         };
     }
     const updatedAt = Math.max(
@@ -630,6 +734,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     return {
         heartbeat,
         diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, evidenceMode: runner.evidenceMode, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: decisionEvidence.tickStatus, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
+        observability: runnerObservability(runner, state, heartbeat),
     };
 }
 
@@ -659,13 +764,33 @@ async function main() {
     const marginGuard = await marginGuardStatus(now);
     const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, MARGIN_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
     const asterRateBudget = await sharedAsterRateBudgetStatus(now);
+    const pending = await pendingExposureStatus(now);
     const globalReasons = [killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
     const globalBlockReason = globalReasons.join("; ");
     const results = [];
+    const runnerSnapshots = {};
     for (const runner of RUNNERS) {
-        const { heartbeat, diagnostics } = await buildHeartbeat(runner, now, globalBlockReason);
+        const { heartbeat, diagnostics, observability } = await buildHeartbeat(runner, now, globalBlockReason);
         await atomicJson(`${HEALTH_ROOT}/heartbeats/${runner.heartbeatFile}`, heartbeat);
         results.push({ runner: runner.key, safetyState: heartbeat.safetyState, stateAt: heartbeat.lastTickAt, ...diagnostics });
+        runnerSnapshots[runner.key] = {
+            runnerId: runner.runnerId,
+            expectedSha: heartbeat.expectedSha,
+            runtimeSha: heartbeat.runtimeSha,
+            serviceUnit: heartbeat.serviceUnit,
+            workingDirectory: heartbeat.workingDirectory,
+            evidenceMode: heartbeat.evidenceMode,
+            safetyState: heartbeat.safetyState,
+            orderPermission: heartbeat.orderPermission,
+            healthReason: heartbeat.healthReason || "",
+            heartbeatAt: heartbeat.heartbeatAt,
+            lastTickAt: heartbeat.lastTickAt,
+            tickStatus: heartbeat.tickStatus || null,
+            tickReason: heartbeat.tickReason || null,
+            tickAgeMs: heartbeat.tickAgeMs,
+            diagnostics,
+            observability,
+        };
     }
     const overall = summarizeOverallSafety(globalReasons, results);
     const runnerOrderPermissions = Object.fromEntries(results.map((result) => [
@@ -679,24 +804,49 @@ async function main() {
             : asterRateBudget.status !== "HEALTHY"
                 ? "DEGRADED"
                 : "HEALTHY";
-    console.log(JSON.stringify({
-        status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_PASS",
-        overallSafetyState,
-        newOrdersAllowed: overall.globalOrdersAllowed,
-        globalOrdersAllowed: overall.globalOrdersAllowed,
+    const snapshot = {
+        schema: "disdex-runner-health-snapshot/v1",
+        generatedAt: now,
+        heartbeatAt: now,
+        authenticatedSourceRequired: true,
+        runnerPins: Object.fromEntries(RUNNERS.map((runner) => [runner.key, {
+            runnerId: runner.runnerId,
+            expectedSha: runner.expectedSha,
+            releaseRoot: runner.releaseRoot,
+            serviceUnit: runner.unit || null,
+            evidenceMode: runner.evidenceMode,
+        }])),
+        runners: runnerSnapshots,
         runnerOrderPermissions,
-        disabledRunners: overall.disabledRunners,
-        enabledRunnerBlocks: overall.enabledRunnerBlocks,
-        blockReasons: overall.blockReasons,
         sharedKillSwitchActive: Boolean(killReason),
         sharedRisk,
         sharedRiskService,
         marginGuard,
         marginGuardService,
         asterRateBudget,
+        pending,
+        gross: {
+            status: "UNAVAILABLE",
+            reason: "SIGNED_VENUE_POSITION_SNAPSHOT_REQUIRED",
+            cryptoGross: null,
+            stockGross: null,
+            availableCryptoGross: null,
+            availableStockGross: null,
+        },
+        overallSafetyState,
+        newOrdersAllowed: overall.globalOrdersAllowed,
+        globalOrdersAllowed: overall.globalOrdersAllowed,
+        disabledRunners: overall.disabledRunners,
+        enabledRunnerBlocks: overall.enabledRunnerBlocks,
+        blockReasons: overall.blockReasons,
         readOnly: true,
         tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
         ordersSent: 0,
+    };
+    await atomicJson(CANONICAL_SNAPSHOT_PATH, snapshot);
+    console.log(JSON.stringify({
+        status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_PASS",
+        ...snapshot,
         results,
     }));
 }

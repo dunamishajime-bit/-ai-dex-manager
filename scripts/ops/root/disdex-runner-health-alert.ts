@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { chmod, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
@@ -21,6 +22,7 @@ import {
 
 const ROOT = process.env.DISDEX_TRADING_ROOT || "/home/deploy/disdex-trading/current";
 const STATE_PATH = process.env.DISDEX_ALERT_STATE_PATH || "/var/lib/disdex/runner-health/private/email-alert-state.json";
+const HEALTH_ROOT = process.env.DISDEX_ALERT_HEALTH_ROOT || "/var/lib/disdex/runner-health";
 const DEFAULT_RECIPIENT = "dunamis.hajime@gmail.com";
 
 // No order, cancel, position, Kill Switch, or approval-gate mutation is
@@ -154,10 +156,63 @@ async function readState(): Promise<AlertState> {
 
 async function saveState(state: AlertState) {
   await mkdir(dirname(STATE_PATH), { recursive: true, mode: 0o700 });
-  const temporaryPath = `${STATE_PATH}.tmp-${process.pid}`;
-  await writeFile(temporaryPath, JSON.stringify(state, null, 2), { encoding: "utf8", mode: 0o600 });
-  await rename(temporaryPath, STATE_PATH);
+  const temporaryPath = `${STATE_PATH}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(temporaryPath, JSON.stringify(state, null, 2), { encoding: "utf8", mode: 0o600, flag: "wx" });
+    await rename(temporaryPath, STATE_PATH);
+  } catch (error) {
+    await unlink(temporaryPath).catch(() => undefined);
+    throw error;
+  }
   await chmod(STATE_PATH, 0o600);
+}
+
+function heartbeatFileFor(runner: typeof runners[number], service: string) {
+  if (runner.id === "V12") return service.startsWith("disdex-v12-v4@") ? "v12-v4.json" : "v12-x1-all.json";
+  if (runner.id === "PENGU_V8") return "pengu-v8.json";
+  if (runner.id === "V52") return "v52.json";
+  if (runner.id === "QUALITY102_CAUSAL_V1") return "quality102-causal-v1.json";
+  if (runner.id === "FET_BRK48_RESIDUAL") return "fet-brk48-residual.json";
+  if (runner.id === "HYPE_TREND_LONG") return "hype-trend-long.json";
+  if (runner.id === "IDLE_PRIORITY_SHORT") return "idle-priority-short.json";
+  return `${runner.id.toLowerCase()}.json`;
+}
+
+async function readRunnerEvidence(runner: typeof runners[number], service: string) {
+  const path = join(HEALTH_ROOT, "heartbeats", heartbeatFileFor(runner, service));
+  try {
+    const heartbeat = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
+    return { present: true, path, heartbeat };
+  } catch {
+    return { present: false, path, heartbeat: null };
+  }
+}
+
+function evidenceSha(unit: string, heartbeat: Record<string, unknown> | null) {
+  return String(heartbeat?.expectedSha || unit.match(/@([0-9a-f]{40})\.service$/i)?.[1] || "UNKNOWN").toLowerCase();
+}
+
+function evidenceDetail(runner: typeof runners[number], observed: { service: string; detail: string }, evidence: Awaited<ReturnType<typeof readRunnerEvidence>>, now = Date.now()) {
+  const heartbeat = evidence.heartbeat;
+  const expectedSha = evidenceSha(observed.service, heartbeat);
+  const actualSha = String(heartbeat?.runtimeSha || "UNKNOWN").toLowerCase();
+  const heartbeatAt = Number(heartbeat?.heartbeatAt || 0);
+  const lastTickAt = Number(heartbeat?.lastTickAt || 0);
+  const heartbeatAgeMs = Number.isFinite(heartbeatAt) && heartbeatAt > 0 ? Math.max(0, now - heartbeatAt) : null;
+  const tickAgeMs = Number.isFinite(lastTickAt) && lastTickAt > 0 ? Math.max(0, now - lastTickAt) : null;
+  const serviceMismatch = Boolean(heartbeat?.serviceUnit && observed.service && heartbeat.serviceUnit !== observed.service);
+  const reason = String(heartbeat?.healthReason || heartbeat?.tickReason || "").trim();
+  return [
+    observed.detail,
+    `runner=${runner.id}`,
+    `expectedSha=${expectedSha}`,
+    `actualSha=${actualSha}`,
+    `heartbeatAgeMs=${heartbeatAgeMs === null ? "UNKNOWN" : heartbeatAgeMs}`,
+    `tickAgeMs=${tickAgeMs === null ? "UNKNOWN" : tickAgeMs}`,
+    `serviceMismatch=${serviceMismatch}`,
+    `evidence=${evidence.present ? "PRESENT" : "UNAVAILABLE"}`,
+    ...(reason ? [`healthReason=${reason}`] : []),
+  ].join("; ");
 }
 
 function statusForRunner(runner: typeof runners[number], currentReleaseSha: string | undefined, observedAt = new Date()) {
@@ -219,7 +274,12 @@ async function main() {
   const currentReleaseSha = await readCurrentReleaseSha();
   for (const runner of runners) {
     const observed = statusForRunner(runner, currentReleaseSha, observedAt);
-    const observation = observeRunnerStatus(state.runners[runner.id], observed.status, observedAt);
+    const evidence = await readRunnerEvidence(runner, observed.service);
+    const combinedDetail = evidenceDetail(runner, observed, evidence, observedAt.getTime());
+    const heartbeatBlocked = evidence.heartbeat?.safetyState === "BLOCKED"
+      || (evidence.heartbeat?.evidenceMode === "tick-v1" && (!Number.isFinite(Number(evidence.heartbeat?.lastTickAt)) || Number(evidence.heartbeat?.lastTickAt) <= 0));
+    const effectiveStatus: RunnerHealthStatus = heartbeatBlocked && observed.status === "ACTIVE" ? "UNKNOWN" : observed.status;
+    const observation = observeRunnerStatus(state.runners[runner.id], effectiveStatus, observedAt);
     state.runners[runner.id] = observation.record;
     if (!observation.shouldSend || observation.transition === "NONE") continue;
 
@@ -230,11 +290,11 @@ async function main() {
     const mail = formatRunnerHealthEmail({
       runnerLabel: runnerLabel(runner),
       service: observed.service,
-      status: observed.status,
+      status: effectiveStatus,
       previousStatus: observation.previousNotifiedStatus,
       transition: observation.transition,
       observedAt,
-      detail: observed.detail,
+      detail: combinedDetail,
     });
     try {
       const provider = await sendAlert(mail.subject, mail.text);
