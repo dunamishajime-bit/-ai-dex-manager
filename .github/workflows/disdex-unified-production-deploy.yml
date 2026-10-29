@@ -45,7 +45,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment:
@@ -58,6 +57,7 @@ jobs:
       - name: Verify owner-controlled policy and exact authorization
         shell: bash
         env:
+          REF: ${{ github.ref }}
           READY: ${{ vars.DISDEX_DEPLOYMENT_POLICY_READY }}
           ALLOWED: ${{ vars.DISDEX_DEPLOY_ALLOWED_ACTORS }}
           OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
@@ -69,6 +69,7 @@ jobs:
           PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
         run: |
           set -euo pipefail
+          [[ "$REF" == "refs/heads/master" ]]
           [[ "$READY" == "OWNER_ENV_LOCKED_V1" ]]
           [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
           [[ "$PLAN_SHA" =~ ^[0-9a-f]{64}$ ]]
