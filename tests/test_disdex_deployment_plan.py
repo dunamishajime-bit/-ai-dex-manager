@@ -13,7 +13,7 @@ def plan(scope, runner=None):
         deploymentTarget="professional-dismanager.net",
         operatorTarget="DD1296_FINAL_ALLIN_10BPS",
         sourceSha=NEW, scope=scope, runners={k: OLD for k in IDS},
-        uiSha=OLD, monitorSha=OLD)
+        uiSha=OLD, monitorSha=OLD, ordersEnabled=False)
     if runner:
         obj["runners"][runner] = NEW
     return obj
@@ -30,6 +30,19 @@ class PlanTests(unittest.TestCase):
         current = plan("FULL_PROJECT")
         wanted = plan("QUALITY102_CAUSAL_V1", "QUALITY102_CAUSAL_V1")
         self.assertEqual(digest(wanted, current)[1]["changedRunners"], ["QUALITY102_CAUSAL_V1"])
+
+    def test_order_permission_is_explicit_for_order_capable_scope(self):
+        current = plan("FULL_PROJECT")
+        wanted = plan("V12_V4", "V12_V4")
+        wanted["ordersEnabled"] = True
+        self.assertTrue(digest(wanted, current)[1]["ordersEnabled"])
+
+    def test_shared_risk_cannot_enable_orders(self):
+        current = plan("FULL_PROJECT")
+        wanted = plan("SHARED_CRYPTO_RISK_ONLY", "SHARED_CRYPTO_RISK")
+        wanted["ordersEnabled"] = True
+        with self.assertRaisesRegex(ValueError, "order permission"):
+            digest(wanted, current)
 
     def test_shared_risk_forbids_peer_update(self):
         current = plan("FULL_PROJECT")

@@ -4,21 +4,31 @@ on:
   push:
     paths:
       - 'scripts/ops/deploy/disdex_owner_approval.py'
+      - 'scripts/ops/deploy/disdex_deployment_contract.py'
       - 'tests/test_disdex_owner_approval.py'
       - '.github/workflows/disdex-unified-production-deploy.yml'
       - '.github/workflows/disdex-owner-deploy-ci.yml'
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
       - 'scripts/ops/deploy/disdex_deployment_plan.py'
       - 'tests/test_disdex_deployment_plan.py'
+      - 'scripts/ops/deploy/disdex_codex_ssh.py'
+      - 'tests/test_disdex_codex_ssh_deploy.py'
+      - 'docs/implementation/DISDEX_UNIFIED_OWNER_APPROVAL_DEPLOYMENT_20261030.md'
+      - 'docs/superpowers/plans/2026-10-30-pr302-route-neutral-deployment.md'
   pull_request:
     paths:
       - 'scripts/ops/deploy/disdex_owner_approval.py'
+      - 'scripts/ops/deploy/disdex_deployment_contract.py'
       - 'tests/test_disdex_owner_approval.py'
       - '.github/workflows/disdex-unified-production-deploy.yml'
       - '.github/workflows/disdex-owner-deploy-ci.yml'
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
       - 'scripts/ops/deploy/disdex_deployment_plan.py'
       - 'tests/test_disdex_deployment_plan.py'
+      - 'scripts/ops/deploy/disdex_codex_ssh.py'
+      - 'tests/test_disdex_codex_ssh_deploy.py'
+      - 'docs/implementation/DISDEX_UNIFIED_OWNER_APPROVAL_DEPLOYMENT_20261030.md'
+      - 'docs/superpowers/plans/2026-10-30-pr302-route-neutral-deployment.md'
   workflow_dispatch:
 
 permissions:
@@ -40,17 +50,29 @@ jobs:
       - name: Source and workflow fail-closed contract
         run: |
           set -euo pipefail
-          python3 -m py_compile scripts/ops/deploy/disdex_owner_approval.py
+          python3 -m py_compile \
+            scripts/ops/deploy/disdex_deployment_contract.py \
+            scripts/ops/deploy/disdex_owner_approval.py \
+            scripts/ops/deploy/disdex_deployment_plan.py \
+            scripts/ops/deploy/disdex_codex_ssh.py
           python3 - <<'PY'
           from pathlib import Path
           p = Path('.github/workflows/disdex-unified-production-deploy.yml').read_text()
           for pattern in ('workflow_dispatch:', 'name: disdex-production',
                           'OWNER_ENV_LOCKED_V1', 'DISDEX_PRODUCTION_SSH_PRIVATE_KEY',
                           'DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM',
-                          '--read-approval-stdin', 'cancel-in-progress: false',
+                          '--read-approval-stdin', '--route GITHUB_ACTIONS',
+                          '--deployment-target', '--operator-target',
+                          '--orders-enabled', 'cancel-in-progress: false',
                           '[[ "$REF" == "refs/heads/master" ]]'):
               assert pattern in p, pattern
-          assert 'secrets.DISDEX_VPS_ROOT_PRIVATE_KEY' not in p
+          legacy_secret = 'secrets.' + 'DISDEX_VPS_ROOT_' + 'PRIVATE_KEY'
+          assert legacy_secret not in p
           assert 'password:' not in p
+          adapter = Path('scripts/ops/deploy/disdex_codex_ssh.py').read_text()
+          assert 'CODEX_SSH' in adapter
+          assert '/usr/local/sbin/disdex-unified-production-deploy' in adapter
+          assert 'shell=True' not in adapter
+          assert 'subprocess.run(command' in adapter
           print('DISDEX_OWNER_DEPLOY_POLICY_SOURCE_PASS')
           PY

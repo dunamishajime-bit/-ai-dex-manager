@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only GitHub Actions inventory: find old paths able to reach VPS root."""
+"""Read-only workflow inventory: distinguish policy paths from old VPS-root paths."""
 import argparse
 import json
 from pathlib import Path
@@ -9,6 +9,10 @@ OLD_KEY = re.compile(r"secrets\.(DISDEX_VPS_ROOT_PRIVATE_KEY|DISDEX_VPS_SSH_PRIV
 ROOT_SSH = re.compile(r"(?:ssh|scp)\b[\s\S]{0,300}?(?:root@|DISDEX_VPS)", re.I)
 MUTATIONS = re.compile(r"\bsystemctl\b|--apply\b|deploy\b|cutover\b|atomic_switch_current\b|"
                        r"\brm -rf\b|\bchown\b|\binstall -o\b|\bln -s\b", re.I)
+POLICY_WORKFLOWS = frozenset((
+    "disdex-owner-deploy-ci.yml",
+    "disdex-unified-production-deploy.yml",
+))
 
 def inventory(root):
     folder = Path(root) / ".github" / "workflows"
@@ -18,11 +22,14 @@ def inventory(root):
     for file in sorted(list(folder.glob("*.yml")) + list(folder.glob("*.yaml"))):
         text = file.read_text(encoding="utf-8")
         if OLD_KEY.search(text) or ROOT_SSH.search(text):
+            current_policy = file.name in POLICY_WORKFLOWS
             rows.append({
                 "workflow": str(file.relative_to(root)).replace("\\", "/"),
                 "legacyRootCredential": bool(OLD_KEY.search(text)),
                 "possiblyWriteCapable": bool(MUTATIONS.search(text)),
                 "workflowDispatch": "workflow_dispatch:" in text,
+                "currentPolicyPath": current_policy,
+                "legacyRetirementCandidate": not current_policy,
             })
     return rows
 
@@ -33,9 +40,11 @@ def main():
                    help="enable ONLY after new path and rollback are proven")
     a = p.parse_args()
     rows = inventory(a.root)
+    legacy_rows = [row for row in rows if row["legacyRetirementCandidate"]]
     print(json.dumps({"legacyVpsAccessWorkflowCount": len(rows),
+                      "legacyRetirementCandidateCount": len(legacy_rows),
                       "paths": rows}, indent=2))
-    if a.require_retired and rows:
+    if a.require_retired and legacy_rows:
         print("DISDEX_LEGACY_DEPLOY_PATHS_STILL_PRESENT")
         return 1
     print("DISDEX_LEGACY_DEPLOY_INVENTORY_COMPLETE_READONLY")

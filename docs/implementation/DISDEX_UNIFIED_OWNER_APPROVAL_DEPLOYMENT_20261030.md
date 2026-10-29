@@ -1,126 +1,253 @@
-# DisDex Unified Owner-Approved Deployment - Staged (2026-10-30)
+# DisDex route-neutral owner-approved deployment - staged (2026-10-30)
 
-STATE: SOURCE READY FOR CI REVIEW. NOT LIVE.
+**State:** SOURCE READY FOR CI REVIEW. NOT LIVE.
 
-This branch adds a proposed unified workflow entry point and a time-limited,
-Ed25519 owner approval verifier. It does NOT change LIVE systemd, orders,
-STOPs, gross, kill switch, or any VPS operator artifact.
+This PR unifies the deployment approval rules, safety gates, and audit
+contract. It does **not** require every deployment to run through GitHub
+Actions. GitHub Actions is the formal GPT/ChatGPT adapter; Codex may use the
+direct SSH/operator-helper adapter. Both adapters must submit the same
+route-neutral approval contract to the same root-owned VPS helper.
 
-## Authorization model
+This PR does not install the helper, change a systemd unit, move a release
+symlink, change a position or protective order, change Gross, change the
+Shared Risk limit, operate the Kill Switch, submit an order, or claim
+`LIVE_VERIFIED`.
 
-The owner and the owner's expressly authorized GPT GitHub App principals may
-prepare or request deployments. Only the owner can approve real-money LIVE.
+## 1. Common authorization contract
 
-A password is required on the owner's trusted device to decrypt an encrypted
-Ed25519 signing key. GitHub Actions receives only a signed public authorization
-token: repository, SHA, exact scope, immutable plan SHA-256, operator, nonce, issue time and expiry
-(maximum 300 seconds). Neither the password nor private key is sent to GPT,
-GitHub Actions inputs, repository files, VPS or logs.
+The approval is a short-lived Ed25519-signed grant. The owner enters the
+password only on the owner's trusted device to unlock the encrypted private
+key. The password and private key never enter GPT, Codex, GitHub, the VPS,
+workflow inputs, repository files, or logs.
 
-Independent approval must ALSO happen through the GitHub protected Environment
-named disdex-production. The owner must be its only required reviewer.
-The environment secrets are released to the job only after that review.
-If the sole owner starts and reviews the workflow, do not select the GitHub
-Prevent self-review option.
+The signed grant uses schema `disdex-owner-deployment-approval/v2` and binds
+all of the following:
 
-## One-time owner setup required before enabling LIVE
+| Field | Required rule |
+| --- | --- |
+| repository | `dunamishajime-bit/-ai-dex-manager` |
+| deploymentTarget | `professional-dismanager.net` |
+| operatorTarget | `DD1296_FINAL_ALLIN_10BPS` |
+| sourceSha | exact lower-case 40-character immutable SHA |
+| scope | one exact runner, Shared Risk-only, monitor-only, HP-only, full, or rollback scope |
+| runner plan | canonical plan hash containing every runner SHA, UI SHA, monitor SHA and scope delta |
+| route | exactly `GITHUB_ACTIONS` or `CODEX_SSH`; route is audit provenance, not extra authority |
+| ordersEnabled | explicit boolean; never inferred from scope or route |
+| operator | owner-approved operator identity |
+| issuedAt/expiresAt | maximum five-minute window |
+| nonce | root-side single-use replay journal |
 
-1. Protect master, workflow files, approval code and deployment policy using
-   GitHub branch/ruleset controls. The current production development branch
-   differs materially from master. Only audited bootstrap files should be
-   ported to master; DO NOT merge the whole trading branch into master.
-2. Create GitHub Environment disdex-production, owner-only required reviewer,
-   restrict to master, disable administrative bypass where possible.
-3. Create a NEW forced-command deploy SSH key, without general root shell.
-   Root-owned helper /usr/local/sbin/disdex-unified-production-deploy must
-   independently validate:
-   - owner approval signature and root-pinned public key;
-   - signed SHA, scope, target, source and unique nonce (single-use journal);
-   - current/next immutable markers and runner-specific SHA map;
-   - exact scope; no trading owner or permission changes for peer-only update;
-   - real signed Aster venue truth; STOP owner, protective qty, account budget;
-   - shared 7.5% loss limit; fixed Gross, pending, lock; no double risk Writer;
-   - no new synthetic tick markers; genuine writer/reader compatibility;
-   - post-cutover three cycles and safe rollback with no unsafe STOP operations.
-4. The root helper is NOT implemented in this source-phase branch. Without it
-   the new workflow MUST fail before any production mutation.
-5. Add to GitHub Environment secrets ONLY (not repository-level Secrets):
-   DISDEX_PRODUCTION_SSH_HOST, DISDEX_PRODUCTION_SSH_PRIVATE_KEY,
-   DISDEX_PRODUCTION_SSH_KNOWN_HOSTS,
-   DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM.
-   Add Environment vars:
-   DISDEX_PRODUCTION_OWNER_LOGIN, DISDEX_DEPLOY_ALLOWED_ACTORS (comma-separated),
-   DISDEX_PRODUCTION_SSH_PORT.
-6. DISDEX_DEPLOYMENT_POLICY_READY must remain UNSET. Set its value to
-   OWNER_ENV_LOCKED_V1 ONLY once protected Environment, root helper, rollback,
-   production permission checks, legacy workflow revocation and signed
-   approval are fully verified.
-7. After the new path works, remove old write-capable Actions workflows,
-   rotate/revoke old repository-level root SSH credentials and old VPS
-   sudo/authorized_keys deploy rights. Keep read-only audits and CI.
+The canonical plan uses schema `disdex-unified-deployment-plan/v1` and is
+reconstructed from fresh runtime/systemd readback by the trusted root helper.
+A repository copy is not venue truth. The helper must recompute the plan hash
+and reject any mismatch before a mutation.
 
-## Owner password / signing instructions (owner's device ONLY)
+The exact runner map includes:
 
-Requires OpenSSL 3 and Python 3:
+`V12_V4`, `PENGU_V8`, `QUALITY102_CAUSAL_V1`, `V52`,
+`FET_BRK48_RESIDUAL`, `HYPE_TREND_LONG`, `IDLE_PRIORITY_SHORT`,
+`SHARED_CRYPTO_RISK`, and `MARGIN_GUARD`.
 
-  openssl genpkey -algorithm ED25519 -aes-256-cbc -out disdex-owner-private.pem
-  openssl pkey -in disdex-owner-private.pem -pubout -out disdex-owner-public.pem
+The approval is not valid if a caller changes the SHA, runner map, scope,
+target, operator target, plan hash, route, order permission, or nonce after
+signing.
 
-Encrypted private key must be backed up securely and NEVER copied to GPT.
-Root-side helper and protected GitHub environment need only the public key.
-Signing prompts locally for the key password:
+The owner generates a token on the trusted device only. The command below is
+illustrative; the private key path stays local and the token is transferred
+only through the selected adapter's stdin. For the first Shared Risk-only
+stage, `orders-enabled` must remain `false`.
 
-  python scripts/ops/deploy/disdex_owner_approval.py sign \
-    --key disdex-owner-private.pem \
-    --repository dunamishajime-bit/-ai-dex-manager \
-    --sha EXACT_40_CHARACTER_SHA \
-    --scope SHARED_CRYPTO_RISK_ONLY \
-    --plan-sha256 SHA256_OF_CANONICAL_IMMUTABLE_DEPLOY_PLAN \
-    --operator YOUR_GITHUB_LOGIN
+```bash
+python3 scripts/ops/deploy/disdex_owner_approval.py sign \
+  --key /secure/local/disdex-owner-private.pem \
+  --repository dunamishajime-bit/-ai-dex-manager \
+  --deployment-target professional-dismanager.net \
+  --operator-target DD1296_FINAL_ALLIN_10BPS \
+  --sha EXACT_40_CHARACTER_SHA \
+  --scope SHARED_CRYPTO_RISK_ONLY \
+  --plan-sha256 CANONICAL_64_CHARACTER_PLAN_HASH \
+  --operator OWNER_GITHUB_LOGIN \
+  --route CODEX_SSH \
+  --orders-enabled false
+```
 
-Paste the signed token (not the password) into the workflow_dispatch
-owner_signed_token input. A token is bound to SHA and scope and expires
-after five minutes; root nonce journal must reject reuse.
+For the GPT route, use the same fields with `--route GITHUB_ACTIONS`. A
+route-specific token cannot be replayed through the other adapter, while the
+underlying target, scope, plan, order permission, and root safety checks stay
+identical.
 
-## Supported deployment scopes
+## 2. Shared safety gates for both routes
 
-FULL_PROJECT, V12_V4, QUALITY102_CAUSAL_V1, V52, PENGU_V8,
-FET_BRK48_RESIDUAL, HYPE_TREND_LONG, IDLE_PRIORITY_SHORT,
-SHARED_CRYPTO_RISK_ONLY, MARGIN_GUARD_ONLY, API_MONITORS,
-HP_ONLY, ROLLBACK.
+The root-owned helper is the final authority. It must fail closed unless all
+of these checks pass:
 
-For SHARED_CRYPTO_RISK_ONLY, ensure old/new Writer mutual exclusion and leave
-all other services, peer order permissions and protective orders unchanged.
-Never use the existing all-runner disdex-current-runtime-wiring --apply for
-this specific scope.
+1. The actual current release, runner-specific releases, release markers,
+   systemd units, PIDs, working directories, health snapshots, runner pins,
+   and heartbeat/tick readers agree with the submitted multi-SHA plan.
+2. The requested scope is an exact subset of the plan delta. A Shared Risk
+   deployment cannot change a peer runner, UI, monitor, or trading logic.
+3. The target is the canonical XServer VPS and the operator target is the
+   exact approved target. No arbitrary host, shell command, or alternate
+   operator target is accepted.
+4. A fresh signed Aster read-only proof, or an already accepted evidence
+   record within the existing freshness policy, reconciles positions, open
+   orders, protective STOP/TP ownership, pending exposure, and account lock.
+   If the latest allowed venue proof is unavailable, preserve existing STOPs
+   and do not grant new-order authority.
+5. Shared Crypto Risk remains capped at **7.5% daily loss**. Gross caps,
+   reservations, Margin Guard, Kill Switch state, API rate budget, account
+   lock, and pending reconciliation must remain safe and unchanged outside
+   the approved scope.
+6. The old and new Shared Risk Writers cannot be active together. Unknown or
+   partially reconciled STOPs are not classified as managed; the result is
+   manual review/fail closed.
+7. The helper has an immutable release marker, root-owned runner-pin
+   manifest, single-use nonce record, and safe rollback target. Rollback must
+   preserve existing protective orders and must not require a test order.
+8. After a successful change, three read-only audit cycles verify runner
+   SHA/PID/unit, actual tick versus supervisor heartbeat, positions and STOPs,
+   Shared Risk/Gross/pending/API cooldown, Kill Switch, and HP truth.
 
-## Honest limitations
+`ordersEnabled=false` is the safe default. A route does not imply order
+permission. If an existing production gate requires explicit order authority,
+the helper must block until the owner signs a grant whose `ordersEnabled=true`
+and the independent production gate accepts it. No approval may be expanded
+from Shared Risk-only into trading permission.
 
-Environment protection settings, SSH secrets, root deployment helper,
-password/key generation and live activation require the repository owner and
-an authorized VPS operator. They have NOT been performed. This PR provides
-a signed-approval verifier plus a workflow that FAILS CLOSED until all such
-requirements are met. There is no claim of LIVE_VERIFIED or a finished
-single-path deployment. The old workflows must not be deleted before a tested
-replacement and rollback exist.
+## 3. GPT/ChatGPT deployment route: GitHub Actions
 
-Signed planSha256 must equal a root-verified immutable deployment plan hash
-covering every runner SHA, STOP owner, target service and HP release. The
-VPS helper must recompute this hash from the pinned plan, not trust a caller-
-supplied hash. This prevents FULL_PROJECT multi-SHA substitution.
+`.github/workflows/disdex-unified-production-deploy.yml` is the formal GPT
+adapter. It is deliberately limited to `refs/heads/master`, the protected
+`disdex-production` Environment, the configured allowed actor list, and the
+owner-only Environment reviewer.
 
-## Legacy paths inventory
-Use python scripts/ops/deploy/audit_legacy_deploy_paths.py to enumerate
-GitHub Actions workflows that reference legacy VPS root secrets or SSH.
-It only reports filenames, not secret values. Enable --require-retired only
-after the new, independently verified deployment and rollback work. The
-presence of old root keys is a SECURITY BLOCKER for exclusive control.
+The workflow:
 
-## Canonical exact-scope plan hash
-The root helper must generate two validated plan JSON files: current actual
-runner SHA map obtained from systemd and desired immutable target. Run
-  python scripts/ops/deploy/disdex_deployment_plan.py --desired plan.json --current current.json
-and approve the printed SHA-256 plan hash. The owner must independently
-inspect the full plan before signing, and root must independently reconstruct
-and re-hash it before changing any service. Source policy refuses out-of-scope
-runner changes for individual deployments and HP/monitor-only updates.
+1. receives an exact SHA, exact scope, canonical plan hash, signed token, and
+   explicit `orders_enabled` value;
+2. verifies the grant as route `GITHUB_ACTIONS`, including target, operator
+   target, plan hash, and order permission;
+3. uses only the Environment-scoped SSH credential and pinned known hosts;
+4. passes the signed token over stdin to the fixed root helper; and
+5. never exposes a private key, password, general root shell, or arbitrary
+   deployment command.
+
+The protected Environment review is an additional Actions-specific control;
+it does not replace the signed owner grant or the root helper's venue/risk
+gates. A successful workflow dispatch without those gates is not a LIVE
+approval.
+
+## 4. Codex deployment route: direct SSH/operator helper
+
+`scripts/ops/deploy/disdex_codex_ssh.py` is the Codex adapter. It is allowed
+to use the existing formal direct-SSH/operator-helper route, but it is not a
+general SSH shell. It accepts only:
+
+- the canonical host `professional-dismanager.net`;
+- a local identity file and pinned known-hosts file;
+- an exact SHA, scope, plan hash, and explicit order permission; and
+- the short-lived owner-signed token on stdin.
+
+It constructs one fixed command for:
+
+`/usr/local/sbin/disdex-unified-production-deploy`
+
+with route `CODEX_SSH`, then sends the token over stdin. The root helper must
+verify the same v2 grant and the same multi-SHA plan as the Actions route.
+Codex may perform source edits, CI, backtests, staging, read-only audits, and
+this adapter invocation preparation directly. LIVE mutation still requires
+the owner's formal approval and every shared safety gate.
+
+Illustrative invocation (the identity and known-host files remain local and
+are never committed or printed):
+
+```bash
+python3 scripts/ops/deploy/disdex_codex_ssh.py \
+  --identity-file /secure/local/DisDex.pem \
+  --known-hosts /secure/local/disdex-known-hosts \
+  --sha EXACT_40_CHARACTER_SHA \
+  --scope SHARED_CRYPTO_RISK_ONLY \
+  --plan-sha256 CANONICAL_64_CHARACTER_PLAN_HASH \
+  --orders-enabled false < owner-signed-token.txt
+```
+
+The token file is a short-lived local secret and must not be committed,
+uploaded, copied into a report, or included in command output. The wrapper
+does not read or request the owner's password.
+
+## 5. Shared Risk-only first-stage boundary
+
+The intended first-stage Shared Risk Writer change is explicitly limited to
+the Shared Risk Writer and its state/ownership reconciliation. It must keep
+the existing V4, Q102, V52, PENGU, FET, HYPE, and IDLE runner SHAs, positions,
+STOPs, strategy conditions, and new-order permissions unchanged.
+
+For `SHARED_CRYPTO_RISK_ONLY`:
+
+- `ordersEnabled` must be `false` in both the plan and signed grant;
+- the plan may change only `SHARED_CRYPTO_RISK`;
+- existing STOPs and positions are preserved and re-read before/after;
+- old/new Writer mutual exclusion is mandatory;
+- the 7.5% daily loss limit, risk snapshot freshness/date/latch, pending
+  registry, account lock, Gross and Kill Switch are rechecked; and
+- a missing or stale venue proof blocks the cutover and grants no new order
+  capability.
+
+This scope must not invoke the existing all-runner
+`disdex-current-runtime-wiring --apply` path. A Shared Risk approval is not
+an approval to enable any Runner's trading orders.
+
+## 6. Owner setup and secret boundaries
+
+Before any LIVE enablement, the owner and authorized VPS operator must
+independently complete the following. This PR does not claim that they are
+complete:
+
+1. Protect `master`, workflow files, approval code, and deployment policy.
+2. Configure the owner-only `disdex-production` Environment for the Actions
+   route; do not use repository-level broad root credentials.
+3. Generate a new password-encrypted Ed25519 key on the owner's device and
+   install only its public key in the protected Environment and the forced
+   root helper.
+4. Install and certify the root-owned forced-command helper with exact scope,
+   plan reconstruction, nonce replay protection, venue/STOP/risk checks,
+   mutual exclusion, immutable release/runner pins, audit cycles, and safe
+   rollback.
+5. Verify the Codex adapter and Actions adapter against the same helper in a
+   non-mutating or staging dry-run. Do not treat an HTTP 200, an anonymous HP
+   page, or a source-only CI pass as production authentication.
+6. Set `DISDEX_DEPLOYMENT_POLICY_READY=OWNER_ENV_LOCKED_V1` only after the
+   above are independently evidenced and the existing production gate accepts
+   the exact scope.
+
+The following may exist only as protected Environment/operator configuration,
+never in repository files or logs: SSH private key, owner password, venue
+credentials, or token values. The repository may contain only the verifier,
+fixed adapters, public policy, and tests.
+
+## 7. Legacy path retirement
+
+`audit_legacy_deploy_paths.py` remains a read-only inventory. The current
+legacy write-capable workflows and broad SSH references are not silently
+deleted by this PR. After both adapters, the root helper, rollback, and
+three-cycle audit are independently proven, the owner/operator must:
+
+- remove or disable unrestricted write-capable Actions workflows;
+- rotate/revoke broad repository-level root keys and obsolete VPS
+  `authorized_keys`/sudo permissions;
+- retain read-only audits and CI; and
+- rerun the inventory with `--require-retired`.
+
+If the new route is not independently verified, the safe state is to leave
+the current LIVE release and existing protection in place, with new mutation
+blocked.
+
+## 8. Current PR status
+
+This PR is source/CI work only. It has no root-owned helper installation,
+operator activation artifact, GitHub Environment configuration, password
+authentication, VPS deployment, release promotion, order, STOP change, Gross
+change, Kill Switch operation, or LIVE audit. The correct status remains
+`SOURCE_READY_NOT_LIVE` until those external gates are completed; if an
+operator gate is requested without the required artifact, the result is
+`BLOCKED_OPERATOR_AUTH`.

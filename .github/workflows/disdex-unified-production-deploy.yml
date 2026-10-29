@@ -1,4 +1,4 @@
-name: DisDex Unified Production Deployment (Owner Approved)
+name: DisDex GPT Actions Production Deployment (Owner Approved)
 
 # Fail closed until the owner explicitly configures environment protection,
 # removes legacy broad SSH permissions and certifies the VPS root helper.
@@ -35,6 +35,14 @@ on:
         description: Signed short-lived token only; NEVER paste a password
         type: string
         required: true
+      orders_enabled:
+        description: Explicit new-order authority; false for Shared Risk/monitor-only changes
+        type: choice
+        required: true
+        default: 'false'
+        options:
+          - 'false'
+          - 'true'
 
 permissions:
   contents: read
@@ -66,7 +74,10 @@ jobs:
           SCOPE: ${{ inputs.scope }}
           PLAN_SHA: ${{ inputs.plan_sha256 }}
           TOKEN: ${{ inputs.owner_signed_token }}
+          ORDERS_ENABLED: ${{ inputs.orders_enabled }}
           PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
+          TARGET: professional-dismanager.net
+          OPERATOR_TARGET: DD1296_FINAL_ALLIN_10BPS
         run: |
           set -euo pipefail
           [[ "$REF" == "refs/heads/master" ]]
@@ -75,6 +86,9 @@ jobs:
           [[ "$PLAN_SHA" =~ ^[0-9a-f]{64}$ ]]
           [[ "$OWNER" =~ ^[A-Za-z0-9-]{1,39}$ ]]
           [[ ",$ALLOWED," == *",$ACTOR,"* ]]
+          [[ "$TARGET" == "professional-dismanager.net" ]]
+          [[ "$OPERATOR_TARGET" == "DD1296_FINAL_ALLIN_10BPS" ]]
+          [[ "$ORDERS_ENABLED" == "true" || "$ORDERS_ENABLED" == "false" ]]
           [[ -n "$TOKEN" && -n "$PUBLIC_KEY" ]]
           umask 077
           printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-owner.pub"
@@ -82,7 +96,9 @@ jobs:
             python3 scripts/ops/deploy/disdex_owner_approval.py verify \
               --public-key "$RUNNER_TEMP/disdex-owner.pub" \
               --repository "$GITHUB_REPOSITORY" --sha "$SHA" \
-              --scope "$SCOPE" --operator "$OWNER" --plan-sha256 "$PLAN_SHA"
+              --scope "$SCOPE" --operator "$OWNER" --plan-sha256 "$PLAN_SHA" \
+              --deployment-target "$TARGET" --operator-target "$OPERATOR_TARGET" \
+              --route GITHUB_ACTIONS --orders-enabled "$ORDERS_ENABLED"
       - name: Invoke exact-scope dedicated VPS root helper
         shell: bash
         env:
@@ -94,11 +110,17 @@ jobs:
           SCOPE: ${{ inputs.scope }}
           PLAN_SHA: ${{ inputs.plan_sha256 }}
           TOKEN: ${{ inputs.owner_signed_token }}
+          ORDERS_ENABLED: ${{ inputs.orders_enabled }}
+          TARGET: professional-dismanager.net
+          OPERATOR_TARGET: DD1296_FINAL_ALLIN_10BPS
         run: |
           set -euo pipefail
           [[ -n "$HOST" && -n "$KEY" && -n "$HOST_KEYS" ]]
           [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
           [[ "$SCOPE" =~ ^[A-Z0-9_]+$ ]]
+          [[ "$TARGET" == "professional-dismanager.net" ]]
+          [[ "$OPERATOR_TARGET" == "DD1296_FINAL_ALLIN_10BPS" ]]
+          [[ "$ORDERS_ENABLED" == "true" || "$ORDERS_ENABLED" == "false" ]]
           if [[ -z "$PORT" ]]; then PORT=22; fi
           [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
           umask 077
@@ -115,4 +137,4 @@ jobs:
             -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts" \
             -p "$PORT" "root@$HOST" \
-            "/usr/local/sbin/disdex-unified-production-deploy --sha $SHA --scope $SCOPE --plan-sha256 $PLAN_SHA --read-approval-stdin"
+            "/usr/local/sbin/disdex-unified-production-deploy --deployment-target $TARGET --operator-target $OPERATOR_TARGET --sha $SHA --scope $SCOPE --plan-sha256 $PLAN_SHA --orders-enabled $ORDERS_ENABLED --route GITHUB_ACTIONS --read-approval-stdin"

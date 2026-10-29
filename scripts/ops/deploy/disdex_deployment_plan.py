@@ -8,11 +8,17 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import re
 
-REPO = "dunamishajime-bit/-ai-dex-manager"
+from disdex_deployment_contract import (
+    DEPLOYMENT_TARGET,
+    OPERATOR_TARGET,
+    REPO,
+    SCOPES,
+    SHA,
+    validate_order_permission,
+)
+
 SCHEMA = "disdex-unified-deployment-plan/v1"
-SHA = re.compile(r"[0-9a-f]{40}\Z")
 IDS = (
     "V12_V4", "QUALITY102_CAUSAL_V1", "V52", "PENGU_V8",
     "FET_BRK48_RESIDUAL", "HYPE_TREND_LONG", "IDLE_PRIORITY_SHORT",
@@ -28,9 +34,8 @@ INDIVIDUAL = {
     "SHARED_CRYPTO_RISK_ONLY": "SHARED_CRYPTO_RISK",
     "MARGIN_GUARD_ONLY": "MARGIN_GUARD",
 }
-SCOPES = frozenset(set(INDIVIDUAL) | {"API_MONITORS", "HP_ONLY", "FULL_PROJECT", "ROLLBACK"})
 FIELDS = {"schema", "repository", "deploymentTarget", "operatorTarget",
-          "sourceSha", "scope", "runners", "uiSha", "monitorSha"}
+          "sourceSha", "scope", "runners", "uiSha", "monitorSha", "ordersEnabled"}
 
 def canonical(obj):
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
@@ -39,10 +44,11 @@ def validate(plan):
     if not isinstance(plan, dict) or set(plan) != FIELDS:
         raise ValueError("deployment plan schema fields")
     if (plan["schema"] != SCHEMA or plan["repository"] != REPO or
-        plan["deploymentTarget"] != "professional-dismanager.net" or
-        plan["operatorTarget"] != "DD1296_FINAL_ALLIN_10BPS" or
+        plan["deploymentTarget"] != DEPLOYMENT_TARGET or
+        plan["operatorTarget"] != OPERATOR_TARGET or
         plan["scope"] not in SCOPES):
         raise ValueError("deployment target, operator or scope mismatch")
+    validate_order_permission(plan["scope"], plan["ordersEnabled"])
     for field in ("sourceSha", "uiSha", "monitorSha"):
         value = plan[field]
         if not isinstance(value, str) or not SHA.fullmatch(value):
@@ -75,7 +81,8 @@ def approve_diff(desired, current):
     if not changed and not ui_changed and not monitor_changed:
         raise ValueError("no deployment differences")
     return dict(changedRunners=sorted(changed), uiChanged=ui_changed,
-                monitorChanged=monitor_changed, exactScope=scope)
+                monitorChanged=monitor_changed, exactScope=scope,
+                ordersEnabled=desired["ordersEnabled"])
 
 def digest(desired, current):
     changes = approve_diff(desired, current)
