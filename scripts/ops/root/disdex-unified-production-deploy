@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Root-owned wrapper installed at /usr/local/sbin/disdex-unified-production-deploy
+set -Eeuo pipefail
+umask 077
+[[ "$(id -u)" == "0" ]] || { echo "DISDEX_ROOT_REQUIRED" >&2; exit 1; }
+exec /usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_unified_root_gate.py "$@"
