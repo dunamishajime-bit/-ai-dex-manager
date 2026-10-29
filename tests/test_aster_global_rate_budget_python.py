@@ -2,11 +2,12 @@ import json
 import io
 import os
 import sys
-import tempfile
 import time
 import unittest
 import json as json_module
 from pathlib import Path
+
+from tests.portable_temp import portable_temporary_directory
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
@@ -19,7 +20,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
     def test_margin_guard_state_remains_readable_by_deploy_group(self):
         if os.name == "nt":
             self.skipTest("POSIX ownership contract")
-        with tempfile.TemporaryDirectory() as directory:
+        with portable_temporary_directory() as directory:
             guard = object.__new__(margin_guard.MarginGuard)
             guard.state_root = Path(directory)
             guard.state_path = guard.state_root / "guard-live.json"
@@ -33,7 +34,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
         keys = ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")
         original_env = {key: os.environ.get(key) for key in keys}
         try:
-            with tempfile.TemporaryDirectory() as directory:
+            with portable_temporary_directory() as directory:
                 budget = Path(directory) / "aster-rate-budget.json"
                 os.environ[keys[0]] = str(budget)
                 os.environ[keys[1]] = "20"
@@ -61,7 +62,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
     def test_weighted_rate_budget_reserves_multiple_weight_units(self):
         original_env = {key: os.environ.get(key) for key in ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")}
         try:
-            with tempfile.TemporaryDirectory() as directory:
+            with portable_temporary_directory() as directory:
                 path = Path(directory) / "aster-rate-budget.json"
                 os.environ["DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH"] = str(path)
                 os.environ["DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS"] = "20"
@@ -89,7 +90,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
     def test_shared_cooldown_blocks_followup_requests(self):
         original_env = {key: os.environ.get(key) for key in ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")}
         try:
-            with tempfile.TemporaryDirectory() as directory:
+            with portable_temporary_directory() as directory:
                 path = Path(directory) / "aster-rate-budget.json"
                 os.environ["DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH"] = str(path)
                 os.environ["DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS"] = "50"
@@ -108,7 +109,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
         original_urlopen = base.urllib.request.urlopen
         original_env = {key: os.environ.get(key) for key in ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")}
         try:
-            with tempfile.TemporaryDirectory() as directory:
+            with portable_temporary_directory() as directory:
                 path = Path(directory) / "aster-rate-budget.json"
                 os.environ["DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH"] = str(path)
                 os.environ["DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS"] = "50"
@@ -131,7 +132,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
         keys = ("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", "DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", "DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS")
         original_env = {key: os.environ.get(key) for key in keys}
         try:
-            with tempfile.TemporaryDirectory() as directory:
+            with portable_temporary_directory() as directory:
                 os.environ[keys[0]] = str(Path(directory) / "aster-rate-budget.json")
                 os.environ[keys[1]] = "not-a-number"
                 os.environ[keys[2]] = "1000"
@@ -145,7 +146,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
                     os.environ[key] = value
 
     def test_shared_budget_never_evicts_an_old_lock_owned_by_a_live_process(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with portable_temporary_directory() as directory:
             path = Path(directory) / "aster-rate-budget.json"
             lock_path = Path(str(path) + ".lock")
             lock_path.mkdir()
@@ -179,7 +180,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
         current_start = base._aster_budget_process_start_ticks(os.getpid())
         if current_start is None:
             self.skipTest("/proc start ticks unavailable")
-        with tempfile.TemporaryDirectory() as directory:
+        with portable_temporary_directory() as directory:
             path = Path(directory) / "aster-rate-budget.json"
             lock_path = Path(str(path) + ".lock")
             lock_path.mkdir()
@@ -197,7 +198,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
                 base._aster_budget_release_lock(lock_path, owner)
 
     def test_stale_ownerless_recovery_mutex_is_reclaimed(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with portable_temporary_directory() as directory:
             path = Path(directory) / "aster-rate-budget.json"
             lock_path = Path(str(path) + ".lock")
             recovery_path = Path(str(lock_path) + ".recovery")
@@ -214,7 +215,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
                 base._aster_budget_release_lock(lock_path, owner)
 
     def test_live_recovery_mutex_is_never_evicted(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with portable_temporary_directory() as directory:
             path = Path(directory) / "aster-rate-budget.json"
             lock_path = Path(str(path) + ".lock")
             recovery_path = Path(str(lock_path) + ".recovery")
@@ -298,7 +299,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
         self.assertEqual(flatten_calls, ["FATAL_TICK_ERROR"])
 
     def test_lock_loss_after_owner_write_retries_instead_of_failing_v52(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with portable_temporary_directory() as directory:
             lock_path = Path(directory) / "aster-rate-budget.json.lock"
             original_chmod = base.os.chmod
             injected = {"done": False}
@@ -326,7 +327,7 @@ class AsterGlobalRateBudgetPythonTests(unittest.TestCase):
 
     def test_concurrent_stale_ownerless_lock_recovery_serializes_budget_updates(self):
         import concurrent.futures
-        with tempfile.TemporaryDirectory() as directory:
+        with portable_temporary_directory() as directory:
             path = Path(directory) / "aster-rate-budget.json"
             lock_path = Path(str(path) + ".lock")
             lock_path.mkdir()

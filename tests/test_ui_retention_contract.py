@@ -1,9 +1,10 @@
 import importlib.machinery
 import os
-import tempfile
 import unittest
 from unittest import mock
 from pathlib import Path
+
+from tests.portable_temp import portable_temporary_directory
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/ops/root/disdex-vps-retention-cleanup"
@@ -15,7 +16,7 @@ ui_retention = importlib.machinery.SourceFileLoader("disdex_ui_retention_marker_
 
 class UiRetentionContractTest(unittest.TestCase):
     def test_systemd_reference_blocks_ui_release_deletion(self):
-        with tempfile.TemporaryDirectory() as td:
+        with portable_temporary_directory() as td:
             root = Path(td)
             release = root / "ui-old"
             release.mkdir()
@@ -36,8 +37,9 @@ class UiRetentionContractTest(unittest.TestCase):
             self.assertFalse(audit.safe)
             self.assertTrue(audit.references["systemd"])
 
+    @unittest.skipIf(os.name == "nt", "requires Windows symlink privilege")
     def test_symlink_reference_scan_finds_ui_target(self):
-        with tempfile.TemporaryDirectory() as td:
+        with portable_temporary_directory() as td:
             root = Path(td)
             release = root / "ui-old"
             release.mkdir()
@@ -50,8 +52,9 @@ class UiRetentionContractTest(unittest.TestCase):
 
             self.assertEqual(references, [f"{link} -> {release}"])
 
+    @unittest.skipIf(os.name == "nt", "requires Windows symlink privilege")
     def test_bulk_symlink_scan_indexes_ui_targets_once(self):
-        with tempfile.TemporaryDirectory() as td:
+        with portable_temporary_directory() as td:
             root = Path(td)
             release_one = root / "ui-one"
             release_two = root / "ui-two"
@@ -89,7 +92,7 @@ class UiRetentionContractTest(unittest.TestCase):
 
     def test_current_ui_sha_marker_is_accepted_by_both_retention_paths(self):
         sha = "a" * 40
-        with tempfile.TemporaryDirectory() as td:
+        with portable_temporary_directory() as td:
             release = Path(td) / "ui-current"
             release.mkdir()
             (release / ".disdex-ui-sha").write_text(sha + "\n", encoding="utf-8")
@@ -97,7 +100,7 @@ class UiRetentionContractTest(unittest.TestCase):
             self.assertEqual(ui_retention.release_sha(release), sha)
 
     def test_markerless_current_ui_is_resolved_for_protection(self):
-        with tempfile.TemporaryDirectory() as td:
+        with portable_temporary_directory() as td:
             root = Path(td)
             ui_root = root / "ui-releases"
             release = ui_root / "ui-current-markerless"
@@ -114,7 +117,7 @@ class UiRetentionContractTest(unittest.TestCase):
                     os.environ["DISDEX_UI_ACTIVE_RELEASE"] = previous
 
     def test_unverified_current_ui_path_is_resolved_only_for_protection(self):
-        with tempfile.TemporaryDirectory() as td:
+        with portable_temporary_directory() as td:
             root = Path(td) / "ui-releases"
             release = root / "ui-current-markerless"
             release.mkdir(parents=True)
@@ -128,7 +131,7 @@ class UiRetentionContractTest(unittest.TestCase):
                 self.assertIsNone(ui_retention.release_sha(resolved))
 
     def test_conflicting_ui_identity_markers_fail_closed(self):
-        with tempfile.TemporaryDirectory() as td:
+        with portable_temporary_directory() as td:
             release = Path(td) / "ui-current"
             release.mkdir()
             (release / ".disdex-ui-release-sha").write_text("a" * 40 + "\n", encoding="utf-8")

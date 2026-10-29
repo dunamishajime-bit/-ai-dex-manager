@@ -1,9 +1,12 @@
 import importlib.machinery
 import os
+import shutil
 import subprocess
 import tempfile
 import time
 import unittest
+import uuid
+from contextlib import contextmanager
 from unittest import mock
 from pathlib import Path
 
@@ -16,10 +19,25 @@ POSIX_SYMLINK_FIXTURE = unittest.skipIf(
 )
 
 
+@contextmanager
+def _portable_temporary_directory(prefix: str = "disdex-retention-"):
+    """Use a normal user-writable ACL for Microsoft Store Python tests."""
+    if os.name != "nt":
+        with tempfile.TemporaryDirectory(prefix=prefix) as td:
+            yield Path(td)
+        return
+
+    root = Path(tempfile.gettempdir()) / f"{prefix}{uuid.uuid4().hex}"
+    root.mkdir(mode=0o755)
+    try:
+        yield root
+    finally:
+        shutil.rmtree(root, ignore_errors=False)
+
+
 class RetentionDependencyProtectionTest(unittest.TestCase):
     def test_systemd_reference_makes_release_unverified_protected(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
+        with _portable_temporary_directory() as root:
             paths = retention.CleanupPaths(
                 trading_root=root / "trading",
                 shared_root=root / "shared",
@@ -46,8 +64,7 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
 
     @POSIX_SYMLINK_FIXTURE
     def test_open_process_fd_makes_release_unverified_protected(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
+        with _portable_temporary_directory() as root:
             paths = retention.CleanupPaths(
                 trading_root=root / "trading",
                 shared_root=root / "shared",
@@ -74,8 +91,7 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
 
     @POSIX_SYMLINK_FIXTURE
     def test_symlink_reference_scan_finds_target_without_recursive_python_walk(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
+        with _portable_temporary_directory() as root:
             release = root / ("c" * 40)
             release.mkdir()
             link_root = root / "deploy"
@@ -89,8 +105,7 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
 
     @POSIX_SYMLINK_FIXTURE
     def test_bulk_symlink_scan_indexes_trading_targets_once(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
+        with _portable_temporary_directory() as root:
             release_one = root / ("c" * 40)
             release_two = root / ("d" * 40)
             release_one.mkdir()
@@ -111,8 +126,7 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
 
     @POSIX_SYMLINK_FIXTURE
     def test_current_release_dependency_target_is_never_deleted(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
+        with _portable_temporary_directory() as root:
             paths = retention.CleanupPaths(
                 trading_root=root / "trading",
                 shared_root=root / "shared",
@@ -159,8 +173,7 @@ class RetentionDependencyProtectionTest(unittest.TestCase):
 
     @POSIX_SYMLINK_FIXTURE
     def test_symlink_scan_timeout_is_fail_closed_without_service_failure(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
+        with _portable_temporary_directory() as root:
             paths = retention.CleanupPaths(
                 trading_root=root / "trading",
                 shared_root=root / "shared",

@@ -13,7 +13,8 @@ route-neutral approval contract to the same root-owned VPS helper.
 The source contains an explicit root-only execution boundary for the
 first-stage `SHARED_CRYPTO_RISK_ONLY` scope. The PR branch baseline was
 re-read at `31cfae65daabfbe07acd805925bc7c9e9db19c4d`; the final source SHA
-must be refreshed after the remaining fixes are pushed. A read-only VPS audit
+for this preparation is `48467309faf59f8627d5c24e7070ce0a6c4c5f63`. A
+read-only VPS audit
 did find the root wrapper and helper under `/usr/local`, but it did not find a
 release for the PR branch and did not find the root-owned execution inputs.
 The audit did not move a release symlink, change a position or protective
@@ -252,7 +253,7 @@ fixed adapters, public policy, and tests.
 ## 7. Current VPS boundary
 
 The read-only audit was captured on `x162-43-50-223` at
-`2026-10-29T22:57:50Z`. The live `current` symlink remains pinned to
+`2026-10-29T23:17:44Z`. The live `current` symlink remains pinned to
 `7688ed7c93a1918d8b44837339b7da5584a868f5`, and the active SHA map was:
 
 | Runner | Active systemd SHA | Main PID | Restart count |
@@ -260,7 +261,7 @@ The read-only audit was captured on `x162-43-50-223` at
 | V12 V4 | `53a0be396719f0284af4e11b35c66a4ac7d58f79` | 806758 | 0 |
 | Q102 | `ef1ab178e26a7bf5bddb6473467765edba242e1d` | 805183 | 0 |
 | V52 | `97830672e2f139b39f7194166d7dc8c36e8c8933` | 1112659 | 0 |
-| PENGU / FET / HYPE / IDLE / Shared Risk / Margin Guard | `7688ed7c93a1918d8b44837339b7da5584a868f5` | read from systemd | 0 except FET=3 |
+| PENGU / FET / HYPE / IDLE / Shared Risk / Margin Guard | `7688ed7c93a1918d8b44837339b7da5584a868f5` | PENGU 3065213; FET 440551; HYPE 2269754; IDLE 3065918; Risk 3064641; Guard 3064744 | 0 except FET=3 |
 
 The current symlink is `root:deploy` mode `777`; its release directory and
 marker are `deploy:deploy` (directory mode `2755`, marker mode `644`). The
@@ -281,14 +282,25 @@ contain the PR-302 unified root gate/deployment-plan sources. Its release
 payload also contains group/other-writable files, so it is not accepted as a
 complete immutable PR-302 activation target. It was not modified.
 
-Aster read-only evidence was obtained without mutation: the account held
-`DOGEUSDT` short `226`, with one `BUY STOP_MARKET` `reduceOnly=true` order for
-quantity `226` at stop price `0.086960`, client id
-`v12-v4-98ded39746ed3502a4d7b0e26ef9`; the diagnostic reported zero orders,
-cancels, and position changes. This is venue evidence only, not an owner
-activation artifact. The existing pending-exposure state was also stale and
-did not expose a trustworthy `activeCount`, so it cannot be promoted to a
-formal zero-pending proof.
+Aster read-only evidence was obtained without mutation in three spaced
+rounds. All three rounds matched `DOGEUSDT` short `226` and one `BUY
+STOP_MARKET` `reduceOnly=true` order for quantity `226` at stop price
+`0.086960`, client id `v12-v4-98ded39746ed3502a4d7b0e26ef9`, status `NEW`,
+and `executedQty=0`. Each round reported zero orders, cancels, and position
+changes. This is venue evidence only, not an owner activation artifact. The
+pending-exposure registry currently has zero non-`RELEASED` entries, but its
+`updatedAt` is stale and both `activeCount` and `entriesCount` are null; it
+therefore cannot be promoted to a formal fresh zero-pending proof.
+
+The active Margin Guard readback was `stage=HEALTHY`, `ordersAllowed=true`,
+and `consecutiveFailures=0`; Shared Risk was complete, untripped, and capped
+at 7.5%; the Kill Switch was inactive with its existing V52 reference-only
+reason preserved. The Aster global rate-budget record was read without
+changing it. The shared heartbeat writer was current, but its runner
+`lastTickAt` values were not uniformly current: V52/FET/V4 were fresh while
+HYPE, PENGU, Q102, and IDLE were stale relative to the shared heartbeat.
+This is a monitoring/preflight blocker, not a reason to alter or restart a
+runner during this task.
 
 Until those genuine operator artifacts and accepted venue evidence exist, the
 helper must remain a staging/read-only installation. No token, approval date,
@@ -328,6 +340,20 @@ change, Kill Switch operation, or LIVE audit. The correct status remains
 operator gate is requested without the required artifact, the result is
 `BLOCKED_OPERATOR_AUTH`.
 
+The final branch HEAD is
+`48467309faf59f8627d5c24e7070ce0a6c4c5f63`. PR #302 remains OPEN and Draft
+with merge state CLEAN. The final required checks passed: production parity
+`40971815828`, integrated V96/V52 validation `40971815797`, owner
+authorization contract `40971816115`, margin risk `40971815716`, and VPS
+release boundary `40971815801` (including the non-blocking historical
+compatibility check). The branch is clean and `git diff --check` passes.
+
+Read-only GitHub settings inspection found no configured
+`disdex-production` Environment and no protection record for the base branch.
+No repository settings were changed because creating owner-review rules or
+granting deployment secrets requires the owner's GitHub administration and
+reviewer identity.
+
 ## Root-gate implementation stage (source and staging boundary)
 
 Source adds `scripts/ops/deploy/disdex_unified_root_gate.py` plus root wrapper
@@ -350,3 +376,30 @@ Environment, installed the public key, and approved the exact plan. Missing,
 stale, copied, edited, replayed, or mismatched artifacts remain fail-closed.
 Both Actions and Codex pass explicit owner identity and the fixed execution
 mode to the same root gate.
+
+## 10. Windows portability verification
+
+The remaining Windows-only test failures were addressed without changing the
+Linux production contract. The heartbeat writer retains mode `0750` on POSIX;
+on Windows it uses the inherited user-writable ACL instead of asking
+Microsoft Store Python to translate a POSIX mode into a restrictive ACL.
+The heartbeat and VPS-retention tests use disposable user-writable fixtures on
+Windows, while POSIX-only symlink coverage remains enabled on Linux and
+explicitly skipped on Windows where the required privilege is unavailable.
+
+The final local verification completed with 77 focused Python tests (`OK`, 28
+platform/crypto-library skips) and 46 passing focused TypeScript tests (2
+skips, 0 failures). The margin-guard self-test, release-evidence self-test,
+research TypeScript compile, legacy-path inventory, and `git diff --check`
+also passed. These are source and test results only; no VPS or venue state was
+changed.
+
+The complete Python unit-test discovery was also rerun after the final
+portability fixes: `250 tests`, `OK (skipped=32)`. This included the Aster
+global rate-budget lock/retry tests, V52 safety regressions, Idle/Q102
+ownership, fill notification, margin guard, VPS/UI retention, and deployment
+helper contracts. The Windows skips are limited to symlink fixtures requiring
+the unavailable Windows symlink privilege. The Aster lock uses the inherited
+Windows ACL only for Windows test/runtime portability; Linux keeps the
+existing private-directory and shared-group permission behavior. No order,
+cancel, position, STOP, or production state was changed.

@@ -4,10 +4,11 @@ import json
 import os
 from pathlib import Path
 import sys
-import tempfile
 import time
 import unittest
 from unittest.mock import patch
+
+from tests.portable_temp import portable_temporary_directory
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"scripts"))
 from disdex_strict_portfolio_planner import (
@@ -36,9 +37,10 @@ def venue(symbol,qty,price):
             "entryPrice":price}
 class OwnerTest(unittest.TestCase):
     def setUp(self):
-        self.tmp=tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.path=Path(self.tmp.name)/"idle-state.json"
+        self.tmp=portable_temporary_directory()
+        self.root=self.tmp.__enter__()
+        self.addCleanup(self.tmp.__exit__, None, None, None)
+        self.path=self.root/"idle-state.json"
         self.state={"schema":"disdex-idle-priority-state/v2","runtimeSha":SHA,
             "updatedAt":NOW-120000,"pending":None,"manualReview":None,
             "positions":[pos("DOTUSDT",65.9,1.087),pos("JUPUSDT",225,0.3048)]}

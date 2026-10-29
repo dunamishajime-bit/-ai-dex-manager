@@ -1,16 +1,17 @@
 import json
 import os
-import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+
+from tests.portable_temp import portable_temporary_directory
 
 from scripts.disdex_trade_fill_notification import enqueue_trade_fill_notification
 
 
 class TradeFillNotificationProducerTest(unittest.TestCase):
     def test_only_confirmed_live_fills_are_spooled(self):
-        with tempfile.TemporaryDirectory(prefix="disdex-fill-") as directory:
+        with portable_temporary_directory(prefix="disdex-fill-") as directory:
             path = str(Path(directory) / "inbox.jsonl")
             env = {
                 "DISDEX_TRADE_FILL_NOTIFICATION_ENABLED": "true",
@@ -35,7 +36,7 @@ class TradeFillNotificationProducerTest(unittest.TestCase):
             self.assertFalse(enqueue_trade_fill_notification(SimpleNamespace(**{**fill.__dict__, "status": "NEW"}), strategy_id="V52", event_type="ENTRY_FILL", reason="NEW", live=True, env=env))
 
     def test_disabled_or_missing_fill_does_not_create_spool(self):
-        with tempfile.TemporaryDirectory(prefix="disdex-fill-disabled-") as directory:
+        with portable_temporary_directory(prefix="disdex-fill-disabled-") as directory:
             path = str(Path(directory) / "inbox.jsonl")
             fill = SimpleNamespace(symbol="BTCUSDT", side="BUY", status="FILLED", executed_qty=1, average_price=1, client_id="id")
             self.assertFalse(enqueue_trade_fill_notification(fill, strategy_id="V52", event_type="ENTRY_FILL", reason="x", live=True, env={"DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH": path}))

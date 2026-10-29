@@ -16,8 +16,8 @@
 - [x] VPS read-only evidence audit
 - [x] Dry-run and focused tests
 - [x] Portable test fixes, if justified
-- [ ] CI and branch push
-- [ ] Final readiness report
+- [x] CI and branch push
+- [x] Final readiness report
 
 ## Evidence log
 
@@ -32,6 +32,12 @@ Record command, timestamp, scope, and result for every verification here. Do not
 - Candidate `c9beb423ae9b6b18333ae9426a21a69cf35baeef` is root-owned with a marker and Shared Risk writer, but lacks the PR-302 root gate/deployment plan and is not an accepted immutable PR-302 target.
 - Aster signed read-only diagnostic PASS: DOGEUSDT position `-226`; one reduce-only BUY STOP_MARKET quantity `226`, stop `0.086960`, client id `v12-v4-98ded39746ed3502a4d7b0e26ef9`; zero orders/cancels/position changes sent.
 - Pending-exposure state was stale and had no trustworthy active count; it remains a formal preflight blocker.
+- Final source HEAD is `48467309faf59f8627d5c24e7070ce0a6c4c5f63`; PR #302 remains OPEN/Draft with merge state CLEAN.
+- Final CI PASS: production parity `40971815828`, integrated V96/V52 validation `40971815797`, owner authorization `40971816115`, margin risk `40971815716`, and VPS boundary `40971815801` including historical compatibility.
+- Fresh three-round signed Aster read-only evidence matched DOGEUSDT SHORT 226 and the same reduce-only BUY STOP quantity 226 at 0.086960 with client id `v12-v4-98ded39746ed3502a4d7b0e26ef9`; all effects were zero.
+- Shared Risk remained complete/untripped at 7.5%, Margin Guard remained HEALTHY/ordersAllowed=true, Kill Switch remained inactive, and no VPS or venue mutation was performed.
+- Pending registry had zero non-RELEASED entries but stale `updatedAt` and null counters; runner heartbeat timestamps showed stale ticks for HYPE, PENGU, Q102, and IDLE, so formal operator preflight remains blocked.
+- Read-only GitHub inspection found no `disdex-production` Environment and no branch-protection record for the base branch; no settings or secrets were changed.
 
 ### Test evidence
 
@@ -43,6 +49,9 @@ Record command, timestamp, scope, and result for every verification here. Do not
 - `npx tsc --noEmit` and `npx tsc --noEmit -p tsconfig.research.json`: PASS after worktree dependency installation.
 - `git diff --check`: PASS.
 - `audit_legacy_deploy_paths.py`: read-only inventory complete; 10 VPS-access workflows, 9 legacy retirement candidates.
+- Windows portability follow-up: heartbeat writer and retention fixtures now avoid Microsoft Store Python's restrictive temporary-directory ACL behavior; Linux keeps the production `0750` heartbeat directory mode and POSIX-only symlink fixtures remain skipped only on Windows.
+- Final local verification after the portability fixes: focused Python suite `Ran 77 tests`, `OK (skipped=28)`; focused TypeScript suite `46 pass, 2 skipped, 0 fail`; margin-guard self-test, release-evidence self-test, TypeScript research compile, legacy-path inventory, and `git diff --check` all passed.
+- Full Python discovery then exposed the same Store-Python ACL behavior in Aster rate-budget locks, V52 safety fixtures, Idle/Q102/fill fixtures, and UI retention. A shared `tests/portable_temp.py` fixture, Windows-safe Aster lock-directory creation, Windows-safe shared JSON ownership handling, and optional UI retention `fcntl`/CRT locking were added. The final discovery result is `250 tests`, `OK (skipped=32)`; the Windows-only symlink cases are explicitly skipped because the required privilege is unavailable.
 
 ### Safety disposition
 

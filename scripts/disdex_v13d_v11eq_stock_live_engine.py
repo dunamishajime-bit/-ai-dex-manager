@@ -128,11 +128,13 @@ def atomic_write_shared_json(path: Path, payload: dict) -> None:
             writer.flush()
             os.fsync(writer.fileno())
         directory_gid = path.parent.stat().st_gid
-        if os.stat(temporary).st_gid != directory_gid:
-            os.chown(temporary, -1, directory_gid)
-        os.chmod(temporary, 0o660)
+        if os.name != "nt" and hasattr(os, "chown"):
+            if os.stat(temporary).st_gid != directory_gid:
+                os.chown(temporary, -1, directory_gid)
+            os.chmod(temporary, 0o660)
         os.replace(temporary, path)
-        os.chmod(path, 0o660)
+        if os.name != "nt":
+            os.chmod(path, 0o660)
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
@@ -252,6 +254,14 @@ def _aster_budget_transient_lock_race(error: BaseException) -> bool:
     }
 
 
+def _aster_budget_mkdir(path: Path) -> None:
+    """Create a private lock directory without Store-Python ACL translation."""
+    if os.name == "nt":
+        path.mkdir()
+    else:
+        path.mkdir(mode=0o700)
+
+
 def _aster_budget_safe_pre_request_failure(error: BaseException) -> bool:
     message = str(error)
     return any(code in message for code in (
@@ -267,7 +277,7 @@ def _aster_budget_acquire_generation_mutex(lock_path: Path, deadline: float) -> 
     owner = _aster_budget_new_lock_owner()
     while True:
         try:
-            recovery_path.mkdir(mode=0o700)
+            _aster_budget_mkdir(recovery_path)
             try:
                 owner_path = _aster_budget_lock_owner_path(recovery_path)
                 owner_path.write_text(json.dumps(owner, separators=(",", ":")) + "\n", encoding="utf-8")
@@ -316,7 +326,7 @@ def _aster_budget_acquire_lock(lock_path: Path, max_queue_ms: int) -> dict:
     owner = _aster_budget_new_lock_owner()
     while True:
         try:
-            lock_path.mkdir(mode=0o700)
+            _aster_budget_mkdir(lock_path)
             while True:
                 try:
                     owner_path = _aster_budget_lock_owner_path(lock_path)

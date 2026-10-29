@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import os
 import sys
-import tempfile
 import unittest
 from itertools import permutations
 from pathlib import Path
 from unittest.mock import patch
+
+from tests.portable_temp import portable_temporary_directory
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -175,7 +176,7 @@ class DynamicManagedSymbolTest(unittest.TestCase):
 
 
     def test_recoverable_data_failure_holds_protected_positions_before_grace_expiry(self):
-        with tempfile.TemporaryDirectory(prefix="margin-guard-grace-") as temporary:
+        with portable_temporary_directory(prefix="margin-guard-grace-") as temporary:
             guard = object.__new__(margin_guard.MarginGuard)
             guard.live = True
             guard.mode = "live"
@@ -216,7 +217,7 @@ class DynamicManagedSymbolTest(unittest.TestCase):
             self.assertEqual(cleared["action"], margin_guard.SOFT_HOLD_ACTION)
 
     def test_recoverable_hold_escalates_only_after_grace_expiry(self):
-        with tempfile.TemporaryDirectory(prefix="margin-guard-expired-") as temporary:
+        with portable_temporary_directory(prefix="margin-guard-expired-") as temporary:
             guard = object.__new__(margin_guard.MarginGuard)
             guard.live = True
             guard.mode = "live"
@@ -262,7 +263,7 @@ class DynamicManagedSymbolTest(unittest.TestCase):
             self.assertTrue(result["positionChangesSent"])
 
     def test_hard_margin_stage_still_flattens_immediately(self):
-        with tempfile.TemporaryDirectory(prefix="margin-guard-hard-") as temporary:
+        with portable_temporary_directory(prefix="margin-guard-hard-") as temporary:
             guard = object.__new__(margin_guard.MarginGuard)
             guard.live = True
             guard.mode = "live"

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import fcntl
 import json
 import os
 import re
@@ -11,6 +10,16 @@ import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - Windows uses the native CRT lock
+    fcntl = None
+
+try:
+    import msvcrt
+except ImportError:  # pragma: no cover - POSIX does not provide msvcrt
+    msvcrt = None
 
 ROOT = Path("/home/deploy/disdex-trading/ui-releases")
 SERVICE = "ai-dex-manager-ui.service"
@@ -23,6 +32,35 @@ SYMLINK_SCAN_TIMEOUT_SECONDS = 180
 SYSTEMD_REFERENCE_ROOTS = (Path("/etc/systemd/system"), Path("/usr/lib/systemd/system"), Path("/etc/disdex"))
 SYMLINK_SCAN_ROOT = Path("/home/deploy")
 PROCESS_ROOT = Path("/proc")
+
+
+def _lock_exclusive(handle, *, nonblocking: bool) -> None:
+    """Use POSIX flock in production and a native Windows lock in tests."""
+    if fcntl is not None:
+        fcntl.flock(
+            handle.fileno(),
+            fcntl.LOCK_EX | (fcntl.LOCK_NB if nonblocking else 0),
+        )
+        return
+    if msvcrt is None:
+        raise RuntimeError("UI retention lock is unsupported on this platform")
+    handle.seek(0)
+    if handle.read(1) == "":
+        handle.seek(0)
+        handle.write("0")
+        handle.flush()
+    handle.seek(0)
+    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK if nonblocking else msvcrt.LK_LOCK, 1)
+
+
+def _unlock_exclusive(handle) -> None:
+    if fcntl is not None:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        return
+    if msvcrt is None:
+        raise RuntimeError("UI retention lock is unsupported on this platform")
+    handle.seek(0)
+    msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
 
 
 @dataclass(frozen=True)
@@ -229,8 +267,8 @@ def main() -> int:
     LOCK.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     with LOCK.open("a+", encoding="utf-8") as lock:
         try:
-            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
+            _lock_exclusive(lock, nonblocking=True)
+        except (BlockingIOError, OSError):
             print(json.dumps({"status": "DISDEX_UI_RETENTION_SKIPPED", "reason": "lock_busy"}))
             return 0
 

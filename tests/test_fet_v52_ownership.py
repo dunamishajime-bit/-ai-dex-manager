@@ -1,12 +1,27 @@
-import unittest,tempfile,json,os,sys,time
+import unittest,tempfile,json,os,sys,time,shutil,uuid
+from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
 from disdex_strict_portfolio_planner import quality102_crypto_notional_from_positions
+
+@contextmanager
+def _portable_temporary_directory(prefix="disdex-fet-ownership-"):
+ if os.name != "nt":
+  with tempfile.TemporaryDirectory(prefix=prefix) as td:
+   yield Path(td)
+  return
+ root=Path(tempfile.gettempdir())/f"{prefix}{uuid.uuid4().hex}"
+ root.mkdir(mode=0o755)
+ try:
+  yield root
+ finally:
+  shutil.rmtree(root,ignore_errors=False)
+
 class FetV52Ownership(unittest.TestCase):
  def test_exact_owned_fet_is_counted_and_ambiguous_fails_closed(self):
-  with tempfile.TemporaryDirectory() as tmp:
-   p=Path(tmp)/'fet.json';now=time.time()*1000;sha='a'*40
+  with _portable_temporary_directory() as tmp:
+   p=tmp/'fet.json';now=time.time()*1000;sha='a'*40
    state={'schema':'fet-brk48-residual-state/v1','strategyId':'FET_BRK48_RESIDUAL','runtimeCommitSha':sha,'updatedAt':now,'position':{'symbol':'FETUSDT','side':1,'quantity':515,'entryPrice':.2407},'pending':None,'manualReview':None}
    row={'symbol':'FETUSDT','positionAmt':515,'markPrice':.258,'entryPrice':.2407}
    with patch.dict(os.environ,{'FET_BRK48_STATE_PATH':str(p),'DISDEX_RUNTIME_COMMIT_SHA':sha,'QUALITY102_CAUSAL_V1_STATE_PATH':str(Path(tmp)/'missing'),'DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH':''}):
