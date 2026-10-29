@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""DisDex root-side unified deployment gate (READ-ONLY PREFLIGHT only).
+"""DisDex root-side unified deployment gate.
 
-This source deliberately refuses all LIVE mutations until a separately
-certified scoped executor, venue/STOP readback and rollback audit exist.
-DO NOT present a passing preflight as operator activation or LIVE proof.
+``--preflight-readonly`` remains a non-mutating proof only.  ``--execute``
+is a separately guarded transaction boundary: at this stage it can mutate
+only the explicitly scoped Shared Risk Writer, with a root-owned activation
+artifact, a fresh signed read-only venue proof, a single-use approval nonce,
+and a mandatory rollback plus three-cycle audit.  Every other scope remains
+fail-closed until it has its own transaction and audit implementation.
 """
 from __future__ import annotations
 import argparse
