@@ -1,6 +1,8 @@
-# DisDex route-neutral owner-approved deployment - staged (2026-10-30)
+# DisDex route-neutral owner-approved deployment - preparation (2026-10-30)
 
-**State:** VPS HELPER STAGED ON NON-CURRENT RELEASE. LIVE CUTOVER NOT AUTHORIZED.
+**State:** SOURCE_READY / CI_READY / VPS_READONLY_AUDITED. OPERATOR PREFLIGHT
+AND LIVE CUTOVER REMAIN BLOCKED BY MISSING OWNER ARTIFACTS AND EXISTING VPS
+RELEASE-LINEAGE PERMISSIONS.
 
 This PR unifies the deployment approval rules, safety gates, and audit
 contract. It does **not** require every deployment to run through GitHub
@@ -8,14 +10,28 @@ Actions. GitHub Actions is the formal GPT/ChatGPT adapter; Codex may use the
 direct SSH/operator-helper adapter. Both adapters must submit the same
 route-neutral approval contract to the same root-owned VPS helper.
 
-The source now contains an explicit root-only execution boundary for the
-first-stage `SHARED_CRYPTO_RISK_ONLY` scope. The verified PR head
-`1c2c37f919ff87a19f6407d46183725d054e6320` has been staged on the VPS as a
-root-owned immutable non-current release and its helper has been installed
-under `/usr/local`. This staging does not create a root-owned activation
-artifact, move a release symlink, change a position or protective order,
-change Gross, change the Shared Risk limit, operate the Kill Switch, submit
-an order, or claim `LIVE_VERIFIED`.
+The source contains an explicit root-only execution boundary for the
+first-stage `SHARED_CRYPTO_RISK_ONLY` scope. The PR branch baseline was
+re-read at `31cfae65daabfbe07acd805925bc7c9e9db19c4d`; the final source SHA
+must be refreshed after the remaining fixes are pushed. A read-only VPS audit
+did find the root wrapper and helper under `/usr/local`, but it did not find a
+release for the PR branch and did not find the root-owned execution inputs.
+The audit did not move a release symlink, change a position or protective
+order, change Gross, change the Shared Risk limit, operate the Kill Switch,
+submit an order, or claim `LIVE_VERIFIED`.
+
+The installed helper component hashes observed on the VPS were:
+
+| Component | SHA-256 |
+| --- | --- |
+| `disdex_unified_root_gate.py` | `0b2578d919a53c9d8cefe533c530e4703f461c674d57d1bcb67d686a208bf5b0` |
+| `disdex_deployment_contract.py` | `955c2a983a7fe0cb0f10949dc8bb05546114dfc04f2b48b72ae2e475b9995fc8` |
+| `disdex_deployment_plan.py` | `3fd3eb79285b2f2af536d6f7412753c7f4f6de8a18fe34bd7e42833fdd680371` |
+| `disdex_owner_approval.py` | `9f033abce5cc2cc17b81d372a7421bde4c1b825cb21dc2720dc9d1f213d830f9` |
+
+These hashes match the corresponding PR-302 source files currently under
+audit, but they do not substitute for a final immutable release marker or an
+owner-signed activation.
 
 ## 1. Common authorization contract
 
@@ -213,13 +229,14 @@ complete:
 3. Generate a new password-encrypted Ed25519 key on the owner's device and
    install only its public key in the protected Environment and the forced
    root helper.
-4. The root-owned forced-command helper is now staged from the exact
-   `1c2c37f...` release. Before any execution, the owner/operator must still
-   provision and independently certify the exact activation artifact, current
-   plan, runner-pin manifest, owner public key, signed venue evidence, and
-   rollback baseline. The source executor is mutation-capable only for
-   `SHARED_CRYPTO_RISK_ONLY`; all other scopes remain fail-closed until their
-   own transaction and audit implementation is certified.
+4. The root wrapper/helper exists on the VPS, but its installed source must be
+   re-verified against the final pushed PR SHA before execution. Before any
+   execution, the owner/operator must still provision and independently
+   certify the exact activation artifact, current plan, runner-pin manifest,
+   owner public key, signed venue evidence, and rollback baseline. The source
+   executor is mutation-capable only for `SHARED_CRYPTO_RISK_ONLY`; all other
+   scopes remain fail-closed until their own transaction and audit
+   implementation is certified.
 5. Verify the Codex adapter and Actions adapter against the same helper in a
    non-mutating or staging dry-run. Do not treat an HTTP 200, an anonymous HP
    page, or a source-only CI pass as production authentication.
@@ -234,17 +251,44 @@ fixed adapters, public policy, and tests.
 
 ## 7. Current VPS boundary
 
-The staging audit confirmed that the live `current` symlink remains pinned to
-the existing old common release and that V4, Q102, V52, and Shared Risk keep
-their existing active/enabled units and SHAs. The root-owned helper is
-available, but the following root-owned execution inputs are not yet
-provisioned on the VPS: `/etc/disdex/runner-pins.json`,
+The read-only audit was captured on `x162-43-50-223` at
+`2026-10-29T22:57:50Z`. The live `current` symlink remains pinned to
+`7688ed7c93a1918d8b44837339b7da5584a868f5`, and the active SHA map was:
+
+| Runner | Active systemd SHA | Main PID | Restart count |
+| --- | --- | ---: | ---: |
+| V12 V4 | `53a0be396719f0284af4e11b35c66a4ac7d58f79` | 806758 | 0 |
+| Q102 | `ef1ab178e26a7bf5bddb6473467765edba242e1d` | 805183 | 0 |
+| V52 | `97830672e2f139b39f7194166d7dc8c36e8c8933` | 1112659 | 0 |
+| PENGU / FET / HYPE / IDLE / Shared Risk / Margin Guard | `7688ed7c93a1918d8b44837339b7da5584a868f5` | read from systemd | 0 except FET=3 |
+
+The current symlink is `root:deploy` mode `777`; its release directory and
+marker are `deploy:deploy` (directory mode `2755`, marker mode `644`). The
+runner-specific releases for V4, Q102, and V52 have the same deploy-owned
+lineage. The root gate therefore correctly rejects the current release as
+production immutable lineage until an authorized operator establishes the
+root-owned release contract. This report does not change those permissions.
+
+The following root-owned execution inputs are not provisioned on the VPS:
+`/etc/disdex/runner-pins.json`,
 `/var/lib/disdex/unified-deploy/current-plan.json`, the owner public key,
 nonce directory, scoped activation artifact, and before/after signed
-read-only venue evidence. The old live release directories are deploy-owned
-and therefore are not accepted as immutable root execution lineage. The
-existing root-owned `c9beb...` release was not modified because it does not
-contain the helper source.
+read-only venue evidence.
+
+The existing root-owned candidate `c9beb423ae9b6b18333ae9426a21a69cf35baeef`
+has an immutable marker and the Shared Risk writer source, but it does not
+contain the PR-302 unified root gate/deployment-plan sources. Its release
+payload also contains group/other-writable files, so it is not accepted as a
+complete immutable PR-302 activation target. It was not modified.
+
+Aster read-only evidence was obtained without mutation: the account held
+`DOGEUSDT` short `226`, with one `BUY STOP_MARKET` `reduceOnly=true` order for
+quantity `226` at stop price `0.086960`, client id
+`v12-v4-98ded39746ed3502a4d7b0e26ef9`; the diagnostic reported zero orders,
+cancels, and position changes. This is venue evidence only, not an owner
+activation artifact. The existing pending-exposure state was also stale and
+did not expose a trustworthy `activeCount`, so it cannot be promoted to a
+formal zero-pending proof.
 
 Until those genuine operator artifacts and accepted venue evidence exist, the
 helper must remain a staging/read-only installation. No token, approval date,
@@ -253,10 +297,16 @@ gate pass.
 
 ## 8. Legacy path retirement
 
-`audit_legacy_deploy_paths.py` remains a read-only inventory. The current
-legacy write-capable workflows and broad SSH references are not silently
-deleted by this PR. After both adapters, the root helper, rollback, and
-three-cycle audit are independently proven, the owner/operator must:
+`audit_legacy_deploy_paths.py` remains a read-only inventory. It found 10
+workflow paths with VPS access and 9 retirement candidates. The candidates
+are the older rate-budget recovery, full-order production/read-only audit,
+Idle redeploy/read-only audit, PENGU normalization, remnant diagnostic,
+Q102 deploy, and V4 history read-only audit workflows. The current
+`disdex-unified-production-deploy.yml` is the only listed path marked as the
+current policy path. The old write-capable workflows and broad SSH
+references are not silently deleted by this PR. After both adapters, the
+root helper, rollback, and three-cycle audit are independently proven, the
+owner/operator must:
 
 - remove or disable unrestricted write-capable Actions workflows;
 - rotate/revoke broad repository-level root keys and obsolete VPS
@@ -268,7 +318,7 @@ If the new route is not independently verified, the safe state is to leave
 the current LIVE release and existing protection in place, with new mutation
 blocked.
 
-## 8. Current PR status
+## 9. Current PR status
 
 This PR is source/CI work only. It has no root-owned helper installation,
 operator activation artifact, GitHub Environment configuration, password
