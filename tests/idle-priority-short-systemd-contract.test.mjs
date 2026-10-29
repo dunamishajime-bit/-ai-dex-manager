@@ -74,9 +74,11 @@ test("Idle is wired into release-pinned health snapshot and watchdog", async () 
   assert.match(watchdog, /disdex-idle-priority-short@\*\.service/);
   assert.match(watchdog, /disdex-idle-priority-short\.service/);
 
-  assert.match(wiring, /DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(wiring, /DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=\$\{IDLE_SHA\}/);
+  assert.doesNotMatch(wiring, /DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
   assert.match(wiring, /DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=\$\{IDLE_PRIORITY_STATE_ROOT\}\/state\.json/);
-  assert.match(wiring, /DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(wiring, /DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=\$\{IDLE_SHA\}/);
+  assert.doesNotMatch(wiring, /DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
   assert.match(wiring, /DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=\$\{IDLE_UNIT\}/);
 });
 
