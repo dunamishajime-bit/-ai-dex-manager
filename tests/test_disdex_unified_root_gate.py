@@ -202,7 +202,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
             release = self.releases / sha
             release.mkdir()
             (release / ".disdex-release-sha").write_text(sha, encoding="ascii")
-            (release / ".disdex-release-sha").chmod(0o600)
+            (release / ".disdex-release-sha").chmod(0o400)
         self.current.symlink_to(self.releases / self.old, target_is_directory=True)
         self.pins_path = base / "runner-pins.json"
         self.current_plan_path = self.root / "current-plan.json"
