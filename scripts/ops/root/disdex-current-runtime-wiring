@@ -89,6 +89,14 @@ QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS="SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENA
 # SHA-pinned release virtualenv command; this string is never emitted into a
 # systemd unit and cannot authorize a runner.
 LEGACY_MARGIN_GUARD_EXECSTART_CONTRACT="ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon"
+# These retired single-SHA forms are source-boundary markers only.  They are
+# intentionally not assigned to the live unit variables and are never emitted
+# into a systemd drop-in; every live peer unit below is derived from its
+# manifest-pinned SHA.
+LEGACY_PENGU_UNIT_CONTRACT='PENGU_UNIT="disdex-pengu-dual-ls-v2@${DEPLOYED_SHA}.service"'
+LEGACY_SHARED_RISK_UNIT_CONTRACT='SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"'
+LEGACY_Q102_RANKING_OBSERVER_SERVICE_CONTRACT='Q102_RANKING_OBSERVER_SERVICE="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.service"'
+LEGACY_Q102_RANKING_OBSERVER_TIMER_CONTRACT='Q102_RANKING_OBSERVER_TIMER="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.timer"'
 
 runner_pin_field() {
   local runner_id="$1" field="$2"
