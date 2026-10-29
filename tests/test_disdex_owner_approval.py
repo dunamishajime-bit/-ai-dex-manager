@@ -11,6 +11,7 @@ from disdex_owner_approval import issue, verify, canonical, unique_json
 
 REPO = "dunamishajime-bit/-ai-dex-manager"
 SHA = "c9beb423ae9b6b18333ae9426a21a69cf35baeef"
+PLAN = "d" * 64
 
 class DeploymentApprovalTests(unittest.TestCase):
     @classmethod
@@ -28,12 +29,12 @@ class DeploymentApprovalTests(unittest.TestCase):
         cls.temp.cleanup()
 
     def token(self):
-        return issue(REPO, SHA, "SHARED_CRYPTO_RISK_ONLY", "owner", self.key,
+        return issue(REPO, SHA, "SHARED_CRYPTO_RISK_ONLY", "owner", self.key, PLAN,
                      now=1700000000, ttl=120)
 
     def check(self, token, sha=SHA, scope="SHARED_CRYPTO_RISK_ONLY",
               operator="owner", now=1700000010):
-        return verify(token, self.pub, REPO, sha, scope, operator, now=now)
+        return verify(token, self.pub, REPO, sha, scope, operator, PLAN, now=now)
 
     def test_valid(self):
         self.assertEqual(self.check(self.token())["sourceSha"], SHA)
@@ -49,6 +50,11 @@ class DeploymentApprovalTests(unittest.TestCase):
     def test_different_operator(self):
         with self.assertRaisesRegex(ValueError, "mismatch"):
             self.check(self.token(), operator="other")
+
+    def test_plan_swap(self):
+        with self.assertRaisesRegex(ValueError, "target mismatch"):
+            verify(self.token(), self.pub, REPO, SHA, "SHARED_CRYPTO_RISK_ONLY",
+                   "owner", "f"*64, now=1700000010)
 
     def test_expired(self):
         with self.assertRaisesRegex(ValueError, "time window"):

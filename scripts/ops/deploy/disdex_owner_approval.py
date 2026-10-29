@@ -18,10 +18,11 @@ REPO = "dunamishajime-bit/-ai-dex-manager"
 SCOPES = frozenset(("FULL_PROJECT V12_V4 QUALITY102_CAUSAL_V1 V52 PENGU_V8 "
     "FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT SHARED_CRYPTO_RISK_ONLY "
     "MARGIN_GUARD_ONLY API_MONITORS HP_ONLY ROLLBACK").split())
-FIELDS = {"schema", "repository", "sourceSha", "scope", "operator", "nonce", "issuedAt", "expiresAt"}
+FIELDS = {"schema", "repository", "sourceSha", "scope", "operator", "nonce", "issuedAt", "expiresAt", "planSha256"}
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 LOGIN = re.compile(r"[A-Za-z0-9-]{1,39}\Z")
 NONCE = re.compile(r"[0-9a-f]{32}\Z")
+PLAN_HASH = re.compile(r"[0-9a-f]{64}\Z")
 
 def canonical(obj):
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
@@ -53,19 +54,21 @@ def crypto(data, key, signature=None):
             raise ValueError("invalid owner signature or key")
         return sig.read_bytes() if signature is None else True
 
-def issue(repo, sha, scope, operator, key, now=None, ttl=300):
+def issue(repo, sha, scope, operator, key, plan_sha256, now=None, ttl=300):
     now = int(time.time()) if now is None else now
     if (repo != REPO or not SHA.fullmatch(sha) or scope not in SCOPES or
-        not LOGIN.fullmatch(operator) or type(ttl) is not int or not 1 <= ttl <= 300):
+        not LOGIN.fullmatch(operator) or not PLAN_HASH.fullmatch(plan_sha256)
+        or type(ttl) is not int or not 1 <= ttl <= 300):
         raise ValueError("invalid approval request")
     payload = dict(schema=SCHEMA, repository=repo, sourceSha=sha, scope=scope,
                    operator=operator, nonce=secrets.token_hex(16),
+                   planSha256=plan_sha256,
                    issuedAt=now, expiresAt=now + ttl)
     sig = crypto(canonical(payload), key)
     return base64.b64encode(canonical(dict(payload=payload,
         signature=base64.b64encode(sig).decode("ascii")))).decode("ascii")
 
-def verify(token, public_key, repo, sha, scope, operator, now=None, nonce_dir=None):
+def verify(token, public_key, repo, sha, scope, operator, plan_sha256, now=None, nonce_dir=None):
     now = int(time.time()) if now is None else now
     if len(token) > 16384:
         raise ValueError("oversized approval")
@@ -81,11 +84,12 @@ def verify(token, public_key, repo, sha, scope, operator, now=None, nonce_dir=No
         raise ValueError("unexpected payload fields")
     if (repo != REPO or payload["schema"] != SCHEMA or payload["repository"] != repo or
         payload["sourceSha"] != sha or payload["scope"] != scope or
-        payload["operator"] != operator):
+        payload["operator"] != operator or payload["planSha256"] != plan_sha256):
         raise ValueError("approval target mismatch")
     if (not isinstance(sha, str) or not SHA.fullmatch(sha) or scope not in SCOPES
         or not isinstance(operator, str) or not LOGIN.fullmatch(operator)
-        or not isinstance(payload["nonce"], str) or not NONCE.fullmatch(payload["nonce"])):
+        or not isinstance(payload["nonce"], str) or not NONCE.fullmatch(payload["nonce"])
+        or not isinstance(plan_sha256, str) or not PLAN_HASH.fullmatch(plan_sha256)):
         raise ValueError("invalid approval identity")
     issued, expires = payload["issuedAt"], payload["expiresAt"]
     if (type(issued) is not int or type(expires) is not int or
@@ -123,13 +127,15 @@ def main():
         command.add_argument("--sha", required=True)
         command.add_argument("--scope", required=True, choices=sorted(SCOPES))
         command.add_argument("--operator", required=True)
+        command.add_argument("--plan-sha256", required=True)
     a = parser.parse_args()
     try:
         if a.mode == "sign":
-            print(issue(a.repository, a.sha, a.scope, a.operator, a.key, ttl=a.ttl))
+            print(issue(a.repository, a.sha, a.scope, a.operator, a.key,
+                        a.plan_sha256, ttl=a.ttl))
         else:
             verify(sys.stdin.read().strip(), a.public_key, a.repository, a.sha,
-                   a.scope, a.operator, nonce_dir=a.nonce_dir)
+                   a.scope, a.operator, a.plan_sha256, nonce_dir=a.nonce_dir)
             print("DISDEX_OWNER_APPROVAL_VALID")
     except (ValueError, OSError) as e:
         print("DISDEX_OWNER_APPROVAL_BLOCKED: " + str(e), file=sys.stderr)

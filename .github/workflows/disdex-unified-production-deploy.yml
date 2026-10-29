@@ -27,6 +27,10 @@ on:
           - HP_ONLY
           - FULL_PROJECT
           - ROLLBACK
+      plan_sha256:
+        description: Canonical SHA-256 of the immutable full runner/UI deployment plan
+        type: string
+        required: true
       owner_signed_token:
         description: Signed short-lived token only; NEVER paste a password
         type: string
@@ -60,12 +64,14 @@ jobs:
           ACTOR: ${{ github.actor }}
           SHA: ${{ inputs.target_sha }}
           SCOPE: ${{ inputs.scope }}
+          PLAN_SHA: ${{ inputs.plan_sha256 }}
           TOKEN: ${{ inputs.owner_signed_token }}
           PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
         run: |
           set -euo pipefail
           [[ "$READY" == "OWNER_ENV_LOCKED_V1" ]]
           [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PLAN_SHA" =~ ^[0-9a-f]{64}$ ]]
           [[ "$OWNER" =~ ^[A-Za-z0-9-]{1,39}$ ]]
           [[ ",$ALLOWED," == *",$ACTOR,"* ]]
           [[ -n "$TOKEN" && -n "$PUBLIC_KEY" ]]
@@ -75,7 +81,7 @@ jobs:
             python3 scripts/ops/deploy/disdex_owner_approval.py verify \
               --public-key "$RUNNER_TEMP/disdex-owner.pub" \
               --repository "$GITHUB_REPOSITORY" --sha "$SHA" \
-              --scope "$SCOPE" --operator "$OWNER"
+              --scope "$SCOPE" --operator "$OWNER" --plan-sha256 "$PLAN_SHA"
       - name: Invoke exact-scope dedicated VPS root helper
         shell: bash
         env:
@@ -85,6 +91,7 @@ jobs:
           PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
           SHA: ${{ inputs.target_sha }}
           SCOPE: ${{ inputs.scope }}
+          PLAN_SHA: ${{ inputs.plan_sha256 }}
           TOKEN: ${{ inputs.owner_signed_token }}
         run: |
           set -euo pipefail
@@ -107,4 +114,4 @@ jobs:
             -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts" \
             -p "$PORT" "root@$HOST" \
-            "/usr/local/sbin/disdex-unified-production-deploy --sha $SHA --scope $SCOPE --read-approval-stdin"
+            "/usr/local/sbin/disdex-unified-production-deploy --sha $SHA --scope $SCOPE --plan-sha256 $PLAN_SHA --read-approval-stdin"

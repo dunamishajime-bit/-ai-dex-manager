@@ -13,7 +13,7 @@ prepare or request deployments. Only the owner can approve real-money LIVE.
 
 A password is required on the owner's trusted device to decrypt an encrypted
 Ed25519 signing key. GitHub Actions receives only a signed public authorization
-token: repository, SHA, exact scope, operator, nonce, issue time and expiry
+token: repository, SHA, exact scope, immutable plan SHA-256, operator, nonce, issue time and expiry
 (maximum 300 seconds). Neither the password nor private key is sent to GPT,
 GitHub Actions inputs, repository files, VPS or logs.
 
@@ -75,6 +75,7 @@ Signing prompts locally for the key password:
     --repository dunamishajime-bit/-ai-dex-manager \
     --sha EXACT_40_CHARACTER_SHA \
     --scope SHARED_CRYPTO_RISK_ONLY \
+    --plan-sha256 SHA256_OF_CANONICAL_IMMUTABLE_DEPLOY_PLAN \
     --operator YOUR_GITHUB_LOGIN
 
 Paste the signed token (not the password) into the workflow_dispatch
@@ -102,3 +103,8 @@ a signed-approval verifier plus a workflow that FAILS CLOSED until all such
 requirements are met. There is no claim of LIVE_VERIFIED or a finished
 single-path deployment. The old workflows must not be deleted before a tested
 replacement and rollback exist.
+
+Signed planSha256 must equal a root-verified immutable deployment plan hash
+covering every runner SHA, STOP owner, target service and HP release. The
+VPS helper must recompute this hash from the pinned plan, not trust a caller-
+supplied hash. This prevents FULL_PROJECT multi-SHA substitution.
