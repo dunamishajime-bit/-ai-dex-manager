@@ -1,0 +1,46 @@
+name: DisDex Owner Deployment Authorization CI
+
+on:
+  push:
+    paths:
+      - 'scripts/ops/deploy/disdex_owner_approval.py'
+      - 'tests/test_disdex_owner_approval.py'
+      - '.github/workflows/disdex-unified-production-deploy.yml'
+      - '.github/workflows/disdex-owner-deploy-ci.yml'
+  pull_request:
+    paths:
+      - 'scripts/ops/deploy/disdex_owner_approval.py'
+      - 'tests/test_disdex_owner_approval.py'
+      - '.github/workflows/disdex-unified-production-deploy.yml'
+      - '.github/workflows/disdex-owner-deploy-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  owner-authorization-contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify Ed25519 grant rejection cases
+        run: python3 -m unittest discover -s tests -p test_disdex_owner_approval.py -v
+      - name: Source and workflow fail-closed contract
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_owner_approval.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('.github/workflows/disdex-unified-production-deploy.yml').read_text()
+          for pattern in ('workflow_dispatch:', 'name: disdex-production',
+                          'OWNER_ENV_LOCKED_V1', 'DISDEX_PRODUCTION_SSH_PRIVATE_KEY',
+                          'DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM',
+                          '--read-approval-stdin', 'cancel-in-progress: false',
+                          'github.ref =='):
+              assert pattern in p, pattern
+          assert 'secrets.DISDEX_VPS_ROOT_PRIVATE_KEY' not in p
+          assert 'password:' not in p
+          print('DISDEX_OWNER_DEPLOY_POLICY_SOURCE_PASS')
+          PY
