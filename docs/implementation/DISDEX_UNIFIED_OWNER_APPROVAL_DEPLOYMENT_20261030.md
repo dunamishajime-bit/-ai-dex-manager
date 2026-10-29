@@ -340,9 +340,12 @@ change, Kill Switch operation, or LIVE audit. The correct status remains
 operator gate is requested without the required artifact, the result is
 `BLOCKED_OPERATOR_AUTH`.
 
-The final branch HEAD is
+The final implementation/source commit is
 `0fd02a5cce623fd3ce985ee86737e32998d92c12`. PR #302 remains OPEN and Draft
-with merge state CLEAN. The final required checks passed at that SHA:
+with merge state CLEAN. The branch may carry a later documentation-only
+evidence commit; the exact current remote tip is always read back separately
+and is not self-referenced here. The required checks passed at the
+implementation commit:
 production parity `40973489222`, V13D/V11-EQ/V96 runner validation
 `40973489208`, owner authorization contract `40973489164`, margin risk
 `40973489174`, source/runtime heartbeat contract `40973489288`, and VPS
