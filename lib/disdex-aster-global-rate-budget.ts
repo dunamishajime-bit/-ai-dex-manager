@@ -4,6 +4,23 @@ import { dirname, join, resolve } from "node:path";
 import type { AsterRatePriority } from "./disdex-aster-rate-budget-policy";
 
 export const ASTER_GLOBAL_RATE_BUDGET_SCHEMA = "disdex-aster-rate-budget/v1";
+export const ASTER_GLOBAL_RATE_BUDGET_EVENT_SCHEMA = "disdex-aster-rate-budget-event/v1" as const;
+
+export type AsterRateBudgetDiagnostic = {
+  schema: typeof ASTER_GLOBAL_RATE_BUDGET_EVENT_SCHEMA;
+  event: "LOCK_CONTENDED" | "LOCK_TIMEOUT" | "SLOT_WAIT" | "SLOT_DEFERRED" | "COOLDOWN_PUBLISHED";
+  at: number;
+  path: string;
+  pid: number;
+  ownerPid?: number;
+  contenderPid?: number;
+  priority?: AsterRatePriority;
+  waitMs?: number;
+  status?: 418 | 429;
+  reason?: string;
+};
+
+export type AsterRateBudgetDiagnosticSink = (event: AsterRateBudgetDiagnostic) => void;
 
 export type AsterGlobalRateSlotOptions = {
   path: string;
@@ -12,6 +29,7 @@ export type AsterGlobalRateSlotOptions = {
   weight?: number;
   nowMs?: number;
   priority?: AsterRatePriority;
+  onDiagnostic?: AsterRateBudgetDiagnosticSink;
 };
 
 type BudgetState = {
@@ -39,6 +57,30 @@ const PRIORITY_QUEUE_FRACTION: Record<AsterRatePriority, number> = {
 function priorityQueueMs(maxQueueMs:number,priority:AsterRatePriority){
   return Math.max(1,Math.floor(maxQueueMs*PRIORITY_QUEUE_FRACTION[priority]));
 }
+
+function emitBudgetDiagnostic(
+  sink: AsterRateBudgetDiagnosticSink | undefined,
+  event: Omit<AsterRateBudgetDiagnostic, "schema" | "at" | "pid">,
+) {
+  const record: AsterRateBudgetDiagnostic = {
+    schema: ASTER_GLOBAL_RATE_BUDGET_EVENT_SCHEMA,
+    at: Date.now(),
+    pid: process.pid,
+    ...event,
+  };
+  try {
+    (sink || ((value: AsterRateBudgetDiagnostic) => console.info(`[DISDEX_ASTER_GLOBAL_RATE_BUDGET] ${JSON.stringify(value)}`)))(record);
+  } catch {
+    // Diagnostics must never turn a rate-budget safety decision into an
+    // unhandled exception or bypass the existing fail-closed path.
+  }
+}
+
+type BudgetDiagnosticContext = {
+  path: string;
+  onDiagnostic?: AsterRateBudgetDiagnosticSink;
+  priority?: AsterRatePriority;
+};
 
 type BudgetLockOwner = {
   schema: typeof LOCK_OWNER_SCHEMA;
@@ -202,9 +244,9 @@ async function readBudget(path: string): Promise<Partial<BudgetState>> {
   }
 }
 async function atomicWriteBudget(path: string, state: BudgetState) {
-  const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+  const temporary = `${path}.${randomUUID()}.tmp`;
   try {
-    await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o660 });
+    await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o660, flag: "wx" });
     // Root-owned diagnostics/recovery helpers must never steal the shared
     // rate-budget file from deploy-owned trading daemons via atomic rename.
     // When running as root, inherit the parent directory ownership before the
@@ -221,9 +263,22 @@ async function atomicWriteBudget(path: string, state: BudgetState) {
   }
 }
 
-async function acquireBudgetLock(lockPath: string, maxQueueMs: number): Promise<BudgetLockOwner> {
+async function acquireBudgetLock(lockPath: string, maxQueueMs: number, diagnostics?: BudgetDiagnosticContext): Promise<BudgetLockOwner> {
   const deadline = Date.now() + maxQueueMs;
+  const startedAt = Date.now();
+  let contentionReported = false;
   const owner = await newLockOwner();
+  const timeout = (): never => {
+    emitBudgetDiagnostic(diagnostics?.onDiagnostic, {
+      event: "LOCK_TIMEOUT",
+      path: diagnostics?.path || lockPath,
+      contenderPid: process.pid,
+      priority: diagnostics?.priority,
+      waitMs: Math.max(0, Date.now() - startedAt),
+      reason: "LOCK_WAIT_EXPIRED",
+    });
+    throw new Error("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT");
+  };
   while (true) {
     try {
       await mkdir(lockPath, { mode: 0o700 });
@@ -237,12 +292,25 @@ async function acquireBudgetLock(lockPath: string, maxQueueMs: number): Promise<
             throw error;
           }
           if (errorCode(error) === "ENOENT") break;
-          if (Date.now() >= deadline) throw new Error("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT");
+          if (Date.now() >= deadline) timeout();
           await sleep(5);
         }
       }
     } catch (error) {
       if (errorCode(error) !== "EEXIST" && !transientLockRace(error)) throw error;
+      if (!contentionReported) {
+        const currentOwner = await readLockOwner(lockPath);
+        emitBudgetDiagnostic(diagnostics?.onDiagnostic, {
+          event: "LOCK_CONTENDED",
+          path: diagnostics?.path || lockPath,
+          ownerPid: currentOwner?.pid,
+          contenderPid: process.pid,
+          priority: diagnostics?.priority,
+          waitMs: Math.max(0, Date.now() - startedAt),
+          reason: "LOCK_HELD",
+        });
+        contentionReported = true;
+      }
       const trustFreshBudgetLock = process.platform === "win32";
       if (errorCode(error) === "EEXIST" && await lockIsStale(lockPath, trustFreshBudgetLock)) {
         const recovery = await acquireLockGenerationMutex(lockPath, deadline);
@@ -262,7 +330,7 @@ async function acquireBudgetLock(lockPath: string, maxQueueMs: number): Promise<
         continue;
       }
     }
-    if (Date.now() >= deadline) throw new Error("ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT");
+    if (Date.now() >= deadline) timeout();
     await sleep(5);
   }
 }
@@ -303,7 +371,7 @@ export async function reserveAsterGlobalRateSlot(options: AsterGlobalRateSlotOpt
     throw new Error("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID");
   const queueMs=priorityQueueMs(maxQueueMs,priority);
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-  const owner = await acquireBudgetLock(lockPath, queueMs);
+  const owner = await acquireBudgetLock(lockPath, queueMs, { path, onDiagnostic: options.onDiagnostic, priority });
   try {
     const current = await readBudget(path);
     if (Object.keys(current).length > 0 && current.schema !== ASTER_GLOBAL_RATE_BUDGET_SCHEMA) {
@@ -316,7 +384,25 @@ export async function reserveAsterGlobalRateSlot(options: AsterGlobalRateSlotOpt
     const waitMs = permitAt - now;
     const serviceMs = minIntervalMs * weight;
     const projectedMs = waitMs + serviceMs;
-    if (projectedMs > queueMs) throw new Error(`ASTER_GLOBAL_RATE_BUDGET_SATURATED:${projectedMs}`);
+    if (waitMs > 0) {
+      emitBudgetDiagnostic(options.onDiagnostic, {
+        event: "SLOT_WAIT",
+        path,
+        priority,
+        waitMs,
+        reason: "NEXT_ALLOWED_AT",
+      });
+    }
+    if (projectedMs > queueMs) {
+      emitBudgetDiagnostic(options.onDiagnostic, {
+        event: "SLOT_DEFERRED",
+        path,
+        priority,
+        waitMs: projectedMs,
+        reason: "QUEUE_SATURATED",
+      });
+      throw new Error(`ASTER_GLOBAL_RATE_BUDGET_SATURATED:${projectedMs}`);
+    }
     const state: BudgetState = {
       schema: ASTER_GLOBAL_RATE_BUDGET_SCHEMA,
       nextAllowedAt: permitAt + (minIntervalMs * weight),
@@ -331,11 +417,11 @@ export async function reserveAsterGlobalRateSlot(options: AsterGlobalRateSlotOpt
   }
 }
 
-export async function deferAsterGlobalRateBudget(options: { path: string; cooldownMs: number; status: 418 | 429; nowMs?: number }) {
+export async function deferAsterGlobalRateBudget(options: { path: string; cooldownMs: number; status: 418 | 429; nowMs?: number; onDiagnostic?: AsterRateBudgetDiagnosticSink }) {
   if (!Number.isFinite(options.cooldownMs) || options.cooldownMs < 0 || (options.nowMs !== undefined && !Number.isFinite(options.nowMs))) throw new Error("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID");
   const path = resolve(options.path); const lockPath = `${path}.lock`; const now = options.nowMs ?? Date.now();
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-  const owner = await acquireBudgetLock(lockPath, 2_000);
+  const owner = await acquireBudgetLock(lockPath, 2_000, { path, onDiagnostic: options.onDiagnostic, priority: "PROTECTIVE" });
   try {
     const current = await readBudget(path);
     if (Object.keys(current).length > 0 && current.schema !== ASTER_GLOBAL_RATE_BUDGET_SCHEMA) throw new Error("ASTER_GLOBAL_RATE_BUDGET_MALFORMED");
@@ -343,6 +429,14 @@ export async function deferAsterGlobalRateBudget(options: { path: string; cooldo
     if (!Number.isFinite(existing) || existing < 0) throw new Error("ASTER_GLOBAL_RATE_BUDGET_MALFORMED");
     const cooldownUntil = Math.max(existing, now + Math.floor(options.cooldownMs));
     await atomicWriteBudget(path, { schema: ASTER_GLOBAL_RATE_BUDGET_SCHEMA, nextAllowedAt: cooldownUntil, updatedAt: now, pid: process.pid, cooldownUntil, lastRateLimitStatus: options.status });
+    emitBudgetDiagnostic(options.onDiagnostic, {
+      event: "COOLDOWN_PUBLISHED",
+      path,
+      priority: "PROTECTIVE",
+      status: options.status,
+      waitMs: Math.max(0, cooldownUntil - now),
+      reason: options.status === 418 ? "VENUE_IP_BAN" : "VENUE_RATE_LIMIT",
+    });
     return { cooldownUntil };
   } finally { await releaseBudgetLock(lockPath, owner); }
 }

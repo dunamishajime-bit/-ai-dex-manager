@@ -1,11 +1,23 @@
 import { privateKeyToAccount } from "viem/accounts";
 import { deferAsterGlobalRateBudget, waitForAsterGlobalRateSlot } from "./disdex-aster-global-rate-budget";
+import { nextAsterRateBudgetRetryMs } from "./disdex-aster-rate-budget-policy";
 import type {AsterRatePriority} from "./disdex-aster-rate-budget-policy";
 
 export type AsterHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type AsterOrderSide = "BUY" | "SELL";
 export type AsterPositionSide = "BOTH" | "LONG" | "SHORT";
 export type AsterConditionalOrderType = "STOP_MARKET" | "TAKE_PROFIT_MARKET";
+
+export type AsterReadOnlyRetryDiagnostic = {
+    schema: "disdex-aster-read-only-retry/v1";
+    event: "READ_ONLY_RATE_LIMIT_RETRY";
+    at: number;
+    path: string;
+    status: number;
+    attempt: number;
+    waitMs: number;
+    reason: "BOUNDED_JITTER";
+};
 
 export interface AsterV3ClientOptions {
     baseUrl?: string;
@@ -17,6 +29,8 @@ export interface AsterV3ClientOptions {
     readOnlyRateLimitMaxRetries?: number;
     readOnlyRateLimitBackoffBaseMs?: number;
     readOnlyRateLimitBackoffMaxMs?: number;
+    readOnlyRateLimitRandom?: () => number;
+    onReadOnlyRetry?: (event: AsterReadOnlyRetryDiagnostic) => void;
     fetchImpl?: typeof fetch;
     userAgent?: string;
 }
@@ -293,6 +307,23 @@ function isReadOnlyRateLimitError(error: AsterApiError) {
 }
 function sleep(ms: number) { return new Promise<void>((resolve) => setTimeout(resolve, ms)); }
 
+function emitReadOnlyRetryDiagnostic(
+    sink: ((event: AsterReadOnlyRetryDiagnostic) => void) | undefined,
+    event: Omit<AsterReadOnlyRetryDiagnostic, "schema" | "at">,
+) {
+    const record: AsterReadOnlyRetryDiagnostic = {
+        schema: "disdex-aster-read-only-retry/v1",
+        at: Date.now(),
+        ...event,
+    };
+    try {
+        (sink || ((value: AsterReadOnlyRetryDiagnostic) => console.info(`[DISDEX_ASTER_READ_ONLY_RETRY] ${JSON.stringify(value)}`)))(record);
+    } catch {
+        // Retry diagnostics are observability only and cannot alter the
+        // fail-closed request decision.
+    }
+}
+
 class MonotonicMicrosecondNonce {
     private last = 0n;
     next() { const now = BigInt(Date.now()) * 1000n; this.last = now > this.last ? now : this.last + 1n; return this.last.toString(); }
@@ -308,6 +339,8 @@ export class AsterV3Client {
     private readonly readOnlyRateLimitMaxRetries: number;
     private readonly readOnlyRateLimitBackoffBaseMs: number;
     private readonly readOnlyRateLimitBackoffMaxMs: number;
+    private readonly readOnlyRateLimitRandom: () => number;
+    private readonly onReadOnlyRetry?: (event: AsterReadOnlyRetryDiagnostic) => void;
     private readonly fetchImpl: typeof fetch;
     private readonly userAgent: string;
     private readonly nonce = new MonotonicMicrosecondNonce();
@@ -323,6 +356,8 @@ export class AsterV3Client {
         this.readOnlyRateLimitMaxRetries = Math.max(0, Math.min(5, Math.floor(options.readOnlyRateLimitMaxRetries ?? 3)));
         this.readOnlyRateLimitBackoffBaseMs = Math.max(1, Math.min(60_000, Math.floor(options.readOnlyRateLimitBackoffBaseMs ?? 1_000)));
         this.readOnlyRateLimitBackoffMaxMs = Math.max(this.readOnlyRateLimitBackoffBaseMs, Math.min(120_000, Math.floor(options.readOnlyRateLimitBackoffMaxMs ?? 120_000)));
+        this.readOnlyRateLimitRandom = options.readOnlyRateLimitRandom ?? Math.random;
+        this.onReadOnlyRetry = options.onReadOnlyRetry;
         this.fetchImpl = options.fetchImpl ?? fetch;
         this.userAgent = options.userAgent || "DisDex-Win80-LiveRunner/1.0";
     }
@@ -381,8 +416,21 @@ export class AsterV3Client {
                     && error instanceof AsterApiError
                     && isReadOnlyRateLimitError(error);
                 if (canRetry) {
-                    const exponential = this.readOnlyRateLimitBackoffBaseMs * (2 ** retries);
-                    const waitMs = Math.min(this.readOnlyRateLimitBackoffMaxMs, Math.max(exponential, error.retryAfterMs ?? 0));
+                    const waitMs = nextAsterRateBudgetRetryMs(
+                        retries,
+                        this.readOnlyRateLimitBackoffBaseMs,
+                        this.readOnlyRateLimitBackoffMaxMs,
+                        error.retryAfterMs ?? 0,
+                        this.readOnlyRateLimitRandom,
+                    );
+                    emitReadOnlyRetryDiagnostic(this.onReadOnlyRetry, {
+                        event: "READ_ONLY_RATE_LIMIT_RETRY",
+                        path: input.path,
+                        status: error.status,
+                        attempt: retries + 1,
+                        waitMs,
+                        reason: "BOUNDED_JITTER",
+                    });
                     retries += 1;
                     await sleep(waitMs);
                     continue;

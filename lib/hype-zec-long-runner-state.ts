@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { chmod, chown, constants as fsConstants, copyFile, lstat, mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
@@ -266,7 +267,7 @@ export class FileHypeZecLongRunnerStateStore {
       failures: [...before.failures, { message: auditReason, occurredAt: now }].slice(-100),
     };
     const nextBytes = `${JSON.stringify(nextRaw, null, 2)}\n`;
-    const temporary = `${this.path}.${process.pid}.${Date.now()}.stale-recovery.tmp`;
+    const temporary = `${this.path}.${randomUUID()}.stale-recovery.tmp`;
     const handle = await open(temporary, "wx", metadata.mode & 0o777);
     try {
       await handle.writeFile(nextBytes, "utf8");
@@ -311,9 +312,9 @@ export class FileHypeZecLongRunnerStateStore {
       const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
       if (code !== "ENOENT") throw error;
     }
-    const temporary = `${this.path}.${process.pid}.${Date.now()}.tmp`;
+    const temporary = `${this.path}.${randomUUID()}.tmp`;
     try {
-      await writeFile(temporary, `${JSON.stringify(normalized, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+      await writeFile(temporary, `${JSON.stringify(normalized, null, 2)}\n`, { encoding: "utf8", mode: 0o600, flag: "wx" });
       await rename(temporary, this.path);
       await chmod(this.path, 0o600);
     } catch (error) {
