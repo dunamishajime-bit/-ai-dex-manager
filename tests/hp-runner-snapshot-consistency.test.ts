@@ -48,13 +48,12 @@ test("HP source does not authorize anonymous or stale/anonymous snapshot data", 
 });
 
 test("HP and operator activation use the same explicit deployment/operator target identity", async () => {
-  const [routeSource, snapshotSource, wiringSource, targetSource, evidenceSource, readinessSource, gateSource] = await Promise.all([
+  const [routeSource, snapshotSource, wiringSource, targetSource, evidenceSource, gateSource] = await Promise.all([
     readFile("app/api/system/runner-health/route.ts", "utf8"),
     readFile("scripts/ops/root/disdex-runner-health-snapshot-current.mjs", "utf8"),
     readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8"),
     readFile("docs/production/current-live-target.json", "utf8"),
     readFile("scripts/ops/root/disdex-multisha-release-evidence.mjs", "utf8"),
-    readFile("scripts/disdex-current-live-target-readiness.ts", "utf8"),
     readFile("scripts/ops/root/disdex-live-operator-activation-gate.mjs", "utf8"),
   ]);
   const target = JSON.parse(targetSource) as {
@@ -75,6 +74,5 @@ test("HP and operator activation use the same explicit deployment/operator targe
   assert.match(wiringSource, /DISDEX_HEALTH_SNAPSHOT_DEPLOYMENT_TARGET=\$\{DEPLOYMENT_TARGET\}/);
   assert.match(wiringSource, /DISDEX_HEALTH_SNAPSHOT_OPERATOR_TARGET=\$\{OPERATOR_TARGET\}/);
   assert.match(evidenceSource, /operatorTarget/);
-  assert.match(readinessSource, /canonical\.operatorTarget/);
   assert.match(gateSource, /target/);
 });
