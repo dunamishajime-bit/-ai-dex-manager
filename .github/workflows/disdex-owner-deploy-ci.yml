@@ -8,6 +8,8 @@ on:
       - '.github/workflows/disdex-unified-production-deploy.yml'
       - '.github/workflows/disdex-owner-deploy-ci.yml'
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
+      - 'scripts/ops/deploy/disdex_deployment_plan.py'
+      - 'tests/test_disdex_deployment_plan.py'
   pull_request:
     paths:
       - 'scripts/ops/deploy/disdex_owner_approval.py'
@@ -15,6 +17,8 @@ on:
       - '.github/workflows/disdex-unified-production-deploy.yml'
       - '.github/workflows/disdex-owner-deploy-ci.yml'
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
+      - 'scripts/ops/deploy/disdex_deployment_plan.py'
+      - 'tests/test_disdex_deployment_plan.py'
   workflow_dispatch:
 
 permissions:
@@ -29,6 +33,8 @@ jobs:
           persist-credentials: false
       - name: Verify Ed25519 grant rejection cases
         run: python3 -m unittest discover -s tests -p test_disdex_owner_approval.py -v
+      - name: Verify multi-SHA exact-scope plans
+        run: python3 -m unittest discover -s tests -p test_disdex_deployment_plan.py -v
       - name: Audit legacy VPS SSH paths (read-only inventory)
         run: python3 scripts/ops/deploy/audit_legacy_deploy_paths.py
       - name: Source and workflow fail-closed contract

@@ -115,3 +115,12 @@ GitHub Actions workflows that reference legacy VPS root secrets or SSH.
 It only reports filenames, not secret values. Enable --require-retired only
 after the new, independently verified deployment and rollback work. The
 presence of old root keys is a SECURITY BLOCKER for exclusive control.
+
+## Canonical exact-scope plan hash
+The root helper must generate two validated plan JSON files: current actual
+runner SHA map obtained from systemd and desired immutable target. Run
+  python scripts/ops/deploy/disdex_deployment_plan.py --desired plan.json --current current.json
+and approve the printed SHA-256 plan hash. The owner must independently
+inspect the full plan before signing, and root must independently reconstruct
+and re-hash it before changing any service. Source policy refuses out-of-scope
+runner changes for individual deployments and HP/monitor-only updates.
