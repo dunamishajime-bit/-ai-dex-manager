@@ -7,6 +7,7 @@ the row. It is a coordination record only and never submits or cancels orders.
 from __future__ import annotations
 
 import json
+import math
 import os
 import tempfile
 import time
@@ -15,6 +16,7 @@ from typing import Any
 
 SCHEMA = "disdex-pending-exposure/v1"
 ACTIVE_STATUSES = {"PENDING", "SUBMITTED", "UNKNOWN"}
+PENDING_EXPOSURE_MAX_AGE_MS = 5 * 60 * 1000
 
 
 def default_path() -> Path:
@@ -55,12 +57,22 @@ def _validate_entry(row: Any) -> dict[str, Any]:
     if status not in ACTIVE_STATUSES | {"RELEASED"}:
         raise RuntimeError("PENDING_EXPOSURE_STATUS_INVALID")
     for key in ("gross", "notionalUsd"):
-        value = float(row.get(key, 0))
-        if value < 0:
+        if key not in row:
+            raise RuntimeError(f"PENDING_EXPOSURE_{key.upper()}_INVALID")
+        try:
+            value = float(row[key])
+        except (TypeError, ValueError, OverflowError) as error:
+            raise RuntimeError(f"PENDING_EXPOSURE_{key.upper()}_INVALID") from error
+        if not math.isfinite(value) or value < 0:
             raise RuntimeError(f"PENDING_EXPOSURE_{key.upper()}_INVALID")
     for key in ("createdAt", "updatedAt"):
-        value = int(row.get(key, 0))
-        if value <= 0:
+        if key not in row:
+            raise RuntimeError(f"PENDING_EXPOSURE_{key.upper()}_INVALID")
+        try:
+            value = float(row[key])
+        except (TypeError, ValueError, OverflowError) as error:
+            raise RuntimeError(f"PENDING_EXPOSURE_{key.upper()}_INVALID") from error
+        if not math.isfinite(value) or value <= 0:
             raise RuntimeError(f"PENDING_EXPOSURE_{key.upper()}_INVALID")
     return dict(row, strategyId=strategy_id, sleeve=sleeve, status=status)
 
@@ -84,6 +96,15 @@ def read_registry(path: str | Path | None = None) -> dict[str, Any]:
     entries = [_validate_entry(row) for row in value["entries"]]
     if len({row["reservationId"] for row in entries}) != len(entries):
         raise RuntimeError("PENDING_EXPOSURE_DUPLICATE")
+    now = _now_ms()
+    for row in entries:
+        if row["status"] not in ACTIVE_STATUSES:
+            continue
+        updated_at = float(row["updatedAt"])
+        if updated_at > now + 5_000:
+            raise RuntimeError(f"PENDING_EXPOSURE_FUTURE:{row.get('reservationId', '')}")
+        if now - updated_at > PENDING_EXPOSURE_MAX_AGE_MS:
+            raise RuntimeError(f"PENDING_EXPOSURE_STALE:{row.get('reservationId', '')}")
     return dict(value, entries=entries)
 
 

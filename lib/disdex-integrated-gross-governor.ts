@@ -25,7 +25,6 @@ export interface IntegratedGrossGovernorDecision {
   currentDrawdownPct: number;
   twrIndex: number;
 }
-const EPS = 1e-12;
 const DD_MAX_AGE_MS = 120_000;
 
 function finite(value: unknown, fallback = 0) {
@@ -62,42 +61,13 @@ export function resolveIntegratedGrossGovernor(
   const dailyPct = dailyProfitPct(input.sharedDailyRisk);
   const twr = ddFresh ? finite(input.portfolioDdGovernor?.twrIndex, 1) : 1;
   const dd = ddFresh ? finite(input.portfolioDdGovernor?.currentDrawdownPct) : 100;
-  const profitGate = Boolean(
-    availableKnown
-    && input.sharedDailyRisk
-    && input.sharedDailyRisk.sourceComplete === true
-    && dailyPct > 0
-    && twr > 1 + EPS,
-  );
-
-  let tier: IntegratedGrossGovernorDecision["tier"] = "BASE";
-  let desiredCrypto: number = policy.cryptoGrossCap;
-  let desiredTotal: number = policy.totalGrossCap;
-  let reservePct: number = policy.grossGovernorBaseAvailableBalanceReservePct;
-  if (profitGate && dd <= 3 && twr >= 1.05) {
-    tier = "PROFIT_1";
-    desiredCrypto = 3.25;
-    desiredTotal = 5.0;
-    reservePct = 12.5;
-  }
-  if (profitGate && dd <= 2 && twr >= 1.10) {
-    tier = "PROFIT_2";
-    desiredCrypto = 3.5;
-    desiredTotal = 6.0;
-    reservePct = 10.0;
-  }
-  if (profitGate && dd <= 1 && twr >= 1.20) {
-    tier = "PROFIT_3";
-    desiredCrypto = 4.0;
-    desiredTotal = 7.0;
-    reservePct = 5.0;
-  }
-  if (profitGate && dd <= 0.5 && twr >= 1.30) {
-    tier = "PROFIT_4";
-    desiredCrypto = policy.cryptoGrossHardCap;
-    desiredTotal = policy.totalGrossHardCap;
-    reservePct = 0.0;
-  }
+  // The formal LIVE contract uses fixed normal caps.  Profit/DD/margin data
+  // remains observable for diagnostics, but it must never allocate additional
+  // Gross dynamically or turn research tiers into order authority.
+  const tier: IntegratedGrossGovernorDecision["tier"] = "BASE";
+  const desiredCrypto = policy.cryptoGrossCap;
+  const desiredTotal = policy.totalGrossCap;
+  const reservePct = policy.grossGovernorBaseAvailableBalanceReservePct;
 
   const reserveUsd = equity * reservePct / 100;
   const additionalMarginUsd = Math.max(0, available - reserveUsd);
@@ -115,9 +85,7 @@ export function resolveIntegratedGrossGovernor(
     currentCrypto,
     Math.min(policy.cryptoGrossHardCap, desiredCrypto, totalEntryCap),
   );
-  const reason = tier === "BASE"
-    ? (ddFresh ? "BASE_CAPS_NO_PROFIT_BURST" : "BASE_CAPS_GOVERNOR_UNAVAILABLE_OR_STALE")
-    : tier + "_DAILY_PROFIT_DD_TWR_MARGIN_OK";
+  const reason = "BASE_CAPS_DYNAMIC_GROSS_DISABLED";
 
   return {
     cryptoEntryCap,

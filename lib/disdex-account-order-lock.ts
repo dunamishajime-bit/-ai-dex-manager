@@ -283,9 +283,11 @@ export class FileAccountOrderLock {
                 if (errorCode(error) !== "EEXIST") throw error;
 
                 let currentOwner: AccountLockDocument | undefined;
+                let firstReadError: unknown;
                 try {
                     currentOwner = await this.read();
-                } catch {
+                } catch (readError) {
+                    firstReadError = readError;
                     // Malformed or partially written state remains fail-closed;
                     // the diagnostic records the reason without exposing bytes.
                 }
@@ -298,6 +300,14 @@ export class FileAccountOrderLock {
                     leaseRemainingMs: currentOwner ? Math.max(0, currentOwner.expiresAt - Date.now()) : undefined,
                     reason: currentOwner ? "LOCK_HELD" : "LOCK_UNREADABLE_OR_MALFORMED",
                 });
+
+                // An ENOENT observed during the first inspection is already
+                // proof that the previous owner disappeared after our
+                // exclusive-open attempt. Retry immediately once; probing the
+                // same path again can hide that transition behind a synthetic
+                // or partially-written read and incorrectly suppress recovery.
+                if (errorCode(firstReadError) === "ENOENT" && attempt === 0) continue;
+                if (firstReadError !== undefined) return null;
 
                 // The previous owner may have released after our exclusive-open
                 // attempt failed but before we inspect the file. Retry exactly
