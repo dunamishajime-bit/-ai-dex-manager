@@ -125,7 +125,7 @@ jobs:
           if (!marginRuntime.includes('reduceOnly": "true"')) throw new Error('serialized emergency reduce-only orders missing');
           if (!marginRuntime.includes('emergency-flatten.lock')) throw new Error('emergency action lock missing');
           if (!marginRuntime.includes('CONCURRENT_FLATTEN_ALREADY_COMPLETED')) throw new Error('concurrent flatten reconciliation missing');
-          if (!v52.includes('V52 adaptive margin-aware concurrent Stock runner self-test: PASS')) throw new Error('adaptive V52 runner missing');
+          if (!v52.includes('V52_STRICT_MARGIN_AWARE_SELFTEST_PASS')) throw new Error('strict margin-aware V52 runner self-test marker missing');
           if (!livePolicy.includes('DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py')) throw new Error('fixed serialized Guard path missing');
           if (!liveLauncher.includes('scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon')) throw new Error('serialized Guard launcher missing');
           if (!liveUnit.includes('DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true')) throw new Error('LIVE unit Margin Guard missing');
