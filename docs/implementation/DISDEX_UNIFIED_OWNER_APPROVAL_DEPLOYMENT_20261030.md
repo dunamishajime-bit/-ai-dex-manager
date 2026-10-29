@@ -10,7 +10,7 @@ route-neutral approval contract to the same root-owned VPS helper.
 
 The source now contains an explicit root-only execution boundary for the
 first-stage `SHARED_CRYPTO_RISK_ONLY` scope. The verified PR head
-`7f67c467a4606fd2476a0e5b556f880b2151ab0b` has been staged on the VPS as a
+`1c2c37f919ff87a19f6407d46183725d054e6320` has been staged on the VPS as a
 root-owned immutable non-current release and its helper has been installed
 under `/usr/local`. This staging does not create a root-owned activation
 artifact, move a release symlink, change a position or protective order,
@@ -214,7 +214,7 @@ complete:
    install only its public key in the protected Environment and the forced
    root helper.
 4. The root-owned forced-command helper is now staged from the exact
-   `7f67c467...` release. Before any execution, the owner/operator must still
+   `1c2c37f...` release. Before any execution, the owner/operator must still
    provision and independently certify the exact activation artifact, current
    plan, runner-pin manifest, owner public key, signed venue evidence, and
    rollback baseline. The source executor is mutation-capable only for
