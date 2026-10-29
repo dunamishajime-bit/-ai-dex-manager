@@ -6,6 +6,7 @@ const SHA = /^[0-9a-f]{40}$/;
 const SCHEMA = "disdex-live-operator-activation/v1";
 const ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION";
 const LIMITED_OVERLAY_ACK = "I_ACK_LIMITED_OVERLAY_LIVE_WITH_EXISTING_EVIDENCE";
+const RUNNER_SHA_MAP_REQUIRED = "DISDEX_OPERATOR_RUNNER_SHA_MAP_REQUIRED";
 const DEFAULT_PATH = "/var/lib/disdex/shared/operator-activation/current.json";
 export const LIMITED_OVERLAY_RUNNERS = Object.freeze([
   "QUALITY102_CAUSAL_V1",
@@ -65,7 +66,18 @@ export function validateOperatorActivationArtifact(artifact, input) {
     return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_MISSING_OR_INVALID" };
   }
   const approvedSha = exactSha(artifact.approvedSha);
-  if (!approvedSha || approvedSha !== input.sha) {
+  if (!approvedSha) {
+    return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:APPROVED_SHA_INVALID" };
+  }
+  const approvedShaByRunner = artifact.approvedShaByRunner && typeof artifact.approvedShaByRunner === "object" && !Array.isArray(artifact.approvedShaByRunner)
+    ? artifact.approvedShaByRunner
+    : null;
+  const mappedSha = exactSha(approvedShaByRunner?.[input.runner]);
+  if (input.requireRunnerShaMap === true) {
+    if (!mappedSha || mappedSha !== input.sha) {
+      return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:${RUNNER_SHA_MAP_REQUIRED}:RUNNER_SHA_MISMATCH:${input.runner}` };
+    }
+  } else if (mappedSha ? mappedSha !== input.sha : approvedSha !== input.sha) {
     return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:SHA_MISMATCH" };
   }
   if (artifact.target !== input.target) {
@@ -190,13 +202,14 @@ export async function evaluateOperatorActivationGate(input) {
     sha,
     target: implementation.target,
     runner,
+    requireRunnerShaMap: input.requireRunnerShaMap === true,
   });
 }
 
 export async function evaluateAllOperatorActivationGates(input) {
   const results = [];
   for (const runner of TRADING_RUNNERS) {
-    const result = await evaluateOperatorActivationGate({ ...input, runner });
+    const result = await evaluateOperatorActivationGate({ ...input, runner, requireRunnerShaMap: input.requireRunnerShaMap === true });
     results.push({ runner, ...result });
     if (!result.allowed) {
       return {
@@ -218,7 +231,7 @@ export async function evaluateLimitedOverlayActivationGates(input) {
   const runners = [...LIMITED_OVERLAY_RUNNERS, ...LIMITED_OVERLAY_UNCHANGED_PEERS];
   const results = [];
   for (const runner of runners) {
-    const result = await evaluateOperatorActivationGate({ ...input, runner });
+    const result = await evaluateOperatorActivationGate({ ...input, runner, requireRunnerShaMap: input.requireRunnerShaMap === true });
     results.push({ runner, ...result });
     if (!result.allowed) {
       return { allowed: false, reason: result.reason || "OPERATOR_LIVE_ACTIVATION_REQUIRED", blockedRunner: runner, results };
@@ -304,6 +317,7 @@ async function cliMain() {
     releaseRoot: arg("--release-root"),
     sha: arg("--sha"),
     activationPath: arg("--activation-path") || DEFAULT_PATH,
+    requireRunnerShaMap: process.argv.includes("--require-runner-sha-map"),
   };
   const result = process.argv.includes("--limited-overlay")
     ? await evaluateLimitedOverlayActivationGates(common)

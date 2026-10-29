@@ -34,18 +34,22 @@ class RuntimeMultilineageMonitoringTest(unittest.TestCase):
         self.assertIn('safetyReason.includes("service identity is not current")', source)
         self.assertIn("manual review is active", SNAPSHOT.read_text(encoding="utf-8"))
 
-    def test_monolithic_wiring_emits_explicit_per_runner_defaults(self):
+    def test_monolithic_wiring_emits_manifest_bound_per_runner_pins(self):
         source = WIRING.read_text(encoding="utf-8")
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}", source)
         self.assertIn("DISDEX_WATCHDOG_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}", source)
-        for sleeve in ("PENGU", "V52", "Q102", "FET"):
-            self.assertIn(f"DISDEX_HEALTH_SNAPSHOT_{sleeve}_EXPECTED_SHA=${{DEPLOYED_SHA}}", source)
-            self.assertIn(f"DISDEX_WATCHDOG_{sleeve}_EXPECTED_SHA=${{DEPLOYED_SHA}}", source)
+        self.assertIn("RUNNER_PINS_PATH=", source)
+        self.assertIn("load_runner_pin_manifest()", source)
+        for sleeve in ("PENGU", "V52", "Q102", "FET", "HYPE", "IDLE"):
+            self.assertIn(f"DISDEX_HEALTH_SNAPSHOT_{sleeve}_EXPECTED_SHA=${{{sleeve}_SHA}}", source)
+            self.assertIn(f"DISDEX_WATCHDOG_{sleeve}_EXPECTED_SHA=${{{sleeve}_SHA}}", source)
+            self.assertNotIn(f"DISDEX_HEALTH_SNAPSHOT_{sleeve}_EXPECTED_SHA=${{DEPLOYED_SHA}}", source)
+            self.assertNotIn(f"DISDEX_WATCHDOG_{sleeve}_EXPECTED_SHA=${{DEPLOYED_SHA}}", source)
         self.assertIn("QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json", source)
         self.assertIn("FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json", source)
         self.assertNotIn("FET_BRK48_MAX_GROSS=", source)
         self.assertNotIn("ZEC_LONG_RISK_PCT=", source)
-        self.assertIn("DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}", source)
+        self.assertIn("DISDEX_Q102_RUNTIME_SHA=${Q102_SHA}", source)
         self.assertIn("DISDEX_WATCHDOG_APPROVED_SHA=${MONITOR_RUNTIME_SHA}", source)
 
 

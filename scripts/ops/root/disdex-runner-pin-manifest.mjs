@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 
 export const RUNNER_PIN_MANIFEST_SCHEMA = "disdex-runner-pin-manifest/v1";
 
@@ -123,5 +124,27 @@ export async function loadRunnerPinManifestFromFile(path) {
   const result = validateRunnerPinManifest(parsed);
   if (!result.ok) throw new Error(`RUNNER_PIN_MANIFEST_INVALID:${result.errors.join(",")}`);
   return result.manifest;
+}
+
+async function cliMain() {
+  const mode = process.argv[2];
+  const path = process.argv[3];
+  if (mode !== "--validate" || !path) {
+    console.error("usage: runner-pin-manifest --validate /absolute/path/runner-pins.json");
+    process.exitCode = 2;
+    return;
+  }
+  try {
+    const manifest = await loadRunnerPinManifestFromFile(path);
+    process.stdout.write(`${JSON.stringify(manifest)}\n`);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
+}
+
+const mainUrl = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
+if (mainUrl === import.meta.url) {
+  void cliMain();
 }
 

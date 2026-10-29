@@ -1,4 +1,7 @@
 import test from "node:test";
+import { execFile } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -12,6 +15,8 @@ import {
   serviceUnitForPin,
   validateRunnerPinManifest,
 } from "../scripts/ops/root/disdex-runner-pin-manifest.mjs";
+
+const execFileAsync = promisify(execFile);
 
 const SHAS = {
   V4: "53a0be396719f0284af4e11b35c66a4ac7d58f79",
@@ -125,6 +130,12 @@ test("loads and validates a root-owned manifest projection from JSON", async () 
     const loaded = await loadRunnerPinManifestFromFile(path);
     assert.equal(loaded.target, "professional-dismanager.net");
     assert.equal(loaded.runners.QUALITY102_CAUSAL_V1.sha, SHAS.Q102);
+    const cli = await execFileAsync(process.execPath, [
+      fileURLToPath(new URL("../scripts/ops/root/disdex-runner-pin-manifest.mjs", import.meta.url)),
+      "--validate",
+      path,
+    ], { encoding: "utf8" });
+    assert.equal(JSON.parse(cli.stdout).runners.V52.sha, SHAS.V52);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

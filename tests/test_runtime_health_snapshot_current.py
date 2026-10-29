@@ -74,8 +74,15 @@ class DependencyLivenessHealthTest(unittest.TestCase):
         self.assertIn("SHARED_RISK_RELEASE_ROOT", source)
         self.assertIn("MARGIN_RELEASE_ROOT", source)
         wiring = WIRING.read_text(encoding="utf-8")
-        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
-        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT=${SHARED_RISK_RELEASE}", wiring)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT=${MARGIN_RELEASE}", wiring)
+
+    def test_snapshot_separates_supervisor_heartbeat_from_runner_decision_time(self):
+        source = SNAPSHOT.read_text(encoding="utf-8")
+        self.assertIn('evidenceMode: runner.evidenceMode', source)
+        self.assertIn('lastTickAt: decisionEvidence.lastTickAt', source)
+        self.assertIn('heartbeatAt: now', source)
+        self.assertIn('runner.evidenceMode === "tick-v1"', source)
 
     def test_v4_primary_keeps_peer_margin_paths_explicit_without_peer_env_reload(self):
         wiring = WIRING.read_text(encoding="utf-8")

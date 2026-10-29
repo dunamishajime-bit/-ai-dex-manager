@@ -23,8 +23,8 @@ test("V4 prepares the deploy-owned FET peer state before it reads peers", () => 
 test("V4 runtime wiring keeps V4 primary and all peer pins explicit", () => {
   assert.match(wiring, /DISDEX_V12_V4_PRIMARY_SHA/);
   assert.match(wiring, /DISDEX_V12_V4_PEER_SHA/);
-  assert.match(wiring, /DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
-  assert.match(wiring, /DISDEX_WATCHDOG_FET_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(wiring, /DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=\$\{FET_SHA\}/);
+  assert.match(wiring, /DISDEX_WATCHDOG_FET_EXPECTED_SHA=\$\{FET_SHA\}/);
 });
 
 test("runtime migration commands execute from the exact release root", () => {
@@ -81,7 +81,7 @@ test("V4 primary contract preserves peer safety overrides after V4 env generatio
   assert.match(wiring, /DISDEX_V52_V50_GROSS_CAP=2\.0/);
   assert.match(wiring, /DISDEX_V52_PORTFOLIO_GROSS_CAP=4\.25/);
   assert.match(wiring, /DISDEX_HYPE_ZEC_MAX_GROSS=1\.5/);
-  assert.match(wiring, /DISDEX_IDLE_PRIORITY_RUNTIME_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(wiring, /DISDEX_IDLE_PRIORITY_RUNTIME_SHA=\$\{IDLE_SHA\}/);
   assert.match(wiring, /DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7\.5/);
   assert.match(wiring, /PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7\.5/);
   assert.match(wiring, /QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7\.5/);

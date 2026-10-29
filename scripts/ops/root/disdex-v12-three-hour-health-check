@@ -15,7 +15,7 @@ operator_activation_ready() {
   local gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
   local activation_path="${DISDEX_OPERATOR_ACTIVATION_PATH:-/var/lib/disdex/shared/operator-activation/current.json}"
   [[ -f "$gate" ]] || return 1
-  /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$RELEASE_SHA" --all --activation-path "$activation_path" >/dev/null 2>&1
+  /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$RELEASE_SHA" --all --require-runner-sha-map --activation-path "$activation_path" >/dev/null 2>&1
 }
 
 validate_current() {
@@ -92,7 +92,7 @@ run_self_test() {
   [[ "$Q102_UNIT" == "disdex-quality102-causal-v1@$RELEASE_SHA.service" ]]
   [[ "$FET_UNIT" == "disdex-fet-brk48@$RELEASE_SHA.service" ]]
   grep -q 'V12_3H_INSPECTION_OPERATOR_ACTIVATION_REQUIRED' "$0"
-  grep -q -- '--all --activation-path' "$0"
+  grep -q -- '--all --require-runner-sha-map --activation-path' "$0"
   printf 'V12 three-hour health-check self-test: PASS\n'
 }
 

@@ -49,22 +49,25 @@ function configuredPath(name, fallback) {
     return String(process.env[name] || fallback).trim();
 }
 
-function runnerPin(expectedShaEnv, releaseRootEnv) {
+function runnerPin(expectedShaEnv, releaseRootEnv, evidenceModeEnv) {
+    const evidenceMode = String(process.env[evidenceModeEnv] || "legacy").trim().toLowerCase();
+    if (!["legacy", "tick-v1"].includes(evidenceMode)) throw new Error(`${evidenceModeEnv} is invalid`);
     return {
         expectedSha: String(process.env[expectedShaEnv] || DEFAULT_EXPECTED_SHA).trim().toLowerCase(),
         releaseRoot: String(process.env[releaseRootEnv] || DEFAULT_RELEASE_ROOT).trim(),
+        evidenceMode,
     };
 }
 
-const V12_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT");
+const V12_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_V12_EVIDENCE_MODE");
 const V12_MODE = String(process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE || "LEGACY").trim().toUpperCase();
 if (!["LEGACY","V4","DISABLED"].includes(V12_MODE)) throw new Error("V12 health snapshot mode is invalid");
-const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT");
-const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT");
-const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT");
-const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT");
-const HYPE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT");
-const IDLE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT");
+const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_PENGU_EVIDENCE_MODE");
+const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_V52_EVIDENCE_MODE");
+const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_Q102_EVIDENCE_MODE");
+const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_FET_EVIDENCE_MODE");
+const HYPE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_HYPE_EVIDENCE_MODE");
+const IDLE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_IDLE_EVIDENCE_MODE");
 
 const V12_RUNNER = V12_MODE === "DISABLED" ? {
     key: "V12_V4",
@@ -74,6 +77,7 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     unit: "",
     expectedSha: V12_PIN.expectedSha,
     releaseRoot: V12_PIN.releaseRoot,
+    evidenceMode: V12_PIN.evidenceMode,
     script: "scripts/v12-v4-production-runner.ts",
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-v4/heartbeat.json"),
     heartbeatFile: "v12-v4.json",
@@ -84,6 +88,7 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     unit: `disdex-v12-v4@${V12_PIN.expectedSha}.service`,
     expectedSha: V12_PIN.expectedSha,
     releaseRoot: V12_PIN.releaseRoot,
+    evidenceMode: V12_PIN.evidenceMode,
     script: "scripts/v12-v4-production-runner.ts",
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-v4/heartbeat.json"),
     heartbeatFile: "v12-v4.json",
@@ -95,6 +100,7 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     unit: `disdex-v12-x1-all@${V12_PIN.expectedSha}.service`,
     expectedSha: V12_PIN.expectedSha,
     releaseRoot: V12_PIN.releaseRoot,
+    evidenceMode: V12_PIN.evidenceMode,
     script: "scripts/disdex-v12-x1-all-live-runner.ts",
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"),
     heartbeatFile: "v12-x1-all.json",
@@ -109,6 +115,7 @@ const RUNNERS = [
         unit: `disdex-pengu-dual-ls-v2@${PENGU_PIN.expectedSha}.service`,
         expectedSha: PENGU_PIN.expectedSha,
         releaseRoot: PENGU_PIN.releaseRoot,
+        evidenceMode: PENGU_PIN.evidenceMode,
         script: "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH", "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"),
         heartbeatFile: "pengu-v8.json",
@@ -121,6 +128,7 @@ const RUNNERS = [
         unit: `disdex-v52-aster-only@${V52_PIN.expectedSha}.service`,
         expectedSha: V52_PIN.expectedSha,
         releaseRoot: V52_PIN.releaseRoot,
+        evidenceMode: V52_PIN.evidenceMode,
         script: "scripts/disdex_v52_aster_only_live_engine.py",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH", "/var/lib/disdex/v52-aster-only/runner-live.json"),
         heartbeatFile: "v52.json",
@@ -133,6 +141,7 @@ const RUNNERS = [
         unit: `disdex-quality102-causal-v1@${Q102_PIN.expectedSha}.service`,
         expectedSha: Q102_PIN.expectedSha,
         releaseRoot: Q102_PIN.releaseRoot,
+        evidenceMode: Q102_PIN.evidenceMode,
         script: "scripts/disdex-quality102-causal-v1-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", "/var/lib/disdex/quality102-causal-v1/state.json"),
         heartbeatFile: "quality102-causal-v1.json",
@@ -145,6 +154,7 @@ const RUNNERS = [
         unit: `disdex-fet-brk48@${FET_PIN.expectedSha}.service`,
         expectedSha: FET_PIN.expectedSha,
         releaseRoot: FET_PIN.releaseRoot,
+        evidenceMode: FET_PIN.evidenceMode,
         script: "scripts/disdex-fet-brk48-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH", "/var/lib/disdex/fet-brk48-residual/state.json"),
         heartbeatFile: "fet-brk48-residual.json",
@@ -157,6 +167,7 @@ const RUNNERS = [
         unit: `disdex-hype-long@${HYPE_PIN.expectedSha}.service`,
         expectedSha: HYPE_PIN.expectedSha,
         releaseRoot: HYPE_PIN.releaseRoot,
+        evidenceMode: HYPE_PIN.evidenceMode,
         script: "scripts/disdex-hype-trend-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH", "/var/lib/disdex/hype-zec-long/runner.json"),
         heartbeatFile: "hype-trend-long.json",
@@ -169,6 +180,7 @@ const RUNNERS = [
         unit: `disdex-idle-priority-short@${IDLE_PIN.expectedSha}.service`,
         expectedSha: IDLE_PIN.expectedSha,
         releaseRoot: IDLE_PIN.releaseRoot,
+        evidenceMode: IDLE_PIN.evidenceMode,
         script: "scripts/disdex-idle-priority-short-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH", "/var/lib/disdex/idle-priority/state.json"),
         parityCertificatePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_PARITY_CERT_PATH", "/var/lib/disdex/shared/idle-priority-parity-cert.json"),
@@ -193,6 +205,17 @@ function json(path) {
 }
 
 export async function readRunnerTickHeartbeat(runner, now) {
+    if (runner.evidenceMode === "legacy") {
+        return {
+            present: false,
+            path: null,
+            valid: true,
+            fresh: true,
+            ageMs: null,
+            marker: null,
+            reason: "LEGACY_STATE_TIMESTAMP_COMPATIBILITY",
+        };
+    }
     const path = `${TICK_ROOT}/${runner.runnerId}.json`;
     let raw;
     try {
@@ -434,6 +457,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
             runtimeSha: runner.expectedSha,
             expectedSha: runner.expectedSha,
             workingDirectory: runner.releaseRoot,
+            evidenceMode: runner.evidenceMode,
             mode: "DISABLED",
             liveEnabled: false,
             safetyState: "DISABLED",
@@ -497,6 +521,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
                 runtimeSha: runner.expectedSha,
                 expectedSha: runner.expectedSha,
                 workingDirectory: runner.releaseRoot,
+                evidenceMode: runner.evidenceMode,
                 mode: "DISABLED",
                 liveEnabled: false,
                 safetyState: "DISABLED",
@@ -541,6 +566,13 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
     const tickEvidence = projectValidatedTickEvidence(tick);
+    const decisionEvidence = runner.evidenceMode === "tick-v1"
+        ? tickEvidence
+        : {
+            lastTickAt: updatedAt > 0 ? updatedAt : 0,
+            tickStatus: updatedAt > 0 ? String(state?.lastDecisionStatus || state?.lastEvaluationStatus || state?.status || "LEGACY_STATE_UPDATE") : null,
+            tickReason: updatedAt > 0 ? String(state?.lastDecisionReason || state?.lastEvaluationReason || state?.reason || "LEGACY_STATE_TIMESTAMP") : "LEGACY_STATE_TIMESTAMP",
+        };
     const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
         ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
         : manualReviewReason
@@ -549,7 +581,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
                 ? `${runner.key} service identity is not current`
                 : !stateIdentityMatches(runner, state)
                     ? `${runner.key} state identity is invalid`
-                    : !tick.fresh
+                    : runner.evidenceMode === "tick-v1" && !tick.fresh
                         ? `${runner.key} tick heartbeat is not fresh: ${tick.reason}`
                         : "";
     const heartbeat = {
@@ -559,6 +591,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         runtimeSha: runner.expectedSha,
         expectedSha: runner.expectedSha,
         workingDirectory: runner.releaseRoot,
+        evidenceMode: runner.evidenceMode,
         mode: String(state?.operationMode || "LIVE").toUpperCase() === "CANARY" ? "CANARY" : "LIVE",
         liveEnabled: serviceActive,
         safetyState: blockedReason ? "BLOCKED" : "HEALTHY",
@@ -567,10 +600,10 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED",
         newOrdersAllowed: !blockedReason,
         heartbeatAt: now,
-        lastTickAt: tickEvidence.lastTickAt,
-        tickStatus: tickEvidence.tickStatus,
-        tickReason: tickEvidence.tickReason,
-        tickAgeMs: tick.ageMs,
+        lastTickAt: decisionEvidence.lastTickAt,
+        tickStatus: decisionEvidence.tickStatus,
+        tickReason: decisionEvidence.tickReason,
+        tickAgeMs: runner.evidenceMode === "tick-v1" ? tick.ageMs : null,
         mainPid: Number(service?.pid || 0),
         nRestarts: Number(service?.nRestarts || 0),
         serviceResult: String(service?.result || ""),
@@ -596,7 +629,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
-        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: tickEvidence.tickStatus, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
+        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, evidenceMode: runner.evidenceMode, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: decisionEvidence.tickStatus, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
     };
 }
 

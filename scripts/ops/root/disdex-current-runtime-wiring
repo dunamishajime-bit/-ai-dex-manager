@@ -33,6 +33,8 @@ LIVE_STATE_FILES=(
   "${IDLE_PRIORITY_STATE_ROOT}/state.json"
 )
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
+RUNNER_PINS_PATH="${DISDEX_RUNNER_PINS_PATH:-/etc/disdex/runner-pins.json}"
+RUNNER_PIN_MANIFEST_JSON=""
 PENDING_EXPOSURE_REGISTRY_PATH="${SHARED_ROOT}/pending-exposure.json"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
@@ -49,6 +51,7 @@ V12_DROPIN_DIR="/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d"
 PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
 FET_DROPIN_DIR="/etc/systemd/system/disdex-fet-brk48@CURRENT.service.d"
+HYPE_DROPIN_DIR="/etc/systemd/system/disdex-hype-long@CURRENT.service.d"
 MARGIN_DROPIN_DIR="/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d"
 V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
 SHARED_RISK_DROPIN_DIR="/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.service.d"
@@ -78,6 +81,64 @@ SELF_TEST_FIXTURE=''
 # boundary in the SHA-bound runtime contract so a stale env cannot reintroduce
 # a cross-sleeve symbol collision.
 QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS="SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT"
+
+runner_pin_field() {
+  local runner_id="$1" field="$2"
+  [[ -n "$RUNNER_PIN_MANIFEST_JSON" ]] || {
+    printf 'runner-pin manifest has not been loaded\n' >&2
+    return 1
+  }
+  /usr/bin/jq -er --arg runner "$runner_id" --arg field "$field" \
+    '.runners[$runner][$field] // empty' <<<"$RUNNER_PIN_MANIFEST_JSON"
+}
+
+load_runner_pin_manifest() {
+  local validator="$CURRENT_RELEASE/scripts/ops/root/disdex-runner-pin-manifest.mjs"
+  [[ -f "$validator" && ! -L "$validator" ]] || {
+    printf 'runner-pin manifest validator is missing or symlinked: %s\n' "$validator" >&2
+    return 1
+  }
+  [[ -f "$RUNNER_PINS_PATH" && ! -L "$RUNNER_PINS_PATH" ]] || {
+    printf 'root-owned runner-pin manifest is missing or symlinked: %s\n' "$RUNNER_PINS_PATH" >&2
+    return 1
+  }
+  local metadata
+  metadata="$(stat -c '%u:%g:%a' -- "$RUNNER_PINS_PATH")"
+  [[ "$metadata" =~ ^0:0:([0-7]{3}|[0-7]{4})$ ]] || {
+    printf 'runner-pin manifest must be root-owned and non-writable: %s (%s)\n' "$RUNNER_PINS_PATH" "$metadata" >&2
+    return 1
+  }
+  local mode="${BASH_REMATCH[1]}"
+  [[ "$((8#${mode} & 8#0022))" == "0" ]] || {
+    printf 'runner-pin manifest is writable by a non-root class: %s (%s)\n' "$RUNNER_PINS_PATH" "$metadata" >&2
+    return 1
+  }
+  RUNNER_PIN_MANIFEST_JSON="$(/usr/bin/node "$validator" --validate "$RUNNER_PINS_PATH")" || {
+    printf 'runner-pin manifest validation failed: %s\n' "$RUNNER_PINS_PATH" >&2
+    return 1
+  }
+  [[ -n "$RUNNER_PIN_MANIFEST_JSON" ]] || {
+    printf 'runner-pin manifest validation returned no data: %s\n' "$RUNNER_PINS_PATH" >&2
+    return 1
+  }
+}
+
+validate_runner_pin_releases() {
+  local runner_id runner_sha runner_root runner_marker
+  for runner_id in V12_V4 PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT SHARED_CRYPTO_RISK MARGIN_GUARD; do
+    runner_sha="$(runner_pin_field "$runner_id" sha)"
+    runner_root="$(runner_pin_field "$runner_id" releaseRoot)"
+    runner_marker="$runner_root/.disdex-release-sha"
+    [[ -d "$runner_root" && ! -L "$runner_root" && -f "$runner_marker" && ! -L "$runner_marker" ]] || {
+      printf 'runner-pin release is missing or unsafe: runner=%s root=%s\n' "$runner_id" "$runner_root" >&2
+      return 1
+    }
+    [[ "$(tr -d '[:space:]' < "$runner_marker")" == "$runner_sha" ]] || {
+      printf 'runner-pin release marker mismatch: runner=%s root=%s expected=%s\n' "$runner_id" "$runner_root" "$runner_sha" >&2
+      return 1
+    }
+  done
+}
 
 usage() {
   printf '%s\n' \
@@ -195,6 +256,8 @@ resolve_current() {
     MONITOR_RUNTIME_SHA="$DEPLOYED_SHA"
     MONITOR_RUNTIME_ROOT="$CURRENT_RELEASE"
   fi
+  load_runner_pin_manifest
+  validate_runner_pin_releases
   validate_release_artifacts
   NODE_MODULES_SOURCE_SHA="$(dependency_source_sha "$CURRENT_RELEASE/node_modules")"
   PYTHON_RUNTIME_SOURCE_SHA="$(dependency_source_sha "$CURRENT_RELEASE/.venv2")"
@@ -825,6 +888,39 @@ recover_hype_benign_state() {
 }
 
 set_units() {
+  PENGU_SHA="$(runner_pin_field PENGU_V8 sha)"
+  PENGU_RELEASE="$(runner_pin_field PENGU_V8 releaseRoot)"
+  PENGU_EVIDENCE_MODE="$(runner_pin_field PENGU_V8 evidenceMode)"
+  Q102_SHA="$(runner_pin_field QUALITY102_CAUSAL_V1 sha)"
+  Q102_RELEASE="$(runner_pin_field QUALITY102_CAUSAL_V1 releaseRoot)"
+  Q102_EVIDENCE_MODE="$(runner_pin_field QUALITY102_CAUSAL_V1 evidenceMode)"
+  V52_SHA="$(runner_pin_field V52 sha)"
+  V52_RELEASE="$(runner_pin_field V52 releaseRoot)"
+  V52_EVIDENCE_MODE="$(runner_pin_field V52 evidenceMode)"
+  FET_SHA="$(runner_pin_field FET_BRK48_RESIDUAL sha)"
+  FET_RELEASE="$(runner_pin_field FET_BRK48_RESIDUAL releaseRoot)"
+  FET_EVIDENCE_MODE="$(runner_pin_field FET_BRK48_RESIDUAL evidenceMode)"
+  HYPE_SHA="$(runner_pin_field HYPE_TREND_LONG sha)"
+  HYPE_RELEASE="$(runner_pin_field HYPE_TREND_LONG releaseRoot)"
+  HYPE_EVIDENCE_MODE="$(runner_pin_field HYPE_TREND_LONG evidenceMode)"
+  IDLE_SHA="$(runner_pin_field IDLE_PRIORITY_SHORT sha)"
+  IDLE_RELEASE="$(runner_pin_field IDLE_PRIORITY_SHORT releaseRoot)"
+  IDLE_EVIDENCE_MODE="$(runner_pin_field IDLE_PRIORITY_SHORT evidenceMode)"
+  SHARED_RISK_SHA="$(runner_pin_field SHARED_CRYPTO_RISK sha)"
+  SHARED_RISK_RELEASE="$(runner_pin_field SHARED_CRYPTO_RISK releaseRoot)"
+  SHARED_RISK_EVIDENCE_MODE="$(runner_pin_field SHARED_CRYPTO_RISK evidenceMode)"
+  MARGIN_SHA="$(runner_pin_field MARGIN_GUARD sha)"
+  MARGIN_RELEASE="$(runner_pin_field MARGIN_GUARD releaseRoot)"
+  MARGIN_EVIDENCE_MODE="$(runner_pin_field MARGIN_GUARD evidenceMode)"
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    [[ "$V4_PRIMARY_SHA" == "$(runner_pin_field V12_V4 sha)" && "$V4_PRIMARY_RELEASE" == "$(runner_pin_field V12_V4 releaseRoot)" ]] || {
+      printf 'V4 primary runner-pin manifest does not match the selected V4 release\n' >&2
+      return 1
+    }
+    V4_EVIDENCE_MODE="$(runner_pin_field V12_V4 evidenceMode)"
+  else
+    V4_EVIDENCE_MODE="legacy"
+  fi
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     V12_UNIT="disdex-v12-v4@${V4_PRIMARY_SHA}.service"
     V12_OPERATOR_RUNNER="V12_V4"
@@ -841,16 +937,16 @@ set_units() {
     V12_STATE_PATH="/var/lib/disdex/v12-x1-all/runner.json"
     V12_HEARTBEAT_FILE="v12-x1-all.json"
   fi
-  PENGU_UNIT="disdex-pengu-dual-ls-v2@${DEPLOYED_SHA}.service"
-  Q102_UNIT="disdex-quality102-causal-v1@${DEPLOYED_SHA}.service"
-  Q102_RANKING_OBSERVER_SERVICE="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.service"
-  Q102_RANKING_OBSERVER_TIMER="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.timer"
-  FET_UNIT="disdex-fet-brk48@${DEPLOYED_SHA}.service"
-  HYPE_UNIT="disdex-hype-long@${DEPLOYED_SHA}.service"
-  IDLE_UNIT="disdex-idle-priority-short@${DEPLOYED_SHA}.service"
-  V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
-  MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
-  SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"
+  PENGU_UNIT="disdex-pengu-dual-ls-v2@${PENGU_SHA}.service"
+  Q102_UNIT="disdex-quality102-causal-v1@${Q102_SHA}.service"
+  Q102_RANKING_OBSERVER_SERVICE="disdex-quality102-ranking-observer@${Q102_SHA}.service"
+  Q102_RANKING_OBSERVER_TIMER="disdex-quality102-ranking-observer@${Q102_SHA}.timer"
+  FET_UNIT="disdex-fet-brk48@${FET_SHA}.service"
+  HYPE_UNIT="disdex-hype-long@${HYPE_SHA}.service"
+  IDLE_UNIT="disdex-idle-priority-short@${IDLE_SHA}.service"
+  V52_UNIT="disdex-v52-aster-only@${V52_SHA}.service"
+  MARGIN_UNIT="disdex-v12-v52-margin-guard@${MARGIN_SHA}.service"
+  SHARED_RISK_UNIT="disdex-shared-crypto-risk@${SHARED_RISK_SHA}.service"
   V12_DROPIN_DIR=""
   [[ -n "$V12_UNIT" ]] && V12_DROPIN_DIR="/etc/systemd/system/${V12_UNIT}.d"
   PENGU_DROPIN_DIR="/etc/systemd/system/${PENGU_UNIT}.d"
@@ -861,8 +957,8 @@ set_units() {
   SHARED_RISK_DROPIN_DIR="/etc/systemd/system/${SHARED_RISK_UNIT}.d"
   IDLE_DROPIN_DIR="/etc/systemd/system/${IDLE_UNIT}.d"
   CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"
-  IDLE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.idle-operator.env"
-  HYPE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.hype-operator.env"
+  IDLE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${IDLE_SHA}.idle-operator.env"
+  HYPE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${HYPE_SHA}.hype-operator.env"
   HEALTH_SNAPSHOT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.health-snapshot.env"
   WATCHDOG_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.watchdog.env"
 }
@@ -1070,7 +1166,14 @@ write_v4_primary_runtime_artifacts() {
   mode_content="DISDEX_PRIMARY_V12_RUNNER=V4
 DISDEX_V12_V4_PRIMARY_SHA=${V4_PRIMARY_SHA}
 DISDEX_V12_V4_OPERATION_MODE=${V4_OPERATION_MODE}
-DISDEX_V12_V4_PEER_SHA=${DEPLOYED_SHA}"
+DISDEX_V12_V4_PEER_SHA=${PENGU_SHA}
+DISDEX_V12_V4_PEER_SHA_Q102=${Q102_SHA}
+DISDEX_V12_V4_PEER_SHA_V52=${V52_SHA}
+DISDEX_V12_V4_PEER_SHA_FET=${FET_SHA}
+DISDEX_V12_V4_PEER_SHA_HYPE=${HYPE_SHA}
+DISDEX_V12_V4_PEER_SHA_IDLE=${IDLE_SHA}
+DISDEX_V12_V4_PEER_SHA_SHARED_RISK=${SHARED_RISK_SHA}
+DISDEX_V12_V4_PEER_SHA_MARGIN=${MARGIN_SHA}"
   env_content="DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
 DISDEX_RUNTIME_SHA=${V4_PRIMARY_SHA}
 DISDEX_RELEASE_ROOT=${V4_PRIMARY_RELEASE}
@@ -1107,9 +1210,9 @@ QUALITY102_CAUSAL_V1_OPERATOR_ARMED=true
 QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
 QUALITY102_Q102_PROFIT_FLOOR_ENABLED=true
 QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ENABLED=true
-QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK=${DEPLOYED_SHA}
+QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK=${Q102_SHA}
 QUALITY102_CAUSAL_V1_SYMBOLS=${QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS}
-QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
+QUALITY102_CAUSAL_V1_LIVE_ACK=${Q102_SHA}
 FET_BRK48_LIVE_ENABLED=true
 FET_BRK48_TRAILING_STOP_ENABLED=true
 FET_BRK48_TRAILING_STOP_POLICY=FET_TRAIL_8P_GIVEBACK_4P
@@ -1117,7 +1220,7 @@ FET_BRK48_CORE_PREEMPTION_READY=${fet_core_preemption_ready}
 DISDEX_IDLE_PRIORITY_MODE=LIVE
 DISDEX_IDLE_PRIORITY_ENABLED=true
 DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=true
-DISDEX_IDLE_PRIORITY_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_IDLE_PRIORITY_RUNTIME_SHA=${IDLE_SHA}
 DISDEX_IDLE_RESIDUAL_LONG_ENABLED=true
 DISDEX_IDLE_RESIDUAL_LONG_OPERATOR_ARMED=true
 DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/residual-long-state.json
@@ -1755,23 +1858,53 @@ ensure_v4_time_stop_approval_runtime_access() {
 }
 
 operator_activation_all_trading_ready() {
-  local runner gate peer_gate release_root sha activation_path
-  peer_gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
-  gate="$peer_gate"
+  local runner gate release_root sha activation_path
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     gate="$V4_PRIMARY_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     /usr/bin/node "$gate" --release-root "$V4_PRIMARY_RELEASE" --sha "$V4_PRIMARY_SHA" \
-      --runner V12_V4 --activation-path "$V4_OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
+      --runner V12_V4 --require-runner-sha-map --activation-path "$V4_OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
   fi
   for runner in "$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
     [[ -n "$runner" ]] || continue
     [[ "$PRIMARY_V12_MODE" == "V4" && "$runner" == "V12_V4" ]] && continue
-    gate="$peer_gate"
-    release_root="$CURRENT_RELEASE"
-    sha="$DEPLOYED_SHA"
+    case "$runner" in
+      V12_X1_ALL)
+        release_root="$CURRENT_RELEASE"
+        sha="$DEPLOYED_SHA"
+        ;;
+      PENGU_V8)
+        release_root="$PENGU_RELEASE"
+        sha="$PENGU_SHA"
+        ;;
+      QUALITY102_CAUSAL_V1)
+        release_root="$Q102_RELEASE"
+        sha="$Q102_SHA"
+        ;;
+      V52)
+        release_root="$V52_RELEASE"
+        sha="$V52_SHA"
+        ;;
+      FET_BRK48_RESIDUAL)
+        release_root="$FET_RELEASE"
+        sha="$FET_SHA"
+        ;;
+      HYPE_TREND_LONG)
+        release_root="$HYPE_RELEASE"
+        sha="$HYPE_SHA"
+        ;;
+      IDLE_PRIORITY_SHORT)
+        release_root="$IDLE_RELEASE"
+        sha="$IDLE_SHA"
+        ;;
+      *)
+        printf 'unknown operator runner pin: %s\n' "$runner" >&2
+        return 1
+        ;;
+    esac
+    gate="$release_root/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     activation_path="$OPERATOR_ACTIVATION_PATH"
     /usr/bin/node "$gate" --release-root "$release_root" --sha "$sha" \
-      --runner "$runner" --activation-path "$activation_path" >/dev/null 2>&1 || return 1
+      --runner "$runner" --require-runner-sha-map --activation-path "$activation_path" >/dev/null 2>&1 || return 1
   done
   return 0
 }
@@ -1942,6 +2075,9 @@ apply_wiring() {
 DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
 DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+DISDEX_RUNNER_PIN_MANIFEST_PATH=${RUNNER_PINS_PATH}
+DISDEX_SHARED_CRYPTO_RISK_RUNTIME_SHA=${SHARED_RISK_SHA}
+DISDEX_MARGIN_GUARD_RUNTIME_SHA=${MARGIN_SHA}
 DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
@@ -1979,10 +2115,10 @@ DISDEX_V52_V50_GROSS_CAP=2.0
 DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25
 DISDEX_HYPE_ZEC_OPERATOR_ARMED=false
 DISDEX_HYPE_ZEC_PREEMPTION_ENABLED=false
-DISDEX_HYPE_ZEC_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_HYPE_ZEC_RUNTIME_SHA=${HYPE_SHA}
 DISDEX_HYPE_ZEC_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
 DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH=/var/lib/disdex/hype-zec-long/preemption.json
-DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT=${CURRENT_RELEASE}/scripts/disdex-hype-zec-core-preempt.ts
+DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT=${HYPE_RELEASE}/scripts/disdex-hype-zec-core-preempt.ts
 DISDEX_HYPE_ZEC_MAX_GROSS=1.5
 HYPE_LONG_MAX_GROSS=1.5
 HYPE_LONG_RISK_PCT=5.0
@@ -1996,7 +2132,7 @@ DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT
 DISDEX_IDLE_PRIORITY_MODE=LIVE
 DISDEX_IDLE_PRIORITY_ENABLED=true
 DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=true
-DISDEX_IDLE_PRIORITY_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_IDLE_PRIORITY_RUNTIME_SHA=${IDLE_SHA}
 DISDEX_IDLE_PRIORITY_PARITY_CERT_PATH=${SHARED_ROOT}/idle-priority-parity-cert.json
 DISDEX_IDLE_PRIORITY_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json
 DISDEX_IDLE_PRIORITY_DECISION_PATH=${IDLE_PRIORITY_STATE_ROOT}/decision.json
@@ -2024,16 +2160,16 @@ QUALITY102_CAUSAL_V1_MAX_GROSS=3.0
 QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
 QUALITY102_Q102_PROFIT_FLOOR_ENABLED=true
 QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ENABLED=true
-QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK=${DEPLOYED_SHA}
+QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK=${Q102_SHA}
 QUALITY102_CAUSAL_V1_SYMBOLS=${QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS}
-QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
+QUALITY102_CAUSAL_V1_LIVE_ACK=${Q102_SHA}
 QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
 FET_BRK48_LIVE_ENABLED=true
 FET_BRK48_TRAILING_STOP_ENABLED=true
 FET_BRK48_TRAILING_STOP_POLICY=FET_TRAIL_8P_GIVEBACK_4P
 FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
 FET_BRK48_CORE_PREEMPTION_READY=${fet_core_preemption_ready}
-DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_Q102_RUNTIME_SHA=${Q102_SHA}
 QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
 # Historical selector flags intentionally remain false.  The canonical
 # QUALITY102_CAUSAL_V1_* flags above are the only live execution surface.
@@ -2069,19 +2205,26 @@ DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}
 DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
 DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}
 DISDEX_HEALTH_SNAPSHOT_V12_MODE=${PRIMARY_V12_MODE}
+DISDEX_HEALTH_SNAPSHOT_V12_EVIDENCE_MODE=${V4_EVIDENCE_MODE}
 DISDEX_HEALTH_SNAPSHOT_V12_DISABLED_REASON=V12_V4_DISABLED_OR_LIMITED_PENDING_INDEPENDENT_VENUE_CERTIFICATION
-DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA=${PENGU_SHA}
+DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT=${PENGU_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_PENGU_EVIDENCE_MODE=${PENGU_EVIDENCE_MODE}
+DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=${V52_SHA}
+DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT=${V52_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_V52_EVIDENCE_MODE=${V52_EVIDENCE_MODE}
+DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=${Q102_SHA}
+DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=${Q102_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_Q102_EVIDENCE_MODE=${Q102_EVIDENCE_MODE}
+DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=${FET_SHA}
+DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=${FET_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_FET_EVIDENCE_MODE=${FET_EVIDENCE_MODE}
+DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA=${HYPE_SHA}
+DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT=${HYPE_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_HYPE_EVIDENCE_MODE=${HYPE_EVIDENCE_MODE}
+DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=${IDLE_SHA}
+DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT=${IDLE_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_IDLE_EVIDENCE_MODE=${IDLE_EVIDENCE_MODE}
 DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=${SHARED_ROOT}/kill-switch.json
 DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=${V12_STATE_PATH}
@@ -2093,10 +2236,10 @@ DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
 DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json
 DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json
 DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
-DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT=${SHARED_RISK_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json
 DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=${MARGIN_UNIT}
-DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT=${CURRENT_RELEASE}"
+DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT=${MARGIN_RELEASE}"
 
   write_atomic "$WATCHDOG_ENV_FILE" "DISDEX_WATCHDOG_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}
 DISDEX_WATCHDOG_EXPECTED_SHA=${MONITOR_RUNTIME_SHA}
@@ -2106,21 +2249,28 @@ DISDEX_WATCHDOG_RUNNER_ROOT=${MONITOR_RUNTIME_ROOT}
 DISDEX_WATCHDOG_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
 DISDEX_WATCHDOG_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}
 DISDEX_WATCHDOG_V12_MODE=${PRIMARY_V12_MODE}
+DISDEX_WATCHDOG_V12_EVIDENCE_MODE=${V4_EVIDENCE_MODE}
 DISDEX_WATCHDOG_V12_DISABLED_REASON=V12_V4_DISABLED_OR_LIMITED_PENDING_INDEPENDENT_VENUE_CERTIFICATION
-DISDEX_WATCHDOG_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_V52_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_V52_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_FET_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_FET_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_HYPE_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_HYPE_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_IDLE_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_PENGU_EXPECTED_SHA=${PENGU_SHA}
+DISDEX_WATCHDOG_PENGU_RELEASE_ROOT=${PENGU_RELEASE}
+DISDEX_WATCHDOG_PENGU_EVIDENCE_MODE=${PENGU_EVIDENCE_MODE}
+DISDEX_WATCHDOG_V52_EXPECTED_SHA=${V52_SHA}
+DISDEX_WATCHDOG_V52_RELEASE_ROOT=${V52_RELEASE}
+DISDEX_WATCHDOG_V52_EVIDENCE_MODE=${V52_EVIDENCE_MODE}
+DISDEX_WATCHDOG_Q102_EXPECTED_SHA=${Q102_SHA}
+DISDEX_WATCHDOG_Q102_RELEASE_ROOT=${Q102_RELEASE}
+DISDEX_WATCHDOG_Q102_EVIDENCE_MODE=${Q102_EVIDENCE_MODE}
+DISDEX_WATCHDOG_FET_EXPECTED_SHA=${FET_SHA}
+DISDEX_WATCHDOG_FET_RELEASE_ROOT=${FET_RELEASE}
+DISDEX_WATCHDOG_FET_EVIDENCE_MODE=${FET_EVIDENCE_MODE}
+DISDEX_WATCHDOG_HYPE_EXPECTED_SHA=${HYPE_SHA}
+DISDEX_WATCHDOG_HYPE_RELEASE_ROOT=${HYPE_RELEASE}
+DISDEX_WATCHDOG_HYPE_EVIDENCE_MODE=${HYPE_EVIDENCE_MODE}
+DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${IDLE_SHA}
+DISDEX_WATCHDOG_IDLE_RELEASE_ROOT=${IDLE_RELEASE}
+DISDEX_WATCHDOG_IDLE_EVIDENCE_MODE=${IDLE_EVIDENCE_MODE}
+DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA=${SHARED_RISK_SHA}
+DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA=${MARGIN_SHA}
 DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
 DISDEX_WATCHDOG_AUDIT_PATH=/var/lib/disdex/runner-health/private/watchdog-current-audit.json
@@ -2163,7 +2313,7 @@ WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=
 ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --all --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --all --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStart=
 ExecStart=/usr/local/libexec/disdex-runner-position-recovery"
 
@@ -2267,7 +2417,7 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
-ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V12_X1_ALL --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V12_X1_ALL --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=V12_LIVE_ACK=${DEPLOYED_SHA}
@@ -2289,9 +2439,14 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
-ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner PENGU_V8 --activation-path ${OPERATOR_ACTIVATION_PATH}
+WorkingDirectory=${PENGU_RELEASE}
+ExecStartPre=+/usr/bin/node ${PENGU_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${PENGU_RELEASE} --sha ${PENGU_SHA} --runner PENGU_V8 --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/pengu-dual-ls-v2/runner-live.json ]; then chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2/runner-live.json && chmod 600 /var/lib/disdex/pengu-dual-ls-v2/runner-live.json; fi'
 ReadWritePaths=${PENGU_STATE_ROOT}
+Environment=DISDEX_RUNTIME_SHA=${PENGU_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${PENGU_SHA}
+Environment=DISDEX_RELEASE_SHA=${PENGU_SHA}
+Environment=DISDEX_RELEASE_ROOT=${PENGU_RELEASE}
 Environment=PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
 Environment=PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
@@ -2311,16 +2466,19 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
-ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner QUALITY102_CAUSAL_V1 --activation-path ${OPERATOR_ACTIVATION_PATH}
+WorkingDirectory=${Q102_RELEASE}
+ExecStartPre=+/usr/bin/node ${Q102_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${Q102_RELEASE} --sha ${Q102_SHA} --runner QUALITY102_CAUSAL_V1 --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
-Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
-Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RUNTIME_SHA=${Q102_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${Q102_SHA}
+Environment=DISDEX_RELEASE_SHA=${Q102_SHA}
+Environment=DISDEX_RELEASE_ROOT=${Q102_RELEASE}
 Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=3.0
 Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
 Environment=QUALITY102_Q102_PROFIT_FLOOR_ENABLED=true
 Environment=QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ENABLED=true
-Environment=QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK=${DEPLOYED_SHA}
-Environment=QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
+Environment=QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK=${Q102_SHA}
+Environment=QUALITY102_CAUSAL_V1_LIVE_ACK=${Q102_SHA}
 Environment=QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
 Environment=QUALITY102_LIVE_SELECTOR_PARITY=false
 Environment=QUALITY102_LIVE_ENABLED=false
@@ -2335,11 +2493,14 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
-ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner FET_BRK48_RESIDUAL --activation-path ${OPERATOR_ACTIVATION_PATH}
+WorkingDirectory=${FET_RELEASE}
+ExecStartPre=+/usr/bin/node ${FET_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${FET_RELEASE} --sha ${FET_SHA} --runner FET_BRK48_RESIDUAL --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json ]; then chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json && chmod 600 /var/lib/disdex/fet-brk48-residual/state.json; fi'
-Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
-Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RUNTIME_SHA=${FET_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${FET_SHA}
+Environment=DISDEX_RELEASE_SHA=${FET_SHA}
+Environment=DISDEX_RELEASE_ROOT=${FET_RELEASE}
 Environment=FET_BRK48_LIVE_ENABLED=true
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
@@ -2352,20 +2513,28 @@ ReadWritePaths=/var/lib/disdex/fet-brk48-residual /var/lib/disdex/shared"
 
   write_atomic "${SHARED_RISK_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
+WorkingDirectory=${SHARED_RISK_RELEASE}
+Environment=DISDEX_RUNTIME_SHA=${SHARED_RISK_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${SHARED_RISK_SHA}
+Environment=DISDEX_RELEASE_SHA=${SHARED_RISK_SHA}
+Environment=DISDEX_RELEASE_ROOT=${SHARED_RISK_RELEASE}
 Restart=always
 RestartSec=5s"
 
   write_atomic "${MARGIN_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
 EnvironmentFile=${CONTRACT_ENV_FILE}
-WorkingDirectory=${CURRENT_RELEASE}
+WorkingDirectory=${MARGIN_RELEASE}
 ExecStartPre=
-ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/test -f ${MARGIN_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${MARGIN_SHA} ${MARGIN_RELEASE}/.disdex-release-sha
 ExecStart=
-ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon
+ExecStart=${MARGIN_RELEASE}/.venv2/bin/python scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon
 Restart=always
 RestartSec=15s
-Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RUNTIME_SHA=${MARGIN_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${MARGIN_SHA}
+Environment=DISDEX_RELEASE_SHA=${MARGIN_SHA}
+Environment=DISDEX_RELEASE_ROOT=${MARGIN_RELEASE}
 Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk
 Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/var/lib/disdex/shared/margin-risk/guard-live.json
 Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
@@ -2383,20 +2552,39 @@ DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
 DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl
 DISDEX_TRADE_FILL_STRATEGY_ID=HYPE_LONG"
 
+  write_atomic "${HYPE_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
+EnvironmentFile=${HYPE_OPERATOR_ENV_FILE}
+WorkingDirectory=${HYPE_RELEASE}
+Environment=DISDEX_RUNTIME_SHA=${HYPE_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${HYPE_SHA}
+Environment=DISDEX_RELEASE_SHA=${HYPE_SHA}
+Environment=DISDEX_RELEASE_ROOT=${HYPE_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${HYPE_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${HYPE_SHA} ${HYPE_RELEASE}/.disdex-release-sha
+ExecStartPre=+/usr/bin/node ${HYPE_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${HYPE_RELEASE} --sha ${HYPE_SHA} --runner HYPE_TREND_LONG --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStart=${HYPE_RELEASE}/node_modules/.bin/tsx scripts/disdex-hype-trend-live-runner.ts --daemon
+ReadWritePaths=${HYPE_ZEC_STATE_ROOT} ${SHARED_ROOT}"
+
   write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Unit]
 StartLimitIntervalSec=300s
 StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
-ExecCondition=+/usr/bin/python3 ${fet_readiness_guard} --prestart --sha ${DEPLOYED_SHA} --activation-path ${OPERATOR_ACTIVATION_PATH}
-WorkingDirectory=${CURRENT_RELEASE}
+ExecCondition=+/usr/bin/python3 ${fet_readiness_guard} --prestart --sha ${V52_SHA} --activation-path ${OPERATOR_ACTIVATION_PATH}
+WorkingDirectory=${V52_RELEASE}
 ExecStartPre=
-ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V52 --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=/usr/bin/test -f ${V52_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${V52_SHA} ${V52_RELEASE}/.disdex-release-sha
+ExecStartPre=+/usr/bin/node ${V52_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${V52_RELEASE} --sha ${V52_SHA} --runner V52 --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStart=
-ExecStart=${CURRENT_RELEASE}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon
+ExecStart=${V52_RELEASE}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon
+Environment=DISDEX_RUNTIME_SHA=${V52_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${V52_SHA}
+Environment=DISDEX_RELEASE_SHA=${V52_SHA}
+Environment=DISDEX_RELEASE_ROOT=${V52_RELEASE}
 Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
 Environment=DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
 Environment=DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json
@@ -2415,22 +2603,23 @@ StartLimitBurst=3
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
 EnvironmentFile=${IDLE_OPERATOR_ENV_FILE}
-Environment=DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
-Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
-Environment=DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
+Environment=DISDEX_RUNTIME_SHA=${IDLE_SHA}
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${IDLE_SHA}
+Environment=DISDEX_RELEASE_SHA=${IDLE_SHA}
+Environment=DISDEX_RELEASE_ROOT=${IDLE_RELEASE}
 Environment=DISDEX_TRADE_FILL_STRATEGY_ID=IDLE_PRIORITY_SHORT
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl
 Environment=DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_RUNTIME_PATH}
-WorkingDirectory=${CURRENT_RELEASE}
+WorkingDirectory=${IDLE_RELEASE}
 ExecStartPre=
-ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner IDLE_PRIORITY_SHORT --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=/usr/bin/test -f ${IDLE_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${IDLE_SHA} ${IDLE_RELEASE}/.disdex-release-sha
+ExecStartPre=+/usr/bin/node ${IDLE_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${IDLE_RELEASE} --sha ${IDLE_SHA} --runner IDLE_PRIORITY_SHORT --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/usr/bin/install -o root -g root -m 0644 ${OPERATOR_ACTIVATION_PATH} ${OPERATOR_ACTIVATION_RUNTIME_PATH}
 ExecStart=
-ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
+ExecStart=${IDLE_RELEASE}/node_modules/.bin/tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
 ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
 
   ensure_idle_parity_certificate_access
@@ -2689,16 +2878,16 @@ self_test() {
   fi
   mv "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_ARTIFACT_SELFTEST_PASS\n'
-  grep -q -- '--all --activation-path ${OPERATOR_ACTIVATION_PATH}' "$0"
+  grep -q -- '--all --require-runner-sha-map --activation-path ${OPERATOR_ACTIVATION_PATH}' "$0"
   grep -q 'systemctl disable --now disdex-runner-position-recovery.timer' "$0"
   grep -q 'systemctl disable --now disdex-v12-three-hour-health-check.timer' "$0"
   grep -q 'systemctl enable --now disdex-runner-position-recovery.timer' "$0"
   grep -q 'systemctl enable --now disdex-v12-three-hour-health-check.timer' "$0"
   grep -q 'systemctl enable --now "$IDLE_UNIT"' "$0"
   grep -q 'IDLE_PRIORITY_SHORT' "$0"
-  grep -q 'DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}' "$0"
+  grep -q 'DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=${IDLE_SHA}' "$0"
   grep -q 'DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json' "$0"
-  grep -q 'DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}' "$0"
+  grep -q 'DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${IDLE_SHA}' "$0"
   grep -q 'DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=${IDLE_UNIT}' "$0"
   grep -q 'V12_OPERATOR_RUNNER="V12_V4"' "$0"
   grep -Fq 'V4_OPERATION_MODE="${DISDEX_V12_V4_OPERATION_MODE:-}"' "$0"

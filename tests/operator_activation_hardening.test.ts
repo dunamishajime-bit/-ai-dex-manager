@@ -76,6 +76,34 @@ test("operator activation artifact is exact-SHA and runner scoped", () => {
   }).allowed, false);
 });
 
+test("mixed-SHA activation requires the effective runner SHA map", () => {
+  const runnerSha = "b".repeat(40);
+  const mixed = artifact({
+    approvedShaByRunner: {
+      V12_X1_ALL: SHA,
+      PENGU_V8: runnerSha,
+    },
+  });
+  assert.equal(validateOperatorActivationArtifact(mixed, {
+    sha: runnerSha,
+    target: TARGET,
+    runner: "PENGU_V8",
+    requireRunnerShaMap: true,
+  }).allowed, true);
+  assert.equal(validateOperatorActivationArtifact(mixed, {
+    sha: SHA,
+    target: TARGET,
+    runner: "PENGU_V8",
+    requireRunnerShaMap: true,
+  }).allowed, false);
+  assert.equal(validateOperatorActivationArtifact(artifact(), {
+    sha: SHA,
+    target: TARGET,
+    runner: "V12_X1_ALL",
+    requireRunnerShaMap: true,
+  }).allowed, false);
+});
+
 test("operator activation file must be root-owned non-writable regular file", () => {
   assert.equal(validateOperatorActivationFileMetadata(stats()).allowed, true);
   assert.equal(validateOperatorActivationFileMetadata(stats({ uid: 1000 })).allowed, false);
@@ -110,7 +138,7 @@ test("watchdog restart is held fail-closed until operator activation", () => {
 test("runtime wiring places exact operator gates in legacy and V4 primary paths", async () => {
   const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   for (const runner of ["V12_X1_ALL", "PENGU_V8", "QUALITY102_CAUSAL_V1", "V52", "FET_BRK48_RESIDUAL"]) {
-    assert.match(source, new RegExp(`--runner ${runner} --activation-path`));
+    assert.match(source, new RegExp(`--runner ${runner} --require-runner-sha-map --activation-path`));
   }
   assert.match(source, /V12_OPERATOR_RUNNER="V12_V4"/);
   assert.match(source, /for runner in "\$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL/);
@@ -134,7 +162,7 @@ test("activation gate prestart runs as root so root-owned 0600 artifact remains 
     assert.match(unit, /ExecStartPre=\+\/usr\/bin\/node .*disdex-live-operator-activation-gate\.mjs/);
   }
   const v4 = await readFile("deploy/systemd/disdex-v12-v4@.service", "utf8");
-  assert.match(v4, /--runner V12_V4 --activation-path \/var\/lib\/disdex\/shared\/operator-activation\/v12-v4-full\.json/);
+  assert.match(v4, /--runner V12_V4 --require-runner-sha-map --activation-path \/var\/lib\/disdex\/shared\/operator-activation\/v12-v4-full\.json/);
   assert.doesNotMatch(v4, /(?:After|Wants)=.*disdex-(?:shared-crypto-risk|v12-v52-margin-guard)@%i\.service/);
 });
 
@@ -209,9 +237,9 @@ test("three-hour and position-recovery automation remain blocked before operator
   const threeHour = await readFile("scripts/ops/root/disdex-v12-three-hour-health-check", "utf8");
   const wiring = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   assert.match(threeHour, /V12_3H_INSPECTION_OPERATOR_ACTIVATION_REQUIRED/);
-  assert.match(threeHour, /--all --activation-path/);
+  assert.match(threeHour, /--all --require-runner-sha-map --activation-path/);
   assert.match(wiring, /disdex-runner-position-recovery\.service/);
-  assert.match(wiring, /--all --activation-path \$\{OPERATOR_ACTIVATION_PATH\}/);
+  assert.match(wiring, /--all --require-runner-sha-map --activation-path \$\{OPERATOR_ACTIVATION_PATH\}/);
   assert.match(wiring, /disable --now disdex-runner-position-recovery\.timer/);
   assert.match(wiring, /disable --now disdex-v12-three-hour-health-check\.timer/);
 });
