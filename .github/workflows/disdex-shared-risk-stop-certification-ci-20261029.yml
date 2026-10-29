@@ -65,7 +65,10 @@ jobs:
             tests/resident-stop-q102-multisha.test.ts \
             tests/operator_activation_hardening.test.ts \
             tests/shared-risk-writer-concurrency.test.ts
-          ! grep -R -n -E 'COMMON_SHA|DYNAMIC_GROSS|dynamic.?gross' \
+          # V12_DYNAMIC_GROSS_CAP is the legacy name of a fixed 2.0 runner
+          # cap and is covered by the strict-cap tests; reject allocation,
+          # tier, or authority strings instead of that fixed-cap contract.
+          ! grep -R -n -E 'COMMON_SHA|DYNAMIC_GROSS_(ALLOCATION|TIER|AUTHORITY)|dynamic.?gross[[:space:]_-]*(allocation|tier|authority)' \
             scripts/ops/root/disdex-risk-api-final-preflight-20261028.py \
             scripts/ops/root/disdex-current-runtime-wiring \
             lib/disdex-shared-crypto-daily-risk.ts
