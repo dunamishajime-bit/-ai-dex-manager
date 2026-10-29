@@ -108,3 +108,10 @@ Signed planSha256 must equal a root-verified immutable deployment plan hash
 covering every runner SHA, STOP owner, target service and HP release. The
 VPS helper must recompute this hash from the pinned plan, not trust a caller-
 supplied hash. This prevents FULL_PROJECT multi-SHA substitution.
+
+## Legacy paths inventory
+Use python scripts/ops/deploy/audit_legacy_deploy_paths.py to enumerate
+GitHub Actions workflows that reference legacy VPS root secrets or SSH.
+It only reports filenames, not secret values. Enable --require-retired only
+after the new, independently verified deployment and rollback work. The
+presence of old root keys is a SECURITY BLOCKER for exclusive control.
