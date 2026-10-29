@@ -256,4 +256,3 @@
 - **Type consistency:** Task 1 owns the manifest helpers; Tasks 2–5 consume the same runner identity fields; Tasks 6–8 consume the resulting permission/evidence contracts; Task 9 consumes only committed task outputs.
 - **Review focus coverage:** The five high-risk review inputs are pinned to Tasks 2, 3/4, 5, and 6 respectively.
 - **Proportion:** The plan defines file boundaries, test names/commands, interfaces, and acceptance evidence without prescribing implementation bodies beyond the safety invariants.
-

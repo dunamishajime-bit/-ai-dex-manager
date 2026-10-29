@@ -147,4 +147,3 @@ const mainUrl = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
 if (mainUrl === import.meta.url) {
   void cliMain();
 }
-

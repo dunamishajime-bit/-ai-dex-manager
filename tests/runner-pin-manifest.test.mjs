@@ -140,4 +140,3 @@ test("loads and validates a root-owned manifest projection from JSON", async () 
     await rm(directory, { recursive: true, force: true });
   }
 });
-

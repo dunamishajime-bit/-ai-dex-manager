@@ -326,4 +326,3 @@ The final report will use these labels exactly:
 
 No source or CI result will be reported as `LIVE_VERIFIED` without actual
 production evidence.
-
