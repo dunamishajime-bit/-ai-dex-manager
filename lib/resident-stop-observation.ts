@@ -10,6 +10,12 @@ export const Q102_PRIMARY_OWNER_SHA = "ef1ab178e26a7bf5bddb6473467765edba242e1d"
 
 const SHA_PATTERN = /^[a-f0-9]{40}$/i;
 
+// Keep the shared STOP environment namespace explicit for the root wiring and
+// source-boundary audits.  It is a compatibility namespace only: owner
+// authority still comes exclusively from the validated root-owned pin manifest
+// passed to resolveResidentStopOwnerPins(), never from process.env.
+export const SHARED_STOP_OWNER_ENV_PREFIX = "DISDEX_SHARED_STOP_";
+
 export type ResidentStopOwnerPins = Readonly<Record<
   "V12" | "Q102" | "PENGU" | "V52" | "FET" | "HYPE" | "IDLE" | "RESIDUAL",
   string

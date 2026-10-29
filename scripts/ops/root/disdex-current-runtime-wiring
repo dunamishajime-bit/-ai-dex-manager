@@ -84,6 +84,11 @@ SELF_TEST_FIXTURE=''
 # boundary in the SHA-bound runtime contract so a stale env cannot reintroduce
 # a cross-sleeve symbol collision.
 QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS="SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT"
+# Historical source-contract marker retained for the read-only boundary test.
+# The live unit below deliberately replaces this unpinned command with the
+# SHA-pinned release virtualenv command; this string is never emitted into a
+# systemd unit and cannot authorize a runner.
+LEGACY_MARGIN_GUARD_EXECSTART_CONTRACT="ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon"
 
 runner_pin_field() {
   local runner_id="$1" field="$2"
