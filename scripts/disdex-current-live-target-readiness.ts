@@ -39,7 +39,9 @@ async function main() {
   };
 
   if (readiness.schema !== "disdex-current-implementation-readiness/v1") throw new Error("READINESS_SCHEMA_INVALID");
-  if (readiness.target !== canonical.formalBacktest.selectedCase) throw new Error("READINESS_TARGET_MISMATCH");
+  if (canonical.deploymentTarget !== "professional-dismanager.net") throw new Error("READINESS_DEPLOYMENT_TARGET_MISMATCH");
+  if (canonical.operatorTarget !== canonical.formalBacktest.selectedCase) throw new Error("CANONICAL_OPERATOR_TARGET_MISMATCH");
+  if (readiness.target !== canonical.operatorTarget) throw new Error("READINESS_TARGET_MISMATCH");
   if (canonical.acceptance.requireFetCorePreemption !== true) throw new Error("CANONICAL_FET_PREEMPTION_NOT_REQUIRED");
   if (!managed.includes("findManagedFetBrk48ProtectiveOrders")) throw new Error("FET_PROTECTIVE_ORDER_CLASSIFIER_MISSING");
 

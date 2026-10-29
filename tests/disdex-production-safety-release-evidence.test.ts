@@ -19,6 +19,8 @@ test("release evidence generator is immutable-source/read-only and preserves ext
   assert.match(source, /BLOCKED_OPERATOR_AUTH/);
   assert.match(source, /BLOCKED_NATIVE_HISTORY/);
   assert.match(source, /BLOCKED_VENUE_EVIDENCE/);
+  assert.match(source, /DISDEX_SIGNED_VENUE_EVIDENCE_PATH/);
+  assert.match(source, /SIGNED_READONLY_GET_VERIFIED/);
   assert.match(source, /ordersSent:\s*0/);
   assert.match(source, /OPERATOR_LIVE_ACTIVATION_REQUIRED/);
   assert.doesNotMatch(source, /ASTER_API_SECRET|DISDEX_API_KEY|private[_-]?key|Vercel/i);

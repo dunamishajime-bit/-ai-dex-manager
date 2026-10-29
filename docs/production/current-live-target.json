@@ -2,6 +2,8 @@
   "schema": "disdex-current-live-target/v1",
   "date": "2026-10-05",
   "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
+  "deploymentTarget": "professional-dismanager.net",
+  "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
   "productionBaseSha": "b9a0c86d6cf72b0209e44edc8883e45e6d241c5b",
   "strategy": {
     "v12": {

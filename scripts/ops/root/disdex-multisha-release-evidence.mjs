@@ -4,7 +4,8 @@ import { lstat, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const SCHEMA = "disdex-multisha-release-evidence/v1";
-const TARGET = "professional-dismanager.net";
+const DEPLOYMENT_TARGET = "professional-dismanager.net";
+const OPERATOR_TARGET = "DD1296_FINAL_ALLIN_10BPS";
 const REQUIRED_FILES = [
   "scripts/ops/root/disdex-runner-pin-manifest.mjs",
   "scripts/ops/root/disdex-current-runtime-wiring",
@@ -23,6 +24,32 @@ const REQUIRED_FILES = [
 async function sha256(path) {
   const bytes = await readFile(path);
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+async function readSignedVenueEvidence(path) {
+  if (!path) return null;
+  try {
+    const evidence = JSON.parse(await readFile(path, "utf8"));
+    if (evidence?.schema !== "disdex-aster-signed-readonly-account-evidence/v1"
+      || evidence?.classification !== "SIGNED_READONLY_GET_VERIFIED"
+      || evidence?.effects?.ordersSent !== 0
+      || evidence?.effects?.cancelsSent !== 0
+      || evidence?.effects?.positionChangesSent !== 0
+      || !Array.isArray(evidence?.positions)
+      || !Array.isArray(evidence?.openOrders)
+      || evidence?.pendingOrderReadback?.status !== "NEW") return null;
+    return {
+      status: "SIGNED_READONLY_GET_VERIFIED",
+      signedReadOnlyGetVerified: true,
+      positionOrderStopReconciliation: true,
+      evidencePath: path,
+      observedAt: Number.isFinite(Number(evidence.observedAt)) ? Number(evidence.observedAt) : null,
+      positionCount: evidence.positions.length,
+      openOrderCount: evidence.openOrders.length,
+    };
+  } catch {
+    return null;
+  }
 }
 
 function gitSha(root) {
@@ -47,6 +74,7 @@ async function releaseMarker(root) {
 
 export async function collectReleaseEvidence(root = process.cwd()) {
   const absoluteRoot = resolve(root);
+  const signedVenueEvidence = await readSignedVenueEvidence(String(process.env.DISDEX_SIGNED_VENUE_EVIDENCE_PATH || "").trim());
   const files = {};
   const missingFiles = [];
   for (const relativePath of REQUIRED_FILES) {
@@ -61,14 +89,16 @@ export async function collectReleaseEvidence(root = process.cwd()) {
   const blockers = [
     "OPERATOR_LIVE_ACTIVATION_REQUIRED",
     "BLOCKED_NATIVE_HISTORY",
-    "BLOCKED_VENUE_EVIDENCE",
   ];
+  if (!signedVenueEvidence) blockers.push("BLOCKED_VENUE_EVIDENCE");
   if (missingFiles.length > 0) blockers.push("RELEASE_SOURCE_FILES_MISSING");
   if (marker.status !== "PRESENT") blockers.push("RELEASE_MARKER_NOT_PRESENT_IN_SOURCE_CHECKOUT");
   return {
     schema: SCHEMA,
     generatedAt: new Date().toISOString(),
-    target: TARGET,
+    target: DEPLOYMENT_TARGET,
+    deploymentTarget: DEPLOYMENT_TARGET,
+    operatorTarget: OPERATOR_TARGET,
     source: {
       root: absoluteRoot,
       gitSha: gitSha(absoluteRoot),
@@ -90,9 +120,9 @@ export async function collectReleaseEvidence(root = process.cwd()) {
       liveActivationGranted: false,
     },
     externalEvidence: {
-      operator: { status: "BLOCKED_OPERATOR_AUTH", approvedSha: null, approvedRunners: [], approvedAt: null },
+      operator: { status: "BLOCKED_OPERATOR_AUTH", target: OPERATOR_TARGET, deploymentTarget: DEPLOYMENT_TARGET, approvedSha: null, approvedRunners: [], approvedAt: null },
       nativeHistory: { status: "BLOCKED_NATIVE_HISTORY", venue: "Aster", requestedPeriod: "2025-08-10..2026-08-10", substituteDataUsed: false },
-      venue: { status: "BLOCKED_VENUE_EVIDENCE", signedReadOnlyGetVerified: false, positionOrderStopReconciliation: false },
+      venue: signedVenueEvidence || { status: "BLOCKED_VENUE_EVIDENCE", signedReadOnlyGetVerified: false, positionOrderStopReconciliation: false },
       postCutoverAudits: { requiredCycles: 3, completedCycles: 0 },
     },
     classification: "SOURCE_READY_NOT_LIVE",

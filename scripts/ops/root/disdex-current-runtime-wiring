@@ -7,6 +7,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 TRADING_ROOT="${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}"
 TRADING_RELEASES="${TRADING_ROOT}/releases"
 TRADING_CURRENT="${TRADING_ROOT}/current"
+DEPLOYMENT_TARGET="professional-dismanager.net"
+OPERATOR_TARGET=""
 SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
 OPERATOR_ACTIVATION_PATH="${SHARED_ROOT}/operator-activation/current.json"
 V52_INTENTIONAL_STOP_MARKER="/var/lib/disdex/runner-health/v52.intentional-stop"
@@ -195,6 +197,20 @@ resolve_current() {
   MARKER_SHA="$(tr -d '[:space:]' < "$CURRENT_RELEASE/.disdex-release-sha")"
   [[ "$MARKER_SHA" == "$DEPLOYED_SHA" ]] || {
     printf 'release marker mismatch: directory=%s marker=%s\n' "$DEPLOYED_SHA" "$MARKER_SHA" >&2
+    return 1
+  }
+  local canonical_target_file="${CURRENT_RELEASE}/docs/production/current-live-target.json"
+  [[ -f "$canonical_target_file" && ! -L "$canonical_target_file" ]] || {
+    printf 'canonical production target is missing or symlinked: %s\n' "$canonical_target_file" >&2
+    return 1
+  }
+  [[ "$(/usr/bin/jq -er '.deploymentTarget // empty' "$canonical_target_file")" == "$DEPLOYMENT_TARGET" ]] || {
+    printf 'canonical deployment target mismatch: expected=%s file=%s\n' "$DEPLOYMENT_TARGET" "$canonical_target_file" >&2
+    return 1
+  }
+  OPERATOR_TARGET="$(/usr/bin/jq -er '.operatorTarget // .formalBacktest.selectedCase // empty' "$canonical_target_file")"
+  [[ -n "$OPERATOR_TARGET" ]] || {
+    printf 'canonical operator target is missing: %s\n' "$canonical_target_file" >&2
     return 1
   }
   [[ -d "$CURRENT_RELEASE/scripts" ]] || {
@@ -2297,6 +2313,8 @@ DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=true"
 
   write_atomic "$HEALTH_SNAPSHOT_ENV_FILE" "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${MONITOR_RUNTIME_SHA}
 DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}
+DISDEX_HEALTH_SNAPSHOT_DEPLOYMENT_TARGET=${DEPLOYMENT_TARGET}
+DISDEX_HEALTH_SNAPSHOT_OPERATOR_TARGET=${OPERATOR_TARGET}
 DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
 DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}
 DISDEX_HEALTH_SNAPSHOT_V12_MODE=${PRIMARY_V12_MODE}

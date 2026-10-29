@@ -46,3 +46,35 @@ test("HP source does not authorize anonymous or stale/anonymous snapshot data", 
   assert.match(idleRouteSource, /disdex_auth/);
   assert.match(idleRouteSource, /status:\s*401/);
 });
+
+test("HP and operator activation use the same explicit deployment/operator target identity", async () => {
+  const [routeSource, snapshotSource, wiringSource, targetSource, evidenceSource, readinessSource, gateSource] = await Promise.all([
+    readFile("app/api/system/runner-health/route.ts", "utf8"),
+    readFile("scripts/ops/root/disdex-runner-health-snapshot-current.mjs", "utf8"),
+    readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8"),
+    readFile("docs/production/current-live-target.json", "utf8"),
+    readFile("scripts/ops/root/disdex-multisha-release-evidence.mjs", "utf8"),
+    readFile("scripts/disdex-current-live-target-readiness.ts", "utf8"),
+    readFile("scripts/ops/root/disdex-live-operator-activation-gate.mjs", "utf8"),
+  ]);
+  const target = JSON.parse(targetSource) as {
+    deploymentTarget?: string;
+    operatorTarget?: string;
+    formalBacktest?: { selectedCase?: string };
+  };
+
+  assert.equal(target.deploymentTarget, "professional-dismanager.net");
+  assert.equal(target.operatorTarget, target.formalBacktest?.selectedCase);
+  assert.match(snapshotSource, /DISDEX_HEALTH_SNAPSHOT_DEPLOYMENT_TARGET/);
+  assert.match(snapshotSource, /DISDEX_HEALTH_SNAPSHOT_OPERATOR_TARGET/);
+  assert.match(snapshotSource, /targetIdentity/);
+  assert.match(routeSource, /DISDEX_HP_DEPLOYMENT_TARGET/);
+  assert.match(routeSource, /DISDEX_HP_OPERATOR_TARGET/);
+  assert.match(routeSource, /TARGET_IDENTITY_MISMATCH/);
+  assert.match(wiringSource, /DEPLOYMENT_TARGET="professional-dismanager\.net"/);
+  assert.match(wiringSource, /DISDEX_HEALTH_SNAPSHOT_DEPLOYMENT_TARGET=\$\{DEPLOYMENT_TARGET\}/);
+  assert.match(wiringSource, /DISDEX_HEALTH_SNAPSHOT_OPERATOR_TARGET=\$\{OPERATOR_TARGET\}/);
+  assert.match(evidenceSource, /operatorTarget/);
+  assert.match(readinessSource, /canonical\.operatorTarget/);
+  assert.match(gateSource, /target/);
+});

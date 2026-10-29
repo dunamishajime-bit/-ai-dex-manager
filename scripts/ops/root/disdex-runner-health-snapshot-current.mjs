@@ -10,6 +10,8 @@ const execFile = promisify(execFileCallback);
 const SYSTEMCTL = "/usr/bin/systemctl";
 const DEFAULT_EXPECTED_SHA = String(process.env.DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA || "").trim().toLowerCase();
 const DEFAULT_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT || "").trim();
+const DEPLOYMENT_TARGET = String(process.env.DISDEX_HEALTH_SNAPSHOT_DEPLOYMENT_TARGET || "").trim();
+const OPERATOR_TARGET = String(process.env.DISDEX_HEALTH_SNAPSHOT_OPERATOR_TARGET || "").trim();
 const HEALTH_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT || "/var/lib/disdex/runner-health").trim();
 const TICK_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_TICK_ROOT || `${HEALTH_ROOT}/ticks`).trim();
 const KILL_SWITCH_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json").trim();
@@ -51,6 +53,12 @@ const IDLE_PARITY_REPLAY_MODEL = "FIXED_BASELINE_ACCEPTED_INTENTS_DYNAMIC_GROSS_
 
 function configuredPath(name, fallback) {
     return String(process.env[name] || fallback).trim();
+}
+
+function targetIdentityReason() {
+    if (DEPLOYMENT_TARGET !== "professional-dismanager.net") return "DEPLOYMENT_TARGET_MISMATCH";
+    if (!OPERATOR_TARGET) return "OPERATOR_TARGET_MISSING";
+    return "";
 }
 
 function runnerPin(expectedShaEnv, releaseRootEnv, evidenceModeEnv) {
@@ -758,6 +766,7 @@ function summarizeOverallSafety(globalReasons, results) {
 
 async function main() {
     const now = Date.now();
+    const targetReason = targetIdentityReason();
     const killReason = await sharedKillSwitch();
     const sharedRisk = await sharedRiskStatus(now);
     const sharedRiskService = await safetyServiceStatus("Shared Risk", SHARED_RISK_UNIT, SHARED_RISK_RELEASE_ROOT, "scripts/disdex-shared-crypto-risk-writer.ts");
@@ -765,7 +774,7 @@ async function main() {
     const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, MARGIN_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
     const asterRateBudget = await sharedAsterRateBudgetStatus(now);
     const pending = await pendingExposureStatus(now);
-    const globalReasons = [killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
+    const globalReasons = [targetReason, killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
     const globalBlockReason = globalReasons.join("; ");
     const results = [];
     const runnerSnapshots = {};
@@ -809,6 +818,12 @@ async function main() {
         generatedAt: now,
         heartbeatAt: now,
         authenticatedSourceRequired: true,
+        targetIdentity: {
+            deploymentTarget: DEPLOYMENT_TARGET || null,
+            operatorTarget: OPERATOR_TARGET || null,
+            valid: !targetReason,
+            reason: targetReason || null,
+        },
         runnerPins: Object.fromEntries(RUNNERS.map((runner) => [runner.key, {
             runnerId: runner.runnerId,
             expectedSha: runner.expectedSha,
