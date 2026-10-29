@@ -32,8 +32,8 @@ Record command, timestamp, scope, and result for every verification here. Do not
 - Candidate `c9beb423ae9b6b18333ae9426a21a69cf35baeef` is root-owned with a marker and Shared Risk writer, but lacks the PR-302 root gate/deployment plan and is not an accepted immutable PR-302 target.
 - Aster signed read-only diagnostic PASS: DOGEUSDT position `-226`; one reduce-only BUY STOP_MARKET quantity `226`, stop `0.086960`, client id `v12-v4-98ded39746ed3502a4d7b0e26ef9`; zero orders/cancels/position changes sent.
 - Pending-exposure state was stale and had no trustworthy active count; it remains a formal preflight blocker.
-- Final source HEAD is `48467309faf59f8627d5c24e7070ce0a6c4c5f63`; PR #302 remains OPEN/Draft with merge state CLEAN.
-- Final CI PASS: production parity `40971815828`, integrated V96/V52 validation `40971815797`, owner authorization `40971816115`, margin risk `40971815716`, and VPS boundary `40971815801` including historical compatibility.
+- Final source HEAD is `0fd02a5cce623fd3ce985ee86737e32998d92c12`; PR #302 remains OPEN/Draft with merge state CLEAN.
+- Final CI PASS at that SHA: production parity `40973489222`, V13D/V11-EQ/V96 runner validation `40973489208`, owner authorization `40973489164`, margin risk `40973489174`, source/runtime heartbeat contract `40973489288`, and VPS release boundary `40973489180` including historical compatibility.
 - Fresh three-round signed Aster read-only evidence matched DOGEUSDT SHORT 226 and the same reduce-only BUY STOP quantity 226 at 0.086960 with client id `v12-v4-98ded39746ed3502a4d7b0e26ef9`; all effects were zero.
 - Shared Risk remained complete/untripped at 7.5%, Margin Guard remained HEALTHY/ordersAllowed=true, Kill Switch remained inactive, and no VPS or venue mutation was performed.
 - Pending registry had zero non-RELEASED entries but stale `updatedAt` and null counters; runner heartbeat timestamps showed stale ticks for HYPE, PENGU, Q102, and IDLE, so formal operator preflight remains blocked.

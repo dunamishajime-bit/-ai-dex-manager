@@ -13,7 +13,7 @@ route-neutral approval contract to the same root-owned VPS helper.
 The source contains an explicit root-only execution boundary for the
 first-stage `SHARED_CRYPTO_RISK_ONLY` scope. The PR branch baseline was
 re-read at `31cfae65daabfbe07acd805925bc7c9e9db19c4d`; the final source SHA
-for this preparation is `48467309faf59f8627d5c24e7070ce0a6c4c5f63`. A
+for this preparation is `0fd02a5cce623fd3ce985ee86737e32998d92c12`. A
 read-only VPS audit
 did find the root wrapper and helper under `/usr/local`, but it did not find a
 release for the PR branch and did not find the root-owned execution inputs.
@@ -341,11 +341,12 @@ operator gate is requested without the required artifact, the result is
 `BLOCKED_OPERATOR_AUTH`.
 
 The final branch HEAD is
-`48467309faf59f8627d5c24e7070ce0a6c4c5f63`. PR #302 remains OPEN and Draft
-with merge state CLEAN. The final required checks passed: production parity
-`40971815828`, integrated V96/V52 validation `40971815797`, owner
-authorization contract `40971816115`, margin risk `40971815716`, and VPS
-release boundary `40971815801` (including the non-blocking historical
+`0fd02a5cce623fd3ce985ee86737e32998d92c12`. PR #302 remains OPEN and Draft
+with merge state CLEAN. The final required checks passed at that SHA:
+production parity `40973489222`, V13D/V11-EQ/V96 runner validation
+`40973489208`, owner authorization contract `40973489164`, margin risk
+`40973489174`, source/runtime heartbeat contract `40973489288`, and VPS
+release boundary `40973489180` (including the non-blocking historical
 compatibility check). The branch is clean and `git diff --check` passes.
 
 Read-only GitHub settings inspection found no configured
