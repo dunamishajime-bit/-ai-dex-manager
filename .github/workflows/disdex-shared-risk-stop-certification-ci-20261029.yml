@@ -1,0 +1,71 @@
+name: DisDex shared risk and STOP certification contracts
+
+on:
+  pull_request:
+    paths:
+      - lib/disdex-shared-crypto-daily-risk.ts
+      - lib/resident-stop-observation.ts
+      - scripts/ops/root/disdex-current-runtime-wiring
+      - scripts/ops/root/disdex-live-operator-activation-gate.mjs
+      - scripts/ops/root/disdex-risk-api-final-preflight-20261028.py
+      - tests/resident-stop-pin-manifest.test.ts
+      - tests/resident-stop-v4-multisha.test.ts
+      - tests/resident-stop-q102-multisha.test.ts
+      - tests/resident-stop-cross-sha-writer-rollout.test.ts
+      - tests/resident-stop-observation.test.ts
+      - tests/operator_activation_hardening.test.ts
+      - tests/shared-risk-writer-concurrency.test.ts
+      - tests/test_risk_api_final_preflight_multisha.py
+      - package.json
+      - package-lock.json
+      - .github/workflows/disdex-shared-risk-stop-certification-ci-20261029.yml
+  push:
+    branches:
+      - codex/disdex-production-safety-20261029
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shared-risk-stop-certification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: >-
+          npx --no-install tsx --test
+          tests/resident-stop-pin-manifest.test.ts
+          tests/resident-stop-v4-multisha.test.ts
+          tests/resident-stop-q102-multisha.test.ts
+          tests/resident-stop-cross-sha-writer-rollout.test.ts
+          tests/resident-stop-observation.test.ts
+          tests/operator_activation_hardening.test.ts
+          tests/shared-risk-writer-concurrency.test.ts
+      - run: npx --no-install tsc --noEmit --pretty false
+      - run: python -m unittest tests.test_risk_api_final_preflight_multisha -v
+      - run: python scripts/ops/root/disdex-risk-api-final-preflight-20261028.py --self-test
+      - name: Validate root wiring syntax
+        shell: bash
+        run: bash -n scripts/ops/root/disdex-current-runtime-wiring
+      - name: Enforce non-live and fixed-gross source boundaries
+        shell: bash
+        run: |
+          ! grep -R -n -E 'curl .*aster|DISDEX_API_KEY|ASTER_API_SECRET|place(Market|Conditional|Stop)|cancelOrder' \
+            tests/resident-stop-pin-manifest.test.ts \
+            tests/resident-stop-v4-multisha.test.ts \
+            tests/resident-stop-q102-multisha.test.ts \
+            tests/operator_activation_hardening.test.ts \
+            tests/shared-risk-writer-concurrency.test.ts
+          ! grep -R -n -E 'COMMON_SHA|DYNAMIC_GROSS|dynamic.?gross' \
+            scripts/ops/root/disdex-risk-api-final-preflight-20261028.py \
+            scripts/ops/root/disdex-current-runtime-wiring \
+            lib/disdex-shared-crypto-daily-risk.ts

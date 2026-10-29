@@ -913,6 +913,13 @@ set_units() {
   MARGIN_SHA="$(runner_pin_field MARGIN_GUARD sha)"
   MARGIN_RELEASE="$(runner_pin_field MARGIN_GUARD releaseRoot)"
   MARGIN_EVIDENCE_MODE="$(runner_pin_field MARGIN_GUARD evidenceMode)"
+  STOP_OWNER_V12_SHA="$(runner_pin_field V12_V4 sha)"
+  STOP_OWNER_Q102_SHA="$(runner_pin_field QUALITY102_CAUSAL_V1 sha)"
+  STOP_OWNER_PENGU_SHA="$(runner_pin_field PENGU_V8 sha)"
+  STOP_OWNER_V52_SHA="$(runner_pin_field V52 sha)"
+  STOP_OWNER_FET_SHA="$(runner_pin_field FET_BRK48_RESIDUAL sha)"
+  STOP_OWNER_HYPE_SHA="$(runner_pin_field HYPE_TREND_LONG sha)"
+  STOP_OWNER_IDLE_SHA="$(runner_pin_field IDLE_PRIORITY_SHORT sha)"
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     [[ "$V4_PRIMARY_SHA" == "$(runner_pin_field V12_V4 sha)" && "$V4_PRIMARY_RELEASE" == "$(runner_pin_field V12_V4 releaseRoot)" ]] || {
       printf 'V4 primary runner-pin manifest does not match the selected V4 release\n' >&2
@@ -1381,6 +1388,46 @@ remove_stale_health_alert_unit_pin_dropins() {
   done < <(find "$HEALTH_ALERT_DROPIN_DIR" -maxdepth 1 -type f -name '*.conf' -print0)
 }
 
+is_expected_runtime_unit() {
+  local unit="$1" expected
+  [[ -n "$unit" ]] || return 1
+  for expected in \
+    "$V12_UNIT" \
+    "$PENGU_UNIT" \
+    "$Q102_UNIT" \
+    "$Q102_RANKING_OBSERVER_SERVICE" \
+    "$FET_UNIT" \
+    "$HYPE_UNIT" \
+    "$V52_UNIT" \
+    "$MARGIN_UNIT" \
+    "$SHARED_RISK_UNIT" \
+    "$IDLE_UNIT"; do
+    [[ -n "$expected" && "$unit" == "$expected" ]] && return 0
+  done
+  return 1
+}
+
+is_expected_runtime_sha() {
+  local sha="$1" expected
+  [[ -n "$sha" ]] || return 1
+  for expected in \
+    "$DEPLOYED_SHA" \
+    "$V4_PRIMARY_SHA" \
+    "$PENGU_SHA" \
+    "$Q102_SHA" \
+    "$V52_SHA" \
+    "$FET_SHA" \
+    "$HYPE_SHA" \
+    "$IDLE_SHA" \
+    "$SHARED_RISK_SHA" \
+    "$MARGIN_SHA" \
+    "$NODE_MODULES_SOURCE_SHA" \
+    "$PYTHON_RUNTIME_SOURCE_SHA"; do
+    [[ -n "$expected" && "$sha" == "$expected" ]] && return 0
+  done
+  return 1
+}
+
 retire_stale_release_enabled_units() {
   local link unit sha
   for link in /etc/systemd/system/multi-user.target.wants/disdex-*@*.service; do
@@ -1388,8 +1435,7 @@ retire_stale_release_enabled_units() {
     unit="$(basename "$link")"
     [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|v12-v4-canary|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@([0-9a-f]{40})\.service$ ]] || continue
     sha="${BASH_REMATCH[2]}"
-    [[ "$sha" == "$DEPLOYED_SHA" ]] && continue
-    [[ "$PRIMARY_V12_MODE" == "V4" && "$unit" == "$V12_UNIT" ]] && continue
+    is_expected_runtime_unit "$unit" && continue
     systemctl disable --now "$unit" >/dev/null 2>&1 || true
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
     printf 'DISDEX_STALE_RELEASE_UNIT_RETIRED unit=%s\n' "$unit"
@@ -1414,7 +1460,9 @@ prune_stale_runtime_metadata() {
     base="$(basename -- "$path")"
     sha="${base:0:40}"
     [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || continue
-    [[ "$sha" == "$DEPLOYED_SHA" || ( "$PRIMARY_V12_MODE" == "V4" && "$sha" == "$V4_PRIMARY_SHA" ) || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
+    is_expected_runtime_sha "$sha" || {
+      [[ -n "$previous_sha" && "$sha" == "$previous_sha" ]] && continue
+    }
     rm -f -- "$path"
     printf 'DISDEX_STALE_RUNTIME_ENV_REMOVED path=%s\n' "$path"
   done
@@ -1423,7 +1471,9 @@ prune_stale_runtime_metadata() {
     base="$(basename -- "$path")"
     [[ "$base" =~ @([0-9a-f]{40})\.service\.d$ ]] || continue
     sha="${BASH_REMATCH[1]}"
-    [[ "$sha" == "$DEPLOYED_SHA" || ( "$PRIMARY_V12_MODE" == "V4" && "$sha" == "$V4_PRIMARY_SHA" ) || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
+    is_expected_runtime_sha "$sha" || {
+      [[ -n "$previous_sha" && "$sha" == "$previous_sha" ]] && continue
+    }
     unit="${base%.d}"
     state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     [[ "$state" != "active" && "$state" != "activating" && "$state" != "deactivating" ]] || {
@@ -1440,8 +1490,7 @@ reset_stale_release_failed_units() {
   while read -r unit _; do
     [[ -n "$unit" ]] || continue
     [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@[0-9a-f]{40}\.service$ ]] || continue
-    [[ "$unit" == *"@${DEPLOYED_SHA}.service" ]] && continue
-    [[ "$PRIMARY_V12_MODE" == "V4" && "$unit" == "$V12_UNIT" ]] && continue
+    is_expected_runtime_unit "$unit" && continue
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
   done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
 }
@@ -2114,6 +2163,14 @@ DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
 DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 DISDEX_RUNNER_PIN_MANIFEST_PATH=${RUNNER_PINS_PATH}
+DISDEX_SHARED_STOP_V12_OWNER_SHA=${STOP_OWNER_V12_SHA}
+DISDEX_SHARED_STOP_Q102_OWNER_SHA=${STOP_OWNER_Q102_SHA}
+DISDEX_SHARED_STOP_PENGU_OWNER_SHA=${STOP_OWNER_PENGU_SHA}
+DISDEX_SHARED_STOP_V52_OWNER_SHA=${STOP_OWNER_V52_SHA}
+DISDEX_SHARED_STOP_FET_OWNER_SHA=${STOP_OWNER_FET_SHA}
+DISDEX_SHARED_STOP_HYPE_OWNER_SHA=${STOP_OWNER_HYPE_SHA}
+DISDEX_SHARED_STOP_IDLE_OWNER_SHA=${STOP_OWNER_IDLE_SHA}
+DISDEX_SHARED_STOP_RESIDUAL_OWNER_SHA=${STOP_OWNER_IDLE_SHA}
 DISDEX_SHARED_CRYPTO_RISK_RUNTIME_SHA=${SHARED_RISK_SHA}
 DISDEX_MARGIN_GUARD_RUNTIME_SHA=${MARGIN_SHA}
 DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json

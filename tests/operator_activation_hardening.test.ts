@@ -102,6 +102,18 @@ test("mixed-SHA activation requires the effective runner SHA map", () => {
     runner: "V12_X1_ALL",
     requireRunnerShaMap: true,
   }).allowed, false);
+  assert.equal(validateOperatorActivationArtifact(mixed, {
+    sha: runnerSha,
+    target: TARGET,
+    runner: "PENGU_V8",
+    requireRunnerShaMap: true,
+    requiredRunners: ["V12_X1_ALL", "PENGU_V8", "QUALITY102_CAUSAL_V1"],
+  }).allowed, false);
+  assert.equal(validateOperatorActivationArtifact(artifact({ approvedRunners: ["V12_X1_ALL", "V12_X1_ALL"] }), {
+    sha: SHA,
+    target: TARGET,
+    runner: "V12_X1_ALL",
+  }).allowed, false);
 });
 
 test("operator activation file must be root-owned non-writable regular file", () => {

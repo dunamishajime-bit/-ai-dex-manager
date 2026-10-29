@@ -74,8 +74,12 @@ export function validateOperatorActivationArtifact(artifact, input) {
     : null;
   const mappedSha = exactSha(approvedShaByRunner?.[input.runner]);
   if (input.requireRunnerShaMap === true) {
+    const requiredRunners = Array.isArray(input.requiredRunners) ? input.requiredRunners : [];
     if (!mappedSha || mappedSha !== input.sha) {
       return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:${RUNNER_SHA_MAP_REQUIRED}:RUNNER_SHA_MISMATCH:${input.runner}` };
+    }
+    if (!approvedShaByRunner || requiredRunners.some((runner) => !exactSha(approvedShaByRunner[runner]))) {
+      return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:${RUNNER_SHA_MAP_REQUIRED}:MAP_INCOMPLETE` };
     }
   } else if (mappedSha ? mappedSha !== input.sha : approvedSha !== input.sha) {
     return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:SHA_MISMATCH" };
@@ -86,7 +90,10 @@ export function validateOperatorActivationArtifact(artifact, input) {
   if (artifact.ordersEnabled !== true) {
     return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING" };
   }
-  if (!Array.isArray(artifact.approvedRunners) || !artifact.approvedRunners.includes(input.runner)) {
+  if (!Array.isArray(artifact.approvedRunners) || new Set(artifact.approvedRunners).size !== artifact.approvedRunners.length) {
+    return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:APPROVED_RUNNERS_DUPLICATE" };
+  }
+  if (!artifact.approvedRunners.includes(input.runner)) {
     return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:RUNNER_NOT_APPROVED:${input.runner}` };
   }
   const activationClass = String(artifact.activationClass || "FULL_LIVE").trim().toUpperCase();
@@ -209,7 +216,7 @@ export async function evaluateOperatorActivationGate(input) {
 export async function evaluateAllOperatorActivationGates(input) {
   const results = [];
   for (const runner of TRADING_RUNNERS) {
-    const result = await evaluateOperatorActivationGate({ ...input, runner, requireRunnerShaMap: input.requireRunnerShaMap === true });
+    const result = await evaluateOperatorActivationGate({ ...input, runner, requiredRunners: TRADING_RUNNERS, requireRunnerShaMap: input.requireRunnerShaMap === true });
     results.push({ runner, ...result });
     if (!result.allowed) {
       return {
@@ -231,7 +238,7 @@ export async function evaluateLimitedOverlayActivationGates(input) {
   const runners = [...LIMITED_OVERLAY_RUNNERS, ...LIMITED_OVERLAY_UNCHANGED_PEERS];
   const results = [];
   for (const runner of runners) {
-    const result = await evaluateOperatorActivationGate({ ...input, runner, requireRunnerShaMap: input.requireRunnerShaMap === true });
+    const result = await evaluateOperatorActivationGate({ ...input, runner, requiredRunners: runners, requireRunnerShaMap: input.requireRunnerShaMap === true });
     results.push({ runner, ...result });
     if (!result.allowed) {
       return { allowed: false, reason: result.reason || "OPERATOR_LIVE_ACTIVATION_REQUIRED", blockedRunner: runner, results };
