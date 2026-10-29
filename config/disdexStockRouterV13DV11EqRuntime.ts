@@ -131,7 +131,7 @@ export const DISDEX_V13D_V11EQ_V96_RISK = {
 
 export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     strategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
-    implementationStatus: "VPS_LIVE_READY_INTEGRATED_CRYPTO_3P0_STOCK_1P5_PORTFOLIO_3P5_FIXED_5X_MARGIN_GATED",
+    implementationStatus: "VPS_LIVE_READY_INTEGRATED_CRYPTO_3P0_STOCK_4P0_PORTFOLIO_4P25_FIXED_5X_MARGIN_GATED",
     mode: "LIVE_READY" as const,
     liveTradingEnabled: true,
     orderSubmissionAllowed: true,
@@ -139,7 +139,7 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     stateSchemaVersion: 3,
     stateDirectory: ".runtime-state/disdex-v13d-v11eq-v96",
     stockOrderClientIdPrefix: "stock-v52-",
-    pythonStockEngine: "scripts/disdex_v52_aster_only_live_engine.py",
+    pythonStockEngine: "scripts/disdex_v52_margin_aware_live_engine.py",
     combinedSupervisor: "scripts/disdex-v13d-v11eq-v96-live-runner.ts",
     combinedPreflight: "scripts/disdex-v13d-v11eq-v96-live-preflight.ts",
     requireCredentialsAndEndpointPreflight: true,
@@ -149,5 +149,5 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     legacyV11StateMigrationAcknowledgement: "I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION",
     cryptoV96RetainsOwnLiveGates: true,
     liveBlockReason:
-        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU COMBINED_FILTERED 1.0, shared Crypto Gross 3.0, Stock Gross 1.5, Total Gross 3.5, fixed 5x cross margin for all managed Aster symbols, at least 20% projected available balance, at most 70% projected initial-margin usage, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all sleeve limits. Hyperliquid and V13D remain excluded.",
+        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU COMBINED_FILTERED 1.0, shared Crypto Gross 3.0, Stock Gross 4.0, Total Gross 4.25, fixed 5x cross margin for all managed Aster symbols, at least 20% projected available balance, at most 70% projected initial-margin usage, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all sleeve limits. Hyperliquid and V13D remain excluded.",
 } as const;

@@ -111,7 +111,9 @@ jobs:
           if (!combinedConfig.includes('minimumSecondStockGross: 0.25')) throw new Error('second Stock minimum missing');
           if (!combinedConfig.includes('maximumConcurrentStockPositions: 2')) throw new Error('two Stock slots missing');
           if (!combinedConfig.includes('requiredMarginType: "cross"')) throw new Error('cross margin requirement missing');
-          if (!supervisor.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 supervisor path missing');
+          if (!combinedConfig.includes('pythonStockEngine: "scripts/disdex_v52_margin_aware_live_engine.py"')) throw new Error('margin-aware V52 runtime engine binding missing');
+          if (!supervisor.includes('const V52_ENGINE = DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine')) throw new Error('V52 supervisor must use the canonical runtime engine binding');
+          if (!supervisor.includes('spawn(python, [V52_ENGINE')) throw new Error('V52 supervisor spawn path is not SHA/config bound');
           if (!integratedPreflight.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 preflight path missing');
           if (!readonlyPreflight.includes('READ_ONLY_PREFLIGHT_LEVERAGE_BELOW_')) throw new Error('authenticated leverage gate missing');
           if (!capacity.includes('managedGrossCap') || !capacity.includes('portfolioGrossCap')) throw new Error('separated Gross capacity gates missing');
