@@ -23,7 +23,7 @@ NEW="c"*40
 def plan(scope, r=None):
     p=dict(schema=SCHEMA, repository="dunamishajime-bit/-ai-dex-manager",
            deploymentTarget="professional-dismanager.net",
-           operatorTarget="DD1296_FINAL_ALLIN_10BPS", sourceSha=NEW,
+           operatorTarget="DD1296_FINAL_ALLIN_10BPS", sourceSha=(OLD if scope == "FULL_PROJECT" else NEW),
            scope=scope, runners={i:OLD for i in IDS},
            uiSha=OLD, monitorSha=OLD, ordersEnabled=False)
     if r:
