@@ -9,15 +9,19 @@ ALLOWED = (
     "--deployment-target", "--operator-target", "--sha", "--scope",
     "--plan-sha256", "--orders-enabled", "--route", "--owner",
 )
+MODES = ("--preflight-readonly", "--execute")
 
 def parse_original(value):
     argv = shlex.split(value, posix=True)
     if not argv or argv[0] != HELPER:
         raise ValueError("invalid forced-command target")
-    if len(argv) != 1 + len(ALLOWED) * 2 + 1:
+    if len(argv) != 1 + len(ALLOWED) * 2 + 2:
         raise ValueError("forced-command argument count")
     arguments = argv[1:]
-    if arguments[-1] != "--read-approval-stdin":
+    mode_index = len(ALLOWED) * 2
+    if arguments[mode_index] not in MODES:
+        raise ValueError("invalid forced-command mode")
+    if arguments[mode_index + 1] != "--read-approval-stdin":
         raise ValueError("missing required signed approval flag")
     for index, field in enumerate(ALLOWED):
         if arguments[2 * index] != field:

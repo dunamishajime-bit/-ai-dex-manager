@@ -1,6 +1,6 @@
 # DisDex route-neutral owner-approved deployment - staged (2026-10-30)
 
-**State:** SOURCE READY FOR CI REVIEW. NOT LIVE.
+**State:** SOURCE READY FOR VPS STAGING. LIVE CUTOVER NOT AUTHORIZED.
 
 This PR unifies the deployment approval rules, safety gates, and audit
 contract. It does **not** require every deployment to run through GitHub
@@ -8,9 +8,11 @@ Actions. GitHub Actions is the formal GPT/ChatGPT adapter; Codex may use the
 direct SSH/operator-helper adapter. Both adapters must submit the same
 route-neutral approval contract to the same root-owned VPS helper.
 
-This PR does not install the helper, change a systemd unit, move a release
-symlink, change a position or protective order, change Gross, change the
-Shared Risk limit, operate the Kill Switch, submit an order, or claim
+The source now contains an explicit root-only execution boundary for the
+first-stage `SHARED_CRYPTO_RISK_ONLY` scope. This source change does not by
+itself install the helper, create a root-owned activation artifact, move a
+release symlink, change a position or protective order, change Gross, change
+the Shared Risk limit, operate the Kill Switch, submit an order, or claim
 `LIVE_VERIFIED`.
 
 ## 1. Common authorization contract
@@ -212,7 +214,9 @@ complete:
 4. Install and certify the root-owned forced-command helper with exact scope,
    plan reconstruction, nonce replay protection, venue/STOP/risk checks,
    mutual exclusion, immutable release/runner pins, audit cycles, and safe
-   rollback.
+   rollback. The source executor is mutation-capable only for
+   `SHARED_CRYPTO_RISK_ONLY`; all other scopes remain fail-closed until their
+   own transaction and audit implementation is certified.
 5. Verify the Codex adapter and Actions adapter against the same helper in a
    non-mutating or staging dry-run. Do not treat an HTTP 200, an anonymous HP
    page, or a source-only CI pass as production authentication.
@@ -252,18 +256,25 @@ change, Kill Switch operation, or LIVE audit. The correct status remains
 operator gate is requested without the required artifact, the result is
 `BLOCKED_OPERATOR_AUTH`.
 
-## Root-gate implementation stage (source only)
+## Root-gate implementation stage (source and staging boundary)
 
 Source adds `scripts/ops/deploy/disdex_unified_root_gate.py` plus root wrapper
 and an SSH authorized_keys forced-command dispatcher. The helper implements
-**read-only preflight only**: it validates the owner grant, exact multi-SHA
-plan hash, root-only current plan, `/etc/disdex/runner-pins.json`, release
-markers, target, scope and runner STOP-owner metadata. It returns
-`READONLY_PREFLIGHT_PASS_NOT_LIVE` on success, and **always rejects any
-mutation command** with `LIVE_EXECUTOR_NOT_CERTIFIED`.
+both `--preflight-readonly` and an explicit `--execute` mode. The execute path
+validates the owner grant, exact multi-SHA plan hash, root-only current plan,
+root-owned `/etc/disdex/runner-pins.json`, immutable release markers, scoped
+activation artifact, signed read-only venue evidence, target, scope, STOP
+ownership metadata, and the 7.5% Shared Risk limit. It consumes a single-use
+nonce only after the read-only checks pass, changes only the exact Shared Risk
+unit, preserves the global `current` symlink and peer pins, and rolls back the
+manifest and systemd state on any failed postcondition. Three advancing
+read-only audit cycles are required before the helper emits a verified
+receipt. Every receipt reports zero orders, cancels, and position changes.
 
-Do NOT install the helper as a LIVE-capable executable until real account
-and STOP reconciliation, systemd cutover, writer exclusivity, rollback and
-3-cycle post-check are implemented, tested and owner-approved. A source-only
-passing CI does not prove the VPS operator workflow has been deployed.
-Both Actions and Codex now pass explicit owner identity to the root gate.
+The source implementation is not yet a production authentication proof. Do
+not install or invoke `--execute` until the owner has independently provisioned
+the root-owned activation artifact and venue evidence, protected the Actions
+Environment, installed the public key, and approved the exact plan. Missing,
+stale, copied, edited, replayed, or mismatched artifacts remain fail-closed.
+Both Actions and Codex pass explicit owner identity and the fixed execution
+mode to the same root gate.

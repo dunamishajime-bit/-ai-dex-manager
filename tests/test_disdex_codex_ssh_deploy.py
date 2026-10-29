@@ -32,6 +32,7 @@ class CodexSshAdapterTests(unittest.TestCase):
         self.assertIn("/usr/local/sbin/disdex-unified-production-deploy", command)
         self.assertIn("CODEX_SSH", command)
         self.assertIn("--owner", command)
+        self.assertIn("--execute", command)
         self.assertIn("--read-approval-stdin", command)
         self.assertNotIn("bash", command)
         self.assertNotIn("sh -c", command)

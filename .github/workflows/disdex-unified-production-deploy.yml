@@ -138,4 +138,4 @@ jobs:
             -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts" \
             -p "$PORT" "root@$HOST" \
-            "/usr/local/sbin/disdex-unified-production-deploy --deployment-target $TARGET --operator-target $OPERATOR_TARGET --sha $SHA --scope $SCOPE --plan-sha256 $PLAN_SHA --orders-enabled $ORDERS_ENABLED --route GITHUB_ACTIONS --owner $OWNER --read-approval-stdin"
+            "/usr/local/sbin/disdex-unified-production-deploy --deployment-target $TARGET --operator-target $OPERATOR_TARGET --sha $SHA --scope $SCOPE --plan-sha256 $PLAN_SHA --orders-enabled $ORDERS_ENABLED --route GITHUB_ACTIONS --owner $OWNER --execute --read-approval-stdin"

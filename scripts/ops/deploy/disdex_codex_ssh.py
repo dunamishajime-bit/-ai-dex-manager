@@ -63,6 +63,7 @@ def build_ssh_command(*, host, identity_file, known_hosts, port, sha, scope,
         "--orders-enabled", str(orders_enabled).lower(),
         "--route", CODEX_ROUTE,
         "--owner", owner,
+        "--execute",
         "--read-approval-stdin",
     ]
 
