@@ -24,7 +24,7 @@ CODEX_ROUTE = "CODEX_SSH"
 
 
 def _validate_inputs(host, identity_file, known_hosts, port, sha, scope,
-                     plan_sha256, orders_enabled):
+                     plan_sha256, orders_enabled, owner):
     if host != DEPLOYMENT_TARGET:
         raise ValueError("deployment host must match the canonical target")
     if not identity_file or not known_hosts:
@@ -38,12 +38,14 @@ def _validate_inputs(host, identity_file, known_hosts, port, sha, scope,
     if not isinstance(plan_sha256, str) or not PLAN_HASH.fullmatch(plan_sha256):
         raise ValueError("invalid plan hash")
     validate_order_permission(scope, orders_enabled)
+    if not isinstance(owner, str) or not owner or len(owner) > 39 or not owner.replace('-', '').isalnum():
+        raise ValueError('invalid owner')
 
 
 def build_ssh_command(*, host, identity_file, known_hosts, port, sha, scope,
-                      plan_sha256, orders_enabled):
+                      plan_sha256, orders_enabled, owner):
     _validate_inputs(host, identity_file, known_hosts, port, sha, scope,
-                     plan_sha256, orders_enabled)
+                     plan_sha256, orders_enabled, owner)
     return [
         "ssh", "-T", "-i", identity_file,
         "-o", "IdentitiesOnly=yes",
@@ -60,6 +62,7 @@ def build_ssh_command(*, host, identity_file, known_hosts, port, sha, scope,
         "--plan-sha256", plan_sha256,
         "--orders-enabled", str(orders_enabled).lower(),
         "--route", CODEX_ROUTE,
+        "--owner", owner,
         "--read-approval-stdin",
     ]
 
@@ -77,6 +80,7 @@ def run(args):
         scope=args.scope,
         plan_sha256=args.plan_sha256,
         orders_enabled=args.orders_enabled == "true",
+        owner=args.owner,
     )
     return subprocess.run(command, input=token, text=True, check=False).returncode
 
@@ -91,6 +95,7 @@ def main():
     parser.add_argument("--scope", required=True, choices=sorted(SCOPES))
     parser.add_argument("--plan-sha256", required=True)
     parser.add_argument("--orders-enabled", required=True, choices=("true", "false"))
+    parser.add_argument("--owner", required=True)
     args = parser.parse_args()
     try:
         return run(args)

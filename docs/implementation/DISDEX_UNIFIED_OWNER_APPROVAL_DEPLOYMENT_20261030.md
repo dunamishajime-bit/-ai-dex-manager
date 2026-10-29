@@ -251,3 +251,19 @@ change, Kill Switch operation, or LIVE audit. The correct status remains
 `SOURCE_READY_NOT_LIVE` until those external gates are completed; if an
 operator gate is requested without the required artifact, the result is
 `BLOCKED_OPERATOR_AUTH`.
+
+## Root-gate implementation stage (source only)
+
+Source adds `scripts/ops/deploy/disdex_unified_root_gate.py` plus root wrapper
+and an SSH authorized_keys forced-command dispatcher. The helper implements
+**read-only preflight only**: it validates the owner grant, exact multi-SHA
+plan hash, root-only current plan, `/etc/disdex/runner-pins.json`, release
+markers, target, scope and runner STOP-owner metadata. It returns
+`READONLY_PREFLIGHT_PASS_NOT_LIVE` on success, and **always rejects any
+mutation command** with `LIVE_EXECUTOR_NOT_CERTIFIED`.
+
+Do NOT install the helper as a LIVE-capable executable until real account
+and STOP reconciliation, systemd cutover, writer exclusivity, rollback and
+3-cycle post-check are implemented, tested and owner-approved. A source-only
+passing CI does not prove the VPS operator workflow has been deployed.
+Both Actions and Codex now pass explicit owner identity to the root gate.

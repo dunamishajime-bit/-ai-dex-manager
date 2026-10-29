@@ -21,6 +21,7 @@ class CodexSshAdapterTests(unittest.TestCase):
             scope="SHARED_CRYPTO_RISK_ONLY",
             plan_sha256=PLAN,
             orders_enabled=False,
+            owner='dunamishajime-bit',
         )
         args.update(overrides)
         return build_ssh_command(**args)
@@ -30,6 +31,7 @@ class CodexSshAdapterTests(unittest.TestCase):
         self.assertIn("root@professional-dismanager.net", command)
         self.assertIn("/usr/local/sbin/disdex-unified-production-deploy", command)
         self.assertIn("CODEX_SSH", command)
+        self.assertIn("--owner", command)
         self.assertIn("--read-approval-stdin", command)
         self.assertNotIn("bash", command)
         self.assertNotIn("sh -c", command)

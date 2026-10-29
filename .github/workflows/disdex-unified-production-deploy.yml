@@ -111,6 +111,7 @@ jobs:
           PLAN_SHA: ${{ inputs.plan_sha256 }}
           TOKEN: ${{ inputs.owner_signed_token }}
           ORDERS_ENABLED: ${{ inputs.orders_enabled }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
           TARGET: professional-dismanager.net
           OPERATOR_TARGET: DD1296_FINAL_ALLIN_10BPS
         run: |
@@ -137,4 +138,4 @@ jobs:
             -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts" \
             -p "$PORT" "root@$HOST" \
-            "/usr/local/sbin/disdex-unified-production-deploy --deployment-target $TARGET --operator-target $OPERATOR_TARGET --sha $SHA --scope $SCOPE --plan-sha256 $PLAN_SHA --orders-enabled $ORDERS_ENABLED --route GITHUB_ACTIONS --read-approval-stdin"
+            "/usr/local/sbin/disdex-unified-production-deploy --deployment-target $TARGET --operator-target $OPERATOR_TARGET --sha $SHA --scope $SCOPE --plan-sha256 $PLAN_SHA --orders-enabled $ORDERS_ENABLED --route GITHUB_ACTIONS --owner $OWNER --read-approval-stdin"
