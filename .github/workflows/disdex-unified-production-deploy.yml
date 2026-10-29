@@ -1,0 +1,110 @@
+name: DisDex Unified Production Deployment (Owner Approved)
+
+# Fail closed until the owner explicitly configures environment protection,
+# removes legacy broad SSH permissions and certifies the VPS root helper.
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: Exact immutable 40-character SHA
+        type: string
+        required: true
+      scope:
+        description: Exact DisDex deployment scope
+        type: choice
+        required: true
+        options:
+          - SHARED_CRYPTO_RISK_ONLY
+          - V12_V4
+          - QUALITY102_CAUSAL_V1
+          - V52
+          - PENGU_V8
+          - FET_BRK48_RESIDUAL
+          - HYPE_TREND_LONG
+          - IDLE_PRIORITY_SHORT
+          - MARGIN_GUARD_ONLY
+          - API_MONITORS
+          - HP_ONLY
+          - FULL_PROJECT
+          - ROLLBACK
+      owner_signed_token:
+        description: Signed short-lived token only; NEVER paste a password
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/master' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Verify owner-controlled policy and exact authorization
+        shell: bash
+        env:
+          READY: ${{ vars.DISDEX_DEPLOYMENT_POLICY_READY }}
+          ALLOWED: ${{ vars.DISDEX_DEPLOY_ALLOWED_ACTORS }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
+          ACTOR: ${{ github.actor }}
+          SHA: ${{ inputs.target_sha }}
+          SCOPE: ${{ inputs.scope }}
+          TOKEN: ${{ inputs.owner_signed_token }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          [[ "$READY" == "OWNER_ENV_LOCKED_V1" ]]
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$OWNER" =~ ^[A-Za-z0-9-]{1,39}$ ]]
+          [[ ",$ALLOWED," == *",$ACTOR,"* ]]
+          [[ -n "$TOKEN" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-owner.pub"
+          printf '%s' "$TOKEN" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/disdex-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" --sha "$SHA" \
+              --scope "$SCOPE" --operator "$OWNER"
+      - name: Invoke exact-scope dedicated VPS root helper
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          SHA: ${{ inputs.target_sha }}
+          SCOPE: ${{ inputs.scope }}
+          TOKEN: ${{ inputs.owner_signed_token }}
+        run: |
+          set -euo pipefail
+          [[ -n "$HOST" && -n "$KEY" && -n "$HOST_KEYS" ]]
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$SCOPE" =~ ^[A-Z0-9_]+$ ]]
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/disdex-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/disdex-ssh/key"
+          printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/disdex-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/disdex-ssh/key" "$RUNNER_TEMP/disdex-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/disdex-ssh/key" >/dev/null
+          # VPS must independently verify owner key, replay nonce, release,
+          # Aster/STOP/risk evidence, unchanged peer SHAs and rollback.
+          # This must NOT provide an arbitrary shell or use general --apply.
+          printf '%s' "$TOKEN" | ssh -T \
+            -i "$RUNNER_TEMP/disdex-ssh/key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts" \
+            -p "$PORT" "root@$HOST" \
+            "/usr/local/sbin/disdex-unified-production-deploy --sha $SHA --scope $SCOPE --read-approval-stdin"
