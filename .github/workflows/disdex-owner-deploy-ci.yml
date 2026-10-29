@@ -48,7 +48,7 @@ jobs:
                           'OWNER_ENV_LOCKED_V1', 'DISDEX_PRODUCTION_SSH_PRIVATE_KEY',
                           'DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM',
                           '--read-approval-stdin', 'cancel-in-progress: false',
-                          'github.ref =='):
+                          '[[ "$REF" == "refs/heads/master" ]]'):
               assert pattern in p, pattern
           assert 'secrets.DISDEX_VPS_ROOT_PRIVATE_KEY' not in p
           assert 'password:' not in p
