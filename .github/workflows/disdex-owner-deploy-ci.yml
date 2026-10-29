@@ -8,13 +8,13 @@ on:
       - '.github/workflows/disdex-unified-production-deploy.yml'
       - '.github/workflows/disdex-owner-deploy-ci.yml'
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
-      - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
   pull_request:
     paths:
       - 'scripts/ops/deploy/disdex_owner_approval.py'
       - 'tests/test_disdex_owner_approval.py'
       - '.github/workflows/disdex-unified-production-deploy.yml'
       - '.github/workflows/disdex-owner-deploy-ci.yml'
+      - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
   workflow_dispatch:
 
 permissions:
