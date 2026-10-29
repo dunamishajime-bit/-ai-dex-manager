@@ -16,6 +16,11 @@ class UnifiedHelperInstallerContractTests(unittest.TestCase):
         self.assertNotIn("authorized_keys", installer)
         self.assertNotIn("PRIVATE_KEY", installer)
 
+    def test_installer_groups_permission_bit_checks_before_comparison(self):
+        installer = (ROOT / "scripts/ops/root/install-disdex-unified-deployment").read_text()
+        self.assertIn("(( (0$release_mode & 022) == 0 ))", installer)
+        self.assertIn("(( (0$marker_mode & 0222) == 0 ))", installer)
+
     def test_authorized_keys_example_is_forced_command_only(self):
         example = (ROOT / "deploy/ssh/disdex-unified-forced-command.authorized_keys.example").read_text()
         self.assertIn("command=\"/usr/local/libexec/disdex-unified/disdex_unified_forced_command.py\"", example)
