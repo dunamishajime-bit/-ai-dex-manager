@@ -1,0 +1,90 @@
+name: DisDex V4 Production Readiness (Read Only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-v4-readiness-readonly
+  cancel-in-progress: false
+
+jobs:
+  readiness:
+    name: Read-only VPS readiness — never deploys or trades
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment:
+      name: disdex-production
+    steps:
+      - name: Verify caller and environment
+        shell: bash
+        env:
+          ACTOR: ${{ github.actor }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
+          ALLOWED: ${{ vars.DISDEX_DEPLOY_ALLOWED_ACTORS }}
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REPOSITORY" == "dunamishajime-bit/-ai-dex-manager" ]]
+          [[ "$OWNER" == "dunamishajime-bit" ]]
+          [[ ",$ALLOWED," == *",$ACTOR,"* ]] || { echo "UNAUTHORIZED_ACTOR"; exit 1; }
+          [[ "$HOST" == "professional-dismanager.net" ]] || { echo "VPS_HOST_MISMATCH"; exit 1; }
+
+      - name: Read VPS readiness through exact forced command
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          work="$RUNNER_TEMP/disdex-v4-readiness"
+          install -d -m 0700 "$work"
+          trap 'rm -rf "$work"' EXIT
+          printf '%s\n' "$KEY" > "$work/key"
+          printf '%s\n' "$HOST_KEYS" > "$work/known_hosts"
+          chmod 0600 "$work/key" "$work/known_hosts"
+          ssh-keygen -y -f "$work/key" >/dev/null
+
+          ssh -T \
+            -i "$work/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$work/known_hosts" \
+            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
+            "/usr/local/sbin/disdex-v4-live-readiness" > "$work/readiness.json"
+
+          python3 - "$work/readiness.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          p=Path(sys.argv[1])
+          d=json.loads(p.read_text())
+          if d.get("schema")!="disdex-v4-live-readiness-observation/v1":
+              raise SystemExit("READINESS_SCHEMA_INVALID")
+          blockers=d.get("blockers")
+          if not isinstance(blockers,list):
+              raise SystemExit("READINESS_BLOCKERS_INVALID")
+          print("READINESS_STATUS="+str(d.get("status")))
+          print("CANDIDATE_SHA="+str(d.get("candidateSha")))
+          print("CURRENT_RELEASE_SHA="+str(d.get("currentReleaseSha")))
+          print("BLOCKER_COUNT="+str(len(blockers)))
+          for x in blockers:
+              print("BLOCKER="+str(x))
+          with open(__import__("os").environ["GITHUB_STEP_SUMMARY"],"a",encoding="utf8") as f:
+              f.write("## V4 Production Readiness — READ ONLY\n\n")
+              f.write(f"- Status: **{d.get('status')}**\n")
+              f.write(f"- Candidate: `{d.get('candidateSha')}`\n")
+              f.write(f"- Current release: `{d.get('currentReleaseSha')}`\n")
+              f.write(f"- Blockers: **{len(blockers)}**\n\n")
+              for x in blockers:
+                  f.write(f"- `{x}`\n")
+              f.write("\nThis workflow cannot deploy, restart a runner, clear a Kill Switch, or place/cancel/modify orders.\n")
+          if blockers:
+              raise SystemExit("V4_READINESS_BLOCKED")
+          PY
