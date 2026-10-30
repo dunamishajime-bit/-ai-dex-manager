@@ -10,7 +10,44 @@ export const EVIDENCE_KEYS = [
   "sharedRiskAndPeers",
 ];
 const SHA = /^[a-f0-9]{40}$/;
-const EVIDENCE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+export const EVIDENCE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+export const EVIDENCE_FILE_NAMES = Object.freeze({
+  routeSourceParity: "route-source-parity.json",
+  establishedAsterOrders: "established-aster-orders.json",
+  signedAsterAccount: "signed-aster-account.json",
+  v4ExecutionTests: "v4-execution-tests.json",
+  sharedRiskAndPeers: "shared-risk-and-peers.json",
+});
+// Advisory only: this function cannot authorize LIVE or renew account proof.
+export function inspectV4EvidenceExpiry({sha, payloads, now = Date.now(),
+  warningWindowMs = 12 * 60 * 60 * 1000}) {
+  if (!SHA.test(String(sha || ""))) throw Error("V4_EVIDENCE_SHA_INVALID");
+  if (!Number.isFinite(now) || !Number.isFinite(warningWindowMs)
+      || warningWindowMs < 0 || warningWindowMs > EVIDENCE_MAX_AGE_MS)
+    throw Error("V4_EVIDENCE_MONITOR_INPUT_INVALID");
+  const evidence = [];
+  for (const key of EVIDENCE_KEYS) {
+    const record = asRecord(payloads?.[key], key);
+    if (record.status !== "PASS") throw Error("V4_EVIDENCE_STATUS_NOT_PASS:" + key);
+    if (record.candidateSha !== sha) throw Error("V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:" + key);
+    const captured = Date.parse(String(record.capturedAt || ""));
+    if (!Number.isFinite(captured) || captured > now + 5 * 60_000)
+      throw Error("V4_EVIDENCE_TIMESTAMP_INVALID:" + key);
+    evidence.push({
+      key, capturedAt: new Date(captured).toISOString(),
+      expiresAt: new Date(captured + EVIDENCE_MAX_AGE_MS).toISOString(),
+      remainingMs: captured + EVIDENCE_MAX_AGE_MS - now,
+    });
+  }
+  const earliest = Math.min(...evidence.map(e => Date.parse(e.expiresAt)));
+  const remainingMs = earliest - now;
+  return {
+    status: remainingMs < 0 ? "EXPIRED" : remainingMs <= warningWindowMs ? "EXPIRING_SOON" : "FRESH",
+    earliestExpiryAt: new Date(earliest).toISOString(),
+    remainingMs, warningWindowMs, evidence, readOnly: true, authorizesTrading: false,
+  };
+}
+
 
 function asRecord(value, label) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`V4_EVIDENCE_CONTENT_INVALID:${label}`);
@@ -50,7 +87,9 @@ export function validateEvidenceBundle({ sha, releaseMarker, payloads, now = Dat
     sha,
     routeCount: 41,
     mutationCalls: 0,
-    evidenceCapturedAt: Math.max(...EVIDENCE_KEYS.map((key) => Date.parse(payloads[key].capturedAt))),
+    // The earliest proof controls expiry, not the newest one.
+    evidenceCapturedAt: Math.min(...EVIDENCE_KEYS.map((key) => Date.parse(payloads[key].capturedAt))),
+    evidenceEarliestExpiryAt: new Date(Math.min(...EVIDENCE_KEYS.map((key) => Date.parse(payloads[key].capturedAt))) + EVIDENCE_MAX_AGE_MS).toISOString(),
   };
 }
 
@@ -96,7 +135,7 @@ async function main() {
   const payloads = {};
   const evidenceSha256 = {};
   for (const key of EVIDENCE_KEYS) {
-    const file = await secureEvidenceFile(join(evidenceRoot, `${key === "routeSourceParity" ? "route-source-parity" : key === "establishedAsterOrders" ? "established-aster-orders" : key === "signedAsterAccount" ? "signed-aster-account" : key === "v4ExecutionTests" ? "v4-execution-tests" : "shared-risk-and-peers"}.json`));
+    const file = await secureEvidenceFile(join(evidenceRoot, EVIDENCE_FILE_NAMES[key]));
     payloads[key] = file.payload;
     evidenceSha256[key] = file.sha256;
   }
