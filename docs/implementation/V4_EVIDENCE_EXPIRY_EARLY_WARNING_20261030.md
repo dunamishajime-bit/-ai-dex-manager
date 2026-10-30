@@ -57,6 +57,14 @@ exit-code-2 path. The watchdog now treats exit code 2 as fatal even during a
 transient systemd `auto-restart` state and holds instead of issuing another
 restart. `RestartPreventExitStatus=2` remains in the unit.
 
+The V4 primary and canary units invoke the release-local `tsx` CLI entrypoint
+through `/usr/bin/node` rather than `node_modules/.bin/tsx`. The latter is a
+mutable symlink in some deployed dependency trees and can resolve to another
+release SHA even while the runner working directory is correct. The unit also
+requires the release-local CLI file to be a regular file. This keeps the
+runner's executable lineage aligned with its pinned release without changing
+order permission or the current release link.
+
 Codex/operator follow-on:
 - First read current V4 systemd, journal, current venue positions and STOP
   without changing state. 2026-10-30 13:03 JST email was a past snapshot.

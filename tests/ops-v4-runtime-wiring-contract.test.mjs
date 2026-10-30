@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 const wiring = readFileSync("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
 const v4Unit = readFileSync("deploy/systemd/disdex-v12-v4@.service", "utf8");
+const v4CanaryUnit = readFileSync("deploy/systemd/disdex-v12-v4-canary@.service", "utf8");
 
 test("V4 SHA-bound env contract unifies every shared kill-switch alias", () => {
   for (const key of [
@@ -73,6 +74,17 @@ test("V4 primary unit must not load the peer-SHA env after the V4 ACK env", () =
   assert.ok(v4PrimaryBlock, "V4 primary unit drop-in branch must be present");
   assert.match(v4PrimaryBlock, /EnvironmentFile=\$\{V4_CONTRACT_ENV_FILE\}/);
   assert.doesNotMatch(v4PrimaryBlock, /EnvironmentFile=\$\{CONTRACT_ENV_FILE\}/);
+});
+
+test("V4 primary units execute the release-local tsx loader, not a cross-release .bin symlink", () => {
+  for (const unit of [v4Unit, v4CanaryUnit]) {
+    assert.match(
+      unit,
+      /ExecStart=\/usr\/bin\/node \/home\/deploy\/disdex-trading\/releases\/%i\/node_modules\/tsx\/dist\/cli\.mjs scripts\/v12-v4-production-runner\.ts --daemon/,
+    );
+    assert.match(unit, /node_modules\/tsx\/dist\/cli\.mjs/);
+    assert.doesNotMatch(unit, /ExecStart=.*node_modules\/\.bin\/tsx/);
+  }
 });
 
 test("V4 wiring projects the root-managed TIME37 approval for deploy read access", () => {

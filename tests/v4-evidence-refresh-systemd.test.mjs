@@ -11,6 +11,8 @@ test("refresh service runs the real apply helper under the exact release SHA", (
   assert.match(service, /ProtectSystem=strict/);
   assert.match(service, /ReadWritePaths=\/etc\/disdex\/v12-v4-evidence \/var\/lib\/disdex\/v12-v4/);
   assert.match(service, /flock -n \/run\/lock\/disdex-v4-evidence-refresh\.lock/);
+  assert.match(service, /\/usr\/bin\/node \/home\/deploy\/disdex-trading\/releases\/%i\/node_modules\/tsx\/dist\/cli\.mjs/);
+  assert.doesNotMatch(service, /node_modules\/\.bin\/tsx/);
   assert.match(service, /disdex-v4-dynamic-evidence-refresh\.ts --sha %i --apply/);
   assert.match(service, /--lease \/var\/lib\/disdex\/unified-deploy\/refresh-leases\/v4\/%i\.json/);
   assert.doesNotMatch(service, /disdex-v4-evidence-expiry-watch/);
