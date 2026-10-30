@@ -529,8 +529,11 @@ async function inspectService(unit) {
 }
 
 function isFatalFailClosedService(service) {
-    return service?.active === false
-        && service?.mainPid === 0
+    // systemd may briefly report auto-restart while it is processing a
+    // prevented exit.  Exit status 2 is the runner's explicit fatal
+    // fail-closed contract; never issue a watchdog restart for that status,
+    // regardless of the transient ActiveState value.
+    return service?.mainPid === 0
         && service?.result === "exit-code"
         && service?.execMainCode === "exited"
         && service?.execMainStatus === 2;
@@ -877,6 +880,8 @@ function selfTest() {
     const v4 = V4_V12_RUNNER;
     if (!serviceAllowed(v4, v4.expectedUnit(sha), sha)) throw new Error("V4 allowlist self-test failed");
     if (serviceAllowed(v4, LEGACY_V12_RUNNER.expectedUnit(sha), sha)) throw new Error("V4 allowlist accepted legacy V12");
+    if (!isFatalFailClosedService({ active: true, mainPid: 0, result: "exit-code", execMainCode: "exited", execMainStatus: 2 })) throw new Error("V4 fatal exit-2 watchdog hold self-test failed");
+    if (isFatalFailClosedService({ active: true, mainPid: 0, result: "success", execMainCode: "exited", execMainStatus: 0 })) throw new Error("V4 nonfatal watchdog self-test failed");
     for (const [legacyUnits, canaryUnits] of [
         [[LEGACY_V12_RUNNER.expectedUnit(sha)], []],
         [[], [`disdex-v12-v4-canary@${sha}.service`]],

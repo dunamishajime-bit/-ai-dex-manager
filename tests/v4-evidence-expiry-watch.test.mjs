@@ -26,11 +26,19 @@ test("fresh bundle is non-authorizing", () => {
 });
 test("warn 12 hours before oldest proof expires", () => {
   const old=new Date(NOW-18*3600000).toISOString();
-  const b=bundle({routeSourceParity:{...bundle().routeSourceParity,capturedAt:old}});
+  const b=bundle({signedAsterAccount:{...bundle().signedAsterAccount,capturedAt:old}});
   const r=inspectV4EvidenceExpiry({sha:SHA,payloads:b,now:NOW});
   assert.equal(r.status,"EXPIRING_SOON");
   assert.equal(r.earliestExpiryAt,new Date(NOW+6*3600000).toISOString());
-  assert.equal(r.evidence.filter(e=>e.remainingMs<=r.warningWindowMs).length,1);
+  assert.equal(r.evidence.filter(e=>e.remainingMs!==null && e.remainingMs<=r.warningWindowMs).length,1);
+});
+test("old static release proof is reusable and does not create a dynamic expiry warning", () => {
+  const old=new Date(NOW-30*3600000).toISOString();
+  const b=bundle({routeSourceParity:{...bundle().routeSourceParity,capturedAt:old},v4ExecutionTests:{...bundle().v4ExecutionTests,capturedAt:old}});
+  const r=inspectV4EvidenceExpiry({sha:SHA,payloads:b,now:NOW});
+  assert.equal(r.status,"FRESH");
+  assert.equal(r.evidence.find(e=>e.key==="routeSourceParity").expiresAt,null);
+  assert.equal(r.evidence.find(e=>e.key==="v4ExecutionTests").refreshRequired,false);
 });
 test("expired signed account remains blocked by real gate", () => {
   const old=new Date(NOW-25*3600000).toISOString();
@@ -40,7 +48,7 @@ test("expired signed account remains blocked by real gate", () => {
 });
 test("authoritative gate earliest capture time is conservative", () => {
   const old=new Date(NOW-20*3600000).toISOString();
-  const b=bundle({v4ExecutionTests:{...bundle().v4ExecutionTests,capturedAt:old}});
+  const b=bundle({signedAsterAccount:{...bundle().signedAsterAccount,capturedAt:old}});
   const v=validateEvidenceBundle({sha:SHA,releaseMarker:SHA,payloads:b,now:NOW});
   assert.equal(v.evidenceCapturedAt,Date.parse(old));
   assert.equal(v.evidenceEarliestExpiryAt,new Date(NOW+4*3600000).toISOString());
@@ -54,6 +62,7 @@ test("cannot alter expiry monitoring threshold beyond 24 hours",()=>{
   assert.throws(()=>inspectV4EvidenceExpiry({sha:SHA,payloads:bundle(),now:NOW,warningWindowMs:26*3600000}),/MONITOR_INPUT/);
 });
 test("scanner rejects mutable and symlink files", async()=>{
+  if(process.platform === "win32") return;
   const dir=await mkdtemp(join(tmpdir(),"disdex-v4-expiry-"));
   try {
     const b=bundle();

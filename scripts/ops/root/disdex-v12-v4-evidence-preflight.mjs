@@ -18,6 +18,65 @@ export const EVIDENCE_FILE_NAMES = Object.freeze({
   v4ExecutionTests: "v4-execution-tests.json",
   sharedRiskAndPeers: "shared-risk-and-peers.json",
 });
+export const EVIDENCE_CLASSES = Object.freeze({
+  // These records are bound to the immutable release and are re-created only
+  // when the release SHA changes.  They must not force a running daemon to
+  // exit merely because a 24-hour wall clock elapsed.
+  STATIC: Object.freeze(["routeSourceParity", "v4ExecutionTests"]),
+  // These records describe mutable account/venue/risk state and must be
+  // revalidated from their official read-only sources before the 24-hour
+  // dynamic evidence deadline.
+  DYNAMIC: Object.freeze(["establishedAsterOrders", "signedAsterAccount", "sharedRiskAndPeers"]),
+});
+const EVIDENCE_CLASS_BY_KEY = Object.freeze(Object.fromEntries([
+  ...EVIDENCE_CLASSES.STATIC.map((key) => [key, "STATIC_RELEASE"]),
+  ...EVIDENCE_CLASSES.DYNAMIC.map((key) => [key, "DYNAMIC_ACCOUNT_RISK"]),
+]));
+
+function evidenceClass(key) {
+  const value = EVIDENCE_CLASS_BY_KEY[key];
+  if (!value) throw new Error(`V4_EVIDENCE_KEY_UNKNOWN:${key}`);
+  return value;
+}
+
+function assertEvidenceMetadataForMonitor(record, key, sha, now) {
+  if (record.status !== "PASS") throw Error("V4_EVIDENCE_STATUS_NOT_PASS:" + key);
+  if (record.candidateSha !== sha) throw Error("V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:" + key);
+  const captured = Date.parse(String(record.capturedAt || ""));
+  if (!Number.isFinite(captured) || captured > now + 5 * 60_000) {
+    throw Error("V4_EVIDENCE_TIMESTAMP_INVALID:" + key);
+  }
+  return captured;
+}
+
+/**
+ * Read-only policy description used by the expiry monitor and by the root
+ * refresh worker.  It deliberately returns a plan, never an order permit.
+ */
+export function classifyV4EvidenceRefresh({sha, payloads, now = Date.now(), warningWindowMs = 12 * 60 * 60 * 1000}) {
+  const inspected = inspectV4EvidenceExpiry({sha, payloads, now, warningWindowMs});
+  const refreshRequired = inspected.evidence
+    .filter((entry) => entry.class === "DYNAMIC_ACCOUNT_RISK"
+      && (entry.remainingMs === null || entry.remainingMs <= warningWindowMs))
+    .map((entry) => entry.key);
+  return {
+    sha,
+    staticKeys: [...EVIDENCE_CLASSES.STATIC],
+    dynamicKeys: [...EVIDENCE_CLASSES.DYNAMIC],
+    refreshRequired,
+    staticAction: "REUSE_SHA_BOUND_RELEASE_PROOF",
+    dynamicAction: "REVALIDATE_OFFICIAL_SIGNED_READONLY_SOURCE",
+    readOnly: true,
+    authorizesTrading: false,
+    status: inspected.status,
+    earliestExpiryAt: inspected.earliestExpiryAt,
+    assertRefreshAllowed(key) {
+      if (evidenceClass(key) === "STATIC_RELEASE") throw Error("STATIC_RELEASE_PROOF_REFRESH_FORBIDDEN");
+      return true;
+    },
+  };
+}
+
 // Advisory only: this function cannot authorize LIVE or renew account proof.
 export function inspectV4EvidenceExpiry({sha, payloads, now = Date.now(),
   warningWindowMs = 12 * 60 * 60 * 1000}) {
@@ -28,18 +87,19 @@ export function inspectV4EvidenceExpiry({sha, payloads, now = Date.now(),
   const evidence = [];
   for (const key of EVIDENCE_KEYS) {
     const record = asRecord(payloads?.[key], key);
-    if (record.status !== "PASS") throw Error("V4_EVIDENCE_STATUS_NOT_PASS:" + key);
-    if (record.candidateSha !== sha) throw Error("V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:" + key);
-    const captured = Date.parse(String(record.capturedAt || ""));
-    if (!Number.isFinite(captured) || captured > now + 5 * 60_000)
-      throw Error("V4_EVIDENCE_TIMESTAMP_INVALID:" + key);
+    const captured = assertEvidenceMetadataForMonitor(record, key, sha, now);
+    const klass = evidenceClass(key);
+    const dynamic = klass === "DYNAMIC_ACCOUNT_RISK";
+    const expiresAt = dynamic ? captured + EVIDENCE_MAX_AGE_MS : null;
     evidence.push({
-      key, capturedAt: new Date(captured).toISOString(),
-      expiresAt: new Date(captured + EVIDENCE_MAX_AGE_MS).toISOString(),
-      remainingMs: captured + EVIDENCE_MAX_AGE_MS - now,
+      key, class: klass, capturedAt: new Date(captured).toISOString(),
+      expiresAt: expiresAt === null ? null : new Date(expiresAt).toISOString(),
+      remainingMs: expiresAt === null ? null : expiresAt - now,
+      refreshRequired: dynamic && expiresAt - now <= warningWindowMs,
     });
   }
-  const earliest = Math.min(...evidence.map(e => Date.parse(e.expiresAt)));
+  const dynamicEvidence = evidence.filter((entry) => entry.class === "DYNAMIC_ACCOUNT_RISK");
+  const earliest = Math.min(...dynamicEvidence.map((entry) => Date.parse(entry.expiresAt)));
   const remainingMs = earliest - now;
   return {
     status: remainingMs < 0 ? "EXPIRED" : remainingMs <= warningWindowMs ? "EXPIRING_SOON" : "FRESH",
@@ -64,7 +124,8 @@ function assertMetadata(payload, key, sha, now) {
   if (payload.status !== "PASS") throw new Error(`V4_EVIDENCE_STATUS_NOT_PASS:${key}`);
   if (payload.candidateSha !== sha) throw new Error(`V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:${key}`);
   const captured = Date.parse(String(payload.capturedAt || ""));
-  if (!Number.isFinite(captured) || captured > now + 5 * 60_000 || now - captured > EVIDENCE_MAX_AGE_MS) {
+  if (!Number.isFinite(captured) || captured > now + 5 * 60_000
+      || (evidenceClass(key) === "DYNAMIC_ACCOUNT_RISK" && now - captured > EVIDENCE_MAX_AGE_MS)) {
     throw new Error(`V4_EVIDENCE_STALE:${key}`);
   }
 }
@@ -83,13 +144,28 @@ export function validateEvidenceBundle({ sha, releaseMarker, payloads, now = Dat
   if (finiteNumber(tests.testPasses, "testPasses") <= 0 || finiteNumber(tests.failCount, "failCount") !== 0 || tests.typecheck !== true) throw new Error("V4_EVIDENCE_TESTS_NOT_PASS");
   const risk = asRecord(payloads.sharedRiskAndPeers, "sharedRiskAndPeers");
   if (risk.sharedRiskHealthy !== true || risk.marginGuardHealthy !== true || risk.killSwitch !== false || finiteNumber(risk.pendingCount, "pendingCount") !== 0) throw new Error("V4_EVIDENCE_HEALTH_NOT_PASS");
+  const refreshGenerations = EVIDENCE_CLASSES.DYNAMIC.map((key) => payloads[key].refreshGeneration);
+  // A refresh is a three-file read-only transaction.  Older evidence bundles
+  // predate this marker and remain valid, but once one dynamic file carries a
+  // generation marker every dynamic file must carry the same marker.  This
+  // prevents a crash between renames from silently creating a mixed-age gate.
+  if (refreshGenerations.some((value) => value !== undefined)
+      && (refreshGenerations.some((value) => typeof value !== "string" || !value)
+        || new Set(refreshGenerations).size !== 1)) {
+    throw new Error("V4_EVIDENCE_DYNAMIC_REFRESH_GENERATION_MISMATCH");
+  }
+  const dynamicCapturedAt = Math.min(...EVIDENCE_CLASSES.DYNAMIC.map((key) => Date.parse(payloads[key].capturedAt)));
   return {
     sha,
     routeCount: 41,
     mutationCalls: 0,
-    // The earliest proof controls expiry, not the newest one.
-    evidenceCapturedAt: Math.min(...EVIDENCE_KEYS.map((key) => Date.parse(payloads[key].capturedAt))),
-    evidenceEarliestExpiryAt: new Date(Math.min(...EVIDENCE_KEYS.map((key) => Date.parse(payloads[key].capturedAt))) + EVIDENCE_MAX_AGE_MS).toISOString(),
+    // Dynamic account/risk evidence controls expiry.  Static release proof is
+    // lineage-bound and intentionally does not create a wall-clock expiry.
+    evidenceCapturedAt: dynamicCapturedAt,
+    staticEvidenceCapturedAt: Math.min(...EVIDENCE_CLASSES.STATIC.map((key) => Date.parse(payloads[key].capturedAt))),
+    dynamicEvidenceCapturedAt: Math.min(...EVIDENCE_CLASSES.DYNAMIC.map((key) => Date.parse(payloads[key].capturedAt))),
+    dynamicEvidenceEarliestExpiryAt: new Date(Math.min(...EVIDENCE_CLASSES.DYNAMIC.map((key) => Date.parse(payloads[key].capturedAt))) + EVIDENCE_MAX_AGE_MS).toISOString(),
+    evidenceEarliestExpiryAt: new Date(dynamicCapturedAt + EVIDENCE_MAX_AGE_MS).toISOString(),
   };
 }
 
