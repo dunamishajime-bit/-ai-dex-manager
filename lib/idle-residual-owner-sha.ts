@@ -4,7 +4,7 @@
  * separate and must not be used to validate the IDLE state.
  */
 export function resolveIdleResidualOwnerShaForPreemption(
-  env: Pick<NodeJS.ProcessEnv, "DISDEX_IDLE_PRIORITY_RUNTIME_SHA">,
+  env: { DISDEX_IDLE_PRIORITY_RUNTIME_SHA?: string },
 ): string {
   const owner = String(env.DISDEX_IDLE_PRIORITY_RUNTIME_SHA || "").trim().toLowerCase();
   if (!/^[a-f0-9]{40}$/.test(owner)) {
