@@ -1,0 +1,58 @@
+name: DisDex Production SSH Transport Preflight (No Orders)
+
+# This is intentionally NOT a trading deployment workflow.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-production-ssh-readonly
+  cancel-in-progress: false
+
+jobs:
+  verify-transport:
+    name: Verify approved SSH identity and forced-command denial
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment:
+      name: disdex-production
+    steps:
+      - name: Read-only SSH identity attestation (no checkout or deployment)
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == "refs/heads/master" ]] || { echo "master-only"; exit 1; }
+          [[ "$HOST" == "professional-dismanager.net" ]] || { echo "SSH host rejected"; exit 1; }
+          [[ -n "$KEY" && -n "$HOST_KEYS" ]] || { echo "SSH env secrets missing"; exit 1; }
+          PORT="${PORT:-22}"
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]] || { echo "invalid SSH port"; exit 1; }
+          umask 077
+          directory="$RUNNER_TEMP/disdex-readonly-ssh"
+          install -d -m 0700 "$directory"
+          trap 'rm -f "$directory/key" "$directory/known_hosts"; rmdir "$directory" 2>/dev/null || true' EXIT
+          printf '%s\n' "$KEY" > "$directory/key"
+          printf '%s\n' "$HOST_KEYS" > "$directory/known_hosts"
+          chmod 0600 "$directory/key" "$directory/known_hosts"
+          ssh-keygen -y -f "$directory/key" >/dev/null
+          # The dedicated VPS key is bound to a root-owned forced-command dispatcher.
+          # A generic shell request MUST be denied. Never send an order/token.
+          set +e
+          output="$(ssh -T -i "$directory/key" -o BatchMode=yes \
+            -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$directory/known_hosts" \
+            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" 'true' 2>&1)"
+          rc="$?"
+          set -e
+          if [[ "$rc" == 0 || "$output" != *"DISDEX_FORCED_COMMAND_BLOCKED:invalid forced-command target"* ]]; then
+            echo "PRODUCTION_SSH_FORCED_COMMAND_ATTESTATION_FAILED"
+            exit 1
+          fi
+          echo "PRODUCTION_SSH_CONNECTION_AND_FORCED_COMMAND_DENIAL_VERIFIED"
+          echo "NO_ORDERS_NO_CANCELS_NO_STOP_CHANGES_NO_DEPLOYMENT"
