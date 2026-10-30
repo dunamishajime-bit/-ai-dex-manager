@@ -1,0 +1,10 @@
+# Opt-in only after alert delivery and release identity are reviewed.
+[Unit]
+Description=Check V4 evidence expiry every 30 minutes (%i)
+[Timer]
+OnCalendar=*:0/30
+Persistent=true
+RandomizedDelaySec=90s
+Unit=disdex-v4-evidence-expiry@%i.service
+[Install]
+WantedBy=timers.target

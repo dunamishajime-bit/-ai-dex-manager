@@ -1,0 +1,38 @@
+name: DisDex V4 Evidence Expiry Early Warning CI
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs'
+      - 'scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs'
+      - 'tests/v4-evidence-expiry-watch.test.mjs'
+      - '.github/workflows/disdex-v4-evidence-expiry-ci.yml'
+  push:
+    paths:
+      - 'scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs'
+      - 'scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs'
+      - 'tests/v4-evidence-expiry-watch.test.mjs'
+      - '.github/workflows/disdex-v4-evidence-expiry-ci.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-monitor:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Evidence freshness test
+        run: node --test tests/v12-v4-evidence-preflight.test.mjs tests/v4-evidence-expiry-watch.test.mjs
+      - name: Syntax check
+        run: |
+          node --check scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs
+          node --check scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs
+      - name: Refuse monitor mutations
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path('scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs').read_text()
+          for forbidden in ('fetch(', 'execFile(', 'spawn(', 'systemctl', 'writeFile(', 'chown(', 'chmod(', 'rename('):
+              assert forbidden not in s, forbidden
+          print('V4_WATCH_READONLY_PASS')
+          PY
