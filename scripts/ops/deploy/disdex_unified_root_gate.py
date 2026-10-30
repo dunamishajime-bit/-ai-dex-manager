@@ -159,6 +159,14 @@ def assert_private_dir(path: Path, *, root_uid=0):
     if not stat.S_ISDIR(s.st_mode) or s.st_uid != root_uid or s.st_mode & 0o077:
         raise ValueError("root-only directory required: " + str(path))
 
+
+def assert_root_trusted_dir(path: Path, *, root_uid=0):
+    """Permit root-owned 0755 /etc/disdex for non-secret runner metadata."""
+    s = path.lstat()
+    if (not stat.S_ISDIR(s.st_mode) or s.st_uid != root_uid
+            or s.st_mode & 0o022):
+        raise ValueError("root-owned non-writable directory required: " + str(path))
+
 def read_root_json(path: Path, *, root_uid=0, private=True):
     assert_regular_secure(path, root_uid=root_uid, private=private)
     with path.open("rb") as f:
@@ -292,7 +300,10 @@ def _assert_execution_root(root_uid: int) -> None:
 def _atomic_json(path: Path, value: dict, *, root_uid: int,
                  private: bool = True) -> None:
     """Publish a root-owned JSON object without following a destination link."""
-    assert_private_dir(path.parent, root_uid=root_uid)
+    if private:
+        assert_private_dir(path.parent, root_uid=root_uid)
+    else:
+        assert_root_trusted_dir(path.parent, root_uid=root_uid)
     if path.exists() or path.is_symlink():
         assert_regular_secure(path, root_uid=root_uid, private=private)
     temporary = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
@@ -305,7 +316,7 @@ def _atomic_json(path: Path, value: dict, *, root_uid: int,
             writer.flush()
             os.fsync(writer.fileno())
         os.replace(temporary, path)
-        os.chmod(path, 0o600)
+        os.chmod(path, 0o600 if private else 0o644)
     finally:
         try:
             temporary.unlink()

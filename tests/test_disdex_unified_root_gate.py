@@ -13,7 +13,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "ops" / "deploy"))
 from disdex_unified_root_gate import (
     parse_live_pins, validate_bootstrap_plan, release_marker,
     auxiliary_release_marker,
-    assert_regular_secure, assert_private_dir, preflight, PREFIXES, STOP_OWNERS,
+    assert_regular_secure, assert_private_dir, assert_root_trusted_dir, _atomic_json,
+    preflight, PREFIXES, STOP_OWNERS,
     ROOT, RELEASES, DeploymentPaths, RootDeploymentExecutor,
     certify_live_executor,
 )
@@ -163,6 +164,36 @@ class RootGateTest(unittest.TestCase):
             p.chmod(0o777)
             with self.assertRaisesRegex(ValueError,"root-only"):
                 assert_private_dir(p,root_uid=__import__("os").geteuid())
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_public_runner_pins_can_be_published_under_trusted_etc_dir(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            directory = root / "etc-disdex"
+            directory.mkdir(mode=0o755)
+            directory.chmod(0o755)
+            target = directory / "runner-pins.json"
+            _atomic_json(target, {"schema": "test-pins"}, root_uid=os.geteuid(), private=False)
+            self.assertEqual(json.loads(target.read_text())["schema"], "test-pins")
+            self.assertEqual(target.stat().st_mode & 0o777, 0o644)
+
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_public_pins_reject_writable_parent_and_symlink(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            directory = root / "unsafe"
+            directory.mkdir(mode=0o777)
+            directory.chmod(0o777)
+            target = directory / "runner-pins.json"
+            with self.assertRaisesRegex(ValueError, "non-writable directory"):
+                _atomic_json(target, {"schema": "unsafe"}, root_uid=os.geteuid(), private=False)
+            directory.chmod(0o755)
+            ordinary = directory / "original"
+            ordinary.write_text("original", encoding="utf8")
+            target.symlink_to(ordinary)
+            with self.assertRaisesRegex(ValueError, "untrusted file type"):
+                _atomic_json(target, {"schema": "unsafe"}, root_uid=os.geteuid(), private=False)
+            self.assertEqual(ordinary.read_text(), "original")
+
     def test_forced_command_rejects_shell(self):
         with self.assertRaises(ValueError):
             parse_original("/bin/sh -c whoami")
