@@ -16,7 +16,7 @@ from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO,
 from disdex_unified_root_gate import (
     EXECUTION_ACTIVATION_SCHEMA, ZERO_EFFECTS, SHARED_RISK_SCOPE,
     _assert_execution_root, _atomic_json, _unit_for_runner,
-    _validate_venue_evidence, assert_private_dir, assert_regular_secure,
+    _validate_venue_evidence, assert_private_dir, assert_root_trusted_dir, assert_regular_secure,
     read_root_json, release_marker, validate_release_roots,
     parse_live_pins, validate_bootstrap_plan,
 )
@@ -103,9 +103,13 @@ class V4RootExecutor:
         for directory in (
             paths.root, paths.root / "plans", paths.root / "plans" / V4_SCOPE,
             paths.nonce_dir, paths.activation_dir, paths.activation_dir / V4_SCOPE,
-            paths.receipts, self.runtime_approval.parent,
+            paths.receipts,
         ):
             assert_private_dir(directory, root_uid=c.root_uid)
+        # Existing operator-activation root is normally root:root 0755 for
+        # multiple runner gates; the approval file itself remains root-only
+        # mode 0600. Never chmod this shared live directory to 0700.
+        assert_root_trusted_dir(self.runtime_approval.parent, root_uid=c.root_uid)
         assert_regular_secure(paths.public_key, root_uid=c.root_uid, private=True)
         desired = read_root_json(
             paths.root / "plans" / V4_SCOPE / (args.sha + ".json"),
@@ -213,7 +217,7 @@ class V4RootExecutor:
             _atomic_json(paths.pins, next_manifest, root_uid=c.root_uid, private=False)
             _atomic_json(paths.current_plan, next_plan, root_uid=c.root_uid)
             _atomic_json(self.runtime_approval, runtime_activation(activation, args.sha),
-                         root_uid=c.root_uid)
+                         root_uid=c.root_uid, trusted_parent=True)
             if old_enabled:
                 c.systemd.enable(new_unit)
             c.systemd.start(new_unit)
@@ -259,7 +263,8 @@ class V4RootExecutor:
                 _atomic_json(paths.pins, raw_pins, root_uid=c.root_uid, private=False)
                 _atomic_json(paths.current_plan, current, root_uid=c.root_uid)
                 if old_runtime is not None:
-                    _atomic_json(self.runtime_approval, old_runtime, root_uid=c.root_uid)
+                    _atomic_json(self.runtime_approval, old_runtime, root_uid=c.root_uid,
+                                 trusted_parent=True)
                 elif self.runtime_approval.exists():
                     assert_regular_secure(self.runtime_approval,
                                           root_uid=c.root_uid, private=True)

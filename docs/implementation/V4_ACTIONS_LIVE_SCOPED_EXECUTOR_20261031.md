@@ -43,3 +43,9 @@ modify production, owner keys, staged releases, positions or resident STOPs.
 
 NO unattended LIVE orders. No production changes in this branch.
 A green SSH transport check is not proof of LIVE authorization.
+
+Production metadata permissions follow the actual root-owned layout:
+runner-pins.json may be published 0644 in root-owned 0755 /etc/disdex;
+the shared operator activation directory may be root-owned 0755 while the
+v12-v4-full.json artifact itself remains atomically written 0600. This
+does not relax owner approval, nonce, venue, or STOP checks.

@@ -298,12 +298,14 @@ def _assert_execution_root(root_uid: int) -> None:
 
 
 def _atomic_json(path: Path, value: dict, *, root_uid: int,
-                 private: bool = True) -> None:
+                 private: bool = True, trusted_parent: bool = False) -> None:
     """Publish a root-owned JSON object without following a destination link."""
-    if private:
+    if private and not trusted_parent:
         assert_private_dir(path.parent, root_uid=root_uid)
     else:
         assert_root_trusted_dir(path.parent, root_uid=root_uid)
+    if trusted_parent and not private:
+        raise ValueError("trusted-parent override requires private artifact")
     if path.exists() or path.is_symlink():
         assert_regular_secure(path, root_uid=root_uid, private=private)
     temporary = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"

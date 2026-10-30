@@ -177,6 +177,19 @@ class RootGateTest(unittest.TestCase):
             self.assertEqual(target.stat().st_mode & 0o777, 0o644)
 
     @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_private_operator_artifact_in_trusted_root_public_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp) / "shared-operator-activation"
+            directory.mkdir(mode=0o755)
+            directory.chmod(0o755)
+            target = directory / "v12-v4-full.json"
+            _atomic_json(target, {"approvedSha": "x" * 40},
+                         root_uid=os.geteuid(), private=True,
+                         trusted_parent=True)
+            self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(json.loads(target.read_text())["approvedSha"], "x" * 40)
+
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
     def test_public_pins_reject_writable_parent_and_symlink(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
