@@ -68,7 +68,10 @@ The plan explicitly carries `releaseRoots` for `runners`, `ui`, and
 root. UI and monitor releases may have independent directory names, but each
 must contain a root-owned, non-writable `.disdex-release-sha` marker matching
 the corresponding SHA. A UI or monitor SHA is never silently looked up under
-the Runner release root.
+the Runner release root. Runner releases also fail closed when their
+`node_modules` root is an external symlink; dependency closure must be
+inside the immutable release or be provisioned as a separately pinned,
+root-owned artifact.
 
 The exact runner map includes:
 

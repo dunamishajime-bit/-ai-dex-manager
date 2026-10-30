@@ -91,6 +91,22 @@ class RootGateTest(unittest.TestCase):
                 release_marker(NEW,root,root_uid=__import__("os").geteuid())
 
     @unittest.skipIf(os.name == "nt", "Windows ACLs do not expose POSIX root ownership/mode semantics")
+    def test_marker_rejects_external_dependency_symlink(self):
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d)
+            root = base / "releases"
+            release = root / NEW
+            release.mkdir(parents=True)
+            (release / ".disdex-release-sha").write_text(NEW, encoding="ascii")
+            release.chmod(0o755)
+            (release / ".disdex-release-sha").chmod(0o444)
+            external = base / "shared-node-modules"
+            external.mkdir()
+            (release / "node_modules").symlink_to(external, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "external dependency"):
+                release_marker(NEW, root, root_uid=__import__("os").geteuid())
+
+    @unittest.skipIf(os.name == "nt", "Windows ACLs do not expose POSIX root ownership/mode semantics")
     def test_auxiliary_marker_can_use_a_non_sha_release_directory(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d) / "ui-hp-ranking-rise-fall-737ec0503a"

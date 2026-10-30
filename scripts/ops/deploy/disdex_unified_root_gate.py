@@ -191,6 +191,16 @@ def release_marker(sha: str, releases=RELEASES, *, root_uid=None):
         raise ValueError("immutable release marker is writable")
     if marker.read_text(encoding="ascii").strip() != sha:
         raise ValueError("immutable release marker SHA mismatch")
+    dependency_root = release / "node_modules"
+    if dependency_root.is_symlink():
+        dependency_stat = dependency_root.lstat()
+        if dependency_stat.st_uid != owner:
+            raise ValueError("external dependency symlink is not root-owned")
+        resolved_dependency = dependency_root.resolve(strict=True)
+        try:
+            resolved_dependency.relative_to(release.resolve())
+        except ValueError:
+            raise ValueError("external dependency symlink escapes immutable release") from None
     return release
 
 def auxiliary_release_marker(sha: str, release_root: Path, *, root_uid=None):
