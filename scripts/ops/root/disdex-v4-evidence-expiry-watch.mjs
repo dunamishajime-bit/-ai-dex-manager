@@ -40,7 +40,9 @@ async function main() {
     status: "V4_EVIDENCE_" + result.status,
     earliestExpiryAt: result.earliestExpiryAt,
     remainingMs: result.remainingMs,
-    expiringKeys: result.evidence.filter(e => e.remainingMs <= result.warningWindowMs).map(e => e.key),
+    expiringKeys: result.evidence
+      .filter(e => e.refreshRequired || (e.remainingMs !== null && e.remainingMs <= result.warningWindowMs))
+      .map(e => e.key),
     requiredAction: result.status === "FRESH" ? "NONE" : "ROOT_OPERATOR_REVALIDATE_FROM_SOURCE",
     readOnly: true, authorizesTrading: false,
   }));
