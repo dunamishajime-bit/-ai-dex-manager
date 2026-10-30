@@ -473,6 +473,11 @@ class RootDeploymentExecutor:
         certify_live_executor()
         if args.deployment_target != DEPLOYMENT_TARGET or args.operator_target != OPERATOR_TARGET:
             raise ValueError("unapproved deployment target or identity")
+        if args.scope == "V12_V4":
+            # Lazy import keeps the shared-risk and V4 mutation boundaries
+            # independent; the owner-signed scope selects the only executor.
+            from disdex_v4_root_cutover import V4RootExecutor
+            return V4RootExecutor(self).execute(args, token)
         if args.scope != SHARED_RISK_SCOPE:
             raise ValueError("unsupported execution scope: " + str(args.scope))
         orders_enabled = args.orders_enabled == "true"
@@ -761,6 +766,13 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
                 "POST_CUTOVER_3_CYCLES"]
     if args.scope == SHARED_RISK_SCOPE:
         verified_contracts.append(certification["status"])
+    elif args.scope == "V12_V4":
+        from disdex_v4_root_cutover import V4RootExecutor
+        if not callable(V4RootExecutor.execute):
+            raise ValueError("V4 executor missing")
+        verified_contracts.append("V4_SCOPE_SPECIFIC_EXECUTOR_PRESENT_SOURCE_ONLY")
+        unproven.extend(["V4_RESIDENT_STOP_HANDOVER", "V4_RUNTIME_ACTIVATION",
+                         "V4_POST_START_VENUE_AUDIT"])
     else:
         unproven.append("SCOPE_SPECIFIC_EXECUTOR_NOT_IMPLEMENTED")
     return {
@@ -815,8 +827,24 @@ def main():
         if len(raw) > 16384:
             raise ValueError("owner approval too large")
         if args.execute:
-            result = RootDeploymentExecutor(default_execution_paths()).execute(
-                args, raw.strip())
+            # Exclusive root-owned lock across GitHub Actions / CODEX_SSH paths.
+            # An Actions concurrency group alone cannot serialize VPS writers.
+            import fcntl
+            assert_private_dir(ROOT, root_uid=0)
+            lock_path = ROOT / "deployment-execution.lock"
+            if lock_path.is_symlink():
+                raise ValueError("untrusted deployment lock symlink")
+            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
+            try:
+                assert_regular_secure(lock_path, root_uid=0, private=True)
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    raise ValueError("another root deployment is in progress") from None
+                result = RootDeploymentExecutor(default_execution_paths()).execute(
+                    args, raw.strip())
+            finally:
+                os.close(fd)
         else:
             result = preflight(args, raw.strip())
         print(json.dumps(result, sort_keys=True))
