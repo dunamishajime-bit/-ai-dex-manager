@@ -765,15 +765,29 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
     resolved = current.resolve(strict=True)
     if resolved.parent != releases or not SHA.fullmatch(resolved.name):
         raise ValueError("production current symlink escapes immutable releases")
-    release_marker(resolved.name, releases, root_uid=root_uid)
     sha_hash, diff = validate_bootstrap_plan(
         desired, current_plan, pins, resolved.name)
     if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
         raise ValueError("supplied SHA / plan hash differs from root plan")
-    validate_release_roots(current_plan, releases, root_uid=root_uid)
-    validate_release_roots(desired, releases, root_uid=root_uid)
-    for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
-        release_marker(sha, releases, root_uid=root_uid)
+    if args.scope == "V12_V4":
+        # V4 is a trust-boundary migration from legacy deploy-owned peer/current
+        # releases. Do not require rewriting unchanged peer/UI releases merely
+        # to satisfy the new root-owned convention. The signed plan freezes
+        # their exact SHA map; only the newly introduced V4 release must meet
+        # the root-owned immutable release contract.
+        if (diff["changedRunners"] != ["V12_V4"]
+            or diff["uiChanged"] or diff["monitorChanged"]
+            or diff["releaseRootsChanged"]
+            or desired["runners"].get("V12_V4") != args.sha
+            or desired["releaseRoots"]["runners"] != str(releases)):
+            raise ValueError("V4 preflight exceeds exact single-runner delta")
+        release_marker(args.sha, releases, root_uid=root_uid)
+    else:
+        release_marker(resolved.name, releases, root_uid=root_uid)
+        validate_release_roots(current_plan, releases, root_uid=root_uid)
+        validate_release_roots(desired, releases, root_uid=root_uid)
+        for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
+            release_marker(sha, releases, root_uid=root_uid)
     # Verify signature but DO NOT consume a nonce here: a read-only preflight
     # cannot authorize or burn the owner's one-use LIVE grant.
     payload = verify(token, root / "owner-approval-public.pem", REPO,

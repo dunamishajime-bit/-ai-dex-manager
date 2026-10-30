@@ -5,6 +5,7 @@ import os
 import sys
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -15,6 +16,7 @@ from test_disdex_unified_root_gate import (
     OLD, NEW, plan,
 )
 from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
+from disdex_unified_root_gate import preflight
 from disdex_deployment_plan import digest
 from disdex_v4_root_cutover import (
     V4RootExecutor, V4_SCOPE, V4_ACK, validate_v4_activation, runtime_activation,
@@ -131,6 +133,29 @@ class V4CutoverTransactionTest(unittest.TestCase):
 
     def _executor(self, sysd):
         return V4RootExecutor(self.fx._executor(sysd),runtime_approval=self.runtime)
+
+    def test_v4_preflight_accepts_legacy_writable_current_but_certifies_new_release(self):
+        # Legacy current/peer releases predate the root-owned immutable boundary.
+        # V4 migration must freeze their SHA map without requiring an in-place
+        # ownership rewrite; the newly introduced V4 candidate remains strict.
+        old_marker=self.fx.releases/OLD/".disdex-release-sha"
+        old_marker.chmod(0o600)
+        args=self._args()
+        token_payload={
+            "deploymentTarget":DEPLOYMENT_TARGET,
+            "operatorTarget":OPERATOR_TARGET,
+            "nonce":"a"*32,
+        }
+        with patch("disdex_unified_root_gate.verify", return_value=token_payload):
+            result=preflight(
+                args,"signed-token",
+                root=self.fx.root,pins_path=self.fx.pins_path,
+                current=self.fx.current,releases=self.fx.releases,
+                root_uid=os.geteuid(),
+            )
+        self.assertEqual(result["status"],"READONLY_PREFLIGHT_PASS_NOT_LIVE")
+        self.assertEqual(result["changedRunners"],[V4_SCOPE])
+        self.assertTrue((self.fx.releases/NEW/".disdex-release-sha").is_file())
 
     def test_only_v4_changes_and_receipt_validated(self):
         sysd=FakeSystemd(self.old_unit,self.new_unit)
