@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import argparse
-import fcntl
 import json
 import os
 import signal
 import time
 from pathlib import Path
 from typing import List
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - exercised by the Windows self-test
+    fcntl = None
+
+try:
+    import msvcrt
+except ImportError:  # pragma: no cover - exercised on POSIX only
+    msvcrt = None
 
 import disdex_v13d_v11eq_stock_live_engine as base
 from disdex_v96_v52_margin_guard import (
@@ -22,6 +31,42 @@ from disdex_v96_v52_margin_risk_policy import WARNING_POLL_INTERVAL_MS
 EMERGENCY_LOCK_WAIT_SECONDS = 25.0
 
 
+def _lock_exclusive(handle, *, nonblocking: bool) -> None:
+    """Acquire the emergency serialization lock without weakening Linux.
+
+    Production runs on Linux and continue to use ``flock``.  Windows cannot
+    import ``fcntl``; the local self-test uses the native one-byte CRT lock so
+    the test can exercise the same serialized path without adding a third-party
+    dependency.  An unsupported platform fails closed.
+    """
+    if fcntl is not None:
+        fcntl.flock(
+            handle.fileno(),
+            fcntl.LOCK_EX | (fcntl.LOCK_NB if nonblocking else 0),
+        )
+        return
+    if msvcrt is None:
+        raise RuntimeError("serialized emergency lock is unsupported on this platform")
+    handle.seek(0)
+    if handle.read(1) == "":
+        handle.seek(0)
+        handle.write("0")
+        handle.flush()
+    handle.seek(0)
+    mode = msvcrt.LK_NBLCK if nonblocking else msvcrt.LK_LOCK
+    msvcrt.locking(handle.fileno(), mode, 1)
+
+
+def _unlock_exclusive(handle) -> None:
+    if fcntl is not None:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        return
+    if msvcrt is None:
+        raise RuntimeError("serialized emergency lock is unsupported on this platform")
+    handle.seek(0)
+    msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+
+
 class SerializedMarginGuard(MarginGuard):
     def __init__(self, mode: str):
         super().__init__(mode)
@@ -33,9 +78,9 @@ class SerializedMarginGuard(MarginGuard):
         deadline = time.monotonic() + EMERGENCY_LOCK_WAIT_SECONDS
         while True:
             try:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                _lock_exclusive(handle, nonblocking=True)
                 return handle
-            except BlockingIOError:
+            except (BlockingIOError, OSError):
                 if time.monotonic() >= deadline:
                     handle.close()
                     raise RuntimeError("Timed out waiting for the serialized emergency-flatten lock")
@@ -168,7 +213,7 @@ class SerializedMarginGuard(MarginGuard):
             result["emergencyEvidence"] = self.record_emergency_flatten_evidence(result)
             return result
         finally:
-            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
+            _unlock_exclusive(lock_handle)
             lock_handle.close()
 
     def _kill_switch_requests_flatten(self) -> bool:

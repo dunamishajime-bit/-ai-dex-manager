@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import tempfile
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 from disdex_v96_v52_margin_guard_runtime import SerializedMarginGuard
@@ -72,16 +76,42 @@ class FakeAsterClient:
         }
 
 
+@contextmanager
+def _selftest_directory():
+    """Create a writable disposable directory on Windows Python runtimes.
+
+    Some Microsoft Store Python builds apply a restrictive ACL when
+    ``TemporaryDirectory`` creates a mode-0700 directory.  The production
+    Linux path continues to use ``TemporaryDirectory``; the Windows branch
+    creates an ordinary disposable directory with explicit cleanup so the
+    platform self-test exercises the lock and state-file logic rather than
+    the host's temp-directory ACL policy.
+    """
+    if os.name != "nt":
+        with tempfile.TemporaryDirectory(prefix="disdex-margin-guard-selftest-") as temporary:
+            yield Path(temporary)
+        return
+
+    temporary = Path(tempfile.gettempdir()) / (
+        "disdex-margin-guard-selftest-" + uuid.uuid4().hex
+    )
+    temporary.mkdir(mode=0o755)
+    try:
+        yield temporary
+    finally:
+        shutil.rmtree(temporary)
+
+
 def main() -> int:
-    with tempfile.TemporaryDirectory(prefix="disdex-margin-guard-selftest-") as temporary:
+    with _selftest_directory() as temporary:
         guard = object.__new__(SerializedMarginGuard)
         guard.live = True
         guard.mode = "live"
         guard.client = FakeAsterClient()
-        guard.state_root = Path(temporary)
-        guard.emergency_lock_path = Path(temporary) / "emergency-flatten.lock"
-        guard.emergency_evidence_path = Path(temporary) / "emergency-flatten-evidence.json"
-        guard.kill_switch_path = Path(temporary) / "kill-switch.json"
+        guard.state_root = temporary
+        guard.emergency_lock_path = temporary / "emergency-flatten.lock"
+        guard.emergency_evidence_path = temporary / "emergency-flatten-evidence.json"
+        guard.kill_switch_path = temporary / "kill-switch.json"
         guard.kill_switch_path.write_text(json.dumps({
             "active": True,
             "action": "FLATTEN_MANAGED",

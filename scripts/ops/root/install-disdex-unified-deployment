@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+[[ "$(id -u)" == "0" ]] || { echo "DISDEX_ROOT_REQUIRED" >&2; exit 1; }
+
+usage() {
+  echo "usage: install-disdex-unified-deployment --release-root /home/deploy/disdex-trading/releases/<sha>" >&2
+  exit 2
+}
+
+release_root=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --release-root)
+      [[ $# -eq 2 ]] || usage
+      release_root="$2"
+      shift 2
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+[[ "$release_root" =~ ^/home/deploy/disdex-trading/releases/[0-9a-f]{40}$ ]] || {
+  echo "DISDEX_RELEASE_ROOT_INVALID" >&2
+  exit 1
+}
+sha="${release_root##*/}"
+[[ -d "$release_root" && ! -L "$release_root" ]] || {
+  echo "DISDEX_RELEASE_DIRECTORY_INVALID" >&2
+  exit 1
+}
+[[ "$(stat -c '%U:%G' "$release_root")" == "root:root" ]] || {
+  echo "DISDEX_RELEASE_DIRECTORY_OWNER_INVALID" >&2
+  exit 1
+}
+release_mode="$(stat -c '%a' "$release_root")"
+(( (0$release_mode & 022) == 0 )) || {
+  echo "DISDEX_RELEASE_DIRECTORY_WRITABLE" >&2
+  exit 1
+}
+marker="$release_root/.disdex-release-sha"
+[[ -f "$marker" && ! -L "$marker" ]] || {
+  echo "DISDEX_RELEASE_MARKER_MISSING" >&2
+  exit 1
+}
+[[ "$(stat -c '%U:%G' "$marker")" == "root:root" ]] || {
+  echo "DISDEX_RELEASE_MARKER_METADATA_INVALID" >&2
+  exit 1
+}
+marker_mode="$(stat -c '%a' "$marker")"
+(( (0$marker_mode & 0222) == 0 )) || {
+  echo "DISDEX_RELEASE_MARKER_WRITABLE" >&2
+  exit 1
+}
+[[ "$(tr -d '\r\n' < "$marker")" == "$sha" ]] || {
+  echo "DISDEX_RELEASE_MARKER_MISMATCH" >&2
+  exit 1
+}
+
+for source in \
+  scripts/ops/deploy/disdex_unified_root_gate.py \
+  scripts/ops/deploy/disdex_unified_forced_command.py \
+  scripts/ops/deploy/disdex_deployment_contract.py \
+  scripts/ops/deploy/disdex_deployment_plan.py \
+  scripts/ops/deploy/disdex_owner_approval.py \
+  scripts/ops/root/disdex-unified-production-deploy; do
+  [[ -f "$release_root/$source" && ! -L "$release_root/$source" ]] || {
+    echo "DISDEX_HELPER_SOURCE_MISSING:$source" >&2
+    exit 1
+  }
+done
+
+install -d -o root -g root -m 0755 /usr/local/libexec/disdex-unified
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/deploy/disdex_unified_root_gate.py" \
+  /usr/local/libexec/disdex-unified/disdex_unified_root_gate.py
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/deploy/disdex_unified_forced_command.py" \
+  /usr/local/libexec/disdex-unified/disdex_unified_forced_command.py
+for source in disdex_deployment_contract.py disdex_deployment_plan.py disdex_owner_approval.py; do
+  install -o root -g root -m 0644 "$release_root/scripts/ops/deploy/$source" \
+    "/usr/local/libexec/disdex-unified/$source"
+done
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/root/disdex-unified-production-deploy" \
+  /usr/local/sbin/disdex-unified-production-deploy
+
+printf 'DISDEX_UNIFIED_HELPER_STAGED sha=%s root=%s ordersEnabled=false\n' \
+  "$sha" "/usr/local/libexec/disdex-unified"

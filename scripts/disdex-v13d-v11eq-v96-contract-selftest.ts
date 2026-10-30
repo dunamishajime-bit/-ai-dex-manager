@@ -76,7 +76,7 @@ assert.equal(DISDEX_V50_CONFIG.strategyId, "POST_EARLY3__B60__C20__STOP1.75__EDG
 assert.deepEqual(DISDEX_V50_CONFIG.entryTimesNy, ["11:30:00", "12:30:00", "13:30:00"]);
 assert.equal(DISDEX_V13D_V11EQ_V96_RUNTIME.stateSchemaVersion, 3);
 assert.equal(DISDEX_V13D_V11EQ_V96_RUNTIME.liveTradingEnabled, true);
-assert.equal(DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine, "scripts/disdex_v52_aster_only_live_engine.py");
+assert.equal(DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine, "scripts/disdex_v52_margin_aware_live_engine.py");
 assert.throws(() => assertLiveOrderSubmissionEnabled({
     runnerMode: "live",
     environmentLiveExecutionEnabled: false,

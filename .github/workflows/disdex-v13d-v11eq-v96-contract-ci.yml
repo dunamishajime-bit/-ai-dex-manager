@@ -105,13 +105,15 @@ jobs:
           if (!v96Config.includes('maximumPortfolioGross: 1.5')) throw new Error('Operator Override V96 Gross 1.5 missing');
           if (!v96Config.includes('requiredInitialLeverage: 5')) throw new Error('fixed 5x leverage missing');
           if (!combinedConfig.includes('cryptoSleeveGrossCap: 1.5')) throw new Error('Crypto sleeve 1.5 missing');
-          if (!combinedConfig.includes('stockSleeveGrossCap: 4.0')) throw new Error('Stock sleeve 1.5 missing');
-          if (!combinedConfig.includes('portfolioGrossCap: 2.5')) throw new Error('Combined Gross 2.5 missing');
+          if (!combinedConfig.includes('stockSleeveGrossCap: 4.0')) throw new Error('Stock sleeve 4.0 missing');
+          if (!combinedConfig.includes('portfolioGrossCap: 4.25')) throw new Error('Combined Gross 4.25 missing');
           if (!combinedConfig.includes('reservedFirstStockGross: 1.0')) throw new Error('first Stock slot reservation missing');
           if (!combinedConfig.includes('minimumSecondStockGross: 0.25')) throw new Error('second Stock minimum missing');
           if (!combinedConfig.includes('maximumConcurrentStockPositions: 2')) throw new Error('two Stock slots missing');
           if (!combinedConfig.includes('requiredMarginType: "cross"')) throw new Error('cross margin requirement missing');
-          if (!supervisor.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 supervisor path missing');
+          if (!combinedConfig.includes('pythonStockEngine: "scripts/disdex_v52_margin_aware_live_engine.py"')) throw new Error('margin-aware V52 runtime engine binding missing');
+          if (!supervisor.includes('const V52_ENGINE = DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine')) throw new Error('V52 supervisor must use the canonical runtime engine binding');
+          if (!supervisor.includes('spawn(python, [V52_ENGINE')) throw new Error('V52 supervisor spawn path is not SHA/config bound');
           if (!integratedPreflight.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 preflight path missing');
           if (!readonlyPreflight.includes('READ_ONLY_PREFLIGHT_LEVERAGE_BELOW_')) throw new Error('authenticated leverage gate missing');
           if (!capacity.includes('managedGrossCap') || !capacity.includes('portfolioGrossCap')) throw new Error('separated Gross capacity gates missing');
@@ -123,7 +125,7 @@ jobs:
           if (!marginRuntime.includes('reduceOnly": "true"')) throw new Error('serialized emergency reduce-only orders missing');
           if (!marginRuntime.includes('emergency-flatten.lock')) throw new Error('emergency action lock missing');
           if (!marginRuntime.includes('CONCURRENT_FLATTEN_ALREADY_COMPLETED')) throw new Error('concurrent flatten reconciliation missing');
-          if (!v52.includes('V52 adaptive margin-aware concurrent Stock runner self-test: PASS')) throw new Error('adaptive V52 runner missing');
+          if (!v52.includes('V52_STRICT_MARGIN_AWARE_SELFTEST_PASS')) throw new Error('strict margin-aware V52 runner self-test marker missing');
           if (!livePolicy.includes('DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py')) throw new Error('fixed serialized Guard path missing');
           if (!liveLauncher.includes('scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon')) throw new Error('serialized Guard launcher missing');
           if (!liveUnit.includes('DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true')) throw new Error('LIVE unit Margin Guard missing');

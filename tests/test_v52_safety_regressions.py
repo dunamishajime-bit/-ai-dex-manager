@@ -2,11 +2,12 @@ import datetime as dt
 import json
 import os
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
+
+from tests.portable_temp import portable_temporary_directory
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
@@ -17,7 +18,7 @@ import disdex_v52_aster_only_live_engine as live  # noqa: E402
 
 class V52SafetyRegressionTests(unittest.TestCase):
     def test_string_state_path_from_environment_is_read_as_a_path(self):
-        with tempfile.TemporaryDirectory(
+        with portable_temporary_directory(
             prefix="v52-v12-state-",
             dir=Path(__file__).resolve().parents[1],
         ) as directory:
@@ -52,7 +53,7 @@ class V52SafetyRegressionTests(unittest.TestCase):
                     os.environ["V12_X1_ALL_STATE_PATH"] = previous
 
     def test_successful_managed_tick_keeps_recoverable_kill_switch_active(self):
-        with tempfile.TemporaryDirectory(
+        with portable_temporary_directory(
             prefix="v52-soft-hold-",
             dir=Path(__file__).resolve().parents[1],
         ) as directory:
@@ -96,7 +97,7 @@ class V52SafetyRegressionTests(unittest.TestCase):
             self.assertIs(review_fields[0]["newOrdersAllowed"], False)
 
     def test_expired_recovery_hold_requires_review_without_flattening(self):
-        with tempfile.TemporaryDirectory(
+        with portable_temporary_directory(
             prefix="v52-expired-hold-",
             dir=Path(__file__).resolve().parents[1],
         ) as directory:

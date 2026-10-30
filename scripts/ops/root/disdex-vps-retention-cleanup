@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import fcntl
 import gzip
 import json
 import os
@@ -16,6 +15,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Optional
 
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - Windows uses the native CRT lock
+    fcntl = None
+
+try:
+    import msvcrt
+except ImportError:  # pragma: no cover - POSIX does not provide msvcrt
+    msvcrt = None
+
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 RELEASE_KEEP_NONCURRENT = 2
 UI_RELEASE_KEEP_NONCURRENT = 2
@@ -28,6 +37,35 @@ PROMOTION_FAILURE_RETENTION_DAYS = 90
 PROMOTION_FAILURE_KEEP = 3
 STALE_TEMP_RETENTION_SECONDS = 24 * 60 * 60
 SYMLINK_SCAN_TIMEOUT_SECONDS = 180
+
+
+def _lock_exclusive(handle, *, nonblocking: bool) -> None:
+    """Use POSIX flock in production and a native Windows lock in tests."""
+    if fcntl is not None:
+        fcntl.flock(
+            handle.fileno(),
+            fcntl.LOCK_EX | (fcntl.LOCK_NB if nonblocking else 0),
+        )
+        return
+    if msvcrt is None:
+        raise RuntimeError("retention promotion lock is unsupported on this platform")
+    handle.seek(0)
+    if handle.read(1) == "":
+        handle.seek(0)
+        handle.write("0")
+        handle.flush()
+    handle.seek(0)
+    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK if nonblocking else msvcrt.LK_LOCK, 1)
+
+
+def _unlock_exclusive(handle) -> None:
+    if fcntl is not None:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        return
+    if msvcrt is None:
+        raise RuntimeError("retention promotion lock is unsupported on this platform")
+    handle.seek(0)
+    msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
 
 
 @dataclass(frozen=True)
@@ -695,8 +733,8 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
         paths.promotion_lock.parent.mkdir(parents=True, exist_ok=True)
         lock_handle = paths.promotion_lock.open("a+")
         try:
-            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
+            _lock_exclusive(lock_handle, nonblocking=True)
+        except (BlockingIOError, OSError):
             report.promotion_lock_busy = True
             report.skipped_paths.append("promotion lock busy; cleanup skipped")
             lock_handle.close()
@@ -738,7 +776,7 @@ def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -
         verify_protected_paths(paths, existed_before, current_before, report)
     finally:
         if lock_handle is not None:
-            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
+            _unlock_exclusive(lock_handle)
             lock_handle.close()
     return report
 

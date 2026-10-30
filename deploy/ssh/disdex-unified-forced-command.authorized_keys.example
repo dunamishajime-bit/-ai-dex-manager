@@ -1,0 +1,4 @@
+# Install only after the owner has verified the public key fingerprint on the
+# trusted device. Replace OWNER_PUBLIC_KEY with the actual public key; never
+# commit the private key or an owner-signed approval token.
+command="/usr/local/libexec/disdex-unified/disdex_unified_forced_command.py",no-agent-forwarding,no-port-forwarding,no-pty,no-X11-forwarding ssh-ed25519 OWNER_PUBLIC_KEY disdex-unified-owner

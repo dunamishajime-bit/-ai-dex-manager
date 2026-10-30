@@ -32,6 +32,20 @@ def runner_tick_heartbeat_path(root: Path | str, runner_id: str) -> Path:
     return Path(root) / "ticks" / f"{runner_id}.json"
 
 
+def _ensure_heartbeat_directory(path: Path) -> None:
+    """Create the heartbeat directory without breaking Windows ACLs.
+
+    Linux production keeps the private 0750 mode.  Microsoft Store Python
+    builds can translate a POSIX mode passed to ``Path.mkdir`` into an ACL
+    that even the creating test process cannot traverse, so the Windows
+    branch relies on the inherited user-writable temp/runtime ACL instead.
+    """
+    if os.name == "nt":
+        path.mkdir(parents=True, exist_ok=True)
+    else:
+        path.mkdir(parents=True, mode=0o750, exist_ok=True)
+
+
 def write_runner_tick_heartbeat(
     *,
     runner_id: str,
@@ -79,7 +93,7 @@ def write_runner_tick_heartbeat(
         root or os.environ.get("DISDEX_RUNNER_TICK_HEARTBEAT_ROOT") or DEFAULT_ROOT,
         runner_id,
     )
-    marker_path.parent.mkdir(parents=True, mode=0o750, exist_ok=True)
+    _ensure_heartbeat_directory(marker_path.parent)
     fd, temporary_name = tempfile.mkstemp(prefix=f".{marker_path.name}.", suffix=".tmp", dir=marker_path.parent)
     temporary_path = Path(temporary_name)
     try:

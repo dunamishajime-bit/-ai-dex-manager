@@ -157,7 +157,7 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn("retire_stale_release_enabled_units()", source)
         self.assertIn("/etc/systemd/system/multi-user.target.wants/disdex-*@*.service", source)
         self.assertIn('systemctl disable --now "$unit"', source)
-        self.assertIn('[[ "$sha" == "$DEPLOYED_SHA" ]] && continue', source)
+        self.assertIn('is_expected_runtime_unit "$unit" && continue', source)
         self.assertIn("retire_stale_release_enabled_units", source)
 
 

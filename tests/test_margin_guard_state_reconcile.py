@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import stat
 import tempfile
 import unittest
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,10 +20,27 @@ import disdex_margin_guard_state_reconcile as reconcile
 import disdex_v96_v52_margin_guard as margin_guard
 
 
+@contextmanager
+def _portable_temporary_directory(prefix: str = "disdex-margin-reconcile-"):
+    """Avoid Microsoft Store Python's restrictive mode-0700 temp ACL."""
+    if os.name != "nt":
+        with tempfile.TemporaryDirectory(prefix=prefix) as td:
+            yield Path(td)
+        return
+
+    root = Path(tempfile.gettempdir()) / f"{prefix}{uuid.uuid4().hex}"
+    root.mkdir(mode=0o755)
+    try:
+        yield root
+    finally:
+        shutil.rmtree(root, ignore_errors=False)
+
+
 class MarginGuardStateReconcileTest(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name)
+        self.tmp = _portable_temporary_directory()
+        self.root = self.tmp.__enter__()
+        self.addCleanup(self.tmp.__exit__, None, None, None)
         self.paths = {
             "v12": self.root / "v12.json",
             "pengu": self.root / "pengu.json",
@@ -42,7 +62,7 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
         self.write_default_states()
 
     def tearDown(self):
-        self.tmp.cleanup()
+        pass
 
     def write(self, key: str, value: dict):
         path = self.paths[key]

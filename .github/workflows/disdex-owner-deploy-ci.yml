@@ -1,0 +1,105 @@
+name: DisDex Owner Deployment Authorization CI
+
+on:
+  push:
+    paths:
+      - 'scripts/ops/deploy/disdex_owner_approval.py'
+      - 'scripts/ops/deploy/disdex_deployment_contract.py'
+      - 'tests/test_disdex_owner_approval.py'
+      - '.github/workflows/disdex-unified-production-deploy.yml'
+      - '.github/workflows/disdex-owner-deploy-ci.yml'
+      - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
+      - 'scripts/ops/deploy/disdex_deployment_plan.py'
+      - 'tests/test_disdex_deployment_plan.py'
+      - 'scripts/ops/deploy/disdex_codex_ssh.py'
+      - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_unified_forced_command.py'
+      - 'scripts/ops/root/disdex-unified-production-deploy'
+      - 'scripts/ops/root/install-disdex-unified-deployment'
+      - 'deploy/ssh/disdex-unified-forced-command.authorized_keys.example'
+      - 'tests/test_disdex_unified_root_gate.py'
+      - 'tests/test_disdex_unified_helper_installer.py'
+      - 'tests/test_disdex_codex_ssh_deploy.py'
+      - 'docs/implementation/DISDEX_UNIFIED_OWNER_APPROVAL_DEPLOYMENT_20261030.md'
+      - 'docs/superpowers/plans/2026-10-30-pr302-route-neutral-deployment.md'
+  pull_request:
+    paths:
+      - 'scripts/ops/deploy/disdex_owner_approval.py'
+      - 'scripts/ops/deploy/disdex_deployment_contract.py'
+      - 'tests/test_disdex_owner_approval.py'
+      - '.github/workflows/disdex-unified-production-deploy.yml'
+      - '.github/workflows/disdex-owner-deploy-ci.yml'
+      - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
+      - 'scripts/ops/deploy/disdex_deployment_plan.py'
+      - 'tests/test_disdex_deployment_plan.py'
+      - 'scripts/ops/deploy/disdex_codex_ssh.py'
+      - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_unified_forced_command.py'
+      - 'scripts/ops/root/disdex-unified-production-deploy'
+      - 'scripts/ops/root/install-disdex-unified-deployment'
+      - 'deploy/ssh/disdex-unified-forced-command.authorized_keys.example'
+      - 'tests/test_disdex_unified_root_gate.py'
+      - 'tests/test_disdex_unified_helper_installer.py'
+      - 'tests/test_disdex_codex_ssh_deploy.py'
+      - 'docs/implementation/DISDEX_UNIFIED_OWNER_APPROVAL_DEPLOYMENT_20261030.md'
+      - 'docs/superpowers/plans/2026-10-30-pr302-route-neutral-deployment.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  owner-authorization-contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify Ed25519 grant rejection cases
+        run: python3 -m unittest discover -s tests -p test_disdex_owner_approval.py -v
+      - name: Verify multi-SHA exact-scope plans
+        run: python3 -m unittest discover -s tests -p test_disdex_deployment_plan.py -v
+      - name: Root-side read-only preflight and forced-command tests
+        run: python3 -m unittest discover -s tests -p test_disdex_unified_root_gate.py -v
+      - name: Root helper installer contract tests
+        run: python3 -m unittest discover -s tests -p test_disdex_unified_helper_installer.py -v
+      - name: Audit legacy VPS SSH paths (read-only inventory)
+        run: python3 scripts/ops/deploy/audit_legacy_deploy_paths.py
+      - name: Source and workflow fail-closed contract
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            scripts/ops/deploy/disdex_deployment_contract.py \
+            scripts/ops/deploy/disdex_owner_approval.py \
+            scripts/ops/deploy/disdex_deployment_plan.py \
+            scripts/ops/deploy/disdex_codex_ssh.py \
+            scripts/ops/deploy/disdex_unified_root_gate.py \
+            scripts/ops/deploy/disdex_unified_forced_command.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('.github/workflows/disdex-unified-production-deploy.yml').read_text()
+          for pattern in ('workflow_dispatch:', 'name: disdex-production',
+                          'OWNER_ENV_LOCKED_V1', 'DISDEX_PRODUCTION_SSH_PRIVATE_KEY',
+                          'DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM',
+                          '--execute', '--read-approval-stdin', '--route GITHUB_ACTIONS',
+                          '--deployment-target', '--operator-target',
+                          '--orders-enabled', 'cancel-in-progress: false',
+                          '[[ "$REF" == "refs/heads/master" ]]'):
+              assert pattern in p, pattern
+          legacy_secret = 'secrets.' + 'DISDEX_VPS_ROOT_' + 'PRIVATE_KEY'
+          assert legacy_secret not in p
+          assert 'password:' not in p
+          adapter = Path('scripts/ops/deploy/disdex_codex_ssh.py').read_text()
+          assert 'CODEX_SSH' in adapter
+          assert '/usr/local/sbin/disdex-unified-production-deploy' in adapter
+          assert 'shell=True' not in adapter
+          assert 'subprocess.run(command' in adapter
+          root_gate = Path('scripts/ops/deploy/disdex_unified_root_gate.py').read_text()
+          assert 'LIVE_EXECUTOR_NOT_CERTIFIED' in root_gate
+          assert 'READONLY_PREFLIGHT_PASS_NOT_LIVE' in root_gate
+          assert 'SHARED_RISK_CUTOVER_VERIFIED' in root_gate
+          assert 'three-cycle audit' in root_gate
+          assert 'verify(token' in root_gate
+          assert '--owner $OWNER' in p
+          print('DISDEX_OWNER_DEPLOY_POLICY_SOURCE_PASS')
+          PY

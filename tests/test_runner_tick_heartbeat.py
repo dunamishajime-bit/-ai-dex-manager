@@ -1,14 +1,34 @@
+import os
+import shutil
 import tempfile
 import unittest
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 from scripts.disdex_runner_tick_heartbeat import write_runner_tick_heartbeat
 
 
+@contextmanager
+def _portable_temporary_directory(prefix: str = "disdex-runner-tick-"):
+    """Avoid restrictive mode-0700 ACLs from Microsoft Store Python."""
+    if os.name != "nt":
+        with tempfile.TemporaryDirectory(prefix=prefix) as td:
+            yield Path(td)
+        return
+
+    root = Path(tempfile.gettempdir()) / f"{prefix}{uuid.uuid4().hex}"
+    root.mkdir(mode=0o755)
+    try:
+        yield root
+    finally:
+        shutil.rmtree(root, ignore_errors=False)
+
+
 class RunnerTickHeartbeatContractTest(unittest.TestCase):
     def test_writes_atomic_marker_with_identity_and_status(self):
         sha = "b" * 40
-        with tempfile.TemporaryDirectory(prefix="disdex-runner-tick-") as root:
+        with _portable_temporary_directory() as root:
             marker = write_runner_tick_heartbeat(
                 runner_id="V52",
                 runtime_sha=sha,
@@ -18,16 +38,16 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
                 status="held",
                 reason="MARKET_CLOSED_REFERENCE_DEFERRED",
                 counters={"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0},
-                root=Path(root),
+                root=root,
             )
             self.assertEqual(marker["schema"], "disdex-runner-tick-heartbeat/v1")
             self.assertEqual(marker["runnerId"], "V52")
             self.assertEqual(marker["runtimeSha"], sha)
             self.assertEqual(marker["tickCompletedAt"], 1250)
-            self.assertEqual(sorted((Path(root) / "ticks").iterdir()), [Path(root) / "ticks" / "V52.json"])
+            self.assertEqual(sorted((root / "ticks").iterdir()), [root / "ticks" / "V52.json"])
 
     def test_rejects_invalid_identity_and_negative_counter(self):
-        with tempfile.TemporaryDirectory(prefix="disdex-runner-tick-") as root:
+        with _portable_temporary_directory() as root:
             with self.assertRaises(ValueError):
                 write_runner_tick_heartbeat(
                     runner_id="V52",
@@ -38,7 +58,7 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
                     status="held",
                     reason="x",
                     counters={"ordersSent": 0, "cancelsSent": -1, "positionChangesSent": 0},
-                    root=Path(root),
+                    root=root,
                 )
             with self.assertRaises(ValueError):
                 write_runner_tick_heartbeat(
@@ -50,7 +70,7 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
                     status="held",
                     reason="x",
                     counters={"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0},
-                    root=Path(root),
+                    root=root,
                 )
 
     def test_v52_live_entrypoint_records_completed_cycles(self):
