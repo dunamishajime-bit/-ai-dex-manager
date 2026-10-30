@@ -64,9 +64,13 @@ test("current-SHA evidence payloads are content-validated before hashing grants 
   ...evidencePayloads,
   sharedRiskAndPeers:{...evidencePayloads.sharedRiskAndPeers,marginGuardHealthy:false},
  },sha,now),/HEALTH/);
- assert.throws(()=>validateV4SharedExecutionEvidencePayloads({
+ assert.doesNotThrow(()=>validateV4SharedExecutionEvidencePayloads({
   ...evidencePayloads,
   routeSourceParity:{...evidencePayloads.routeSourceParity,capturedAt:"2026-10-01T00:00:00.000Z"},
+ },sha,now));
+ assert.throws(()=>validateV4SharedExecutionEvidencePayloads({
+  ...evidencePayloads,
+  signedAsterAccount:{...evidencePayloads.signedAsterAccount,capturedAt:"2026-10-01T00:00:00.000Z"},
  },sha,now),/STALE/);
 });
 

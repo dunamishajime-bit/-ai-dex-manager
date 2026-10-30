@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "baseUrl": "."
+  },
+  "files": [],
+  "include": [
+    "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts",
+    "scripts/ops/root/disdex-runner-health-alert.ts",
+    "scripts/v12-v4-production-runner.ts",
+    "lib/server/runner-health-notification.ts",
+    "lib/v12-v4-certified-gates.ts",
+    "tests/v4-dynamic-evidence-refresh.test.ts",
+    "tests/v4-evidence-notification.test.ts",
+    "tests/v12-v4-recoverable-safety.test.ts",
+    "tests/v12-v4-certified-gates.test.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "backups",
+    "restoretmp"
+  ]
+}

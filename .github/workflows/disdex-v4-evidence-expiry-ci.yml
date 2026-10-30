@@ -1,0 +1,80 @@
+name: DisDex V4 Evidence Expiry Early Warning CI
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs'
+      - 'scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs'
+      - 'scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts'
+      - 'scripts/ops/root/disdex-runner-health-alert.ts'
+      - 'scripts/ops/root/disdex-runner-watchdog-current.mjs'
+      - 'scripts/v12-v4-production-runner.ts'
+      - 'lib/v12-v4-certified-gates.ts'
+      - 'lib/server/runner-health-notification.ts'
+      - 'tsconfig.v4-evidence-expiry.json'
+      - 'tests/v4-evidence-expiry-watch.test.mjs'
+      - 'tests/v4-evidence-lifecycle.test.mjs'
+      - 'tests/v4-dynamic-evidence-refresh.test.ts'
+      - 'tests/v4-evidence-notification.test.ts'
+      - 'tests/v4-evidence-alert-integration.test.mjs'
+      - 'tests/v12-v4-recoverable-safety.test.ts'
+      - 'tests/v12-v4-certified-gates.test.ts'
+      - '.github/workflows/disdex-v4-evidence-expiry-ci.yml'
+  push:
+    paths:
+      - 'scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs'
+      - 'scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs'
+      - 'scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts'
+      - 'scripts/ops/root/disdex-runner-health-alert.ts'
+      - 'scripts/ops/root/disdex-runner-watchdog-current.mjs'
+      - 'scripts/v12-v4-production-runner.ts'
+      - 'lib/v12-v4-certified-gates.ts'
+      - 'lib/server/runner-health-notification.ts'
+      - 'tsconfig.v4-evidence-expiry.json'
+      - 'tests/v4-evidence-expiry-watch.test.mjs'
+      - 'tests/v4-evidence-lifecycle.test.mjs'
+      - 'tests/v4-dynamic-evidence-refresh.test.ts'
+      - 'tests/v4-evidence-notification.test.ts'
+      - 'tests/v4-evidence-alert-integration.test.mjs'
+      - 'tests/v12-v4-recoverable-safety.test.ts'
+      - 'tests/v12-v4-certified-gates.test.ts'
+      - '.github/workflows/disdex-v4-evidence-expiry-ci.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-monitor:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install test dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Evidence freshness test
+        run: node --test tests/v12-v4-evidence-preflight.test.mjs tests/v4-evidence-expiry-watch.test.mjs
+      - name: V4 safety and notification tests
+        run: npx --no-install tsx --test tests/v4-evidence-lifecycle.test.mjs tests/v4-dynamic-evidence-refresh.test.ts tests/v4-evidence-notification.test.ts tests/v4-evidence-alert-integration.test.mjs tests/v12-v4-recoverable-safety.test.ts tests/v12-v4-certified-gates.test.ts
+      - name: Syntax check
+        run: |
+          node --check scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs
+          node --check scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs
+          node --check scripts/ops/root/disdex-runner-watchdog-current.mjs
+      - name: Focused TypeScript check
+        run: npx --no-install tsc --noEmit -p tsconfig.v4-evidence-expiry.json --pretty false
+      - name: Refuse monitor mutations
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path('scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs').read_text()
+          for forbidden in ('fetch(', 'execFile(', 'spawn(', 'systemctl', 'writeFile(', 'chown(', 'chmod(', 'rename('):
+              assert forbidden not in s, forbidden
+          refresh = Path('scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts').read_text()
+          for forbidden in ('placeMarketOrder(', 'placeConditionalOrder(', 'placeStopMarketOrder(', 'cancelOrder(', 'setLeverage(', 'setMarginType('):
+              assert forbidden not in refresh, forbidden
+          print('V4_WATCH_READONLY_PASS')
+          PY
+      - name: Diff hygiene
+        run: git diff --check
