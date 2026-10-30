@@ -562,7 +562,10 @@ function commandMatches(config, runner, command) {
     const tokens = command.split(/\s+/);
     const scripts = runner.script ? [runner.script] : runner.scripts;
     const scriptFound = scripts.some((script) => pathToken(tokens[tokens.indexOf(script)] || "", runner.expectedCwd, script) || tokens.some((token) => token === join(runner.expectedCwd, script)));
-    const runnerLoaderFound = tokens.some((token) => samePath(token, join(runner.expectedCwd, "node_modules/tsx/dist/cli.mjs")) || samePath(token, join(runner.expectedCwd, "node_modules/.bin/tsx")));
+    const releaseLocalLoader = join(runner.expectedCwd, "node_modules/tsx/dist/cli.mjs");
+    const runnerLoaderFound = runner.key === "V12_V4"
+        ? tokens.some((token) => samePath(token, releaseLocalLoader))
+        : tokens.some((token) => samePath(token, releaseLocalLoader) || samePath(token, join(runner.expectedCwd, "node_modules/.bin/tsx")));
     const daemon = tokens.includes("--daemon") || tokens.includes("--once");
     const v52Python = runner.key === "V52" && (
         tokens[0] === "/usr/bin/python3" || tokens[0] === "python3" || tokens[0] === "python"
@@ -939,6 +942,9 @@ function selfTest() {
     const v4Pinned = { ...v4, expectedCwd: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT };
     const v4Command = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/tsx/dist/cli.mjs scripts/v12-v4-production-runner.ts --daemon`;
     if (!commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4Command)) throw new Error("V4 command pin self-test failed");
+    const v4CrossReleaseLoader = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --daemon`;
+    if (commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4CrossReleaseLoader)) throw new Error("V4 cross-release loader self-test accepted a .bin shim");
+    console.log("DISDEX_CURRENT_WATCHDOG_V4_RELEASE_LOCAL_LOADER_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_V12_V4_MODE_SELFTEST_PASS");
     const mismatchedApprovalSha = "f".repeat(40);
     try {

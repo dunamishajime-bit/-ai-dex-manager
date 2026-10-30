@@ -255,6 +255,7 @@ def install_refresh_lease(*, token: str, sha: str, operator: str,
         raise ValueError("refresh plan mismatch")
     if lease_path.parent != LEASE_ROOT or lease_path.name != f"{sha}.json":
         raise ValueError("refresh lease path must be exact SHA path")
+    existing = None
     if lease_path.exists() or lease_path.is_symlink():
         _private_dir(lease_path.parent)
         existing_stat = lease_path.lstat()
@@ -283,6 +284,9 @@ def install_refresh_lease(*, token: str, sha: str, operator: str,
         operator_target=OPERATOR_TARGET,
         orders_enabled=False,
     )
+    if existing is not None and existing["approvalNonceDigest"] == hashlib.sha256(
+            approval["nonce"].encode("ascii")).hexdigest():
+        raise ValueError("refresh approval nonce reused")
     lease = build_refresh_lease(approval, now=now)
     validate_refresh_lease(lease, sha=sha, now=now)
     _write_root_json(lease_path, lease)

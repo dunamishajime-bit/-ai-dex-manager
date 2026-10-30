@@ -15,6 +15,14 @@ test("current watchdog accepts snapshot-only health-snapshot heartbeats", async 
   assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_HEARTBEAT_CONTRACT_SELFTEST_PASS/);
 });
 
+test("current watchdog requires the V4 release-local tsx loader", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_V4_RELEASE_LOCAL_LOADER_SELFTEST_PASS/);
+});
+
 test("current watchdog rejects fresh snapshots with stale runner ticks", async () => {
   const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
     encoding: "utf8",

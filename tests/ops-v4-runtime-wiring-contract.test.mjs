@@ -87,6 +87,18 @@ test("V4 primary units execute the release-local tsx loader, not a cross-release
   }
 });
 
+test("V4 health alerts execute from the same release-local loader lineage", () => {
+  assert.match(wiring, /HEALTH_ALERT_LOADER="\/usr\/bin\/node \$\{HEALTH_ALERT_EXEC_ROOT\}\/node_modules\/tsx\/dist\/cli\.mjs"/);
+  assert.match(
+    wiring,
+    /ExecStart=\$\{HEALTH_ALERT_LOADER\} \$\{HEALTH_ALERT_EXEC_ROOT\}\/scripts\/ops\/root\/disdex-runner-health-alert\.ts/,
+  );
+  assert.doesNotMatch(
+    wiring,
+    /ExecStart=\$\{HEALTH_ALERT_EXEC_ROOT\}\/node_modules\/\.bin\/tsx \$\{HEALTH_ALERT_EXEC_ROOT\}\/scripts\/ops\/root\/disdex-runner-health-alert\.ts/,
+  );
+});
+
 test("V4 wiring projects the root-managed TIME37 approval for deploy read access", () => {
   const fn = wiring.match(/ensure_v4_time_stop_approval_runtime_access\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
   assert.ok(fn, "TIME37 approval runtime-access function must be present");

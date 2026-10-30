@@ -247,7 +247,13 @@ complete:
    owner public key, signed venue evidence, and rollback baseline. The source
    executor is mutation-capable only for `SHARED_CRYPTO_RISK_ONLY`; all other
    scopes remain fail-closed until their own transaction and audit
-   implementation is certified.
+   implementation is certified.  The source-level
+   `LIVE_EXECUTOR_CONTRACT_CERTIFIED` report now proves the Shared Risk
+   transaction boundary (root authority, signed owner token, single-use nonce,
+   fresh read-only venue evidence, peer preservation, rollback, and three audit
+   cycles).  It is deliberately not a production grant: owner approval,
+   current venue evidence, and post-cutover observations remain external
+   requirements.
 5. Verify the Codex adapter and Actions adapter against the same helper in a
    non-mutating or staging dry-run. Do not treat an HTTP 200, an anonymous HP
    page, or a source-only CI pass as production authentication.
@@ -259,6 +265,22 @@ The following may exist only as protected Environment/operator configuration,
 never in repository files or logs: SSH private key, owner password, venue
 credentials, or token values. The repository may contain only the verifier,
 fixed adapters, public policy, and tests.
+
+### V4 evidence-refresh and release-loader boundary
+
+PR #304 keeps V4 evidence refresh independent from trading authorization.  The
+refresh lease is exact-SHA, V4-only, and always carries `ordersEnabled=false`.
+An active lease cannot be extended or overwritten.  Once expired, replacement
+requires a new owner-signed approval with a new nonce; a nonce digest recorded
+in the expired lease is rejected even if the separate nonce journal is missing.
+The refresh path cannot change `current`, runner pins, systemd Runner units,
+orders, positions, STOPs, or Kill Switch state.
+
+V4 Runner systemd, watchdog, and V4 health-alert wiring use the release-local
+`node_modules/tsx/dist/cli.mjs` entrypoint.  V4 watchdog self-tests reject the
+cross-release `.bin/tsx` shim, while peer Runner loader contracts remain
+unchanged.  This keeps the process command, working directory, release marker,
+health snapshot, and watchdog SHA on the same V4 release lineage.
 
 ## 7. Current VPS boundary
 
