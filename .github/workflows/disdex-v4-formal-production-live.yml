@@ -1,0 +1,111 @@
+name: DisDex V4 Formal Production LIVE
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: Exact CI-approved immutable V4 release SHA
+        type: string
+        required: true
+      plan_sha256:
+        description: Root-owned canonical V4 deployment plan SHA-256
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  v4-live:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify owner policy and short-lived V4 LIVE signature
+        shell: bash
+        env:
+          READY: ${{ vars.DISDEX_DEPLOYMENT_POLICY_READY }}
+          ALLOWED: ${{ vars.DISDEX_DEPLOY_ALLOWED_ACTORS }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
+          ACTOR: ${{ github.actor }}
+          SHA: ${{ inputs.target_sha }}
+          PLAN: ${{ inputs.plan_sha256 }}
+          TOKEN: ${{ secrets.DISDEX_PRODUCTION_OWNER_SIGNED_TOKEN }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REPOSITORY" == "dunamishajime-bit/-ai-dex-manager" ]]
+          [[ "$GITHUB_REF" == "refs/heads/master" ]]
+          [[ "$READY" == "OWNER_ENV_LOCKED_V1" ]]
+          [[ "$OWNER" == "dunamishajime-bit" ]]
+          [[ ",$ALLOWED," == *",$ACTOR,"* ]]
+          [[ "$SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$PLAN" =~ ^[a-f0-9]{64}$ ]]
+          [[ -n "$TOKEN" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-owner.pub"
+          printf '%s' "$TOKEN" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify               --public-key "$RUNNER_TEMP/disdex-owner.pub"               --repository "$GITHUB_REPOSITORY"               --sha "$SHA" --scope V12_V4               --operator "$OWNER" --plan-sha256 "$PLAN"               --deployment-target professional-dismanager.net               --operator-target DD1296_FINAL_ALLIN_10BPS               --route GITHUB_ACTIONS --orders-enabled true
+
+      - name: Prepare restricted SSH identity
+        shell: bash
+        env:
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ -n "$KEY" && -n "$HOST_KEYS" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/disdex-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/disdex-ssh/key"
+          printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/disdex-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/disdex-ssh/key" "$RUNNER_TEMP/disdex-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/disdex-ssh/key" >/dev/null
+
+      - name: Root-owned V4 preflight - no production mutation
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          SHA: ${{ inputs.target_sha }}
+          PLAN: ${{ inputs.plan_sha256 }}
+          TOKEN: ${{ secrets.DISDEX_PRODUCTION_OWNER_SIGNED_TOKEN }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" ]]
+          [[ "$OWNER" == "dunamishajime-bit" ]]
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          printf '%s' "$TOKEN" | ssh -T             -i "$RUNNER_TEMP/disdex-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-unified-production-deploy --deployment-target professional-dismanager.net --operator-target DD1296_FINAL_ALLIN_10BPS --sha $SHA --scope V12_V4 --plan-sha256 $PLAN --orders-enabled true --route GITHUB_ACTIONS --owner $OWNER --preflight-readonly --read-approval-stdin"
+
+      - name: Execute exact V4 LIVE cutover
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          SHA: ${{ inputs.target_sha }}
+          PLAN: ${{ inputs.plan_sha256 }}
+          TOKEN: ${{ secrets.DISDEX_PRODUCTION_OWNER_SIGNED_TOKEN }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" ]]
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          printf '%s' "$TOKEN" | ssh -T             -i "$RUNNER_TEMP/disdex-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-unified-production-deploy --deployment-target professional-dismanager.net --operator-target DD1296_FINAL_ALLIN_10BPS --sha $SHA --scope V12_V4 --plan-sha256 $PLAN --orders-enabled true --route GITHUB_ACTIONS --owner $OWNER --execute --read-approval-stdin"
+
+      - name: Destroy ephemeral SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/disdex-ssh" "$RUNNER_TEMP/disdex-owner.pub"
