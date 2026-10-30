@@ -35,6 +35,9 @@ REFRESH_LEASE_SCHEMA = "disdex-v4-evidence-refresh-lease/v1"
 REFRESH_PLAN_SCHEMA = "disdex-v4-evidence-refresh-plan/v1"
 REFRESH_RUNNER = "V12_V4"
 MAX_LEASE_SECONDS = 24 * 60 * 60
+# A new independently signed grant can renew the bounded lease before expiry.
+# Never allow early renewal outside the final warning window.
+EARLY_RENEWAL_WINDOW_SECONDS = 12 * 60 * 60
 LOGIN = re.compile(r"[A-Za-z0-9-]{1,39}\Z")
 PLAN_HASH = re.compile(r"[0-9a-f]{64}\Z")
 HEX32 = re.compile(r"[0-9a-f]{32}\Z")
@@ -217,6 +220,24 @@ def require_fresh_refresh_approval(existing: dict | None, approval: dict) -> Non
         raise ValueError("refresh approval nonce reused")
 
 
+def validate_refresh_renewal_window(existing: dict | None, *, now: int) -> None:
+    """Allow a newly signed grant to replace a lease only near its deadline.
+
+    This does NOT renew a lease by itself. install_refresh_lease still requires
+    a new owner-signed token, consumes its nonce, and binds the exact same SHA,
+    scope, plan and ordersEnabled=false. No self-renewal or silent extension.
+    """
+    if existing is None:
+        return
+    if type(now) is not int or now <= 0:
+        raise ValueError("refresh renewal time invalid")
+    expires_at = existing.get("expiresAt")
+    if type(expires_at) is not int:
+        raise ValueError("refresh renewal expiry invalid")
+    if expires_at - now > EARLY_RENEWAL_WINDOW_SECONDS:
+        raise ValueError("refresh lease renewal too early")
+
+
 def _assert_root() -> None:
     geteuid = getattr(os, "geteuid", None)
     if not callable(geteuid) or geteuid() != 0:
@@ -277,8 +298,7 @@ def install_refresh_lease(*, token: str, sha: str, operator: str,
             validate_refresh_lease(existing, sha=sha, now=now, allow_expired=True)
         except (OSError, ValueError, json.JSONDecodeError) as error:
             raise ValueError("existing refresh lease is invalid; refusing overwrite") from error
-        if existing["expiresAt"] > now:
-            raise ValueError("refresh lease already active")
+        validate_refresh_renewal_window(existing, now=now)
     approval = verify_fn(
         token,
         public_key,
