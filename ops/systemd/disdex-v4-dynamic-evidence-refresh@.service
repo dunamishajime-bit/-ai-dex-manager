@@ -1,0 +1,25 @@
+# Root-owned, no-order V4 dynamic evidence refresh.
+# The lease is installed only by the owner-signed refresh activation helper.
+[Unit]
+Description=DisDex V4 dynamic evidence refresh (%i)
+After=network-online.target local-fs.target
+Wants=network-online.target
+ConditionPathExists=/var/lib/disdex/unified-deploy/refresh-leases/v4/%i.json
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=-/etc/disdex/aster.env
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/usr/bin/flock -n /run/lock/disdex-v4-evidence-refresh.lock /home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts --sha %i --apply --lease /var/lib/disdex/unified-deploy/refresh-leases/v4/%i.json
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ReadWritePaths=/etc/disdex/v12-v4-evidence /var/lib/disdex/v12-v4
+UMask=0077
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6
+TimeoutStartSec=5min

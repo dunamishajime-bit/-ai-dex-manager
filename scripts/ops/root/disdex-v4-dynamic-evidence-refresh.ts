@@ -16,6 +16,7 @@ import {
   type AsterOrderResponse,
   type AsterPositionRiskRow,
 } from "../../../lib/aster-v3-client";
+import type { AsterRateBudgetDiagnostic } from "../../../lib/disdex-aster-global-rate-budget";
 import { validateV4SharedExecutionEvidencePayloads } from "../../../lib/v12-v4-certified-gates";
 import {
   EVIDENCE_CLASSES,
@@ -24,6 +25,11 @@ import {
 } from "./disdex-v12-v4-evidence-preflight.mjs";
 
 const SHA = /^[a-f0-9]{40}$/;
+export const V4_DYNAMIC_REFRESH_SCOPE = "V4_EVIDENCE_REFRESH_ONLY" as const;
+const REFRESH_LEASE_SCHEMA = "disdex-v4-evidence-refresh-lease/v1" as const;
+const REFRESH_MAX_LEASE_MS = 24 * 60 * 60 * 1000;
+const REFRESH_MAX_APPROVAL_MS = 300 * 1000;
+const REFRESH_OUTPUT_PATH = "/var/lib/disdex/v12-v4/evidence-refresh-last.json";
 const MAX_JSON_BYTES = 256 * 1024;
 const DYNAMIC_KEYS = [...EVIDENCE_CLASSES.DYNAMIC] as const;
 const STATIC_KEYS = [...EVIDENCE_CLASSES.STATIC] as const;
@@ -31,6 +37,107 @@ const evidenceFileName = (key: string) => (EVIDENCE_FILE_NAMES as Record<string,
 
 type JsonRecord = Record<string, any>;
 type EvidenceKey = (typeof EVIDENCE_KEYS)[number];
+
+export type V4DynamicRefreshArgs = {
+  mode: "verify-only" | "apply";
+  sha: string;
+  releaseRoot: string;
+  evidenceRoot: string;
+  outputPath: string;
+  leasePath: string;
+};
+
+const REFRESH_VALUE_ARGS = new Set(["--sha", "--release-root", "--evidence-root", "--output", "--lease"]);
+
+/** Parse the refresh CLI strictly; implicit dry-run and unknown flags are forbidden. */
+export function parseV4DynamicRefreshArgs(argv: readonly string[]): V4DynamicRefreshArgs {
+  let mode: V4DynamicRefreshArgs["mode"] | undefined;
+  const values: Record<string, string> = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const flag = String(argv[index] || "");
+    if (flag === "--verify-only" || flag === "--apply") {
+      if (mode) throw new Error("V4_DYNAMIC_REFRESH_MODE_CONFLICT");
+      mode = flag === "--apply" ? "apply" : "verify-only";
+      continue;
+    }
+    if (!REFRESH_VALUE_ARGS.has(flag)) throw new Error(`V4_DYNAMIC_REFRESH_ARG_UNKNOWN:${flag}`);
+    if (values[flag] !== undefined) throw new Error(`V4_DYNAMIC_REFRESH_ARG_DUPLICATE:${flag}`);
+    const value = String(argv[index + 1] || "");
+    if (!value || value.startsWith("--")) throw new Error(`V4_DYNAMIC_REFRESH_ARG_VALUE_REQUIRED:${flag}`);
+    values[flag] = value;
+    index += 1;
+  }
+  if (!mode) throw new Error("V4_DYNAMIC_REFRESH_MODE_REQUIRED");
+  const sha = String(values["--sha"] || "").toLowerCase();
+  if (!SHA.test(sha)) throw new Error("V4_DYNAMIC_REFRESH_SHA_INVALID");
+  return {
+    mode,
+    sha,
+    releaseRoot: values["--release-root"] || `/home/deploy/disdex-trading/releases/${sha}`,
+    evidenceRoot: values["--evidence-root"] || "/etc/disdex/v12-v4-evidence",
+    outputPath: values["--output"] || "/var/lib/disdex/v12-v4/evidence-refresh-last.json",
+    leasePath: values["--lease"] || `/var/lib/disdex/unified-deploy/refresh-leases/v4/${sha}.json`,
+  };
+}
+
+const REFRESH_LEASE_FIELDS = new Set([
+  "schema", "repository", "deploymentTarget", "operatorTarget", "scope", "route",
+  "approvedSha", "approvedRunner", "approvedRunners", "approvedShaByRunner",
+  "releaseRoot", "evidenceRoot", "outputPath", "planSha256", "ordersEnabled", "signatureVerified",
+  "approvalNonceDigest", "approvalIssuedAt", "approvalExpiresAt", "approvedAt",
+  "expiresAt", "leaseId",
+]);
+
+export function validateV4RefreshLease(input: { lease: unknown; sha: string; now?: number }) {
+  const sha = assertSha(input.sha);
+  const now = input.now ?? Date.now();
+  const lease = assertRecord(input.lease, "refreshLease");
+  if (lease.schema !== REFRESH_LEASE_SCHEMA || new Set(Object.keys(lease)).size !== REFRESH_LEASE_FIELDS.size
+      || [...REFRESH_LEASE_FIELDS].some((field) => !Object.prototype.hasOwnProperty.call(lease, field))) {
+    throw new Error("V4_REFRESH_LEASE_SCHEMA_INVALID");
+  }
+  if (lease.repository !== "dunamishajime-bit/-ai-dex-manager"
+      || lease.deploymentTarget !== "professional-dismanager.net"
+      || lease.operatorTarget !== "DD1296_FINAL_ALLIN_10BPS") {
+    throw new Error("V4_REFRESH_LEASE_TARGET_MISMATCH");
+  }
+  if (lease.scope !== V4_DYNAMIC_REFRESH_SCOPE) throw new Error("V4_REFRESH_LEASE_SCOPE_MISMATCH");
+  if (lease.approvedSha !== sha) throw new Error("V4_REFRESH_LEASE_SHA_MISMATCH");
+  if (lease.approvedRunner !== "V12_V4" || JSON.stringify(lease.approvedRunners) !== JSON.stringify(["V12_V4"])
+      || lease.approvedShaByRunner?.V12_V4 !== sha
+      || Object.keys(lease.approvedShaByRunner || {}).length !== 1) {
+    throw new Error("V4_REFRESH_LEASE_RUNNER_MAP_MISMATCH");
+  }
+  if (lease.releaseRoot !== `/home/deploy/disdex-trading/releases/${sha}`
+      || lease.evidenceRoot !== "/etc/disdex/v12-v4-evidence") {
+    throw new Error("V4_REFRESH_LEASE_PATH_MISMATCH");
+  }
+  if (lease.outputPath !== REFRESH_OUTPUT_PATH) throw new Error("V4_REFRESH_LEASE_OUTPUT_PATH_MISMATCH");
+  if (lease.ordersEnabled !== false) throw new Error("V4_REFRESH_LEASE_ORDERS_NOT_ALLOWED");
+  if (lease.signatureVerified !== true) throw new Error("V4_REFRESH_LEASE_SIGNATURE_NOT_VERIFIED");
+  if (!/^(?:GITHUB_ACTIONS|CODEX_SSH)$/.test(String(lease.route || ""))) {
+    throw new Error("V4_REFRESH_LEASE_ROUTE_INVALID");
+  }
+  if (!/^[a-f0-9]{64}$/.test(String(lease.planSha256 || ""))
+      || !/^[a-f0-9]{64}$/.test(String(lease.approvalNonceDigest || ""))
+      || !/^[a-f0-9]{32}$/.test(String(lease.leaseId || ""))) {
+    throw new Error("V4_REFRESH_LEASE_DIGEST_INVALID");
+  }
+  const approvedAt = Number(lease.approvedAt);
+  const expiresAt = Number(lease.expiresAt);
+  const approvalIssuedAt = Number(lease.approvalIssuedAt);
+  const approvalExpiresAt = Number(lease.approvalExpiresAt);
+  if (![approvedAt, expiresAt, approvalIssuedAt, approvalExpiresAt].every(Number.isInteger)
+      || [approvedAt, expiresAt, approvalIssuedAt, approvalExpiresAt].some((value) => value <= 0)
+      || approvedAt > now + 30 || expiresAt <= now || expiresAt <= approvedAt
+      || expiresAt - approvedAt > REFRESH_MAX_LEASE_MS
+      || !Number.isInteger(approvalExpiresAt - approvalIssuedAt)
+      || approvalExpiresAt - approvalIssuedAt < 1
+      || approvalExpiresAt - approvalIssuedAt > REFRESH_MAX_APPROVAL_MS) {
+    throw new Error("V4_REFRESH_LEASE_EXPIRED_OR_FUTURE");
+  }
+  return lease as JsonRecord;
+}
 
 export type V4DynamicRuntimeSnapshot = {
   sharedRisk: JsonRecord;
@@ -296,6 +403,20 @@ async function assertTrustedDirectory(path: string, requiredUid = 0) {
   }
 }
 
+async function assertTrustedOutputTarget(path: string) {
+  if (path !== REFRESH_OUTPUT_PATH) throw new Error("V4_DYNAMIC_REFRESH_OUTPUT_PATH_MISMATCH");
+  await assertTrustedDirectory(dirname(path), 0);
+  try {
+    const stats = await lstat(path);
+    if (stats.isSymbolicLink() || !stats.isFile() || stats.uid !== 0 || (stats.mode & 0o022) !== 0) {
+      throw new Error(`V4_DYNAMIC_REFRESH_OUTPUT_UNTRUSTED:${path}`);
+    }
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && String((error as { code?: unknown }).code) === "ENOENT") return;
+    throw error;
+  }
+}
+
 async function readStaticPayloads(evidenceRoot: string) {
   const payloads: Record<string, unknown> = {};
   for (const key of EVIDENCE_KEYS) {
@@ -332,19 +453,47 @@ async function refreshDynamicFiles(input: {
   sha: string;
   releaseRoot: string;
   evidenceRoot: string;
+  leasePath?: string;
   client: Pick<AsterV3Client, "hasTradingCredentials" | "getServerTime" | "getBalances" | "getPositions" | "getOpenOrders">;
   outputPath?: string;
   apply: boolean;
+  now?: number;
+  budgetDiagnostics?: AsterRateBudgetDiagnostic[];
 }) {
   if (typeof process.getuid !== "function" || process.getuid() !== 0) throw new Error("V4_DYNAMIC_REFRESH_ROOT_REQUIRED");
   const sha = assertSha(input.sha);
+  const now = input.now ?? Date.now();
   const releaseRoot = await assertReleaseMarker(input.releaseRoot, sha);
   await assertTrustedDirectory(input.evidenceRoot, 0);
+  if (input.apply) {
+    const leasePath = input.leasePath || `/var/lib/disdex/unified-deploy/refresh-leases/v4/${sha}.json`;
+    if (leasePath !== `/var/lib/disdex/unified-deploy/refresh-leases/v4/${sha}.json`) {
+      throw new Error("V4_DYNAMIC_REFRESH_LEASE_PATH_MISMATCH");
+    }
+    const lease = await readTrustedJson(leasePath, 0);
+    const validatedLease = validateV4RefreshLease({ lease, sha, now });
+    if (validatedLease.releaseRoot !== releaseRoot || validatedLease.evidenceRoot !== input.evidenceRoot) {
+      throw new Error("V4_DYNAMIC_REFRESH_LEASE_RUNTIME_PATH_MISMATCH");
+    }
+    if ((input.outputPath || REFRESH_OUTPUT_PATH) !== REFRESH_OUTPUT_PATH) {
+      throw new Error("V4_DYNAMIC_REFRESH_OUTPUT_PATH_MISMATCH");
+    }
+    await assertTrustedOutputTarget(input.outputPath || REFRESH_OUTPUT_PATH);
+  }
   const current = await readStaticPayloads(input.evidenceRoot);
   const runtime = await readRuntimeSnapshot();
-  const dynamic = await collectV4DynamicEvidence({ sha, client: input.client, runtime });
-  const plan = buildV4DynamicRefreshPlan({ sha, staticPayloads: current, dynamicPayloads: dynamic });
-  if (!input.apply) return { ...plan, status: "V4_DYNAMIC_EVIDENCE_REFRESH_DRY_RUN", releaseRoot, evidenceRoot: input.evidenceRoot } as const;
+  const dynamic = await collectV4DynamicEvidence({ sha, client: input.client, runtime, now });
+  const plan = buildV4DynamicRefreshPlan({ sha, staticPayloads: current, dynamicPayloads: dynamic, now });
+  const apiBudgetDiagnostics = (input.budgetDiagnostics || []).map((event) => ({ ...event }));
+  if (!input.apply) {
+    return {
+      ...plan,
+      status: "V4_DYNAMIC_EVIDENCE_REFRESH_DRY_RUN",
+      releaseRoot,
+      evidenceRoot: input.evidenceRoot,
+      apiBudgetDiagnostics,
+    } as const;
+  }
 
   const staged: Array<{ key: (typeof DYNAMIC_KEYS)[number]; path: string; temporary: string }> = [];
   const dynamicRecord = dynamic as Record<string, JsonRecord>;
@@ -374,6 +523,7 @@ async function refreshDynamicFiles(input: {
     status: "V4_DYNAMIC_EVIDENCE_REFRESH_APPLIED",
     releaseRoot,
     evidenceRoot: input.evidenceRoot,
+    apiBudgetDiagnostics,
     evidenceSha256: Object.fromEntries(DYNAMIC_KEYS.map((key) => [key, createHash("sha256").update(JSON.stringify(dynamicRecord[key], null, 2) + "\n").digest("hex")])),
   } as const;
   if (input.outputPath) {
@@ -381,11 +531,6 @@ async function refreshDynamicFiles(input: {
     try { await rename(outputTemp, input.outputPath); } catch (error) { await unlink(outputTemp).catch(() => undefined); throw error; }
   }
   return applied;
-}
-
-function argValue(name: string, fallback = "") {
-  const index = process.argv.indexOf(name);
-  return index >= 0 ? String(process.argv[index + 1] || fallback) : fallback;
 }
 
 function selfTest() {
@@ -410,10 +555,8 @@ function selfTest() {
 
 async function main() {
   if (process.argv.includes("--self-test")) { selfTest(); return; }
-  const sha = assertSha(argValue("--sha").toLowerCase());
-  const releaseRoot = argValue("--release-root", `/home/deploy/disdex-trading/releases/${sha}`);
-  const evidenceRoot = argValue("--evidence-root", "/etc/disdex/v12-v4-evidence");
-  const outputPath = argValue("--output", "/var/lib/disdex/v12-v4/evidence-refresh-last.json");
+  const parsed = parseV4DynamicRefreshArgs(process.argv.slice(2));
+  const budgetDiagnostics: AsterRateBudgetDiagnostic[] = [];
   const client = new AsterV3Client({
     baseUrl: process.env.ASTER_FUTURES_BASE_URL,
     userAddress: process.env.ASTER_USER_ADDRESS,
@@ -421,9 +564,19 @@ async function main() {
     requestTimeoutMs: Number(process.env.ASTER_REQUEST_TIMEOUT_MS || 10_000),
     recvWindowMs: Number(process.env.ASTER_RECV_WINDOW_MS || 5_000),
     readOnlyRateLimitMaxRetries: 0,
+    onRateBudgetDiagnostic: (event) => budgetDiagnostics.push(event),
     userAgent: "DisDex-V4-Dynamic-Evidence-Refresh/1.0",
   });
-  const result = await refreshDynamicFiles({ sha, releaseRoot, evidenceRoot, client, outputPath, apply: process.argv.includes("--apply") });
+  const result = await refreshDynamicFiles({
+    sha: parsed.sha,
+    releaseRoot: parsed.releaseRoot,
+    evidenceRoot: parsed.evidenceRoot,
+    leasePath: parsed.leasePath,
+    client,
+    outputPath: parsed.outputPath,
+    apply: parsed.mode === "apply",
+    budgetDiagnostics,
+  });
   console.log(JSON.stringify(result));
 }
 

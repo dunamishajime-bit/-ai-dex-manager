@@ -20,6 +20,7 @@ from disdex_deployment_contract import (
 )
 
 REMOTE_HELPER = "/usr/local/sbin/disdex-unified-production-deploy"
+REFRESH_REMOTE_HELPER = "/usr/local/sbin/disdex-v4-evidence-refresh-activate"
 CODEX_ROUTE = "CODEX_SSH"
 
 
@@ -46,6 +47,23 @@ def build_ssh_command(*, host, identity_file, known_hosts, port, sha, scope,
                       plan_sha256, orders_enabled, owner):
     _validate_inputs(host, identity_file, known_hosts, port, sha, scope,
                      plan_sha256, orders_enabled, owner)
+    if scope == "V4_EVIDENCE_REFRESH_ONLY":
+        return [
+            "ssh", "-T", "-i", identity_file,
+            "-o", "IdentitiesOnly=yes",
+            "-o", "BatchMode=yes",
+            "-o", "StrictHostKeyChecking=yes",
+            "-o", f"UserKnownHostsFile={known_hosts}",
+            "-p", str(port),
+            f"root@{host}",
+            REFRESH_REMOTE_HELPER,
+            "--install",
+            "--sha", sha,
+            "--operator", owner,
+            "--route", CODEX_ROUTE,
+            "--plan-sha256", plan_sha256,
+            "--token-stdin",
+        ]
     return [
         "ssh", "-T", "-i", identity_file,
         "-o", "IdentitiesOnly=yes",

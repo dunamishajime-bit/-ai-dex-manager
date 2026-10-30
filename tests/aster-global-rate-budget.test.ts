@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import { mkdir, mkdtemp, readFile, rm, stat, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { deferAsterGlobalRateBudget, reserveAsterGlobalRateSlot } from "../lib/disdex-aster-global-rate-budget";
+import { AsterV3Client } from "../lib/aster-v3-client";
 
 test("shared Aster rate budget module exists", () => {
   assert.equal(existsSync(resolve("lib/disdex-aster-global-rate-budget.ts")), true);
@@ -53,6 +54,35 @@ test("AsterV3Client routes every request attempt through the shared global rate 
   assert.match(source, /waitForAsterGlobalRateSlot/);
   const requestBody = source.split("private async request<T>", 2)[1] || "";
   assert.match(requestBody, /await waitForAsterGlobalRateSlot\(asterFuturesRequestWeight\(method, input\.path, params\),[\s\S]*?input\.ratePriority/);
+});
+
+test("Aster client exposes shared-budget owner, priority and wait diagnostics", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-client-diagnostics-"));
+  const path = join(directory, "aster-rate-budget.json");
+  const priorPath = process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH;
+  const priorInterval = process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS;
+  const priorQueue = process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS;
+  const events: Array<Record<string, unknown>> = [];
+  process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH = path;
+  process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS = "50";
+  process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = "5000";
+  try {
+    const client = new AsterV3Client({
+      fetchImpl: async () => new Response("{}", { status: 200 }),
+      onRateBudgetDiagnostic: (event) => events.push(event),
+    });
+    await client.ping();
+    await client.ping();
+    assert.ok(events.some((event) => event.event === "SLOT_WAIT"));
+    assert.ok(events.every((event) => event.schema === "disdex-aster-rate-budget-event/v1"));
+    assert.ok(events.every((event) => !Object.prototype.hasOwnProperty.call(event, "signature")));
+    assert.ok(events.every((event) => !Object.prototype.hasOwnProperty.call(event, "apiKey")));
+  } finally {
+    if (priorPath === undefined) delete process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH; else process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH = priorPath;
+    if (priorInterval === undefined) delete process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS; else process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS = priorInterval;
+    if (priorQueue === undefined) delete process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS; else process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = priorQueue;
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test("shared budget rejects a non-empty document without the canonical schema", async () => {

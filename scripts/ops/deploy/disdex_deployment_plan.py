@@ -86,6 +86,8 @@ def approve_diff(desired, current):
     monitor_changed = desired["monitorSha"] != current["monitorSha"]
     release_roots_changed = desired["releaseRoots"] != current["releaseRoots"]
     scope = desired["scope"]
+    if scope == "V4_EVIDENCE_REFRESH_ONLY" and (changed or ui_changed or monitor_changed or release_roots_changed):
+        raise ValueError("refresh-only scope cannot modify deployment pins")
     if scope in INDIVIDUAL and (changed - {INDIVIDUAL[scope]} or ui_changed
                                 or monitor_changed or release_roots_changed):
         raise ValueError("scope exceeds approved runner")
