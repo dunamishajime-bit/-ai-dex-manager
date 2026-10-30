@@ -18,7 +18,7 @@ from disdex_deployment_contract import (
     validate_order_permission,
 )
 
-SCHEMA = "disdex-unified-deployment-plan/v1"
+SCHEMA = "disdex-unified-deployment-plan/v2"
 IDS = (
     "V12_V4", "QUALITY102_CAUSAL_V1", "V52", "PENGU_V8",
     "FET_BRK48_RESIDUAL", "HYPE_TREND_LONG", "IDLE_PRIORITY_SHORT",
@@ -35,10 +35,22 @@ INDIVIDUAL = {
     "MARGIN_GUARD_ONLY": "MARGIN_GUARD",
 }
 FIELDS = {"schema", "repository", "deploymentTarget", "operatorTarget",
-          "sourceSha", "scope", "runners", "uiSha", "monitorSha", "ordersEnabled"}
+          "sourceSha", "scope", "runners", "uiSha", "monitorSha",
+          "releaseRoots", "ordersEnabled"}
+RELEASE_ROOT_FIELDS = {"runners", "ui", "monitor"}
 
 def canonical(obj):
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+
+def _validate_release_roots(value):
+    if not isinstance(value, dict) or set(value) != RELEASE_ROOT_FIELDS:
+        raise ValueError("release root map missing, extra or malformed")
+    for name, root in value.items():
+        if (not isinstance(root, str) or not root or "\x00" in root
+            or not root.startswith("/") or root.endswith("/")
+            or any(part in ("", ".", "..") for part in root.split("/")[1:])):
+            raise ValueError("invalid immutable release root for " + name)
+    return value
 
 def validate(plan):
     if not isinstance(plan, dict) or set(plan) != FIELDS:
@@ -59,6 +71,7 @@ def validate(plan):
     for runner_id, sha in pins.items():
         if not isinstance(sha, str) or not SHA.fullmatch(sha):
             raise ValueError("invalid runner SHA for " + runner_id)
+    _validate_release_roots(plan["releaseRoots"])
     return plan
 
 def approve_diff(desired, current):
@@ -71,17 +84,23 @@ def approve_diff(desired, current):
     changed = {k for k in IDS if desired["runners"][k] != current["runners"][k]}
     ui_changed = desired["uiSha"] != current["uiSha"]
     monitor_changed = desired["monitorSha"] != current["monitorSha"]
+    release_roots_changed = desired["releaseRoots"] != current["releaseRoots"]
     scope = desired["scope"]
-    if scope in INDIVIDUAL and (changed - {INDIVIDUAL[scope]} or ui_changed or monitor_changed):
+    if scope in INDIVIDUAL and (changed - {INDIVIDUAL[scope]} or ui_changed
+                                or monitor_changed or release_roots_changed):
         raise ValueError("scope exceeds approved runner")
-    if scope == "HP_ONLY" and (changed or monitor_changed):
+    if scope == "HP_ONLY" and (changed or monitor_changed
+                                or desired["releaseRoots"]["ui"] != current["releaseRoots"]["ui"]):
         raise ValueError("HP-only scope modifies trading/runtime")
-    if scope == "API_MONITORS" and (changed or ui_changed):
+    if scope == "API_MONITORS" and (changed or ui_changed
+                                     or desired["releaseRoots"]["monitor"] != current["releaseRoots"]["monitor"]):
         raise ValueError("monitor-only scope modifies trading/UI")
     if not changed and not ui_changed and not monitor_changed:
         raise ValueError("no deployment differences")
     return dict(changedRunners=sorted(changed), uiChanged=ui_changed,
-                monitorChanged=monitor_changed, exactScope=scope,
+                monitorChanged=monitor_changed,
+                releaseRootsChanged=release_roots_changed,
+                exactScope=scope,
                 ordersEnabled=desired["ordersEnabled"])
 
 def digest(desired, current):

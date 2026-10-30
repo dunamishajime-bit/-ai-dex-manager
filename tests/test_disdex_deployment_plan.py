@@ -13,12 +13,35 @@ def plan(scope, runner=None):
         deploymentTarget="professional-dismanager.net",
         operatorTarget="DD1296_FINAL_ALLIN_10BPS",
         sourceSha=NEW, scope=scope, runners={k: OLD for k in IDS},
-        uiSha=OLD, monitorSha=OLD, ordersEnabled=False)
+        uiSha=OLD, monitorSha=OLD,
+        releaseRoots={
+            "runners": "/home/deploy/disdex-trading/releases",
+            "ui": "/home/deploy/disdex-trading/ui-releases/current-ui",
+            "monitor": "/home/deploy/disdex-trading/monitor-releases/current-monitor",
+        },
+        ordersEnabled=False)
     if runner:
         obj["runners"][runner] = NEW
     return obj
 
 class PlanTests(unittest.TestCase):
+    def test_accepts_explicit_auxiliary_release_roots(self):
+        current = plan("FULL_PROJECT")
+        desired = plan("SHARED_CRYPTO_RISK_ONLY", "SHARED_CRYPTO_RISK")
+        roots = {
+            "runners": "/home/deploy/disdex-trading/releases",
+            "ui": "/home/deploy/disdex-trading/ui-releases/ui-hp-ranking-rise-fall-737ec0503a",
+            "monitor": "/home/deploy/disdex-trading/releases/139e8879fae2d6e161cad67584685307d4c63a7c",
+        }
+        current["releaseRoots"] = roots
+        desired["releaseRoots"] = roots
+
+        plan_hash, changes = digest(desired, current)
+
+        self.assertEqual(len(plan_hash), 64)
+        self.assertEqual(changes["changedRunners"], ["SHARED_CRYPTO_RISK"])
+        self.assertFalse(changes["releaseRootsChanged"])
+
     def test_shared_risk_alone(self):
         current = plan("FULL_PROJECT")
         desired = plan("SHARED_CRYPTO_RISK_ONLY", "SHARED_CRYPTO_RISK")
@@ -56,6 +79,20 @@ class PlanTests(unittest.TestCase):
         wanted = plan("SHARED_CRYPTO_RISK_ONLY", "SHARED_CRYPTO_RISK")
         wanted["monitorSha"] = NEW
         with self.assertRaisesRegex(ValueError, "scope exceeds"):
+            digest(wanted, current)
+
+    def test_shared_risk_forbids_release_root_update(self):
+        current = plan("FULL_PROJECT")
+        wanted = plan("SHARED_CRYPTO_RISK_ONLY", "SHARED_CRYPTO_RISK")
+        wanted["releaseRoots"]["monitor"] = "/home/deploy/disdex-trading/monitor-releases/next"
+        with self.assertRaisesRegex(ValueError, "scope exceeds"):
+            digest(wanted, current)
+
+    def test_release_root_paths_are_canonical_absolute_paths(self):
+        current = plan("FULL_PROJECT")
+        wanted = plan("SHARED_CRYPTO_RISK_ONLY", "SHARED_CRYPTO_RISK")
+        wanted["releaseRoots"]["ui"] = "/home/deploy/disdex-trading/ui-releases/../next"
+        with self.assertRaisesRegex(ValueError, "invalid immutable release root"):
             digest(wanted, current)
 
     def test_hp_only(self):

@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "ops" / "deploy"))
 from disdex_unified_root_gate import (
     parse_live_pins, validate_bootstrap_plan, release_marker,
+    auxiliary_release_marker,
     assert_regular_secure, assert_private_dir, preflight, PREFIXES, STOP_OWNERS,
     ROOT, RELEASES, DeploymentPaths, RootDeploymentExecutor,
 )
@@ -27,7 +28,13 @@ def plan(scope, r=None):
            deploymentTarget="professional-dismanager.net",
            operatorTarget="DD1296_FINAL_ALLIN_10BPS", sourceSha=(OLD if scope == "FULL_PROJECT" else NEW),
            scope=scope, runners={i:OLD for i in IDS},
-           uiSha=OLD, monitorSha=OLD, ordersEnabled=False)
+           uiSha=OLD, monitorSha=OLD,
+           releaseRoots={
+               "runners": "/home/deploy/disdex-trading/releases",
+               "ui": "/home/deploy/disdex-trading/ui-releases/current-ui",
+               "monitor": "/home/deploy/disdex-trading/monitor-releases/current-monitor",
+           },
+           ordersEnabled=False)
     if r:
         p["runners"][r]=NEW
     return p
@@ -82,6 +89,30 @@ class RootGateTest(unittest.TestCase):
             (r / ".disdex-release-sha").write_text(OLD)
             with self.assertRaisesRegex(ValueError,"marker"):
                 release_marker(NEW,root,root_uid=__import__("os").geteuid())
+
+    @unittest.skipIf(os.name == "nt", "Windows ACLs do not expose POSIX root ownership/mode semantics")
+    def test_auxiliary_marker_can_use_a_non_sha_release_directory(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "ui-hp-ranking-rise-fall-737ec0503a"
+            root.mkdir()
+            (root / ".disdex-release-sha").write_text(NEW, encoding="ascii")
+            root.chmod(0o755)
+            (root / ".disdex-release-sha").chmod(0o444)
+            self.assertEqual(
+                auxiliary_release_marker(NEW, root, root_uid=__import__("os").geteuid()),
+                root,
+            )
+
+    @unittest.skipIf(os.name == "nt", "Windows ACLs do not expose POSIX root ownership/mode semantics")
+    def test_auxiliary_marker_rejects_wrong_sha(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "monitor-release"
+            root.mkdir()
+            (root / ".disdex-release-sha").write_text(OLD, encoding="ascii")
+            root.chmod(0o755)
+            (root / ".disdex-release-sha").chmod(0o444)
+            with self.assertRaisesRegex(ValueError, "marker SHA mismatch"):
+                auxiliary_release_marker(NEW, root, root_uid=__import__("os").geteuid())
     @unittest.skipIf(os.name == "nt", "Windows ACLs do not expose POSIX root ownership/mode semantics")
     def test_untrusted_symlink_file(self):
         with tempfile.TemporaryDirectory() as d:
@@ -195,9 +226,16 @@ class SharedRiskExecutorTest(unittest.TestCase):
         self.receipts = _secure_dir(self.root / "receipts")
         self.releases = base / "releases"
         self.releases.mkdir()
-        self.current = base / "current"
         self.old = OLD
         self.new = NEW
+        self.ui_root = base / "ui-release"
+        self.monitor_root = base / "monitor-release"
+        for auxiliary_root in (self.ui_root, self.monitor_root):
+            auxiliary_root.mkdir()
+            (auxiliary_root / ".disdex-release-sha").write_text(self.old, encoding="ascii")
+            auxiliary_root.chmod(0o755)
+            (auxiliary_root / ".disdex-release-sha").chmod(0o444)
+        self.current = base / "current"
         for sha in (self.old, self.new):
             release = self.releases / sha
             release.mkdir()
@@ -214,6 +252,12 @@ class SharedRiskExecutorTest(unittest.TestCase):
 
         current = plan("FULL_PROJECT")
         desired = plan("SHARED_CRYPTO_RISK_ONLY", "SHARED_CRYPTO_RISK")
+        for candidate in (current, desired):
+            candidate["releaseRoots"] = {
+                "runners": str(self.releases),
+                "ui": str(self.ui_root),
+                "monitor": str(self.monitor_root),
+            }
         self.current_plan = current
         self.desired_plan = desired
         self.plan_hash = digest(desired, current)[0]

@@ -58,10 +58,17 @@ all of the following:
 | issuedAt/expiresAt | maximum five-minute window |
 | nonce | root-side single-use replay journal |
 
-The canonical plan uses schema `disdex-unified-deployment-plan/v1` and is
+The canonical plan uses schema `disdex-unified-deployment-plan/v2` and is
 reconstructed from fresh runtime/systemd readback by the trusted root helper.
 A repository copy is not venue truth. The helper must recompute the plan hash
 and reject any mismatch before a mutation.
+
+The plan explicitly carries `releaseRoots` for `runners`, `ui`, and
+`monitor`. Runner releases use the canonical SHA-named production release
+root. UI and monitor releases may have independent directory names, but each
+must contain a root-owned, non-writable `.disdex-release-sha` marker matching
+the corresponding SHA. A UI or monitor SHA is never silently looked up under
+the Runner release root.
 
 The exact runner map includes:
 

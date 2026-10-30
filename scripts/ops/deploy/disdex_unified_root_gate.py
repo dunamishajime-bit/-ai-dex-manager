@@ -193,6 +193,38 @@ def release_marker(sha: str, releases=RELEASES, *, root_uid=None):
         raise ValueError("immutable release marker SHA mismatch")
     return release
 
+def auxiliary_release_marker(sha: str, release_root: Path, *, root_uid=None):
+    """Verify a non-Runner immutable release root without inventing a SHA path.
+
+    UI and monitor releases are independently versioned roots. Their directory
+    names are deployment metadata and are not required to equal the source
+    SHA; the root-owned marker remains the immutable identity proof.
+    """
+    if not isinstance(sha, str) or not SHA.fullmatch(sha):
+        raise ValueError("invalid exact auxiliary release SHA")
+    release_root = Path(release_root)
+    s = release_root.lstat()
+    owner = 0 if root_uid is None else root_uid
+    if (not stat.S_ISDIR(s.st_mode) or s.st_uid != owner
+        or s.st_mode & 0o022):
+        raise ValueError("auxiliary release directory missing or not root-owned immutable")
+    marker = release_root / ".disdex-release-sha"
+    marker_stat = assert_regular_secure(marker, root_uid=owner, private=False)
+    if marker_stat.st_mode & 0o222:
+        raise ValueError("auxiliary immutable release marker is writable")
+    if marker.read_text(encoding="ascii").strip() != sha:
+        raise ValueError("auxiliary immutable release marker SHA mismatch")
+    return release_root
+
+def validate_release_roots(plan: dict, releases=RELEASES, *, root_uid=None):
+    """Validate the plan's explicit runner/UI/monitor lineage roots."""
+    roots = plan["releaseRoots"]
+    if roots["runners"] != str(releases):
+        raise ValueError("runner release root differs from production releases")
+    auxiliary_release_marker(plan["uiSha"], roots["ui"], root_uid=root_uid)
+    auxiliary_release_marker(plan["monitorSha"], roots["monitor"], root_uid=root_uid)
+    return roots
+
 def parse_live_pins(manifest: dict, releases=RELEASES):
     if (not isinstance(manifest, dict)
         or manifest.get("schema") != PIN_SCHEMA
@@ -458,10 +490,12 @@ class RootDeploymentExecutor:
             raise ValueError("supplied SHA / plan hash differs from root plan")
         if (desired["runners"].get(SHARED_RISK_RUNNER) != args.sha
             or diff["changedRunners"] != [SHARED_RISK_RUNNER]
-            or diff["uiChanged"] or diff["monitorChanged"]):
+            or diff["uiChanged"] or diff["monitorChanged"]
+            or diff["releaseRootsChanged"]):
             raise ValueError("Shared Risk scope exceeds exact plan delta")
-        for sha in set(desired["runners"].values()) | {
-            desired["sourceSha"], desired["uiSha"], desired["monitorSha"]}:
+        validate_release_roots(desired, self.paths.releases,
+                               root_uid=self.root_uid)
+        for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
             release_marker(sha, self.paths.releases, root_uid=self.root_uid)
 
         activation_path = (self.paths.activation_dir / args.scope / f"{args.sha}.json")
@@ -644,8 +678,9 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         desired, current_plan, pins, resolved.name)
     if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
         raise ValueError("supplied SHA / plan hash differs from root plan")
-    for sha in set(desired["runners"].values()) | {
-        desired["sourceSha"], desired["uiSha"], desired["monitorSha"]}:
+    validate_release_roots(current_plan, releases, root_uid=root_uid)
+    validate_release_roots(desired, releases, root_uid=root_uid)
+    for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
         release_marker(sha, releases, root_uid=root_uid)
     # Verify signature but DO NOT consume a nonce here: a read-only preflight
     # cannot authorize or burn the owner's one-use LIVE grant.
