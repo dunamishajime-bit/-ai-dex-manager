@@ -28,7 +28,7 @@ async function main(){
   // The V52 caller release SHA is NOT the IDLE Residual state owner.
   // Use the independently pinned IDLE runtime SHA, never the state file's
   // self-reported SHA or the requesting V52 release SHA.
-  const runtimeSha=resolveIdleResidualOwnerShaForPreemption(process.env);
+  const runtimeSha=resolveIdleResidualOwnerShaForPreemption(process.env.DISDEX_IDLE_PRIORITY_RUNTIME_SHA);
 
   const client=new AsterV3Client({
     baseUrl:process.env.ASTER_FUTURES_BASE_URL,

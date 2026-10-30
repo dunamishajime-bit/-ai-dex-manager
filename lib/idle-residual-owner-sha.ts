@@ -4,9 +4,9 @@
  * separate and must not be used to validate the IDLE state.
  */
 export function resolveIdleResidualOwnerShaForPreemption(
-  env: { DISDEX_IDLE_PRIORITY_RUNTIME_SHA?: string },
+  pinnedSha: string | undefined,
 ): string {
-  const owner = String(env.DISDEX_IDLE_PRIORITY_RUNTIME_SHA || "").trim().toLowerCase();
+  const owner = String(pinnedSha || "").trim().toLowerCase();
   if (!/^[a-f0-9]{40}$/.test(owner)) {
     throw new Error("IDLE_RESIDUAL_PREEMPT_OWNER_SHA_REQUIRED");
   }

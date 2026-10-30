@@ -28,7 +28,7 @@ export async function releaseIdleResidualLongForFormalEntry(input: {
   // IDLE SHA if available; never infer the owner from the persisted state.
   const pin = String(process.env.DISDEX_IDLE_PRIORITY_RUNTIME_SHA || "").trim();
   const sha = pin
-    ? resolveIdleResidualOwnerShaForPreemption(process.env)
+    ? resolveIdleResidualOwnerShaForPreemption(pin)
     : String(input.expectedRuntimeSha || "").trim().toLowerCase();
   if (!/^[0-9a-f]{40}$/.test(sha)) return { status: "blocked" as const, message: "IDLE_RESIDUAL_PREEMPTION_SHA_REQUIRED" };
   const store = new FileIdleResidualLongStateStore(
