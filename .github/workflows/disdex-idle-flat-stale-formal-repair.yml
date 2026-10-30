@@ -1,0 +1,62 @@
+name: DisDex IDLE Flat Stale State Formal Repair
+
+on:
+  workflow_dispatch:
+    inputs:
+      acknowledgement:
+        description: Type the exact protected repair acknowledgement
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: disdex-production
+    steps:
+      - name: Verify exact owner-reviewed repair request
+        shell: bash
+        env:
+          ACK: ${{ inputs.acknowledgement }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
+          ALLOWED: ${{ vars.DISDEX_DEPLOY_ALLOWED_ACTORS }}
+          ACTOR: ${{ github.actor }}
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REPOSITORY" == "dunamishajime-bit/-ai-dex-manager" ]]
+          [[ "$GITHUB_REF" == "refs/heads/master" ]]
+          [[ "$OWNER" == "dunamishajime-bit" ]]
+          [[ ",$ALLOWED," == *",$ACTOR,"* ]]
+          [[ "$HOST" == "professional-dismanager.net" ]]
+          [[ "$ACK" == "I_ACK_IDLE_FLAT_STALE_REPAIR_AFTER_THREE_SIGNED_GETS" ]]
+
+      - name: Execute exact restricted repair helper
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ -n "$KEY" && -n "$HOST_KEYS" ]]
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/disdex-idle-repair-ssh"
+          trap 'rm -rf "$RUNNER_TEMP/disdex-idle-repair-ssh"' EXIT
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/disdex-idle-repair-ssh/key"
+          printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/disdex-idle-repair-ssh/key" "$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/disdex-idle-repair-ssh/key" >/dev/null
+          ssh -T             -i "$RUNNER_TEMP/disdex-idle-repair-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-idle-residual-flat-stale-repair --execute-after-three-signed-gets"
