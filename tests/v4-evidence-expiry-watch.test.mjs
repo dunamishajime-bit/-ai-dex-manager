@@ -4,7 +4,7 @@ import { chmod, lstat, mkdtemp, writeFile, symlink, rm } from "node:fs/promises"
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { EVIDENCE_FILE_NAMES, inspectV4EvidenceExpiry, validateEvidenceBundle } from "../scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs";
-import { inspectRootEvidenceFiles } from "../scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs";
+import { inspectRootEvidenceFiles, inspectRootRefreshLease, combineV4EvidenceAndLease } from "../scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs";
 const SHA = "a".repeat(40);
 const NOW = Date.parse("2026-10-30T00:00:00Z");
 function bundle(overrides = {}) {
@@ -79,4 +79,68 @@ test("scanner rejects mutable and symlink files", async()=>{
     await symlink(join(dir,EVIDENCE_FILE_NAMES.establishedAsterOrders),p);
     await assert.rejects(inspectRootEvidenceFiles({sha:SHA,directory:dir,now:NOW,requiredUid:uid}),/UNTRUSTED/);
   } finally {await rm(dir,{recursive:true,force:true});}
+});
+
+test("fresh proof warns when owner-signed refresh lease nears expiry", () => {
+  const evidence=inspectV4EvidenceExpiry({sha:SHA,payloads:bundle(),now:NOW});
+  const lease={status:"EXPIRING_SOON",earliestExpiryAt:new Date(NOW+3*3600000).toISOString(),
+    remainingMs:3*3600000,expiringKeys:["refreshLease"]};
+  const merged=combineV4EvidenceAndLease(evidence,lease);
+  assert.equal(evidence.status,"FRESH");
+  assert.equal(merged.status,"EXPIRING_SOON");
+  assert.equal(merged.remainingMs,3*3600000);
+  assert.deepEqual(merged.lease.expiringKeys,["refreshLease"]);
+});
+test("lease expiry blocks even when dynamic account proofs are fresh", () => {
+  const evidence=inspectV4EvidenceExpiry({sha:SHA,payloads:bundle(),now:NOW});
+  const lease={status:"EXPIRED",earliestExpiryAt:new Date(NOW-1000).toISOString(),
+    remainingMs:-1000,expiringKeys:["refreshLease"]};
+  const merged=combineV4EvidenceAndLease(evidence,lease);
+  assert.equal(merged.status,"EXPIRED");
+  assert.equal(merged.remainingMs,-1000);
+});
+test("missing lease directory is not mistaken for installed lease",async()=>{
+  const missing=join(tmpdir(),"v4-lease-absent-"+process.pid+"-"+Date.now());
+  assert.equal(await inspectRootRefreshLease({sha:SHA,directory:missing,now:NOW}),null);
+});
+test("installed lease is read-only and validates SHA, scope, mode, ownership and expiry",async()=>{
+  if(process.platform==="win32")return;
+  const dir=await mkdtemp(join(tmpdir(),"v4-lease-"));
+  const file=join(dir,SHA+".json");
+  const base={
+    schema:"disdex-v4-evidence-refresh-lease/v1",
+    scope:"V4_EVIDENCE_REFRESH_ONLY", approvedSha:SHA, approvedRunner:"V12_V4",
+    approvedRunners:["V12_V4"], approvedShaByRunner:{V12_V4:SHA},
+    deploymentTarget:"professional-dismanager.net", operatorTarget:"DD1296_FINAL_ALLIN_10BPS",
+    ordersEnabled:false, signatureVerified:true, planSha256:"d".repeat(64),
+    approvalNonceDigest:"f".repeat(64),
+    approvedAt:Math.floor(NOW/1000)-3600,
+    expiresAt:Math.floor(NOW/1000)+20*3600,
+  };
+  const write=async(value)=>{await writeFile(file,JSON.stringify(value),{mode:0o600});await chmod(file,0o600);};
+  try{
+    await chmod(dir,0o700);
+    const uid=(await lstat(dir)).uid;
+    await assert.rejects(inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW,requiredUid:uid}),/MISSING/);
+    await write(base);
+    const fresh=await inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW,requiredUid:uid});
+    assert.equal(fresh.status,"FRESH");
+    assert.equal(fresh.authorizesTrading,false);
+    const soon=await inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW+12*3600000,requiredUid:uid});
+    assert.equal(soon.status,"EXPIRING_SOON");
+    const expired=await inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW+21*3600000,requiredUid:uid});
+    assert.equal(expired.status,"EXPIRED");
+    await write({...base,ordersEnabled:true});
+    await assert.rejects(inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW,requiredUid:uid}),/METADATA_INVALID/);
+    await write({...base,approvedSha:"b".repeat(40)});
+    await assert.rejects(inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW,requiredUid:uid}),/METADATA_INVALID/);
+    await write({...base,expiresAt:base.approvedAt+86401});
+    await assert.rejects(inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW,requiredUid:uid}),/METADATA_INVALID/);
+    await write(base);
+    await chmod(file,0o666);
+    await assert.rejects(inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW,requiredUid:uid}),/UNTRUSTED/);
+    await rm(file);
+    await symlink(join(dir,"other.json"),file);
+    await assert.rejects(inspectRootRefreshLease({sha:SHA,directory:dir,now:NOW,requiredUid:uid}),/UNTRUSTED/);
+  }finally{await rm(dir,{recursive:true,force:true});}
 });

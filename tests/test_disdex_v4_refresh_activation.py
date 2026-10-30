@@ -12,11 +12,14 @@ from disdex_v4_evidence_refresh_activation import (  # noqa: E402
     require_fresh_refresh_approval,
     refresh_plan_sha256,
     validate_refresh_lease,
+    validate_refresh_renewal_window,
+    EARLY_RENEWAL_WINDOW_SECONDS,
 )
 
 
 SHA = "a" * 40
 NOW = 2_000_000_000
+MAX_AGE_BEFORE_RENEWAL = 86400 - EARLY_RENEWAL_WINDOW_SECONDS
 
 
 def approval(**overrides):
@@ -77,6 +80,36 @@ class RefreshLeaseTest(unittest.TestCase):
         active = build_refresh_lease(approval(), now=NOW)
         with self.assertRaisesRegex(ValueError, "schema"):
             validate_refresh_lease({**active, "unexpected": True}, sha=SHA, now=NOW)
+
+    def test_active_lease_cannot_be_replaced_early(self):
+        existing = build_refresh_lease(approval(), now=NOW)
+        with self.assertRaisesRegex(ValueError, "too early"):
+            validate_refresh_renewal_window(existing, now=NOW)
+        with self.assertRaisesRegex(ValueError, "too early"):
+            validate_refresh_renewal_window(
+                existing, now=NOW + MAX_AGE_BEFORE_RENEWAL - 1,
+            )
+
+    def test_renewal_can_start_inside_final_twelve_hours(self):
+        existing = build_refresh_lease(approval(), now=NOW)
+        validate_refresh_renewal_window(
+            existing, now=NOW + MAX_AGE_BEFORE_RENEWAL,
+        )
+        validate_refresh_renewal_window(existing, now=NOW + 86400)
+        self.assertIsNone(
+            require_fresh_refresh_approval(existing, approval(nonce="d" * 32)),
+        )
+        with self.assertRaisesRegex(ValueError, "nonce reused"):
+            require_fresh_refresh_approval(existing, approval())
+
+    def test_renewal_does_not_extend_without_fresh_signed_grant(self):
+        existing = build_refresh_lease(approval(), now=NOW)
+        self.assertEqual(existing["expiresAt"], NOW + 86400)
+        self.assertIsNone(validate_refresh_renewal_window(
+            existing, now=NOW + MAX_AGE_BEFORE_RENEWAL,
+        ))
+        self.assertEqual(existing["expiresAt"], NOW + 86400)
+        self.assertFalse(existing["ordersEnabled"])
 
     def test_expired_lease_requires_a_fresh_owner_nonce(self):
         previous = build_refresh_lease(approval(), now=NOW)
