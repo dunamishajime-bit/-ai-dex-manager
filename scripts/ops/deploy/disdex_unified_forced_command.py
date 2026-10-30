@@ -6,6 +6,8 @@ import sys
 
 HELPER = "/usr/local/sbin/disdex-unified-production-deploy"
 READINESS_HELPER = "/usr/local/sbin/disdex-v4-live-readiness"
+IDLE_FLAT_REPAIR_HELPER = "/usr/local/sbin/disdex-idle-residual-flat-stale-repair"
+IDLE_FLAT_REPAIR_ARGV = [IDLE_FLAT_REPAIR_HELPER, "--execute-after-three-signed-gets"]
 ALLOWED = (
     "--deployment-target", "--operator-target", "--sha", "--scope",
     "--plan-sha256", "--orders-enabled", "--route", "--owner",
@@ -15,6 +17,8 @@ MODES = ("--preflight-readonly", "--execute")
 def parse_original(value):
     argv = shlex.split(value, posix=True)
     if argv == [READINESS_HELPER]:
+        return argv
+    if argv == IDLE_FLAT_REPAIR_ARGV:
         return argv
     if not argv or argv[0] != HELPER:
         raise ValueError("invalid forced-command target")
@@ -37,7 +41,12 @@ def parse_original(value):
 def main():
     try:
         command = parse_original(os.environ.get("SSH_ORIGINAL_COMMAND", ""))
-        target = READINESS_HELPER if command == [READINESS_HELPER] else HELPER
+        if command == [READINESS_HELPER]:
+            target = READINESS_HELPER
+        elif command == IDLE_FLAT_REPAIR_ARGV:
+            target = IDLE_FLAT_REPAIR_HELPER
+        else:
+            target = HELPER
         os.execv(target, command)
     except (ValueError, OSError) as e:
         print("DISDEX_FORCED_COMMAND_BLOCKED:" + str(e), file=sys.stderr)
