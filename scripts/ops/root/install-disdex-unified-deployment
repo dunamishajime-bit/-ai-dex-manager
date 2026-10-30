@@ -64,6 +64,7 @@ for source in \
   scripts/ops/deploy/disdex_unified_root_gate.py \
   scripts/ops/deploy/disdex_v4_root_cutover.py \
   scripts/ops/deploy/disdex_unified_forced_command.py \
+  scripts/ops/deploy/disdex_v4_live_readiness.py \
   scripts/ops/deploy/disdex_deployment_contract.py \
   scripts/ops/deploy/disdex_deployment_plan.py \
   scripts/ops/deploy/disdex_owner_approval.py \
@@ -94,6 +95,9 @@ install -o root -g root -m 0644 \
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/root/disdex-unified-production-deploy" \
   /usr/local/sbin/disdex-unified-production-deploy
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/deploy/disdex_v4_live_readiness.py" \
+  /usr/local/sbin/disdex-v4-live-readiness
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/root/disdex-v4-evidence-refresh-activate" \
   /usr/local/sbin/disdex-v4-evidence-refresh-activate

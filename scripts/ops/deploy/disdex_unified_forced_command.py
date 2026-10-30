@@ -5,6 +5,7 @@ import shlex
 import sys
 
 HELPER = "/usr/local/sbin/disdex-unified-production-deploy"
+READINESS_HELPER = "/usr/local/sbin/disdex-v4-live-readiness"
 ALLOWED = (
     "--deployment-target", "--operator-target", "--sha", "--scope",
     "--plan-sha256", "--orders-enabled", "--route", "--owner",
@@ -13,6 +14,8 @@ MODES = ("--preflight-readonly", "--execute")
 
 def parse_original(value):
     argv = shlex.split(value, posix=True)
+    if argv == [READINESS_HELPER]:
+        return argv
     if not argv or argv[0] != HELPER:
         raise ValueError("invalid forced-command target")
     if len(argv) != 1 + len(ALLOWED) * 2 + 2:
@@ -34,7 +37,8 @@ def parse_original(value):
 def main():
     try:
         command = parse_original(os.environ.get("SSH_ORIGINAL_COMMAND", ""))
-        os.execv(HELPER, command)
+        target = READINESS_HELPER if command == [READINESS_HELPER] else HELPER
+        os.execv(target, command)
     except (ValueError, OSError) as e:
         print("DISDEX_FORCED_COMMAND_BLOCKED:" + str(e), file=sys.stderr)
         return 1

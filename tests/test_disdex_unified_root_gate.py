@@ -20,7 +20,7 @@ from disdex_unified_root_gate import (
 )
 from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
 from disdex_deployment_plan import IDS, SCHEMA, digest
-from disdex_unified_forced_command import parse_original, HELPER, ALLOWED
+from disdex_unified_forced_command import parse_original, HELPER, READINESS_HELPER, ALLOWED
 
 OLD="7"*40
 NEW="c"*40
@@ -206,6 +206,13 @@ class RootGateTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "untrusted file type"):
                 _atomic_json(target, {"schema": "unsafe"}, root_uid=os.geteuid(), private=False)
             self.assertEqual(ordinary.read_text(), "original")
+
+    def test_forced_command_exact_readiness_helper_allowed(self):
+        self.assertEqual(parse_original(READINESS_HELPER), [READINESS_HELPER])
+
+    def test_forced_command_readiness_helper_rejects_arguments(self):
+        with self.assertRaises(ValueError):
+            parse_original(READINESS_HELPER + " --execute")
 
     def test_forced_command_rejects_shell(self):
         with self.assertRaises(ValueError):
