@@ -70,6 +70,7 @@ for source in \
   scripts/ops/deploy/disdex_owner_approval.py \
   scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py \
   scripts/ops/root/disdex-idle-residual-flat-stale-repair.py \
+  scripts/ops/root/disdex-idle-residual-kill-recovery.py \
   scripts/ops/root/disdex-v4-evidence-refresh-activate \
   scripts/ops/root/install-disdex-v4-evidence-refresh \
   scripts/ops/root/disdex-unified-production-deploy; do
@@ -103,6 +104,10 @@ install -o root -g root -m 0755 \
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/root/disdex-idle-residual-flat-stale-repair.py" \
   /usr/local/sbin/disdex-idle-residual-flat-stale-repair
+
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/root/disdex-idle-residual-kill-recovery.py" \
+  /usr/local/sbin/disdex-idle-residual-kill-recovery
 marker_tmp="/usr/local/libexec/disdex-unified/.installed-source-sha.$$"
 printf '%s\n' "$sha" > "$marker_tmp"
 chown root:root "$marker_tmp"

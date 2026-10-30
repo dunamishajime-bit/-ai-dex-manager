@@ -8,6 +8,8 @@ HELPER = "/usr/local/sbin/disdex-unified-production-deploy"
 READINESS_HELPER = "/usr/local/sbin/disdex-v4-live-readiness"
 IDLE_FLAT_REPAIR_HELPER = "/usr/local/sbin/disdex-idle-residual-flat-stale-repair"
 IDLE_FLAT_REPAIR_ARGV = [IDLE_FLAT_REPAIR_HELPER, "--execute-after-three-signed-gets"]
+IDLE_KILL_RECOVERY_HELPER = "/usr/local/sbin/disdex-idle-residual-kill-recovery"
+IDLE_KILL_RECOVERY_ARGV = [IDLE_KILL_RECOVERY_HELPER, "--execute-after-three-signed-gets"]
 ALLOWED = (
     "--deployment-target", "--operator-target", "--sha", "--scope",
     "--plan-sha256", "--orders-enabled", "--route", "--owner",
@@ -19,6 +21,8 @@ def parse_original(value):
     if argv == [READINESS_HELPER]:
         return argv
     if argv == IDLE_FLAT_REPAIR_ARGV:
+        return argv
+    if argv == IDLE_KILL_RECOVERY_ARGV:
         return argv
     if not argv or argv[0] != HELPER:
         raise ValueError("invalid forced-command target")
@@ -45,6 +49,8 @@ def main():
             target = READINESS_HELPER
         elif command == IDLE_FLAT_REPAIR_ARGV:
             target = IDLE_FLAT_REPAIR_HELPER
+        elif command == IDLE_KILL_RECOVERY_ARGV:
+            target = IDLE_KILL_RECOVERY_HELPER
         else:
             target = HELPER
         os.execv(target, command)

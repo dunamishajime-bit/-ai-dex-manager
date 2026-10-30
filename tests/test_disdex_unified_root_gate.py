@@ -227,6 +227,18 @@ class RootGateTest(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 parse_original(bad)
 
+    def test_forced_command_allows_exact_idle_kill_recovery_only(self):
+        from disdex_unified_forced_command import parse_original, IDLE_KILL_RECOVERY_HELPER
+        command=f"{IDLE_KILL_RECOVERY_HELPER} --execute-after-three-signed-gets"
+        self.assertEqual(parse_original(command), [IDLE_KILL_RECOVERY_HELPER, "--execute-after-three-signed-gets"])
+        for bad in (
+            IDLE_KILL_RECOVERY_HELPER,
+            f"{IDLE_KILL_RECOVERY_HELPER} --verify-only",
+            f"{IDLE_KILL_RECOVERY_HELPER} --execute-after-three-signed-gets extra",
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                parse_original(bad)
+
     def test_forced_command_rejects_shell(self):
         with self.assertRaises(ValueError):
             parse_original("/bin/sh -c whoami")
