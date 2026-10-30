@@ -25,7 +25,7 @@ import {
   resolveRunnerServiceUnit,
   type AlertRunnerId,
 } from "../../../lib/server/runner-service-resolution";
-import { inspectRootEvidenceFiles } from "./disdex-v4-evidence-expiry-watch.mjs";
+import { inspectRootEvidenceFiles, inspectRootRefreshLease, combineV4EvidenceAndLease } from "./disdex-v4-evidence-expiry-watch.mjs";
 
 const ROOT = process.env.DISDEX_TRADING_ROOT || "/home/deploy/disdex-trading/current";
 const STATE_PATH = process.env.DISDEX_ALERT_STATE_PATH || "/var/lib/disdex/runner-health/private/email-alert-state.json";
@@ -120,17 +120,20 @@ async function readV4EvidenceExpiry(currentReleaseSha: string | undefined): Prom
     return { status: "BLOCKED", earliestExpiryAt: undefined, remainingMs: null, expiringKeys: ["releaseSha"], sha: sha || "UNKNOWN" };
   }
   try {
-    const result = await inspectRootEvidenceFiles({
+    const now = Date.now();
+    const evidence = await inspectRootEvidenceFiles({
       sha,
       directory: process.env.DISDEX_ALERT_V4_EVIDENCE_ROOT || "/etc/disdex/v12-v4-evidence",
-      now: Date.now(),
+      now,
     });
+    const lease = await inspectRootRefreshLease({ sha, now });
+    const result = combineV4EvidenceAndLease(evidence, lease);
     const status = String(result.status) as V4EvidenceExpirySnapshot["status"];
     return {
       status,
       earliestExpiryAt: result.earliestExpiryAt,
       remainingMs: result.remainingMs,
-      expiringKeys: result.evidence.filter((row: { remainingMs: number | null; refreshRequired: boolean }) => row.refreshRequired || (row.remainingMs !== null && row.remainingMs < 0)).map((row: { key: string }) => row.key),
+      expiringKeys: result.evidence.filter((row: { remainingMs: number | null; refreshRequired: boolean }) => row.refreshRequired || (row.remainingMs !== null && row.remainingMs < 0)).map((row: { key: string }) => row.key).concat(result.lease?.expiringKeys || []),
       sha,
     };
   } catch (error) {

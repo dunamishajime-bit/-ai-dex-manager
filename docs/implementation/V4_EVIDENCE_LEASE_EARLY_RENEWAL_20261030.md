@@ -42,3 +42,12 @@ python -m unittest tests.test_disdex_v4_refresh_activation -v
 Tests: too-early rejection, boundary acceptance, expired replacement
 eligibility, no extension without a new grant, nonce-reuse rejection,
 scope/plan/SHA, ordersEnabled=false validation.
+
+## Lease-expiry monitoring
+The read-only evidence expiry watcher and runner-health notification path now
+also inspect the root-owned lease when its dedicated directory is staged.
+A missing directory means the lease scheduler is not yet installed; an installed
+directory with a missing, tampered, wrong-SHA, wrong-scope, expired or insecure
+lease produces a blocked advisory. A lease nearing expiry generates a warning
+even while 30-minute signed read-only evidence refreshes remain fresh.
+This is an alert, not a renewal or trading authorization.
