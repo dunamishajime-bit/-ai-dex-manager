@@ -19,3 +19,8 @@ PRODUCTION STATUS: not deployed. The Shared Kill Switch remains active until
 a separately approved root operator verifies all independent contributors and
 runs the formal recovery protocol. Do not clear/relax the Kill Switch,
 alter state JSON in place, or restart V4 just because the source tests pass.
+
+This same common preemption utility is invoked by V12, PENGU, Q102 and FET.
+The root-pinned IDLE SHA also takes precedence for these callers, so distinct
+runner SHAs do not incorrectly claim ownership of the IDLE state. A missing
+pin preserves the original strict check; an invalid nonempty pin fails closed.
