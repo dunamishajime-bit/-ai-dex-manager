@@ -98,6 +98,11 @@ install -o root -g root -m 0755 \
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/deploy/disdex_v4_live_readiness.py" \
   /usr/local/sbin/disdex-v4-live-readiness
+marker_tmp="/usr/local/libexec/disdex-unified/.installed-source-sha.$$"
+printf '%s\n' "$sha" > "$marker_tmp"
+chown root:root "$marker_tmp"
+chmod 0444 "$marker_tmp"
+mv -T -- "$marker_tmp" /usr/local/libexec/disdex-unified/installed-source-sha
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/root/disdex-v4-evidence-refresh-activate" \
   /usr/local/sbin/disdex-v4-evidence-refresh-activate

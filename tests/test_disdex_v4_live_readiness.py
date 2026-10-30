@@ -3,7 +3,31 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts" / "ops" / "deploy"))
-from disdex_v4_live_readiness import assess, PREFIXES, REQUIRED_ROOT
+from disdex_v4_live_readiness import assess, PREFIXES, REQUIRED_ROOT, _installed_candidate_sha
+
+class InstalledCandidateMarker(unittest.TestCase):
+    def test_root_like_readonly_marker_value_validation(self):
+        import os,tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/"source-sha"
+            p.write_text("a"*40+"\n",encoding="ascii")
+            p.chmod(0o444)
+            # On non-root local CI the owner check deliberately fails closed.
+            # Windows stat reports a synthetic uid; Linux CI verifies the
+            # real root-ownership semantics. The value/mode contract is still
+            # portable here.
+            if os.name=="nt":
+                self.assertEqual(_installed_candidate_sha(p),"a"*40)
+            else:
+                geteuid=getattr(os,"geteuid")
+                if geteuid()==0:
+                    self.assertEqual(_installed_candidate_sha(p),"a"*40)
+                else:
+                    self.assertIsNone(_installed_candidate_sha(p))
+            p.chmod(0o644)
+            self.assertIsNone(_installed_candidate_sha(p))
+
 
 class ReadinessFailsClosed(unittest.TestCase):
     def baseline(self):

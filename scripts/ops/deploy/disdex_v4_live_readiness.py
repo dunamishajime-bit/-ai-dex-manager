@@ -14,7 +14,7 @@ import stat
 import subprocess
 import time
 
-CANDIDATE_SHA = "ca69be31bc033cd495e3735ec05469827a2184c1"
+INSTALLED_SOURCE_MARKER = Path("/usr/local/libexec/disdex-unified/installed-source-sha")
 SHA = re.compile(r"^[a-f0-9]{40}$")
 ROOT = Path("/var/lib/disdex/unified-deploy")
 RELEASES = Path("/home/deploy/disdex-trading/releases")
@@ -81,6 +81,18 @@ def _unit_states():
     return result
 
 
+def _installed_candidate_sha(marker: Path = INSTALLED_SOURCE_MARKER) -> str | None:
+    try:
+        st = marker.lstat()
+        if (not stat.S_ISREG(st.st_mode) or st.st_uid != 0
+                or st.st_mode & 0o222):
+            return None
+        value = marker.read_text(encoding="ascii").strip()
+        return value if SHA.fullmatch(value) else None
+    except OSError:
+        return None
+
+
 def _candidate(sha: str) -> dict:
     if not SHA.fullmatch(sha):
         raise ValueError("candidate SHA invalid")
@@ -133,7 +145,8 @@ def assess(raw: dict) -> list[str]:
     return sorted(set(blockers))
 
 
-def inventory(candidate_sha=CANDIDATE_SHA) -> dict:
+def inventory(candidate_sha: str | None = None) -> dict:
+    candidate_sha = candidate_sha or _installed_candidate_sha()
     units = _unit_states()
     grouped = {
         key: [{"unit": name, **state} for name, state in sorted(units.items())
@@ -173,7 +186,10 @@ def inventory(candidate_sha=CANDIDATE_SHA) -> dict:
         "killSwitchActive": kill_state,
         "rootPrerequisites": paths,
         "runnerUnits": grouped,
-        "candidate": _candidate(candidate_sha),
+        "candidate": (_candidate(candidate_sha) if candidate_sha
+                      else {"release": {"present": False}, "markerMatches": False,
+                            "localRuntime": False, "sourceGate": False,
+                            "readyProof": False}),
         "legacyRunnerReleaseOwnership": (
             "all-root-owned" if ownership and all(r["rootOwned"] for r in ownership)
             else "legacy-deploy-owned-or-absent"),
