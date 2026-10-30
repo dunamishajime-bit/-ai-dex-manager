@@ -51,6 +51,8 @@ export const V4_SHARED_EXECUTION_EVIDENCE_PATHS={
  sharedRiskAndPeers:"/etc/disdex/v12-v4-evidence/shared-risk-and-peers.json",
 } as const;
 type V4EvidenceKey=keyof typeof V4_SHARED_EXECUTION_EVIDENCE_PATHS;
+const STATIC_EVIDENCE_KEYS=new Set<V4EvidenceKey>(["routeSourceParity","v4ExecutionTests"]);
+const DYNAMIC_EVIDENCE_KEYS=new Set<V4EvidenceKey>(["establishedAsterOrders","signedAsterAccount","sharedRiskAndPeers"]);
 export type V4SharedExecutionCertificate={
  schema:"disdex-v12-v4-production-certification/v3";
  approvedSha:string;policyId:typeof V12_V4_V2_POLICY;
@@ -80,11 +82,14 @@ function record(value:unknown,key:V4EvidenceKey):V4EvidenceRecord{
 function numberField(value:unknown,key:string){
  const n=Number(value);if(!Number.isFinite(n))throw Error(`V4_EVIDENCE_FIELD_INVALID:${key}`);return n;
 }
+function evidenceIsStatic(key:V4EvidenceKey){return STATIC_EVIDENCE_KEYS.has(key);}
+function evidenceIsDynamic(key:V4EvidenceKey){return DYNAMIC_EVIDENCE_KEYS.has(key);}
 function assertCurrentEvidenceMetadata(value:V4EvidenceRecord,key:V4EvidenceKey,sha:string,now:number){
  if(value.status!=="PASS")throw Error(`V4_EVIDENCE_STATUS_NOT_PASS:${key}`);
  if(value.candidateSha!==sha)throw Error(`V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:${key}`);
  const captured=Date.parse(String(value.capturedAt??""));
- if(!Number.isFinite(captured)||captured>now+5*60_000||now-captured>EVIDENCE_MAX_AGE_MS)
+  if(!Number.isFinite(captured)||captured>now+5*60_000||
+     (evidenceIsDynamic(key)&&now-captured>EVIDENCE_MAX_AGE_MS))
   throw Error(`V4_EVIDENCE_STALE:${key}`);
 }
 /** Validate redacted evidence content before its digest grants authority. */
@@ -107,6 +112,15 @@ export function validateV4SharedExecutionEvidencePayloads(payloads:Record<V4Evid
  const risk=record(payloads.sharedRiskAndPeers,"sharedRiskAndPeers");
  if(risk.sharedRiskHealthy!==true||risk.marginGuardHealthy!==true||risk.killSwitch!==false||numberField(risk.pendingCount,"pendingCount")!==0)
   throw Error("V4_EVIDENCE_HEALTH_NOT_PASS");
+ const refreshGenerations=DYNAMIC_EVIDENCE_KEYS.size===0?[]:
+  [...DYNAMIC_EVIDENCE_KEYS].map(key=>record(payloads[key],key).refreshGeneration);
+ // Dynamic refreshes are written as one staged generation.  Legacy evidence
+ // has no marker and remains accepted; once a marker is present, a partial
+ // rename or mixed-age bundle is fail-closed instead of being treated as a
+ // fresh account/risk proof.
+ if(refreshGenerations.some(value=>value!==undefined)&&
+   (refreshGenerations.some(value=>typeof value!=="string"||!value)||new Set(refreshGenerations).size!==1))
+  throw Error("V4_EVIDENCE_DYNAMIC_REFRESH_GENERATION_MISMATCH");
  return true as const;
 }
 function validateV4SharedExecutionCertificate(raw:Record<string,any>,sha:string,now:number):V4SharedExecutionCertificate{
@@ -146,7 +160,11 @@ export async function verifyV4SharedExecutionEvidence(c:V4SharedExecutionCertifi
    if(!st.isFile()||st.uid!==0||(st.mode&0o022)!==0)
     throw Error("V4_EVIDENCE_FILE_UNTRUSTED:"+key);
    const data=await file.readFile();
-   if(createHash("sha256").update(data).digest("hex")!==c.evidenceSha256[key])
+    // Static release proofs remain digest-bound to the certificate. Dynamic
+    // account/risk proofs are revalidated from the official read-only source
+    // on every gate evaluation, so a legitimate 24-hour refresh must not be
+    // mistaken for a release tamper and crash the daemon.
+    if(evidenceIsStatic(key)&&createHash("sha256").update(data).digest("hex")!==c.evidenceSha256[key])
     throw Error("V4_EVIDENCE_DIGEST_MISMATCH:"+key);
    try{payloads[key]=JSON.parse(data.toString("utf8"));}
    catch{throw Error("V4_EVIDENCE_CONTENT_INVALID:"+key);}

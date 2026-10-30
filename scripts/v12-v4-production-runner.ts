@@ -69,6 +69,20 @@ export function classifyV4DaemonRateBudgetOutcome(
  return {status:"blocked",reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:"+rate.reason,
   waitMs:Math.max(15000,nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5))};
 }
+
+// A stale dynamic proof or a transient read-only transport failure is
+// recoverable: keep the daemon alive so reconciliation/monitoring can retry,
+// but make the order permission unambiguously BLOCKED for that cycle.  Proof
+// tampering, SHA drift, protection drift, and unknown exceptions intentionally
+// remain on the fatal fail-closed path below.
+export function classifyV4RecoverableSafetyFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+ const reason=error instanceof Error?error.message:String(error);
+ const recoverableEvidence=/^V4_EVIDENCE_STALE:(?:establishedAsterOrders|signedAsterAccount|sharedRiskAndPeers)$/.test(reason);
+ const recoverableTransport=/^(?:Aster request timeout|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|fetch failed|UND_ERR_)/i.test(reason);
+ if(!recoverableEvidence&&!recoverableTransport)return;
+ const prefix=recoverableTransport?"V4_EVIDENCE_REFRESH_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED";
+ return {status:"blocked",reason:`${prefix}:${reason}`,eventTs,candidateCount:0,orderEnabled:false};
+}
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
 }
@@ -158,13 +172,18 @@ export function buildV4HealthPayload(releaseSha:string,operationMode:string,resu
  const failed=result.status==="locked"||result.status==="blocked"||result.status.toLowerCase()==="failed";
  const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
  const safetyState=failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":"HEALTHY";
+ const ordersAllowed=safetyState==="HEALTHY"&&result.orderEnabled===true;
+ const orderPermission=safetyState==="BLOCKED"?"BLOCKED":ordersAllowed?"ALLOWED":"NO_SIGNAL";
  const payload={
   schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
-  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState,
+  // Process liveness is intentionally independent from new-order authority.
+  // A running BLOCKED daemon keeps reconciling and publishing evidence while
+  // the actual entry permission remains false.
+  liveEnabled:true,processAlive:true,processState:"RUNNING",limitedLive:operationMode==="CANARY",safetyState,
   heartbeatAt,mainPid:process.pid,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
   operationMode,mode:"LIVE",updatedAt:heartbeatAt,lastTickAt:lastCompletedTickAt,
   status:result.status,reason:result.reason,candidateCount:result.candidateCount,
-  orderEnabled:result.orderEnabled,
+  orderEnabled:result.orderEnabled,ordersAllowed,orderPermission,
   healthReason:safetyState==="HEALTHY"?null:result.reason,
  };
  return payload;
@@ -369,10 +388,18 @@ async function main(){
     result=recoverableExitGap;
     deferredWaitMs=Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
    }else{
-    const budget=classifyV4DaemonRateBudgetOutcome(error,store.read());
-    if(!budget)throw error;
-    deferredWaitMs=budget.waitMs;
-    result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+     const budget=classifyV4DaemonRateBudgetOutcome(error,store.read());
+     const recoverableSafety=classifyV4RecoverableSafetyFailure(error,Date.now());
+     if(!budget&&!recoverableSafety)throw error;
+     if(recoverableSafety){
+      deferredWaitMs=Math.max(15000,Number(process.env.V12_V4_EVIDENCE_RETRY_MS||60000));
+      result=recoverableSafety;
+     }else if(budget){
+      deferredWaitMs=budget.waitMs;
+      result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+     }else{
+      throw error;
+     }
    }
   }
   const resultRecord=result as unknown as Record<string,unknown>;

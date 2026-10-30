@@ -441,11 +441,15 @@ export async function deferAsterGlobalRateBudget(options: { path: string; cooldo
   } finally { await releaseBudgetLock(lockPath, owner); }
 }
 
-export async function waitForAsterGlobalRateSlot(weight = 1, priority:AsterRatePriority="RISK_READ") {
+export async function waitForAsterGlobalRateSlot(
+  weight = 1,
+  priority:AsterRatePriority="RISK_READ",
+  onDiagnostic?: AsterRateBudgetDiagnosticSink,
+) {
   const path = String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || "").trim();
   if (!path) return;
   const minIntervalMs = Number(process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS || 50);
   const maxQueueMs = Number(process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS || 5_000);
-  const slot = await reserveAsterGlobalRateSlot({ path, minIntervalMs, maxQueueMs, weight, priority });
+  const slot = await reserveAsterGlobalRateSlot({ path, minIntervalMs, maxQueueMs, weight, priority, onDiagnostic });
   if (slot.waitMs > 0) await sleep(slot.waitMs);
 }

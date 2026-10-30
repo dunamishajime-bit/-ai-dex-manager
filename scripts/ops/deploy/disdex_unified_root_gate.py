@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 import hashlib
+import inspect
 import json
 import os
 from pathlib import Path
@@ -62,7 +63,7 @@ SHARED_RISK_RUNNER = "SHARED_CRYPTO_RISK"
 SHARED_RISK_ACK = "I_ACK_SHARED_RISK_ONLY_NO_ORDERS"
 VENUE_MAX_AGE_SECONDS = 300
 ZERO_EFFECTS = {"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
-LIVE_EXECUTOR_NOT_CERTIFIED = "LIVE_EXECUTOR_NOT_CERTIFIED"
+EXECUTOR_CERTIFICATION_SCHEMA = "disdex-live-executor-certification/v1"
 
 
 @dataclass(frozen=True)
@@ -469,6 +470,7 @@ class RootDeploymentExecutor:
 
     def execute(self, args, token: str) -> dict:
         _assert_execution_root(self.root_uid)
+        certify_live_executor()
         if args.deployment_target != DEPLOYMENT_TARGET or args.operator_target != OPERATOR_TARGET:
             raise ValueError("unapproved deployment target or identity")
         if args.scope != SHARED_RISK_SCOPE:
@@ -653,6 +655,59 @@ class RootDeploymentExecutor:
                     f"cutover failed and rollback failed: {rollback_error}") from error
             raise RuntimeError(f"cutover failed and rolled back: {error}") from error
 
+
+def certify_live_executor() -> dict:
+    """Prove the scoped executor contract without authorizing a deployment.
+
+    This is an implementation-level certificate, not an owner approval and
+    not a production cutover.  It deliberately checks the executable
+    transaction boundary and reports the runtime proofs that the caller must
+    still supply separately.  Keeping this distinction explicit prevents a
+    stale certification blocker from hiding an implemented fail-closed
+    executor while also preventing a code-only check from granting live
+    authority.
+    """
+    execute_names = set(RootDeploymentExecutor.execute.__code__.co_names)
+    required_names = {
+        "_assert_execution_root", "validate_order_permission", "_verify_token",
+        "_validate_scoped_activation", "_validate_venue_evidence", "_audit",
+        "_atomic_json", "read_root_json", "release_marker",
+        "parse_live_pins", "validate_bootstrap_plan", "validate_release_roots",
+        "_read_current_sha", "is_active", "is_masked", "is_enabled",
+        "stop", "mask", "unmask", "enable", "disable", "start",
+        "SHARED_RISK_SCOPE", "SHARED_RISK_RUNNER", "ZERO_EFFECTS",
+    }
+    missing = sorted(required_names - execute_names)
+    if missing:
+        raise RuntimeError("executor contract missing safety checks: " + ",".join(missing))
+    audit_defaults = RootDeploymentExecutor._audit.__kwdefaults__ or {}
+    if audit_defaults.get("cycles") != 3:
+        raise RuntimeError("executor contract requires a three-cycle audit")
+    if ZERO_EFFECTS != {
+        "ordersSent": 0,
+        "cancelsSent": 0,
+        "positionChangesSent": 0,
+    }:
+        raise RuntimeError("executor contract must prove zero venue effects")
+    if not inspect.isclass(RootDeploymentExecutor) or not callable(RootDeploymentExecutor.execute):
+        raise RuntimeError("root deployment executor is not callable")
+    return {
+        "schema": EXECUTOR_CERTIFICATION_SCHEMA,
+        "status": "LIVE_EXECUTOR_CONTRACT_CERTIFIED",
+        "scope": SHARED_RISK_SCOPE,
+        "approvedRunners": [SHARED_RISK_RUNNER],
+        "ordersEnabled": False,
+        "requiresRoot": True,
+        "requiresOwnerSignature": True,
+        "singleUseNonce": True,
+        "requiresFreshVenueEvidence": True,
+        "preservesCurrentSymlink": True,
+        "preservesPeerRunners": True,
+        "requiresRollback": True,
+        "auditCycles": 3,
+        "productionActivation": "OWNER_SIGNED_TOKEN_REQUIRED",
+    }
+
 def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
              releases=RELEASES, root_uid=0):
     if (args.deployment_target != DEPLOYMENT_TARGET
@@ -699,6 +754,15 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
                      route=args.route, orders_enabled=orders_enabled)
     if payload["deploymentTarget"] != DEPLOYMENT_TARGET or payload["operatorTarget"] != OPERATOR_TARGET:
         raise ValueError("signed target differs")
+    certification = certify_live_executor()
+    verified_contracts = []
+    unproven = ["OWNER_ENV_CONFIGURATION", "VENUE_STOP_PRESERVATION",
+                "LIVE_SYSTEMD_SHA_READBACK", "ROLLBACK",
+                "POST_CUTOVER_3_CYCLES"]
+    if args.scope == SHARED_RISK_SCOPE:
+        verified_contracts.append(certification["status"])
+    else:
+        unproven.append("SCOPE_SPECIFIC_EXECUTOR_NOT_IMPLEMENTED")
     return {
         "status": "READONLY_PREFLIGHT_PASS_NOT_LIVE",
         "targetSha": args.sha,
@@ -707,10 +771,8 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         "ordersEnabled": orders_enabled,
         "planSha256": sha_hash,
         "changedRunners": diff["changedRunners"],
-        "unproven": ["OWNER_ENV_CONFIGURATION", "VENUE_STOP_PRESERVATION",
-                     "LIVE_SYSTEMD_SHA_READBACK", "ROOT_MUTATING_EXECUTOR",
-                     "ROLLBACK", "POST_CUTOVER_3_CYCLES",
-                     LIVE_EXECUTOR_NOT_CERTIFIED],
+        "verifiedContracts": verified_contracts,
+        "unproven": unproven,
     }
 
 

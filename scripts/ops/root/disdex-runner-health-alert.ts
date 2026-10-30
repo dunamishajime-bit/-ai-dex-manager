@@ -13,12 +13,19 @@ import {
   markRunnerAlertAttempt,
   markRunnerAlertDelivered,
   observeRunnerStatus,
+  formatV4EvidenceExpiryEmail,
+  markV4EvidenceExpiryAttempt,
+  markV4EvidenceExpiryDelivered,
+  observeV4EvidenceExpiry,
+  type V4EvidenceExpiryRecord,
+  type V4EvidenceExpirySnapshot,
   type RunnerAlertRecord,
 } from "../../../lib/server/runner-health-notification";
 import {
   resolveRunnerServiceUnit,
   type AlertRunnerId,
 } from "../../../lib/server/runner-service-resolution";
+import { inspectRootEvidenceFiles, inspectRootRefreshLease, combineV4EvidenceAndLease } from "./disdex-v4-evidence-expiry-watch.mjs";
 
 const ROOT = process.env.DISDEX_TRADING_ROOT || "/home/deploy/disdex-trading/current";
 const STATE_PATH = process.env.DISDEX_ALERT_STATE_PATH || "/var/lib/disdex/runner-health/private/email-alert-state.json";
@@ -29,7 +36,10 @@ const DEFAULT_RECIPIENT = "dunamis.hajime@gmail.com";
 // performed by this monitor. It is observation and email notification only.
 
 type RunnerId = AlertRunnerId;
-type AlertState = { runners: Partial<Record<RunnerId, RunnerAlertRecord>> };
+type AlertState = {
+  runners: Partial<Record<RunnerId, RunnerAlertRecord>>;
+  v4EvidenceExpiry?: V4EvidenceExpiryRecord;
+};
 
 const runners: Array<{ id: RunnerId; label: string; unitEnv: string; intentionalStopPath?: string }> = [
   {
@@ -95,6 +105,45 @@ async function readCurrentReleaseSha() {
     return (await readFile(join(ROOT, ".disdex-release-sha"), "utf8")).trim();
   } catch {
     return undefined;
+  }
+}
+
+async function readV4EvidenceExpiry(currentReleaseSha: string | undefined): Promise<V4EvidenceExpirySnapshot | undefined> {
+  const configuredService = String(process.env.DISDEX_ALERT_V12_SERVICE_UNIT || "").trim();
+  const expectedShaOverride = String(process.env.DISDEX_ALERT_V12_EXPECTED_SHA || "").trim().toLowerCase();
+  if (configuredService && !configuredService.startsWith("disdex-v12-v4@")) return undefined;
+  // Do not infer V4 mode merely from the generic current-release marker.  The
+  // dedicated V4 service or its expected-SHA pin must opt the alert monitor in.
+  if (!configuredService && !expectedShaOverride) return undefined;
+  const sha = String(expectedShaOverride || currentReleaseSha || "").trim().toLowerCase();
+  if (!/^[0-9a-f]{40}$/.test(sha)) {
+    return { status: "BLOCKED", earliestExpiryAt: undefined, remainingMs: null, expiringKeys: ["releaseSha"], sha: sha || "UNKNOWN" };
+  }
+  try {
+    const now = Date.now();
+    const evidence = await inspectRootEvidenceFiles({
+      sha,
+      directory: process.env.DISDEX_ALERT_V4_EVIDENCE_ROOT || "/etc/disdex/v12-v4-evidence",
+      now,
+    });
+    const lease = await inspectRootRefreshLease({ sha, now });
+    const result = combineV4EvidenceAndLease(evidence, lease);
+    const status = String(result.status) as V4EvidenceExpirySnapshot["status"];
+    return {
+      status,
+      earliestExpiryAt: result.earliestExpiryAt,
+      remainingMs: result.remainingMs,
+      expiringKeys: result.evidence.filter((row: { remainingMs: number | null; refreshRequired: boolean }) => row.refreshRequired || (row.remainingMs !== null && row.remainingMs < 0)).map((row: { key: string }) => row.key).concat(result.lease?.expiringKeys || []),
+      sha,
+    };
+  } catch (error) {
+    return {
+      status: "BLOCKED",
+      earliestExpiryAt: undefined,
+      remainingMs: null,
+      expiringKeys: [error instanceof Error ? error.message.slice(0, 120) : "V4_EVIDENCE_MONITOR_ERROR"],
+      sha,
+    };
   }
 }
 
@@ -298,13 +347,33 @@ async function main() {
     });
     try {
       const provider = await sendAlert(mail.subject, mail.text);
-      state.runners[runner.id] = markRunnerAlertDelivered(state.runners[runner.id], observed.status, observedAt);
+      state.runners[runner.id] = markRunnerAlertDelivered(state.runners[runner.id] || observation.record, observed.status, observedAt);
       console.log(`DISDEX_RUNNER_HEALTH_ALERT runner=${runner.id} status=${observed.status} transition=${observation.transition} provider=${provider}`);
     } catch (error) {
       deliveryFailure = true;
       console.error(`DISDEX_RUNNER_HEALTH_ALERT_FAILED runner=${runner.id} status=${observed.status} transition=${observation.transition} reason=${error instanceof Error ? error.message : String(error)}`);
       // Keep lastAttemptAt so the same incident is retried only after the
       // bounded retry interval, never on every timer tick.
+    }
+  }
+  const v4Expiry = await readV4EvidenceExpiry(currentReleaseSha);
+  if (v4Expiry) {
+    const observation = observeV4EvidenceExpiry(state.v4EvidenceExpiry, v4Expiry, observedAt);
+    state.v4EvidenceExpiry = observation.record;
+    if (observation.shouldSend && observation.transition !== "NONE") {
+      // Persist the attempt before SMTP delivery so a monitor restart cannot
+      // turn one incident into a one-minute duplicate mail storm.
+      state.v4EvidenceExpiry = markV4EvidenceExpiryAttempt(observation.record, observedAt);
+      await saveState(state);
+      const mail = formatV4EvidenceExpiryEmail(v4Expiry);
+      try {
+        const provider = await sendAlert(mail.subject, mail.text);
+        state.v4EvidenceExpiry = markV4EvidenceExpiryDelivered(state.v4EvidenceExpiry, observedAt);
+        console.log(`DISDEX_V4_EVIDENCE_EXPIRY_ALERT status=${v4Expiry.status} transition=${observation.transition} provider=${provider}`);
+      } catch (error) {
+        deliveryFailure = true;
+        console.error(`DISDEX_V4_EVIDENCE_EXPIRY_ALERT_FAILED status=${v4Expiry.status} transition=${observation.transition} reason=${error instanceof Error ? error.message : String(error)}`);
+      }
     }
   }
   await saveState(state);

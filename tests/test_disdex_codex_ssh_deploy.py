@@ -45,6 +45,14 @@ class CodexSshAdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "order permission"):
             self.command(orders_enabled=True)
 
+    def test_v4_refresh_scope_uses_dedicated_owner_wrapper(self):
+        command = self.command(scope="V4_EVIDENCE_REFRESH_ONLY")
+        self.assertIn("/usr/local/sbin/disdex-v4-evidence-refresh-activate", command)
+        self.assertIn("--install", command)
+        self.assertIn("--token-stdin", command)
+        self.assertNotIn("--execute", command)
+        self.assertNotIn("disdex-unified-production-deploy", command)
+
     def test_rejects_invalid_sha_and_plan(self):
         with self.assertRaisesRegex(ValueError, "SHA"):
             self.command(sha="not-a-sha")

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run DisDex V4 dynamic evidence refresh every 30 minutes (%i)
+
+[Timer]
+OnCalendar=*:0/30
+Persistent=true
+RandomizedDelaySec=90s
+Unit=disdex-v4-dynamic-evidence-refresh@%i.service
+
+[Install]
+WantedBy=timers.target

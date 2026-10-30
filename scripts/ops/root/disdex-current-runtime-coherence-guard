@@ -248,7 +248,7 @@ monitor_pins_current() {
     grep -Fxq "Environment=DISDEX_ALERT_V12_EXPECTED_SHA=$V4_PRIMARY_SHA" "$ALERT_DROPIN" || return 1
     grep -Fxq "Environment=DISDEX_ALERT_V12_SERVICE_UNIT=$V12_EXPECTED_UNIT" "$ALERT_DROPIN" || return 1
     grep -Fq "WorkingDirectory=$V4_PRIMARY_RELEASE" "$ALERT_DROPIN" || return 1
-    grep -Fq "ExecStart=$V4_PRIMARY_RELEASE/node_modules/.bin/tsx $V4_PRIMARY_RELEASE/scripts/ops/root/disdex-runner-health-alert.ts" "$ALERT_DROPIN" || return 1
+    grep -Fq "ExecStart=/usr/bin/node $V4_PRIMARY_RELEASE/node_modules/tsx/dist/cli.mjs $V4_PRIMARY_RELEASE/scripts/ops/root/disdex-runner-health-alert.ts" "$ALERT_DROPIN" || return 1
     grep -Fxq "ExecStartPre=/usr/bin/test -f $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
     grep -Fxq "ExecStartPre=/usr/bin/grep -Fxq $V4_PRIMARY_SHA $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
     grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json" "$HEALTH_ENV" || return 1

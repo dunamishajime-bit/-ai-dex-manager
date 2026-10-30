@@ -1,5 +1,5 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { deferAsterGlobalRateBudget, waitForAsterGlobalRateSlot } from "./disdex-aster-global-rate-budget";
+import { deferAsterGlobalRateBudget, waitForAsterGlobalRateSlot, type AsterRateBudgetDiagnosticSink } from "./disdex-aster-global-rate-budget";
 import { nextAsterRateBudgetRetryMs } from "./disdex-aster-rate-budget-policy";
 import type {AsterRatePriority} from "./disdex-aster-rate-budget-policy";
 
@@ -31,6 +31,7 @@ export interface AsterV3ClientOptions {
     readOnlyRateLimitBackoffMaxMs?: number;
     readOnlyRateLimitRandom?: () => number;
     onReadOnlyRetry?: (event: AsterReadOnlyRetryDiagnostic) => void;
+    onRateBudgetDiagnostic?: AsterRateBudgetDiagnosticSink;
     fetchImpl?: typeof fetch;
     userAgent?: string;
 }
@@ -341,6 +342,7 @@ export class AsterV3Client {
     private readonly readOnlyRateLimitBackoffMaxMs: number;
     private readonly readOnlyRateLimitRandom: () => number;
     private readonly onReadOnlyRetry?: (event: AsterReadOnlyRetryDiagnostic) => void;
+    private readonly onRateBudgetDiagnostic?: AsterRateBudgetDiagnosticSink;
     private readonly fetchImpl: typeof fetch;
     private readonly userAgent: string;
     private readonly nonce = new MonotonicMicrosecondNonce();
@@ -358,6 +360,7 @@ export class AsterV3Client {
         this.readOnlyRateLimitBackoffMaxMs = Math.max(this.readOnlyRateLimitBackoffBaseMs, Math.min(120_000, Math.floor(options.readOnlyRateLimitBackoffMaxMs ?? 120_000)));
         this.readOnlyRateLimitRandom = options.readOnlyRateLimitRandom ?? Math.random;
         this.onReadOnlyRetry = options.onReadOnlyRetry;
+        this.onRateBudgetDiagnostic = options.onRateBudgetDiagnostic;
         this.fetchImpl = options.fetchImpl ?? fetch;
         this.userAgent = options.userAgent || "DisDex-Win80-LiveRunner/1.0";
     }
@@ -381,8 +384,7 @@ export class AsterV3Client {
         let retries = 0;
         while (true) {
             try {
-                await waitForAsterGlobalRateSlot(asterFuturesRequestWeight(method, input.path, params),
-                    input.ratePriority ?? (input.orderMutation===true?"NEW_EXPOSURE":"RISK_READ"));
+                await waitForAsterGlobalRateSlot(asterFuturesRequestWeight(method, input.path, params), input.ratePriority ?? (input.orderMutation===true?"NEW_EXPOSURE":"RISK_READ"), this.onRateBudgetDiagnostic);
                 const abort = new AbortController();
                 const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
                 try {
@@ -403,7 +405,12 @@ export class AsterV3Client {
                         const budgetPath = String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || "").trim();
                         if (budgetPath && (response.status === 429 || response.status === 418)) {
                             const minimumCooldownMs = response.status === 418 ? 120_000 : 60_000;
-                            await deferAsterGlobalRateBudget({ path: budgetPath, cooldownMs: Math.max(minimumCooldownMs, retryAfterMs ?? 0), status: response.status });
+                            await deferAsterGlobalRateBudget({
+                                path: budgetPath,
+                                cooldownMs: Math.max(minimumCooldownMs, retryAfterMs ?? 0),
+                                status: response.status,
+                                onDiagnostic: this.onRateBudgetDiagnostic,
+                            });
                         }
                         throw new AsterApiError({ path: input.path, message: parseErrorMessage(payload, `Aster HTTP ${response.status}`), status: response.status, code: parseErrorCode(payload), retryAfterMs, executionUnknown, responseBody: payload });
                     }
