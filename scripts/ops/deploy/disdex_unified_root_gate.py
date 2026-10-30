@@ -757,8 +757,10 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
     desired = read_root_json(root / "plans" / args.scope / (args.sha + ".json"),
                              root_uid=root_uid)
     current_plan = read_root_json(root / "current-plan.json", root_uid=root_uid)
-    pins = parse_live_pins(read_root_json(pins_path, root_uid=root_uid,
-                                           private=False))
+    pins = parse_live_pins(
+        read_root_json(pins_path, root_uid=root_uid, private=False),
+        releases=releases,
+    )
     link = current.lstat()
     if not stat.S_ISLNK(link.st_mode):
         raise ValueError("production current is not symlink")
