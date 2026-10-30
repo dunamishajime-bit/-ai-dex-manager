@@ -239,13 +239,28 @@ class RootGateTest(unittest.TestCase):
 
 
 class FakeSystemd:
-    def __init__(self, old_unit, new_unit, *, fail_new_start=False):
+    def __init__(self, old_unit, new_unit, *, fail_new_start=False,
+                 old_active=True, dormant_old_pid=0):
         self.old_unit = old_unit
         self.new_unit = new_unit
         self.fail_new_start = fail_new_start
-        self.active_units = {old_unit: True, new_unit: False}
+        self.active_units = {old_unit: old_active, new_unit: False}
+        self.failed_units = {old_unit} if not old_active else set()
+        self.dormant_old_pid = dormant_old_pid
         self.masked_units = set()
         self.calls = []
+
+    def active_state(self, unit):
+        if self.active_units.get(unit, False):
+            return "active"
+        return "failed" if unit in self.failed_units else "inactive"
+
+    def main_pid(self, unit):
+        if self.active_units.get(unit, False):
+            return 4242
+        if unit == self.old_unit:
+            return self.dormant_old_pid
+        return 0
 
     def is_active(self, unit):
         return bool(self.active_units.get(unit, False))
@@ -259,6 +274,7 @@ class FakeSystemd:
     def stop(self, unit):
         self.calls.append(("stop", unit))
         self.active_units[unit] = False
+        self.failed_units.discard(unit)
 
     def mask(self, unit):
         self.calls.append(("mask", unit))
@@ -275,6 +291,7 @@ class FakeSystemd:
         if unit in self.masked_units:
             raise RuntimeError("masked unit cannot start")
         self.active_units[unit] = True
+        self.failed_units.discard(unit)
 
     def enable(self, unit):
         self.calls.append(("enable", unit))

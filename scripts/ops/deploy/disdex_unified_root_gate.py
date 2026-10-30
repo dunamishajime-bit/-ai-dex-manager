@@ -119,8 +119,17 @@ class SystemdAdapter:
             raise RuntimeError(f"systemd show {unit}: {detail[:240]}")
         return result.stdout.strip()
 
+    def active_state(self, unit: str) -> str:
+        return self._state(unit, "ActiveState")
+
+    def main_pid(self, unit: str) -> int:
+        value = self._state(unit, "MainPID")
+        if not value.isdigit():
+            raise RuntimeError("systemd MainPID is not numeric: " + unit)
+        return int(value)
+
     def is_active(self, unit: str) -> bool:
-        return self._state(unit, "ActiveState") in ("active", "activating", "deactivating")
+        return self.active_state(unit) in ("active", "activating", "deactivating")
 
     def is_masked(self, unit: str) -> bool:
         return self._state(unit, "UnitFileState") == "masked"

@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 import stat
 
-from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, validate_order_permission
+from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, SHA, validate_order_permission
 from disdex_unified_root_gate import (
     EXECUTION_ACTIVATION_SCHEMA, ZERO_EFFECTS, SHARED_RISK_SCOPE,
     _assert_execution_root, _atomic_json, _unit_for_runner,
@@ -28,6 +28,35 @@ RUNTIME_ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
 RUNTIME_SCHEMA = "disdex-live-operator-activation/v1"
 RUNTIME_TARGET = "DD1296_FINAL_ALLIN_10BPS"
 RUNTIME_APPROVAL = Path("/var/lib/disdex/shared/operator-activation/v12-v4-full.json")
+
+def _legacy_transition_current_sha(paths) -> str:
+    """Read exact production current SHA without blessing legacy ownership.
+
+    This is only a migration identity check. The *candidate* V4 release must
+    still satisfy the root-owned immutable marker contract.
+    """
+    link = paths.current.lstat()
+    if not stat.S_ISLNK(link.st_mode):
+        raise ValueError("production current is not symlink")
+    resolved = paths.current.resolve(strict=True)
+    if resolved.parent != paths.releases or not SHA.fullmatch(resolved.name):
+        raise ValueError("production current symlink escapes immutable releases")
+    return resolved.name
+
+
+def _validate_old_v4_baseline(systemd, unit: str) -> tuple[bool, str, int]:
+    if systemd.is_masked(unit):
+        raise ValueError("old V4 baseline is masked")
+    state = systemd.active_state(unit)
+    pid = systemd.main_pid(unit)
+    active = systemd.is_active(unit)
+    if active:
+        if state != "active" or pid <= 0:
+            raise ValueError("old V4 active baseline PID/state invalid")
+    else:
+        if state not in ("failed", "inactive") or pid != 0:
+            raise ValueError("old V4 dormant baseline is not proven PID 0")
+    return active, state, pid
 
 
 def validate_v4_activation(activation, args, desired, plan_hash, now):
@@ -118,7 +147,7 @@ class V4RootExecutor:
         current = read_root_json(paths.current_plan, root_uid=c.root_uid)
         raw_pins = read_root_json(paths.pins, root_uid=c.root_uid, private=False)
         pins = parse_live_pins(raw_pins, releases=paths.releases)
-        current_sha = c._read_current_sha()
+        current_sha = _legacy_transition_current_sha(paths)
         plan_hash, diff = validate_bootstrap_plan(desired, current, pins, current_sha)
         if (plan_hash != args.plan_sha256 or desired["sourceSha"] != args.sha
                 or desired["ordersEnabled"] is not True
@@ -128,9 +157,14 @@ class V4RootExecutor:
             raise ValueError("V4 plan exceeds single-runner authorized delta")
         if desired["runners"][V4_RUNNER] != args.sha:
             raise ValueError("V4 candidate SHA differs from plan")
-        validate_release_roots(desired, paths.releases, root_uid=c.root_uid)
-        for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
-            release_marker(sha, paths.releases, root_uid=c.root_uid)
+        # Exact V4 transition must not require rewriting legacy peer/UI
+        # releases merely to satisfy a new ownership convention. Their SHA map
+        # remains frozen in the signed plan and venue evidence. Only the new
+        # V4 release is introduced by this scope, so only that release must be
+        # root-owned immutable here.
+        if desired["releaseRoots"]["runners"] != str(paths.releases):
+            raise ValueError("V4 runner release root differs from production releases")
+        release_marker(args.sha, paths.releases, root_uid=c.root_uid)
         # The unit must have a genuine SHA-local executable and readiness file,
         # rather than relying on another release's shared tsx executable.
         release = paths.releases / args.sha
@@ -161,10 +195,7 @@ class V4RootExecutor:
         new_unit = _unit_for_runner(V4_RUNNER, args.sha)
         if c.systemd.is_active(new_unit) or c.systemd.is_masked(new_unit):
             raise ValueError("new V4 already active or masked")
-        if not c.systemd.is_active(old_unit) or c.systemd.is_masked(old_unit):
-            raise ValueError("old V4 is not the sole active owner")
-        # A dormant old V4 is not an acceptable cutover baseline. No
-        # uncontrolled overlapping V4 trader is allowed.
+        old_was_active, old_state, old_pid = _validate_old_v4_baseline(c.systemd, old_unit)
         if old_unit == new_unit:
             raise ValueError("V4 no-op cutover")
         old_enabled = c.systemd.is_enabled(old_unit)
@@ -208,11 +239,14 @@ class V4RootExecutor:
                 "phase": "PREPARED", "scope": V4_SCOPE,
                 "oldSha": old_sha, "newSha": args.sha,
                 "oldUnit": old_unit, "newUnit": new_unit,
+                "oldBaselineState": old_state, "oldBaselinePid": old_pid,
+                "oldBaselineWasActive": old_was_active,
                 "oldPins": raw_pins, "oldPlan": current,
                 "oldRuntimeApprovalPresent": old_runtime is not None,
             }, root_uid=c.root_uid)
             changes_started = True
-            c.systemd.stop(old_unit)
+            if old_was_active:
+                c.systemd.stop(old_unit)
             c.systemd.mask(old_unit)
             _atomic_json(paths.pins, next_manifest, root_uid=c.root_uid, private=False)
             _atomic_json(paths.current_plan, next_plan, root_uid=c.root_uid)
@@ -269,7 +303,7 @@ class V4RootExecutor:
                     assert_regular_secure(self.runtime_approval,
                                           root_uid=c.root_uid, private=True)
                     self.runtime_approval.unlink()
-                if not c.systemd.is_active(old_unit):
+                if old_was_active and not c.systemd.is_active(old_unit):
                     c.systemd.start(old_unit)
                 _atomic_json(journal, {
                     "schema": "disdex-unified-deploy-transaction/v1",

@@ -148,6 +148,28 @@ class V4CutoverTransactionTest(unittest.TestCase):
         self.assertEqual(self.fx.current.resolve(),self.fx.releases/OLD)
         self.assertEqual(json.loads(self.runtime.read_text())["approvedSha"],NEW)
 
+    def test_failed_pid_zero_old_v4_can_recover_directly_to_new_live(self):
+        sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False)
+        result=self._executor(sysd).execute(self._args(),"signed-token")
+        self.assertEqual(result["status"],"V4_LIVE_CUTOVER_VERIFIED")
+        self.assertFalse(sysd.is_active(self.old_unit))
+        self.assertTrue(sysd.is_active(self.new_unit))
+        self.assertNotIn(("stop",self.old_unit),sysd.calls)
+
+    def test_dormant_old_with_nonzero_pid_is_blocked_before_mutation(self):
+        sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False,dormant_old_pid=42)
+        with self.assertRaisesRegex(ValueError,"PID 0"):
+            self._executor(sysd).execute(self._args(),"signed-token")
+        self.assertEqual(sysd.calls,[])
+
+    def test_failed_candidate_from_failed_baseline_does_not_resurrect_old_v4(self):
+        sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False,fail_new_start=True)
+        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+            self._executor(sysd).execute(self._args(),"signed-token")
+        self.assertFalse(sysd.is_active(self.old_unit))
+        self.assertFalse(sysd.is_active(self.new_unit))
+        self.assertNotIn(("start",self.old_unit),sysd.calls)
+
     def test_failed_start_rolls_back_without_unprotected_window(self):
         old_approval={"approvedSha":OLD}
         _write_secure_json(self.runtime,old_approval)
