@@ -207,6 +207,16 @@ def expected_lease_path(sha: str, root: Path = LEASE_ROOT) -> Path:
     return root / f"{sha}.json"
 
 
+def require_fresh_refresh_approval(existing: dict | None, approval: dict) -> None:
+    """Reject a re-approval that repeats the nonce recorded in an old lease."""
+    if existing is None:
+        return
+    nonce = approval.get("nonce") if isinstance(approval, dict) else None
+    if isinstance(nonce, str) and existing.get("approvalNonceDigest") == hashlib.sha256(
+            nonce.encode("ascii")).hexdigest():
+        raise ValueError("refresh approval nonce reused")
+
+
 def _assert_root() -> None:
     geteuid = getattr(os, "geteuid", None)
     if not callable(geteuid) or geteuid() != 0:
@@ -284,9 +294,7 @@ def install_refresh_lease(*, token: str, sha: str, operator: str,
         operator_target=OPERATOR_TARGET,
         orders_enabled=False,
     )
-    if existing is not None and existing["approvalNonceDigest"] == hashlib.sha256(
-            approval["nonce"].encode("ascii")).hexdigest():
-        raise ValueError("refresh approval nonce reused")
+    require_fresh_refresh_approval(existing, approval)
     lease = build_refresh_lease(approval, now=now)
     validate_refresh_lease(lease, sha=sha, now=now)
     _write_root_json(lease_path, lease)

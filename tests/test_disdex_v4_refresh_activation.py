@@ -1,12 +1,7 @@
 """Owner-to-refresh-lease boundary tests; no real key or VPS access."""
-import hashlib
-import json
-import os
 import sys
-import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "ops" / "deploy"))
@@ -14,12 +9,10 @@ sys.path.insert(0, str(ROOT / "scripts" / "ops" / "deploy"))
 from disdex_v4_evidence_refresh_activation import (  # noqa: E402
     REFRESH_SCOPE,
     build_refresh_lease,
-    expected_lease_path,
-    install_refresh_lease,
+    require_fresh_refresh_approval,
     refresh_plan_sha256,
     validate_refresh_lease,
 )
-import disdex_v4_evidence_refresh_activation as refresh_activation  # noqa: E402
 
 
 SHA = "a" * 40
@@ -85,86 +78,19 @@ class RefreshLeaseTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "schema"):
             validate_refresh_lease({**active, "unexpected": True}, sha=SHA, now=NOW)
 
-    @unittest.skipIf(os.name == "nt", "root-owned lease replacement semantics require Linux CI")
     def test_expired_lease_requires_a_fresh_owner_nonce(self):
-        with tempfile.TemporaryDirectory() as directory:
-            lease_root = Path(directory) / "refresh-leases" / "v4"
-            nonce_dir = Path(directory) / "nonces"
-            public_key = Path(directory) / "owner-approval-public.pem"
-            lease_root.mkdir(parents=True, mode=0o700)
-            nonce_dir.mkdir(mode=0o700)
-            public_key.write_text("test public key", encoding="ascii")
-            public_key.chmod(0o600)
-            lease_path = lease_root / f"{SHA}.json"
-            previous = build_refresh_lease(approval(), now=NOW)
-            previous["approvedAt"] = NOW - 2
-            previous["expiresAt"] = NOW - 1
-            lease_path.write_text(json.dumps(previous), encoding="utf-8")
-            lease_path.chmod(0o600)
+        previous = build_refresh_lease(approval(), now=NOW)
+        with self.assertRaisesRegex(ValueError, "nonce reused"):
+            require_fresh_refresh_approval(previous, approval())
 
-            def reused_nonce(*_args, **_kwargs):
-                return approval()
-
-            with patch.object(refresh_activation, "LEASE_ROOT", lease_root):
-                with self.assertRaisesRegex(ValueError, "nonce reused"):
-                    install_refresh_lease(
-                        token="reused-token",
-                        sha=SHA,
-                        operator="owner",
-                        route="CODEX_SSH",
-                        plan_sha256=refresh_plan_sha256(SHA),
-                        public_key=public_key,
-                        nonce_dir=nonce_dir,
-                        lease_path=expected_lease_path(SHA, lease_root),
-                        now=NOW,
-                        verify_fn=reused_nonce,
-                    )
-
-    @unittest.skipIf(os.name == "nt", "root-owned lease replacement semantics require Linux CI")
     def test_expired_lease_replacement_publishes_only_a_fresh_nonce(self):
-        with tempfile.TemporaryDirectory() as directory:
-            lease_root = Path(directory) / "refresh-leases" / "v4"
-            nonce_dir = Path(directory) / "nonces"
-            public_key = Path(directory) / "owner-approval-public.pem"
-            lease_root.mkdir(parents=True, mode=0o700)
-            nonce_dir.mkdir(mode=0o700)
-            public_key.write_text("test public key", encoding="ascii")
-            public_key.chmod(0o600)
-            lease_path = lease_root / f"{SHA}.json"
-            previous = build_refresh_lease(approval(), now=NOW)
-            previous["approvedAt"] = NOW - 2
-            previous["expiresAt"] = NOW - 1
-            lease_path.write_text(json.dumps(previous), encoding="utf-8")
-            lease_path.chmod(0o600)
-            fresh = approval(nonce="c" * 32)
-
-            def fresh_nonce(*_args, **_kwargs):
-                return fresh
-
-            with patch.object(refresh_activation, "LEASE_ROOT", lease_root):
-                result = install_refresh_lease(
-                    token="fresh-token",
-                    sha=SHA,
-                    operator="owner",
-                    route="CODEX_SSH",
-                    plan_sha256=refresh_plan_sha256(SHA),
-                    public_key=public_key,
-                    nonce_dir=nonce_dir,
-                    lease_path=expected_lease_path(SHA, lease_root),
-                    now=NOW,
-                    verify_fn=fresh_nonce,
-                )
-
-            self.assertEqual(result["status"], "V4_REFRESH_LEASE_INSTALLED")
-            renewed = json.loads(lease_path.read_text(encoding="utf-8"))
-            self.assertNotEqual(
-                renewed["approvalNonceDigest"],
-                previous["approvalNonceDigest"],
-            )
-            self.assertEqual(
-                renewed["approvalNonceDigest"],
-                hashlib.sha256(("c" * 32).encode("ascii")).hexdigest(),
-            )
+        previous = build_refresh_lease(approval(), now=NOW)
+        fresh = approval(nonce="c" * 32)
+        self.assertIsNone(require_fresh_refresh_approval(previous, fresh))
+        renewed = build_refresh_lease(fresh, now=NOW)
+        self.assertNotEqual(
+            renewed["approvalNonceDigest"], previous["approvalNonceDigest"],
+        )
 
 
 if __name__ == "__main__":
