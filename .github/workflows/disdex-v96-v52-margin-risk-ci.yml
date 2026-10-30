@@ -18,6 +18,10 @@ on:
       - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
       - 'scripts/disdex_v52_margin_aware_live_engine.py'
       - 'scripts/disdex-v96-v52-prepare-account-risk.py'
+      - 'scripts/disdex-idle-residual-long-core-preempt.ts'
+      - 'lib/idle-residual-long-preemption.ts'
+      - 'lib/idle-residual-owner-sha.ts'
+      - 'tests/idle-residual-v52-owner-sha.test.ts'
       - 'scripts/ops/**'
       - 'ops/systemd/**'
       - '.github/workflows/disdex-v96-v52-margin-risk-ci.yml'
@@ -40,6 +44,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: IDLE owner SHA preemption contract
+        run: node --import tsx --test tests/idle-residual-v52-owner-sha.test.ts
 
       - name: Validate TypeScript and strategy contracts
         run: |

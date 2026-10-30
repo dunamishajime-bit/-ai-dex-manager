@@ -2,6 +2,7 @@ import type { AccountLockHandle } from "./disdex-account-order-lock";
 import type { DirectPosition, DirectTradeExecutor } from "./direct-trade-executor";
 import type { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
 import { FileIdleResidualLongStateStore } from "./idle-residual-long-state";
+import { resolveIdleResidualOwnerShaForPreemption } from "./idle-residual-owner-sha";
 
 const EPS = 1e-9;
 
@@ -22,7 +23,10 @@ export async function releaseIdleResidualLongForFormalEntry(input: {
   now?: () => number;
 }) {
   if (input.enabled !== true) return { status: "not-needed" as const, message: "IDLE_RESIDUAL_PREEMPTION_DISABLED" };
-  const sha = String(input.expectedRuntimeSha || "").trim().toLowerCase();
+  const pin = String(process.env.DISDEX_IDLE_PRIORITY_RUNTIME_SHA || "").trim();
+  const sha = pin
+    ? resolveIdleResidualOwnerShaForPreemption(pin)
+    : String(input.expectedRuntimeSha || "").trim().toLowerCase();
   if (!/^[0-9a-f]{40}$/.test(sha)) return { status: "blocked" as const, message: "IDLE_RESIDUAL_PREEMPTION_SHA_REQUIRED" };
   const store = new FileIdleResidualLongStateStore(
     input.statePath || process.env.DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH || "/var/lib/disdex/idle-priority/residual-long-state.json",
