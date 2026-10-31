@@ -65,6 +65,7 @@ export const STRATEGY_SOLANA_EXPANSION_SYMBOLS = [
 
 export const STRATEGY_BNB_DEXSCREENER_SYMBOLS = [
     "ADA",
+    "APE",
     "LINK",
     "AVAX",
     "LTC",
@@ -74,6 +75,8 @@ export const STRATEGY_BNB_DEXSCREENER_SYMBOLS = [
     "TRX",
     "INJ",
     "BCH",
+    "COS",
+    "MITO",
     "PEPE",
 ] as const;
 
@@ -151,7 +154,7 @@ const PROFILE_DEFAULTS: Record<UniverseSeedProfile, SeedDefaults> = {
 };
 
 const BNB_ECOSYSTEM_SYMBOLS = new Set([
-    "BNB", "CAKE", "XVS", "TWT", "ALPACA", "DODO", "ID", "SFP", "ASTER", "WLFI",
+    "BNB", "CAKE", "XVS", "TWT", "ALPACA", "DODO", "ID", "SFP", "ASTER", "WLFI", "APE", "COS", "MITO",
     "ANKR", "IOTX", "KAVA", "LISTA", "HOOK", "TKO", "TLM", "TPT", "TRONPAD",
 ]);
 
@@ -331,9 +334,12 @@ export const STRATEGY_UNIVERSE_SEEDS: StrategyUniverseSeed[] = [
 
 export const STRATEGY_UNIVERSE_SYMBOLS = STRATEGY_UNIVERSE_SEEDS.map((seed) => seed.symbol);
 
-export const STRATEGY_UNIVERSE_PROVIDER_MAP: Record<string, string> = Object.fromEntries(
-    STRATEGY_UNIVERSE_SEEDS.map((seed) => [seed.symbol, seed.providerId]),
-);
+export const STRATEGY_UNIVERSE_PROVIDER_MAP: Record<string, string> = {
+    ...Object.fromEntries(STRATEGY_UNIVERSE_SEEDS.map((seed) => [seed.symbol, seed.providerId])),
+    APE: "apecoin",
+    COS: "contentos",
+    MITO: "mitosis",
+};
 
 export const STRATEGY_UNIVERSE_SEED_MAP: Record<string, StrategyUniverseSeed> = Object.fromEntries(
     STRATEGY_UNIVERSE_SEEDS.map((seed) => [seed.symbol, seed]),
