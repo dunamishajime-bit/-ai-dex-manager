@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Start an already-certified V4 or IDLE runner under the all-runner task.
+"""Start an already-certified V4, IDLE, or HYPE runner under the all-runner task.
 
 This helper never places a test order and never changes venue orders, positions,
 STOPs, Kill Switch state, operator activation, strategy files, or risk limits.
@@ -43,6 +43,13 @@ RUNNERS={
         "root":Path("/home/deploy/disdex-trading/current"),
         "activation":Path("/var/lib/disdex/shared/operator-activation/current.json"),
         "activation_runner":"IDLE_PRIORITY_SHORT",
+    },
+    "HYPE":{
+        "unit":f"disdex-hype-long@{MAIN}.service",
+        "sha":MAIN,
+        "root":BASE/MAIN,
+        "activation":Path("/var/lib/disdex/shared/operator-activation/current.json"),
+        "activation_runner":"HYPE_TREND_LONG",
     },
 }
 
