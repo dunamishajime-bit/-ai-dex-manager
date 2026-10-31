@@ -1,0 +1,362 @@
+name: DisDex HP Approval UI Production Deploy
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-hp-approval-ui-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Validate exact deployment command
+        id: request
+        shell: bash
+        env:
+          BODY: ${{ github.event.comment.body }}
+          EVENT_MASTER_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, re
+          body = os.environ["BODY"].strip()
+          m = re.fullmatch(
+              r"DISDEX_HP_APPROVAL_UI_DEPLOY SHA=([0-9a-f]{40}) FROM=([0-9a-f]{40})",
+              body,
+          )
+          if not m:
+              raise SystemExit("deployment comment does not match exact grammar")
+          target, expected_old = m.groups()
+          if target != os.environ["EVENT_MASTER_SHA"]:
+              raise SystemExit("target SHA is not the default-branch SHA bound to this issue_comment event")
+          print("target_sha=" + target)
+          print("expected_old_sha=" + expected_old)
+          PY
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ steps.request.outputs.target_sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Build exact HP release with its own dependencies
+        shell: bash
+        env:
+          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
+          npm ci --ignore-scripts
+          npm run deploy:hp-approval:selftest
+          npm run build
+          test -f .next/BUILD_ID
+          npm prune --omit=dev --ignore-scripts
+          test -x node_modules/.bin/next
+          printf '%s\n' "$TARGET_SHA" > .disdex-release-sha
+          tar -czf /tmp/disdex-hp-approval-ui-runtime.tgz             .next node_modules public package.json package-lock.json next.config.mjs .disdex-release-sha
+          echo "RUNTIME_ARCHIVE_BYTES=$(stat -c %s /tmp/disdex-hp-approval-ui-runtime.tgz)"
+
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+
+      - name: Read-only preflight against exact current HP release
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
+          EXPECTED_OLD_SHA: ${{ steps.request.outputs.expected_old_sha }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_OLD_SHA='$EXPECTED_OLD_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          svc='ai-dex-manager-ui.service'
+          [[ "$(systemctl is-active "$svc")" == "active" ]]
+          current="$(systemctl show "$svc" --property WorkingDirectory --value)"
+          [[ -d "$current" && ! -L "$current" ]]
+          actual_sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          [[ "$actual_sha" == "$EXPECTED_OLD_SHA" ]] || {
+            echo "CURRENT_UI_SHA_MISMATCH expected=$EXPECTED_OLD_SHA actual=$actual_sha"
+            exit 40
+          }
+          user="$(systemctl show "$svc" --property User --value)"
+          [[ -z "$user" || "$user" == "deploy" ]]
+          pid="$(systemctl show "$svc" --property MainPID --value)"
+          [[ "$pid" =~ ^[1-9][0-9]*$ ]]
+          env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
+          if grep -qx 'GMAIL_USER' <<<"$env_names" && grep -qx 'GMAIL_APP_PASSWORD' <<<"$env_names"; then
+            echo 'MAIL_PROVIDER=GMAIL_CONFIGURED'
+          elif grep -qx 'SENDGRID_API_KEY' <<<"$env_names"; then
+            echo 'MAIL_PROVIDER=SENDGRID_CONFIGURED'
+          else
+            echo 'MAIL_PROVIDER_MISSING'
+            exit 41
+          fi
+          trading="$(readlink -f /home/deploy/disdex-trading/current)"
+          [[ "$trading" == /home/deploy/disdex-trading/releases/* ]]
+          avail_kb="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          [[ "$avail_kb" -ge 2500000 ]] || {
+            echo "INSUFFICIENT_DISK_KB=$avail_kb"
+            exit 42
+          }
+          echo "CURRENT_UI_SHA=$actual_sha"
+          echo "CURRENT_UI_WORKDIR=$current"
+          echo "TRADING_CURRENT_BEFORE=$trading"
+          echo "AVAILABLE_KB=$avail_kb"
+          echo 'TRADING_MUTATION=0'
+          REMOTE
+
+      - name: Upload exact runtime bundle
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -P "$PORT"             /tmp/disdex-hp-approval-ui-runtime.tgz             "root@$SSH_HOST:/tmp/disdex-hp-approval-ui-runtime-${GITHUB_RUN_ID}.tgz"
+
+      - name: Install HP approval secrets and switch UI only
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
+          EXPECTED_OLD_SHA: ${{ steps.request.outputs.expected_old_sha }}
+          REQUEST_ID: hp-approval-${{ github.run_id }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_OLD_SHA='$EXPECTED_OLD_SHA' REQUEST_ID='$REQUEST_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          umask 077
+          svc='ai-dex-manager-ui.service'
+          ui_root='/home/deploy/disdex-trading/ui-releases'
+          current="$(systemctl show "$svc" --property WorkingDirectory --value)"
+          actual_sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          [[ "$actual_sha" == "$EXPECTED_OLD_SHA" ]]
+          trading_before="$(readlink -f /home/deploy/disdex-trading/current)"
+          release="$ui_root/ui-hp-approval-${TARGET_SHA:0:12}"
+          stage="$ui_root/.ui-hp-approval-${TARGET_SHA:0:12}.tmp-$REQUEST_ID"
+          archive="/tmp/disdex-hp-approval-ui-runtime-${REQUEST_ID#hp-approval-}.tgz"
+          [[ -f "$archive" ]]
+          [[ ! -e "$release" && ! -L "$release" ]]
+          rm -rf -- "$stage"
+          install -d -o deploy -g deploy -m 0755 "$stage"
+          tar --no-same-owner -xzf "$archive" -C "$stage"
+          rm -f -- "$archive"
+          [[ -f "$stage/.next/BUILD_ID" && -x "$stage/node_modules/.bin/next" ]]
+          [[ "$(tr -d '[:space:]' < "$stage/.disdex-release-sha")" == "$TARGET_SHA" ]]
+
+          shared_data='/home/deploy/disdex-ui/shared/data'
+          install -d -o deploy -g deploy -m 0750 "$shared_data"
+          rm -rf -- "$stage/data"
+          ln -s "$shared_data" "$stage/data"
+          chown -h deploy:deploy "$stage/data"
+          chown -R deploy:deploy "$stage"
+
+          approval_dir='/etc/disdex/hp-approval'
+          private_key="$approval_dir/approver-ed25519.pem"
+          public_key="$approval_dir/approver-ed25519.pub"
+          env_file='/etc/disdex/hp-approval.env'
+          approval_store="$shared_data/deploy-approvals.json"
+          install -d -o root -g deploy -m 0750 "$approval_dir"
+          if [[ ! -f "$private_key" ]]; then
+            openssl genpkey -algorithm ED25519 -out "$private_key"
+          fi
+          chown root:deploy "$private_key"
+          chmod 0640 "$private_key"
+          openssl pkey -in "$private_key" -pubout -out "$public_key"
+          chown root:root "$public_key"
+          chmod 0644 "$public_key"
+
+          if [[ ! -f "$env_file" ]]; then
+            pepper="$(openssl rand -hex 32)"
+            {
+              printf 'DISDEX_DEPLOY_OTP_PEPPER=%s\n' "$pepper"
+              printf 'DISDEX_HP_APPROVER_PRIVATE_KEY_PATH=%s\n' "$private_key"
+              printf 'DISDEX_DEPLOY_APPROVAL_STORE_PATH=%s\n' "$approval_store"
+            } > "$env_file"
+          fi
+          grep -Eq '^DISDEX_DEPLOY_OTP_PEPPER=[0-9a-f]{64}$' "$env_file"
+          grep -Fxq "DISDEX_HP_APPROVER_PRIVATE_KEY_PATH=$private_key" "$env_file"
+          grep -Fxq "DISDEX_DEPLOY_APPROVAL_STORE_PATH=$approval_store" "$env_file"
+          chown root:root "$env_file"
+          chmod 0600 "$env_file"
+
+          if [[ ! -f "$approval_store" ]]; then
+            printf '[]\n' > "$approval_store"
+          fi
+          python3 - "$approval_store" <<'PY'
+          import json, sys
+          p=sys.argv[1]
+          data=json.load(open(p,encoding='utf-8'))
+          assert isinstance(data,list)
+          PY
+          chown deploy:deploy "$approval_store"
+          chmod 0600 "$approval_store"
+
+          dropin_dir='/etc/systemd/system/ai-dex-manager-ui.service.d'
+          approval_dropin="$dropin_dir/95-disdex-hp-production-approval.conf"
+          install -d -o root -g root -m 0755 "$dropin_dir"
+
+          mapfile -t work_files < <(grep -lFx "WorkingDirectory=$current" "$dropin_dir"/*.conf 2>/dev/null || true)
+          [[ "${#work_files[@]}" -eq 1 ]] || {
+            echo "WORKDIR_DROPIN_COUNT=${#work_files[@]}"
+            exit 43
+          }
+          mapfile -t sha_files < <(grep -lF "DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_SHA" "$dropin_dir"/*.conf 2>/dev/null || true)
+          [[ "${#sha_files[@]}" -eq 1 ]] || {
+            echo "SHA_DROPIN_COUNT=${#sha_files[@]}"
+            exit 44
+          }
+
+          backup_root="/var/lib/disdex-hp-deploy/$REQUEST_ID"
+          install -d -o root -g root -m 0700 "$backup_root"
+          cp -a -- "${work_files[0]}" "$backup_root/workdir.conf"
+          if [[ "${sha_files[0]}" != "${work_files[0]}" ]]; then
+            cp -a -- "${sha_files[0]}" "$backup_root/sha.conf"
+          fi
+          if [[ -f "$approval_dropin" ]]; then
+            cp -a -- "$approval_dropin" "$backup_root/approval.conf"
+            touch "$backup_root/approval-existed"
+          fi
+
+          rollback() {
+            rc=$?
+            trap - ERR
+            set +e
+            cp -a -- "$backup_root/workdir.conf" "${work_files[0]}"
+            if [[ -f "$backup_root/sha.conf" ]]; then
+              cp -a -- "$backup_root/sha.conf" "${sha_files[0]}"
+            fi
+            if [[ -f "$backup_root/approval-existed" ]]; then
+              cp -a -- "$backup_root/approval.conf" "$approval_dropin"
+            else
+              rm -f -- "$approval_dropin"
+            fi
+            systemctl daemon-reload
+            systemctl restart "$svc"
+            echo 'HP_UI_ROLLBACK_ATTEMPTED=TRUE'
+            exit "$rc"
+          }
+          trap rollback ERR
+
+          mv -- "$stage" "$release"
+          python3 - "${work_files[0]}" "$current" "$release" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); old=sys.argv[2]; new=sys.argv[3]
+          s=p.read_text()
+          needle=f"WorkingDirectory={old}"
+          if s.count(needle)!=1: raise SystemExit("WORKDIR_REPLACE_COUNT_INVALID")
+          p.write_text(s.replace(needle,f"WorkingDirectory={new}"))
+          PY
+          python3 - "${sha_files[0]}" "$EXPECTED_OLD_SHA" "$TARGET_SHA" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); old=sys.argv[2]; new=sys.argv[3]
+          s=p.read_text()
+          needle=f"DISDEX_UI_RELEASE_SHA={old}"
+          if s.count(needle)!=1: raise SystemExit("SHA_REPLACE_COUNT_INVALID")
+          p.write_text(s.replace(needle,f"DISDEX_UI_RELEASE_SHA={new}"))
+          PY
+          cat > "$approval_dropin" <<EOF
+          [Service]
+          EnvironmentFile=$env_file
+          EOF
+          chown root:root "${work_files[0]}" "${sha_files[0]}" "$approval_dropin"
+          chmod 0644 "${work_files[0]}" "${sha_files[0]}" "$approval_dropin"
+
+          systemctl daemon-reload
+          systemctl restart "$svc"
+          ok=false
+          for _ in $(seq 1 40); do
+            if [[ "$(systemctl is-active "$svc" 2>/dev/null || true)" == "active" ]]; then
+              code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+              admin_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/admin || true)"
+              if [[ "$code" == "200" && "$admin_code" =~ ^(200|30[1278])$ ]]; then
+                ok=true
+                break
+              fi
+            fi
+            sleep 1
+          done
+          [[ "$ok" == true ]]
+          [[ "$(systemctl show "$svc" --property WorkingDirectory --value)" == "$release" ]]
+          final_env="$(systemctl show "$svc" --property Environment --value)"
+          [[ " $final_env " == *" DISDEX_UI_RELEASE_SHA=$TARGET_SHA "* ]]
+
+          pid="$(systemctl show "$svc" --property MainPID --value)"
+          env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
+          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH; do
+            grep -qx "$name" <<<"$env_names"
+          done
+          if grep -qx 'GMAIL_USER' <<<"$env_names" && grep -qx 'GMAIL_APP_PASSWORD' <<<"$env_names"; then
+            :
+          elif grep -qx 'SENDGRID_API_KEY' <<<"$env_names"; then
+            :
+          else
+            echo 'MAIL_CONFIG_LOST_AFTER_RESTART'
+            false
+          fi
+
+          trading_after="$(readlink -f /home/deploy/disdex-trading/current)"
+          [[ "$trading_after" == "$trading_before" ]]
+          trap - ERR
+          echo 'STATUS=HP_APPROVAL_UI_DEPLOYED_VERIFIED'
+          echo "UI_RELEASE=$release"
+          echo "UI_SHA=$TARGET_SHA"
+          echo 'UI_HTTP_STATUS=200'
+          echo 'HP_APPROVAL_ENV=READY'
+          echo 'TRADING_CURRENT_UNCHANGED=TRUE'
+          echo 'TRADING_RESTART_ATTEMPTED=FALSE'
+          echo 'ORDERS_SENT_BY_DEPLOY=0'
+          REMOTE
+
+      - name: Verify public HP surface
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          home="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/)"
+          admin="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/admin)"
+          echo "PUBLIC_HOME_HTTP=$home"
+          echo "PUBLIC_ADMIN_HTTP=$admin"
+          [[ "$home" =~ ^(200|30[1278])$ ]]
+          [[ "$admin" =~ ^(200|30[1278]|401|403)$ ]]
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts" /tmp/disdex-hp-approval-ui-runtime.tgz
