@@ -132,6 +132,31 @@ jobs:
               --operator-target DD1296_FINAL_ALLIN_10BPS \
               --route GITHUB_ACTIONS --orders-enabled false
 
+      - name: Repair exact V52 systemd dependency to canonical Margin Guard
+        id: v52_dependency
+        if: ${{ inputs.mode == 'execute' }}
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          python3 -m py_compile scripts/ops/deploy/disdex_v52_exact_instance_margin_dependency.py
+          scp -i "$RUNNER_TEMP/hold-ui/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_v52_exact_instance_margin_dependency.py \
+            "root@$HOST:/tmp/disdex-v52-instance-margin-$GITHUB_RUN_ID.py"
+          ssh -T -i "$RUNNER_TEMP/hold-ui/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+            -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-v52-instance-margin-$GITHUB_RUN_ID.py --run-id $GITHUB_RUN_ID"
+
       - name: Verify and apply owner-only Margin Guard source-contract parity
         id: margin_fix
         if: ${{ inputs.mode == 'execute' }}
@@ -286,7 +311,7 @@ jobs:
               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
               -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
               -o ConnectTimeout=6 -p "$PORT" "root@$HOST" \
-              "rm -f -- /tmp/disdex-margin-hold-parity-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+              "rm -f -- /tmp/disdex-margin-hold-parity-$GITHUB_RUN_ID.py /tmp/disdex-v52-instance-margin-$GITHUB_RUN_ID.py" >/dev/null 2>&1
           fi
           rm -rf "$RUNNER_TEMP/hold-ui" "$RUNNER_TEMP/hold-forced" \
             "$RUNNER_TEMP/hold-task-token" "$RUNNER_TEMP/hold-task-plan" "$RUNNER_TEMP/hold-owner.pub"
