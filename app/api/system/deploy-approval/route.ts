@@ -5,11 +5,23 @@ import {
   getDeploymentApproval,
   saveDeploymentApproval,
   sanitizeDeploymentApproval,
+  mutateDeploymentApprovalAtomic,
 } from "@/lib/server/deploy-approval-store";
 import {
   DEPLOY_APPROVAL_OPERATION_POLICY,
   type DeploymentApprovalOperation,
+  issueDeploymentApprovalToken,
+  loadDeploymentApprovalPrivateKey,
 } from "@/lib/deploy-approval-token";
+
+import {
+  ALL_RUNNERS_LIVE_TASK,
+  ALL_RUNNERS_LIVE_PLAN_SHA256,
+  ALL_RUNNER_TASK_STEPS,
+  allRunnerStepPlanSha256,
+  isAllRunnerTaskStep,
+  validateAllRunnerTaskClaim,
+} from "@/lib/deploy-all-runners-task";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -58,6 +70,139 @@ export async function POST(request: NextRequest) {
     body = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: "invalid JSON" }, { status: 400 });
+  }
+
+  if (body?.action === "publish_task") {
+    const targetSha = String(body.target_sha || "").trim();
+    const actor = String(body.actor || "").trim();
+    if (targetSha !== ALL_RUNNERS_LIVE_TASK.baselineSha || actor !== "dunamishajime-bit") {
+      return NextResponse.json({ ok: false, error: "task baseline or owner mismatch" }, { status: 409 });
+    }
+    const record = await createPendingDeploymentApproval({
+      targetSha,
+      planSha256: ALL_RUNNERS_LIVE_PLAN_SHA256,
+      scope: "FULL_PROJECT",
+      operation: "ALL_RUNNERS_LIVE_RESTORE",
+      ordersEnabled: true,
+      requestActor: actor,
+      requestCommentId: String(body.comment_id || "").slice(0, 32),
+    });
+    return NextResponse.json(
+      { ok: true, approval: sanitizeDeploymentApproval(record) },
+      { status: 201 },
+    );
+  }
+
+  if (body?.action === "claim_task_step") {
+    const id = String(body.task_id || "").trim();
+    const stepName = String(body.step || "").trim();
+    const targetSha = String(body.target_sha || "").trim();
+    const planSha256 = String(body.plan_sha256 || "").trim();
+    const runId = String(body.run_id || "").trim();
+    if (!UUID_RE.test(id) || !RUN_ID_RE.test(runId) || !isAllRunnerTaskStep(stepName) ||
+        !SHA_RE.test(targetSha) || !PLAN_RE.test(planSha256)) {
+      return NextResponse.json({ ok: false, error: "invalid task claim" }, { status: 400 });
+    }
+    try {
+      const response = await mutateDeploymentApprovalAtomic(id, (record) => {
+        const now = Date.now();
+        const step = ALL_RUNNER_TASK_STEPS[stepName];
+        if (!record || !validateAllRunnerTaskClaim({
+          taskOperation: record.operation,
+          taskScope: record.scope,
+          taskTargetSha: record.targetSha,
+          taskPlanSha256: record.planSha256,
+          taskOrdersEnabled: record.ordersEnabled,
+          step: stepName,
+          stepTargetSha: targetSha,
+          stepPlanSha256: planSha256,
+          stepOrdersEnabled: step.ordersEnabled,
+        })) throw new Error("TASK_OR_STAGE_IDENTITY_MISMATCH");
+        if (!record.approvedAt || !record.taskApprovedExpiresAt ||
+            record.taskApprovedExpiresAt !== record.approvedAt + ALL_RUNNERS_LIVE_TASK.maxAgeMs ||
+            now >= record.taskApprovedExpiresAt)
+          throw new Error("TASK_APPROVAL_WINDOW_EXPIRED");
+        if (record.status !== "APPROVED") throw new Error("TASK_NOT_AVAILABLE_FOR_NEW_STAGE");
+        if (record.taskActiveClaim) throw new Error("TASK_STAGE_ALREADY_IN_PROGRESS");
+        if (!Number.isSafeInteger(record.taskClaimCount) ||
+            (record.taskClaimCount ?? 0) >= ALL_RUNNERS_LIVE_TASK.maxClaims ||
+            record.taskMaxClaims !== ALL_RUNNERS_LIVE_TASK.maxClaims)
+          throw new Error("TASK_STAGE_ATTEMPT_LIMIT_REACHED");
+        const { token, payload } = issueDeploymentApprovalToken({
+          targetSha: step.targetSha,
+          planSha256,
+          scope: step.scope,
+          ordersEnabled: step.ordersEnabled,
+          operator: "dunamishajime-bit",
+          privateKey: loadDeploymentApprovalPrivateKey(),
+          ttlSeconds: 300,
+        });
+        const claim = { step: stepName, runId, claimedAt: now };
+        return {
+          next: {
+            ...record,
+            status: "DISPATCHED",
+            taskClaimCount: (record.taskClaimCount ?? 0) + 1,
+            taskActiveClaim: claim,
+            taskClaimHistory: [...(record.taskClaimHistory ?? []), claim].slice(-40),
+          },
+          result: { ok: true, token, tokenExpiresAt: payload.expiresAt,
+                    taskId: id, step: stepName, runId, taskExpiresAt: record.taskApprovedExpiresAt },
+        };
+      });
+      return NextResponse.json(response);
+    } catch (error) {
+      return NextResponse.json({
+        ok: false, error: error instanceof Error ? error.message : "task claim rejected",
+      }, { status: 409 });
+    }
+  }
+
+  if (body?.action === "finish_task_step") {
+    const id = String(body.task_id || "").trim();
+    const step = String(body.step || "").trim();
+    const runId = String(body.run_id || "").trim();
+    const outcome = String(body.outcome || "").trim();
+    if (!UUID_RE.test(id) || !RUN_ID_RE.test(runId) || !isAllRunnerTaskStep(step) ||
+        !["success", "failure"].includes(outcome)) {
+      return NextResponse.json({ ok: false, error: "invalid task completion" }, { status: 400 });
+    }
+    try {
+      const response = await mutateDeploymentApprovalAtomic(id, (record) => {
+        if (!record || record.operation !== "ALL_RUNNERS_LIVE_RESTORE" ||
+            record.status !== "DISPATCHED" || record.taskActiveClaim?.runId !== runId ||
+            record.taskActiveClaim.step !== step) throw new Error("TASK_STAGE_NOT_OWNED_BY_RUN");
+        const now = Date.now();
+        const claims = (record.taskClaimHistory ?? []).map((claim) =>
+          claim.runId === runId && claim.step === step && !claim.finishedAt
+            ? { ...claim, finishedAt: now, outcome: outcome as "success" | "failure" }
+            : claim);
+        const completedSteps = new Set(
+          claims.filter((claim) => claim.outcome === "success").map((claim) => claim.step));
+        const isFinal = outcome === "success" && step === "FINAL_ALL_RUNNERS_AUDIT";
+        if (isFinal && Object.keys(ALL_RUNNER_TASK_STEPS).some((name) => !completedSteps.has(name))) {
+          throw new Error("TASK_CANNOT_COMPLETE_WITH_UNVERIFIED_RUNNERS");
+        }
+        return {
+          next: {
+            ...record,
+            status: isFinal ? "COMPLETED" : "APPROVED",
+            completedAt: isFinal ? now : undefined,
+            taskActiveClaim: undefined,
+            taskClaimHistory: claims,
+            lastError: outcome === "failure" ? "stage failed; task remains bounded and retryable" : undefined,
+          },
+          result: { ok: true, status: isFinal ? "COMPLETED" : "APPROVED",
+                    taskExpiresAt: record.taskApprovedExpiresAt, remainingClaims:
+                    ALL_RUNNERS_LIVE_TASK.maxClaims - (record.taskClaimCount ?? 0) },
+        };
+      });
+      return NextResponse.json(response);
+    } catch (error) {
+      return NextResponse.json({
+        ok: false, error: error instanceof Error ? error.message : "task completion rejected",
+      }, { status: 409 });
+    }
   }
 
   if (body?.action === "publish") {
