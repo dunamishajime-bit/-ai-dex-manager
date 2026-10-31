@@ -1,0 +1,135 @@
+name: HP 737 Email OTP Approval CI 20261031
+
+on:
+  push:
+    branches:
+      - fix/hp-737-email-otp-approval-20261031
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hp-737-email-otp-approval-ci-20261031
+  cancel-in-progress: false
+
+jobs:
+  hp-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Verify current HP lineage
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git merge-base --is-ancestor 737ec0503a92b320b4102f9a09bcdf841ccddd3e HEAD
+          node -e 'const p=require("./package.json"); if(!String(p.dependencies?.next||"").includes("16.2.6")) throw new Error("NEXT_LINEAGE_MISMATCH");'
+          grep -q 'output: "standalone"' next.config.mjs
+          test -f app/realtime/page.tsx
+          test -f components/features/RealtimeRankingBoard.tsx
+          test -f hooks/useRealtimeRankingFeedback.ts
+          test -f app/production-approval/page.tsx
+          test -f app/api/production-approval/route.ts
+          test -f lib/deploy-approval-token.ts
+          test -f lib/server/deploy-approval-store.ts
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Formal approval Python syntax
+        run: python3 -m py_compile scripts/ops/deploy/disdex_owner_approval.py scripts/ops/deploy/disdex_deployment_contract.py
+
+      - name: HP approval token interoperability
+        run: npm run deploy:hp-approval:selftest
+
+      - name: Focused current HP regression suite
+        run: >-
+          npx tsx --test
+          tests/v12-v4-hp-observability.test.ts
+          tests/v12-v4-hp-status-route.test.ts
+          tests/realtime-ranking.test.ts
+          tests/realtime-universe-score.test.ts
+          tests/realtime-ranking-observability.test.ts
+          tests/realtime-ranking-ui-contract.test.ts
+          tests/runtime-lineage-display.test.ts
+          tests/v12-v4-hp-ui-contract.test.ts
+          tests/decision-status-layout-regression.test.ts
+          tests/mobile-layout-regression.test.ts
+          tests/live-performance-ui-contract.test.ts
+          tests/v4-independent-runtime-ui-contract.test.ts
+          tests/v4-primary-decision-status-contract.test.ts
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: Production standalone build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          DISDEX_UI_VERIFIED_TSC: "1"
+        run: npm run build
+
+      - name: Verify current UI and approval route artifacts
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const manifest = require('./.next/server/app-paths-manifest.json');
+          const required = [
+            '/page',
+            '/positions/page',
+            '/history/page',
+            '/realtime/page',
+            '/decision-status/page',
+            '/decision-status/v12/page',
+            '/api/system/v12-v4-hp-status/route',
+            '/api/system/realtime-ranking/route',
+            '/api/system/runner-health/route',
+            '/api/system/live-runtime/route',
+            '/production-approval/page',
+            '/api/production-approval/route',
+            '/api/system/deploy-approval/route',
+          ];
+          const missing = required.filter((route) => !manifest[route]);
+          if (missing.length) throw new Error('HP_ROUTE_MISSING:' + missing.join(','));
+          console.log('HP_ROUTE_MANIFEST_PASS=' + required.length);
+          NODE
+          test -s .next/standalone/server.js
+          node --check .next/standalone/server.js
+
+      - name: Package exact-SHA standalone UI release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          rm -rf .deploy-ui
+          mkdir -p .deploy-ui/.next
+          cp -a .next/standalone/. .deploy-ui/
+          cp -a .next/static .deploy-ui/.next/static
+          if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          printf '%s\n' "$GITHUB_SHA" > .deploy-ui/.disdex-release-sha
+          python3 - <<'PY'
+          import pathlib
+          root=pathlib.Path('.deploy-ui').resolve()
+          for path in root.rglob('*'):
+              if path.is_symlink():
+                  target=path.resolve()
+                  if target!=root and root not in target.parents:
+                      raise SystemExit(f'UI_RELEASE_EXTERNAL_SYMLINK:{path}')
+          print('UI_RELEASE_SYMLINKS_INTERNAL=PASS')
+          PY
+          archive="$RUNNER_TEMP/disdex-ui-$GITHUB_SHA.tar.gz"
+          tar -C .deploy-ui -czf "$archive" .
+          test -s "$archive"
+          echo "UI_ARCHIVE_SHA256=$(sha256sum "$archive" | awk '{print $1}')"
+          echo "UI_ARCHIVE_BYTES=$(stat -c '%s' "$archive")"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: disdex-hp-current-ui-approval-${{ github.sha }}
+          path: ${{ runner.temp }}/disdex-ui-${{ github.sha }}.tar.gz
+          if-no-files-found: error
+          retention-days: 30
