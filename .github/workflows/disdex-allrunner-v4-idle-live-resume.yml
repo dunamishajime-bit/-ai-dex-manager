@@ -11,7 +11,7 @@ on:
         description: Exact runner to resume
         required: true
         type: choice
-        options: [V4, IDLE]
+        options: [V4, IDLE, HYPE]
 
 permissions:
   contents: read
@@ -51,6 +51,10 @@ jobs:
             echo "step=IDLE_LIVE_RESUME" >> "$GITHUB_OUTPUT"
             echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"
             echo "scope=IDLE_PRIORITY_SHORT" >> "$GITHUB_OUTPUT"
+          elif [[ "$RUNNER" == "HYPE" ]]; then
+            echo "step=HYPE_LIVE_RECOVER" >> "$GITHUB_OUTPUT"
+            echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"
+            echo "scope=HYPE_TREND_LONG" >> "$GITHUB_OUTPUT"
           else
             exit 2
           fi
