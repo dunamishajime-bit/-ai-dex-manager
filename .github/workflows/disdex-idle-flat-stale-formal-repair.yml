@@ -175,12 +175,18 @@ jobs:
           import json
           state = json.load(open("/var/lib/disdex/idle-priority/residual-long-state.json", encoding="utf-8"))
           kill = json.load(open("/var/lib/disdex/shared/kill-switch.json", encoding="utf-8"))
-          if isinstance(state.get("position"), dict):
-              raise SystemExit("IDLE_POST_REPAIR_NOT_FLAT")
+          if state.get("positionPresent") is not False:
+              raise SystemExit("IDLE_POST_REPAIR_POSITION_PRESENT")
+          if state.get("pending") is not None:
+              raise SystemExit("IDLE_POST_REPAIR_PENDING_NOT_CLEAR")
+          if state.get("manualReview") is not None:
+              raise SystemExit("IDLE_POST_REPAIR_MANUAL_REVIEW_NOT_CLEAR")
           reason = str(kill.get("reason") or "")
           if "IDLE_RESIDUAL_STATE_RUNTIME_OR_SCHEMA_MISMATCH" in reason:
               raise SystemExit("IDLE_MISMATCH_KILL_REASON_STILL_ACTIVE")
           print("IDLE_POST_REPAIR_FLAT=TRUE")
+          print("IDLE_POST_REPAIR_PENDING_CLEAR=TRUE")
+          print("IDLE_POST_REPAIR_MANUAL_REVIEW_CLEAR=TRUE")
           print("IDLE_MISMATCH_KILL_REASON_CLEARED=TRUE")
           print("TRADING_MUTATION_POSTCHECK=0")
           PY'
