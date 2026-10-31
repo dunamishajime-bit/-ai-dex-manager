@@ -1,0 +1,242 @@
+name: DisDex All-Runner Task Final Verifications
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: Approved ALL_RUNNERS_LIVE_RESTORE task ID
+        required: true
+        type: string
+      step:
+        description: Verification stage
+        required: true
+        type: choice
+        options:
+          - V52_VERIFY
+          - PENGU_LIVE_VERIFY
+          - Q102_LIVE_VERIFY
+          - FET_LIVE_VERIFY
+          - FINAL_ALL_RUNNERS_AUDIT
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Bind exact task verification stage
+        id: bind
+        shell: bash
+        env:
+          STEP: ${{ inputs.step }}
+        run: |
+          set -euo pipefail
+          case "$STEP" in
+            V52_VERIFY)
+              echo "sha=4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81" >> "$GITHUB_OUTPUT"
+              echo "scope=V52" >> "$GITHUB_OUTPUT"
+              echo "orders=false" >> "$GITHUB_OUTPUT"
+              ;;
+            PENGU_LIVE_VERIFY)
+              echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"
+              echo "scope=PENGU_V8" >> "$GITHUB_OUTPUT"
+              echo "orders=true" >> "$GITHUB_OUTPUT"
+              ;;
+            Q102_LIVE_VERIFY)
+              echo "sha=ef1ab178e26a7bf5bddb6473467765edba242e1d" >> "$GITHUB_OUTPUT"
+              echo "scope=QUALITY102_CAUSAL_V1" >> "$GITHUB_OUTPUT"
+              echo "orders=true" >> "$GITHUB_OUTPUT"
+              ;;
+            FET_LIVE_VERIFY)
+              echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"
+              echo "scope=FET_BRK48_RESIDUAL" >> "$GITHUB_OUTPUT"
+              echo "orders=true" >> "$GITHUB_OUTPUT"
+              ;;
+            FINAL_ALL_RUNNERS_AUDIT)
+              echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"
+              echo "scope=FULL_PROJECT" >> "$GITHUB_OUTPUT"
+              echo "orders=false" >> "$GITHUB_OUTPUT"
+              ;;
+            *) exit 2 ;;
+          esac
+
+      - name: Claim exact verification child authorization
+        id: claim
+        shell: bash
+        env:
+          TASK_ID: ${{ inputs.task_id }}
+          RUN_ID: ${{ github.run_id }}
+          STEP: ${{ inputs.step }}
+          SHA: ${{ steps.bind.outputs.sha }}
+          SCOPE: ${{ steps.bind.outputs.scope }}
+          ORDERS: ${{ steps.bind.outputs.orders }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          [[ "$TASK_ID" =~ ^[0-9a-fA-F-]{36}$ && "$RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          python3 - <<'PY'
+          import json,os,pathlib,urllib.request
+          body=json.dumps({
+            "action":"claim_task_step",
+            "task_id":os.environ["TASK_ID"],
+            "step":os.environ["STEP"],
+            "target_sha":os.environ["SHA"],
+            "run_id":os.environ["RUN_ID"],
+          }).encode()
+          req=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",
+            headers={"Authorization":"Bearer "+os.environ["BRIDGE"],
+                     "Content-Type":"application/json"},
+          )
+          with urllib.request.urlopen(req,timeout=15) as response:
+            data=json.load(response)
+          expected_orders=os.environ["ORDERS"]=="true"
+          assert data.get("ok") and data.get("step")==os.environ["STEP"]
+          assert data.get("scope")==os.environ["SCOPE"]
+          assert data.get("ordersEnabled") is expected_orders
+          token=str(data.get("token") or "")
+          plan=str(data.get("planSha256") or "")
+          assert token and len(plan)==64
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          (root/"allrunner-verify-token").write_text(token,encoding="ascii")
+          (root/"allrunner-verify-plan").write_text(plan,encoding="ascii")
+          print("::add-mask::"+token)
+          print("ALLRUNNER_VERIFY_TASK_CHILD_CLAIMED=TRUE")
+          PY
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/allrunner-verify-owner.pub"
+          cat "$RUNNER_TEMP/allrunner-verify-token" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/allrunner-verify-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" \
+              --sha "$SHA" --scope "$SCOPE" \
+              --operator dunamishajime-bit \
+              --plan-sha256 "$(cat "$RUNNER_TEMP/allrunner-verify-plan")" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled "$ORDERS"
+
+      - name: Configure reviewed read-only audit SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/allrunner-verify-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/allrunner-verify-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/allrunner-verify-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/allrunner-verify-ssh/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/allrunner-verify-ssh/key" >/dev/null
+
+      - name: Upload exact read-only verifier
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          python3 -m py_compile scripts/ops/deploy/disdex_allrunner_final_verify.py
+          scp -i "$RUNNER_TEMP/allrunner-verify-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_allrunner_final_verify.py \
+            "root@$HOST:/tmp/disdex-allrunner-verify-$GITHUB_RUN_ID.py"
+
+      - name: Execute read-only verification
+        id: execute
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          STEP: ${{ inputs.step }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/allrunner-verify-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
+            -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-allrunner-verify-$GITHUB_RUN_ID.py --step $STEP"
+
+      - name: Finish verification stage
+        if: ${{ always() && steps.claim.outcome == 'success' }}
+        shell: bash
+        env:
+          TASK_ID: ${{ inputs.task_id }}
+          RUN_ID: ${{ github.run_id }}
+          STEP: ${{ inputs.step }}
+          EXECUTION: ${{ steps.execute.outcome }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,urllib.request
+          passed=os.environ["EXECUTION"]=="success"
+          body=json.dumps({
+            "action":"finish_task_step",
+            "task_id":os.environ["TASK_ID"],
+            "step":os.environ["STEP"],
+            "run_id":os.environ["RUN_ID"],
+            "outcome":"success" if passed else "failure",
+          }).encode()
+          req=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",
+            headers={"Authorization":"Bearer "+os.environ["BRIDGE"],
+                     "Content-Type":"application/json"},
+          )
+          with urllib.request.urlopen(req,timeout=15) as response:
+            result=json.load(response)
+          assert result.get("ok")
+          if passed and os.environ["STEP"]=="FINAL_ALL_RUNNERS_AUDIT":
+              assert result.get("status")=="COMPLETED"
+          else:
+              assert result.get("status")=="APPROVED"
+          print("ALLRUNNER_VERIFY_STAGE="+("SUCCESS" if passed else "RETRYABLE"))
+          print("TASK_STATUS="+str(result.get("status")))
+          PY
+
+      - name: Cleanup ephemeral audit material
+        if: always()
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          if [[ -s "$RUNNER_TEMP/allrunner-verify-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/allrunner-verify-ssh/key" \
+              -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
+              -o ConnectTimeout=5 -p "$PORT" "root@$HOST" \
+              "rm -f -- /tmp/disdex-allrunner-verify-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/allrunner-verify-ssh" "$RUNNER_TEMP/allrunner-verify-token" \
+            "$RUNNER_TEMP/allrunner-verify-plan" "$RUNNER_TEMP/allrunner-verify-owner.pub"
