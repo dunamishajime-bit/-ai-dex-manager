@@ -97,7 +97,9 @@ export async function POST(request: NextRequest) {
     const id = String(body.task_id || "").trim();
     const stepName = String(body.step || "").trim();
     const targetSha = String(body.target_sha || "").trim();
-    const planSha256 = String(body.plan_sha256 || "").trim();
+    const planSha256 = isAllRunnerTaskStep(stepName)
+      ? (body.plan_sha256 == null ? allRunnerStepPlanSha256(stepName) : String(body.plan_sha256).trim())
+      : "";
     const runId = String(body.run_id || "").trim();
     if (!UUID_RE.test(id) || !RUN_ID_RE.test(runId) || !isAllRunnerTaskStep(stepName) ||
         !SHA_RE.test(targetSha) || !PLAN_RE.test(planSha256)) {
@@ -147,7 +149,9 @@ export async function POST(request: NextRequest) {
             taskClaimHistory: [...(record.taskClaimHistory ?? []), claim].slice(-40),
           },
           result: { ok: true, token, tokenExpiresAt: payload.expiresAt,
-                    taskId: id, step: stepName, runId, taskExpiresAt: record.taskApprovedExpiresAt },
+                    taskId: id, step: stepName, scope: step.scope,
+                    ordersEnabled: step.ordersEnabled, planSha256, runId,
+                    taskExpiresAt: record.taskApprovedExpiresAt },
         };
       });
       return NextResponse.json(response);
