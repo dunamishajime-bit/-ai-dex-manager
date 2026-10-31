@@ -63,6 +63,8 @@ marker_mode="$(stat -c '%a' "$marker")"
 for source in \
   scripts/ops/deploy/disdex_unified_root_gate.py \
   scripts/ops/deploy/disdex_v4_root_cutover.py \
+  scripts/ops/deploy/disdex_v4_venue_witness.py \
+  scripts/ops/deploy/disdex_v4_static_evidence.py \
   scripts/ops/deploy/disdex_unified_forced_command.py \
   scripts/ops/deploy/disdex_v4_live_readiness.py \
   scripts/ops/deploy/disdex_deployment_contract.py \
@@ -87,7 +89,7 @@ install -o root -g root -m 0755 \
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/deploy/disdex_unified_forced_command.py" \
   /usr/local/libexec/disdex-unified/disdex_unified_forced_command.py
-for source in disdex_deployment_contract.py disdex_deployment_plan.py disdex_owner_approval.py disdex_v4_root_cutover.py; do
+for source in disdex_deployment_contract.py disdex_deployment_plan.py disdex_owner_approval.py disdex_v4_root_cutover.py disdex_v4_venue_witness.py; do
   install -o root -g root -m 0644 "$release_root/scripts/ops/deploy/$source" \
     "/usr/local/libexec/disdex-unified/$source"
 done
@@ -100,6 +102,9 @@ install -o root -g root -m 0755 \
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/deploy/disdex_v4_live_readiness.py" \
   /usr/local/sbin/disdex-v4-live-readiness
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/deploy/disdex_v4_static_evidence.py" \
+  /usr/local/sbin/disdex-v4-static-evidence
 
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/root/disdex-idle-residual-flat-stale-repair.py" \
