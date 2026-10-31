@@ -60,7 +60,8 @@
     "strategy:live:selftest": "tsx scripts/win80-ultra90-live-runner-selftest.ts && tsx scripts/aster-market-data-provider-selftest.ts",
     "strategy:executor:selftest": "tsx scripts/aster-direct-trade-executor-selftest.ts",
     "strategy:market:selftest": "tsx scripts/aster-market-data-provider-selftest.ts",
-    "strategy:live:typecheck": "tsc --noEmit -p tsconfig.live-runner.json"
+    "strategy:live:typecheck": "tsc --noEmit -p tsconfig.live-runner.json",
+    "deploy:hp-approval:selftest": "tsx scripts/disdex-hp-deploy-approval-selftest.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
