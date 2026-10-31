@@ -17,9 +17,6 @@ export const dynamic = "force-dynamic";
 const ADMIN_COOKIE = "disdex_admin_session";
 const ADMIN_2FA_RECEIVER = process.env.ADMIN_CONTACT_EMAIL || process.env.GMAIL_USER || "";
 const OTP_PEPPER = process.env.DISDEX_DEPLOY_OTP_PEPPER?.trim() || "";
-const GITHUB_TOKEN = process.env.DISDEX_GITHUB_ACTIONS_TOKEN?.trim() || "";
-const REPOSITORY = "dunamishajime-bit/-ai-dex-manager";
-const WORKFLOW = "disdex-v4-formal-production-live.yml";
 const OPERATOR = "dunamishajime-bit";
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 
@@ -80,40 +77,6 @@ function ipFingerprint(request: NextRequest) {
     .trim();
   if (!raw) return "";
   return crypto.createHmac("sha256", OTP_PEPPER).update(raw).digest("hex");
-}
-
-async function dispatchFormalWorkflow(input: {
-  targetSha: string;
-  planSha256: string;
-  approvalId: string;
-}) {
-  if (!GITHUB_TOKEN) throw new Error("DISDEX_GITHUB_ACTIONS_TOKEN is not configured");
-  const response = await fetch(
-    `https://api.github.com/repos/${REPOSITORY}/actions/workflows/${WORKFLOW}/dispatches`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Content-Type": "application/json",
-        "User-Agent": "DisDexDeployer-HP-OTP",
-      },
-      body: JSON.stringify({
-        ref: "master",
-        inputs: {
-          target_sha: input.targetSha,
-          plan_sha256: input.planSha256,
-          approval_id: input.approvalId,
-        },
-      }),
-      cache: "no-store",
-    },
-  );
-  if (!response.ok) {
-    const detail = (await response.text()).slice(0, 300);
-    throw new Error(`GitHub workflow dispatch failed (${response.status}): ${detail}`);
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -239,54 +202,13 @@ export async function POST(request: NextRequest) {
         lastError: undefined,
       });
 
-      await dispatchFormalWorkflow({
-        targetSha: approved.targetSha,
-        planSha256: approved.planSha256,
-        approvalId: approved.id,
+      return redirect(request, {
+        message: "本人認証が完了しました。署名済み承認証明を発行しました",
       });
-      await saveDeploymentApproval({
-        ...approved,
-        status: "DISPATCHED",
-        dispatchedAt: Date.now(),
-        lastError: undefined,
-      });
-      return redirect(request, { message: "本人認証が完了し、正式GitHub Actionへ引き渡しました" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "approval dispatch failed";
-      const latest = await getDeploymentApproval(record.id);
-      if (latest && latest.status === "APPROVED") {
-        await saveDeploymentApproval({ ...latest, lastError: message });
-      }
-      return redirect(request, { error: "本人認証後のAction起動に失敗しました。再試行できます" });
-    }
-  }
-
-  if (intent === "retry-dispatch") {
-    if (
-      record.status !== "APPROVED" ||
-      !record.approvalToken ||
-      !record.approvalTokenExpiresAt ||
-      record.approvalTokenExpiresAt < Math.floor(Date.now() / 1000)
-    ) {
-      return redirect(request, { error: "承認証明が失効しています。OTP承認からやり直してください" });
-    }
-    try {
-      await dispatchFormalWorkflow({
-        targetSha: record.targetSha,
-        planSha256: record.planSha256,
-        approvalId: record.id,
-      });
-      await saveDeploymentApproval({
-        ...record,
-        status: "DISPATCHED",
-        dispatchedAt: Date.now(),
-        lastError: undefined,
-      });
-      return redirect(request, { message: "正式GitHub Actionを再起動しました" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "workflow dispatch failed";
-      await saveDeploymentApproval({ ...record, lastError: message });
-      return redirect(request, { error: "GitHub Actionの再起動に失敗しました" });
+      const message = error instanceof Error ? error.message : "approval signing failed";
+      await saveDeploymentApproval({ ...record, status: "FAILED", lastError: message });
+      return redirect(request, { error: "本人認証後の署名済み承認証明の発行に失敗しました" });
     }
   }
 
