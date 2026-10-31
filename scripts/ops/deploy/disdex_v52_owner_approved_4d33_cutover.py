@@ -50,7 +50,10 @@ def service_active(unit: str) -> bool:
     return unit_property(unit, "ActiveState") == "active"
 
 def is_enabled(unit: str) -> bool:
-    return run("systemctl", "is-enabled", unit) == "enabled"
+    p = subprocess.run(["systemctl", "is-enabled", unit], capture_output=True, text=True, timeout=12)
+    require(p.returncode in (0, 1) and p.stdout.strip() in ("enabled", "disabled", "indirect", "static"),
+            "SERVICE_ENABLED_STATE_UNAVAILABLE")
+    return p.stdout.strip() == "enabled"
 
 def require(cond: bool, message: str) -> None:
     if not cond:
