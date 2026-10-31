@@ -16,6 +16,7 @@ on:
       - "package.json"
       - ".github/workflows/disdex-v4-hp-approval-request.yml"
       - ".github/workflows/disdex-hp-approval-ui-production-deploy.yml"
+      - ".github/workflows/disdex-hp-standard-approval-ui-deploy.yml"
       - ".github/workflows/disdex-hp-deploy-approval-ci.yml"
   workflow_dispatch:
 
