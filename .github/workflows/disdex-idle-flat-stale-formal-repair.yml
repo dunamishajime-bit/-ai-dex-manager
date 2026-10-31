@@ -180,6 +180,39 @@ jobs:
               --operator-target DD1296_FINAL_ALLIN_10BPS \
               --route GITHUB_ACTIONS --orders-enabled false
 
+      - name: Align flat refresh threshold with 20-minute HOLD freshness contract
+        if: ${{ inputs.task_id != '' }}
+        id: refresh_threshold
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$HOST_KEYS" ]]
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ && "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          python3 -m py_compile scripts/ops/deploy/disdex_idle_flat_refresh_threshold_gap.py
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/idle-threshold-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/idle-threshold-ssh/key"
+          printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/idle-threshold-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/idle-threshold-ssh/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/idle-threshold-ssh/key" >/dev/null
+          scp -i "$RUNNER_TEMP/idle-threshold-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-threshold-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_idle_flat_refresh_threshold_gap.py \
+            "root@$HOST:/tmp/disdex-idle-refresh-threshold-$GITHUB_RUN_ID.py"
+          ssh -T -i "$RUNNER_TEMP/idle-threshold-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-threshold-ssh/known_hosts" \
+            -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-idle-refresh-threshold-$GITHUB_RUN_ID.py --run-id $GITHUB_RUN_ID"
+
       - name: Execute exact restricted repair helper
         id: execute_repair
         shell: bash
@@ -292,4 +325,13 @@ jobs:
       - name: Destroy ephemeral approval and SSH material
         if: always()
         shell: bash
-        run: rm -rf "$RUNNER_TEMP/disdex-idle-repair-ssh" "$RUNNER_TEMP/disdex-idle-postcheck-ssh" "$RUNNER_TEMP/disdex-owner.pub" "$RUNNER_TEMP/disdex-idle-repair-token"
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/idle-threshold-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/idle-threshold-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/idle-threshold-ssh/known_hosts"               -o ConnectTimeout=6 -p "$PORT" "root@$HOST"               "rm -f -- /tmp/disdex-idle-refresh-threshold-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/disdex-idle-repair-ssh" "$RUNNER_TEMP/disdex-idle-postcheck-ssh"             "$RUNNER_TEMP/disdex-owner.pub" "$RUNNER_TEMP/disdex-idle-repair-token" "$RUNNER_TEMP/idle-threshold-ssh"
