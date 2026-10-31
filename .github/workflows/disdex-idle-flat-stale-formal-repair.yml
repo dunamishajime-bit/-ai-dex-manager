@@ -108,7 +108,7 @@ jobs:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
           SHA: ${{ inputs.target_sha }}
           PLAN: ${{ steps.context.outputs.plan_sha256 }}
-          PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
         run: |
           set -euo pipefail
           [[ "$GITHUB_REPOSITORY" == "dunamishajime-bit/-ai-dex-manager" ]]
@@ -154,44 +154,54 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts" \
             -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
-            "test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = '$SHA' && /usr/local/sbin/disdex-idle-residual-flat-stale-repair --execute-after-three-signed-gets"
+            "/usr/local/sbin/disdex-idle-residual-flat-stale-repair --execute-after-three-signed-gets"
 
-      - name: Read-only post-repair proof
+      - name: Read-only post-repair proof (separate UI-maintenance SSH identity)
         shell: bash
         env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
-          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
-          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          SHA: ${{ inputs.target_sha }}
         run: |
           set -euo pipefail
-          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$HOST" == "professional-dismanager.net" ]]
+          [[ -n "$KEY" && -n "$HOST_KEYS" ]]
+          [[ "$SHA" =~ ^[a-f0-9]{40}$ ]]
+          PORT="${PORT:-22}"
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/disdex-idle-postcheck-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/disdex-idle-postcheck-ssh/key"
+          printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/disdex-idle-postcheck-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/disdex-idle-postcheck-ssh/key" "$RUNNER_TEMP/disdex-idle-postcheck-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/disdex-idle-postcheck-ssh/key" >/dev/null
           ssh -T \
-            -i "$RUNNER_TEMP/disdex-idle-repair-ssh/key" \
-            -o BatchMode=yes -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile="$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts" \
-            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" 'python3 - <<'"'"'PY'"'"'
-          import json
-          state = json.load(open("/var/lib/disdex/idle-priority/residual-long-state.json", encoding="utf-8"))
-          kill = json.load(open("/var/lib/disdex/shared/kill-switch.json", encoding="utf-8"))
-          if state.get("positionPresent") is not False:
-              raise SystemExit("IDLE_POST_REPAIR_POSITION_PRESENT")
-          if state.get("pending") is not None:
-              raise SystemExit("IDLE_POST_REPAIR_PENDING_NOT_CLEAR")
-          if state.get("manualReview") is not None:
-              raise SystemExit("IDLE_POST_REPAIR_MANUAL_REVIEW_NOT_CLEAR")
-          reason = str(kill.get("reason") or "")
-          if "IDLE_RESIDUAL_STATE_RUNTIME_OR_SCHEMA_MISMATCH" in reason:
-              raise SystemExit("IDLE_MISMATCH_KILL_REASON_STILL_ACTIVE")
+            -i "$RUNNER_TEMP/disdex-idle-postcheck-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/disdex-idle-postcheck-ssh/known_hosts" \
+            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
+            "EXPECTED_SHA=$SHA python3 -" <<'PY'
+          import json, os, pathlib, time
+          state = json.loads(pathlib.Path("/var/lib/disdex/idle-priority/residual-long-state.json").read_text())
+          kill = json.loads(pathlib.Path("/var/lib/disdex/shared/kill-switch.json").read_text())
+          assert state.get("schema") == "disdex-idle-residual-long-state/v1", "IDLE_STATE_SCHEMA_MISMATCH"
+          assert state.get("runtimeSha") == os.environ["EXPECTED_SHA"], "IDLE_STATE_SHA_MISMATCH"
+          assert pathlib.Path("/home/deploy/disdex-trading/current/.disdex-release-sha").read_text().strip() == os.environ["EXPECTED_SHA"], "PRODUCTION_SHA_DRIFT"
+          for field in ("position", "pending", "manualReview"):
+              assert state.get(field) is None, "IDLE_NOT_FLAT_" + field
+          age = int(time.time()*1000) - int(state["updatedAt"])
+          assert 0 <= age < 300000, "IDLE_STATE_NOT_FRESH_AFTER_REPAIR"
+          # This state-only repair deliberately does NOT clear the shared Kill Switch.
+          assert kill.get("active") is True, "KILL_SWITCH_UNEXPECTEDLY_CLEARED"
+          print("IDLE_STATE_REPAIR_VERIFIED=TRUE")
           print("IDLE_POST_REPAIR_FLAT=TRUE")
-          print("IDLE_POST_REPAIR_PENDING_CLEAR=TRUE")
-          print("IDLE_POST_REPAIR_MANUAL_REVIEW_CLEAR=TRUE")
-          print("IDLE_MISMATCH_KILL_REASON_CLEARED=TRUE")
-          print("TRADING_MUTATION_POSTCHECK=0")
-          PY'
+          print("SHARED_KILL_SWITCH_PRESERVED=TRUE")
+          print("ORDERS_SENT_BY_POSTCHECK=0")
+          PY
 
       - name: Destroy ephemeral approval and SSH material
         if: always()
         shell: bash
-        run: rm -rf "$RUNNER_TEMP/disdex-idle-repair-ssh" "$RUNNER_TEMP/disdex-owner.pub" "$RUNNER_TEMP/disdex-idle-repair-token"
+        run: rm -rf "$RUNNER_TEMP/disdex-idle-repair-ssh" "$RUNNER_TEMP/disdex-idle-postcheck-ssh" "$RUNNER_TEMP/disdex-owner.pub" "$RUNNER_TEMP/disdex-idle-repair-token"
