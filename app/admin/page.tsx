@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { maskEmail } from "@/lib/security-utils";
 import { loadUsers } from "@/lib/server/user-db";
 import { loadSystemSettings } from "@/lib/server/system-settings-db";
+import { getLatestDeploymentApprovalSummary } from "@/lib/server/deploy-approval-store";
 import { PUBLIC_ADMIN_ENABLED } from "@/lib/site-access";
 
 export const dynamic = "force-dynamic";
@@ -104,6 +105,7 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
 
   const users = await loadUsers();
   const settings = await loadSystemSettings();
+  const deployApproval = await getLatestDeploymentApprovalSummary();
 
   return (
     <main className="mx-auto flex min-h-[calc(100dvh-1rem)] max-w-6xl flex-col gap-4 px-2 py-2 md:px-4 md:py-4">
@@ -133,6 +135,111 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
 
       {message ? <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">{message}</div> : null}
       {error ? <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">{error}</div> : null}
+
+      {card(
+        <>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/70">
+                Production Approval
+              </div>
+              <h2 className="mt-1 text-xl font-black text-white">LIVE切替オーナー承認</h2>
+            </div>
+            <span className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-[11px] font-semibold text-amber-100">
+              メールOTP必須
+            </span>
+          </div>
+
+          {!deployApproval ? (
+            <div className="mt-4 rounded-xl border border-dashed border-white/12 px-4 py-6 text-center text-sm text-white/65">
+              現在、承認待ちのProduction切替はありません。
+            </div>
+          ) : (
+            <div className="mt-4 space-y-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/80">
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="rounded-full border border-white/15 px-2 py-1">Scope: {deployApproval.scope}</span>
+                  <span className="rounded-full border border-white/15 px-2 py-1">Status: {deployApproval.status}</span>
+                </div>
+                <div className="mt-3 text-xs text-white/60">Target SHA</div>
+                <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.targetSha}</div>
+                <div className="mt-3 text-xs text-white/60">Plan SHA-256</div>
+                <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.planSha256}</div>
+                <div className="mt-3 grid gap-1 text-xs text-white/60 md:grid-cols-2">
+                  <div>要求者: {deployApproval.requestActor}</div>
+                  <div>要求作成: {formatDateTime(deployApproval.createdAt)}</div>
+                  <div>要求期限: {formatDateTime(deployApproval.requestExpiresAt)}</div>
+                  <div>承認ID: <span className="font-mono">{deployApproval.id}</span></div>
+                </div>
+                {deployApproval.lastError ? (
+                  <div className="mt-3 rounded-lg border border-rose-400/25 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                    {deployApproval.lastError}
+                  </div>
+                ) : null}
+              </div>
+
+              {deployApproval.status === "PENDING" ? (
+                <form method="post" action="/api/admin/deploy-approval">
+                  <input type="hidden" name="intent" value="request-otp" />
+                  <input type="hidden" name="requestId" value={deployApproval.id} />
+                  <button className="w-full rounded-xl border border-amber-300/35 bg-amber-300/15 px-4 py-3 text-sm font-black text-amber-50">
+                    メール認証してLIVE切替を承認
+                  </button>
+                </form>
+              ) : null}
+
+              {deployApproval.status === "OTP_SENT" ? (
+                <form method="post" action="/api/admin/deploy-approval" className="space-y-3">
+                  <input type="hidden" name="intent" value="verify-otp" />
+                  <input type="hidden" name="requestId" value={deployApproval.id} />
+                  <div className="text-xs text-white/70">
+                    メールへ送信した6桁コードを入力してください。コードは5分で失効します。
+                  </div>
+                  <input
+                    type="text"
+                    name="approvalCode"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                    className="w-full rounded-xl border border-amber-300/25 bg-[#0b1018] px-4 py-3 text-center font-mono text-xl tracking-[0.35em] text-white outline-none"
+                    placeholder="000000"
+                  />
+                  <button className="w-full rounded-xl border border-emerald-300/35 bg-emerald-400/15 px-4 py-3 text-sm font-black text-emerald-50">
+                    正式承認してGitHub Actionへ引き渡す
+                  </button>
+                </form>
+              ) : null}
+
+              {deployApproval.status === "APPROVED" ? (
+                <form method="post" action="/api/admin/deploy-approval">
+                  <input type="hidden" name="intent" value="retry-dispatch" />
+                  <input type="hidden" name="requestId" value={deployApproval.id} />
+                  <button className="w-full rounded-xl border border-sky-300/35 bg-sky-400/15 px-4 py-3 text-sm font-bold text-sky-50">
+                    承認済み証明でGitHub Action起動を再試行
+                  </button>
+                </form>
+              ) : null}
+
+              {deployApproval.status === "DISPATCHED" ? (
+                <div className="rounded-xl border border-sky-300/25 bg-sky-400/10 px-4 py-3 text-sm text-sky-100">
+                  本人認証済み。正式GitHub Actionへ引き渡し済みです。
+                </div>
+              ) : null}
+
+              {deployApproval.status === "REDEEMED" ? (
+                <div className="rounded-xl border border-emerald-300/25 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+                  GitHub Actionが一回限りの承認証明を取得済みです。
+                </div>
+              ) : null}
+
+              <div className="rounded-xl border border-rose-400/20 bg-rose-500/[0.06] px-4 py-3 text-xs leading-relaxed text-rose-100/85">
+                この承認は表示中の exact SHA / plan hash / V12_V4 にのみ有効です。内容が変わった場合は再承認が必要です。
+              </div>
+            </div>
+          )}
+        </>,
+      )}
 
       <section className="grid gap-4 xl:grid-cols-2">
         {card(
