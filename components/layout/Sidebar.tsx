@@ -10,6 +10,7 @@ import {
   LogOut,
   MessageSquareText,
   Settings,
+  ShieldCheck,
   Wallet,
 } from "lucide-react";
 
@@ -41,6 +42,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/history", label: "トレード履歴", icon: FileText },
+  { href: "/production-approval", label: "LIVE切替承認", icon: ShieldCheck },
   { href: "/settings", label: "設定", icon: Settings },
 ];
 
