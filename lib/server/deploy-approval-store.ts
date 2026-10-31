@@ -51,19 +51,15 @@ const FILE_PATH =
   process.env.DISDEX_DEPLOY_APPROVAL_STORE_PATH ||
   path.join(process.cwd(), "data", "deploy-approvals.json");
 
-let memoryRecords: DeploymentApprovalRecord[] | null = null;
-
 async function redisClient() {
   const { Redis } = await import("@upstash/redis");
   return new Redis({ url: KV_URL!, token: KV_TOKEN! });
 }
 
 function loadFileRecords(): DeploymentApprovalRecord[] {
-  if (memoryRecords) return memoryRecords;
   try {
     if (!fs.existsSync(FILE_PATH)) return [];
-    memoryRecords = JSON.parse(fs.readFileSync(FILE_PATH, "utf8")) as DeploymentApprovalRecord[];
-    return memoryRecords;
+    return JSON.parse(fs.readFileSync(FILE_PATH, "utf8")) as DeploymentApprovalRecord[];
   } catch (error) {
     console.error("[DeployApproval] failed to read approval store", error);
     return [];
@@ -71,10 +67,11 @@ function loadFileRecords(): DeploymentApprovalRecord[] {
 }
 
 function saveFileRecords(records: DeploymentApprovalRecord[]) {
-  memoryRecords = records;
   const dir = path.dirname(FILE_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(FILE_PATH, JSON.stringify(records, null, 2), { encoding: "utf8", mode: 0o600 });
+  const tmp = `${FILE_PATH}.tmp-${process.pid}-${Date.now()}`;
+  fs.writeFileSync(tmp, JSON.stringify(records, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, FILE_PATH);
 }
 
 export function sanitizeDeploymentApproval(
