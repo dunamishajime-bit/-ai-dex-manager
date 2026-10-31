@@ -53,11 +53,8 @@ ACTIVATION=Path("/var/lib/disdex/shared/operator-activation/current.json")
 
 OLD_IMPORT='import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "./disdex-managed-protective-orders";'
 NEW_IMPORT='import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders, findManagedV12V4ProtectiveOrders } from "./disdex-managed-protective-orders";'
-OLD_MANAGED='''    ...findManagedV12ProtectiveOrders(openOrders, positions),
-    ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),'''
-NEW_MANAGED='''    ...findManagedV12ProtectiveOrders(openOrders, positions),
-    ...findManagedV12V4ProtectiveOrders(openOrders, positions),
-    ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),'''
+OLD_MANAGED='    ...findManagedV12ProtectiveOrders(openOrders, positions),'
+NEW_MANAGED='    ...findManagedV12V4ProtectiveOrders(openOrders, positions),'
 DROPIN_TEXT=f"""[Service]
 # HYPE-only reversible source overlay; immutable release bytes stay unchanged.
 BindReadOnlyPaths={OVERLAY}:{SOURCE}
@@ -173,7 +170,9 @@ def patched_source() -> bytes:
     require(text.count(OLD_MANAGED)==1,"HYPE_MANAGED_PATCH_ANCHOR_NOT_UNIQUE")
     require("findManagedV12V4ProtectiveOrders(openOrders, positions)" not in text,
             "HYPE_BASELINE_ALREADY_HAS_V4_CLASSIFIER")
-    text=text.replace(OLD_IMPORT,NEW_IMPORT,1).replace(OLD_MANAGED,NEW_MANAGED,1)
+    newline="\r\n" if "\r\n" in text else "\n"
+    text=text.replace(OLD_IMPORT,NEW_IMPORT,1)
+    text=text.replace(OLD_MANAGED,OLD_MANAGED+newline+NEW_MANAGED,1)
     require(text.count("findManagedV12V4ProtectiveOrders(openOrders, positions)")==1,
             "HYPE_PATCHED_CLASSIFIER_COUNT_INVALID")
     return text.encode("utf-8")
