@@ -212,13 +212,9 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
               ) : null}
 
               {deployApproval.status === "APPROVED" ? (
-                <form method="post" action="/api/admin/deploy-approval">
-                  <input type="hidden" name="intent" value="retry-dispatch" />
-                  <input type="hidden" name="requestId" value={deployApproval.id} />
-                  <button className="w-full rounded-xl border border-sky-300/35 bg-sky-400/15 px-4 py-3 text-sm font-bold text-sky-50">
-                    承認済み証明でGitHub Action起動を再試行
-                  </button>
-                </form>
+                <div className="rounded-xl border border-emerald-300/25 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+                  本人認証済み。exact SHA / plan hash に固定した署名済み承認証明を発行済みです。
+                </div>
               ) : null}
 
               {deployApproval.status === "DISPATCHED" ? (
