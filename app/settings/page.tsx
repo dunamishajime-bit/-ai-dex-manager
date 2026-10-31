@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
 import { HelpCircle, Settings2, ShieldCheck, Smartphone, UserCircle2 } from "lucide-react";
@@ -435,6 +436,24 @@ export default function SettingsPage() {
             {statusMessage}
           </div>
         ) : null}
+
+        <Link
+          href="/production-approval"
+          className="flex items-center justify-between gap-3 rounded-[22px] border border-amber-300/25 bg-amber-300/[0.08] px-4 py-4 transition hover:bg-amber-300/[0.12]"
+        >
+          <div className="flex items-center gap-3">
+            <div className="rounded-2xl border border-amber-300/25 bg-amber-300/10 p-3">
+              <ShieldCheck className="h-5 w-5 text-amber-100" />
+            </div>
+            <div>
+              <div className="text-sm font-black text-white">LIVE切替承認</div>
+              <div className="mt-1 text-xs leading-5 text-white/65">Production切替のメールOTP承認画面を開きます。</div>
+            </div>
+          </div>
+          <span className="rounded-full border border-amber-300/25 px-3 py-1 text-[11px] font-semibold text-amber-100">
+            開く
+          </span>
+        </Link>
 
         <section className="grid gap-3 xl:grid-cols-2">
           <Section title="アカウント" description="表示名と表示通貨を設定します。" icon={UserCircle2}>
