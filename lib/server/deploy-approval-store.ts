@@ -1,7 +1,11 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { DEPLOY_APPROVAL_SCOPE } from "@/lib/deploy-approval-token";
+import {
+  DEPLOY_APPROVAL_SCOPE,
+  type DeploymentApprovalOperation,
+  type DeploymentApprovalScope,
+} from "@/lib/deploy-approval-token";
 
 export type DeploymentApprovalStatus =
   | "PENDING"
@@ -14,7 +18,9 @@ export type DeploymentApprovalStatus =
 
 export type DeploymentApprovalRecord = {
   id: string;
-  scope: typeof DEPLOY_APPROVAL_SCOPE;
+  scope: DeploymentApprovalScope;
+  operation?: DeploymentApprovalOperation;
+  ordersEnabled?: boolean;
   targetSha: string;
   planSha256: string;
   requestActor: string;
@@ -122,6 +128,9 @@ export async function getLatestDeploymentApprovalSummary() {
 export async function createPendingDeploymentApproval(input: {
   targetSha: string;
   planSha256: string;
+  scope?: DeploymentApprovalScope;
+  operation?: DeploymentApprovalOperation;
+  ordersEnabled?: boolean;
   requestActor: string;
   requestCommentId?: string;
 }) {
@@ -132,7 +141,10 @@ export async function createPendingDeploymentApproval(input: {
     ["PENDING", "OTP_SENT", "APPROVED", "DISPATCHED"].includes(current.status) &&
     current.requestExpiresAt > now &&
     current.targetSha === input.targetSha &&
-    current.planSha256 === input.planSha256
+    current.planSha256 === input.planSha256 &&
+    current.scope === (input.scope ?? DEPLOY_APPROVAL_SCOPE) &&
+    (current.operation ?? "V12_V4_LIVE") === (input.operation ?? "V12_V4_LIVE") &&
+    (current.ordersEnabled ?? true) === (input.ordersEnabled ?? true)
   ) {
     return current;
   }
@@ -147,7 +159,9 @@ export async function createPendingDeploymentApproval(input: {
 
   const record: DeploymentApprovalRecord = {
     id: crypto.randomUUID(),
-    scope: DEPLOY_APPROVAL_SCOPE,
+    scope: input.scope ?? DEPLOY_APPROVAL_SCOPE,
+    operation: input.operation ?? "V12_V4_LIVE",
+    ordersEnabled: input.ordersEnabled ?? true,
     targetSha: input.targetSha,
     planSha256: input.planSha256,
     requestActor: input.requestActor,

@@ -7,39 +7,40 @@ import {
   DEPLOY_APPROVAL_OPERATOR_TARGET,
   DEPLOY_APPROVAL_REPOSITORY,
   DEPLOY_APPROVAL_ROUTE,
-  DEPLOY_APPROVAL_SCOPE,
   DEPLOY_APPROVAL_TARGET,
   issueDeploymentApprovalToken,
+  type DeploymentApprovalScope,
 } from "../lib/deploy-approval-token";
 
 const targetSha = "1".repeat(40);
-const planSha256 = "2".repeat(64);
 const operator = "dunamishajime-bit";
 
 const { privateKey, publicKey } = generateKeyPairSync("ed25519");
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "disdex-hp-approval-"));
 const publicPath = path.join(dir, "public.pem");
 
-try {
-  fs.writeFileSync(
-    publicPath,
-    publicKey.export({ type: "spki", format: "pem" }),
-    { mode: 0o600 },
-  );
-
+function verifyCase(input: {
+  scope: DeploymentApprovalScope;
+  ordersEnabled: boolean;
+  planSha256: string;
+}) {
   const { token, payload } = issueDeploymentApprovalToken({
     targetSha,
-    planSha256,
+    planSha256: input.planSha256,
     operator,
     privateKey,
+    scope: input.scope,
+    ordersEnabled: input.ordersEnabled,
     ttlSeconds: 300,
   });
 
-  if (payload.sourceSha !== targetSha || payload.planSha256 !== planSha256) {
+  if (
+    payload.sourceSha !== targetSha ||
+    payload.planSha256 !== input.planSha256 ||
+    payload.ordersEnabled !== input.ordersEnabled ||
+    payload.scope !== input.scope
+  ) {
     throw new Error("issued token identity mismatch");
-  }
-  if (payload.ordersEnabled !== true || payload.scope !== DEPLOY_APPROVAL_SCOPE) {
-    throw new Error("issued token permission mismatch");
   }
 
   const args = [
@@ -48,13 +49,13 @@ try {
     "--public-key", publicPath,
     "--repository", DEPLOY_APPROVAL_REPOSITORY,
     "--sha", targetSha,
-    "--scope", DEPLOY_APPROVAL_SCOPE,
+    "--scope", input.scope,
     "--operator", operator,
-    "--plan-sha256", planSha256,
+    "--plan-sha256", input.planSha256,
     "--deployment-target", DEPLOY_APPROVAL_TARGET,
     "--operator-target", DEPLOY_APPROVAL_OPERATOR_TARGET,
     "--route", DEPLOY_APPROVAL_ROUTE,
-    "--orders-enabled", "true",
+    "--orders-enabled", String(input.ordersEnabled),
   ];
 
   const ok = spawnSync("python3", args, {
@@ -69,14 +70,33 @@ try {
 
   const badArgs = args.slice();
   const planIndex = badArgs.indexOf("--plan-sha256") + 1;
-  badArgs[planIndex] = "3".repeat(64);
+  badArgs[planIndex] = "f".repeat(64);
   const bad = spawnSync("python3", badArgs, {
     input: token,
     encoding: "utf8",
   });
   if (bad.status === 0) {
-    throw new Error("Python verifier accepted mismatched plan hash");
+    throw new Error("Python verifier accepted mismatched plan/context hash");
   }
+}
+
+try {
+  fs.writeFileSync(
+    publicPath,
+    publicKey.export({ type: "spki", format: "pem" }),
+    { mode: 0o600 },
+  );
+
+  verifyCase({
+    scope: "V12_V4",
+    ordersEnabled: true,
+    planSha256: "2".repeat(64),
+  });
+  verifyCase({
+    scope: "IDLE_PRIORITY_SHORT",
+    ordersEnabled: false,
+    planSha256: "3".repeat(64),
+  });
 
   console.log("DISDEX_HP_DEPLOY_APPROVAL_SELFTEST_OK");
 } finally {

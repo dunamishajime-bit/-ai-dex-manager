@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLatestDeploymentApprovalSummary } from "@/lib/server/deploy-approval-store";
+import { DEPLOY_APPROVAL_OPERATION_POLICY, type DeploymentApprovalOperation } from "@/lib/deploy-approval-token";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,13 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
   const message = firstValue(searchParams.message);
   const error = firstValue(searchParams.error);
   const deployApproval = await getLatestDeploymentApprovalSummary();
+  const operation = deployApproval
+    ? (deployApproval.operation ?? (deployApproval.scope === "V12_V4" ? "V12_V4_LIVE" : null))
+    : null;
+  const operationPolicy =
+    operation && operation in DEPLOY_APPROVAL_OPERATION_POLICY
+      ? DEPLOY_APPROVAL_OPERATION_POLICY[operation as DeploymentApprovalOperation]
+      : null;
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-4">
@@ -37,9 +45,9 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
             <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-100/70">
               Production Approval
             </div>
-            <h1 className="mt-2 text-3xl font-black text-white">LIVE切替承認</h1>
+            <h1 className="mt-2 text-3xl font-black text-white">Production操作承認</h1>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-white/70">
-              現在のログインに加え、登録メールへ送る6桁コードでProduction切替を本人承認します。
+              現在のログインに加え、登録メールへ送る6桁コードで対象のProduction操作だけを本人承認します。
             </p>
           </div>
           <span className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-[11px] font-semibold text-amber-100">
@@ -60,18 +68,20 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
 
         {!deployApproval ? (
           <div className="mt-5 rounded-2xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-white/60">
-            現在、承認待ちのProduction切替はありません。
+            現在、承認待ちのProduction操作はありません。
           </div>
         ) : (
           <div className="mt-5 space-y-4">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/80">
               <div className="flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full border border-white/15 px-2 py-1">Operation: {operation || "UNKNOWN"}</span>
                 <span className="rounded-full border border-white/15 px-2 py-1">Scope: {deployApproval.scope}</span>
+                <span className="rounded-full border border-white/15 px-2 py-1">Orders: {(deployApproval.ordersEnabled ?? true) ? "ENABLED" : "DISABLED"}</span>
                 <span className="rounded-full border border-white/15 px-2 py-1">Status: {deployApproval.status}</span>
               </div>
               <div className="mt-4 text-xs text-white/50">Target SHA</div>
               <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.targetSha}</div>
-              <div className="mt-4 text-xs text-white/50">Plan SHA-256</div>
+              <div className="mt-4 text-xs text-white/50">Plan / Context SHA-256</div>
               <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.planSha256}</div>
               <div className="mt-4 grid gap-2 text-xs text-white/55 md:grid-cols-2">
                 <div>要求者: {deployApproval.requestActor}</div>
@@ -91,7 +101,7 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
                 <input type="hidden" name="intent" value="request-otp" />
                 <input type="hidden" name="requestId" value={deployApproval.id} />
                 <button className="w-full rounded-2xl border border-amber-300/35 bg-amber-300/15 px-4 py-4 text-sm font-black text-amber-50">
-                  メール認証してLIVE切替を承認
+                  メール認証して{operationPolicy?.label || "Production操作"}を承認
                 </button>
               </form>
             ) : null}
@@ -122,7 +132,7 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
 
             {deployApproval.status === "APPROVED" ? (
               <div className="rounded-2xl border border-emerald-300/25 bg-emerald-400/10 px-4 py-4 text-sm text-emerald-100">
-                本人認証済みです。表示中のexact SHA / plan hashだけに有効な署名済み承認証明を発行済みです。
+                本人認証済みです。表示中のoperation / scope / exact SHA / plan-context hash / 注文権限だけに有効な署名済み承認証明を発行済みです。
               </div>
             ) : null}
 
@@ -139,7 +149,7 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
             ) : null}
 
             <div className="rounded-2xl border border-rose-400/20 bg-rose-500/[0.06] px-4 py-3 text-xs leading-6 text-rose-100/85">
-              承認はV12_V4・exact SHA・plan hash・有効期限に固定されます。対象が変われば再承認が必要です。
+              承認はoperation・scope・exact SHA・plan/context hash・注文権限・有効期限に固定されます。対象が変われば再承認が必要です。Kill Switch、STOP、venue evidence、peer healthは承認では上書きされません。
             </div>
           </div>
         )}

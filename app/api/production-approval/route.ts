@@ -7,8 +7,10 @@ import {
   saveDeploymentApproval,
 } from "@/lib/server/deploy-approval-store";
 import {
+  DEPLOY_APPROVAL_OPERATION_POLICY,
   issueDeploymentApprovalToken,
   loadDeploymentApprovalPrivateKey,
+  type DeploymentApprovalOperation,
 } from "@/lib/deploy-approval-token";
 
 export const runtime = "nodejs";
@@ -19,6 +21,14 @@ const APPROVAL_RECEIVER = process.env.ADMIN_CONTACT_EMAIL || process.env.GMAIL_U
 const OTP_PEPPER = process.env.DISDEX_DEPLOY_OTP_PEPPER?.trim() || "";
 const OPERATOR = "dunamishajime-bit";
 const UUID_RE = /^[0-9a-f-]{36}$/i;
+
+function resolveRecordOperation(record: { operation?: DeploymentApprovalOperation; scope: string }) {
+  const operation = record.operation ?? (record.scope === "V12_V4" ? "V12_V4_LIVE" : null);
+  if (!operation || !(operation in DEPLOY_APPROVAL_OPERATION_POLICY)) {
+    throw new Error("unsupported approval operation");
+  }
+  return operation as DeploymentApprovalOperation;
+}
 
 function redirectUrl(request: NextRequest, params: Record<string, string>) {
   const forwardedHost = request.headers.get("x-forwarded-host");
@@ -119,18 +129,26 @@ export async function POST(request: NextRequest) {
       return redirect(request, { error: "30秒後に再送できます" });
     }
 
+    const operation = resolveRecordOperation(record);
+    const policy = DEPLOY_APPROVAL_OPERATION_POLICY[operation];
+    if (record.scope !== policy.scope || (record.ordersEnabled ?? true) !== policy.ordersEnabled) {
+      return redirect(request, { error: "承認対象の操作ポリシーが一致しません" });
+    }
+
     const code = String(crypto.randomInt(100000, 1000000));
     const now = Date.now();
     const sent = await sendEmail(
       APPROVAL_RECEIVER,
-      "DisDex Production LIVE 承認コード",
+      "DisDex Production 操作承認コード",
       [
         `承認コード: ${code}`,
         "有効期限: 5分",
         "",
-        "対象: V12_V4 Production LIVE",
+        `対象: ${policy.label}`,
+        `Scope: ${policy.scope}`,
+        `注文権限: ${policy.ordersEnabled ? "有効" : "無効"}`,
         `SHA: ${record.targetSha}`,
-        `Plan SHA-256: ${record.planSha256}`,
+        `Plan/Context SHA-256: ${record.planSha256}`,
         "",
         "心当たりがない場合は承認しないでください。",
       ].join("\n"),
@@ -184,11 +202,19 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      const operation = resolveRecordOperation(record);
+      const policy = DEPLOY_APPROVAL_OPERATION_POLICY[operation];
+      if (record.scope !== policy.scope || (record.ordersEnabled ?? true) !== policy.ordersEnabled) {
+        throw new Error("approval operation policy mismatch");
+      }
+
       const { token, payload } = issueDeploymentApprovalToken({
         targetSha: record.targetSha,
         planSha256: record.planSha256,
         operator: OPERATOR,
         privateKey: loadDeploymentApprovalPrivateKey(),
+        scope: policy.scope,
+        ordersEnabled: policy.ordersEnabled,
         ttlSeconds: 300,
       });
 

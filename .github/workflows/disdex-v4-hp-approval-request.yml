@@ -1,4 +1,4 @@
-name: DisDex V4 HP Approval Request
+name: DisDex HP Production Approval Request
 
 on:
   issue_comment:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: disdex-v4-hp-approval-request
+  group: disdex-hp-production-approval-request
   cancel-in-progress: false
 
 jobs:
@@ -17,11 +17,15 @@ jobs:
       github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
       github.event.issue.number == 317 &&
       github.actor == 'dunamishajime-bit' &&
-      github.event.comment.author_association == 'OWNER'
+      github.event.comment.author_association == 'OWNER' &&
+      (
+        startsWith(github.event.comment.body, 'DISDEX_DEPLOY_REQUEST V12_V4 ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ')
+      )
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Validate exact request command
+      - name: Validate exact request command and bind operation
         id: request
         shell: bash
         env:
@@ -30,16 +34,38 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import os, re
+          import hashlib, os, re
+
           body = os.environ["BODY"].strip()
-          m = re.fullmatch(
+          deploy = re.fullmatch(
               r"DISDEX_DEPLOY_REQUEST V12_V4 SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
               body,
           )
-          if not m:
-              raise SystemExit("request comment does not match the exact deployment request grammar")
-          print("target_sha=" + m.group(1))
-          print("plan_sha256=" + m.group(2))
+          idle = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR SHA=([0-9a-f]{40})",
+              body,
+          )
+
+          if deploy:
+              target, plan = deploy.groups()
+              operation = "V12_V4_LIVE"
+              scope = "V12_V4"
+              orders_enabled = "true"
+          elif idle:
+              target = idle.group(1)
+              operation = "IDLE_FLAT_STALE_REPAIR"
+              scope = "IDLE_PRIORITY_SHORT"
+              orders_enabled = "false"
+              context = f"IDLE_FLAT_STALE_REPAIR_AFTER_THREE_SIGNED_GETS\n{target}\n"
+              plan = hashlib.sha256(context.encode("ascii")).hexdigest()
+          else:
+              raise SystemExit("request comment does not match a protected production request grammar")
+
+          print("operation=" + operation)
+          print("scope=" + scope)
+          print("orders_enabled=" + orders_enabled)
+          print("target_sha=" + target)
+          print("plan_sha256=" + plan)
           print("comment_id=" + os.environ["COMMENT_ID"])
           PY
 
@@ -64,6 +90,9 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
           SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          OPERATION: ${{ steps.request.outputs.operation }}
+          SCOPE: ${{ steps.request.outputs.scope }}
+          ORDERS_ENABLED: ${{ steps.request.outputs.orders_enabled }}
           TARGET_SHA: ${{ steps.request.outputs.target_sha }}
           PLAN_SHA256: ${{ steps.request.outputs.plan_sha256 }}
           COMMENT_ID: ${{ steps.request.outputs.comment_id }}
@@ -72,9 +101,16 @@ jobs:
           set -euo pipefail
           PORT="${SSH_PORT:-22}"
           [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
-          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' PLAN_SHA256='$PLAN_SHA256' COMMENT_ID='$COMMENT_ID' ACTOR='$ACTOR' python3 - <<'PY'
+          ssh -T -i "$HOME/.ssh/id_vps_root" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10 \
+            -p "$PORT" "root@$SSH_HOST" \
+            "OPERATION='$OPERATION' SCOPE='$SCOPE' ORDERS_ENABLED='$ORDERS_ENABLED' TARGET_SHA='$TARGET_SHA' PLAN_SHA256='$PLAN_SHA256' COMMENT_ID='$COMMENT_ID' ACTOR='$ACTOR' python3 - <<'PY'
           import json, os, pathlib, pwd, tempfile, time, uuid
 
+          operation = os.environ['OPERATION']
+          scope = os.environ['SCOPE']
+          orders_enabled = os.environ['ORDERS_ENABLED'].lower() == 'true'
           target = os.environ['TARGET_SHA']
           plan = os.environ['PLAN_SHA256']
           comment_id = os.environ['COMMENT_ID']
@@ -84,12 +120,10 @@ jobs:
           now = int(time.time() * 1000)
           records = []
           if path.exists():
-              try:
-                  loaded = json.loads(path.read_text(encoding='utf-8'))
-                  if isinstance(loaded, list):
-                      records = loaded
-              except Exception:
+              loaded = json.loads(path.read_text(encoding='utf-8'))
+              if not isinstance(loaded, list):
                   raise SystemExit('APPROVAL_STORE_INVALID_JSON')
+              records = loaded
 
           active = {'PENDING', 'OTP_SENT', 'APPROVED', 'DISPATCHED'}
           existing = next(
@@ -97,6 +131,9 @@ jobs:
                   r for r in records
                   if r.get('targetSha') == target
                   and r.get('planSha256') == plan
+                  and (r.get('operation') or ('V12_V4_LIVE' if r.get('scope') == 'V12_V4' else None)) == operation
+                  and r.get('scope') == scope
+                  and bool(r.get('ordersEnabled', True)) == orders_enabled
                   and r.get('status') in active
                   and int(r.get('requestExpiresAt') or 0) > now
               ),
@@ -119,7 +156,9 @@ jobs:
           request_id = str(uuid.uuid4())
           records.append({
               'id': request_id,
-              'scope': 'V12_V4',
+              'scope': scope,
+              'operation': operation,
+              'ordersEnabled': orders_enabled,
               'targetSha': target,
               'planSha256': plan,
               'requestActor': actor,
@@ -138,8 +177,8 @@ jobs:
                   handle.write('\n')
                   handle.flush()
                   os.fsync(handle.fileno())
-              deploy = pwd.getpwnam('deploy')
-              os.chown(tmp_name, deploy.pw_uid, deploy.pw_gid)
+              deploy_user = pwd.getpwnam('deploy')
+              os.chown(tmp_name, deploy_user.pw_uid, deploy_user.pw_gid)
               os.chmod(tmp_name, 0o600)
               os.replace(tmp_name, path)
           finally:
@@ -148,5 +187,13 @@ jobs:
 
           print('APPROVAL_REQUEST_ID=' + request_id)
           print('APPROVAL_REQUEST_PUBLISHED=TRUE')
+          print('OPERATION=' + operation)
+          print('SCOPE=' + scope)
+          print('ORDERS_ENABLED=' + str(orders_enabled).lower())
           print('TRADING_MUTATION=0')
           PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
