@@ -7,6 +7,10 @@ on:
         required: true
         type: choice
         options: [preflight, execute]
+      task_id:
+        description: Approved whole-runner LIVE restoration task ID (required for execute)
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -26,6 +30,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 16
     steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Require a whole-task owner approval for HOLD recovery
+        if: ${{ inputs.mode == 'execute' }}
+        shell: bash
+        env:
+          TASK_ID: ${{ inputs.task_id }}
+        run: |
+          set -euo pipefail
+          [[ "$TASK_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+
       - name: Configure pinned maintenance read-only SSH
         env:
           KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
@@ -57,6 +75,62 @@ jobs:
             -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
             "/usr/bin/python3 /usr/local/sbin/disdex-idle-residual-kill-recovery"
 
+      - name: Claim and verify exact whole-task HOLD recovery grant
+        id: task_claim
+        if: ${{ inputs.mode == 'execute' }}
+        shell: bash
+        env:
+          TASK_ID: ${{ inputs.task_id }}
+          RUN_ID: ${{ github.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          [[ "$TASK_ID" =~ ^[0-9a-fA-F-]{36}$ && -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          python3 - <<'PY'
+          import json,os,pathlib,urllib.request
+          data=json.dumps({
+            "action":"claim_task_step",
+            "task_id":os.environ["TASK_ID"],
+            "step":"SHARED_HOLD_RECOVERY",
+            "target_sha":"7688ed7c93a1918d8b44837339b7da5584a868f5",
+            "run_id":os.environ["RUN_ID"],
+          }).encode()
+          request=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=data,method="POST",headers={
+              "Authorization":"Bearer "+os.environ["BRIDGE"],
+              "Content-Type":"application/json",
+            },
+          )
+          with urllib.request.urlopen(request,timeout=15) as response:
+            result=json.load(response)
+          assert result.get("ok") and result.get("scope")=="SHARED_CRYPTO_RISK_ONLY"
+          assert result.get("ordersEnabled") is False
+          assert result.get("step")=="SHARED_HOLD_RECOVERY"
+          token=str(result.get("token") or "")
+          plan=str(result.get("planSha256") or "")
+          assert len(plan)==64 and token
+          base=pathlib.Path(os.environ["RUNNER_TEMP"])
+          (base/"hold-task-token").write_text(token,encoding="ascii")
+          (base/"hold-task-plan").write_text(plan,encoding="ascii")
+          print("::add-mask::"+token)
+          print("WHOLE_TASK_HOLD_STAGE_CLAIMED=TRUE")
+          PY
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/hold-owner.pub"
+          cat "$RUNNER_TEMP/hold-task-token" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/hold-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" \
+              --sha 7688ed7c93a1918d8b44837339b7da5584a868f5 \
+              --scope SHARED_CRYPTO_RISK_ONLY \
+              --operator dunamishajime-bit \
+              --plan-sha256 "$(cat "$RUNNER_TEMP/hold-task-plan")" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled false
+
       - name: Configure forced-command root SSH
         if: ${{ inputs.mode == 'execute' }}
         env:
@@ -75,6 +149,7 @@ jobs:
           ssh-keygen -y -f "$RUNNER_TEMP/hold-forced/key" >/dev/null
 
       - name: Exact owner-reviewed allowlisted HOLD recovery
+        id: execute_recovery
         if: ${{ inputs.mode == 'execute' }}
         env:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
@@ -92,6 +167,7 @@ jobs:
             "/usr/local/sbin/disdex-idle-residual-kill-recovery --execute-after-three-signed-gets"
 
       - name: Verify V52 and released HOLD in read-only mode
+        id: postproof
         if: ${{ inputs.mode == 'execute' }}
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -120,7 +196,41 @@ jobs:
           print("NEW_V52_ONLY=TRUE ORDERS_FROM_POSTCHECK=0")
           PY
 
+      - name: Close exact whole-task HOLD stage for success or retry
+        if: ${{ always() && inputs.mode == 'execute' && steps.task_claim.outcome == 'success' }}
+        shell: bash
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          TASK_ID: ${{ inputs.task_id }}
+          RUN_ID: ${{ github.run_id }}
+          EXECUTION: ${{ steps.execute_recovery.outcome }}
+          POSTPROOF: ${{ steps.postproof.outcome }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,urllib.request
+          passed=os.environ["EXECUTION"]=="success" and os.environ["POSTPROOF"]=="success"
+          body=json.dumps({
+            "action":"finish_task_step",
+            "task_id":os.environ["TASK_ID"],
+            "step":"SHARED_HOLD_RECOVERY",
+            "run_id":os.environ["RUN_ID"],
+            "outcome":"success" if passed else "failure",
+          }).encode()
+          request=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",headers={
+              "Authorization":"Bearer "+os.environ["BRIDGE"],
+              "Content-Type":"application/json",
+            },
+          )
+          with urllib.request.urlopen(request,timeout=15) as response:
+            result=json.load(response)
+          assert result.get("ok") and result.get("status")=="APPROVED"
+          print("WHOLE_TASK_HOLD_STAGE="+("SUCCESS" if passed else "RETRYABLE"))
+          PY
+
       - name: Destroy ephemeral SSH material
         if: always()
         shell: bash
-        run: rm -rf "$RUNNER_TEMP/hold-ui" "$RUNNER_TEMP/hold-forced"
+        run: rm -rf "$RUNNER_TEMP/hold-ui" "$RUNNER_TEMP/hold-forced" "$RUNNER_TEMP/hold-task-token" "$RUNNER_TEMP/hold-task-plan" "$RUNNER_TEMP/hold-owner.pub"
