@@ -200,5 +200,5 @@ test("HYPE recognizes the exact V12 V4 STOP-only DOGE protection and still block
     [{ ...stop, clientOrderId: "manual-doge-stop" }],
   );
   assert.equal(unmanagedHypeZecOrders([{ ...stop, reduceOnly: false }], [position]).length, 1);
-  assert.equal(unmanagedHypeZecOrders([{ ...stop, quantity: 225 }], [position]).length, 1);
+  assert.equal(unmanagedHypeZecOrders([{ ...stop, quantity: 220 }], [position]).length, 1);
 });
