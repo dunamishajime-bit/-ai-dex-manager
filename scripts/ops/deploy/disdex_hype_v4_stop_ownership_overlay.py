@@ -215,11 +215,15 @@ def namespace_hash(pid: int) -> str:
 
 
 def namespace_selftest(pid: int) -> None:
-    p=subprocess.run(["nsenter","-t",str(pid),"-m","--",
-                      str(RELEASE/"node_modules/.bin/tsx"),str(SELFTEST)],
-                     capture_output=True,text=True,timeout=45)
+    p=subprocess.run([
+        "nsenter","-t",str(pid),"-m","--",
+        str(RELEASE/"node_modules/.bin/tsx"),
+        "--tsconfig",str(RELEASE/"tsconfig.json"),
+        str(SELFTEST),
+    ],cwd=RELEASE,capture_output=True,text=True,timeout=45)
+    detail=(p.stderr or p.stdout or "")[-500:].replace("\n"," ")
     require(p.returncode==0 and "HYPE_V4_STOP_OWNERSHIP_SELFTEST=PASS" in p.stdout,
-            "HYPE_NAMESPACE_CLASSIFIER_SELFTEST_FAILED:"+p.stderr[-160:])
+            "HYPE_NAMESPACE_CLASSIFIER_SELFTEST_FAILED:"+detail)
 
 
 def main(run_id: str) -> None:
