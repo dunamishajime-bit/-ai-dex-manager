@@ -29,9 +29,9 @@ jobs:
       - name: Validate scoped secret and production SSH inputs
         env:
           BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
-          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -44,8 +44,8 @@ jobs:
 
       - name: Configure pinned production SSH
         env:
-          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
-          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -58,8 +58,8 @@ jobs:
 
       - name: Upload verified UI-only bridge installer
         env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -74,8 +74,8 @@ jobs:
       - name: Bind GitHub bridge to existing UI environment only
         env:
           BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -93,8 +93,8 @@ jobs:
       - name: Remove temporary material
         if: always()
         env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         shell: bash
         run: |
           set +e
