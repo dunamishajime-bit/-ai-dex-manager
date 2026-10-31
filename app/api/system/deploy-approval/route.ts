@@ -270,6 +270,9 @@ export async function POST(request: NextRequest) {
 
     const record = await getDeploymentApproval(approvalId);
     if (!record) return NextResponse.json({ ok: false, error: "approval not found" }, { status: 404 });
+    if (record.operation === "ALL_RUNNERS_LIVE_RESTORE") {
+      return NextResponse.json({ ok: false, error: "task approval must use scoped task-stage claims" }, { status: 409 });
+    }
 
     const operation = recordOperation(record);
     const policy = DEPLOY_APPROVAL_OPERATION_POLICY[requestedOperation];
