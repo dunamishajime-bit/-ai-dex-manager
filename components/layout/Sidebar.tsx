@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CalendarDays, FileText, Home, LogOut, Settings, Wallet } from "lucide-react";
+import { BarChart3, CalendarDays, FileText, Home, LogOut, Settings, ShieldCheck, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { SITE_BRAND_NAME } from "@/lib/site-access";
@@ -30,6 +30,7 @@ const NAV_ITEMS = [
       { href: "/history/v52", label: "V52", icon: BarChart3 },
     ],
   },
+  { href: "/production-approval", label: "LIVE切替承認", icon: ShieldCheck },
   { href: "/settings", label: "設定", icon: Settings },
 ] as const;
 
