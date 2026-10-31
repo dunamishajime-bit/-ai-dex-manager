@@ -13,22 +13,22 @@ concurrency:
 
 jobs:
   publish-request:
-    if: github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager'
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER'
     runs-on: ubuntu-24.04
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
-      - name: Validate actor and exact request command
+      - name: Validate exact request command
         id: request
         shell: bash
         env:
-          ACTOR: ${{ github.actor }}
-          ALLOWED: ${{ vars.DISDEX_DEPLOY_ALLOWED_ACTORS }}
           BODY: ${{ github.event.comment.body }}
           COMMENT_ID: ${{ github.event.comment.id }}
         run: |
           set -euo pipefail
-          [[ -n "$ALLOWED" ]]
-          [[ ",$ALLOWED," == *",$ACTOR,"* ]]
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import os, re
           body = os.environ["BODY"].strip()
@@ -43,28 +43,110 @@ jobs:
           print("comment_id=" + os.environ["COMMENT_ID"])
           PY
 
-      - name: Publish pending request to DisDex HP
+      - name: Configure pinned root SSH
         shell: bash
         env:
-          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+
+      - name: Publish pending request to HP shared approval store
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
           TARGET_SHA: ${{ steps.request.outputs.target_sha }}
           PLAN_SHA256: ${{ steps.request.outputs.plan_sha256 }}
           COMMENT_ID: ${{ steps.request.outputs.comment_id }}
           ACTOR: ${{ github.actor }}
         run: |
           set -euo pipefail
-          [[ -n "$BRIDGE_SECRET" ]]
-          payload="$(
-            python3 - <<'PY'
-          import json, os
-          print(json.dumps({
-              "action": "publish",
-              "scope": "V12_V4",
-              "target_sha": os.environ["TARGET_SHA"],
-              "plan_sha256": os.environ["PLAN_SHA256"],
-              "actor": os.environ["ACTOR"],
-              "comment_id": os.environ["COMMENT_ID"],
-          }, separators=(",", ":")))
-          PY
-          )"
-          curl --fail-with-body --silent --show-error             --connect-timeout 10 --max-time 20             -H "Authorization: Bearer $BRIDGE_SECRET"             -H "Content-Type: application/json"             --data "$payload"             https://professional-dismanager.net/api/system/deploy-approval
+          PORT="${SSH_PORT:-22}"
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' PLAN_SHA256='$PLAN_SHA256' COMMENT_ID='$COMMENT_ID' ACTOR='$ACTOR' python3 - <<'PY'
+          import json, os, pathlib, pwd, tempfile, time, uuid
+
+          target = os.environ['TARGET_SHA']
+          plan = os.environ['PLAN_SHA256']
+          comment_id = os.environ['COMMENT_ID']
+          actor = os.environ['ACTOR']
+          path = pathlib.Path('/home/deploy/disdex-ui/shared/data/deploy-approvals.json')
+          path.parent.mkdir(parents=True, exist_ok=True)
+          now = int(time.time() * 1000)
+          records = []
+          if path.exists():
+              try:
+                  loaded = json.loads(path.read_text(encoding='utf-8'))
+                  if isinstance(loaded, list):
+                      records = loaded
+              except Exception:
+                  raise SystemExit('APPROVAL_STORE_INVALID_JSON')
+
+          active = {'PENDING', 'OTP_SENT', 'APPROVED', 'DISPATCHED'}
+          existing = next(
+              (
+                  r for r in records
+                  if r.get('targetSha') == target
+                  and r.get('planSha256') == plan
+                  and r.get('status') in active
+                  and int(r.get('requestExpiresAt') or 0) > now
+              ),
+              None,
+          )
+          if existing:
+              print('APPROVAL_REQUEST_ID=' + str(existing.get('id')))
+              print('APPROVAL_REQUEST_REUSED=TRUE')
+              raise SystemExit(0)
+
+          for record in records:
+              if (
+                  record.get('status') in {'PENDING', 'OTP_SENT', 'APPROVED'}
+                  and int(record.get('requestExpiresAt') or 0) <= now
+              ):
+                  record['status'] = 'EXPIRED'
+                  record['lastError'] = 'request expired'
+                  record['updatedAt'] = now
+
+          request_id = str(uuid.uuid4())
+          records.append({
+              'id': request_id,
+              'scope': 'V12_V4',
+              'targetSha': target,
+              'planSha256': plan,
+              'requestActor': actor,
+              'requestCommentId': comment_id,
+              'createdAt': now,
+              'requestExpiresAt': now + 30 * 60 * 1000,
+              'updatedAt': now,
+              'status': 'PENDING',
+          })
+          records = sorted(records, key=lambda x: int(x.get('createdAt') or 0), reverse=True)[:50]
+
+          fd, tmp_name = tempfile.mkstemp(prefix='.deploy-approvals-', dir=str(path.parent))
+          try:
+              with os.fdopen(fd, 'w', encoding='utf-8') as handle:
+                  json.dump(records, handle, ensure_ascii=False, indent=2)
+                  handle.write('\n')
+                  handle.flush()
+                  os.fsync(handle.fileno())
+              deploy = pwd.getpwnam('deploy')
+              os.chown(tmp_name, deploy.pw_uid, deploy.pw_gid)
+              os.chmod(tmp_name, 0o600)
+              os.replace(tmp_name, path)
+          finally:
+              if os.path.exists(tmp_name):
+                  os.unlink(tmp_name)
+
+          print('APPROVAL_REQUEST_ID=' + request_id)
+          print('APPROVAL_REQUEST_PUBLISHED=TRUE')
+          print('TRADING_MUTATION=0')
+          PY"
