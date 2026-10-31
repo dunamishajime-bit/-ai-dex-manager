@@ -336,7 +336,8 @@ def _atomic_json(path: Path, value: dict, *, root_uid: int,
 
 
 def _validate_venue_evidence(value: dict, *, now: int, label: str,
-                             baseline: Optional[dict] = None) -> dict:
+                             baseline: Optional[dict] = None,
+                             require_v4_runtime: bool = True) -> dict:
     if not isinstance(value, dict) or value.get("schema") != VENUE_EVIDENCE_SCHEMA:
         raise ValueError(f"venue evidence {label} schema invalid")
     if value.get("venue") != "aster" or value.get("readOnly") is not True:
@@ -354,9 +355,10 @@ def _validate_venue_evidence(value: dict, *, now: int, label: str,
         "signatureVerified", "positionsReconciled", "protectiveStopsReconciled",
         "stopOwnershipReconciled", "pendingExposureReconciled",
         "grossReconciled", "sharedRiskHealthy", "marginGuardHealthy",
-        "accountLockHealthy", "killSwitchHealthy", "heartbeatVerified",
-        "tickVerified", "runnerShaMapVerified",
+        "accountLockHealthy", "killSwitchHealthy", "runnerShaMapVerified",
     )
+    if require_v4_runtime:
+        required_true += ("heartbeatVerified", "tickVerified")
     if any(value.get(field) is not True for field in required_true):
         raise ValueError(f"venue evidence {label} safety reconciliation incomplete")
     if value.get("sharedRiskDailyLossLimit") != 0.075:
