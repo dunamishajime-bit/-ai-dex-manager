@@ -45,12 +45,14 @@ jobs:
           for x in [
             'V4_LIVE_RECOVER','IDLE_LIVE_RESUME','claim_task_step','finish_task_step',
             'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM','disdex-production',
-            '--orders-enabled true','disdex_allrunner_v4_idle_live_resume.py',
+            '--orders-enabled true','disdex_allrunner_v4_idle_live_resume.py','TARGET_RUNNER: ${{ inputs.runner }}',
           ]:
               assert x in w,x
           for forbidden in ['cancelOrder','createOrder','test-order','kill-switch clear']:
               assert forbidden not in h
           assert 'systemctl","start"' in h
+          assert 'RUNNER_NAME:' not in w
+          assert '--runner $TARGET_RUNNER' in w
           assert 'reset-failed' in h
           print("ALLRUNNER_V4_IDLE_RESUME_POLICY=PASS")
           PY
