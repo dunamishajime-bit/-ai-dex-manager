@@ -144,7 +144,6 @@ jobs:
           [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
           umask 077
           install -d -m 0700 "$RUNNER_TEMP/disdex-idle-repair-ssh"
-          trap 'rm -rf "$RUNNER_TEMP/disdex-idle-repair-ssh"' EXIT
           printf '%s\n' "$KEY" > "$RUNNER_TEMP/disdex-idle-repair-ssh/key"
           printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"
           chmod 0600 "$RUNNER_TEMP/disdex-idle-repair-ssh/key" "$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"
