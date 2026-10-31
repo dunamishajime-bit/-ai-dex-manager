@@ -6,7 +6,11 @@ on:
       approval_id:
         description: HP email-OTP approval request ID
         type: string
-        required: true
+        required: false
+      task_id:
+        description: Parent all-runner LIVE task ID (use instead of approval_id)
+        type: string
+        required: false
       target_sha:
         description: Exact current trading runtime SHA approved for the repair
         type: string
@@ -44,6 +48,7 @@ jobs:
           echo "plan_sha256=$PLAN" >> "$GITHUB_OUTPUT"
 
       - name: Redeem one-time HP email-OTP repair approval
+        if: ${{ inputs.task_id == '' }}
         shell: bash
         env:
           BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
@@ -99,6 +104,52 @@ jobs:
           print("HP_IDLE_REPAIR_APPROVAL_REDEEMED=TRUE")
           PY
 
+      - name: Claim approved all-runner task IDLE repair stage
+        if: ${{ inputs.task_id != '' }}
+        id: claim
+        shell: bash
+        env:
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          TASK_ID: ${{ inputs.task_id }}
+          SHA: ${{ inputs.target_sha }}
+          PLAN: ${{ steps.context.outputs.plan_sha256 }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$TASK_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          [[ -n "$BRIDGE_SECRET" ]]
+          umask 077
+          python3 - <<'PY'
+          import json,os,pathlib,urllib.request
+          body=json.dumps({
+            "action":"claim_task_step",
+            "task_id":os.environ["TASK_ID"],
+            "step":"IDLE_FLAT_STALE_REPAIR",
+            "target_sha":os.environ["SHA"],
+            "plan_sha256":os.environ["PLAN"],
+            "run_id":os.environ["RUN_ID"],
+          }).encode()
+          request=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",
+            headers={
+              "Authorization":"Bearer "+os.environ["BRIDGE_SECRET"],
+              "Content-Type":"application/json",
+            },
+          )
+          with urllib.request.urlopen(request,timeout=15) as response:
+            data=json.load(response)
+          assert data.get("ok") and data.get("scope")=="IDLE_PRIORITY_SHORT"
+          assert data.get("ordersEnabled") is False
+          assert data.get("planSha256")==os.environ["PLAN"]
+          assert data.get("step")=="IDLE_FLAT_STALE_REPAIR"
+          token=str(data.get("token") or "")
+          assert token
+          pathlib.Path(os.environ["RUNNER_TEMP"],"disdex-idle-repair-token").write_text(token,encoding="ascii")
+          print("::add-mask::"+token)
+          print("IDLE_REPAIR_TASK_CLAIMED=TRUE")
+          PY
+
       - name: Verify exact owner-reviewed non-order repair grant
         shell: bash
         env:
@@ -130,6 +181,7 @@ jobs:
               --route GITHUB_ACTIONS --orders-enabled false
 
       - name: Execute exact restricted repair helper
+        id: execute_repair
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
@@ -157,6 +209,7 @@ jobs:
             "/usr/local/sbin/disdex-idle-residual-flat-stale-repair --execute-after-three-signed-gets"
 
       - name: Read-only post-repair proof (separate UI-maintenance SSH identity)
+        id: postproof
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -199,6 +252,41 @@ jobs:
           print("IDLE_POST_REPAIR_FLAT=TRUE")
           print("SHARED_KILL_SWITCH_PRESERVED=TRUE")
           print("ORDERS_SENT_BY_POSTCHECK=0")
+          PY
+
+      - name: Finish whole-task stage without requesting another HP OTP
+        if: ${{ always() && inputs.task_id != '' && steps.claim.outcome == 'success' }}
+        shell: bash
+        env:
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          TASK_ID: ${{ inputs.task_id }}
+          RUN_ID: ${{ github.run_id }}
+          EXECUTE_RESULT: ${{ steps.execute_repair.outcome }}
+          PROOF_RESULT: ${{ steps.postproof.outcome }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,urllib.request
+          success=os.environ["EXECUTE_RESULT"]=="success" and os.environ["PROOF_RESULT"]=="success"
+          body=json.dumps({
+            "action":"finish_task_step",
+            "task_id":os.environ["TASK_ID"],
+            "step":"IDLE_FLAT_STALE_REPAIR",
+            "run_id":os.environ["RUN_ID"],
+            "outcome":"success" if success else "failure",
+          }).encode()
+          request=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",
+            headers={
+              "Authorization":"Bearer "+os.environ["BRIDGE_SECRET"],
+              "Content-Type":"application/json",
+            },
+          )
+          with urllib.request.urlopen(request,timeout=15) as response:
+            result=json.load(response)
+          assert result.get("ok") and result.get("status")=="APPROVED"
+          print("TASK_STAGE_FINISHED="+("SUCCESS" if success else "RETRYABLE"))
           PY
 
       - name: Destroy ephemeral approval and SSH material
