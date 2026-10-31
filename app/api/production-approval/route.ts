@@ -219,18 +219,19 @@ export async function POST(request: NextRequest) {
         ttlSeconds: 300,
       });
 
+      const approvedAt = Date.now();
       await saveDeploymentApproval({
         ...record,
         status: "APPROVED",
         otpHash: undefined,
         otpExpiresAt: undefined,
         otpAttemptsRemaining: undefined,
-        approvedAt: Date.now(),
+        approvedAt,
         approvalToken: token,
         approvalTokenExpiresAt: payload.expiresAt,
         approverIpHash: ipFingerprint(request),
         ...(operation === "ALL_RUNNERS_LIVE_RESTORE" ? {
-          taskApprovedExpiresAt: Date.now() + ALL_RUNNERS_LIVE_TASK.maxAgeMs,
+          taskApprovedExpiresAt: approvedAt + ALL_RUNNERS_LIVE_TASK.maxAgeMs,
           taskMaxClaims: ALL_RUNNERS_LIVE_TASK.maxClaims,
           taskClaimCount: 0,
           taskClaimHistory: [],
