@@ -76,9 +76,14 @@ def prerequisites() -> tuple[bytes, os.stat_result]:
     st = TARGET.stat()
     check(st.st_uid == 0 and (st.st_mode & 0o022) == 0, "RECOVERY_HELPER_UNTRUSTED")
     previous = TARGET.read_bytes()
-    check(hashlib.sha256(previous).hexdigest() == SOURCE_SHA, "RECOVERY_HELPER_SOURCE_CHANGED")
-    check(previous.count(OLD.encode()) == 1, "EXACT_OLD_SECURITY_CHECK_NOT_UNIQUE")
-    check(NEW_FILE_MARKER.encode() not in previous, "PATCH_ALREADY_APPLIED")
+    if hashlib.sha256(previous).hexdigest() == SOURCE_SHA:
+        check(previous.count(OLD.encode()) == 1, "EXACT_OLD_SECURITY_CHECK_NOT_UNIQUE")
+        check(NEW_FILE_MARKER.encode() not in previous, "UNEXPECTED_NEW_MARKER")
+    else:
+        check(previous.count(NEW.encode()) == 1, "PATCHED_SECURITY_CHECK_NOT_UNIQUE")
+        check(hashlib.sha256(previous.replace(NEW.encode(), OLD.encode(), 1)).hexdigest()
+              == SOURCE_SHA, "RECOVERY_HELPER_SOURCE_CHANGED")
+        check(NEW_FILE_MARKER.encode() in previous, "NEW_MARKER_MISSING")
     # Observe exactly the private group-shared writer format.
     gs, ds = GUARD.stat(), GUARD.parent.lstat()
     check((gs.st_uid, gs.st_gid, stat.S_IMODE(gs.st_mode)) == (1000, 1000, 0o660),
@@ -127,7 +132,8 @@ def validate_proof():
 def main(run_id: str):
     check(run_id.isdecimal() and len(run_id) < 21, "RUN_ID_INVALID")
     old, st = prerequisites()
-    updated = old.replace(OLD.encode(), NEW.encode(), 1)
+    already_patched = NEW_FILE_MARKER.encode() in old
+    updated = old if already_patched else old.replace(OLD.encode(), NEW.encode(), 1)
     compile(updated, str(TARGET), "exec")
     BACKUPS.mkdir(mode=0o700, parents=True, exist_ok=True)
     bst = BACKUPS.stat()
@@ -142,7 +148,8 @@ def main(run_id: str):
     check(backup.read_bytes() == old, "BACKUP_BYTES_MISMATCH")
     try:
         check(TARGET.read_bytes() == old, "TARGET_CHANGED_BEFORE_PATCH")
-        atomic_update(updated, st)
+        if not already_patched:
+            atomic_update(updated, st)
         check(TARGET.read_bytes() == updated, "PATCH_READBACK_FAILED")
         validate_proof()
         # This unit is disabled, lacks its executable and is repeatedly
@@ -152,7 +159,8 @@ def main(run_id: str):
               "BROKEN_GUARD_STILL_RUNNING")
         validate_proof()
     except Exception:
-        atomic_update(old, st)
+        if not already_patched:
+            atomic_update(old, st)
         print("MARGIN_HOLD_CONTRACT_PATCH=ROLLBACK", file=sys.stderr)
         raise
     print("MARGIN_HOLD_CONTRACT_PATCH=SUCCESS")
