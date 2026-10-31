@@ -239,6 +239,35 @@ class RootGateTest(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 parse_original(bad)
 
+    def test_forced_command_allows_exact_static_evidence_only(self):
+        from disdex_unified_forced_command import STATIC_EVIDENCE_HELPER
+        sha="a"*40
+        command=f"{STATIC_EVIDENCE_HELPER} --sha {sha}"
+        self.assertEqual(parse_original(command),[STATIC_EVIDENCE_HELPER,"--sha",sha])
+        for bad in (
+            f"{STATIC_EVIDENCE_HELPER} --sha latest",
+            f"{STATIC_EVIDENCE_HELPER} --sha {sha} extra",
+            STATIC_EVIDENCE_HELPER,
+        ):
+            with self.subTest(bad=bad),self.assertRaises(ValueError):
+                parse_original(bad)
+
+    def test_forced_command_allows_exact_no_order_refresh_activation_only(self):
+        from disdex_unified_forced_command import REFRESH_HELPER
+        sha="a"*40; plan="b"*64
+        command=(f"{REFRESH_HELPER} --install --sha {sha} --operator dunamishajime-bit "
+                 f"--route GITHUB_ACTIONS --plan-sha256 {plan} --token-stdin")
+        self.assertEqual(parse_original(command),[
+            REFRESH_HELPER,"--install","--sha",sha,"--operator","dunamishajime-bit",
+            "--route","GITHUB_ACTIONS","--plan-sha256",plan,"--token-stdin"])
+        for bad in (
+            command.replace("GITHUB_ACTIONS","CODEX_SSH"),
+            command.replace(plan,"bad"),
+            command+" extra",
+        ):
+            with self.subTest(bad=bad),self.assertRaises(ValueError):
+                parse_original(bad)
+
     def test_forced_command_rejects_shell(self):
         with self.assertRaises(ValueError):
             parse_original("/bin/sh -c whoami")
