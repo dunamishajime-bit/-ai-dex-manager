@@ -1,0 +1,37 @@
+name: DisDex HP Deployment Approval CI
+
+on:
+  pull_request:
+    paths:
+      - "lib/deploy-approval-token.ts"
+      - "lib/server/deploy-approval-store.ts"
+      - "app/api/admin/deploy-approval/**"
+      - "app/api/system/deploy-approval/**"
+      - "app/admin/page.tsx"
+      - "scripts/disdex-hp-deploy-approval-selftest.ts"
+      - "package.json"
+      - ".github/workflows/disdex-v4-hp-approval-request.yml"
+      - ".github/workflows/disdex-hp-deploy-approval-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  approval-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Python verifier syntax
+        run: python3 -m py_compile scripts/ops/deploy/disdex_owner_approval.py scripts/ops/deploy/disdex_deployment_contract.py
+
+      - name: HP approval token interoperability
+        run: npm run deploy:hp-approval:selftest
