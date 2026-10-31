@@ -3,7 +3,7 @@ import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { cookies } from "next/headers";
 import { getWebAuthnRequestContext } from "@/lib/server/webauthn-origin";
 
-const RP_NAME = "Professional DisManager";
+const RP_NAME = "DISTerminal";
 
 export async function POST(req: NextRequest) {
     try {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Store challenge in a cookie for 5 minutes
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         cookieStore.set("registration-challenge", options.challenge, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
