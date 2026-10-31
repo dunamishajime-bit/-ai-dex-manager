@@ -1,0 +1,51 @@
+name: DisDex All-Runner Final Verification Safety CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_allrunner_final_verify.py"
+      - ".github/workflows/disdex-allrunner-final-verifications.yml"
+      - ".github/workflows/disdex-allrunner-final-verifications-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile verifier
+        shell: bash
+        run: python3 -m py_compile scripts/ops/deploy/disdex_allrunner_final_verify.py
+      - name: Enforce read-only final audit policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path("scripts/ops/deploy/disdex_allrunner_final_verify.py").read_text()
+          w=Path(".github/workflows/disdex-allrunner-final-verifications.yml").read_text()
+          for x in [
+            'V52_VERIFY','PENGU_LIVE_VERIFY','Q102_LIVE_VERIFY','FET_LIVE_VERIFY',
+            'FINAL_ALL_RUNNERS_AUDIT','ALL_SEVEN_RUNNERS_ACTIVE=TRUE',
+            'HYPE_V4_STOP_OVERLAY_VERIFIED=TRUE','SIGNED_ASTER_GETS=3',
+            'READ_ONLY_FINAL_AUDIT=PASS','KILL_SWITCH_ACTIVE',
+            'PENDING_ACTIVE','HYPE_OVERLAY_HASH_MISMATCH',
+          ]:
+              assert x in h,x
+          for x in [
+            'claim_task_step','finish_task_step','disdex-production',
+            'FULL_PROJECT','QUALITY102_CAUSAL_V1','PENGU_V8','FET_BRK48_RESIDUAL',
+            'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM',
+          ]:
+              assert x in w,x
+          for forbidden in ['systemctl","start"','systemctl","restart"','systemctl","stop"',
+                            'cancelOrder','createOrder','test-order','kill-switch clear']:
+              assert forbidden not in h
+          print("ALLRUNNER_FINAL_VERIFY_POLICY=PASS")
+          PY
