@@ -173,6 +173,25 @@ class V4CutoverTransactionTest(unittest.TestCase):
         self.assertEqual(self.fx.current.resolve(),self.fx.releases/OLD)
         self.assertEqual(json.loads(self.runtime.read_text())["approvedSha"],NEW)
 
+    def test_failed_pid_zero_recovery_does_not_require_old_v4_heartbeat_in_before_proof(self):
+        evidence=json.loads(self.fx.before_venue.read_text("utf8"))
+        evidence["heartbeatVerified"]=False
+        evidence["tickVerified"]=False
+        _write_secure_json(self.fx.before_venue,evidence)
+        sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False)
+        result=self._executor(sysd).execute(self._args(),"signed-token")
+        self.assertEqual(result["status"],"V4_LIVE_CUTOVER_VERIFIED")
+        self.assertTrue(sysd.is_active(self.new_unit))
+
+    def test_post_start_audit_still_requires_new_v4_heartbeat_and_tick(self):
+        evidence=json.loads(self.fx.after_venue.read_text("utf8"))
+        evidence["heartbeatVerified"]=False
+        _write_secure_json(self.fx.after_venue,evidence)
+        sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False)
+        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+            self._executor(sysd).execute(self._args(),"signed-token")
+        self.assertFalse(sysd.is_active(self.new_unit))
+
     def test_failed_pid_zero_old_v4_can_recover_directly_to_new_live(self):
         sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False)
         result=self._executor(sysd).execute(self._args(),"signed-token")
