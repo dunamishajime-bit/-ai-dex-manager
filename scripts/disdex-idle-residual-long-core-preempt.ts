@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor } from "../lib/direct-trade-executor";
 import { releaseIdleResidualLongForFormalEntry } from "../lib/idle-residual-long-preemption";
+import { resolveIdleResidualOwnerShaForPreemption } from "../lib/idle-residual-owner-sha";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 
 function arg(name:string){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:undefined;}
@@ -24,8 +25,10 @@ async function main(){
   if(arg("--shared-lock-held")!=="true")throw new Error("IDLE_RESIDUAL_CORE_PREEMPT_SHARED_LOCK_ASSERTION_REQUIRED");
   const cause=String(arg("--cause")||"").trim();
   if(!cause)throw new Error("IDLE_RESIDUAL_CORE_PREEMPT_CAUSE_REQUIRED");
-  const runtimeSha=String(process.env.DISDEX_RUNTIME_COMMIT_SHA||process.env.DISDEX_RELEASE_SHA||"").trim().toLowerCase();
-  if(!/^[0-9a-f]{40}$/.test(runtimeSha))throw new Error("IDLE_RESIDUAL_CORE_PREEMPT_RUNTIME_SHA_REQUIRED");
+  // The V52 caller release SHA is NOT the IDLE Residual state owner.
+  // Use the independently pinned IDLE runtime SHA, never the state file's
+  // self-reported SHA or the requesting V52 release SHA.
+  const runtimeSha=resolveIdleResidualOwnerShaForPreemption(process.env.DISDEX_IDLE_PRIORITY_RUNTIME_SHA);
 
   const client=new AsterV3Client({
     baseUrl:process.env.ASTER_FUTURES_BASE_URL,
