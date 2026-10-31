@@ -1,204 +1,122 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Activity,
-  ArrowRight,
-  BarChart3,
-  Clock3,
-  Gauge,
-  Settings,
-  ShieldCheck,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { Activity, ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
 
-function Stat({ title, value, note }: { title: string; value: string; note: string }) {
+import { useCurrency } from "@/context/CurrencyContext";
+import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useLivePortfolio } from "@/hooks/useLivePortfolio";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
+import { V12V4RuntimePanel } from "@/components/features/V12V4RuntimePanel";
+import { V12RouteInventoryPanel } from "@/components/features/V12RouteInventoryPanel";
+import { buildRuntimeLineageDisplay } from "@/lib/runtime-lineage-display";
+
+function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
   return (
     <div className="panel-gold rounded-[24px] p-4">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>
-      <div className="mt-2 text-[1.45rem] font-black text-white">{value}</div>
-      <div className="mt-1 text-[11px] leading-5 text-white/76">{note}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gold-100/72">{title}</div>
+      <div className={`mt-2 text-2xl font-black ${tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"}`}>{value}</div>
+      <div className="mt-1 text-[11px] leading-5 text-white/72">{detail}</div>
     </div>
   );
 }
 
-function Engine({
-  eyebrow,
-  title,
-  status,
-  text,
-  chips,
-  icon: Icon,
-}: {
-  eyebrow: string;
-  title: string;
-  status: string;
-  text: string;
-  chips: string[];
-  icon: React.ComponentType<{ className?: string }>;
-}) {
+function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: string; detail: string; icon: typeof Wallet }) {
   return (
-    <div className="panel-gold rounded-[26px] p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">
-            <Icon className="h-3.5 w-3.5" />
-            {eyebrow}
-          </div>
-          <h2 className="mt-2 break-words text-lg font-black text-white">{title}</h2>
-        </div>
-        <span className="rounded-full border border-profit/30 bg-profit/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-profit">
-          {status}
-        </span>
+    <Link href={href} className="group rounded-[22px] border border-gold-400/16 bg-black/20 p-4 transition hover:border-gold-300/40">
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex items-center gap-2 text-sm font-bold text-white"><Icon className="h-4 w-4 text-gold-100" />{title}</span>
+        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-1" />
       </div>
-      <p className="mt-3 text-[12px] leading-6 text-white/80">{text}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {chips.map((chip) => (
-          <span key={chip} className="rounded-full border border-gold-400/18 bg-gold-400/[0.07] px-2.5 py-1 text-[10px] font-semibold text-gold-50">
-            {chip}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function NavCard({ href, title, text }: { href: string; title: string; text: string }) {
-  return (
-    <Link href={href} className="group rounded-[22px] border border-gold-400/16 bg-black/25 px-4 py-4 transition hover:border-gold-300/36">
-      <div className="flex items-center justify-between gap-3 text-sm font-bold text-white">
-        {title}
-        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />
-      </div>
-      <p className="mt-2 text-[11px] leading-5 text-white/72">{text}</p>
+      <p className="mt-2 text-[11px] leading-5 text-white/72">{detail}</p>
     </Link>
   );
 }
 
-export default function HomePage() {
+function V52Top2Summary() {
+  const { snapshot: runtime } = useProductionRuntime();
+  const v52 = runtime?.v52;
+  const caps = runtime?.caps;
   return (
-    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">
-      <div className="absolute inset-0 bg-[url('/backgrounds/login_bg.png')] bg-cover bg-center opacity-[0.20] mix-blend-screen" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.72))]" />
+    <section className="panel-gold rounded-[30px] p-4 md:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-sm font-black"><Activity className="h-4 w-4 text-gold-100" />V52 Top2 LIVE / retry-aware</div>
+          <p className="mt-2 text-[12px] leading-6 text-white/78">最新VPS実装のV50候補選定を、固定snapshotのままHPに表示します。候補順位だけでは発注せず、basis・net edge・データ品質・容量Gateを通過した候補だけが発注経路へ進みます。</p>
+        </div>
+        <Link href="/decision-status" className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold text-emerald-100">判定状況で詳細を見る</Link>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">Policy</div><div className="mt-1 text-sm font-bold text-white">{v52?.policyId ?? "runtime未取得"}</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">容量上限</div><div className="mt-1 text-sm font-bold text-white">{v52 && caps ? `Slot ${caps.v52V50Gross.toFixed(2)}x / Stock ${caps.stockGross.toFixed(2)}x` : "runtime未取得"}</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">発火Gate</div><div className="mt-1 text-sm font-bold text-white">{v52 ? `B${v52.minimumEntryBasisBps} / C${v52.convergenceBps} / Stop${v52.basisStopMultiple}x / Edge≥${v52.minimumNetEdgeBps} / Cost≤${v52.maximumRoundTripCostBps}` : "runtime未取得"}</div></div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">判定窓</div><div className="mt-1 text-sm font-bold text-white">{v52 ? `NY ${v52.windowsNy.join(" / ")} / Hold≤${v52.maximumHoldingHours}h` : "runtime未取得"}</div></div>
+      </div>
+      <p className="mt-3 text-[11px] leading-5 text-white/58">一時的なデータ品質・板・spread拒否は窓内retry、basis/net edge不足やSIGN_CHANGED等は最終拒否。注文・取消・決済はHPから実行しません。</p>
+    </section>
+  );
+}
 
-      <div className="relative z-10 space-y-3 p-3 md:p-4">
-        <section className="grid gap-3 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="panel-gold rounded-[30px] p-4 md:p-5">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              DisDex Current Production Logic
-            </div>
-            <h1 className="gold-heading mt-3 break-words text-[1.85rem] font-black tracking-tight md:text-[2.75rem]">
-              V96 + PENGU_DUAL_LS_V2_FINAL + V52
-            </h1>
-            <p className="mt-3 max-w-4xl text-sm leading-7 text-white/86 md:text-[15px]">
-              現在の本番構成はAster Perpetual上の3エンジンです。Crypto CoreのV96、独立PENGU Long / Shortの
-              <span className="font-black text-gold-100"> PENGU_DUAL_LS_V2_FINAL </span>
-              、米国株V52を共通のPortfolio Gross・Margin Guard・Fail-Closed Gateで制御します。Legacy PENGU V1は発注しません。
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {["Aster Perpetual", "5x Cross", "Combined Gross 2.5", "Fail Closed", "V1 Disabled"].map((item) => (
-                <span key={item} className="rounded-full border border-gold-400/20 bg-gold-400/[0.08] px-3 py-1.5 text-[11px] font-semibold text-gold-50">
-                  {item}
-                </span>
-              ))}
+export default function HomePage() {
+  const { wallet } = useOperationalWallet();
+  const { snapshot, loading: liveLoading, error: liveError } = useLivePortfolio();
+  const { snapshot: productionRuntime, error: productionRuntimeError } = useProductionRuntime();
+  const { formatPrice } = useCurrency();
+  const caps = productionRuntime?.caps;
+  const v12 = productionRuntime?.["v12"];
+  const q102 = productionRuntime?.quality102;
+  const pengu = productionRuntime?.pengu;
+  const v52 = productionRuntime?.v52;
+  const lineageDisplay = productionRuntime ? buildRuntimeLineageDisplay(productionRuntime) : null;
+  const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
+  const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
+  const positions = snapshot?.positions ?? [];
+
+  return (
+    <main className="relative min-w-0 min-h-full overflow-x-hidden overflow-y-visible rounded-[28px] border border-gold-400/16 bg-[#03050a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.06)] md:p-4">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />
+      <div className="relative z-10 min-w-0 space-y-3">
+        <section className="grid min-w-0 gap-3 xl:grid-cols-[1.15fr_0.85fr]">
+          <div className="panel-gold min-w-0 rounded-[30px] p-5 md:p-7 [overflow-wrap:anywhere]">
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
+            <h1 className="gold-heading mt-3 break-words text-2xl font-black leading-tight tracking-tight sm:text-3xl md:text-5xl">{pengu && v52 ? `V12 V4 / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">V12はV4 target仕様とVPS実runtimeを別々に表示します。PENGU Short V20 / Recovery V8、FET BRK48、Q102 Causal V4、V52 Stock、HYPEサイドカーも本番Runtimeの読取値とともに表示します。取得できない状態をLIVEと推測しません。</p>
+            <div className="mt-5 flex min-w-0 flex-wrap gap-2 text-[11px] font-semibold [overflow-wrap:anywhere]">
+              <span className="min-w-0 break-words rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{pengu?.strategyId ?? "PENGU runtime未取得"}</span>
+              <span className={`min-w-0 break-words rounded-full border px-3 py-1.5 ${lineageDisplay?.tone === "healthy" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : lineageDisplay?.tone === "scoped" ? "border-cyan-400/25 bg-cyan-500/10 text-cyan-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`} title={lineageDisplay?.detail}>{lineageDisplay?.label ?? `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : ""}`}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `Crypto共有損失上限 ${caps.sharedCryptoDailyLossPct}%` : "Crypto risk runtime未取得"}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `V52損失上限 ${caps.stockDailyLossPct}%` : "V52 risk runtime未取得"}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `Portfolio Gross上限 ≤ ${caps.totalGross.toFixed(1)}x` : "Portfolio runtime未取得"}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{v12 ? `V12 Score≥${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} / ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 contract runtime未取得"}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps && v52 ? `V52 ${v52.policyId} / Stock ${caps.stockGross.toFixed(2)}x / Slot ${caps.v52V50Gross.toFixed(2)}x` : "V52 runtime未取得"}</span>
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">{q102 && caps ? `Q102 ${q102.selectorMode}: 1 Slot / ${caps.quality102Gross.toFixed(2)}x / HV ${q102.familyGross.HIGH_VOL.toFixed(3)}x` : "Q102 runtime未取得"}</span>
             </div>
           </div>
-
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <Stat title="Production Engines" value="3" note="V96 / PENGU_DUAL_LS_V2_FINAL / V52" />
-            <Stat title="Portfolio Cap" value="2.5 Gross" note="Crypto 1.5 / Stock 1.5を全体上限2.5で制御" />
+            <SummaryCard title="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? "Aster account balance unavailable" : `Available ${formatPrice(available)}`} tone="profit" />
+            <SummaryCard title="実建玉 / 未決済注文" value={snapshot ? `${positions.length} / ${snapshot.orders.count}` : "UNAVAILABLE"} detail={snapshot ? `保護注文 ${snapshot.orders.protectionCount} / ${snapshot.capturedAt.replace("T", " ").slice(0, 16)} UTC` : liveError || "Aster live state unavailable"} />
           </div>
         </section>
-
-        <section className="grid gap-3 xl:grid-cols-3">
-          <Engine
-            eyebrow="Crypto Core"
-            title="V96"
-            status="LIVE"
-            icon={Activity}
-            text="BTC・ETH・BNB・SOLのCrypto Core。PENGU V2とCrypto sleeve 1.5を共有し、V96側Daily Loss 5%のFail-Closed制御下で動作します。"
-            chips={["BTC / ETH / BNB / SOL", "Crypto Sleeve 1.5", "Daily Loss 5%", "Aster 5x Cross"]}
-          />
-          <Engine
-            eyebrow="Independent PENGU"
-            title="PENGU_DUAL_LS_V2_FINAL"
-            status="LIVE"
-            icon={TrendingDown}
-            text="PENGU専用1H Long / Short。Shortは下降レジームの急落→戻り→再下抜け、Longは強い72h上昇レジームの18h高値Breakoutを狙います。Legacy V1とは独立し、V2だけがPENGU注文オーナーです。"
-            chips={["1H", "Long + Short", "Gross 0.60–0.75", "6h Cooldown", "V1 Disabled"]}
-          />
-          <Engine
-            eyebrow="US Stock Sleeve"
-            title="V52"
-            status="SESSION"
-            icon={TrendingUp}
-            text="AMZN・META・MSFT・NVDA・TSLAを対象とする米国株エンジン。通常市場時間だけworkerを稼働し、時間外はWAITING_MARKET_CLOSEDで待機します。"
-            chips={["AMZN / META / MSFT / NVDA / TSLA", "Stock Sleeve 1.5", "Max 2 Positions", "Daily Loss 3.5%"]}
-          />
+        <V12V4RuntimePanel />
+        <V12RouteInventoryPanel />
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、FET、V52、Quality102の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
+          <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
+          <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
         </section>
-
-        <section className="panel-gold rounded-[28px] p-4">
-          <div className="flex items-center gap-2 text-sm font-black text-white">
-            <Gauge className="h-4 w-4 text-gold-100" />
-            PENGU_DUAL_LS_V2_FINAL 固定ロジック
+        <V52Top2Summary />
+        <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
+          <div className="font-bold">Q102 {q102?.selectorMode ?? "runtime未取得"} の公開状態</div>
+          <p className="mt-1 text-[12px] text-amber-100/80">Q102は固定CSV playback/replayではなく、Causal V4 generator / selector / planner / reconciliation / live adapterの実stateを読み取る1-slot補完スリーブです。</p>
+          {q102 && caps ? <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {caps.quality102Gross.toFixed(2)}x / HIGH_VOL {q102.familyGross.HIGH_VOL.toFixed(3)}x / MR {q102.familyGross.MR.toFixed(2)}x / BRK {q102.familyGross.BRK.toFixed(3)}x / REV {q102.familyGross.REV.toFixed(2)}x / PB {q102.familyGross.PB.toFixed(2)}x / Crypto ≤ {caps.cryptoGross.toFixed(2)}x / Total ≤ {caps.totalGross.toFixed(2)}x</p> : <p className="mt-1 text-[11px] text-amber-100/65">Production runtime未取得のため、旧固定値は表示しません。</p>}
+        </section>
+        <section className="panel-gold rounded-[30px] p-4 md:p-5">
+          <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
+          <div className="mt-3 space-y-2">
+            {positions.length ? positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">数量 {position.quantity.toFixed(6)} / 建玉評価額 {formatPrice(position.notionalUsd)}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice > 0 ? position.entryPrice.toFixed(6) : "—"} / Mark {position.markPrice > 0 ? position.markPrice.toFixed(6) : "—"}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : "Aster実建玉を取得できません。"}</div>}
           </div>
-          <div className="mt-3 grid gap-3 xl:grid-cols-2">
-            <div className="rounded-[20px] border border-loss/20 bg-loss/[0.05] p-4">
-              <div className="flex items-center gap-2 font-black text-white"><TrendingDown className="h-4 w-4 text-loss" />Short</div>
-              <p className="mt-2 text-[12px] leading-6 text-white/78">
-                72h騰落率≤0%、24hで-7%以上のImpulseを起点に24h監視。安値から+1.25%以上戻した後、+6%以内で再下抜けし、EMA72&lt;EMA168・BTC比相対弱さ・Volume・RSI等の固定Gateを満たした時だけ次の1H OpenでEntryします。
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-semibold text-gold-50">
-                <span className="rounded-full border border-white/10 px-2.5 py-1">Max Hold 72h</span>
-                <span className="rounded-full border border-white/10 px-2.5 py-1">Hard Stop 8%</span>
-                <span className="rounded-full border border-white/10 px-2.5 py-1">Trail +15% / 4%</span>
-              </div>
-            </div>
-            <div className="rounded-[20px] border border-profit/20 bg-profit/[0.05] p-4">
-              <div className="flex items-center gap-2 font-black text-white"><TrendingUp className="h-4 w-4 text-profit" />Long</div>
-              <p className="mt-2 text-[12px] leading-6 text-white/78">
-                72hで+15%以上、24hで+10%以上の強い上昇レジームを要求し、18h高値Breakout・BTC比Relative・BTC地合い・RSI・Volume・ATR・EMA168の固定条件が揃った最初のBreakoutだけを次の1H OpenでEntryします。
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-semibold text-gold-50">
-                <span className="rounded-full border border-white/10 px-2.5 py-1">Max Hold 120h</span>
-                <span className="rounded-full border border-white/10 px-2.5 py-1">Hard Stop 8%</span>
-                <span className="rounded-full border border-white/10 px-2.5 py-1">Trail +10% / 3%</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <Stat title="PENGU Gross" value="0.60–0.75" note="ATR24連動。固定上限0.75。" />
-          <Stat title="Crypto Daily Loss" value="5%" note="V96 Crypto側のDaily Loss Gate。" />
-          <Stat title="Stock Daily Loss" value="3.5%" note="V52 Stock側のDaily Loss Gate。" />
-          <Stat title="Margin Guard" value="5 min / 1 min" note="通常5分、WARNING時1分。" />
-        </section>
-
-        <section className="panel-gold rounded-[28px] p-4">
-          <div className="flex items-center gap-2 text-sm font-black text-white">
-            <Clock3 className="h-4 w-4 text-gold-100" />
-            実行ポリシー
-          </div>
-          <div className="mt-3 grid gap-2 text-[12px] leading-6 text-white/78 md:grid-cols-2">
-            <div className="rounded-[18px] border border-white/10 bg-white/[0.035] p-3">PENGU V2は最大1ポジション。Short優先、決済後6時間Cooldown。</div>
-            <div className="rounded-[18px] border border-white/10 bg-white/[0.035] p-3">Aster対象10銘柄は5x Cross。Portfolio Gross全体上限は2.5。</div>
-            <div className="rounded-[18px] border border-white/10 bg-white/[0.035] p-3">V52は通常市場時間のみworker稼働。時間外はWAITING_MARKET_CLOSED。</div>
-            <div className="rounded-[18px] border border-white/10 bg-white/[0.035] p-3">認証・state・approval・parity・preflight不一致時はFail Closed。</div>
-          </div>
-        </section>
-
-        <section className="grid gap-3 md:grid-cols-3">
-          <NavCard href="/positions" title="現行ロジック・運用ダッシュボード" text="3エンジンと固定リスクポリシーを確認します。" />
-          <NavCard href="/history" title="トレード履歴" text="保存されている取引履歴を確認します。" />
-          <NavCard href="/settings" title="設定" text="HP側の認証・基本設定を確認します。" />
-        </section>
-
-        <section className="rounded-[22px] border border-gold-400/14 bg-black/25 px-4 py-3 text-[11px] leading-5 text-white/62">
-          HPは固定Production Logicを表示します。実際の注文・建玉・Kill Switch・service・Aster残高などの瞬間状態はVPSのFail-Closed runtimeを正とし、HP表示からLIVEロジックを変更しません。
+          <p className="mt-3 text-[11px] leading-5 text-white/55">この表示はAsterの読み取り結果です。HPから注文・取消・決済・建玉変更は行いません。</p>
         </section>
       </div>
     </main>
