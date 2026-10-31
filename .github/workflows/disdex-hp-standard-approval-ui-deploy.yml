@@ -56,6 +56,10 @@ jobs:
           node-version: '20'
           cache: npm
 
+      - name: Reject legacy homepage regression
+        shell: bash
+        run: node scripts/ops/disdex-hp-ui-regression-guard.mjs
+
       - name: Build exact HP release with its own dependencies
         shell: bash
         env:

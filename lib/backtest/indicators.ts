@@ -13,23 +13,25 @@ export function sma(values: number[], period: number) {
     return average(values.slice(-period));
 }
 
-function floorTo12h(ts: number) {
-    return Math.floor(ts / H12_MS) * H12_MS;
+function floorTo12h(ts: number, offsetHours = 0) {
+    const offsetMs = offsetHours * HOUR_MS;
+    return Math.floor((ts - offsetMs) / H12_MS) * H12_MS + offsetMs;
 }
 
-function floorToHours(ts: number, hours: number) {
-    return Math.floor(ts / (hours * HOUR_MS)) * (hours * HOUR_MS);
+function floorToHours(ts: number, hours: number, offsetHours = 0) {
+    const offsetMs = offsetHours * HOUR_MS;
+    return Math.floor((ts - offsetMs) / (hours * HOUR_MS)) * (hours * HOUR_MS) + offsetMs;
 }
 
 function floorTo1d(ts: number) {
     return Math.floor(ts / H24_MS) * H24_MS;
 }
 
-export function resampleToHours(raw1h: Candle1h[], hours: number) {
+export function resampleToHours(raw1h: Candle1h[], hours: number, offsetHours = 0) {
     const bucketMs = hours * HOUR_MS;
     const buckets = new Map<number, Candle1h[]>();
     for (const bar of raw1h) {
-        const bucketTs = floorToHours(bar.ts, hours);
+        const bucketTs = floorToHours(bar.ts, hours, offsetHours);
         const bucket = buckets.get(bucketTs) || [];
         bucket.push(bar);
         buckets.set(bucketTs, bucket);
@@ -54,10 +56,10 @@ export function resampleToHours(raw1h: Candle1h[], hours: number) {
         });
 }
 
-export function resampleTo12h(raw1h: Candle1h[]) {
+export function resampleTo12h(raw1h: Candle1h[], offsetHours = 0) {
     const buckets = new Map<number, Candle1h[]>();
     for (const bar of raw1h) {
-        const bucketTs = floorTo12h(bar.ts);
+        const bucketTs = floorTo12h(bar.ts, offsetHours);
         const bucket = buckets.get(bucketTs) || [];
         bucket.push(bar);
         buckets.set(bucketTs, bucket);

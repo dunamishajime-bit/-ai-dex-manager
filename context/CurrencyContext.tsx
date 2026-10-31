@@ -31,6 +31,21 @@ const STORAGE_KEY = "jdex_currency_pref";
 const DEFAULT_USD_JPY_RATE = 157;
 const JPY_SYMBOL = "¥";
 
+function formatJpyAmount(jpyValue: number, unitPrice: boolean) {
+  if (!unitPrice) {
+    return Math.round(jpyValue).toLocaleString("ja-JP");
+  }
+
+  const absValue = Math.abs(jpyValue);
+  const fractionDigits =
+    absValue >= 100 ? 0 : absValue >= 1 ? 2 : absValue >= 0.01 ? 4 : 6;
+
+  return jpyValue.toLocaleString("ja-JP", {
+    minimumFractionDigits: absValue >= 1 && absValue < 100 ? 2 : 0,
+    maximumFractionDigits: fractionDigits,
+  });
+}
+
 export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -100,9 +115,7 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     if (currency === "JPY") {
-      return `${JPY_SYMBOL}${Math.round(safeUsdPrice * jpyRate).toLocaleString(
-        "ja-JP",
-      )}`;
+      return `${JPY_SYMBOL}${formatJpyAmount(safeUsdPrice * jpyRate, true)}`;
     }
 
     return `$${safeUsdPrice.toLocaleString("en-US", {
@@ -118,9 +131,7 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     if (currency === "JPY") {
-      return `${JPY_SYMBOL}${Math.round(safeUsdValue * jpyRate).toLocaleString(
-        "ja-JP",
-      )}`;
+      return `${JPY_SYMBOL}${formatJpyAmount(safeUsdValue * jpyRate, false)}`;
     }
 
     return `$${safeUsdValue.toLocaleString("en-US", {
