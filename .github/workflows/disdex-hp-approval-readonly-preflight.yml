@@ -1,0 +1,93 @@
+name: DisDex HP Approval Read Only Preflight
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_HP_APPROVAL_READONLY_PREFLIGHT_20261031'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+
+      - name: Read-only HP approval prerequisites
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          svc='ai-dex-manager-ui.service'
+          [[ "$(systemctl is-active "$svc")" == "active" ]]
+          wd="$(systemctl show "$svc" --property WorkingDirectory --value)"
+          sha="$(tr -d '[:space:]' < "$wd/.disdex-release-sha")"
+          pid="$(systemctl show "$svc" --property MainPID --value)"
+          [[ "$pid" =~ ^[1-9][0-9]*$ ]]
+          env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
+          if grep -qx 'GMAIL_USER' <<<"$env_names" && grep -qx 'GMAIL_APP_PASSWORD' <<<"$env_names"; then
+            echo 'MAIL_PROVIDER=GMAIL_CONFIGURED'
+          elif grep -qx 'SENDGRID_API_KEY' <<<"$env_names"; then
+            echo 'MAIL_PROVIDER=SENDGRID_CONFIGURED'
+          else
+            echo 'MAIL_PROVIDER=MISSING'
+          fi
+          if grep -qx 'ADMIN_CONTACT_EMAIL' <<<"$env_names"; then
+            echo 'APPROVAL_RECEIVER=ADMIN_CONTACT_EMAIL'
+          elif grep -qx 'GMAIL_USER' <<<"$env_names"; then
+            echo 'APPROVAL_RECEIVER=GMAIL_USER_FALLBACK'
+          else
+            echo 'APPROVAL_RECEIVER=MISSING'
+          fi
+          shared='/home/deploy/disdex-ui/shared/data'
+          if [[ -d "$shared" ]]; then
+            echo "SHARED_DATA=$(stat -c '%U:%G:%a' "$shared")"
+            if runuser -u deploy -- test -w "$shared"; then
+              echo 'SHARED_DATA_DEPLOY_WRITABLE=TRUE'
+            else
+              echo 'SHARED_DATA_DEPLOY_WRITABLE=FALSE'
+            fi
+          else
+            echo 'SHARED_DATA=MISSING'
+          fi
+          trading="$(readlink -f /home/deploy/disdex-trading/current)"
+          available_kb="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          echo "UI_SHA=$sha"
+          echo "UI_WORKDIR=$wd"
+          echo "TRADING_CURRENT=$trading"
+          echo "AVAILABLE_KB=$available_kb"
+          echo "UI_LOCAL_HTTP=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+          echo 'TRADING_MUTATION=0'
+          echo 'HP_APPROVAL_READONLY_PREFLIGHT=PASS'
+          REMOTE
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
