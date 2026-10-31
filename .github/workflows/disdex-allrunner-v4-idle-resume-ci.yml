@@ -1,0 +1,56 @@
+name: DisDex All-Runner V4 IDLE Resume Safety CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py"
+      - ".github/workflows/disdex-allrunner-v4-idle-live-resume.yml"
+      - ".github/workflows/disdex-allrunner-v4-idle-resume-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile helper
+        shell: bash
+        run: python3 -m py_compile scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py
+      - name: Enforce exact task and service safety contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path("scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py").read_text()
+          w=Path(".github/workflows/disdex-allrunner-v4-idle-live-resume.yml").read_text()
+          for x in [
+            'V4="53a0be396719f0284af4e11b35c66a4ac7d58f79"',
+            'MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"',
+            'SHARED_KILL_SWITCH_ACTIVE',
+            'MARGIN_GUARD_NOT_HEALTHY',
+            'PENDING_EXPOSURE_ACTIVE',
+            'RESIDENT_DOGE_PROTECTION_MISSING',
+            'OPERATOR_ACTIVATION_BLOCKED',
+            'IDLE_STATE_STALE_REPAIR_REQUIRED',
+            'ORDERS_SENT_BY_HELPER=0 CANCELS_SENT_BY_HELPER=0 STOP_CHANGES_BY_HELPER=0',
+          ]:
+              assert x in h,x
+          for x in [
+            'V4_LIVE_RECOVER','IDLE_LIVE_RESUME','claim_task_step','finish_task_step',
+            'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM','disdex-production',
+            '--orders-enabled true','disdex_allrunner_v4_idle_live_resume.py',
+          ]:
+              assert x in w,x
+          for forbidden in ['cancelOrder','createOrder','test-order','kill-switch clear']:
+              assert forbidden not in h
+          assert 'systemctl","start"' in h
+          assert 'reset-failed' in h
+          print("ALLRUNNER_V4_IDLE_RESUME_POLICY=PASS")
+          PY
