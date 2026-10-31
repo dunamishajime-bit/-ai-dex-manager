@@ -47,6 +47,9 @@ jobs:
               assert value in helper, value
           for value in [
               "V52_INSTANCE_DEPENDENCY_REPAIR=SUCCESS",
+              "V52_INSTANCE_DEPENDENCY_REPAIR=ALREADY_APPLIED_VERIFIED",
+              "EXISTING_INSTANCE_CONTENT_MISMATCH",
+              "instance_preexisting = INSTANCE.exists()",
               "V52_CANONICAL_MARGIN_REQUIRES=TRUE",
               "V52_BROKEN_MARGIN_REQUIRES=FALSE",
               "V52_STABLE_35_SECONDS=TRUE",
@@ -58,6 +61,8 @@ jobs:
           assert "systemctl\",\"stop\",V52_UNIT" in v52
           assert 'BAD_GUARD not in deps' in v52
           assert 'GOOD_GUARD in deps' in v52
+          assert 'if not instance_preexisting:' in v52
+          assert 'if instance_preexisting and INSTANCE.is_file()' in v52
           assert 'disdex_v52_exact_instance_margin_dependency.py' in workflow
           for value in [
               "SHARED_HOLD_RECOVERY",
