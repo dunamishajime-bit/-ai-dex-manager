@@ -197,6 +197,20 @@ export async function createPendingDeploymentApproval(input: {
   const now = Date.now();
   const current = await getLatestDeploymentApproval();
   if (
+    current?.operation === "ALL_RUNNERS_LIVE_RESTORE" &&
+    input.operation === "ALL_RUNNERS_LIVE_RESTORE" &&
+    current.scope === "FULL_PROJECT" &&
+    current.ordersEnabled === true &&
+    input.ordersEnabled === true &&
+    current.targetSha === input.targetSha &&
+    current.planSha256 === input.planSha256 &&
+    ["APPROVED", "DISPATCHED"].includes(current.status) &&
+    (current.taskApprovedExpiresAt ?? 0) > now
+  ) {
+    return current;
+  }
+
+  if (
     current &&
     ["PENDING", "OTP_SENT", "APPROVED", "DISPATCHED"].includes(current.status) &&
     current.requestExpiresAt > now &&
