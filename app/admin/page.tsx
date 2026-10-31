@@ -206,7 +206,7 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
                     placeholder="000000"
                   />
                   <button className="w-full rounded-xl border border-emerald-300/35 bg-emerald-400/15 px-4 py-3 text-sm font-black text-emerald-50">
-                    正式承認してGitHub Actionへ引き渡す
+                    正式承認して署名済み承認証明を発行
                   </button>
                 </form>
               ) : null}
