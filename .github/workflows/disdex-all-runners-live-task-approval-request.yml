@@ -1,0 +1,58 @@
+name: DisDex Whole Task Approval Request - All Runners LIVE
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-production-approval-task-request
+  cancel-in-progress: false
+
+jobs:
+  publish-one-owner-task:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment:
+      name: disdex-production
+    steps:
+      - name: Publish one bounded task-level approval; do not start trading
+        shell: bash
+        env:
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+        run: |
+          set -euo pipefail
+          [[ -n "$BRIDGE_SECRET" ]]
+          python3 - <<'PY'
+          import json,os,urllib.request
+          body=json.dumps({
+            "action":"publish_task",
+            "actor":"dunamishajime-bit",
+            "target_sha":"7688ed7c93a1918d8b44837339b7da5584a868f5",
+            "comment_id":os.environ["GITHUB_RUN_ID"],
+          }).encode()
+          request=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,
+            method="POST",
+            headers={
+              "Authorization":"Bearer "+os.environ["BRIDGE_SECRET"],
+              "Content-Type":"application/json",
+            },
+          )
+          with urllib.request.urlopen(request,timeout=15) as response:
+            result=json.load(response)
+          approval=result.get("approval") or {}
+          assert result.get("ok") and approval.get("operation")=="ALL_RUNNERS_LIVE_RESTORE"
+          assert approval.get("scope")=="FULL_PROJECT" and approval.get("ordersEnabled") is True
+          print("ALL_RUNNERS_TASK_APPROVAL_ID="+str(approval["id"]))
+          print("ALL_RUNNERS_TASK_APPROVAL_STATUS="+str(approval["status"]))
+          print("ALL_RUNNERS_TASK_SCOPE=FULL_PROJECT")
+          print("TASK_WHOLE_REQUEST_PUBLISHED=TRUE")
+          print("ORDERS_SENT=0 CANCELS_SENT=0")
+          PY

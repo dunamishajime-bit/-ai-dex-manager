@@ -13,6 +13,7 @@ export type DeploymentApprovalStatus =
   | "APPROVED"
   | "DISPATCHED"
   | "REDEEMED"
+  | "COMPLETED"
   | "EXPIRED"
   | "FAILED";
 
@@ -41,6 +42,22 @@ export type DeploymentApprovalRecord = {
   redeemedByRunId?: string;
   approverIpHash?: string;
   lastError?: string;
+  taskApprovedExpiresAt?: number;
+  completedAt?: number;
+  taskMaxClaims?: number;
+  taskClaimCount?: number;
+  taskActiveClaim?: {
+    step: string;
+    runId: string;
+    claimedAt: number;
+  };
+  taskClaimHistory?: Array<{
+    step: string;
+    runId: string;
+    claimedAt: number;
+    finishedAt?: number;
+    outcome?: "success" | "failure";
+  }>;
 };
 
 export type DeploymentApprovalSummary = Omit<
@@ -78,6 +95,50 @@ function saveFileRecords(records: DeploymentApprovalRecord[]) {
   const tmp = `${FILE_PATH}.tmp-${process.pid}-${Date.now()}`;
   fs.writeFileSync(tmp, JSON.stringify(records, null, 2), { encoding: "utf8", mode: 0o600 });
   fs.renameSync(tmp, FILE_PATH);
+}
+
+
+/** File mode uses an exclusive directory lock for multi-Action task claims. */
+export async function mutateDeploymentApprovalAtomic<T>(
+  id: string,
+  update: (current: DeploymentApprovalRecord | null) => {
+    next?: DeploymentApprovalRecord;
+    result: T;
+  },
+): Promise<T> {
+  // A Redis transaction would be needed for atomic claims. Fail closed instead.
+  if (USE_REDIS) throw new Error("TASK_CLAIMS_REQUIRE_ATOMIC_STORAGE");
+  const lockPath = FILE_PATH + ".task-lock";
+  let acquired = false;
+  for (let i = 0; i < 50; i += 1) {
+    try {
+      await fs.promises.mkdir(lockPath, { mode: 0o700 });
+      acquired = true;
+      break;
+    } catch (error: any) {
+      if (error?.code !== "EEXIST") throw error;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  }
+  if (!acquired) throw new Error("APPROVAL_STORE_BUSY_FAIL_CLOSED");
+  try {
+    if (!fs.existsSync(FILE_PATH)) throw new Error("APPROVAL_STORE_MISSING");
+    const raw = JSON.parse(fs.readFileSync(FILE_PATH, "utf8")) as unknown;
+    if (!Array.isArray(raw)) throw new Error("APPROVAL_STORE_INVALID");
+    const records = raw as DeploymentApprovalRecord[];
+    const current = records.find((item) => item.id === id) || null;
+    const result = update(current);
+    if (result.next) {
+      const next = { ...result.next, updatedAt: Date.now() };
+      const updated = records.filter((record) => record.id !== id);
+      updated.push(next);
+      updated.sort((a, b) => b.createdAt - a.createdAt);
+      saveFileRecords(updated.slice(0, 50));
+    }
+    return result.result;
+  } finally {
+    await fs.promises.rmdir(lockPath);
+  }
 }
 
 export function sanitizeDeploymentApproval(
@@ -136,6 +197,20 @@ export async function createPendingDeploymentApproval(input: {
 }) {
   const now = Date.now();
   const current = await getLatestDeploymentApproval();
+  if (
+    current?.operation === "ALL_RUNNERS_LIVE_RESTORE" &&
+    input.operation === "ALL_RUNNERS_LIVE_RESTORE" &&
+    current.scope === "FULL_PROJECT" &&
+    current.ordersEnabled === true &&
+    input.ordersEnabled === true &&
+    current.targetSha === input.targetSha &&
+    current.planSha256 === input.planSha256 &&
+    ["APPROVED", "DISPATCHED"].includes(current.status) &&
+    (current.taskApprovedExpiresAt ?? 0) > now
+  ) {
+    return current;
+  }
+
   if (
     current &&
     ["PENDING", "OTP_SENT", "APPROVED", "DISPATCHED"].includes(current.status) &&

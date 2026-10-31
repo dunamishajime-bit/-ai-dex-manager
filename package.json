@@ -12,6 +12,7 @@
     "bt:v7:current": "tsx scripts/backtest-v7-current-fast.ts",
     "bt:v7:live": "tsx scripts/backtest-v7-live-equivalent-fast.ts",
     "deploy:hp-approval:selftest": "tsx scripts/disdex-hp-deploy-approval-selftest.ts",
+    "deploy:all-runner-task:selftest": "tsx scripts/disdex-all-runners-task-approval-selftest.ts",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.research.json",
     "research:lab": "tsx scripts/research-lab-runner.ts",
     "research:lab:selftest": "tsx scripts/research-lab-selftest.ts",

@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { ALL_RUNNERS_LIVE_TASK } from "@/lib/deploy-all-runners-task";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/mail-service";
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
 
   const record = await getDeploymentApproval(requestId);
   if (!record) return redirect(request, { error: "承認リクエストが見つかりません" });
-  if (record.requestExpiresAt < Date.now() && !["DISPATCHED", "REDEEMED"].includes(record.status)) {
+  if (record.requestExpiresAt < Date.now() && ["PENDING", "OTP_SENT"].includes(record.status)) {
     await saveDeploymentApproval({ ...record, status: "EXPIRED", lastError: "request expired" });
     return redirect(request, { error: "承認リクエストの有効期限が切れています" });
   }
@@ -218,21 +219,30 @@ export async function POST(request: NextRequest) {
         ttlSeconds: 300,
       });
 
+      const approvedAt = Date.now();
       await saveDeploymentApproval({
         ...record,
         status: "APPROVED",
         otpHash: undefined,
         otpExpiresAt: undefined,
         otpAttemptsRemaining: undefined,
-        approvedAt: Date.now(),
+        approvedAt,
         approvalToken: token,
         approvalTokenExpiresAt: payload.expiresAt,
         approverIpHash: ipFingerprint(request),
+        ...(operation === "ALL_RUNNERS_LIVE_RESTORE" ? {
+          taskApprovedExpiresAt: approvedAt + ALL_RUNNERS_LIVE_TASK.maxAgeMs,
+          taskMaxClaims: ALL_RUNNERS_LIVE_TASK.maxClaims,
+          taskClaimCount: 0,
+          taskClaimHistory: [],
+        } : {}),
         lastError: undefined,
       });
 
       return redirect(request, {
-        message: "本人認証が完了しました。署名済み承認証明を発行しました",
+        message: operation === "ALL_RUNNERS_LIVE_RESTORE"
+          ? "全Runner LIVE復旧作業を承認しました。登録済みの復旧工程と再試行は有効期間内なら追加のメール認証なしで進みます。"
+          : "本人認証が完了しました。署名済み承認証明を発行しました",
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "approval signing failed";
