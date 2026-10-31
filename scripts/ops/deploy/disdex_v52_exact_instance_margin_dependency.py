@@ -106,7 +106,12 @@ def validate_static() -> None:
             "V52_TEMPLATE_CHANGED")
     require(DROPIN.is_file() and not DROPIN.is_symlink() and sha(DROPIN)==DROPIN_SHA,
             "V52_HOTFIX_DROPIN_CHANGED")
-    require(not INSTANCE.exists() and not INSTANCE.is_symlink(),"EXACT_INSTANCE_ALREADY_EXISTS")
+    if INSTANCE.exists() or INSTANCE.is_symlink():
+        require(INSTANCE.is_file() and not INSTANCE.is_symlink(), "EXISTING_INSTANCE_NOT_REGULAR")
+        ist=INSTANCE.stat()
+        require(ist.st_uid==0 and ist.st_gid==0 and stat.S_IMODE(ist.st_mode)==0o644,
+                "EXISTING_INSTANCE_PERMISSIONS_UNTRUSTED")
+        require(INSTANCE.read_bytes()==UNIT, "EXISTING_INSTANCE_CONTENT_MISMATCH")
     require(state(GOOD_GUARD,"ActiveState")=="active","CANONICAL_MARGIN_GUARD_NOT_ACTIVE")
     require(state(BAD_GUARD,"UnitFileState")=="disabled","BAD_MARGIN_GUARD_NOT_DISABLED")
     current_hold()
@@ -176,17 +181,19 @@ def main(run_id: str) -> None:
     BACKUP.mkdir(mode=0o700,parents=True,exist_ok=True)
     bst=BACKUP.stat()
     require(bst.st_uid==0 and stat.S_IMODE(bst.st_mode)==0o700,"BACKUP_DIR_UNSAFE")
-    marker=BACKUP/f"no-instance-before-{run_id}.json"
+    instance_preexisting = INSTANCE.exists()
+    marker=BACKUP/f"instance-before-{run_id}.json"
     require(not marker.exists() and not marker.is_symlink(),"BACKUP_MARKER_EXISTS")
     marker.write_text(json.dumps({
-        "instanceExisted":False,
+        "instanceExisted":instance_preexisting,
         "templateSha256":TEMPLATE_SHA,
         "dropinSha256":DROPIN_SHA,
         "v52Unit":V52_UNIT,
     },sort_keys=True)+"\n")
     os.chmod(marker,0o600)
     try:
-        write_instance()
+        if not instance_preexisting:
+            write_instance()
         require(INSTANCE.read_bytes()==UNIT,"INSTANCE_READBACK_MISMATCH")
         subprocess.run(["systemctl","daemon-reload"],check=True,timeout=30)
         # Bad dependency unit must stay stopped. Starting V52 will use only the
@@ -196,12 +203,15 @@ def main(run_id: str) -> None:
         validate_live()
     except Exception:
         subprocess.run(["systemctl","stop",V52_UNIT],check=False,timeout=90)
-        if INSTANCE.exists() and not INSTANCE.is_symlink():
+        if not instance_preexisting and INSTANCE.exists() and not INSTANCE.is_symlink():
             INSTANCE.unlink()
         subprocess.run(["systemctl","daemon-reload"],check=False,timeout=30)
+        if instance_preexisting and INSTANCE.is_file() and not INSTANCE.is_symlink() and INSTANCE.read_bytes()==UNIT:
+            subprocess.run(["systemctl","start",V52_UNIT],check=False,timeout=100)
         print("V52_INSTANCE_DEPENDENCY_REPAIR=ROLLBACK",flush=True)
         raise
-    print("V52_INSTANCE_DEPENDENCY_REPAIR=SUCCESS")
+    print("V52_INSTANCE_DEPENDENCY_REPAIR=ALREADY_APPLIED_VERIFIED" if instance_preexisting
+          else "V52_INSTANCE_DEPENDENCY_REPAIR=SUCCESS")
     print("V52_CANONICAL_MARGIN_REQUIRES=TRUE")
     print("V52_BROKEN_MARGIN_REQUIRES=FALSE")
     print("V52_STABLE_35_SECONDS=TRUE")
