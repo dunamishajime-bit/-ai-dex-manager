@@ -43,7 +43,7 @@ const requiredPaths = [
 ];
 for (const p of requiredPaths) read(p);
 const pkg = JSON.parse(read("package.json"));
-if (!/^\\^?16\\./.test(pkg.dependencies?.next || "")) {
+if (!/^\^?16\./.test(pkg.dependencies?.next || "")) {
   throw new Error("HP_UI_REGRESSION_NEXT16_RUNTIME_REQUIRED");
 }
 const config = read("next.config.mjs");
