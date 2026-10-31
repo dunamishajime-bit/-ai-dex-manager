@@ -54,8 +54,10 @@ def crypto(data, key, signature=None):
         sig = Path(directory) / "sig"
         message.write_bytes(data)
         if signature is None:
-            argv = ["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", str(key),
-                    "-in", str(message), "-out", str(sig)]
+            argv = ["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", str(key)]
+            if os.environ.get("DISDEX_OWNER_KEY_PASSPHRASE"):
+                argv += ["-passin", "env:DISDEX_OWNER_KEY_PASSPHRASE"]
+            argv += ["-in", str(message), "-out", str(sig)]
         else:
             sig.write_bytes(signature)
             argv = ["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey",
