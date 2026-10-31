@@ -49,6 +49,14 @@ jobs:
           echo "EXECSTART=$(systemctl show "$svc" -p ExecStart --value 2>/dev/null || true)"
           echo "RESULT=$(systemctl show "$svc" -p Result --value 2>/dev/null || true)"
           echo "NRESTARTS=$(systemctl show "$svc" -p NRestarts --value 2>/dev/null || true)"
+          echo "DROPIN_PATHS=$(systemctl show "$svc" -p DropInPaths --value 2>/dev/null || true)"
+          echo 'DROPINS_BEGIN'
+          for file in /etc/systemd/system/ai-dex-manager-ui.service.d/*.conf; do
+            [[ -f "$file" ]] || continue
+            echo "DROPIN_FILE=$file"
+            grep -E '^[[:space:]]*(WorkingDirectory|ExecStart|EnvironmentFile|Environment=DISDEX_UI_RELEASE_SHA|Environment=HOSTNAME)=' "$file" 2>/dev/null               | sed -E 's/(TOKEN|KEY|PASSWORD|SECRET)=[^ ]+/\1=***REDACTED***/Ig' || true
+          done
+          echo 'DROPINS_END'
           echo "UI_HTTP=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
           echo "TRADING_CURRENT=$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
           echo "FAILED_EXISTS=$(test -d "$failed" && echo TRUE || echo FALSE)"
