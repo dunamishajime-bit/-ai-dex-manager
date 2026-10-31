@@ -115,6 +115,10 @@ jobs:
           pid="$(systemctl show "$svc" --property MainPID --value)"
           [[ "$pid" =~ ^[1-9][0-9]*$ ]]
           env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
+          grep -qx 'ADMIN_PASSWORD' <<<"$env_names" || {
+            echo 'ADMIN_PASSWORD_MISSING'
+            exit 45
+          }
           if grep -qx 'GMAIL_USER' <<<"$env_names" && grep -qx 'GMAIL_APP_PASSWORD' <<<"$env_names"; then
             echo 'MAIL_PROVIDER=GMAIL_CONFIGURED'
           elif grep -qx 'SENDGRID_API_KEY' <<<"$env_names"; then
@@ -207,11 +211,15 @@ jobs:
               printf 'DISDEX_DEPLOY_OTP_PEPPER=%s\n' "$pepper"
               printf 'DISDEX_HP_APPROVER_PRIVATE_KEY_PATH=%s\n' "$private_key"
               printf 'DISDEX_DEPLOY_APPROVAL_STORE_PATH=%s\n' "$approval_store"
+              printf 'DISDEX_ADMIN_ENABLED=true\n'
             } > "$env_file"
           fi
           grep -Eq '^DISDEX_DEPLOY_OTP_PEPPER=[0-9a-f]{64}$' "$env_file"
           grep -Fxq "DISDEX_HP_APPROVER_PRIVATE_KEY_PATH=$private_key" "$env_file"
           grep -Fxq "DISDEX_DEPLOY_APPROVAL_STORE_PATH=$approval_store" "$env_file"
+          if ! grep -Fxq 'DISDEX_ADMIN_ENABLED=true' "$env_file"; then
+            printf 'DISDEX_ADMIN_ENABLED=true\n' >> "$env_file"
+          fi
           chown root:root "$env_file"
           chmod 0600 "$env_file"
 
@@ -320,7 +328,7 @@ jobs:
 
           pid="$(systemctl show "$svc" --property MainPID --value)"
           env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
-          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH; do
+          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH DISDEX_ADMIN_ENABLED ADMIN_PASSWORD; do
             grep -qx "$name" <<<"$env_names"
           done
           if grep -qx 'GMAIL_USER' <<<"$env_names" && grep -qx 'GMAIL_APP_PASSWORD' <<<"$env_names"; then
@@ -354,7 +362,7 @@ jobs:
           echo "PUBLIC_HOME_HTTP=$home"
           echo "PUBLIC_ADMIN_HTTP=$admin"
           [[ "$home" =~ ^(200|30[1278])$ ]]
-          [[ "$admin" =~ ^(200|30[1278]|401|403)$ ]]
+          [[ "$admin" == "200" ]]
 
       - name: Destroy SSH material
         if: always()
