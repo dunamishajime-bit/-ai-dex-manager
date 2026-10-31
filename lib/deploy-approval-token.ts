@@ -7,12 +7,17 @@ export const DEPLOY_APPROVAL_TARGET = "professional-dismanager.net";
 export const DEPLOY_APPROVAL_OPERATOR_TARGET = "DD1296_FINAL_ALLIN_10BPS";
 export const DEPLOY_APPROVAL_ROUTE = "GITHUB_ACTIONS";
 
-export const DEPLOY_APPROVAL_SCOPES = ["V12_V4", "IDLE_PRIORITY_SHORT"] as const;
+export const DEPLOY_APPROVAL_SCOPES = [
+  "V12_V4", "IDLE_PRIORITY_SHORT", "FULL_PROJECT", "V52",
+  "HYPE_TREND_LONG", "QUALITY102_CAUSAL_V1", "PENGU_V8",
+  "FET_BRK48_RESIDUAL", "SHARED_CRYPTO_RISK_ONLY",
+] as const;
 export type DeploymentApprovalScope = (typeof DEPLOY_APPROVAL_SCOPES)[number];
 
 export const DEPLOY_APPROVAL_OPERATIONS = [
   "V12_V4_LIVE",
   "IDLE_FLAT_STALE_REPAIR",
+  "ALL_RUNNERS_LIVE_RESTORE",
 ] as const;
 export type DeploymentApprovalOperation = (typeof DEPLOY_APPROVAL_OPERATIONS)[number];
 
@@ -31,6 +36,11 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "IDLE_PRIORITY_SHORT",
     ordersEnabled: false,
     label: "IDLE flat stale state repair",
+  },
+  ALL_RUNNERS_LIVE_RESTORE: {
+    scope: "FULL_PROJECT",
+    ordersEnabled: true,
+    label: "全Runner LIVE復旧（一回の本人承認で同一依頼を完了まで）",
   },
 };
 
