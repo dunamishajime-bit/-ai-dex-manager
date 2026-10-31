@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/ops/deploy/disdex_margin_hold_secure_state_and_ghost_guard.py"
+      - "scripts/ops/deploy/disdex_v52_exact_instance_margin_dependency.py"
       - "tests/ops/test_margin_hold_secure_state.py"
       - ".github/workflows/disdex-idle-v52-owner-hold-formal-recovery.yml"
       - ".github/workflows/disdex-margin-hold-recovery-ci.yml"
@@ -25,6 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m py_compile scripts/ops/deploy/disdex_margin_hold_secure_state_and_ghost_guard.py
+          python3 -m py_compile scripts/ops/deploy/disdex_v52_exact_instance_margin_dependency.py
           python3 -m unittest discover -s tests/ops -p test_margin_hold_secure_state.py -v
       - name: Verify approved task and no order mutation policy
         shell: bash
@@ -34,6 +36,7 @@ jobs:
           from pathlib import Path
           helper=Path("scripts/ops/deploy/disdex_margin_hold_secure_state_and_ghost_guard.py").read_text()
           workflow=Path(".github/workflows/disdex-idle-v52-owner-hold-formal-recovery.yml").read_text()
+          v52=Path("scripts/ops/deploy/disdex_v52_exact_instance_margin_dependency.py").read_text()
           for value in [
               "MARGIN_SECURE_SHARED_OWNER_ONLY_V1",
               "MARGIN_HOLD_CONTRACT_PATCH=SUCCESS",
@@ -42,6 +45,20 @@ jobs:
               "ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES=0 STOP_CHANGES=0",
           ]:
               assert value in helper, value
+          for value in [
+              "V52_INSTANCE_DEPENDENCY_REPAIR=SUCCESS",
+              "V52_CANONICAL_MARGIN_REQUIRES=TRUE",
+              "V52_BROKEN_MARGIN_REQUIRES=FALSE",
+              "V52_STABLE_35_SECONDS=TRUE",
+              "HOLD_PROTECTED_UNCHANGED=TRUE",
+              "1e8a2707e5835b77be8374f8b8b3d615dc1de754543cd36efca85ff1cdc5a45a",
+              "5bf45aabafc6ed290cada5d1d380412e75a71952fd362a90255401d7ab729938",
+          ]:
+              assert value in v52, value
+          assert "systemctl\",\"stop\",V52_UNIT" in v52
+          assert 'BAD_GUARD not in deps' in v52
+          assert 'GOOD_GUARD in deps' in v52
+          assert 'disdex_v52_exact_instance_margin_dependency.py' in workflow
           for value in [
               "SHARED_HOLD_RECOVERY",
               "claim_task_step",
