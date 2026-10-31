@@ -1,0 +1,126 @@
+name: DisDex V52 IDLE Owner HOLD Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        required: true
+        type: choice
+        options: [preflight, execute]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - name: Configure pinned maintenance read-only SSH
+        env:
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/hold-ui"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/hold-ui/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/hold-ui/known_hosts"
+          chmod 600 "$RUNNER_TEMP/hold-ui/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/hold-ui/key" >/dev/null
+
+      - name: Read-only IDLE and Kill Switch health proof
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          ssh -T -i "$RUNNER_TEMP/hold-ui/key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "/usr/bin/python3 /usr/local/sbin/disdex-idle-residual-kill-recovery"
+
+      - name: Configure forced-command root SSH
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          KNOWN: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/hold-forced"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/hold-forced/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/hold-forced/known_hosts"
+          chmod 600 "$RUNNER_TEMP/hold-forced/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/hold-forced/key" >/dev/null
+
+      - name: Exact owner-reviewed allowlisted HOLD recovery
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          ssh -T -i "$RUNNER_TEMP/hold-forced/key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-forced/known_hosts" \
+            -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=6 \
+            -p "$PORT" "root@$HOST" \
+            "/usr/local/sbin/disdex-idle-residual-kill-recovery --execute-after-three-signed-gets"
+
+      - name: Verify V52 and released HOLD in read-only mode
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/hold-ui/key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" "python3 -" <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          new="4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81"
+          old="97830672e2f139b39f7194166d7dc8c36e8c8933"
+          pin=Path("/etc/disdex/current-runtime/v52-current.env").read_text()
+          assert "DISDEX_V52_RUNTIME_SHA="+new in pin,"NEW_V52_NOT_PINNED"
+          def active(sha):
+              return subprocess.run(["systemctl","is-active","disdex-v52-aster-only@"+sha+".service"],capture_output=True,text=True).stdout.strip()=="active"
+          assert active(new) and not active(old),"DUAL_OR_OLD_V52_ACTIVE"
+          kill=json.loads(Path("/var/lib/disdex/shared/kill-switch.json").read_text())
+          assert kill.get("active") is False,"SHARED_HOLD_NOT_RELEASED"
+          assert kill.get("operator")=="V52_IDLE_RESIDUAL_OWNER_RECOVERY_V1","OTHER_KILL_SWITCH_CHANGE"
+          print("V52_IDLE_OWNER_HOLD_RECOVERY=VERIFIED")
+          print("NEW_V52_ONLY=TRUE ORDERS_FROM_POSTCHECK=0")
+          PY
+
+      - name: Destroy ephemeral SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/hold-ui" "$RUNNER_TEMP/hold-forced"
