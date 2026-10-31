@@ -1,0 +1,270 @@
+name: HP 737 Email OTP Approval One Shot Deploy
+
+on:
+  push:
+    branches:
+      - fix/hp-737-email-otp-approval-20261031
+    paths:
+      - ".github/workflows/hp-737-email-otp-approval-one-shot-deploy.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: hp-737-email-otp-approval-one-shot-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Download already-tested exact-SHA UI artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          gh run download 41192725822             --repo "${GITHUB_REPOSITORY}"             --name "disdex-hp-current-ui-approval-a56539d77075e74b2104de15aabd87a543b71302"             --dir "$RUNNER_TEMP/ui-artifact"
+          archive="$RUNNER_TEMP/ui-artifact/disdex-ui-a56539d77075e74b2104de15aabd87a543b71302.tar.gz"
+          test -s "$archive"
+          tar -tzf "$archive" | grep -qx './server.js'
+          tar -xOzf "$archive" ./.disdex-release-sha | tr -d '[:space:]' | grep -qx 'a56539d77075e74b2104de15aabd87a543b71302'
+          echo "ARCHIVE_BYTES=$(stat -c '%s' "$archive")"
+
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Read-only exact-state preflight
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root"             -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          svc='ai-dex-manager-ui.service'
+          [[ "$(systemctl is-active "$svc")" == active ]]
+          current="$(systemctl show "$svc" -p WorkingDirectory --value)"
+          current_sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          [[ "$current_sha" == 'b58aa3468b49751467f48831827d26db7b86b73c' ]]
+          pid="$(systemctl show "$svc" -p MainPID --value)"
+          [[ "$pid" =~ ^[1-9][0-9]*$ ]]
+          env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
+          if grep -qx GMAIL_USER <<<"$env_names" && grep -qx GMAIL_APP_PASSWORD <<<"$env_names"; then
+            echo 'MAIL_PROVIDER=GMAIL_CONFIGURED'
+          elif grep -qx SENDGRID_API_KEY <<<"$env_names"; then
+            echo 'MAIL_PROVIDER=SENDGRID_CONFIGURED'
+          else
+            echo 'MAIL_PROVIDER_MISSING'
+            exit 41
+          fi
+          trading="$(readlink -f /home/deploy/disdex-trading/current)"
+          [[ "$trading" == /home/deploy/disdex-trading/releases/* ]]
+          free_kb="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          [[ "$free_kb" -ge 1000000 ]]
+          echo "CURRENT_UI_SHA=$current_sha"
+          echo "TRADING_CURRENT=$trading"
+          echo "FREE_KB=$free_kb"
+          echo 'TRADING_MUTATION=0'
+          REMOTE
+
+      - name: Upload tested UI artifact
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root"             -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -P "$PORT"             "$RUNNER_TEMP/ui-artifact/disdex-ui-a56539d77075e74b2104de15aabd87a543b71302.tar.gz"             "root@$SSH_HOST:/tmp/disdex-ui-a56539d77075e74b2104de15aabd87a543b71302.tar.gz"
+
+      - name: Switch HP UI only with rollback
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root"             -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          umask 077
+          target_sha='a56539d77075e74b2104de15aabd87a543b71302'
+          expected_old='b58aa3468b49751467f48831827d26db7b86b73c'
+          svc='ai-dex-manager-ui.service'
+          ui_root='/home/deploy/disdex-trading/ui-releases'
+          archive="/tmp/disdex-ui-$target_sha.tar.gz"
+          release="$ui_root/ui-hp737-approval-${target_sha:0:12}"
+          canonical='/etc/systemd/system/ai-dex-manager-ui.service.d/90-current-ui-release.conf'
+          approval_dropin='/etc/systemd/system/ai-dex-manager-ui.service.d/95-disdex-hp-production-approval.conf'
+          approval_dir='/etc/disdex/hp-approval'
+          env_file='/etc/disdex/hp-approval.env'
+          shared_data='/home/deploy/disdex-ui/shared/data'
+          approval_store="$shared_data/deploy-approvals.json"
+
+          old_ui="$(systemctl show "$svc" -p WorkingDirectory --value)"
+          old_sha="$(tr -d '[:space:]' < "$old_ui/.disdex-release-sha")"
+          [[ "$old_sha" == "$expected_old" ]]
+          trading_before="$(readlink -f /home/deploy/disdex-trading/current)"
+          old_canonical="$(mktemp)"
+          cp -a "$canonical" "$old_canonical"
+          old_approval="$(mktemp)"
+          approval_existed=0
+          if [[ -f "$approval_dropin" ]]; then
+            cp -a "$approval_dropin" "$old_approval"
+            approval_existed=1
+          fi
+
+          rm -rf "$release"
+          install -d -o deploy -g deploy -m 0750 "$release"
+          tar -xzf "$archive" -C "$release"
+          rm -f "$archive"
+          [[ -f "$release/server.js" ]]
+          [[ -f "$release/.next/BUILD_ID" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$target_sha" ]]
+          chown -R deploy:deploy "$release"
+
+          install -d -o deploy -g deploy -m 0750 "$shared_data"
+          if [[ ! -f "$approval_store" ]]; then
+            printf '[]\n' > "$approval_store"
+          fi
+          python3 - "$approval_store" <<'PY'
+          import json,sys
+          data=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert isinstance(data,list)
+          PY
+          chown deploy:deploy "$approval_store"
+          chmod 0600 "$approval_store"
+
+          install -d -o root -g deploy -m 0750 "$approval_dir"
+          private_key="$approval_dir/approver-ed25519.pem"
+          if [[ ! -f "$private_key" ]]; then
+            openssl genpkey -algorithm ED25519 -out "$private_key"
+          fi
+          chown root:deploy "$private_key"
+          chmod 0640 "$private_key"
+          openssl pkey -in "$private_key" -pubout -out "$approval_dir/approver-ed25519.pub"
+          chmod 0644 "$approval_dir/approver-ed25519.pub"
+
+          if [[ ! -f "$env_file" ]]; then
+            pepper="$(openssl rand -hex 32)"
+            {
+              printf 'DISDEX_DEPLOY_OTP_PEPPER=%s\n' "$pepper"
+              printf 'DISDEX_HP_APPROVER_PRIVATE_KEY_PATH=%s\n' "$private_key"
+              printf 'DISDEX_DEPLOY_APPROVAL_STORE_PATH=%s\n' "$approval_store"
+            } > "$env_file"
+          fi
+          grep -Eq '^DISDEX_DEPLOY_OTP_PEPPER=[0-9a-f]{64}$' "$env_file"
+          grep -Fxq "DISDEX_HP_APPROVER_PRIVATE_KEY_PATH=$private_key" "$env_file"
+          grep -Fxq "DISDEX_DEPLOY_APPROVAL_STORE_PATH=$approval_store" "$env_file"
+          chmod 0600 "$env_file"
+          chown root:root "$env_file"
+
+          rollback() {
+            rc=$?
+            trap - ERR
+            set +e
+            cp -a "$old_canonical" "$canonical"
+            if [[ "$approval_existed" == 1 ]]; then
+              cp -a "$old_approval" "$approval_dropin"
+            else
+              rm -f "$approval_dropin"
+            fi
+            systemctl daemon-reload
+            systemctl restart "$svc"
+            echo 'ROLLBACK=PREVIOUS_UI_RESTORED'
+            exit "$rc"
+          }
+          trap rollback ERR
+
+          cat > "$canonical" <<EOF
+          [Service]
+          WorkingDirectory=$release
+          Environment=DISDEX_UI_RELEASE_SHA=$target_sha
+          Environment=HOSTNAME=127.0.0.1
+          ExecStart=
+          ExecStart=/usr/bin/node server.js
+          EOF
+          sed -i 's/^[[:space:]]*//' "$canonical"
+          cat > "$approval_dropin" <<EOF
+          [Service]
+          EnvironmentFile=$env_file
+          EOF
+          sed -i 's/^[[:space:]]*//' "$approval_dropin"
+          chmod 0644 "$canonical" "$approval_dropin"
+          chown root:root "$canonical" "$approval_dropin"
+
+          systemctl daemon-reload
+          systemctl restart "$svc"
+
+          ok=0
+          for _ in $(seq 1 35); do
+            active="$(systemctl is-active "$svc" 2>/dev/null || true)"
+            wd="$(systemctl show "$svc" -p WorkingDirectory --value 2>/dev/null || true)"
+            home="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+            approval="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/production-approval || true)"
+            realtime="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/realtime || true)"
+            if [[ "$active" == active && "$wd" == "$release" && "$home" == 200 && "$approval" == 200 && "$realtime" == 200 ]]; then
+              ok=1
+              break
+            fi
+            sleep 1
+          done
+          [[ "$ok" == 1 ]]
+
+          pid="$(systemctl show "$svc" -p MainPID --value)"
+          env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
+          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH; do
+            grep -qx "$name" <<<"$env_names"
+          done
+          if grep -qx GMAIL_USER <<<"$env_names" && grep -qx GMAIL_APP_PASSWORD <<<"$env_names"; then :;
+          elif grep -qx SENDGRID_API_KEY <<<"$env_names"; then :;
+          else false; fi
+
+          trading_after="$(readlink -f /home/deploy/disdex-trading/current)"
+          [[ "$trading_after" == "$trading_before" ]]
+          trap - ERR
+          rm -f "$old_canonical" "$old_approval"
+
+          echo 'STATUS=HP_737_APPROVAL_DEPLOYED'
+          echo "UI_SHA=$target_sha"
+          echo "UI_RELEASE=$release"
+          echo 'HOME_HTTP=200'
+          echo 'REALTIME_HTTP=200'
+          echo 'PRODUCTION_APPROVAL_HTTP=200'
+          echo 'TRADING_CURRENT_UNCHANGED=TRUE'
+          echo 'TRADING_RESTART_ATTEMPTED=FALSE'
+          echo 'ORDERS_SENT_BY_DEPLOY=0'
+          REMOTE
+
+      - name: Public smoke
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for path in / /realtime /positions /decision-status /production-approval; do
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 15 "https://professional-dismanager.net$path")"
+            echo "PUBLIC path=$path http=$code"
+            [[ "$code" == 200 ]]
+          done
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts" "$RUNNER_TEMP/ui-artifact"
