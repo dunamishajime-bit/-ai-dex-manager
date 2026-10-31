@@ -1,0 +1,58 @@
+name: DisDex IDLE HOLD Freshness Gap CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_idle_flat_refresh_threshold_gap.py"
+      - ".github/workflows/disdex-idle-flat-stale-formal-repair.yml"
+      - ".github/workflows/disdex-idle-refresh-threshold-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile narrow threshold migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_idle_flat_refresh_threshold_gap.py
+      - name: Enforce exact one-line threshold and task-only wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path("scripts/ops/deploy/disdex_idle_flat_refresh_threshold_gap.py").read_text()
+          w=Path(".github/workflows/disdex-idle-flat-stale-formal-repair.yml").read_text()
+          for item in [
+              'EXPECTED_SHA="2e60491b5328d1db7dd4e1556b799b7c09992ed350c1326f45d85429a2720221"',
+              '3*60*60*1000',
+              '15*60*1000',
+              'PATCHED_READONLY_THREE_SIGNED_GETS=PASS',
+              'ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES=0 STOP_CHANGES=0',
+              'IDLE_OWNER_NOT_FAILED_PID0',
+              'HOLD_PROTECTED_REQUIRED',
+          ]:
+              assert item in h,item
+          assert 'old.replace(OLD,NEW,1)' in h
+          assert 'restored=old.replace(NEW,OLD,1)' in h
+          for item in [
+              "Align flat refresh threshold with 20-minute HOLD freshness contract",
+              "disdex_idle_flat_refresh_threshold_gap.py",
+              "inputs.task_id != ''",
+              "IDLE_FLAT_STALE_REPAIR",
+              "disdex-production",
+          ]:
+              assert item in w,item
+          assert "createOrder" not in h
+          assert "cancelOrder" not in h
+          print("IDLE_HOLD_FRESHNESS_GAP_POLICY=PASS")
+          PY
