@@ -1,0 +1,114 @@
+name: DisDex V52 IDLE and V4 STOP Diagnostic Read Only
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_V52_IDLE_V4_STOP_DIAG_20261031'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+
+      - name: Read exact V52/IDLE and V4 STOP failure evidence
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+
+          echo '=== V52 SAFE ENV ==='
+          v52='disdex-v52-aster-only@97830672e2f139b39f7194166d7dc8c36e8c8933.service'
+          echo "V52_ACTIVE=$(systemctl is-active "$v52" 2>/dev/null || true)"
+          echo "V52_PID=$(systemctl show "$v52" -p MainPID --value 2>/dev/null || true)"
+          pid="$(systemctl show "$v52" -p MainPID --value 2>/dev/null || true)"
+          if [[ "$pid" =~ ^[1-9][0-9]*$ ]]; then
+            tr '\0' '\n' < "/proc/$pid/environ"               | grep -E '^(DISDEX_IDLE_PRIORITY_RUNTIME_SHA|DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH|DISDEX_IDLE_RESIDUAL_LONG_ENABLED|DISDEX_RUNTIME_COMMIT_SHA|DISDEX_RELEASE_SHA)='               | sed -E 's/(PRIVATE|SECRET|PASSWORD|TOKEN|KEY)[A-Z0-9_]*=.*/REDACTED=***/I' || true
+          fi
+
+          echo '=== IDLE RESIDUAL STATE META ==='
+          state='/var/lib/disdex/idle-priority/residual-long-state.json'
+          if [[ -f "$state" ]]; then
+            stat -c 'IDLE_STATE_STAT=%U:%G:%a SIZE=%s MTIME=%y' "$state"
+            python3 - "$state" <<'PY'
+          import json,sys
+          p=sys.argv[1]
+          d=json.load(open(p,encoding='utf-8'))
+          allowed=['schema','runtimeCommitSha','runtimeSha','expectedSha','updatedAt','manualReview','pending']
+          out={k:d.get(k) for k in allowed if k in d}
+          pos=d.get('position')
+          if isinstance(pos,dict):
+              out['positionPresent']=True
+              out['positionSymbol']=pos.get('symbol')
+              out['positionRoute']=pos.get('route')
+          else:
+              out['positionPresent']=False
+          print('IDLE_STATE_META='+json.dumps(out,separators=(',',':')))
+          PY
+          else
+            echo 'IDLE_STATE=MISSING'
+          fi
+
+          echo '=== KILL SWITCH META ==='
+          python3 - <<'PY'
+          import json
+          p='/var/lib/disdex/shared/kill-switch.json'
+          d=json.load(open(p,encoding='utf-8'))
+          allowed=['active','mode','reason','stage','source','updatedAt','since']
+          print('KILL_SWITCH_META='+json.dumps({k:d.get(k) for k in allowed if k in d},separators=(',',':')))
+          PY
+
+          echo '=== V4 STOP CROSSCHECK ==='
+          u='disdex-v4-resident-stop-crosscheck.service'
+          echo "STOPCHECK_ACTIVE=$(systemctl is-active "$u" 2>/dev/null || true)"
+          echo "STOPCHECK_RESULT=$(systemctl show "$u" -p Result --value 2>/dev/null || true)"
+          echo "STOPCHECK_STATUS=$(systemctl show "$u" -p ExecMainStatus --value 2>/dev/null || true)"
+          journalctl -u "$u" -n 100 --no-pager -o short-iso 2>/dev/null             | sed -E               -e 's/([A-Za-z0-9_]*(TOKEN|KEY|PASSWORD|SECRET)[A-Za-z0-9_]*)=[^ ]+/\1=***REDACTED***/Ig'               -e 's/(0x)[0-9a-fA-F]{32,}/\1***REDACTED***/g'             | tail -n 100
+
+          echo '=== SEVEN RUNNER AUDIT ==='
+          u='disdex-seven-runner-readonly-audit.service'
+          echo "SEVEN_RESULT=$(systemctl show "$u" -p Result --value 2>/dev/null || true)"
+          journalctl -u "$u" -n 80 --no-pager -o short-iso 2>/dev/null             | grep -E 'BLOCK|FAIL|ERROR|MISMATCH|HYPE|IDLE|V4|V52|KILL|status|reason'             | tail -n 80 || true
+
+          echo '=== FET PREEMPT AUDIT ==='
+          u='disdex-fet-preemption-readiness-audit.service'
+          echo "FET_PREEMPT_RESULT=$(systemctl show "$u" -p Result --value 2>/dev/null || true)"
+          journalctl -u "$u" -n 80 --no-pager -o short-iso 2>/dev/null             | grep -E 'BLOCK|FAIL|ERROR|MISMATCH|IDLE|V52|KILL|status|reason'             | tail -n 80 || true
+
+          echo "TRADING_CURRENT=$(readlink -f /home/deploy/disdex-trading/current)"
+          echo 'TRADING_MUTATION=0'
+          echo 'V52_IDLE_V4_STOP_DIAG_COMPLETE'
+          REMOTE
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
