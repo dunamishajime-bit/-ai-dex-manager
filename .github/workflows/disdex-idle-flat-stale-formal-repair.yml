@@ -3,8 +3,12 @@ name: DisDex IDLE Flat Stale State Formal Repair
 on:
   workflow_dispatch:
     inputs:
-      acknowledgement:
-        description: Type the exact protected repair acknowledgement
+      approval_id:
+        description: HP email-OTP approval request ID
+        type: string
+        required: true
+      target_sha:
+        description: Exact current trading runtime SHA approved for the repair
         type: string
         required: true
 
@@ -23,14 +27,88 @@ jobs:
     environment:
       name: disdex-production
     steps:
-      - name: Verify exact owner-reviewed repair request
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Bind exact non-order repair context
+        id: context
         shell: bash
         env:
-          ACK: ${{ inputs.acknowledgement }}
+          SHA: ${{ inputs.target_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$SHA" =~ ^[a-f0-9]{40}$ ]]
+          PLAN="$(printf 'IDLE_FLAT_STALE_REPAIR_AFTER_THREE_SIGNED_GETS\n%s\n' "$SHA" | sha256sum | awk '{print $1}')"
+          echo "plan_sha256=$PLAN" >> "$GITHUB_OUTPUT"
+
+      - name: Redeem one-time HP email-OTP repair approval
+        shell: bash
+        env:
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          SHA: ${{ inputs.target_sha }}
+          PLAN: ${{ steps.context.outputs.plan_sha256 }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          [[ -n "$BRIDGE_SECRET" ]]
+          umask 077
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+
+          body = json.dumps({
+              "action": "redeem",
+              "approval_id": os.environ["APPROVAL_ID"],
+              "operation": "IDLE_FLAT_STALE_REPAIR",
+              "scope": "IDLE_PRIORITY_SHORT",
+              "target_sha": os.environ["SHA"],
+              "plan_sha256": os.environ["PLAN"],
+              "run_id": os.environ["RUN_ID"],
+          }).encode("utf-8")
+          request = urllib.request.Request(
+              "https://professional-dismanager.net/api/system/deploy-approval",
+              data=body,
+              method="POST",
+              headers={
+                  "Authorization": "Bearer " + os.environ["BRIDGE_SECRET"],
+                  "Content-Type": "application/json",
+                  "User-Agent": "disdex-idle-flat-stale-formal-repair",
+              },
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              data = json.load(response)
+          approval = data.get("approval") or {}
+          if not data.get("ok"):
+              raise SystemExit("HP_APPROVAL_REDEEM_BLOCKED")
+          if (
+              approval.get("operation") != "IDLE_FLAT_STALE_REPAIR"
+              or approval.get("scope") != "IDLE_PRIORITY_SHORT"
+              or approval.get("targetSha") != os.environ["SHA"]
+              or approval.get("planSha256") != os.environ["PLAN"]
+              or bool(approval.get("ordersEnabled", False)) is not False
+          ):
+              raise SystemExit("HP_APPROVAL_IDENTITY_MISMATCH")
+          token = str(data.get("token") or "")
+          if not token:
+              raise SystemExit("HP_APPROVAL_TOKEN_MISSING")
+          pathlib.Path(os.environ["RUNNER_TEMP"], "disdex-idle-repair-token").write_text(token, encoding="ascii")
+          print("::add-mask::" + token)
+          print("HP_IDLE_REPAIR_APPROVAL_REDEEMED=TRUE")
+          PY
+
+      - name: Verify exact owner-reviewed non-order repair grant
+        shell: bash
+        env:
           OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
           ALLOWED: ${{ vars.DISDEX_DEPLOY_ALLOWED_ACTORS }}
           ACTOR: ${{ github.actor }}
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          SHA: ${{ inputs.target_sha }}
+          PLAN: ${{ steps.context.outputs.plan_sha256 }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
         run: |
           set -euo pipefail
           [[ "$GITHUB_REPOSITORY" == "dunamishajime-bit/-ai-dex-manager" ]]
@@ -38,7 +116,18 @@ jobs:
           [[ "$OWNER" == "dunamishajime-bit" ]]
           [[ ",$ALLOWED," == *",$ACTOR,"* ]]
           [[ "$HOST" == "professional-dismanager.net" ]]
-          [[ "$ACK" == "I_ACK_IDLE_FLAT_STALE_REPAIR_AFTER_THREE_SIGNED_GETS" ]]
+          [[ -s "$RUNNER_TEMP/disdex-idle-repair-token" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-owner.pub"
+          cat "$RUNNER_TEMP/disdex-idle-repair-token" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/disdex-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" \
+              --sha "$SHA" --scope IDLE_PRIORITY_SHORT \
+              --operator "$OWNER" --plan-sha256 "$PLAN" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled false
 
       - name: Execute exact restricted repair helper
         shell: bash
@@ -47,6 +136,7 @@ jobs:
           PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
           KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
           HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+          SHA: ${{ inputs.target_sha }}
         run: |
           set -euo pipefail
           [[ -n "$KEY" && -n "$HOST_KEYS" ]]
@@ -59,4 +149,44 @@ jobs:
           printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"
           chmod 0600 "$RUNNER_TEMP/disdex-idle-repair-ssh/key" "$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"
           ssh-keygen -y -f "$RUNNER_TEMP/disdex-idle-repair-ssh/key" >/dev/null
-          ssh -T             -i "$RUNNER_TEMP/disdex-idle-repair-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts"             -o ConnectTimeout=10 -p "$PORT" "root@$HOST"             "/usr/local/sbin/disdex-idle-residual-flat-stale-repair --execute-after-three-signed-gets"
+          ssh -T \
+            -i "$RUNNER_TEMP/disdex-idle-repair-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts" \
+            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
+            "test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = '$SHA' && /usr/local/sbin/disdex-idle-residual-flat-stale-repair --execute-after-three-signed-gets"
+
+      - name: Read-only post-repair proof
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T \
+            -i "$RUNNER_TEMP/disdex-idle-repair-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/disdex-idle-repair-ssh/known_hosts" \
+            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" 'python3 - <<'"'"'PY'"'"'
+          import json
+          state = json.load(open("/var/lib/disdex/idle-priority/residual-long-state.json", encoding="utf-8"))
+          kill = json.load(open("/var/lib/disdex/shared/kill-switch.json", encoding="utf-8"))
+          if isinstance(state.get("position"), dict):
+              raise SystemExit("IDLE_POST_REPAIR_NOT_FLAT")
+          reason = str(kill.get("reason") or "")
+          if "IDLE_RESIDUAL_STATE_RUNTIME_OR_SCHEMA_MISMATCH" in reason:
+              raise SystemExit("IDLE_MISMATCH_KILL_REASON_STILL_ACTIVE")
+          print("IDLE_POST_REPAIR_FLAT=TRUE")
+          print("IDLE_MISMATCH_KILL_REASON_CLEARED=TRUE")
+          print("TRADING_MUTATION_POSTCHECK=0")
+          PY'
+
+      - name: Destroy ephemeral approval and SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/disdex-idle-repair-ssh" "$RUNNER_TEMP/disdex-owner.pub" "$RUNNER_TEMP/disdex-idle-repair-token"
