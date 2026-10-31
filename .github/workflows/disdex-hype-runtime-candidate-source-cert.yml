@@ -39,8 +39,9 @@ jobs:
               'git diff --name-only',
           ]:
               assert required in s, required
-          for forbidden in ['ASTER_API_PRIVATE_KEY','systemctl start','systemctl restart']:
-              assert forbidden not in s, forbidden
+          assert 'secrets.ASTER_' not in s
+          assert 'systemctl start' not in s
+          assert 'systemctl restart' not in s
           print('HYPE_RUNTIME_CANDIDATE_WORKFLOW_POLICY=PASS')
           PY
 
