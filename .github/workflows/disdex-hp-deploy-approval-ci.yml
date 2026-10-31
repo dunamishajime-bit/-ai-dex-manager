@@ -14,6 +14,7 @@ on:
       - "app/admin/page.tsx"
       - "scripts/disdex-hp-deploy-approval-selftest.ts"
       - "package.json"
+      - "next.config.mjs"
       - ".github/workflows/disdex-v4-hp-approval-request.yml"
       - ".github/workflows/disdex-hp-approval-ui-production-deploy.yml"
       - ".github/workflows/disdex-hp-standard-approval-ui-deploy.yml"
@@ -43,4 +44,8 @@ jobs:
         run: npm run deploy:hp-approval:selftest
 
       - name: Production HP build
-        run: npm run build
+        run: |
+          npm run build
+          test -f .next/standalone/server.js
+          test -f .next/standalone/.next/BUILD_ID
+          node --check .next/standalone/server.js
