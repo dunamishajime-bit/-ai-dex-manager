@@ -43,6 +43,7 @@ export type DeploymentApprovalRecord = {
   approverIpHash?: string;
   lastError?: string;
   taskApprovedExpiresAt?: number;
+  completedAt?: number;
   taskMaxClaims?: number;
   taskClaimCount?: number;
   taskActiveClaim?: {
