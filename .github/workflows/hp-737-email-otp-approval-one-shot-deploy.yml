@@ -29,8 +29,10 @@ jobs:
           gh run download 41192725822             --repo "${GITHUB_REPOSITORY}"             --name "disdex-hp-current-ui-approval-a56539d77075e74b2104de15aabd87a543b71302"             --dir "$RUNNER_TEMP/ui-artifact"
           archive="$RUNNER_TEMP/ui-artifact/disdex-ui-a56539d77075e74b2104de15aabd87a543b71302.tar.gz"
           test -s "$archive"
-          tar -tzf "$archive" | grep -qx './server.js'
-          tar -xOzf "$archive" ./.disdex-release-sha | tr -d '[:space:]' | grep -qx 'a56539d77075e74b2104de15aabd87a543b71302'
+          tar -tzf "$archive" > "$RUNNER_TEMP/ui-artifact/files.txt"
+          grep -qx './server.js' "$RUNNER_TEMP/ui-artifact/files.txt"
+          release_sha="$(tar -xOzf "$archive" ./.disdex-release-sha | tr -d '[:space:]')"
+          [[ "$release_sha" == 'a56539d77075e74b2104de15aabd87a543b71302' ]]
           echo "ARCHIVE_BYTES=$(stat -c '%s' "$archive")"
 
       - name: Configure pinned root SSH
