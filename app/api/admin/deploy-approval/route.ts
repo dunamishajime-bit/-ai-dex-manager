@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
         ttlSeconds: 300,
       });
 
-      const approved = await saveDeploymentApproval({
+      await saveDeploymentApproval({
         ...record,
         status: "APPROVED",
         otpHash: undefined,
