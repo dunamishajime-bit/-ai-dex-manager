@@ -78,8 +78,11 @@ export async function POST(request: NextRequest) {
 
     const policy = DEPLOY_APPROVAL_OPERATION_POLICY[operation];
     const requestedScope = body.scope == null ? policy.scope : String(body.scope).trim();
+    if (body.orders_enabled != null && typeof body.orders_enabled !== "boolean") {
+      return NextResponse.json({ ok: false, error: "orders_enabled must be boolean" }, { status: 400 });
+    }
     const requestedOrdersEnabled =
-      body.orders_enabled == null ? policy.ordersEnabled : Boolean(body.orders_enabled);
+      body.orders_enabled == null ? policy.ordersEnabled : body.orders_enabled;
     if (requestedScope !== policy.scope || requestedOrdersEnabled !== policy.ordersEnabled) {
       return NextResponse.json({ ok: false, error: "operation policy mismatch" }, { status: 409 });
     }
