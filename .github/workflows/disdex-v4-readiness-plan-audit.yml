@@ -1,0 +1,135 @@
+name: DisDex V4 Readiness and Plan Audit Read Only
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_V4_READINESS_PLAN_AUDIT_20261031'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+
+      - name: Read V4 readiness and root-owned plan metadata
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST" 'python3 - <<'"'"'PY'"'"'
+          import hashlib, json, os, pathlib, subprocess
+
+          print("READINESS_BEGIN")
+          proc = subprocess.run(
+              ["/usr/local/sbin/disdex-v4-live-readiness"],
+              text=True,
+              capture_output=True,
+              timeout=30,
+          )
+          print("READINESS_RC=" + str(proc.returncode))
+          raw = (proc.stdout or "").strip()
+          if raw:
+              try:
+                  data = json.loads(raw)
+              except Exception:
+                  print("READINESS_PARSE=FAILED")
+              else:
+                  allowed = [
+                      "schema", "status", "candidateSha", "currentReleaseSha",
+                      "planSha256", "scope", "ordersEnabled", "route",
+                  ]
+                  for key in allowed:
+                      if key in data and isinstance(data[key], (str, int, float, bool, type(None))):
+                          print(f"READINESS_{key}={data[key]}")
+                  blockers = data.get("blockers")
+                  if isinstance(blockers, list):
+                      print("READINESS_BLOCKER_COUNT=" + str(len(blockers)))
+                      for item in blockers:
+                          print("READINESS_BLOCKER=" + str(item))
+          if proc.stderr:
+              safe = proc.stderr.strip().replace("\n", " | ")
+              if safe:
+                  print("READINESS_STDERR=" + safe[:800])
+          print("READINESS_END")
+
+          root = pathlib.Path("/var/lib/disdex/unified-deploy")
+          print("PLAN_FILES_BEGIN")
+          if not root.is_dir():
+              print("PLAN_DIR=MISSING")
+          else:
+              allowed_keys = {
+                  "schema","status","scope","sourceSha","targetSha","candidateSha",
+                  "currentReleaseSha","planSha256","ordersEnabled","route","owner",
+                  "operator","deploymentTarget","operatorTarget","createdAt","updatedAt",
+              }
+              for p in sorted(root.iterdir()):
+                  if not p.is_file():
+                      continue
+                  st = p.stat()
+                  blob = p.read_bytes()
+                  digest = hashlib.sha256(blob).hexdigest()
+                  print(
+                      "PLAN_FILE="
+                      + p.name
+                      + f" SHA256={digest} SIZE={len(blob)} UID={st.st_uid} GID={st.st_gid} MODE={oct(st.st_mode & 0o777)}"
+                  )
+                  if p.suffix.lower() == ".json" and len(blob) <= 2_000_000:
+                      try:
+                          obj = json.loads(blob)
+                      except Exception:
+                          print("PLAN_JSON_PARSE=" + p.name + ":FAILED")
+                          continue
+                      if isinstance(obj, dict):
+                          for k in sorted(allowed_keys):
+                              v = obj.get(k)
+                              if isinstance(v, (str, int, float, bool)) or v is None and k in obj:
+                                  print(f"PLAN_META={p.name}:{k}={v}")
+          print("PLAN_FILES_END")
+
+          pins = pathlib.Path("/etc/disdex/runner-pins.json")
+          if pins.is_file():
+              b = pins.read_bytes()
+              print("RUNNER_PINS_SHA256=" + hashlib.sha256(b).hexdigest())
+              print("RUNNER_PINS_MODE=" + oct(pins.stat().st_mode & 0o777))
+          else:
+              print("RUNNER_PINS=MISSING")
+
+          current = pathlib.Path("/home/deploy/disdex-trading/current")
+          try:
+              print("TRADING_CURRENT=" + str(current.resolve(strict=True)))
+          except Exception:
+              print("TRADING_CURRENT=UNRESOLVED")
+          print("TRADING_MUTATION=0")
+          print("V4_READINESS_PLAN_AUDIT_COMPLETE")
+          PY'
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
