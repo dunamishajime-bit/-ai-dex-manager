@@ -13,6 +13,8 @@ export type DeploymentApprovalStatus =
   | "APPROVED"
   | "DISPATCHED"
   | "REDEEMED"
+  | "RETRYABLE"
+  | "COMPLETED"
   | "EXPIRED"
   | "FAILED";
 
@@ -41,6 +43,12 @@ export type DeploymentApprovalRecord = {
   redeemedByRunId?: string;
   approverIpHash?: string;
   lastError?: string;
+  retryPolicy?: "IDLE_NONORDER_RETRY_V1";
+  grantExpiresAt?: number;
+  maxAttempts?: number;
+  attemptCount?: number;
+  lastRunOutcome?: "success" | "failure";
+  completedAt?: number;
 };
 
 export type DeploymentApprovalSummary = Omit<
@@ -78,6 +86,53 @@ function saveFileRecords(records: DeploymentApprovalRecord[]) {
   const tmp = `${FILE_PATH}.tmp-${process.pid}-${Date.now()}`;
   fs.writeFileSync(tmp, JSON.stringify(records, null, 2), { encoding: "utf8", mode: 0o600 });
   fs.renameSync(tmp, FILE_PATH);
+}
+
+
+/**
+ * Serializes claims of a grant across HP workers. Never recover a stale lock
+ * automatically: fail-closed until an operator verifies the old process.
+ * The publish workflow also uses this same directory lock.
+ */
+async function withFileApprovalLock<T>(action: () => Promise<T>): Promise<T> {
+  const lock = FILE_PATH + ".approval-lock";
+  for (let tries = 0; tries < 50; tries += 1) {
+    try {
+      await fs.promises.mkdir(lock, { mode: 0o700 });
+      try {
+        return await action();
+      } finally {
+        await fs.promises.rmdir(lock);
+      }
+    } catch (error: any) {
+      if (error?.code !== "EEXIST") throw error;
+      await new Promise((resolve) => setTimeout(resolve, 40));
+    }
+  }
+  throw new Error("DEPLOY_APPROVAL_STORE_LOCK_UNAVAILABLE");
+}
+
+export async function mutateDeploymentApprovalAtomic(
+  id: string,
+  update: (value: DeploymentApprovalRecord | null) =>
+    Promise<{ next?: DeploymentApprovalRecord; result: unknown }>,
+): Promise<unknown> {
+  // Upstash is a separate store. Do not claim multi-run grants if an atomic
+  // transaction is not implemented for that backend.
+  if (USE_REDIS) throw new Error("ATOMIC_RETRY_NOT_AVAILABLE_ON_REDIS");
+  return withFileApprovalLock(async () => {
+    const records = loadFileRecords();
+    const existing = records.find((entry) => entry.id === id) ?? null;
+    const outcome = await update(existing);
+    if (outcome.next) {
+      const next = { ...outcome.next, updatedAt: Date.now() };
+      const updated = records.filter((entry) => entry.id !== id);
+      updated.push(next);
+      updated.sort((a, b) => b.createdAt - a.createdAt);
+      saveFileRecords(updated.slice(0, 50));
+    }
+    return outcome.result;
+  });
 }
 
 export function sanitizeDeploymentApproval(
