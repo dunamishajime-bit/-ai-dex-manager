@@ -189,7 +189,7 @@ class V4RootExecutor:
         validate_v4_activation(activation, args, desired, plan_hash, c.clock())
         before = _validate_venue_evidence(
             read_root_json(paths.venue_before, root_uid=c.root_uid),
-            now=c.clock(), label="before")
+            now=c.clock(), label="before", require_v4_runtime=False)
         old_sha = pins[V4_RUNNER]
         old_unit = _unit_for_runner(V4_RUNNER, old_sha)
         new_unit = _unit_for_runner(V4_RUNNER, args.sha)
