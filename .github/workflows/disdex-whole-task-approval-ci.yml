@@ -1,0 +1,66 @@
+name: DisDex Whole Task Owner Approval CI
+
+on:
+  pull_request:
+    paths:
+      - "lib/deploy-all-runners-task.ts"
+      - "lib/deploy-approval-token.ts"
+      - "lib/server/deploy-approval-store.ts"
+      - "app/api/system/deploy-approval/route.ts"
+      - "app/api/production-approval/route.ts"
+      - "app/production-approval/page.tsx"
+      - "scripts/disdex-all-runners-task-approval-selftest.ts"
+      - ".github/workflows/disdex-all-runners-live-task-approval-request.yml"
+      - ".github/workflows/disdex-idle-flat-stale-formal-repair.yml"
+      - ".github/workflows/disdex-idle-v52-owner-hold-formal-recovery.yml"
+      - ".github/workflows/disdex-whole-task-approval-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-whole-task-signed-approval:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies without lifecycle scripts
+        shell: bash
+        run: npm ci --ignore-scripts
+      - name: Existing OTP and task scope contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run deploy:hp-approval:selftest
+          npm run deploy:all-runner-task:selftest
+          npx tsc --noEmit --pretty false
+      - name: GitHub Actions task flow policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          spec=Path('lib/deploy-all-runners-task.ts').read_text()
+          approve=Path('.github/workflows/disdex-all-runners-live-task-approval-request.yml').read_text()
+          idle=Path('.github/workflows/disdex-idle-flat-stale-formal-repair.yml').read_text()
+          hold=Path('.github/workflows/disdex-idle-v52-owner-hold-formal-recovery.yml').read_text()
+          for source in (approve,idle,hold):
+              assert 'disdex-production' in source
+              assert 'DISDEX_HP_APPROVAL_BRIDGE_SECRET' in source
+          assert "ALL_RUNNERS_LIVE_RESTORE" in approve
+          assert 'claim_task_step' in idle and 'finish_task_step' in idle
+          assert 'claim_task_step' in hold and 'finish_task_step' in hold
+          assert 'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM' in hold
+          assert 'SHARED_HOLD_RECOVERY' in hold
+          assert 'IDLE_FLAT_STALE_REPAIR' in idle
+          assert 'maxAgeMs: 24 * 60 * 60 * 1000' in spec
+          assert 'maxClaims: 30' in spec
+          print("ONE_TASK_NO_REPEATED_OTP_WORKFLOW_CONTRACT=PASS")
+          PY
