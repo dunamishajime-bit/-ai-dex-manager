@@ -61,6 +61,7 @@ jobs:
           ssh-keygen -y -f "$RUNNER_TEMP/hold-ui/key" >/dev/null
 
       - name: Read-only IDLE and Kill Switch health proof
+        if: ${{ inputs.mode == 'preflight' }}
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
           PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
@@ -130,6 +131,47 @@ jobs:
               --deployment-target professional-dismanager.net \
               --operator-target DD1296_FINAL_ALLIN_10BPS \
               --route GITHUB_ACTIONS --orders-enabled false
+
+      - name: Verify and apply owner-only Margin Guard source-contract parity
+        id: margin_fix
+        if: ${{ inputs.mode == 'execute' }}
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          python3 -m py_compile scripts/ops/deploy/disdex_margin_hold_secure_state_and_ghost_guard.py
+          scp -i "$RUNNER_TEMP/hold-ui/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_margin_hold_secure_state_and_ghost_guard.py \
+            "root@$HOST:/tmp/disdex-margin-hold-parity-$GITHUB_RUN_ID.py"
+          ssh -T -i "$RUNNER_TEMP/hold-ui/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+            -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=6 \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-margin-hold-parity-$GITHUB_RUN_ID.py --run-id $GITHUB_RUN_ID"
+
+      - name: Exact HOLD readiness proof after secure margin state repair
+        id: hold_preflight
+        if: ${{ inputs.mode == 'execute' }}
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/hold-ui/key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "/usr/bin/python3 /usr/local/sbin/disdex-idle-residual-kill-recovery"
 
       - name: Configure forced-command root SSH
         if: ${{ inputs.mode == 'execute' }}
@@ -232,5 +274,19 @@ jobs:
 
       - name: Destroy ephemeral SSH material
         if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         shell: bash
-        run: rm -rf "$RUNNER_TEMP/hold-ui" "$RUNNER_TEMP/hold-forced" "$RUNNER_TEMP/hold-task-token" "$RUNNER_TEMP/hold-task-plan" "$RUNNER_TEMP/hold-owner.pub"
+        run: |
+          set +e
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          if [[ -s "$RUNNER_TEMP/hold-ui/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/hold-ui/key" \
+              -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/hold-ui/known_hosts" \
+              -o ConnectTimeout=6 -p "$PORT" "root@$HOST" \
+              "rm -f -- /tmp/disdex-margin-hold-parity-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/hold-ui" "$RUNNER_TEMP/hold-forced" \
+            "$RUNNER_TEMP/hold-task-token" "$RUNNER_TEMP/hold-task-plan" "$RUNNER_TEMP/hold-owner.pub"
