@@ -1,0 +1,116 @@
+name: DisDex HYPE Runtime Candidate Source Certification
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-hype-runtime-candidate-source-cert.yml"
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact HYPE runtime candidate SHA descended from 7688 baseline
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-policy:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify workflow policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('.github/workflows/disdex-hype-runtime-candidate-source-cert.yml').read_text()
+          for required in [
+              'candidate_sha:',
+              '7688ed7c93a1918d8b44837339b7da5584a868f5',
+              'tests/hype-zec-runner-gate.test.ts',
+              'tests/managed-protective-orders.test.ts',
+              'strategy:hype-zec-long:selftest',
+              'git diff --name-only',
+          ]:
+              assert required in s, required
+          for forbidden in ['ASTER_API_PRIVATE_KEY','systemctl start','systemctl restart']:
+              assert forbidden not in s, forbidden
+          print('HYPE_RUNTIME_CANDIDATE_WORKFLOW_POLICY=PASS')
+          PY
+
+  source-cert:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Validate exact candidate input
+        shell: bash
+        env:
+          SHA: ${{ inputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]
+
+      - name: Checkout exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.candidate_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Require exact 7688 descendant and narrow source diff
+        shell: bash
+        env:
+          BASE: 7688ed7c93a1918d8b44837339b7da5584a868f5
+          SHA: ${{ inputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$SHA" ]]
+          git merge-base --is-ancestor "$BASE" "$SHA"
+          mapfile -t files < <(git diff --name-only "$BASE" "$SHA")
+          printf 'DIFF_FILE=%s\n' "${files[@]}"
+          [[ "${#files[@]}" -eq 2 ]]
+          printf '%s\n' "${files[@]}" | sort > "$RUNNER_TEMP/hype-files"
+          printf '%s\n' lib/hype-zec-long-runner.ts tests/hype-zec-runner-gate.test.ts | sort > "$RUNNER_TEMP/expected-files"
+          diff -u "$RUNNER_TEMP/expected-files" "$RUNNER_TEMP/hype-files"
+          git diff --check "$BASE" "$SHA"
+          grep -Fq 'findManagedV12V4ProtectiveOrders(openOrders, positions)' lib/hype-zec-long-runner.ts
+          grep -Fq 'v12-v4-98ded39746ed3502a4d7b0e26ef9' tests/hype-zec-runner-gate.test.ts
+
+      - name: Install locked dependencies without lifecycle scripts
+        shell: bash
+        run: npm ci --ignore-scripts
+
+      - name: Exact ownership regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx --test tests/hype-zec-runner-gate.test.ts tests/managed-protective-orders.test.ts
+          npm run strategy:hype-zec-long:selftest
+
+      - name: TypeScript source validation
+        shell: bash
+        run: npx tsc --noEmit
+
+      - name: Emit source-only evidence
+        shell: bash
+        env:
+          SHA: ${{ inputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          echo HYPE_CANDIDATE_SOURCE_CERT=PASS
+          echo CANDIDATE_SHA=$SHA
+          echo BASE_SHA=7688ed7c93a1918d8b44837339b7da5584a868f5
+          echo VENUE_CREDENTIALS_USED=FALSE
+          echo ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES=0
