@@ -168,3 +168,37 @@ test("HYPE does not misclassify a protected Idle SHORT position as an unmanaged 
   };
   assert.deepEqual(unmanagedHypeZecOrders([stop, tp], [position]), []);
 });
+
+
+test("HYPE recognizes the exact V12 V4 STOP-only DOGE protection and still blocks impostors", () => {
+  const position: any = {
+    symbol: "DOGEUSDT",
+    quantity: -226,
+    entryPrice: 0.08052,
+    markPrice: 0.08010,
+    unrealizedPnl: 0,
+    pnlPct: 0,
+    notionalUsd: 18.1026,
+    positionSide: "BOTH",
+    leverage: 5,
+    updatedAt: Date.now(),
+  };
+  const stop: any = {
+    symbol: "DOGEUSDT",
+    clientOrderId: "v12-v4-98ded39746ed3502a4d7b0e26ef9",
+    side: "BUY",
+    status: "NEW",
+    type: "STOP_MARKET",
+    stopPrice: 0.088,
+    reduceOnly: true,
+    quantity: 226,
+    executedQuantity: 0,
+  };
+  assert.deepEqual(unmanagedHypeZecOrders([stop], [position]), []);
+  assert.deepEqual(
+    unmanagedHypeZecOrders([{ ...stop, clientOrderId: "manual-doge-stop" }], [position]),
+    [{ ...stop, clientOrderId: "manual-doge-stop" }],
+  );
+  assert.equal(unmanagedHypeZecOrders([{ ...stop, reduceOnly: false }], [position]).length, 1);
+  assert.equal(unmanagedHypeZecOrders([{ ...stop, quantity: 225 }], [position]).length, 1);
+});
