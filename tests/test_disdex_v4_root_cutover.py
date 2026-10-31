@@ -132,7 +132,18 @@ class V4CutoverTransactionTest(unittest.TestCase):
             orders_enabled="true", owner="owner")
 
     def _executor(self, sysd):
-        return V4RootExecutor(self.fx._executor(sysd),runtime_approval=self.runtime)
+        calls={"after":0}
+        def witness(*, sha, expected_pins, phase):
+            if phase=="before":
+                return json.loads(self.fx.before_venue.read_text("utf8"))
+            calls["after"]+=1
+            value=json.loads(self.fx.after_venue.read_text("utf8"))
+            value["capturedAt"]=self.now+calls["after"]
+            value["expiresAt"]=self.now+300+calls["after"]
+            return value
+        return V4RootExecutor(
+            self.fx._executor(sysd), runtime_approval=self.runtime,
+            witness_collector=witness, sleeper=lambda _: None)
 
     def test_v4_preflight_accepts_legacy_writable_current_but_certifies_new_release(self):
         # Legacy current/peer releases predate the root-owned immutable boundary.
