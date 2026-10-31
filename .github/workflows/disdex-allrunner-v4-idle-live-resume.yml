@@ -151,7 +151,7 @@ jobs:
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
           PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-          RUNNER_NAME: ${{ inputs.runner }}
+          TARGET_RUNNER: ${{ inputs.runner }}
         run: |
           set -euo pipefail
           if [[ -z "$PORT" ]]; then PORT=22; fi
@@ -160,7 +160,7 @@ jobs:
             -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-live-ssh/known_hosts" \
             -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 \
             -p "$PORT" "root@$HOST" \
-            "python3 /tmp/disdex-allrunner-live-$GITHUB_RUN_ID.py --runner $RUNNER_NAME --run-id $GITHUB_RUN_ID"
+            "python3 /tmp/disdex-allrunner-live-$GITHUB_RUN_ID.py --runner $TARGET_RUNNER --run-id $GITHUB_RUN_ID"
 
       - name: Finish task stage for success or safe retry
         if: ${{ always() && steps.task_claim.outcome == 'success' }}
