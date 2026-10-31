@@ -1,0 +1,109 @@
+name: DisDex HP Approval Bridge Configure UI Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  configure:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Validate scoped secret and production SSH inputs
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$HOST" == "professional-dismanager.net" ]]
+          [[ "$BRIDGE" =~ ^[0-9a-f]{64}$ ]]
+          [[ -n "$KEY" && -n "$HOST_KEYS" ]]
+          [[ -f scripts/ops/deploy/disdex_hp_approval_bridge_configure.py ]]
+          python3 -m py_compile scripts/ops/deploy/disdex_hp_approval_bridge_configure.py
+          echo 'BRIDGE_AND_SSH_PREREQUISITES_PRESENT=TRUE'
+
+      - name: Configure pinned production SSH
+        env:
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/hp-bridge-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/hp-bridge-ssh/key"
+          printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/hp-bridge-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/hp-bridge-ssh/key" "$RUNNER_TEMP/hp-bridge-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/hp-bridge-ssh/key" >/dev/null
+
+      - name: Upload verified UI-only bridge installer
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${PORT:-22}"
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          scp -i "$RUNNER_TEMP/hp-bridge-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hp-bridge-ssh/known_hosts" -P "$PORT" \
+            scripts/ops/deploy/disdex_hp_approval_bridge_configure.py \
+            "root@$HOST:/tmp/disdex-hp-bridge-${GITHUB_RUN_ID}.py"
+
+      - name: Bind GitHub bridge to existing UI environment only
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${PORT:-22}"
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          # Secret stays in runner memory and travels in encrypted SSH stdin.
+          # It is never printed, passed as a command argument, or stored in an artifact.
+          printf '%s' "$BRIDGE" | ssh -T \
+            -i "$RUNNER_TEMP/hp-bridge-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/hp-bridge-ssh/known_hosts" \
+            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-hp-bridge-${GITHUB_RUN_ID}.py --expected-ui-sha 74895d27b340eda07ec2c0cd544a759a66c56c06 --run-id $GITHUB_RUN_ID"
+
+      - name: Remove temporary material
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        shell: bash
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/hp-bridge-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/hp-bridge-ssh/key" \
+              -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/hp-bridge-ssh/known_hosts" \
+              -o ConnectTimeout=5 -p "$PORT" "root@$HOST" \
+              "rm -f -- /tmp/disdex-hp-bridge-${GITHUB_RUN_ID}.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/hp-bridge-ssh"
