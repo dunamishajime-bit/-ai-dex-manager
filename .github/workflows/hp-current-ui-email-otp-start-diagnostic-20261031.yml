@@ -1,0 +1,70 @@
+name: HP Current UI Approval Start Diagnostic 20261031
+
+on:
+  push:
+    branches:
+      - fix/hp-737-email-otp-approval-20261031
+    paths:
+      - "ops/hp-current-ui-email-otp-diagnose.txt"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+
+      - name: Read failed current-UI approval start evidence
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          svc='ai-dex-manager-ui.service'
+          failed='/home/deploy/disdex-trading/ui-releases/ui-hp-current-approval-a19650b1e46d'
+          echo "ACTIVE=$(systemctl is-active "$svc" 2>/dev/null || true)"
+          echo "WORKDIR=$(systemctl show "$svc" -p WorkingDirectory --value 2>/dev/null || true)"
+          echo "EXECSTART=$(systemctl show "$svc" -p ExecStart --value 2>/dev/null || true)"
+          echo "RESULT=$(systemctl show "$svc" -p Result --value 2>/dev/null || true)"
+          echo "NRESTARTS=$(systemctl show "$svc" -p NRestarts --value 2>/dev/null || true)"
+          echo "UI_HTTP=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+          echo "TRADING_CURRENT=$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+          echo "FAILED_EXISTS=$(test -d "$failed" && echo TRUE || echo FALSE)"
+          if [[ -d "$failed" ]]; then
+            echo "FAILED_SHA=$(tr -d '[:space:]' < "$failed/.disdex-release-sha" 2>/dev/null || true)"
+            echo "FAILED_SERVER_STAT=$(stat -c '%U:%G:%a:%s' "$failed/server.js" 2>/dev/null || true)"
+            echo "FAILED_BUILD_ID=$(tr -d '[:space:]' < "$failed/.next/BUILD_ID" 2>/dev/null || true)"
+            echo "FAILED_NODE_MODULES=$(test -d "$failed/node_modules" && echo PRESENT || echo MISSING)"
+            echo "FAILED_NEXT_VERSION=$(node -e 'try{console.log(require(process.argv[1]+"/node_modules/next/package.json").version)}catch(e){console.log("MISSING")}' "$failed")"
+          fi
+          echo 'JOURNAL_BEGIN'
+          journalctl -u "$svc"             --since '2026-10-31 19:33:50'             --until '2026-10-31 19:35:10'             --no-pager -o short-iso 2>/dev/null             | tail -n 260             | sed -E               -e 's/([A-Za-z0-9_]*(TOKEN|KEY|PASSWORD|SECRET)[A-Za-z0-9_]*)=[^ ]+/\1=***REDACTED***/Ig'               -e 's/(Authorization: Bearer )[A-Za-z0-9._-]+/\1***REDACTED***/Ig'
+          echo 'JOURNAL_END'
+          echo 'TRADING_MUTATION=0'
+          REMOTE
+
+      - name: Destroy SSH material
+        if: always()
+        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
