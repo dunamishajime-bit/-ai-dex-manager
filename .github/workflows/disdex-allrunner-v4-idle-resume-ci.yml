@@ -1,4 +1,4 @@
-name: DisDex All-Runner V4 IDLE Resume Safety CI
+name: DisDex All-Runner V4 IDLE HYPE Resume Safety CI
 
 on:
   pull_request:
@@ -33,6 +33,7 @@ jobs:
           for x in [
             'V4="53a0be396719f0284af4e11b35c66a4ac7d58f79"',
             'MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"',
+            '"HYPE":{',
             'SHARED_KILL_SWITCH_ACTIVE',
             'MARGIN_GUARD_NOT_HEALTHY',
             'PENDING_EXPOSURE_ACTIVE',
@@ -43,7 +44,7 @@ jobs:
           ]:
               assert x in h,x
           for x in [
-            'V4_LIVE_RECOVER','IDLE_LIVE_RESUME','claim_task_step','finish_task_step',
+            'V4_LIVE_RECOVER','IDLE_LIVE_RESUME','HYPE_LIVE_RECOVER','claim_task_step','finish_task_step',
             'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM','disdex-production',
             '--orders-enabled true','disdex_allrunner_v4_idle_live_resume.py',
           ]:
@@ -52,5 +53,5 @@ jobs:
               assert forbidden not in h
           assert 'systemctl","start"' in h
           assert 'reset-failed' in h
-          print("ALLRUNNER_V4_IDLE_RESUME_POLICY=PASS")
+          print("ALLRUNNER_V4_IDLE_HYPE_RESUME_POLICY=PASS")
           PY
