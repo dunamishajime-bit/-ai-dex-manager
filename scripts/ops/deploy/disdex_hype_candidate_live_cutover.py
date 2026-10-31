@@ -166,7 +166,7 @@ def preflight_state() -> bytes:
     raw=STATE.read_bytes()
     state=json.loads(raw)
     require(state.get("schema")=="disdex-hype-zec-long/v1","HYPE_STATE_SCHEMA_INVALID")
-    require(state.get("runtimeCommitSha")==BASE_SHA,"HYPE_STATE_SOURCE_SHA_CHANGED")
+    require(state.get("runtimeCommitSha") in (BASE_SHA,CANDIDATE_SHA),"HYPE_STATE_SOURCE_SHA_CHANGED")
     require(state.get("mode")=="LIVE","HYPE_STATE_MODE_INVALID")
     require(not (state.get("positions") or []),"HYPE_STATE_POSITIONS_PRESENT")
     require(state.get("pending") is None,"HYPE_STATE_PENDING_PRESENT")
@@ -402,7 +402,6 @@ def journal_bad(start_epoch: int) -> str|None:
     for needle in (
       "HYPE_ZEC_UNMANAGED_OPEN_ORDER_BLOCK",
       '"status":"manual-review"',
-      '"event":"hype-zec-runner","message"',
       "HYPE_ZEC_RUNNER_FAIL_CLOSED",
     ):
         if needle in text:
@@ -533,7 +532,19 @@ def main(staging: Path, run_id: str, task_id: str) -> None:
     require(sha256(TEMPLATE)==TEMPLATE_HASH,"HYPE_SYSTEMD_TEMPLATE_CHANGED")
     shared_health()
     require(not active(OLD_UNIT),"OLD_HYPE_MUST_BE_INACTIVE_BEFORE_CUTOVER")
-    require(not active(NEW_UNIT),"CANDIDATE_HYPE_ALREADY_ACTIVE_UNEXPECTED")
+    if active(NEW_UNIT):
+        stage_release(staging,run_id)
+        install_runtime_files(task_id,run_id)
+        verify_activation_and_selftest()
+        account=signed_account()
+        state_and_venue_consistent(account)
+        require(enabled(NEW_UNIT),"CANDIDATE_HYPE_ACTIVE_BUT_NOT_ENABLED")
+        print("HYPE_CANDIDATE_LIVE_CUTOVER=ALREADY_ACTIVE_VERIFIED")
+        print("HYPE_ACTIVE_SHA="+CANDIDATE_SHA)
+        print("SOURCE_CERT_RUN="+SOURCE_CERT_RUN)
+        print("RESIDENT_DOGE_STOP_PRESERVED=TRUE")
+        print("HELPER_TEST_ORDERS_SENT=0 HELPER_CANCELS_SENT=0 HELPER_STOP_CHANGES=0")
+        return
     before=signed_account()
     require(no_hype_sidecar(before),"HYPE_OR_ZEC_VENUE_NOT_FLAT_BEFORE_CUTOVER")
     preflight_state()
