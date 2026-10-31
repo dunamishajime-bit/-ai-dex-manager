@@ -1,0 +1,59 @@
+name: DisDex HYPE V4 STOP Overlay Safety CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_hype_v4_stop_ownership_overlay.py"
+      - ".github/workflows/disdex-hype-v4-stop-overlay-hotfix.yml"
+      - ".github/workflows/disdex-hype-v4-stop-overlay-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile exact overlay helper
+        shell: bash
+        run: python3 -m py_compile scripts/ops/deploy/disdex_hype_v4_stop_ownership_overlay.py
+      - name: Verify reversible overlay and whole-task policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          h=Path("scripts/ops/deploy/disdex_hype_v4_stop_ownership_overlay.py").read_text()
+          w=Path(".github/workflows/disdex-hype-v4-stop-overlay-hotfix.yml").read_text()
+          for x in [
+            'SOURCE_SHA256="e8639343f0d9314b9bb29f05dd4bd3cf6a35a66c3d90b6a9f2e1df95edb54e75"',
+            'findManagedV12V4ProtectiveOrders',
+            'BindReadOnlyPaths=',
+            'HYPE_V4_STOP_OWNERSHIP_SELFTEST=PASS',
+            'RESIDENT_DOGE_PROTECTION_MISSING',
+            'REQUIRED_LIVE_UNIT_NOT_ACTIVE',
+            'HYPE_NAMESPACE_OVERLAY_HASH_MISMATCH',
+            'HYPE_V4_STOP_OWNERSHIP_OVERLAY=ROLLBACK',
+            'HELPER_ORDERS_SENT=0 HELPER_CANCELS_SENT=0 HELPER_STOP_CHANGES=0',
+          ]:
+              assert x in h,x
+          for x in [
+            'HYPE_LIVE_RECOVER',
+            'HYPE_TREND_LONG',
+            'claim_task_step',
+            'finish_task_step',
+            'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM',
+            'disdex-production',
+            '--orders-enabled true',
+          ]:
+              assert x in w,x
+          for forbidden in ['cancelOrder','createOrder','test-order','kill-switch clear']:
+              assert forbidden not in h
+          assert 'SOURCE.write_' not in h and 'SOURCE.unlink' not in h
+          print("HYPE_V4_STOP_OVERLAY_POLICY=PASS")
+          PY
