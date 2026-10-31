@@ -1,0 +1,127 @@
+name: DisDex V52 Exact Owner-Approved Hotfix Cutover
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "preflight or execute (requires existing exact-SHA owner activation)"
+        required: true
+        type: choice
+        options:
+          - preflight
+          - execute
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  v52-hotfix:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Validate immutable V52 target and safety helper
+        env:
+          MODE: ${{ inputs.mode }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$MODE" == 'preflight' || "$MODE" == 'execute' ]]
+          test -f scripts/ops/deploy/disdex_v52_owner_approved_4d33_cutover.py
+          python3 -m py_compile scripts/ops/deploy/disdex_v52_owner_approved_4d33_cutover.py
+          grep -Fq '4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81' scripts/ops/deploy/disdex_v52_owner_approved_4d33_cutover.py
+          echo 'V52_EXACT_SHA_HELPER_VALIDATED=TRUE'
+
+      - name: Configure verified UI deployment root SSH (not forced-command SSH)
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$ROOT_KEY" && -n "$KNOWN_HOSTS" ]]
+          umask 077
+          mkdir -p "$RUNNER_TEMP/v52-hotfix-ssh"
+          printf '%s\n' "$ROOT_KEY" > "$RUNNER_TEMP/v52-hotfix-ssh/key"
+          printf '%s\n' "$KNOWN_HOSTS" > "$RUNNER_TEMP/v52-hotfix-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/v52-hotfix-ssh/key" "$RUNNER_TEMP/v52-hotfix-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/v52-hotfix-ssh/key" >/dev/null
+
+      - name: Upload exact checked-out guarded operator helper
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          scp -i "$RUNNER_TEMP/v52-hotfix-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/v52-hotfix-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_v52_owner_approved_4d33_cutover.py \
+            "root@$HOST:/tmp/disdex-v52-approved-$GITHUB_RUN_ID.py"
+
+      - name: Read-only exchange and V52 preflight (three signed Aster GETs)
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/v52-hotfix-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/v52-hotfix-ssh/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-v52-approved-$GITHUB_RUN_ID.py --preflight-readonly"
+
+      - name: Owner-certified exact V52 cutover with automatic rollback
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/v52-hotfix-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/v52-hotfix-ssh/known_hosts" \
+            -o ServerAliveInterval=10 -o ServerAliveCountMax=6 \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-v52-approved-$GITHUB_RUN_ID.py --execute-approved --github-run-id $GITHUB_RUN_ID"
+
+      - name: Cleanup temporary operator material
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set +e
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          if [[ -s "$RUNNER_TEMP/v52-hotfix-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/v52-hotfix-ssh/key" \
+              -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/v52-hotfix-ssh/known_hosts" \
+              -o ConnectTimeout=6 -p "$PORT" "root@$HOST" \
+              "rm -f -- /tmp/disdex-v52-approved-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/v52-hotfix-ssh"
