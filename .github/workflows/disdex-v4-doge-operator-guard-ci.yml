@@ -8,9 +8,6 @@ on:
       - 'tests/v4-doge-direct-route-contract.test.mjs'
       - 'docs/ops/V4_DOGE_DIRECT_NEAR_STYLE_ROUTE_20261101.md'
       - '.github/workflows/disdex-v4-doge-operator-request-stage.yml'
-      - 'tests/v4-doge-direct-route-contract.test.mjs'
-      - 'docs/ops/V4_DOGE_DIRECT_NEAR_STYLE_ROUTE_20261101.md'
-      - '.github/workflows/disdex-v4-doge-operator-request-stage.yml'
       - '.github/workflows/disdex-v4-doge-operator-guard-ci.yml'
       - '.github/workflows/disdex-v4-doge-missed-time-exit-operator-handoff.yml'
   push:
@@ -18,6 +15,9 @@ on:
     paths:
       - 'lib/v12-v4-doge-missed-time-guard.mjs'
       - 'tests/v12-v4-doge-missed-time-guard.test.mjs'
+      - 'tests/v4-doge-direct-route-contract.test.mjs'
+      - 'docs/ops/V4_DOGE_DIRECT_NEAR_STYLE_ROUTE_20261101.md'
+      - '.github/workflows/disdex-v4-doge-operator-request-stage.yml'
       - '.github/workflows/disdex-v4-doge-operator-guard-ci.yml'
       - '.github/workflows/disdex-v4-doge-missed-time-exit-operator-handoff.yml'
 
