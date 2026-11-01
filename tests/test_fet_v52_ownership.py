@@ -24,14 +24,16 @@ class FetV52Ownership(unittest.TestCase):
    p=tmp/'fet.json';now=time.time()*1000;sha='a'*40
    state={'schema':'fet-brk48-residual-state/v1','strategyId':'FET_BRK48_RESIDUAL','runtimeCommitSha':sha,'updatedAt':now,'position':{'symbol':'FETUSDT','side':1,'quantity':515,'entryPrice':.2407},'pending':None,'manualReview':None}
    row={'symbol':'FETUSDT','positionAmt':515,'markPrice':.258,'entryPrice':.2407}
-   with patch.dict(os.environ,{'FET_BRK48_STATE_PATH':str(p),'DISDEX_RUNTIME_COMMIT_SHA':sha,'QUALITY102_CAUSAL_V1_STATE_PATH':str(Path(tmp)/'missing'),'DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH':''}):
+   q=tmp/'q102.json';qsha='b'*40
+   q.write_text(json.dumps({'version':1,'strategyId':'QUALITY102_CAUSAL_V1','mode':'LIVE','runtimeCommitSha':qsha,'updatedAt':now,'failures':[]}))
+   with patch.dict(os.environ,{'FET_BRK48_STATE_PATH':str(p),'FET_BRK48_RUNTIME_SHA':sha,'DISDEX_RUNTIME_COMMIT_SHA':'c'*40,'DISDEX_Q102_RUNTIME_SHA':qsha,'QUALITY102_CAUSAL_V1_STATE_PATH':str(q),'DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH':''}):
     p.write_text(json.dumps(state));self.assertAlmostEqual(quality102_crypto_notional_from_positions([row],now_ms=now),132.87)
     for changes in [{'runtimeCommitSha':'b'*40},{'updatedAt':now-76*60000},{'updatedAt':now+6000},{'pending':{'phase':'submitted'}},{'position':None},{'manualReview':'ambiguous'}]:
      p.write_text(json.dumps({**state,**changes}));
      with self.assertRaises(RuntimeError):quality102_crypto_notional_from_positions([row],now_ms=now)
     p.write_text(json.dumps(state))
     for expected in ['', 'invalid']:
-     with patch.dict(os.environ,{'DISDEX_RUNTIME_COMMIT_SHA':expected}):
+     with patch.dict(os.environ,{'FET_BRK48_RUNTIME_SHA':expected}):
       with self.assertRaises(RuntimeError):quality102_crypto_notional_from_positions([row],now_ms=now)
     for changes in [{'positionAmt':-515},{'positionAmt':520},{'entryPrice':.25}]:
      with self.assertRaises(RuntimeError):quality102_crypto_notional_from_positions([{**row,**changes}],now_ms=now)
