@@ -59,7 +59,7 @@ jobs:
                       continue
                   data=p.read_bytes()
                   text=data.decode(errors='replace')
-                  if 'watchdog' not in name and 'DISDEX_WATCHDOG_V52_' not in text:
+                  if 'watchdog' not in name and 'DISDEX_WATCHDOG_V52_' not in text and 'EnvironmentFile=' not in text:
                       continue
                   st=p.stat()
                   print('PIN_FILE_BEGIN='+str(p))
