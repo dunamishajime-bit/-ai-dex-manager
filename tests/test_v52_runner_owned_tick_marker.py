@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -77,6 +78,34 @@ class V52RunnerOwnedTickTests(unittest.TestCase):
             self.assertEqual(loaded, marker)
             leftovers = [p for p in Path(td).iterdir() if p.name != "v52.json"]
             self.assertEqual(leftovers, [])
+
+
+    def test_failed_decision_cycle_never_publishes_tick(self):
+        engine = object.__new__(v52.V52AsterOnlyEngine)
+        published = []
+        engine._refresh_idle_admission_heartbeat = lambda: None
+        engine._publish_runner_tick = lambda outcome: published.append(outcome)
+
+        with patch.object(v52.legacy.V52AsterOnlyEngine, "tick", side_effect=RuntimeError("boom")):
+            with self.assertRaisesRegex(RuntimeError, "boom"):
+                engine.tick({})
+        self.assertEqual(published, [])
+
+        with patch.object(v52.legacy.V52AsterOnlyEngine, "idle_tick", side_effect=RuntimeError("locked")):
+            with self.assertRaisesRegex(RuntimeError, "locked"):
+                engine.idle_tick({"skipWithoutLock": True})
+        self.assertEqual(published, [])
+
+    def test_successful_cycles_publish_after_parent_returns(self):
+        engine = object.__new__(v52.V52AsterOnlyEngine)
+        published = []
+        engine._refresh_idle_admission_heartbeat = lambda: None
+        engine._publish_runner_tick = lambda outcome: published.append(outcome)
+        with patch.object(v52.legacy.V52AsterOnlyEngine, "tick", return_value=None):
+            engine.tick({})
+        with patch.object(v52.legacy.V52AsterOnlyEngine, "idle_tick", return_value=None):
+            engine.idle_tick({"skipWithoutLock": True})
+        self.assertEqual(published, ["DECISION_CYCLE_COMPLETED", "MARKET_CLOSED_OR_NO_ACTION"])
 
 if __name__ == "__main__":
     unittest.main()
