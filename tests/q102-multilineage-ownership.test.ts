@@ -19,5 +19,7 @@ test("base sleeves use the Q102-specific runtime SHA for ownership and reduction
 test("runtime wiring exposes Q102 state and runtime SHA to other crypto sleeves", async () => {
   const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   assert.match(source, /QUALITY102_CAUSAL_V1_STATE_PATH=\/var\/lib\/disdex\/quality102-causal-v1\/state\.json/);
-  assert.match(source, /DISDEX_Q102_RUNTIME_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(source, /Q102_SHA="\$\(runner_pin_field QUALITY102_CAUSAL_V1 sha\)"/);
+  assert.match(source, /DISDEX_Q102_RUNTIME_SHA=\$\{Q102_SHA\}/);
+  assert.doesNotMatch(source, /DISDEX_Q102_RUNTIME_SHA=\$\{DEPLOYED_SHA\}/);
 });
