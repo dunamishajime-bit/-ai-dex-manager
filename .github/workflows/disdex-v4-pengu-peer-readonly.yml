@@ -1,0 +1,100 @@
+name: DisDex V4 PENGU Peer Read-Only Diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-peer-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-peer-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-peer-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-peer-ssh/"*
+
+      - name: Read exact PENGU peer service identity and V4 peer state
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-peer-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-peer-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import json, pathlib, subprocess
+          expected='7688ed7c93a1918d8b44837339b7da5584a868f5'
+          prefix='disdex-pengu-dual-ls-v2'
+          unit=f'{prefix}@{expected}.service'
+
+          def run(*args):
+              p=subprocess.run(list(args),capture_output=True,text=True,timeout=10)
+              return p.returncode,p.stdout.strip(),p.stderr.strip()
+
+          rc,out,err=run('systemctl','show',unit,'--no-pager',
+              '--property=Id,LoadState,ActiveState,SubState,MainPID,WorkingDirectory,ExecStart,Result')
+          print('EXPECTED_PENGU_UNIT='+unit)
+          print('EXPECTED_PENGU_SHOW_RC='+str(rc))
+          print(out)
+
+          rc,listed,err=run('systemctl','list-units','--no-pager','--plain','--type=service','--all',prefix+'@*.service')
+          print('PENGU_UNIT_LIST_RC='+str(rc))
+          print('PENGU_UNIT_LIST_BEGIN')
+          print(listed)
+          print('PENGU_UNIT_LIST_END')
+
+          env=pathlib.Path('/etc/disdex/disdex-v12-v4.env')
+          peer_path=None
+          if env.is_file() and not env.is_symlink():
+              for line in env.read_text(errors='replace').splitlines():
+                  if line.startswith('V12_V4_PEER_STATE_PATHS_JSON='):
+                      raw=line.split('=',1)[1].strip().strip(chr(34)).strip(chr(39))
+                      try:
+                          mapping=json.loads(raw)
+                          peer_path=mapping.get('PENGU')
+                      except Exception as exc:
+                          print('PENGU_PEER_MAP_PARSE_ERROR='+type(exc).__name__)
+                      break
+          print('PENGU_PEER_STATE_PATH='+str(peer_path))
+          if peer_path:
+              p=pathlib.Path(peer_path)
+              if p.is_file() and not p.is_symlink():
+                  data=json.loads(p.read_text())
+                  selected={k:data.get(k) for k in (
+                      'runnerId','mode','status','reason','runtimeSha','runtimeCommitSha',
+                      'releaseSha','updatedAt','heartbeatAt','ordersAllowed','newOrdersAllowed'
+                  )}
+                  print('PENGU_PEER_STATE='+json.dumps(selected,separators=(',',':')))
+              else:
+                  print('PENGU_PEER_STATE_FILE_MISSING=TRUE')
+
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-peer-ssh"
