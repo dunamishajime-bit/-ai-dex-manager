@@ -1,0 +1,33 @@
+name: DisDex V52 Runner-Owned Tick CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/disdex_v52_aster_only_live_engine.py'
+      - 'tests/test_v52_runner_owned_tick_marker.py'
+      - '.github/workflows/disdex-v52-runner-owned-tick-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  v52-tick-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Compile V52 source and contract test
+        run: |
+          python3 -m py_compile scripts/disdex_v52_aster_only_live_engine.py tests/test_v52_runner_owned_tick_marker.py
+
+      - name: Runner-owned tick contract
+        run: python3 -m unittest tests.test_v52_runner_owned_tick_marker -v
+
+      - name: No trading logic mutation marker
+        run: |
+          echo TRADING_MUTATION=0
+          echo ORDER_TESTS=0
