@@ -56,6 +56,41 @@ jobs:
                   if re.search(r'SECRET|TOKEN|KEY|PASSWORD',k,re.I): continue
                   print(f'{k}={values[k]}')
 
+          w=subprocess.run(['systemctl','show','disdex-runner-watchdog.service','--no-pager',
+              '--property=Id,ActiveState,SubState,MainPID,EnvironmentFiles,FragmentPath,DropInPaths,ExecStart'],
+              capture_output=True,text=True,timeout=10)
+          print('WATCHDOG_SERVICE_SHOW_BEGIN')
+          print(w.stdout.strip())
+          print('WATCHDOG_SERVICE_SHOW_END')
+          wprops={}
+          for line in w.stdout.splitlines():
+              if '=' in line:
+                  k,v=line.split('=',1);wprops[k]=v
+          try: wpid=int(wprops.get('MainPID') or '0')
+          except Exception: wpid=0
+          if wpid>0:
+              proc=pathlib.Path(f'/proc/{wpid}/environ')
+              if proc.is_file():
+                  live={}
+                  for item in proc.read_bytes().split(b'\\0'):
+                      if b'=' not in item: continue
+                      k,v=item.split(b'=',1)
+                      key=k.decode(errors='replace')
+                      if key.startswith('DISDEX_WATCHDOG_V52_') or key in ('DISDEX_WATCHDOG_EXPECTED_SHA','DISDEX_WATCHDOG_APPROVED_SHA'):
+                          live[key]=v.decode(errors='replace')
+                  print('WATCHDOG_LIVE_V52_ENV='+json.dumps(live,separators=(',',':')))
+
+          audit=pathlib.Path('/var/lib/disdex/runner-health/private/watchdog-current-audit.json')
+          if audit.is_file() and not audit.is_symlink():
+              ad=json.loads(audit.read_text())
+              print('WATCHDOG_AUDIT_STAT='+json.dumps({
+                  'mtimeNs':audit.stat().st_mtime_ns,
+                  'keys':sorted(ad.keys()),
+                  'restartCalls':ad.get('restartCalls'),
+                  'penguDecision':(ad.get('decisions') or {}).get('PENGU_V8'),
+                  'v52Decision':(ad.get('decisions') or {}).get('V52'),
+              },separators=(',',':')))
+
           p=subprocess.run(['systemctl','list-units','--all','--type=service','--no-pager','--plain',
               'disdex-v52-aster-only@*.service'],capture_output=True,text=True,timeout=10)
           print('V52_UNIT_LIST_BEGIN')
