@@ -20,9 +20,12 @@ on:
       - "scripts/disdex-hp-deploy-approval-selftest.ts"
       - "tests/deploy-approval-store-concurrency.test.ts"
       - "tests/fixtures/approval-store-writer.ts"
+      - "tests/test_deployment_approval_store_helper.py"
+      - "scripts/ops/deploy/disdex_deployment_approval_store.py"
       - "package.json"
       - "next.config.mjs"
       - ".github/workflows/disdex-v4-hp-approval-request.yml"
+      - ".github/workflows/disdex-v4-doge-missed-time-exit-approval-request.yml"
       - ".github/workflows/disdex-hp-approval-ui-production-deploy.yml"
       - ".github/workflows/disdex-hp-standard-approval-ui-deploy.yml"
       - ".github/workflows/disdex-hp-deploy-approval-ci.yml"
@@ -51,7 +54,10 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Python verifier syntax
-        run: python3 -m py_compile scripts/ops/deploy/disdex_owner_approval.py scripts/ops/deploy/disdex_deployment_contract.py
+        run: python3 -m py_compile scripts/ops/deploy/disdex_owner_approval.py scripts/ops/deploy/disdex_deployment_contract.py scripts/ops/deploy/disdex_deployment_approval_store.py
+
+      - name: Serialized approval store helper
+        run: python3 -m unittest tests.test_deployment_approval_store_helper
 
       - name: HP approval token interoperability
         run: npm run deploy:hp-approval:selftest
