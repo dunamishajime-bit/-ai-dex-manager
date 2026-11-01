@@ -26,6 +26,30 @@ const bar = (close: number, confirmationTs: number) => ({
     close,
 });
 
+test("PENGU SHORT V20 evaluates the exact 3h close before the next bar", () => {
+    const boundary = position.entryTs + 3 * 3_600_000;
+    const result = advancePenguShortV20TimedStops({
+        position,
+        state: BASE,
+        bars: [bar(102.5, boundary), bar(100, boundary + 5 * 60_000)],
+    });
+    assert.deepEqual(result.action, { kind: "TIMED_NEGATIVE_3H_EXIT", referenceTs: boundary, lossPct: 2.5 });
+    assert.equal(result.state.timedStop3hCheckedAtTs, boundary);
+    assert.equal(result.state.timedStop3hCheckedClose, 102.5);
+});
+
+test("PENGU SHORT V20 evaluates the exact 8h close before the next bar", () => {
+    const boundary = position.entryTs + 8 * 3_600_000;
+    const result = advancePenguShortV20TimedStops({
+        position,
+        state: { ...BASE, timedStop3hChecked: true, timedStop3hTriggered: false },
+        bars: [bar(104, boundary), bar(100, boundary + 5 * 60_000)],
+    });
+    assert.deepEqual(result.action, { kind: "TIMED_NEGATIVE_8H_EXIT", referenceTs: boundary, lossPct: 4 });
+    assert.equal(result.state.timedStop8hCheckedAtTs, boundary);
+    assert.equal(result.state.timedStop8hCheckedClose, 104);
+});
+
 test("PENGU SHORT V20 triggers the 3h -2.5% price-loss check once", () => {
     const checkedAt = position.entryTs + 3 * 3_600_000;
     const first = advancePenguShortV20TimedStops({ position, state: BASE, bars: [bar(102.5, checkedAt + 5 * 60_000)] });
@@ -39,20 +63,22 @@ test("PENGU SHORT V20 triggers the 3h -2.5% price-loss check once", () => {
     assert.equal(second.state.timedStop3hChecked, true);
 });
 
-test("PENGU SHORT V20 uses the first completed M5 close after 3h and exact threshold passes", () => {
+test("PENGU SHORT V20 does not replace a clear 3h boundary close with a later loss", () => {
     const threshold = position.entryTs + 3 * 3_600_000;
     const result = advancePenguShortV20TimedStops({
         position,
         state: BASE,
         bars: [bar(102.49, threshold), bar(102.5, threshold + 5 * 60_000)],
     });
-    assert.equal(result.action?.kind, "TIMED_NEGATIVE_3H_EXIT");
-    assert.equal(result.action?.referenceTs, threshold + 5 * 60_000);
+    assert.equal(result.action, undefined);
+    assert.equal(result.state.timedStop3hCheckedAtTs, threshold);
+    assert.equal(result.state.timedStop3hCheckedClose, 102.49);
+    assert.equal(result.state.timedStop3hTriggered, false);
 });
 
 test("PENGU SHORT V20 checks the 8h -4% stop only when 3h was clear", () => {
     const threeHour = position.entryTs + 3 * 3_600_000;
-    const bars = Array.from({ length: 62 }, (_, index) => bar(index === 61 ? 104 : 102.4, threeHour + index * 5 * 60_000));
+    const bars = Array.from({ length: 62 }, (_, index) => bar(index === 60 ? 104 : 102.4, threeHour + index * 5 * 60_000));
     const result = advancePenguShortV20TimedStops({
         position,
         state: BASE,
