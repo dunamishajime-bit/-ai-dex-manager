@@ -1,0 +1,64 @@
+name: DisDex Runner Health Snapshot V2 CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-runner-health-snapshot-v2.mjs'
+      - 'tests/runner-health-snapshot-v2.test.mjs'
+      - 'ops/systemd/disdex-runner-health-snapshot-v2@.service'
+      - 'ops/systemd/disdex-runner-health-snapshot-v2@.timer'
+      - '.github/workflows/disdex-runner-health-snapshot-v2-ci.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/ops/root/disdex-runner-health-snapshot-v2.mjs'
+      - 'tests/runner-health-snapshot-v2.test.mjs'
+      - 'ops/systemd/disdex-runner-health-snapshot-v2@.service'
+      - 'ops/systemd/disdex-runner-health-snapshot-v2@.timer'
+      - '.github/workflows/disdex-runner-health-snapshot-v2-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot-v2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Contract tests
+        run: node --test tests/runner-health-snapshot-v2.test.mjs
+
+      - name: Self-test
+        run: node scripts/ops/root/disdex-runner-health-snapshot-v2.mjs --self-test
+
+      - name: Immutable systemd boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          service='ops/systemd/disdex-runner-health-snapshot-v2@.service'
+          timer='ops/systemd/disdex-runner-health-snapshot-v2@.timer'
+          grep -Fq 'WorkingDirectory=/home/deploy/disdex-trading/releases/%i' "$service"
+          grep -Fq 'grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha' "$service"
+          grep -Fq 'ReadOnlyPaths=/var/lib/disdex/runner-health/ticks' "$service"
+          grep -Fq 'ReadWritePaths=/var/lib/disdex/runner-health/heartbeats' "$service"
+          ! grep -Fq '/home/deploy/disdex-trading/current' "$service"
+          grep -Fq 'Unit=disdex-runner-health-snapshot-v2@%i.service' "$timer"
+          systemd-analyze verify "$service" "$timer" 2>&1 | tee /tmp/systemd-verify.log || {
+            grep -Ev 'Failed to open|does not exist' /tmp/systemd-verify.log
+            exit 1
+          }
+          echo TRADING_MUTATION=0
+
+      - name: Source boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'heartbeatAt:now' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
+          grep -Fq 'lastTickAt:tick.tickCompletedAt' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
+          grep -Fq 'LEGACY_SKIPPED' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
+          ! grep -Eq 'placeOrder|cancelOrder|reduceOnly|kill-switch.*write' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
