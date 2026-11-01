@@ -45,7 +45,7 @@ def validate(raw):
             raise RuntimeError("RUNNER_PIN_UNIT:" + key)
         if pin.get("evidenceMode") not in ("legacy", "heartbeat_v1", "tick_v1"):
             raise RuntimeError("RUNNER_PIN_MODE:" + key)
-        for field in ("healthPath", "tickPath"):
+        for field in ("statePath", "healthPath", "tickPath"):
             value = str(pin.get(field) or "")
             if not value.startswith("/var/lib/disdex/") or ".." in Path(value).parts:
                 raise RuntimeError(f"RUNNER_PIN_{field.upper()}:{key}")
@@ -92,17 +92,17 @@ def render(manifest):
             env_line(f"DISDEX_WATCHDOG_{suffix}_SERVICE_UNIT", pin["serviceUnit"]),
         ]
     health += [
-        env_line("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", r["V12_V4"]["healthPath"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH", r["PENGU_V8"]["healthPath"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH", r["V52"]["healthPath"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", r["QUALITY102_CAUSAL_V1"]["healthPath"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH", r["FET_BRK48_RESIDUAL"]["healthPath"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH", r["HYPE_TREND_LONG"]["healthPath"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH", r["IDLE_PRIORITY_SHORT"]["healthPath"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH", r["SHARED_CRYPTO_RISK"]["healthPath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", r["V12_V4"]["statePath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH", r["PENGU_V8"]["statePath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH", r["V52"]["statePath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", r["QUALITY102_CAUSAL_V1"]["statePath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH", r["FET_BRK48_RESIDUAL"]["statePath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH", r["HYPE_TREND_LONG"]["statePath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH", r["IDLE_PRIORITY_SHORT"]["statePath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH", r["SHARED_CRYPTO_RISK"]["statePath"]),
         env_line("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT", r["SHARED_CRYPTO_RISK"]["serviceUnit"]),
         env_line("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT", r["SHARED_CRYPTO_RISK"]["releaseRoot"]),
-        env_line("DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH", r["MARGIN_GUARD"]["healthPath"]),
+        env_line("DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH", r["MARGIN_GUARD"]["statePath"]),
         env_line("DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT", r["MARGIN_GUARD"]["serviceUnit"]),
         env_line("DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT", r["MARGIN_GUARD"]["releaseRoot"]),
     ]
