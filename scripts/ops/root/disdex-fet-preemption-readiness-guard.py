@@ -9,6 +9,11 @@ import subprocess
 import time
 
 
+RUNNER_PIN_SCHEMA = "disdex-runner-pin-manifest/v2"
+DEFAULT_RUNNER_PINS = "/etc/disdex/runner-pins.json"
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
 def approved_ready(path, sha):
     try:
         artifact = json.loads(Path(path).read_text())
@@ -40,6 +45,74 @@ def evaluate(sha, approval, env, config_flag=None):
                 ordersSent=0, cancelsSent=0, killSwitchChanges=0)
 
 
+def load_v52_pin(path):
+    raw = json.loads(Path(path).read_text())
+    if raw.get('schema') != RUNNER_PIN_SCHEMA or raw.get('target') != 'professional-dismanager.net':
+        raise ValueError('V52_PIN_MANIFEST_IDENTITY_INVALID')
+    runners = raw.get('runners')
+    if not isinstance(runners, dict) or not isinstance(runners.get('V52'), dict):
+        raise ValueError('V52_PIN_MISSING')
+    pin = runners['V52']
+    sha = str(pin.get('sha') or '').lower()
+    release_root = str(pin.get('releaseRoot') or '')
+    service_unit = str(pin.get('serviceUnit') or '')
+    health_path = str(pin.get('healthPath') or '')
+    tick_path = str(pin.get('tickPath') or '')
+    if not SHA_RE.fullmatch(sha):
+        raise ValueError('V52_PIN_SHA_INVALID')
+    if release_root != '/home/deploy/disdex-trading/releases/' + sha:
+        raise ValueError('V52_PIN_RELEASE_ROOT_INVALID')
+    if service_unit != 'disdex-v52-aster-only@' + sha + '.service':
+        raise ValueError('V52_PIN_SERVICE_INVALID')
+    if not health_path.startswith('/var/lib/disdex/runner-health/heartbeats/') or not health_path.endswith('.json'):
+        raise ValueError('V52_PIN_HEALTH_PATH_INVALID')
+    if not tick_path.startswith('/var/lib/disdex/runner-health/ticks/') or not tick_path.endswith('.json'):
+        raise ValueError('V52_PIN_TICK_PATH_INVALID')
+    return dict(sha=sha, releaseRoot=release_root, serviceUnit=service_unit,
+                healthPath=health_path, tickPath=tick_path)
+
+
+def verify_v52_identity(pin):
+    marker = Path(pin['releaseRoot']) / '.disdex-release-sha'
+    if not marker.is_file() or marker.is_symlink() or marker.read_text().strip() != pin['sha']:
+        return False, 'FET_PREEMPTION_V52_RELEASE_MARKER_INVALID', dict(
+            sha=pin['sha'], serviceUnit=pin['serviceUnit'], pid=0)
+    output = subprocess.check_output([
+        'systemctl', 'show', pin['serviceUnit'],
+        '-p', 'MainPID', '-p', 'ActiveState', '-p', 'WorkingDirectory',
+        '--no-pager',
+    ], text=True)
+    props = {}
+    for line in output.splitlines():
+        if '=' in line:
+            key, value = line.split('=', 1)
+            props[key] = value
+    pid = props.get('MainPID', '')
+    v52_running = pid.isdigit() and int(pid) > 0
+    if not v52_running or props.get('ActiveState') != 'active':
+        return False, 'FET_PREEMPTION_V52_NOT_RUNNING', dict(
+            sha=pin['sha'], serviceUnit=pin['serviceUnit'], pid=int(pid or 0))
+    if props.get('WorkingDirectory') != pin['releaseRoot']:
+        return False, 'FET_PREEMPTION_V52_SYSTEMD_CWD_INVALID', dict(
+            sha=pin['sha'], serviceUnit=pin['serviceUnit'], pid=int(pid))
+    proc_cwd = os.path.realpath('/proc/' + pid + '/cwd')
+    if proc_cwd != pin['releaseRoot']:
+        return False, 'FET_PREEMPTION_V52_PID_CWD_INVALID', dict(
+            sha=pin['sha'], serviceUnit=pin['serviceUnit'], pid=int(pid))
+    return True, '', dict(sha=pin['sha'], serviceUnit=pin['serviceUnit'], pid=int(pid))
+
+
+def read_fet_config(sha):
+    config_env = {}
+    for line in Path('/etc/disdex/current-runtime', sha + '.env').read_text().splitlines():
+        if '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        if key in ('DISDEX_RUNTIME_COMMIT_SHA', 'FET_BRK48_CORE_PREEMPTION_READY'):
+            config_env[key] = value.strip()
+    return config_env
+
+
 def main():
     p = argparse.ArgumentParser()
     mode = p.add_mutually_exclusive_group(required=True)
@@ -49,6 +122,7 @@ def main():
     p.add_argument('--sha')
     p.add_argument('--activation-path', default='/var/lib/disdex/shared/operator-activation/current.json')
     p.add_argument('--current', default='/home/deploy/disdex-trading/current')
+    p.add_argument('--runner-pins', default=DEFAULT_RUNNER_PINS)
     p.add_argument('--status-path')
     args = p.parse_args()
     sha = args.sha or (Path(args.current) / '.disdex-release-sha').read_text().strip()
@@ -59,34 +133,37 @@ def main():
     env = os.environ
     config_flag = None
     v52_running = True
+    v52_meta = None
     try:
         if args.audit:
-            # Read only the two non-secret readiness keys from the durable runtime
-            # contract first.  This remains available even when V52 is intentionally
-            # fail-closed by ExecCondition, so the audit can report the real blocker
-            # instead of collapsing to SOURCE_UNAVAILABLE.
-            config_env = {}
-            for line in Path('/etc/disdex/current-runtime', sha + '.env').read_text().splitlines():
-                if '=' not in line:
-                    continue
-                key, value = line.split('=', 1)
-                if key in ('DISDEX_RUNTIME_COMMIT_SHA', 'FET_BRK48_CORE_PREEMPTION_READY'):
-                    config_env[key] = value.strip()
+            # FET readiness is derived from FET's own runtime contract. V52 is
+            # validated independently from the root-owned multi-SHA runner pin;
+            # never substitute the shared/current SHA for V52.
+            config_env = read_fet_config(sha)
             config_flag = config_env.get('FET_BRK48_CORE_PREEMPTION_READY', '')
-            unit = 'disdex-v52-aster-only@' + sha + '.service'
-            pid = subprocess.check_output(['systemctl', 'show', unit, '-p', 'MainPID', '--value'], text=True).strip()
+            env = config_env
+            v52_pin = load_v52_pin(args.runner_pins)
+            pid = subprocess.check_output(
+                ['systemctl', 'show', v52_pin['serviceUnit'], '-p', 'MainPID', '--value'],
+                text=True,
+            ).strip()
             v52_running = pid.isdigit() and int(pid) > 0
             if v52_running:
-                # A running service is authoritative for its effective environment.
-                env = {k: v for k, v in (x.split('=', 1) for x in Path('/proc', pid, 'environ').read_bytes().decode().split(chr(0)) if '=' in x)
-                       if k in ('DISDEX_RUNTIME_COMMIT_SHA', 'FET_BRK48_CORE_PREEMPTION_READY')}
+                v52_ok, v52_reason, v52_meta = verify_v52_identity(v52_pin)
             else:
                 env = config_env
+                v52_ok, v52_reason, v52_meta = False, 'FET_PREEMPTION_V52_NOT_RUNNING', dict(
+                    sha=v52_pin['sha'], serviceUnit=v52_pin['serviceUnit'], pid=0)
+        else:
+            v52_ok, v52_reason = True, ''
         result = evaluate(sha, approval, env, config_flag)
-        if args.audit and not v52_running and result['status'] == 'HEALTHY':
+        if args.audit and not v52_ok:
             result['status'] = 'BLOCKED'
-            result['reasons'].append('FET_PREEMPTION_V52_NOT_RUNNING')
-    except (OSError, ValueError, subprocess.SubprocessError):
+            if v52_reason not in result['reasons']:
+                result['reasons'].append(v52_reason)
+        if args.audit:
+            result['v52Identity'] = v52_meta
+    except (OSError, ValueError, subprocess.SubprocessError, json.JSONDecodeError):
         result = dict(schema='fet-preemption-readiness/v1', status='BLOCKED', productionSha=sha,
                       reasons=['FET_PREEMPTION_AUDIT_SOURCE_UNAVAILABLE'], checkedAt=int(time.time()*1000),
                       ordersSent=0, cancelsSent=0, killSwitchChanges=0)
