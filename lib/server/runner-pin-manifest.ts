@@ -24,6 +24,7 @@ export type RunnerPin = {
   releaseRoot: string;
   serviceUnit: string;
   evidenceMode: RunnerEvidenceMode;
+  statePath: string;
   healthPath: string;
   tickPath: string;
 };
@@ -74,11 +75,13 @@ export function validateRunnerPinManifest(raw: unknown): RunnerPinManifest {
     if (!["legacy", "heartbeat_v1", "tick_v1"].includes(evidenceMode)) {
       throw new Error(`RUNNER_PIN_EVIDENCE_MODE:${id}`);
     }
+    const statePath = String(pin.statePath || "").trim();
     const healthPath = String(pin.healthPath || "").trim();
     const tickPath = String(pin.tickPath || "").trim();
-    if (!canonicalAbsolute(healthPath, "/var/lib/disdex")) throw new Error(`RUNNER_PIN_HEALTH_PATH:${id}`);
+    if (!canonicalAbsolute(statePath, "/var/lib/disdex")) throw new Error(`RUNNER_PIN_STATE_PATH:${id}`);
+    if (!canonicalAbsolute(healthPath, "/var/lib/disdex/runner-health/heartbeats")) throw new Error(`RUNNER_PIN_HEALTH_PATH:${id}`);
     if (!canonicalAbsolute(tickPath, "/var/lib/disdex/runner-health/ticks")) throw new Error(`RUNNER_PIN_TICK_PATH:${id}`);
-    runners[id] = { sha, releaseRoot, serviceUnit, evidenceMode, healthPath, tickPath };
+    runners[id] = { sha, releaseRoot, serviceUnit, evidenceMode, statePath, healthPath, tickPath };
   }
   return {
     schema: "disdex-runner-pin-manifest/v2",
