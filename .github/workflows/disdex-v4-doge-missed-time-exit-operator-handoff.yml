@@ -103,6 +103,25 @@ jobs:
           echo DOGE_OPERATOR_GUARD_VERIFIED=TRUE
           echo TRADING_MUTATION=0
 
+      - name: Verify root-owned DOGE guard matches repository
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          LOCAL_SHA="$(sha256sum lib/v12-v4-doge-missed-time-guard.mjs | awk '{print $1}')"
+          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             dst=/etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.mjs;
+             test -f \"\$dst\";
+             test ! -L \"\$dst\";
+             [[ \"\$(stat -c '%U:%G:%a' \"\$dst\")\" == 'root:root:644' ]];
+             [[ \"\$(sha256sum \"\$dst\" | awk '{print \\$1}')\" == '$LOCAL_SHA' ]];
+             /usr/bin/node --check \"\$dst\";
+             echo DOGE_ROOT_GUARD_ATTESTED=TRUE;
+             echo TRADING_MUTATION=0"
+
       - name: Prove the existing V4 one-shot hook; no order execution
         shell: bash
         env:
