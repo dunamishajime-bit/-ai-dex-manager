@@ -21,7 +21,7 @@ const execFileAsync = promisify(execFile);
 const SHAS = {
   V4: "53a0be396719f0284af4e11b35c66a4ac7d58f79",
   Q102: "ef1ab178e26a7bf5bddb6473467765edba242e1d",
-  V52: "97830672e2f139b39f7194166d7dc8c36e8c8933",
+  V52: "4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81",
   LEGACY: "7688ed7c93a1918d8b44837339b7da5584a868f5",
   CANDIDATE: "06555dcaaf8b62fd8f8fcec2b6fa650225012f2c",
 };
@@ -41,10 +41,12 @@ const SERVICE_NAMES = {
 function pin(runnerId, sha, evidenceMode, stopOwner) {
   return {
     sha,
-    releaseRoot: `/var/lib/disdex/trading/releases/${sha}`,
+    releaseRoot: `/home/deploy/disdex-trading/releases/${sha}`,
     serviceUnit: `${SERVICE_NAMES[runnerId]}@${sha}.service`,
     evidenceMode,
     stopOwner,
+    healthPath: `/var/lib/disdex/runner-health/heartbeats/${runnerId}.json`,
+    tickPath: `/var/lib/disdex/runner-health/ticks/${runnerId}.json`,
   };
 }
 
@@ -139,4 +141,33 @@ test("loads and validates a root-owned manifest projection from JSON", async () 
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+
+test("v2 requires runner-owned health and tick paths and rejects path aliasing", () => {
+  assert.equal(RUNNER_PIN_MANIFEST_SCHEMA, "disdex-runner-pin-manifest/v2");
+  const missing = validManifest();
+  delete missing.runners.V52.healthPath;
+  delete missing.runners.V52.tickPath;
+  const missingResult = validateRunnerPinManifest(missing);
+  assert.equal(missingResult.ok, false);
+  assert.ok(missingResult.errors.includes("V52_HEALTH_PATH_INVALID"));
+  assert.ok(missingResult.errors.includes("V52_TICK_PATH_INVALID"));
+
+  const aliased = validManifest();
+  aliased.runners.FET_BRK48_RESIDUAL.healthPath = aliased.runners.V52.healthPath;
+  aliased.runners.FET_BRK48_RESIDUAL.tickPath = aliased.runners.V52.tickPath;
+  const aliasResult = validateRunnerPinManifest(aliased);
+  assert.equal(aliasResult.ok, false);
+  assert.ok(aliasResult.errors.some((value) => value.includes("HEALTH_PATH_DUPLICATE")));
+  assert.ok(aliasResult.errors.some((value) => value.includes("TICK_PATH_DUPLICATE")));
+});
+
+test("V52 pin is independent from the shared/current release SHA", () => {
+  const manifest = validManifest();
+  const result = validateRunnerPinManifest(manifest);
+  assert.equal(result.ok, true);
+  assert.equal(result.manifest.runners.V52.sha, SHAS.V52);
+  assert.notEqual(result.manifest.runners.V52.sha, SHAS.LEGACY);
+  assert.equal(result.manifest.runners.V52.serviceUnit, `disdex-v52-aster-only@${SHAS.V52}.service`);
 });
