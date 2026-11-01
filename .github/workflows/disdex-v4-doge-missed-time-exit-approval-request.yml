@@ -1,4 +1,4 @@
-name: DisDex V4 DOGE Missed TIME Exit Approval Request
+name: DisDex V4 DOGE Missed TIME Exit Approval Request (Retired)
 
 on:
   issue_comment:
@@ -7,12 +7,8 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: disdex-v4-doge-missed-time-exit-approval
-  cancel-in-progress: false
-
 jobs:
-  publish:
+  retired:
     if: >-
       github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
       github.event.issue.number == 317 &&
@@ -20,166 +16,13 @@ jobs:
       github.event.comment.author_association == 'OWNER' &&
       startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT ')
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-          fetch-depth: 1
-
-      - name: Bind exact DOGE incident and plan hash
-        id: request
+      - name: Fail closed because protected-position incident is already manually settled
         shell: bash
-        env:
-          BODY: ${{ github.event.comment.body }}
-          COMMENT_ID: ${{ github.event.comment.id }}
         run: |
           set -euo pipefail
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import hashlib, os, pathlib, re
-          body=os.environ["BODY"].strip()
-          match=re.fullmatch(
-            r"DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT SHA=([0-9a-f]{40})",
-            body,
-          )
-          if not match:
-            raise SystemExit("request does not match exact DOGE operator grammar")
-          target=match.group(1)
-          expected="53a0be396719f0284af4e11b35c66a4ac7d58f79"
-          if target != expected:
-            raise SystemExit("DOGE operator request must target exact V4 runtime SHA")
-          path=pathlib.Path("docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json")
-          plan=hashlib.sha256(path.read_bytes()).hexdigest()
-          print("target_sha="+target)
-          print("plan_sha256="+plan)
-          print("comment_id="+os.environ["COMMENT_ID"])
-          PY
-
-      - name: Configure pinned root SSH
-        shell: bash
-        env:
-          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
-        run: |
-          set -euo pipefail
-          [[ "$SSH_HOST" == "professional-dismanager.net" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
-          umask 077
-          install -d -m 0700 "$RUNNER_TEMP/doge-approval-ssh"
-          printf '%s\n' "$ROOT_KEY" > "$RUNNER_TEMP/doge-approval-ssh/key"
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$RUNNER_TEMP/doge-approval-ssh/known_hosts"
-          chmod 0600 "$RUNNER_TEMP/doge-approval-ssh/"*
-          ssh-keygen -y -f "$RUNNER_TEMP/doge-approval-ssh/key" >/dev/null
-
-      - name: Publish exact pending request to HP shared approval store
-        shell: bash
-        env:
-          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
-          PLAN_SHA256: ${{ steps.request.outputs.plan_sha256 }}
-          COMMENT_ID: ${{ steps.request.outputs.comment_id }}
-          ACTOR: ${{ github.actor }}
-        run: |
-          set -euo pipefail
-          PORT="${SSH_PORT:-22}"
-          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
-          ssh -T -i "$RUNNER_TEMP/doge-approval-ssh/key" \
-            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile="$RUNNER_TEMP/doge-approval-ssh/known_hosts" \
-            -o ConnectTimeout=10 -p "$PORT" "root@$SSH_HOST" \
-            "TARGET_SHA='$TARGET_SHA' PLAN_SHA256='$PLAN_SHA256' COMMENT_ID='$COMMENT_ID' ACTOR='$ACTOR' python3 - <<'PY'
-          import json, os, pathlib, pwd, tempfile, time, uuid
-
-          operation='V4_DOGE_MISSED_TIME_EXIT'
-          scope='V12_V4'
-          orders_enabled=True
-          target=os.environ['TARGET_SHA']
-          plan=os.environ['PLAN_SHA256']
-          comment_id=os.environ['COMMENT_ID']
-          actor=os.environ['ACTOR']
-          expected_target='53a0be396719f0284af4e11b35c66a4ac7d58f79'
-          if target != expected_target:
-              raise SystemExit('DOGE_APPROVAL_TARGET_SHA_CHANGED')
-          if len(plan) != 64 or any(c not in '0123456789abcdef' for c in plan):
-              raise SystemExit('DOGE_APPROVAL_PLAN_HASH_INVALID')
-
-          path=pathlib.Path('/home/deploy/disdex-ui/shared/data/deploy-approvals.json')
-          path.parent.mkdir(parents=True,exist_ok=True)
-          now=int(time.time()*1000)
-          records=[]
-          if path.exists():
-              loaded=json.loads(path.read_text(encoding='utf-8'))
-              if not isinstance(loaded,list):
-                  raise SystemExit('APPROVAL_STORE_INVALID_JSON')
-              records=loaded
-
-          active={'PENDING','OTP_SENT','APPROVED','DISPATCHED'}
-          existing=next((
-              r for r in records
-              if r.get('targetSha')==target
-              and r.get('planSha256')==plan
-              and r.get('operation')==operation
-              and r.get('scope')==scope
-              and bool(r.get('ordersEnabled',True)) is orders_enabled
-              and r.get('status') in active
-              and int(r.get('requestExpiresAt') or 0)>now
-          ),None)
-          if existing:
-              print('DOGE_APPROVAL_REQUEST_ID='+str(existing.get('id')))
-              print('DOGE_APPROVAL_STATUS='+str(existing.get('status')))
-              print('DOGE_APPROVAL_REQUEST_REUSED=TRUE')
-              print('TRADING_MUTATION=0')
-              raise SystemExit(0)
-
-          for record in records:
-              if record.get('status') in {'PENDING','OTP_SENT','APPROVED'} and int(record.get('requestExpiresAt') or 0)<=now:
-                  record['status']='EXPIRED'
-                  record['lastError']='request expired'
-                  record['updatedAt']=now
-
-          request_id=str(uuid.uuid4())
-          records.append({
-              'id':request_id,
-              'scope':scope,
-              'operation':operation,
-              'ordersEnabled':orders_enabled,
-              'targetSha':target,
-              'planSha256':plan,
-              'requestActor':actor,
-              'requestCommentId':comment_id,
-              'createdAt':now,
-              'requestExpiresAt':now+30*60*1000,
-              'updatedAt':now,
-              'status':'PENDING',
-          })
-          records=sorted(records,key=lambda x:int(x.get('createdAt') or 0),reverse=True)[:50]
-
-          fd,tmp_name=tempfile.mkstemp(prefix='.deploy-approvals-',dir=str(path.parent))
-          try:
-              with os.fdopen(fd,'w',encoding='utf-8') as handle:
-                  json.dump(records,handle,ensure_ascii=False,indent=2)
-                  handle.write('\n')
-                  handle.flush()
-                  os.fsync(handle.fileno())
-              deploy_user=pwd.getpwnam('deploy')
-              os.chown(tmp_name,deploy_user.pw_uid,deploy_user.pw_gid)
-              os.chmod(tmp_name,0o600)
-              os.replace(tmp_name,path)
-          finally:
-              if os.path.exists(tmp_name):
-                  os.unlink(tmp_name)
-
-          print('DOGE_APPROVAL_REQUEST_ID='+request_id)
-          print('DOGE_APPROVAL_STATUS=PENDING')
-          print('DOGE_APPROVAL_REQUEST_PUBLISHED=TRUE')
-          print('OPERATION='+operation)
-          print('SCOPE='+scope)
-          print('ORDERS_ENABLED=true')
-          print('TRADING_MUTATION=0')
-          PY"
-
-      - name: Destroy SSH material
-        if: always()
-        shell: bash
-        run: rm -rf "$RUNNER_TEMP/doge-approval-ssh"
+          echo "DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT=TRUE"
+          echo "REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE=TRUE"
+          echo "TRADING_MUTATION=0"
+          exit 1
