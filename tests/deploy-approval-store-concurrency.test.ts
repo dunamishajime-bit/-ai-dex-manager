@@ -57,6 +57,33 @@ test("file-backed approvals serialize concurrent writers and reject corrupt data
     await assert.rejects(store.saveDeploymentApproval({ ...beforeAtomic, status: "APPROVED" }), /STALE/);
     assert.equal((await store.getDeploymentApproval("worker-1-0"))?.status, "DISPATCHED");
 
+
+    const redeemable = await store.saveDeploymentApproval({
+      ...record("single-redeem"),
+      status: "APPROVED",
+      approvalToken: "token-for-test",
+      approvalTokenExpiresAt: Math.floor(Date.now() / 1000) + 300,
+    });
+    assert.ok(redeemable.storeRevision);
+    const claims = await Promise.allSettled(Array.from({ length: 20 }, (_, i) =>
+      store.mutateDeploymentApprovalAtomic("single-redeem", (current) => {
+        assert.ok(current);
+        if (current.status !== "APPROVED") throw new Error("ALREADY_REDEEMED");
+        return {
+          next: {
+            ...current,
+            status: "REDEEMED",
+            redeemedAt: Date.now(),
+            redeemedByRunId: String(i + 1),
+          },
+          result: i,
+        };
+      }),
+    ));
+    assert.equal(claims.filter((x) => x.status === "fulfilled").length, 1);
+    assert.equal(claims.filter((x) => x.status === "rejected").length, 19);
+    assert.equal((await store.getDeploymentApproval("single-redeem"))?.status, "REDEEMED");
+
     await fs.writeFile(storePath, "{corrupt");
     await assert.rejects(store.saveDeploymentApproval(record("must-not-overwrite")));
     assert.equal(await fs.readFile(storePath, "utf8"), "{corrupt");
