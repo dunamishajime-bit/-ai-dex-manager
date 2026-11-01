@@ -20,6 +20,7 @@ function values(rendered) {
 test("common runtime environment renders independent Q102 and FET owner pins", () => {
   const template = source.match(/write_atomic "\$CONTRACT_ENV_FILE" "([\s\S]*?)"\s*\n\s*retarget_account_config_readiness/);
   assert.ok(template, "the common environment template must be available");
+  assert.doesNotMatch(template[1], /\$\(|`/, "the isolated renderer must not execute template commands");
   const output = execFileSync(bash, ["-c", `printf '%s\\n' "${template[1]}"`], {
     encoding: "utf8", env: { ...process.env, Q102_SHA: q102, FET_SHA: fet },
   });
@@ -35,6 +36,8 @@ test("V4 runtime environment renders independent Q102 and FET owner pins", () =>
   try {
     const base = join(dir, "v4.env");
     writeFileSync(base, "V12_V4_PEER_STATE_PATHS_JSON=[]\n");
+    assert.match(source, /\nmain "\$@"\s*$/, "do not execute the script's real main function");
+    assert.ok(source.includes("v4_base_env=/etc/disdex/disdex-v12-v4.env"), "V4 fixture substitution must succeed");
     const program = source.replace("v4_base_env=/etc/disdex/disdex-v12-v4.env", 'v4_base_env="$TEST_V4_BASE_ENV"')
       .replace(/\nmain "\$@"\s*$/, "\n");
     assert.notEqual(program, source, "the script must be loaded without invoking its main function");
