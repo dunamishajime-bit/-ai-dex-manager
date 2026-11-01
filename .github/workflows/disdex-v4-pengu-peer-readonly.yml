@@ -52,7 +52,7 @@ jobs:
               return p.returncode,p.stdout.strip(),p.stderr.strip()
 
           rc,out,err=run('systemctl','show',unit,'--no-pager',
-              '--property=Id,LoadState,ActiveState,SubState,MainPID,WorkingDirectory,ExecStart,Result')
+              '--property=Id,LoadState,UnitFileState,ActiveState,SubState,MainPID,WorkingDirectory,ExecStart,Result,Restart,RestartUSec,ExecMainCode,ExecMainStatus,InactiveExitTimestamp')
           print('EXPECTED_PENGU_UNIT='+unit)
           print('EXPECTED_PENGU_SHOW_RC='+str(rc))
           print(out)
@@ -62,6 +62,12 @@ jobs:
           print('PENGU_UNIT_LIST_BEGIN')
           print(listed)
           print('PENGU_UNIT_LIST_END')
+
+          rc,journal,err=run('journalctl','-u',unit,'--since','2 hours ago','--no-pager','-n','120','-o','short-iso')
+          print('PENGU_JOURNAL_RC='+str(rc))
+          print('PENGU_JOURNAL_BEGIN')
+          print(journal)
+          print('PENGU_JOURNAL_END')
 
           env=pathlib.Path('/etc/disdex/disdex-v12-v4.env')
           peer_path=None
