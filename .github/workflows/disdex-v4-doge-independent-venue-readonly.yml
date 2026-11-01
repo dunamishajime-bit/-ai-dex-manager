@@ -55,6 +55,28 @@ jobs:
              cd /home/deploy/disdex-trading/releases/\$V4_SHA;
              exec /usr/bin/node node_modules/tsx/dist/cli.mjs scripts/disdex-aster-readonly-account-diagnostic.ts"
 
+      - name: Read-only V4 failed-service diagnostic
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/doge-venue-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-venue-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             V4_SHA=53a0be396719f0284af4e11b35c66a4ac7d58f79;
+             UNIT=disdex-v12-v4@\$V4_SHA.service;
+             echo '=== SYSTEMCTL_SHOW ===';
+             systemctl show \"\$UNIT\" -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecMainCode -p NRestarts -p FragmentPath -p DropInPaths -p WorkingDirectory --no-pager;
+             echo '=== SYSTEMCTL_STATUS ===';
+             systemctl status \"\$UNIT\" --no-pager -l || true;
+             echo '=== JOURNAL_LAST_120 ===';
+             journalctl -u \"\$UNIT\" -n 120 --no-pager -o short-iso || true;
+             echo '=== HEARTBEAT ===';
+             if test -f /var/lib/disdex/v12-v4/heartbeat.json; then cat /var/lib/disdex/v12-v4/heartbeat.json; fi;
+             echo '=== END_READONLY ===';
+             echo ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES_SENT=0"
+
       - name: Destroy SSH material
         if: always()
         shell: bash
