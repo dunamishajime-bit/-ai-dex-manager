@@ -124,18 +124,23 @@ try {
   );
   for (const required of [
     "DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT",
-    "DISDEX_VPS_ROOT_PRIVATE_KEY",
-    "/home/deploy/disdex-ui/shared/data/deploy-approvals.json",
-    "'operation':operation",
-    "'status':'PENDING'",
+    "DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT=TRUE",
+    "REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE=TRUE",
     "TRADING_MUTATION=0",
+    "exit 1",
   ]) {
     if (!dogeApprovalWorkflow.includes(required)) {
-      throw new Error("DOGE approval request workflow contract missing: " + required);
+      throw new Error("retired DOGE approval workflow contract missing: " + required);
     }
   }
-  if (dogeApprovalWorkflow.includes("DISDEX_HP_APPROVAL_BRIDGE_SECRET")) {
-    throw new Error("DOGE approval request unexpectedly depends on unconfigured bridge secret");
+  for (const forbidden of [
+    "DISDEX_VPS_ROOT_PRIVATE_KEY",
+    "/home/deploy/disdex-ui/shared/data/deploy-approvals.json",
+    "json.dump(records",
+  ]) {
+    if (dogeApprovalWorkflow.includes(forbidden)) {
+      throw new Error("retired DOGE workflow still contains legacy direct writer: " + forbidden);
+    }
   }
 
   console.log("DISDEX_HP_DEPLOY_APPROVAL_SELFTEST_OK");
