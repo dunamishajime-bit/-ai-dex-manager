@@ -62,12 +62,12 @@ jobs:
              dst=/etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.mjs;
              install -d -o root -g root -m 0755 /etc/disdex/operator-adapters;
              /usr/bin/node --check \"\$src\";
-             [[ \"\$(sha256sum \"\$src\" | awk '{print \\$1}')\" == '$LOCAL_SHA' ]];
+             [[ \"\$(sha256sum \"\$src\" | cut -d ' ' -f1)\" == '$LOCAL_SHA' ]];
              install -o root -g root -m 0644 \"\$src\" \"\$dst\";
              printf '%s  %s\n' '$LOCAL_SHA' 'v12-v4-doge-missed-time-guard.mjs' > /etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.sha256;
              chown root:root /etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.sha256;
              chmod 0644 /etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.sha256;
-             [[ \"\$(sha256sum \"\$dst\" | awk '{print \\$1}')\" == '$LOCAL_SHA' ]];
+             [[ \"\$(sha256sum \"\$dst\" | cut -d ' ' -f1)\" == '$LOCAL_SHA' ]];
              [[ ! -x \"\$dst\" ]];
              rm -f -- \"\$src\";
              echo DOGE_ROOT_GUARD_INSTALLED=TRUE;
