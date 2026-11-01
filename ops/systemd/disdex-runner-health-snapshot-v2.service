@@ -1,0 +1,22 @@
+[Unit]
+Description=DisDex runner health supervisor v2 (read-only observation + heartbeat publish)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/current
+ExecStart=/usr/bin/node /home/deploy/disdex-trading/current/scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
+Environment=DISDEX_RUNNER_PIN_MANIFEST_PATH=/etc/disdex/runner-pins.json
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/etc/disdex/runner-pins.json
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadOnlyPaths=/var/lib/disdex/runner-health/ticks
+ReadWritePaths=/var/lib/disdex/runner-health/heartbeats
+UMask=0027
