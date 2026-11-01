@@ -40,46 +40,99 @@ def evaluate(sha, approval, env, config_flag=None):
                 ordersSent=0, cancelsSent=0, killSwitchChanges=0)
 
 
-def v52_live_pinned(pin_path=Path('/etc/disdex/current-runtime/v52-current.env'),
-                    heartbeat_path=Path('/var/lib/disdex/runner-health/heartbeats/v52.json')):
-    """Read-only, fail-closed current V52 identity. Never grant FET exposure."""
+def parse_v52_manifest_pin(doc):
+    if not isinstance(doc, dict) or doc.get('schema') != 'disdex-runner-pin-manifest/v2':
+        raise RuntimeError('FET_PREEMPTION_RUNNER_MANIFEST_SCHEMA_INVALID')
+    if doc.get('target') != 'professional-dismanager.net':
+        raise RuntimeError('FET_PREEMPTION_RUNNER_MANIFEST_TARGET_INVALID')
+    if doc.get('operatorTarget') != 'DD1296_FINAL_ALLIN_10BPS':
+        raise RuntimeError('FET_PREEMPTION_RUNNER_MANIFEST_OPERATOR_INVALID')
+    runners = doc.get('runners')
+    row = runners.get('V52') if isinstance(runners, dict) else None
+    if not isinstance(row, dict):
+        raise RuntimeError('FET_PREEMPTION_V52_MANIFEST_PIN_MISSING')
+    sha = str(row.get('sha') or '').strip().lower()
+    root = str(row.get('releaseRoot') or '').strip()
+    unit = str(row.get('serviceUnit') or '').strip()
+    mode = str(row.get('evidenceMode') or '').strip()
+    health = str(row.get('healthPath') or '').strip()
+    tick = str(row.get('tickPath') or '').strip()
+    if not re.fullmatch(r'[0-9a-f]{40}', sha):
+        raise RuntimeError('FET_PREEMPTION_V52_MANIFEST_SHA_INVALID')
+    if root != '/home/deploy/disdex-trading/releases/' + sha:
+        raise RuntimeError('FET_PREEMPTION_V52_MANIFEST_ROOT_MISMATCH')
+    if unit != 'disdex-v52-aster-only@' + sha + '.service':
+        raise RuntimeError('FET_PREEMPTION_V52_MANIFEST_UNIT_MISMATCH')
+    if mode not in ('legacy-state-v1', 'tick-v1'):
+        raise RuntimeError('FET_PREEMPTION_V52_MANIFEST_EVIDENCE_MODE_INVALID')
+    if not health.startswith('/var/lib/disdex/') or not tick.startswith('/var/lib/disdex/runner-health/ticks/'):
+        raise RuntimeError('FET_PREEMPTION_V52_MANIFEST_EVIDENCE_PATH_INVALID')
+    return dict(sha=sha, releaseRoot=root, serviceUnit=unit, evidenceMode=mode,
+                healthPath=health, tickPath=tick)
+
+
+def _trusted_regular_json(path):
+    if path.is_symlink() or not path.is_file():
+        raise RuntimeError('FET_PREEMPTION_EVIDENCE_UNTRUSTED')
+    value = json.loads(path.read_text())
+    if not isinstance(value, dict):
+        raise RuntimeError('FET_PREEMPTION_EVIDENCE_INVALID')
+    return value
+
+
+def _fresh_millis(value, maximum_age_ms=300000):
+    if type(value) is not int or value <= 0:
+        return False
+    now = int(time.time() * 1000)
+    age = now - value
+    return -10000 <= age <= maximum_age_ms
+
+
+def v52_live_pinned(manifest_path=Path('/etc/disdex/runner-pins.json')):
+    """Read-only, fail-closed V52 identity from the canonical per-runner manifest."""
     try:
-        stat = pin_path.lstat()
-        if not pin_path.is_file() or pin_path.is_symlink() or stat.st_uid != 0 or stat.st_mode & 0o022:
-            return False, 'FET_PREEMPTION_V52_PIN_UNTRUSTED'
-        pairs = {}
-        for line in pin_path.read_text().splitlines():
-            if '=' in line:
-                key, value = line.split('=', 1)
-                if key in ('DISDEX_V52_RUNTIME_SHA', 'DISDEX_V52_RUNTIME_ROOT'):
-                    pairs[key] = value.strip()
-        sha = pairs.get('DISDEX_V52_RUNTIME_SHA', '')
-        root = pairs.get('DISDEX_V52_RUNTIME_ROOT', '')
-        if not re.fullmatch(r'[0-9a-f]{40}', sha) or root != '/home/deploy/disdex-trading/releases/' + sha:
-            return False, 'FET_PREEMPTION_V52_PIN_INVALID'
+        stat = manifest_path.lstat()
+        if not manifest_path.is_file() or manifest_path.is_symlink() or stat.st_uid != 0 or stat.st_mode & 0o022:
+            return False, 'FET_PREEMPTION_RUNNER_MANIFEST_UNTRUSTED'
+        pin = parse_v52_manifest_pin(json.loads(manifest_path.read_text()))
+        sha = pin['sha']
+        root = pin['releaseRoot']
+        unit = pin['serviceUnit']
         release = Path(root)
         marker = release / '.disdex-release-sha'
         if release.is_symlink() or marker.is_symlink() or not marker.is_file() or marker.read_text().strip() != sha:
             return False, 'FET_PREEMPTION_V52_RELEASE_MISMATCH'
-        unit = 'disdex-v52-aster-only@' + sha + '.service'
-        if subprocess.check_output(['systemctl', 'show', unit, '-p', 'ActiveState', '--value'], text=True, timeout=8).strip() != 'active':
+        if subprocess.check_output(['systemctl', 'show', unit, '-p', 'ActiveState', '--value'],
+                                   text=True, timeout=8).strip() != 'active':
             return False, 'FET_PREEMPTION_V52_NOT_RUNNING'
-        pid_raw = subprocess.check_output(['systemctl', 'show', unit, '-p', 'MainPID', '--value'], text=True, timeout=8).strip()
+        pid_raw = subprocess.check_output(['systemctl', 'show', unit, '-p', 'MainPID', '--value'],
+                                          text=True, timeout=8).strip()
         if not pid_raw.isdecimal() or int(pid_raw) <= 0:
             return False, 'FET_PREEMPTION_V52_NOT_RUNNING'
         if os.path.realpath('/proc/' + pid_raw + '/cwd') != root:
             return False, 'FET_PREEMPTION_V52_WORKING_DIRECTORY_MISMATCH'
-        if heartbeat_path.is_symlink():
-            return False, 'FET_PREEMPTION_V52_HEARTBEAT_UNTRUSTED'
-        hb = json.loads(heartbeat_path.read_text())
-        if (hb.get('runtimeSha') != sha or hb.get('expectedSha') != sha or hb.get('serviceUnit') != unit
-                or hb.get('mainPid') != int(pid_raw) or hb.get('mode') != 'LIVE'
-                or hb.get('safetyState') != 'HEALTHY' or hb.get('newOrdersAllowed') is not True
-                or int(time.time() * 1000) - int(hb.get('heartbeatAt') or 0) > 300000
-                or int(hb.get('heartbeatAt') or 0) > int(time.time() * 1000) + 10000):
-            return False, 'FET_PREEMPTION_V52_HEARTBEAT_INVALID'
-        return True, 'V52_PINNED_IDENTITY_PASS'
-    except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError):
+
+        if pin['evidenceMode'] == 'legacy-state-v1':
+            state = _trusted_regular_json(Path(pin['healthPath']))
+            runtime_sha = str(state.get('runtimeCommitSha') or state.get('runtimeSha') or '').strip().lower()
+            if (runtime_sha != sha or str(state.get('mode') or '').upper() != 'LIVE'
+                    or str(state.get('status') or '').lower() not in ('ready', 'healthy', 'running')
+                    or state.get('pending') is not None or state.get('pendingOrder') is not None
+                    or state.get('manualReview') not in (None, False, '')
+                    or state.get('operatorReviewRequired') not in (None, False)
+                    or state.get('newOrdersAllowed') is not True
+                    or not _fresh_millis(state.get('updatedAt'))):
+                return False, 'FET_PREEMPTION_V52_LEGACY_STATE_INVALID'
+        else:
+            tick = _trusted_regular_json(Path(pin['tickPath']))
+            if (tick.get('runtimeSha') != sha or tick.get('expectedSha') != sha
+                    or tick.get('serviceUnit') != unit
+                    or tick.get('mainPid') != int(pid_raw)
+                    or tick.get('runnerId') not in ('V52', 'v52')
+                    or not _fresh_millis(tick.get('tickCompletedAt'))):
+                return False, 'FET_PREEMPTION_V52_TICK_INVALID'
+        return True, 'V52_MANIFEST_IDENTITY_PASS'
+    except (OSError, ValueError, TypeError, KeyError, RuntimeError, subprocess.SubprocessError):
         return False, 'FET_PREEMPTION_V52_AUDIT_SOURCE_UNAVAILABLE'
 
 
