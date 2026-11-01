@@ -118,6 +118,26 @@ try {
     throw new Error("legacy non-standalone HP runtime packaging returned");
   }
 
+  const dogeApprovalWorkflow = fs.readFileSync(
+    ".github/workflows/disdex-v4-doge-missed-time-exit-approval-request.yml",
+    "utf8",
+  );
+  for (const required of [
+    "DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT",
+    "DISDEX_VPS_ROOT_PRIVATE_KEY",
+    "/home/deploy/disdex-ui/shared/data/deploy-approvals.json",
+    "'operation':operation",
+    "'status':'PENDING'",
+    "TRADING_MUTATION=0",
+  ]) {
+    if (!dogeApprovalWorkflow.includes(required)) {
+      throw new Error("DOGE approval request workflow contract missing: " + required);
+    }
+  }
+  if (dogeApprovalWorkflow.includes("DISDEX_HP_APPROVAL_BRIDGE_SECRET")) {
+    throw new Error("DOGE approval request unexpectedly depends on unconfigured bridge secret");
+  }
+
   console.log("DISDEX_HP_DEPLOY_APPROVAL_SELFTEST_OK");
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });
