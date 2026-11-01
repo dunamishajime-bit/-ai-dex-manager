@@ -1,0 +1,100 @@
+name: DisDex Coherence Guard PENGU Read-Only Diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/coherence-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/coherence-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/coherence-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/coherence-ssh/"*
+
+      - name: Inspect coherence guard and PENGU stop relationship
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/coherence-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/coherence-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import os,re,shlex,subprocess,pathlib
+          unit='disdex-current-runtime-coherence-guard.service'
+
+          def run(*args):
+              p=subprocess.run(list(args),capture_output=True,text=True,timeout=15)
+              return p.returncode,p.stdout.strip(),p.stderr.strip()
+
+          rc,show,err=run('systemctl','show',unit,'--no-pager',
+              '--property=Id,LoadState,ActiveState,SubState,FragmentPath,DropInPaths,ExecStart,Result')
+          print('COHERENCE_SHOW_RC='+str(rc))
+          print('COHERENCE_SHOW_BEGIN')
+          print(show)
+          print('COHERENCE_SHOW_END')
+
+          rc,cat,err=run('systemctl','cat',unit,'--no-pager')
+          print('COHERENCE_CAT_RC='+str(rc))
+          print('COHERENCE_CAT_BEGIN')
+          print(cat)
+          print('COHERENCE_CAT_END')
+
+          rc,journal,err=run('journalctl','-u',unit,'--since','2026-11-01 14:58:00',
+              '--until','2026-11-01 15:02:00','--no-pager','-o','short-iso')
+          print('COHERENCE_JOURNAL_RC='+str(rc))
+          print('COHERENCE_JOURNAL_BEGIN')
+          print(journal)
+          print('COHERENCE_JOURNAL_END')
+
+          exec_line=''
+          for line in show.splitlines():
+              if line.startswith('ExecStart='):
+                  exec_line=line
+                  break
+          paths=re.findall(r'path=([^ ;}]+)',exec_line)
+          for raw in paths:
+              p=pathlib.Path(raw)
+              print('COHERENCE_EXEC_PATH='+raw)
+              if p.is_file() and not p.is_symlink():
+                  print('COHERENCE_EXEC_META='+subprocess.run(
+                      ['stat','-c','%U:%G:%a:%s:%y',str(p)],capture_output=True,text=True).stdout.strip())
+                  text=p.read_text(errors='replace')
+                  print('COHERENCE_EXEC_RELEVANT_BEGIN')
+                  for n,line in enumerate(text.splitlines(),1):
+                      if re.search(r'pengu|systemctl|stop|restart|current|runtime|coher|runner|7688ed7c',line,re.I):
+                          print(f'{n}:{line}')
+                  print('COHERENCE_EXEC_RELEVANT_END')
+
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/coherence-ssh"
