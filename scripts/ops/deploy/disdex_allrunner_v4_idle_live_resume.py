@@ -130,22 +130,36 @@ def signed_get() -> dict:
     rows=[line for line in p.stdout.splitlines() if line.startswith("{")]
     require(rows,"ASTER_SIGNED_GET_EMPTY")
     value=json.loads(rows[-1])
+    require(isinstance(value,dict),"ASTER_SIGNED_GET_NOT_OBJECT")
     require(value.get("status")=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS",
             "ASTER_SIGNED_GET_NOT_PASS")
-    require(all(value.get(k)==0 for k in ("ordersSent","cancelsSent","positionChangesSent")),
+    now=int(time.time()*1000)
+    for key in ("observedAt","venueTime"):
+        observed=value.get(key)
+        require(type(observed) is int and observed>0 and -5000<=now-observed<=30000,
+                "ASTER_SIGNED_GET_STALE_OR_INVALID:"+key)
+    require(all(type(value.get(k)) is int and value[k]==0
+                for k in ("ordersSent","cancelsSent","positionChangesSent")),
             "DIAGNOSTIC_WAS_NOT_READ_ONLY")
-    positions=value.get("positions") or []
-    orders=value.get("openOrders") or []
-    doge=[p for p in positions if p.get("symbol")=="DOGEUSDT"
+    positions=value.get("positions")
+    orders=value.get("openOrders")
+    require(isinstance(positions,list) and all(isinstance(row,dict) for row in positions),
+            "ASTER_SIGNED_GET_POSITIONS_INVALID")
+    require(isinstance(orders,list) and all(isinstance(row,dict) for row in orders),
+            "ASTER_SIGNED_GET_ORDERS_INVALID")
+    all_doge=[p for p in positions if str(p.get("symbol","")).upper()=="DOGEUSDT"]
+    all_doge_orders=[o for o in orders if str(o.get("symbol","")).upper()=="DOGEUSDT"]
+    doge=[p for p in all_doge if p.get("symbol")=="DOGEUSDT"
           and float(p.get("positionAmt",0))==-226.0
           and float(p.get("entryPrice",0))==0.08052]
-    stops=[o for o in orders if o.get("symbol")=="DOGEUSDT"
+    stops=[o for o in all_doge_orders if o.get("symbol")=="DOGEUSDT"
            and o.get("clientOrderId")==STOP_ID
            and o.get("side")=="BUY" and o.get("type")=="STOP_MARKET"
            and float(o.get("origQty",0))==226.0
            and float(o.get("executedQty",0))==0.0
            and o.get("reduceOnly") is True and o.get("status")=="NEW"]
-    require(len(doge)==1 and len(stops)==1,"RESIDENT_DOGE_PROTECTION_MISSING")
+    require(len(all_doge)==1 and len(all_doge_orders)==1 and len(doge)==1 and len(stops)==1,
+            "RESIDENT_DOGE_PROTECTION_MISSING_OR_AMBIGUOUS")
     return {
       "observedAt":value.get("observedAt"),
       "positionCount":len(positions),
