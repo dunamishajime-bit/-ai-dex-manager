@@ -171,3 +171,15 @@ test("V52 pin is independent from the shared/current release SHA", () => {
   assert.notEqual(result.manifest.runners.V52.sha, SHAS.LEGACY);
   assert.equal(result.manifest.runners.V52.serviceUnit, `disdex-v52-aster-only@${SHAS.V52}.service`);
 });
+
+
+test("DD1296 source runner map validates and pins actual V52 without enabling orders", async () => {
+  const path = fileURLToPath(new URL("../docs/production/DD1296_FINAL_ALLIN_10BPS.runner-pins.v2.json", import.meta.url));
+  const raw = JSON.parse(await (await import("node:fs/promises")).readFile(path, "utf8"));
+  assert.equal(raw.operatorTarget, "DD1296_FINAL_ALLIN_10BPS");
+  assert.equal(raw.ordersEnabled, false);
+  const result = validateRunnerPinManifest(raw);
+  assert.equal(result.ok, true, result.errors.join(","));
+  assert.equal(result.manifest.runners.V52.sha, "4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81");
+  assert.equal(result.manifest.runners.V52.serviceUnit, "disdex-v52-aster-only@4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81.service");
+});
