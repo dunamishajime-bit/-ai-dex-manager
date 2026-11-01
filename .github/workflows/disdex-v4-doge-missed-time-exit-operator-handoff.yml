@@ -1,0 +1,153 @@
+name: DisDex V4 DOGE Missed TIME Exit Operator Handoff Readiness
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: HP approval request UUID after owner OTP approval
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  handoff:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Bind exact immutable plan
+        id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json
+          PLAN="$(sha256sum docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json | awk '{print $1}')"
+          [[ "$PLAN" =~ ^[0-9a-f]{64}$ ]]
+          echo "plan_sha256=$PLAN" >> "$GITHUB_OUTPUT"
+          echo "target_sha=53a0be396719f0284af4e11b35c66a4ac7d58f79" >> "$GITHUB_OUTPUT"
+
+      - name: Redeem exact HP owner approval
+        id: approval
+        shell: bash
+        env:
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          TARGET_SHA: ${{ steps.plan.outputs.target_sha }}
+          PLAN_SHA256: ${{ steps.plan.outputs.plan_sha256 }}
+        run: |
+          set -euo pipefail
+          [[ -n "$BRIDGE_SECRET" && "$APPROVAL_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          python3 - <<'PY' > "$RUNNER_TEMP/redeemed.json"
+          import json, os, urllib.request
+          body=json.dumps({
+            "action":"redeem",
+            "approval_id":os.environ["APPROVAL_ID"],
+            "operation":"V4_DOGE_MISSED_TIME_EXIT",
+            "scope":"V12_V4",
+            "target_sha":os.environ["TARGET_SHA"],
+            "plan_sha256":os.environ["PLAN_SHA256"],
+            "run_id":os.environ["GITHUB_RUN_ID"],
+          }).encode()
+          req=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body, method="POST",
+            headers={"Authorization":"Bearer "+os.environ["BRIDGE_SECRET"],
+                     "Content-Type":"application/json"},
+          )
+          with urllib.request.urlopen(req,timeout=15) as res:
+            data=json.load(res)
+          approval=data.get("approval") or {}
+          assert data.get("ok") is True
+          assert approval.get("operation")=="V4_DOGE_MISSED_TIME_EXIT"
+          assert approval.get("scope")=="V12_V4"
+          assert approval.get("ordersEnabled") is True
+          json.dump({"token":data["token"]},open(os.environ["RUNNER_TEMP"]+"/redeemed.json","w"))
+          print("DOGE_HP_APPROVAL_REDEEMED=TRUE")
+          PY
+
+      - name: Verify owner signature against exact plan
+        shell: bash
+        env:
+          PUBLIC_KEY: ${{ secrets.DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM }}
+          TARGET_SHA: ${{ steps.plan.outputs.target_sha }}
+          PLAN_SHA256: ${{ steps.plan.outputs.plan_sha256 }}
+          OWNER: ${{ vars.DISDEX_PRODUCTION_OWNER_LOGIN }}
+        run: |
+          set -euo pipefail
+          [[ "$OWNER" == "dunamishajime-bit" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/disdex-owner.pub"
+          python3 - <<'PY' > "$RUNNER_TEMP/token"
+          import json,os
+          print(json.load(open(os.environ["RUNNER_TEMP"]+"/redeemed.json"))["token"],end="")
+          PY
+          python3 scripts/ops/deploy/disdex_owner_approval.py verify             --public-key "$RUNNER_TEMP/disdex-owner.pub"             --repository "$GITHUB_REPOSITORY"             --sha "$TARGET_SHA" --scope V12_V4 --operator "$OWNER"             --plan-sha256 "$PLAN_SHA256"             --deployment-target professional-dismanager.net             --operator-target DD1296_FINAL_ALLIN_10BPS             --route GITHUB_ACTIONS --orders-enabled true < "$RUNNER_TEMP/token"
+
+      - name: Configure reviewed maintenance SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/doge-handoff-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/doge-handoff-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/doge-handoff-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/doge-handoff-ssh/"*
+
+      - name: Fresh exact DOGE read-only preflight on VPS
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          scp -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -P "$PORT" scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py             "root@$HOST:/tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py"
+          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py"
+
+      - name: Prove V4 one-shot operator hook exists; do not submit an order
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             ROOT=/home/deploy/disdex-trading/releases/53a0be396719f0284af4e11b35c66a4ac7d58f79;
+             grep -q 'operatorExitLegIds' \"\$ROOT/lib/v12-v4-runner-engine.ts\";
+             grep -q 'authorizeOperatorExit' \"\$ROOT/lib/v12-v4-runner-engine.ts\";
+             grep -q 'scripts/v12-v4-operator-exit' <(find \"\$ROOT/scripts\" -maxdepth 1 -type f -printf '%p\n');
+             echo DOGE_OPERATOR_HANDOFF_READY=TRUE;
+             echo ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES_SENT=0"
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/doge-handoff-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"               -p "$PORT" "root@$HOST"               "rm -f -- /tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/doge-handoff-ssh" "$RUNNER_TEMP/disdex-owner.pub"             "$RUNNER_TEMP/token" "$RUNNER_TEMP/redeemed.json"
