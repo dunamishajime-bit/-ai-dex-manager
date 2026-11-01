@@ -85,7 +85,7 @@ jobs:
           chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
           ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
 
-      - name: Publish pending request to HP shared approval store
+      - name: Publish pending request through serialized approval store helper
         shell: bash
         env:
           SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -101,98 +101,17 @@ jobs:
           set -euo pipefail
           PORT="${SSH_PORT:-22}"
           [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          REMOTE_HELPER="/tmp/disdex_deployment_approval_store.$GITHUB_RUN_ID.py"
+          scp -i "$HOME/.ssh/id_vps_root" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -P "$PORT" \
+            scripts/ops/deploy/disdex_deployment_approval_store.py \
+            "root@$SSH_HOST:$REMOTE_HELPER"
           ssh -T -i "$HOME/.ssh/id_vps_root" \
             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10 \
             -p "$PORT" "root@$SSH_HOST" \
-            "OPERATION='$OPERATION' SCOPE='$SCOPE' ORDERS_ENABLED='$ORDERS_ENABLED' TARGET_SHA='$TARGET_SHA' PLAN_SHA256='$PLAN_SHA256' COMMENT_ID='$COMMENT_ID' ACTOR='$ACTOR' python3 - <<'PY'
-          import json, os, pathlib, pwd, tempfile, time, uuid
-
-          operation = os.environ['OPERATION']
-          scope = os.environ['SCOPE']
-          orders_enabled = os.environ['ORDERS_ENABLED'].lower() == 'true'
-          target = os.environ['TARGET_SHA']
-          plan = os.environ['PLAN_SHA256']
-          comment_id = os.environ['COMMENT_ID']
-          actor = os.environ['ACTOR']
-          path = pathlib.Path('/home/deploy/disdex-ui/shared/data/deploy-approvals.json')
-          path.parent.mkdir(parents=True, exist_ok=True)
-          now = int(time.time() * 1000)
-          records = []
-          if path.exists():
-              loaded = json.loads(path.read_text(encoding='utf-8'))
-              if not isinstance(loaded, list):
-                  raise SystemExit('APPROVAL_STORE_INVALID_JSON')
-              records = loaded
-
-          active = {'PENDING', 'OTP_SENT', 'APPROVED', 'DISPATCHED'}
-          existing = next(
-              (
-                  r for r in records
-                  if r.get('targetSha') == target
-                  and r.get('planSha256') == plan
-                  and (r.get('operation') or ('V12_V4_LIVE' if r.get('scope') == 'V12_V4' else None)) == operation
-                  and r.get('scope') == scope
-                  and bool(r.get('ordersEnabled', True)) == orders_enabled
-                  and r.get('status') in active
-                  and int(r.get('requestExpiresAt') or 0) > now
-              ),
-              None,
-          )
-          if existing:
-              print('APPROVAL_REQUEST_ID=' + str(existing.get('id')))
-              print('APPROVAL_REQUEST_REUSED=TRUE')
-              raise SystemExit(0)
-
-          for record in records:
-              if (
-                  record.get('status') in {'PENDING', 'OTP_SENT', 'APPROVED'}
-                  and int(record.get('requestExpiresAt') or 0) <= now
-              ):
-                  record['status'] = 'EXPIRED'
-                  record['lastError'] = 'request expired'
-                  record['updatedAt'] = now
-
-          request_id = str(uuid.uuid4())
-          records.append({
-              'id': request_id,
-              'scope': scope,
-              'operation': operation,
-              'ordersEnabled': orders_enabled,
-              'targetSha': target,
-              'planSha256': plan,
-              'requestActor': actor,
-              'requestCommentId': comment_id,
-              'createdAt': now,
-              'requestExpiresAt': now + 30 * 60 * 1000,
-              'updatedAt': now,
-              'status': 'PENDING',
-          })
-          records = sorted(records, key=lambda x: int(x.get('createdAt') or 0), reverse=True)[:50]
-
-          fd, tmp_name = tempfile.mkstemp(prefix='.deploy-approvals-', dir=str(path.parent))
-          try:
-              with os.fdopen(fd, 'w', encoding='utf-8') as handle:
-                  json.dump(records, handle, ensure_ascii=False, indent=2)
-                  handle.write('\n')
-                  handle.flush()
-                  os.fsync(handle.fileno())
-              deploy_user = pwd.getpwnam('deploy')
-              os.chown(tmp_name, deploy_user.pw_uid, deploy_user.pw_gid)
-              os.chmod(tmp_name, 0o600)
-              os.replace(tmp_name, path)
-          finally:
-              if os.path.exists(tmp_name):
-                  os.unlink(tmp_name)
-
-          print('APPROVAL_REQUEST_ID=' + request_id)
-          print('APPROVAL_REQUEST_PUBLISHED=TRUE')
-          print('OPERATION=' + operation)
-          print('SCOPE=' + scope)
-          print('ORDERS_ENABLED=' + str(orders_enabled).lower())
-          print('TRADING_MUTATION=0')
-          PY"
-
+            "set -euo pipefail; trap 'rm -f -- $REMOTE_HELPER' EXIT; python3 '$REMOTE_HELPER' create-pending --operation '$OPERATION' --scope '$SCOPE' --orders-enabled '$ORDERS_ENABLED' --target-sha '$TARGET_SHA' --plan-sha256 '$PLAN_SHA256' --actor '$ACTOR' --comment-id '$COMMENT_ID'"
       - name: Destroy SSH material
         if: always()
         shell: bash
