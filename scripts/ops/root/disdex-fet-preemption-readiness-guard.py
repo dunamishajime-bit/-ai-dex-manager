@@ -40,6 +40,43 @@ def evaluate(sha, approval, env, config_flag=None):
                 ordersSent=0, cancelsSent=0, killSwitchChanges=0)
 
 
+def validate_v52_contract(pin, hb, now_ms, pid, cwd, marker_sha, active):
+    if not isinstance(pin, dict):
+        return 'FET_PREEMPTION_V52_PIN_MISSING'
+    sha = str(pin.get('sha') or '').strip().lower()
+    root = str(pin.get('releaseRoot') or '').strip()
+    unit = str(pin.get('serviceUnit') or '').strip()
+    evidence_mode = str(pin.get('evidenceMode') or '').strip()
+    expected_root = '/home/deploy/disdex-trading/releases/' + sha
+    expected_unit = 'disdex-v52-aster-only@' + sha + '.service'
+    if (not re.fullmatch(r'[0-9a-f]{40}', sha) or root != expected_root
+            or unit != expected_unit or evidence_mode != 'heartbeat_v1'):
+        return 'FET_PREEMPTION_V52_PIN_INVALID'
+    if marker_sha != sha:
+        return 'FET_PREEMPTION_V52_RELEASE_MISMATCH'
+    if not active or not isinstance(pid, int) or pid <= 0:
+        return 'FET_PREEMPTION_V52_NOT_RUNNING'
+    if cwd != root:
+        return 'FET_PREEMPTION_V52_WORKING_DIRECTORY_MISMATCH'
+    if not isinstance(hb, dict):
+        return 'FET_PREEMPTION_V52_HEARTBEAT_INVALID'
+    heartbeat_at = hb.get('heartbeatAt')
+    last_tick_at = hb.get('lastTickAt')
+    if (hb.get('schema') != 'disdex-runner-heartbeat/v1'
+            or hb.get('runnerId') != 'V52'
+            or hb.get('runtimeSha') != sha or hb.get('expectedSha') != sha
+            or hb.get('serviceUnit') != unit or hb.get('mainPid') != pid
+            or hb.get('workingDirectory') != root
+            or hb.get('mode') != 'LIVE' or hb.get('safetyState') != 'HEALTHY'
+            or hb.get('newOrdersAllowed') is not True
+            or type(heartbeat_at) is not int or type(last_tick_at) is not int
+            or heartbeat_at <= 0 or last_tick_at <= 0
+            or heartbeat_at > now_ms + 10000 or last_tick_at > now_ms + 10000
+            or now_ms - heartbeat_at > 300000 or now_ms - last_tick_at > 300000):
+        return 'FET_PREEMPTION_V52_HEARTBEAT_INVALID'
+    return None
+
+
 def v52_live_pinned(manifest_path=Path('/etc/disdex/runner-pins.json')):
     """Read-only, fail-closed V52 identity from the canonical runner-pin manifest."""
     try:
@@ -59,47 +96,29 @@ def v52_live_pinned(manifest_path=Path('/etc/disdex/runner-pins.json')):
         root = str(pin.get('releaseRoot') or '').strip()
         unit = str(pin.get('serviceUnit') or '').strip()
         health_path = Path(str(pin.get('healthPath') or '').strip())
-        evidence_mode = str(pin.get('evidenceMode') or '').strip()
-        expected_root = '/home/deploy/disdex-trading/releases/' + sha
-        expected_unit = 'disdex-v52-aster-only@' + sha + '.service'
-        if (not re.fullmatch(r'[0-9a-f]{40}', sha) or root != expected_root
-                or unit != expected_unit or evidence_mode != 'heartbeat_v1'):
-            return False, 'FET_PREEMPTION_V52_PIN_INVALID'
         if (not str(health_path).startswith('/var/lib/disdex/')
                 or '..' in health_path.parts):
             return False, 'FET_PREEMPTION_V52_HEALTH_PATH_INVALID'
 
         release = Path(root)
         marker = release / '.disdex-release-sha'
-        if release.is_symlink() or marker.is_symlink() or not marker.is_file() or marker.read_text().strip() != sha:
+        if release.is_symlink() or marker.is_symlink() or not marker.is_file():
             return False, 'FET_PREEMPTION_V52_RELEASE_MISMATCH'
-        if subprocess.check_output(['systemctl', 'show', unit, '-p', 'ActiveState', '--value'], text=True, timeout=8).strip() != 'active':
-            return False, 'FET_PREEMPTION_V52_NOT_RUNNING'
-        pid_raw = subprocess.check_output(['systemctl', 'show', unit, '-p', 'MainPID', '--value'], text=True, timeout=8).strip()
-        if not pid_raw.isdecimal() or int(pid_raw) <= 0:
-            return False, 'FET_PREEMPTION_V52_NOT_RUNNING'
-        pid = int(pid_raw)
-        if os.path.realpath('/proc/' + pid_raw + '/cwd') != root:
-            return False, 'FET_PREEMPTION_V52_WORKING_DIRECTORY_MISMATCH'
-
+        marker_sha = marker.read_text().strip()
+        active = subprocess.check_output(
+            ['systemctl', 'show', unit, '-p', 'ActiveState', '--value'],
+            text=True, timeout=8).strip() == 'active'
+        pid_raw = subprocess.check_output(
+            ['systemctl', 'show', unit, '-p', 'MainPID', '--value'],
+            text=True, timeout=8).strip()
+        pid = int(pid_raw) if pid_raw.isdecimal() else 0
+        cwd = os.path.realpath('/proc/' + str(pid) + '/cwd') if pid > 0 else ''
         if health_path.is_symlink() or not health_path.is_file():
             return False, 'FET_PREEMPTION_V52_HEARTBEAT_UNTRUSTED'
         hb = json.loads(health_path.read_text())
-        now = int(time.time() * 1000)
-        heartbeat_at = hb.get('heartbeatAt')
-        last_tick_at = hb.get('lastTickAt')
-        if (hb.get('schema') != 'disdex-runner-heartbeat/v1'
-                or hb.get('runnerId') != 'V52'
-                or hb.get('runtimeSha') != sha or hb.get('expectedSha') != sha
-                or hb.get('serviceUnit') != unit or hb.get('mainPid') != pid
-                or hb.get('workingDirectory') != root
-                or hb.get('mode') != 'LIVE' or hb.get('safetyState') != 'HEALTHY'
-                or hb.get('newOrdersAllowed') is not True
-                or type(heartbeat_at) is not int or type(last_tick_at) is not int
-                or heartbeat_at <= 0 or last_tick_at <= 0
-                or heartbeat_at > now + 10000 or last_tick_at > now + 10000
-                or now - heartbeat_at > 300000 or now - last_tick_at > 300000):
-            return False, 'FET_PREEMPTION_V52_HEARTBEAT_INVALID'
+        reason = validate_v52_contract(pin, hb, int(time.time() * 1000), pid, cwd, marker_sha, active)
+        if reason:
+            return False, reason
         return True, 'V52_PINNED_IDENTITY_PASS'
     except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError, json.JSONDecodeError):
         return False, 'FET_PREEMPTION_V52_AUDIT_SOURCE_UNAVAILABLE'
