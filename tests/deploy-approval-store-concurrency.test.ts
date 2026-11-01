@@ -41,21 +41,25 @@ test("file-backed approvals serialize concurrent writers and reject corrupt data
     assert.equal(saved.length, 50);
     assert.equal(new Set(saved.map((row: { id: string }) => row.id)).size, 50);
 
-    const first = await store.getDeploymentApproval("worker-0-0");
-    const stale = await store.getDeploymentApproval("worker-0-0");
+    const retainedIds = saved.map((row: { id: string }) => row.id);
+    const firstId = retainedIds[0];
+    const secondId = retainedIds[1];
+    assert.ok(firstId && secondId && firstId !== secondId);
+    const first = await store.getDeploymentApproval(firstId);
+    const stale = await store.getDeploymentApproval(firstId);
     assert.ok(first && stale);
     await store.saveDeploymentApproval({ ...first, status: "FAILED" });
     await assert.rejects(store.saveDeploymentApproval({ ...stale, status: "APPROVED" }), /STALE/);
-    assert.equal((await store.getDeploymentApproval("worker-0-0"))?.status, "FAILED");
+    assert.equal((await store.getDeploymentApproval(firstId))?.status, "FAILED");
 
-    const beforeAtomic = await store.getDeploymentApproval("worker-1-0");
+    const beforeAtomic = await store.getDeploymentApproval(secondId);
     assert.ok(beforeAtomic);
-    await store.mutateDeploymentApprovalAtomic("worker-1-0", (current) => {
+    await store.mutateDeploymentApprovalAtomic(secondId, (current) => {
       assert.ok(current);
       return { next: { ...current, status: "DISPATCHED" }, result: null };
     });
     await assert.rejects(store.saveDeploymentApproval({ ...beforeAtomic, status: "APPROVED" }), /STALE/);
-    assert.equal((await store.getDeploymentApproval("worker-1-0"))?.status, "DISPATCHED");
+    assert.equal((await store.getDeploymentApproval(secondId))?.status, "DISPATCHED");
 
 
     const redeemable = await store.saveDeploymentApproval({
