@@ -1,0 +1,32 @@
+{
+  "schema": "disdex-v4-exact-one-shot-operator-exit/v1",
+  "operation": "V4_DOGE_MISSED_TIME_EXIT",
+  "scope": "V12_V4",
+  "sourceSha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+  "masterTradingSha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+  "legId": "DOGEUSDT:REC_Y06_REV_D0_T72:SHORT:1793181600000",
+  "symbol": "DOGEUSDT",
+  "route": "REC_Y06_REV_D0_T72",
+  "side": "SHORT",
+  "qty": 226,
+  "entryPrice": 0.08052,
+  "plannedExit": {
+    "reason": "TIME",
+    "exitTs": 1793440800000,
+    "price": 0.07505,
+    "priceModelOnly": true
+  },
+  "residentStopClientOrderId": "v12-v4-98ded39746ed3502a4d7b0e26ef9",
+  "ordersEnabled": true,
+  "entryAuthority": false,
+  "allowedAction": "ONE_SHOT_REDUCE_ONLY_EXIT",
+  "postconditions": [
+    "DURABLE_EXIT_FILL",
+    "LEG_CLOSED_QTY_ZERO",
+    "SIGNED_VENUE_DOGE_FLAT",
+    "STOP_RETIRED_AFTER_FLAT",
+    "EXACT_V4_RESTART_NO_STALE_EXIT"
+  ],
+  "noTestOrders": true,
+  "noUnrelatedMutation": true
+}
