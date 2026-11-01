@@ -129,9 +129,10 @@ def test_flat_regular_session_outside_action_window_skips_account_lock() -> None
     engine.books_and_refs = lambda: (_ for _ in ()).throw(AssertionError("flat non-action window must not fetch lock-bound books"))
     with patch.object(v52, "regular_us_equity_session", return_value=True):
         prepared = engine.prepare_tick_inputs()
+        interval = engine._loop_interval_ms(prepared)
     assert prepared["skipWithoutLock"] is True
     assert prepared["rows"] is None
-    assert engine._loop_interval_ms(prepared) >= 15_000
+    assert interval >= 15_000
 
 
 def test_flat_regular_session_action_window_still_requires_account_lock() -> None:
@@ -145,9 +146,10 @@ def test_flat_regular_session_action_window_still_requires_account_lock() -> Non
     engine.books_and_refs = lambda: ["prepared"]
     with patch.object(v52, "regular_us_equity_session", return_value=True):
         prepared = engine.prepare_tick_inputs()
+        interval = engine._loop_interval_ms(prepared)
     assert prepared["skipWithoutLock"] is False
     assert prepared["rows"] == ["prepared"]
-    assert engine._loop_interval_ms(prepared) == 250
+    assert interval == 250
 
 if __name__ == "__main__":
     test_v52_releases_shared_lock_before_daemon_sleep()
