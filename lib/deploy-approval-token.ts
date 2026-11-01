@@ -16,6 +16,7 @@ export type DeploymentApprovalScope = (typeof DEPLOY_APPROVAL_SCOPES)[number];
 
 export const DEPLOY_APPROVAL_OPERATIONS = [
   "V12_V4_LIVE",
+  "V4_DOGE_MISSED_TIME_EXIT",
   "IDLE_FLAT_STALE_REPAIR",
   "ALL_RUNNERS_LIVE_RESTORE",
 ] as const;
@@ -31,6 +32,11 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "V12_V4",
     ordersEnabled: true,
     label: "V12 V4 Production LIVE",
+  },
+  V4_DOGE_MISSED_TIME_EXIT: {
+    scope: "V12_V4",
+    ordersEnabled: true,
+    label: "DOGEUSDT SHORT 226 / TIME決済（指定建玉1件のみ）",
   },
   IDLE_FLAT_STALE_REPAIR: {
     scope: "IDLE_PRIORITY_SHORT",
