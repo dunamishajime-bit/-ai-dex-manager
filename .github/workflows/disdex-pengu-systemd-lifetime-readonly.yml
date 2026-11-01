@@ -1,0 +1,58 @@
+name: DisDex PENGU Systemd Lifetime Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-life-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-life-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-life-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-life-ssh/"*
+
+      - name: Read PENGU systemd lifetime and restart semantics
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-life-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-life-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             unit='disdex-pengu-dual-ls-v2@7688ed7c93a1918d8b44837339b7da5584a868f5.service';
+             systemctl show \"\$unit\" --no-pager                -p Id -p ActiveState -p SubState -p MainPID -p Result -p NRestarts                -p Restart -p RestartMode -p RestartUSec -p RestartPreventExitStatus                -p RestartForceExitStatus -p SuccessExitStatus                -p RuntimeMaxUSec -p RuntimeRandomizedExtraUSec                -p TimeoutStartUSec -p TimeoutStopUSec -p WatchdogUSec                -p OOMPolicy -p MemoryCurrent -p MemoryPeak -p MemoryHigh -p MemoryMax                -p StartLimitIntervalUSec -p StartLimitBurst                -p ExecMainStartTimestamp -p ExecMainExitTimestamp                -p ExecMainCode -p ExecMainStatus;
+             echo PENGU_UNIT_FULL_CAT_BEGIN;
+             systemctl cat \"\$unit\" --no-pager;
+             echo PENGU_UNIT_FULL_CAT_END;
+             echo TRADING_MUTATION=0;
+             echo ORDERS_SENT=0;
+             echo CANCELS_SENT=0;
+             echo POSITION_CHANGES_SENT=0"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-life-ssh"
