@@ -1,0 +1,61 @@
+name: DisDex V4 DOGE Independent Venue Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  venue-readonly:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/doge-venue-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/doge-venue-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/doge-venue-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/doge-venue-ssh/"*
+
+      - name: Signed Aster read-only proof independent of V4 service state
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/doge-venue-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-venue-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             V4_SHA=53a0be396719f0284af4e11b35c66a4ac7d58f79;
+             UNIT=disdex-v12-v4@\$V4_SHA.service;
+             echo V4_SERVICE_STATE=\$(systemctl is-active \"\$UNIT\" || true);
+             echo V4_SERVICE_ENABLED=\$(systemctl is-enabled \"\$UNIT\" 2>/dev/null || true);
+             set -ae;
+             for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env; do
+               test -f \"\$f\";
+               . \"\$f\";
+             done;
+             set +a;
+             cd /home/deploy/disdex-trading/releases/\$V4_SHA;
+             exec /usr/bin/node node_modules/tsx/dist/cli.mjs scripts/disdex-aster-readonly-account-diagnostic.ts"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/doge-venue-ssh"
