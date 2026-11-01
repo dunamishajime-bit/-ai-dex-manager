@@ -1,0 +1,74 @@
+name: DisDex Runner Pin Manifest Safety CI
+
+on:
+  pull_request:
+    paths:
+      - 'config/disdex-runner-pins-DD1296_FINAL_ALLIN_10BPS.json'
+      - 'lib/server/runner-pin-manifest.ts'
+      - 'app/api/system/runner-health/route.ts'
+      - 'scripts/ops/root/disdex-fet-preemption-readiness-guard.py'
+      - 'scripts/ops/root/disdex_runner_pin_render.py'
+      - 'tests/runner-pin-manifest.test.ts'
+      - 'tests/test_v52_runner_pin_heartbeat_contract.py'
+      - 'tests/test_runner_pin_render.py'
+      - '.github/workflows/disdex-runner-pin-manifest-ci.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'config/disdex-runner-pins-DD1296_FINAL_ALLIN_10BPS.json'
+      - 'lib/server/runner-pin-manifest.ts'
+      - 'app/api/system/runner-health/route.ts'
+      - 'scripts/ops/root/disdex-fet-preemption-readiness-guard.py'
+      - 'scripts/ops/root/disdex_runner_pin_render.py'
+      - 'tests/runner-pin-manifest.test.ts'
+      - 'tests/test_v52_runner_pin_heartbeat_contract.py'
+      - 'tests/test_runner_pin_render.py'
+      - '.github/workflows/disdex-runner-pin-manifest-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  runner-pin-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+
+      - name: TypeScript runner-pin contract
+        run: node --import tsx --test tests/runner-pin-manifest.test.ts
+
+      - name: Python heartbeat and render contracts
+        run: |
+          python3 -m py_compile             scripts/ops/root/disdex-fet-preemption-readiness-guard.py             scripts/ops/root/disdex_runner_pin_render.py             tests/test_v52_runner_pin_heartbeat_contract.py             tests/test_runner_pin_render.py
+          python3 -m unittest             tests.test_v52_runner_pin_heartbeat_contract             tests.test_runner_pin_render -v
+
+      - name: Render candidate outside production paths
+        run: |
+          rm -rf .runner-pin-render
+          python3 scripts/ops/root/disdex_runner_pin_render.py             --manifest config/disdex-runner-pins-DD1296_FINAL_ALLIN_10BPS.json             --output-dir .runner-pin-render
+          grep -Fq 'DISDEX_WATCHDOG_V52_EXPECTED_SHA=4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81' .runner-pin-render/watchdog.env
+          grep -Fq 'DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=ef1ab178e26a7bf5bddb6473467765edba242e1d' .runner-pin-render/health-snapshot.env
+          ! grep -Fq 'DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=97830672e2f139b39f7194166d7dc8c36e8c8933' .runner-pin-render/health-snapshot.env
+
+      - name: Source boundary assertions
+        run: |
+          grep -Fq 'ROOT_OWNED_RUNNER_PIN_MANIFEST' app/api/system/runner-health/route.ts
+          ! grep -Fq 'COMMON_RUNTIME_RELEASE' app/api/system/runner-health/route.ts
+          grep -Fq "disdex-runner-pin-manifest/v2" scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+          grep -Fq "heartbeat_v1" scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+          echo TRADING_MUTATION=0
+
+      - name: Typecheck
+        run: npx tsc --noEmit --pretty false
