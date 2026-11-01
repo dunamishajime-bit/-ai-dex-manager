@@ -1,0 +1,46 @@
+name: DisDex V4 DOGE Operator Guard CI
+
+on:
+  pull_request:
+    paths:
+      - 'lib/v12-v4-doge-missed-time-guard.mjs'
+      - 'tests/v12-v4-doge-missed-time-guard.test.mjs'
+      - '.github/workflows/disdex-v4-doge-operator-guard-ci.yml'
+      - '.github/workflows/disdex-v4-doge-missed-time-exit-operator-handoff.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'lib/v12-v4-doge-missed-time-guard.mjs'
+      - 'tests/v12-v4-doge-missed-time-guard.test.mjs'
+      - '.github/workflows/disdex-v4-doge-operator-guard-ci.yml'
+      - '.github/workflows/disdex-v4-doge-missed-time-exit-operator-handoff.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  exact-doge-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Exact DOGE operator guard tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/v12-v4-doge-missed-time-guard.test.mjs
+
+      - name: Assert incident constants remain exact
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "DOGEUSDT:REC_Y06_REV_D0_T72:SHORT:1793181600000" lib/v12-v4-doge-missed-time-guard.mjs
+          grep -Fq "v12-v4-98ded39746ed3502a4d7b0e26ef9" lib/v12-v4-doge-missed-time-guard.mjs
+          grep -Fq "53a0be396719f0284af4e11b35c66a4ac7d58f79" lib/v12-v4-doge-missed-time-guard.mjs
+          grep -Fq "DOGE_EXIT_TS=1793440800000" lib/v12-v4-doge-missed-time-guard.mjs
+          grep -Fq "DOGE_EXIT_PRICE=0.07505" lib/v12-v4-doge-missed-time-guard.mjs
+          echo DOGE_OPERATOR_GUARD_CONTRACT_PASS
