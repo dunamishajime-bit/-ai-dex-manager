@@ -48,10 +48,18 @@ jobs:
           grep -Fq 'ReadWritePaths=/var/lib/disdex/runner-health/heartbeats' "$service"
           ! grep -Fq '/home/deploy/disdex-trading/current' "$service"
           grep -Fq 'Unit=disdex-runner-health-snapshot-v2@%i.service' "$timer"
-          systemd-analyze verify "$service" "$timer" 2>&1 | tee /tmp/systemd-verify.log || {
-            grep -Ev 'Failed to open|does not exist' /tmp/systemd-verify.log
-            exit 1
-          }
+
+          # Keep the production unit pinned to /usr/bin/node. GitHub-hosted runners
+          # install Node under the toolcache, so verify an otherwise-identical
+          # temporary unit with the runner's real node path.
+          verify_dir="$RUNNER_TEMP/systemd-verify"
+          mkdir -p "$verify_dir"
+          cp "$service" "$verify_dir/$(basename "$service")"
+          cp "$timer" "$verify_dir/$(basename "$timer")"
+          node_bin="$(command -v node)"
+          sed -i "s#ExecStart=/usr/bin/node #ExecStart=$node_bin #" "$verify_dir/$(basename "$service")"
+          systemd-analyze verify             "$verify_dir/$(basename "$service")"             "$verify_dir/$(basename "$timer")"
+
           echo TRADING_MUTATION=0
 
       - name: Source boundary
