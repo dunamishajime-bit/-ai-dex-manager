@@ -10,3 +10,14 @@ test("FET readiness audit keeps exact blocker detail when V52 is stopped", async
   assert.match(text, /FET_PREEMPTION_V52_NOT_RUNNING/);
   assert.doesNotMatch(text, /raise ValueError\('V52_NOT_RUNNING'\)/);
 });
+
+
+test("FET readiness resolves V52 from the canonical runner-pin manifest", async () => {
+  const text = await readFile(new URL("../scripts/ops/root/disdex-fet-preemption-readiness-guard.py", import.meta.url), "utf8");
+  assert.match(text, /runner-pins\.json/);
+  assert.match(text, /V52/);
+  assert.match(text, /serviceUnit/);
+  assert.match(text, /releaseRoot/);
+  assert.match(text, /\.disdex-release-sha/);
+  assert.doesNotMatch(text, /unit = 'disdex-v52-aster-only@' \+ sha \+ '\\.service'/);
+});
