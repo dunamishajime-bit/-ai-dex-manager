@@ -468,13 +468,16 @@ def assert_strict_live_configuration(env: Mapping[str, str] | None = None) -> St
 
 
 def validate_gross_snapshot(snapshot: Mapping[str, object], caps: StrictPortfolioCaps = STRICT_CAPS) -> dict:
-    equity = _finite(snapshot.get("equityUsd", 0), "EQUITY")
-    crypto = _finite(snapshot.get("cryptoGross", 0), "CRYPTO_GROSS")
-    stock = _finite(snapshot.get("stockGross", 0), "STOCK_GROSS")
-    total = _finite(snapshot.get("totalGross", 0), "TOTAL_GROSS")
+    required = ("equityUsd", "cryptoGross", "stockGross", "totalGross")
+    if any(field not in snapshot for field in required):
+        raise RuntimeError("STRICT_PORTFOLIO_GROSS_SNAPSHOT_INCOMPLETE")
+    equity = _finite(snapshot["equityUsd"], "EQUITY")
+    crypto = _finite(snapshot["cryptoGross"], "CRYPTO_GROSS")
+    stock = _finite(snapshot["stockGross"], "STOCK_GROSS")
+    total = _finite(snapshot["totalGross"], "TOTAL_GROSS")
     if equity <= 0:
         raise RuntimeError("STRICT_PORTFOLIO_EQUITY_NOT_POSITIVE")
-    if min(crypto, stock, total) < -EPSILON:
+    if min(crypto, stock, total) < 0:
         raise RuntimeError("STRICT_PORTFOLIO_NEGATIVE_GROSS")
     if crypto > caps.crypto_gross + EPSILON:
         raise RuntimeError(f"CRYPTO_GROSS_OVER_CAP:{crypto:.9f}>{caps.crypto_gross:.9f}")
