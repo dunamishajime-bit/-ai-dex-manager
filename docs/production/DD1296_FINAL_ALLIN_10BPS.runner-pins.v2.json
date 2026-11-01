@@ -1,0 +1,90 @@
+{
+  "schema": "disdex-runner-pin-manifest/v2",
+  "target": "professional-dismanager.net",
+  "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
+  "ordersEnabled": false,
+  "generatedFrom": "PRODUCTION_READONLY_RECONCILIATION_20261102",
+  "runners": {
+    "V12_V4": {
+      "sha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/53a0be396719f0284af4e11b35c66a4ac7d58f79",
+      "serviceUnit": "disdex-v12-v4@53a0be396719f0284af4e11b35c66a4ac7d58f79.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "V4_PRIMARY",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/v12-v4.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/V12_V4.json"
+    },
+    "PENGU_V8": {
+      "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "serviceUnit": "disdex-pengu-dual-ls-v2@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "PENGU_V8",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/pengu-v8.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/PENGU_V8.json"
+    },
+    "QUALITY102_CAUSAL_V1": {
+      "sha": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/ef1ab178e26a7bf5bddb6473467765edba242e1d",
+      "serviceUnit": "disdex-quality102-causal-v1@ef1ab178e26a7bf5bddb6473467765edba242e1d.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "Q102_PRIMARY",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/QUALITY102_CAUSAL_V1.json"
+    },
+    "V52": {
+      "sha": "4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81",
+      "serviceUnit": "disdex-v52-aster-only@4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "V52",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/v52.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/V52.json"
+    },
+    "FET_BRK48_RESIDUAL": {
+      "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "serviceUnit": "disdex-fet-brk48@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "FET_BRK48_RESIDUAL",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/fet-brk48-residual.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/FET_BRK48_RESIDUAL.json"
+    },
+    "HYPE_TREND_LONG": {
+      "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "serviceUnit": "disdex-hype-long@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "HYPE_TREND_LONG",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/hype-trend-long.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/HYPE_TREND_LONG.json"
+    },
+    "IDLE_PRIORITY_SHORT": {
+      "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "serviceUnit": "disdex-idle-priority-short@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "IDLE_PRIORITY_SHORT",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/IDLE_PRIORITY_SHORT.json"
+    },
+    "SHARED_CRYPTO_RISK": {
+      "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "serviceUnit": "disdex-shared-crypto-risk@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "SHARED_RISK",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/shared-crypto-risk.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/SHARED_CRYPTO_RISK.json"
+    },
+    "MARGIN_GUARD": {
+      "sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "releaseRoot": "/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "serviceUnit": "disdex-v12-v52-margin-guard@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+      "evidenceMode": "legacy",
+      "stopOwner": "MARGIN_GUARD",
+      "healthPath": "/var/lib/disdex/runner-health/heartbeats/margin-guard.json",
+      "tickPath": "/var/lib/disdex/runner-health/ticks/MARGIN_GUARD.json"
+    }
+  }
+}
