@@ -1,0 +1,88 @@
+name: DisDex V52 Watchdog Pin Inventory Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/v52-pin-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/v52-pin-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/v52-pin-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/v52-pin-ssh/"*
+
+      - name: Inventory V52 watchdog overlays and drop-ins
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/v52-pin-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/v52-pin-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import hashlib,pathlib,re,subprocess
+          roots=[
+            pathlib.Path('/etc/disdex/current-runtime'),
+            pathlib.Path('/etc/systemd/system/disdex-runner-watchdog.service.d'),
+          ]
+          for root in roots:
+              print('ROOT='+str(root))
+              if not root.is_dir() or root.is_symlink():
+                  print('ROOT_UNSAFE_OR_MISSING=TRUE'); continue
+              for p in sorted(root.iterdir()):
+                  name=p.name.lower()
+                  if 'v52' not in name and '9783' not in name and '4d33' not in name and 'fc06' not in name:
+                      continue
+                  if not p.is_file() or p.is_symlink():
+                      continue
+                  data=p.read_bytes()
+                  text=data.decode(errors='replace')
+                  if 'watchdog' not in name and 'DISDEX_WATCHDOG_V52_' not in text:
+                      continue
+                  st=p.stat()
+                  print('PIN_FILE_BEGIN='+str(p))
+                  print('META='+f'{st.st_uid}:{st.st_gid}:{st.st_mode & 0o777:o}:{len(data)}')
+                  print('SHA256='+hashlib.sha256(data).hexdigest())
+                  for line in text.splitlines():
+                      if re.search(r'DISDEX_WATCHDOG_V52_|EnvironmentFile|97830672|4d33d824|7688ed7c|fc06d4ce',line):
+                          if re.search(r'SECRET|TOKEN|PASSWORD|PRIVATE_KEY',line,re.I): continue
+                          print(line)
+                  print('PIN_FILE_END='+str(p))
+          p=subprocess.run(['systemctl','show','disdex-runner-watchdog.timer','--no-pager',
+              '--property=Id,LoadState,ActiveState,SubState,UnitFileState,NextElapseUSecRealtime'],
+              capture_output=True,text=True,timeout=10)
+          print('WATCHDOG_TIMER_SHOW_BEGIN')
+          print(p.stdout.strip())
+          print('WATCHDOG_TIMER_SHOW_END')
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/v52-pin-ssh"
