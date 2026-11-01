@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py"
+      - "tests/test_allrunner_resume_freshness.py"
       - ".github/workflows/disdex-allrunner-v4-idle-live-resume.yml"
       - ".github/workflows/disdex-allrunner-v4-idle-resume-ci.yml"
   workflow_dispatch:
@@ -22,6 +23,8 @@ jobs:
       - name: Compile helper
         shell: bash
         run: python3 -m py_compile scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py
+      - name: Verify signed-evidence freshness and ambiguity fail closed
+        run: python3 -m unittest tests.test_allrunner_resume_freshness -v
       - name: Enforce exact task and service safety contract
         shell: bash
         run: |

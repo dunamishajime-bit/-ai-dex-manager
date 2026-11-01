@@ -4,7 +4,7 @@
 This helper never places a test order and never changes venue orders, positions,
 STOPs, Kill Switch state, operator activation, strategy files, or risk limits.
 It relies on the existing systemd ExecStartPre gates and independently proves
-shared risk and the resident protected DOGE position/STOP before and after start.
+shared risk and a fresh signed venue-flat snapshot before and after start.
 """
 from __future__ import annotations
 
@@ -20,7 +20,6 @@ BASE=Path("/home/deploy/disdex-trading/releases")
 MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"
 V4="53a0be396719f0284af4e11b35c66a4ac7d58f79"
 V52="4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81"
-STOP_ID="v12-v4-98ded39746ed3502a4d7b0e26ef9"
 KILL=Path("/var/lib/disdex/shared/kill-switch.json")
 RISK=Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN=Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
@@ -130,22 +129,24 @@ def signed_get() -> dict:
     rows=[line for line in p.stdout.splitlines() if line.startswith("{")]
     require(rows,"ASTER_SIGNED_GET_EMPTY")
     value=json.loads(rows[-1])
+    require(isinstance(value,dict),"ASTER_SIGNED_GET_NOT_OBJECT")
     require(value.get("status")=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS",
             "ASTER_SIGNED_GET_NOT_PASS")
-    require(all(value.get(k)==0 for k in ("ordersSent","cancelsSent","positionChangesSent")),
+    now=int(time.time()*1000)
+    for key in ("observedAt","venueTime"):
+        observed=value.get(key)
+        require(type(observed) is int and observed>0 and -5000<=now-observed<=30000,
+                "ASTER_SIGNED_GET_STALE_OR_INVALID:"+key)
+    require(all(type(value.get(k)) is int and value[k]==0
+                for k in ("ordersSent","cancelsSent","positionChangesSent")),
             "DIAGNOSTIC_WAS_NOT_READ_ONLY")
-    positions=value.get("positions") or []
-    orders=value.get("openOrders") or []
-    doge=[p for p in positions if p.get("symbol")=="DOGEUSDT"
-          and float(p.get("positionAmt",0))==-226.0
-          and float(p.get("entryPrice",0))==0.08052]
-    stops=[o for o in orders if o.get("symbol")=="DOGEUSDT"
-           and o.get("clientOrderId")==STOP_ID
-           and o.get("side")=="BUY" and o.get("type")=="STOP_MARKET"
-           and float(o.get("origQty",0))==226.0
-           and float(o.get("executedQty",0))==0.0
-           and o.get("reduceOnly") is True and o.get("status")=="NEW"]
-    require(len(doge)==1 and len(stops)==1,"RESIDENT_DOGE_PROTECTION_MISSING")
+    positions=value.get("positions")
+    orders=value.get("openOrders")
+    require(isinstance(positions,list) and all(isinstance(row,dict) for row in positions),
+            "ASTER_SIGNED_GET_POSITIONS_INVALID")
+    require(isinstance(orders,list) and all(isinstance(row,dict) for row in orders),
+            "ASTER_SIGNED_GET_ORDERS_INVALID")
+    require(len(positions)==0 and len(orders)==0, "ASTER_ACCOUNT_NOT_FLAT")
     return {
       "observedAt":value.get("observedAt"),
       "positionCount":len(positions),
@@ -198,7 +199,7 @@ def main(runner: str,run_id: str) -> None:
     print("PID="+str(pid))
     print("ASTER_PRE_OBSERVED="+str(before["observedAt"]))
     print("ASTER_POST_OBSERVED="+str(after["observedAt"]))
-    print("RESIDENT_DOGE_STOP_PRESERVED=TRUE")
+    print("ASTER_FLAT_BEFORE_AFTER=TRUE")
     print("ORDERS_SENT_BY_HELPER=0 CANCELS_SENT_BY_HELPER=0 STOP_CHANGES_BY_HELPER=0")
 
 if __name__=="__main__":
