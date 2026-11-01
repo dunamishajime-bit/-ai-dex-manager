@@ -29,6 +29,8 @@ export type DeploymentApprovalRecord = {
   createdAt: number;
   requestExpiresAt: number;
   updatedAt: number;
+  /** Opaque compare-and-swap version for file-backed updates. */
+  storeRevision?: string;
   status: DeploymentApprovalStatus;
   otpHash?: string;
   otpSentAt?: number;
@@ -81,36 +83,34 @@ async function redisClient() {
 
 function loadFileRecords(): DeploymentApprovalRecord[] {
   try {
-    if (!fs.existsSync(FILE_PATH)) return [];
-    return JSON.parse(fs.readFileSync(FILE_PATH, "utf8")) as DeploymentApprovalRecord[];
-  } catch (error) {
-    console.error("[DeployApproval] failed to read approval store", error);
-    return [];
+    const parsed: unknown = JSON.parse(fs.readFileSync(FILE_PATH, "utf8"));
+    if (!Array.isArray(parsed)) throw new Error("APPROVAL_STORE_INVALID");
+    return parsed as DeploymentApprovalRecord[];
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return [];
+    throw new Error("APPROVAL_STORE_INVALID_OR_UNREADABLE", { cause: error });
   }
 }
 
 function saveFileRecords(records: DeploymentApprovalRecord[]) {
   const dir = path.dirname(FILE_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const tmp = `${FILE_PATH}.tmp-${process.pid}-${Date.now()}`;
-  fs.writeFileSync(tmp, JSON.stringify(records, null, 2), { encoding: "utf8", mode: 0o600 });
-  fs.renameSync(tmp, FILE_PATH);
+  const tmp = `${FILE_PATH}.tmp-${process.pid}-${crypto.randomUUID()}`;
+  fs.writeFileSync(tmp, JSON.stringify(records, null, 2), { encoding: "utf8", mode: 0o600, flag: "wx" });
+  try {
+    fs.renameSync(tmp, FILE_PATH);
+  } finally {
+    try { fs.unlinkSync(tmp); } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") throw error;
+    }
+  }
 }
 
-
-/** File mode uses an exclusive directory lock for multi-Action task claims. */
-export async function mutateDeploymentApprovalAtomic<T>(
-  id: string,
-  update: (current: DeploymentApprovalRecord | null) => {
-    next?: DeploymentApprovalRecord;
-    result: T;
-  },
-): Promise<T> {
-  // A Redis transaction would be needed for atomic claims. Fail closed instead.
-  if (USE_REDIS) throw new Error("TASK_CLAIMS_REQUIRE_ATOMIC_STORAGE");
+async function withFileLock<T>(fn: () => T): Promise<T> {
+  await fs.promises.mkdir(path.dirname(FILE_PATH), { recursive: true, mode: 0o700 });
   const lockPath = FILE_PATH + ".task-lock";
   let acquired = false;
-  for (let i = 0; i < 50; i += 1) {
+  for (let i = 0; i < 200; i += 1) {
     try {
       await fs.promises.mkdir(lockPath, { mode: 0o700 });
       acquired = true;
@@ -122,6 +122,23 @@ export async function mutateDeploymentApprovalAtomic<T>(
   }
   if (!acquired) throw new Error("APPROVAL_STORE_BUSY_FAIL_CLOSED");
   try {
+    return fn();
+  } finally {
+    await fs.promises.rmdir(lockPath);
+  }
+}
+
+/** File mode uses an exclusive directory lock for multi-Action task claims. */
+export async function mutateDeploymentApprovalAtomic<T>(
+  id: string,
+  update: (current: DeploymentApprovalRecord | null) => {
+    next?: DeploymentApprovalRecord;
+    result: T;
+  },
+): Promise<T> {
+  // A Redis transaction would be needed for atomic claims. Fail closed instead.
+  if (USE_REDIS) throw new Error("TASK_CLAIMS_REQUIRE_ATOMIC_STORAGE");
+  return withFileLock(() => {
     if (!fs.existsSync(FILE_PATH)) throw new Error("APPROVAL_STORE_MISSING");
     const raw = JSON.parse(fs.readFileSync(FILE_PATH, "utf8")) as unknown;
     if (!Array.isArray(raw)) throw new Error("APPROVAL_STORE_INVALID");
@@ -129,16 +146,14 @@ export async function mutateDeploymentApprovalAtomic<T>(
     const current = records.find((item) => item.id === id) || null;
     const result = update(current);
     if (result.next) {
-      const next = { ...result.next, updatedAt: Date.now() };
+      const next = { ...result.next, updatedAt: Date.now(), storeRevision: crypto.randomUUID() };
       const updated = records.filter((record) => record.id !== id);
       updated.push(next);
       updated.sort((a, b) => b.createdAt - a.createdAt);
       saveFileRecords(updated.slice(0, 50));
     }
     return result.result;
-  } finally {
-    await fs.promises.rmdir(lockPath);
-  }
+  });
 }
 
 export function sanitizeDeploymentApproval(
@@ -166,11 +181,20 @@ export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
     await redis.set(LATEST_KEY, next.id, { ex: 60 * 60 * 2 });
     return next;
   }
-  const records = loadFileRecords().filter((item) => item.id !== next.id);
-  records.push(next);
-  records.sort((a, b) => b.createdAt - a.createdAt);
-  saveFileRecords(records.slice(0, 50));
-  return next;
+  return withFileLock(() => {
+    const existing = loadFileRecords();
+    const current = existing.find((item) => item.id === next.id);
+    if (current && current.storeRevision !== next.storeRevision) {
+      throw new Error("APPROVAL_STORE_STALE_WRITE_FAIL_CLOSED");
+    }
+    if (!current && next.storeRevision) throw new Error("APPROVAL_STORE_STALE_WRITE_FAIL_CLOSED");
+    const persisted = { ...next, storeRevision: crypto.randomUUID() };
+    const records = existing.filter((item) => item.id !== next.id);
+    records.push(persisted);
+    records.sort((a, b) => b.createdAt - a.createdAt);
+    saveFileRecords(records.slice(0, 50));
+    return persisted;
+  });
 }
 
 export async function getLatestDeploymentApproval() {
