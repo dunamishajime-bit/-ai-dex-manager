@@ -17,15 +17,26 @@ SHA = "7688ed7c93a1918d8b44837339b7da5584a868f5"
 class PinnedV52AuditTests(unittest.TestCase):
     def test_absent_pin_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            ok, reason = guard.v52_live_pinned(Path(tmp) / "missing", Path(tmp) / "hb")
+            ok, reason = guard.v52_live_pinned(Path(tmp) / "missing")
             self.assertFalse(ok)
             self.assertNotEqual(reason, "V52_PINNED_IDENTITY_PASS")
 
     def test_invalid_pin_fails_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            pin = Path(tmp) / "v52-current.env"
-            pin.write_text("DISDEX_V52_RUNTIME_SHA=bad\nDISDEX_V52_RUNTIME_ROOT=/tmp/invalid\n")
-            ok, reason = guard.v52_live_pinned(pin, Path(tmp) / "hb")
+            pin = Path(tmp) / "runner-pins.json"
+            pin.write_text(json.dumps({
+                "schema": "disdex-runner-pin-manifest/v2",
+                "target": "professional-dismanager.net",
+                "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
+                "runners": {"V52": {
+                    "sha": "bad", "releaseRoot": "/tmp/invalid",
+                    "serviceUnit": "disdex-v52-aster-only@bad.service",
+                    "evidenceMode": "legacy-state-v1",
+                    "healthPath": "/var/lib/disdex/v52-aster-only/runner-live.json",
+                    "tickPath": "/var/lib/disdex/runner-health/ticks/v52.json",
+                }},
+            }))
+            ok, reason = guard.v52_live_pinned(pin)
             self.assertFalse(ok)
             self.assertNotEqual(reason, "V52_PINNED_IDENTITY_PASS")
 
