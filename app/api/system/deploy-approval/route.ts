@@ -2,8 +2,6 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import {
   createPendingDeploymentApproval,
-  getDeploymentApproval,
-  saveDeploymentApproval,
   sanitizeDeploymentApproval,
   mutateDeploymentApprovalAtomic,
 } from "@/lib/server/deploy-approval-store";
@@ -268,57 +266,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: "invalid redemption request" }, { status: 400 });
     }
 
-    const record = await getDeploymentApproval(approvalId);
-    if (!record) return NextResponse.json({ ok: false, error: "approval not found" }, { status: 404 });
-    if (record.operation === "ALL_RUNNERS_LIVE_RESTORE") {
-      return NextResponse.json({ ok: false, error: "task approval must use scoped task-stage claims" }, { status: 409 });
-    }
+    try {
+      const response = await mutateDeploymentApprovalAtomic(approvalId, (record) => {
+        if (!record) throw new Error("APPROVAL_NOT_FOUND");
+        if (record.operation === "ALL_RUNNERS_LIVE_RESTORE") {
+          throw new Error("TASK_APPROVAL_MUST_USE_SCOPED_STAGE_CLAIMS");
+        }
 
-    const operation = recordOperation(record);
-    const policy = DEPLOY_APPROVAL_OPERATION_POLICY[requestedOperation];
-    if (
-      operation !== requestedOperation ||
-      record.targetSha !== targetSha ||
-      record.planSha256 !== planSha256 ||
-      record.scope !== policy.scope ||
-      (record.ordersEnabled ?? true) !== policy.ordersEnabled
-    ) {
-      return NextResponse.json({ ok: false, error: "approval identity mismatch" }, { status: 409 });
-    }
+        const operation = recordOperation(record);
+        const policy = DEPLOY_APPROVAL_OPERATION_POLICY[requestedOperation];
+        if (
+          operation !== requestedOperation ||
+          record.targetSha !== targetSha ||
+          record.planSha256 !== planSha256 ||
+          record.scope !== policy.scope ||
+          (record.ordersEnabled ?? true) !== policy.ordersEnabled
+        ) {
+          throw new Error("APPROVAL_IDENTITY_MISMATCH");
+        }
 
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    if (!record.approvalToken || !record.approvalTokenExpiresAt || record.approvalTokenExpiresAt < nowSeconds) {
-      return NextResponse.json({ ok: false, error: "approval token expired" }, { status: 410 });
-    }
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        if (!record.approvalToken || !record.approvalTokenExpiresAt ||
+            record.approvalTokenExpiresAt < nowSeconds) {
+          throw new Error("APPROVAL_TOKEN_EXPIRED");
+        }
 
-    if (record.status === "REDEEMED") {
-      if (record.redeemedByRunId !== runId) {
-        return NextResponse.json({ ok: false, error: "approval already redeemed" }, { status: 409 });
-      }
-      return NextResponse.json({
-        ok: true,
-        token: record.approvalToken,
-        approval: sanitizeDeploymentApproval(record),
-        replay: true,
+        if (record.status === "REDEEMED") {
+          if (record.redeemedByRunId !== runId) throw new Error("APPROVAL_ALREADY_REDEEMED");
+          return {
+            result: {
+              ok: true,
+              token: record.approvalToken,
+              approval: sanitizeDeploymentApproval(record),
+              replay: true,
+            },
+          };
+        }
+
+        if (!["APPROVED", "DISPATCHED"].includes(record.status)) {
+          throw new Error("APPROVAL_NOT_REDEEMABLE");
+        }
+
+        const next = {
+          ...record,
+          status: "REDEEMED" as const,
+          redeemedAt: Date.now(),
+          redeemedByRunId: runId,
+        };
+        return {
+          next,
+          result: {
+            ok: true,
+            token: next.approvalToken!,
+            approval: sanitizeDeploymentApproval(next),
+            replay: false,
+          },
+        };
       });
+      return NextResponse.json(response);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "approval redemption rejected";
+      const status = message === "APPROVAL_NOT_FOUND" ? 404
+        : message === "APPROVAL_TOKEN_EXPIRED" ? 410
+          : 409;
+      return NextResponse.json({ ok: false, error: message }, { status });
     }
-
-    if (!["APPROVED", "DISPATCHED"].includes(record.status)) {
-      return NextResponse.json({ ok: false, error: "approval is not redeemable" }, { status: 409 });
-    }
-
-    const redeemed = await saveDeploymentApproval({
-      ...record,
-      status: "REDEEMED",
-      redeemedAt: Date.now(),
-      redeemedByRunId: runId,
-    });
-    return NextResponse.json({
-      ok: true,
-      token: redeemed.approvalToken,
-      approval: sanitizeDeploymentApproval(redeemed),
-      replay: false,
-    });
   }
 
   return NextResponse.json({ ok: false, error: "unsupported action" }, { status: 400 });

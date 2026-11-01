@@ -69,27 +69,10 @@ jobs:
           print("comment_id=" + os.environ["COMMENT_ID"])
           PY
 
-      - name: Configure pinned root SSH
+      - name: Publish pending request through authenticated HP approval API
         shell: bash
         env:
-          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
-        run: |
-          set -euo pipefail
-          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
-          umask 077
-          install -d -m 0700 "$HOME/.ssh"
-          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
-          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
-
-      - name: Publish pending request to HP shared approval store
-        shell: bash
-        env:
-          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
           OPERATION: ${{ steps.request.outputs.operation }}
           SCOPE: ${{ steps.request.outputs.scope }}
           ORDERS_ENABLED: ${{ steps.request.outputs.orders_enabled }}
@@ -99,101 +82,47 @@ jobs:
           ACTOR: ${{ github.actor }}
         run: |
           set -euo pipefail
-          PORT="${SSH_PORT:-22}"
-          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
-          ssh -T -i "$HOME/.ssh/id_vps_root" \
-            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10 \
-            -p "$PORT" "root@$SSH_HOST" \
-            "OPERATION='$OPERATION' SCOPE='$SCOPE' ORDERS_ENABLED='$ORDERS_ENABLED' TARGET_SHA='$TARGET_SHA' PLAN_SHA256='$PLAN_SHA256' COMMENT_ID='$COMMENT_ID' ACTOR='$ACTOR' python3 - <<'PY'
-          import json, os, pathlib, pwd, tempfile, time, uuid
+          [[ -n "$BRIDGE_SECRET" ]]
+          python3 - <<'PY'
+          import json, os, urllib.request
 
-          operation = os.environ['OPERATION']
-          scope = os.environ['SCOPE']
-          orders_enabled = os.environ['ORDERS_ENABLED'].lower() == 'true'
-          target = os.environ['TARGET_SHA']
-          plan = os.environ['PLAN_SHA256']
-          comment_id = os.environ['COMMENT_ID']
-          actor = os.environ['ACTOR']
-          path = pathlib.Path('/home/deploy/disdex-ui/shared/data/deploy-approvals.json')
-          path.parent.mkdir(parents=True, exist_ok=True)
-          now = int(time.time() * 1000)
-          records = []
-          if path.exists():
-              loaded = json.loads(path.read_text(encoding='utf-8'))
-              if not isinstance(loaded, list):
-                  raise SystemExit('APPROVAL_STORE_INVALID_JSON')
-              records = loaded
-
-          active = {'PENDING', 'OTP_SENT', 'APPROVED', 'DISPATCHED'}
-          existing = next(
-              (
-                  r for r in records
-                  if r.get('targetSha') == target
-                  and r.get('planSha256') == plan
-                  and (r.get('operation') or ('V12_V4_LIVE' if r.get('scope') == 'V12_V4' else None)) == operation
-                  and r.get('scope') == scope
-                  and bool(r.get('ordersEnabled', True)) == orders_enabled
-                  and r.get('status') in active
-                  and int(r.get('requestExpiresAt') or 0) > now
-              ),
-              None,
+          body = json.dumps({
+              "action": "publish",
+              "operation": os.environ["OPERATION"],
+              "scope": os.environ["SCOPE"],
+              "orders_enabled": os.environ["ORDERS_ENABLED"].lower() == "true",
+              "target_sha": os.environ["TARGET_SHA"],
+              "plan_sha256": os.environ["PLAN_SHA256"],
+              "actor": os.environ["ACTOR"],
+              "comment_id": os.environ["COMMENT_ID"],
+          }).encode("utf-8")
+          request = urllib.request.Request(
+              "https://professional-dismanager.net/api/system/deploy-approval",
+              data=body,
+              method="POST",
+              headers={
+                  "Authorization": "Bearer " + os.environ["BRIDGE_SECRET"],
+                  "Content-Type": "application/json",
+              },
           )
-          if existing:
-              print('APPROVAL_REQUEST_ID=' + str(existing.get('id')))
-              print('APPROVAL_REQUEST_REUSED=TRUE')
-              raise SystemExit(0)
-
-          for record in records:
-              if (
-                  record.get('status') in {'PENDING', 'OTP_SENT', 'APPROVED'}
-                  and int(record.get('requestExpiresAt') or 0) <= now
-              ):
-                  record['status'] = 'EXPIRED'
-                  record['lastError'] = 'request expired'
-                  record['updatedAt'] = now
-
-          request_id = str(uuid.uuid4())
-          records.append({
-              'id': request_id,
-              'scope': scope,
-              'operation': operation,
-              'ordersEnabled': orders_enabled,
-              'targetSha': target,
-              'planSha256': plan,
-              'requestActor': actor,
-              'requestCommentId': comment_id,
-              'createdAt': now,
-              'requestExpiresAt': now + 30 * 60 * 1000,
-              'updatedAt': now,
-              'status': 'PENDING',
-          })
-          records = sorted(records, key=lambda x: int(x.get('createdAt') or 0), reverse=True)[:50]
-
-          fd, tmp_name = tempfile.mkstemp(prefix='.deploy-approvals-', dir=str(path.parent))
-          try:
-              with os.fdopen(fd, 'w', encoding='utf-8') as handle:
-                  json.dump(records, handle, ensure_ascii=False, indent=2)
-                  handle.write('\n')
-                  handle.flush()
-                  os.fsync(handle.fileno())
-              deploy_user = pwd.getpwnam('deploy')
-              os.chown(tmp_name, deploy_user.pw_uid, deploy_user.pw_gid)
-              os.chmod(tmp_name, 0o600)
-              os.replace(tmp_name, path)
-          finally:
-              if os.path.exists(tmp_name):
-                  os.unlink(tmp_name)
-
-          print('APPROVAL_REQUEST_ID=' + request_id)
-          print('APPROVAL_REQUEST_PUBLISHED=TRUE')
-          print('OPERATION=' + operation)
-          print('SCOPE=' + scope)
-          print('ORDERS_ENABLED=' + str(orders_enabled).lower())
-          print('TRADING_MUTATION=0')
-          PY"
-
-      - name: Destroy SSH material
-        if: always()
-        shell: bash
-        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          with urllib.request.urlopen(request, timeout=15) as response:
+              result = json.load(response)
+          approval = result.get("approval") or {}
+          expected_orders = os.environ["ORDERS_ENABLED"].lower() == "true"
+          if not result.get("ok"):
+              raise SystemExit("APPROVAL_API_NOT_OK")
+          if approval.get("operation") != os.environ["OPERATION"]:
+              raise SystemExit("APPROVAL_OPERATION_MISMATCH")
+          if approval.get("scope") != os.environ["SCOPE"]:
+              raise SystemExit("APPROVAL_SCOPE_MISMATCH")
+          if approval.get("targetSha") != os.environ["TARGET_SHA"]:
+              raise SystemExit("APPROVAL_TARGET_SHA_MISMATCH")
+          if approval.get("planSha256") != os.environ["PLAN_SHA256"]:
+              raise SystemExit("APPROVAL_PLAN_HASH_MISMATCH")
+          if approval.get("ordersEnabled") is not expected_orders:
+              raise SystemExit("APPROVAL_ORDER_PERMISSION_MISMATCH")
+          print("APPROVAL_REQUEST_ID=" + str(approval.get("id")))
+          print("APPROVAL_REQUEST_STATUS=" + str(approval.get("status")))
+          print("APPROVAL_REQUEST_PUBLISHED_VIA_API=TRUE")
+          print("TRADING_MUTATION=0")
+          PY

@@ -18,6 +18,11 @@ on:
       - "app/api/system/deploy-approval/**"
       - "app/admin/page.tsx"
       - "scripts/disdex-hp-deploy-approval-selftest.ts"
+      - "tests/deploy-approval-store-concurrency.test.ts"
+      - "tests/fixtures/approval-store-writer.ts"
+      - "tests/deploy-approval-direct-writer.test.mjs"
+      - ".github/workflows/disdex-v4-hp-approval-request.yml"
+      - ".github/workflows/disdex-v4-doge-missed-time-exit-approval-request.yml"
       - "package.json"
       - "next.config.mjs"
       - ".github/workflows/disdex-v4-hp-approval-request.yml"
@@ -53,6 +58,12 @@ jobs:
 
       - name: HP approval token interoperability
         run: npm run deploy:hp-approval:selftest
+
+      - name: Approval store concurrency and corruption
+        run: node --import tsx --test tests/deploy-approval-store-concurrency.test.ts
+
+      - name: Legacy direct-writer and atomic redeem contract
+        run: node --test tests/deploy-approval-direct-writer.test.mjs
 
       - name: Production HP build
         run: |
