@@ -67,7 +67,7 @@ jobs:
           if audit.is_file() and not audit.is_symlink():
               print('AUDIT_LOG_RELEVANT_BEGIN')
               for line in audit.read_text(errors='replace').splitlines()[-20000:]:
-                  if re.search(r'3065213|disdex-pengu|comm="(kill|systemctl)"|exe="/usr/bin/(kill|systemctl)"',line,re.I):
+                  if re.search(r'3065213|disdex-pengu|comm=.*(kill|systemctl)|exe=.*/usr/bin/(kill|systemctl)',line,re.I):
                       print(line[:3000])
               print('AUDIT_LOG_RELEVANT_END')
 
