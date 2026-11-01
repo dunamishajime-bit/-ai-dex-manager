@@ -1,0 +1,54 @@
+name: DisDex Runner Pin Manifest V2 CI
+
+on:
+  pull_request:
+    paths:
+      - 'config/production-runner-pins-DD1296_FINAL_ALLIN_10BPS.json'
+      - 'lib/server/runner-pin-manifest.ts'
+      - 'app/api/system/runner-health/route.ts'
+      - 'scripts/ops/root/disdex-fet-preemption-readiness-guard.py'
+      - 'scripts/ops/root/disdex-runner-pin-v2-render.py'
+      - 'tests/runner-pin-manifest-v2.test.ts'
+      - 'tests/runner-health-manifest-contract.test.mjs'
+      - 'tests/test_fet_v52_manifest_pin.py'
+      - '.github/workflows/disdex-runner-pin-v2-ci.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'config/production-runner-pins-DD1296_FINAL_ALLIN_10BPS.json'
+      - 'lib/server/runner-pin-manifest.ts'
+      - 'app/api/system/runner-health/route.ts'
+      - 'scripts/ops/root/disdex-fet-preemption-readiness-guard.py'
+      - 'scripts/ops/root/disdex-runner-pin-v2-render.py'
+      - 'tests/runner-pin-manifest-v2.test.ts'
+      - 'tests/runner-health-manifest-contract.test.mjs'
+      - 'tests/test_fet_v52_manifest_pin.py'
+      - '.github/workflows/disdex-runner-pin-v2-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Runner manifest TypeScript contract
+        run: node --import tsx --test tests/runner-pin-manifest-v2.test.ts
+      - name: Runner-health source contract
+        run: node --test tests/runner-health-manifest-contract.test.mjs
+      - name: FET manifest contract and regression
+        run: python3 -m unittest tests.test_fet_v52_manifest_pin tests.test_fet_preemption_v52_pin_20261028 -v
+      - name: Python compile
+        run: python3 -m py_compile scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+      - name: TypeScript typecheck
+        run: npm run typecheck
