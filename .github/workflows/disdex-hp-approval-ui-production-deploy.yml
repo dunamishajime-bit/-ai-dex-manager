@@ -70,11 +70,19 @@ jobs:
           npm ci --ignore-scripts
           npm run deploy:hp-approval:selftest
           npm run build
-          test -f .next/BUILD_ID
-          npm prune --omit=dev --ignore-scripts
-          test -x node_modules/.bin/next
-          printf '%s\n' "$TARGET_SHA" > .disdex-release-sha
-          tar -czf /tmp/disdex-hp-approval-ui-runtime.tgz             .next node_modules public package.json package-lock.json next.config.mjs .disdex-release-sha
+          test -f .next/standalone/server.js
+          test -f .next/standalone/.next/BUILD_ID
+          runtime="$RUNNER_TEMP/disdex-hp-standalone-runtime"
+          rm -rf "$runtime"
+          install -d -m 0755 "$runtime"
+          cp -a .next/standalone/. "$runtime/"
+          rm -rf "$runtime/.next/static" "$runtime/public"
+          cp -a .next/static "$runtime/.next/static"
+          cp -a public "$runtime/public"
+          printf '%s\n' "$TARGET_SHA" > "$runtime/.disdex-release-sha"
+          test -f "$runtime/server.js"
+          node --check "$runtime/server.js"
+          tar -C "$runtime" -czf /tmp/disdex-hp-approval-ui-runtime.tgz .
           echo "RUNTIME_ARCHIVE_BYTES=$(stat -c %s /tmp/disdex-hp-approval-ui-runtime.tgz)"
 
       - name: Configure pinned root SSH
@@ -185,8 +193,9 @@ jobs:
           install -d -o deploy -g deploy -m 0755 "$stage"
           tar --no-same-owner -xzf "$archive" -C "$stage"
           rm -f -- "$archive"
-          [[ -f "$stage/.next/BUILD_ID" && -x "$stage/node_modules/.bin/next" ]]
+          [[ -f "$stage/server.js" && -f "$stage/.next/BUILD_ID" ]]
           [[ "$(tr -d '[:space:]' < "$stage/.disdex-release-sha")" == "$TARGET_SHA" ]]
+          runuser -u deploy -- node --check "$stage/server.js"
 
           shared_data='/home/deploy/disdex-ui/shared/data'
           install -d -o deploy -g deploy -m 0750 "$shared_data"

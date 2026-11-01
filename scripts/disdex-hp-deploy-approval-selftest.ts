@@ -98,6 +98,26 @@ try {
     planSha256: "3".repeat(64),
   });
 
+  const workflow = fs.readFileSync(
+    ".github/workflows/disdex-hp-approval-ui-production-deploy.yml",
+    "utf8",
+  );
+  for (const required of [
+    "test -f .next/standalone/server.js",
+    "cp -a .next/standalone/. \"$runtime/\"",
+    "test -f \"$runtime/server.js\"",
+    "tar -C \"$runtime\" -czf /tmp/disdex-hp-approval-ui-runtime.tgz .",
+    "[[ -f \"$stage/server.js\" && -f \"$stage/.next/BUILD_ID\" ]]",
+    "runuser -u deploy -- node --check \"$stage/server.js\"",
+  ]) {
+    if (!workflow.includes(required)) {
+      throw new Error("HP deploy standalone runtime contract missing: " + required);
+    }
+  }
+  if (workflow.includes("tar -czf /tmp/disdex-hp-approval-ui-runtime.tgz             .next node_modules")) {
+    throw new Error("legacy non-standalone HP runtime packaging returned");
+  }
+
   console.log("DISDEX_HP_DEPLOY_APPROVAL_SELFTEST_OK");
 } finally {
   fs.rmSync(dir, { recursive: true, force: true });
