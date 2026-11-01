@@ -6,7 +6,7 @@ the durable V4 leg, planned TIME exit, protected STOP, shared risk state and
 signed Aster venue state still match the incident being reviewed.
 """
 from __future__ import annotations
-import json, pathlib, subprocess, time
+import argparse, json, pathlib, subprocess, time
 
 V4_SHA="53a0be396719f0284af4e11b35c66a4ac7d58f79"
 MAIN_SHA="7688ed7c93a1918d8b44837339b7da5584a868f5"
@@ -26,9 +26,13 @@ def req(ok, why):
 def same(a,b):
     return abs(float(a)-float(b)) <= max(1e-8,abs(float(b))*1e-7)
 
-def active(unit):
+def service_state(unit):
     p=subprocess.run(["systemctl","is-active",unit],capture_output=True,text=True,timeout=10)
-    return p.stdout.strip()=="active"
+    state=p.stdout.strip() or "unknown"
+    pid=subprocess.run(["systemctl","show",unit,"-p","MainPID","--value"],capture_output=True,text=True,timeout=10)
+    try: main_pid=int((pid.stdout or "0").strip() or "0")
+    except ValueError: main_pid=-1
+    return state,main_pid
 
 def read(path):
     req(path.is_file() and not path.is_symlink(),"UNTRUSTED_FILE:"+str(path))
@@ -57,7 +61,16 @@ def signed_get():
     return d
 
 def main():
-    req(active(V4_UNIT),"V4_NOT_ACTIVE")
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--allow-quiesced",action="store_true",
+        help="Allow inactive/failed exact V4 unit only when MainPID is zero. Read-only recovery handoff mode.")
+    args=parser.parse_args()
+    v4_state,v4_pid=service_state(V4_UNIT)
+    if args.allow_quiesced:
+        req(v4_state=="active" or (v4_state in {"inactive","failed"} and v4_pid==0),
+            "V4_NOT_ACTIVE_OR_SAFELY_QUIESCED")
+    else:
+        req(v4_state=="active","V4_NOT_ACTIVE")
     req(pathlib.Path("/home/deploy/disdex-trading/current/.disdex-release-sha").read_text().strip()==MAIN_SHA,
         "CURRENT_SHA_CHANGED")
     store=read(STORE)
@@ -105,6 +118,9 @@ def main():
         "plannedExitPrice":0.07505,
         "plannedExitReason":"TIME",
         "heartbeatReason":hb.get("reason"),
+        "v4ServiceState":v4_state,
+        "v4MainPid":v4_pid,
+        "allowQuiesced":args.allow_quiesced,
         "venueObservedAt":venue.get("observedAt"),
         "markPrice":pos[0].get("markPrice"),
         "residentStopClientOrderId":STOP_ID,
