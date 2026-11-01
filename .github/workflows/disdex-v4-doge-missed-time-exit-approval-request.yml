@@ -1,0 +1,98 @@
+name: DisDex V4 DOGE Missed TIME Exit Approval Request
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-v4-doge-missed-time-exit-approval
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT ')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Bind exact DOGE incident and plan hash
+        id: request
+        shell: bash
+        env:
+          BODY: ${{ github.event.comment.body }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import hashlib, os, pathlib, re
+          body=os.environ["BODY"].strip()
+          match=re.fullmatch(
+            r"DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT SHA=([0-9a-f]{40})",
+            body,
+          )
+          if not match:
+            raise SystemExit("request does not match exact DOGE operator grammar")
+          target=match.group(1)
+          expected="53a0be396719f0284af4e11b35c66a4ac7d58f79"
+          if target != expected:
+            raise SystemExit("DOGE operator request must target exact V4 runtime SHA")
+          path=pathlib.Path("docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json")
+          raw=path.read_bytes()
+          plan=hashlib.sha256(raw).hexdigest()
+          print("target_sha="+target)
+          print("plan_sha256="+plan)
+          print("comment_id="+os.environ["COMMENT_ID"])
+          PY
+
+      - name: Publish exact pending request to HP approval service
+        shell: bash
+        env:
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
+          PLAN_SHA256: ${{ steps.request.outputs.plan_sha256 }}
+          COMMENT_ID: ${{ steps.request.outputs.comment_id }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          [[ -n "$BRIDGE_SECRET" ]]
+          python3 - <<'PY'
+          import json, os, urllib.request
+          body=json.dumps({
+            "action":"publish",
+            "operation":"V4_DOGE_MISSED_TIME_EXIT",
+            "scope":"V12_V4",
+            "orders_enabled":True,
+            "target_sha":os.environ["TARGET_SHA"],
+            "plan_sha256":os.environ["PLAN_SHA256"],
+            "actor":os.environ["ACTOR"],
+            "comment_id":os.environ["COMMENT_ID"],
+          }).encode()
+          req=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body, method="POST",
+            headers={"Authorization":"Bearer "+os.environ["BRIDGE_SECRET"],
+                     "Content-Type":"application/json"},
+          )
+          with urllib.request.urlopen(req,timeout=15) as res:
+            data=json.load(res)
+          approval=data.get("approval") or {}
+          assert data.get("ok") is True
+          assert approval.get("operation")=="V4_DOGE_MISSED_TIME_EXIT"
+          assert approval.get("scope")=="V12_V4"
+          assert approval.get("ordersEnabled") is True
+          print("DOGE_APPROVAL_REQUEST_ID="+str(approval.get("id")))
+          print("DOGE_APPROVAL_STATUS="+str(approval.get("status")))
+          print("TRADING_MUTATION=0")
+          PY
