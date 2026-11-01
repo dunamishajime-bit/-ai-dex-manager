@@ -85,6 +85,15 @@ jobs:
           echo "UI_LOCAL_HTTP=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
           echo 'TRADING_MUTATION=0'
           echo 'HP_APPROVAL_READONLY_PREFLIGHT=PASS'
+          echo '--- UI_SERVICE_READONLY_DIAGNOSTIC ---'
+          systemctl show "$svc" --no-pager \
+            --property=ActiveState,SubState,Result,MainPID,ExecMainStatus,WorkingDirectory,FragmentPath,DropInPaths \
+            | sed -E 's#(/etc/systemd/system/[^ ]+)#\1#g'
+          journalctl -u "$svc" --since '2026-11-01 03:08:30' --until '2026-11-01 03:11:00' \
+            --no-pager -o short-iso 2>/dev/null \
+            | grep -Ei 'error|failed|failure|exception|enoent|eacces|module|next|listen|address|port|ready|start' \
+            | tail -n 120 || true
+          echo '--- END_UI_SERVICE_READONLY_DIAGNOSTIC ---'
           REMOTE
 
       - name: Destroy SSH material
