@@ -88,3 +88,58 @@ test("monitor manifest fails closed on wrong target and never falls back to stal
 test("monitor resolver explicitly returns legacy-env mode when no manifest path is supplied", () => {
   assert.deepEqual(resolveMonitorRunnerPins({}),{source:"legacy-env",runners:null,path:null});
 });
+
+
+test("health snapshot runner definitions use manifest V52 identity instead of stale env", async () => {
+  const dir=await mkdtemp(join(tmpdir(),"disdex-health-manifest-"));
+  const saved={...process.env};
+  try {
+    const path=join(dir,"runner-pins.json");
+    await writeFile(path,JSON.stringify(manifest()),"utf8");
+    process.env.DISDEX_HEALTH_SNAPSHOT_RUNNER_PIN_MANIFEST_PATH=path;
+    process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE="V4";
+    process.env.DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=STALE_V52;
+    process.env.DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT=`/home/deploy/disdex-trading/releases/${STALE_V52}`;
+    const mod=await import(new URL("../scripts/ops/root/disdex-runner-health-snapshot-current.mjs?manifest-authority=1",import.meta.url));
+    const v52=mod.RUNNER_DEFINITIONS.find((row)=>row.runnerId==="V52");
+    assert.equal(v52.expectedSha,ACTUAL_V52);
+    assert.equal(v52.unit,`disdex-v52-aster-only@${ACTUAL_V52}.service`);
+    assert.equal(v52.healthPath,"/var/lib/disdex/runner-health/heartbeats/v52.json");
+    assert.equal(v52.tickPath,"/var/lib/disdex/runner-health/ticks/V52.json");
+  } finally {
+    for(const key of Object.keys(process.env)) if(!(key in saved)) delete process.env[key];
+    Object.assign(process.env,saved);
+    await rm(dir,{recursive:true,force:true});
+  }
+});
+
+test("watchdog config uses manifest V52, Shared Risk, and Margin Guard identities over stale env", async () => {
+  const dir=await mkdtemp(join(tmpdir(),"disdex-watchdog-manifest-"));
+  try {
+    const path=join(dir,"runner-pins.json");
+    await writeFile(path,JSON.stringify(manifest()),"utf8");
+    const mod=await import(new URL("../scripts/ops/root/disdex-runner-watchdog-current.mjs?manifest-authority=1",import.meta.url));
+    assert.equal(typeof mod.buildWatchdogConfigForTest,"function");
+    const cfg=mod.buildWatchdogConfigForTest({
+      DISDEX_RUNNER_PIN_MANIFEST_PATH:path,
+      DISDEX_WATCHDOG_V12_MODE:"V4",
+      DISDEX_WATCHDOG_RELEASE_ROOT:`/home/deploy/disdex-trading/releases/${LEGACY}`,
+      DISDEX_WATCHDOG_EXPECTED_SHA:LEGACY,
+      DISDEX_WATCHDOG_APPROVED_SHA:LEGACY,
+      DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH:"/var/lib/disdex/shared/operator-activation/current.json",
+      DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH:"/var/lib/disdex/shared/operator-activation/v12-v4-full.json",
+      DISDEX_WATCHDOG_V52_EXPECTED_SHA:STALE_V52,
+      DISDEX_WATCHDOG_V52_RELEASE_ROOT:`/home/deploy/disdex-trading/releases/${STALE_V52}`,
+      DISDEX_WATCHDOG_V52_SERVICE_UNIT:`disdex-v52-aster-only@${STALE_V52}.service`,
+    });
+    assert.equal(cfg.runnerConfig.V52.expectedSha,ACTUAL_V52);
+    assert.equal(cfg.runnerConfig.V52.unit,`disdex-v52-aster-only@${ACTUAL_V52}.service`);
+    assert.equal(cfg.runnerConfig.V52.heartbeat,"/var/lib/disdex/runner-health/heartbeats/v52.json");
+    const shared=cfg.safetyDaemons.find((row)=>row.key==="SHARED_CRYPTO_RISK");
+    const margin=cfg.safetyDaemons.find((row)=>row.key==="MARGIN_GUARD");
+    assert.equal(shared.expectedSha,LEGACY);
+    assert.equal(shared.unit,`disdex-shared-crypto-risk@${LEGACY}.service`);
+    assert.equal(margin.expectedSha,LEGACY);
+    assert.equal(margin.unit,`disdex-v12-v52-margin-guard@${LEGACY}.service`);
+  } finally { await rm(dir,{recursive:true,force:true}); }
+});
