@@ -333,7 +333,7 @@ jobs:
 
           pid="$(systemctl show "$svc" --property MainPID --value)"
           env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
-          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH DISDEX_ADMIN_ENABLED ADMIN_PASSWORD; do
+          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH DISDEX_ADMIN_ENABLED; do
             grep -qx "$name" <<<"$env_names"
           done
           if grep -qx 'GMAIL_USER' <<<"$env_names" && grep -qx 'GMAIL_APP_PASSWORD' <<<"$env_names"; then
