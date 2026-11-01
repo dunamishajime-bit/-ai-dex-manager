@@ -1,4 +1,4 @@
-name: DisDex V4 DOGE Operator Request Stage
+name: DisDex V4 DOGE Operator Request Stage (Legacy Audit Only)
 
 on:
   workflow_dispatch:
@@ -23,6 +23,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
+      - name: Legacy route notice
+        shell: bash
+        run: |
+          echo 'This staging/inbox workflow is retained for audit compatibility only.'
+          echo 'Canonical DOGE recovery uses the NEAR-style dedicated direct executor contract.'
+          echo 'TRADING_MUTATION=0'
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
