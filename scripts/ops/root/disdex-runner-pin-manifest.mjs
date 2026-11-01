@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 export const RUNNER_PIN_MANIFEST_SCHEMA = "disdex-runner-pin-manifest/v2";
@@ -148,6 +149,19 @@ export async function loadRunnerPinManifestFromFile(path) {
   let parsed;
   try {
     parsed = JSON.parse(await readFile(path, "utf8"));
+  } catch (error) {
+    throw new Error(`RUNNER_PIN_MANIFEST_READ_FAILED:${error?.code || error?.name || "UNKNOWN"}`);
+  }
+  const result = validateRunnerPinManifest(parsed);
+  if (!result.ok) throw new Error(`RUNNER_PIN_MANIFEST_INVALID:${result.errors.join(",")}`);
+  return result.manifest;
+}
+
+export function loadRunnerPinManifestSyncFromFile(path) {
+  if (typeof path !== "string" || !path.trim()) throw new Error("RUNNER_PIN_MANIFEST_PATH_INVALID");
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(path, "utf8"));
   } catch (error) {
     throw new Error(`RUNNER_PIN_MANIFEST_READ_FAILED:${error?.code || error?.name || "UNKNOWN"}`);
   }
