@@ -1,0 +1,119 @@
+name: DisDex PENGU Stop-Capability Read-Only Audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-cap-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-cap-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-cap-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-cap-ssh/"*
+
+      - name: Inspect monitor services for PENGU stop capability
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-cap-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-cap-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import pathlib,re,subprocess
+          units=[
+            'disdex-runner-watchdog.service',
+            'disdex-runner-health-snapshot.service',
+            'disdex-runner-health-alert.service',
+            'disdex-seven-runner-readonly-audit.service',
+            'disdex-current-runtime-coherence-guard.service',
+            'disdex-v4-resident-stop-crosscheck.service',
+            'disdex-trade-fill-notifier.service',
+            'disdex-account-config-readiness.service',
+            'disdex-fet-preemption-readiness-audit.service',
+          ]
+
+          def run(*args):
+              p=subprocess.run(list(args),capture_output=True,text=True,timeout=15)
+              return p.returncode,p.stdout.strip(),p.stderr.strip()
+
+          for unit in units:
+              rc,show,err=run('systemctl','show',unit,'--no-pager',
+                  '--property=Id,LoadState,FragmentPath,DropInPaths,ExecStart,ActiveState,SubState')
+              print('MONITOR_UNIT_BEGIN='+unit)
+              print(show)
+              exec_line=next((x for x in show.splitlines() if x.startswith('ExecStart=')),'')
+              paths=re.findall(r'path=([^ ;}]+)',exec_line)
+              argv=re.findall(r'argv\[\]=([^;}]+)',exec_line)
+              candidates=[]
+              for raw in paths:
+                  candidates.append(raw)
+              if argv:
+                  try:
+                      import shlex
+                      candidates.extend(shlex.split(argv[0]))
+                  except Exception:
+                      pass
+              seen=set()
+              for raw in candidates:
+                  if raw in seen: continue
+                  seen.add(raw)
+                  p=pathlib.Path(raw)
+                  if not p.is_file() or p.is_symlink(): continue
+                  if p.stat().st_size>2_000_000: continue
+                  try: text=p.read_text(errors='replace')
+                  except Exception: continue
+                  hits=[]
+                  for n,line in enumerate(text.splitlines(),1):
+                      if re.search(r'pengu|systemctl\s+(stop|restart|kill|disable)|process\.kill|SIGTERM|SIGINT|kill\s+-|pkill|killall|stop_unit|restart_unit|disable --now',line,re.I):
+                          hits.append(f'{n}:{line}')
+                  if hits:
+                      print('CAPABILITY_FILE='+raw)
+                      print('CAPABILITY_HITS_BEGIN')
+                      print('\n'.join(hits[:160]))
+                      print('CAPABILITY_HITS_END')
+              print('MONITOR_UNIT_END='+unit)
+
+          rc,journal,err=run('journalctl','--since','2026-11-01 14:59:50','--until','2026-11-01 15:00:25',
+              '--no-pager','-o','verbose')
+          print('SYSTEM_JOURNAL_VERBOSE_WINDOW_BEGIN')
+          for block in journal.split('\n\n'):
+              if re.search(r'pengu|disdex|SIGTERM|stop|kill|7069|3065213',block,re.I):
+                  keep=[]
+                  for line in block.splitlines():
+                      if re.match(r'^\s*(MESSAGE|_PID|_COMM|_EXE|_SYSTEMD_UNIT|_SYSTEMD_CGROUP|SYSLOG_IDENTIFIER|PRIORITY|__REALTIME_TIMESTAMP)=',line) or line.startswith('2026-'):
+                          keep.append(line)
+                  if keep: print('\n'.join(keep)+'\n--')
+          print('SYSTEM_JOURNAL_VERBOSE_WINDOW_END')
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-cap-ssh"
