@@ -1,0 +1,78 @@
+name: DisDex PENGU Watchdog Decision Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-decision-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-decision-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-decision-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-decision-ssh/"*
+
+      - name: Read current watchdog decision and restart state for PENGU
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-decision-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-decision-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import json,pathlib
+          base=pathlib.Path('/var/lib/disdex/runner-health/private')
+          audit=base/'watchdog-current-audit.json'
+          state=base/'watchdog-current-state.json'
+          for p in (audit,state):
+              if not p.is_file() or p.is_symlink():
+                  raise SystemExit('WATCHDOG_FILE_MISSING_OR_UNSAFE:'+str(p))
+          a=json.loads(audit.read_text())
+          s=json.loads(state.read_text())
+          decision=(a.get('decisions') or {}).get('PENGU_V8')
+          dependencies=a.get('dependencies') or {}
+          print('WATCHDOG_AUDIT_META='+json.dumps({
+              'asOf':a.get('asOf'),'updatedAt':a.get('updatedAt'),
+              'restartCalls':a.get('restartCalls'),
+              'exitCode':a.get('exitCode'),
+          },separators=(',',':')))
+          print('PENGU_WATCHDOG_DECISION='+json.dumps(decision,separators=(',',':')))
+          safeDeps={k:v for k,v in dependencies.items() if k in ('SHARED_CRYPTO_RISK','MARGIN_GUARD')}
+          print('WATCHDOG_DEPENDENCIES='+json.dumps(safeDeps,separators=(',',':')))
+          attempts=(s.get('restartAttempts') or {}).get('PENGU_V8')
+          print('PENGU_RESTART_STATE='+json.dumps({
+              'restartAttempts':attempts,
+              'rawKeys':sorted(s.keys()),
+          },separators=(',',':')))
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-decision-ssh"
