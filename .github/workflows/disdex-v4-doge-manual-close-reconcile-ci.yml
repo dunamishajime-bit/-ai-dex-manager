@@ -1,0 +1,40 @@
+name: DisDex V4 DOGE Manual Close Reconcile CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/deploy/disdex_v4_doge_manual_close_reconcile.ts'
+      - '.github/workflows/disdex-v4-doge-manual-close-reconcile.yml'
+      - 'tests/v4-doge-manual-close-reconcile-contract.test.mjs'
+      - '.github/workflows/disdex-v4-doge-manual-close-reconcile-ci.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/ops/deploy/disdex_v4_doge_manual_close_reconcile.ts'
+      - '.github/workflows/disdex-v4-doge-manual-close-reconcile.yml'
+      - 'tests/v4-doge-manual-close-reconcile-contract.test.mjs'
+      - '.github/workflows/disdex-v4-doge-manual-close-reconcile-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Exact non-ordering reconciliation contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/v4-doge-manual-close-reconcile-contract.test.mjs
+          FILE=scripts/ops/deploy/disdex_v4_doge_manual_close_reconcile.ts
+          ! grep -Eq '\.(placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder|setLeverage|setMarginType)\(' "$FILE"
+          grep -Fq 'ordersSent: 0' "$FILE"
+          grep -Fq 'cancelsSent: 0' "$FILE"
+          grep -Fq 'positionChangesSent: 0' "$FILE"
+          echo DOGE_MANUAL_CLOSE_RECONCILE_CONTRACT=PASS

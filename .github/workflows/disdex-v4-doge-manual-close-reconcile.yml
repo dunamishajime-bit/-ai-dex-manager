@@ -1,0 +1,153 @@
+name: DisDex V4 DOGE Manual Close Reconcile
+
+on:
+  workflow_dispatch:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    if: >-
+      github.actor == 'dunamishajime-bit' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+          github.event.issue.number == 317 &&
+          github.event.comment.author_association == 'OWNER' &&
+          github.event.comment.body == 'DISDEX_RECONCILE_DOGE_MANUAL_CLOSE_20261102'
+        )
+      )
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Static safety audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=scripts/ops/deploy/disdex_v4_doge_manual_close_reconcile.ts
+          test -f "$FILE"
+          grep -Fq 'MANUAL_ASTER_CLOSE' "$FILE"
+          grep -Fq 'PLANNED_TIME_EXIT_MANUAL_SETTLEMENT' "$FILE"
+          grep -Fq '3169513690' "$FILE"
+          grep -Fq '23900268' "$FILE"
+          grep -Fq '0.07497' "$FILE"
+          grep -Fq '1.2543' "$FILE"
+          grep -Fq 'getPositions("DOGEUSDT")' "$FILE"
+          grep -Fq 'getOpenOrders("DOGEUSDT")' "$FILE"
+          grep -Fq 'getUserTrades("DOGEUSDT"' "$FILE"
+          ! grep -Eq '\.(placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder|setLeverage|setMarginType)\(' "$FILE"
+          echo DOGE_MANUAL_RECONCILE_STATIC_AUDIT=PASS
+          echo ORDER_MUTATION_CODE=0
+
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/doge-reconcile-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/doge-reconcile-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/doge-reconcile-ssh/"*
+
+      - name: Verify V4 is quiesced and upload bounded helpers
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          SSH=(ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST")
+          SCP=(scp -i "$RUNNER_TEMP/doge-reconcile-ssh/key"
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"
+            -P "$PORT")
+          "${SSH[@]}" "set -euo pipefail;
+            UNIT=disdex-v12-v4@53a0be396719f0284af4e11b35c66a4ac7d58f79.service;
+            PID=\$(systemctl show \"\$UNIT\" --property=MainPID --value || true);
+            ACTIVE=\$(systemctl show \"\$UNIT\" --property=ActiveState --value || true);
+            [[ \"${PID:-0}\" == '0' ]];
+            [[ \"\$ACTIVE\" == 'failed' || \"\$ACTIVE\" == 'inactive' ]];
+            test -f /var/lib/disdex/v12-v4/orders.json;
+            test ! -L /var/lib/disdex/v12-v4/orders.json;
+            echo V4_QUIESCED=TRUE;
+            echo TRADING_MUTATION=0"
+          "${SCP[@]}" scripts/ops/deploy/disdex_v4_doge_manual_close_reconcile.ts             "root@$HOST:/tmp/disdex_v4_doge_manual_close_reconcile.ts.$GITHUB_RUN_ID"
+          "${SCP[@]}" scripts/ops/deploy/disdex_v4_doge_operator_postflight.py             "root@$HOST:/tmp/disdex_v4_doge_operator_postflight.py.$GITHUB_RUN_ID"
+
+      - name: Reconcile exact manual DOGE close into V4 durable state
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             SHA=53a0be396719f0284af4e11b35c66a4ac7d58f79;
+             ROOT=/home/deploy/disdex-trading/releases/\$SHA;
+             test -f \"\$ROOT/.disdex-release-sha\";
+             [[ \"\$(tr -d '[:space:]' < \"\$ROOT/.disdex-release-sha\")\" == \"\$SHA\" ]];
+             set -a;
+             for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env; do
+               test -f \"\$f\"; . \"\$f\";
+             done;
+             set +a;
+             cd \"\$ROOT\";
+             exec /usr/bin/node node_modules/tsx/dist/cli.mjs /tmp/disdex_v4_doge_manual_close_reconcile.ts.$GITHUB_RUN_ID"
+
+      - name: Exact read-only postflight
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex_v4_doge_operator_postflight.py.$GITHUB_RUN_ID"
+
+      - name: Final no-mutation marker
+        shell: bash
+        run: |
+          echo DOGE_MANUAL_RECONCILE_ACTION=PASS
+          echo ASTER_ORDERS_SENT=0
+          echo ASTER_CANCELS_SENT=0
+          echo ASTER_POSITION_CHANGES_SENT=0
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/doge-reconcile-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"               -p "$PORT" "root@$HOST"               "rm -f -- /tmp/disdex_v4_doge_manual_close_reconcile.ts.$GITHUB_RUN_ID /tmp/disdex_v4_doge_operator_postflight.py.$GITHUB_RUN_ID"               >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/doge-reconcile-ssh"
