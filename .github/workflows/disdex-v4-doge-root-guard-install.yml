@@ -1,0 +1,80 @@
+name: DisDex V4 DOGE Root-Owned Guard Install
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  install:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify guard contract before install
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/v12-v4-doge-missed-time-guard.test.mjs
+          node --check lib/v12-v4-doge-missed-time-guard.mjs
+          sha256sum lib/v12-v4-doge-missed-time-guard.mjs
+          echo TRADING_MUTATION=0
+
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/doge-guard-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/doge-guard-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/doge-guard-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/doge-guard-ssh/"*
+
+      - name: Install root-owned non-executable DOGE guard
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          LOCAL_SHA="$(sha256sum lib/v12-v4-doge-missed-time-guard.mjs | awk '{print $1}')"
+          scp -i "$RUNNER_TEMP/doge-guard-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-guard-ssh/known_hosts"             -P "$PORT" lib/v12-v4-doge-missed-time-guard.mjs             "root@$HOST:/tmp/v12-v4-doge-missed-time-guard.$GITHUB_RUN_ID.mjs"
+          ssh -T -i "$RUNNER_TEMP/doge-guard-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-guard-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             src=/tmp/v12-v4-doge-missed-time-guard.$GITHUB_RUN_ID.mjs;
+             dst=/etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.mjs;
+             install -d -o root -g root -m 0755 /etc/disdex/operator-adapters;
+             /usr/bin/node --check \"\$src\";
+             [[ \"\$(sha256sum \"\$src\" | awk '{print \\$1}')\" == '$LOCAL_SHA' ]];
+             install -o root -g root -m 0644 \"\$src\" \"\$dst\";
+             printf '%s  %s\n' '$LOCAL_SHA' 'v12-v4-doge-missed-time-guard.mjs' > /etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.sha256;
+             chown root:root /etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.sha256;
+             chmod 0644 /etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.sha256;
+             [[ \"\$(sha256sum \"\$dst\" | awk '{print \\$1}')\" == '$LOCAL_SHA' ]];
+             [[ ! -x \"\$dst\" ]];
+             rm -f -- \"\$src\";
+             echo DOGE_ROOT_GUARD_INSTALLED=TRUE;
+             echo DOGE_ROOT_GUARD_SHA256='$LOCAL_SHA';
+             echo ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES_SENT=0"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/doge-guard-ssh"
