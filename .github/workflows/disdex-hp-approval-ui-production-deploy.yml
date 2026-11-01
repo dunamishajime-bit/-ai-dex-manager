@@ -71,10 +71,14 @@ jobs:
           npm run deploy:hp-approval:selftest
           npm run build
           test -f .next/BUILD_ID
+          test -f .next/standalone/server.js
+          cp .next/standalone/server.js ./server.js
+          /usr/bin/node --check server.js
           npm prune --omit=dev --ignore-scripts
           test -x node_modules/.bin/next
           printf '%s\n' "$TARGET_SHA" > .disdex-release-sha
-          tar -czf /tmp/disdex-hp-approval-ui-runtime.tgz             .next node_modules public package.json package-lock.json next.config.mjs .disdex-release-sha
+          tar -czf /tmp/disdex-hp-approval-ui-runtime.tgz             server.js .next node_modules public package.json package-lock.json next.config.mjs .disdex-release-sha
+          tar -tzf /tmp/disdex-hp-approval-ui-runtime.tgz | grep -qx 'server.js'
           echo "RUNTIME_ARCHIVE_BYTES=$(stat -c %s /tmp/disdex-hp-approval-ui-runtime.tgz)"
 
       - name: Configure pinned root SSH
@@ -185,7 +189,8 @@ jobs:
           install -d -o deploy -g deploy -m 0755 "$stage"
           tar --no-same-owner -xzf "$archive" -C "$stage"
           rm -f -- "$archive"
-          [[ -f "$stage/.next/BUILD_ID" && -x "$stage/node_modules/.bin/next" ]]
+          [[ -f "$stage/server.js" && -f "$stage/.next/BUILD_ID" && -x "$stage/node_modules/.bin/next" ]]
+          /usr/bin/node --check "$stage/server.js"
           [[ "$(tr -d '[:space:]' < "$stage/.disdex-release-sha")" == "$TARGET_SHA" ]]
 
           shared_data='/home/deploy/disdex-ui/shared/data'
@@ -281,6 +286,9 @@ jobs:
             fi
             systemctl daemon-reload
             systemctl restart "$svc"
+            if [[ "$release" == "$ui_root"/ui-hp-approval-* && "$release" != "$current" ]]; then
+              rm -rf -- "$release"
+            fi
             echo 'HP_UI_ROLLBACK_ATTEMPTED=TRUE'
             exit "$rc"
           }
