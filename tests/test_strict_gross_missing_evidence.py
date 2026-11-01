@@ -32,6 +32,15 @@ class GrossEvidenceTests(unittest.TestCase):
         self.assertEqual(decision["status"], "planned")
         self.assertEqual(decision["acceptedGross"], 0.5)
 
+    def test_boolean_fields_are_not_gross_or_equity_evidence(self):
+        for name in ("equityUsd", "cryptoGross", "stockGross", "totalGross"):
+            for value in (False, True):
+                with self.subTest(field=name, value=value):
+                    snapshot = {"equityUsd": 100.0, "cryptoGross": 0.0, "stockGross": 0.0, "totalGross": 0.0}
+                    snapshot[name] = value
+                    with self.assertRaises(RuntimeError):
+                        plan_v52_stock_capacity(snapshot, 0.5, 2.0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -484,6 +484,8 @@ def validate_gross_snapshot(snapshot: Mapping[str, object], caps: StrictPortfoli
     required = ("equityUsd", "cryptoGross", "stockGross", "totalGross")
     if any(field not in snapshot for field in required):
         raise RuntimeError("STRICT_PORTFOLIO_GROSS_SNAPSHOT_INCOMPLETE")
+    if any(isinstance(snapshot[field], bool) for field in required):
+        raise RuntimeError("STRICT_PORTFOLIO_GROSS_SNAPSHOT_INVALID_TYPE")
     equity = _finite(snapshot["equityUsd"], "EQUITY")
     crypto = _finite(snapshot["cryptoGross"], "CRYPTO_GROSS")
     stock = _finite(snapshot["stockGross"], "STOCK_GROSS")
