@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { promisify } from "node:util";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { applyOperatorActivationGateToRestart, evaluateOperatorActivationGate } from "./disdex-live-operator-activation-gate.mjs";
+import { resolveMonitorRunnerPins } from "./disdex-runner-monitor-pins.mjs";
 
 /**
  * Release-pinned, read-only runner health watchdog.
@@ -309,7 +310,8 @@ function normalizeV4Heartbeat(value, runner) {
 
 function runnerPaths(config, runner) {
     return {
-        heartbeat: join(config.healthRoot, "heartbeats", runner.heartbeatFile),
+        heartbeat: runner.healthPath || join(config.healthRoot, "heartbeats", runner.heartbeatFile),
+        tick: runner.tickPath || join(config.healthRoot, "ticks", runner.key + ".json"),
         stopMarker: runner.key === "V52" ? join(config.healthRoot, "v52.intentional-stop") : undefined,
     };
 }
@@ -347,7 +349,11 @@ function operatorActivationPathForRunner(runner, env, defaultPath) {
 }
 
 function buildConfig(env) {
+    const monitorPins = resolveMonitorRunnerPins(env);
     const v12Mode = String(env.DISDEX_WATCHDOG_V12_MODE || "LEGACY").trim().toUpperCase();
+    if (monitorPins.source === "manifest-v2" && v12Mode === "LEGACY") {
+        throw new Error("V12_LEGACY_MONITOR_CANNOT_USE_V4_RUNNER_PIN");
+    }
     const healthRoot = env.DISDEX_WATCHDOG_HEALTH_ROOT || DEFAULT_HEALTH_ROOT;
     const releaseRoot = env.DISDEX_WATCHDOG_RELEASE_ROOT;
     const expectedSha = String(env.DISDEX_WATCHDOG_EXPECTED_SHA || "").trim().toLowerCase();
@@ -360,14 +366,15 @@ function buildConfig(env) {
     if (!isAbsoluteCanonicalPath(operatorActivationPath)) throw new Error("watchdog operator activation path is non-canonical");
     const runnerConfig = {};
     for (const runner of runnersForEnv(env)) {
-        const runnerExpectedSha = String(env[runner.expectedShaEnv] || expectedSha).trim().toLowerCase();
-        const runnerReleaseRoot = String(env[runner.releaseRootEnv] || (runnerExpectedSha === expectedSha ? releaseRoot : `/home/deploy/disdex-trading/releases/${runnerExpectedSha}`)).trim();
-        const evidenceMode = String(env[runner.evidenceModeEnv] || "legacy").trim().toLowerCase();
+        const canonical = monitorPins.runners?.[runner.key] ?? null;
+        const runnerExpectedSha = String(canonical?.expectedSha || env[runner.expectedShaEnv] || expectedSha).trim().toLowerCase();
+        const runnerReleaseRoot = String(canonical?.releaseRoot || env[runner.releaseRootEnv] || (runnerExpectedSha === expectedSha ? releaseRoot : `/home/deploy/disdex-trading/releases/${runnerExpectedSha}`)).trim();
+        const evidenceMode = String(canonical?.evidenceMode || env[runner.evidenceModeEnv] || "legacy").trim().toLowerCase();
         if (!["legacy", "tick-v1"].includes(evidenceMode)) throw new Error(`${runner.key} evidence mode is invalid`);
         if (!exactSha(runnerExpectedSha) || !isAbsoluteCanonicalPath(runnerReleaseRoot)) {
             throw new Error(`${runner.key} release pin is incomplete or non-canonical`);
         }
-        const unit = String(env[runner.unitEnv] || "").trim();
+        const unit = String(canonical?.serviceUnit || env[runner.unitEnv] || "").trim();
         if (!serviceAllowed(runner, unit, runnerExpectedSha)) throw new Error(`${runner.key} service unit is not allow-listed for the pinned release`);
         runnerConfig[runner.key] = {
             ...runner,
@@ -375,8 +382,10 @@ function buildConfig(env) {
             expectedSha: runnerExpectedSha,
             expectedCwd: runnerReleaseRoot,
             evidenceMode,
+            healthPath: canonical?.healthPath || null,
+            tickPath: canonical?.tickPath || null,
             operatorActivationPath: operatorActivationPathForRunner(runner, env, operatorActivationPath),
-            ...runnerPaths({ healthRoot }, runner),
+            ...runnerPaths({ healthRoot }, { ...runner, healthPath: canonical?.healthPath || null, tickPath: canonical?.tickPath || null }),
         };
     }
     const statePath = env.DISDEX_WATCHDOG_STATE_PATH || join(healthRoot, "private", "watchdog-current-state.json");
@@ -386,25 +395,27 @@ function buildConfig(env) {
         if (!pathWithin(healthRoot, path) || !isAbsoluteCanonicalPath(path)) throw new Error("watchdog private path escapes health root");
     }
     const primaryV12 = runnerConfig.V12_V4 ?? runnerConfig.V12_X1_ALL;
-    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || primaryV12?.expectedSha || "").trim().toLowerCase();
+    const sharedRiskPin = monitorPins.runners?.SHARED_CRYPTO_RISK ?? null;
+    const marginGuardPin = monitorPins.runners?.MARGIN_GUARD ?? null;
+    const sharedRiskExpectedSha = String(sharedRiskPin?.expectedSha || env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || primaryV12?.expectedSha || "").trim().toLowerCase();
     if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
-    const marginGuardExpectedSha = String(env.DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA || expectedSha).trim().toLowerCase();
+    const marginGuardExpectedSha = String(marginGuardPin?.expectedSha || env.DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA || expectedSha).trim().toLowerCase();
     if (!exactSha(marginGuardExpectedSha)) throw new Error("margin guard release pin is invalid");
-    const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
-    const marginGuardUnit = `disdex-v12-v52-margin-guard@${marginGuardExpectedSha}.service`;
+    const sharedRiskUnit = String(sharedRiskPin?.serviceUnit || `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`);
+    const marginGuardUnit = String(marginGuardPin?.serviceUnit || `disdex-v12-v52-margin-guard@${marginGuardExpectedSha}.service`);
     const safetyDaemons = [
         {
             key: "SHARED_CRYPTO_RISK",
             unit: sharedRiskUnit,
             expectedSha: sharedRiskExpectedSha,
-            expectedCwd: releaseRootForSha(sharedRiskExpectedSha),
+            expectedCwd: sharedRiskPin?.releaseRoot || releaseRootForSha(sharedRiskExpectedSha),
             script: "scripts/disdex-shared-crypto-risk-writer.ts",
         },
         {
             key: "MARGIN_GUARD",
             unit: marginGuardUnit,
             expectedSha: marginGuardExpectedSha,
-            expectedCwd: releaseRootForSha(marginGuardExpectedSha),
+            expectedCwd: marginGuardPin?.releaseRoot || releaseRootForSha(marginGuardExpectedSha),
             script: "scripts/disdex_v96_v52_margin_guard_runtime.py",
         },
     ];

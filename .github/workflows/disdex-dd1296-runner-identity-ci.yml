@@ -1,0 +1,41 @@
+name: DisDex DD1296 Runner Identity Safe CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-runner-pin-manifest.mjs'
+      - 'scripts/ops/root/disdex-fet-preemption-readiness-guard.py'
+      - 'docs/production/DD1296_FINAL_ALLIN_10BPS.runner-pins.v2.json'
+      - 'tests/runner-pin-manifest.test.mjs'
+      - 'tests/fet-preemption-readiness-audit.test.mjs'
+      - 'tests/test_runner_pin_manifest_contract.py'
+      - '.github/workflows/disdex-dd1296-runner-identity-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Runner pin and FET readiness focused tests
+        run: node --test tests/runner-pin-manifest.test.mjs tests/fet-preemption-readiness-audit.test.mjs
+      - name: Python runner pin contract
+        run: python3 -m unittest tests.test_runner_pin_manifest_contract
+      - name: Python syntax
+        run: python3 -m py_compile scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+      - name: Safety-only scope guard
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" > /tmp/dd1296-files
+          ! grep -Eq '(^|/)(fet-brk48-signal|hype-trend-long-signal|pengu-short-v20-timed-stop)\.(ts|js|py)$' /tmp/dd1296-files
+          echo ECONOMIC_LOGIC_FILES_CHANGED=0
+          echo TRADING_MUTATION=0
