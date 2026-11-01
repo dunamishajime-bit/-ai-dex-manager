@@ -62,7 +62,7 @@ jobs:
             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/v4-doge-preflight-ssh/known_hosts" \
             -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
-            "python3 /tmp/disdex-v4-doge-missed-time-exit-preflight-$GITHUB_RUN_ID.py"
+            "python3 /tmp/disdex-v4-doge-missed-time-exit-preflight-$GITHUB_RUN_ID.py --allow-quiesced"
       - name: Cleanup
         if: always()
         env:
