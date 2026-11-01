@@ -34,6 +34,7 @@ jobs:
             'V4="53a0be396719f0284af4e11b35c66a4ac7d58f79"',
             'MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"',
             '"HYPE":{',
+            '"HYPE":{',
             'SHARED_KILL_SWITCH_ACTIVE',
             'MARGIN_GUARD_NOT_HEALTHY',
             'PENDING_EXPOSURE_ACTIVE',
