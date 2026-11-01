@@ -92,7 +92,7 @@ jobs:
           set -euo pipefail
           PORT="${PORT:-22}"
           scp -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -P "$PORT" scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py             "root@$HOST:/tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py"
-          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py"
+          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py --allow-quiesced"
 
       - name: Verify exact DOGE guard contract offline
         shell: bash
@@ -122,7 +122,7 @@ jobs:
              echo DOGE_ROOT_GUARD_ATTESTED=TRUE;
              echo TRADING_MUTATION=0"
 
-      - name: Prove the existing V4 one-shot hook; no order execution
+      - name: Require NEAR-style dedicated DOGE direct executor contract; no apply
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -132,10 +132,24 @@ jobs:
           PORT="${PORT:-22}"
           ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
              ROOT=/home/deploy/disdex-trading/releases/53a0be396719f0284af4e11b35c66a4ac7d58f79;
-             test -f \"\$ROOT/lib/v12-v4-runner-engine.ts\";
-             test -f \"\$ROOT/scripts/v12-v4-operator-exit.ts\";
-             grep -q 'operatorExitLegIds' \"\$ROOT/lib/v12-v4-runner-engine.ts\";
-             grep -q 'authorizeOperatorExit' \"\$ROOT/lib/v12-v4-runner-engine.ts\";
+             ENGINE=\$ROOT/lib/v12-v4-runner-engine.ts;
+             EXEC=\$ROOT/scripts/v12-v4-doge-only-operator-exit.ts;
+             test -f \"\$ENGINE\";
+             grep -q 'operatorExitLegIds' \"\$ENGINE\";
+             grep -q 'authorizeOperatorExit' \"\$ENGINE\";
+             if [[ ! -f \"\$EXEC\" ]]; then
+               echo DOGE_DIRECT_EXECUTOR_MISSING=TRUE;
+               exit 2;
+             fi;
+             test ! -L \"\$EXEC\";
+             grep -q 'buildV4ProductionRuntime' \"\$EXEC\";
+             grep -q 'operatorExitLegIds' \"\$EXEC\";
+             grep -q 'authorizeOperatorExit' \"\$EXEC\";
+             grep -q 'installDogeOnlyGuards' \"\$EXEC\";
+             grep -q 'DOGEUSDT:REC_Y06_REV_D0_T72:SHORT:1793181600000' \"\$EXEC\";
+             grep -q 'v12-v4-98ded39746ed3502a4d7b0e26ef9' \"\$EXEC\";
+             grep -q -- '--apply' \"\$EXEC\";
+             echo DOGE_DIRECT_EXECUTOR_CONTRACT_PRESENT=TRUE;
              echo V4_ONE_SHOT_OPERATOR_HOOK_PRESENT=TRUE;
              echo DOGE_EXECUTION_NOT_RUN=TRUE;
              echo ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES_SENT=0"
