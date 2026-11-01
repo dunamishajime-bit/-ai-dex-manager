@@ -97,6 +97,7 @@ jobs:
             -o UserKnownHostsFile="$RUNNER_TEMP/doge-approval-ssh/known_hosts" \
             -o ConnectTimeout=10 -p "$PORT" "root@$SSH_HOST" \
             "set -euo pipefail; trap 'rm -f -- $REMOTE_HELPER' EXIT; python3 '$REMOTE_HELPER' create-pending --operation 'V4_DOGE_MISSED_TIME_EXIT' --scope 'V12_V4' --orders-enabled 'true' --target-sha '$TARGET_SHA' --plan-sha256 '$PLAN_SHA256' --actor '$ACTOR' --comment-id '$COMMENT_ID'"
+          echo TRADING_MUTATION=0
       - name: Destroy SSH material
         if: always()
         shell: bash
