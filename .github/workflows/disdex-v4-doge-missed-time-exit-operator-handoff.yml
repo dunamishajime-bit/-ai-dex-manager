@@ -117,7 +117,7 @@ jobs:
              test -f \"\$dst\";
              test ! -L \"\$dst\";
              [[ \"\$(stat -c '%U:%G:%a' \"\$dst\")\" == 'root:root:644' ]];
-             [[ \"\$(sha256sum \"\$dst\" | awk '{print \\$1}')\" == '$LOCAL_SHA' ]];
+             [[ \"\$(sha256sum \"\$dst\" | cut -d ' ' -f1)\" == '$LOCAL_SHA' ]];
              /usr/bin/node --check \"\$dst\";
              echo DOGE_ROOT_GUARD_ATTESTED=TRUE;
              echo TRADING_MUTATION=0"
