@@ -5,6 +5,12 @@ on:
     paths:
       - "lib/deploy-approval-token.ts"
       - "lib/server/deploy-approval-store.ts"
+      - "lib/server/owner-session.ts"
+      - "lib/server/password-hash.ts"
+      - "lib/server/otp-challenge-store.ts"
+      - "lib/server/request-security.ts"
+      - "app/api/auth/**"
+      - "context/AuthContext.tsx"
       - "app/api/admin/deploy-approval/**"
       - "app/api/production-approval/**"
       - "app/production-approval/**"
@@ -20,6 +26,11 @@ on:
       - "scripts/disdex-hp-deploy-approval-selftest.ts"
       - "tests/deploy-approval-store-concurrency.test.ts"
       - "tests/fixtures/approval-store-writer.ts"
+      - "tests/password-hash-hardening.test.ts"
+      - "tests/owner-session-hardening.test.ts"
+      - "tests/otp-challenge-store.test.ts"
+      - "tests/auth-boundary-source.test.mjs"
+      - "tests/deploy-approval-atomic-redeem-source.test.mjs"
       - "package.json"
       - "next.config.mjs"
       - ".github/workflows/disdex-v4-hp-approval-request.yml"
@@ -58,6 +69,12 @@ jobs:
 
       - name: Approval store concurrency and corruption
         run: node --import tsx --test tests/deploy-approval-store-concurrency.test.ts
+
+      - name: Owner auth and password contracts
+        run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
+
+      - name: Authentication boundary source contracts
+        run: node --test tests/auth-boundary-source.test.mjs tests/deploy-approval-atomic-redeem-source.test.mjs
 
       - name: Production HP build
         run: |
