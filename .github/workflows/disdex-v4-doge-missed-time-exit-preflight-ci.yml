@@ -1,0 +1,57 @@
+name: DisDex V4 DOGE Missed TIME Exit Preflight CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py"
+      - ".github/workflows/disdex-v4-doge-missed-time-exit-preflight.yml"
+      - "docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_HANDOFF_20261101.md"
+      - ".github/workflows/disdex-v4-doge-missed-time-exit-preflight-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile and enforce exact read-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py").read_text()
+          w=Path(".github/workflows/disdex-v4-doge-missed-time-exit-preflight.yml").read_text()
+          d=Path("docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_HANDOFF_20261101.md").read_text()
+          for x in [
+              'DOGEUSDT:REC_Y06_REV_D0_T72:SHORT:1793181600000',
+              'v12-v4-98ded39746ed3502a4d7b0e26ef9',
+              '1793440800000',
+              '0.07505',
+              'V4_STALE_EXIT_REVIEW_REQUIRED',
+              'ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS',
+              '"ordersSent":0',
+              '"cancelsSent":0',
+              '"positionChangesSent":0',
+          ]:
+              assert x in p, x
+          for x in [
+              "environment:",
+              "name: disdex-production",
+              "github.actor == 'dunamishajime-bit'",
+              "disdex_v4_doge_missed_time_exit_preflight.py",
+          ]:
+              assert x in w, x
+          for forbidden in ["createOrder","cancelOrder","--apply","MARKET order","reduce-only BUY"]:
+              assert forbidden not in p
+          assert "Do not cancel the STOP first" in d
+          assert "Never send a second reduction" in d
+          print("V4_DOGE_MISSED_TIME_EXIT_READONLY_CONTRACT=PASS")
+          PY

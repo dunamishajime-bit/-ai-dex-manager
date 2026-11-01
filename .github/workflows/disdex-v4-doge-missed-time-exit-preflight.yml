@@ -1,0 +1,82 @@
+name: DisDex V4 DOGE Missed TIME Exit Read-Only Preflight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Compile read-only exact incident preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py
+      - name: Configure reviewed maintenance SSH
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/v4-doge-preflight-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/v4-doge-preflight-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/v4-doge-preflight-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/v4-doge-preflight-ssh/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/v4-doge-preflight-ssh/key" >/dev/null
+      - name: Upload and execute read-only missed-exit proof
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          scp -i "$RUNNER_TEMP/v4-doge-preflight-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/v4-doge-preflight-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py \
+            "root@$HOST:/tmp/disdex-v4-doge-missed-time-exit-preflight-$GITHUB_RUN_ID.py"
+          ssh -T -i "$RUNNER_TEMP/v4-doge-preflight-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/v4-doge-preflight-ssh/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-v4-doge-missed-time-exit-preflight-$GITHUB_RUN_ID.py"
+      - name: Cleanup
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set +e
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          if [[ -s "$RUNNER_TEMP/v4-doge-preflight-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/v4-doge-preflight-ssh/key" \
+              -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/v4-doge-preflight-ssh/known_hosts" \
+              -o ConnectTimeout=5 -p "$PORT" "root@$HOST" \
+              "rm -f -- /tmp/disdex-v4-doge-missed-time-exit-preflight-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/v4-doge-preflight-ssh"
