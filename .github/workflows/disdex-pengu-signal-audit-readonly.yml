@@ -1,0 +1,92 @@
+name: DisDex PENGU Signal Audit Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-audit-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-audit-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-audit-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-audit-ssh/"*
+
+      - name: Inspect OS audit and process accounting for signal source
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-audit-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-audit-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import pathlib,re,shutil,subprocess
+
+          print('AUDITD_PRESENT='+str(bool(shutil.which('ausearch'))).lower())
+          if shutil.which('ausearch'):
+              p=subprocess.run([
+                  'ausearch','--start','11/01/2026','14:59:40','--end','11/01/2026','15:00:30',
+                  '-m','SYSCALL,EXECVE,PROCTITLE'
+              ],capture_output=True,text=True,timeout=30)
+              print('AUSEARCH_RC='+str(p.returncode))
+              print('AUSEARCH_RELEVANT_BEGIN')
+              blocks=p.stdout.split('----')
+              for block in blocks:
+                  if re.search(r'3065213|disdex-pengu|kill|systemctl|SIGTERM|SIGINT|7069',block,re.I):
+                      safe=[]
+                      for line in block.splitlines():
+                          if re.search(r'type=(SYSCALL|EXECVE|PROCTITLE)|pid=|ppid=|uid=|auid=|comm=|exe=|syscall=|success=|exit=',line,re.I):
+                              safe.append(line)
+                      if safe: print('\n'.join(safe)+'\n--')
+              print('AUSEARCH_RELEVANT_END')
+
+          audit=pathlib.Path('/var/log/audit/audit.log')
+          print('AUDIT_LOG_EXISTS='+str(audit.is_file() and not audit.is_symlink()).lower())
+          if audit.is_file() and not audit.is_symlink():
+              print('AUDIT_LOG_RELEVANT_BEGIN')
+              for line in audit.read_text(errors='replace').splitlines()[-20000:]:
+                  if re.search(r'3065213|disdex-pengu|comm="(kill|systemctl)"|exe="/usr/bin/(kill|systemctl)"',line,re.I):
+                      print(line[:3000])
+              print('AUDIT_LOG_RELEVANT_END')
+
+          print('PROCESS_ACCOUNTING_PRESENT='+str(bool(shutil.which('lastcomm'))).lower())
+          if shutil.which('lastcomm'):
+              p=subprocess.run(['lastcomm'],capture_output=True,text=True,timeout=20)
+              print('LASTCOMM_RELEVANT_BEGIN')
+              for line in p.stdout.splitlines()[:20000]:
+                  if re.search(r'(^|\s)(kill|pkill|killall|systemctl)(\s|$)|pengu|disdex-current-runtime',line,re.I):
+                      print(line)
+              print('LASTCOMM_RELEVANT_END')
+
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-audit-ssh"
