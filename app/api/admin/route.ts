@@ -1,33 +1,48 @@
-import crypto from "crypto";
-import { cookies } from "next/headers";
+import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/mail-service";
 import { deleteUser, findUserByEmail, findUserById, upsertUser } from "@/lib/server/user-db";
 import { loadSystemSettings, saveSystemSettings } from "@/lib/server/system-settings-db";
+import {
+  issueOwnerSession,
+  loadOwnerSessionKey,
+  OWNER_SESSION_COOKIE,
+  ownerSessionCookieOptions,
+  verifyRequestSession,
+} from "@/lib/server/owner-session";
+import { createOtpChallenge, consumeOtpChallenge } from "@/lib/server/otp-challenge-store";
+import { requireSameOriginMutation } from "@/lib/server/request-security";
 
-const ADMIN_COOKIE = "disdex_admin_session";
-const ADMIN_2FA_HASH_COOKIE = "disdex_admin_2fa_hash";
-const ADMIN_2FA_EXPIRES_COOKIE = "disdex_admin_2fa_expires";
+const ADMIN_2FA_CHALLENGE_COOKIE = "disdex_admin_2fa_challenge";
 const ADMIN_2FA_EMAIL_COOKIE = "disdex_admin_2fa_email";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim() || "";
 const ADMIN_2FA_RECEIVER = process.env.ADMIN_CONTACT_EMAIL || process.env.GMAIL_USER || "";
+const ADMIN_SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
 function hashCode(code: string) {
   return crypto.createHash("sha256").update(code).digest("hex");
+}
+
+function safePasswordEqual(left: string, right: string) {
+  const a = Buffer.from(left);
+  const b = Buffer.from(right);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function audience(request: NextRequest) {
+  return request.headers.get("x-forwarded-host") || request.headers.get("host") || request.nextUrl.host;
 }
 
 function adminUrl(request: NextRequest, params: Record<string, string>) {
   const forwardedHost = request.headers.get("x-forwarded-host");
   const forwardedProto = request.headers.get("x-forwarded-proto");
   const envBase = process.env.NEXT_PUBLIC_APP_URL;
-
   const base =
     forwardedHost && forwardedProto
       ? `${forwardedProto}://${forwardedHost}`
       : envBase && !/localhost|127\.0\.0\.1/.test(envBase)
         ? envBase
         : request.nextUrl.origin;
-
   const url = new URL("/admin", base);
   Object.entries(params).forEach(([key, value]) => {
     if (value) url.searchParams.set(key, value);
@@ -39,15 +54,32 @@ function redirectWithCookies(request: NextRequest, params: Record<string, string
   return NextResponse.redirect(adminUrl(request, params));
 }
 
-async function requireAdminSession() {
-  const store = await cookies();
-  return store.get(ADMIN_COOKIE)?.value === "active";
+function issueAdminSession(response: NextResponse, request: NextRequest) {
+  const token = issueOwnerSession({
+    key: loadOwnerSessionKey(),
+    subject: "admin",
+    purpose: "ADMIN",
+    audience: audience(request),
+    ttlMs: ADMIN_SESSION_TTL_MS,
+  });
+  response.cookies.set(OWNER_SESSION_COOKIE, token, ownerSessionCookieOptions(ADMIN_SESSION_TTL_MS / 1000));
+}
+
+function clearAdminCookies(response: NextResponse) {
+  response.cookies.delete(OWNER_SESSION_COOKIE);
+  response.cookies.delete(ADMIN_2FA_CHALLENGE_COOKIE);
+  response.cookies.delete(ADMIN_2FA_EMAIL_COOKIE);
 }
 
 export async function POST(request: NextRequest) {
+  try {
+    requireSameOriginMutation(request);
+  } catch {
+    return NextResponse.json({ ok: false, error: "origin mismatch" }, { status: 403 });
+  }
+
   const formData = await request.formData();
   const intent = String(formData.get("intent") || "");
-  const store = await cookies();
 
   if (intent === "login") {
     if (!ADMIN_PASSWORD) {
@@ -58,28 +90,26 @@ export async function POST(request: NextRequest) {
     }
 
     const password = String(formData.get("admin_password") || "").trim();
-    if (password !== ADMIN_PASSWORD) {
+    if (!safePasswordEqual(password, ADMIN_PASSWORD)) {
       return redirectWithCookies(request, { error: "管理者パスワードが正しくありません" });
     }
 
     const settings = await loadSystemSettings();
     if (!settings.adminTwoFactorEnabled) {
-      const response = redirectWithCookies(request, { message: "ログインしました" });
-      response.cookies.set(ADMIN_COOKIE, "active", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 12,
-      });
-      return response;
+      try {
+        const response = redirectWithCookies(request, { message: "ログインしました" });
+        issueAdminSession(response, request);
+        return response;
+      } catch {
+        return redirectWithCookies(request, { error: "管理者セッション鍵が未設定です" });
+      }
     }
 
     if (!ADMIN_2FA_RECEIVER) {
       return redirectWithCookies(request, { error: "管理者2FAの送信先メールが未設定です" });
     }
 
-    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const code = String(crypto.randomInt(100000, 1000000));
     const expiresAt = Date.now() + 10 * 60 * 1000;
     const sent = await sendEmail(
       ADMIN_2FA_RECEIVER,
@@ -87,29 +117,30 @@ export async function POST(request: NextRequest) {
       `管理者ログイン認証コード: ${code}\n有効期限: 10分`,
     );
 
-    if (!sent.success) {
-      return redirectWithCookies(request, { error: "認証コードの送信に失敗しました" });
+    if (!sent.success || sent.simulated) {
+      return redirectWithCookies(request, { error: "認証コードの実送信に失敗しました" });
     }
 
-    const response = redirectWithCookies(request, { step: "code", message: "認証コードを送信しました" });
-    response.cookies.set(ADMIN_2FA_HASH_COOKIE, hashCode(code), {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 10,
+    const challenge = await createOtpChallenge({
+      purpose: "ADMIN_LOGIN",
+      subject: ADMIN_2FA_RECEIVER,
+      codeHash: hashCode(code),
+      expiresAt,
+      maxAttempts: 5,
     });
-    response.cookies.set(ADMIN_2FA_EXPIRES_COOKIE, String(expiresAt), {
+
+    const response = redirectWithCookies(request, { step: "code", message: "認証コードを送信しました" });
+    response.cookies.set(ADMIN_2FA_CHALLENGE_COOKIE, challenge.id, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "strict",
       path: "/",
       maxAge: 60 * 10,
     });
     response.cookies.set(ADMIN_2FA_EMAIL_COOKIE, ADMIN_2FA_RECEIVER, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "strict",
       path: "/",
       maxAge: 60 * 10,
     });
@@ -118,45 +149,54 @@ export async function POST(request: NextRequest) {
 
   if (intent === "verify") {
     const code = String(formData.get("admin_code") || "").trim();
-    const hash = store.get(ADMIN_2FA_HASH_COOKIE)?.value;
-    const expiresAt = Number(store.get(ADMIN_2FA_EXPIRES_COOKIE)?.value || "0");
-
-    if (!code || !hash || !expiresAt || Date.now() > expiresAt) {
+    const challengeId = request.cookies.get(ADMIN_2FA_CHALLENGE_COOKIE)?.value || "";
+    if (!/^\d{6}$/.test(code) || !challengeId || !ADMIN_2FA_RECEIVER) {
       const response = redirectWithCookies(request, { error: "認証コードの有効期限が切れています" });
-      response.cookies.delete(ADMIN_2FA_HASH_COOKIE);
-      response.cookies.delete(ADMIN_2FA_EXPIRES_COOKIE);
+      response.cookies.delete(ADMIN_2FA_CHALLENGE_COOKIE);
       response.cookies.delete(ADMIN_2FA_EMAIL_COOKIE);
       return response;
     }
 
-    if (hashCode(code) !== hash) {
-      return redirectWithCookies(request, { step: "code", error: "認証コードが正しくありません" });
+    const result = await consumeOtpChallenge({
+      id: challengeId,
+      codeHash: hashCode(code),
+      purpose: "ADMIN_LOGIN",
+      subject: ADMIN_2FA_RECEIVER,
+    });
+    if (!result.ok) {
+      const response = redirectWithCookies(request, {
+        step: result.reason === "INVALID_CODE" ? "code" : "",
+        error: result.reason === "INVALID_CODE"
+          ? `認証コードが正しくありません。残り${result.remainingAttempts ?? 0}回`
+          : "認証コードが失効しています。再度ログインしてください",
+      });
+      if (result.reason !== "INVALID_CODE") {
+        response.cookies.delete(ADMIN_2FA_CHALLENGE_COOKIE);
+        response.cookies.delete(ADMIN_2FA_EMAIL_COOKIE);
+      }
+      return response;
     }
 
-    const response = redirectWithCookies(request, { message: "管理者ログインを確認しました" });
-    response.cookies.delete(ADMIN_2FA_HASH_COOKIE);
-    response.cookies.delete(ADMIN_2FA_EXPIRES_COOKIE);
-    response.cookies.delete(ADMIN_2FA_EMAIL_COOKIE);
-    response.cookies.set(ADMIN_COOKIE, "active", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 12,
-    });
-    return response;
+    try {
+      const response = redirectWithCookies(request, { message: "管理者ログインを確認しました" });
+      response.cookies.delete(ADMIN_2FA_CHALLENGE_COOKIE);
+      response.cookies.delete(ADMIN_2FA_EMAIL_COOKIE);
+      issueAdminSession(response, request);
+      return response;
+    } catch {
+      return redirectWithCookies(request, { error: "管理者セッション鍵が未設定です" });
+    }
   }
 
   if (intent === "logout") {
     const response = redirectWithCookies(request, { message: "ログアウトしました" });
-    response.cookies.delete(ADMIN_COOKIE);
-    response.cookies.delete(ADMIN_2FA_HASH_COOKIE);
-    response.cookies.delete(ADMIN_2FA_EXPIRES_COOKIE);
-    response.cookies.delete(ADMIN_2FA_EMAIL_COOKIE);
+    clearAdminCookies(response);
     return response;
   }
 
-  if (!(await requireAdminSession())) {
+  try {
+    verifyRequestSession(request, ["ADMIN"]);
+  } catch {
     return redirectWithCookies(request, { error: "管理者ログインが必要です" });
   }
 
