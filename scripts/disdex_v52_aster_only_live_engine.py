@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import signal
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -36,6 +37,67 @@ V50_MAX_ROUND_TRIP_COST_BPS = legacy.V50_MAX_ROUND_TRIP_COST_BPS
 V50_MIN_NET_EDGE_BPS = legacy.V50_MIN_NET_EDGE_BPS
 transient_reference_error = legacy.transient_reference_error
 
+SHA_RE = __import__("re").compile(r"^[0-9a-f]{40}$")
+
+
+def build_v52_tick_marker(*, runtime_sha: str, service_unit: str, main_pid: int,
+                          working_directory: str, tick_completed_at: int,
+                          outcome: str, new_orders_allowed: bool) -> dict:
+    sha = str(runtime_sha or "").strip().lower()
+    expected_root = f"/home/deploy/disdex-trading/releases/{sha}"
+    expected_unit = f"disdex-v52-aster-only@{sha}.service"
+    if not SHA_RE.fullmatch(sha):
+        raise RuntimeError("V52_TICK_RUNTIME_SHA_INVALID")
+    if service_unit != expected_unit:
+        raise RuntimeError("V52_TICK_SERVICE_UNIT_MISMATCH")
+    if not isinstance(main_pid, int) or main_pid <= 0:
+        raise RuntimeError("V52_TICK_PID_INVALID")
+    if working_directory != expected_root:
+        raise RuntimeError("V52_TICK_CWD_MISMATCH")
+    if type(tick_completed_at) is not int or tick_completed_at <= 0:
+        raise RuntimeError("V52_TICK_TIMESTAMP_INVALID")
+    if not isinstance(outcome, str) or not outcome.strip():
+        raise RuntimeError("V52_TICK_OUTCOME_INVALID")
+    if type(new_orders_allowed) is not bool:
+        raise RuntimeError("V52_TICK_ORDER_PERMISSION_INVALID")
+    return {
+        "schema": "disdex-runner-tick/v1",
+        "runnerId": "V52",
+        "runtimeSha": sha,
+        "expectedSha": sha,
+        "serviceUnit": service_unit,
+        "mainPid": main_pid,
+        "workingDirectory": working_directory,
+        "tickCompletedAt": tick_completed_at,
+        "outcome": outcome.strip(),
+        "newOrdersAllowed": new_orders_allowed,
+    }
+
+
+def write_v52_tick_marker(path: Path, marker: dict) -> None:
+    target = Path(path)
+    parent = target.parent
+    if not parent.is_dir() or parent.is_symlink():
+        raise RuntimeError("V52_TICK_DIRECTORY_UNAVAILABLE")
+    if target.exists() or target.is_symlink():
+        st = target.lstat()
+        if stat.S_ISLNK(st.st_mode) or not stat.S_ISREG(st.st_mode):
+            raise RuntimeError("V52_TICK_TARGET_UNSAFE")
+    temp = parent / f".{target.name}.{os.getpid()}.{marker['tickCompletedAt']}.tmp"
+    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o640)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(marker, handle, ensure_ascii=False, separators=(",", ":"))
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp, target)
+    finally:
+        try:
+            temp.unlink()
+        except FileNotFoundError:
+            pass
+
 
 class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
     """V52 legacy execution/reconciliation with the strict BT #33404708902 planner gate."""
@@ -60,18 +122,48 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.state["idleAdmissionDecisionTs"] = (base.now_ms() // 3_600_000) * 3_600_000
         self.save()
 
+    def _publish_runner_tick(self, outcome: str) -> None:
+        if not self.live:
+            return
+        sha = (os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+        expected_root = f"/home/deploy/disdex-trading/releases/{sha}"
+        marker_path = Path(expected_root) / ".disdex-release-sha"
+        if not SHA_RE.fullmatch(sha) or not marker_path.is_file() or marker_path.is_symlink():
+            raise RuntimeError("V52_TICK_RELEASE_IDENTITY_UNAVAILABLE")
+        if marker_path.read_text(encoding="utf-8").strip() != sha:
+            raise RuntimeError("V52_TICK_RELEASE_MARKER_MISMATCH")
+        cwd = os.path.realpath(os.getcwd())
+        service_unit = (os.getenv("DISDEX_V52_SERVICE_UNIT") or f"disdex-v52-aster-only@{sha}.service").strip()
+        tick_path = Path(os.getenv("DISDEX_V52_TICK_PATH") or "/var/lib/disdex/runner-health/ticks/v52.json")
+        permission = (
+            self.state.get("orderEnabled") is True
+            and self.state.get("ordersAllowed") is True
+            and self.state.get("newOrdersAllowed") is True
+        )
+        marker = build_v52_tick_marker(
+            runtime_sha=sha,
+            service_unit=service_unit,
+            main_pid=os.getpid(),
+            working_directory=cwd,
+            tick_completed_at=base.now_ms(),
+            outcome=outcome,
+            new_orders_allowed=permission,
+        )
+        write_v52_tick_marker(tick_path, marker)
+
     def idle_tick(self, prepared: dict) -> None:
         super().idle_tick(prepared)
         # V52 is a stock sleeve, but Idle Priority is a 24/7 crypto sleeve.
-        # Even while US equities are closed (or a safe prelock skip is used),
-        # publish a current explicit "no V52 acceptance this hour" heartbeat so
-        # Idle can prove Formal > Idle priority without depending on stale stock
-        # session state.
+        # Publish only after the real idle decision cycle completed successfully.
         self._refresh_idle_admission_heartbeat()
+        outcome = "MARKET_CLOSED_OR_NO_ACTION" if prepared.get("skipWithoutLock") else "IDLE_CYCLE_COMPLETED"
+        self._publish_runner_tick(outcome)
 
     def tick(self, prepared: dict | None = None) -> None:
         super().tick(prepared)
+        # A failed/unknown cycle never reaches this marker write.
         self._refresh_idle_admission_heartbeat()
+        self._publish_runner_tick("DECISION_CYCLE_COMPLETED")
 
     def assert_gross_safe(self, snapshot=None) -> None:
         row = snapshot or self.gross_snapshot()

@@ -17,6 +17,8 @@ on:
       - 'scripts/disdex_v96_v52_margin_guard_runtime.py'
       - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
       - 'scripts/disdex_v52_margin_aware_live_engine.py'
+      - 'scripts/disdex_v52_aster_only_live_engine.py'
+      - 'tests/test_v52_runner_owned_tick_marker.py'
       - 'scripts/disdex-v96-v52-prepare-account-risk.py'
       - 'scripts/disdex-idle-residual-long-core-preempt.ts'
       - 'lib/idle-residual-long-preemption.ts'
@@ -63,6 +65,7 @@ jobs:
           python3 -m py_compile \
             scripts/disdex_v11eq_aster_only_live_engine.py \
             scripts/disdex_v52_aster_only_live_engine.py \
+            tests/test_v52_runner_owned_tick_marker.py \
             scripts/disdex_v96_v52_margin_risk_policy.py \
             scripts/disdex_v96_v52_margin_guard.py \
             scripts/disdex_v96_v52_margin_guard_runtime.py \
@@ -71,6 +74,7 @@ jobs:
             scripts/disdex-v96-v52-prepare-account-risk.py \
             scripts/ops/root/disdex-vps-retention-cleanup
           python3 scripts/disdex_v52_aster_only_live_engine.py --self-test
+          python3 -m unittest tests.test_v52_runner_owned_tick_marker -v
           python3 scripts/disdex_v96_v52_margin_risk_policy.py
           python3 scripts/disdex_v96_v52_margin_guard.py --self-test
           python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test
