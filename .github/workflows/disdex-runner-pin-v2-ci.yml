@@ -46,7 +46,9 @@ jobs:
         run: node --import tsx --test tests/runner-pin-manifest-v2.test.ts
       - name: Runner-health source contract
         run: node --test tests/runner-health-manifest-contract.test.mjs
-      - name: FET manifest contract
-        run: python3 -m unittest tests.test_fet_v52_manifest_pin -v
+      - name: FET manifest contract and regression
+        run: python3 -m unittest tests.test_fet_v52_manifest_pin tests.test_fet_preemption_v52_pin_20261028 -v
       - name: Python compile
         run: python3 -m py_compile scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+      - name: TypeScript typecheck
+        run: npm run typecheck
