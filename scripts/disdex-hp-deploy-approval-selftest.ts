@@ -125,9 +125,10 @@ try {
   for (const required of [
     "DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT",
     "DISDEX_VPS_ROOT_PRIVATE_KEY",
-    "/home/deploy/disdex-ui/shared/data/deploy-approvals.json",
-    "'operation':operation",
-    "'status':'PENDING'",
+    "scripts/ops/deploy/disdex_deployment_approval_store.py",
+    "--operation 'V4_DOGE_MISSED_TIME_EXIT'",
+    "--scope 'V12_V4'",
+    "--orders-enabled 'true'",
     "TRADING_MUTATION=0",
   ]) {
     if (!dogeApprovalWorkflow.includes(required)) {
