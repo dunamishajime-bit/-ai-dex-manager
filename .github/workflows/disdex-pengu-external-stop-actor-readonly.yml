@@ -1,0 +1,108 @@
+name: DisDex PENGU External Stop Actor Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-actor-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-actor-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-actor-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-actor-ssh/"*
+
+      - name: Inspect watchdog, cron and SSH evidence around PENGU stop
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-actor-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-actor-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import pathlib,re,subprocess
+
+          def run(*args):
+              p=subprocess.run(list(args),capture_output=True,text=True,timeout=20)
+              return p.returncode,p.stdout.strip(),p.stderr.strip()
+
+          for unit in ['disdex-runner-watchdog.service','disdex-current-runtime-coherence-guard.service']:
+              rc,out,err=run('journalctl','-u',unit,'--since','2026-11-01 14:58:30',
+                  '--until','2026-11-01 15:00:30','--no-pager','-o','short-iso')
+              print('UNIT_JOURNAL_BEGIN='+unit)
+              print(out)
+              print('UNIT_JOURNAL_END='+unit)
+
+          rc,out,err=run('journalctl','--since','2026-11-01 14:59:45',
+              '--until','2026-11-01 15:00:30','--no-pager','-o','short-iso')
+          print('ROOT_CRON_SSH_WINDOW_BEGIN')
+          for line in out.splitlines():
+              if re.search(r'CRON|sshd|session opened|session closed|CMD \(|goldcat|sudo|su\[',line,re.I):
+                  print(line)
+          print('ROOT_CRON_SSH_WINDOW_END')
+
+          script=pathlib.Path('/home/deploy/goldcat-system/deploy/run-goldcat-copy-autopilot.sh')
+          print('GOLDCAT_AUTOPILOT_EXISTS='+str(script.is_file() and not script.is_symlink()).lower())
+          if script.is_file() and not script.is_symlink():
+              text=script.read_text(errors='replace')
+              print('GOLDCAT_AUTOPILOT_RELEVANT_BEGIN')
+              for n,line in enumerate(text.splitlines(),1):
+                  if re.search(r'kill|pkill|killall|systemctl|service |docker|pm2|node|tsx|stop|restart|disdex|pengu',line,re.I):
+                      print(f'{n}:{line}')
+              print('GOLDCAT_AUTOPILOT_RELEVANT_END')
+
+              refs=[]
+              for line in text.splitlines():
+                  for m in re.finditer(r'(/home/deploy/goldcat[^\s\"\'\;]+)',line):
+                      refs.append(m.group(1))
+              for raw in sorted(set(refs))[:40]:
+                  p=pathlib.Path(raw)
+                  if not p.is_file() or p.is_symlink() or p.stat().st_size>1_000_000: continue
+                  body=p.read_text(errors='replace')
+                  hits=[f'{n}:{line}' for n,line in enumerate(body.splitlines(),1)
+                        if re.search(r'kill|pkill|killall|systemctl\s+(stop|restart|kill)|service\s+.*(stop|restart)|disdex|pengu',line,re.I)]
+                  if hits:
+                      print('GOLDCAT_REFERENCED_FILE='+raw)
+                      print('GOLDCAT_REFERENCED_HITS_BEGIN')
+                      print('\n'.join(hits[:120]))
+                      print('GOLDCAT_REFERENCED_HITS_END')
+
+          rc,out,err=run('last','-Fai','-n','30')
+          print('RECENT_LOGIN_SESSIONS_BEGIN')
+          for line in out.splitlines():
+              if 'Nov  1' in line or 'Nov 1' in line:
+                  print(line)
+          print('RECENT_LOGIN_SESSIONS_END')
+
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-actor-ssh"
