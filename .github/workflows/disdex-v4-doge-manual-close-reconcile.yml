@@ -96,8 +96,8 @@ jobs:
             test ! -L /var/lib/disdex/v12-v4/orders.json;
             echo V4_QUIESCED=TRUE;
             echo TRADING_MUTATION=0"
-          "${SCP[@]}" scripts/ops/deploy/disdex_v4_doge_manual_close_reconcile.ts             "root@$HOST:/tmp/disdex_v4_doge_manual_close_reconcile.ts.$GITHUB_RUN_ID"
-          "${SCP[@]}" scripts/ops/deploy/disdex_v4_doge_operator_postflight.py             "root@$HOST:/tmp/disdex_v4_doge_operator_postflight.py.$GITHUB_RUN_ID"
+          "${SCP[@]}" scripts/ops/deploy/disdex_v4_doge_manual_close_reconcile.ts             "root@$HOST:/tmp/disdex_v4_doge_manual_close_reconcile.$GITHUB_RUN_ID.ts"
+          "${SCP[@]}" scripts/ops/deploy/disdex_v4_doge_operator_postflight.py             "root@$HOST:/tmp/disdex_v4_doge_operator_postflight.$GITHUB_RUN_ID.py"
 
       - name: Reconcile exact manual DOGE close into V4 durable state
         shell: bash
@@ -118,7 +118,7 @@ jobs:
              done;
              set +a;
              cd \"\$ROOT\";
-             exec /usr/bin/node node_modules/tsx/dist/cli.mjs /tmp/disdex_v4_doge_manual_close_reconcile.ts.$GITHUB_RUN_ID"
+             exec /usr/bin/node node_modules/tsx/dist/cli.mjs /tmp/disdex_v4_doge_manual_close_reconcile.$GITHUB_RUN_ID.ts"
 
       - name: Exact read-only postflight
         shell: bash
@@ -128,7 +128,7 @@ jobs:
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex_v4_doge_operator_postflight.py.$GITHUB_RUN_ID"
+          ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex_v4_doge_operator_postflight.$GITHUB_RUN_ID.py"
 
       - name: Final no-mutation marker
         shell: bash
@@ -148,6 +148,6 @@ jobs:
           set +e
           PORT="${PORT:-22}"
           if [[ -s "$RUNNER_TEMP/doge-reconcile-ssh/key" && -n "$HOST" ]]; then
-            ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"               -p "$PORT" "root@$HOST"               "rm -f -- /tmp/disdex_v4_doge_manual_close_reconcile.ts.$GITHUB_RUN_ID /tmp/disdex_v4_doge_operator_postflight.py.$GITHUB_RUN_ID"               >/dev/null 2>&1
+            ssh -T -i "$RUNNER_TEMP/doge-reconcile-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/doge-reconcile-ssh/known_hosts"               -p "$PORT" "root@$HOST"               "rm -f -- /tmp/disdex_v4_doge_manual_close_reconcile.$GITHUB_RUN_ID.ts /tmp/disdex_v4_doge_operator_postflight.$GITHUB_RUN_ID.py"               >/dev/null 2>&1
           fi
           rm -rf "$RUNNER_TEMP/doge-reconcile-ssh"
