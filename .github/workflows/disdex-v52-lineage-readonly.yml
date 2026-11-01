@@ -1,0 +1,102 @@
+name: DisDex V52 Lineage Read-Only Diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/v52-lineage-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/v52-lineage-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/v52-lineage-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/v52-lineage-ssh/"*
+
+      - name: Read V52 expected pin, active units and state lineage
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/v52-lineage-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/v52-lineage-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import json,pathlib,re,subprocess
+          sha='7688ed7c93a1918d8b44837339b7da5584a868f5'
+          env=pathlib.Path(f'/etc/disdex/current-runtime/{sha}.watchdog.env')
+          if not env.is_file() or env.is_symlink():
+              raise SystemExit('WATCHDOG_ENV_MISSING_OR_UNSAFE')
+          values={}
+          for line in env.read_text(errors='replace').splitlines():
+              if '=' in line and not line.lstrip().startswith('#'):
+                  k,v=line.split('=',1);values[k.strip()]=v.strip().strip(chr(34)).strip(chr(39))
+          for k in sorted(values):
+              if k.startswith('DISDEX_WATCHDOG_V52_') or k in ('DISDEX_WATCHDOG_EXPECTED_SHA','DISDEX_WATCHDOG_APPROVED_SHA'):
+                  if re.search(r'SECRET|TOKEN|KEY|PASSWORD',k,re.I): continue
+                  print(f'{k}={values[k]}')
+
+          p=subprocess.run(['systemctl','list-units','--all','--type=service','--no-pager','--plain',
+              'disdex-v52-aster-only@*.service'],capture_output=True,text=True,timeout=10)
+          print('V52_UNIT_LIST_BEGIN')
+          print(p.stdout.strip())
+          print('V52_UNIT_LIST_END')
+
+          for line in p.stdout.splitlines():
+              m=re.match(r'\s*(disdex-v52-aster-only@([0-9a-f]{40})\.service)\s+',line)
+              if not m: continue
+              unit=m.group(1)
+              q=subprocess.run(['systemctl','show',unit,'--no-pager',
+                  '--property=Id,LoadState,ActiveState,SubState,MainPID,WorkingDirectory,ExecStart,Result,UnitFileState'],
+                  capture_output=True,text=True,timeout=10)
+              print('V52_UNIT_SHOW_BEGIN='+unit)
+              print(q.stdout.strip())
+              print('V52_UNIT_SHOW_END='+unit)
+
+          candidates=[
+            '/var/lib/disdex/v52-aster-only/runner-live.json',
+            '/var/lib/disdex/v52-aster-only/state.json',
+            '/var/lib/disdex/v52-aster-only/heartbeat.json',
+          ]
+          for raw in candidates:
+              pth=pathlib.Path(raw)
+              if not pth.is_file() or pth.is_symlink(): continue
+              try:d=json.loads(pth.read_text())
+              except Exception: continue
+              keep={k:d.get(k) for k in (
+                  'runnerId','strategyId','mode','status','reason','runtimeSha','runtimeCommitSha',
+                  'releaseSha','updatedAt','heartbeatAt','ordersAllowed','newOrdersAllowed',
+                  'pending','pendingOrder','manualReview','manualReviewReason'
+              )}
+              print('V52_STATE='+raw+' '+json.dumps(keep,separators=(',',':')))
+
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/v52-lineage-ssh"
