@@ -70,7 +70,7 @@ test("expired, wrong-purpose and corrupt OTP stores fail closed", async () => {
   delete process.env.KV_REST_API_TOKEN;
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
-  const store = await import("../lib/server/auth-otp-store?bad=" + Date.now());
+  const store = await import("../lib/server/auth-otp-store");
 
   try {
     const issued = await store.createOtpChallenge({
