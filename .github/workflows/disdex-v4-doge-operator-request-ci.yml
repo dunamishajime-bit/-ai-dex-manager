@@ -1,0 +1,55 @@
+name: DisDex V4 DOGE Operator Request CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py'
+      - 'scripts/ops/deploy/disdex_v4_doge_operator_postflight.py'
+      - 'tests/test_v4_doge_operator_request_stage.py'
+      - '.github/workflows/disdex-v4-doge-operator-request-stage.yml'
+      - '.github/workflows/disdex-v4-doge-operator-postflight.yml'
+      - '.github/workflows/disdex-v4-doge-operator-request-ci.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py'
+      - 'scripts/ops/deploy/disdex_v4_doge_operator_postflight.py'
+      - 'tests/test_v4_doge_operator_request_stage.py'
+      - '.github/workflows/disdex-v4-doge-operator-request-stage.yml'
+      - '.github/workflows/disdex-v4-doge-operator-postflight.yml'
+      - '.github/workflows/disdex-v4-doge-operator-request-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  safe-route:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Compile Python helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile             scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py             scripts/ops/deploy/disdex_v4_doge_operator_postflight.py
+
+      - name: Run exact request staging tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tests/test_v4_doge_operator_request_stage.py
+
+      - name: Prove workflows remain non-ordering
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'READY_FOR_EXTERNAL_EXECUTOR' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
+          grep -Fq 'ordersSent":0' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
+          grep -Fq 'V4_DOGE_OPERATOR_POSTFLIGHT_PASS' scripts/ops/deploy/disdex_v4_doge_operator_postflight.py
+          ! grep -R -E 'executeExit\(|newOrder\(|placeOrder\(|MARKET.*reduceOnly'             scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py             scripts/ops/deploy/disdex_v4_doge_operator_postflight.py
+          echo DOGE_SAFE_ROUTE_CI_PASS

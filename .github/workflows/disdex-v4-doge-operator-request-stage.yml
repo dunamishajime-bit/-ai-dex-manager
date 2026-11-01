@@ -1,0 +1,107 @@
+name: DisDex V4 DOGE Operator Request Stage
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: Approved HP request UUID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  stage:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify exact staging helper and guard offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
+          python3 tests/test_v4_doge_operator_request_stage.py
+          node --test tests/v12-v4-doge-missed-time-guard.test.mjs
+          echo TRADING_MUTATION=0
+
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/doge-stage-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/doge-stage-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/doge-stage-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/doge-stage-ssh/"*
+
+      - name: Upload exact helper, plan, guard and preflight
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          for f in             scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py             scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py             docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json             lib/v12-v4-doge-missed-time-guard.mjs; do
+            scp -i "$RUNNER_TEMP/doge-stage-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/doge-stage-ssh/known_hosts"               -P "$PORT" "$f" "root@$HOST:/tmp/$(basename "$f").$GITHUB_RUN_ID"
+          done
+
+      - name: Fresh quiesced exact DOGE preflight
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/doge-stage-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-stage-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex_v4_doge_missed_time_exit_preflight.py.$GITHUB_RUN_ID --allow-quiesced"
+
+      - name: Stage root-owned exact operator request only
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/doge-stage-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-stage-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             python3 /tmp/disdex_v4_doge_operator_request_stage.py.$GITHUB_RUN_ID                --approval-id '$APPROVAL_ID'                --plan /tmp/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json.$GITHUB_RUN_ID                --guard /tmp/v12-v4-doge-missed-time-guard.mjs.$GITHUB_RUN_ID;
+             req=/var/lib/disdex/operator-requests/V4_DOGE_MISSED_TIME_EXIT-$APPROVAL_ID.json;
+             test -f \"\$req\" && test ! -L \"\$req\";
+             [[ \"\$(stat -c '%U:%G:%a' \"\$req\")\" == 'root:root:600' ]];
+             echo DOGE_OPERATOR_REQUEST_ROOT_ATTESTED=TRUE;
+             echo ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES_SENT=0"
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/doge-stage-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/doge-stage-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/doge-stage-ssh/known_hosts"               -p "$PORT" "root@$HOST"               "rm -f /tmp/disdex_v4_doge_operator_request_stage.py.$GITHUB_RUN_ID                      /tmp/disdex_v4_doge_missed_time_exit_preflight.py.$GITHUB_RUN_ID                      /tmp/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json.$GITHUB_RUN_ID                      /tmp/v12-v4-doge-missed-time-guard.mjs.$GITHUB_RUN_ID" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/doge-stage-ssh"
