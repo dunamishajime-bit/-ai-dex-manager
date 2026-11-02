@@ -13,3 +13,12 @@
 - [ ] Add the test to the existing HP approval CI workflow and its pull-request path filter.
 - [ ] Run the regression and protected-environment tests, parse the actual YAML with an independent parser, and verify the diff preserves the approval gate and HTTP Location handling.
 - [ ] Push the reviewed change for CI without deploying or enabling orders.
+
+## Follow-up: prevent stale V4 witness promotion
+
+- [ ] Exercise the actual witness collector with fresh, stale, future, missing, and mixed-generation source evidence; prove stale evidence currently passes incorrectly.
+- [ ] Require every dynamic source to be within the existing signed-read diagnostic's 30-second age / 5-second clock-skew bound, and require one nonempty refresh generation across the three sources.
+- [ ] Bound the output expiry by the earliest source capture rather than extending the evidence lifetime when the witness is generated.
+- [ ] Do not claim all-runner heartbeat or tick verification before V4 starts, or when an approved peer is stopped.
+- [ ] Run the V4 witness tests and all-runner safety tests; keep the witness unwired to production until the remaining runtime and ownership gaps are resolved.
+- [ ] Run the witness, final-verify, and risk-freshness tests in GitHub CI when their sources change.

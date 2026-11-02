@@ -419,10 +419,31 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
     orders_evidence = _secure_json(EVIDENCE_ROOT / "established-aster-orders.json")
     account_evidence = _secure_json(EVIDENCE_ROOT / "signed-aster-account.json")
     risk_evidence = _secure_json(EVIDENCE_ROOT / "shared-risk-and-peers.json")
+    captures = []
+    generations = set()
     for label, evidence in (
         ("orders", orders_evidence), ("account", account_evidence), ("risk", risk_evidence)):
         if evidence.get("status") != "PASS" or evidence.get("candidateSha") != sha:
             raise ValueError("DYNAMIC_EVIDENCE_IDENTITY_MISMATCH:" + label)
+        captured_at = evidence.get("capturedAt")
+        try:
+            if not isinstance(captured_at, str):
+                raise ValueError("missing timestamp")
+            captured = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
+            if captured.tzinfo is None or captured.utcoffset() is None:
+                raise ValueError("missing timezone")
+            captured_s = captured.timestamp()
+        except (ValueError, OverflowError, OSError):
+            raise ValueError("DYNAMIC_EVIDENCE_TIMESTAMP_INVALID:" + label) from None
+        if not now_s - 30 <= captured_s <= now_s + 5:
+            raise ValueError("DYNAMIC_EVIDENCE_STALE_OR_FUTURE:" + label)
+        generation = evidence.get("refreshGeneration")
+        if not isinstance(generation, str) or not generation.strip() or len(generation) > 160:
+            raise ValueError("DYNAMIC_EVIDENCE_GENERATION_INVALID:" + label)
+        generations.add(generation)
+        captures.append(captured_s)
+    if len(generations) != 1:
+        raise ValueError("DYNAMIC_EVIDENCE_GENERATION_MISMATCH")
     if (account_evidence.get("signedGet") is not True
             or account_evidence.get("readOnly") is not True
             or account_evidence.get("mutationCalls") != 0
@@ -450,13 +471,16 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
 
     return {
         "schema": VENUE_SCHEMA, "venue": "aster", "readOnly": True,
-        "capturedAt": now_s, "expiresAt": now_s + 180,
+        "capturedAt": now_s, "expiresAt": min(now_s, int(min(captures))) + 180,
         "signatureVerified": True, "positionsReconciled": True,
         "protectiveStopsReconciled": True, "stopOwnershipReconciled": True,
         "pendingExposureReconciled": True, "grossReconciled": True,
         "sharedRiskHealthy": True, "marginGuardHealthy": True,
         "accountLockHealthy": True, "killSwitchHealthy": True,
-        "heartbeatVerified": True, "tickVerified": True,
+        # The before phase explicitly skips V4 heartbeat/tick verification.
+        # A peer-stop approval likewise cannot attest a stopped peer's tick.
+        "heartbeatVerified": phase == "after" and not peer_stop_approvals,
+        "tickVerified": phase == "after" and not peer_stop_approvals,
         "runnerShaMapVerified": True,
         "peerStopApprovalsVerified": sorted(peer_stop_approvals or {}),
         "sharedRiskDailyLossLimit": float(

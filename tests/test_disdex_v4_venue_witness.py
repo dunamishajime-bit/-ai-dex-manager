@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -11,6 +12,56 @@ SHA="a"*40
 OLD="7"*40
 
 class VenueWitnessContractTest(unittest.TestCase):
+    def test_collector_rejects_stale_future_missing_or_mixed_generation_evidence(self):
+        now = 1793596500
+        captured = datetime.fromtimestamp(now - 1, timezone.utc).isoformat()
+        common = {"status": "PASS", "candidateSha": SHA, "capturedAt": captured,
+                  "refreshGeneration": "generation-1", "readOnly": True,
+                  "mutationCalls": 0}
+        orders = dict(common, positions=[], openOrders=[])
+        account = dict(common, signedGet=True, positions=[], openOrders=[])
+        risk = dict(common, sharedRiskHealthy=True, marginGuardHealthy=True,
+                    killSwitch=False, pendingCount=0)
+
+        def collect(records, *, phase="before", peer_stop_approvals=None):
+            def read(path):
+                return records[Path(path).name]
+            with patch.object(m.os, "geteuid", return_value=0, create=True), \
+                 patch.object(m, "_assert_release", return_value=Path(".")), \
+                 patch.object(m, "_assert_runtime_health", return_value=({"maximumLossPct": 7.5}, [])), \
+                 patch.object(m, "validate_units_and_ticks"), \
+                 patch.object(m, "_secure_json", side_effect=read):
+                return m.collect_v4_venue_evidence(sha=SHA, expected_pins={},
+                                                   phase=phase, now=now, refresh=False,
+                                                   peer_stop_approvals=peer_stop_approvals)
+
+        records = {"established-aster-orders.json": orders,
+                   "signed-aster-account.json": account,
+                   "shared-risk-and-peers.json": risk}
+        result = collect(records)
+        self.assertFalse(result["heartbeatVerified"], "pre-cutover does not verify the V4 heartbeat")
+        self.assertFalse(result["tickVerified"], "pre-cutover does not verify the V4 tick")
+        post_cutover = collect(records, phase="after")
+        self.assertTrue(post_cutover["heartbeatVerified"])
+        self.assertTrue(post_cutover["tickVerified"])
+        peer_stopped = collect(records, phase="after", peer_stop_approvals={"PENGU_V8": {}})
+        self.assertFalse(peer_stopped["heartbeatVerified"])
+        self.assertFalse(peer_stopped["tickVerified"])
+        for name, source in records.items():
+            for changes in ({"capturedAt": datetime.fromtimestamp(now - 31, timezone.utc).isoformat()},
+                            {"capturedAt": datetime.fromtimestamp(now + 6, timezone.utc).isoformat()},
+                            {"capturedAt": None}, {"capturedAt": "2026-11-02T05:15:00"},
+                            {"refreshGeneration": "other"}, {"refreshGeneration": ""}):
+                with self.subTest(name=name, changes=changes):
+                    bad = dict(records, **{name: dict(source, **changes)})
+                    with self.assertRaises(ValueError):
+                        collect(bad)
+        self.assertLessEqual(result["expiresAt"], now - 1 + 180)
+        at_upper_skew = datetime.fromtimestamp(now + 5, timezone.utc).isoformat()
+        future_records = {name: dict(source, capturedAt=at_upper_skew)
+                          for name, source in records.items()}
+        self.assertLessEqual(collect(future_records)["expiresAt"], now + 180)
+
     def test_shared_runtime_owner_and_modes_are_bound_to_deploy(self):
         self.assertTrue(m._valid_runtime_metadata(1001, 1001, 0o100600, 1001, 1001, 1001, 1001))
         self.assertTrue(m._valid_runtime_metadata(1001, 1001, 0o100660, 1001, 1001, 1001, 1001))
