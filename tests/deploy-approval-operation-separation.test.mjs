@@ -16,6 +16,7 @@ test("approval operations separate monitoring, runner enablement, shared-risk wr
     "PENGU_V8_LIVE",
     "SHARED_CRYPTO_RISK_WRITER",
     "ALL_RUNNERS_LIVE_RESTORE",
+    "ALL_RUNNERS_ORDER_ENABLE_PREP",
     "ALL_RUNNERS_ORDER_ENABLE",
   ]) assert.ok(token.includes(operation), operation);
 
@@ -23,6 +24,7 @@ test("approval operations separate monitoring, runner enablement, shared-risk wr
   assert.match(token, /PENGU_V8_LIVE:[\s\S]*?scope:\s*"PENGU_V8"[\s\S]*?ordersEnabled:\s*true/);
   assert.match(token, /SHARED_CRYPTO_RISK_WRITER:[\s\S]*?scope:\s*"SHARED_CRYPTO_RISK_ONLY"[\s\S]*?ordersEnabled:\s*false/);
   assert.match(token, /ALL_RUNNERS_LIVE_RESTORE:[\s\S]*?scope:\s*"FULL_PROJECT"[\s\S]*?ordersEnabled:\s*false/);
+  assert.match(token, /ALL_RUNNERS_ORDER_ENABLE_PREP:[\s\S]*?scope:\s*"FULL_PROJECT"[\s\S]*?ordersEnabled:\s*false/);
   assert.match(token, /ALL_RUNNERS_ORDER_ENABLE:[\s\S]*?scope:\s*"FULL_PROJECT"[\s\S]*?ordersEnabled:\s*true/);
 });
 
@@ -73,11 +75,13 @@ test("formal HP request workflow exposes each separated approval operation with 
     "DISDEX_DEPLOY_REQUEST PENGU_V8 ",
     "DISDEX_PROTECTED_REQUEST SHARED_CRYPTO_RISK_WRITER ",
     "DISDEX_PROTECTED_REQUEST ALL_RUNNERS_MONITOR_REFRESH ",
+    "DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE_PREP ",
     "DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE ",
     "DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ",
   ]) assert.ok(source.includes(marker), marker);
   assert.match(source, /operation = "PENGU_V8_LIVE"[\s\S]*?scope = "PENGU_V8"[\s\S]*?orders_enabled = "true"/);
   assert.match(source, /operation = "SHARED_CRYPTO_RISK_WRITER"[\s\S]*?scope = "SHARED_CRYPTO_RISK_ONLY"[\s\S]*?orders_enabled = "false"/);
   assert.match(source, /operation = "ALL_RUNNERS_MONITOR_REFRESH"[\s\S]*?scope = "FULL_PROJECT"[\s\S]*?orders_enabled = "false"/);
+  assert.match(source, /operation = "ALL_RUNNERS_ORDER_ENABLE_PREP"[\s\S]*?scope = "FULL_PROJECT"[\s\S]*?orders_enabled = "false"/);
   assert.match(source, /operation = "ALL_RUNNERS_ORDER_ENABLE"[\s\S]*?scope = "FULL_PROJECT"[\s\S]*?orders_enabled = "true"/);
 });

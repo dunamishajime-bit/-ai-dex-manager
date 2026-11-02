@@ -14,7 +14,7 @@ test("order-enable installer workflow is protected and install-only", () => {
   assert.match(s, /config\/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS\.json/);
   assert.match(s, /install-disdex-allrunner-order-enable/);
   assert.match(s, /sha256sum -c/);
-  assert.match(s, /ALLRUNNER_ORDER_ENABLE_HELPER_INSTALLED_SOURCE_READY_NOT_LIVE/);
+  assert.match(s, /ALLRUNNER_ORDER_ENABLE_HELPERS_INSTALLED_SOURCE_READY_NOT_LIVE/);
   assert.doesNotMatch(s, /api\/system\/deploy-approval/);
   assert.doesNotMatch(s, /--execute/);
   assert.doesNotMatch(s, /systemctl/);
@@ -27,10 +27,12 @@ test("installer workflow transfers only the reviewed bootstrap file set", () => 
   const s = fs.readFileSync(workflowPath, "utf8");
   for (const path of [
     "scripts/ops/deploy/disdex_allrunner_order_enable.py",
+    "scripts/ops/deploy/disdex_allrunner_order_enable_prep.py",
     "scripts/ops/deploy/disdex_owner_approval.py",
     "scripts/ops/deploy/disdex_deployment_contract.py",
     "scripts/ops/deploy/disdex_allrunner_final_verify.py",
     "scripts/ops/root/disdex-allrunner-order-enable",
+    "scripts/ops/root/disdex-allrunner-order-enable-prep",
     "scripts/ops/root/install-disdex-allrunner-order-enable",
     "config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json",
   ]) assert.ok(s.includes(path), "missing reviewed path: " + path);

@@ -22,6 +22,7 @@ export const DEPLOY_APPROVAL_OPERATIONS = [
   "V4_DOGE_MISSED_TIME_EXIT",
   "IDLE_FLAT_STALE_REPAIR",
   "ALL_RUNNERS_LIVE_RESTORE",
+  "ALL_RUNNERS_ORDER_ENABLE_PREP",
   "ALL_RUNNERS_ORDER_ENABLE",
 ] as const;
 export type DeploymentApprovalOperation = (typeof DEPLOY_APPROVAL_OPERATIONS)[number];
@@ -66,6 +67,11 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "FULL_PROJECT",
     ordersEnabled: false,
     label: "全Runner LIVE復旧（monitor-only / 注文無効）",
+  },
+  ALL_RUNNERS_ORDER_ENABLE_PREP: {
+    scope: "FULL_PROJECT",
+    ordersEnabled: false,
+    label: "全Runner 注文有効化準備（helper導入・activation配線のみ / 注文無効）",
   },
   ALL_RUNNERS_ORDER_ENABLE: {
     scope: "FULL_PROJECT",

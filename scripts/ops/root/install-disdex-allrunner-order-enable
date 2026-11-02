@@ -13,12 +13,14 @@ case "$plan_sha" in *[!0-9a-f]*|'') echo PLAN_SHA_INVALID >&2; exit 2;; esac
 [ "$(printf %s "$plan_sha" | wc -c)" -eq 64 ] || { echo PLAN_SHA_INVALID >&2; exit 2; }
 
 helper="$src/scripts/ops/deploy/disdex_allrunner_order_enable.py"
+prep="$src/scripts/ops/deploy/disdex_allrunner_order_enable_prep.py"
 owner="$src/scripts/ops/deploy/disdex_owner_approval.py"
 contract="$src/scripts/ops/deploy/disdex_deployment_contract.py"
 verify="$src/scripts/ops/deploy/disdex_allrunner_final_verify.py"
 wrapper="$src/scripts/ops/root/disdex-allrunner-order-enable"
+prep_wrapper="$src/scripts/ops/root/disdex-allrunner-order-enable-prep"
 plan="$src/config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json"
-for f in "$helper" "$owner" "$contract" "$verify" "$wrapper" "$plan"; do
+for f in "$helper" "$prep" "$owner" "$contract" "$verify" "$wrapper" "$prep_wrapper" "$plan"; do
   [ -f "$f" ] && [ ! -L "$f" ] || { echo SOURCE_FILE_INVALID:$f >&2; exit 1; }
 done
 actual=$(sha256sum "$plan" | awk '{print $1}')
@@ -26,6 +28,7 @@ actual=$(sha256sum "$plan" | awk '{print $1}')
 
 install -d -o root -g root -m 0755 /usr/local/lib/disdex-allrunner-order-enable
 install -o root -g root -m 0644 "$helper" /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_order_enable.py
+install -o root -g root -m 0644 "$prep" /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_order_enable_prep.py
 install -o root -g root -m 0644 "$owner" /usr/local/lib/disdex-allrunner-order-enable/disdex_owner_approval.py
 install -o root -g root -m 0644 "$contract" /usr/local/lib/disdex-allrunner-order-enable/disdex_deployment_contract.py
 install -o root -g root -m 0644 "$verify" /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_final_verify.py
@@ -34,6 +37,23 @@ printf '%s\n' "$source_sha" >/usr/local/lib/disdex-allrunner-order-enable/source
 chown root:root /usr/local/lib/disdex-allrunner-order-enable/source-sha
 chmod 0600 /usr/local/lib/disdex-allrunner-order-enable/source-sha
 install -o root -g root -m 0755 "$wrapper" /usr/local/sbin/disdex-allrunner-order-enable
+install -o root -g root -m 0755 "$prep_wrapper" /usr/local/sbin/disdex-allrunner-order-enable-prep
 python3 -m py_compile /usr/local/lib/disdex-allrunner-order-enable/*.py
+
+check_pair() {
+  source_file=$1
+  installed_file=$2
+  source_hash=$(sha256sum "$source_file" | awk '{print $1}')
+  installed_hash=$(sha256sum "$installed_file" | awk '{print $1}')
+  [ "$source_hash" = "$installed_hash" ] || { echo INSTALLED_HASH_MISMATCH:$installed_file >&2; exit 1; }
+}
+check_pair "$helper" /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_order_enable.py
+check_pair "$prep" /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_order_enable_prep.py
+check_pair "$owner" /usr/local/lib/disdex-allrunner-order-enable/disdex_owner_approval.py
+check_pair "$contract" /usr/local/lib/disdex-allrunner-order-enable/disdex_deployment_contract.py
+check_pair "$verify" /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_final_verify.py
+check_pair "$plan" /usr/local/lib/disdex-allrunner-order-enable/order-enable-plan.json
+check_pair "$wrapper" /usr/local/sbin/disdex-allrunner-order-enable
+check_pair "$prep_wrapper" /usr/local/sbin/disdex-allrunner-order-enable-prep
 [ "$(sha256sum /usr/local/lib/disdex-allrunner-order-enable/order-enable-plan.json | awk '{print $1}')" = "$plan_sha" ]
-echo ALLRUNNER_ORDER_ENABLE_HELPER_INSTALLED_SOURCE_READY_NOT_LIVE
+echo ALLRUNNER_ORDER_ENABLE_HELPERS_INSTALLED_SOURCE_READY_NOT_LIVE
