@@ -316,7 +316,7 @@ def release_marker(sha: str, releases=RELEASES, *, root_uid=None):
     return release
 
 
-def legacy_release_marker(sha: str, releases=RELEASES):
+def legacy_release_marker(sha: str, releases=RELEASES, *, root_uid=0):
     """Verify an unchanged legacy peer release without blessing it as mutable.
 
     Existing dormant peers were deployed before the root-owned release
@@ -331,12 +331,12 @@ def legacy_release_marker(sha: str, releases=RELEASES):
     release = releases / sha
     directory = release.lstat()
     if (not stat.S_ISDIR(directory.st_mode) or release.is_symlink()
-            or directory.st_uid != 0 or directory.st_mode & 0o022):
+            or directory.st_uid != root_uid or directory.st_mode & 0o022):
         raise ValueError("legacy release directory is writable or invalid")
     marker = release / ".disdex-release-sha"
     marker_stat = marker.lstat()
     if (not stat.S_ISREG(marker_stat.st_mode) or marker.is_symlink()
-            or marker_stat.st_uid != 0
+            or marker_stat.st_uid != root_uid
             or marker_stat.st_mode & 0o222):
         raise ValueError("legacy release marker is untrusted")
     if marker.read_text(encoding="ascii").strip() != sha:
@@ -354,12 +354,12 @@ def legacy_release_marker(sha: str, releases=RELEASES):
         target_marker = target_release / ".disdex-release-sha"
         target_marker_stat = target_marker.lstat()
         if (not stat.S_ISDIR(target_release_stat.st_mode)
-                or target_release_stat.st_uid != 0
+                or target_release_stat.st_uid != root_uid
                 or target_release_stat.st_mode & 0o022
-                or not stat.S_ISDIR(target.st_mode) or target.st_uid != 0
+                or not stat.S_ISDIR(target.st_mode) or target.st_uid != root_uid
                 or target.st_mode & 0o022
                 or not stat.S_ISREG(target_marker_stat.st_mode)
-                or target_marker_stat.st_uid != 0
+                or target_marker_stat.st_uid != root_uid
                 or target_marker_stat.st_mode & 0o222
                 or target_marker.read_text(encoding="ascii").strip() != target_release.name):
             raise ValueError("legacy dependency target is not immutable")

@@ -190,7 +190,7 @@ class RootGateTest(unittest.TestCase):
             (dependency_release / ".disdex-release-sha").chmod(0o444)
 
             self.assertEqual(
-                legacy_release_marker(OLD, root),
+                legacy_release_marker(OLD, root, root_uid=__import__("os").geteuid()),
                 release,
             )
 
