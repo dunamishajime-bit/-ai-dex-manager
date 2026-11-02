@@ -6,13 +6,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class UnifiedHelperInstallerContractTests(unittest.TestCase):
-    def test_installer_is_root_only_exact_release_and_never_touches_systemd(self):
+    def test_installer_is_root_only_exact_release_and_stages_refresh_systemd(self):
         installer = (ROOT / "scripts/ops/root/install-disdex-unified-deployment").read_text()
         self.assertIn('"$(id -u)" == "0"', installer)
         self.assertIn("/home/deploy/disdex-trading/releases/", installer)
         self.assertIn(".disdex-release-sha", installer)
         self.assertIn("install -o root -g root", installer)
-        self.assertNotIn("systemctl", installer)
+        self.assertIn("ops/systemd/disdex-v4-dynamic-evidence-refresh@.service", installer)
+        self.assertIn("ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer", installer)
+        self.assertIn("/etc/systemd/system/disdex-v4-dynamic-evidence-refresh@.service", installer)
+        self.assertIn("/etc/systemd/system/disdex-v4-dynamic-evidence-refresh@.timer", installer)
+        self.assertIn("systemctl daemon-reload", installer)
         self.assertNotIn("authorized_keys", installer)
         self.assertNotIn("PRIVATE_KEY", installer)
 
