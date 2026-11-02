@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { lstat, readFile, mkdir, rename, writeFile, unlink } from "node:fs/promises";
 import { dirname } from "node:path";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { loadV4ClosedCandles, buildV4LiveDecisionBatch } from "../lib/v12-v4-live-candidate-builder";
 import { attachV4NativeCoreCandidates } from "../lib/v12-v4-core-candidate";
@@ -17,10 +17,17 @@ function releaseSha(){
  if(!SHA_RE.test(value))throw Error("V4_MONITOR_RELEASE_SHA_INVALID");
  return value;
 }
-async function trustedJson(path:string){
+async function trustedJson(path:string,requiredUid?:number){
+ const st=await lstat(path);
+ if(!st.isFile()||st.isSymbolicLink()||(st.mode&0o002)!==0
+   ||(requiredUid!==undefined&&st.uid!==requiredUid))throw Error("V4_MONITOR_SHARED_STATE_UNTRUSTED:"+path);
+ return JSON.parse(await readFile(path,"utf8"));
+}
+async function trustedJsonWithHash(path:string){
  const st=await lstat(path);
  if(!st.isFile()||st.isSymbolicLink()||(st.mode&0o002)!==0)throw Error("V4_MONITOR_SHARED_STATE_UNTRUSTED:"+path);
- return JSON.parse(await readFile(path,"utf8"));
+ const raw=await readFile(path,"utf8");
+ return {value:JSON.parse(raw),hash:createHash("sha256").update(raw).digest("hex")};
 }
 async function atomicJson(path:string,value:unknown){
  await mkdir(dirname(path),{recursive:true,mode:0o750});
@@ -60,15 +67,19 @@ async function cycle(now=Date.now()){
  });
  if(!client.hasTradingCredentials())throw Error("V4_SIGNED_VENUE_CREDENTIALS_REQUIRED");
  const entrySafetyError=await assertV4EntrySafety().then(()=>null,(error)=>safeReason(error));
- const [risk,margin,killSwitch,pending,positions,openOrders,market]=await Promise.all([
+ const pendingPath=process.env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH||"/var/lib/disdex/shared/pending-exposure.json";
+ const proofPath=process.env.V12_V4_PENDING_READONLY_PROOF_PATH||"/var/lib/disdex/v12-v4/monitor/pending-proof.json";
+ const [risk,margin,killSwitch,pendingSource,pendingProof,positions,openOrders,market]=await Promise.all([
   trustedJson(process.env.DISDEX_V4_DYNAMIC_SHARED_RISK_PATH||"/var/lib/disdex/shared/crypto-daily-risk.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_MARGIN_PATH||"/var/lib/disdex/shared/margin-risk/guard-live.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_KILL_SWITCH_PATH||"/var/lib/disdex/shared/kill-switch.json"),
-  trustedJson(process.env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH||"/var/lib/disdex/shared/pending-exposure.json"),
+  trustedJsonWithHash(pendingPath),
+  trustedJson(proofPath,0),
   client.getPositions(),client.getOpenOrders(),decision(client,now),
  ]);
  return {sha,result:evaluateV4MonitorCompletedDecision({
-  now,risk,margin,killSwitch,pending,
+  now,risk,margin,killSwitch,pending:pendingSource.value,runtimeSha:sha,
+  pendingHash:pendingSource.hash,pendingProof,
   positions:positions as unknown as JsonRecord[],openOrders:openOrders as unknown as JsonRecord[],
   decision:market as unknown as JsonRecord,
  },entrySafetyError)};
