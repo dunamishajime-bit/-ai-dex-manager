@@ -120,3 +120,14 @@ test("concurrent atomic heartbeat writes never corrupt the destination",async()=
     assert.deepEqual(await fs.readdir(dir),["v52.json"]);
   }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+test("runner with failed shared safety cannot be shown LIVE or order-ready",()=>{
+  const v=validateRunnerTick(tick(),{runnerId:"V52",pin,pid:PID,cwd:ROOT,now:NOW});
+  const hb=buildSupervisorHeartbeat({runnerId:"V52",pin,pid:PID,cwd:ROOT,now:NOW,
+    tick:v,safetyState:"BLOCKED",healthReason:"SHARED_RISK_STALE"});
+  assert.equal(hb.safetyState,"BLOCKED");
+  assert.equal(hb.liveEnabled,false);
+  assert.equal(hb.mode,"BLOCKED");
+  assert.equal(hb.newOrdersAllowed,false);
+  assert.equal(hb.lastTickAt,NOW-2_000);
+});
