@@ -28,14 +28,40 @@ Q102_EMPTY_NEW = '''    position = root.get("position")
         if root.get("pending") is not None:
             raise RuntimeError("QUALITY102_PENDING_UNRECONCILED")
         return None'''
+VALIDATE_START_OLD = '''    root = _quality102_object(raw, "root")
+    allowed = {'''
+VALIDATE_START_NEW = '''    return _validate_quality102_live_state_document(raw, now_ms=now_ms)
+
+
+def _validate_quality102_live_state_document(raw, *, now_ms=None):
+    root = _quality102_object(raw, "root")
+    allowed = {'''
+DOCUMENT_OLD = '''    owned = load_quality102_live_state(resolved, now_ms=now_ms)
+    try:
+        raw = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from error
+    if not isinstance(raw, dict):
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:root")
+    return resolved, raw, owned'''
+DOCUMENT_NEW = '''    try:
+        raw = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from error
+    if not isinstance(raw, dict):
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:root")
+    owned = _validate_quality102_live_state_document(raw, now_ms=now_ms)
+    return resolved, raw, owned'''
 
 
 def patch_planner(source):
     if any(source.count(part) != 1 for part in (OLD, IDLE_OLD, IDLE_COMPARE, FET_OLD, Q102_EMPTY_OLD,
+                                                 VALIDATE_START_OLD, DOCUMENT_OLD,
                                                  "from __future__ import annotations")):
         raise RuntimeError("V52_PREVIEW_UNEXPECTED_BASELINE")
     return (source.replace("from __future__ import annotations", "from __future__ import annotations\n\nfrom v52_q102_independent_pin import verify_q102_identity, verify_peer_identity", 1)
             .replace(OLD, NEW, 1).replace(Q102_EMPTY_OLD, Q102_EMPTY_NEW, 1)
+            .replace(VALIDATE_START_OLD, VALIDATE_START_NEW, 1).replace(DOCUMENT_OLD, DOCUMENT_NEW, 1)
             .replace(IDLE_OLD, "    # Identity is checked against the independently pinned Idle service below.", 1)
             .replace(IDLE_COMPARE, '    verify_peer_identity("IDLE_PRIORITY_SHORT", str(document.get("runtimeSha") or "").lower())', 1)
             .replace(FET_OLD, '                expected = verify_peer_identity("FET_BRK48_RESIDUAL", str(fet.get("runtimeCommitSha") or "").lower())', 1))

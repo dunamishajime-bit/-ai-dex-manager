@@ -13,7 +13,10 @@ and state SHA; any missing or conflicting evidence fails closed. The original
 position, STOP, freshness, gross-cap, and Kill Switch logic is not replaced by
 the preview builder. A Q102 state with no position but a pending entry now
 blocks V52 accounting instead of being treated as flat; this conservative
-change can delay V52 decisions until pending is reconciled. The builder does
+change can delay V52 decisions until pending is reconciled. The validated
+Q102 document is also the same single read returned to the caller, preventing
+an unvalidated second read. The shared account lock is still required around
+operations that act on or update the document. The builder does
 not create an immutable release or approve,
 start, stop, or change any service.
 
