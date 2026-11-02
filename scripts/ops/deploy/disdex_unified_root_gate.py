@@ -315,6 +315,34 @@ def release_marker(sha: str, releases=RELEASES, *, root_uid=None):
             raise ValueError("external dependency symlink escapes immutable release") from None
     return release
 
+
+def legacy_release_marker(sha: str, releases=RELEASES):
+    """Verify an unchanged legacy peer release without blessing it as mutable.
+
+    Existing dormant peers were deployed before the root-owned release
+    boundary and may still be owned by ``deploy``.  The only operation that
+    may use this migration proof is the no-order PENGU peer-stop certificate;
+    it never starts the peer, changes pins, or grants venue authority.  The
+    directory and marker must still be non-writable by group/other and the
+    marker must match the exact SHA.
+    """
+    if not isinstance(sha, str) or not SHA.fullmatch(sha):
+        raise ValueError("invalid exact legacy release SHA")
+    release = releases / sha
+    directory = release.lstat()
+    if (not stat.S_ISDIR(directory.st_mode) or release.is_symlink()
+            or directory.st_mode & 0o022):
+        raise ValueError("legacy release directory is writable or invalid")
+    marker = release / ".disdex-release-sha"
+    marker_stat = marker.lstat()
+    if (not stat.S_ISREG(marker_stat.st_mode) or marker.is_symlink()
+            or marker_stat.st_uid != directory.st_uid
+            or marker_stat.st_mode & 0o222):
+        raise ValueError("legacy release marker is untrusted")
+    if marker.read_text(encoding="ascii").strip() != sha:
+        raise ValueError("legacy release marker SHA mismatch")
+    return release
+
 def auxiliary_release_marker(sha: str, release_root: Path, *, root_uid=None):
     """Verify a non-Runner immutable release root without inventing a SHA path.
 
@@ -386,6 +414,29 @@ def validate_bootstrap_plan(desired, current, pins, current_release_sha):
     # Any plan targeting FULL_PROJECT MUST retain a complete SHA mapping.
     plan_hash, diff = digest(desired, current)
     return plan_hash, diff
+
+
+def validate_pengu_peer_stop_plan(desired, current, pins, current_release_sha):
+    """Validate the exact no-change plan used only for peer-stop proof."""
+    validate(current)
+    validate(desired)
+    if (current["runners"] != pins or current["sourceSha"] != current_release_sha
+            or desired["scope"] != PENGU_SCOPE
+            or desired["sourceSha"] != current_release_sha
+            or desired["runners"] != pins
+            or desired["uiSha"] != current["uiSha"]
+            or desired["monitorSha"] != current["monitorSha"]
+            or desired["releaseRoots"] != current["releaseRoots"]
+            or desired["ordersEnabled"] is not False):
+        raise ValueError("PENGU peer-stop plan is not exact no-change scope")
+    return hashlib.sha256(canonical(desired)).hexdigest(), {
+        "changedRunners": [],
+        "uiChanged": False,
+        "monitorChanged": False,
+        "releaseRootsChanged": False,
+        "exactScope": PENGU_SCOPE,
+        "ordersEnabled": False,
+    }
 
 
 def _unit_for_runner(runner_id: str, sha: str) -> str:
@@ -674,7 +725,13 @@ class RootDeploymentExecutor:
                 or desired["releaseRoots"] != current["releaseRoots"]
                 or pins[PENGU_SCOPE] != args.sha):
             raise ValueError("PENGU peer-stop plan is not an exact no-change scope")
-        release_marker(args.sha, paths.releases, root_uid=self.root_uid)
+        try:
+            release_marker(args.sha, paths.releases, root_uid=self.root_uid)
+        except ValueError:
+            # PENGU is a dormant legacy peer in this migration.  Its
+            # no-order certificate may prove the exact immutable marker
+            # without converting the live legacy release into a new runtime.
+            legacy_release_marker(args.sha, paths.releases)
         unit = _unit_for_runner(PENGU_SCOPE, args.sha)
         if self.systemd.is_active(unit):
             raise ValueError("PENGU peer is active; peer-stop approval is not applicable")
@@ -1022,8 +1079,12 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
     resolved = current.resolve(strict=True)
     if resolved.parent != releases or not SHA.fullmatch(resolved.name):
         raise ValueError("production current symlink escapes immutable releases")
-    sha_hash, diff = validate_bootstrap_plan(
-        desired, current_plan, pins, resolved.name)
+    if args.scope == PENGU_SCOPE:
+        sha_hash, diff = validate_pengu_peer_stop_plan(
+            desired, current_plan, pins, resolved.name)
+    else:
+        sha_hash, diff = validate_bootstrap_plan(
+            desired, current_plan, pins, resolved.name)
     if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
         raise ValueError("supplied SHA / plan hash differs from root plan")
     if args.scope == "V12_V4":
@@ -1040,11 +1101,15 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
             raise ValueError("V4 preflight exceeds exact single-runner delta")
         release_marker(args.sha, releases, root_uid=root_uid)
     else:
-        release_marker(resolved.name, releases, root_uid=root_uid)
+        if args.scope == PENGU_SCOPE:
+            legacy_release_marker(resolved.name, releases)
+        else:
+            release_marker(resolved.name, releases, root_uid=root_uid)
         validate_release_roots(current_plan, releases, root_uid=root_uid)
         validate_release_roots(desired, releases, root_uid=root_uid)
-        for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
-            release_marker(sha, releases, root_uid=root_uid)
+        if args.scope != PENGU_SCOPE:
+            for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
+                release_marker(sha, releases, root_uid=root_uid)
     # Verify the owner signature, or establish the root-SSH route.  Neither
     # branch consumes an execution nonce during read-only preflight.
     if not codex_ssh:
