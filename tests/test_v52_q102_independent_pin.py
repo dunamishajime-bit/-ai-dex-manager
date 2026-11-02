@@ -18,6 +18,8 @@ class IndependentPinTest(unittest.TestCase):
                     parent_uid=0, parent_mode=0o755, active=True, pid=7,
                     service_cwd="/home/deploy/disdex-trading/releases/" + Q,
                     process_cwd="/home/deploy/disdex-trading/releases/" + Q,
+                    release_uid=0, release_mode=0o755,
+                    marker_uid=0, marker_mode=0o644,
                     marker_sha=Q, state_sha=Q)
 
     def test_q102_pin_is_independent_of_v52_sha(self):
@@ -27,7 +29,9 @@ class IndependentPinTest(unittest.TestCase):
     def test_untrusted_or_mismatching_identity_fails_closed(self):
         for change in ({"manifest_uid": 1000}, {"manifest_mode": 0o666}, {"parent_mode": 0o777},
                        {"active": False}, {"pid": 0}, {"process_cwd": "/tmp"},
-                       {"service_cwd": "/tmp"}, {"marker_sha": V}, {"state_sha": V}):
+                       {"service_cwd": "/tmp"}, {"release_uid": 1000}, {"release_mode": 0o777},
+                       {"marker_uid": 1000}, {"marker_mode": 0o666},
+                       {"marker_sha": V}, {"state_sha": V}):
             with self.subTest(change=change), self.assertRaises(RuntimeError):
                 validate_q102_identity(**(self.valid() | change))
 

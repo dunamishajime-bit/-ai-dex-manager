@@ -18,7 +18,9 @@ PREFIX = {"QUALITY102_CAUSAL_V1": "disdex-quality102-causal-v1",
 
 
 def validate_peer_identity(*, runner, manifest, manifest_uid, manifest_mode, parent_uid, parent_mode,
-                           active, pid, service_cwd, process_cwd, marker_sha, state_sha):
+                           active, pid, service_cwd, process_cwd,
+                           release_uid, release_mode, marker_uid, marker_mode,
+                           marker_sha, state_sha):
     def require(value):
         if not value:
             raise RuntimeError("QUALITY102_PEER_IDENTITY_UNTRUSTED")
@@ -38,6 +40,9 @@ def validate_peer_identity(*, runner, manifest, manifest_uid, manifest_mode, par
     require(pin.get("releaseRoot") == root and pin.get("serviceUnit") ==
             PREFIX[runner] + "@" + sha + ".service")
     require(active is True and isinstance(pid, int) and not isinstance(pid, bool) and pid > 0)
+    # Peer code/state is trusted only from a root-owned, non-group/world-writable release.
+    require(release_uid == 0 and not (release_mode & 0o022))
+    require(marker_uid == 0 and not (marker_mode & 0o022))
     require(service_cwd == root and process_cwd == root and marker_sha == sha and state_sha == sha)
     return sha
 
@@ -91,10 +96,15 @@ def verify_peer_identity(runner, state_sha):
         values = dict(lines)
         pid = int(values["MainPID"])
         process_cwd = os.readlink(f"/proc/{pid}/cwd")
-        _, marker = _open_regular(ROOT + sha + "/.disdex-release-sha", 128)
+        release = os.stat(ROOT + sha, follow_symlinks=False)
+        marker_meta, marker = _open_regular(ROOT + sha + "/.disdex-release-sha", 128)
+        if not stat.S_ISDIR(release.st_mode):
+            raise RuntimeError("bad release root")
         return validate_peer_identity(runner=runner, manifest=manifest, manifest_uid=meta.st_uid, manifest_mode=meta.st_mode,
             parent_uid=parent.st_uid, parent_mode=parent.st_mode, active=values["ActiveState"] == "active",
             pid=pid, service_cwd=values["WorkingDirectory"], process_cwd=process_cwd,
+            release_uid=release.st_uid, release_mode=release.st_mode,
+            marker_uid=marker_meta.st_uid, marker_mode=marker_meta.st_mode,
             marker_sha=marker.decode("ascii").strip(), state_sha=state_sha)
     except (OSError, ValueError, KeyError, TypeError, UnicodeError, json.JSONDecodeError,
             subprocess.SubprocessError) as error:
