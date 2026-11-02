@@ -14,6 +14,13 @@ position, STOP, freshness, gross, and Kill Switch logic is not replaced by the
 preview builder. The builder does not create an immutable release or approve,
 start, stop, or change any service.
 
+On 2026-11-02, a read-only VPS probe run as `deploy` passed for the Q102,
+FET, and IDLE pins. The probe also passed in a transient systemd unit with
+`ProtectSystem=full`, `ProtectHome=read-only`, `PrivateTmp=yes`,
+`NoNewPrivileges=yes`, and read-only releases. It did not replace the running
+V52 unit or exercise its complete order lifecycle. The live planner and V52
+engine files both matched the SHA-256 hashes of their `4d33...` Git blobs.
+
 The existing Q102 release directory and marker were observed to be writable by
 `deploy`; SHA and marker agreement alone do not prove an immutable release.
 Actual deployment additionally needs trusted release contents, source parity,
