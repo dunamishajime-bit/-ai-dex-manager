@@ -7,10 +7,13 @@ import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4EvidenceFetch,
 const NOW = Date.parse("2026-11-02T12:00:00.000Z");
 
 test("monitor requires the same shared API budget used by the live runners", () => {
-  assert.doesNotThrow(() => assertV4MonitorRateBudget("/var/lib/disdex/shared/aster-rate-budget.json"));
+  const sha="a".repeat(40),socket=`/run/disdex-v4-budget-${sha}/budget.sock`;
+  assert.doesNotThrow(() => assertV4MonitorRateBudget("/var/lib/disdex/shared/aster-rate-budget.json",socket,sha));
   for (const value of [undefined, "", "/tmp/other-budget.json"]) {
-    assert.throws(() => assertV4MonitorRateBudget(value), /RATE_BUDGET_REQUIRED/);
+    assert.throws(() => assertV4MonitorRateBudget(value,socket,sha), /RATE_BUDGET_REQUIRED/);
   }
+  assert.throws(()=>assertV4MonitorRateBudget("/var/lib/disdex/shared/aster-rate-budget.json",undefined,sha),/PROXY_REQUIRED/);
+  assert.throws(()=>assertV4MonitorRateBudget("/var/lib/disdex/shared/aster-rate-budget.json","/tmp/other.sock",sha),/SOCKET_PATH/);
 });
 
 test("monitor transport permits only the required read endpoints", async () => {

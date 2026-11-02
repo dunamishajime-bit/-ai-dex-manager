@@ -2,7 +2,8 @@
 # The lease is installed only by the owner-signed refresh activation helper.
 [Unit]
 Description=DisDex V4 dynamic evidence refresh (%i)
-After=network-online.target local-fs.target
+After=network-online.target local-fs.target disdex-v4-rate-budget-broker@%i.service
+Requires=disdex-v4-rate-budget-broker@%i.service
 Wants=network-online.target
 ConditionPathExists=/var/lib/disdex/unified-deploy/refresh-leases/v4/%i.json
 
@@ -10,11 +11,14 @@ ConditionPathExists=/var/lib/disdex/unified-deploy/refresh-leases/v4/%i.json
 Type=oneshot
 User=root
 Group=root
+SupplementaryGroups=deploy
 RuntimeDirectory=disdex-v4-evidence-refresh
 RuntimeDirectoryMode=0750
 WorkingDirectory=/home/deploy/disdex-trading/releases/%i
 EnvironmentFile=/etc/disdex/disdex-v12-aster-credentials.env
 Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json
+Environment=DISDEX_RELEASE_SHA=%i
+Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/node_modules/tsx/dist/cli.mjs
 ExecStartPre=/usr/bin/test ! -L /home/deploy/disdex-trading/releases/%i/node_modules/tsx

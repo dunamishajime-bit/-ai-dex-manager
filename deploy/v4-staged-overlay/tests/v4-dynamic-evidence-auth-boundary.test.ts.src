@@ -15,10 +15,12 @@ const NOW = Math.floor(Date.parse("2026-10-30T00:00:00.000Z") / 1000);
 const OUTPUT = "/var/lib/disdex/unified-deploy/v4-evidence/evidence-refresh-last.json";
 
 test("refresh requires the production shared API rate budget", () => {
-  assert.doesNotThrow(() => assertV4RefreshRateBudget("/var/lib/disdex/shared/aster-rate-budget.json"));
+  const socket=`/run/disdex-v4-budget-${SHA}/budget.sock`;
+  assert.doesNotThrow(() => assertV4RefreshRateBudget("/var/lib/disdex/shared/aster-rate-budget.json",socket,SHA));
   for (const path of [undefined, "", "/tmp/other.json"]) {
-    assert.throws(() => assertV4RefreshRateBudget(path), /RATE_BUDGET_REQUIRED/);
+    assert.throws(() => assertV4RefreshRateBudget(path,socket,SHA), /RATE_BUDGET_REQUIRED/);
   }
+  assert.throws(()=>assertV4RefreshRateBudget("/var/lib/disdex/shared/aster-rate-budget.json",undefined,SHA),/PROXY_REQUIRED/);
 });
 
 test("refresh CLI uses the GET-only evidence transport", () => {

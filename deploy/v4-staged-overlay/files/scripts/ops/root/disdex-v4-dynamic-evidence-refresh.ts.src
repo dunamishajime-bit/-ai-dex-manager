@@ -19,8 +19,8 @@ import {
 import { validateV4SharedExecutionEvidencePayloads } from "../../../lib/v12-v4-certified-gates";
 import { assertV4MonitorRateBudget, createV4EvidenceFetch } from "../../../lib/v12-v4-monitor-only";
 
-export function assertV4RefreshRateBudget(path: unknown): void {
-  assertV4MonitorRateBudget(path);
+export function assertV4RefreshRateBudget(path: unknown, socket: unknown, sha: unknown): void {
+  assertV4MonitorRateBudget(path, socket, sha);
 }
 const EVIDENCE_KEYS = [
   "routeSourceParity",
@@ -682,7 +682,8 @@ function selfTest() {
 async function main() {
   if (process.argv.includes("--self-test")) { selfTest(); return; }
   const parsed = parseV4DynamicRefreshArgs(process.argv.slice(2));
-  assertV4RefreshRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
+  assertV4RefreshRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH,
+    process.env.DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET, parsed.sha);
   const budgetDiagnostics: JsonRecord[] = [];
   const client = new AsterV3Client({
     baseUrl: process.env.ASTER_FUTURES_BASE_URL,

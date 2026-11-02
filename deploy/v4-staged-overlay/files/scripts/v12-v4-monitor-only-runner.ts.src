@@ -51,8 +51,8 @@ async function decision(client:AsterV3Client,now:number){
  return value;
 }
 async function cycle(now=Date.now()){
- assertV4MonitorRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
  const sha=releaseSha();
+ assertV4MonitorRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH,process.env.DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET,sha);
  const client=new AsterV3Client({
   baseUrl:process.env.ASTER_FUTURES_BASE_URL,userAddress:process.env.ASTER_USER_ADDRESS,
   privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`|undefined,

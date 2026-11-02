@@ -91,7 +91,7 @@ test("pending reconcile source cannot place, cancel, or close orders", () => {
   assert.doesNotMatch(source,/placeOrder|cancelOrder|closePosition|submitOrder/);
   assert.match(source,/ordersSent: 0/);
   assert.match(source,/positionChangesSent: 0/);
-  assert.match(source,/assertV4MonitorRateBudget\(process\.env\.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH\)/);
+  assert.match(source,/assertV4SharedRateBudget\(process\.env\.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH\)/);
   assert.match(source,/fetchImpl:\s*createV4EvidenceFetch\(fetch\)/);
   assert.match(source,/await handle\.renew\(\)/);
 });

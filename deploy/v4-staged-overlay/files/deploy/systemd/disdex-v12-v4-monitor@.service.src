@@ -1,7 +1,8 @@
 # Read-only V4 monitor. This unit cannot authorize or send trading mutations.
 [Unit]
 Description=DisDex V12 V4 read-only monitor (%i)
-After=network-online.target
+After=network-online.target disdex-v4-rate-budget-broker@%i.service
+Requires=disdex-v4-rate-budget-broker@%i.service
 Wants=network-online.target
 StartLimitIntervalSec=300
 StartLimitBurst=3
@@ -19,6 +20,7 @@ Environment=DISDEX_RELEASE_SHA=%i
 Environment=V12_V4_LIVE_ACK=%i
 Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i
 Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json
+Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock
 Environment=V12_V4_MONITOR_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/monitor/heartbeat.json
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha

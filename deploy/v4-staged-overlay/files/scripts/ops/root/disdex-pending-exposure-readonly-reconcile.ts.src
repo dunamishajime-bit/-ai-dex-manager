@@ -7,7 +7,7 @@ import { dirname } from "node:path";
 import { AsterV3Client } from "../../../lib/aster-v3-client";
 import { FileAccountOrderLock } from "../../../lib/disdex-account-order-lock";
 import { normalizePendingExposureRegistry } from "../../../lib/disdex-pending-exposure-registry";
-import { assertV4MonitorRateBudget, createV4EvidenceFetch } from "../../../lib/v12-v4-monitor-only";
+import { assertV4SharedRateBudget, createV4EvidenceFetch } from "../../../lib/v12-v4-monitor-only";
 
 type JsonRecord = Record<string, any>;
 
@@ -159,7 +159,7 @@ export function assertPendingApplyCertified(apply: boolean): void {
 async function main() {
   const { apply } = parsePendingReconcileArgs(process.argv.slice(2));
   assertPendingApplyCertified(apply);
-  assertV4MonitorRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
+  assertV4SharedRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
   const deploy = await readDeployIds();
   if (typeof process.getuid !== "function" || typeof process.getgid !== "function") {
     throw new Error("PENDING_RECONCILE_EXECUTION_USER_INVALID");

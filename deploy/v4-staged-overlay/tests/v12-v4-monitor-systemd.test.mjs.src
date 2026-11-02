@@ -22,9 +22,11 @@ test("monitor checks pre-provisioned tick access without changing directory owne
 
 test("monitor is configured to use the production shared API budget", () => {
   assert.match(source, /^Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=\/var\/lib\/disdex\/shared\/aster-rate-budget\.json$/m);
+  assert.match(source, /^Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=\/run\/disdex-v4-budget-%i\/budget\.sock$/m);
 });
 
 test("dynamic refresh uses the same production shared API budget", () => {
   const refresh = readFileSync("ops/systemd/disdex-v4-dynamic-evidence-refresh@.service", "utf8");
   assert.match(refresh, /^Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=\/var\/lib\/disdex\/shared\/aster-rate-budget\.json$/m);
+  assert.match(refresh, /^Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=\/run\/disdex-v4-budget-%i\/budget\.sock$/m);
 });

@@ -3,6 +3,30 @@
   "baseSha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
   "files": [
     {
+      "source": "files/lib/disdex-aster-global-rate-budget.ts.src",
+      "target": "lib/disdex-aster-global-rate-budget.ts"
+    },
+    {
+      "source": "files/lib/disdex-v4-rate-budget-proxy.ts.src",
+      "target": "lib/disdex-v4-rate-budget-proxy.ts"
+    },
+    {
+      "source": "files/lib/disdex-v4-rate-budget-server.ts.src",
+      "target": "lib/disdex-v4-rate-budget-server.ts"
+    },
+    {
+      "source": "files/lib/disdex-v4-rate-budget-runtime.ts.src",
+      "target": "lib/disdex-v4-rate-budget-runtime.ts"
+    },
+    {
+      "source": "files/scripts/ops/root/disdex-v4-rate-budget-broker.ts.src",
+      "target": "scripts/ops/root/disdex-v4-rate-budget-broker.ts"
+    },
+    {
+      "source": "files/ops/systemd/disdex-v4-rate-budget-broker@.service.src",
+      "target": "ops/systemd/disdex-v4-rate-budget-broker@.service"
+    },
+    {
       "source": "files/lib/disdex-runner-tick-heartbeat.ts.src",
       "target": "lib/disdex-runner-tick-heartbeat.ts"
     },
