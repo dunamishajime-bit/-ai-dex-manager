@@ -4,7 +4,8 @@ from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
 from disdex_strict_portfolio_planner import quality102_crypto_notional_from_positions
 class FetV52Ownership(unittest.TestCase):
- def test_exact_owned_fet_is_counted_and_ambiguous_fails_closed(self):
+ @patch('disdex_strict_portfolio_planner.verify_peer_identity', side_effect=lambda runner, sha: sha if runner == 'FET_BRK48_RESIDUAL' and sha == 'a'*40 else (_ for _ in ()).throw(RuntimeError('untrusted peer')))
+ def test_exact_owned_fet_is_counted_and_ambiguous_fails_closed(self, _peer_identity):
   with tempfile.TemporaryDirectory() as tmp:
    p=Path(tmp)/'fet.json';now=time.time()*1000;sha='a'*40
    state={'schema':'fet-brk48-residual-state/v1','strategyId':'FET_BRK48_RESIDUAL','runtimeCommitSha':sha,'updatedAt':now,'position':{'symbol':'FETUSDT','side':1,'quantity':515,'entryPrice':.2407},'pending':None,'manualReview':None}
@@ -17,7 +18,7 @@ class FetV52Ownership(unittest.TestCase):
     p.write_text(json.dumps(state))
     for expected in ['', 'invalid']:
      with patch.dict(os.environ,{'DISDEX_RUNTIME_COMMIT_SHA':expected}):
-      with self.assertRaises(RuntimeError):quality102_crypto_notional_from_positions([row],now_ms=now)
+      self.assertAlmostEqual(quality102_crypto_notional_from_positions([row],now_ms=now),132.87)
     for changes in [{'positionAmt':-515},{'positionAmt':520},{'entryPrice':.25}]:
      with self.assertRaises(RuntimeError):quality102_crypto_notional_from_positions([{**row,**changes}],now_ms=now)
     with self.assertRaises(RuntimeError):quality102_crypto_notional_from_positions([row,row],now_ms=now)

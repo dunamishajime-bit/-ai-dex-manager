@@ -63,8 +63,14 @@ def patch_planner(source):
             .replace(OLD, NEW, 1).replace(Q102_EMPTY_OLD, Q102_EMPTY_NEW, 1)
             .replace(VALIDATE_START_OLD, VALIDATE_START_NEW, 1).replace(DOCUMENT_OLD, DOCUMENT_NEW, 1)
             .replace(IDLE_OLD, "    # Identity is checked against the independently pinned Idle service below.", 1)
-            .replace(IDLE_COMPARE, '    verify_peer_identity("IDLE_PRIORITY_SHORT", str(document.get("runtimeSha") or "").lower())', 1)
-            .replace(FET_OLD, '                expected = verify_peer_identity("FET_BRK48_RESIDUAL", str(fet.get("runtimeCommitSha") or "").lower())', 1))
+            .replace(IDLE_COMPARE, '''    try:
+        verify_peer_identity("IDLE_PRIORITY_SHORT", str(document.get("runtimeSha") or "").lower())
+    except RuntimeError:
+        fail("RELEASE_SHA")''', 1)
+            .replace(FET_OLD, '''                try:
+                    expected = verify_peer_identity("FET_BRK48_RESIDUAL", str(fet.get("runtimeCommitSha") or "").lower())
+                except RuntimeError as error:
+                    raise ValueError("peer pin mismatch") from error''', 1))
 
 
 def build(output):

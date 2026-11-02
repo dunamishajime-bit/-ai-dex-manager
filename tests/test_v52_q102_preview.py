@@ -109,7 +109,7 @@ class PreviewTest(unittest.TestCase):
                     self.assertEqual(module.quality102_crypto_notional_from_positions(rows, now_ms=2000), 295)
                     self.assertEqual(seen, [("FET_BRK48_RESIDUAL","f"*40), ("IDLE_PRIORITY_SHORT","a"*40)])
                     module.verify_peer_identity = lambda runner, sha: (_ for _ in ()).throw(RuntimeError("bad pin"))
-                    with self.assertRaisesRegex(RuntimeError, "bad pin"):
+                    with self.assertRaisesRegex(RuntimeError, "FET_STATE_POSITION_MISMATCH"):
                         module.quality102_crypto_notional_from_positions(rows, now_ms=2000)
 
 if __name__ == "__main__":

@@ -46,6 +46,12 @@ class OwnerTest(unittest.TestCase):
         self.env=patch.dict(os.environ,{"DISDEX_RUNTIME_COMMIT_SHA":SHA,
             "DISDEX_IDLE_PRIORITY_STATE_PATH":str(self.path)})
         self.env.start();self.addCleanup(self.env.stop)
+        def peer_identity(runner, sha):
+            if runner != "IDLE_PRIORITY_SHORT" or sha != SHA:
+                raise RuntimeError("untrusted peer")
+            return sha
+        self.peer=patch("disdex_strict_portfolio_planner.verify_peer_identity",side_effect=peer_identity)
+        self.peer.start();self.addCleanup(self.peer.stop)
     def write(self):
         self.path.write_text(json.dumps(self.state))
     def check(self,sym="DOTUSDT",qty=65.9,price=1.087):

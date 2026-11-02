@@ -314,7 +314,10 @@ def _validated_idle_owned_notional(
         raise RuntimeError(f"IDLE_VERIFIED_OWNER_MISMATCH:{symbol}:STATE_UNAVAILABLE") from error
     if not isinstance(document, dict) or document.get("schema") != IDLE_PROTECTED_STATE_SCHEMA:
         fail("SCHEMA")
-    verify_peer_identity("IDLE_PRIORITY_SHORT", str(document.get("runtimeSha") or "").lower())
+    try:
+        verify_peer_identity("IDLE_PRIORITY_SHORT", str(document.get("runtimeSha") or "").lower())
+    except RuntimeError:
+        fail("RELEASE_SHA")
     if document.get("pending") is not None or document.get("manualReview") is not None:
         fail("PENDING_OR_MANUAL_REVIEW")
     positions = document.get("positions")
@@ -399,7 +402,10 @@ def quality102_crypto_notional_from_positions(
             try:
                 fet = json.loads(path.read_text(encoding="utf-8"))
                 p = fet.get("position")
-                expected = verify_peer_identity("FET_BRK48_RESIDUAL", str(fet.get("runtimeCommitSha") or "").lower())
+                try:
+                    expected = verify_peer_identity("FET_BRK48_RESIDUAL", str(fet.get("runtimeCommitSha") or "").lower())
+                except RuntimeError as error:
+                    raise ValueError("peer pin mismatch") from error
                 clock = now_ms if now_ms is not None else time.time() * 1000
                 age = clock - float(fet["updatedAt"])
                 sha = str(fet.get("runtimeCommitSha") or "")
