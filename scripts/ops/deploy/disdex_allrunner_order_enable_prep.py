@@ -184,7 +184,8 @@ def planned_dropins(plan: dict, runners: dict):
     changes={}
     units={}
     for runner in DEDICATED_RUNNERS:
-        unit=str(runners[runner]["serviceUnit"])
+        entry=runners[runner]
+        unit=str(entry["serviceUnit"])
         expected=plan["activationPathsByRunner"][runner]
         release_root=Path(str(entry["releaseRoot"]))
         gate_path=release_root/"scripts/ops/root/disdex-live-operator-activation-gate.mjs"

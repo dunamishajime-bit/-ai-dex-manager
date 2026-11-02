@@ -73,6 +73,36 @@ ExecStartPre=/usr/bin/test -f /three
         self.assertIn("--runner V12_V4",out[2])
         self.assertIn("--activation-path /var/lib/disdex/shared/operator-activation/v12-v4-full.json",out[2])
 
+    def test_planned_dropins_uses_each_runner_manifest_entry(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            runners={}
+            paths={
+                "V12_V4":"/tmp/v4-activation.json",
+                "QUALITY102_CAUSAL_V1":"/tmp/q102-activation.json",
+                "V52":"/tmp/v52-activation.json",
+            }
+            for i,runner in enumerate(self.m.DEDICATED_RUNNERS):
+                sha=(str(i+1)*40)[:40]
+                release=root/runner/sha
+                gate=release/"scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+                gate.parent.mkdir(parents=True)
+                gate.write_text("// gate\n",encoding="utf-8")
+                runners[runner]={"sha":sha,"releaseRoot":str(release),"serviceUnit":runner.lower()+".service"}
+            plan={"activationPathsByRunner":paths}
+            old=self.m.unit_cat
+            self.m.unit_cat=lambda unit:"[Service]\nExecStartPre=/usr/bin/test -f /safe\n"
+            try:
+                changes,units=self.m.planned_dropins(plan,runners)
+            finally:
+                self.m.unit_cat=old
+            self.assertEqual(set(units),set(self.m.DEDICATED_RUNNERS))
+            self.assertEqual(len(changes),3)
+            rendered="\n".join(changes.values())
+            for runner in self.m.DEDICATED_RUNNERS:
+                self.assertIn("--runner "+runner,rendered)
+                self.assertIn("--activation-path "+paths[runner],rendered)
+
     def test_render_dropin_resets_then_replays_every_preflight(self):
         cmds=["/usr/bin/test -f /a","+/usr/bin/node /gate --activation-path /new","/usr/bin/test -f /b"]
         text=self.m.render_dropin(cmds)
