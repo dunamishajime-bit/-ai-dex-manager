@@ -2,6 +2,7 @@ import { chmod, chown, mkdir, readFile, rename, rm, stat, writeFile } from "node
 import { randomUUID } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 import type { AsterRatePriority } from "./disdex-aster-rate-budget-policy";
+import { requestV4BudgetProxy, V4_BUDGET_PROXY_SCHEMA, type V4ReadPriority } from "./disdex-v4-rate-budget-proxy";
 
 export const ASTER_GLOBAL_RATE_BUDGET_SCHEMA = "disdex-aster-rate-budget/v1";
 
@@ -333,6 +334,13 @@ export async function reserveAsterGlobalRateSlot(options: AsterGlobalRateSlotOpt
 
 export async function deferAsterGlobalRateBudget(options: { path: string; cooldownMs: number; status: 418 | 429; nowMs?: number }) {
   if (!Number.isFinite(options.cooldownMs) || options.cooldownMs < 0 || (options.nowMs !== undefined && !Number.isFinite(options.nowMs))) throw new Error("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID");
+  const proxy = String(process.env.DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET || "").trim();
+  if (proxy) {
+    if (options.path !== "/var/lib/disdex/shared/aster-rate-budget.json" || options.nowMs !== undefined) throw new Error("V4_BUDGET_PROXY_BUDGET_PATH_INVALID");
+    const response = await requestV4BudgetProxy(String(process.env.DISDEX_RELEASE_SHA || ""), proxy,
+      {schema:V4_BUDGET_PROXY_SCHEMA, operation:"defer", status:options.status, cooldownMs:Math.ceil(options.cooldownMs)});
+    return {cooldownUntil:response.cooldownUntil as number};
+  }
   const path = resolve(options.path); const lockPath = `${path}.lock`; const now = options.nowMs ?? Date.now();
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
   const owner = await acquireBudgetLock(lockPath, 2_000);
@@ -349,6 +357,16 @@ export async function deferAsterGlobalRateBudget(options: { path: string; cooldo
 
 export async function waitForAsterGlobalRateSlot(weight = 1, priority:AsterRatePriority="RISK_READ") {
   const path = String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || "").trim();
+  const proxy = String(process.env.DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET || "").trim();
+  if (proxy) {
+    if (path !== "/var/lib/disdex/shared/aster-rate-budget.json") throw new Error("V4_BUDGET_PROXY_BUDGET_PATH_INVALID");
+    if (!["MARKET_DATA","RECONCILIATION","RISK_READ"].includes(priority)) throw new Error("V4_BUDGET_PROXY_PRIORITY_INVALID");
+    const response = await requestV4BudgetProxy(String(process.env.DISDEX_RELEASE_SHA || ""), proxy,
+      {schema:V4_BUDGET_PROXY_SCHEMA, operation:"reserve", weight, priority:priority as V4ReadPriority});
+    const waitMs = response.waitMs as number;
+    if (waitMs > 0) await sleep(waitMs);
+    return;
+  }
   if (!path) return;
   const minIntervalMs = Number(process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS || 50);
   const maxQueueMs = Number(process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS || 5_000);
