@@ -2,19 +2,21 @@
 """DisDex root-side unified deployment gate.
 
 ``--preflight-readonly`` remains a non-mutating proof only.  ``--execute``
-is a separately guarded transaction boundary: at this stage it can mutate
-only the explicitly scoped Shared Risk Writer, with a root-owned activation
-artifact, a fresh signed read-only venue proof, a single-use approval nonce,
-and a mandatory rollback plus three-cycle audit.  Every other scope remains
+is a separately guarded transaction boundary. It accepts either the signed
+Actions route or the authenticated Codex root-SSH route, then still requires
+a root-owned exact plan, a fresh read-only venue proof, a single-use nonce, and
+a mandatory rollback plus three-cycle audit. Every other scope remains
 fail-closed until it has its own transaction and audit implementation.
 """
 from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 import hashlib
+import inspect
 import json
 import os
 from pathlib import Path
+import re
 import stat
 import subprocess
 import sys
@@ -23,11 +25,15 @@ from typing import Callable, Optional
 import uuid
 
 from disdex_deployment_contract import (
+    CODEX_SSH_AUTH_SCHEMA, CODEX_SSH_OPERATOR,
     DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, ROUTES, SCOPES,
     SHA, PLAN_HASH, validate_order_permission,
 )
-from disdex_deployment_plan import IDS, digest, validate
+from disdex_deployment_plan import IDS, canonical, digest, validate
 from disdex_owner_approval import verify
+from disdex_v4_venue_witness import (
+    PEER_STOP_ACK, PEER_STOP_SCHEMA, validate_peer_stop_approval,
+)
 
 ROOT = Path("/var/lib/disdex/unified-deploy")
 PINS = Path("/etc/disdex/runner-pins.json")
@@ -62,7 +68,8 @@ SHARED_RISK_RUNNER = "SHARED_CRYPTO_RISK"
 SHARED_RISK_ACK = "I_ACK_SHARED_RISK_ONLY_NO_ORDERS"
 VENUE_MAX_AGE_SECONDS = 300
 ZERO_EFFECTS = {"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
-LIVE_EXECUTOR_NOT_CERTIFIED = "LIVE_EXECUTOR_NOT_CERTIFIED"
+EXECUTOR_CERTIFICATION_SCHEMA = "disdex-live-executor-certification/v1"
+PENGU_SCOPE = "PENGU_V8"
 
 
 @dataclass(frozen=True)
@@ -86,6 +93,7 @@ class DeploymentPaths:
     venue_after: Path
     receipts: Path
     journal: Optional[Path] = None
+    peer_stop_dir: Optional[Path] = None
 
 
 class SystemdAdapter:
@@ -118,8 +126,17 @@ class SystemdAdapter:
             raise RuntimeError(f"systemd show {unit}: {detail[:240]}")
         return result.stdout.strip()
 
+    def active_state(self, unit: str) -> str:
+        return self._state(unit, "ActiveState")
+
+    def main_pid(self, unit: str) -> int:
+        value = self._state(unit, "MainPID")
+        if not value.isdigit():
+            raise RuntimeError("systemd MainPID is not numeric: " + unit)
+        return int(value)
+
     def is_active(self, unit: str) -> bool:
-        return self._state(unit, "ActiveState") in ("active", "activating", "deactivating")
+        return self.active_state(unit) in ("active", "activating", "deactivating")
 
     def is_masked(self, unit: str) -> bool:
         return self._state(unit, "UnitFileState") == "masked"
@@ -157,6 +174,101 @@ def assert_private_dir(path: Path, *, root_uid=0):
     s = path.lstat()
     if not stat.S_ISDIR(s.st_mode) or s.st_uid != root_uid or s.st_mode & 0o077:
         raise ValueError("root-only directory required: " + str(path))
+
+
+def assert_codex_ssh_session(environment=None) -> dict:
+    """Authenticate the Codex direct route through the root SSH session.
+
+    The historical Codex deployment path already authenticated the operator by
+    the root SSH key.  ``CODEX_SSH`` therefore does not require an additional
+    owner signature.  It is still not a generic local-root bypass: the helper
+    must be reached through sshd, which supplies both connection variables, and
+    the caller must use the fixed ``codex-ssh`` operator identity.  The exact
+    SHA/plan/scope/order checks remain in the root executor.
+    """
+    env = os.environ if environment is None else environment
+    connection = str(env.get("SSH_CONNECTION", "")).split()
+    client = str(env.get("SSH_CLIENT", "")).split()
+    if (len(connection) != 4 or len(client) != 3
+            or not connection[1].isdigit() or not connection[3].isdigit()
+            or not client[1].isdigit() or not client[2].isdigit()
+            or not 1 <= int(connection[1]) <= 65535
+            or not 1 <= int(connection[3]) <= 65535
+            or not 1 <= int(client[1]) <= 65535
+            or not 1 <= int(client[2]) <= 65535):
+        raise ValueError("authenticated Codex SSH session required")
+    return {
+        "schema": CODEX_SSH_AUTH_SCHEMA,
+        "route": "CODEX_SSH",
+        "operator": CODEX_SSH_OPERATOR,
+        "authorizationMethod": "ROOT_SSH_SESSION",
+    }
+
+
+def build_codex_ssh_authorization(args, *, now: int | None = None) -> dict:
+    """Create an in-memory, short-lived root-SSH authorization record.
+
+    This is deliberately not a signed owner artifact and is never written as
+    an approval file.  The executor caches it for one invocation and consumes
+    its nonce in the root-owned nonce directory immediately before mutation.
+    """
+    if (getattr(args, "route", None) != "CODEX_SSH"
+            or getattr(args, "owner", None) != CODEX_SSH_OPERATOR
+            or getattr(args, "_codex_ssh_authenticated", False) is not True):
+        raise ValueError("Codex SSH authority is not established")
+    now = int(time.time()) if now is None else now
+    if type(now) is not int or now <= 0:
+        raise ValueError("Codex SSH authorization time invalid")
+    orders_enabled = getattr(args, "orders_enabled", None) == "true"
+    validate_order_permission(args.scope, orders_enabled)
+    nonce = getattr(args, "_codex_ssh_nonce", None)
+    if nonce is None:
+        nonce = uuid.uuid4().hex
+        setattr(args, "_codex_ssh_nonce", nonce)
+    payload = {
+        "schema": CODEX_SSH_AUTH_SCHEMA,
+        "repository": REPO,
+        "deploymentTarget": DEPLOYMENT_TARGET,
+        "operatorTarget": OPERATOR_TARGET,
+        "route": "CODEX_SSH",
+        "sourceSha": args.sha,
+        "scope": args.scope,
+        "operator": CODEX_SSH_OPERATOR,
+        "nonce": nonce,
+        "planSha256": args.plan_sha256,
+        "ordersEnabled": orders_enabled,
+        "issuedAt": now,
+        "expiresAt": now + 300,
+        "authorizationMethod": "ROOT_SSH_SESSION",
+        "signatureVerified": False,
+    }
+    setattr(args, "_codex_ssh_authorization", payload)
+    return payload
+
+
+def _consume_codex_ssh_nonce(nonce_dir: Path, nonce: str, *, root_uid: int) -> None:
+    assert_private_dir(nonce_dir, root_uid=root_uid)
+    if not re.fullmatch(r"[0-9a-f]{32}", nonce):
+        raise ValueError("Codex SSH nonce invalid")
+    path = nonce_dir / nonce
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(path, flags, 0o600)
+    except FileExistsError:
+        raise
+    try:
+        os.write(fd, b"CODEX_SSH\n")
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def assert_root_trusted_dir(path: Path, *, root_uid=0):
+    """Permit root-owned 0755 /etc/disdex for non-secret runner metadata."""
+    s = path.lstat()
+    if (not stat.S_ISDIR(s.st_mode) or s.st_uid != root_uid
+            or s.st_mode & 0o022):
+        raise ValueError("root-owned non-writable directory required: " + str(path))
 
 def read_root_json(path: Path, *, root_uid=0, private=True):
     assert_regular_secure(path, root_uid=root_uid, private=private)
@@ -201,6 +313,50 @@ def release_marker(sha: str, releases=RELEASES, *, root_uid=None):
             resolved_dependency.relative_to(release.resolve())
         except ValueError:
             raise ValueError("external dependency symlink escapes immutable release") from None
+    return release
+
+
+def legacy_release_marker(sha: str, releases=RELEASES):
+    """Verify an unchanged legacy peer release without blessing it as mutable.
+
+    Existing dormant peers were deployed before the root-owned release
+    boundary and may still be owned by ``deploy``.  The only operation that
+    may use this migration proof is the no-order PENGU peer-stop certificate;
+    it never starts the peer, changes pins, or grants venue authority.  The
+    directory and marker must still be non-writable by group/other and the
+    marker must match the exact SHA.
+    """
+    if not isinstance(sha, str) or not SHA.fullmatch(sha):
+        raise ValueError("invalid exact legacy release SHA")
+    release = releases / sha
+    directory = release.lstat()
+    if (not stat.S_ISDIR(directory.st_mode) or release.is_symlink()
+            or directory.st_uid != 0 or directory.st_mode & 0o022):
+        raise ValueError("legacy release directory is writable or invalid")
+    marker = release / ".disdex-release-sha"
+    marker_stat = marker.lstat()
+    if (not stat.S_ISREG(marker_stat.st_mode) or marker.is_symlink()
+            or marker_stat.st_uid != 0
+            or marker_stat.st_mode & 0o222):
+        raise ValueError("legacy release marker is untrusted")
+    if marker.read_text(encoding="ascii").strip() != sha:
+        raise ValueError("legacy release marker SHA mismatch")
+    dependency = release / "node_modules"
+    if dependency.is_symlink():
+        resolved = dependency.resolve(strict=True)
+        if (resolved.parent != releases or not SHA.fullmatch(resolved.name)
+                or resolved == release):
+            raise ValueError("legacy dependency symlink escapes release lineage")
+        target = resolved.lstat()
+        target_marker = resolved / ".disdex-release-sha"
+        target_marker_stat = target_marker.lstat()
+        if (not stat.S_ISDIR(target.st_mode) or target.st_uid != 0
+                or target.st_mode & 0o022
+                or not stat.S_ISREG(target_marker_stat.st_mode)
+                or target_marker_stat.st_uid != 0
+                or target_marker_stat.st_mode & 0o222
+                or target_marker.read_text(encoding="ascii").strip() != resolved.name):
+            raise ValueError("legacy dependency target is not immutable")
     return release
 
 def auxiliary_release_marker(sha: str, release_root: Path, *, root_uid=None):
@@ -276,6 +432,29 @@ def validate_bootstrap_plan(desired, current, pins, current_release_sha):
     return plan_hash, diff
 
 
+def validate_pengu_peer_stop_plan(desired, current, pins, current_release_sha):
+    """Validate the exact no-change plan used only for peer-stop proof."""
+    validate(current)
+    validate(desired)
+    if (current["runners"] != pins or current["sourceSha"] != current_release_sha
+            or desired["scope"] != PENGU_SCOPE
+            or desired["sourceSha"] != current_release_sha
+            or desired["runners"] != pins
+            or desired["uiSha"] != current["uiSha"]
+            or desired["monitorSha"] != current["monitorSha"]
+            or desired["releaseRoots"] != current["releaseRoots"]
+            or desired["ordersEnabled"] is not False):
+        raise ValueError("PENGU peer-stop plan is not exact no-change scope")
+    return hashlib.sha256(canonical(desired)).hexdigest(), {
+        "changedRunners": [],
+        "uiChanged": False,
+        "monitorChanged": False,
+        "releaseRootsChanged": False,
+        "exactScope": PENGU_SCOPE,
+        "ordersEnabled": False,
+    }
+
+
 def _unit_for_runner(runner_id: str, sha: str) -> str:
     if runner_id not in PREFIXES or not SHA.fullmatch(str(sha)):
         raise ValueError("runner service identity invalid")
@@ -288,10 +467,53 @@ def _assert_execution_root(root_uid: int) -> None:
         raise ValueError("root authority required")
 
 
+def build_peer_stop_certificate(args, desired: dict, plan_hash: str,
+                                payload: dict, now: int) -> dict:
+    """Build a derived proof for an explicitly approved stopped PENGU peer.
+
+    This function never signs or accepts an owner artifact.  The caller must
+    first verify the owner token against the exact PENGU SHA and then pass the
+    verified payload.  The resulting certificate is only a root-owned witness
+    input for the later V4 venue read; it grants no order or service-control
+    authority.
+    """
+    nonce = payload.get("nonce") if isinstance(payload, dict) else None
+    if (getattr(args, "scope", None) != PENGU_SCOPE
+            or getattr(args, "sha", None) != desired.get("sourceSha")
+            or desired.get("scope") != PENGU_SCOPE
+            or desired.get("ordersEnabled") is not False
+            or desired.get("runners", {}).get("PENGU_V8") != args.sha
+            or not isinstance(nonce, str) or not re.fullmatch(r"[0-9a-f]{32}", nonce)
+            or not PLAN_HASH.fullmatch(str(plan_hash))):
+        raise ValueError("PENGU peer-stop plan or token mismatch")
+    certificate = {
+        "schema": PEER_STOP_SCHEMA,
+        "status": "APPROVED",
+        "runner": PENGU_SCOPE,
+        "approvedSha": args.sha,
+        "deploymentTarget": DEPLOYMENT_TARGET,
+        "operatorTarget": OPERATOR_TARGET,
+        "operator": args.owner,
+        "planSha256": plan_hash,
+        "ordersEnabled": False,
+        "approvedAt": now,
+        "expiresAt": now + 300,
+        "operatorAcknowledgement": PEER_STOP_ACK,
+        "nonceDigest": hashlib.sha256(nonce.encode("ascii")).hexdigest(),
+    }
+    return validate_peer_stop_approval(
+        certificate, runner=PENGU_SCOPE, sha=args.sha, now=now)
+
+
 def _atomic_json(path: Path, value: dict, *, root_uid: int,
-                 private: bool = True) -> None:
+                 private: bool = True, trusted_parent: bool = False) -> None:
     """Publish a root-owned JSON object without following a destination link."""
-    assert_private_dir(path.parent, root_uid=root_uid)
+    if private and not trusted_parent:
+        assert_private_dir(path.parent, root_uid=root_uid)
+    else:
+        assert_root_trusted_dir(path.parent, root_uid=root_uid)
+    if trusted_parent and not private:
+        raise ValueError("trusted-parent override requires private artifact")
     if path.exists() or path.is_symlink():
         assert_regular_secure(path, root_uid=root_uid, private=private)
     temporary = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
@@ -304,7 +526,7 @@ def _atomic_json(path: Path, value: dict, *, root_uid: int,
             writer.flush()
             os.fsync(writer.fileno())
         os.replace(temporary, path)
-        os.chmod(path, 0o600)
+        os.chmod(path, 0o600 if private else 0o644)
     finally:
         try:
             temporary.unlink()
@@ -313,7 +535,8 @@ def _atomic_json(path: Path, value: dict, *, root_uid: int,
 
 
 def _validate_venue_evidence(value: dict, *, now: int, label: str,
-                             baseline: Optional[dict] = None) -> dict:
+                             baseline: Optional[dict] = None,
+                             require_v4_runtime: bool = True) -> dict:
     if not isinstance(value, dict) or value.get("schema") != VENUE_EVIDENCE_SCHEMA:
         raise ValueError(f"venue evidence {label} schema invalid")
     if value.get("venue") != "aster" or value.get("readOnly") is not True:
@@ -331,9 +554,10 @@ def _validate_venue_evidence(value: dict, *, now: int, label: str,
         "signatureVerified", "positionsReconciled", "protectiveStopsReconciled",
         "stopOwnershipReconciled", "pendingExposureReconciled",
         "grossReconciled", "sharedRiskHealthy", "marginGuardHealthy",
-        "accountLockHealthy", "killSwitchHealthy", "heartbeatVerified",
-        "tickVerified", "runnerShaMapVerified",
+        "accountLockHealthy", "killSwitchHealthy", "runnerShaMapVerified",
     )
+    if require_v4_runtime:
+        required_true += ("heartbeatVerified", "tickVerified")
     if any(value.get(field) is not True for field in required_true):
         raise ValueError(f"venue evidence {label} safety reconciliation incomplete")
     if value.get("sharedRiskDailyLossLimit") != 0.075:
@@ -407,17 +631,30 @@ class RootDeploymentExecutor:
         self.sleep_fn = sleep_fn
         self.audit_reader = audit_reader
 
-    def _read_current_sha(self) -> str:
+    def _read_current_sha(self, *, allow_legacy=False) -> str:
         link = self.paths.current.lstat()
         if not stat.S_ISLNK(link.st_mode):
             raise ValueError("production current is not symlink")
         resolved = self.paths.current.resolve(strict=True)
         if resolved.parent != self.paths.releases or not SHA.fullmatch(resolved.name):
             raise ValueError("production current symlink escapes immutable releases")
-        release_marker(resolved.name, self.paths.releases, root_uid=self.root_uid)
+        try:
+            release_marker(resolved.name, self.paths.releases, root_uid=self.root_uid)
+        except ValueError:
+            if not allow_legacy:
+                raise
+            legacy_release_marker(resolved.name, self.paths.releases)
         return resolved.name
 
     def _verify_token(self, args, token: str, *, nonce_dir=None):
+        if args.route == "CODEX_SSH":
+            payload = getattr(args, "_codex_ssh_authorization", None)
+            if payload is None:
+                payload = build_codex_ssh_authorization(args, now=self.clock())
+            if nonce_dir is not None:
+                _consume_codex_ssh_nonce(
+                    nonce_dir, payload["nonce"], root_uid=self.root_uid)
+            return payload
         return self.verify_fn(
             token,
             self.paths.public_key,
@@ -467,25 +704,132 @@ class RootDeploymentExecutor:
             })
         return observations
 
+    def _execute_pengu_peer_stop(self, args, token: str) -> dict:
+        """Redeem a PENGU stop approval without changing runtime state.
+
+        This is an authorization-only transaction.  It records that the
+        owner explicitly accepted the exact dormant PENGU SHA as a peer for a
+        short period; it never starts, stops, masks, enables, or disables the
+        service and never changes the venue, current symlink, or runner pins.
+        The later V4 witness must still prove the fresh flat venue state.
+        """
+        _assert_execution_root(self.root_uid)
+        paths = self.paths
+        peer_stop_dir = paths.peer_stop_dir or paths.root / "peer-stop"
+        for directory in (
+            paths.root, paths.root / "plans", paths.root / "plans" / PENGU_SCOPE,
+            paths.nonce_dir, paths.receipts, peer_stop_dir,
+        ):
+            assert_private_dir(directory, root_uid=self.root_uid)
+        if args.route != "CODEX_SSH":
+            assert_regular_secure(paths.public_key, root_uid=self.root_uid, private=True)
+        desired = read_root_json(
+            paths.root / "plans" / PENGU_SCOPE / (args.sha + ".json"),
+            root_uid=self.root_uid,
+        )
+        current = read_root_json(paths.current_plan, root_uid=self.root_uid)
+        raw_pins = read_root_json(paths.pins, root_uid=self.root_uid, private=False)
+        pins = parse_live_pins(raw_pins, releases=paths.releases)
+        current_sha = self._read_current_sha(allow_legacy=True)
+        validate(current)
+        validate(desired)
+        plan_hash = hashlib.sha256(canonical(desired)).hexdigest()
+        if (args.scope != PENGU_SCOPE or args.orders_enabled != "false"
+                or args.plan_sha256 != plan_hash
+                or desired["sourceSha"] != args.sha
+                or desired["runners"] != pins
+                or desired["sourceSha"] != current_sha
+                or desired["scope"] != PENGU_SCOPE
+                or desired["ordersEnabled"] is not False
+                or desired["uiSha"] != current["uiSha"]
+                or desired["monitorSha"] != current["monitorSha"]
+                or desired["releaseRoots"] != current["releaseRoots"]
+                or pins[PENGU_SCOPE] != args.sha):
+            raise ValueError("PENGU peer-stop plan is not an exact no-change scope")
+        try:
+            release_marker(args.sha, paths.releases, root_uid=self.root_uid)
+        except ValueError:
+            # PENGU is a dormant legacy peer in this migration.  Its
+            # no-order certificate may prove the exact immutable marker
+            # without converting the live legacy release into a new runtime.
+            legacy_release_marker(args.sha, paths.releases)
+        unit = _unit_for_runner(PENGU_SCOPE, args.sha)
+        if self.systemd.is_active(unit):
+            raise ValueError("PENGU peer is active; peer-stop approval is not applicable")
+        pid = self.systemd.main_pid(unit)
+        if pid != 0:
+            raise ValueError("PENGU dormant peer has nonzero PID")
+        approval_path = peer_stop_dir / f"{PENGU_SCOPE}-{args.sha}.json"
+        if approval_path.exists() or approval_path.is_symlink():
+            raise ValueError("PENGU peer-stop approval already exists")
+        if args.route != "CODEX_SSH":
+            if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
+                raise ValueError("missing signed approval")
+        payload = self._verify_token(args, token)
+        nonce = payload.get("nonce")
+        if not isinstance(nonce, str):
+            raise ValueError("PENGU peer-stop nonce missing")
+        try:
+            consumed = self._verify_token(args, token, nonce_dir=paths.nonce_dir)
+        except FileExistsError:
+            raise ValueError("PENGU peer-stop approval replay") from None
+        if consumed.get("nonce") != nonce:
+            raise ValueError("PENGU peer-stop nonce changed")
+        certificate = build_peer_stop_certificate(
+            args, desired, plan_hash, consumed, self.clock())
+        _atomic_json(approval_path, certificate, root_uid=self.root_uid)
+        receipt = {
+            "schema": "disdex-unified-deploy-receipt/v1",
+            "status": "PENGU_PEER_STOP_AUTHORIZED",
+            "repository": REPO,
+            "deploymentTarget": DEPLOYMENT_TARGET,
+            "operatorTarget": OPERATOR_TARGET,
+            "scope": PENGU_SCOPE,
+            "targetSha": args.sha,
+            "planSha256": plan_hash,
+            "route": args.route,
+            "ordersEnabled": False,
+            "serviceUnit": unit,
+            "mainPid": pid,
+            "approvalPath": str(approval_path),
+            "nonceDigest": certificate["nonceDigest"],
+            **ZERO_EFFECTS,
+        }
+        receipt_path = paths.receipts / f"pengu-peer-stop-{args.sha}-{nonce[:8]}.json"
+        _atomic_json(receipt_path, receipt, root_uid=self.root_uid)
+        return receipt
+
     def execute(self, args, token: str) -> dict:
         _assert_execution_root(self.root_uid)
+        certify_live_executor()
         if args.deployment_target != DEPLOYMENT_TARGET or args.operator_target != OPERATOR_TARGET:
             raise ValueError("unapproved deployment target or identity")
+        if args.scope == "V12_V4":
+            # Lazy import keeps the shared-risk and V4 mutation boundaries
+            # independent; the owner-signed scope selects the only executor.
+            from disdex_v4_root_cutover import V4RootExecutor
+            return V4RootExecutor(self).execute(args, token)
+        if args.scope == PENGU_SCOPE:
+            if args.orders_enabled != "false":
+                raise ValueError("PENGU peer-stop scope cannot enable orders")
+            return self._execute_pengu_peer_stop(args, token)
         if args.scope != SHARED_RISK_SCOPE:
             raise ValueError("unsupported execution scope: " + str(args.scope))
         orders_enabled = args.orders_enabled == "true"
         validate_order_permission(args.scope, orders_enabled)
         if orders_enabled:
             raise ValueError("Shared Risk-only cannot enable orders")
-        if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
-            raise ValueError("missing signed approval")
+        if args.route != "CODEX_SSH":
+            if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
+                raise ValueError("missing signed approval")
 
         assert_private_dir(self.paths.root, root_uid=self.root_uid)
         assert_private_dir(self.paths.root / "plans", root_uid=self.root_uid)
         assert_private_dir(self.paths.nonce_dir, root_uid=self.root_uid)
         assert_private_dir(self.paths.activation_dir, root_uid=self.root_uid)
         assert_private_dir(self.paths.receipts, root_uid=self.root_uid)
-        assert_regular_secure(self.paths.public_key, root_uid=self.root_uid, private=True)
+        if args.route != "CODEX_SSH":
+            assert_regular_secure(self.paths.public_key, root_uid=self.root_uid, private=True)
         desired_path = self.paths.root / "plans" / args.scope / f"{args.sha}.json"
         assert_private_dir(desired_path.parent, root_uid=self.root_uid)
         desired = read_root_json(desired_path, root_uid=self.root_uid, private=True)
@@ -653,6 +997,69 @@ class RootDeploymentExecutor:
                     f"cutover failed and rollback failed: {rollback_error}") from error
             raise RuntimeError(f"cutover failed and rolled back: {error}") from error
 
+
+def certify_live_executor() -> dict:
+    """Prove the scoped executor contract without authorizing a deployment.
+
+    This is an implementation-level certificate, not an owner approval and
+    not a production cutover.  It deliberately checks the executable
+    transaction boundary and reports the runtime proofs that the caller must
+    still supply separately.  Keeping this distinction explicit prevents a
+    stale certification blocker from hiding an implemented fail-closed
+    executor while also preventing a code-only check from granting live
+    authority.
+    """
+    execute_names = set(RootDeploymentExecutor.execute.__code__.co_names)
+    execute_names.update(RootDeploymentExecutor._execute_pengu_peer_stop.__code__.co_names)
+    required_names = {
+        "_assert_execution_root", "validate_order_permission", "_verify_token",
+        "_validate_scoped_activation", "_validate_venue_evidence", "_audit",
+        "_atomic_json", "read_root_json", "release_marker",
+        "parse_live_pins", "validate_bootstrap_plan", "validate_release_roots",
+        "_read_current_sha", "is_active", "is_masked", "is_enabled",
+        "stop", "mask", "unmask", "enable", "disable", "start",
+        "SHARED_RISK_SCOPE", "SHARED_RISK_RUNNER", "PENGU_SCOPE",
+        "_execute_pengu_peer_stop", "build_peer_stop_certificate", "ZERO_EFFECTS",
+    }
+    missing = sorted(required_names - execute_names)
+    if missing:
+        raise RuntimeError("executor contract missing safety checks: " + ",".join(missing))
+    audit_defaults = RootDeploymentExecutor._audit.__kwdefaults__ or {}
+    if audit_defaults.get("cycles") != 3:
+        raise RuntimeError("executor contract requires a three-cycle audit")
+    if ZERO_EFFECTS != {
+        "ordersSent": 0,
+        "cancelsSent": 0,
+        "positionChangesSent": 0,
+    }:
+        raise RuntimeError("executor contract must prove zero venue effects")
+    if not inspect.isclass(RootDeploymentExecutor) or not callable(RootDeploymentExecutor.execute):
+        raise RuntimeError("root deployment executor is not callable")
+    return {
+        "schema": EXECUTOR_CERTIFICATION_SCHEMA,
+        "status": "LIVE_EXECUTOR_CONTRACT_CERTIFIED",
+        "scope": SHARED_RISK_SCOPE,
+        "approvedRunners": [SHARED_RISK_RUNNER],
+        "ordersEnabled": False,
+        "requiresRoot": True,
+        "requiresOwnerSignature": True,
+        "requiresOwnerSignatureByRoute": {
+            "GITHUB_ACTIONS": True,
+            "CODEX_SSH": False,
+        },
+        "singleUseNonce": True,
+        "requiresFreshVenueEvidence": True,
+        "preservesCurrentSymlink": True,
+        "preservesPeerRunners": True,
+        "requiresRollback": True,
+        "auditCycles": 3,
+        "productionActivation": "OWNER_SIGNED_TOKEN_REQUIRED",
+        "productionActivationByRoute": {
+            "GITHUB_ACTIONS": "OWNER_SIGNED_TOKEN_REQUIRED",
+            "CODEX_SSH": "ROOT_SSH_SESSION_REQUIRED",
+        },
+    }
+
 def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
              releases=RELEASES, root_uid=0):
     if (args.deployment_target != DEPLOYMENT_TARGET
@@ -663,54 +1070,103 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         raise ValueError("unapproved deployment target or identity")
     orders_enabled = args.orders_enabled == "true"
     validate_order_permission(args.scope, orders_enabled)
-    if not isinstance(token, str) or len(token) > 16384 or not token.strip():
-        raise ValueError("missing signed approval")
+    codex_ssh = args.route == "CODEX_SSH"
+    if codex_ssh:
+        if (args.owner != CODEX_SSH_OPERATOR
+                or getattr(args, "_codex_ssh_authenticated", False) is not True):
+            raise ValueError("authenticated Codex SSH session required")
+        payload = build_codex_ssh_authorization(args, now=int(time.time()))
+    else:
+        if not isinstance(token, str) or len(token) > 16384 or not token.strip():
+            raise ValueError("missing signed approval")
     # The following paths must be provisioned only by a root operator, not
     # by GPT, Actions, or a repo checkout (which may be deploy-writable).
     assert_private_dir(root, root_uid=root_uid)
     assert_private_dir(root / "plans", root_uid=root_uid)
-    assert_regular_secure(root / "owner-approval-public.pem", root_uid=root_uid)
+    if not codex_ssh:
+        assert_regular_secure(root / "owner-approval-public.pem", root_uid=root_uid)
     assert_regular_secure(pins_path, root_uid=root_uid)
     assert_private_dir(root / "plans" / args.scope, root_uid=root_uid)
     desired = read_root_json(root / "plans" / args.scope / (args.sha + ".json"),
                              root_uid=root_uid)
     current_plan = read_root_json(root / "current-plan.json", root_uid=root_uid)
-    pins = parse_live_pins(read_root_json(pins_path, root_uid=root_uid,
-                                           private=False))
+    pins = parse_live_pins(
+        read_root_json(pins_path, root_uid=root_uid, private=False),
+        releases=releases,
+    )
     link = current.lstat()
     if not stat.S_ISLNK(link.st_mode):
         raise ValueError("production current is not symlink")
     resolved = current.resolve(strict=True)
     if resolved.parent != releases or not SHA.fullmatch(resolved.name):
         raise ValueError("production current symlink escapes immutable releases")
-    release_marker(resolved.name, releases, root_uid=root_uid)
-    sha_hash, diff = validate_bootstrap_plan(
-        desired, current_plan, pins, resolved.name)
+    if args.scope == PENGU_SCOPE:
+        sha_hash, diff = validate_pengu_peer_stop_plan(
+            desired, current_plan, pins, resolved.name)
+    else:
+        sha_hash, diff = validate_bootstrap_plan(
+            desired, current_plan, pins, resolved.name)
     if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
         raise ValueError("supplied SHA / plan hash differs from root plan")
-    validate_release_roots(current_plan, releases, root_uid=root_uid)
-    validate_release_roots(desired, releases, root_uid=root_uid)
-    for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
-        release_marker(sha, releases, root_uid=root_uid)
-    # Verify signature but DO NOT consume a nonce here: a read-only preflight
-    # cannot authorize or burn the owner's one-use LIVE grant.
-    payload = verify(token, root / "owner-approval-public.pem", REPO,
-                     args.sha, args.scope, args.owner, args.plan_sha256,
-                     route=args.route, orders_enabled=orders_enabled)
+    if args.scope == "V12_V4":
+        # V4 is a trust-boundary migration from legacy deploy-owned peer/current
+        # releases. Do not require rewriting unchanged peer/UI releases merely
+        # to satisfy the new root-owned convention. The signed plan freezes
+        # their exact SHA map; only the newly introduced V4 release must meet
+        # the root-owned immutable release contract.
+        if (diff["changedRunners"] != ["V12_V4"]
+            or diff["uiChanged"] or diff["monitorChanged"]
+            or diff["releaseRootsChanged"]
+            or desired["runners"].get("V12_V4") != args.sha
+            or desired["releaseRoots"]["runners"] != str(releases)):
+            raise ValueError("V4 preflight exceeds exact single-runner delta")
+        release_marker(args.sha, releases, root_uid=root_uid)
+    else:
+        if args.scope == PENGU_SCOPE:
+            legacy_release_marker(resolved.name, releases)
+        else:
+            release_marker(resolved.name, releases, root_uid=root_uid)
+        validate_release_roots(current_plan, releases, root_uid=root_uid)
+        validate_release_roots(desired, releases, root_uid=root_uid)
+        if args.scope != PENGU_SCOPE:
+            for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
+                release_marker(sha, releases, root_uid=root_uid)
+    # Verify the owner signature, or establish the root-SSH route.  Neither
+    # branch consumes an execution nonce during read-only preflight.
+    if not codex_ssh:
+        payload = verify(token, root / "owner-approval-public.pem", REPO,
+                         args.sha, args.scope, args.owner, args.plan_sha256,
+                         route=args.route, orders_enabled=orders_enabled)
     if payload["deploymentTarget"] != DEPLOYMENT_TARGET or payload["operatorTarget"] != OPERATOR_TARGET:
         raise ValueError("signed target differs")
+    certification = certify_live_executor()
+    verified_contracts = []
+    unproven = ["OWNER_ENV_CONFIGURATION", "VENUE_STOP_PRESERVATION",
+                "LIVE_SYSTEMD_SHA_READBACK", "ROLLBACK",
+                "POST_CUTOVER_3_CYCLES"]
+    if args.scope == SHARED_RISK_SCOPE:
+        verified_contracts.append(certification["status"])
+    elif args.scope == "V12_V4":
+        from disdex_v4_root_cutover import V4RootExecutor
+        if not callable(V4RootExecutor.execute):
+            raise ValueError("V4 executor missing")
+        verified_contracts.append("V4_SCOPE_SPECIFIC_EXECUTOR_PRESENT_SOURCE_ONLY")
+        unproven.extend(["V4_RESIDENT_STOP_HANDOVER", "V4_RUNTIME_ACTIVATION",
+                         "V4_POST_START_VENUE_AUDIT"])
+    else:
+        unproven.append("SCOPE_SPECIFIC_EXECUTOR_NOT_IMPLEMENTED")
     return {
         "status": "READONLY_PREFLIGHT_PASS_NOT_LIVE",
         "targetSha": args.sha,
         "scope": args.scope,
         "route": args.route,
+        "authorizationMethod": payload["authorizationMethod"]
+            if codex_ssh else "OWNER_SIGNED_TOKEN",
         "ordersEnabled": orders_enabled,
         "planSha256": sha_hash,
         "changedRunners": diff["changedRunners"],
-        "unproven": ["OWNER_ENV_CONFIGURATION", "VENUE_STOP_PRESERVATION",
-                     "LIVE_SYSTEMD_SHA_READBACK", "ROOT_MUTATING_EXECUTOR",
-                     "ROLLBACK", "POST_CUTOVER_3_CYCLES",
-                     LIVE_EXECUTOR_NOT_CERTIFIED],
+        "verifiedContracts": verified_contracts,
+        "unproven": unproven,
     }
 
 
@@ -727,6 +1183,7 @@ def default_execution_paths() -> DeploymentPaths:
         venue_before=ROOT / "venue-before.json",
         venue_after=ROOT / "venue-after.json",
         receipts=ROOT / "receipts",
+        peer_stop_dir=ROOT / "peer-stop",
     )
 
 def main():
@@ -740,6 +1197,7 @@ def main():
     p.add_argument("--route", required=True, choices=sorted(ROUTES))
     p.add_argument("--owner", required=True)
     p.add_argument("--read-approval-stdin", action="store_true")
+    p.add_argument("--codex-ssh", action="store_true")
     mode = p.add_mutually_exclusive_group(required=True)
     mode.add_argument("--preflight-readonly", action="store_true")
     mode.add_argument("--execute", action="store_true")
@@ -747,14 +1205,38 @@ def main():
     try:
         if os.geteuid() != 0:
             raise ValueError("root authority required")
-        if not args.read_approval_stdin:
-            raise ValueError("stdin owner approval is mandatory")
-        raw = sys.stdin.read(16385)
-        if len(raw) > 16384:
-            raise ValueError("owner approval too large")
+        if args.route == "CODEX_SSH":
+            if (not args.codex_ssh or args.read_approval_stdin
+                    or args.owner != CODEX_SSH_OPERATOR):
+                raise ValueError("CODEX_SSH requires the fixed Codex SSH route")
+            assert_codex_ssh_session()
+            args._codex_ssh_authenticated = True
+            raw = ""
+        else:
+            if args.codex_ssh or not args.read_approval_stdin:
+                raise ValueError("stdin owner approval is mandatory")
+            raw = sys.stdin.read(16385)
+            if len(raw) > 16384:
+                raise ValueError("owner approval too large")
         if args.execute:
-            result = RootDeploymentExecutor(default_execution_paths()).execute(
-                args, raw.strip())
+            # Exclusive root-owned lock across GitHub Actions / CODEX_SSH paths.
+            # An Actions concurrency group alone cannot serialize VPS writers.
+            import fcntl
+            assert_private_dir(ROOT, root_uid=0)
+            lock_path = ROOT / "deployment-execution.lock"
+            if lock_path.is_symlink():
+                raise ValueError("untrusted deployment lock symlink")
+            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
+            try:
+                assert_regular_secure(lock_path, root_uid=0, private=True)
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    raise ValueError("another root deployment is in progress") from None
+                result = RootDeploymentExecutor(default_execution_paths()).execute(
+                    args, raw.strip())
+            finally:
+                os.close(fd)
         else:
             result = preflight(args, raw.strip())
         print(json.dumps(result, sort_keys=True))

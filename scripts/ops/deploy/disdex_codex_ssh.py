@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Safe Codex direct-SSH adapter for the shared DisDex deployment contract.
 
-This adapter never accepts a shell command.  It passes the owner-signed token
-over stdin to the same root-owned VPS helper used by the GitHub Actions route.
-The helper, not this client, remains the authority for venue/STOP/risk and
-production mutation gates.
+This adapter never accepts a shell command or an owner secret.  It invokes the
+same root-owned VPS helper used by the GitHub Actions route, but authenticates
+the Codex path by the root SSH session itself.  The helper, not this client,
+remains the authority for venue/STOP/risk and production mutation gates.
 """
 import argparse
 import subprocess
@@ -13,6 +13,7 @@ import sys
 from disdex_deployment_contract import (
     DEPLOYMENT_TARGET,
     OPERATOR_TARGET,
+    CODEX_SSH_OPERATOR,
     PLAN_HASH,
     SCOPES,
     SHA,
@@ -20,6 +21,7 @@ from disdex_deployment_contract import (
 )
 
 REMOTE_HELPER = "/usr/local/sbin/disdex-unified-production-deploy"
+REFRESH_REMOTE_HELPER = "/usr/local/sbin/disdex-v4-evidence-refresh-activate"
 CODEX_ROUTE = "CODEX_SSH"
 
 
@@ -38,14 +40,31 @@ def _validate_inputs(host, identity_file, known_hosts, port, sha, scope,
     if not isinstance(plan_sha256, str) or not PLAN_HASH.fullmatch(plan_sha256):
         raise ValueError("invalid plan hash")
     validate_order_permission(scope, orders_enabled)
-    if not isinstance(owner, str) or not owner or len(owner) > 39 or not owner.replace('-', '').isalnum():
-        raise ValueError('invalid owner')
+    if owner != CODEX_SSH_OPERATOR:
+        raise ValueError("Codex operator must be codex-ssh")
 
 
 def build_ssh_command(*, host, identity_file, known_hosts, port, sha, scope,
-                      plan_sha256, orders_enabled, owner):
+                      plan_sha256, orders_enabled, owner=CODEX_SSH_OPERATOR):
     _validate_inputs(host, identity_file, known_hosts, port, sha, scope,
                      plan_sha256, orders_enabled, owner)
+    if scope == "V4_EVIDENCE_REFRESH_ONLY":
+        return [
+            "ssh", "-T", "-i", identity_file,
+            "-o", "IdentitiesOnly=yes",
+            "-o", "BatchMode=yes",
+            "-o", "StrictHostKeyChecking=yes",
+            "-o", f"UserKnownHostsFile={known_hosts}",
+            "-p", str(port),
+            f"root@{host}",
+            REFRESH_REMOTE_HELPER,
+            "--install",
+            "--sha", sha,
+            "--operator", CODEX_SSH_OPERATOR,
+            "--route", CODEX_ROUTE,
+            "--plan-sha256", plan_sha256,
+            "--codex-ssh",
+        ]
     return [
         "ssh", "-T", "-i", identity_file,
         "-o", "IdentitiesOnly=yes",
@@ -62,16 +81,13 @@ def build_ssh_command(*, host, identity_file, known_hosts, port, sha, scope,
         "--plan-sha256", plan_sha256,
         "--orders-enabled", str(orders_enabled).lower(),
         "--route", CODEX_ROUTE,
-        "--owner", owner,
+        "--owner", CODEX_SSH_OPERATOR,
         "--execute",
-        "--read-approval-stdin",
+        "--codex-ssh",
     ]
 
 
 def run(args):
-    token = sys.stdin.read()
-    if not token or len(token) > 16384:
-        raise ValueError("owner approval token must be supplied on stdin")
     command = build_ssh_command(
         host=args.host,
         identity_file=args.identity_file,
@@ -83,7 +99,7 @@ def run(args):
         orders_enabled=args.orders_enabled == "true",
         owner=args.owner,
     )
-    return subprocess.run(command, input=token, text=True, check=False).returncode
+    return subprocess.run(command, text=True, check=False).returncode
 
 
 def main():
@@ -96,7 +112,7 @@ def main():
     parser.add_argument("--scope", required=True, choices=sorted(SCOPES))
     parser.add_argument("--plan-sha256", required=True)
     parser.add_argument("--orders-enabled", required=True, choices=("true", "false"))
-    parser.add_argument("--owner", required=True)
+    parser.add_argument("--owner", default=CODEX_SSH_OPERATOR)
     args = parser.parse_args()
     try:
         return run(args)

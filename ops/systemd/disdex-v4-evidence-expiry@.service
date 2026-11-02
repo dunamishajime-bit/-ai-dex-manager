@@ -1,0 +1,15 @@
+# Independent expiry watcher; cannot restart V4 or refresh approvals.
+[Unit]
+Description=DisDex V4 proof expiry monitor (%i)
+After=local-fs.target
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+ExecStart=/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-v4-evidence-expiry-watch.mjs --sha %i
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+UMask=0077

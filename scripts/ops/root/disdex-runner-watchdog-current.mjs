@@ -529,8 +529,11 @@ async function inspectService(unit) {
 }
 
 function isFatalFailClosedService(service) {
-    return service?.active === false
-        && service?.mainPid === 0
+    // systemd may briefly report auto-restart while it is processing a
+    // prevented exit.  Exit status 2 is the runner's explicit fatal
+    // fail-closed contract; never issue a watchdog restart for that status,
+    // regardless of the transient ActiveState value.
+    return service?.mainPid === 0
         && service?.result === "exit-code"
         && service?.execMainCode === "exited"
         && service?.execMainStatus === 2;
@@ -559,7 +562,10 @@ function commandMatches(config, runner, command) {
     const tokens = command.split(/\s+/);
     const scripts = runner.script ? [runner.script] : runner.scripts;
     const scriptFound = scripts.some((script) => pathToken(tokens[tokens.indexOf(script)] || "", runner.expectedCwd, script) || tokens.some((token) => token === join(runner.expectedCwd, script)));
-    const runnerLoaderFound = tokens.some((token) => samePath(token, join(runner.expectedCwd, "node_modules/tsx/dist/cli.mjs")) || samePath(token, join(runner.expectedCwd, "node_modules/.bin/tsx")));
+    const releaseLocalLoader = join(runner.expectedCwd, "node_modules/tsx/dist/cli.mjs");
+    const runnerLoaderFound = runner.key === "V12_V4"
+        ? tokens.some((token) => samePath(token, releaseLocalLoader))
+        : tokens.some((token) => samePath(token, releaseLocalLoader) || samePath(token, join(runner.expectedCwd, "node_modules/.bin/tsx")));
     const daemon = tokens.includes("--daemon") || tokens.includes("--once");
     const v52Python = runner.key === "V52" && (
         tokens[0] === "/usr/bin/python3" || tokens[0] === "python3" || tokens[0] === "python"
@@ -877,6 +883,8 @@ function selfTest() {
     const v4 = V4_V12_RUNNER;
     if (!serviceAllowed(v4, v4.expectedUnit(sha), sha)) throw new Error("V4 allowlist self-test failed");
     if (serviceAllowed(v4, LEGACY_V12_RUNNER.expectedUnit(sha), sha)) throw new Error("V4 allowlist accepted legacy V12");
+    if (!isFatalFailClosedService({ active: true, mainPid: 0, result: "exit-code", execMainCode: "exited", execMainStatus: 2 })) throw new Error("V4 fatal exit-2 watchdog hold self-test failed");
+    if (isFatalFailClosedService({ active: true, mainPid: 0, result: "success", execMainCode: "exited", execMainStatus: 0 })) throw new Error("V4 nonfatal watchdog self-test failed");
     for (const [legacyUnits, canaryUnits] of [
         [[LEGACY_V12_RUNNER.expectedUnit(sha)], []],
         [[], [`disdex-v12-v4-canary@${sha}.service`]],
@@ -934,6 +942,9 @@ function selfTest() {
     const v4Pinned = { ...v4, expectedCwd: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT };
     const v4Command = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/tsx/dist/cli.mjs scripts/v12-v4-production-runner.ts --daemon`;
     if (!commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4Command)) throw new Error("V4 command pin self-test failed");
+    const v4CrossReleaseLoader = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --daemon`;
+    if (commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4CrossReleaseLoader)) throw new Error("V4 cross-release loader self-test accepted a .bin shim");
+    console.log("DISDEX_CURRENT_WATCHDOG_V4_RELEASE_LOCAL_LOADER_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_V12_V4_MODE_SELFTEST_PASS");
     const mismatchedApprovalSha = "f".repeat(40);
     try {

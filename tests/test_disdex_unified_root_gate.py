@@ -13,12 +13,17 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "ops" / "deploy"))
 from disdex_unified_root_gate import (
     parse_live_pins, validate_bootstrap_plan, release_marker,
     auxiliary_release_marker,
-    assert_regular_secure, assert_private_dir, preflight, PREFIXES, STOP_OWNERS,
+    assert_regular_secure, assert_private_dir, assert_root_trusted_dir, _atomic_json,
+    preflight, PREFIXES, STOP_OWNERS,
     ROOT, RELEASES, DeploymentPaths, RootDeploymentExecutor,
+    certify_live_executor, build_peer_stop_certificate,
+    assert_codex_ssh_session, build_codex_ssh_authorization,
 )
-from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
+from disdex_deployment_contract import (
+    DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, CODEX_SSH_OPERATOR,
+)
 from disdex_deployment_plan import IDS, SCHEMA, digest
-from disdex_unified_forced_command import parse_original, HELPER, ALLOWED
+from disdex_unified_forced_command import parse_original, HELPER, READINESS_HELPER, ALLOWED
 
 OLD="7"*40
 NEW="c"*40
@@ -48,6 +53,62 @@ def pins(releases=RELEASES):
                             "stopOwner":STOP_OWNERS[key]} for key in IDS}}
 
 class RootGateTest(unittest.TestCase):
+    def test_codex_ssh_requires_sshd_connection_metadata(self):
+        with self.assertRaisesRegex(ValueError, "authenticated Codex SSH"):
+            assert_codex_ssh_session({})
+        with self.assertRaisesRegex(ValueError, "authenticated Codex SSH"):
+            assert_codex_ssh_session({"SSH_CONNECTION": "203.0.113.10 22"})
+
+    def test_codex_ssh_authority_is_route_specific_and_has_no_owner_signature(self):
+        env = {
+            "SSH_CONNECTION": "203.0.113.10 54321 198.51.100.20 22",
+            "SSH_CLIENT": "203.0.113.10 54321 22",
+        }
+        authority = assert_codex_ssh_session(env)
+        self.assertEqual(authority["route"], "CODEX_SSH")
+        self.assertEqual(authority["operator"], CODEX_SSH_OPERATOR)
+        args = SimpleNamespace(
+            route="CODEX_SSH", owner=CODEX_SSH_OPERATOR, sha=NEW,
+            scope="V12_V4", plan_sha256="a" * 64, orders_enabled="true",
+            _codex_ssh_authenticated=True,
+        )
+        payload = build_codex_ssh_authorization(args, now=2_000_000_000)
+        self.assertEqual(payload["authorizationMethod"], "ROOT_SSH_SESSION")
+        self.assertFalse(payload["signatureVerified"])
+        self.assertEqual(payload["ordersEnabled"], True)
+        self.assertEqual(len(payload["nonce"]), 32)
+
+    def test_pengu_peer_stop_certificate_is_explicit_no_order_authority(self):
+        desired = plan("PENGU_V8")
+        desired["sourceSha"] = OLD
+        desired["ordersEnabled"] = False
+        args = SimpleNamespace(sha=OLD, scope="PENGU_V8", owner="owner")
+        certificate = build_peer_stop_certificate(
+            args, desired, "a" * 64, {"nonce": "b" * 32}, 2_000_000_000)
+        self.assertEqual(certificate["schema"], "disdex-peer-stop-approval/v1")
+        self.assertEqual(certificate["runner"], "PENGU_V8")
+        self.assertEqual(certificate["approvedSha"], OLD)
+        self.assertFalse(certificate["ordersEnabled"])
+        self.assertEqual(
+            certificate["operatorAcknowledgement"],
+            "I_ACK_PENGU_V8_PEER_STOP_NO_ORDERS",
+        )
+
+    def test_live_executor_contract_is_certified_without_granting_live_authority(self):
+        report = certify_live_executor()
+
+        self.assertEqual(report["status"], "LIVE_EXECUTOR_CONTRACT_CERTIFIED")
+        self.assertEqual(report["scope"], "SHARED_CRYPTO_RISK_ONLY")
+        self.assertEqual(report["approvedRunners"], ["SHARED_CRYPTO_RISK"])
+        self.assertFalse(report["ordersEnabled"])
+        self.assertTrue(report["requiresRoot"])
+        self.assertTrue(report["requiresOwnerSignature"])
+        self.assertTrue(report["singleUseNonce"])
+        self.assertTrue(report["requiresFreshVenueEvidence"])
+        self.assertTrue(report["preservesCurrentSymlink"])
+        self.assertEqual(report["auditCycles"], 3)
+        self.assertEqual(report["productionActivation"], "OWNER_SIGNED_TOKEN_REQUIRED")
+
     def test_valid_pins(self):
         self.assertEqual(parse_live_pins(pins()),{key:OLD for key in IDS})
     def test_cannot_replace_stop_owner(self):
@@ -147,6 +208,110 @@ class RootGateTest(unittest.TestCase):
             p.chmod(0o777)
             with self.assertRaisesRegex(ValueError,"root-only"):
                 assert_private_dir(p,root_uid=__import__("os").geteuid())
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_public_runner_pins_can_be_published_under_trusted_etc_dir(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            directory = root / "etc-disdex"
+            directory.mkdir(mode=0o755)
+            directory.chmod(0o755)
+            target = directory / "runner-pins.json"
+            _atomic_json(target, {"schema": "test-pins"}, root_uid=os.geteuid(), private=False)
+            self.assertEqual(json.loads(target.read_text())["schema"], "test-pins")
+            self.assertEqual(target.stat().st_mode & 0o777, 0o644)
+
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_private_operator_artifact_in_trusted_root_public_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp) / "shared-operator-activation"
+            directory.mkdir(mode=0o755)
+            directory.chmod(0o755)
+            target = directory / "v12-v4-full.json"
+            _atomic_json(target, {"approvedSha": "x" * 40},
+                         root_uid=os.geteuid(), private=True,
+                         trusted_parent=True)
+            self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(json.loads(target.read_text())["approvedSha"], "x" * 40)
+
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_public_pins_reject_writable_parent_and_symlink(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            directory = root / "unsafe"
+            directory.mkdir(mode=0o777)
+            directory.chmod(0o777)
+            target = directory / "runner-pins.json"
+            with self.assertRaisesRegex(ValueError, "non-writable directory"):
+                _atomic_json(target, {"schema": "unsafe"}, root_uid=os.geteuid(), private=False)
+            directory.chmod(0o755)
+            ordinary = directory / "original"
+            ordinary.write_text("original", encoding="utf8")
+            target.symlink_to(ordinary)
+            with self.assertRaisesRegex(ValueError, "untrusted file type"):
+                _atomic_json(target, {"schema": "unsafe"}, root_uid=os.geteuid(), private=False)
+            self.assertEqual(ordinary.read_text(), "original")
+
+    def test_forced_command_exact_readiness_helper_allowed(self):
+        self.assertEqual(parse_original(READINESS_HELPER), [READINESS_HELPER])
+
+    def test_forced_command_readiness_helper_rejects_arguments(self):
+        with self.assertRaises(ValueError):
+            parse_original(READINESS_HELPER + " --execute")
+
+    def test_forced_command_allows_exact_idle_flat_repair_only(self):
+        from disdex_unified_forced_command import parse_original, IDLE_FLAT_REPAIR_HELPER
+        command=f"{IDLE_FLAT_REPAIR_HELPER} --execute-after-three-signed-gets"
+        self.assertEqual(parse_original(command), [IDLE_FLAT_REPAIR_HELPER, "--execute-after-three-signed-gets"])
+        for bad in (
+            f"{IDLE_FLAT_REPAIR_HELPER}",
+            f"{IDLE_FLAT_REPAIR_HELPER} --verify-only",
+            f"{IDLE_FLAT_REPAIR_HELPER} --execute-after-three-signed-gets extra",
+            f"/bin/sh -c '{command}'",
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                parse_original(bad)
+
+    def test_forced_command_allows_exact_idle_kill_recovery_only(self):
+        from disdex_unified_forced_command import parse_original, IDLE_KILL_RECOVERY_HELPER
+        command=f"{IDLE_KILL_RECOVERY_HELPER} --execute-after-three-signed-gets"
+        self.assertEqual(parse_original(command), [IDLE_KILL_RECOVERY_HELPER, "--execute-after-three-signed-gets"])
+        for bad in (
+            IDLE_KILL_RECOVERY_HELPER,
+            f"{IDLE_KILL_RECOVERY_HELPER} --verify-only",
+            f"{IDLE_KILL_RECOVERY_HELPER} --execute-after-three-signed-gets extra",
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                parse_original(bad)
+
+    def test_forced_command_allows_exact_static_evidence_only(self):
+        from disdex_unified_forced_command import STATIC_EVIDENCE_HELPER
+        sha="a"*40
+        command=f"{STATIC_EVIDENCE_HELPER} --sha {sha}"
+        self.assertEqual(parse_original(command),[STATIC_EVIDENCE_HELPER,"--sha",sha])
+        for bad in (
+            f"{STATIC_EVIDENCE_HELPER} --sha latest",
+            f"{STATIC_EVIDENCE_HELPER} --sha {sha} extra",
+            STATIC_EVIDENCE_HELPER,
+        ):
+            with self.subTest(bad=bad),self.assertRaises(ValueError):
+                parse_original(bad)
+
+    def test_forced_command_allows_exact_no_order_refresh_activation_only(self):
+        from disdex_unified_forced_command import REFRESH_HELPER
+        sha="a"*40; plan="b"*64
+        command=(f"{REFRESH_HELPER} --install --sha {sha} --operator dunamishajime-bit "
+                 f"--route GITHUB_ACTIONS --plan-sha256 {plan} --token-stdin")
+        self.assertEqual(parse_original(command),[
+            REFRESH_HELPER,"--install","--sha",sha,"--operator","dunamishajime-bit",
+            "--route","GITHUB_ACTIONS","--plan-sha256",plan,"--token-stdin"])
+        for bad in (
+            command.replace("GITHUB_ACTIONS","CODEX_SSH"),
+            command.replace(plan,"bad"),
+            command+" extra",
+        ):
+            with self.subTest(bad=bad),self.assertRaises(ValueError):
+                parse_original(bad)
+
     def test_forced_command_rejects_shell(self):
         with self.assertRaises(ValueError):
             parse_original("/bin/sh -c whoami")
@@ -160,8 +325,21 @@ class RootGateTest(unittest.TestCase):
     def test_forced_command_valid(self):
         args=[HELPER]
         for k in ALLOWED:
-            args += [k, "VALUE"]
+            args += [k, "GITHUB_ACTIONS" if k == "--route" else "VALUE"]
         args += ["--execute", "--read-approval-stdin"]
+        self.assertEqual(parse_original(" ".join(args)),args)
+
+    def test_forced_command_valid_codex_ssh_route(self):
+        args=[HELPER]
+        for k in ALLOWED:
+            if k == "--route":
+                value = "CODEX_SSH"
+            elif k == "--owner":
+                value = "codex-ssh"
+            else:
+                value = "VALUE"
+            args += [k, value]
+        args += ["--execute", "--codex-ssh"]
         self.assertEqual(parse_original(" ".join(args)),args)
     def test_wrong_target_before_files(self):
         args=SimpleNamespace(deployment_target="attacker",operator_target="DD1296_FINAL_ALLIN_10BPS",
@@ -172,13 +350,28 @@ class RootGateTest(unittest.TestCase):
 
 
 class FakeSystemd:
-    def __init__(self, old_unit, new_unit, *, fail_new_start=False):
+    def __init__(self, old_unit, new_unit, *, fail_new_start=False,
+                 old_active=True, dormant_old_pid=0):
         self.old_unit = old_unit
         self.new_unit = new_unit
         self.fail_new_start = fail_new_start
-        self.active_units = {old_unit: True, new_unit: False}
+        self.active_units = {old_unit: old_active, new_unit: False}
+        self.failed_units = {old_unit} if not old_active else set()
+        self.dormant_old_pid = dormant_old_pid
         self.masked_units = set()
         self.calls = []
+
+    def active_state(self, unit):
+        if self.active_units.get(unit, False):
+            return "active"
+        return "failed" if unit in self.failed_units else "inactive"
+
+    def main_pid(self, unit):
+        if self.active_units.get(unit, False):
+            return 4242
+        if unit == self.old_unit:
+            return self.dormant_old_pid
+        return 0
 
     def is_active(self, unit):
         return bool(self.active_units.get(unit, False))
@@ -192,6 +385,7 @@ class FakeSystemd:
     def stop(self, unit):
         self.calls.append(("stop", unit))
         self.active_units[unit] = False
+        self.failed_units.discard(unit)
 
     def mask(self, unit):
         self.calls.append(("mask", unit))
@@ -208,6 +402,7 @@ class FakeSystemd:
         if unit in self.masked_units:
             raise RuntimeError("masked unit cannot start")
         self.active_units[unit] = True
+        self.failed_units.discard(unit)
 
     def enable(self, unit):
         self.calls.append(("enable", unit))
@@ -238,6 +433,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
         _secure_dir(self.plans / "SHARED_CRYPTO_RISK_ONLY")
         self.activations = _secure_dir(self.root / "activations")
         _secure_dir(self.activations / "SHARED_CRYPTO_RISK_ONLY")
+        self.peer_stop_dir = _secure_dir(self.root / "peer-stop")
         self.nonce_dir = _secure_dir(self.root / "nonces")
         self.receipts = _secure_dir(self.root / "receipts")
         self.releases = base / "releases"
@@ -296,6 +492,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
             venue_before=self.before_venue,
             venue_after=self.after_venue,
             receipts=self.receipts,
+            peer_stop_dir=self.peer_stop_dir,
         )
         self.old_unit = f"disdex-shared-crypto-risk@{self.old}.service"
         self.new_unit = f"disdex-shared-crypto-risk@{self.new}.service"
@@ -370,7 +567,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
             operator_target=OPERATOR_TARGET,
             sha=self.new,
             scope="SHARED_CRYPTO_RISK_ONLY",
-            route="CODEX_SSH",
+            route="GITHUB_ACTIONS",
             plan_sha256=self.plan_hash,
             orders_enabled="false",
             owner="owner",
@@ -433,6 +630,23 @@ class SharedRiskExecutorTest(unittest.TestCase):
             [("stop", self.old_unit), ("mask", self.old_unit),
              ("enable", self.new_unit), ("start", self.new_unit)],
         )
+
+    def test_codex_ssh_shared_risk_route_uses_root_session_without_token(self):
+        args = self._args()
+        args.route = "CODEX_SSH"
+        args.owner = "codex-ssh"
+        args._codex_ssh_authenticated = True
+        activation_path = (
+            self.activations / "SHARED_CRYPTO_RISK_ONLY" / f"{self.new}.json"
+        )
+        activation = json.loads(activation_path.read_text(encoding="utf-8"))
+        activation["operator"] = CODEX_SSH_OPERATOR
+        _write_secure_json(activation_path, activation)
+        systemd = FakeSystemd(self.old_unit, self.new_unit)
+        result = self._executor(systemd).execute(args, "")
+        self.assertEqual(result["status"], "SHARED_RISK_CUTOVER_VERIFIED")
+        self.assertEqual(result["route"], "CODEX_SSH")
+        self.assertEqual(result["ordersSent"], 0)
 
     def test_shared_risk_start_failure_rolls_back_writer_and_manifest(self):
         systemd = FakeSystemd(self.old_unit, self.new_unit, fail_new_start=True)

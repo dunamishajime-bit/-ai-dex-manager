@@ -13,6 +13,16 @@ on:
       - 'tests/test_disdex_deployment_plan.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_v4_venue_witness.py'
+      - 'scripts/ops/deploy/disdex_v4_static_evidence.py'
+      - 'tests/test_disdex_v4_venue_witness.py'
+      - 'tests/test_disdex_v4_static_evidence.py'
+      - 'scripts/ops/deploy/disdex_v4_live_readiness.py'
+      - 'tests/test_disdex_v4_live_readiness.py'
+      - 'scripts/ops/root/disdex-idle-residual-flat-stale-repair.py'
+      - 'tests/test_disdex_idle_flat_stale_recovery.py'
+      - 'tests/test_disdex_v4_root_cutover.py'
       - 'scripts/ops/deploy/disdex_unified_forced_command.py'
       - 'scripts/ops/root/disdex-unified-production-deploy'
       - 'scripts/ops/root/install-disdex-unified-deployment'
@@ -34,6 +44,16 @@ on:
       - 'tests/test_disdex_deployment_plan.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_v4_venue_witness.py'
+      - 'scripts/ops/deploy/disdex_v4_static_evidence.py'
+      - 'tests/test_disdex_v4_venue_witness.py'
+      - 'tests/test_disdex_v4_static_evidence.py'
+      - 'scripts/ops/deploy/disdex_v4_live_readiness.py'
+      - 'tests/test_disdex_v4_live_readiness.py'
+      - 'scripts/ops/root/disdex-idle-residual-flat-stale-repair.py'
+      - 'tests/test_disdex_idle_flat_stale_recovery.py'
+      - 'tests/test_disdex_v4_root_cutover.py'
       - 'scripts/ops/deploy/disdex_unified_forced_command.py'
       - 'scripts/ops/root/disdex-unified-production-deploy'
       - 'scripts/ops/root/install-disdex-unified-deployment'
@@ -61,6 +81,16 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_disdex_deployment_plan.py -v
       - name: Root-side read-only preflight and forced-command tests
         run: python3 -m unittest discover -s tests -p test_disdex_unified_root_gate.py -v
+      - name: Strict flat IDLE residual venue witness tests
+        run: python3 -m unittest discover -s tests -p test_disdex_idle_flat_stale_recovery.py -v
+      - name: Read-only live-readiness inventory fail-closed test
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_live_readiness.py -v
+      - name: V4 fresh venue witness contract tests
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_venue_witness.py -v
+      - name: V4 immutable static evidence contract tests
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_static_evidence.py -v
+      - name: V4 exact-scope rollback and owner approval tests
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_root_cutover.py -v
       - name: Root helper installer contract tests
         run: python3 -m unittest discover -s tests -p test_disdex_unified_helper_installer.py -v
       - name: Audit legacy VPS SSH paths (read-only inventory)
@@ -74,6 +104,7 @@ jobs:
             scripts/ops/deploy/disdex_deployment_plan.py \
             scripts/ops/deploy/disdex_codex_ssh.py \
             scripts/ops/deploy/disdex_unified_root_gate.py \
+            scripts/ops/deploy/disdex_v4_root_cutover.py \
             scripts/ops/deploy/disdex_unified_forced_command.py
           python3 - <<'PY'
           from pathlib import Path
@@ -91,11 +122,17 @@ jobs:
           assert 'password:' not in p
           adapter = Path('scripts/ops/deploy/disdex_codex_ssh.py').read_text()
           assert 'CODEX_SSH' in adapter
+          assert '--codex-ssh' in adapter
+          assert 'CODEX_SSH_OPERATOR' in adapter
           assert '/usr/local/sbin/disdex-unified-production-deploy' in adapter
           assert 'shell=True' not in adapter
           assert 'subprocess.run(command' in adapter
           root_gate = Path('scripts/ops/deploy/disdex_unified_root_gate.py').read_text()
-          assert 'LIVE_EXECUTOR_NOT_CERTIFIED' in root_gate
+          assert 'def assert_codex_ssh_session' in root_gate
+          assert 'ROOT_SSH_SESSION' in root_gate
+          assert 'def certify_live_executor' in root_gate
+          assert 'LIVE_EXECUTOR_CONTRACT_CERTIFIED' in root_gate
+          assert 'LIVE_EXECUTOR_NOT_CERTIFIED' not in root_gate
           assert 'READONLY_PREFLIGHT_PASS_NOT_LIVE' in root_gate
           assert 'SHARED_RISK_CUTOVER_VERIFIED' in root_gate
           assert 'three-cycle audit' in root_gate
