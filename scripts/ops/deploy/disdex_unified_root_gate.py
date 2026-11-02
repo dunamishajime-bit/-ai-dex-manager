@@ -344,18 +344,24 @@ def legacy_release_marker(sha: str, releases=RELEASES):
     dependency = release / "node_modules"
     if dependency.is_symlink():
         resolved = dependency.resolve(strict=True)
-        if (resolved.parent != releases or not SHA.fullmatch(resolved.name)
-                or resolved == release):
+        target_release = resolved.parent
+        if (target_release.parent != releases
+                or not SHA.fullmatch(target_release.name)
+                or target_release == release):
             raise ValueError("legacy dependency symlink escapes release lineage")
         target = resolved.lstat()
-        target_marker = resolved / ".disdex-release-sha"
+        target_release_stat = target_release.lstat()
+        target_marker = target_release / ".disdex-release-sha"
         target_marker_stat = target_marker.lstat()
-        if (not stat.S_ISDIR(target.st_mode) or target.st_uid != 0
+        if (not stat.S_ISDIR(target_release_stat.st_mode)
+                or target_release_stat.st_uid != 0
+                or target_release_stat.st_mode & 0o022
+                or not stat.S_ISDIR(target.st_mode) or target.st_uid != 0
                 or target.st_mode & 0o022
                 or not stat.S_ISREG(target_marker_stat.st_mode)
                 or target_marker_stat.st_uid != 0
                 or target_marker_stat.st_mode & 0o222
-                or target_marker.read_text(encoding="ascii").strip() != resolved.name):
+                or target_marker.read_text(encoding="ascii").strip() != target_release.name):
             raise ValueError("legacy dependency target is not immutable")
     return release
 
