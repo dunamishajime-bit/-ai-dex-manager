@@ -1,0 +1,34 @@
+{
+  "schema": "disdex-v4-staged-overlay/v1",
+  "baseSha": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+  "files": [
+    {
+      "source": "files/lib/disdex-runner-tick-heartbeat.ts.src",
+      "target": "lib/disdex-runner-tick-heartbeat.ts"
+    },
+    {
+      "source": "files/lib/v12-v4-monitor-only.ts.src",
+      "target": "lib/v12-v4-monitor-only.ts"
+    },
+    {
+      "source": "files/scripts/v12-v4-production-runner.ts.src",
+      "target": "scripts/v12-v4-production-runner.ts"
+    },
+    {
+      "source": "files/scripts/v12-v4-monitor-only-runner.ts.src",
+      "target": "scripts/v12-v4-monitor-only-runner.ts"
+    },
+    {
+      "source": "files/scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts.src",
+      "target": "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts"
+    },
+    {
+      "source": "files/deploy/systemd/disdex-v12-v4-monitor@.service.src",
+      "target": "deploy/systemd/disdex-v12-v4-monitor@.service"
+    },
+    {
+      "source": "files/ops/systemd/disdex-v4-dynamic-evidence-refresh@.service.src",
+      "target": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.service"
+    }
+  ]
+}

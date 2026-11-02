@@ -1,0 +1,153 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { existsSync, readFileSync } from "node:fs";
+
+import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4MonitorFetch, runV4MonitorCycle, validateV4MonitorReadOnlySnapshot } from "../lib/v12-v4-monitor-only";
+
+const NOW = Date.parse("2026-11-02T12:00:00.000Z");
+
+test("monitor requires the same shared API budget used by the live runners", () => {
+  assert.doesNotThrow(() => assertV4MonitorRateBudget("/var/lib/disdex/shared/aster-rate-budget.json"));
+  for (const value of [undefined, "", "/tmp/other-budget.json"]) {
+    assert.throws(() => assertV4MonitorRateBudget(value), /RATE_BUDGET_REQUIRED/);
+  }
+});
+
+test("monitor transport permits only the required read endpoints", async () => {
+  const sent: string[] = [];
+  const fetcher = createV4MonitorFetch(async (input) => {
+    sent.push(String(input));
+    return new Response("ok");
+  });
+  await fetcher("https://fapi.asterdex.com/fapi/v3/positionRisk", { method: "GET" });
+  for (const [path, method] of [["/fapi/v3/order", "GET"], ["/fapi/v3/klines", "POST"],
+    ["/fapi/v3/openOrders", "DELETE"], ["/fapi/v3/positionRisk", "PUT"]]) {
+    await assert.rejects(() => fetcher("https://fapi.asterdex.com" + path, { method }), /MONITOR_HTTP_NOT_ALLOWED/);
+  }
+  await assert.rejects(() => fetcher("https://example.test/fapi/v3/positionRisk"), /MONITOR_HTTP_NOT_ALLOWED/);
+  assert.equal(sent.length, 1);
+});
+
+function snapshot(overrides: Record<string, unknown> = {}) {
+  const base = {
+    now: NOW,
+    risk: { sourceComplete: true, tripped: false, utcDay: "2026-11-02", updatedAt: NOW - 1_000, maximumLossPct: 7.5 },
+    margin: { stage: "HEALTHY", ordersAllowed: true, checkedAt: NOW - 2_000 },
+    killSwitch: { active: false },
+    pending: {
+      schema: "disdex-pending-exposure/v1",
+      accountScope: "ASTER_FUTURES",
+      updatedAt: NOW - 3_000,
+      entries: [{ status: "RELEASED" }],
+    },
+    positions: [],
+    openOrders: [],
+    decision: {
+      orderEnabled: false,
+      tradingMutation: 0,
+      realOrderEnabledV4: 0,
+      errors: [],
+      candidateCount: 2,
+    },
+  };
+  return { ...base, ...overrides } as any;
+}
+
+test("monitor-only accepts a fresh flat read-only cycle without granting orders", () => {
+  const result = validateV4MonitorReadOnlySnapshot(snapshot());
+  assert.equal(result.status, "observing");
+  assert.equal(result.reason, "V4_MONITOR_ONLY_READONLY_CYCLE");
+  assert.equal(result.orderEnabled, false);
+  assert.equal(result.candidateCount, 2);
+});
+
+test("monitor-only rejects stale shared state instead of re-stamping it", () => {
+  assert.throws(() => validateV4MonitorReadOnlySnapshot(snapshot({
+    pending: { ...snapshot().pending, updatedAt: NOW - 15 * 60_000 - 1 },
+  })), /PENDING_STALE/);
+  assert.throws(() => validateV4MonitorReadOnlySnapshot(snapshot({
+    risk: { ...snapshot().risk, updatedAt: NOW - 15 * 60_000 - 1 },
+  })), /SHARED_RISK_STALE/);
+  assert.throws(() => validateV4MonitorReadOnlySnapshot(snapshot({
+    margin: { ...snapshot().margin, checkedAt: NOW - 15 * 60_000 - 1 },
+  })), /MARGIN_GUARD_STALE/);
+});
+
+test("monitor-only never infers ownership for non-flat venue state", () => {
+  const result = validateV4MonitorReadOnlySnapshot(snapshot({
+    positions: [{ symbol: "DOGEUSDT", positionAmt: "1" }],
+  }));
+  assert.equal(result.status, "blocked");
+  assert.match(result.reason, /NONFLAT_REQUIRES_INDEPENDENT_OWNERSHIP_PROOF/);
+  assert.equal(result.orderEnabled, false);
+});
+
+test("monitor-only rejects any decision source that claims a trading mutation", () => {
+  assert.throws(() => validateV4MonitorReadOnlySnapshot(snapshot({
+    decision: { ...snapshot().decision, orderEnabled: true },
+  })), /MUTATION_CONTRACT_INVALID/);
+});
+
+test("monitor-only requires the exact 7.5 percent shared risk limit", () => {
+  for (const value of [undefined, null, 0, 7.6, 8, "NaN"]) {
+    assert.throws(() => validateV4MonitorReadOnlySnapshot(snapshot({
+      risk: { ...snapshot().risk, maximumLossPct: value },
+    })), /SHARED_RISK_LIMIT/);
+  }
+});
+
+test("monitor-only does not treat missing venue amounts or mutation evidence as zero", () => {
+  assert.throws(() => validateV4MonitorReadOnlySnapshot(snapshot({
+    positions: [{ symbol: "DOGEUSDT", positionAmt: null }],
+  })), /POSITION_AMOUNT_INVALID/);
+  for (const field of ["tradingMutation", "realOrderEnabledV4"]) {
+    assert.throws(() => validateV4MonitorReadOnlySnapshot(snapshot({
+      decision: { ...snapshot().decision, [field]: null },
+    })), /MUTATION_CONTRACT_INVALID/);
+  }
+});
+
+test("failed monitor reads update heartbeat without fabricating a completed tick", async () => {
+  const calls: string[] = [];
+  const blocked = blockedV4MonitorRead("READ_FAILED", NOW);
+  assert.equal(blocked.positionCount, null);
+  assert.equal(blocked.openOrderCount, null);
+  assert.equal(blocked.pendingCount, null);
+  assert.equal(blocked.candidateCount, null);
+  const result = await runV4MonitorCycle({
+    collect: async () => { throw new Error("READ_FAILED"); },
+    onError: () => blocked,
+    publishTick: async () => { calls.push("tick"); },
+    publishHealth: async (_result, _at, lastTickAt) => { calls.push(`health:${lastTickAt}`); },
+    clock: () => NOW,
+    lastTickAt: NOW - 60_000,
+  });
+  assert.deepEqual(calls, [`health:${NOW - 60_000}`]);
+  assert.equal(result.lastTickAt, NOW - 60_000);
+});
+
+test("a completed monitor decision records its tick before publishing health", async () => {
+  const calls: string[] = [];
+  const observed = validateV4MonitorReadOnlySnapshot(snapshot());
+  const result = await runV4MonitorCycle({
+    collect: async () => observed,
+    onError: () => { throw new Error("unexpected"); },
+    publishTick: async () => { calls.push("tick"); },
+    publishHealth: async (_result, _at, lastTickAt) => { calls.push(`health:${lastTickAt}`); },
+    clock: () => NOW,
+    lastTickAt: null,
+  });
+  assert.deepEqual(calls, ["tick", `health:${NOW}`]);
+  assert.equal(result.lastTickAt, NOW);
+});
+
+test("monitor-only runner path does not call the order-capable engine tick", () => {
+  const path = existsSync("scripts/v12-v4-monitor-only-runner.ts")
+    ? "scripts/v12-v4-monitor-only-runner.ts"
+    : "deploy/v4-staged-overlay/files/scripts/v12-v4-monitor-only-runner.ts.src";
+  const monitorSource = readFileSync(path, "utf8");
+  assert.doesNotMatch(monitorSource, /V4RunnerEngine|V12AsterLiveAdapter|engine\.tick\s*\(/);
+  assert.match(monitorSource, /createV4MonitorFetch\(fetch\)/);
+  assert.match(monitorSource, /newOrdersAllowed:false/);
+  assert.match(monitorSource, /ordersSent:0,cancelsSent:0,positionChangesSent:0/);
+});
