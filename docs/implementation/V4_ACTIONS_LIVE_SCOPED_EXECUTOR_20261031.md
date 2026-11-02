@@ -17,6 +17,12 @@ modify production, owner keys, staged releases, positions or resident STOPs.
   activation with explicit acknowledgement.
 - Fresh independent root-owned signed GET/STOP/risk evidence before mutation;
   never manufacture evidence to satisfy this requirement.
+- A separate `PENGU_V8` `ordersEnabled=false` authorization-only route can
+  redeem a short-lived owner token while the exact PENGU service is inactive
+  and PID 0. It writes only a derived root-owned peer-stop certificate; it
+  never starts/stops/masks a service or changes pins, symlinks, or venue state.
+  The V4 witness consumes that certificate only together with a fresh venue
+  read and still fails closed on non-flat PENGU exposure.
 - Nonblocking root-wide deployment lock (Actions and CODEX_SSH).
 - Stop+mask old V4, update only V4 pin/plan/activation, start candidate, verify
   three distinct after-cycle venue records; on failure roll back changes.
@@ -40,6 +46,9 @@ modify production, owner keys, staged releases, positions or resident STOPs.
    to OWNER_ENV_LOCKED_V1 until all prerequisites pass.
 7. Reconfirm Shared Risk, Kill Switch, margin, pending exposure and all peers
    from the live venue before approving first production deployment.
+8. If PENGU remains inactive, issue the exact owner-signed `PENGU_V8`
+   no-order peer-stop token first; otherwise complete a separately approved
+   PENGU recovery. Neither authorization grants V4 order permission.
 
 NO unattended LIVE orders. No production changes in this branch.
 A green SSH transport check is not proof of LIVE authorization.

@@ -16,6 +16,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+import re
 import stat
 import subprocess
 import sys
@@ -27,8 +28,11 @@ from disdex_deployment_contract import (
     DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, ROUTES, SCOPES,
     SHA, PLAN_HASH, validate_order_permission,
 )
-from disdex_deployment_plan import IDS, digest, validate
+from disdex_deployment_plan import IDS, canonical, digest, validate
 from disdex_owner_approval import verify
+from disdex_v4_venue_witness import (
+    PEER_STOP_ACK, PEER_STOP_SCHEMA, validate_peer_stop_approval,
+)
 
 ROOT = Path("/var/lib/disdex/unified-deploy")
 PINS = Path("/etc/disdex/runner-pins.json")
@@ -64,6 +68,7 @@ SHARED_RISK_ACK = "I_ACK_SHARED_RISK_ONLY_NO_ORDERS"
 VENUE_MAX_AGE_SECONDS = 300
 ZERO_EFFECTS = {"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
 EXECUTOR_CERTIFICATION_SCHEMA = "disdex-live-executor-certification/v1"
+PENGU_SCOPE = "PENGU_V8"
 
 
 @dataclass(frozen=True)
@@ -87,6 +92,7 @@ class DeploymentPaths:
     venue_after: Path
     receipts: Path
     journal: Optional[Path] = None
+    peer_stop_dir: Optional[Path] = None
 
 
 class SystemdAdapter:
@@ -306,6 +312,44 @@ def _assert_execution_root(root_uid: int) -> None:
         raise ValueError("root authority required")
 
 
+def build_peer_stop_certificate(args, desired: dict, plan_hash: str,
+                                payload: dict, now: int) -> dict:
+    """Build a derived proof for an explicitly approved stopped PENGU peer.
+
+    This function never signs or accepts an owner artifact.  The caller must
+    first verify the owner token against the exact PENGU SHA and then pass the
+    verified payload.  The resulting certificate is only a root-owned witness
+    input for the later V4 venue read; it grants no order or service-control
+    authority.
+    """
+    nonce = payload.get("nonce") if isinstance(payload, dict) else None
+    if (getattr(args, "scope", None) != PENGU_SCOPE
+            or getattr(args, "sha", None) != desired.get("sourceSha")
+            or desired.get("scope") != PENGU_SCOPE
+            or desired.get("ordersEnabled") is not False
+            or desired.get("runners", {}).get("PENGU_V8") != args.sha
+            or not isinstance(nonce, str) or not re.fullmatch(r"[0-9a-f]{32}", nonce)
+            or not PLAN_HASH.fullmatch(str(plan_hash))):
+        raise ValueError("PENGU peer-stop plan or token mismatch")
+    certificate = {
+        "schema": PEER_STOP_SCHEMA,
+        "status": "APPROVED",
+        "runner": PENGU_SCOPE,
+        "approvedSha": args.sha,
+        "deploymentTarget": DEPLOYMENT_TARGET,
+        "operatorTarget": OPERATOR_TARGET,
+        "operator": args.owner,
+        "planSha256": plan_hash,
+        "ordersEnabled": False,
+        "approvedAt": now,
+        "expiresAt": now + 300,
+        "operatorAcknowledgement": PEER_STOP_ACK,
+        "nonceDigest": hashlib.sha256(nonce.encode("ascii")).hexdigest(),
+    }
+    return validate_peer_stop_approval(
+        certificate, runner=PENGU_SCOPE, sha=args.sha, now=now)
+
+
 def _atomic_json(path: Path, value: dict, *, root_uid: int,
                  private: bool = True, trusted_parent: bool = False) -> None:
     """Publish a root-owned JSON object without following a destination link."""
@@ -492,6 +536,93 @@ class RootDeploymentExecutor:
             })
         return observations
 
+    def _execute_pengu_peer_stop(self, args, token: str) -> dict:
+        """Redeem a PENGU stop approval without changing runtime state.
+
+        This is an authorization-only transaction.  It records that the
+        owner explicitly accepted the exact dormant PENGU SHA as a peer for a
+        short period; it never starts, stops, masks, enables, or disables the
+        service and never changes the venue, current symlink, or runner pins.
+        The later V4 witness must still prove the fresh flat venue state.
+        """
+        _assert_execution_root(self.root_uid)
+        paths = self.paths
+        peer_stop_dir = paths.peer_stop_dir or paths.root / "peer-stop"
+        for directory in (
+            paths.root, paths.root / "plans", paths.root / "plans" / PENGU_SCOPE,
+            paths.nonce_dir, paths.receipts, peer_stop_dir,
+        ):
+            assert_private_dir(directory, root_uid=self.root_uid)
+        assert_regular_secure(paths.public_key, root_uid=self.root_uid, private=True)
+        desired = read_root_json(
+            paths.root / "plans" / PENGU_SCOPE / (args.sha + ".json"),
+            root_uid=self.root_uid,
+        )
+        current = read_root_json(paths.current_plan, root_uid=self.root_uid)
+        raw_pins = read_root_json(paths.pins, root_uid=self.root_uid, private=False)
+        pins = parse_live_pins(raw_pins, releases=paths.releases)
+        current_sha = self._read_current_sha()
+        validate(current)
+        validate(desired)
+        plan_hash = hashlib.sha256(canonical(desired)).hexdigest()
+        if (args.scope != PENGU_SCOPE or args.orders_enabled != "false"
+                or args.plan_sha256 != plan_hash
+                or desired["sourceSha"] != args.sha
+                or desired["runners"] != pins
+                or desired["sourceSha"] != current_sha
+                or desired["scope"] != PENGU_SCOPE
+                or desired["ordersEnabled"] is not False
+                or desired["uiSha"] != current["uiSha"]
+                or desired["monitorSha"] != current["monitorSha"]
+                or desired["releaseRoots"] != current["releaseRoots"]
+                or pins[PENGU_SCOPE] != args.sha):
+            raise ValueError("PENGU peer-stop plan is not an exact no-change scope")
+        release_marker(args.sha, paths.releases, root_uid=self.root_uid)
+        unit = _unit_for_runner(PENGU_SCOPE, args.sha)
+        if self.systemd.is_active(unit):
+            raise ValueError("PENGU peer is active; peer-stop approval is not applicable")
+        pid = self.systemd.main_pid(unit)
+        if pid != 0:
+            raise ValueError("PENGU dormant peer has nonzero PID")
+        approval_path = peer_stop_dir / f"{PENGU_SCOPE}-{args.sha}.json"
+        if approval_path.exists() or approval_path.is_symlink():
+            raise ValueError("PENGU peer-stop approval already exists")
+        if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
+            raise ValueError("missing signed approval")
+        payload = self._verify_token(args, token)
+        nonce = payload.get("nonce")
+        if not isinstance(nonce, str):
+            raise ValueError("PENGU peer-stop nonce missing")
+        try:
+            consumed = self._verify_token(args, token, nonce_dir=paths.nonce_dir)
+        except FileExistsError:
+            raise ValueError("PENGU peer-stop approval replay") from None
+        if consumed.get("nonce") != nonce:
+            raise ValueError("PENGU peer-stop nonce changed")
+        certificate = build_peer_stop_certificate(
+            args, desired, plan_hash, consumed, self.clock())
+        _atomic_json(approval_path, certificate, root_uid=self.root_uid)
+        receipt = {
+            "schema": "disdex-unified-deploy-receipt/v1",
+            "status": "PENGU_PEER_STOP_AUTHORIZED",
+            "repository": REPO,
+            "deploymentTarget": DEPLOYMENT_TARGET,
+            "operatorTarget": OPERATOR_TARGET,
+            "scope": PENGU_SCOPE,
+            "targetSha": args.sha,
+            "planSha256": plan_hash,
+            "route": args.route,
+            "ordersEnabled": False,
+            "serviceUnit": unit,
+            "mainPid": pid,
+            "approvalPath": str(approval_path),
+            "nonceDigest": certificate["nonceDigest"],
+            **ZERO_EFFECTS,
+        }
+        receipt_path = paths.receipts / f"pengu-peer-stop-{args.sha}-{nonce[:8]}.json"
+        _atomic_json(receipt_path, receipt, root_uid=self.root_uid)
+        return receipt
+
     def execute(self, args, token: str) -> dict:
         _assert_execution_root(self.root_uid)
         certify_live_executor()
@@ -502,6 +633,10 @@ class RootDeploymentExecutor:
             # independent; the owner-signed scope selects the only executor.
             from disdex_v4_root_cutover import V4RootExecutor
             return V4RootExecutor(self).execute(args, token)
+        if args.scope == PENGU_SCOPE:
+            if args.orders_enabled != "false":
+                raise ValueError("PENGU peer-stop scope cannot enable orders")
+            return self._execute_pengu_peer_stop(args, token)
         if args.scope != SHARED_RISK_SCOPE:
             raise ValueError("unsupported execution scope: " + str(args.scope))
         orders_enabled = args.orders_enabled == "true"
@@ -697,6 +832,7 @@ def certify_live_executor() -> dict:
     authority.
     """
     execute_names = set(RootDeploymentExecutor.execute.__code__.co_names)
+    execute_names.update(RootDeploymentExecutor._execute_pengu_peer_stop.__code__.co_names)
     required_names = {
         "_assert_execution_root", "validate_order_permission", "_verify_token",
         "_validate_scoped_activation", "_validate_venue_evidence", "_audit",
@@ -704,7 +840,8 @@ def certify_live_executor() -> dict:
         "parse_live_pins", "validate_bootstrap_plan", "validate_release_roots",
         "_read_current_sha", "is_active", "is_masked", "is_enabled",
         "stop", "mask", "unmask", "enable", "disable", "start",
-        "SHARED_RISK_SCOPE", "SHARED_RISK_RUNNER", "ZERO_EFFECTS",
+        "SHARED_RISK_SCOPE", "SHARED_RISK_RUNNER", "PENGU_SCOPE",
+        "_execute_pengu_peer_stop", "build_peer_stop_certificate", "ZERO_EFFECTS",
     }
     missing = sorted(required_names - execute_names)
     if missing:
@@ -841,6 +978,7 @@ def default_execution_paths() -> DeploymentPaths:
         venue_before=ROOT / "venue-before.json",
         venue_after=ROOT / "venue-after.json",
         receipts=ROOT / "receipts",
+        peer_stop_dir=ROOT / "peer-stop",
     )
 
 def main():

@@ -45,6 +45,13 @@ HEARTBEATS = {
     "IDLE_PRIORITY_SHORT": ("idle-priority-short.json", 20 * 60_000),
 }
 ZERO_EFFECTS = {"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
+PEER_STOP_SCHEMA = "disdex-peer-stop-approval/v1"
+PEER_STOP_ACK = "I_ACK_PENGU_V8_PEER_STOP_NO_ORDERS"
+PEER_STOP_FIELDS = {
+    "schema", "status", "runner", "approvedSha", "deploymentTarget",
+    "operatorTarget", "operator", "planSha256", "ordersEnabled",
+    "approvedAt", "expiresAt", "operatorAcknowledgement", "nonceDigest",
+}
 
 
 def _secure_json(path: Path, *, require_root=True, max_bytes=524288) -> dict:
@@ -81,6 +88,41 @@ def _dec_text(value, label: str) -> str:
     if result == 0:
         return "0"
     return format(result.normalize(), "f")
+
+
+def validate_peer_stop_approval(value: dict, *, runner: str, sha: str,
+                                now: int) -> dict:
+    """Validate the derived, root-owned peer-stop certificate.
+
+    The certificate is written only after the root executor verifies and
+    consumes the owner's one-use token.  It is deliberately not an order
+    grant and cannot be used to start, stop, or alter a service.  It only
+    permits a fresh V4 witness to attest an explicitly approved, flat,
+    inactive peer without silently treating that peer as healthy.
+    """
+    if (not isinstance(value, dict) or set(value) != PEER_STOP_FIELDS
+            or value.get("schema") != PEER_STOP_SCHEMA
+            or value.get("status") != "APPROVED"
+            or value.get("runner") != runner
+            or value.get("approvedSha") != sha
+            or runner != "PENGU_V8"
+            or not SHA_RE.fullmatch(str(sha))
+            or value.get("deploymentTarget") != "professional-dismanager.net"
+            or value.get("operatorTarget") != "DD1296_FINAL_ALLIN_10BPS"
+            or not isinstance(value.get("operator"), str)
+            or not re.fullmatch(r"[A-Za-z0-9-]{1,39}", value["operator"])
+            or not re.fullmatch(r"[0-9a-f]{64}", str(value.get("planSha256")))
+            or value.get("ordersEnabled") is not False
+            or value.get("operatorAcknowledgement") != PEER_STOP_ACK
+            or not re.fullmatch(r"[0-9a-f]{64}", str(value.get("nonceDigest")))):
+        raise ValueError("PEER_STOP_APPROVAL_IDENTITY_INVALID")
+    approved_at = value.get("approvedAt")
+    expires_at = value.get("expiresAt")
+    if (type(approved_at) is not int or type(expires_at) is not int
+            or approved_at > now + 5 or expires_at <= now
+            or not 1 <= expires_at - approved_at <= 3600):
+        raise ValueError("PEER_STOP_APPROVAL_EXPIRED_OR_INVALID")
+    return value
 
 
 def normalize_positions(rows) -> list[dict]:
@@ -218,9 +260,11 @@ def _assert_runtime_health(now_ms: int) -> tuple[dict, list[dict]]:
 
 
 def validate_units_and_ticks(expected_pins: dict[str, str], phase: str,
-                             candidate_sha: str, now_ms: int) -> None:
+                             candidate_sha: str, now_ms: int, *,
+                             peer_stop_approvals: dict[str, dict] | None = None) -> None:
     if set(expected_pins) != set(PREFIXES):
         raise ValueError("RUNNER_SHA_MAP_INCOMPLETE")
+    peer_stop_approvals = peer_stop_approvals or {}
     for runner, sha in expected_pins.items():
         if not SHA_RE.fullmatch(str(sha)):
             raise ValueError("RUNNER_SHA_INVALID:" + runner)
@@ -233,7 +277,16 @@ def validate_units_and_ticks(expected_pins: dict[str, str], phase: str,
             if active != "active" and pid != "0":
                 raise ValueError("OLD_V4_DORMANT_PID_NONZERO")
             continue
-        if active != "active" or not pid.isdigit() or int(pid) <= 100:
+        if active != "active":
+            if not pid.isdigit() or int(pid) != 0:
+                raise ValueError("RUNNER_DORMANT_PID_INVALID:" + runner)
+            approval = peer_stop_approvals.get(runner)
+            if approval is None:
+                raise ValueError("RUNNER_NOT_ACTIVE:" + runner)
+            validate_peer_stop_approval(
+                approval, runner=runner, sha=sha, now=now_ms // 1000)
+            continue
+        if not pid.isdigit() or int(pid) <= 100:
             raise ValueError("RUNNER_NOT_ACTIVE:" + runner)
         if runner in HEARTBEATS and runner != "V12_V4":
             file_name, max_age = HEARTBEATS[runner]
@@ -292,7 +345,8 @@ def refresh_and_preflight(sha: str, release: Path) -> None:
 
 def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
                               phase: str, now: int | None = None,
-                              refresh: bool = True) -> dict:
+                              refresh: bool = True,
+                              peer_stop_approvals: dict[str, dict] | None = None) -> dict:
     if os.geteuid() != 0:
         raise ValueError("ROOT_REQUIRED")
     if phase not in ("before", "after"):
@@ -303,7 +357,10 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
     now_s = int(time.time()) if now is None else now
     now_ms = now_s * 1000
     risk, active_pending = _assert_runtime_health(now_ms)
-    validate_units_and_ticks(expected_pins, phase, sha, now_ms)
+    validate_units_and_ticks(
+        expected_pins, phase, sha, now_ms,
+        peer_stop_approvals=peer_stop_approvals,
+    )
 
     orders_evidence = _secure_json(EVIDENCE_ROOT / "established-aster-orders.json")
     account_evidence = _secure_json(EVIDENCE_ROOT / "signed-aster-account.json")
@@ -346,6 +403,7 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
         "accountLockHealthy": True, "killSwitchHealthy": True,
         "heartbeatVerified": True, "tickVerified": True,
         "runnerShaMapVerified": True,
+        "peerStopApprovalsVerified": sorted(peer_stop_approvals or {}),
         "sharedRiskDailyLossLimit": float(
             _dec(risk.get("maximumLossPct"), "maximumLossPct") / Decimal("100")),
         "unknownStops": 0, "partialStops": 0,

@@ -14,7 +14,9 @@ import stat
 import time
 
 from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, SHA, validate_order_permission
-from disdex_v4_venue_witness import collect_v4_venue_evidence
+from disdex_v4_venue_witness import (
+    collect_v4_venue_evidence, validate_peer_stop_approval,
+)
 from disdex_unified_root_gate import (
     EXECUTION_ACTIVATION_SCHEMA, ZERO_EFFECTS, SHARED_RISK_SCOPE,
     _assert_execution_root, _atomic_json, _unit_for_runner,
@@ -121,6 +123,28 @@ class V4RootExecutor:
         self.witness_collector = witness_collector
         self.sleeper = sleeper
 
+    def _peer_stop_approvals(self, pins, now):
+        """Load only the owner-derived certificate for an inactive PENGU peer."""
+        directory = self.common.paths.peer_stop_dir or self.common.paths.root / "peer-stop"
+        path = directory / f"PENGU_V8-{pins['PENGU_V8']}.json"
+        unit = _unit_for_runner("PENGU_V8", pins["PENGU_V8"])
+        if self.common.systemd.is_active(unit):
+            if path.exists() or path.is_symlink():
+                raise ValueError("PENGU peer-stop approval exists while peer is active")
+            return {}
+        if not path.exists() and not path.is_symlink():
+            return {}
+        approval = read_root_json(path, root_uid=self.common.root_uid, private=True)
+        validate_peer_stop_approval(
+            approval, runner="PENGU_V8", sha=pins["PENGU_V8"], now=now)
+        return {"PENGU_V8": approval}
+
+    @staticmethod
+    def _assert_peer_stop_witness(witness, expected):
+        observed = witness.get("peerStopApprovalsVerified", [])
+        if sorted(observed) != sorted(expected):
+            raise ValueError("V4 peer-stop witness does not match approved peers")
+
     def execute(self, args, token):
         c = self.common
         paths = c.paths
@@ -138,7 +162,7 @@ class V4RootExecutor:
         for directory in (
             paths.root, paths.root / "plans", paths.root / "plans" / V4_SCOPE,
             paths.nonce_dir, paths.activation_dir, paths.activation_dir / V4_SCOPE,
-            paths.receipts,
+            paths.receipts, paths.peer_stop_dir or paths.root / "peer-stop",
         ):
             assert_private_dir(directory, root_uid=c.root_uid)
         # Existing operator-activation root is normally root:root 0755 for
@@ -163,6 +187,7 @@ class V4RootExecutor:
             raise ValueError("V4 plan exceeds single-runner authorized delta")
         if desired["runners"][V4_RUNNER] != args.sha:
             raise ValueError("V4 candidate SHA differs from plan")
+        peer_stop_approvals = self._peer_stop_approvals(pins, c.clock())
         # Exact V4 transition must not require rewriting legacy peer/UI
         # releases merely to satisfy a new ownership convention. Their SHA map
         # remains frozen in the signed plan and venue evidence. Only the new
@@ -201,8 +226,10 @@ class V4RootExecutor:
         # mandatory in the collector and validator.
         before = _validate_venue_evidence(
             self.witness_collector(
-                sha=args.sha, expected_pins=pins, phase="before"),
+                sha=args.sha, expected_pins=pins, phase="before",
+                peer_stop_approvals=peer_stop_approvals),
             now=c.clock(), label="before", require_v4_runtime=False)
+        self._assert_peer_stop_witness(before, peer_stop_approvals)
         _atomic_json(paths.venue_before, before, root_uid=c.root_uid)
         old_sha = pins[V4_RUNNER]
         old_unit = _unit_for_runner(V4_RUNNER, old_sha)
@@ -283,10 +310,12 @@ class V4RootExecutor:
                 self.sleeper(1)
                 after = _validate_venue_evidence(
                     self.witness_collector(
-                        sha=args.sha, expected_pins=expected, phase="after"),
+                        sha=args.sha, expected_pins=expected, phase="after",
+                        peer_stop_approvals=peer_stop_approvals),
                     now=c.clock(), label=f"after-{cycle + 1}",
                     baseline=before,
                 )
+                self._assert_peer_stop_witness(after, peer_stop_approvals)
                 if after["capturedAt"] <= previous_captured:
                     raise RuntimeError("V4 post-cutover witness did not advance")
                 previous_captured = after["capturedAt"]

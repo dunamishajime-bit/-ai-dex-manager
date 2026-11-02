@@ -11,6 +11,23 @@ SHA="a"*40
 OLD="7"*40
 
 class VenueWitnessContractTest(unittest.TestCase):
+    def _peer_stop_approval(self, now):
+        return {
+            "schema": "disdex-peer-stop-approval/v1",
+            "status": "APPROVED",
+            "runner": "PENGU_V8",
+            "approvedSha": OLD,
+            "deploymentTarget": "professional-dismanager.net",
+            "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
+            "operator": "owner",
+            "planSha256": "b" * 64,
+            "ordersEnabled": False,
+            "approvedAt": now - 1,
+            "expiresAt": now + 60,
+            "operatorAcknowledgement": "I_ACK_PENGU_V8_PEER_STOP_NO_ORDERS",
+            "nonceDigest": "c" * 64,
+        }
+
     def test_position_normalization_ignores_mark_price_but_binds_entry_and_size(self):
         first=m.normalize_positions([{
             "symbol":"DOGEUSDT","positionSide":"BOTH","positionAmt":"-226",
@@ -100,6 +117,38 @@ class VenueWitnessContractTest(unittest.TestCase):
         with patch.object(m,"_systemd",side_effect=systemd), patch.object(m,"_secure_json",side_effect=secure):
             with self.assertRaisesRegex(ValueError,"HEARTBEAT_STALE"):
                 m.validate_units_and_ticks(pins,"before",SHA,now)
+
+    def test_inactive_pengu_requires_explicit_owner_peer_stop_approval(self):
+        now=2_000_000_000_000
+        pins=self._pins()
+        def systemd(unit,prop):
+            is_v4=unit.startswith("disdex-v12-v4@")
+            is_pengu=unit.startswith("disdex-pengu-dual-ls-v2@")
+            if prop=="ActiveState": return "failed" if is_v4 or is_pengu else "active"
+            if prop=="MainPID": return "0" if is_v4 or is_pengu else "4242"
+            raise AssertionError(prop)
+        def secure(path,*args,**kwargs):
+            return self._fake_hb(path,now)
+        with patch.object(m,"_systemd",side_effect=systemd), patch.object(m,"_secure_json",side_effect=secure):
+            with self.assertRaisesRegex(ValueError,"RUNNER_NOT_ACTIVE:PENGU_V8"):
+                m.validate_units_and_ticks(pins,"before",SHA,now)
+            approval=self._peer_stop_approval(now // 1000)
+            m.validate_peer_stop_approval(approval, runner="PENGU_V8", sha=OLD, now=now // 1000)
+            m.validate_units_and_ticks(
+                pins,"before",SHA,now,
+                peer_stop_approvals={"PENGU_V8": approval},
+            )
+
+    def test_peer_stop_approval_rejects_wrong_sha_or_order_authority(self):
+        now=2_000_000_000
+        approval=self._peer_stop_approval(now)
+        for field, value in (("approvedSha", SHA), ("ordersEnabled", True),
+                             ("operatorAcknowledgement", "I_APPROVE")):
+            with self.subTest(field=field):
+                invalid=dict(approval, **{field: value})
+                with self.assertRaises(ValueError):
+                    m.validate_peer_stop_approval(
+                        invalid, runner="PENGU_V8", sha=OLD, now=now)
 
 if __name__=="__main__":
     unittest.main()

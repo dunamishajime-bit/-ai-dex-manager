@@ -83,6 +83,7 @@ for source in \
 done
 
 install -d -o root -g root -m 0755 /usr/local/libexec/disdex-unified
+install -d -o root -g root -m 0700 /var/lib/disdex/unified-deploy/peer-stop
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/deploy/disdex_unified_root_gate.py" \
   /usr/local/libexec/disdex-unified/disdex_unified_root_gate.py

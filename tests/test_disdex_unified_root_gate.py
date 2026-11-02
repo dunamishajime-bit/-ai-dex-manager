@@ -16,7 +16,7 @@ from disdex_unified_root_gate import (
     assert_regular_secure, assert_private_dir, assert_root_trusted_dir, _atomic_json,
     preflight, PREFIXES, STOP_OWNERS,
     ROOT, RELEASES, DeploymentPaths, RootDeploymentExecutor,
-    certify_live_executor,
+    certify_live_executor, build_peer_stop_certificate,
 )
 from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
 from disdex_deployment_plan import IDS, SCHEMA, digest
@@ -50,6 +50,22 @@ def pins(releases=RELEASES):
                             "stopOwner":STOP_OWNERS[key]} for key in IDS}}
 
 class RootGateTest(unittest.TestCase):
+    def test_pengu_peer_stop_certificate_is_explicit_no_order_authority(self):
+        desired = plan("PENGU_V8")
+        desired["sourceSha"] = OLD
+        desired["ordersEnabled"] = False
+        args = SimpleNamespace(sha=OLD, scope="PENGU_V8", owner="owner")
+        certificate = build_peer_stop_certificate(
+            args, desired, "a" * 64, {"nonce": "b" * 32}, 2_000_000_000)
+        self.assertEqual(certificate["schema"], "disdex-peer-stop-approval/v1")
+        self.assertEqual(certificate["runner"], "PENGU_V8")
+        self.assertEqual(certificate["approvedSha"], OLD)
+        self.assertFalse(certificate["ordersEnabled"])
+        self.assertEqual(
+            certificate["operatorAcknowledgement"],
+            "I_ACK_PENGU_V8_PEER_STOP_NO_ORDERS",
+        )
+
     def test_live_executor_contract_is_certified_without_granting_live_authority(self):
         report = certify_live_executor()
 
@@ -376,6 +392,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
         _secure_dir(self.plans / "SHARED_CRYPTO_RISK_ONLY")
         self.activations = _secure_dir(self.root / "activations")
         _secure_dir(self.activations / "SHARED_CRYPTO_RISK_ONLY")
+        self.peer_stop_dir = _secure_dir(self.root / "peer-stop")
         self.nonce_dir = _secure_dir(self.root / "nonces")
         self.receipts = _secure_dir(self.root / "receipts")
         self.releases = base / "releases"
@@ -434,6 +451,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
             venue_before=self.before_venue,
             venue_after=self.after_venue,
             receipts=self.receipts,
+            peer_stop_dir=self.peer_stop_dir,
         )
         self.old_unit = f"disdex-shared-crypto-risk@{self.old}.service"
         self.new_unit = f"disdex-shared-crypto-risk@{self.new}.service"

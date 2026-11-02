@@ -133,13 +133,16 @@ class V4CutoverTransactionTest(unittest.TestCase):
 
     def _executor(self, sysd):
         calls={"after":0}
-        def witness(*, sha, expected_pins, phase):
+        def witness(*, sha, expected_pins, phase, **kwargs):
             if phase=="before":
-                return json.loads(self.fx.before_venue.read_text("utf8"))
+                value=json.loads(self.fx.before_venue.read_text("utf8"))
+                value["peerStopApprovalsVerified"] = sorted(kwargs.get("peer_stop_approvals", {}))
+                return value
             calls["after"]+=1
             value=json.loads(self.fx.after_venue.read_text("utf8"))
             value["capturedAt"]=self.now+calls["after"]
             value["expiresAt"]=self.now+300+calls["after"]
+            value["peerStopApprovalsVerified"] = sorted(kwargs.get("peer_stop_approvals", {}))
             return value
         return V4RootExecutor(
             self.fx._executor(sysd), runtime_approval=self.runtime,
