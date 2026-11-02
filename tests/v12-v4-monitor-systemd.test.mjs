@@ -13,6 +13,8 @@ test("V4 monitor systemd unit is read-only and has no production activation gate
   assert.match(source, /ReadOnlyPaths=.*\/var\/lib\/disdex\/shared/);
   assert.match(source, /ReadWritePaths=\/var\/lib\/disdex\/v12-v4\/monitor \/var\/lib\/disdex\/runner-health\/ticks/);
   assert.match(source, /NoNewPrivileges=true/);
+  assert.match(source, /^StateDirectory=disdex\/v12-v4\/monitor$/m);
+  assert.match(source, /^StateDirectoryMode=0750$/m);
 });
 
 test("monitor checks pre-provisioned tick access without changing directory ownership", () => {
