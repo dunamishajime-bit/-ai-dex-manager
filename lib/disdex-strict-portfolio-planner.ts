@@ -568,21 +568,54 @@ export function planStrictPortfolio(input: {
         if (isCoreStrategy(intent.strategy)) {
             const currentFet = active.find((row) => row.strategy === "FET_RESIDUAL");
             if (currentFet) {
-                const evidence = liveQuoteEvidence(currentFet);
-                if (!evidence || !fetLiveMarkIsFresh(currentFet, input.now, maxDataAgeMs)) {
-                    return rejectPlan("FET_RESIDUAL_MTM_SOURCE_UNVERIFIED", input.active, equity);
+                const currentTotals = planTotals(active, accepted, workingEquity, pendingExposure);
+                const strategyAggregateResidualBefore = intent.strategy === "V12"
+                    ? INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap - (
+                        pendingGrossForStrategy(pendingExposure, "V12") * workingEquity
+                        + sumNotional(active, (row) => row.strategy === "V12")
+                        + accepted.filter((row) => row.strategy === "V12").reduce((sum, row) => sum + row.notionalUsd, 0)
+                    ) / workingEquity
+                    : intent.strategy === "PENGU_DUAL_LS_V2"
+                        ? INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross - (
+                            pendingGrossForStrategy(pendingExposure, "PENGU_DUAL_LS_V2") * workingEquity
+                            + sumNotional(active, (row) => row.strategy === "PENGU_DUAL_LS_V2")
+                            + accepted.filter((row) => row.strategy === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.notionalUsd, 0)
+                        ) / workingEquity
+                        : Number.POSITIVE_INFINITY;
+                const desiredGrossBeforeShared = Math.max(0, Math.min(
+                    intent.gross,
+                    strategyCap(intent.strategy),
+                    strategyAggregateResidualBefore,
+                ));
+                const classGrossBefore = isCrypto(intent.strategy) ? currentTotals.cryptoGross : currentTotals.stockGross;
+                const classCapBefore = isCrypto(intent.strategy)
+                    ? cryptoEntryCeiling
+                    : INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap;
+                const classResidualBefore = classCapBefore - classGrossBefore;
+                const totalResidualBefore = totalEntryCeiling - currentTotals.totalGross;
+                const fetCanRelieveClassConstraint = isCrypto(intent.strategy);
+                const needsFetPreemption = desiredGrossBeforeShared > EPSILON
+                    && (
+                        totalResidualBefore + EPSILON < desiredGrossBeforeShared
+                        || (fetCanRelieveClassConstraint && classResidualBefore + EPSILON < desiredGrossBeforeShared)
+                    );
+                if (needsFetPreemption) {
+                    const evidence = liveQuoteEvidence(currentFet);
+                    if (!evidence || !fetLiveMarkIsFresh(currentFet, input.now, maxDataAgeMs)) {
+                        return rejectPlan("FET_RESIDUAL_MTM_SOURCE_UNVERIFIED", input.active, equity);
+                    }
+                    const reduction = markToMarketReducePosition({
+                        position: currentFet,
+                        reduceQuantity: currentFet.quantity,
+                        markPrice: evidence.price,
+                        markTs: evidence.timestamp,
+                        markSource: "LIVE_MARKET_QUOTE",
+                        markSourceEvidence: evidence,
+                    });
+                    reductions.push(reduction);
+                    workingEquity = Math.max(0.001, workingEquity + reduction.realizedPnl);
+                    active = active.filter((row) => row.id !== currentFet.id);
                 }
-                const reduction = markToMarketReducePosition({
-                    position: currentFet,
-                    reduceQuantity: currentFet.quantity,
-                    markPrice: evidence.price,
-                    markTs: evidence.timestamp,
-                    markSource: "LIVE_MARKET_QUOTE",
-                    markSourceEvidence: evidence,
-                });
-                reductions.push(reduction);
-                workingEquity = Math.max(0.001, workingEquity + reduction.realizedPnl);
-                active = active.filter((row) => row.id !== currentFet.id);
             }
         }
         const baseOtherTotalNotional = (pendingExposure.cryptoGross + pendingExposure.stockGross) * workingEquity + sumNotional(active, (row) => !isCausalQuality102Strategy(row.strategy)) + accepted.filter((row) => !isCausalQuality102Strategy(row.strategy)).reduce((sum, row) => sum + row.notionalUsd, 0);
