@@ -31,6 +31,7 @@ on:
       - "tests/owner-session-hardening.test.ts"
       - "tests/otp-challenge-store.test.ts"
       - "tests/auth-boundary-source.test.mjs"
+      - "tests/production-workflow-protected-environment.test.mjs"
       - ".github/workflows/disdex-v4-hp-approval-request.yml"
       - ".github/workflows/disdex-v4-doge-missed-time-exit-approval-request.yml"
       - "package.json"
@@ -80,6 +81,9 @@ jobs:
 
       - name: Legacy direct-writer and atomic redeem contract
         run: node --test tests/deploy-approval-direct-writer.test.mjs
+
+      - name: Protected Production workflow contracts
+        run: node --test tests/production-workflow-protected-environment.test.mjs
 
       - name: Owner auth, password and OTP contracts
         run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
