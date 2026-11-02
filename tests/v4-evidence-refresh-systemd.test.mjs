@@ -9,8 +9,8 @@ const activate = await readFile(new URL("../scripts/ops/root/disdex-v4-evidence-
 test("refresh service runs the real apply helper under the exact release SHA", () => {
   assert.match(service, /User=root/);
   assert.match(service, /ProtectSystem=strict/);
-  assert.match(service, /ReadWritePaths=\/etc\/disdex\/v12-v4-evidence \/var\/lib\/disdex\/v12-v4/);
-  assert.match(service, /flock -n \/run\/lock\/disdex-v4-evidence-refresh\.lock/);
+  assert.match(service, /ReadWritePaths=\/run\/disdex-v4-evidence-refresh \/etc\/disdex\/v12-v4-evidence \/var\/lib\/disdex\/v12-v4/);
+  assert.match(service, /flock -n \/run\/disdex-v4-evidence-refresh\/refresh\.lock/);
   assert.match(service, /\/usr\/bin\/node \/home\/deploy\/disdex-trading\/releases\/%i\/node_modules\/tsx\/dist\/cli\.mjs/);
   assert.doesNotMatch(service, /node_modules\/\.bin\/tsx/);
   assert.match(service, /disdex-v4-dynamic-evidence-refresh\.ts --sha %i --apply/);
@@ -27,6 +27,14 @@ test("refresh service loads the canonical root-owned Aster credentials", () => {
 test("refresh service retains only the capability needed to traverse the protected release root", () => {
   assert.match(service, /^CapabilityBoundingSet=CAP_DAC_READ_SEARCH$/m);
   assert.doesNotMatch(service, /^CapabilityBoundingSet=$/m);
+});
+
+test("refresh service owns a private writable runtime directory for its flock lock", () => {
+  assert.match(service, /^RuntimeDirectory=disdex-v4-evidence-refresh$/m);
+  assert.match(service, /^RuntimeDirectoryMode=0750$/m);
+  assert.match(service, /^ReadWritePaths=.*\/run\/disdex-v4-evidence-refresh/m);
+  assert.match(service, /flock -n \/run\/disdex-v4-evidence-refresh\/refresh\.lock/);
+  assert.doesNotMatch(service, /flock -n \/run\/lock\/disdex-v4-evidence-refresh\.lock/);
 });
 
 test("refresh timer is periodic and keeps monitor separate", () => {
