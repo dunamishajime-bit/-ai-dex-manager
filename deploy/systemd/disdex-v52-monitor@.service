@@ -13,19 +13,15 @@ EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=/etc/disdex/disdex-v52-formal-approval.env
 EnvironmentFile=/etc/disdex/current-runtime/7688ed7c93a1918d8b44837339b7da5584a868f5.env
-Environment=DISDEX_RELEASE_SHA=%i
-Environment=DISDEX_RUNTIME_COMMIT_SHA=%i
-Environment=DISDEX_RUNTIME_SHA=%i
-Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i
-Environment=DISDEX_V52_MONITOR_ONLY=true
-Environment=DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false
+EnvironmentFile=/etc/disdex/current-runtime/4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81-v52-overrides.env
+EnvironmentFile=/etc/disdex/current-runtime/4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81-market-closed-api-cadence.env
 Environment=DISDEX_V52_MONITOR_SERVICE_UNIT=disdex-v52-monitor@%i.service
 Environment=DISDEX_V52_MONITOR_TICK_PATH=/var/lib/disdex/v52-monitor/tick.json
 Environment=DISDEX_V52_MONITOR_HEALTH_PATH=/var/lib/disdex/v52-monitor/heartbeat.json
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/test -x /home/deploy/disdex-trading/releases/%i/.venv2/bin/python
-ExecStart=/home/deploy/disdex-trading/releases/%i/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon --monitor-only-daemon
+ExecStart=/bin/sh -ec 'export DISDEX_RELEASE_SHA=%i DISDEX_RUNTIME_COMMIT_SHA=%i DISDEX_RUNTIME_SHA=%i DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i DISDEX_V52_MONITOR_ONLY=true DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false; exec /home/deploy/disdex-trading/releases/%i/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon --monitor-only-daemon'
 Restart=on-failure
 RestartSec=30s
 TimeoutStopSec=30s

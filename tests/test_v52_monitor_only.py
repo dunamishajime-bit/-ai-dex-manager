@@ -7,7 +7,11 @@ class V52MonitorOnlyContractTest(unittest.TestCase):
     def test_source_has_hard_monitor_boundary(self):
         source=MOD.read_text()
         self.assertIn("DISDEX_V52_MONITOR_ONLY",source)
-        self.assertIn("LIVE_EXECUTION_ENABLED=false", (ROOT/"deploy/systemd/disdex-v52-monitor@.service").read_text())
+        unit=(ROOT/"deploy/systemd/disdex-v52-monitor@.service").read_text()
+        self.assertIn("LIVE_EXECUTION_ENABLED=false",unit)
+        self.assertIn("4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81-v52-overrides.env",unit)
+        self.assertIn("export DISDEX_RELEASE_SHA=%i",unit)
+        self.assertIn("DISDEX_V52_MONITOR_ONLY=true",unit)
         self.assertIn("--monitor-only-daemon",source)
         self.assertIn("runner.preflight(read_only=True)",source)
         self.assertIn("monitor-only environment cannot enter order-capable runner",source)
