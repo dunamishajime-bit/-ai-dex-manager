@@ -18,6 +18,8 @@ jobs:
       github.event.issue.number == 317 &&
       github.actor == 'dunamishajime-bit' &&
       github.event.comment.author_association == 'OWNER'
+    environment:
+      name: disdex-production
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
