@@ -32,6 +32,20 @@ def run_fixture(value):
 
 
 class SignedEvidenceFreshnessTests(unittest.TestCase):
+    def test_no_order_approval_cannot_start_an_inactive_live_runner(self):
+        with patch.object(resume, "active", return_value=False), \
+             patch.object(resume.subprocess, "run") as run:
+            with self.assertRaisesRegex(RuntimeError, "MONITOR_ONLY_START_NOT_CERTIFIED"):
+                resume.stable_start({"unit": "disdex-v12-v4@test.service"})
+            run.assert_not_called()
+
+    def test_already_active_runner_can_be_inspected_without_service_mutation(self):
+        with patch.object(resume, "active", return_value=True), \
+             patch.object(resume, "prop", return_value="1234"), \
+             patch.object(resume.subprocess, "run") as run:
+            self.assertEqual(resume.stable_start({"unit": "disdex-v12-v4@test.service"}), (1234, True))
+            run.assert_not_called()
+
     def test_shared_health_rejects_bad_risk_and_malformed_pending(self):
         from datetime import datetime, timezone
         day = datetime.fromtimestamp(NOW / 1000, timezone.utc).date().isoformat()

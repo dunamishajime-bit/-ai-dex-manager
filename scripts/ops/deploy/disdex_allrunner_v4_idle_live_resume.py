@@ -180,24 +180,11 @@ def stable_start(spec: dict) -> tuple[int,bool]:
         pid=int(prop(unit,"MainPID") or "0")
         require(pid>100,"ACTIVE_RUNNER_PID_INVALID")
         return pid,True
-    subprocess.run(["systemctl","reset-failed",unit],check=False,timeout=15)
-    p=subprocess.run(["systemctl","start",unit],capture_output=True,text=True,timeout=110)
-    require(p.returncode==0,"SYSTEMD_START_FAILED:"+p.stderr[-160:])
-    deadline=time.monotonic()+65
-    pid=0
-    stable_since=None
-    while time.monotonic()<deadline:
-        state=prop(unit,"ActiveState")
-        current=int(prop(unit,"MainPID") or "0")
-        if state=="active" and current>100:
-            if current!=pid:
-                pid=current;stable_since=time.monotonic()
-            if stable_since is not None and time.monotonic()-stable_since>=25:
-                return pid,False
-        else:
-            stable_since=None
-        time.sleep(2)
-    raise RuntimeError("RUNNER_NOT_STABLE_25_SECONDS")
+    # The workflow authorizes ordersEnabled=false, while the existing live
+    # systemd unit consumes an ordersEnabled=true artifact.  Starting it can
+    # place an order before a post-start venue check; no monitor-only runtime
+    # has been certified for this path yet.
+    raise RuntimeError("MONITOR_ONLY_START_NOT_CERTIFIED")
 
 def main(runner: str,run_id: str) -> None:
     require(os.geteuid()==0,"ROOT_REQUIRED")
