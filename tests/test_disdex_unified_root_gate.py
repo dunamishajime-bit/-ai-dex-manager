@@ -636,6 +636,12 @@ class SharedRiskExecutorTest(unittest.TestCase):
         args.route = "CODEX_SSH"
         args.owner = "codex-ssh"
         args._codex_ssh_authenticated = True
+        activation_path = (
+            self.activations / "SHARED_CRYPTO_RISK_ONLY" / f"{self.new}.json"
+        )
+        activation = json.loads(activation_path.read_text(encoding="utf-8"))
+        activation["operator"] = CODEX_SSH_OPERATOR
+        _write_secure_json(activation_path, activation)
         systemd = FakeSystemd(self.old_unit, self.new_unit)
         result = self._executor(systemd).execute(args, "")
         self.assertEqual(result["status"], "SHARED_RISK_CUTOVER_VERIFIED")
