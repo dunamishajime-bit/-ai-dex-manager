@@ -40,11 +40,16 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
                 counters={"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0},
                 root=root,
             )
-            self.assertEqual(marker["schema"], "disdex-runner-tick-heartbeat/v1")
+            self.assertEqual(marker["schema"], "disdex-runner-tick/v1")
+            self.assertEqual(marker["expectedSha"], sha)
+            self.assertEqual(marker["mainPid"], os.getpid())
+            self.assertEqual(marker["workingDirectory"], str(Path.cwd().resolve()))
+            self.assertEqual(marker["outcome"], "held")
+            self.assertIs(marker["newOrdersAllowed"], False)
             self.assertEqual(marker["runnerId"], "V52")
             self.assertEqual(marker["runtimeSha"], sha)
             self.assertEqual(marker["tickCompletedAt"], 1250)
-            self.assertEqual(sorted((root / "ticks").iterdir()), [root / "ticks" / "V52.json"])
+            self.assertEqual(sorted((root / "ticks").iterdir()), [root / "ticks" / "v52.json"])
 
     def test_rejects_invalid_identity_and_negative_counter(self):
         with _portable_temporary_directory() as root:
@@ -78,6 +83,36 @@ class RunnerTickHeartbeatContractTest(unittest.TestCase):
         self.assertIn("write_runner_tick_heartbeat", source)
         self.assertIn("tick_started_at", source)
         self.assertIn("tick_completed_at", source)
+
+
+    def test_three_cycles_replace_one_canonical_v52_tick_atomically(self):
+        sha = "c" * 40
+        with _portable_temporary_directory() as root:
+            for index, outcome in enumerate(("no-change", "completed", "held"), start=1):
+                marker = write_runner_tick_heartbeat(
+                    runner_id="V52",
+                    runtime_sha=sha,
+                    service_unit=f"disdex-v52-aster-only@{sha}.service",
+                    tick_started_at=1000 * index,
+                    tick_completed_at=1000 * index + 250,
+                    status=outcome,
+                    reason=f"cycle-{index}",
+                    new_orders_allowed=outcome == "completed",
+                    root=root,
+                )
+                self.assertEqual(marker["tickCompletedAt"], 1000 * index + 250)
+            files = sorted((root / "ticks").iterdir())
+            self.assertEqual(files, [root / "ticks" / "v52.json"])
+            payload = __import__("json").loads(files[0].read_text(encoding="utf-8"))
+            self.assertEqual(payload["tickCompletedAt"], 3250)
+            self.assertEqual(payload["outcome"], "held")
+            self.assertIs(payload["newOrdersAllowed"], False)
+            self.assertEqual(list((root / "ticks").glob("*.tmp")), [])
+
+    def test_v52_writer_source_supplies_runtime_identity_and_order_permission(self):
+        source = (Path(__file__).resolve().parents[1] / "scripts" / "disdex_v52_aster_only_legacy_engine.py").read_text(encoding="utf-8")
+        self.assertIn("new_orders_allowed", source)
+        self.assertIn("_tick_new_orders_allowed", source)
 
     def test_python_writer_uses_exclusive_random_temp_and_atomic_replace(self):
         source = (Path(__file__).resolve().parents[1] / "scripts" / "disdex_runner_tick_heartbeat.py").read_text(encoding="utf-8")
