@@ -70,6 +70,7 @@ def main() -> int:
                 "typeRoots": [str(NODE_MODULES / "@types")], "types": ["node"],
             },
             "files": ["lib/v12-v4-monitor-only.ts", "lib/disdex-runner-tick-heartbeat.ts",
+                      "scripts/v12-v4-production-runner.ts",
                       "scripts/v12-v4-monitor-only-runner.ts",
                       "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts",
                       "scripts/ops/root/disdex-v4-rate-budget-broker.ts",
