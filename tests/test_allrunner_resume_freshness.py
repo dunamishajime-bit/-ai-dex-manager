@@ -32,6 +32,39 @@ def run_fixture(value):
 
 
 class SignedEvidenceFreshnessTests(unittest.TestCase):
+    def test_shared_health_rejects_bad_risk_and_malformed_pending(self):
+        from datetime import datetime, timezone
+        day = datetime.fromtimestamp(NOW / 1000, timezone.utc).date().isoformat()
+        risk = {"sourceComplete": True, "tripped": False, "utcDay": day,
+                "updatedAt": NOW - 1000, "maximumLossPct": 7.5}
+        margin = {"stage": "HEALTHY", "ordersAllowed": True, "checkedAt": NOW - 1000}
+        def check(risk_value, entries):
+            records = {resume.KILL: {"active": False}, resume.RISK: risk_value,
+                       resume.MARGIN: margin, resume.PENDING: {"entries": entries}}
+            with patch.object(resume, "json_file", side_effect=lambda path: records[path]), \
+                 patch.object(resume, "active", return_value=True), \
+                 patch.object(resume.time, "time", return_value=NOW / 1000):
+                resume.shared_health("V4")
+        check(risk, [])
+        for bad_risk, entries in ((dict(risk, tripped=None), []),
+                                  (dict(risk, updatedAt=NOW - 900001), []),
+                                  (dict(risk, maximumLossPct=8), []),
+                                  (risk, [None])):
+            with self.subTest(risk=bad_risk, entries=entries):
+                with self.assertRaises(RuntimeError):
+                    check(bad_risk, entries)
+
+    def test_signed_get_requires_shared_budget_and_runs_as_deploy(self):
+        result = types.SimpleNamespace(returncode=0, stdout=json.dumps(diagnostic()), stderr="")
+        with patch.object(resume.subprocess, "run", return_value=result) as run, \
+             patch.object(resume.time, "time", return_value=NOW / 1000):
+            resume.signed_get()
+        command = run.call_args.args[0][2]
+        self.assertIn("/etc/disdex/current-runtime/" + resume.V4 + ".env", command)
+        self.assertIn("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH", command)
+        self.assertIn("/var/lib/disdex/shared/aster-rate-budget.json", command)
+        self.assertIn("/usr/sbin/runuser -u deploy --", command)
+
     def test_fresh_signed_flat_account_is_accepted(self):
         self.assertEqual(run_fixture(diagnostic())["observedAt"], NOW - 500)
 

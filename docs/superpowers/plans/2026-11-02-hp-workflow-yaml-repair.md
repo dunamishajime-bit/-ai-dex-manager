@@ -23,5 +23,7 @@
 - [ ] Reject missing/non-boolean Shared Risk trip state and malformed pending entries instead of treating them as clear.
 - [ ] Apply strict pending validation, fresh 7.5% Shared Risk, and fresh Margin Guard checks to both the final audit and the order-enable gate.
 - [ ] Load and require the real shared API budget in final signed GET and run it with the deploy account, avoiding root-owned shared-budget writes.
+- [ ] Apply the same signed-GET budget and deploy-user checks to the V4/IDLE/HYPE recovery helper.
+- [ ] Require valid fresh 7.5% risk and well-formed pending records in the recovery helper before any start.
 - [ ] Run the V4 witness tests and all-runner safety tests; keep the witness unwired to production until the remaining runtime and ownership gaps are resolved.
 - [ ] Run the witness, final-verify, and risk-freshness tests in GitHub CI when their sources change.
