@@ -38,18 +38,19 @@ jobs:
           set -euo pipefail
           python3 -m py_compile             scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py             scripts/ops/deploy/disdex_v4_doge_operator_postflight.py
 
-      - name: Run exact request staging tests
+      - name: Prove historical request staging is retired
         shell: bash
         run: |
           set -euo pipefail
           python3 tests/test_v4_doge_operator_request_stage.py
 
-      - name: Prove workflows remain non-ordering
+      - name: Prove retired route remains fail-closed and non-ordering
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'READY_FOR_EXTERNAL_EXECUTOR' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
-          grep -Fq 'ordersSent":0' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
-          grep -Fq 'V4_DOGE_OPERATOR_POSTFLIGHT_PASS' scripts/ops/deploy/disdex_v4_doge_operator_postflight.py
+          grep -Fq 'DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
+          grep -Fq 'REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
+          ! grep -Fq 'READY_FOR_EXTERNAL_EXECUTOR' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
+          ! grep -Fq 'deploy-approvals.json' scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py
           ! grep -R -E 'executeExit\(|newOrder\(|placeOrder\(|MARKET.*reduceOnly'             scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py             scripts/ops/deploy/disdex_v4_doge_operator_postflight.py
-          echo DOGE_SAFE_ROUTE_CI_PASS
+          echo DOGE_RETIRED_ROUTE_FAIL_CLOSED_CI_PASS
