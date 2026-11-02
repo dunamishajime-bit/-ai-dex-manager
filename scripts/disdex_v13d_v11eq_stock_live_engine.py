@@ -539,6 +539,21 @@ def append_jsonl(path: Path, payload: dict) -> None:
         writer.flush()
 
 
+def assert_v52_monitor_http(method: str, url: str, *, signed: bool = False) -> None:
+    if not bool_env("DISDEX_V52_MONITOR_ONLY", False):
+        return
+    parsed = urllib.parse.urlsplit(url)
+    if method.upper() != "GET":
+        raise RuntimeError("V52_MONITOR_HTTP_MUTATION_FORBIDDEN")
+    aster = (parsed.hostname or "").endswith(".asterdex.com")
+    if signed or aster:
+        if (parsed.scheme != "https" or parsed.netloc not in {"fapi.asterdex.com", "fapi3.asterdex.com"}
+                or parsed.path not in {"/fapi/v3/ping", "/fapi/v3/time", "/fapi/v3/exchangeInfo",
+                    "/fapi/v3/balance", "/fapi/v3/account", "/fapi/v3/positionRisk",
+                    "/fapi/v3/openOrders", "/fapi/v3/order", "/fapi/v1/depth", "/fapi/v3/klines"}):
+            raise RuntimeError("V52_MONITOR_HTTP_DESTINATION_FORBIDDEN")
+
+
 def http_json(
     url: str,
     *,
@@ -547,6 +562,7 @@ def http_json(
     headers: Optional[Dict[str, str]] = None,
     timeout: float = 10.0,
 ) -> Any:
+    assert_v52_monitor_http(method, url)
     encoded = None
     target = url
     if params:
@@ -562,7 +578,14 @@ def http_json(
         headers={"User-Agent": "DisDex-V13D-V11EQ-Live/1.0", **(headers or {})},
     )
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        if bool_env("DISDEX_V52_MONITOR_ONLY", False):
+            class NoRedirect(urllib.request.HTTPRedirectHandler):
+                def redirect_request(self, req, fp, code, msg, headers, newurl):
+                    raise RuntimeError("V52_MONITOR_REDIRECT_FORBIDDEN")
+            response_context = urllib.request.build_opener(NoRedirect()).open(request, timeout=timeout)
+        else:
+            response_context = urllib.request.urlopen(request, timeout=timeout)
+        with response_context as response:
             text = response.read().decode()
             return json.loads(text) if text else {}
     except urllib.error.HTTPError as error:
@@ -578,6 +601,8 @@ def http_json(
                     retry_after_ms = 0
             minimum_cooldown_ms = 120_000 if error.code == 418 else 60_000
             defer_aster_global_rate_budget(max(minimum_cooldown_ms, retry_after_ms), error.code)
+        if bool_env("DISDEX_V52_MONITOR_ONLY", False):
+            raise RuntimeError(f"V52_MONITOR_HTTP_ERROR:{error.code}") from None
         raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
 
 
@@ -755,6 +780,7 @@ class AsterClient:
         return self._nonce
 
     def _signed(self, method: str, path: str, params: Dict[str, Any]) -> Any:
+        assert_v52_monitor_http(method, f"{self.base_url}{path}", signed=True)
         if self._signer is None:
             raise RuntimeError("Aster signed method called without live credentials")
         wait_for_aster_global_rate_budget(aster_futures_request_weight(method, path, params))

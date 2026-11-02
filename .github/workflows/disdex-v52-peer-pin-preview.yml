@@ -27,4 +27,4 @@ jobs:
       - name: Fetch exact existing V52 source
         run: git fetch --no-tags --depth=1 origin 4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81
       - name: Test independent runner pins and existing planner
-        run: python -m unittest tests.test_v52_q102_independent_pin tests.test_v52_q102_preview tests.test_v52_release_candidate_source tests.test_q102_resident_state tests.test_fet_v52_ownership tests.test_disdex_v52_idle_owned_position tests.test_final_dynamic_gross_strict_caps -v
+        run: python -m unittest tests.test_v52_q102_independent_pin tests.test_v52_q102_preview tests.test_v52_release_candidate_source tests.test_q102_resident_state tests.test_fet_v52_ownership tests.test_disdex_v52_idle_owned_position tests.test_final_dynamic_gross_strict_caps tests.test_v52_monitor_only tests.test_v52_monitor_transport -v
