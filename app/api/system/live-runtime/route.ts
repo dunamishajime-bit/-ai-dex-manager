@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
-  if (req.cookies.get("disdex_auth")?.value !== "1") {
+  if (!requestHasSignedOwnerSession(req)) {
     return NextResponse.json(
       { ok: false, readOnly: true, tradingMutation: 0, error: "Authentication required." },
       { status: 401, headers: { "Cache-Control": "private, no-store, max-age=0" } },

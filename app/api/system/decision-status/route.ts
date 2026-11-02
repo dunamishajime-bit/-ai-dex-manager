@@ -5,9 +5,10 @@ import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
 import { loadQuality102RuntimeObservability } from "@/lib/server/quality102-runtime-observability";
 import { loadFetRuntimeObservability } from "@/lib/server/fet-runtime-observability";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
-  if (req.cookies.get("disdex_auth")?.value !== "1") return NextResponse.json({ ok: false, readOnly: true, error: "ログインが必要です。" }, { status: 401 });
+  if (!requestHasSignedOwnerSession(req)) return NextResponse.json({ ok: false, readOnly: true, error: "ログインが必要です。" }, { status: 401 });
   try {
     const snapshot = await loadDecisionStatus({ force: req.nextUrl.searchParams.get("refresh") === "1" });
     let v12Observability;

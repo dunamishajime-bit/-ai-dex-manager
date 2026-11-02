@@ -7,6 +7,7 @@ import {
   type RunnerPin,
   type RunnerPinId,
 } from "@/lib/server/runner-pin-manifest";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -152,7 +153,7 @@ async function inspect(
 }
 
 export async function GET(req: NextRequest) {
-  if (req.cookies.get("disdex_auth")?.value !== "1") {
+  if (!requestHasSignedOwnerSession(req)) {
     return NextResponse.json({ ok: false, readOnly: true, error: "Authentication required" }, { status: 401 });
   }
   try {

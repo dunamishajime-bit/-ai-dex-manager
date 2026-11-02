@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 import { NextRequest, NextResponse } from "next/server";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -11,7 +12,7 @@ function finite(value: unknown) {
 }
 
 export async function GET(req: NextRequest) {
-  if (req.cookies.get("disdex_auth")?.value !== "1") {
+  if (!requestHasSignedOwnerSession(req)) {
     return NextResponse.json({ ok: false, readOnly: true, tradingMutation: 0, status: "UNAVAILABLE", error: "Authentication required." }, { status: 401 });
   }
 
