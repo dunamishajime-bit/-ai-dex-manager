@@ -110,5 +110,8 @@ test("shared runtime metadata accepts only the canonical deploy-owned writer con
 test("first refresh may replace a valid previous-SHA dynamic evidence seed", () => {
   const previous = { candidateSha: "5".repeat(40), status: "PASS", readOnly: true, mutationCalls: 0 };
   assert.equal(validateDynamicRefreshTarget(previous, SHA), true);
+  assert.equal(validateDynamicRefreshTarget({ ...previous, readOnly: null, mutationCalls: null }, SHA), true);
   assert.throws(() => validateDynamicRefreshTarget({ ...previous, candidateSha: "not-a-sha" }, SHA), /TARGET_SHA_INVALID/);
+  assert.throws(() => validateDynamicRefreshTarget({ ...previous, readOnly: false }, SHA), /TARGET_SHA_INVALID/);
+  assert.throws(() => validateDynamicRefreshTarget({ ...previous, mutationCalls: 1 }, SHA), /TARGET_SHA_INVALID/);
 });

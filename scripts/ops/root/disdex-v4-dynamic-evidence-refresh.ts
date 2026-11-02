@@ -181,10 +181,12 @@ export function validateSharedRuntimeMetadata(input: {
 
 export function validateDynamicRefreshTarget(existing: JsonRecord, sha: string) {
   assertSha(sha);
+  const readOnly = existing.readOnly;
+  const mutationCalls = existing.mutationCalls;
   if (!SHA.test(String(existing.candidateSha || "").toLowerCase())
       || existing.status !== "PASS"
-      || existing.readOnly !== true
-      || existing.mutationCalls !== 0) {
+      || (readOnly !== undefined && readOnly !== null && readOnly !== true)
+      || (mutationCalls !== undefined && mutationCalls !== null && mutationCalls !== 0)) {
     throw new Error("V4_DYNAMIC_REFRESH_TARGET_SHA_INVALID");
   }
   return true as const;
