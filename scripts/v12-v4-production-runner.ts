@@ -18,6 +18,7 @@ import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource,type V4PeerLinea
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 import {classifyAsterRateBudgetFailure,nextAsterRateBudgetRetryMs} from "../lib/disdex-aster-rate-budget-policy";
+import {writeRunnerTickHeartbeat} from "../lib/disdex-runner-tick-heartbeat";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 import type {V4PreparedDecision,V4TickResult} from "../lib/v12-v4-runner-engine";
 const H2=7200000;
@@ -431,6 +432,7 @@ async function main(){
  const {engine,store,releaseSha,operationMode}=runtime;
  if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  do{
+  const tickStartedAt=Date.now();
   let result:V4TickResult;
   let prepared:V4PreparedDecision|undefined;
   let deferredWaitMs=0;
@@ -491,6 +493,12 @@ async function main(){
    console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:error instanceof Error?error.message:String(error)}));
   }
   await writeV4Health(releaseSha,operationMode,result);
+  await writeRunnerTickHeartbeat({
+   runnerId:"V12_V4",runtimeSha:releaseSha,
+   serviceUnit:String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim(),
+   tickStartedAt,tickCompletedAt:Date.now(),status:result.status,reason:result.reason,
+   newOrdersAllowed:result.orderEnabled===true,
+  });
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result,
    ...(deferredWaitMs?{retryAfterMs:deferredWaitMs}:{}),hadLockContention}));
   if(!daemon||stopping)break;
