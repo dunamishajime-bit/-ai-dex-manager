@@ -6,7 +6,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { loadV4ClosedCandles, buildV4LiveDecisionBatch } from "../lib/v12-v4-live-candidate-builder";
 import { attachV4NativeCoreCandidates } from "../lib/v12-v4-core-candidate";
 import { assertV4EntrySafety } from "../lib/v12-v4-entry-safety";
-import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4MonitorFetch, runV4MonitorCycle, validateV4MonitorReadOnlySnapshot, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
+import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
 import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 type JsonRecord=Record<string,any>;
@@ -59,7 +59,7 @@ async function cycle(now=Date.now()){
   requestTimeoutMs:10000,fetchImpl:createV4MonitorFetch(fetch),userAgent:"DisDex-V12-V4-Monitor/"+sha.slice(0,12),
  });
  if(!client.hasTradingCredentials())throw Error("V4_SIGNED_VENUE_CREDENTIALS_REQUIRED");
- await assertV4EntrySafety();
+ const entrySafetyError=await assertV4EntrySafety().then(()=>null,(error)=>safeReason(error));
  const [risk,margin,killSwitch,pending,positions,openOrders,market]=await Promise.all([
   trustedJson(process.env.DISDEX_V4_DYNAMIC_SHARED_RISK_PATH||"/var/lib/disdex/shared/crypto-daily-risk.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_MARGIN_PATH||"/var/lib/disdex/shared/margin-risk/guard-live.json"),
@@ -67,11 +67,11 @@ async function cycle(now=Date.now()){
   trustedJson(process.env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH||"/var/lib/disdex/shared/pending-exposure.json"),
   client.getPositions(),client.getOpenOrders(),decision(client,now),
  ]);
- return {sha,result:validateV4MonitorReadOnlySnapshot({
+ return {sha,result:evaluateV4MonitorCompletedDecision({
   now,risk,margin,killSwitch,pending,
   positions:positions as unknown as JsonRecord[],openOrders:openOrders as unknown as JsonRecord[],
   decision:market as unknown as JsonRecord,
- })};
+ },entrySafetyError)};
 }
 async function health(sha:string,result:V4MonitorResult,at:number,lastTickAt:number|null){
  const path=String(process.env.V12_V4_MONITOR_HEALTH_STATE_PATH||"/var/lib/disdex/v12-v4/monitor/heartbeat.json");

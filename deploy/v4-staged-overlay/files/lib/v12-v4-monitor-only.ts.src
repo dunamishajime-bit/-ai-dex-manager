@@ -124,6 +124,24 @@ function activePositions(rows: JsonRecord[]) {
   });
 }
 
+/** A finished read-only decision can be recorded even when entries are blocked. */
+export function evaluateV4MonitorCompletedDecision(input: V4MonitorReadOnlySnapshot, entrySafetyError: string | null): V4MonitorResult {
+  if (!entrySafetyError) return validateV4MonitorReadOnlySnapshot(input);
+  const now = Number(input.now);
+  if (!Number.isFinite(now) || now <= 0) throw new Error("V4_MONITOR_TIME_INVALID");
+  if (!input.decision) throw new Error("V4_MONITOR_DECISION_MISSING");
+  const decision = record(input.decision, "DECISION");
+  if (decision.orderEnabled !== false || decision.tradingMutation !== 0 || decision.realOrderEnabledV4 !== 0)
+    throw new Error("V4_MONITOR_DECISION_MUTATION_CONTRACT_INVALID");
+  if (!Array.isArray(decision.errors) || decision.errors.length) throw new Error("V4_MONITOR_DECISION_INCOMPLETE");
+  const candidateCount = decision.candidateCount;
+  if (!Number.isSafeInteger(candidateCount) || candidateCount < 0) throw new Error("V4_MONITOR_CANDIDATE_COUNT_INVALID");
+  const reason = entrySafetyError.replace(/[^A-Za-z0-9_:.-]/g, "_").slice(0, 160);
+  if (!reason) throw new Error("V4_MONITOR_SAFETY_REASON_INVALID");
+  return {status:"blocked",reason:"V4_MONITOR_ENTRY_SAFETY_BLOCKED:"+reason,eventTs:now,
+    candidateCount,orderEnabled:false,positionCount:null,openOrderCount:null,pendingCount:null};
+}
+
 export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapshot): V4MonitorResult {
   const now = Number(input.now);
   if (!Number.isFinite(now) || now <= 0) throw new Error("V4_MONITOR_TIME_INVALID");
@@ -164,6 +182,17 @@ export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapsh
   }
   const positions = activePositions(input.positions);
   const openOrders = input.openOrders;
+  const decision = input.decision ? record(input.decision, "DECISION") : undefined;
+  if (!decision) throw new Error("V4_MONITOR_DECISION_MISSING");
+  if (decision.orderEnabled !== false || decision.tradingMutation !== 0
+      || decision.realOrderEnabledV4 !== 0) {
+    throw new Error("V4_MONITOR_DECISION_MUTATION_CONTRACT_INVALID");
+  }
+  if (!Array.isArray(decision.errors) || decision.errors.length) throw new Error("V4_MONITOR_DECISION_INCOMPLETE");
+  const candidateCount = decision.candidateCount;
+  if (!Number.isSafeInteger(candidateCount) || candidateCount < 0) {
+    throw new Error("V4_MONITOR_CANDIDATE_COUNT_INVALID");
+  }
   // Monitor-only has no independent ownership graph. Non-flat venue state must
   // be handled by the separate STOP/gross ownership attestation before LIVE.
   if (positions.length || openOrders.length) {
@@ -171,7 +200,7 @@ export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapsh
       status: "blocked",
       reason: "V4_MONITOR_NONFLAT_REQUIRES_INDEPENDENT_OWNERSHIP_PROOF",
       eventTs: now,
-      candidateCount: 0,
+      candidateCount,
       orderEnabled: false,
       positionCount: positions.length,
       openOrderCount: openOrders.length,
@@ -179,29 +208,6 @@ export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapsh
     };
   }
 
-  const decision = input.decision ? record(input.decision, "DECISION") : undefined;
-  if (!decision) throw new Error("V4_MONITOR_DECISION_MISSING");
-  if (decision.orderEnabled !== false || decision.tradingMutation !== 0
-      || decision.realOrderEnabledV4 !== 0) {
-    throw new Error("V4_MONITOR_DECISION_MUTATION_CONTRACT_INVALID");
-  }
-  if (!Array.isArray(decision.errors)) throw new Error("V4_MONITOR_DECISION_ERRORS_INVALID");
-  if (decision.errors.length) {
-    return {
-      status: "blocked",
-      reason: "V4_MONITOR_MARKET_DATA_INCOMPLETE",
-      eventTs: now,
-      candidateCount: 0,
-      orderEnabled: false,
-      positionCount: 0,
-      openOrderCount: 0,
-      pendingCount: 0,
-    };
-  }
-  const candidateCount = Number(decision.candidateCount);
-  if (!Number.isSafeInteger(candidateCount) || candidateCount < 0) {
-    throw new Error("V4_MONITOR_CANDIDATE_COUNT_INVALID");
-  }
   return {
     status: "observing",
     reason: "V4_MONITOR_ONLY_READONLY_CYCLE",
