@@ -19,7 +19,7 @@ class PreviewTest(unittest.TestCase):
         cls.source = subprocess.check_output(
             ["git", "show", BASE + ":scripts/disdex_strict_portfolio_planner.py"], text=True)
 
-    def test_only_wrong_self_sha_comparison_is_replaced(self):
+    def test_peer_pin_changes_preserve_existing_identity_and_freshness_checks(self):
         updated = patch_planner(self.source)
         self.assertIn("verify_q102_identity(runtime_sha)", updated)
         q102_section = updated.split("def load_quality102_live_state(", 1)[1].split("def read_quality102_live_state_document(", 1)[0]
@@ -69,6 +69,13 @@ class PreviewTest(unittest.TestCase):
                     module.load_quality102_live_state(state, now_ms=1000)
                 pending_state["pending"] = None
                 state.write_text(json.dumps(pending_state))
+                trusted = json.dumps(pending_state)
+                changed = json.dumps(dict(pending_state, runtimeCommitSha="b" * 40))
+                with patch.object(Path, "read_text", side_effect=[trusted, changed]) as reads:
+                    _, snapshot, owned = module.read_quality102_live_state_document(state, now_ms=1000)
+                    self.assertEqual(snapshot["runtimeCommitSha"], "e" * 40)
+                    self.assertIsNone(owned)
+                    self.assertEqual(reads.call_count, 1)
                 fake.verify_q102_identity = lambda sha: (_ for _ in ()).throw(RuntimeError("bad peer"))
                 module.verify_q102_identity = fake.verify_q102_identity
                 with self.assertRaisesRegex(RuntimeError, "bad peer"):
