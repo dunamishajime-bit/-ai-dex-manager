@@ -79,19 +79,44 @@ test("monitor-only accepts a fresh flat read-only cycle without granting orders"
 test("a completed decision remains order-blocked but records a real tick while kill switch is active", async () => {
   const result=evaluateV4MonitorCompletedDecision(snapshot({killSwitch:{active:true}}),"V4_KILL_SWITCH_ACTIVE");
   assert.equal(result.status,"blocked");
-  assert.equal(result.reason,"V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE");
+  assert.equal(result.reason,"V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE|V4_KILL_SWITCH_ACTIVE");
   assert.equal(result.orderEnabled,false);
   assert.equal(result.candidateCount,2);
-  assert.equal(result.positionCount,null);
+  assert.equal(result.positionCount,0);
+  assert.equal(result.openOrderCount,0);
+  assert.equal(result.pendingCount,0);
   let tick=false;
   await runV4MonitorCycle({collect:async()=>result,onError:()=>{throw Error("unexpected");},
     publishTick:async()=>{tick=true;},publishHealth:async()=>{},clock:()=>NOW,lastTickAt:null});
   assert.equal(tick,true);
+  assert.throws(()=>evaluateV4MonitorCompletedDecision(snapshot({risk:{...snapshot().risk,updatedAt:NOW-901_000}}),"V4_KILL_SWITCH_ACTIVE"),/SHARED_RISK_STALE/);
   assert.throws(()=>evaluateV4MonitorCompletedDecision(snapshot({decision:{...snapshot().decision,orderEnabled:true}}),"BLOCKED"),/MUTATION_CONTRACT_INVALID/);
   assert.throws(()=>evaluateV4MonitorCompletedDecision(snapshot({decision:undefined}),"BLOCKED"),/DECISION_MISSING/);
   for (const value of [null, "2", undefined]) {
     assert.throws(()=>evaluateV4MonitorCompletedDecision(snapshot({decision:{...snapshot().decision,candidateCount:value}}),"BLOCKED"),/CANDIDATE_COUNT_INVALID/);
   }
+});
+
+test("stale pending requires a fresh SHA-bound proof and active Kill Switch", () => {
+  const runtimeSha="a".repeat(40),pendingHash="b".repeat(64);
+  const stalePending={...snapshot().pending,updatedAt:NOW-901_000};
+  const proof={schema:"disdex-pending-readonly-proof/v1",candidateSha:runtimeSha,
+    source:"SIGNED_ASTER_READONLY_ACCOUNT_LOCK",registryHash:pendingHash,
+    priorUpdatedAt:stalePending.updatedAt,registryEntries:1,positionCount:0,openOrderCount:0,
+    verifiedAt:NOW-1_000,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+  const result=validateV4MonitorReadOnlySnapshot(snapshot({
+    killSwitch:{active:true},pending:stalePending,runtimeSha,pendingHash,pendingProof:proof,
+  }));
+  assert.equal(result.status,"blocked");
+  assert.match(result.reason,/V4_KILL_SWITCH_ACTIVE/);
+  assert.match(result.reason,/V4_PENDING_FRESHNESS_PROVEN_READONLY/);
+  assert.throws(()=>validateV4MonitorReadOnlySnapshot(snapshot({
+    killSwitch:{active:false},pending:stalePending,runtimeSha,pendingHash,pendingProof:proof,
+  })),/PENDING_STALE/);
+  assert.throws(()=>validateV4MonitorReadOnlySnapshot(snapshot({
+    killSwitch:{active:true},pending:stalePending,runtimeSha,pendingHash,
+    pendingProof:{...proof,registryHash:"c".repeat(64)},
+  })),/PENDING_PROOF_INVALID/);
 });
 
 test("monitor-only rejects stale shared state instead of re-stamping it", () => {
@@ -175,6 +200,13 @@ test("a completed monitor decision records its tick before publishing health", a
   });
   assert.deepEqual(calls, ["tick", `health:${NOW}`]);
   assert.equal(result.lastTickAt, NOW);
+});
+
+test("monitor runner binds stale-pending proof to root ownership and exact bytes", () => {
+  const source=readFileSync("scripts/v12-v4-monitor-only-runner.ts","utf8");
+  assert.match(source,/trustedJson\(proofPath,0\)/);
+  assert.match(source,/createHash\("sha256"\)\.update\(raw\)\.digest\("hex"\)/);
+  assert.match(source,/pendingHash:pendingSource\.hash/);
 });
 
 test("monitor-only runner path does not call the order-capable engine tick", () => {
