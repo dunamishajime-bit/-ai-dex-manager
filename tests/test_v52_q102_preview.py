@@ -62,6 +62,13 @@ class PreviewTest(unittest.TestCase):
                     "position": None, "failures": []}))
                 self.assertIsNone(module.load_quality102_live_state(state, now_ms=1000))
                 self.assertEqual(seen, ["e" * 40])
+                pending_state = json.loads(state.read_text())
+                pending_state["pending"] = {"phase":"submitted"}
+                state.write_text(json.dumps(pending_state))
+                with self.assertRaisesRegex(RuntimeError, "QUALITY102_PENDING_UNRECONCILED"):
+                    module.load_quality102_live_state(state, now_ms=1000)
+                pending_state["pending"] = None
+                state.write_text(json.dumps(pending_state))
                 fake.verify_q102_identity = lambda sha: (_ for _ in ()).throw(RuntimeError("bad peer"))
                 module.verify_q102_identity = fake.verify_q102_identity
                 with self.assertRaisesRegex(RuntimeError, "bad peer"):

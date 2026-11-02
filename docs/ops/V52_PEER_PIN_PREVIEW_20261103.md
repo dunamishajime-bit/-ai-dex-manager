@@ -10,8 +10,11 @@ This branch prepares a source-only preview of the existing V52 planner with
 the three peer SHA comparisons bound to their respective root-managed runner
 pins. It also checks the peer systemd PID, working directory, release marker,
 and state SHA; any missing or conflicting evidence fails closed. The original
-position, STOP, freshness, gross, and Kill Switch logic is not replaced by the
-preview builder. The builder does not create an immutable release or approve,
+position, STOP, freshness, gross-cap, and Kill Switch logic is not replaced by
+the preview builder. A Q102 state with no position but a pending entry now
+blocks V52 accounting instead of being treated as flat; this conservative
+change can delay V52 decisions until pending is reconciled. The builder does
+not create an immutable release or approve,
 start, stop, or change any service.
 
 On 2026-11-02, a read-only VPS probe run as `deploy` passed for the Q102,
