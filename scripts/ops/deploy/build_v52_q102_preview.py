@@ -18,14 +18,25 @@ IDLE_OLD = '''    expected_sha = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA")
 IDLE_COMPARE = '''    if str(document.get("runtimeSha") or "").lower() != expected_sha:
         fail("RELEASE_SHA")'''
 FET_OLD = '''                expected = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "")'''
+Q102_EMPTY_OLD = '''    position = root.get("position")
+    if position is None:
+        return None'''
+Q102_EMPTY_NEW = '''    position = root.get("position")
+    if position is None:
+        # A submitted/unknown entry can still consume exposure.  Do not treat
+        # an unprocessed pending entry as a flat, available portfolio.
+        if root.get("pending") is not None:
+            raise RuntimeError("QUALITY102_PENDING_UNRECONCILED")
+        return None'''
 
 
 def patch_planner(source):
-    if any(source.count(part) != 1 for part in (OLD, IDLE_OLD, IDLE_COMPARE, FET_OLD,
+    if any(source.count(part) != 1 for part in (OLD, IDLE_OLD, IDLE_COMPARE, FET_OLD, Q102_EMPTY_OLD,
                                                  "from __future__ import annotations")):
         raise RuntimeError("V52_PREVIEW_UNEXPECTED_BASELINE")
     return (source.replace("from __future__ import annotations", "from __future__ import annotations\n\nfrom v52_q102_independent_pin import verify_q102_identity, verify_peer_identity", 1)
-            .replace(OLD, NEW, 1).replace(IDLE_OLD, "    # Identity is checked against the independently pinned Idle service below.", 1)
+            .replace(OLD, NEW, 1).replace(Q102_EMPTY_OLD, Q102_EMPTY_NEW, 1)
+            .replace(IDLE_OLD, "    # Identity is checked against the independently pinned Idle service below.", 1)
             .replace(IDLE_COMPARE, '    verify_peer_identity("IDLE_PRIORITY_SHORT", str(document.get("runtimeSha") or "").lower())', 1)
             .replace(FET_OLD, '                expected = verify_peer_identity("FET_BRK48_RESIDUAL", str(fet.get("runtimeCommitSha") or "").lower())', 1))
 
