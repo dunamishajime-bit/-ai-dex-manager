@@ -108,7 +108,8 @@ jobs:
               assert forbidden not in refresh, forbidden
           assert '--verify-only' in refresh and '--apply' in refresh
           assert 'V4_DYNAMIC_REFRESH_MODE_REQUIRED' in refresh
-          assert 'V4_REFRESH_LEASE_SIGNATURE_NOT_VERIFIED' in refresh
+          assert 'V4_REFRESH_LEASE_AUTHORIZATION_NOT_VERIFIED' in refresh
+          assert 'ROOT_SSH_SESSION' in refresh
           for unit in ('ops/systemd/disdex-v4-dynamic-evidence-refresh@.service', 'ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer'):
               assert Path(unit).is_file(), unit
           service = Path('ops/systemd/disdex-v4-dynamic-evidence-refresh@.service').read_text()

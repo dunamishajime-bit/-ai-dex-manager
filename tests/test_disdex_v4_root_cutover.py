@@ -271,3 +271,14 @@ class V4CutoverTransactionTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"ordersEnabled"):
             self._executor(sysd).execute(a,"signed-token")
         self.assertEqual(sysd.calls,[])
+
+    def test_codex_ssh_route_uses_root_ssh_authority_without_owner_token(self):
+        args = self._args()
+        args.route = "CODEX_SSH"
+        args.owner = "codex-ssh"
+        args._codex_ssh_authenticated = True
+        systemd = FakeSystemd(self.old_unit, self.new_unit)
+        result = self._executor(systemd).execute(args, "")
+        self.assertEqual(result["status"], "V4_LIVE_CUTOVER_VERIFIED")
+        self.assertEqual(result["route"], "CODEX_SSH")
+        self.assertEqual(result["ordersSent"], 0)

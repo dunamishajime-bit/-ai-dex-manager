@@ -177,17 +177,24 @@ general SSH shell. It accepts only:
 - the canonical host `professional-dismanager.net`;
 - a local identity file and pinned known-hosts file;
 - an exact SHA, scope, plan hash, and explicit order permission; and
-- the short-lived owner-signed token on stdin.
+- the root SSH session as the route-specific authorization.
 
 It constructs one fixed command for:
 
 `/usr/local/sbin/disdex-unified-production-deploy`
 
-with route `CODEX_SSH`, then sends the token over stdin. The root helper must
-verify the same v2 grant and the same multi-SHA plan as the Actions route.
-Codex may perform source edits, CI, backtests, staging, read-only audits, and
-this adapter invocation preparation directly. LIVE mutation still requires
-the owner's formal approval and every shared safety gate.
+with route `CODEX_SSH` and the fixed `--codex-ssh` mode. The root helper
+requires an actual sshd connection (`SSH_CONNECTION` and `SSH_CLIENT`), the
+root identity, the fixed `codex-ssh` operator, and the same multi-SHA plan,
+release, venue, STOP, rollback, and audit gates as the Actions route. It does
+not read an owner password or Ed25519 token. The root SSH credential is the
+authentication for the Codex route; it is not a general shell because the
+forced-command dispatcher accepts only the exact helper arguments.
+
+The Actions route remains owner-token based. The two routes therefore share
+the safety contract and audit schema, but do not require the same
+authentication ceremony. Codex may perform source edits, CI, backtests,
+staging, read-only audits, and direct LIVE mutation through this fixed helper.
 
 Illustrative invocation (the identity and known-host files remain local and
 are never committed or printed):
@@ -199,12 +206,12 @@ python3 scripts/ops/deploy/disdex_codex_ssh.py \
   --sha EXACT_40_CHARACTER_SHA \
   --scope SHARED_CRYPTO_RISK_ONLY \
   --plan-sha256 CANONICAL_64_CHARACTER_PLAN_HASH \
-  --orders-enabled false < owner-signed-token.txt
+  --orders-enabled false
 ```
 
-The token file is a short-lived local secret and must not be committed,
-uploaded, copied into a report, or included in command output. The wrapper
-does not read or request the owner's password.
+The local SSH identity and known-host file remain private and are never
+committed, uploaded, copied into a report, or included in command output. The
+adapter does not read or request the owner's password.
 
 ## 5. Shared Risk-only first-stage boundary
 

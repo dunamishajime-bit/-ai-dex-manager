@@ -21,6 +21,7 @@ RELEASES = Path("/home/deploy/disdex-trading/releases")
 CURRENT = Path("/home/deploy/disdex-trading/current")
 PINS = Path("/etc/disdex/runner-pins.json")
 KILL = Path("/var/lib/disdex/shared/kill-switch.json")
+RUNTIME_ACTIVATION = Path("/var/lib/disdex/shared/operator-activation/v12-v4-full.json")
 PREFIXES = {
     "V12_V4": "disdex-v12-v4",
     "PENGU_V8": "disdex-pengu-dual-ls-v2",
@@ -40,6 +41,7 @@ REQUIRED_ROOT = {
     "v4Activations": ROOT / "activations" / "V12_V4",
     "venueBefore": ROOT / "venue-before.json",
     "venueAfter": ROOT / "venue-after.json",
+    "v4RuntimeActivation": RUNTIME_ACTIVATION,
 }
 
 
@@ -138,9 +140,20 @@ def assess(raw: dict) -> list[str]:
         blockers.append("LEGACY_RUNNER_RELEASE_TRUST_TRANSITION_UNPROVEN")
     if not raw.get("auxiliaryLiveRootsVerified"):
         blockers.append("UI_MONITOR_RELEASE_TRUST_UNPROVEN")
-    # GitHub policy, owner token, signed Aster venue witness and the
-    # independent operator's final decision remain separate, off-box gates.
-    blockers.append("OWNER_SIGNATURE_AND_GITHUB_REVIEW_NOT_ATTESTED")
+    # The authentication ceremony is route-specific.  A Codex deployment is
+    # authorized by the root SSH session and the exact runtime activation; an
+    # Actions deployment is authorized by its owner-signed grant.  Do not
+    # report the Actions-only blocker after a valid Codex cutover.
+    authorization = raw.get("authorization", {})
+    auth_ok = (
+        authorization.get("route") in ("GITHUB_ACTIONS", "CODEX_SSH")
+        and authorization.get("authorizationMethod") in
+        ("OWNER_SIGNED_TOKEN", "ROOT_SSH_SESSION")
+        and authorization.get("approvedSha") == raw.get("candidateSha")
+        and authorization.get("ordersEnabled") is True
+    )
+    if not auth_ok:
+        blockers.append("OWNER_SIGNATURE_AND_GITHUB_REVIEW_NOT_ATTESTED")
     blockers.append("VENUE_SIGNED_STOP_PRESERVATION_NOT_ATTESTED")
     return sorted(set(blockers))
 
@@ -196,6 +209,14 @@ def inventory(candidate_sha: str | None = None) -> dict:
         "legacyRunnerReleases": ownership,
         "auxiliaryLiveRootsVerified": False,
     }
+    try:
+        runtime = _json(RUNTIME_ACTIVATION)
+        x["authorization"] = {
+            key: runtime.get(key)
+            for key in ("route", "authorizationMethod", "approvedSha", "ordersEnabled")
+        }
+    except (OSError, ValueError, json.JSONDecodeError):
+        x["authorization"] = {}
     x["blockers"] = assess(x)
     x["status"] = "BLOCKED" if x["blockers"] else "READ_ONLY_PREFLIGHT_NOT_LIVE"
     return x

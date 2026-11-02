@@ -4,6 +4,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts" / "ops" / "deploy"))
 from disdex_codex_ssh import build_ssh_command
+from disdex_deployment_contract import CODEX_SSH_OPERATOR
 
 
 SHA = "c9beb423ae9b6b18333ae9426a21a69cf35baeef"
@@ -21,7 +22,7 @@ class CodexSshAdapterTests(unittest.TestCase):
             scope="SHARED_CRYPTO_RISK_ONLY",
             plan_sha256=PLAN,
             orders_enabled=False,
-            owner='dunamishajime-bit',
+            owner=CODEX_SSH_OPERATOR,
         )
         args.update(overrides)
         return build_ssh_command(**args)
@@ -33,7 +34,8 @@ class CodexSshAdapterTests(unittest.TestCase):
         self.assertIn("CODEX_SSH", command)
         self.assertIn("--owner", command)
         self.assertIn("--execute", command)
-        self.assertIn("--read-approval-stdin", command)
+        self.assertIn("--codex-ssh", command)
+        self.assertNotIn("--read-approval-stdin", command)
         self.assertNotIn("bash", command)
         self.assertNotIn("sh -c", command)
 
@@ -49,9 +51,14 @@ class CodexSshAdapterTests(unittest.TestCase):
         command = self.command(scope="V4_EVIDENCE_REFRESH_ONLY")
         self.assertIn("/usr/local/sbin/disdex-v4-evidence-refresh-activate", command)
         self.assertIn("--install", command)
-        self.assertIn("--token-stdin", command)
+        self.assertIn("--codex-ssh", command)
+        self.assertNotIn("--token-stdin", command)
         self.assertNotIn("--execute", command)
         self.assertNotIn("disdex-unified-production-deploy", command)
+
+    def test_codex_route_has_fixed_operator_identity(self):
+        with self.assertRaisesRegex(ValueError, "Codex operator"):
+            self.command(owner="dunamishajime-bit")
 
     def test_rejects_invalid_sha_and_plan(self):
         with self.assertRaisesRegex(ValueError, "SHA"):

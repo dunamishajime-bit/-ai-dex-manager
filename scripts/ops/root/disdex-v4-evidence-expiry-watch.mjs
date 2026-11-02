@@ -68,7 +68,12 @@ export async function inspectRootRefreshLease({
       || lease?.approvedShaByRunner?.V12_V4 !== sha
       || lease?.deploymentTarget !== "professional-dismanager.net"
       || lease?.operatorTarget !== "DD1296_FINAL_ALLIN_10BPS"
-      || lease?.ordersEnabled !== false || lease?.signatureVerified !== true
+      || lease?.ordersEnabled !== false
+      || !((lease?.signatureVerified === true
+            && lease?.authorizationMethod === "OWNER_SIGNED_TOKEN")
+          || (lease?.route === "CODEX_SSH"
+              && lease?.signatureVerified === false
+              && lease?.authorizationMethod === "ROOT_SSH_SESSION"))
       || !/^[0-9a-f]{64}$/.test(String(lease?.approvalNonceDigest || ""))
       || !/^[0-9a-f]{64}$/.test(String(lease?.planSha256 || ""))
       || !Number.isInteger(approvedAt) || !Number.isInteger(expiresAt)

@@ -84,6 +84,7 @@ const REFRESH_LEASE_FIELDS = new Set([
   "schema", "repository", "deploymentTarget", "operatorTarget", "scope", "route",
   "approvedSha", "approvedRunner", "approvedRunners", "approvedShaByRunner",
   "releaseRoot", "evidenceRoot", "outputPath", "planSha256", "ordersEnabled", "signatureVerified",
+  "authorizationMethod",
   "approvalNonceDigest", "approvalIssuedAt", "approvalExpiresAt", "approvedAt",
   "expiresAt", "leaseId",
 ]);
@@ -114,9 +115,16 @@ export function validateV4RefreshLease(input: { lease: unknown; sha: string; now
   }
   if (lease.outputPath !== REFRESH_OUTPUT_PATH) throw new Error("V4_REFRESH_LEASE_OUTPUT_PATH_MISMATCH");
   if (lease.ordersEnabled !== false) throw new Error("V4_REFRESH_LEASE_ORDERS_NOT_ALLOWED");
-  if (lease.signatureVerified !== true) throw new Error("V4_REFRESH_LEASE_SIGNATURE_NOT_VERIFIED");
   if (!/^(?:GITHUB_ACTIONS|CODEX_SSH)$/.test(String(lease.route || ""))) {
     throw new Error("V4_REFRESH_LEASE_ROUTE_INVALID");
+  }
+  const ownerSigned = lease.signatureVerified === true
+    && lease.authorizationMethod === "OWNER_SIGNED_TOKEN";
+  const codexSsh = lease.route === "CODEX_SSH"
+    && lease.signatureVerified === false
+    && lease.authorizationMethod === "ROOT_SSH_SESSION";
+  if (!ownerSigned && !codexSsh) {
+    throw new Error("V4_REFRESH_LEASE_AUTHORIZATION_NOT_VERIFIED");
   }
   if (!/^[a-f0-9]{64}$/.test(String(lease.planSha256 || ""))
       || !/^[a-f0-9]{64}$/.test(String(lease.approvalNonceDigest || ""))

@@ -29,6 +29,7 @@ function lease(overrides: Record<string, unknown> = {}) {
     planSha256: PLAN,
     ordersEnabled: false,
     signatureVerified: true,
+    authorizationMethod: "OWNER_SIGNED_TOKEN",
     approvalNonceDigest: "c".repeat(64),
     approvalIssuedAt: NOW - 120_000,
     approvalExpiresAt: NOW - 60_000,
@@ -58,7 +59,15 @@ test("refresh lease is limited to V4 evidence and never authorizes orders", () =
   assert.throws(() => validateV4RefreshLease({ lease: lease({ scope: "FULL_PROJECT" }), sha: SHA, now: NOW }), /SCOPE_MISMATCH/);
   assert.throws(() => validateV4RefreshLease({ lease: lease({ approvedSha: "e".repeat(40) }), sha: SHA, now: NOW }), /SHA_MISMATCH/);
   assert.throws(() => validateV4RefreshLease({ lease: lease({ ordersEnabled: true }), sha: SHA, now: NOW }), /ORDERS_NOT_ALLOWED/);
-  assert.throws(() => validateV4RefreshLease({ lease: lease({ signatureVerified: false }), sha: SHA, now: NOW }), /SIGNATURE_NOT_VERIFIED/);
+  assert.throws(() => validateV4RefreshLease({ lease: lease({ signatureVerified: false }), sha: SHA, now: NOW }), /AUTHORIZATION_NOT_VERIFIED/);
   assert.throws(() => validateV4RefreshLease({ lease: lease({ expiresAt: NOW - 1 }), sha: SHA, now: NOW }), /EXPIRED/);
   assert.throws(() => validateV4RefreshLease({ lease: lease({ outputPath: "/etc/shadow" }), sha: SHA, now: NOW }), /OUTPUT_PATH_MISMATCH/);
+});
+
+test("Codex SSH refresh lease uses root-session authorization without a signature", () => {
+  const value = lease({
+    signatureVerified: false,
+    authorizationMethod: "ROOT_SSH_SESSION",
+  });
+  assert.equal(validateV4RefreshLease({ lease: value, sha: SHA, now: NOW }).route, "CODEX_SSH");
 });

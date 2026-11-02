@@ -2,8 +2,9 @@
 """Exact-scope V12_V4 live transaction. No shell/canary/order-test fallback.
 
 The root caller supplies already provisioned immutable releases, a root-only plan,
-a fresh signed venue attestation, and a one-use owner token. No prerequisites
-are synthesized or weakened by this executor.
+a fresh signed venue attestation, and either a one-use Actions owner token or an
+authenticated Codex root-SSH session. No venue or strategy prerequisite is
+synthesized or weakened by this executor.
 """
 from __future__ import annotations
 
@@ -13,7 +14,10 @@ from pathlib import Path
 import stat
 import time
 
-from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, SHA, validate_order_permission
+from disdex_deployment_contract import (
+    CODEX_SSH_OPERATOR, DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, SHA,
+    validate_order_permission,
+)
 from disdex_v4_venue_witness import (
     collect_v4_venue_evidence, validate_peer_stop_approval,
 )
@@ -28,6 +32,7 @@ from disdex_unified_root_gate import (
 V4_SCOPE = "V12_V4"
 V4_RUNNER = "V12_V4"
 V4_ACK = "I_ACK_V12_V4_FULL_LIVE_PRESERVE_RESIDENT_STOP"
+CODEX_V4_ACK = "I_ACK_CODEX_SSH_V4_FULL_LIVE_PRESERVE_RESIDENT_STOP"
 RUNTIME_ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
 RUNTIME_SCHEMA = "disdex-live-operator-activation/v1"
 RUNTIME_TARGET = "DD1296_FINAL_ALLIN_10BPS"
@@ -72,6 +77,9 @@ def validate_v4_activation(activation, args, desired, plan_hash, now):
     }
     if not isinstance(activation, dict) or set(activation) != fields:
         raise ValueError("V4 activation schema or fields invalid")
+    codex_ssh = getattr(args, "route", "GITHUB_ACTIONS") == "CODEX_SSH"
+    expected_operator = CODEX_SSH_OPERATOR if codex_ssh else args.owner
+    expected_ack = CODEX_V4_ACK if codex_ssh else V4_ACK
     checks = (
         activation["schema"] == EXECUTION_ACTIVATION_SCHEMA,
         activation["repository"] == REPO,
@@ -83,8 +91,8 @@ def validate_v4_activation(activation, args, desired, plan_hash, now):
         activation["approvedShaByRunner"] == desired["runners"],
         activation["approvedRunners"] == [V4_RUNNER],
         activation["ordersEnabled"] is True,
-        activation["operator"] == args.owner,
-        activation["operatorAcknowledgement"] == V4_ACK,
+        activation["operator"] == expected_operator,
+        activation["operatorAcknowledgement"] == expected_ack,
     )
     if not all(checks):
         raise ValueError("V4 operator activation does not match signed exact scope")
@@ -95,7 +103,31 @@ def validate_v4_activation(activation, args, desired, plan_hash, now):
     return activation
 
 
-def runtime_activation(activation, sha):
+def build_codex_v4_activation(args, desired, plan_hash, now):
+    """Build the exact V4 activation from authenticated root SSH only."""
+    if (args.route != "CODEX_SSH"
+            or args.owner != CODEX_SSH_OPERATOR
+            or getattr(args, "_codex_ssh_authenticated", False) is not True):
+        raise ValueError("Codex SSH V4 authority is not established")
+    return validate_v4_activation({
+        "schema": EXECUTION_ACTIVATION_SCHEMA,
+        "repository": REPO,
+        "deploymentTarget": DEPLOYMENT_TARGET,
+        "operatorTarget": OPERATOR_TARGET,
+        "scope": V4_SCOPE,
+        "approvedSha": args.sha,
+        "approvedShaByRunner": desired["runners"],
+        "approvedRunners": [V4_RUNNER],
+        "planSha256": plan_hash,
+        "ordersEnabled": True,
+        "operator": CODEX_SSH_OPERATOR,
+        "approvedAt": now,
+        "expiresAt": now + 300,
+        "operatorAcknowledgement": CODEX_V4_ACK,
+    }, args, desired, plan_hash, now)
+
+
+def runtime_activation(activation, sha, route="GITHUB_ACTIONS"):
     # PreStart operator gate accepts full live, but does not itself authorize
     # trading: the exact-scope root grant + venue checks are mandatory first.
     from datetime import datetime, timezone
@@ -105,6 +137,10 @@ def runtime_activation(activation, sha):
         "approvedShaByRunner": activation["approvedShaByRunner"],
         "approvedRunners": [V4_RUNNER],
         "target": RUNTIME_TARGET,
+        "route": route,
+        "authorizationMethod": (
+            "ROOT_SSH_SESSION" if route == "CODEX_SSH"
+            else "OWNER_SIGNED_TOKEN"),
         "ordersEnabled": True,
         "activationClass": "FULL_LIVE",
         "operatorAcknowledgement": RUNTIME_ACK,
@@ -151,13 +187,19 @@ class V4RootExecutor:
         _assert_execution_root(c.root_uid)
         if (args.deployment_target != DEPLOYMENT_TARGET or
                 args.operator_target != OPERATOR_TARGET or
-                args.scope != V4_SCOPE or args.route != "GITHUB_ACTIONS"):
+                args.scope != V4_SCOPE or
+                args.route not in ("GITHUB_ACTIONS", "CODEX_SSH")):
             raise ValueError("V4 scope/target/route mismatch")
         orders = args.orders_enabled == "true"
         validate_order_permission(args.scope, orders)
         if not orders:
             raise ValueError("V4 live requires explicitly signed ordersEnabled=true")
-        if not isinstance(token, str) or not token.strip() or len(token) > 16384:
+        codex_ssh = args.route == "CODEX_SSH"
+        if codex_ssh and (args.owner != CODEX_SSH_OPERATOR
+                          or getattr(args, "_codex_ssh_authenticated", False) is not True):
+            raise ValueError("V4 Codex SSH authority is not established")
+        if not codex_ssh and (not isinstance(token, str)
+                              or not token.strip() or len(token) > 16384):
             raise ValueError("V4 missing signed owner approval")
         for directory in (
             paths.root, paths.root / "plans", paths.root / "plans" / V4_SCOPE,
@@ -169,7 +211,8 @@ class V4RootExecutor:
         # multiple runner gates; the approval file itself remains root-only
         # mode 0600. Never chmod this shared live directory to 0700.
         assert_root_trusted_dir(self.runtime_approval.parent, root_uid=c.root_uid)
-        assert_regular_secure(paths.public_key, root_uid=c.root_uid, private=True)
+        if not codex_ssh:
+            assert_regular_secure(paths.public_key, root_uid=c.root_uid, private=True)
         desired = read_root_json(
             paths.root / "plans" / V4_SCOPE / (args.sha + ".json"),
             root_uid=c.root_uid,
@@ -214,9 +257,13 @@ class V4RootExecutor:
                 any(x != "OPERATOR_LIVE_ACTIVATION_REQUIRED"
                     for x in readiness.get("blockers", []))):
             raise ValueError("V4 release readiness not certified")
-        activation = read_root_json(
-            paths.activation_dir / V4_SCOPE / (args.sha + ".json"),
-            root_uid=c.root_uid)
+        if codex_ssh:
+            activation = build_codex_v4_activation(
+                args, desired, plan_hash, c.clock())
+        else:
+            activation = read_root_json(
+                paths.activation_dir / V4_SCOPE / (args.sha + ".json"),
+                root_uid=c.root_uid)
         validate_v4_activation(activation, args, desired, plan_hash, c.clock())
         # Generate the pre-cutover witness from the signed read-only refresh
         # path immediately before any systemd or pin mutation.  The legacy V4
@@ -290,7 +337,8 @@ class V4RootExecutor:
             c.systemd.mask(old_unit)
             _atomic_json(paths.pins, next_manifest, root_uid=c.root_uid, private=False)
             _atomic_json(paths.current_plan, next_plan, root_uid=c.root_uid)
-            _atomic_json(self.runtime_approval, runtime_activation(activation, args.sha),
+            _atomic_json(self.runtime_approval,
+                         runtime_activation(activation, args.sha, args.route),
                          root_uid=c.root_uid, trusted_parent=True)
             if old_enabled:
                 c.systemd.enable(new_unit)

@@ -17,8 +17,11 @@ from disdex_unified_root_gate import (
     preflight, PREFIXES, STOP_OWNERS,
     ROOT, RELEASES, DeploymentPaths, RootDeploymentExecutor,
     certify_live_executor, build_peer_stop_certificate,
+    assert_codex_ssh_session, build_codex_ssh_authorization,
 )
-from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
+from disdex_deployment_contract import (
+    DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, CODEX_SSH_OPERATOR,
+)
 from disdex_deployment_plan import IDS, SCHEMA, digest
 from disdex_unified_forced_command import parse_original, HELPER, READINESS_HELPER, ALLOWED
 
@@ -50,6 +53,31 @@ def pins(releases=RELEASES):
                             "stopOwner":STOP_OWNERS[key]} for key in IDS}}
 
 class RootGateTest(unittest.TestCase):
+    def test_codex_ssh_requires_sshd_connection_metadata(self):
+        with self.assertRaisesRegex(ValueError, "authenticated Codex SSH"):
+            assert_codex_ssh_session({})
+        with self.assertRaisesRegex(ValueError, "authenticated Codex SSH"):
+            assert_codex_ssh_session({"SSH_CONNECTION": "203.0.113.10 22"})
+
+    def test_codex_ssh_authority_is_route_specific_and_has_no_owner_signature(self):
+        env = {
+            "SSH_CONNECTION": "203.0.113.10 54321 198.51.100.20 22",
+            "SSH_CLIENT": "203.0.113.10 54321 22",
+        }
+        authority = assert_codex_ssh_session(env)
+        self.assertEqual(authority["route"], "CODEX_SSH")
+        self.assertEqual(authority["operator"], CODEX_SSH_OPERATOR)
+        args = SimpleNamespace(
+            route="CODEX_SSH", owner=CODEX_SSH_OPERATOR, sha=NEW,
+            scope="V12_V4", plan_sha256="a" * 64, orders_enabled="true",
+            _codex_ssh_authenticated=True,
+        )
+        payload = build_codex_ssh_authorization(args, now=2_000_000_000)
+        self.assertEqual(payload["authorizationMethod"], "ROOT_SSH_SESSION")
+        self.assertFalse(payload["signatureVerified"])
+        self.assertEqual(payload["ordersEnabled"], True)
+        self.assertEqual(len(payload["nonce"]), 32)
+
     def test_pengu_peer_stop_certificate_is_explicit_no_order_authority(self):
         desired = plan("PENGU_V8")
         desired["sourceSha"] = OLD
@@ -297,8 +325,21 @@ class RootGateTest(unittest.TestCase):
     def test_forced_command_valid(self):
         args=[HELPER]
         for k in ALLOWED:
-            args += [k, "VALUE"]
+            args += [k, "GITHUB_ACTIONS" if k == "--route" else "VALUE"]
         args += ["--execute", "--read-approval-stdin"]
+        self.assertEqual(parse_original(" ".join(args)),args)
+
+    def test_forced_command_valid_codex_ssh_route(self):
+        args=[HELPER]
+        for k in ALLOWED:
+            if k == "--route":
+                value = "CODEX_SSH"
+            elif k == "--owner":
+                value = "codex-ssh"
+            else:
+                value = "VALUE"
+            args += [k, value]
+        args += ["--execute", "--codex-ssh"]
         self.assertEqual(parse_original(" ".join(args)),args)
     def test_wrong_target_before_files(self):
         args=SimpleNamespace(deployment_target="attacker",operator_target="DD1296_FINAL_ALLIN_10BPS",

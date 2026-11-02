@@ -2,10 +2,10 @@
 """DisDex root-side unified deployment gate.
 
 ``--preflight-readonly`` remains a non-mutating proof only.  ``--execute``
-is a separately guarded transaction boundary: at this stage it can mutate
-only the explicitly scoped Shared Risk Writer, with a root-owned activation
-artifact, a fresh signed read-only venue proof, a single-use approval nonce,
-and a mandatory rollback plus three-cycle audit.  Every other scope remains
+is a separately guarded transaction boundary. It accepts either the signed
+Actions route or the authenticated Codex root-SSH route, then still requires
+a root-owned exact plan, a fresh read-only venue proof, a single-use nonce, and
+a mandatory rollback plus three-cycle audit. Every other scope remains
 fail-closed until it has its own transaction and audit implementation.
 """
 from __future__ import annotations
@@ -25,6 +25,7 @@ from typing import Callable, Optional
 import uuid
 
 from disdex_deployment_contract import (
+    CODEX_SSH_AUTH_SCHEMA, CODEX_SSH_OPERATOR,
     DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, ROUTES, SCOPES,
     SHA, PLAN_HASH, validate_order_permission,
 )
@@ -173,6 +174,93 @@ def assert_private_dir(path: Path, *, root_uid=0):
     s = path.lstat()
     if not stat.S_ISDIR(s.st_mode) or s.st_uid != root_uid or s.st_mode & 0o077:
         raise ValueError("root-only directory required: " + str(path))
+
+
+def assert_codex_ssh_session(environment=None) -> dict:
+    """Authenticate the Codex direct route through the root SSH session.
+
+    The historical Codex deployment path already authenticated the operator by
+    the root SSH key.  ``CODEX_SSH`` therefore does not require an additional
+    owner signature.  It is still not a generic local-root bypass: the helper
+    must be reached through sshd, which supplies both connection variables, and
+    the caller must use the fixed ``codex-ssh`` operator identity.  The exact
+    SHA/plan/scope/order checks remain in the root executor.
+    """
+    env = os.environ if environment is None else environment
+    connection = str(env.get("SSH_CONNECTION", "")).split()
+    client = str(env.get("SSH_CLIENT", "")).split()
+    if (len(connection) != 4 or len(client) != 3
+            or not connection[1].isdigit() or not connection[3].isdigit()
+            or not client[1].isdigit() or not client[2].isdigit()
+            or not 1 <= int(connection[1]) <= 65535
+            or not 1 <= int(connection[3]) <= 65535
+            or not 1 <= int(client[1]) <= 65535
+            or not 1 <= int(client[2]) <= 65535):
+        raise ValueError("authenticated Codex SSH session required")
+    return {
+        "schema": CODEX_SSH_AUTH_SCHEMA,
+        "route": "CODEX_SSH",
+        "operator": CODEX_SSH_OPERATOR,
+        "authorizationMethod": "ROOT_SSH_SESSION",
+    }
+
+
+def build_codex_ssh_authorization(args, *, now: int | None = None) -> dict:
+    """Create an in-memory, short-lived root-SSH authorization record.
+
+    This is deliberately not a signed owner artifact and is never written as
+    an approval file.  The executor caches it for one invocation and consumes
+    its nonce in the root-owned nonce directory immediately before mutation.
+    """
+    if (getattr(args, "route", None) != "CODEX_SSH"
+            or getattr(args, "owner", None) != CODEX_SSH_OPERATOR
+            or getattr(args, "_codex_ssh_authenticated", False) is not True):
+        raise ValueError("Codex SSH authority is not established")
+    now = int(time.time()) if now is None else now
+    if type(now) is not int or now <= 0:
+        raise ValueError("Codex SSH authorization time invalid")
+    orders_enabled = getattr(args, "orders_enabled", None) == "true"
+    validate_order_permission(args.scope, orders_enabled)
+    nonce = getattr(args, "_codex_ssh_nonce", None)
+    if nonce is None:
+        nonce = uuid.uuid4().hex
+        setattr(args, "_codex_ssh_nonce", nonce)
+    payload = {
+        "schema": CODEX_SSH_AUTH_SCHEMA,
+        "repository": REPO,
+        "deploymentTarget": DEPLOYMENT_TARGET,
+        "operatorTarget": OPERATOR_TARGET,
+        "route": "CODEX_SSH",
+        "sourceSha": args.sha,
+        "scope": args.scope,
+        "operator": CODEX_SSH_OPERATOR,
+        "nonce": nonce,
+        "planSha256": args.plan_sha256,
+        "ordersEnabled": orders_enabled,
+        "issuedAt": now,
+        "expiresAt": now + 300,
+        "authorizationMethod": "ROOT_SSH_SESSION",
+        "signatureVerified": False,
+    }
+    setattr(args, "_codex_ssh_authorization", payload)
+    return payload
+
+
+def _consume_codex_ssh_nonce(nonce_dir: Path, nonce: str, *, root_uid: int) -> None:
+    assert_private_dir(nonce_dir, root_uid=root_uid)
+    if not re.fullmatch(r"[0-9a-f]{32}", nonce):
+        raise ValueError("Codex SSH nonce invalid")
+    path = nonce_dir / nonce
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(path, flags, 0o600)
+    except FileExistsError:
+        raise
+    try:
+        os.write(fd, b"CODEX_SSH\n")
+        os.fsync(fd)
+    finally:
+        os.close(fd)
 
 
 def assert_root_trusted_dir(path: Path, *, root_uid=0):
@@ -487,6 +575,14 @@ class RootDeploymentExecutor:
         return resolved.name
 
     def _verify_token(self, args, token: str, *, nonce_dir=None):
+        if args.route == "CODEX_SSH":
+            payload = getattr(args, "_codex_ssh_authorization", None)
+            if payload is None:
+                payload = build_codex_ssh_authorization(args, now=self.clock())
+            if nonce_dir is not None:
+                _consume_codex_ssh_nonce(
+                    nonce_dir, payload["nonce"], root_uid=self.root_uid)
+            return payload
         return self.verify_fn(
             token,
             self.paths.public_key,
@@ -553,7 +649,8 @@ class RootDeploymentExecutor:
             paths.nonce_dir, paths.receipts, peer_stop_dir,
         ):
             assert_private_dir(directory, root_uid=self.root_uid)
-        assert_regular_secure(paths.public_key, root_uid=self.root_uid, private=True)
+        if args.route != "CODEX_SSH":
+            assert_regular_secure(paths.public_key, root_uid=self.root_uid, private=True)
         desired = read_root_json(
             paths.root / "plans" / PENGU_SCOPE / (args.sha + ".json"),
             root_uid=self.root_uid,
@@ -587,8 +684,9 @@ class RootDeploymentExecutor:
         approval_path = peer_stop_dir / f"{PENGU_SCOPE}-{args.sha}.json"
         if approval_path.exists() or approval_path.is_symlink():
             raise ValueError("PENGU peer-stop approval already exists")
-        if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
-            raise ValueError("missing signed approval")
+        if args.route != "CODEX_SSH":
+            if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
+                raise ValueError("missing signed approval")
         payload = self._verify_token(args, token)
         nonce = payload.get("nonce")
         if not isinstance(nonce, str):
@@ -643,15 +741,17 @@ class RootDeploymentExecutor:
         validate_order_permission(args.scope, orders_enabled)
         if orders_enabled:
             raise ValueError("Shared Risk-only cannot enable orders")
-        if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
-            raise ValueError("missing signed approval")
+        if args.route != "CODEX_SSH":
+            if not isinstance(token, str) or not token.strip() or len(token) > 16_384:
+                raise ValueError("missing signed approval")
 
         assert_private_dir(self.paths.root, root_uid=self.root_uid)
         assert_private_dir(self.paths.root / "plans", root_uid=self.root_uid)
         assert_private_dir(self.paths.nonce_dir, root_uid=self.root_uid)
         assert_private_dir(self.paths.activation_dir, root_uid=self.root_uid)
         assert_private_dir(self.paths.receipts, root_uid=self.root_uid)
-        assert_regular_secure(self.paths.public_key, root_uid=self.root_uid, private=True)
+        if args.route != "CODEX_SSH":
+            assert_regular_secure(self.paths.public_key, root_uid=self.root_uid, private=True)
         desired_path = self.paths.root / "plans" / args.scope / f"{args.sha}.json"
         assert_private_dir(desired_path.parent, root_uid=self.root_uid)
         desired = read_root_json(desired_path, root_uid=self.root_uid, private=True)
@@ -865,6 +965,10 @@ def certify_live_executor() -> dict:
         "ordersEnabled": False,
         "requiresRoot": True,
         "requiresOwnerSignature": True,
+        "requiresOwnerSignatureByRoute": {
+            "GITHUB_ACTIONS": True,
+            "CODEX_SSH": False,
+        },
         "singleUseNonce": True,
         "requiresFreshVenueEvidence": True,
         "preservesCurrentSymlink": True,
@@ -872,6 +976,10 @@ def certify_live_executor() -> dict:
         "requiresRollback": True,
         "auditCycles": 3,
         "productionActivation": "OWNER_SIGNED_TOKEN_REQUIRED",
+        "productionActivationByRoute": {
+            "GITHUB_ACTIONS": "OWNER_SIGNED_TOKEN_REQUIRED",
+            "CODEX_SSH": "ROOT_SSH_SESSION_REQUIRED",
+        },
     }
 
 def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
@@ -884,13 +992,21 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         raise ValueError("unapproved deployment target or identity")
     orders_enabled = args.orders_enabled == "true"
     validate_order_permission(args.scope, orders_enabled)
-    if not isinstance(token, str) or len(token) > 16384 or not token.strip():
-        raise ValueError("missing signed approval")
+    codex_ssh = args.route == "CODEX_SSH"
+    if codex_ssh:
+        if (args.owner != CODEX_SSH_OPERATOR
+                or getattr(args, "_codex_ssh_authenticated", False) is not True):
+            raise ValueError("authenticated Codex SSH session required")
+        payload = build_codex_ssh_authorization(args, now=int(time.time()))
+    else:
+        if not isinstance(token, str) or len(token) > 16384 or not token.strip():
+            raise ValueError("missing signed approval")
     # The following paths must be provisioned only by a root operator, not
     # by GPT, Actions, or a repo checkout (which may be deploy-writable).
     assert_private_dir(root, root_uid=root_uid)
     assert_private_dir(root / "plans", root_uid=root_uid)
-    assert_regular_secure(root / "owner-approval-public.pem", root_uid=root_uid)
+    if not codex_ssh:
+        assert_regular_secure(root / "owner-approval-public.pem", root_uid=root_uid)
     assert_regular_secure(pins_path, root_uid=root_uid)
     assert_private_dir(root / "plans" / args.scope, root_uid=root_uid)
     desired = read_root_json(root / "plans" / args.scope / (args.sha + ".json"),
@@ -929,11 +1045,12 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         validate_release_roots(desired, releases, root_uid=root_uid)
         for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
             release_marker(sha, releases, root_uid=root_uid)
-    # Verify signature but DO NOT consume a nonce here: a read-only preflight
-    # cannot authorize or burn the owner's one-use LIVE grant.
-    payload = verify(token, root / "owner-approval-public.pem", REPO,
-                     args.sha, args.scope, args.owner, args.plan_sha256,
-                     route=args.route, orders_enabled=orders_enabled)
+    # Verify the owner signature, or establish the root-SSH route.  Neither
+    # branch consumes an execution nonce during read-only preflight.
+    if not codex_ssh:
+        payload = verify(token, root / "owner-approval-public.pem", REPO,
+                         args.sha, args.scope, args.owner, args.plan_sha256,
+                         route=args.route, orders_enabled=orders_enabled)
     if payload["deploymentTarget"] != DEPLOYMENT_TARGET or payload["operatorTarget"] != OPERATOR_TARGET:
         raise ValueError("signed target differs")
     certification = certify_live_executor()
@@ -957,6 +1074,8 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         "targetSha": args.sha,
         "scope": args.scope,
         "route": args.route,
+        "authorizationMethod": payload["authorizationMethod"]
+            if codex_ssh else "OWNER_SIGNED_TOKEN",
         "ordersEnabled": orders_enabled,
         "planSha256": sha_hash,
         "changedRunners": diff["changedRunners"],
@@ -992,6 +1111,7 @@ def main():
     p.add_argument("--route", required=True, choices=sorted(ROUTES))
     p.add_argument("--owner", required=True)
     p.add_argument("--read-approval-stdin", action="store_true")
+    p.add_argument("--codex-ssh", action="store_true")
     mode = p.add_mutually_exclusive_group(required=True)
     mode.add_argument("--preflight-readonly", action="store_true")
     mode.add_argument("--execute", action="store_true")
@@ -999,11 +1119,19 @@ def main():
     try:
         if os.geteuid() != 0:
             raise ValueError("root authority required")
-        if not args.read_approval_stdin:
-            raise ValueError("stdin owner approval is mandatory")
-        raw = sys.stdin.read(16385)
-        if len(raw) > 16384:
-            raise ValueError("owner approval too large")
+        if args.route == "CODEX_SSH":
+            if (not args.codex_ssh or args.read_approval_stdin
+                    or args.owner != CODEX_SSH_OPERATOR):
+                raise ValueError("CODEX_SSH requires the fixed Codex SSH route")
+            assert_codex_ssh_session()
+            args._codex_ssh_authenticated = True
+            raw = ""
+        else:
+            if args.codex_ssh or not args.read_approval_stdin:
+                raise ValueError("stdin owner approval is mandatory")
+            raw = sys.stdin.read(16385)
+            if len(raw) > 16384:
+                raise ValueError("owner approval too large")
         if args.execute:
             # Exclusive root-owned lock across GitHub Actions / CODEX_SSH paths.
             # An Actions concurrency group alone cannot serialize VPS writers.

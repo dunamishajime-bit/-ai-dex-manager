@@ -5,6 +5,8 @@ import re
 REPO = "dunamishajime-bit/-ai-dex-manager"
 DEPLOYMENT_TARGET = "professional-dismanager.net"
 OPERATOR_TARGET = "DD1296_FINAL_ALLIN_10BPS"
+CODEX_SSH_OPERATOR = "codex-ssh"
+CODEX_SSH_AUTH_SCHEMA = "disdex-codex-ssh-root-auth/v1"
 ROUTES = frozenset(("GITHUB_ACTIONS", "CODEX_SSH"))
 SCOPES = frozenset((
     "FULL_PROJECT", "V12_V4", "QUALITY102_CAUSAL_V1", "V52", "PENGU_V8",

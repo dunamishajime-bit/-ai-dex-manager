@@ -5,6 +5,8 @@ import re
 import shlex
 import sys
 
+from disdex_deployment_contract import CODEX_SSH_OPERATOR
+
 HELPER = "/usr/local/sbin/disdex-unified-production-deploy"
 READINESS_HELPER = "/usr/local/sbin/disdex-v4-live-readiness"
 IDLE_FLAT_REPAIR_HELPER = "/usr/local/sbin/disdex-idle-residual-flat-stale-repair"
@@ -37,10 +39,14 @@ def parse_original(value):
             and argv[1] == "--install"
             and argv[2] == "--sha" and SHA_RE.fullmatch(argv[3] or "")
             and argv[4] == "--operator" and LOGIN_RE.fullmatch(argv[5] or "")
-            and argv[6] == "--route" and argv[7] == "GITHUB_ACTIONS"
-            and argv[8] == "--plan-sha256" and PLAN_RE.fullmatch(argv[9] or "")
-            and argv[10] == "--token-stdin"):
-        return argv
+            and argv[6] == "--route"
+            and argv[8] == "--plan-sha256" and PLAN_RE.fullmatch(argv[9] or "")):
+        if argv[7] == "GITHUB_ACTIONS" and argv[10] == "--token-stdin":
+            return argv
+        if (argv[7] == "CODEX_SSH" and argv[5] == CODEX_SSH_OPERATOR
+                and argv[10] == "--codex-ssh"):
+            return argv
+        raise ValueError("invalid refresh authorization route")
     if not argv or argv[0] != HELPER:
         raise ValueError("invalid forced-command target")
     if len(argv) != 1 + len(ALLOWED) * 2 + 2:
@@ -49,14 +55,23 @@ def parse_original(value):
     mode_index = len(ALLOWED) * 2
     if arguments[mode_index] not in MODES:
         raise ValueError("invalid forced-command mode")
-    if arguments[mode_index + 1] != "--read-approval-stdin":
-        raise ValueError("missing required signed approval flag")
+    terminal_flag = arguments[mode_index + 1]
     for index, field in enumerate(ALLOWED):
         if arguments[2 * index] != field:
             raise ValueError("invalid forced-command flag order")
         value = arguments[2 * index + 1]
         if not value or len(value) > 128 or value.startswith("-"):
             raise ValueError("invalid forced-command argument")
+    route = arguments[2 * ALLOWED.index("--route") + 1]
+    owner = arguments[2 * ALLOWED.index("--owner") + 1]
+    if terminal_flag == "--read-approval-stdin":
+        if route != "GITHUB_ACTIONS":
+            raise ValueError("signed approval route mismatch")
+    elif terminal_flag == "--codex-ssh":
+        if route != "CODEX_SSH" or owner != CODEX_SSH_OPERATOR:
+            raise ValueError("invalid Codex SSH authorization")
+    else:
+        raise ValueError("invalid forced-command authorization mode")
     return argv
 
 def main():

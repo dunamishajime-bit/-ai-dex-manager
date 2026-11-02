@@ -122,10 +122,14 @@ jobs:
           assert 'password:' not in p
           adapter = Path('scripts/ops/deploy/disdex_codex_ssh.py').read_text()
           assert 'CODEX_SSH' in adapter
+          assert '--codex-ssh' in adapter
+          assert 'CODEX_SSH_OPERATOR' in adapter
           assert '/usr/local/sbin/disdex-unified-production-deploy' in adapter
           assert 'shell=True' not in adapter
           assert 'subprocess.run(command' in adapter
           root_gate = Path('scripts/ops/deploy/disdex_unified_root_gate.py').read_text()
+          assert 'def assert_codex_ssh_session' in root_gate
+          assert 'ROOT_SSH_SESSION' in root_gate
           assert 'def certify_live_executor' in root_gate
           assert 'LIVE_EXECUTOR_CONTRACT_CERTIFIED' in root_gate
           assert 'LIVE_EXECUTOR_NOT_CERTIFIED' not in root_gate

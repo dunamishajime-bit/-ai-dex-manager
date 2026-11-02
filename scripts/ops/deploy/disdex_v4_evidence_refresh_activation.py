@@ -21,6 +21,8 @@ import time
 from typing import Callable
 
 from disdex_deployment_contract import (
+    CODEX_SSH_AUTH_SCHEMA,
+    CODEX_SSH_OPERATOR,
     DEPLOYMENT_TARGET,
     OPERATOR_TARGET,
     REPO,
@@ -29,6 +31,7 @@ from disdex_deployment_contract import (
     validate_order_permission,
 )
 from disdex_owner_approval import verify
+from disdex_unified_root_gate import assert_codex_ssh_session
 
 REFRESH_SCOPE = "V4_EVIDENCE_REFRESH_ONLY"
 REFRESH_LEASE_SCHEMA = "disdex-v4-evidence-refresh-lease/v1"
@@ -48,6 +51,7 @@ LEASE_FIELDS = frozenset({
     "schema", "repository", "deploymentTarget", "operatorTarget", "scope", "route",
     "approvedSha", "approvedRunner", "approvedRunners", "approvedShaByRunner",
     "releaseRoot", "evidenceRoot", "outputPath", "planSha256", "ordersEnabled", "signatureVerified",
+    "authorizationMethod",
     "approvalNonceDigest", "approvalIssuedAt", "approvalExpiresAt", "approvedAt",
     "expiresAt", "leaseId",
 })
@@ -93,7 +97,9 @@ def refresh_plan_sha256(sha: str) -> str:
 def _assert_approval_shape(approval: dict) -> None:
     if not isinstance(approval, dict):
         raise ValueError("approval must be an object")
-    if (approval.get("schema") != "disdex-owner-deployment-approval/v2"
+    owner_signed = approval.get("schema") == "disdex-owner-deployment-approval/v2"
+    codex_ssh = approval.get("schema") == CODEX_SSH_AUTH_SCHEMA
+    if ((not owner_signed and not codex_ssh)
             or approval.get("repository") != REPO
             or approval.get("deploymentTarget") != DEPLOYMENT_TARGET
             or approval.get("operatorTarget") != OPERATOR_TARGET
@@ -104,7 +110,8 @@ def _assert_approval_shape(approval: dict) -> None:
     if not isinstance(sha, str) or not SHA.fullmatch(sha):
         raise ValueError("refresh approval SHA invalid")
     operator = approval.get("operator")
-    if not isinstance(operator, str) or not LOGIN.fullmatch(operator):
+    if (not isinstance(operator, str) or not LOGIN.fullmatch(operator)
+            or (codex_ssh and operator != CODEX_SSH_OPERATOR)):
         raise ValueError("refresh approval operator invalid")
     if approval.get("route") not in ROUTES:
         raise ValueError("refresh approval route invalid")
@@ -113,6 +120,11 @@ def _assert_approval_shape(approval: dict) -> None:
     nonce = approval.get("nonce")
     if not isinstance(nonce, str) or not HEX32.fullmatch(nonce):
         raise ValueError("refresh approval nonce invalid")
+    expected_method = "ROOT_SSH_SESSION" if codex_ssh else "OWNER_SIGNED_TOKEN"
+    if approval.get("authorizationMethod", "OWNER_SIGNED_TOKEN") != expected_method:
+        raise ValueError("refresh approval authorization method invalid")
+    if approval.get("signatureVerified", True) is not (not codex_ssh):
+        raise ValueError("refresh approval signature state invalid")
     issued = approval.get("issuedAt")
     expires = approval.get("expiresAt")
     if (type(issued) is not int or type(expires) is not int
@@ -148,7 +160,8 @@ def build_refresh_lease(approval: dict, *, now: int | None = None,
         "outputPath": REFRESH_OUTPUT_PATH,
         "planSha256": approval["planSha256"],
         "ordersEnabled": False,
-        "signatureVerified": True,
+        "signatureVerified": approval.get("signatureVerified", True),
+        "authorizationMethod": approval.get("authorizationMethod", "OWNER_SIGNED_TOKEN"),
         "approvalNonceDigest": hashlib.sha256(approval["nonce"].encode("ascii")).hexdigest(),
         "approvalIssuedAt": approval["issuedAt"],
         "approvalExpiresAt": approval["expiresAt"],
@@ -178,10 +191,15 @@ def validate_refresh_lease(lease: dict, *, sha: str, now: int | None = None,
         raise ValueError("refresh lease path mismatch")
     if lease.get("ordersEnabled") is not False:
         raise ValueError("refresh lease orders are not allowed")
-    if lease.get("signatureVerified") is not True:
-        raise ValueError("refresh lease signature not verified")
     if lease.get("route") not in ROUTES:
         raise ValueError("refresh lease route invalid")
+    if lease.get("signatureVerified") is True:
+        if lease.get("authorizationMethod") != "OWNER_SIGNED_TOKEN":
+            raise ValueError("refresh lease authorization method invalid")
+    elif (lease.get("route") != "CODEX_SSH"
+          or lease.get("signatureVerified") is not False
+          or lease.get("authorizationMethod") != "ROOT_SSH_SESSION"):
+        raise ValueError("refresh lease authorization not verified")
     if not PLAN_HASH.fullmatch(str(lease.get("planSha256", ""))) or lease["planSha256"] != refresh_plan_sha256(sha):
         raise ValueError("refresh lease plan mismatch")
     if not HEX64.fullmatch(str(lease.get("approvalNonceDigest", ""))) or not HEX32.fullmatch(str(lease.get("leaseId", ""))):
@@ -274,10 +292,51 @@ def _write_root_json(path: Path, value: dict) -> None:
             pass
 
 
+def _consume_codex_nonce(nonce_dir: Path, nonce: str) -> None:
+    _private_dir(nonce_dir)
+    path = nonce_dir / nonce
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags, 0o600)
+    try:
+        os.write(fd, b"CODEX_SSH_REFRESH\n")
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def build_codex_refresh_approval(*, sha: str, plan_sha256: str,
+                                 now: int, nonce: str | None = None) -> dict:
+    if not SHA.fullmatch(sha) or plan_sha256 != refresh_plan_sha256(sha):
+        raise ValueError("refresh plan mismatch")
+    if type(now) is not int or now <= 0:
+        raise ValueError("refresh approval time invalid")
+    nonce = secrets.token_hex(16) if nonce is None else nonce
+    if not HEX32.fullmatch(nonce):
+        raise ValueError("refresh approval nonce invalid")
+    return {
+        "schema": CODEX_SSH_AUTH_SCHEMA,
+        "repository": REPO,
+        "deploymentTarget": DEPLOYMENT_TARGET,
+        "operatorTarget": OPERATOR_TARGET,
+        "route": "CODEX_SSH",
+        "sourceSha": sha,
+        "scope": REFRESH_SCOPE,
+        "operator": CODEX_SSH_OPERATOR,
+        "nonce": nonce,
+        "issuedAt": now,
+        "expiresAt": now + 300,
+        "planSha256": plan_sha256,
+        "ordersEnabled": False,
+        "authorizationMethod": "ROOT_SSH_SESSION",
+        "signatureVerified": False,
+    }
+
+
 def install_refresh_lease(*, token: str, sha: str, operator: str,
                           route: str, plan_sha256: str, public_key: Path,
                           nonce_dir: Path, lease_path: Path,
-                          now: int | None = None, verify_fn: Callable = verify) -> dict:
+                          now: int | None = None, verify_fn: Callable = verify,
+                          codex_ssh_authenticated: bool = False) -> dict:
     _assert_root()
     now = int(time.time()) if now is None else now
     if type(now) is not int or now <= 0:
@@ -299,28 +358,41 @@ def install_refresh_lease(*, token: str, sha: str, operator: str,
         except (OSError, ValueError, json.JSONDecodeError) as error:
             raise ValueError("existing refresh lease is invalid; refusing overwrite") from error
         validate_refresh_renewal_window(existing, now=now)
-    approval = verify_fn(
-        token,
-        public_key,
-        REPO,
-        sha,
-        REFRESH_SCOPE,
-        operator,
-        plan_sha256,
-        now=now,
-        nonce_dir=nonce_dir,
-        route=route,
-        deployment_target=DEPLOYMENT_TARGET,
-        operator_target=OPERATOR_TARGET,
-        orders_enabled=False,
-    )
+    if route == "CODEX_SSH":
+        if operator != CODEX_SSH_OPERATOR or not codex_ssh_authenticated:
+            raise ValueError("authenticated Codex SSH session required")
+        assert_codex_ssh_session()
+        approval = build_codex_refresh_approval(
+            sha=sha, plan_sha256=plan_sha256, now=now)
+        try:
+            _consume_codex_nonce(nonce_dir, approval["nonce"])
+        except FileExistsError:
+            raise ValueError("refresh approval replay") from None
+    else:
+        approval = verify_fn(
+            token,
+            public_key,
+            REPO,
+            sha,
+            REFRESH_SCOPE,
+            operator,
+            plan_sha256,
+            now=now,
+            nonce_dir=nonce_dir,
+            route=route,
+            deployment_target=DEPLOYMENT_TARGET,
+            operator_target=OPERATOR_TARGET,
+            orders_enabled=False,
+        )
     require_fresh_refresh_approval(existing, approval)
     lease = build_refresh_lease(approval, now=now)
     validate_refresh_lease(lease, sha=sha, now=now)
     _write_root_json(lease_path, lease)
     return {"status": "V4_REFRESH_LEASE_INSTALLED", "scope": REFRESH_SCOPE,
             "approvedSha": sha, "ordersEnabled": False,
-            "leasePath": str(lease_path), "signatureVerified": True}
+            "leasePath": str(lease_path),
+            "signatureVerified": lease["signatureVerified"],
+            "authorizationMethod": lease["authorizationMethod"]}
 
 
 def main() -> int:
@@ -330,21 +402,30 @@ def main() -> int:
     parser.add_argument("--operator", required=True)
     parser.add_argument("--route", required=True, choices=sorted(ROUTES))
     parser.add_argument("--plan-sha256", required=True)
-    parser.add_argument("--token-stdin", action="store_true", required=True)
+    auth = parser.add_mutually_exclusive_group(required=True)
+    auth.add_argument("--token-stdin", action="store_true")
+    auth.add_argument("--codex-ssh", action="store_true")
     parser.add_argument("--public-key", default="/var/lib/disdex/unified-deploy/owner-approval-public.pem")
     parser.add_argument("--nonce-dir", default="/var/lib/disdex/unified-deploy/nonces")
     args = parser.parse_args()
     try:
         if not SHA.fullmatch(args.sha) or not LOGIN.fullmatch(args.operator):
             raise ValueError("refresh identity invalid")
-        token = sys.stdin.read(16_385)
-        if len(token) > 16_384:
-            raise ValueError("owner approval too large")
+        if args.codex_ssh:
+            if args.route != "CODEX_SSH" or args.operator != CODEX_SSH_OPERATOR:
+                raise ValueError("Codex SSH refresh identity invalid")
+            assert_codex_ssh_session()
+            token = ""
+        else:
+            token = sys.stdin.read(16_385)
+            if len(token) > 16_384:
+                raise ValueError("owner approval too large")
         result = install_refresh_lease(
             token=token.strip(), sha=args.sha, operator=args.operator,
             route=args.route, plan_sha256=args.plan_sha256,
             public_key=Path(args.public_key), nonce_dir=Path(args.nonce_dir),
             lease_path=expected_lease_path(args.sha),
+            codex_ssh_authenticated=args.codex_ssh,
         )
         print(json.dumps(result, sort_keys=True))
         return 0

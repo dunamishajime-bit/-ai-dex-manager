@@ -52,6 +52,17 @@ class ReadinessFailsClosed(unittest.TestCase):
         self.assertIn("OWNER_SIGNATURE_AND_GITHUB_REVIEW_NOT_ATTESTED",b)
         self.assertIn("VENUE_SIGNED_STOP_PRESERVATION_NOT_ATTESTED",b)
 
+    def test_codex_root_ssh_activation_is_not_reported_as_missing_owner_signature(self):
+        s=self.baseline()
+        s["candidateSha"] = s["currentReleaseSha"]
+        s["authorization"] = {
+            "route": "CODEX_SSH",
+            "authorizationMethod": "ROOT_SSH_SESSION",
+            "approvedSha": s["currentReleaseSha"],
+            "ordersEnabled": True,
+        }
+        self.assertNotIn("OWNER_SIGNATURE_AND_GITHUB_REVIEW_NOT_ATTESTED", assess(s))
+
     def test_active_kill_switch_old_v4_failed_and_unowned_legacy_block(self):
         s=self.baseline()
         s["killSwitchActive"]=True
