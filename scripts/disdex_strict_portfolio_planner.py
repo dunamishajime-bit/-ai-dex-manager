@@ -505,6 +505,36 @@ def validate_gross_snapshot(snapshot: Mapping[str, object], caps: StrictPortfoli
     return {"equityUsd": equity, "cryptoGross": crypto, "stockGross": stock, "totalGross": total}
 
 
+def v52_shared_total_reclaim_required(
+    snapshot: Mapping[str, object],
+    requested_gross: float,
+    slot_cap: float,
+    caps: StrictPortfolioCaps = STRICT_CAPS,
+    *,
+    candidate_worst_case_gross: float | None = None,
+) -> bool:
+    current = validate_gross_snapshot(snapshot, caps)
+    requested = _finite(requested_gross, "REQUESTED_GROSS")
+    per_slot = _finite(slot_cap, "V52_SLOT_CAP")
+    if requested <= EPSILON:
+        return False
+    if requested < 0 or per_slot < 0:
+        raise RuntimeError("STRICT_PORTFOLIO_NEGATIVE_REQUEST")
+    if requested > per_slot + EPSILON:
+        return False
+    worst_case = requested if candidate_worst_case_gross is None else _finite(
+        candidate_worst_case_gross, "V52_CANDIDATE_WORST_CASE_GROSS"
+    )
+    if worst_case < requested - EPSILON:
+        raise RuntimeError("STRICT_PORTFOLIO_WORST_CASE_BELOW_NOMINAL")
+    worst_case_ratio = worst_case / requested
+    stock_residual = max(0.0, caps.stock_gross - current["stockGross"])
+    total_residual = max(0.0, caps.total_gross - current["totalGross"])
+    stock_can_fit = stock_residual / worst_case_ratio + EPSILON >= requested
+    total_can_fit = total_residual / worst_case_ratio + EPSILON >= requested
+    return stock_can_fit and not total_can_fit
+
+
 def plan_v52_stock_capacity(
     snapshot: Mapping[str, object],
     requested_gross: float,

@@ -14,6 +14,7 @@ from disdex_strict_portfolio_planner import (
     STRICT_CAPS,
     assert_strict_live_configuration,
     plan_v52_stock_capacity,
+    v52_shared_total_reclaim_required,
     self_test as strict_planner_self_test,
     validate_gross_snapshot,
 )
@@ -447,11 +448,23 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         # The tick loop may safely retry such a decision inside the same entry window.
         self._v52_last_entry_blocked_before_order = False
         if self.live:
-            target_gross = self._prepare_idle_residual_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_hype_zec_for_stock_entry(slot, candidate, target_gross)
+            slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+
+            def reclaim_required() -> bool:
+                snapshot = self._pending_adjusted_snapshot(self.gross_snapshot())
+                self.assert_gross_safe(snapshot)
+                return v52_shared_total_reclaim_required(snapshot, target_gross, slot_cap)
+
+            if reclaim_required():
+                target_gross = self._prepare_idle_residual_for_stock_entry(slot, target_gross)
+            if reclaim_required():
+                target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
+            if reclaim_required():
+                target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
+            if reclaim_required():
+                target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
+            if reclaim_required():
+                target_gross = self._prepare_hype_zec_for_stock_entry(slot, candidate, target_gross)
         snapshot = self._pending_adjusted_snapshot(self.gross_snapshot())
         self.assert_gross_safe(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
