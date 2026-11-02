@@ -13,6 +13,12 @@ on:
       - 'tests/test_disdex_deployment_plan.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_v4_live_readiness.py'
+      - 'tests/test_disdex_v4_live_readiness.py'
+      - 'scripts/ops/root/disdex-idle-residual-flat-stale-repair.py'
+      - 'tests/test_disdex_idle_flat_stale_recovery.py'
+      - 'tests/test_disdex_v4_root_cutover.py'
       - 'scripts/ops/deploy/disdex_unified_forced_command.py'
       - 'scripts/ops/root/disdex-unified-production-deploy'
       - 'scripts/ops/root/install-disdex-unified-deployment'
@@ -34,6 +40,12 @@ on:
       - 'tests/test_disdex_deployment_plan.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_v4_live_readiness.py'
+      - 'tests/test_disdex_v4_live_readiness.py'
+      - 'scripts/ops/root/disdex-idle-residual-flat-stale-repair.py'
+      - 'tests/test_disdex_idle_flat_stale_recovery.py'
+      - 'tests/test_disdex_v4_root_cutover.py'
       - 'scripts/ops/deploy/disdex_unified_forced_command.py'
       - 'scripts/ops/root/disdex-unified-production-deploy'
       - 'scripts/ops/root/install-disdex-unified-deployment'
@@ -61,6 +73,12 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_disdex_deployment_plan.py -v
       - name: Root-side read-only preflight and forced-command tests
         run: python3 -m unittest discover -s tests -p test_disdex_unified_root_gate.py -v
+      - name: Strict flat IDLE residual venue witness tests
+        run: python3 -m unittest discover -s tests -p test_disdex_idle_flat_stale_recovery.py -v
+      - name: Read-only live-readiness inventory fail-closed test
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_live_readiness.py -v
+      - name: V4 exact-scope rollback and owner approval tests
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_root_cutover.py -v
       - name: Root helper installer contract tests
         run: python3 -m unittest discover -s tests -p test_disdex_unified_helper_installer.py -v
       - name: Audit legacy VPS SSH paths (read-only inventory)
@@ -74,6 +92,7 @@ jobs:
             scripts/ops/deploy/disdex_deployment_plan.py \
             scripts/ops/deploy/disdex_codex_ssh.py \
             scripts/ops/deploy/disdex_unified_root_gate.py \
+            scripts/ops/deploy/disdex_v4_root_cutover.py \
             scripts/ops/deploy/disdex_unified_forced_command.py
           python3 - <<'PY'
           from pathlib import Path

@@ -13,13 +13,14 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "ops" / "deploy"))
 from disdex_unified_root_gate import (
     parse_live_pins, validate_bootstrap_plan, release_marker,
     auxiliary_release_marker,
-    assert_regular_secure, assert_private_dir, preflight, PREFIXES, STOP_OWNERS,
+    assert_regular_secure, assert_private_dir, assert_root_trusted_dir, _atomic_json,
+    preflight, PREFIXES, STOP_OWNERS,
     ROOT, RELEASES, DeploymentPaths, RootDeploymentExecutor,
     certify_live_executor,
 )
 from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
 from disdex_deployment_plan import IDS, SCHEMA, digest
-from disdex_unified_forced_command import parse_original, HELPER, ALLOWED
+from disdex_unified_forced_command import parse_original, HELPER, READINESS_HELPER, ALLOWED
 
 OLD="7"*40
 NEW="c"*40
@@ -163,6 +164,81 @@ class RootGateTest(unittest.TestCase):
             p.chmod(0o777)
             with self.assertRaisesRegex(ValueError,"root-only"):
                 assert_private_dir(p,root_uid=__import__("os").geteuid())
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_public_runner_pins_can_be_published_under_trusted_etc_dir(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            directory = root / "etc-disdex"
+            directory.mkdir(mode=0o755)
+            directory.chmod(0o755)
+            target = directory / "runner-pins.json"
+            _atomic_json(target, {"schema": "test-pins"}, root_uid=os.geteuid(), private=False)
+            self.assertEqual(json.loads(target.read_text())["schema"], "test-pins")
+            self.assertEqual(target.stat().st_mode & 0o777, 0o644)
+
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_private_operator_artifact_in_trusted_root_public_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp) / "shared-operator-activation"
+            directory.mkdir(mode=0o755)
+            directory.chmod(0o755)
+            target = directory / "v12-v4-full.json"
+            _atomic_json(target, {"approvedSha": "x" * 40},
+                         root_uid=os.geteuid(), private=True,
+                         trusted_parent=True)
+            self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(json.loads(target.read_text())["approvedSha"], "x" * 40)
+
+    @unittest.skipIf(os.name == "nt", "Linux root-owned fixture required")
+    def test_public_pins_reject_writable_parent_and_symlink(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            directory = root / "unsafe"
+            directory.mkdir(mode=0o777)
+            directory.chmod(0o777)
+            target = directory / "runner-pins.json"
+            with self.assertRaisesRegex(ValueError, "non-writable directory"):
+                _atomic_json(target, {"schema": "unsafe"}, root_uid=os.geteuid(), private=False)
+            directory.chmod(0o755)
+            ordinary = directory / "original"
+            ordinary.write_text("original", encoding="utf8")
+            target.symlink_to(ordinary)
+            with self.assertRaisesRegex(ValueError, "untrusted file type"):
+                _atomic_json(target, {"schema": "unsafe"}, root_uid=os.geteuid(), private=False)
+            self.assertEqual(ordinary.read_text(), "original")
+
+    def test_forced_command_exact_readiness_helper_allowed(self):
+        self.assertEqual(parse_original(READINESS_HELPER), [READINESS_HELPER])
+
+    def test_forced_command_readiness_helper_rejects_arguments(self):
+        with self.assertRaises(ValueError):
+            parse_original(READINESS_HELPER + " --execute")
+
+    def test_forced_command_allows_exact_idle_flat_repair_only(self):
+        from disdex_unified_forced_command import parse_original, IDLE_FLAT_REPAIR_HELPER
+        command=f"{IDLE_FLAT_REPAIR_HELPER} --execute-after-three-signed-gets"
+        self.assertEqual(parse_original(command), [IDLE_FLAT_REPAIR_HELPER, "--execute-after-three-signed-gets"])
+        for bad in (
+            f"{IDLE_FLAT_REPAIR_HELPER}",
+            f"{IDLE_FLAT_REPAIR_HELPER} --verify-only",
+            f"{IDLE_FLAT_REPAIR_HELPER} --execute-after-three-signed-gets extra",
+            f"/bin/sh -c '{command}'",
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                parse_original(bad)
+
+    def test_forced_command_allows_exact_idle_kill_recovery_only(self):
+        from disdex_unified_forced_command import parse_original, IDLE_KILL_RECOVERY_HELPER
+        command=f"{IDLE_KILL_RECOVERY_HELPER} --execute-after-three-signed-gets"
+        self.assertEqual(parse_original(command), [IDLE_KILL_RECOVERY_HELPER, "--execute-after-three-signed-gets"])
+        for bad in (
+            IDLE_KILL_RECOVERY_HELPER,
+            f"{IDLE_KILL_RECOVERY_HELPER} --verify-only",
+            f"{IDLE_KILL_RECOVERY_HELPER} --execute-after-three-signed-gets extra",
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                parse_original(bad)
+
     def test_forced_command_rejects_shell(self):
         with self.assertRaises(ValueError):
             parse_original("/bin/sh -c whoami")
@@ -188,13 +264,28 @@ class RootGateTest(unittest.TestCase):
 
 
 class FakeSystemd:
-    def __init__(self, old_unit, new_unit, *, fail_new_start=False):
+    def __init__(self, old_unit, new_unit, *, fail_new_start=False,
+                 old_active=True, dormant_old_pid=0):
         self.old_unit = old_unit
         self.new_unit = new_unit
         self.fail_new_start = fail_new_start
-        self.active_units = {old_unit: True, new_unit: False}
+        self.active_units = {old_unit: old_active, new_unit: False}
+        self.failed_units = {old_unit} if not old_active else set()
+        self.dormant_old_pid = dormant_old_pid
         self.masked_units = set()
         self.calls = []
+
+    def active_state(self, unit):
+        if self.active_units.get(unit, False):
+            return "active"
+        return "failed" if unit in self.failed_units else "inactive"
+
+    def main_pid(self, unit):
+        if self.active_units.get(unit, False):
+            return 4242
+        if unit == self.old_unit:
+            return self.dormant_old_pid
+        return 0
 
     def is_active(self, unit):
         return bool(self.active_units.get(unit, False))
@@ -208,6 +299,7 @@ class FakeSystemd:
     def stop(self, unit):
         self.calls.append(("stop", unit))
         self.active_units[unit] = False
+        self.failed_units.discard(unit)
 
     def mask(self, unit):
         self.calls.append(("mask", unit))
@@ -224,6 +316,7 @@ class FakeSystemd:
         if unit in self.masked_units:
             raise RuntimeError("masked unit cannot start")
         self.active_units[unit] = True
+        self.failed_units.discard(unit)
 
     def enable(self, unit):
         self.calls.append(("enable", unit))
