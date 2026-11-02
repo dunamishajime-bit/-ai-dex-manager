@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+import json
 import unittest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "ops" / "root" / "disdex-fet-preemption-readiness-guard.py"
@@ -41,6 +42,16 @@ def heartbeat():
     }
 
 class V52EvidenceContractTests(unittest.TestCase):
+
+    def test_current_production_v52_pin_remains_legacy_until_compatible_writer_cutover(self):
+        manifest_path = Path(__file__).resolve().parents[1] / "config" / "disdex-runner-pins-DD1296_FINAL_ALLIN_10BPS.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        current = manifest["runners"]["V52"]
+        old_sha = "4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81"
+        self.assertEqual(current["sha"], old_sha)
+        self.assertEqual(current["evidenceMode"], "legacy")
+        self.assertEqual(current["tickPath"], "/var/lib/disdex/runner-health/ticks/v52.json")
+
     def test_valid_contract_passes(self):
         self.assertIsNone(guard.validate_v52_contract(pin(), heartbeat(), NOW, PID, ROOT, SHA, True))
 

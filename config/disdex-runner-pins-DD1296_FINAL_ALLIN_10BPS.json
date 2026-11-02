@@ -35,7 +35,7 @@
       "sha": "4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81",
       "releaseRoot": "/home/deploy/disdex-trading/releases/4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81",
       "serviceUnit": "disdex-v52-aster-only@4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81.service",
-      "evidenceMode": "heartbeat_v1",
+      "evidenceMode": "legacy",
       "healthPath": "/var/lib/disdex/runner-health/heartbeats/v52.json",
       "tickPath": "/var/lib/disdex/runner-health/ticks/v52.json",
       "statePath": "/var/lib/disdex/v52-aster-only/runner-live.json"
