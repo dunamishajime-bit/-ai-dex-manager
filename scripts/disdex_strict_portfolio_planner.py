@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from v52_q102_independent_pin import verify_q102_identity, verify_peer_identity
+
 import math
 import os
 import json
@@ -93,6 +95,10 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
         raw = json.loads(resolved.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from error
+    return _validate_quality102_live_state_document(raw, now_ms=now_ms)
+
+
+def _validate_quality102_live_state_document(raw, *, now_ms=None):
     root = _quality102_object(raw, "root")
     allowed = {
         "version", "strategyId", "mode", "runtimeCommitSha", "updatedAt",
@@ -109,9 +115,8 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
     runtime_sha = str(root.get("runtimeCommitSha") or "")
     if not _SHA256_RE.fullmatch(runtime_sha):
         raise RuntimeError("QUALITY102_STATE_MALFORMED:runtimeCommitSha")
-    expected_sha = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "").strip()
-    if expected_sha and runtime_sha.lower() != expected_sha.lower():
-        raise RuntimeError("QUALITY102_STATE_MISMATCH:runtimeCommitSha")
+    # A peer owns this state: the V52 program SHA cannot authenticate Q102.
+    verify_q102_identity(runtime_sha)
     updated_at = _quality102_finite(root.get("updatedAt"), "updatedAt", positive=True)
     clock = _quality102_finite(now_ms if now_ms is not None else time.time() * 1000, "now_ms", positive=True)
     if updated_at > clock + 5_000:
@@ -139,6 +144,10 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
 
     position = root.get("position")
     if position is None:
+        # A submitted/unknown entry can still consume exposure.  Do not treat
+        # an unprocessed pending entry as a flat, available portfolio.
+        if root.get("pending") is not None:
+            raise RuntimeError("QUALITY102_PENDING_UNRECONCILED")
         return None
     position = _quality102_object(position, "position")
     if set(position) - {"symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger"}:
@@ -249,13 +258,13 @@ def read_quality102_live_state_document(
     resolved = path or _quality102_state_path()
     if resolved is None or not resolved.exists():
         return None
-    owned = load_quality102_live_state(resolved, now_ms=now_ms)
     try:
         raw = json.loads(resolved.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from error
     if not isinstance(raw, dict):
         raise RuntimeError("QUALITY102_STATE_MALFORMED:root")
+    owned = _validate_quality102_live_state_document(raw, now_ms=now_ms)
     return resolved, raw, owned
 
 
@@ -297,9 +306,7 @@ def _validated_idle_owned_notional(
         raise RuntimeError(f"IDLE_VERIFIED_OWNER_MISMATCH:{symbol}:{detail}")
     if symbol not in IDLE_FROZEN_OWNER_SYMBOLS or venue_qty >= -EPSILON:
         fail("SYMBOL_OR_SIDE")
-    expected_sha = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
-    if not _SHA256_RE.fullmatch(expected_sha):
-        fail("RUNTIME_SHA_UNSET")
+    # Identity is checked against the independently pinned Idle service below.
     path = Path(os.environ.get("DISDEX_IDLE_PRIORITY_STATE_PATH") or "/var/lib/disdex/idle-priority/state.json")
     try:
         document = json.loads(path.read_text(encoding="utf-8"))
@@ -307,8 +314,7 @@ def _validated_idle_owned_notional(
         raise RuntimeError(f"IDLE_VERIFIED_OWNER_MISMATCH:{symbol}:STATE_UNAVAILABLE") from error
     if not isinstance(document, dict) or document.get("schema") != IDLE_PROTECTED_STATE_SCHEMA:
         fail("SCHEMA")
-    if str(document.get("runtimeSha") or "").lower() != expected_sha:
-        fail("RELEASE_SHA")
+    verify_peer_identity("IDLE_PRIORITY_SHORT", str(document.get("runtimeSha") or "").lower())
     if document.get("pending") is not None or document.get("manualReview") is not None:
         fail("PENDING_OR_MANUAL_REVIEW")
     positions = document.get("positions")
@@ -393,7 +399,7 @@ def quality102_crypto_notional_from_positions(
             try:
                 fet = json.loads(path.read_text(encoding="utf-8"))
                 p = fet.get("position")
-                expected = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "")
+                expected = verify_peer_identity("FET_BRK48_RESIDUAL", str(fet.get("runtimeCommitSha") or "").lower())
                 clock = now_ms if now_ms is not None else time.time() * 1000
                 age = clock - float(fet["updatedAt"])
                 sha = str(fet.get("runtimeCommitSha") or "")
