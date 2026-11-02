@@ -27,8 +27,8 @@ import {
 const SHA = /^[a-f0-9]{40}$/;
 export const V4_DYNAMIC_REFRESH_SCOPE = "V4_EVIDENCE_REFRESH_ONLY" as const;
 const REFRESH_LEASE_SCHEMA = "disdex-v4-evidence-refresh-lease/v1" as const;
-const REFRESH_MAX_LEASE_MS = 24 * 60 * 60 * 1000;
-const REFRESH_MAX_APPROVAL_MS = 300 * 1000;
+const REFRESH_MAX_LEASE_SECONDS = 24 * 60 * 60;
+const REFRESH_MAX_APPROVAL_SECONDS = 300;
 const REFRESH_OUTPUT_PATH = "/var/lib/disdex/v12-v4/evidence-refresh-last.json";
 const MAX_JSON_BYTES = 256 * 1024;
 const DYNAMIC_KEYS = [...EVIDENCE_CLASSES.DYNAMIC] as const;
@@ -91,7 +91,7 @@ const REFRESH_LEASE_FIELDS = new Set([
 
 export function validateV4RefreshLease(input: { lease: unknown; sha: string; now?: number }) {
   const sha = assertSha(input.sha);
-  const now = input.now ?? Date.now();
+  const now = input.now ?? Math.floor(Date.now() / 1000);
   const lease = assertRecord(input.lease, "refreshLease");
   if (lease.schema !== REFRESH_LEASE_SCHEMA || new Set(Object.keys(lease)).size !== REFRESH_LEASE_FIELDS.size
       || [...REFRESH_LEASE_FIELDS].some((field) => !Object.prototype.hasOwnProperty.call(lease, field))) {
@@ -138,10 +138,10 @@ export function validateV4RefreshLease(input: { lease: unknown; sha: string; now
   if (![approvedAt, expiresAt, approvalIssuedAt, approvalExpiresAt].every(Number.isInteger)
       || [approvedAt, expiresAt, approvalIssuedAt, approvalExpiresAt].some((value) => value <= 0)
       || approvedAt > now + 30 || expiresAt <= now || expiresAt <= approvedAt
-      || expiresAt - approvedAt > REFRESH_MAX_LEASE_MS
+      || expiresAt - approvedAt > REFRESH_MAX_LEASE_SECONDS
       || !Number.isInteger(approvalExpiresAt - approvalIssuedAt)
       || approvalExpiresAt - approvalIssuedAt < 1
-      || approvalExpiresAt - approvalIssuedAt > REFRESH_MAX_APPROVAL_MS) {
+      || approvalExpiresAt - approvalIssuedAt > REFRESH_MAX_APPROVAL_SECONDS) {
     throw new Error("V4_REFRESH_LEASE_EXPIRED_OR_FUTURE");
   }
   return lease as JsonRecord;
@@ -479,7 +479,7 @@ async function refreshDynamicFiles(input: {
       throw new Error("V4_DYNAMIC_REFRESH_LEASE_PATH_MISMATCH");
     }
     const lease = await readTrustedJson(leasePath, 0);
-    const validatedLease = validateV4RefreshLease({ lease, sha, now });
+    const validatedLease = validateV4RefreshLease({ lease, sha, now: Math.floor(now / 1000) });
     if (validatedLease.releaseRoot !== releaseRoot || validatedLease.evidenceRoot !== input.evidenceRoot) {
       throw new Error("V4_DYNAMIC_REFRESH_LEASE_RUNTIME_PATH_MISMATCH");
     }

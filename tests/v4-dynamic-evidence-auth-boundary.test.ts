@@ -8,7 +8,7 @@ import {
 
 const SHA = "a".repeat(40);
 const PLAN = "b".repeat(64);
-const NOW = Date.parse("2026-10-30T00:00:00.000Z");
+const NOW = Math.floor(Date.parse("2026-10-30T00:00:00.000Z") / 1000);
 const OUTPUT = "/var/lib/disdex/v12-v4/evidence-refresh-last.json";
 
 function lease(overrides: Record<string, unknown> = {}) {
@@ -31,10 +31,10 @@ function lease(overrides: Record<string, unknown> = {}) {
     signatureVerified: true,
     authorizationMethod: "OWNER_SIGNED_TOKEN",
     approvalNonceDigest: "c".repeat(64),
-    approvalIssuedAt: NOW - 120_000,
-    approvalExpiresAt: NOW - 60_000,
-    approvedAt: NOW - 60_000,
-    expiresAt: NOW + 23 * 60 * 60 * 1000,
+    approvalIssuedAt: NOW - 120,
+    approvalExpiresAt: NOW - 60,
+    approvedAt: NOW - 60,
+    expiresAt: NOW + 23 * 60 * 60,
     leaseId: "d".repeat(32),
     ...overrides,
   };
@@ -70,4 +70,17 @@ test("Codex SSH refresh lease uses root-session authorization without a signatur
     authorizationMethod: "ROOT_SSH_SESSION",
   });
   assert.equal(validateV4RefreshLease({ lease: value, sha: SHA, now: NOW }).route, "CODEX_SSH");
+});
+
+test("runtime refresh leases use Unix seconds while evidence timestamps use milliseconds", () => {
+  const now = Math.floor(Date.now() / 1000);
+  const value = lease({
+    signatureVerified: false,
+    authorizationMethod: "ROOT_SSH_SESSION",
+    approvalIssuedAt: now - 120,
+    approvalExpiresAt: now - 60,
+    approvedAt: now - 60,
+    expiresAt: now + 23 * 60 * 60,
+  });
+  assert.equal(validateV4RefreshLease({ lease: value, sha: SHA }).expiresAt, value.expiresAt);
 });
