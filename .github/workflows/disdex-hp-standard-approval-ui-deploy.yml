@@ -18,6 +18,8 @@ jobs:
       github.event.issue.number == 317 &&
       github.actor == 'dunamishajime-bit' &&
       github.event.comment.author_association == 'OWNER'
+    environment:
+      name: disdex-production
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -318,8 +320,12 @@ jobs:
           for _ in $(seq 1 40); do
             if [[ "$(systemctl is-active "$svc" 2>/dev/null || true)" == "active" ]]; then
               code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
-              approval_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 -H 'Cookie: disdex_auth=1' http://127.0.0.1:3001/production-approval || true)"
-              if [[ "$code" == "200" && "$approval_code" == "200" ]]; then
+              approval_headers="$(mktemp)"
+              approval_code="$(curl -sS -o /dev/null -D "$approval_headers" -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/production-approval || true)"
+              approval_location="$(awk 'BEGIN{IGNORECASE=1} /^location:/{sub(/^[^:]*:[[:space:]]*/,""); sub(/$/,""); print; exit}' "$approval_headers")"
+              rm -f -- "$approval_headers"
+              if [[ "$code" == "200" && "$approval_code" =~ ^30[1278]$ && "$approval_location" == *"/login"* && "$approval_location" == *"production-approval"* ]]; then
+                echo "APPROVAL_ROUTE_PROTECTED=$approval_code location=$approval_location"
                 ok=true
                 break
               fi

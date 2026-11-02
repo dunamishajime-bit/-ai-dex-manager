@@ -79,20 +79,15 @@ jobs:
           done
           hb=/var/lib/disdex/runner-health/heartbeats/fet-brk48-residual.json
           if runuser -u deploy -- test -r "$hb"; then echo "DEPLOY_READABLE=TRUE path=$hb"; else echo "DEPLOY_READABLE=FALSE path=$hb"; fi
-          code="$(curl -sS -o /tmp/fet-local.json -w '%{http_code}' --max-time 5 -H 'Cookie: disdex_auth=1' http://127.0.0.1:3001/api/system/fet-status)"
-          [[ "$code" == "200" ]]
+          code="$(curl -sS -o /tmp/fet-local.json -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/api/system/fet-status)"
+          [[ "$code" == "401" ]]
           node - /tmp/fet-local.json <<'NODE'
           const fs=require("fs");
           const j=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
-          if(j.readOnly!==true || j.tradingMutation!==0 || j.strategyId!=="FET_BRK48_RESIDUAL" || j.symbol!=="FETUSDT") process.exit(2);
-          if(!["LIVE","STALE","UNAVAILABLE","UNCONFIRMED"].includes(j.status)) process.exit(3);
-          console.log("FET_API_STATUS="+j.status);
-          console.log("FET_API_OK="+j.ok);
-          console.log("FET_API_REASON="+String(j.reason||"").replace(/\n/g," "));
-          console.log("FET_RUNTIME_SHA="+String(j.runtimeCommitSha||"UNAVAILABLE"));
-          console.log("FET_EXPECTED_SHA="+String(j.expectedRuntimeSha||"UNAVAILABLE"));
-          console.log("FET_MAX_GROSS="+String(j.maximumGross??"UNAVAILABLE"));
-          console.log("FET_KILL_SWITCH_ACTIVE="+String(j.killSwitchActive));
+          if(j.ok!==false || j.readOnly!==true || j.tradingMutation!==0) process.exit(2);
+          if(typeof j.error!=="string" || j.error.length===0) process.exit(3);
+          if("runtimeCommitSha" in j || "expectedRuntimeSha" in j || "killSwitchActive" in j) process.exit(4);
+          console.log("FET_API_AUTH_BOUNDARY=401_SIGNED_SESSION_REQUIRED");
           NODE
           echo "UI_WORKDIR=$wd"
           echo "UI_SHA=$sha"

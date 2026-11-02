@@ -18,6 +18,8 @@ jobs:
       github.actor == 'dunamishajime-bit' &&
       github.event.comment.author_association == 'OWNER' &&
       github.event.comment.body == 'DISDEX_HP_MOBILE_FET_DEPLOY_20260925'
+    environment:
+      name: disdex-production
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
