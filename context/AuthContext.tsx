@@ -72,21 +72,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_KEY = "disdex_auth_user";
-const AUTH_COOKIE = "disdex_auth";
 const ACTIVITY_KEY = "jdex_last_activity";
 const INACTIVITY_LIMIT_MS = 10 * 60 * 1000;
-
-function setAuthCookie() {
-  if (typeof document === "undefined") return;
-  const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${AUTH_COOKIE}=1; Path=/; Max-Age=2592000; SameSite=Lax${secure}`;
-}
-
-function clearAuthCookie() {
-  if (typeof document === "undefined") return;
-  const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${AUTH_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
-}
 
 function toAuthUser(user: any): AuthUser {
   return {
@@ -193,7 +180,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveUser(normalized);
     setCurrentUser(normalized);
     localStorage.setItem(AUTH_KEY, normalized.id);
-    setAuthCookie();
     setUser(toAuthUser(normalized));
   }, []);
 
@@ -265,11 +251,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [syncUsers]);
 
   const triggerLogout = useCallback(() => {
+    void fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     setUser(null);
     resetSecondFactorFlow();
     setCurrentUser(null);
     localStorage.removeItem(AUTH_KEY);
-    clearAuthCookie();
     router.replace("/login");
     window.setTimeout(() => {
       if (typeof window !== "undefined") {
@@ -282,7 +268,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let alive = true;
     const currentUser = getCurrentUser();
     if (currentUser) {
-      setAuthCookie();
       setUser(toAuthUser(currentUser));
     }
     if (alive) setIsLoading(false);
@@ -437,15 +422,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       const json = await response.json();
       if (json.success && json.user) {
-        matched = { ...json.user, passwordHash: btoa(password) };
+        matched = json.user;
         saveUser(matched);
-        localStorage.setItem(`jdex_pw_${matched.id}`, btoa(password));
       }
     } catch {
       // fallback below
     }
 
-    if (!matched) {
+    if (
+      !matched &&
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ) {
       matched = verifyUserCredential(email, password);
     }
 

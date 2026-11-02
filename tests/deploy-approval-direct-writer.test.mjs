@@ -5,6 +5,8 @@ import test from "node:test";
 const hp = fs.readFileSync(".github/workflows/disdex-v4-hp-approval-request.yml", "utf8");
 const doge = fs.readFileSync(".github/workflows/disdex-v4-doge-missed-time-exit-approval-request.yml", "utf8");
 const route = fs.readFileSync("app/api/system/deploy-approval/route.ts", "utf8");
+const handoff = fs.readFileSync(".github/workflows/disdex-v4-doge-missed-time-exit-operator-handoff.yml", "utf8");
+const stage = fs.readFileSync("scripts/ops/deploy/disdex_v4_doge_operator_request_stage.py", "utf8");
 
 test("legacy approval workflows never write the JSON store directly", () => {
   for (const source of [hp, doge]) {
@@ -34,4 +36,12 @@ test("redeem uses the atomic store mutation and does not do read-then-save", () 
   assert.match(redeem, /APPROVAL_ALREADY_REDEEMED/);
   assert.match(redeem, /APPROVAL_IDENTITY_MISMATCH/);
   assert.match(redeem, /APPROVAL_TOKEN_EXPIRED/);
+});
+
+test("retired DOGE handoff and staging code cannot read or write approval JSON directly",()=>{
+  for(const source of [handoff,stage]){
+    assert.doesNotMatch(source,/deploy-approvals\.json/);
+    assert.match(source,/DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT/);
+    assert.match(source,/REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE/);
+  }
 });

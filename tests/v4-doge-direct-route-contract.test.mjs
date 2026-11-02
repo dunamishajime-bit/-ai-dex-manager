@@ -6,13 +6,14 @@ const handoff=fs.readFileSync('.github/workflows/disdex-v4-doge-missed-time-exit
 const staging=fs.readFileSync('.github/workflows/disdex-v4-doge-operator-request-stage.yml','utf8');
 const route=fs.readFileSync('docs/ops/V4_DOGE_DIRECT_NEAR_STYLE_ROUTE_20261101.md','utf8');
 
-test('DOGE handoff uses quiesced preflight and requires dedicated direct executor',()=>{
-  assert.match(handoff,/--allow-quiesced/);
-  assert.match(handoff,/v12-v4-doge-only-operator-exit\.ts/);
-  assert.match(handoff,/DOGE_DIRECT_EXECUTOR_MISSING=TRUE/);
-  assert.match(handoff,/installDogeOnlyGuards/);
-  assert.match(handoff,/DOGEUSDT:REC_Y06_REV_D0_T72:SHORT:1793181600000/);
-  assert.match(handoff,/v12-v4-98ded39746ed3502a4d7b0e26ef9/);
+test('historical DOGE protected-position handoff is retired after manual flat settlement',()=>{
+  assert.match(handoff,/DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT=TRUE/);
+  assert.match(handoff,/REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE=TRUE/);
+  assert.match(handoff,/TRADING_MUTATION=0/);
+  assert.match(handoff,/exit 1/);
+  assert.doesNotMatch(handoff,/--allow-quiesced/);
+  assert.doesNotMatch(handoff,/v12-v4-doge-only-operator-exit\.ts/);
+  assert.doesNotMatch(handoff,/deploy-approvals\.json/);
 });
 
 test('operator inbox workflow is explicitly legacy, not canonical',()=>{

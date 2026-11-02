@@ -72,6 +72,12 @@ jobs:
       - name: Approval store concurrency and corruption
         run: node --import tsx --test tests/deploy-approval-store-concurrency.test.ts
 
+      - name: Owner auth and password contracts
+        run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
+
+      - name: Authentication boundary source contracts
+        run: node --test tests/auth-boundary-source.test.mjs tests/deploy-approval-atomic-redeem-source.test.mjs
+
       - name: Legacy direct-writer and atomic redeem contract
         run: node --test tests/deploy-approval-direct-writer.test.mjs
 

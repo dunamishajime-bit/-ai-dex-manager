@@ -1,20 +1,22 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/mail-service";
 import {
   getDeploymentApproval,
-  saveDeploymentApproval,
+  mutateDeploymentApprovalAtomic,
 } from "@/lib/server/deploy-approval-store";
 import {
   issueDeploymentApprovalToken,
   loadDeploymentApprovalPrivateKey,
 } from "@/lib/deploy-approval-token";
 import { verifyRequestSession } from "@/lib/server/owner-session";
+import { createOtpChallenge, consumeOtpChallenge } from "@/lib/server/otp-challenge-store";
 import { requireSameOriginMutation } from "@/lib/server/request-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const DEPLOY_OTP_COOKIE = "disdex_admin_deploy_otp_challenge";
 const ADMIN_2FA_RECEIVER = process.env.ADMIN_CONTACT_EMAIL || process.env.GMAIL_USER || "";
 const OTP_PEPPER = process.env.DISDEX_DEPLOY_OTP_PEPPER?.trim() || "";
 const OPERATOR = "dunamishajime-bit";
@@ -26,7 +28,7 @@ function redirectUrl(request: NextRequest, params: Record<string, string>) {
   const envBase = process.env.NEXT_PUBLIC_APP_URL;
   const base =
     forwardedHost && forwardedProto
-      ? `${forwardedProto}://${forwardedHost}`
+      ? forwardedProto + "://" + forwardedHost
       : envBase && !/localhost|127\.0\.0\.1/.test(envBase)
         ? envBase
         : request.nextUrl.origin;
@@ -37,19 +39,13 @@ function redirectUrl(request: NextRequest, params: Record<string, string>) {
   return url;
 }
 
-function redirect(request: NextRequest, params: Record<string, string>) {
+function redirectToAdmin(request: NextRequest, params: Record<string, string>) {
   return NextResponse.redirect(redirectUrl(request, params));
 }
 
-function otpHash(requestId: string, code: string) {
+function otpHash(subject: string, code: string) {
   if (!OTP_PEPPER) throw new Error("DISDEX_DEPLOY_OTP_PEPPER is not configured");
-  return crypto.createHmac("sha256", OTP_PEPPER).update(`${requestId}:${code}`).digest("hex");
-}
-
-function safeEqualHex(a: string, b: string) {
-  const left = Buffer.from(a, "hex");
-  const right = Buffer.from(b, "hex");
-  return left.length === right.length && crypto.timingSafeEqual(left, right);
+  return crypto.createHmac("sha256", OTP_PEPPER).update(subject + ":" + code).digest("hex");
 }
 
 function ipFingerprint(request: NextRequest) {
@@ -61,40 +57,50 @@ function ipFingerprint(request: NextRequest) {
   return crypto.createHmac("sha256", OTP_PEPPER).update(raw).digest("hex");
 }
 
+function setChallengeCookie(response: NextResponse, challengeId: string) {
+  response.cookies.set(DEPLOY_OTP_COOKIE, challengeId, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    path: "/",
+    maxAge: 5 * 60,
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     requireSameOriginMutation(request);
     verifyRequestSession(request, ["ADMIN"]);
   } catch {
-    return redirect(request, { error: "管理者ログインが必要です" });
+    return NextResponse.json({ ok: false, error: "Authentication required." }, { status: 403 });
   }
 
   const formData = await request.formData();
   const intent = String(formData.get("intent") || "");
   const requestId = String(formData.get("requestId") || "").trim();
   if (!UUID_RE.test(requestId)) {
-    return redirect(request, { error: "承認リクエストIDが不正です" });
+    return redirectToAdmin(request, { error: "承認リクエストIDが不正です" });
   }
 
   const record = await getDeploymentApproval(requestId);
-  if (!record) return redirect(request, { error: "承認リクエストが見つかりません" });
+  if (!record) return redirectToAdmin(request, { error: "承認リクエストが見つかりません" });
   if (record.requestExpiresAt < Date.now() && !["DISPATCHED", "REDEEMED"].includes(record.status)) {
-    await saveDeploymentApproval({ ...record, status: "EXPIRED", lastError: "request expired" });
-    return redirect(request, { error: "承認リクエストの有効期限が切れています" });
+    await mutateDeploymentApprovalAtomic(record.id, (current) => {
+      if (!current) throw new Error("APPROVAL_NOT_FOUND");
+      return { next: { ...current, status: "EXPIRED", lastError: "request expired" }, result: null };
+    });
+    return redirectToAdmin(request, { error: "承認リクエストの有効期限が切れています" });
   }
 
   if (intent === "request-otp") {
-    if (!ADMIN_2FA_RECEIVER) {
-      return redirect(request, { error: "承認コードの送信先メールが未設定です" });
-    }
-    if (!OTP_PEPPER) {
-      return redirect(request, { error: "デプロイ承認OTP秘密値が未設定です" });
+    if (!ADMIN_2FA_RECEIVER || !OTP_PEPPER) {
+      return redirectToAdmin(request, { error: "承認OTPのserver-side設定が未完了です" });
     }
     if (!["PENDING", "OTP_SENT"].includes(record.status)) {
-      return redirect(request, { error: "このリクエストはOTP送信対象ではありません" });
+      return redirectToAdmin(request, { error: "このリクエストはOTP送信対象ではありません" });
     }
     if (record.otpSentAt && Date.now() - record.otpSentAt < 30_000) {
-      return redirect(request, { deployStep: "code", error: "30秒後に再送できます" });
+      return redirectToAdmin(request, { deployStep: "code", error: "30秒後に再送できます" });
     }
 
     const code = String(crypto.randomInt(100000, 1000000));
@@ -102,97 +108,104 @@ export async function POST(request: NextRequest) {
     const sent = await sendEmail(
       ADMIN_2FA_RECEIVER,
       "DisDex Production LIVE 承認コード",
-      [
-        `承認コード: ${code}`,
-        "有効期限: 5分",
-        "",
-        "対象: V12_V4 Production LIVE",
-        `SHA: ${record.targetSha}`,
-        `Plan SHA-256: ${record.planSha256}`,
-        "",
-        "心当たりがない場合は承認しないでください。",
-      ].join("\n"),
+      "承認コード: " + code + "\n有効期限: 5分\n\nSHA: " + record.targetSha + "\nPlan SHA-256: " + record.planSha256,
     );
-    if (!sent.success) {
-      return redirect(request, { error: "承認コードの送信に失敗しました" });
+    if (!sent.success || sent.simulated) {
+      return redirectToAdmin(request, { error: "実メールによる承認コード送信を確認できませんでした" });
     }
 
-    await saveDeploymentApproval({
-      ...record,
-      status: "OTP_SENT",
-      otpHash: otpHash(record.id, code),
-      otpSentAt: now,
-      otpExpiresAt: now + 5 * 60 * 1000,
-      otpAttemptsRemaining: 5,
-      lastError: undefined,
+    const subject = "admin-deploy:" + record.id;
+    const challenge = await createOtpChallenge({
+      purpose: "DEPLOY_APPROVAL",
+      subject,
+      codeHash: otpHash(subject, code),
+      now,
+      expiresAt: now + 5 * 60 * 1000,
+      maxAttempts: 5,
     });
-    return redirect(request, { deployStep: "code", message: "LIVE承認コードをメール送信しました" });
+    await mutateDeploymentApprovalAtomic(record.id, (current) => {
+      if (!current || !["PENDING", "OTP_SENT"].includes(current.status)) {
+        throw new Error("APPROVAL_NOT_OTP_ELIGIBLE");
+      }
+      return {
+        next: {
+          ...current,
+          status: "OTP_SENT",
+          otpSentAt: now,
+          otpHash: undefined,
+          otpExpiresAt: undefined,
+          otpAttemptsRemaining: undefined,
+          lastError: undefined,
+        },
+        result: null,
+      };
+    });
+    const response = redirectToAdmin(request, { deployStep: "code", message: "LIVE承認コードをメール送信しました" });
+    setChallengeCookie(response, challenge.id);
+    return response;
   }
 
   if (intent === "verify-otp") {
-    if (!OTP_PEPPER) {
-      return redirect(request, { error: "デプロイ承認OTP秘密値が未設定です" });
-    }
+    if (!OTP_PEPPER) return redirectToAdmin(request, { error: "承認OTP秘密値が未設定です" });
+    const challengeId = request.cookies.get(DEPLOY_OTP_COOKIE)?.value || "";
     const code = String(formData.get("approvalCode") || "").trim();
-    if (!/^\d{6}$/.test(code)) {
-      return redirect(request, { deployStep: "code", error: "6桁の承認コードを入力してください" });
+    if (!challengeId || !/^\d{6}$/.test(code)) {
+      const response = redirectToAdmin(request, { error: "承認challengeが無効です。再送してください" });
+      response.cookies.delete(DEPLOY_OTP_COOKIE);
+      return response;
     }
-    if (
-      record.status !== "OTP_SENT" ||
-      !record.otpHash ||
-      !record.otpExpiresAt ||
-      Date.now() > record.otpExpiresAt ||
-      (record.otpAttemptsRemaining ?? 0) <= 0
-    ) {
-      return redirect(request, { error: "承認コードが失効しています。再送してください" });
-    }
-
-    const matched = safeEqualHex(otpHash(record.id, code), record.otpHash);
-    if (!matched) {
-      const remaining = Math.max(0, (record.otpAttemptsRemaining ?? 1) - 1);
-      await saveDeploymentApproval({
-        ...record,
-        otpAttemptsRemaining: remaining,
-        status: remaining === 0 ? "FAILED" : "OTP_SENT",
-        lastError: "invalid OTP",
+    const subject = "admin-deploy:" + record.id;
+    const consumed = await consumeOtpChallenge({
+      id: challengeId,
+      codeHash: otpHash(subject, code),
+      purpose: "DEPLOY_APPROVAL",
+      subject,
+    });
+    if (!consumed.ok) {
+      const response = redirectToAdmin(request, {
+        deployStep: consumed.reason === "INVALID_CODE" ? "code" : "",
+        error: consumed.reason === "INVALID_CODE"
+          ? "承認コードが違います。残り" + String(consumed.remainingAttempts ?? 0) + "回"
+          : "承認challengeが失効または使用済みです",
       });
-      return redirect(request, {
-        deployStep: remaining > 0 ? "code" : "",
-        error: remaining > 0 ? `承認コードが違います。残り${remaining}回` : "試行回数上限に達しました",
-      });
+      if (consumed.reason !== "INVALID_CODE") response.cookies.delete(DEPLOY_OTP_COOKIE);
+      return response;
     }
 
     try {
-      const { token, payload } = issueDeploymentApprovalToken({
-        targetSha: record.targetSha,
-        planSha256: record.planSha256,
-        operator: OPERATOR,
-        privateKey: loadDeploymentApprovalPrivateKey(),
-        ttlSeconds: 300,
+      await mutateDeploymentApprovalAtomic(record.id, (current) => {
+        if (!current || current.status !== "OTP_SENT") throw new Error("APPROVAL_NOT_OTP_SENT");
+        if (current.requestExpiresAt < Date.now()) throw new Error("APPROVAL_EXPIRED");
+        const issued = issueDeploymentApprovalToken({
+          targetSha: current.targetSha,
+          planSha256: current.planSha256,
+          operator: OPERATOR,
+          privateKey: loadDeploymentApprovalPrivateKey(),
+          ttlSeconds: 300,
+        });
+        return {
+          next: {
+            ...current,
+            status: "APPROVED",
+            approvedAt: Date.now(),
+            approvalToken: issued.token,
+            approvalTokenExpiresAt: issued.payload.expiresAt,
+            approverIpHash: ipFingerprint(request),
+            otpHash: undefined,
+            otpExpiresAt: undefined,
+            otpAttemptsRemaining: undefined,
+            lastError: undefined,
+          },
+          result: null,
+        };
       });
-
-      await saveDeploymentApproval({
-        ...record,
-        status: "APPROVED",
-        otpHash: undefined,
-        otpExpiresAt: undefined,
-        otpAttemptsRemaining: undefined,
-        approvedAt: Date.now(),
-        approvalToken: token,
-        approvalTokenExpiresAt: payload.expiresAt,
-        approverIpHash: ipFingerprint(request),
-        lastError: undefined,
-      });
-
-      return redirect(request, {
-        message: "本人認証が完了しました。署名済み承認証明を発行しました",
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "approval signing failed";
-      await saveDeploymentApproval({ ...record, status: "FAILED", lastError: message });
-      return redirect(request, { error: "本人認証後の署名済み承認証明の発行に失敗しました" });
+      const response = redirectToAdmin(request, { message: "本人認証が完了しました。署名済み承認証明を発行しました" });
+      response.cookies.delete(DEPLOY_OTP_COOKIE);
+      return response;
+    } catch {
+      return redirectToAdmin(request, { error: "署名済み承認証明の発行に失敗しました" });
     }
   }
 
-  return redirect(request, { error: "未対応の承認操作です" });
+  return redirectToAdmin(request, { error: "未対応の承認操作です" });
 }

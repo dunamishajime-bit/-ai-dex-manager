@@ -51,3 +51,22 @@ test("privileged pages do not trust legacy fixed cookies",()=>{
   assert.doesNotMatch(admin,/disdex_admin_session/);
   assert.doesNotMatch(production,/disdex_auth/);
 });
+
+test("privileged pages and client auth do not trust or mint legacy fixed cookies",()=>{
+  const adminPage=read("app/admin/page.tsx");
+  const approvalPage=read("app/production-approval/page.tsx");
+  const authContext=read("context/AuthContext.tsx");
+  assert.match(adminPage,/verifyOwnerSession/);
+  assert.match(approvalPage,/verifyOwnerSession/);
+  assert.doesNotMatch(adminPage,/disdex_admin_session/);
+  assert.doesNotMatch(approvalPage,/disdex_auth/);
+  assert.doesNotMatch(authContext,/document\.cookie\s*=/);
+  assert.doesNotMatch(authContext,/AUTH_COOKIE\s*=\s*["']disdex_auth["']/);
+});
+
+test("manual auto-trade mutation requires signed session and strict same-origin",()=>{
+  const src=read("app/api/system/auto-trade/manual-run/route.ts");
+  assert.match(src,/verifyRequestSession/);
+  assert.match(src,/requireSameOriginMutation/);
+  assert.doesNotMatch(src,/disdex_auth/);
+});
