@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Read-only verification for remaining all-runner task stages and final audit."""
 from __future__ import annotations
-import argparse,json,os,subprocess,time
+import argparse,json,math,os,subprocess,time
+from datetime import datetime, timezone
 from pathlib import Path
 
 MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"
@@ -9,7 +10,6 @@ V4="53a0be396719f0284af4e11b35c66a4ac7d58f79"
 V52="4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81"
 Q102="ef1ab178e26a7bf5bddb6473467765edba242e1d"
 HYPE_OVERLAY_SHA="d13b3e12ca833fc139ebbb5860fae0669700674b421c3ded9665935b31f9d55f"
-STOP_ID="v12-v4-98ded39746ed3502a4d7b0e26ef9"
 BASE=Path("/home/deploy/disdex-trading/releases")
 CURRENT=Path("/home/deploy/disdex-trading/current")
 
@@ -61,40 +61,64 @@ def readj(path):
 def shared_health():
     req(os.path.realpath(CURRENT)==str(BASE/MAIN),"CURRENT_SHA_MISMATCH")
     k=readj(KILL);req(k.get("active") is False,"KILL_SWITCH_ACTIVE")
-    r=readj(RISK);req(r.get("sourceComplete") is True and r.get("tripped") is not True,"SHARED_RISK_BAD")
+    now=int(time.time()*1000)
+    r=readj(RISK);req(r.get("sourceComplete") is True and r.get("tripped") is False,"SHARED_RISK_BAD")
+    updated=r.get("updatedAt")
+    req(r.get("utcDay")==datetime.fromtimestamp(now/1000,timezone.utc).date().isoformat()
+        and type(updated) in (int,float) and -1000 <= now-updated <= 15*60_000,
+        "SHARED_RISK_STALE_OR_WRONG_UTC_DAY")
+    limits=[r[k] for k in ("maximumLossPct","dailyLossLimit","maxDailyLossPct","dailyLossLimitPct")
+            if k in r and r[k] is not None]
+    req(bool(limits),"SHARED_RISK_LIMIT_MISSING")
+    for value in limits:
+        try:
+            req(not isinstance(value,bool),"SHARED_RISK_LIMIT_INVALID")
+            number=float(value)
+        except (TypeError,ValueError):
+            raise RuntimeError("SHARED_RISK_LIMIT_INVALID") from None
+        req(math.isfinite(number) and (abs(number-0.075)<1e-9 or abs(number-7.5)<1e-9),
+            "SHARED_RISK_LIMIT_MISMATCH")
     m=readj(MARGIN);req(m.get("stage")=="HEALTHY" and m.get("ordersAllowed") is True,"MARGIN_BAD")
-    now=int(time.time()*1000);checked=m.get("checkedAt")
+    checked=m.get("checkedAt")
     req(type(checked) in (int,float) and -1000 <= now-checked <= 15*60_000,"MARGIN_STALE")
     p=readj(PENDING);entries=p.get("entries")
-    req(isinstance(entries,list),"PENDING_INVALID")
-    req(not any(isinstance(e,dict) and str(e.get("status","")).upper()!="RELEASED" for e in entries),
+    req(isinstance(entries,list) and all(isinstance(e,dict) for e in entries),"PENDING_INVALID")
+    req(not any(str(e.get("status","")).upper()!="RELEASED" for e in entries),
         "PENDING_ACTIVE")
+
+def validate_flat_signed_get(value, now_ms):
+    req(isinstance(value, dict), "ASTER_GET_INVALID")
+    req(value.get("status") == "ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS", "ASTER_GET_NOT_PASS")
+    req(all(type(value.get(k)) is int and value[k] == 0
+            for k in ("ordersSent", "cancelsSent", "positionChangesSent")), "ASTER_GET_MUTATED")
+    for key in ("observedAt", "venueTime"):
+        observed = value.get(key)
+        req(type(observed) is int and observed > 0 and -5000 <= now_ms - observed <= 30000,
+            "ASTER_GET_STALE_OR_INVALID:" + key)
+    positions = value.get("positions")
+    orders = value.get("openOrders")
+    req(isinstance(positions, list) and isinstance(orders, list), "ASTER_GET_ARRAYS_INVALID")
+    # This verifier has no independent per-runner STOP ownership proof.
+    # A non-flat account must go through that separate reconciliation path.
+    req(not positions and not orders, "ASTER_ACCOUNT_NOT_FLAT_REQUIRES_OWNERSHIP_PROOF")
+    return value["observedAt"]
+
 
 def signed_get():
     release=BASE/V4
     cmd=("set -ae; for f in /etc/disdex/disdex-v13d-v11eq-v96.env "
-         "/etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env; "
+         "/etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env "
+         f"/etc/disdex/current-runtime/{V4}.env; "
          "do . \"$f\"; done; set +a; "
-         f"exec /usr/bin/node {release}/node_modules/tsx/dist/cli.mjs "
+         "[ \"${DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH:-}\" = "
+         "\"/var/lib/disdex/shared/aster-rate-budget.json\" ] || exit 42; "
+         f"exec /usr/sbin/runuser -u deploy -- /usr/bin/node {release}/node_modules/tsx/dist/cli.mjs "
          "scripts/disdex-aster-readonly-account-diagnostic.ts")
     p=subprocess.run(["/bin/bash","-c",cmd],cwd=release,capture_output=True,text=True,timeout=55)
     req(p.returncode==0,"ASTER_GET_FAILED")
     rows=[x for x in p.stdout.splitlines() if x.startswith("{")];req(rows,"ASTER_GET_EMPTY")
     x=json.loads(rows[-1])
-    req(x.get("status")=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS","ASTER_GET_NOT_PASS")
-    req(all(x.get(k)==0 for k in ("ordersSent","cancelsSent","positionChangesSent")),"ASTER_GET_MUTATED")
-    pos=x.get("positions") or [];orders=x.get("openOrders") or []
-    doge=[p for p in pos if p.get("symbol")=="DOGEUSDT"]
-    stop=[o for o in orders if o.get("clientOrderId")==STOP_ID]
-    if doge:
-        req(len(doge)==1 and float(doge[0].get("positionAmt",0))==-226.0,"DOGE_POSITION_IDENTITY_CHANGED")
-        req(len(stop)==1 and stop[0].get("symbol")=="DOGEUSDT" and stop[0].get("side")=="BUY"
-            and stop[0].get("type")=="STOP_MARKET" and stop[0].get("reduceOnly") is True
-            and float(stop[0].get("origQty",0))==226.0 and float(stop[0].get("executedQty",0))==0.0
-            and stop[0].get("status")=="NEW","DOGE_STOP_NOT_PROTECTED")
-    else:
-        req(not stop,"ORPHAN_DOGE_STOP")
-    return x.get("observedAt")
+    return validate_flat_signed_get(x, int(time.time() * 1000))
 
 def hype_overlay_verify(pid):
     drop=Path(f"/etc/systemd/system/disdex-hype-long@{MAIN}.service.d/zzzzzzzzzz-v4-stop-ownership-hotfix.conf")
@@ -115,6 +139,10 @@ def verify_step(step):
         unit,root=SERVICES[step];pid=verify_service(step,unit,root)
         print("VERIFIED_UNIT="+unit);print("PID="+str(pid));return
     req(step=="FINAL_ALL_RUNNERS_AUDIT","STEP_NOT_ALLOWED")
+    # Three back-to-back venue reads and one PID snapshot do not establish
+    # three independent heartbeat/tick and risk audit cycles.  Until that
+    # audit is implemented, never emit a misleading final PASS.
+    raise RuntimeError("THREE_CYCLE_TICK_AUDIT_NOT_CERTIFIED")
     pids={}
     for name,(unit,root) in ALL_SERVICES.items():
         pids[name]=verify_service(name,unit,root)

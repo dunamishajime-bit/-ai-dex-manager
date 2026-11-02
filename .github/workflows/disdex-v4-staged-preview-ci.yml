@@ -1,0 +1,36 @@
+name: DisDex V4 Staged Preview CI
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/v4-staged-overlay/**'
+      - 'scripts/ops/deploy/build_v4_staged_overlay.py'
+      - 'scripts/ops/deploy/verify_v4_staged_preview.py'
+      - 'tests/test_build_v4_staged_overlay.py'
+      - 'scripts/ops/root/disdex-runner-health-snapshot-v2.mjs'
+      - '.github/workflows/disdex-v4-staged-preview-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Require the exact V4 baseline
+        run: git cat-file -e '53a0be396719f0284af4e11b35c66a4ac7d58f79^{commit}'
+      - name: Verify preview construction and safety
+        run: python3 -m unittest tests.test_build_v4_staged_overlay -v
+      - name: Verify V4 preview runtime contracts
+        run: python3 scripts/ops/deploy/verify_v4_staged_preview.py

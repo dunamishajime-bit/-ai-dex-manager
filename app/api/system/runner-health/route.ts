@@ -60,6 +60,9 @@ async function heartbeatEvidence(pin: RunnerPin, mainPid: number, now: number) {
   if (value.serviceUnit !== pin.serviceUnit) throw new Error("HEALTH_SERVICE_MISMATCH");
   if (value.mainPid !== mainPid) throw new Error("HEALTH_PID_MISMATCH");
   if (value.workingDirectory !== pin.releaseRoot) throw new Error("HEALTH_CWD_MISMATCH");
+  if (value.safetyState !== "HEALTHY" || value.liveEnabled !== true || value.mode !== "LIVE") {
+    throw new Error("HEALTH_SAFETY_NOT_VERIFIED");
+  }
   if (!heartbeatAt || !lastTickAt) throw new Error("HEALTH_TIMESTAMP_MISSING");
   if (heartbeatAt > now + 10_000 || lastTickAt > now + 10_000) throw new Error("HEALTH_TIMESTAMP_FUTURE");
   if (now - heartbeatAt > 300_000) throw new Error("HEARTBEAT_STALE");

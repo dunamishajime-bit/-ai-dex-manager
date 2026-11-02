@@ -19,11 +19,57 @@ class RunnerPinRenderTests(unittest.TestCase):
         health = rendered["health-snapshot.env"]
         watchdog = rendered["watchdog.env"]
         v52 = rendered["v52-current.env"]
+        pengu_q102 = rendered["pengu-q102-runtime.env"]
+        pengu_dropin = rendered["pengu-q102-runtime.conf"]
+        fet_q102 = rendered["fet-q102-runtime.env"]
+        fet_dropin = rendered["fet-q102-runtime.conf"]
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81", health)
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=ef1ab178e26a7bf5bddb6473467765edba242e1d", health)
         self.assertIn("DISDEX_WATCHDOG_V52_SERVICE_UNIT=disdex-v52-aster-only@4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81.service", watchdog)
         self.assertIn("DISDEX_V52_RUNTIME_SHA=4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81", v52)
+        self.assertEqual(
+            pengu_q102,
+            "DISDEX_Q102_RUNTIME_SHA=ef1ab178e26a7bf5bddb6473467765edba242e1d\n",
+        )
+        self.assertEqual(
+            pengu_dropin,
+            "[Service]\nEnvironmentFile=/etc/disdex/current-runtime/"
+            "7688ed7c93a1918d8b44837339b7da5584a868f5-pengu-q102-runtime.env\n",
+        )
+        self.assertEqual(
+            fet_q102,
+            "DISDEX_Q102_RUNTIME_SHA=ef1ab178e26a7bf5bddb6473467765edba242e1d\n",
+        )
+        self.assertEqual(
+            fet_dropin,
+            "[Service]\nEnvironmentFile=/etc/disdex/current-runtime/"
+            "7688ed7c93a1918d8b44837339b7da5584a868f5-fet-q102-runtime.env\n",
+        )
         self.assertNotIn("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=7688ed7c93a1918d8b44837339b7da5584a868f5", health)
+
+    def test_render_supports_production_v1_pin_manifest_with_explicit_path_fallbacks(self):
+        raw = json.loads(MANIFEST.read_text())
+        raw["schema"] = "disdex-runner-pin-manifest/v1"
+        raw.pop("operatorTarget")
+        for pin in raw["runners"].values():
+            pin.pop("statePath", None)
+            pin.pop("healthPath", None)
+            pin.pop("tickPath", None)
+
+        rendered = mod.render(mod.validate(raw))
+
+        self.assertIn(
+            "DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json",
+            rendered["health-snapshot.env"],
+        )
+        self.assertIn(
+            "DISDEX_V52_HEALTH_PATH=/var/lib/disdex/runner-health/heartbeats/v52.json",
+            rendered["v52-current.env"],
+        )
+        self.assertIn(
+            "DISDEX_V52_TICK_PATH=/var/lib/disdex/runner-health/ticks/v52.json",
+            rendered["v52-current.env"],
+        )
 
     def test_validation_rejects_cross_runner_sha_reuse_and_wrong_unit(self):
         raw = json.loads(MANIFEST.read_text())

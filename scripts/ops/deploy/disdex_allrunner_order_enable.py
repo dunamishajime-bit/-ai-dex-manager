@@ -6,7 +6,7 @@ never sends/cancels/replaces/closes/tests orders, changes STOPs or Kill Switch,
 or restarts runners. The global artifact is the final commit point.
 """
 from __future__ import annotations
-import argparse, hashlib, json, os, re, subprocess, sys, tempfile
+import argparse, hashlib, json, math, os, re, subprocess, sys, tempfile, time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
@@ -114,18 +114,39 @@ def validate_gross_and_daily_loss(plan):
         except (KeyError,ValueError): raise ValueError("GROSS_ENV_INVALID:"+key) from None
         require(abs(got-float(want))<1e-9,"GROSS_ENV_MISMATCH:"+key)
 
+def validate_shared_risk(risk, now_ms):
+    require(risk.get("sourceComplete") is True and risk.get("tripped") is False,
+            "SHARED_RISK_BAD")
+    day = datetime.fromtimestamp(now_ms / 1000, timezone.utc).date().isoformat()
+    updated = risk.get("updatedAt")
+    require(risk.get("utcDay") == day and type(updated) in (int, float)
+            and now_ms - 15 * 60_000 <= updated <= now_ms + 1000,
+            "SHARED_RISK_STALE_OR_WRONG_UTC_DAY")
+    limits = [risk[k] for k in ("maximumLossPct", "dailyLossLimit", "maxDailyLossPct", "dailyLossLimitPct")
+              if k in risk and risk[k] is not None]
+    require(bool(limits), "SHARED_RISK_LIMIT_MISSING")
+    for value in limits:
+        try:
+            require(not isinstance(value, bool), "SHARED_RISK_LIMIT_INVALID")
+            number = float(value)
+        except (TypeError, ValueError):
+            raise ValueError("SHARED_RISK_LIMIT_INVALID") from None
+        require(math.isfinite(number) and (abs(number - 0.075) < 1e-9 or abs(number - 7.5) < 1e-9),
+                "SHARED_RISK_LIMIT_MISMATCH")
+
+
 def validate_shared_safety():
     require(os.path.realpath(CURRENT)==str(RELEASES/MAIN),"CURRENT_SHA_MISMATCH")
     require(read_json(KILL).get("active") is False,"KILL_SWITCH_ACTIVE")
     risk=read_json(RISK)
-    require(risk.get("sourceComplete") is True and risk.get("tripped") is not True,"SHARED_RISK_BAD")
-    limit=risk.get("dailyLossLimit",risk.get("maxDailyLossPct",risk.get("dailyLossLimitPct")))
-    if limit is not None:
-        x=float(limit); require(abs(x-0.075)<1e-9 or abs(x-7.5)<1e-9,"SHARED_RISK_LIMIT_MISMATCH")
+    validate_shared_risk(risk, int(time.time() * 1000))
     margin=read_json(MARGIN)
     require(margin.get("stage")=="HEALTHY" and margin.get("ordersAllowed") is True,"MARGIN_BAD")
-    entries=read_json(PENDING).get("entries"); require(isinstance(entries,list),"PENDING_INVALID")
-    require(not any(isinstance(e,dict) and str(e.get("status","")).upper()!="RELEASED" for e in entries),"PENDING_ACTIVE")
+    checked=margin.get("checkedAt"); now=int(time.time()*1000)
+    require(type(checked) in (int,float) and -1000 <= now-checked <= 15*60_000,"MARGIN_STALE")
+    entries=read_json(PENDING).get("entries")
+    require(isinstance(entries,list) and all(isinstance(e,dict) for e in entries),"PENDING_INVALID")
+    require(not any(str(e.get("status","")).upper()!="RELEASED" for e in entries),"PENDING_ACTIVE")
 
 def systemctl(*args):
     p=subprocess.run(["systemctl",*args],capture_output=True,text=True,timeout=30)

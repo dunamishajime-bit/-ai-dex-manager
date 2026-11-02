@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { execFile as execFileCallback } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { setTimeout as delay } from "node:timers/promises";
 import {
   lstat,
   mkdir,
@@ -17,8 +19,53 @@ const SYSTEMCTL="/usr/bin/systemctl";
 const SHA_RE=/^[0-9a-f]{40}$/;
 const MAX_TICK_AGE_MS=300_000;
 const FUTURE_GRACE_MS=10_000;
+const MAX_SAFETY_AGE_MS=15*60_000;
+const SAFETY_PATHS=Object.freeze({
+  kill:"/var/lib/disdex/shared/kill-switch.json",
+  risk:"/var/lib/disdex/shared/crypto-daily-risk.json",
+  margin:"/var/lib/disdex/shared/margin-risk/guard-live.json",
+  pending:"/var/lib/disdex/shared/pending-exposure.json",
+});
 
 function fail(reason){ throw new Error(reason); }
+
+export function validateSafetySnapshots({kill,risk,margin,pending},now){
+  if(!Number.isFinite(now)||now<=0) fail("SAFETY_NOW_INVALID");
+  if(kill?.active!==false) fail("KILL_SWITCH_ACTIVE_OR_INVALID");
+  if(risk?.sourceComplete!==true||risk?.tripped!==false) fail("SHARED_RISK_NOT_HEALTHY");
+  const day=new Date(now).toISOString().slice(0,10);
+  if(risk.utcDay!==day) fail("SHARED_RISK_WRONG_UTC_DAY");
+  for(const [label,stamp] of [["SHARED_RISK",risk.updatedAt],["MARGIN",margin?.checkedAt]]){
+    if(typeof stamp!=="number"||!Number.isFinite(stamp)||
+       stamp<=0||stamp>now+1000||now-stamp>MAX_SAFETY_AGE_MS)
+      fail(label+"_STALE");
+  }
+  const limits=["maximumLossPct","dailyLossLimit","maxDailyLossPct","dailyLossLimitPct"]
+    .filter((field)=>risk[field]!=null).map((field)=>risk[field]);
+  if(!limits.length) fail("SHARED_RISK_LIMIT_MISSING");
+  for(const value of limits){
+    if(typeof value==="boolean"||value===null||value==="") fail("SHARED_RISK_LIMIT_INVALID");
+    const number=Number(value);
+    if(!Number.isFinite(number)||!(Math.abs(number-7.5)<1e-9||Math.abs(number-0.075)<1e-9))
+      fail("SHARED_RISK_LIMIT_MISMATCH");
+  }
+  if(margin?.stage!=="HEALTHY"||margin?.ordersAllowed!==true) fail("MARGIN_GUARD_NOT_HEALTHY");
+  if(pending?.schema!=="disdex-pending-exposure/v1"||!Array.isArray(pending.entries)||
+     !pending.entries.every((row)=>row&&typeof row==="object"&&!Array.isArray(row)&&
+       row.status==="RELEASED")) fail("PENDING_EXPOSURE_NOT_CLEARED");
+  return true;
+}
+
+async function readSafetySnapshots(now){
+  const rows={};
+  for(const [name,filePath] of Object.entries(SAFETY_PATHS)){
+    const stat=await lstat(filePath);
+    if(!stat.isFile()||stat.isSymbolicLink()||(stat.mode&0o002)!==0)
+      fail("SAFETY_FILE_UNTRUSTED:"+name);
+    rows[name]=JSON.parse(await readFile(filePath,"utf8"));
+  }
+  return validateSafetySnapshots(rows,now);
+}
 
 export function validateRunnerTick(value,{runnerId,pin,pid,cwd,now}){
   if(!value||typeof value!=="object"||Array.isArray(value)) fail("TICK_INVALID");
@@ -50,8 +97,8 @@ export function buildSupervisorHeartbeat({runnerId,pin,pid,cwd,now,tick,safetySt
     runtimeSha:pin.sha,
     expectedSha:pin.sha,
     workingDirectory:cwd,
-    mode:"LIVE",
-    liveEnabled:true,
+    mode:safetyState==="HEALTHY"?"LIVE":"BLOCKED",
+    liveEnabled:safetyState==="HEALTHY",
     safetyState,
     newOrdersAllowed:safetyState==="HEALTHY"&&tick.newOrdersAllowed===true,
     heartbeatAt:now,
@@ -72,10 +119,17 @@ export async function atomicJson(filePath,value){
   }catch(error){
     if(error?.code!=="ENOENT") throw error;
   }
-  const temp=`${filePath}.${process.pid}.${Date.now()}.tmp`;
+  const temp=`${filePath}.${process.pid}.${randomUUID()}.tmp`;
   await writeFile(temp,JSON.stringify(value)+"\n",{encoding:"utf8",mode:0o640,flag:"wx"});
   try{
-    await rename(temp,filePath);
+    for(let attempt=0;;attempt++){
+      try {await rename(temp,filePath);break;}
+      catch(error){
+        // Never unlink the complete destination. Windows may temporarily lock it.
+        if(!["EPERM","EACCES","EBUSY"].includes(error?.code)||attempt>=12) throw error;
+        await delay(Math.min(10*(attempt+1),100));
+      }
+    }
   }finally{
     await unlink(temp).catch((error)=>{if(error?.code!=="ENOENT") throw error;});
   }
@@ -123,42 +177,65 @@ async function loadManifest(filePath){
   return value;
 }
 
-async function observeRunner(runnerId,pin,now){
+async function observeRunner(runnerId,pin,now,safetyError){
   await validateRelease(pin);
   const service=await serviceIdentity(pin);
   const tickRaw=JSON.parse(await readFile(pin.tickPath,"utf8"));
   const tick=validateRunnerTick(tickRaw,{runnerId,pin,pid:service.pid,cwd:service.cwd,now});
   return buildSupervisorHeartbeat({
     runnerId,pin,pid:service.pid,cwd:service.cwd,now,tick,
-    safetyState:"HEALTHY",healthReason:"",
+    safetyState:safetyError?"BLOCKED":"HEALTHY",
+    healthReason:safetyError||"",
   });
+}
+
+function blockedHeartbeat(runnerId,pin,now,reason){
+  return {
+    schema:"disdex-runner-heartbeat/v1",runnerId,
+    serviceUnit:pin.serviceUnit,runtimeSha:pin.sha,expectedSha:pin.sha,
+    workingDirectory:null,mode:"BLOCKED",liveEnabled:false,safetyState:"BLOCKED",
+    newOrdersAllowed:false,heartbeatAt:now,lastTickAt:null,mainPid:0,
+    healthReason:reason,tickOutcome:null,
+  };
+}
+
+export function unsupportedEvidenceResult(runnerId){
+  return {runnerId,status:"BLOCKED",reason:"RUNNER_TICK_EVIDENCE_NOT_SUPPORTED",
+    newOrdersAllowed:false,tradingMutation:0};
 }
 
 export async function runSnapshot({manifestPath="/etc/disdex/runner-pins.json",now=Date.now(),write=true}={}){
   const manifest=await loadManifest(manifestPath);
+  let safetyError="";
+  try {await readSafetySnapshots(now);}
+  catch(error){safetyError=error instanceof Error?error.message:String(error);}
   const results=[];
   for(const [runnerId,pin] of Object.entries(manifest.runners)){
     if(pin.evidenceMode!=="heartbeat_v1"){
-      results.push({runnerId,status:"LEGACY_SKIPPED",tradingMutation:0});
+      results.push(unsupportedEvidenceResult(runnerId));
       continue;
     }
     try{
-      const heartbeat=await observeRunner(runnerId,pin,now);
+      const heartbeat=await observeRunner(runnerId,pin,now,safetyError);
       if(write) await atomicJson(pin.healthPath,heartbeat);
       results.push({
-        runnerId,status:"HEALTHY",heartbeatAt:heartbeat.heartbeatAt,lastTickAt:heartbeat.lastTickAt,
-        tradingMutation:0,
+        runnerId,status:heartbeat.safetyState,reason:heartbeat.healthReason,
+        heartbeatAt:heartbeat.heartbeatAt,lastTickAt:heartbeat.lastTickAt,
+        newOrdersAllowed:heartbeat.newOrdersAllowed,tradingMutation:0,
       });
     }catch(error){
-      results.push({
-        runnerId,status:"BLOCKED",reason:error instanceof Error?error.message:String(error),
-        tradingMutation:0,
-      });
+      let reason=error instanceof Error?error.message:String(error);
+      if(write){
+        try {await atomicJson(pin.healthPath,blockedHeartbeat(runnerId,pin,now,reason));}
+        catch(writeError){reason+=";BLOCKED_HEARTBEAT_WRITE_FAILED:"+String(writeError?.code||writeError);}
+      }
+      results.push({runnerId,status:"BLOCKED",reason,newOrdersAllowed:false,tradingMutation:0});
     }
   }
   return {
     schema:"disdex-runner-health-snapshot/v2",
     checkedAt:now,
+    overallStatus:results.length>0&&results.every((row)=>row.status==="HEALTHY")?"HEALTHY":"BLOCKED",
     target:manifest.target,
     operatorTarget:manifest.operatorTarget,
     results,
@@ -192,7 +269,7 @@ async function main(){
   }
   const result=await runSnapshot({write:!dryRun});
   console.log(JSON.stringify(result));
-  if(result.results.some((row)=>row.status==="BLOCKED")) process.exitCode=1;
+  if(result.overallStatus!=="HEALTHY") process.exitCode=1;
 }
 
 if(import.meta.url===`file://${process.argv[1]}`){

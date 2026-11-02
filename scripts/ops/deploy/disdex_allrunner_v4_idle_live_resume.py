@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 import sys
@@ -75,19 +77,34 @@ def shared_health(runner: str) -> None:
     kill=json_file(KILL)
     require(kill.get("active") is False,"SHARED_KILL_SWITCH_ACTIVE")
     risk=json_file(RISK)
-    require(risk.get("sourceComplete") is True and risk.get("tripped") is not True,
+    require(risk.get("sourceComplete") is True and risk.get("tripped") is False,
             "SHARED_RISK_NOT_HEALTHY")
+    now=int(time.time()*1000)
+    updated=risk.get("updatedAt")
+    require(risk.get("utcDay")==datetime.fromtimestamp(now/1000,timezone.utc).date().isoformat()
+            and type(updated) in (int,float) and -1000 <= now-updated <= 15*60_000,
+            "SHARED_RISK_STALE_OR_WRONG_UTC_DAY")
+    limits=[risk[k] for k in ("maximumLossPct","dailyLossLimit","maxDailyLossPct","dailyLossLimitPct")
+            if k in risk and risk[k] is not None]
+    require(bool(limits),"SHARED_RISK_LIMIT_MISSING")
+    for value in limits:
+        try:
+            require(not isinstance(value,bool),"SHARED_RISK_LIMIT_INVALID")
+            number=float(value)
+        except (TypeError,ValueError):
+            raise RuntimeError("SHARED_RISK_LIMIT_INVALID") from None
+        require(math.isfinite(number) and (abs(number-0.075)<1e-9 or abs(number-7.5)<1e-9),
+                "SHARED_RISK_LIMIT_MISMATCH")
     margin=json_file(MARGIN)
     require(margin.get("stage")=="HEALTHY" and margin.get("ordersAllowed") is True,
             "MARGIN_GUARD_NOT_HEALTHY")
     checked=margin.get("checkedAt")
-    now=int(time.time()*1000)
     require(type(checked) in (int,float) and -1000 <= now-checked <= 15*60_000,
             "MARGIN_GUARD_STALE")
     pending=json_file(PENDING)
     entries=pending.get("entries")
-    require(isinstance(entries,list),"PENDING_EXPOSURE_INVALID")
-    require(not any(isinstance(e,dict) and str(e.get("status","")).upper()!="RELEASED" for e in entries),
+    require(isinstance(entries,list) and all(isinstance(e,dict) for e in entries),"PENDING_EXPOSURE_INVALID")
+    require(not any(str(e.get("status","")).upper()!="RELEASED" for e in entries),
             "PENDING_EXPOSURE_ACTIVE")
     require(active(V52_UNIT),"V52_NOT_ACTIVE")
     require(active(MARGIN_UNIT),"CANONICAL_MARGIN_GUARD_NOT_ACTIVE")
@@ -119,8 +136,11 @@ def signed_get() -> dict:
       "set -ae; for f in "
       "/etc/disdex/disdex-v13d-v11eq-v96.env "
       "/etc/disdex/disdex-v12-pengu-v2-v52.env "
-      "/etc/disdex/disdex-v12-v4.env; do . \"$f\"; done; set +a; "
-      f"exec /usr/bin/node {release}/node_modules/tsx/dist/cli.mjs "
+      "/etc/disdex/disdex-v12-v4.env "
+      f"/etc/disdex/current-runtime/{V4}.env; do . \"$f\"; done; set +a; "
+      "[ \"${DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH:-}\" = "
+      "\"/var/lib/disdex/shared/aster-rate-budget.json\" ] || exit 42; "
+      f"exec /usr/sbin/runuser -u deploy -- /usr/bin/node {release}/node_modules/tsx/dist/cli.mjs "
       "scripts/disdex-aster-readonly-account-diagnostic.ts"
     )
     p=subprocess.run(["/bin/bash","-c",command],cwd=release,
@@ -160,24 +180,11 @@ def stable_start(spec: dict) -> tuple[int,bool]:
         pid=int(prop(unit,"MainPID") or "0")
         require(pid>100,"ACTIVE_RUNNER_PID_INVALID")
         return pid,True
-    subprocess.run(["systemctl","reset-failed",unit],check=False,timeout=15)
-    p=subprocess.run(["systemctl","start",unit],capture_output=True,text=True,timeout=110)
-    require(p.returncode==0,"SYSTEMD_START_FAILED:"+p.stderr[-160:])
-    deadline=time.monotonic()+65
-    pid=0
-    stable_since=None
-    while time.monotonic()<deadline:
-        state=prop(unit,"ActiveState")
-        current=int(prop(unit,"MainPID") or "0")
-        if state=="active" and current>100:
-            if current!=pid:
-                pid=current;stable_since=time.monotonic()
-            if stable_since is not None and time.monotonic()-stable_since>=25:
-                return pid,False
-        else:
-            stable_since=None
-        time.sleep(2)
-    raise RuntimeError("RUNNER_NOT_STABLE_25_SECONDS")
+    # The workflow authorizes ordersEnabled=false, while the existing live
+    # systemd unit consumes an ordersEnabled=true artifact.  Starting it can
+    # place an order before a post-start venue check; no monitor-only runtime
+    # has been certified for this path yet.
+    raise RuntimeError("MONITOR_ONLY_START_NOT_CERTIFIED")
 
 def main(runner: str,run_id: str) -> None:
     require(os.geteuid()==0,"ROOT_REQUIRED")

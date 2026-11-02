@@ -37,3 +37,11 @@ test("HP approval UI post-deploy check verifies protected redirect without an au
   assert.match(source, /location:/i);
   assert.doesNotMatch(source, /Cookie:\s*disdex_auth/);
 });
+
+test("HP deployment workflow has no bare carriage return that splits a YAML block scalar", () => {
+  const source = fs.readFileSync(
+    ".github/workflows/disdex-hp-standard-approval-ui-deploy.yml",
+    "utf8",
+  );
+  assert.doesNotMatch(source, /\r(?!\n)/, "bare CR makes the deployment workflow invalid YAML");
+});
