@@ -3,11 +3,11 @@ import { readFile, readlink } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import {
-import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
   loadRunnerPinManifest,
   type RunnerPin,
   type RunnerPinId,
 } from "@/lib/server/runner-pin-manifest";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
