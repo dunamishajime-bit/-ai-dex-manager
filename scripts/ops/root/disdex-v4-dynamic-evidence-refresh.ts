@@ -179,6 +179,17 @@ export function validateSharedRuntimeMetadata(input: {
   return true as const;
 }
 
+export function validateDynamicRefreshTarget(existing: JsonRecord, sha: string) {
+  assertSha(sha);
+  if (!SHA.test(String(existing.candidateSha || "").toLowerCase())
+      || existing.status !== "PASS"
+      || existing.readOnly !== true
+      || existing.mutationCalls !== 0) {
+    throw new Error("V4_DYNAMIC_REFRESH_TARGET_SHA_INVALID");
+  }
+  return true as const;
+}
+
 export type V4DynamicRuntimeSnapshot = {
   sharedRisk: JsonRecord;
   marginGuard: JsonRecord;
@@ -559,7 +570,7 @@ async function refreshDynamicFiles(input: {
     for (const key of DYNAMIC_KEYS) {
       const path = join(input.evidenceRoot, evidenceFileName(key));
       const existing = await readTrustedJson(path, 0);
-      if (existing.candidateSha !== sha) throw new Error(`V4_DYNAMIC_REFRESH_TARGET_SHA_MISMATCH:${key}`);
+      validateDynamicRefreshTarget(existing, sha);
       staged.push({ key, path, temporary: await stageJson(path, dynamicRecord[key]) });
     }
     // All payloads are validated and staged before the first target is

@@ -5,6 +5,7 @@ import {
   buildV4DynamicRefreshPlan,
   collectV4DynamicEvidence,
   type V4DynamicRuntimeSnapshot,
+  validateDynamicRefreshTarget,
   validateSharedRuntimeMetadata,
 } from "../scripts/ops/root/disdex-v4-dynamic-evidence-refresh";
 
@@ -104,4 +105,10 @@ test("shared runtime metadata accepts only the canonical deploy-owned writer con
     parentGid: 1001,
     parentMode: 0o2770,
   }), /PATH_UNTRUSTED/);
+});
+
+test("first refresh may replace a valid previous-SHA dynamic evidence seed", () => {
+  const previous = { candidateSha: "5".repeat(40), status: "PASS", readOnly: true, mutationCalls: 0 };
+  assert.equal(validateDynamicRefreshTarget(previous, SHA), true);
+  assert.throws(() => validateDynamicRefreshTarget({ ...previous, candidateSha: "not-a-sha" }, SHA), /TARGET_SHA_INVALID/);
 });
