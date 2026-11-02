@@ -77,17 +77,23 @@ def _quality102_object(value: object, field: str) -> dict:
 def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None = None) -> Quality102OwnedPosition | None:
     """Load only a schema-valid LIVE Q102 state for cross-runner accounting.
 
-    Absence is equivalent to no owned Q102 position. Any present-but-invalid
-    file is a hard failure so the base runners cannot trade against an
-    ambiguous ownership or gross snapshot.
+    A configured but unavailable state is not evidence of a flat position.
+    Invalid or unavailable state is a hard failure for configured Q102 owners.
     """
     resolved = path or _quality102_state_path()
-    if resolved is None or not resolved.exists():
-        return None
+    if resolved is None:
+        raise RuntimeError("QUALITY102_STATE_PATH_MISSING")
     try:
         raw = json.loads(resolved.read_text(encoding="utf-8"))
+    except FileNotFoundError as error:
+        raise RuntimeError("QUALITY102_STATE_UNAVAILABLE") from error
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from error
+    return _validate_quality102_live_state(raw, now_ms=now_ms)
+
+
+def _validate_quality102_live_state(raw: object, *, now_ms: float | None = None) -> Quality102OwnedPosition | None:
+    """Validate the exact in-memory snapshot a caller will consume."""
     root = _quality102_object(raw, "root")
     allowed = {
         "version", "strategyId", "mode", "runtimeCommitSha", "updatedAt",
@@ -104,8 +110,12 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
     runtime_sha = str(root.get("runtimeCommitSha") or "")
     if not _SHA256_RE.fullmatch(runtime_sha):
         raise RuntimeError("QUALITY102_STATE_MALFORMED:runtimeCommitSha")
-    expected_sha = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "").strip()
-    if expected_sha and runtime_sha.lower() != expected_sha.lower():
+    # The caller (for example V52) can run a different release from Q102.
+    # Never turn that caller's SHA, or an absent pin, into owner evidence.
+    expected_sha = str(os.environ.get("DISDEX_Q102_RUNTIME_SHA") or "").strip()
+    if not _SHA256_RE.fullmatch(expected_sha):
+        raise RuntimeError("QUALITY102_OWNER_SHA_PIN_REQUIRED")
+    if runtime_sha.lower() != expected_sha.lower():
         raise RuntimeError("QUALITY102_STATE_MISMATCH:runtimeCommitSha")
     updated_at = _quality102_finite(root.get("updatedAt"), "updatedAt", positive=True)
     clock = _quality102_finite(now_ms if now_ms is not None else time.time() * 1000, "now_ms", positive=True)
@@ -134,6 +144,10 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
 
     position = root.get("position")
     if position is None:
+        # A submitted or unknown entry may already exist at the venue.  Flat
+        # local state alone is not evidence that pending exposure is zero.
+        if root.get("pending") is not None:
+            raise RuntimeError("QUALITY102_PENDING_ENTRY_REQUIRES_RECONCILIATION")
         return None
     position = _quality102_object(position, "position")
     if set(position) - {"symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger"}:
@@ -236,21 +250,20 @@ def read_quality102_live_state_document(
 ) -> tuple[Path, dict, Quality102OwnedPosition | None] | None:
     """Return a validated live-state document for cross-runner coordination.
 
-    Validation is deliberately delegated to ``load_quality102_live_state``
-    before the document is returned.  Callers that need to update the state
-    (for example, a base-priority MTM reduction) must hold the shared account
-    lock; this function does not provide locking itself.
+    The returned document and ownership result are derived from the same read.
+    Callers that update the state must hold the shared account lock; this
+    function does not provide locking itself.
     """
     resolved = path or _quality102_state_path()
-    if resolved is None or not resolved.exists():
-        return None
-    owned = load_quality102_live_state(resolved, now_ms=now_ms)
+    if resolved is None:
+        raise RuntimeError("QUALITY102_STATE_PATH_MISSING")
     try:
         raw = json.loads(resolved.read_text(encoding="utf-8"))
+    except FileNotFoundError as error:
+        raise RuntimeError("QUALITY102_STATE_UNAVAILABLE") from error
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise RuntimeError("QUALITY102_STATE_MALFORMED:json") from error
-    if not isinstance(raw, dict):
-        raise RuntimeError("QUALITY102_STATE_MALFORMED:root")
+    owned = _validate_quality102_live_state(raw, now_ms=now_ms)
     return resolved, raw, owned
 
 
@@ -388,13 +401,13 @@ def quality102_crypto_notional_from_positions(
             try:
                 fet = json.loads(path.read_text(encoding="utf-8"))
                 p = fet.get("position")
-                expected = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "")
+                expected = str(os.environ.get("FET_BRK48_RUNTIME_SHA") or "").strip()
                 clock = now_ms if now_ms is not None else time.time() * 1000
                 age = clock - float(fet["updatedAt"])
                 sha = str(fet.get("runtimeCommitSha") or "")
                 valid = (fet.get("schema") == "fet-brk48-residual-state/v1" and fet.get("strategyId") == "FET_BRK48_RESIDUAL"
                          and _SHA256_RE.fullmatch(sha) and _SHA256_RE.fullmatch(expected)
-                         and (not expected or sha.lower() == expected.lower())
+                         and sha.lower() == expected.lower()
                          and -5000 <= age <= 75 * 60_000
                          and fet.get("pending") is None and fet.get("manualReview") is None
                          and isinstance(p, dict) and p.get("symbol") == symbol and p.get("side") == 1
@@ -468,13 +481,18 @@ def assert_strict_live_configuration(env: Mapping[str, str] | None = None) -> St
 
 
 def validate_gross_snapshot(snapshot: Mapping[str, object], caps: StrictPortfolioCaps = STRICT_CAPS) -> dict:
-    equity = _finite(snapshot.get("equityUsd", 0), "EQUITY")
-    crypto = _finite(snapshot.get("cryptoGross", 0), "CRYPTO_GROSS")
-    stock = _finite(snapshot.get("stockGross", 0), "STOCK_GROSS")
-    total = _finite(snapshot.get("totalGross", 0), "TOTAL_GROSS")
+    required = ("equityUsd", "cryptoGross", "stockGross", "totalGross")
+    if any(field not in snapshot for field in required):
+        raise RuntimeError("STRICT_PORTFOLIO_GROSS_SNAPSHOT_INCOMPLETE")
+    if any(isinstance(snapshot[field], bool) for field in required):
+        raise RuntimeError("STRICT_PORTFOLIO_GROSS_SNAPSHOT_INVALID_TYPE")
+    equity = _finite(snapshot["equityUsd"], "EQUITY")
+    crypto = _finite(snapshot["cryptoGross"], "CRYPTO_GROSS")
+    stock = _finite(snapshot["stockGross"], "STOCK_GROSS")
+    total = _finite(snapshot["totalGross"], "TOTAL_GROSS")
     if equity <= 0:
         raise RuntimeError("STRICT_PORTFOLIO_EQUITY_NOT_POSITIVE")
-    if min(crypto, stock, total) < -EPSILON:
+    if min(crypto, stock, total) < 0:
         raise RuntimeError("STRICT_PORTFOLIO_NEGATIVE_GROSS")
     if crypto > caps.crypto_gross + EPSILON:
         raise RuntimeError(f"CRYPTO_GROSS_OVER_CAP:{crypto:.9f}>{caps.crypto_gross:.9f}")

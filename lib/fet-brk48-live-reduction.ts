@@ -4,7 +4,8 @@ import { createHash } from "node:crypto";
 import type { DirectTradeExecutor } from "@/lib/direct-trade-executor";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { readFetBrk48State, writeFetBrk48State } from "@/lib/fet-brk48-state";
-import { readQuality102CausalV1Ownership, quality102OwnsPosition } from "@/lib/disdex-quality102-causal-v1-ownership";
+import { quality102OwnsPosition } from "@/lib/disdex-quality102-causal-v1-ownership";
+import { readPinnedQ102Owner, resolveFetCoreOwnerPins } from "@/lib/fet-core-owner-pins";
 
 const EPS = 1e-9;
 
@@ -14,6 +15,7 @@ export interface FetCoreReductionInput {
     causeIdempotencyKey: string;
     statePath?: string;
     maxSlippageBps: number;
+    /** Legacy caller SHA; never used as evidence of either independent owner. */
     expectedRuntimeSha?: string;
     now?: () => number;
 }
@@ -25,19 +27,24 @@ async function stopIsActive(adapter: V12AsterLiveAdapter, clientOrderId: string)
 }
 
 export async function reduceFetBrk48ForCoreConflict(input: FetCoreReductionInput) {
+    const pins = resolveFetCoreOwnerPins(process.env);
+    if ("error" in pins) return { status: "blocked" as const, message: pins.error };
     const now = input.now || Date.now;
     const path = input.statePath || process.env.FET_BRK48_STATE_PATH || "/var/lib/disdex/fet-brk48-residual/state.json";
     let state;
     try {
-        state = await readFetBrk48State(path, input.expectedRuntimeSha);
+        state = await readFetBrk48State(path, pins.fetSha);
     } catch (error) {
         return { status: "blocked" as const, message: error instanceof Error ? error.message : String(error) };
     }
     if (state.manualReview) return { status: "blocked" as const, message: `FET_RESIDUAL_MANUAL_REVIEW:${state.manualReview}` };
 
-    const q102 = await readQuality102CausalV1Ownership({
-        expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || input.expectedRuntimeSha,
-    });
+    let q102;
+    try {
+        q102 = await readPinnedQ102Owner(process.env, pins.q102Sha);
+    } catch (error) {
+        return { status: "blocked" as const, message: error instanceof Error ? error.message : String(error) };
+    }
     const allFet = (await input.executor.getPositions()).filter(
         (position) => position.symbol.toUpperCase() === "FETUSDT" && Math.abs(position.quantity) > EPS,
     );

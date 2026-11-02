@@ -15,8 +15,9 @@ export function buildFetBrk48Signal(rows: readonly FetBrk48Bar[], now:number): F
   const entryHour=new Date(entryTs).getUTCHours();
   if(entryHour%FET_BRK48_RESIDUAL.decisionEntryHourModulo!==FET_BRK48_RESIDUAL.decisionEntryHourRemainder)return undefined;
   if(now-entryTs>FET_BRK48_RESIDUAL.liveEntryWindowMs)return undefined;
-  const completed=rows.filter(r=>r.closeTs<entryTs);
-  if(completed.length<73)return undefined;
+  const hourMs=3_600_000;
+  const completed=rows.filter(r=>r.openTs>=entryTs-73*hourMs&&r.openTs<entryTs);
+  if(completed.length!==73||completed.some((r,i)=>r.openTs!==entryTs-(73-i)*hourMs||r.closeTs!==r.openTs+hourMs-1))return undefined;
   const signal=completed[completed.length-1];
   if(signal.openTs!==entryTs-3_600_000)return undefined;
   const prior48=completed.slice(-49,-1);

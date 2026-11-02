@@ -45,8 +45,13 @@ class OwnerTest(unittest.TestCase):
             "updatedAt":NOW-120000,"pending":None,"manualReview":None,
             "positions":[pos("DOTUSDT",65.9,1.087),pos("JUPUSDT",225,0.3048)]}
         self.write()
+        q102_sha="b"*40
+        q102_path=self.root/"q102-state.json"
+        q102_path.write_text(json.dumps({"version":1,"strategyId":"QUALITY102_CAUSAL_V1",
+            "mode":"LIVE","runtimeCommitSha":q102_sha,"updatedAt":NOW,"failures":[]}))
         self.env=patch.dict(os.environ,{"DISDEX_RUNTIME_COMMIT_SHA":SHA,
-            "DISDEX_IDLE_PRIORITY_STATE_PATH":str(self.path)})
+            "DISDEX_IDLE_PRIORITY_STATE_PATH":str(self.path),
+            "DISDEX_Q102_RUNTIME_SHA":q102_sha,"QUALITY102_CAUSAL_V1_STATE_PATH":str(q102_path)})
         self.env.start();self.addCleanup(self.env.stop)
     def write(self):
         self.path.write_text(json.dumps(self.state))

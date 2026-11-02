@@ -64,9 +64,11 @@ def main() -> int:
         path.write_text(json.dumps(state), encoding="utf-8")
         original_path = os.environ.get("QUALITY102_CAUSAL_V1_STATE_PATH")
         original_sha = os.environ.get("DISDEX_RUNTIME_COMMIT_SHA")
+        original_q102_sha = os.environ.get("DISDEX_Q102_RUNTIME_SHA")
         try:
             os.environ["QUALITY102_CAUSAL_V1_STATE_PATH"] = str(path)
             os.environ["DISDEX_RUNTIME_COMMIT_SHA"] = "a" * 40
+            os.environ["DISDEX_Q102_RUNTIME_SHA"] = "a" * 40
             engine = object.__new__(V52AsterOnlyEngine)
             engine.live = True
             engine.aster = FakeAster(now)
@@ -99,6 +101,10 @@ def main() -> int:
                 os.environ.pop("DISDEX_RUNTIME_COMMIT_SHA", None)
             else:
                 os.environ["DISDEX_RUNTIME_COMMIT_SHA"] = original_sha
+            if original_q102_sha is None:
+                os.environ.pop("DISDEX_Q102_RUNTIME_SHA", None)
+            else:
+                os.environ["DISDEX_Q102_RUNTIME_SHA"] = original_q102_sha
             path.unlink(missing_ok=True)
             directory.rmdir()
     finally:

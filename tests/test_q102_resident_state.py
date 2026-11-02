@@ -1,4 +1,5 @@
 import unittest, json, os, sys
+from unittest.mock import patch
 from pathlib import Path
 from tests.portable_temp import portable_temporary_directory
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
@@ -7,7 +8,7 @@ class StateContract(unittest.TestCase):
  def test_v4_and_resident_protection_fields_are_validated(self):
   p={'symbol':'FETUSDT','side':-1,'quantity':2,'entryPrice':11,'entryTs':1000,'hardStop':.05,'bestPrice':11,'trailActive':False,'family':'BRK','variant':'BRK_FET','layer':'S3','exitPolicy':'FIXED_HOLD_STOP','maxHoldHours':24,'residentStop':{'protected':True,'clientOrderId':'q102-stop-'+'a'*22,'orderId':55,'symbol':'FETUSDT','side':'BUY','quantity':2,'originalQuantity':2,'stopPrice':11.55,'readBackStatus':'VERIFIED','lastReconciledAt':2000}}
   d={'version':1,'strategyId':'QUALITY102_CAUSAL_V1','mode':'LIVE','runtimeCommitSha':'a'*40,'updatedAt':2000,'failures':[],'position':p}
-  with portable_temporary_directory() as td:
+  with patch.dict(os.environ, {'DISDEX_Q102_RUNTIME_SHA': 'a'*40}), portable_temporary_directory() as td:
    f=Path(td)/'state.json';f.write_text(json.dumps(d));self.assertIsNotNone(load_quality102_live_state(f,now_ms=3000))
    for change in [{'side':'SELL'},{'quantity':1},{'readBackStatus':'UNKNOWN'},{'extra':1}]:
     d['position']['residentStop']={**p['residentStop'],**change};f.write_text(json.dumps(d))

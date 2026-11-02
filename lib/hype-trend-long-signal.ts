@@ -114,6 +114,8 @@ export function buildHypeTrendSignal(input: { btc: readonly HypeTrendCandle[]; h
   const btcLast = btcRows.at(-1)!;
   const hypeLast = hypeRows.at(-1)!;
   if (btcLast.openTime !== hypeLast.openTime) return invalid("BTC_HYPE_BAR_ALIGNMENT_MISMATCH");
+  // Once the next H1 bar should have closed, the aligned data is stale.
+  if (input.now - (hypeLast.openTime + HOUR_MS) >= HOUR_MS) return invalid("STALE_COMPLETED_H1_DATA");
 
   const fast = ema(hypeRows, HYPE_TREND_LONG_POLICY.fastEmaPeriod);
   const slow = ema(hypeRows, HYPE_TREND_LONG_POLICY.slowEmaPeriod);

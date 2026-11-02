@@ -100,7 +100,7 @@ export function advancePenguShortV20TimedStops(input: {
 
     for (const stage of stages) {
         if (stage.checked) continue;
-        const candidate = sorted.find((bar) => bar.timestampMs + FIVE_MINUTE_MS > stage.boundaryTs);
+        const candidate = sorted.find((bar) => bar.timestampMs + FIVE_MINUTE_MS >= stage.boundaryTs);
         if (!candidate) continue;
         const adverseLossPct = lossPct(entryPrice, candidate.close);
         if (!Number.isFinite(adverseLossPct)) throw new Error("PENGU_SHORT_V20_TIMED_STOP_BAR_INVALID");
