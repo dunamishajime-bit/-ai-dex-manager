@@ -567,7 +567,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
             operator_target=OPERATOR_TARGET,
             sha=self.new,
             scope="SHARED_CRYPTO_RISK_ONLY",
-            route="CODEX_SSH",
+            route="GITHUB_ACTIONS",
             plan_sha256=self.plan_hash,
             orders_enabled="false",
             owner="owner",
@@ -630,6 +630,17 @@ class SharedRiskExecutorTest(unittest.TestCase):
             [("stop", self.old_unit), ("mask", self.old_unit),
              ("enable", self.new_unit), ("start", self.new_unit)],
         )
+
+    def test_codex_ssh_shared_risk_route_uses_root_session_without_token(self):
+        args = self._args()
+        args.route = "CODEX_SSH"
+        args.owner = "codex-ssh"
+        args._codex_ssh_authenticated = True
+        systemd = FakeSystemd(self.old_unit, self.new_unit)
+        result = self._executor(systemd).execute(args, "")
+        self.assertEqual(result["status"], "SHARED_RISK_CUTOVER_VERIFIED")
+        self.assertEqual(result["route"], "CODEX_SSH")
+        self.assertEqual(result["ordersSent"], 0)
 
     def test_shared_risk_start_failure_rolls_back_writer_and_manifest(self):
         systemd = FakeSystemd(self.old_unit, self.new_unit, fail_new_start=True)
