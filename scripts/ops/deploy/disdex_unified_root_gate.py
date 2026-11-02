@@ -119,8 +119,17 @@ class SystemdAdapter:
             raise RuntimeError(f"systemd show {unit}: {detail[:240]}")
         return result.stdout.strip()
 
+    def active_state(self, unit: str) -> str:
+        return self._state(unit, "ActiveState")
+
+    def main_pid(self, unit: str) -> int:
+        value = self._state(unit, "MainPID")
+        if not value.isdigit():
+            raise RuntimeError("systemd MainPID is not numeric: " + unit)
+        return int(value)
+
     def is_active(self, unit: str) -> bool:
-        return self._state(unit, "ActiveState") in ("active", "activating", "deactivating")
+        return self.active_state(unit) in ("active", "activating", "deactivating")
 
     def is_masked(self, unit: str) -> bool:
         return self._state(unit, "UnitFileState") == "masked"
@@ -158,6 +167,14 @@ def assert_private_dir(path: Path, *, root_uid=0):
     s = path.lstat()
     if not stat.S_ISDIR(s.st_mode) or s.st_uid != root_uid or s.st_mode & 0o077:
         raise ValueError("root-only directory required: " + str(path))
+
+
+def assert_root_trusted_dir(path: Path, *, root_uid=0):
+    """Permit root-owned 0755 /etc/disdex for non-secret runner metadata."""
+    s = path.lstat()
+    if (not stat.S_ISDIR(s.st_mode) or s.st_uid != root_uid
+            or s.st_mode & 0o022):
+        raise ValueError("root-owned non-writable directory required: " + str(path))
 
 def read_root_json(path: Path, *, root_uid=0, private=True):
     assert_regular_secure(path, root_uid=root_uid, private=private)
@@ -290,9 +307,14 @@ def _assert_execution_root(root_uid: int) -> None:
 
 
 def _atomic_json(path: Path, value: dict, *, root_uid: int,
-                 private: bool = True) -> None:
+                 private: bool = True, trusted_parent: bool = False) -> None:
     """Publish a root-owned JSON object without following a destination link."""
-    assert_private_dir(path.parent, root_uid=root_uid)
+    if private and not trusted_parent:
+        assert_private_dir(path.parent, root_uid=root_uid)
+    else:
+        assert_root_trusted_dir(path.parent, root_uid=root_uid)
+    if trusted_parent and not private:
+        raise ValueError("trusted-parent override requires private artifact")
     if path.exists() or path.is_symlink():
         assert_regular_secure(path, root_uid=root_uid, private=private)
     temporary = path.parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
@@ -305,7 +327,7 @@ def _atomic_json(path: Path, value: dict, *, root_uid: int,
             writer.flush()
             os.fsync(writer.fileno())
         os.replace(temporary, path)
-        os.chmod(path, 0o600)
+        os.chmod(path, 0o600 if private else 0o644)
     finally:
         try:
             temporary.unlink()
@@ -314,7 +336,8 @@ def _atomic_json(path: Path, value: dict, *, root_uid: int,
 
 
 def _validate_venue_evidence(value: dict, *, now: int, label: str,
-                             baseline: Optional[dict] = None) -> dict:
+                             baseline: Optional[dict] = None,
+                             require_v4_runtime: bool = True) -> dict:
     if not isinstance(value, dict) or value.get("schema") != VENUE_EVIDENCE_SCHEMA:
         raise ValueError(f"venue evidence {label} schema invalid")
     if value.get("venue") != "aster" or value.get("readOnly") is not True:
@@ -332,9 +355,10 @@ def _validate_venue_evidence(value: dict, *, now: int, label: str,
         "signatureVerified", "positionsReconciled", "protectiveStopsReconciled",
         "stopOwnershipReconciled", "pendingExposureReconciled",
         "grossReconciled", "sharedRiskHealthy", "marginGuardHealthy",
-        "accountLockHealthy", "killSwitchHealthy", "heartbeatVerified",
-        "tickVerified", "runnerShaMapVerified",
+        "accountLockHealthy", "killSwitchHealthy", "runnerShaMapVerified",
     )
+    if require_v4_runtime:
+        required_true += ("heartbeatVerified", "tickVerified")
     if any(value.get(field) is not True for field in required_true):
         raise ValueError(f"venue evidence {label} safety reconciliation incomplete")
     if value.get("sharedRiskDailyLossLimit") != 0.075:
@@ -473,6 +497,11 @@ class RootDeploymentExecutor:
         certify_live_executor()
         if args.deployment_target != DEPLOYMENT_TARGET or args.operator_target != OPERATOR_TARGET:
             raise ValueError("unapproved deployment target or identity")
+        if args.scope == "V12_V4":
+            # Lazy import keeps the shared-risk and V4 mutation boundaries
+            # independent; the owner-signed scope selects the only executor.
+            from disdex_v4_root_cutover import V4RootExecutor
+            return V4RootExecutor(self).execute(args, token)
         if args.scope != SHARED_RISK_SCOPE:
             raise ValueError("unsupported execution scope: " + str(args.scope))
         orders_enabled = args.orders_enabled == "true"
@@ -730,23 +759,39 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
     desired = read_root_json(root / "plans" / args.scope / (args.sha + ".json"),
                              root_uid=root_uid)
     current_plan = read_root_json(root / "current-plan.json", root_uid=root_uid)
-    pins = parse_live_pins(read_root_json(pins_path, root_uid=root_uid,
-                                           private=False))
+    pins = parse_live_pins(
+        read_root_json(pins_path, root_uid=root_uid, private=False),
+        releases=releases,
+    )
     link = current.lstat()
     if not stat.S_ISLNK(link.st_mode):
         raise ValueError("production current is not symlink")
     resolved = current.resolve(strict=True)
     if resolved.parent != releases or not SHA.fullmatch(resolved.name):
         raise ValueError("production current symlink escapes immutable releases")
-    release_marker(resolved.name, releases, root_uid=root_uid)
     sha_hash, diff = validate_bootstrap_plan(
         desired, current_plan, pins, resolved.name)
     if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
         raise ValueError("supplied SHA / plan hash differs from root plan")
-    validate_release_roots(current_plan, releases, root_uid=root_uid)
-    validate_release_roots(desired, releases, root_uid=root_uid)
-    for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
-        release_marker(sha, releases, root_uid=root_uid)
+    if args.scope == "V12_V4":
+        # V4 is a trust-boundary migration from legacy deploy-owned peer/current
+        # releases. Do not require rewriting unchanged peer/UI releases merely
+        # to satisfy the new root-owned convention. The signed plan freezes
+        # their exact SHA map; only the newly introduced V4 release must meet
+        # the root-owned immutable release contract.
+        if (diff["changedRunners"] != ["V12_V4"]
+            or diff["uiChanged"] or diff["monitorChanged"]
+            or diff["releaseRootsChanged"]
+            or desired["runners"].get("V12_V4") != args.sha
+            or desired["releaseRoots"]["runners"] != str(releases)):
+            raise ValueError("V4 preflight exceeds exact single-runner delta")
+        release_marker(args.sha, releases, root_uid=root_uid)
+    else:
+        release_marker(resolved.name, releases, root_uid=root_uid)
+        validate_release_roots(current_plan, releases, root_uid=root_uid)
+        validate_release_roots(desired, releases, root_uid=root_uid)
+        for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
+            release_marker(sha, releases, root_uid=root_uid)
     # Verify signature but DO NOT consume a nonce here: a read-only preflight
     # cannot authorize or burn the owner's one-use LIVE grant.
     payload = verify(token, root / "owner-approval-public.pem", REPO,
@@ -761,6 +806,13 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
                 "POST_CUTOVER_3_CYCLES"]
     if args.scope == SHARED_RISK_SCOPE:
         verified_contracts.append(certification["status"])
+    elif args.scope == "V12_V4":
+        from disdex_v4_root_cutover import V4RootExecutor
+        if not callable(V4RootExecutor.execute):
+            raise ValueError("V4 executor missing")
+        verified_contracts.append("V4_SCOPE_SPECIFIC_EXECUTOR_PRESENT_SOURCE_ONLY")
+        unproven.extend(["V4_RESIDENT_STOP_HANDOVER", "V4_RUNTIME_ACTIVATION",
+                         "V4_POST_START_VENUE_AUDIT"])
     else:
         unproven.append("SCOPE_SPECIFIC_EXECUTOR_NOT_IMPLEMENTED")
     return {
@@ -815,8 +867,24 @@ def main():
         if len(raw) > 16384:
             raise ValueError("owner approval too large")
         if args.execute:
-            result = RootDeploymentExecutor(default_execution_paths()).execute(
-                args, raw.strip())
+            # Exclusive root-owned lock across GitHub Actions / CODEX_SSH paths.
+            # An Actions concurrency group alone cannot serialize VPS writers.
+            import fcntl
+            assert_private_dir(ROOT, root_uid=0)
+            lock_path = ROOT / "deployment-execution.lock"
+            if lock_path.is_symlink():
+                raise ValueError("untrusted deployment lock symlink")
+            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
+            try:
+                assert_regular_secure(lock_path, root_uid=0, private=True)
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    raise ValueError("another root deployment is in progress") from None
+                result = RootDeploymentExecutor(default_execution_paths()).execute(
+                    args, raw.strip())
+            finally:
+                os.close(fd)
         else:
             result = preflight(args, raw.strip())
         print(json.dumps(result, sort_keys=True))

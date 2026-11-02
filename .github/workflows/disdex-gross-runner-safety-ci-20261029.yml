@@ -22,6 +22,9 @@ on:
       - tests/quality102-preflight-protective-order.test.ts
       - tests/hype-zec-preemption.test.ts
       - tests/idle-residual-long-preemption.test.ts
+      - tests/idle-residual-v52-owner-sha.test.ts
+      - lib/idle-residual-owner-sha.ts
+      - scripts/disdex-idle-residual-long-core-preempt.ts
       - package.json
       - package-lock.json
       - .github/workflows/disdex-gross-runner-safety-ci-20261029.yml
@@ -60,6 +63,7 @@ jobs:
           tests/quality102-preflight-rate-budget.test.ts
           tests/hype-zec-preemption.test.ts
           tests/idle-residual-long-preemption.test.ts
+          tests/idle-residual-v52-owner-sha.test.ts
           tests/idle-residual-long-contract.test.ts
           tests/fet_core_preemption_wiring.test.ts
       - run: npx --no-install tsc --noEmit --pretty false
