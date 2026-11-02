@@ -57,6 +57,10 @@
     {
       "source": "files/ops/systemd/disdex-v4-dynamic-evidence-refresh@.service.src",
       "target": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.service"
+    },
+    {
+      "source": "files/ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer.src",
+      "target": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer"
     }
   ]
 }

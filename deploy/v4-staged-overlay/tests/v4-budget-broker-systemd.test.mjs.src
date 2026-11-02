@@ -23,3 +23,14 @@ test("monitor and refresh require the matching broker before starting", () => {
   }
   assert.match(refresh,/^SupplementaryGroups=deploy$/m);
 });
+
+test("an explicit timer schedules only the SHA-pinned refresh service", () => {
+  const timer=readFileSync("ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer","utf8");
+  const refresh=readFileSync("ops/systemd/disdex-v4-dynamic-evidence-refresh@.service","utf8");
+  assert.match(timer,/^OnBootSec=2min$/m);
+  assert.match(timer,/^OnUnitActiveSec=15min$/m);
+  assert.match(timer,/^RandomizedDelaySec=30s$/m);
+  assert.match(timer,/^Unit=disdex-v4-dynamic-evidence-refresh@%i\.service$/m);
+  assert.match(refresh,/^ConditionPathExists=\/var\/lib\/disdex\/unified-deploy\/refresh-leases\/v4\/%i\.json$/m);
+  assert.match(refresh,/--apply --lease \/var\/lib\/disdex\/unified-deploy\/refresh-leases\/v4\/%i\.json/);
+});
