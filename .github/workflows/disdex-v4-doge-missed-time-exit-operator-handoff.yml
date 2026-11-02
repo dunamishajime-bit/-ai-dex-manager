@@ -2,168 +2,21 @@ name: DisDex V4 DOGE Missed TIME Exit Operator Handoff Readiness
 
 on:
   workflow_dispatch:
-    inputs:
-      approval_id:
-        description: HP approval request UUID after owner OTP approval
-        type: string
-        required: true
 
 permissions:
   contents: read
 
-concurrency:
-  group: disdex-unified-production
-  cancel-in-progress: false
-
 jobs:
-  handoff:
-    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
-    environment:
-      name: disdex-production
+  retired-manual-flat:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-          fetch-depth: 1
-
-      - name: Bind exact immutable plan
-        id: plan
+      - name: Retire stale protected-position handoff
         shell: bash
         run: |
           set -euo pipefail
-          test -f docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json
-          PLAN="$(sha256sum docs/ops/V4_DOGE_MISSED_TIME_EXIT_OPERATOR_PLAN_20261101.json | awk '{print $1}')"
-          [[ "$PLAN" =~ ^[0-9a-f]{64}$ ]]
-          echo "plan_sha256=$PLAN" >> "$GITHUB_OUTPUT"
-          echo "target_sha=53a0be396719f0284af4e11b35c66a4ac7d58f79" >> "$GITHUB_OUTPUT"
-
-      - name: Configure reviewed maintenance SSH
-        shell: bash
-        env:
-          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
-          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
-        run: |
-          set -euo pipefail
-          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
-          umask 077
-          install -d -m 0700 "$RUNNER_TEMP/doge-handoff-ssh"
-          printf '%s\n' "$KEY" > "$RUNNER_TEMP/doge-handoff-ssh/key"
-          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/doge-handoff-ssh/known_hosts"
-          chmod 0600 "$RUNNER_TEMP/doge-handoff-ssh/"*
-
-      - name: Verify exact HP approval is APPROVED without consuming it
-        shell: bash
-        env:
-          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-          APPROVAL_ID: ${{ inputs.approval_id }}
-          TARGET_SHA: ${{ steps.plan.outputs.target_sha }}
-          PLAN_SHA256: ${{ steps.plan.outputs.plan_sha256 }}
-        run: |
-          set -euo pipefail
-          [[ "$APPROVAL_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
-          PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "APPROVAL_ID='$APPROVAL_ID' TARGET_SHA='$TARGET_SHA' PLAN_SHA256='$PLAN_SHA256' python3 - <<'PY'
-          import json,os,pathlib,time
-          p=pathlib.Path('/home/deploy/disdex-ui/shared/data/deploy-approvals.json')
-          assert p.is_file() and not p.is_symlink(), 'APPROVAL_STORE_UNTRUSTED'
-          records=json.loads(p.read_text(encoding='utf-8'))
-          row=next((r for r in records if r.get('id')==os.environ['APPROVAL_ID']),None)
-          assert row is not None, 'APPROVAL_NOT_FOUND'
-          assert row.get('status')=='APPROVED', 'APPROVAL_NOT_APPROVED'
-          assert row.get('operation')=='V4_DOGE_MISSED_TIME_EXIT', 'OPERATION_MISMATCH'
-          assert row.get('scope')=='V12_V4' and row.get('ordersEnabled') is True, 'SCOPE_OR_PERMISSION_MISMATCH'
-          assert row.get('targetSha')==os.environ['TARGET_SHA'], 'TARGET_SHA_MISMATCH'
-          assert row.get('planSha256')==os.environ['PLAN_SHA256'], 'PLAN_HASH_MISMATCH'
-          assert int(row.get('approvalTokenExpiresAt') or 0) >= int(time.time()), 'APPROVAL_TOKEN_EXPIRED'
-          assert not row.get('redeemedByRunId'), 'APPROVAL_ALREADY_REDEEMED'
-          print('DOGE_HP_APPROVAL_EXACT_AND_UNCONSUMED=TRUE')
-          PY"
-
-      - name: Fresh exact DOGE read-only preflight on VPS
-        shell: bash
-        env:
-          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-        run: |
-          set -euo pipefail
-          PORT="${PORT:-22}"
-          scp -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -P "$PORT" scripts/ops/deploy/disdex_v4_doge_missed_time_exit_preflight.py             "root@$HOST:/tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py"
-          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 /tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py --allow-quiesced"
-
-      - name: Verify exact DOGE guard contract offline
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --test tests/v12-v4-doge-missed-time-guard.test.mjs
-          test -f lib/v12-v4-doge-missed-time-guard.mjs
-          echo DOGE_OPERATOR_GUARD_VERIFIED=TRUE
+          echo DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT=TRUE
+          echo REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE=TRUE
           echo TRADING_MUTATION=0
-
-      - name: Verify root-owned DOGE guard matches repository
-        shell: bash
-        env:
-          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-        run: |
-          set -euo pipefail
-          PORT="${PORT:-22}"
-          LOCAL_SHA="$(sha256sum lib/v12-v4-doge-missed-time-guard.mjs | awk '{print $1}')"
-          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
-             dst=/etc/disdex/operator-adapters/v12-v4-doge-missed-time-guard.mjs;
-             test -f \"\$dst\";
-             test ! -L \"\$dst\";
-             [[ \"\$(stat -c '%U:%G:%a' \"\$dst\")\" == 'root:root:644' ]];
-             [[ \"\$(sha256sum \"\$dst\" | cut -d ' ' -f1)\" == '$LOCAL_SHA' ]];
-             /usr/bin/node --check \"\$dst\";
-             echo DOGE_ROOT_GUARD_ATTESTED=TRUE;
-             echo TRADING_MUTATION=0"
-
-      - name: Require NEAR-style dedicated DOGE direct executor contract; no apply
-        shell: bash
-        env:
-          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-        run: |
-          set -euo pipefail
-          PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
-             ROOT=/home/deploy/disdex-trading/releases/53a0be396719f0284af4e11b35c66a4ac7d58f79;
-             ENGINE=\$ROOT/lib/v12-v4-runner-engine.ts;
-             EXEC=\$ROOT/scripts/v12-v4-doge-only-operator-exit.ts;
-             test -f \"\$ENGINE\";
-             grep -q 'operatorExitLegIds' \"\$ENGINE\";
-             grep -q 'authorizeOperatorExit' \"\$ENGINE\";
-             if [[ ! -f \"\$EXEC\" ]]; then
-               echo DOGE_DIRECT_EXECUTOR_MISSING=TRUE;
-               exit 2;
-             fi;
-             test ! -L \"\$EXEC\";
-             grep -q 'buildV4ProductionRuntime' \"\$EXEC\";
-             grep -q 'operatorExitLegIds' \"\$EXEC\";
-             grep -q 'authorizeOperatorExit' \"\$EXEC\";
-             grep -q 'installDogeOnlyGuards' \"\$EXEC\";
-             grep -q 'DOGEUSDT:REC_Y06_REV_D0_T72:SHORT:1793181600000' \"\$EXEC\";
-             grep -q 'v12-v4-98ded39746ed3502a4d7b0e26ef9' \"\$EXEC\";
-             grep -q -- '--apply' \"\$EXEC\";
-             echo DOGE_DIRECT_EXECUTOR_CONTRACT_PRESENT=TRUE;
-             echo V4_ONE_SHOT_OPERATOR_HOOK_PRESENT=TRUE;
-             echo DOGE_EXECUTION_NOT_RUN=TRUE;
-             echo ORDERS_SENT=0 CANCELS_SENT=0 POSITION_CHANGES_SENT=0"
-
-      - name: Cleanup
-        if: always()
-        shell: bash
-        env:
-          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-        run: |
-          set +e
-          PORT="${PORT:-22}"
-          if [[ -s "$RUNNER_TEMP/doge-handoff-ssh/key" && -n "$HOST" ]]; then
-            ssh -T -i "$RUNNER_TEMP/doge-handoff-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/doge-handoff-ssh/known_hosts"               -p "$PORT" "root@$HOST"               "rm -f -- /tmp/disdex-doge-handoff-preflight-$GITHUB_RUN_ID.py" >/dev/null 2>&1
-          fi
-          rm -rf "$RUNNER_TEMP/doge-handoff-ssh"
+          exit 1

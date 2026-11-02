@@ -9,8 +9,8 @@ import { loadOwnerSessionKey, OWNER_SESSION_COOKIE, verifyOwnerSession } from "@
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_2FA_CHALLENGE_COOKIE = "disdex_admin_2fa_challenge";
-const ADMIN_2FA_EMAIL_COOKIE = "disdex_admin_2fa_email";
+const ADMIN_OTP_COOKIE = "disdex_admin_otp_challenge";
+const ADMIN_2FA_RECEIVER = process.env.ADMIN_CONTACT_EMAIL || process.env.GMAIL_USER || "";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -53,8 +53,8 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
       unlocked = false;
     }
   }
-  const pendingCode = Boolean(store.get(ADMIN_2FA_CHALLENGE_COOKIE)?.value);
-  const pendingEmail = store.get(ADMIN_2FA_EMAIL_COOKIE)?.value || "";
+  const pendingCode = Boolean(store.get(ADMIN_OTP_COOKIE)?.value);
+  const pendingEmail = ADMIN_2FA_RECEIVER;
   const message = firstValue(searchParams.message);
   const error = firstValue(searchParams.error);
   const step = firstValue(searchParams.step);
