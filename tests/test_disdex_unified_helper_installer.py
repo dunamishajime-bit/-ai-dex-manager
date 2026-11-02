@@ -16,6 +16,8 @@ class UnifiedHelperInstallerContractTests(unittest.TestCase):
         self.assertIn("ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer", installer)
         self.assertIn("/etc/systemd/system/disdex-v4-dynamic-evidence-refresh@.service", installer)
         self.assertIn("/etc/systemd/system/disdex-v4-dynamic-evidence-refresh@.timer", installer)
+        self.assertIn("/var/lib/disdex/unified-deploy/refresh-leases/v4", installer)
+        self.assertIn("/var/lib/disdex/unified-deploy/nonces", installer)
         self.assertIn("systemctl daemon-reload", installer)
         self.assertNotIn("authorized_keys", installer)
         self.assertNotIn("PRIVATE_KEY", installer)
