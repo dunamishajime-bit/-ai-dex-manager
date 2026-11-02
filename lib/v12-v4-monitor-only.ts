@@ -45,6 +45,9 @@ export type V4MonitorReadOnlySnapshot = {
   margin: JsonRecord;
   killSwitch: JsonRecord;
   pending: JsonRecord;
+  runtimeSha?: string;
+  pendingHash?: string;
+  pendingProof?: JsonRecord;
   positions: JsonRecord[];
   openOrders: JsonRecord[];
   decision?: JsonRecord;
@@ -111,6 +114,29 @@ function fresh(value: unknown, now: number, label: string) {
   return timestamp;
 }
 
+function validateStalePendingProof(input: V4MonitorReadOnlySnapshot, pending: JsonRecord, now: number, entryCount: number): void {
+  const sha = String(input.runtimeSha || "").toLowerCase();
+  const hash = String(input.pendingHash || "").toLowerCase();
+  if (!/^[a-f0-9]{40}$/.test(sha) || !/^[a-f0-9]{64}$/.test(hash)) {
+    throw new Error("V4_MONITOR_PENDING_PROOF_BINDING_INVALID");
+  }
+  const proof = record(input.pendingProof, "PENDING_PROOF");
+  if (proof.schema !== "disdex-pending-readonly-proof/v1"
+      || proof.candidateSha !== sha
+      || proof.source !== "SIGNED_ASTER_READONLY_ACCOUNT_LOCK"
+      || proof.registryHash !== hash
+      || Number(proof.priorUpdatedAt) !== Number(pending.updatedAt)
+      || Number(proof.registryEntries) !== entryCount
+      || Number(proof.positionCount) !== 0
+      || Number(proof.openOrderCount) !== 0
+      || Number(proof.ordersSent) !== 0
+      || Number(proof.cancelsSent) !== 0
+      || Number(proof.positionChangesSent) !== 0) {
+    throw new Error("V4_MONITOR_PENDING_PROOF_INVALID");
+  }
+  fresh(proof.verifiedAt, now, "PENDING_PROOF");
+}
+
 function activePositions(rows: JsonRecord[]) {
   return rows.filter((row) => {
     const amount = row?.positionAmt;
@@ -167,11 +193,24 @@ export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapsh
       || !Array.isArray(pending.entries)) {
     throw new Error("V4_MONITOR_PENDING_REGISTRY_INVALID");
   }
-  fresh(pending.updatedAt, now, "PENDING");
+  const pendingUpdatedAt = Number(pending.updatedAt);
+  if (!Number.isFinite(pendingUpdatedAt) || pendingUpdatedAt <= 0
+      || pendingUpdatedAt > now + V4_MONITOR_FUTURE_GRACE_MS) {
+    throw new Error("V4_MONITOR_PENDING_TIMESTAMP_INVALID");
+  }
   const activePending = pending.entries.filter(
     (entry: JsonRecord) => String(entry?.status || "").toUpperCase() !== "RELEASED",
   );
   if (activePending.length) safetyReasons.push("V4_PENDING_NOT_EMPTY:" + activePending.length);
+  if (now - pendingUpdatedAt > V4_MONITOR_RUNTIME_MAX_AGE_MS) {
+    // A stale registry may be used only while the global Kill Switch is
+    // demonstrably active and a fresh root-owned signed/account-lock proof
+    // binds the exact registry bytes. Once Kill is inactive, normal freshness
+    // is mandatory again.
+    if (kill.active !== true) throw new Error("V4_MONITOR_PENDING_STALE");
+    validateStalePendingProof(input, pending, now, pending.entries.length);
+    safetyReasons.push("V4_PENDING_FRESHNESS_PROVEN_READONLY");
+  }
 
   if (!Array.isArray(input.positions) || !Array.isArray(input.openOrders)) {
     throw new Error("V4_MONITOR_VENUE_SNAPSHOT_INVALID");
