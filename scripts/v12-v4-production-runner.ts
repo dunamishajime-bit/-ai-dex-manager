@@ -79,8 +79,17 @@ export function classifyV4RecoverableSafetyFailure(error:unknown,eventTs=Date.no
  const reason=error instanceof Error?error.message:String(error);
  const recoverableEvidence=/^V4_EVIDENCE_STALE:(?:establishedAsterOrders|signedAsterAccount|sharedRiskAndPeers)$/.test(reason);
  const recoverableTransport=/^(?:Aster request timeout|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|fetch failed|UND_ERR_)/i.test(reason);
- if(!recoverableEvidence&&!recoverableTransport)return;
- const prefix=recoverableTransport?"V4_EVIDENCE_REFRESH_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED";
+ // A peer that is stopped or running under a different release is a
+ // recoverable operational condition, not a reason to terminate V4. Keep the
+ // daemon alive so it can continue publishing its blocked health state and
+ // retry after the peer is repaired. This classification deliberately covers
+ // only the exact read-only systemd attestation failure; missing/invalid state
+ // and other lineage errors remain fatal below.
+ const recoverablePeer=/^V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:/.test(reason);
+ if(!recoverableEvidence&&!recoverableTransport&&!recoverablePeer)return;
+ const prefix=recoverablePeer
+   ?"V4_PEER_ATTESTATION_RETRY_REQUIRED"
+   :recoverableTransport?"V4_EVIDENCE_REFRESH_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED";
  return {status:"blocked",reason:`${prefix}:${reason}`,eventTs,candidateCount:0,orderEnabled:false};
 }
 function v4HealthPath(){

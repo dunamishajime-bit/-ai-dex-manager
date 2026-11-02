@@ -43,6 +43,25 @@ test("temporary read-only network failures stay blocked and retryable", () => {
   }
 });
 
+test("an unavailable exact-SHA peer keeps V4 alive but never grants order permission", () => {
+  const result = classifyV4RecoverableSafetyFailure(
+    new Error("V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:disdex-pengu-dual-ls-v2@7688ed7c93a1918d8b44837339b7da5584a868f5.service"),
+    25_000,
+  );
+  assert.deepEqual(result, {
+    status: "blocked",
+    reason: "V4_PEER_ATTESTATION_RETRY_REQUIRED:V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:disdex-pengu-dual-ls-v2@7688ed7c93a1918d8b44837339b7da5584a868f5.service",
+    eventTs: 25_000,
+    candidateCount: 0,
+    orderEnabled: false,
+  });
+  const health = buildV4HealthPayload("a".repeat(40), "CERTIFIED", result!, 25_000, 25_001);
+  assert.equal(health.processState, "RUNNING");
+  assert.equal(health.safetyState, "BLOCKED");
+  assert.equal(health.ordersAllowed, false);
+  assert.equal(health.orderPermission, "BLOCKED");
+});
+
 test("tampering, SHA mismatch, protection drift, and unknown errors remain fatal", () => {
   for (const reason of [
     "V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:signedAsterAccount",
