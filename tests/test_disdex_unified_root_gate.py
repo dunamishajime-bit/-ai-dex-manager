@@ -182,12 +182,12 @@ class RootGateTest(unittest.TestCase):
             (dependency_release / ".disdex-release-sha").write_text(NEW, encoding="ascii")
             dependency_modules = dependency_release / "node_modules"
             dependency_modules.mkdir()
+            (release / "node_modules").symlink_to(dependency_modules, target_is_directory=True)
             release.chmod(0o555)
             dependency_release.chmod(0o555)
             dependency_modules.chmod(0o555)
             (release / ".disdex-release-sha").chmod(0o444)
             (dependency_release / ".disdex-release-sha").chmod(0o444)
-            (release / "node_modules").symlink_to(dependency_modules, target_is_directory=True)
 
             self.assertEqual(
                 legacy_release_marker(OLD, root, root_uid=__import__("os").geteuid()),
