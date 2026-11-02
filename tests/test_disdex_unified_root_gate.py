@@ -15,6 +15,7 @@ from disdex_unified_root_gate import (
     auxiliary_release_marker,
     assert_regular_secure, assert_private_dir, preflight, PREFIXES, STOP_OWNERS,
     ROOT, RELEASES, DeploymentPaths, RootDeploymentExecutor,
+    certify_live_executor,
 )
 from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
 from disdex_deployment_plan import IDS, SCHEMA, digest
@@ -48,6 +49,21 @@ def pins(releases=RELEASES):
                             "stopOwner":STOP_OWNERS[key]} for key in IDS}}
 
 class RootGateTest(unittest.TestCase):
+    def test_live_executor_contract_is_certified_without_granting_live_authority(self):
+        report = certify_live_executor()
+
+        self.assertEqual(report["status"], "LIVE_EXECUTOR_CONTRACT_CERTIFIED")
+        self.assertEqual(report["scope"], "SHARED_CRYPTO_RISK_ONLY")
+        self.assertEqual(report["approvedRunners"], ["SHARED_CRYPTO_RISK"])
+        self.assertFalse(report["ordersEnabled"])
+        self.assertTrue(report["requiresRoot"])
+        self.assertTrue(report["requiresOwnerSignature"])
+        self.assertTrue(report["singleUseNonce"])
+        self.assertTrue(report["requiresFreshVenueEvidence"])
+        self.assertTrue(report["preservesCurrentSymlink"])
+        self.assertEqual(report["auditCycles"], 3)
+        self.assertEqual(report["productionActivation"], "OWNER_SIGNED_TOKEN_REQUIRED")
+
     def test_valid_pins(self):
         self.assertEqual(parse_live_pins(pins()),{key:OLD for key in IDS})
     def test_cannot_replace_stop_owner(self):

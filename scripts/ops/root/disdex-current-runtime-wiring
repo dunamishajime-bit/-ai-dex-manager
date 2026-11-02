@@ -274,6 +274,7 @@ resolve_current() {
     V4_CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${V4_PRIMARY_SHA}.env"
     V4_OPERATOR_ACTIVATION_PATH="${SHARED_ROOT}/operator-activation/v12-v4-full.json"
     HEALTH_ALERT_EXEC_ROOT="$V4_PRIMARY_RELEASE"
+    HEALTH_ALERT_LOADER="/usr/bin/node ${HEALTH_ALERT_EXEC_ROOT}/node_modules/tsx/dist/cli.mjs"
     MONITOR_RUNTIME_SHA="$V4_PRIMARY_SHA"
     MONITOR_RUNTIME_ROOT="$V4_PRIMARY_RELEASE"
   else
@@ -283,6 +284,7 @@ resolve_current() {
     V4_CONTRACT_ENV_FILE=""
     V4_OPERATOR_ACTIVATION_PATH="${OPERATOR_ACTIVATION_PATH}"
     HEALTH_ALERT_EXEC_ROOT="$CURRENT_RELEASE"
+    HEALTH_ALERT_LOADER="${HEALTH_ALERT_EXEC_ROOT}/node_modules/.bin/tsx"
     MONITOR_RUNTIME_SHA="$DEPLOYED_SHA"
     MONITOR_RUNTIME_ROOT="$CURRENT_RELEASE"
   fi
@@ -385,6 +387,9 @@ validate_release_artifacts() {
     "$v4_release/lib/disdex-runner-tick-heartbeat.ts"
     "$v4_release/deploy/systemd/disdex-v12-v4@.service"
   )
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    v4_required_files+=("$v4_release/node_modules/tsx/dist/cli.mjs")
+  fi
   for required_file in "${required_files[@]}"; do
     [[ -f "$required_file" && ! -L "$required_file" ]] || {
       printf 'required release artifact is missing or a symlink: %s\n' "$required_file" >&2
@@ -2453,7 +2458,7 @@ ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/op
   write_atomic "${HEALTH_ALERT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
 WorkingDirectory=${HEALTH_ALERT_EXEC_ROOT}
 ExecStart=
-ExecStart=${HEALTH_ALERT_EXEC_ROOT}/node_modules/.bin/tsx ${HEALTH_ALERT_EXEC_ROOT}/scripts/ops/root/disdex-runner-health-alert.ts
+ExecStart=${HEALTH_ALERT_LOADER} ${HEALTH_ALERT_EXEC_ROOT}/scripts/ops/root/disdex-runner-health-alert.ts
 Environment=DISDEX_TRADING_ROOT=${CURRENT_RELEASE}
 Environment=DISDEX_ALERT_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
 Environment=DISDEX_ALERT_V12_SERVICE_UNIT=${V12_UNIT}

@@ -66,6 +66,9 @@ for source in \
   scripts/ops/deploy/disdex_deployment_contract.py \
   scripts/ops/deploy/disdex_deployment_plan.py \
   scripts/ops/deploy/disdex_owner_approval.py \
+  scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py \
+  scripts/ops/root/disdex-v4-evidence-refresh-activate \
+  scripts/ops/root/install-disdex-v4-evidence-refresh \
   scripts/ops/root/disdex-unified-production-deploy; do
   [[ -f "$release_root/$source" && ! -L "$release_root/$source" ]] || {
     echo "DISDEX_HELPER_SOURCE_MISSING:$source" >&2
@@ -84,9 +87,18 @@ for source in disdex_deployment_contract.py disdex_deployment_plan.py disdex_own
   install -o root -g root -m 0644 "$release_root/scripts/ops/deploy/$source" \
     "/usr/local/libexec/disdex-unified/$source"
 done
+install -o root -g root -m 0644 \
+  "$release_root/scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py" \
+  /usr/local/libexec/disdex-unified/disdex_v4_evidence_refresh_activation.py
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/root/disdex-unified-production-deploy" \
   /usr/local/sbin/disdex-unified-production-deploy
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/root/disdex-v4-evidence-refresh-activate" \
+  /usr/local/sbin/disdex-v4-evidence-refresh-activate
+install -o root -g root -m 0755 \
+  "$release_root/scripts/ops/root/install-disdex-v4-evidence-refresh" \
+  /usr/local/sbin/install-disdex-v4-evidence-refresh
 
 printf 'DISDEX_UNIFIED_HELPER_STAGED sha=%s root=%s ordersEnabled=false\n' \
   "$sha" "/usr/local/libexec/disdex-unified"

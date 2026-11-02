@@ -113,6 +113,13 @@ class PlanTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "monitor-only"):
             digest(wanted, current)
 
+    def test_v4_refresh_scope_cannot_be_used_as_a_runner_deployment_plan(self):
+        current = plan("FULL_PROJECT")
+        wanted = plan("V4_EVIDENCE_REFRESH_ONLY")
+        wanted["runners"]["V12_V4"] = NEW
+        with self.assertRaisesRegex(ValueError, "refresh-only scope"):
+            digest(wanted, current)
+
     def test_full_project(self):
         current = plan("FULL_PROJECT")
         wanted = plan("FULL_PROJECT", "SHARED_CRYPTO_RISK")
