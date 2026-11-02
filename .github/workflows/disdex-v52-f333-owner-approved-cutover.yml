@@ -1,0 +1,132 @@
+name: DisDex V52 f333 Owner-Approved Cutover
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/deploy/disdex_v52_owner_approved_f333_cutover.py'
+      - 'tests/test_disdex_v52_owner_approved_f333_cutover.py'
+      - 'tests/test_disdex_v52_f333_workflow.py'
+      - '.github/workflows/disdex-v52-f333-owner-approved-cutover.yml'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "preflight or execute"
+        required: true
+        type: choice
+        options: [preflight, execute]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Validate exact f333 helper contracts
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_v52_owner_approved_f333_cutover.py
+          python3 -m unittest tests.test_disdex_v52_owner_approved_f333_cutover tests.test_disdex_v52_f333_workflow -v
+
+  production:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    needs: source-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Configure reviewed Production root SSH
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$ROOT_KEY" && -n "$KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/v52-f333-ssh"
+          printf '%s\n' "$ROOT_KEY" > "$RUNNER_TEMP/v52-f333-ssh/key"
+          printf '%s\n' "$KNOWN_HOSTS" > "$RUNNER_TEMP/v52-f333-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/v52-f333-ssh/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/v52-f333-ssh/key" >/dev/null
+      - name: Upload exact reviewed helper
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ && "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          scp -i "$RUNNER_TEMP/v52-f333-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/v52-f333-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_v52_owner_approved_f333_cutover.py \
+            "root@$HOST:/tmp/disdex-v52-f333-$GITHUB_RUN_ID.py"
+      - name: Read-only f333 candidate and signed venue preflight
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/v52-f333-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/v52-f333-ssh/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-v52-f333-$GITHUB_RUN_ID.py --preflight-readonly"
+      - name: Prepare exact root-owned f333 runtime material
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/v52-f333-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/v52-f333-ssh/known_hosts" \
+            -o ConnectTimeout=12 -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-v52-f333-$GITHUB_RUN_ID.py --prepare-approved --github-run-id $GITHUB_RUN_ID --github-actor $GITHUB_ACTOR"
+      - name: Execute V52-only f333 cutover with automatic rollback
+        if: ${{ inputs.mode == 'execute' }}
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/v52-f333-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/v52-f333-ssh/known_hosts" \
+            -o ServerAliveInterval=10 -o ServerAliveCountMax=6 -o ConnectTimeout=12 \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-v52-f333-$GITHUB_RUN_ID.py --execute-approved --github-run-id $GITHUB_RUN_ID --github-actor $GITHUB_ACTOR"
+      - name: Cleanup ephemeral helper and SSH material
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          if [[ -s "$RUNNER_TEMP/v52-f333-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/v52-f333-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/v52-f333-ssh/known_hosts" \
+              -o ConnectTimeout=6 -p "$PORT" "root@$HOST" \
+              "rm -f -- /tmp/disdex-v52-f333-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/v52-f333-ssh"
