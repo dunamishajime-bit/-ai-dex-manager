@@ -112,9 +112,20 @@ export function classifyV4DaemonRateBudgetOutcome(
 }
 export type V4HealthSafetyState="HEALTHY"|"BLOCKED"|"DEFERRED_FAIL_CLOSED";
 export function classifyV4HealthSafetyState(result:{status:string;reason:string}):V4HealthSafetyState{
- if(result.status==="blocked"||/^(?:V4_PREPARE_NOT_AVAILABLE|V4_MARKET_DATA_UNAVAILABLE|V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE|V4_EXIT_FEED_GAP_RETRY|V4_EXIT_FEED_NEXT_OPEN_RETRY|V4_STALE_EXIT_REVIEW_REQUIRED|V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY)(?::|$)/.test(result.reason))return "BLOCKED";
+ if(["blocked","locked","failed"].includes(result.status.toLowerCase())||/^(?:V4_PREPARE_NOT_AVAILABLE|V4_MARKET_DATA_UNAVAILABLE|V4_STARTUP_EXCHANGE_INFO_UNAVAILABLE|V4_EXIT_FEED_GAP_RETRY|V4_EXIT_FEED_NEXT_OPEN_RETRY|V4_STALE_EXIT_REVIEW_REQUIRED|V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY)(?::|$)/.test(result.reason))return "BLOCKED";
  if(result.reason.startsWith("V4_RATE_BUDGET_"))return "DEFERRED_FAIL_CLOSED";
  return "HEALTHY";
+}
+// Only explicitly classified read-only safety failures can retry in place.
+// Generic transport errors may follow an order submission and must not be
+// reclassified as safe without pending-order reconciliation.
+export function classifyV4RecoverableSafetyFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
+ const reason=error instanceof Error?error.message:String(error);
+ const stale=/^V4_EVIDENCE_STALE:(?:establishedAsterOrders|signedAsterAccount|sharedRiskAndPeers)$/.test(reason);
+ const peer=/^V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:/.test(reason);
+ if(!stale&&!peer)return;
+ return {status:"blocked",reason:`${peer?"V4_PEER_ATTESTATION_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED"}:${reason}`,
+  eventTs,candidateCount:0,orderEnabled:false};
 }
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
@@ -153,18 +164,18 @@ async function writeAtomicJson(path:string,payload:Record<string,unknown>){
  await writeFile(tmp,JSON.stringify(payload)+"\n",{encoding:"utf8",mode:0o600});
  await rename(tmp,path);
 }
-export function buildV4RealtimeDecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,updatedAt=Date.now()):Record<string,unknown>{
+export function buildV4RealtimeDecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,updatedAt=Date.now(),lastTickAt:number|null=result.eventTs):Record<string,unknown>{
  const base={releaseSha,runtimeSha:releaseSha,sourceRuntimeSha:releaseSha,source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",operationMode,
-  status:result.status,reason:result.reason,orderEnabled:result.orderEnabled,updatedAt,lastTickAt:result.eventTs};
+  status:result.status,reason:result.reason,orderEnabled:result.orderEnabled,updatedAt,lastTickAt};
  if(!prepared||prepared.kind!=="READY")return {schema:V4_REALTIME_DECISION_SCHEMA,policyId:"V2_M150_D05_CORE_NATIVE",decisionTs:null,capturedAtMs:null,
   sourceFingerprint:null,candidateCount:0,filteredCount:0,sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[prepared&&prepared.kind==="FAILED"?prepared.reason:"V4_PREPARE_NOT_AVAILABLE"],
   candidates:[],filtered:[],realOrderEnabledV4:0,tradingMutation:0,stale:true,staleReason:prepared&&prepared.kind==="FAILED"?prepared.reason:"V4_PREPARE_NOT_AVAILABLE",...base};
  const decision=prepared.decision;
  return {...decision,...base,schema:V4_REALTIME_DECISION_SCHEMA,stale:false,staleReason:null};
 }
-export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,computedAtMs=Date.now()):Record<string,unknown>{
+export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,computedAtMs=Date.now(),lastTickAt:number|null=result.eventTs):Record<string,unknown>{
  const base={schema:V4_GATE_TELEMETRY_SCHEMA,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,activeRunnerSha:releaseSha,operationMode,
-  source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",computedAtMs,updatedAt:computedAtMs,lastTickAt:result.eventTs,status:result.status,reason:result.reason,
+  source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",computedAtMs,updatedAt:computedAtMs,lastTickAt,status:result.status,reason:result.reason,
   stale:true,telemetryFresh:false};
  if(!prepared||prepared.kind!=="READY")return {...base,decisionTs:null,capturedAtMs:null,sourceFingerprint:null,sourceCount:0,candidateCount:0,filteredCount:0,btcRegime:"UNKNOWN",symbolCount:0,symbols:[]};
  const decision=prepared.decision;
@@ -192,30 +203,37 @@ export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prep
   sourceCount:decision.sourceCount,candidateCount:decision.candidateCount,filteredCount:decision.filteredCount,btcRegime:decision.btcRegime??"UNKNOWN",
   symbolCount:symbols.length,symbols,stale:false,telemetryFresh:true};
 }
-async function writeV4DecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">){
+async function writeV4DecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,lastTickAt:number|null){
  const now=Date.now();
- await writeAtomicJson(telemetryPath("V12_V4_REALTIME_DECISION_PATH","/var/lib/disdex/v12-v4/realtime-decision.json"),buildV4RealtimeDecisionTelemetry(releaseSha,operationMode,prepared,result,now));
- await writeAtomicJson(telemetryPath("V12_V4_GATE_TELEMETRY_PATH","/var/lib/disdex/v12-v4/gate-telemetry.json"),buildV4GateTelemetry(releaseSha,operationMode,prepared,result,now));
+ await writeAtomicJson(telemetryPath("V12_V4_REALTIME_DECISION_PATH","/var/lib/disdex/v12-v4/realtime-decision.json"),buildV4RealtimeDecisionTelemetry(releaseSha,operationMode,prepared,result,now,lastTickAt));
+ await writeAtomicJson(telemetryPath("V12_V4_GATE_TELEMETRY_PATH","/var/lib/disdex/v12-v4/gate-telemetry.json"),buildV4GateTelemetry(releaseSha,operationMode,prepared,result,now,lastTickAt));
 }
-async function writeV4Health(releaseSha:string,operationMode:string,result:{
+export function buildV4HealthPayload(releaseSha:string,operationMode:string,result:{
  status:string;reason:string;eventTs:number;candidateCount:number;orderEnabled:boolean;
-}){
- const path=v4HealthPath();
- if(!path.startsWith("/var/lib/disdex/v12-v4/"))throw Error("V4_HEALTH_PATH_INVALID");
- await mkdir(dirname(path),{recursive:true,mode:0o700});
- const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
+},lastTickAt:number|null,now=Date.now()):Record<string,unknown>{
  const serviceUnit=String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim();
  const workingDirectory=String(process.env.DISDEX_RELEASE_ROOT??process.cwd()).trim();
  const failed=result.status==="blocked"||result.status.toLowerCase()==="failed";
  const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
- const payload={
+ const safetyState=failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":classifyV4HealthSafetyState(result);
+ const ordersAllowed=safetyState==="HEALTHY"&&result.orderEnabled===true;
+ return {
   schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
-  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState:failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":classifyV4HealthSafetyState(result),
+  liveEnabled:true,processAlive:true,processState:"RUNNING",limitedLive:operationMode==="CANARY",safetyState,
   heartbeatAt:now,mainPid:process.pid,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
-  operationMode,mode:"LIVE",updatedAt:now,lastTickAt:result.eventTs,
+  operationMode,mode:"LIVE",updatedAt:now,lastTickAt,
   status:result.status,reason:result.reason,candidateCount:result.candidateCount,
-  orderEnabled:result.orderEnabled,
+  orderEnabled:ordersAllowed,ordersAllowed,orderPermission:ordersAllowed?"ALLOWED":safetyState==="HEALTHY"?"NO_SIGNAL":"BLOCKED",
  };
+}
+async function writeV4Health(releaseSha:string,operationMode:string,result:{
+ status:string;reason:string;eventTs:number;candidateCount:number;orderEnabled:boolean;
+},lastTickAt:number|null){
+ const path=v4HealthPath();
+ if(!path.startsWith("/var/lib/disdex/v12-v4/"))throw Error("V4_HEALTH_PATH_INVALID");
+ await mkdir(dirname(path),{recursive:true,mode:0o700});
+ const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
+ const payload=buildV4HealthPayload(releaseSha,operationMode,result,lastTickAt,now);
  await writeFile(tmp,JSON.stringify(payload)+"\n",{encoding:"utf8",mode:0o600});
  await rename(tmp,path);
 }
@@ -418,10 +436,10 @@ async function main(){
    const startup=classifyV4StartupExchangeInfoFailure(error,Date.now());
    if(!startup)throw error;
    const releaseSha=requireReleaseSha(),operationMode=requireV4OperationMode();
-   try{await writeV4DecisionTelemetry(releaseSha,operationMode,undefined,startup);}catch(telemetryError){
+   try{await writeV4DecisionTelemetry(releaseSha,operationMode,undefined,startup,null);}catch(telemetryError){
     console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:telemetryError instanceof Error?telemetryError.message:String(telemetryError)}));
    }
-   await writeV4Health(releaseSha,operationMode,startup);
+   await writeV4Health(releaseSha,operationMode,startup,null);
    const retryAfterMs=startup.retryAfterMs??15000;
    console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...startup,retryAfterMs,startup:true}));
    if(!daemon||stopping)return;
@@ -431,8 +449,10 @@ async function main(){
  if(!runtime)return;
  const {engine,store,releaseSha,operationMode}=runtime;
  if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
+ let lastCompletedTickAt:number|null=null;
  do{
   const tickStartedAt=Date.now();
+  let tickCompleted=false;
   let result:V4TickResult;
   let prepared:V4PreparedDecision|undefined;
   let deferredWaitMs=0;
@@ -463,6 +483,7 @@ async function main(){
      attempts:10,retryMs:750,shouldStop:()=>stopping,
      onContention:()=>{hadLockContention=true;},
     });
+    tickCompleted=true;
     deferredWaitMs=Math.max(deferredWaitMs,result.retryAfterMs??0);
    }
   }catch(error){
@@ -482,23 +503,30 @@ async function main(){
     deferredWaitMs=Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
     }else{
     const budget=classifyV4DaemonRateBudgetOutcome(error,store.read());
-    if(!budget)throw error;
-    deferredWaitMs=budget.waitMs;
-    result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+    const recoverable=classifyV4RecoverableSafetyFailure(error,Date.now());
+    if(recoverable){result=recoverable;deferredWaitMs=60000;}
+    else if(budget){
+     deferredWaitMs=budget.waitMs;
+     result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+    }else throw error;
     }
    }
    }
   }
-  try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result);}catch(error){
+  if(tickCompleted){
+   const tickCompletedAt=Date.now();
+   await writeRunnerTickHeartbeat({
+    runnerId:"V12_V4",runtimeSha:releaseSha,
+    serviceUnit:String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim(),
+    tickStartedAt,tickCompletedAt,status:result.status,reason:result.reason,
+    newOrdersAllowed:result.orderEnabled===true&&classifyV4HealthSafetyState(result)==="HEALTHY",
+   });
+   lastCompletedTickAt=tickCompletedAt;
+  }
+  try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result,lastCompletedTickAt);}catch(error){
    console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:error instanceof Error?error.message:String(error)}));
   }
-  await writeV4Health(releaseSha,operationMode,result);
-  await writeRunnerTickHeartbeat({
-   runnerId:"V12_V4",runtimeSha:releaseSha,
-   serviceUnit:String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim(),
-   tickStartedAt,tickCompletedAt:Date.now(),status:result.status,reason:result.reason,
-   newOrdersAllowed:result.orderEnabled===true,
-  });
+  await writeV4Health(releaseSha,operationMode,result,lastCompletedTickAt);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result,
    ...(deferredWaitMs?{retryAfterMs:deferredWaitMs}:{}),hadLockContention}));
   if(!daemon||stopping)break;
