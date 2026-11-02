@@ -12,6 +12,7 @@ class V52MonitorOnlyContractTest(unittest.TestCase):
         self.assertIn("4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81-v52-overrides.env",unit)
         self.assertIn("export DISDEX_RELEASE_SHA=%i",unit)
         self.assertIn("DISDEX_V52_MONITOR_ONLY=true",unit)
+        self.assertIn("PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages",unit)
         self.assertIn("--monitor-only-daemon",source)
         self.assertIn("runner.preflight(read_only=True)",source)
         self.assertIn("monitor-only environment cannot enter order-capable runner",source)
