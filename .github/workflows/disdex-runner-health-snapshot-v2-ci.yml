@@ -68,5 +68,6 @@ jobs:
           set -euo pipefail
           grep -Fq 'heartbeatAt:now' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
           grep -Fq 'lastTickAt:tick.tickCompletedAt' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
-          grep -Fq 'LEGACY_SKIPPED' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
+          grep -Fq 'RUNNER_TICK_EVIDENCE_NOT_SUPPORTED' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
+          ! grep -Fq 'LEGACY_SKIPPED' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
           ! grep -Eq 'placeOrder|cancelOrder|reduceOnly|kill-switch.*write' scripts/ops/root/disdex-runner-health-snapshot-v2.mjs
