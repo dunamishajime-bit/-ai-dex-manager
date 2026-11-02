@@ -64,6 +64,27 @@ test("privileged pages and client auth do not trust or mint legacy fixed cookies
   assert.doesNotMatch(authContext,/AUTH_COOKIE\s*=\s*["']disdex_auth["']/);
 });
 
+test("system observability endpoints reject legacy fixed auth cookies",()=>{
+  const files=[
+    "app/api/system/decision-status/route.ts",
+    "app/api/system/fet-gates/route.ts",
+    "app/api/system/fet-status/route.ts",
+    "app/api/system/formal-priority-status/route.ts",
+    "app/api/system/hype-status/route.ts",
+    "app/api/system/idle-priority-status/route.ts",
+    "app/api/system/live-runtime/route.ts",
+    "app/api/system/live-status/route.ts",
+    "app/api/system/realtime-ranking/route.ts",
+    "app/api/system/runner-health/route.ts",
+    "lib/server/v12-v4-hp-status-handler.ts",
+  ];
+  for(const file of files){
+    const src=read(file);
+    assert.doesNotMatch(src,/disdex_auth/);
+    assert.match(src,/requestHasSignedOwnerSession/);
+  }
+});
+
 test("manual auto-trade mutation requires signed session and strict same-origin",()=>{
   const src=read("app/api/system/auto-trade/manual-run/route.ts");
   assert.match(src,/verifyRequestSession/);

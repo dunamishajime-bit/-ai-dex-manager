@@ -3,6 +3,7 @@ import { readFile, readlink } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import {
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
   loadRunnerPinManifest,
   type RunnerPin,
   type RunnerPinId,
@@ -152,7 +153,7 @@ async function inspect(
 }
 
 export async function GET(req: NextRequest) {
-  if (req.cookies.get("disdex_auth")?.value !== "1") {
+  if (!requestHasSignedOwnerSession(req)) {
     return NextResponse.json({ ok: false, readOnly: true, error: "Authentication required" }, { status: 401 });
   }
   try {

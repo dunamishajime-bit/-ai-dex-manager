@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { loadV12V4HpObservability } from "@/lib/server/v12-v4-hp-observability";
 import type { V12V4HpSnapshot } from "@/lib/v12-v4-hp-contract";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 
 type Loader = () => Promise<V12V4HpSnapshot>;
 const headers = { "Cache-Control": "private, no-store, max-age=0" };
 
 export function createV12V4HpStatusGet(loader: Loader = loadV12V4HpObservability) {
   return async function GET(req: NextRequest) {
-    if (req.cookies.get("disdex_auth")?.value !== "1") {
+    if (!requestHasSignedOwnerSession(req)) {
       return NextResponse.json({
         ok: false,
         displayStatus: "UNAVAILABLE",

@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -13,7 +14,7 @@ async function textFile(path: string) {
   catch { return ""; }
 }
 function authorized(req: NextRequest) {
-  return req.cookies.get("disdex_auth")?.value === "1";
+  return requestHasSignedOwnerSession(req);
 }
 
 export async function GET(req: NextRequest) {
