@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/mail-service";
 import {
@@ -10,11 +9,12 @@ import {
   issueDeploymentApprovalToken,
   loadDeploymentApprovalPrivateKey,
 } from "@/lib/deploy-approval-token";
+import { verifyRequestSession } from "@/lib/server/owner-session";
+import { requireSameOriginMutation } from "@/lib/server/request-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ADMIN_COOKIE = "disdex_admin_session";
 const ADMIN_2FA_RECEIVER = process.env.ADMIN_CONTACT_EMAIL || process.env.GMAIL_USER || "";
 const OTP_PEPPER = process.env.DISDEX_DEPLOY_OTP_PEPPER?.trim() || "";
 const OPERATOR = "dunamishajime-bit";
@@ -41,24 +41,6 @@ function redirect(request: NextRequest, params: Record<string, string>) {
   return NextResponse.redirect(redirectUrl(request, params));
 }
 
-async function requireAdminSession() {
-  const store = await cookies();
-  return store.get(ADMIN_COOKIE)?.value === "active";
-}
-
-function sameOrigin(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (!origin) return true;
-  try {
-    const originUrl = new URL(origin);
-    const forwardedHost = request.headers.get("x-forwarded-host");
-    const expectedHost = forwardedHost || request.headers.get("host") || request.nextUrl.host;
-    return originUrl.host === expectedHost;
-  } catch {
-    return false;
-  }
-}
-
 function otpHash(requestId: string, code: string) {
   if (!OTP_PEPPER) throw new Error("DISDEX_DEPLOY_OTP_PEPPER is not configured");
   return crypto.createHmac("sha256", OTP_PEPPER).update(`${requestId}:${code}`).digest("hex");
@@ -80,10 +62,10 @@ function ipFingerprint(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!sameOrigin(request)) {
-    return NextResponse.json({ ok: false, error: "origin mismatch" }, { status: 403 });
-  }
-  if (!(await requireAdminSession())) {
+  try {
+    requireSameOriginMutation(request);
+    verifyRequestSession(request, ["ADMIN"]);
+  } catch {
     return redirect(request, { error: "管理者ログインが必要です" });
   }
 

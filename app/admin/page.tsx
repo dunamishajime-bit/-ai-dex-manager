@@ -1,15 +1,15 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { maskEmail } from "@/lib/security-utils";
 import { loadUsers } from "@/lib/server/user-db";
 import { loadSystemSettings } from "@/lib/server/system-settings-db";
 import { getLatestDeploymentApprovalSummary } from "@/lib/server/deploy-approval-store";
 import { PUBLIC_ADMIN_ENABLED } from "@/lib/site-access";
+import { loadOwnerSessionKey, OWNER_SESSION_COOKIE, verifyOwnerSession } from "@/lib/server/owner-session";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_COOKIE = "disdex_admin_session";
-const ADMIN_2FA_HASH_COOKIE = "disdex_admin_2fa_hash";
+const ADMIN_2FA_CHALLENGE_COOKIE = "disdex_admin_2fa_challenge";
 const ADMIN_2FA_EMAIL_COOKIE = "disdex_admin_2fa_email";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -37,8 +37,23 @@ export default async function AdminPage(props: { searchParams?: SearchParams }) 
 
   const searchParams = (await props.searchParams) || {};
   const store = await cookies();
-  const unlocked = store.get(ADMIN_COOKIE)?.value === "active";
-  const pendingCode = Boolean(store.get(ADMIN_2FA_HASH_COOKIE)?.value);
+  const headerStore = await headers();
+  const token = store.get(OWNER_SESSION_COOKIE)?.value || "";
+  const audience = headerStore.get("x-forwarded-host") || headerStore.get("host") || "";
+  let unlocked = false;
+  if (token && audience) {
+    try {
+      verifyOwnerSession(token, {
+        key: loadOwnerSessionKey(),
+        purpose: "ADMIN",
+        audience,
+      });
+      unlocked = true;
+    } catch {
+      unlocked = false;
+    }
+  }
+  const pendingCode = Boolean(store.get(ADMIN_2FA_CHALLENGE_COOKIE)?.value);
   const pendingEmail = store.get(ADMIN_2FA_EMAIL_COOKIE)?.value || "";
   const message = firstValue(searchParams.message);
   const error = firstValue(searchParams.error);

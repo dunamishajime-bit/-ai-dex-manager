@@ -1,12 +1,12 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLatestDeploymentApprovalSummary } from "@/lib/server/deploy-approval-store";
 import { DEPLOY_APPROVAL_OPERATION_POLICY, type DeploymentApprovalOperation } from "@/lib/deploy-approval-token";
 import { ALL_RUNNERS_LIVE_TASK } from "@/lib/deploy-all-runners-task";
+import { loadOwnerSessionKey, OWNER_SESSION_COOKIE, verifyOwnerSession } from "@/lib/server/owner-session";
 
 export const dynamic = "force-dynamic";
 
-const AUTH_COOKIE = "disdex_auth";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -22,9 +22,22 @@ function formatDateTime(value?: string | number) {
 
 export default async function ProductionApprovalPage(props: { searchParams?: SearchParams }) {
   const store = await cookies();
-  if (store.get(AUTH_COOKIE)?.value !== "1") {
-    redirect("/login?next=/production-approval");
+  const headerStore = await headers();
+  const token = store.get(OWNER_SESSION_COOKIE)?.value || "";
+  const audience = headerStore.get("x-forwarded-host") || headerStore.get("host") || "";
+  let authenticated = false;
+  if (token && audience) {
+    for (const purpose of ["USER", "ADMIN"] as const) {
+      try {
+        verifyOwnerSession(token, { key: loadOwnerSessionKey(), purpose, audience });
+        authenticated = true;
+        break;
+      } catch {
+        // Try the other signed-session purpose.
+      }
+    }
   }
+  if (!authenticated) redirect("/login?next=/production-approval");
 
   const searchParams = (await props.searchParams) || {};
   const message = firstValue(searchParams.message);

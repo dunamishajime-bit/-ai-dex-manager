@@ -5,6 +5,12 @@ on:
     paths:
       - "lib/deploy-approval-token.ts"
       - "lib/server/deploy-approval-store.ts"
+      - "lib/server/owner-session.ts"
+      - "lib/server/password-hash.ts"
+      - "lib/server/otp-challenge-store.ts"
+      - "lib/server/request-security.ts"
+      - "app/api/auth/**"
+      - "app/api/admin/**"
       - "app/api/admin/deploy-approval/**"
       - "app/api/production-approval/**"
       - "app/production-approval/**"
@@ -21,6 +27,10 @@ on:
       - "tests/deploy-approval-store-concurrency.test.ts"
       - "tests/fixtures/approval-store-writer.ts"
       - "tests/deploy-approval-direct-writer.test.mjs"
+      - "tests/password-hash-hardening.test.ts"
+      - "tests/owner-session-hardening.test.ts"
+      - "tests/otp-challenge-store.test.ts"
+      - "tests/auth-boundary-source.test.mjs"
       - ".github/workflows/disdex-v4-hp-approval-request.yml"
       - ".github/workflows/disdex-v4-doge-missed-time-exit-approval-request.yml"
       - "package.json"
@@ -64,6 +74,12 @@ jobs:
 
       - name: Legacy direct-writer and atomic redeem contract
         run: node --test tests/deploy-approval-direct-writer.test.mjs
+
+      - name: Owner auth, password and OTP contracts
+        run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
+
+      - name: Authentication boundary source contracts
+        run: node --test tests/auth-boundary-source.test.mjs
 
       - name: Production HP build
         run: |

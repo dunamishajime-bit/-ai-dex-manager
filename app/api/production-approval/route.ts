@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import { ALL_RUNNERS_LIVE_TASK } from "@/lib/deploy-all-runners-task";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/mail-service";
 import {
@@ -13,11 +12,12 @@ import {
   loadDeploymentApprovalPrivateKey,
   type DeploymentApprovalOperation,
 } from "@/lib/deploy-approval-token";
+import { verifyRequestSession } from "@/lib/server/owner-session";
+import { requireSameOriginMutation } from "@/lib/server/request-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const AUTH_COOKIE = "disdex_auth";
 const APPROVAL_RECEIVER = process.env.ADMIN_CONTACT_EMAIL || process.env.GMAIL_USER || "";
 const OTP_PEPPER = process.env.DISDEX_DEPLOY_OTP_PEPPER?.trim() || "";
 const OPERATOR = "dunamishajime-bit";
@@ -52,28 +52,6 @@ function redirect(request: NextRequest, params: Record<string, string>) {
   return NextResponse.redirect(redirectUrl(request, params));
 }
 
-async function requireAuthenticatedSession() {
-  const store = await cookies();
-  return store.get(AUTH_COOKIE)?.value === "1";
-}
-
-function sameOrigin(request: NextRequest) {
-  const fetchSite = request.headers.get("sec-fetch-site");
-  if (fetchSite && fetchSite !== "same-origin") return false;
-
-  const origin = request.headers.get("origin");
-  if (!origin) return process.env.NODE_ENV !== "production";
-
-  try {
-    const originUrl = new URL(origin);
-    const forwardedHost = request.headers.get("x-forwarded-host");
-    const expectedHost = forwardedHost || request.headers.get("host") || request.nextUrl.host;
-    return originUrl.host === expectedHost && originUrl.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
 function otpHash(requestId: string, code: string) {
   if (!OTP_PEPPER) throw new Error("DISDEX_DEPLOY_OTP_PEPPER is not configured");
   return crypto.createHmac("sha256", OTP_PEPPER).update(`${requestId}:${code}`).digest("hex");
@@ -95,10 +73,10 @@ function ipFingerprint(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!sameOrigin(request)) {
-    return NextResponse.json({ ok: false, error: "origin mismatch" }, { status: 403 });
-  }
-  if (!(await requireAuthenticatedSession())) {
+  try {
+    requireSameOriginMutation(request);
+    verifyRequestSession(request, ["USER", "ADMIN"]);
+  } catch {
     return NextResponse.redirect(new URL("/login?next=/production-approval", request.nextUrl.origin));
   }
 
