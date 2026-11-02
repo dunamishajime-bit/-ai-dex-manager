@@ -23,6 +23,10 @@
       "target": "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts"
     },
     {
+      "source": "files/scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts.src",
+      "target": "scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts"
+    },
+    {
       "source": "files/deploy/systemd/disdex-v12-v4-monitor@.service.src",
       "target": "deploy/systemd/disdex-v12-v4-monitor@.service"
     },

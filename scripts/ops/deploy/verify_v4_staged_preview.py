@@ -38,7 +38,8 @@ def main() -> int:
         if result.get("productionRelease") is not False or (preview / ".disdex-release-sha").exists():
             raise RuntimeError("V4_PREVIEW_UNEXPECTED_RELEASE_MARKER")
         names = ("v12-v4-monitor-only.test.ts", "v4-dynamic-evidence-auth-boundary.test.ts",
-                 "runner-tick-heartbeat.test.ts", "v12-v4-monitor-systemd.test.mjs")
+                 "runner-tick-heartbeat.test.ts", "v12-v4-monitor-systemd.test.mjs",
+                 "pending-exposure-readonly-reconcile.test.ts")
         for name in names:
             dest = preview / "tests" / name
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -49,7 +50,7 @@ def main() -> int:
         shutil.copyfile(ROOT / snapshot, dest)
         env = os.environ.copy()
         env["NODE_PATH"] = str(NODE_MODULES) + (os.pathsep + env["NODE_PATH"] if env.get("NODE_PATH") else "")
-        for name in names[:2]:
+        for name in (names[0], names[1], names[4]):
             run(["node", str(tsx), str(preview / "tests" / name)], cwd=preview, env=env)
         run(["node", str(preview / "tests" / names[3])], cwd=preview, env=env)
         pattern = ("tick filenames|a V4 writer|writes an atomic|replaces an existing|"
@@ -67,7 +68,8 @@ def main() -> int:
             },
             "files": ["lib/v12-v4-monitor-only.ts", "lib/disdex-runner-tick-heartbeat.ts",
                       "scripts/v12-v4-monitor-only-runner.ts",
-                      "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts"],
+                      "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts",
+                      "scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts"],
         }
         config_path = preview / "tsconfig.preview-check.json"
         config_path.write_text(json.dumps(config), encoding="utf-8")

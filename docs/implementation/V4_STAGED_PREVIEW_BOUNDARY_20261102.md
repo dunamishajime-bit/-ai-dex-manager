@@ -11,6 +11,8 @@ the repository's Node dependencies. It builds a temporary preview, checks
 monitor-only and refresh behavior, validates V4 tick markers against the
 supervisor, exercises 80 concurrent marker writes, and typechecks the preview.
 The tick test is scoped to V4; it does not certify the peer runners.
+The pending reconciliation helper is preview-only and rejects its apply mode
+until a scoped executor has been implemented and certified.
 
 Before a monitor-only deployment, a production release must be built from a
 real reviewed Git commit, with its tree and release marker independently

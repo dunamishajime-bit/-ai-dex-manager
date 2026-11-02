@@ -37,7 +37,7 @@ class V4StagedOverlayBuildTest(unittest.TestCase):
         self.assertIn("lib/disdex-runner-tick-heartbeat.ts",targets)
         self.assertNotIn("lib/v12-v4-runner-engine.ts",targets)
         self.assertNotIn("config/integratedProductionRiskPolicy.ts",targets)
-        self.assertNotIn("scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts",targets)
+        self.assertIn("scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts",targets)
 
     def test_materialized_candidate_preserves_core_engine_and_only_overlays_declared_targets(self):
         repo=Path(__file__).parents[1]
