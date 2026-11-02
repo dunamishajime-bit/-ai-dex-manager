@@ -8,7 +8,9 @@ import hashlib
 import json
 import math
 import os
+import re
 import signal
+import socket
 import secrets
 import shutil
 import sys
@@ -393,15 +395,82 @@ def aster_futures_request_weight(method: str, path: str, params: Optional[Dict[s
     return 100
 
 
+def _v52_monitor_budget_proxy_request(payload: dict) -> Optional[dict]:
+    """Reserve the shared Aster budget through the credential-free V4 broker.
+
+    This path is permitted only for the hard read-only V52 monitor. Normal LIVE
+    runners continue using the existing direct shared-budget implementation.
+    """
+    if not bool_env("DISDEX_V52_MONITOR_ONLY", False):
+        return None
+    broker_sha = (os.getenv("DISDEX_V52_MONITOR_BUDGET_BROKER_SHA") or "").strip().lower()
+    socket_path = (os.getenv("DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET") or "").strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", broker_sha):
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_SHA_INVALID")
+    expected = f"/run/disdex-v4-budget-{broker_sha}/budget.sock"
+    if socket_path != expected:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_SOCKET_INVALID")
+    request = json.dumps(payload, separators=(",", ":")).encode("utf-8") + b"\n"
+    if len(request) > 4096:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_REQUEST_INVALID")
+    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    client.settimeout(10.0)
+    response = bytearray()
+    try:
+        client.connect(socket_path)
+        client.sendall(request)
+        while b"\n" not in response:
+            chunk = client.recv(4096)
+            if not chunk:
+                break
+            response.extend(chunk)
+            if len(response) > 4096:
+                raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+    except (OSError, TimeoutError) as error:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_UNAVAILABLE") from error
+    finally:
+        client.close()
+    if b"\n" not in response:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+    line, trailing = bytes(response).split(b"\n", 1)
+    if trailing.strip():
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+    try:
+        value = json.loads(line.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID") from error
+    if not isinstance(value, dict) or value.get("ok") is not True:
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+    return value
+
+
 def wait_for_aster_global_rate_budget(weight: int = 1) -> None:
     raw_path = (os.getenv("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH") or "").strip()
-    if not raw_path:
+    monitor_proxy = bool_env("DISDEX_V52_MONITOR_ONLY", False)
+    if monitor_proxy and raw_path != "/var/lib/disdex/shared/aster-rate-budget.json":
+        raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_BUDGET_PATH_INVALID")
+    if not raw_path and not monitor_proxy:
         return
     minimum_ms = max(1, min(1000, _aster_global_budget_int_env("DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS", 50)))
     max_queue_ms = max(minimum_ms, min(30_000, _aster_global_budget_int_env("DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS", 5000)))
     if not isinstance(weight, (int, float)) or not math.isfinite(float(weight)):
         raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID")
     weight_units = max(1, min(100, math.floor(float(weight))))
+    if monitor_proxy:
+        value = _v52_monitor_budget_proxy_request({
+            "schema": "disdex-v4-budget-proxy/v1",
+            "operation": "reserve",
+            "weight": weight_units,
+            "priority": "MARKET_DATA",
+        })
+        if not isinstance(value, dict) or set(value) != {"ok", "waitMs"}:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+        wait_ms = value.get("waitMs")
+        if type(wait_ms) is not int or wait_ms < 0 or wait_ms > 30_000:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+        if wait_ms > 0:
+            time.sleep(wait_ms / 1000.0)
+        return
     path = Path(raw_path).resolve()
     lock_path = Path(str(path) + ".lock")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -432,9 +501,25 @@ def wait_for_aster_global_rate_budget(weight: int = 1) -> None:
 
 def defer_aster_global_rate_budget(cooldown_ms: int, status: int) -> None:
     raw_path = (os.getenv("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH") or "").strip()
-    if not raw_path: return
     if status not in {418, 429} or not isinstance(cooldown_ms, (int, float)) or not math.isfinite(float(cooldown_ms)) or cooldown_ms < 0:
         raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID")
+    if bool_env("DISDEX_V52_MONITOR_ONLY", False):
+        if raw_path != "/var/lib/disdex/shared/aster-rate-budget.json":
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_BUDGET_PATH_INVALID")
+        value = _v52_monitor_budget_proxy_request({
+            "schema": "disdex-v4-budget-proxy/v1",
+            "operation": "defer",
+            "status": status,
+            "cooldownMs": math.ceil(float(cooldown_ms)),
+        })
+        if not isinstance(value, dict) or set(value) != {"ok", "cooldownUntil"}:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+        until = value.get("cooldownUntil")
+        if type(until) is not int or until <= 0:
+            raise RuntimeError("ASTER_GLOBAL_RATE_BUDGET_PROXY_RESPONSE_INVALID")
+        return
+    if not raw_path:
+        return
     path = Path(raw_path).resolve(); lock_path = Path(str(path) + ".lock"); path.parent.mkdir(parents=True, exist_ok=True)
     owner = _aster_budget_acquire_lock(lock_path, 2_000)
     try:
@@ -446,7 +531,6 @@ def defer_aster_global_rate_budget(cooldown_ms: int, status: int) -> None:
         atomic_write_shared_json(path, {"schema":"disdex-aster-rate-budget/v1","nextAllowedAt":until,"updatedAt":now,"pid":os.getpid(),"cooldownUntil":until,"lastRateLimitStatus":status})
     finally:
         _aster_budget_release_lock(lock_path, owner)
-
 
 def append_jsonl(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
