@@ -228,6 +228,7 @@ def candidate_preflight_readonly() -> dict:
         "do . \"$f\"; done; "
         f"export DISDEX_RELEASE_SHA={NEW} DISDEX_RUNTIME_SHA={NEW} "
         f"DISDEX_RUNTIME_COMMIT_SHA={NEW} DISDEX_RELEASE_ROOT={release}; "
+        "export PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages; "
         "set +a; exec /usr/sbin/runuser -u deploy --preserve-environment -- "
         f"{release}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py "
         "--mode live --preflight-readonly"

@@ -61,6 +61,10 @@ class V52F333CutoverContractTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,"GITHUB_ACTOR"):
             m.build_activation("12345","other","a"*64)
 
+    def test_candidate_preflight_matches_live_pythonpath(self):
+        source=(m.Path(__file__).resolve().parents[1]/"scripts/ops/deploy/disdex_v52_owner_approved_f333_cutover.py").read_text()
+        self.assertIn("PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages",source)
+
     def test_exact_production_transition_is_bound(self):
         self.assertEqual(m.OLD,"4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81")
         self.assertEqual(m.NEW,"f33301be4805969333a5c580feaa38b72f825236")
