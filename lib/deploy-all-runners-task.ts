@@ -9,7 +9,7 @@ export const ALL_RUNNERS_LIVE_TASK = {
   operation: "ALL_RUNNERS_LIVE_RESTORE" as const,
   scope: "FULL_PROJECT" as const,
   baselineSha: "7688ed7c93a1918d8b44837339b7da5584a868f5",
-  label: "全Runner LIVE復旧（V52・IDLE・V4・HYPE・Q102・PENGU・FET）",
+  label: "全Runner LIVE復旧 monitor-only（V52・IDLE・V4・HYPE・Q102・PENGU・FET）",
   maxAgeMs: 24 * 60 * 60 * 1000,
   maxClaims: 30,
   safeguards: [
@@ -29,12 +29,12 @@ export const ALL_RUNNER_TASK_STEPS = {
   V52_VERIFY: { scope: "V52", targetSha: "4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81", ordersEnabled: false },
   IDLE_FLAT_STALE_REPAIR: { scope: "IDLE_PRIORITY_SHORT", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: false },
   SHARED_HOLD_RECOVERY: { scope: "SHARED_CRYPTO_RISK_ONLY", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: false },
-  V4_LIVE_RECOVER: { scope: "V12_V4", targetSha: "53a0be396719f0284af4e11b35c66a4ac7d58f79", ordersEnabled: true },
-  IDLE_LIVE_RESUME: { scope: "IDLE_PRIORITY_SHORT", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: true },
-  HYPE_LIVE_RECOVER: { scope: "HYPE_TREND_LONG", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: true },
-  Q102_LIVE_VERIFY: { scope: "QUALITY102_CAUSAL_V1", targetSha: "ef1ab178e26a7bf5bddb6473467765edba242e1d", ordersEnabled: true },
-  PENGU_LIVE_VERIFY: { scope: "PENGU_V8", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: true },
-  FET_LIVE_VERIFY: { scope: "FET_BRK48_RESIDUAL", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: true },
+  V4_LIVE_RECOVER: { scope: "V12_V4", targetSha: "53a0be396719f0284af4e11b35c66a4ac7d58f79", ordersEnabled: false },
+  IDLE_LIVE_RESUME: { scope: "IDLE_PRIORITY_SHORT", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: false },
+  HYPE_LIVE_RECOVER: { scope: "HYPE_TREND_LONG", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: false },
+  Q102_LIVE_VERIFY: { scope: "QUALITY102_CAUSAL_V1", targetSha: "ef1ab178e26a7bf5bddb6473467765edba242e1d", ordersEnabled: false },
+  PENGU_LIVE_VERIFY: { scope: "PENGU_V8", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: false },
+  FET_LIVE_VERIFY: { scope: "FET_BRK48_RESIDUAL", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: false },
   FINAL_ALL_RUNNERS_AUDIT: { scope: "FULL_PROJECT", targetSha: ALL_RUNNERS_LIVE_TASK.baselineSha, ordersEnabled: false },
 } as const;
 
@@ -82,7 +82,7 @@ export function validateAllRunnerTaskClaim(input: {
     input.taskScope === ALL_RUNNERS_LIVE_TASK.scope &&
     input.taskTargetSha === ALL_RUNNERS_LIVE_TASK.baselineSha &&
     input.taskPlanSha256 === ALL_RUNNERS_LIVE_PLAN_SHA256 &&
-    input.taskOrdersEnabled === true &&
+    input.taskOrdersEnabled === false &&
     step.targetSha === input.stepTargetSha &&
     allRunnerStepPlanSha256(input.step) === input.stepPlanSha256 &&
     step.ordersEnabled === input.stepOrdersEnabled

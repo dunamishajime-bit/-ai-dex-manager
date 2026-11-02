@@ -49,7 +49,7 @@ jobs:
             result=json.load(response)
           approval=result.get("approval") or {}
           assert result.get("ok") and approval.get("operation")=="ALL_RUNNERS_LIVE_RESTORE"
-          assert approval.get("scope")=="FULL_PROJECT" and approval.get("ordersEnabled") is True
+          assert approval.get("scope")=="FULL_PROJECT" and approval.get("ordersEnabled") is False
           print("ALL_RUNNERS_TASK_APPROVAL_ID="+str(approval["id"]))
           print("ALL_RUNNERS_TASK_APPROVAL_STATUS="+str(approval["status"]))
           print("ALL_RUNNERS_TASK_SCOPE=FULL_PROJECT")

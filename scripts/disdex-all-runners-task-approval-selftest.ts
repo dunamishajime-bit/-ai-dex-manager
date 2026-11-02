@@ -11,7 +11,7 @@ import {
 } from "../lib/deploy-approval-token";
 
 assert.equal(DEPLOY_APPROVAL_OPERATION_POLICY.ALL_RUNNERS_LIVE_RESTORE.scope, "FULL_PROJECT");
-assert.equal(DEPLOY_APPROVAL_OPERATION_POLICY.ALL_RUNNERS_LIVE_RESTORE.ordersEnabled, true);
+assert.equal(DEPLOY_APPROVAL_OPERATION_POLICY.ALL_RUNNERS_LIVE_RESTORE.ordersEnabled, false);
 assert.equal(ALL_RUNNERS_LIVE_TASK.maxAgeMs, 24 * 60 * 60 * 1000);
 assert.ok(ALL_RUNNERS_LIVE_TASK.maxClaims >= Object.keys(ALL_RUNNER_TASK_STEPS).length);
 assert.equal(ALL_RUNNERS_LIVE_PLAN_SHA256.length, 64);
@@ -30,7 +30,7 @@ for (const [step, spec] of Object.entries(ALL_RUNNER_TASK_STEPS)) {
     taskScope: ALL_RUNNERS_LIVE_TASK.scope,
     taskTargetSha: ALL_RUNNERS_LIVE_TASK.baselineSha,
     taskPlanSha256: ALL_RUNNERS_LIVE_PLAN_SHA256,
-    taskOrdersEnabled: true,
+    taskOrdersEnabled: false,
     step,
     stepTargetSha: spec.targetSha,
     stepPlanSha256: plan,
@@ -39,7 +39,7 @@ for (const [step, spec] of Object.entries(ALL_RUNNER_TASK_STEPS)) {
   assert.equal(validateAllRunnerTaskClaim(grant), true, step);
   assert.equal(validateAllRunnerTaskClaim({ ...grant, taskOperation: "V12_V4_LIVE" }), false);
   assert.equal(validateAllRunnerTaskClaim({ ...grant, taskPlanSha256: "f".repeat(64) }), false);
-  assert.equal(validateAllRunnerTaskClaim({ ...grant, taskOrdersEnabled: false }), false);
+  assert.equal(validateAllRunnerTaskClaim({ ...grant, taskOrdersEnabled: true }), false);
   assert.equal(validateAllRunnerTaskClaim({ ...grant, stepTargetSha: "f".repeat(40) }), false);
   assert.equal(validateAllRunnerTaskClaim({ ...grant, stepPlanSha256: "f".repeat(64) }), false);
   assert.equal(validateAllRunnerTaskClaim({ ...grant, stepOrdersEnabled: !spec.ordersEnabled }), false);
@@ -61,7 +61,7 @@ assert.equal(validateAllRunnerTaskClaim({
   taskScope: ALL_RUNNERS_LIVE_TASK.scope,
   taskTargetSha: ALL_RUNNERS_LIVE_TASK.baselineSha,
   taskPlanSha256: ALL_RUNNERS_LIVE_PLAN_SHA256,
-  taskOrdersEnabled: true,
+  taskOrdersEnabled: false,
   step: "UNAUTHORIZED_TRADING_STAGE",
   stepTargetSha: ALL_RUNNERS_LIVE_TASK.baselineSha,
   stepPlanSha256: "0".repeat(64),
