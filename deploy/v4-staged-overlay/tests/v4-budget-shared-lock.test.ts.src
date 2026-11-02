@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createConnection } from "node:net";
+import { spawn } from "node:child_process";
 import test from "node:test";
 import { reserveAsterGlobalRateSlot, deferAsterGlobalRateBudget } from "../lib/disdex-aster-global-rate-budget";
 import { createV4BudgetBrokerServer } from "../lib/disdex-v4-rate-budget-server";
@@ -40,6 +41,29 @@ test("broker and direct runners serialize 80 real shared-budget writes and retai
     await assert.rejects(()=>reserve());
   } finally {
     await new Promise<void>(resolve=>server.close(()=>resolve()));
+    await rm(dir,{recursive:true,force:true});
+  }
+});
+
+test("a crashed lock owner is recovered before the next reservation", {timeout:20000}, async () => {
+  const dir=await mkdtemp(join(tmpdir(), "disdex-budget-crash-"));
+  const path=join(dir,"budget.json");
+  const childCode = `const fs=require('node:fs');const p=process.argv[1]+'.lock';fs.mkdirSync(p);fs.writeFileSync(p+'/owner.json',JSON.stringify({schema:'disdex-aster-rate-budget-lock/v1',pid:process.pid,createdAt:Date.now(),token:'crash-test'}));process.stdout.write('READY\\n');setInterval(()=>{},1000);`;
+  const child=spawn(process.execPath,["-e",childCode,path],{stdio:["ignore","pipe","pipe"]});
+  try {
+    await new Promise<void>((resolve,reject)=>{
+      let output=""; child.stdout.setEncoding("utf8");
+      child.stdout.on("data",chunk=>{output+=chunk;if(output.includes("READY\n"))resolve();});
+      child.once("error",reject); child.once("exit",()=>reject(new Error("LOCK_OWNER_EXITED_BEFORE_READY")));
+    });
+    const stopped=new Promise<void>(resolve=>child.once("exit",()=>resolve()));
+    child.kill("SIGKILL"); await stopped;
+    const result=await reserveAsterGlobalRateSlot({path,minIntervalMs:1,maxQueueMs:30000,priority:"RISK_READ"});
+    assert.ok(Number.isFinite(result.permitAt));
+    const persisted=JSON.parse(await readFile(path,"utf8"));
+    assert.equal(persisted.nextAllowedAt,result.nextAllowedAt);
+  } finally {
+    if(child.exitCode===null && child.signalCode===null) child.kill("SIGKILL");
     await rm(dir,{recursive:true,force:true});
   }
 });
