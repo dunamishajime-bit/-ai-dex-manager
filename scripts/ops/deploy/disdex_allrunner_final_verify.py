@@ -139,6 +139,10 @@ def verify_step(step):
         unit,root=SERVICES[step];pid=verify_service(step,unit,root)
         print("VERIFIED_UNIT="+unit);print("PID="+str(pid));return
     req(step=="FINAL_ALL_RUNNERS_AUDIT","STEP_NOT_ALLOWED")
+    # Three back-to-back venue reads and one PID snapshot do not establish
+    # three independent heartbeat/tick and risk audit cycles.  Until that
+    # audit is implemented, never emit a misleading final PASS.
+    raise RuntimeError("THREE_CYCLE_TICK_AUDIT_NOT_CERTIFIED")
     pids={}
     for name,(unit,root) in ALL_SERVICES.items():
         pids[name]=verify_service(name,unit,root)

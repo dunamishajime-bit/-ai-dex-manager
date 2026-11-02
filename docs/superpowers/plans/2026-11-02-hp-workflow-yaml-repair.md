@@ -26,5 +26,6 @@
 - [ ] Apply the same signed-GET budget and deploy-user checks to the V4/IDLE/HYPE recovery helper.
 - [ ] Require valid fresh 7.5% risk and well-formed pending records in the recovery helper before any start.
 - [ ] Fail closed for inactive runners until a genuinely order-disabled startup is certified; an `ordersEnabled=false` approval must not start an order-enabled unit.
+- [ ] Block the final audit from claiming PASS until three real heartbeat/tick/risk audit cycles are implemented; three consecutive venue GETs are not equivalent.
 - [ ] Run the V4 witness tests and all-runner safety tests; keep the witness unwired to production until the remaining runtime and ownership gaps are resolved.
 - [ ] Run the witness, final-verify, and risk-freshness tests in GitHub CI when their sources change.
