@@ -17,7 +17,7 @@ import {
   type AsterPositionRiskRow,
 } from "../../../lib/aster-v3-client";
 import { validateV4SharedExecutionEvidencePayloads } from "../../../lib/v12-v4-certified-gates";
-import { assertV4MonitorRateBudget } from "../../../lib/v12-v4-monitor-only";
+import { assertV4MonitorRateBudget, createV4EvidenceFetch } from "../../../lib/v12-v4-monitor-only";
 
 export function assertV4RefreshRateBudget(path: unknown): void {
   assertV4MonitorRateBudget(path);
@@ -691,6 +691,7 @@ async function main() {
     requestTimeoutMs: Number(process.env.ASTER_REQUEST_TIMEOUT_MS || 10_000),
     recvWindowMs: Number(process.env.ASTER_RECV_WINDOW_MS || 5_000),
     readOnlyRateLimitMaxRetries: 0,
+    fetchImpl: createV4EvidenceFetch(fetch),
     userAgent: "DisDex-V4-Dynamic-Evidence-Refresh/1.0",
   });
   const result = await refreshDynamicFiles({

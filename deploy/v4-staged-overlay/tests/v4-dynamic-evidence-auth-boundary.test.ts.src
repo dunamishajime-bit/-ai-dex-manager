@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import {
   assertHealthyV4DynamicRuntime,
   assertV4RefreshRateBudget,
@@ -18,6 +19,11 @@ test("refresh requires the production shared API rate budget", () => {
   for (const path of [undefined, "", "/tmp/other.json"]) {
     assert.throws(() => assertV4RefreshRateBudget(path), /RATE_BUDGET_REQUIRED/);
   }
+});
+
+test("refresh CLI uses the GET-only evidence transport", () => {
+  const source=readFileSync("scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts", "utf8");
+  assert.match(source,/fetchImpl:\s*createV4EvidenceFetch\(fetch\)/);
 });
 
 function lease(overrides: Record<string, unknown> = {}) {

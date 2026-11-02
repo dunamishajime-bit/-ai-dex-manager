@@ -9,9 +9,7 @@ export function assertV4MonitorRateBudget(path: unknown): void {
   }
 }
 
-/** A transport boundary that cannot send order mutations or follow redirects. */
-export function createV4MonitorFetch(fetchImpl: typeof fetch): typeof fetch {
-  const allowedPaths = new Set(["/fapi/v3/klines", "/fapi/v3/positionRisk", "/fapi/v3/openOrders"]);
+function createV4ReadOnlyFetch(fetchImpl: typeof fetch, allowedPaths: ReadonlySet<string>): typeof fetch {
   return async (input, init) => {
     const raw = input instanceof Request ? input.url : String(input);
     const method = String(init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
@@ -22,6 +20,15 @@ export function createV4MonitorFetch(fetchImpl: typeof fetch): typeof fetch {
     }
     return fetchImpl(input, { ...init, redirect: "error" });
   };
+}
+
+/** A transport boundary that cannot send order mutations or follow redirects. */
+export function createV4MonitorFetch(fetchImpl: typeof fetch): typeof fetch {
+  return createV4ReadOnlyFetch(fetchImpl, new Set(["/fapi/v3/klines", "/fapi/v3/positionRisk", "/fapi/v3/openOrders"]));
+}
+
+export function createV4EvidenceFetch(fetchImpl: typeof fetch): typeof fetch {
+  return createV4ReadOnlyFetch(fetchImpl, new Set(["/fapi/v3/time", "/fapi/v3/balance", "/fapi/v3/positionRisk", "/fapi/v3/openOrders"]));
 }
 
 export type V4MonitorReadOnlySnapshot = {

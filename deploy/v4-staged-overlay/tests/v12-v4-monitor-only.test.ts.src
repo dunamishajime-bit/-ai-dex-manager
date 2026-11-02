@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { existsSync, readFileSync } from "node:fs";
 
-import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4MonitorFetch, runV4MonitorCycle, validateV4MonitorReadOnlySnapshot } from "../lib/v12-v4-monitor-only";
+import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4EvidenceFetch, createV4MonitorFetch, runV4MonitorCycle, validateV4MonitorReadOnlySnapshot } from "../lib/v12-v4-monitor-only";
 
 const NOW = Date.parse("2026-11-02T12:00:00.000Z");
 
@@ -26,6 +26,18 @@ test("monitor transport permits only the required read endpoints", async () => {
   }
   await assert.rejects(() => fetcher("https://example.test/fapi/v3/positionRisk"), /MONITOR_HTTP_NOT_ALLOWED/);
   assert.equal(sent.length, 1);
+});
+
+test("evidence transport allows signed account reads but rejects mutations and redirects", async () => {
+  const calls: RequestInit[] = [];
+  const fetcher = createV4EvidenceFetch(async (_input, init) => {
+    calls.push(init ?? {}); return new Response("ok");
+  });
+  await fetcher("https://fapi.asterdex.com/fapi/v3/balance", {method:"GET", redirect:"follow"});
+  await fetcher("https://fapi.asterdex.com/fapi/v3/time");
+  await assert.rejects(() => fetcher("https://fapi.asterdex.com/fapi/v3/order", {method:"POST"}), /MONITOR_HTTP_NOT_ALLOWED/);
+  assert.equal(calls.length, 2);
+  assert.ok(calls.every((item) => item.redirect === "error"));
 });
 
 function snapshot(overrides: Record<string, unknown> = {}) {
