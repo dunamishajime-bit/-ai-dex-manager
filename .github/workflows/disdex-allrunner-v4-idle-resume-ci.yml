@@ -50,7 +50,7 @@ jobs:
           for x in [
             'V4_LIVE_RECOVER','IDLE_LIVE_RESUME','HYPE_LIVE_RECOVER','claim_task_step','finish_task_step',
             'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM','disdex-production',
-            '--orders-enabled true','disdex_allrunner_v4_idle_live_resume.py',
+            '--orders-enabled false','disdex_allrunner_v4_idle_live_resume.py',
           ]:
               assert x in w,x
           for forbidden in ['cancelOrder','createOrder','test-order','kill-switch clear']:

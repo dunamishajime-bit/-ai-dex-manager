@@ -57,17 +57,17 @@ jobs:
             PENGU_LIVE_VERIFY)
               echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"
               echo "scope=PENGU_V8" >> "$GITHUB_OUTPUT"
-              echo "orders=true" >> "$GITHUB_OUTPUT"
+              echo "orders=false" >> "$GITHUB_OUTPUT"
               ;;
             Q102_LIVE_VERIFY)
               echo "sha=ef1ab178e26a7bf5bddb6473467765edba242e1d" >> "$GITHUB_OUTPUT"
               echo "scope=QUALITY102_CAUSAL_V1" >> "$GITHUB_OUTPUT"
-              echo "orders=true" >> "$GITHUB_OUTPUT"
+              echo "orders=false" >> "$GITHUB_OUTPUT"
               ;;
             FET_LIVE_VERIFY)
               echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"
               echo "scope=FET_BRK48_RESIDUAL" >> "$GITHUB_OUTPUT"
-              echo "orders=true" >> "$GITHUB_OUTPUT"
+              echo "orders=false" >> "$GITHUB_OUTPUT"
               ;;
             FINAL_ALL_RUNNERS_AUDIT)
               echo "sha=7688ed7c93a1918d8b44837339b7da5584a868f5" >> "$GITHUB_OUTPUT"

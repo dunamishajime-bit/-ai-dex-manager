@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       planSha256: ALL_RUNNERS_LIVE_PLAN_SHA256,
       scope: "FULL_PROJECT",
       operation: "ALL_RUNNERS_LIVE_RESTORE",
-      ordersEnabled: true,
+      ordersEnabled: false,
       requestActor: actor,
       requestCommentId: String(body.comment_id || "").slice(0, 32),
     });

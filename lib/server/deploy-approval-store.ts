@@ -270,8 +270,8 @@ export async function createPendingDeploymentApproval(input: {
     current?.operation === "ALL_RUNNERS_LIVE_RESTORE" &&
     input.operation === "ALL_RUNNERS_LIVE_RESTORE" &&
     current.scope === "FULL_PROJECT" &&
-    current.ordersEnabled === true &&
-    input.ordersEnabled === true &&
+    current.ordersEnabled === false &&
+    input.ordersEnabled === false &&
     current.targetSha === input.targetSha &&
     current.planSha256 === input.planSha256 &&
     ["APPROVED", "DISPATCHED"].includes(current.status) &&

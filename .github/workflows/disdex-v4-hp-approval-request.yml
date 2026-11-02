@@ -20,8 +20,14 @@ jobs:
       github.event.comment.author_association == 'OWNER' &&
       (
         startsWith(github.event.comment.body, 'DISDEX_DEPLOY_REQUEST V12_V4 ') ||
+        startsWith(github.event.comment.body, 'DISDEX_DEPLOY_REQUEST PENGU_V8 ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST SHARED_CRYPTO_RISK_WRITER ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_MONITOR_REFRESH ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ')
       )
+    environment:
+      name: disdex-production
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -41,6 +47,22 @@ jobs:
               r"DISDEX_DEPLOY_REQUEST V12_V4 SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
               body,
           )
+          pengu = re.fullmatch(
+              r"DISDEX_DEPLOY_REQUEST PENGU_V8 SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          shared = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST SHARED_CRYPTO_RISK_WRITER SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          monitor = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST ALL_RUNNERS_MONITOR_REFRESH SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          order_enable = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
           idle = re.fullmatch(
               r"DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR SHA=([0-9a-f]{40})",
               body,
@@ -50,6 +72,26 @@ jobs:
               target, plan = deploy.groups()
               operation = "V12_V4_LIVE"
               scope = "V12_V4"
+              orders_enabled = "true"
+          elif pengu:
+              target, plan = pengu.groups()
+              operation = "PENGU_V8_LIVE"
+              scope = "PENGU_V8"
+              orders_enabled = "true"
+          elif shared:
+              target, plan = shared.groups()
+              operation = "SHARED_CRYPTO_RISK_WRITER"
+              scope = "SHARED_CRYPTO_RISK_ONLY"
+              orders_enabled = "false"
+          elif monitor:
+              target, plan = monitor.groups()
+              operation = "ALL_RUNNERS_MONITOR_REFRESH"
+              scope = "FULL_PROJECT"
+              orders_enabled = "false"
+          elif order_enable:
+              target, plan = order_enable.groups()
+              operation = "ALL_RUNNERS_ORDER_ENABLE"
+              scope = "FULL_PROJECT"
               orders_enabled = "true"
           elif idle:
               target = idle.group(1)

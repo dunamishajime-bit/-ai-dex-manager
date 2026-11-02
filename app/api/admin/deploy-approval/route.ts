@@ -6,8 +6,10 @@ import {
   mutateDeploymentApprovalAtomic,
 } from "@/lib/server/deploy-approval-store";
 import {
+  DEPLOY_APPROVAL_OPERATION_POLICY,
   issueDeploymentApprovalToken,
   loadDeploymentApprovalPrivateKey,
+  type DeploymentApprovalOperation,
 } from "@/lib/deploy-approval-token";
 import { verifyRequestSession } from "@/lib/server/owner-session";
 import { createOtpChallenge, consumeOtpChallenge } from "@/lib/server/otp-challenge-store";
@@ -176,11 +178,19 @@ export async function POST(request: NextRequest) {
       await mutateDeploymentApprovalAtomic(record.id, (current) => {
         if (!current || current.status !== "OTP_SENT") throw new Error("APPROVAL_NOT_OTP_SENT");
         if (current.requestExpiresAt < Date.now()) throw new Error("APPROVAL_EXPIRED");
+        const operation = (current.operation ?? "V12_V4_LIVE") as DeploymentApprovalOperation;
+        const policy = DEPLOY_APPROVAL_OPERATION_POLICY[operation];
+        if (!policy) throw new Error("APPROVAL_OPERATION_UNSUPPORTED");
+        if (current.scope !== policy.scope || current.ordersEnabled !== policy.ordersEnabled) {
+          throw new Error("APPROVAL_OPERATION_POLICY_MISMATCH");
+        }
         const issued = issueDeploymentApprovalToken({
           targetSha: current.targetSha,
           planSha256: current.planSha256,
           operator: OPERATOR,
           privateKey: loadDeploymentApprovalPrivateKey(),
+          scope: policy.scope,
+          ordersEnabled: policy.ordersEnabled,
           ttlSeconds: 300,
         });
         return {

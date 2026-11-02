@@ -95,7 +95,7 @@ jobs:
           assert data.get("ok")
           assert data.get("step")==os.environ["STEP"]
           assert data.get("scope")==os.environ["SCOPE"]
-          assert data.get("ordersEnabled") is True
+          assert data.get("ordersEnabled") is False
           token=str(data.get("token") or "")
           plan=str(data.get("planSha256") or "")
           assert token and len(plan)==64
@@ -115,7 +115,7 @@ jobs:
               --plan-sha256 "$(cat "$RUNNER_TEMP/allrunner-live-plan")" \
               --deployment-target professional-dismanager.net \
               --operator-target DD1296_FINAL_ALLIN_10BPS \
-              --route GITHUB_ACTIONS --orders-enabled true
+              --route GITHUB_ACTIONS --orders-enabled false
 
       - name: Configure reviewed root maintenance SSH
         shell: bash
