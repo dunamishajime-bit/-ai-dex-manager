@@ -17,7 +17,9 @@ test("candidate manifest pins every runner independently", async () => {
   assert.equal(manifest.runners.QUALITY102_CAUSAL_V1.sha, "ef1ab178e26a7bf5bddb6473467765edba242e1d");
   assert.equal(manifest.runners.V12_V4.sha, "53a0be396719f0284af4e11b35c66a4ac7d58f79");
   assert.notEqual(manifest.runners.V52.sha, manifest.runners.FET_BRK48_RESIDUAL.sha);
-  assert.equal(manifest.runners.V52.evidenceMode, "heartbeat_v1");
+  // The currently pinned Production V52 release predates the supervisor-compatible
+  // runner-owned tick schema. Keep it on legacy evidence until SHA + mode cut over together.
+  assert.equal(manifest.runners.V52.evidenceMode, "legacy");
 });
 
 test("wrong sha, release root, service and paths fail closed", async () => {
