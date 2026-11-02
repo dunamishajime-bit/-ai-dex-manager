@@ -19,6 +19,11 @@ test("refresh service runs the real apply helper under the exact release SHA", (
   assert.doesNotMatch(service, /systemctl\s+(restart|start|stop)/);
 });
 
+test("refresh service loads the canonical root-owned Aster credentials", () => {
+  assert.match(service, /^EnvironmentFile=\/etc\/disdex\/disdex-v12-aster-credentials\.env$/m);
+  assert.doesNotMatch(service, /EnvironmentFile=-\/etc\/disdex\/aster\.env/);
+});
+
 test("refresh timer is periodic and keeps monitor separate", () => {
   assert.match(timer, /OnCalendar=\*:0\/30/);
   assert.match(timer, /Unit=disdex-v4-dynamic-evidence-refresh@%i\.service/);
