@@ -14,7 +14,7 @@ jobs:
           node-version: '20'
       - run: npm ci --ignore-scripts
       - name: Fetch exact reviewed preview source
-        run: git fetch --no-tags --depth=1 origin a8a55560e2f038e8397829f4f5ce8fbedc94f891
+        run: git fetch --no-tags --depth=1 origin 724a2e020d6582c614ca7503a689314175d55075
       - name: Verify candidate source lineage
         run: python3 -m unittest tests.test_v4_release_candidate_source -v
       - name: Test monitoring, evidence and shared API budget

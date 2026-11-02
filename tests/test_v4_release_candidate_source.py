@@ -3,7 +3,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-PREVIEW = "a8a55560e2f038e8397829f4f5ce8fbedc94f891"
+PREVIEW = "724a2e020d6582c614ca7503a689314175d55075"
 
 def source(path):
     return subprocess.check_output(["git", "show", PREVIEW + ":" + path])
