@@ -6,6 +6,7 @@ import {
   type DeploymentApprovalOperation,
   type DeploymentApprovalScope,
 } from "@/lib/deploy-approval-token";
+import { redisApprovalCompareAndSwap } from "@/lib/server/deploy-approval-redis-cas";
 
 export type DeploymentApprovalStatus =
   | "PENDING"
@@ -136,8 +137,32 @@ export async function mutateDeploymentApprovalAtomic<T>(
     result: T;
   },
 ): Promise<T> {
-  // A Redis transaction would be needed for atomic claims. Fail closed instead.
-  if (USE_REDIS) throw new Error("TASK_CLAIMS_REQUIRE_ATOMIC_STORAGE");
+  if (USE_REDIS) {
+    const redis = await redisClient();
+    const recordKey = KEY_PREFIX + id;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const current = (await redis.get<DeploymentApprovalRecord>(recordKey)) || null;
+      const result = update(current);
+      if (!result.next) return result.result;
+      const next = {
+        ...result.next,
+        updatedAt: Date.now(),
+        storeRevision: crypto.randomUUID(),
+      };
+      const cas = await redisApprovalCompareAndSwap(redis, {
+        recordKey,
+        latestKey: LATEST_KEY,
+        current,
+        next,
+        touchLatest: false,
+      });
+      if (cas === "SWAPPED") return result.result;
+      if (cas === "INVALID_STORED_VALUE") {
+        throw new Error("APPROVAL_STORE_INVALID_OR_UNREADABLE");
+      }
+    }
+    throw new Error("APPROVAL_STORE_BUSY_FAIL_CLOSED");
+  }
   return withFileLock(() => {
     if (!fs.existsSync(FILE_PATH)) throw new Error("APPROVAL_STORE_MISSING");
     const raw = JSON.parse(fs.readFileSync(FILE_PATH, "utf8")) as unknown;
@@ -177,9 +202,29 @@ export async function saveDeploymentApproval(record: DeploymentApprovalRecord) {
   const next = { ...record, updatedAt: Date.now() };
   if (USE_REDIS) {
     const redis = await redisClient();
-    await redis.set(KEY_PREFIX + next.id, next, { ex: 60 * 60 * 2 });
-    await redis.set(LATEST_KEY, next.id, { ex: 60 * 60 * 2 });
-    return next;
+    const recordKey = KEY_PREFIX + next.id;
+    const current = (await redis.get<DeploymentApprovalRecord>(recordKey)) || null;
+    if (current && current.storeRevision !== next.storeRevision) {
+      throw new Error("APPROVAL_STORE_STALE_WRITE_FAIL_CLOSED");
+    }
+    if (!current && next.storeRevision) {
+      throw new Error("APPROVAL_STORE_STALE_WRITE_FAIL_CLOSED");
+    }
+    const persisted = { ...next, storeRevision: crypto.randomUUID() };
+    const cas = await redisApprovalCompareAndSwap(redis, {
+      recordKey,
+      latestKey: LATEST_KEY,
+      current,
+      next: persisted,
+      touchLatest: true,
+    });
+    if (cas === "INVALID_STORED_VALUE") {
+      throw new Error("APPROVAL_STORE_INVALID_OR_UNREADABLE");
+    }
+    if (cas !== "SWAPPED") {
+      throw new Error("APPROVAL_STORE_STALE_WRITE_FAIL_CLOSED");
+    }
+    return persisted;
   }
   return withFileLock(() => {
     const existing = loadFileRecords();
