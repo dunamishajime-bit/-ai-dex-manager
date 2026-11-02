@@ -49,7 +49,7 @@ jobs:
             'finish_task_step',
             'DISDEX_HP_APPROVER_PUBLIC_KEY_PEM',
             'disdex-production',
-            '--orders-enabled true',
+            '--orders-enabled false',
           ]:
               assert x in w,x
           for forbidden in ['cancelOrder','createOrder','test-order','kill-switch clear']:

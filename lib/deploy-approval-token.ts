@@ -15,10 +15,14 @@ export const DEPLOY_APPROVAL_SCOPES = [
 export type DeploymentApprovalScope = (typeof DEPLOY_APPROVAL_SCOPES)[number];
 
 export const DEPLOY_APPROVAL_OPERATIONS = [
+  "ALL_RUNNERS_MONITOR_REFRESH",
   "V12_V4_LIVE",
+  "PENGU_V8_LIVE",
+  "SHARED_CRYPTO_RISK_WRITER",
   "V4_DOGE_MISSED_TIME_EXIT",
   "IDLE_FLAT_STALE_REPAIR",
   "ALL_RUNNERS_LIVE_RESTORE",
+  "ALL_RUNNERS_ORDER_ENABLE",
 ] as const;
 export type DeploymentApprovalOperation = (typeof DEPLOY_APPROVAL_OPERATIONS)[number];
 
@@ -28,10 +32,25 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
   DeploymentApprovalOperation,
   { scope: DeploymentApprovalScope; ordersEnabled: boolean; label: string }
 > = {
+  ALL_RUNNERS_MONITOR_REFRESH: {
+    scope: "FULL_PROJECT",
+    ordersEnabled: false,
+    label: "全Runner 監視・refreshのみ（注文無効）",
+  },
   V12_V4_LIVE: {
     scope: "V12_V4",
     ordersEnabled: true,
     label: "V12 V4 Production LIVE",
+  },
+  PENGU_V8_LIVE: {
+    scope: "PENGU_V8",
+    ordersEnabled: true,
+    label: "PENGU V8 単独 LIVE / 注文有効化",
+  },
+  SHARED_CRYPTO_RISK_WRITER: {
+    scope: "SHARED_CRYPTO_RISK_ONLY",
+    ordersEnabled: false,
+    label: "Shared Crypto Risk writer 単独有効化（注文権限なし）",
   },
   V4_DOGE_MISSED_TIME_EXIT: {
     scope: "V12_V4",
@@ -45,8 +64,13 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
   },
   ALL_RUNNERS_LIVE_RESTORE: {
     scope: "FULL_PROJECT",
+    ordersEnabled: false,
+    label: "全Runner LIVE復旧（monitor-only / 注文無効）",
+  },
+  ALL_RUNNERS_ORDER_ENABLE: {
+    scope: "FULL_PROJECT",
     ordersEnabled: true,
-    label: "全Runner LIVE復旧（一回の本人承認で同一依頼を完了まで）",
+    label: "全Runner 注文有効化（復旧完了後の別承認）",
   },
 };
 
