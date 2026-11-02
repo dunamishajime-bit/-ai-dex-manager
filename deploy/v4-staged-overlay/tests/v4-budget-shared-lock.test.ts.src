@@ -19,10 +19,14 @@ test("broker and direct runners serialize 80 real shared-budget writes and retai
   };
   const server=createV4BudgetBrokerServer({reserve:async()=>reserve(),defer:async(status,cooldownMs)=>deferAsterGlobalRateBudget({path,status,cooldownMs})});
   try {
-    await new Promise<void>((resolve,reject)=>{server.once("error",reject);server.listen(0,"127.0.0.1",resolve);});
-    const address=server.address(); assert.ok(address && typeof address!=="string");
+    await new Promise<void>((resolve,reject)=>{
+      server.once("error",reject);
+      if (process.platform === "win32") server.listen(0,"127.0.0.1",resolve);
+      else server.listen(join(dir,"budget.sock"),resolve);
+    });
+    const address=server.address(); assert.ok(address);
     const request=()=>new Promise<any>((resolve,reject)=>{
-      const socket=createConnection({host:"127.0.0.1",port:address.port}); let raw="";
+      const socket=createConnection(typeof address === "string" ? {path:address} : {host:"127.0.0.1",port:address.port}); let raw="";
       socket.setEncoding("utf8"); socket.once("error",reject);
       socket.on("data",chunk=>{raw+=chunk;});
       socket.once("end",()=>{try{resolve(JSON.parse(raw));}catch(error){reject(error);}});
