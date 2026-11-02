@@ -199,6 +199,11 @@ function blockedHeartbeat(runnerId,pin,now,reason){
   };
 }
 
+export function unsupportedEvidenceResult(runnerId){
+  return {runnerId,status:"BLOCKED",reason:"RUNNER_TICK_EVIDENCE_NOT_SUPPORTED",
+    newOrdersAllowed:false,tradingMutation:0};
+}
+
 export async function runSnapshot({manifestPath="/etc/disdex/runner-pins.json",now=Date.now(),write=true}={}){
   const manifest=await loadManifest(manifestPath);
   let safetyError="";
@@ -207,7 +212,7 @@ export async function runSnapshot({manifestPath="/etc/disdex/runner-pins.json",n
   const results=[];
   for(const [runnerId,pin] of Object.entries(manifest.runners)){
     if(pin.evidenceMode!=="heartbeat_v1"){
-      results.push({runnerId,status:"BLOCKED",reason:"RUNNER_TICK_EVIDENCE_NOT_SUPPORTED",newOrdersAllowed:false,tradingMutation:0});
+      results.push(unsupportedEvidenceResult(runnerId));
       continue;
     }
     try{
@@ -264,7 +269,7 @@ async function main(){
   }
   const result=await runSnapshot({write:!dryRun});
   console.log(JSON.stringify(result));
-  if(result.results.some((row)=>row.status==="BLOCKED")) process.exitCode=1;
+  if(result.overallStatus!=="HEALTHY") process.exitCode=1;
 }
 
 if(import.meta.url===`file://${process.argv[1]}`){
