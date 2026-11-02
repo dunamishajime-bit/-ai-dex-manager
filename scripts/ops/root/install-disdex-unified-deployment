@@ -88,6 +88,7 @@ install -d -o root -g root -m 0755 /usr/local/libexec/disdex-unified
 install -d -o root -g root -m 0700 /var/lib/disdex/unified-deploy/peer-stop
 install -d -o root -g root -m 0700 /var/lib/disdex/unified-deploy/nonces
 install -d -o root -g root -m 0700 /var/lib/disdex/unified-deploy/refresh-leases/v4
+install -d -o root -g root -m 0700 /var/lib/disdex/v12-v4
 install -o root -g root -m 0755 \
   "$release_root/scripts/ops/deploy/disdex_unified_root_gate.py" \
   /usr/local/libexec/disdex-unified/disdex_unified_root_gate.py
