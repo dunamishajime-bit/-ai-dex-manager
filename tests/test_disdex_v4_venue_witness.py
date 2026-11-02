@@ -1,4 +1,5 @@
 import sys
+from types import SimpleNamespace
 from datetime import datetime, timezone
 from pathlib import Path
 import unittest
@@ -12,6 +13,30 @@ SHA="a"*40
 OLD="7"*40
 
 class VenueWitnessContractTest(unittest.TestCase):
+    def test_runtime_health_rejects_missing_trip_state_and_malformed_pending_entries(self):
+        now = 1793596500000
+        risk = {"sourceComplete": True, "tripped": False, "utcDay": "2026-11-02",
+                "updatedAt": now - 1000, "maximumLossPct": 7.5}
+        margin = {"stage": "HEALTHY", "ordersAllowed": True, "checkedAt": now - 1000}
+        def check(risk_value, entries):
+            records = {m.RISK: risk_value, m.MARGIN: margin, m.KILL: {"active": False},
+                       m.PENDING: {"entries": entries}}
+            no_lock = SimpleNamespace(exists=lambda: False, is_symlink=lambda: False)
+            with patch.object(m, "ACCOUNT_LOCK", no_lock), \
+                 patch.object(m, "_secure_runtime_json", side_effect=lambda path: records[path]):
+                return m._assert_runtime_health(now)
+        check(risk, [])
+        check(risk, [{"status": "RELEASED"}])
+        for bad_risk in ({k: v for k, v in risk.items() if k != "tripped"},
+                         dict(risk, tripped=None), dict(risk, tripped=0)):
+            with self.subTest(risk=bad_risk):
+                with self.assertRaises(ValueError):
+                    check(bad_risk, [])
+        for entries in ([None], [1], [{"status": "PENDING"}], [{}]):
+            with self.subTest(entries=entries):
+                with self.assertRaises(ValueError):
+                    check(risk, entries)
+
     def test_collector_rejects_stale_future_missing_or_mixed_generation_evidence(self):
         now = 1793596500
         captured = datetime.fromtimestamp(now - 1, timezone.utc).isoformat()

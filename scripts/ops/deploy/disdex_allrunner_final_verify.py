@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Read-only verification for remaining all-runner task stages and final audit."""
 from __future__ import annotations
-import argparse,json,os,subprocess,time
+import argparse,json,math,os,subprocess,time
+from datetime import datetime, timezone
 from pathlib import Path
 
 MAIN="7688ed7c93a1918d8b44837339b7da5584a868f5"
@@ -60,13 +61,29 @@ def readj(path):
 def shared_health():
     req(os.path.realpath(CURRENT)==str(BASE/MAIN),"CURRENT_SHA_MISMATCH")
     k=readj(KILL);req(k.get("active") is False,"KILL_SWITCH_ACTIVE")
-    r=readj(RISK);req(r.get("sourceComplete") is True and r.get("tripped") is not True,"SHARED_RISK_BAD")
+    now=int(time.time()*1000)
+    r=readj(RISK);req(r.get("sourceComplete") is True and r.get("tripped") is False,"SHARED_RISK_BAD")
+    updated=r.get("updatedAt")
+    req(r.get("utcDay")==datetime.fromtimestamp(now/1000,timezone.utc).date().isoformat()
+        and type(updated) in (int,float) and -1000 <= now-updated <= 15*60_000,
+        "SHARED_RISK_STALE_OR_WRONG_UTC_DAY")
+    limits=[r[k] for k in ("maximumLossPct","dailyLossLimit","maxDailyLossPct","dailyLossLimitPct")
+            if k in r and r[k] is not None]
+    req(bool(limits),"SHARED_RISK_LIMIT_MISSING")
+    for value in limits:
+        try:
+            req(not isinstance(value,bool),"SHARED_RISK_LIMIT_INVALID")
+            number=float(value)
+        except (TypeError,ValueError):
+            raise RuntimeError("SHARED_RISK_LIMIT_INVALID") from None
+        req(math.isfinite(number) and (abs(number-0.075)<1e-9 or abs(number-7.5)<1e-9),
+            "SHARED_RISK_LIMIT_MISMATCH")
     m=readj(MARGIN);req(m.get("stage")=="HEALTHY" and m.get("ordersAllowed") is True,"MARGIN_BAD")
-    now=int(time.time()*1000);checked=m.get("checkedAt")
+    checked=m.get("checkedAt")
     req(type(checked) in (int,float) and -1000 <= now-checked <= 15*60_000,"MARGIN_STALE")
     p=readj(PENDING);entries=p.get("entries")
-    req(isinstance(entries,list),"PENDING_INVALID")
-    req(not any(isinstance(e,dict) and str(e.get("status","")).upper()!="RELEASED" for e in entries),
+    req(isinstance(entries,list) and all(isinstance(e,dict) for e in entries),"PENDING_INVALID")
+    req(not any(str(e.get("status","")).upper()!="RELEASED" for e in entries),
         "PENDING_ACTIVE")
 
 def validate_flat_signed_get(value, now_ms):

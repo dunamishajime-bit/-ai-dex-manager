@@ -142,8 +142,11 @@ def validate_shared_safety():
     validate_shared_risk(risk, int(time.time() * 1000))
     margin=read_json(MARGIN)
     require(margin.get("stage")=="HEALTHY" and margin.get("ordersAllowed") is True,"MARGIN_BAD")
-    entries=read_json(PENDING).get("entries"); require(isinstance(entries,list),"PENDING_INVALID")
-    require(not any(isinstance(e,dict) and str(e.get("status","")).upper()!="RELEASED" for e in entries),"PENDING_ACTIVE")
+    checked=margin.get("checkedAt"); now=int(time.time()*1000)
+    require(type(checked) in (int,float) and -1000 <= now-checked <= 15*60_000,"MARGIN_STALE")
+    entries=read_json(PENDING).get("entries")
+    require(isinstance(entries,list) and all(isinstance(e,dict) for e in entries),"PENDING_INVALID")
+    require(not any(str(e.get("status","")).upper()!="RELEASED" for e in entries),"PENDING_ACTIVE")
 
 def systemctl(*args):
     p=subprocess.run(["systemctl",*args],capture_output=True,text=True,timeout=30)

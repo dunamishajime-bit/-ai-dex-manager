@@ -283,7 +283,7 @@ def _risk_is_fresh(risk: dict, now_ms: int) -> bool:
 
 def _assert_runtime_health(now_ms: int) -> tuple[dict, list[dict]]:
     risk = _secure_runtime_json(RISK)
-    if risk.get("sourceComplete") is not True or risk.get("tripped") is True:
+    if risk.get("sourceComplete") is not True or risk.get("tripped") is not False:
         raise ValueError("SHARED_RISK_NOT_HEALTHY")
     if not _risk_is_fresh(risk, now_ms):
         raise ValueError("SHARED_RISK_STALE_OR_WRONG_UTC_DAY")
@@ -302,10 +302,9 @@ def _assert_runtime_health(now_ms: int) -> tuple[dict, list[dict]]:
         raise ValueError("SHARED_KILL_SWITCH_ACTIVE")
     pending = _secure_runtime_json(PENDING)
     entries = pending.get("entries")
-    if not isinstance(entries, list):
+    if not isinstance(entries, list) or any(not isinstance(x, dict) for x in entries):
         raise ValueError("PENDING_EXPOSURE_INVALID")
-    active = [x for x in entries if isinstance(x, dict)
-              and str(x.get("status", "")).upper() != "RELEASED"]
+    active = [x for x in entries if str(x.get("status", "")).upper() != "RELEASED"]
     if active:
         raise ValueError("PENDING_EXPOSURE_ACTIVE")
     if ACCOUNT_LOCK.exists() or ACCOUNT_LOCK.is_symlink():
