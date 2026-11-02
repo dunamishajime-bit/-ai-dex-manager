@@ -8,6 +8,7 @@ import {
   buildSupervisorHeartbeat,
   atomicJson,
   validateSafetySnapshots,
+  unsupportedEvidenceResult,
 } from "../scripts/ops/root/disdex-runner-health-snapshot-v2.mjs";
 
 const SHA="4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81";
@@ -130,4 +131,12 @@ test("runner with failed shared safety cannot be shown LIVE or order-ready",()=>
   assert.equal(hb.mode,"BLOCKED");
   assert.equal(hb.newOrdersAllowed,false);
   assert.equal(hb.lastTickAt,NOW-2_000);
+});
+
+test("unsupported legacy evidence is BLOCKED, never a successful LIVE audit",()=>{
+  const result=unsupportedEvidenceResult("V12_V4");
+  assert.equal(result.status,"BLOCKED");
+  assert.equal(result.reason,"RUNNER_TICK_EVIDENCE_NOT_SUPPORTED");
+  assert.equal(result.newOrdersAllowed,false);
+  assert.equal(result.tradingMutation,0);
 });
