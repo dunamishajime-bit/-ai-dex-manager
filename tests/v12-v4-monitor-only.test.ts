@@ -79,14 +79,17 @@ test("monitor-only accepts a fresh flat read-only cycle without granting orders"
 test("a completed decision remains order-blocked but records a real tick while kill switch is active", async () => {
   const result=evaluateV4MonitorCompletedDecision(snapshot({killSwitch:{active:true}}),"V4_KILL_SWITCH_ACTIVE");
   assert.equal(result.status,"blocked");
-  assert.equal(result.reason,"V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE");
+  assert.equal(result.reason,"V4_MONITOR_ENTRY_SAFETY_BLOCKED:V4_KILL_SWITCH_ACTIVE|V4_KILL_SWITCH_ACTIVE");
   assert.equal(result.orderEnabled,false);
   assert.equal(result.candidateCount,2);
-  assert.equal(result.positionCount,null);
+  assert.equal(result.positionCount,0);
+  assert.equal(result.openOrderCount,0);
+  assert.equal(result.pendingCount,0);
   let tick=false;
   await runV4MonitorCycle({collect:async()=>result,onError:()=>{throw Error("unexpected");},
     publishTick:async()=>{tick=true;},publishHealth:async()=>{},clock:()=>NOW,lastTickAt:null});
   assert.equal(tick,true);
+  assert.throws(()=>evaluateV4MonitorCompletedDecision(snapshot({risk:{...snapshot().risk,updatedAt:NOW-901_000}}),"V4_KILL_SWITCH_ACTIVE"),/SHARED_RISK_STALE/);
   assert.throws(()=>evaluateV4MonitorCompletedDecision(snapshot({decision:{...snapshot().decision,orderEnabled:true}}),"BLOCKED"),/MUTATION_CONTRACT_INVALID/);
   assert.throws(()=>evaluateV4MonitorCompletedDecision(snapshot({decision:undefined}),"BLOCKED"),/DECISION_MISSING/);
   for (const value of [null, "2", undefined]) {

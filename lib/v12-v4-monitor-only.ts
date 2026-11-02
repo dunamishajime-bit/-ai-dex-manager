@@ -124,32 +124,24 @@ function activePositions(rows: JsonRecord[]) {
   });
 }
 
-/** A finished read-only decision can be recorded even when entries are blocked. */
+/** A finished read-only decision can be recorded even when entries are blocked.
+ * Safety blocks never bypass freshness/schema/venue checks: only incomplete reads
+ * suppress the completed-tick marker.
+ */
 export function evaluateV4MonitorCompletedDecision(input: V4MonitorReadOnlySnapshot, entrySafetyError: string | null): V4MonitorResult {
-  if (!entrySafetyError) return validateV4MonitorReadOnlySnapshot(input);
-  const now = Number(input.now);
-  if (!Number.isFinite(now) || now <= 0) throw new Error("V4_MONITOR_TIME_INVALID");
-  if (!input.decision) throw new Error("V4_MONITOR_DECISION_MISSING");
-  const decision = record(input.decision, "DECISION");
-  if (decision.orderEnabled !== false || decision.tradingMutation !== 0 || decision.realOrderEnabledV4 !== 0)
-    throw new Error("V4_MONITOR_DECISION_MUTATION_CONTRACT_INVALID");
-  if (!Array.isArray(decision.errors) || decision.errors.length) throw new Error("V4_MONITOR_DECISION_INCOMPLETE");
-  const candidateCount = decision.candidateCount;
-  if (!Number.isSafeInteger(candidateCount) || candidateCount < 0) throw new Error("V4_MONITOR_CANDIDATE_COUNT_INVALID");
-  const reason = entrySafetyError.replace(/[^A-Za-z0-9_:.-]/g, "_").slice(0, 160);
-  if (!reason) throw new Error("V4_MONITOR_SAFETY_REASON_INVALID");
-  return {status:"blocked",reason:"V4_MONITOR_ENTRY_SAFETY_BLOCKED:"+reason,eventTs:now,
-    candidateCount,orderEnabled:false,positionCount:null,openOrderCount:null,pendingCount:null};
+  return validateV4MonitorReadOnlySnapshot(input, entrySafetyError);
 }
 
-export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapshot): V4MonitorResult {
+export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapshot, entrySafetyError: string | null = null): V4MonitorResult {
   const now = Number(input.now);
   if (!Number.isFinite(now) || now <= 0) throw new Error("V4_MONITOR_TIME_INVALID");
 
+  const safetyReasons: string[] = [];
   const risk = record(input.risk, "SHARED_RISK");
-  if (risk.sourceComplete !== true || risk.tripped !== false) {
-    throw new Error("V4_MONITOR_SHARED_RISK_NOT_HEALTHY");
+  if (risk.sourceComplete !== true || typeof risk.tripped !== "boolean") {
+    throw new Error("V4_MONITOR_SHARED_RISK_INVALID");
   }
+  if (risk.tripped === true) safetyReasons.push("V4_SHARED_RISK_TRIPPED");
   if (risk.maximumLossPct !== 7.5) throw new Error("V4_MONITOR_SHARED_RISK_LIMIT_INVALID");
   if (risk.utcDay !== new Date(now).toISOString().slice(0, 10)) {
     throw new Error("V4_MONITOR_SHARED_RISK_WRONG_UTC_DAY");
@@ -157,13 +149,17 @@ export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapsh
   fresh(risk.updatedAt, now, "SHARED_RISK");
 
   const margin = record(input.margin, "MARGIN_GUARD");
-  if (margin.stage !== "HEALTHY" || margin.ordersAllowed !== true) {
-    throw new Error("V4_MONITOR_MARGIN_GUARD_NOT_HEALTHY");
+  if (typeof margin.stage !== "string" || typeof margin.ordersAllowed !== "boolean") {
+    throw new Error("V4_MONITOR_MARGIN_GUARD_INVALID");
   }
   fresh(margin.checkedAt, now, "MARGIN_GUARD");
+  if (margin.stage !== "HEALTHY" || margin.ordersAllowed !== true) {
+    safetyReasons.push("V4_MARGIN_GUARD_BLOCKED");
+  }
 
   const kill = record(input.killSwitch, "KILL_SWITCH");
-  if (kill.active !== false) throw new Error("V4_MONITOR_KILL_SWITCH_NOT_PROVEN_INACTIVE");
+  if (typeof kill.active !== "boolean") throw new Error("V4_MONITOR_KILL_SWITCH_INVALID");
+  if (kill.active === true) safetyReasons.push("V4_KILL_SWITCH_ACTIVE");
 
   const pending = record(input.pending, "PENDING");
   if (pending.schema !== "disdex-pending-exposure/v1"
@@ -175,7 +171,7 @@ export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapsh
   const activePending = pending.entries.filter(
     (entry: JsonRecord) => String(entry?.status || "").toUpperCase() !== "RELEASED",
   );
-  if (activePending.length) throw new Error("V4_MONITOR_PENDING_NOT_EMPTY:" + activePending.length);
+  if (activePending.length) safetyReasons.push("V4_PENDING_NOT_EMPTY:" + activePending.length);
 
   if (!Array.isArray(input.positions) || !Array.isArray(input.openOrders)) {
     throw new Error("V4_MONITOR_VENUE_SNAPSHOT_INVALID");
@@ -196,9 +192,17 @@ export function validateV4MonitorReadOnlySnapshot(input: V4MonitorReadOnlySnapsh
   // Monitor-only has no independent ownership graph. Non-flat venue state must
   // be handled by the separate STOP/gross ownership attestation before LIVE.
   if (positions.length || openOrders.length) {
+    safetyReasons.push("V4_NONFLAT_REQUIRES_INDEPENDENT_OWNERSHIP_PROOF");
+  }
+  if (entrySafetyError) {
+    const reason = entrySafetyError.replace(/[^A-Za-z0-9_:.-]/g, "_").slice(0, 160);
+    if (!reason) throw new Error("V4_MONITOR_SAFETY_REASON_INVALID");
+    safetyReasons.unshift(reason);
+  }
+  if (safetyReasons.length) {
     return {
       status: "blocked",
-      reason: "V4_MONITOR_NONFLAT_REQUIRES_INDEPENDENT_OWNERSHIP_PROOF",
+      reason: "V4_MONITOR_ENTRY_SAFETY_BLOCKED:" + safetyReasons.join("|").slice(0, 360),
       eventTs: now,
       candidateCount,
       orderEnabled: false,
