@@ -208,11 +208,15 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         write_runner_tick_heartbeat(
             runner_id="V52",
             runtime_sha=runtime_sha,
+            expected_sha=runtime_sha,
             service_unit=f"disdex-v52-aster-only@{runtime_sha}.service",
+            main_pid=os.getpid(),
+            working_directory=str(Path.cwd().resolve()),
             tick_started_at=tick_started_at,
             tick_completed_at=base.now_ms(),
             status=status,
             reason=reason,
+            new_orders_allowed=bool(getattr(self, "_tick_new_orders_allowed", False)),
             counters={"ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0},
         )
 
@@ -1258,6 +1262,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     newOrdersAllowed=False,
                 )
             return
+        self._tick_new_orders_allowed = True
         if not self.state.get("v11Attempted") and base.clock("10:30:00") <= sec <= base.clock("10:30:20"):
             gross, snapshot = self.available_slot_gross(V11_SLOT)
             self.v11_notional = gross * snapshot["equityUsd"]
@@ -1343,6 +1348,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def run(self, daemon: bool) -> None:
         started_once = False
         while not self.stop_requested:
+            self._tick_new_orders_allowed = False
             defer_until = int(getattr(self, "_rate_budget_defer_until_ms", 0))
             if defer_until > base.now_ms():
                 time.sleep(max(0, defer_until - base.now_ms()) / 1000.0)
@@ -1391,6 +1397,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                         started_once = True
                     self.tick(prepared)
                 except Exception as error:
+                    self._tick_new_orders_allowed = False
                     tick_status = "held"
                     tick_reason = str(error)
                     self.log("v52-tick-error", error=str(error))

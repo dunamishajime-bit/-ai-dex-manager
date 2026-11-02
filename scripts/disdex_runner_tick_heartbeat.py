@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
-SCHEMA = "disdex-runner-tick-heartbeat/v1"
+SCHEMA = "disdex-runner-tick/v1"
 DEFAULT_ROOT = Path("/var/lib/disdex/runner-health")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
 RUNNER_RE = re.compile(r"^[A-Za-z0-9_]+$")
@@ -29,7 +29,8 @@ def _positive_int(value: Any, label: str) -> int:
 def runner_tick_heartbeat_path(root: Path | str, runner_id: str) -> Path:
     if not RUNNER_RE.fullmatch(runner_id):
         raise ValueError("RUNNER_TICK_HEARTBEAT_RUNNER_ID_INVALID")
-    return Path(root) / "ticks" / f"{runner_id}.json"
+    slug = runner_id.lower().replace("_", "-")
+    return Path(root) / "ticks" / f"{slug}.json"
 
 
 def _ensure_heartbeat_directory(path: Path) -> None:
@@ -56,22 +57,36 @@ def write_runner_tick_heartbeat(
     status: str,
     reason: str = "",
     counters: Mapping[str, Any] | None = None,
+    new_orders_allowed: bool = False,
+    expected_sha: str | None = None,
+    main_pid: int | None = None,
+    working_directory: str | None = None,
     root: Path | str | None = None,
 ) -> dict[str, Any]:
     if not RUNNER_RE.fullmatch(runner_id):
         raise ValueError("RUNNER_TICK_HEARTBEAT_RUNNER_ID_INVALID")
+    runtime_sha = runtime_sha.lower()
     if not SHA_RE.fullmatch(runtime_sha):
         raise ValueError("RUNNER_TICK_HEARTBEAT_SHA_INVALID")
-    if service_unit != service_unit.strip() or not service_unit.endswith(f"@{runtime_sha.lower()}.service"):
+    expected = (expected_sha or runtime_sha).lower()
+    if not SHA_RE.fullmatch(expected) or expected != runtime_sha:
+        raise ValueError("RUNNER_TICK_HEARTBEAT_EXPECTED_SHA_INVALID")
+    if service_unit != service_unit.strip() or not service_unit.endswith(f"@{runtime_sha}.service"):
         raise ValueError("RUNNER_TICK_HEARTBEAT_SERVICE_UNIT_INVALID")
     if not isinstance(status, str) or not status.strip():
         raise ValueError("RUNNER_TICK_HEARTBEAT_STATUS_INVALID")
     if not isinstance(reason, str):
         raise ValueError("RUNNER_TICK_HEARTBEAT_REASON_INVALID")
+    if not isinstance(new_orders_allowed, bool):
+        raise ValueError("RUNNER_TICK_HEARTBEAT_ORDER_PERMISSION_INVALID")
     started = _positive_int(tick_started_at, "STARTED_AT")
     completed = _positive_int(tick_completed_at, "COMPLETED_AT")
     if completed < started:
         raise ValueError("RUNNER_TICK_HEARTBEAT_TIME_ORDER_INVALID")
+    pid = _positive_int(main_pid if main_pid is not None else os.getpid(), "MAIN_PID")
+    cwd = str(Path(working_directory or Path.cwd()).resolve())
+    if not cwd or not Path(cwd).is_absolute():
+        raise ValueError("RUNNER_TICK_HEARTBEAT_WORKING_DIRECTORY_INVALID")
     counters = counters or {}
     orders_sent = _nonnegative_int(counters.get("ordersSent", 0), "ORDERS_SENT")
     cancels_sent = _nonnegative_int(counters.get("cancelsSent", 0), "CANCELS_SENT")
@@ -79,11 +94,16 @@ def write_runner_tick_heartbeat(
     marker = {
         "schema": SCHEMA,
         "runnerId": runner_id,
-        "runtimeSha": runtime_sha.lower(),
+        "runtimeSha": runtime_sha,
+        "expectedSha": expected,
         "serviceUnit": service_unit,
+        "mainPid": pid,
+        "workingDirectory": cwd,
         "tickStartedAt": started,
         "tickCompletedAt": completed,
-        "status": status,
+        "outcome": status.strip(),
+        "newOrdersAllowed": new_orders_allowed,
+        "status": status.strip(),
         "reason": reason,
         "ordersSent": orders_sent,
         "cancelsSent": cancels_sent,
