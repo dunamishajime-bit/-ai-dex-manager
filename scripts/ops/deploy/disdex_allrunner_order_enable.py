@@ -35,6 +35,7 @@ RISK=Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN=Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 PENDING=Path("/var/lib/disdex/shared/pending-exposure.json")
 FINAL_VERIFY=Path("/usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_final_verify.py")
+WRAPPER=Path("/usr/local/sbin/disdex-allrunner-order-enable")
 SHA_RE=re.compile(r"^[0-9a-f]{40}$")
 PLAN_RE=re.compile(r"^[0-9a-f]{64}$")
 RUNNER_KEYS=("V12_V4","PENGU_V8","QUALITY102_CAUSAL_V1","V52","FET_BRK48_RESIDUAL","HYPE_TREND_LONG","IDLE_PRIORITY_SHORT")
@@ -234,6 +235,18 @@ def assert_root_private(path, directory=False):
     require((path.is_dir() if directory else path.is_file()) and not path.is_symlink(),"ROOT_PATH_INVALID:"+str(path))
     require(st.st_uid==0 and st.st_mode & 0o022==0,"ROOT_PATH_PERMISSIONS_INVALID:"+str(path))
 
+def validate_root_owned_executor_installation(plan_path):
+    for path in (
+        Path(__file__).resolve(),
+        SCRIPT_DIR/"disdex_owner_approval.py",
+        SCRIPT_DIR/"disdex_deployment_contract.py",
+        FINAL_VERIFY,
+        WRAPPER,
+        plan_path,
+        SOURCE_SHA_FILE,
+    ):
+        assert_root_private(path)
+
 def consume_owner_approval(token,source_sha,plan_hash,owner,consume):
     require(SHA_RE.fullmatch(source_sha) is not None,"SOURCE_SHA_INVALID")
     require(PLAN_RE.fullmatch(plan_hash) is not None,"PLAN_SHA_INVALID")
@@ -244,7 +257,7 @@ def consume_owner_approval(token,source_sha,plan_hash,owner,consume):
 
 def preflight(plan_path,source_sha,plan_hash,owner,token):
     require(os.geteuid()==0,"ROOT_REQUIRED")
-    assert_root_private(plan_path); assert_root_private(SOURCE_SHA_FILE)
+    validate_root_owned_executor_installation(plan_path)
     require(SOURCE_SHA_FILE.read_text(encoding="ascii").strip()==source_sha,"INSTALLED_SOURCE_SHA_MISMATCH")
     require(plan_sha256(plan_path)==plan_hash,"PLAN_SHA_MISMATCH")
     plan=load_plan(plan_path); runners=validate_pin_manifest(read_json(PINS),plan)
