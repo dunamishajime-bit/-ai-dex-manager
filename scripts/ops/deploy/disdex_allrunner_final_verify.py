@@ -107,9 +107,12 @@ def validate_flat_signed_get(value, now_ms):
 def signed_get():
     release=BASE/V4
     cmd=("set -ae; for f in /etc/disdex/disdex-v13d-v11eq-v96.env "
-         "/etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env; "
+         "/etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4.env "
+         f"/etc/disdex/current-runtime/{V4}.env; "
          "do . \"$f\"; done; set +a; "
-         f"exec /usr/bin/node {release}/node_modules/tsx/dist/cli.mjs "
+         "[ \"${DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH:-}\" = "
+         "\"/var/lib/disdex/shared/aster-rate-budget.json\" ] || exit 42; "
+         f"exec /usr/sbin/runuser -u deploy -- /usr/bin/node {release}/node_modules/tsx/dist/cli.mjs "
          "scripts/disdex-aster-readonly-account-diagnostic.ts")
     p=subprocess.run(["/bin/bash","-c",cmd],cwd=release,capture_output=True,text=True,timeout=55)
     req(p.returncode==0,"ASTER_GET_FAILED")

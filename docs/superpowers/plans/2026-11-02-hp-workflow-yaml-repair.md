@@ -22,5 +22,6 @@
 - [ ] Do not claim all-runner heartbeat or tick verification before V4 starts, or when an approved peer is stopped.
 - [ ] Reject missing/non-boolean Shared Risk trip state and malformed pending entries instead of treating them as clear.
 - [ ] Apply strict pending validation, fresh 7.5% Shared Risk, and fresh Margin Guard checks to both the final audit and the order-enable gate.
+- [ ] Load and require the real shared API budget in final signed GET and run it with the deploy account, avoiding root-owned shared-budget writes.
 - [ ] Run the V4 witness tests and all-runner safety tests; keep the witness unwired to production until the remaining runtime and ownership gaps are resolved.
 - [ ] Run the witness, final-verify, and risk-freshness tests in GitHub CI when their sources change.
