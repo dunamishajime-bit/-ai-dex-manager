@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/disdex-allrunner-order-enable.yml"
+      - ".github/workflows/disdex-allrunner-order-enable-install.yml"
       - ".github/workflows/disdex-allrunner-order-enable-ci.yml"
       - "config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json"
       - "scripts/ops/deploy/disdex_allrunner_order_enable.py"
@@ -11,6 +12,7 @@ on:
       - "scripts/ops/root/install-disdex-allrunner-order-enable"
       - "tests/test_allrunner_order_enable.py"
       - "tests/allrunner-order-enable-source.test.mjs"
+      - "tests/allrunner-order-enable-installer-workflow.test.mjs"
   workflow_dispatch:
 
 permissions:
@@ -29,7 +31,7 @@ jobs:
           python3 -m py_compile scripts/ops/deploy/disdex_allrunner_order_enable.py
           python3 -m unittest tests.test_allrunner_order_enable -v
       - name: Workflow and installer source contract
-        run: node --test tests/allrunner-order-enable-source.test.mjs
+        run: node --test tests/allrunner-order-enable-source.test.mjs tests/allrunner-order-enable-installer-workflow.test.mjs
       - name: Canonical plan syntax and hash
         run: |
           python3 -m json.tool config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json >/dev/null
