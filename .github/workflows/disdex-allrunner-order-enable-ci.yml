@@ -1,0 +1,42 @@
+name: DisDex All-Runner Order Enable CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-allrunner-order-enable.yml"
+      - ".github/workflows/disdex-allrunner-order-enable-ci.yml"
+      - "config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json"
+      - "scripts/ops/deploy/disdex_allrunner_order_enable.py"
+      - "scripts/ops/root/disdex-allrunner-order-enable"
+      - "scripts/ops/root/install-disdex-allrunner-order-enable"
+      - "tests/test_allrunner_order_enable.py"
+      - "tests/allrunner-order-enable-source.test.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Python source and unit contract
+        run: |
+          python3 -m py_compile scripts/ops/deploy/disdex_allrunner_order_enable.py
+          python3 -m unittest tests.test_allrunner_order_enable -v
+      - name: Workflow and installer source contract
+        run: node --test tests/allrunner-order-enable-source.test.mjs
+      - name: Canonical plan syntax and hash
+        run: |
+          python3 -m json.tool config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json >/dev/null
+          sha256sum config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json
+      - name: Safety boundary
+        run: |
+          ! grep -Eiq 'create_order|place_order|cancel_order|test_order' scripts/ops/deploy/disdex_allrunner_order_enable.py
+          grep -Fq 'ALL_RUNNERS_ORDER_ENABLE' .github/workflows/disdex-allrunner-order-enable.yml
+          grep -Fq 'orders-enabled true' .github/workflows/disdex-allrunner-order-enable.yml
+          echo TRADING_MUTATION=0

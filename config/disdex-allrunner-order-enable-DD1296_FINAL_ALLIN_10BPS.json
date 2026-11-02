@@ -1,0 +1,49 @@
+{
+  "schema": "disdex-allrunner-order-enable-plan/v1",
+  "repository": "dunamishajime-bit/-ai-dex-manager",
+  "deploymentTarget": "professional-dismanager.net",
+  "operatorTarget": "DD1296_FINAL_ALLIN_10BPS",
+  "operation": "ALL_RUNNERS_ORDER_ENABLE",
+  "scope": "FULL_PROJECT",
+  "ordersEnabled": true,
+  "runnerShaByRunner": {
+    "V12_V4": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+    "PENGU_V8": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+    "QUALITY102_CAUSAL_V1": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+    "V52": "4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81",
+    "FET_BRK48_RESIDUAL": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+    "HYPE_TREND_LONG": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+    "IDLE_PRIORITY_SHORT": "7688ed7c93a1918d8b44837339b7da5584a868f5"
+  },
+  "runtimeTargets": {
+    "V12_V4": "V12_V4_V2_M150_D05_CORE_NATIVE",
+    "PENGU_V8": "DD1296_FINAL_ALLIN_10BPS",
+    "QUALITY102_CAUSAL_V1": "DD1296_FINAL_ALLIN_10BPS",
+    "V52": "DD1296_FINAL_ALLIN_10BPS",
+    "FET_BRK48_RESIDUAL": "DD1296_FINAL_ALLIN_10BPS",
+    "HYPE_TREND_LONG": "DD1296_FINAL_ALLIN_10BPS",
+    "IDLE_PRIORITY_SHORT": "DD1296_FINAL_ALLIN_10BPS"
+  },
+  "activationPaths": {
+    "global": "/var/lib/disdex/shared/operator-activation/current.json",
+    "v4": "/var/lib/disdex/shared/operator-activation/v12-v4-full.json",
+    "q102": "/var/lib/disdex/quality102-causal-v1/operator-activation/current.json",
+    "v52": "/var/lib/disdex/shared/operator-activation/v52-4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81.json"
+  },
+  "activationPathsByRunner": {
+    "V12_V4": "/var/lib/disdex/shared/operator-activation/v12-v4-full.json",
+    "PENGU_V8": "/var/lib/disdex/shared/operator-activation/current.json",
+    "QUALITY102_CAUSAL_V1": "/var/lib/disdex/quality102-causal-v1/operator-activation/current.json",
+    "V52": "/var/lib/disdex/shared/operator-activation/v52-4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81.json",
+    "FET_BRK48_RESIDUAL": "/var/lib/disdex/shared/operator-activation/current.json",
+    "HYPE_TREND_LONG": "/var/lib/disdex/shared/operator-activation/current.json",
+    "IDLE_PRIORITY_SHORT": "/var/lib/disdex/shared/operator-activation/current.json"
+  },
+  "grossCaps": {
+    "crypto": 3.0,
+    "stock": 1.5,
+    "total": 3.5,
+    "sharedCryptoDailyLossPct": 7.5
+  },
+  "acknowledgement": "I_ACK_REAL_MONEY_LIVE_ACTIVATION"
+}

@@ -1,0 +1,204 @@
+name: DisDex All-Runner Order Enable
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: Approved ALL_RUNNERS_ORDER_ENABLE approval UUID
+        required: true
+        type: string
+      target_sha:
+        description: Exact master source SHA approved for this executor
+        required: true
+        type: string
+      plan_sha256:
+        description: Exact SHA-256 of the canonical all-runner order-enable plan
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  order-enable:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Bind exact source and canonical plan
+        id: bind
+        shell: bash
+        env:
+          TARGET_SHA: ${{ inputs.target_sha }}
+          PLAN_SHA256: ${{ inputs.plan_sha256 }}
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$TARGET_SHA" == "$GITHUB_SHA" ]]
+          actual="$(sha256sum config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json | awk '{print $1}')"
+          [[ "$actual" == "$PLAN_SHA256" ]]
+          echo "source_sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+          echo "plan_sha=$actual" >> "$GITHUB_OUTPUT"
+
+      - name: Configure reviewed Production SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/allrunner-order-enable-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/allrunner-order-enable-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/allrunner-order-enable-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/allrunner-order-enable-ssh/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/allrunner-order-enable-ssh/key" >/dev/null
+
+      - name: Verify installed root-owned executor identity before redemption
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          TARGET_SHA: ${{ steps.bind.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          H_HELPER="$(sha256sum scripts/ops/deploy/disdex_allrunner_order_enable.py | awk '{print $1}')"
+          H_OWNER="$(sha256sum scripts/ops/deploy/disdex_owner_approval.py | awk '{print $1}')"
+          H_CONTRACT="$(sha256sum scripts/ops/deploy/disdex_deployment_contract.py | awk '{print $1}')"
+          H_VERIFY="$(sha256sum scripts/ops/deploy/disdex_allrunner_final_verify.py | awk '{print $1}')"
+          H_PLAN="$(sha256sum config/disdex-allrunner-order-enable-DD1296_FINAL_ALLIN_10BPS.json | awk '{print $1}')"
+          H_WRAPPER="$(sha256sum scripts/ops/root/disdex-allrunner-order-enable | awk '{print $1}')"
+          for x in "$H_HELPER" "$H_OWNER" "$H_CONTRACT" "$H_VERIFY" "$H_PLAN" "$H_WRAPPER"; do
+            [[ "$x" =~ ^[0-9a-f]{64}$ ]]
+          done
+          ssh -T -i "$RUNNER_TEMP/allrunner-order-enable-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-order-enable-ssh/known_hosts" \
+            -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
+            "set -eu
+             test \"\$(cat /usr/local/lib/disdex-allrunner-order-enable/source-sha)\" = '$TARGET_SHA'
+             printf '%s  %s\n' '$H_HELPER' /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_order_enable.py \
+               '$H_OWNER' /usr/local/lib/disdex-allrunner-order-enable/disdex_owner_approval.py \
+               '$H_CONTRACT' /usr/local/lib/disdex-allrunner-order-enable/disdex_deployment_contract.py \
+               '$H_VERIFY' /usr/local/lib/disdex-allrunner-order-enable/disdex_allrunner_final_verify.py \
+               '$H_PLAN' /usr/local/lib/disdex-allrunner-order-enable/order-enable-plan.json \
+               '$H_WRAPPER' /usr/local/sbin/disdex-allrunner-order-enable | /usr/bin/sha256sum -c -"
+
+      - name: Redeem separate ALL_RUNNERS_ORDER_ENABLE approval
+        id: redeem
+        shell: bash
+        env:
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          TARGET_SHA: ${{ steps.bind.outputs.source_sha }}
+          PLAN_SHA256: ${{ steps.bind.outputs.plan_sha }}
+          RUN_ID: ${{ github.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL_ID" =~ ^[0-9a-fA-F-]{36}$ && "$RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          python3 - <<'PY'
+          import json,os,pathlib,urllib.request
+          body=json.dumps({
+            "action":"redeem",
+            "approval_id":os.environ["APPROVAL_ID"],
+            "target_sha":os.environ["TARGET_SHA"],
+            "plan_sha256":os.environ["PLAN_SHA256"],
+            "run_id":os.environ["RUN_ID"],
+            "operation":"ALL_RUNNERS_ORDER_ENABLE",
+            "scope":"FULL_PROJECT",
+          }).encode()
+          req=urllib.request.Request(
+            "https://professional-dismanager.net/api/system/deploy-approval",
+            data=body,method="POST",
+            headers={"Authorization":"Bearer "+os.environ["BRIDGE"],"Content-Type":"application/json"},
+          )
+          with urllib.request.urlopen(req,timeout=15) as response:
+            data=json.load(response)
+          approval=data.get("approval") or {}
+          assert data.get("ok") is True
+          assert approval.get("operation")=="ALL_RUNNERS_ORDER_ENABLE"
+          assert approval.get("scope")=="FULL_PROJECT"
+          assert approval.get("ordersEnabled") is True
+          assert approval.get("targetSha")==os.environ["TARGET_SHA"]
+          assert approval.get("planSha256")==os.environ["PLAN_SHA256"]
+          token=str(data.get("token") or "")
+          assert token
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          (root/"allrunner-order-enable-token").write_text(token,encoding="ascii")
+          print("::add-mask::"+token)
+          PY
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/allrunner-order-enable-owner.pub"
+          cat "$RUNNER_TEMP/allrunner-order-enable-token" |
+            python3 scripts/ops/deploy/disdex_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/allrunner-order-enable-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" \
+              --sha "$TARGET_SHA" --scope FULL_PROJECT \
+              --operator dunamishajime-bit \
+              --plan-sha256 "$PLAN_SHA256" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled true
+
+      - name: Root-owned order-enable preflight
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          TARGET_SHA: ${{ steps.bind.outputs.source_sha }}
+          PLAN_SHA256: ${{ steps.bind.outputs.plan_sha }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          printf '%s' "$(cat "$RUNNER_TEMP/allrunner-order-enable-token")" |
+            ssh -T -i "$RUNNER_TEMP/allrunner-order-enable-ssh/key" \
+              -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-order-enable-ssh/known_hosts" \
+              -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
+              "/usr/local/sbin/disdex-allrunner-order-enable --source-sha $TARGET_SHA --plan-sha256 $PLAN_SHA256 --owner dunamishajime-bit --preflight-readonly --read-approval-stdin"
+
+      - name: Execute activation-only order enable
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          TARGET_SHA: ${{ steps.bind.outputs.source_sha }}
+          PLAN_SHA256: ${{ steps.bind.outputs.plan_sha }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          printf '%s' "$(cat "$RUNNER_TEMP/allrunner-order-enable-token")" |
+            ssh -T -i "$RUNNER_TEMP/allrunner-order-enable-ssh/key" \
+              -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-order-enable-ssh/known_hosts" \
+              -o ConnectTimeout=10 -p "$PORT" "root@$HOST" \
+              "/usr/local/sbin/disdex-allrunner-order-enable --source-sha $TARGET_SHA --plan-sha256 $PLAN_SHA256 --owner dunamishajime-bit --execute --read-approval-stdin"
+
+      - name: Cleanup ephemeral approval and SSH material
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/allrunner-order-enable-ssh" \
+            "$RUNNER_TEMP/allrunner-order-enable-token" \
+            "$RUNNER_TEMP/allrunner-order-enable-owner.pub"
