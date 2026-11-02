@@ -5,6 +5,7 @@ import {
   buildV4DynamicRefreshPlan,
   collectV4DynamicEvidence,
   type V4DynamicRuntimeSnapshot,
+  validateSharedRuntimeMetadata,
 } from "../scripts/ops/root/disdex-v4-dynamic-evidence-refresh";
 
 const SHA = "a".repeat(40);
@@ -56,4 +57,51 @@ test("mixed dynamic generations are rejected instead of being treated as fresh",
     dynamicPayloads: { ...dynamic, signedAsterAccount: { ...dynamic.signedAsterAccount, refreshGeneration: "different-generation" } },
     now: NOW,
   }), /GENERATION_MISMATCH/);
+});
+
+test("shared runtime metadata accepts only the canonical deploy-owned writer contract", () => {
+  assert.equal(validateSharedRuntimeMetadata({
+    path: "/var/lib/disdex/shared/margin-risk/guard-live.json",
+    isSymbolicLink: false,
+    isFile: true,
+    uid: 1001,
+    gid: 1001,
+    mode: 0o660,
+    parentUid: 1001,
+    parentGid: 1001,
+    parentMode: 0o2770,
+  }), true);
+  assert.throws(() => validateSharedRuntimeMetadata({
+    path: "/var/lib/disdex/shared/kill-switch.json",
+    isSymbolicLink: false,
+    isFile: true,
+    uid: 1001,
+    gid: 1001,
+    mode: 0o666,
+    parentUid: 1001,
+    parentGid: 1001,
+    parentMode: 0o2770,
+  }), /METADATA_UNTRUSTED/);
+  assert.throws(() => validateSharedRuntimeMetadata({
+    path: "/var/lib/disdex/shared/kill-switch.json",
+    isSymbolicLink: false,
+    isFile: true,
+    uid: 2002,
+    gid: 1001,
+    mode: 0o600,
+    parentUid: 1001,
+    parentGid: 1001,
+    parentMode: 0o2770,
+  }), /METADATA_UNTRUSTED/);
+  assert.throws(() => validateSharedRuntimeMetadata({
+    path: "/tmp/kill-switch.json",
+    isSymbolicLink: false,
+    isFile: true,
+    uid: 1001,
+    gid: 1001,
+    mode: 0o600,
+    parentUid: 1001,
+    parentGid: 1001,
+    parentMode: 0o2770,
+  }), /PATH_UNTRUSTED/);
 });

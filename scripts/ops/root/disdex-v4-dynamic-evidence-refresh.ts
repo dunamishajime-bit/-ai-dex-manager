@@ -33,6 +33,12 @@ const REFRESH_OUTPUT_PATH = "/var/lib/disdex/v12-v4/evidence-refresh-last.json";
 const MAX_JSON_BYTES = 256 * 1024;
 const DYNAMIC_KEYS = [...EVIDENCE_CLASSES.DYNAMIC] as const;
 const STATIC_KEYS = [...EVIDENCE_CLASSES.STATIC] as const;
+const SHARED_RUNTIME_PATHS = new Set([
+  "/var/lib/disdex/shared/crypto-daily-risk.json",
+  "/var/lib/disdex/shared/margin-risk/guard-live.json",
+  "/var/lib/disdex/shared/kill-switch.json",
+  "/var/lib/disdex/shared/pending-exposure.json",
+]);
 const evidenceFileName = (key: string) => (EVIDENCE_FILE_NAMES as Record<string, string>)[key];
 
 type JsonRecord = Record<string, any>;
@@ -145,6 +151,32 @@ export function validateV4RefreshLease(input: { lease: unknown; sha: string; now
     throw new Error("V4_REFRESH_LEASE_EXPIRED_OR_FUTURE");
   }
   return lease as JsonRecord;
+}
+
+export function validateSharedRuntimeMetadata(input: {
+  path: string;
+  isSymbolicLink: boolean;
+  isFile: boolean;
+  uid: number;
+  gid: number;
+  mode: number;
+  parentUid: number;
+  parentGid: number;
+  parentMode: number;
+}) {
+  if (!SHARED_RUNTIME_PATHS.has(input.path)) {
+    throw new Error("V4_DYNAMIC_REFRESH_SHARED_RUNTIME_PATH_UNTRUSTED");
+  }
+  const mode = input.mode & 0o7777;
+  const parentMode = input.parentMode & 0o7777;
+  if (input.isSymbolicLink || !input.isFile
+      || input.uid !== input.parentUid
+      || input.gid !== input.parentGid
+      || ![0o600, 0o660].includes(mode)
+      || (parentMode & 0o007) !== 0) {
+    throw new Error("V4_DYNAMIC_REFRESH_SHARED_RUNTIME_METADATA_UNTRUSTED");
+  }
+  return true as const;
 }
 
 export type V4DynamicRuntimeSnapshot = {
@@ -395,10 +427,28 @@ export function buildV4DynamicRefreshPlan(input: {
   } as const;
 }
 
-async function readTrustedJson(path: string, requiredUid?: number): Promise<JsonRecord> {
+async function readTrustedJson(path: string, requiredUid?: number, sharedRuntime = false): Promise<JsonRecord> {
   const stats = await lstat(path);
-  if (stats.isSymbolicLink() || !stats.isFile() || (stats.mode & 0o022) !== 0) throw new Error(`V4_DYNAMIC_REFRESH_FILE_UNTRUSTED:${path}`);
-  if (requiredUid !== undefined && stats.uid !== requiredUid) throw new Error(`V4_DYNAMIC_REFRESH_FILE_OWNER_INVALID:${path}`);
+  if (sharedRuntime) {
+    const parent = await lstat(dirname(path));
+    if (parent.isSymbolicLink() || !parent.isDirectory()) {
+      throw new Error(`V4_DYNAMIC_REFRESH_SHARED_RUNTIME_PARENT_UNTRUSTED:${path}`);
+    }
+    validateSharedRuntimeMetadata({
+      path,
+      isSymbolicLink: stats.isSymbolicLink(),
+      isFile: stats.isFile(),
+      uid: stats.uid,
+      gid: stats.gid,
+      mode: stats.mode,
+      parentUid: parent.uid,
+      parentGid: parent.gid,
+      parentMode: parent.mode,
+    });
+  } else {
+    if (stats.isSymbolicLink() || !stats.isFile() || (stats.mode & 0o022) !== 0) throw new Error(`V4_DYNAMIC_REFRESH_FILE_UNTRUSTED:${path}`);
+    if (requiredUid !== undefined && stats.uid !== requiredUid) throw new Error(`V4_DYNAMIC_REFRESH_FILE_OWNER_INVALID:${path}`);
+  }
   const raw = await readFile(path, "utf8");
   if (Buffer.byteLength(raw, "utf8") > MAX_JSON_BYTES) throw new Error(`V4_DYNAMIC_REFRESH_FILE_OVERSIZED:${path}`);
   return assertRecord(JSON.parse(raw), path);
@@ -435,10 +485,10 @@ async function readStaticPayloads(evidenceRoot: string) {
 
 async function readRuntimeSnapshot() {
   return {
-    sharedRisk: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_SHARED_RISK_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json"),
-    marginGuard: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_MARGIN_PATH || "/var/lib/disdex/shared/margin-risk/guard-live.json"),
-    killSwitch: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json"),
-    pendingExposure: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_PENDING_PATH || "/var/lib/disdex/shared/pending-exposure.json"),
+    sharedRisk: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_SHARED_RISK_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json", undefined, true),
+    marginGuard: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_MARGIN_PATH || "/var/lib/disdex/shared/margin-risk/guard-live.json", undefined, true),
+    killSwitch: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json", undefined, true),
+    pendingExposure: await readTrustedJson(process.env.DISDEX_V4_DYNAMIC_PENDING_PATH || "/var/lib/disdex/shared/pending-exposure.json", undefined, true),
   } satisfies V4DynamicRuntimeSnapshot;
 }
 
