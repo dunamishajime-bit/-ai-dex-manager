@@ -1344,7 +1344,15 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
 
     def preflight(self, read_only: bool = False) -> dict:
         if self.live:
-            if not base.bool_env("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", False): raise RuntimeError("V52 LIVE requires DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true")
+            monitor_only = base.bool_env("DISDEX_V52_MONITOR_ONLY", False)
+            live_enabled = base.bool_env("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", False)
+            if monitor_only:
+                if live_enabled:
+                    raise RuntimeError("V52 monitor-only requires LIVE_EXECUTION_ENABLED=false")
+                if not read_only:
+                    raise RuntimeError("V52 monitor-only permits read-only preflight only")
+            elif not live_enabled:
+                raise RuntimeError("V52 LIVE requires DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true")
             if os.getenv("DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT") != LIVE_ACK: raise RuntimeError(f"V52 LIVE requires acknowledgement {LIVE_ACK}")
         if read_only:
             if not self.state_root.is_dir():
