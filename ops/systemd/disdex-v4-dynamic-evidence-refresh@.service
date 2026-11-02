@@ -22,6 +22,6 @@ ProtectHome=read-only
 PrivateTmp=true
 ReadWritePaths=/etc/disdex/v12-v4-evidence /var/lib/disdex/v12-v4
 UMask=0077
-CapabilityBoundingSet=
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
 RestrictAddressFamilies=AF_INET AF_INET6
 TimeoutStartSec=5min

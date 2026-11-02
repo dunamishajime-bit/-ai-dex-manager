@@ -24,6 +24,11 @@ test("refresh service loads the canonical root-owned Aster credentials", () => {
   assert.doesNotMatch(service, /EnvironmentFile=-\/etc\/disdex\/aster\.env/);
 });
 
+test("refresh service retains only the capability needed to traverse the protected release root", () => {
+  assert.match(service, /^CapabilityBoundingSet=CAP_DAC_READ_SEARCH$/m);
+  assert.doesNotMatch(service, /^CapabilityBoundingSet=$/m);
+});
+
 test("refresh timer is periodic and keeps monitor separate", () => {
   assert.match(timer, /OnCalendar=\*:0\/30/);
   assert.match(timer, /Unit=disdex-v4-dynamic-evidence-refresh@%i\.service/);
