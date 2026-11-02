@@ -11,8 +11,10 @@ import hashlib
 import json
 from pathlib import Path
 import stat
+import time
 
 from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO, SHA, validate_order_permission
+from disdex_v4_venue_witness import collect_v4_venue_evidence
 from disdex_unified_root_gate import (
     EXECUTION_ACTIVATION_SCHEMA, ZERO_EFFECTS, SHARED_RISK_SCOPE,
     _assert_execution_root, _atomic_json, _unit_for_runner,
@@ -111,9 +113,13 @@ def runtime_activation(activation, sha):
 class V4RootExecutor:
     """V4 only. Shared Risk implementation is not widened or bypassed."""
 
-    def __init__(self, common, *, runtime_approval=RUNTIME_APPROVAL):
+    def __init__(self, common, *, runtime_approval=RUNTIME_APPROVAL,
+                 witness_collector=collect_v4_venue_evidence,
+                 sleeper=time.sleep):
         self.common = common
         self.runtime_approval = Path(runtime_approval)
+        self.witness_collector = witness_collector
+        self.sleeper = sleeper
 
     def execute(self, args, token):
         c = self.common
@@ -187,9 +193,17 @@ class V4RootExecutor:
             paths.activation_dir / V4_SCOPE / (args.sha + ".json"),
             root_uid=c.root_uid)
         validate_v4_activation(activation, args, desired, plan_hash, c.clock())
+        # Generate the pre-cutover witness from the signed read-only refresh
+        # path immediately before any systemd or pin mutation.  The legacy V4
+        # baseline may be failed/PID 0 during this controlled recovery, so the
+        # witness must not pretend that the old V4 runtime was healthy.  All
+        # peer, venue, risk, STOP, pending, and zero-effect checks remain
+        # mandatory in the collector and validator.
         before = _validate_venue_evidence(
-            read_root_json(paths.venue_before, root_uid=c.root_uid),
+            self.witness_collector(
+                sha=args.sha, expected_pins=pins, phase="before"),
             now=c.clock(), label="before", require_v4_runtime=False)
+        _atomic_json(paths.venue_before, before, root_uid=c.root_uid)
         old_sha = pins[V4_RUNNER]
         old_unit = _unit_for_runner(V4_RUNNER, old_sha)
         new_unit = _unit_for_runner(V4_RUNNER, args.sha)
@@ -263,7 +277,21 @@ class V4RootExecutor:
                 "scope": V4_SCOPE, "oldSha": old_sha, "newSha": args.sha,
                 "oldUnit": old_unit, "newUnit": new_unit,
             }, root_uid=c.root_uid)
-            observed = c._audit(expected, new_unit, old_unit, before, cycles=3)
+            observed = []
+            previous_captured = before["capturedAt"]
+            for cycle in range(3):
+                self.sleeper(1)
+                after = _validate_venue_evidence(
+                    self.witness_collector(
+                        sha=args.sha, expected_pins=expected, phase="after"),
+                    now=c.clock(), label=f"after-{cycle + 1}",
+                    baseline=before,
+                )
+                if after["capturedAt"] <= previous_captured:
+                    raise RuntimeError("V4 post-cutover witness did not advance")
+                previous_captured = after["capturedAt"]
+                _atomic_json(paths.venue_after, after, root_uid=c.root_uid)
+                observed.append(after)
             receipt = {
                 "schema": "disdex-unified-deploy-receipt/v1",
                 "status": "V4_LIVE_CUTOVER_VERIFIED",

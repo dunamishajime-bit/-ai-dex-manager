@@ -14,6 +14,10 @@ on:
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
       - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_v4_venue_witness.py'
+      - 'scripts/ops/deploy/disdex_v4_static_evidence.py'
+      - 'tests/test_disdex_v4_venue_witness.py'
+      - 'tests/test_disdex_v4_static_evidence.py'
       - 'scripts/ops/deploy/disdex_v4_live_readiness.py'
       - 'tests/test_disdex_v4_live_readiness.py'
       - 'scripts/ops/root/disdex-idle-residual-flat-stale-repair.py'
@@ -41,6 +45,10 @@ on:
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
       - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_v4_venue_witness.py'
+      - 'scripts/ops/deploy/disdex_v4_static_evidence.py'
+      - 'tests/test_disdex_v4_venue_witness.py'
+      - 'tests/test_disdex_v4_static_evidence.py'
       - 'scripts/ops/deploy/disdex_v4_live_readiness.py'
       - 'tests/test_disdex_v4_live_readiness.py'
       - 'scripts/ops/root/disdex-idle-residual-flat-stale-repair.py'
@@ -77,6 +85,10 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_disdex_idle_flat_stale_recovery.py -v
       - name: Read-only live-readiness inventory fail-closed test
         run: python3 -m unittest discover -s tests -p test_disdex_v4_live_readiness.py -v
+      - name: V4 fresh venue witness contract tests
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_venue_witness.py -v
+      - name: V4 immutable static evidence contract tests
+        run: python3 -m unittest discover -s tests -p test_disdex_v4_static_evidence.py -v
       - name: V4 exact-scope rollback and owner approval tests
         run: python3 -m unittest discover -s tests -p test_disdex_v4_root_cutover.py -v
       - name: Root helper installer contract tests
