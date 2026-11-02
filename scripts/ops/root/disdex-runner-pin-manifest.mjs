@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
-export const RUNNER_PIN_MANIFEST_SCHEMA = "disdex-runner-pin-manifest/v1";
+export const RUNNER_PIN_MANIFEST_SCHEMA = "disdex-runner-pin-manifest/v2";
 
 export const RUNNER_PIN_IDS = Object.freeze([
   "V12_V4",
@@ -41,6 +42,13 @@ const STOP_OWNERS = new Set([
 
 const EVIDENCE_MODES = new Set(["legacy", "tick-v1"]);
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
+const HEALTH_ROOT = "/var/lib/disdex/runner-health/heartbeats/";
+const TICK_ROOT = "/var/lib/disdex/runner-health/ticks/";
+
+function canonicalEvidencePath(value, root) {
+  if (typeof value !== "string" || !value.startsWith(root) || value.includes("..") || value.includes("//")) return false;
+  return value.length > root.length && value.endsWith(".json");
+}
 
 export function serviceUnitForPin(runnerId, sha) {
   if (!Object.hasOwn(SERVICE_PREFIXES, runnerId)) throw new Error("RUNNER_PIN_UNKNOWN");
@@ -79,6 +87,8 @@ export function validateRunnerPinManifest(input) {
     if (!EVIDENCE_MODES.has(record.evidenceMode)) validationError(errors, runnerId, "EVIDENCE_MODE_INVALID");
     if (record.releaseRootSymlink === true) validationError(errors, runnerId, "RELEASE_ROOT_SYMLINK");
     if (!STOP_OWNERS.has(record.stopOwner)) validationError(errors, runnerId, "STOP_OWNER_INVALID");
+    if (!canonicalEvidencePath(record.healthPath, HEALTH_ROOT)) validationError(errors, runnerId, "HEALTH_PATH_INVALID");
+    if (!canonicalEvidencePath(record.tickPath, TICK_ROOT)) validationError(errors, runnerId, "TICK_PATH_INVALID");
     if (SHA_PATTERN.test(sha)) {
       const expectedUnit = serviceUnitForPin(runnerId, sha);
       if (record.serviceUnit !== expectedUnit) validationError(errors, runnerId, "SERVICE_UNIT_SHA_MISMATCH");
@@ -87,6 +97,27 @@ export function validateRunnerPinManifest(input) {
 
   for (const runnerId of Object.keys(input.runners)) {
     if (!RUNNER_PIN_IDS.includes(runnerId)) validationError(errors, runnerId, "UNKNOWN");
+  }
+
+  const healthOwners = new Map();
+  const tickOwners = new Map();
+  for (const runnerId of RUNNER_PIN_IDS) {
+    const record = input.runners[runnerId];
+    if (!record || typeof record !== "object") continue;
+    if (typeof record.healthPath === "string") {
+      const prior = healthOwners.get(record.healthPath);
+      if (prior) {
+        validationError(errors, runnerId, "HEALTH_PATH_DUPLICATE");
+        validationError(errors, prior, "HEALTH_PATH_DUPLICATE");
+      } else healthOwners.set(record.healthPath, runnerId);
+    }
+    if (typeof record.tickPath === "string") {
+      const prior = tickOwners.get(record.tickPath);
+      if (prior) {
+        validationError(errors, runnerId, "TICK_PATH_DUPLICATE");
+        validationError(errors, prior, "TICK_PATH_DUPLICATE");
+      } else tickOwners.set(record.tickPath, runnerId);
+    }
   }
 
   if (errors.length > 0) return { ok: false, errors };
@@ -118,6 +149,19 @@ export async function loadRunnerPinManifestFromFile(path) {
   let parsed;
   try {
     parsed = JSON.parse(await readFile(path, "utf8"));
+  } catch (error) {
+    throw new Error(`RUNNER_PIN_MANIFEST_READ_FAILED:${error?.code || error?.name || "UNKNOWN"}`);
+  }
+  const result = validateRunnerPinManifest(parsed);
+  if (!result.ok) throw new Error(`RUNNER_PIN_MANIFEST_INVALID:${result.errors.join(",")}`);
+  return result.manifest;
+}
+
+export function loadRunnerPinManifestSyncFromFile(path) {
+  if (typeof path !== "string" || !path.trim()) throw new Error("RUNNER_PIN_MANIFEST_PATH_INVALID");
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(path, "utf8"));
   } catch (error) {
     throw new Error(`RUNNER_PIN_MANIFEST_READ_FAILED:${error?.code || error?.name || "UNKNOWN"}`);
   }

@@ -9,7 +9,9 @@ MANIFEST = ROOT / "scripts" / "ops" / "root" / "disdex-runner-pin-manifest.mjs"
 class RunnerPinManifestContractTest(unittest.TestCase):
     def test_root_manifest_module_exposes_file_loader_and_schema(self):
         source = MANIFEST.read_text(encoding="utf-8")
-        self.assertIn('"disdex-runner-pin-manifest/v1"', source)
+        self.assertIn('"disdex-runner-pin-manifest/v2"', source)
+        self.assertIn("healthPath", source)
+        self.assertIn("tickPath", source)
         self.assertIn("export async function loadRunnerPinManifestFromFile", source)
         self.assertIn("readFile", source)
 

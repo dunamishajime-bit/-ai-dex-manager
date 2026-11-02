@@ -5,8 +5,11 @@ import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
 import { validateRunnerTickHeartbeat } from "./disdex-runner-tick-heartbeat.mjs";
+import { resolveMonitorRunnerPins } from "./disdex-runner-monitor-pins.mjs";
 
 const execFile = promisify(execFileCallback);
+const MONITOR_PINS = resolveMonitorRunnerPins(process.env);
+const canonicalPin = (runnerId) => MONITOR_PINS.runners?.[runnerId] ?? null;
 const SYSTEMCTL = "/usr/bin/systemctl";
 const DEFAULT_EXPECTED_SHA = String(process.env.DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA || "").trim().toLowerCase();
 const DEFAULT_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT || "").trim();
@@ -17,10 +20,12 @@ const TICK_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_TICK_ROOT || `${HEAL
 const KILL_SWITCH_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json").trim();
 const MARGIN_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH || "/var/lib/disdex/shared/margin-risk/guard-live.json").trim();
 const SHARED_RISK_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json").trim();
-const SHARED_RISK_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT || `disdex-shared-crypto-risk@${DEFAULT_EXPECTED_SHA}.service`).trim();
-const SHARED_RISK_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
-const MARGIN_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT || `disdex-v12-v52-margin-guard@${DEFAULT_EXPECTED_SHA}.service`).trim();
-const MARGIN_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
+const SHARED_RISK_CANONICAL_PIN = canonicalPin("SHARED_CRYPTO_RISK");
+const MARGIN_CANONICAL_PIN = canonicalPin("MARGIN_GUARD");
+const SHARED_RISK_UNIT = String(SHARED_RISK_CANONICAL_PIN?.serviceUnit || process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT || `disdex-shared-crypto-risk@${DEFAULT_EXPECTED_SHA}.service`).trim();
+const SHARED_RISK_RELEASE_ROOT = String(SHARED_RISK_CANONICAL_PIN?.releaseRoot || process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
+const MARGIN_UNIT = String(MARGIN_CANONICAL_PIN?.serviceUnit || process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT || `disdex-v12-v52-margin-guard@${DEFAULT_EXPECTED_SHA}.service`).trim();
+const MARGIN_RELEASE_ROOT = String(MARGIN_CANONICAL_PIN?.releaseRoot || process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
 const MARGIN_FRESHNESS_GRACE_MS = 120_000;
 const SHARED_RISK_FRESHNESS_GRACE_MS = 120_000;
 const ASTER_RATE_BUDGET_PATH = configuredPath("DISDEX_HEALTH_SNAPSHOT_RATE_BUDGET_PATH", "/var/lib/disdex/shared/aster-rate-budget.json");
@@ -61,25 +66,38 @@ function targetIdentityReason() {
     return "";
 }
 
-function runnerPin(expectedShaEnv, releaseRootEnv, evidenceModeEnv) {
+function runnerPin(runnerId, expectedShaEnv, releaseRootEnv, evidenceModeEnv) {
+    const canonical = canonicalPin(runnerId);
+    if (canonical) return {
+        expectedSha: canonical.expectedSha,
+        releaseRoot: canonical.releaseRoot,
+        serviceUnit: canonical.serviceUnit,
+        evidenceMode: canonical.evidenceMode,
+        healthPath: canonical.healthPath,
+        tickPath: canonical.tickPath,
+    };
     const evidenceMode = String(process.env[evidenceModeEnv] || "legacy").trim().toLowerCase();
     if (!["legacy", "tick-v1"].includes(evidenceMode)) throw new Error(`${evidenceModeEnv} is invalid`);
     return {
         expectedSha: String(process.env[expectedShaEnv] || DEFAULT_EXPECTED_SHA).trim().toLowerCase(),
         releaseRoot: String(process.env[releaseRootEnv] || DEFAULT_RELEASE_ROOT).trim(),
+        serviceUnit: null,
         evidenceMode,
+        healthPath: null,
+        tickPath: null,
     };
 }
 
-const V12_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_V12_EVIDENCE_MODE");
+const V12_PIN = runnerPin("V12_V4", "DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_V12_EVIDENCE_MODE");
 const V12_MODE = String(process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE || "LEGACY").trim().toUpperCase();
 if (!["LEGACY","V4","DISABLED"].includes(V12_MODE)) throw new Error("V12 health snapshot mode is invalid");
-const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_PENGU_EVIDENCE_MODE");
-const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_V52_EVIDENCE_MODE");
-const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_Q102_EVIDENCE_MODE");
-const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_FET_EVIDENCE_MODE");
-const HYPE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_HYPE_EVIDENCE_MODE");
-const IDLE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_IDLE_EVIDENCE_MODE");
+if (MONITOR_PINS.source === "manifest-v2" && V12_MODE === "LEGACY") throw new Error("V12_LEGACY_MONITOR_CANNOT_USE_V4_RUNNER_PIN");
+const PENGU_PIN = runnerPin("PENGU_V8", "DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_PENGU_EVIDENCE_MODE");
+const V52_PIN = runnerPin("V52", "DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_V52_EVIDENCE_MODE");
+const Q102_PIN = runnerPin("QUALITY102_CAUSAL_V1", "DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_Q102_EVIDENCE_MODE");
+const FET_PIN = runnerPin("FET_BRK48_RESIDUAL", "DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_FET_EVIDENCE_MODE");
+const HYPE_PIN = runnerPin("HYPE_TREND_LONG", "DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_HYPE_EVIDENCE_MODE");
+const IDLE_PIN = runnerPin("IDLE_PRIORITY_SHORT", "DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT", "DISDEX_HEALTH_SNAPSHOT_IDLE_EVIDENCE_MODE");
 
 const V12_RUNNER = V12_MODE === "DISABLED" ? {
     key: "V12_V4",
@@ -90,6 +108,8 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     expectedSha: V12_PIN.expectedSha,
     releaseRoot: V12_PIN.releaseRoot,
     evidenceMode: V12_PIN.evidenceMode,
+    healthPath: V12_PIN.healthPath,
+    tickPath: V12_PIN.tickPath,
     script: "scripts/v12-v4-production-runner.ts",
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-v4/heartbeat.json"),
     heartbeatFile: "v12-v4.json",
@@ -97,10 +117,12 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
 } : V12_MODE === "V4" ? {
     key: "V12_V4",
     runnerId: "V12_V4",
-    unit: `disdex-v12-v4@${V12_PIN.expectedSha}.service`,
+    unit: V12_PIN.serviceUnit || `disdex-v12-v4@${V12_PIN.expectedSha}.service`,
     expectedSha: V12_PIN.expectedSha,
     releaseRoot: V12_PIN.releaseRoot,
     evidenceMode: V12_PIN.evidenceMode,
+    healthPath: V12_PIN.healthPath,
+    tickPath: V12_PIN.tickPath,
     script: "scripts/v12-v4-production-runner.ts",
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-v4/heartbeat.json"),
     heartbeatFile: "v12-v4.json",
@@ -113,6 +135,8 @@ const V12_RUNNER = V12_MODE === "DISABLED" ? {
     expectedSha: V12_PIN.expectedSha,
     releaseRoot: V12_PIN.releaseRoot,
     evidenceMode: V12_PIN.evidenceMode,
+    healthPath: V12_PIN.healthPath,
+    tickPath: V12_PIN.tickPath,
     script: "scripts/disdex-v12-x1-all-live-runner.ts",
     statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"),
     heartbeatFile: "v12-x1-all.json",
@@ -124,10 +148,12 @@ const RUNNERS = [
     {
         key: "PENGU_V8",
         runnerId: "PENGU_V8",
-        unit: `disdex-pengu-dual-ls-v2@${PENGU_PIN.expectedSha}.service`,
+        unit: PENGU_PIN.serviceUnit || `disdex-pengu-dual-ls-v2@${PENGU_PIN.expectedSha}.service`,
         expectedSha: PENGU_PIN.expectedSha,
         releaseRoot: PENGU_PIN.releaseRoot,
         evidenceMode: PENGU_PIN.evidenceMode,
+    healthPath: PENGU_PIN.healthPath,
+    tickPath: PENGU_PIN.tickPath,
         script: "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH", "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"),
         heartbeatFile: "pengu-v8.json",
@@ -137,10 +163,12 @@ const RUNNERS = [
     {
         key: "V52",
         runnerId: "V52",
-        unit: `disdex-v52-aster-only@${V52_PIN.expectedSha}.service`,
+        unit: V52_PIN.serviceUnit || `disdex-v52-aster-only@${V52_PIN.expectedSha}.service`,
         expectedSha: V52_PIN.expectedSha,
         releaseRoot: V52_PIN.releaseRoot,
         evidenceMode: V52_PIN.evidenceMode,
+    healthPath: V52_PIN.healthPath,
+    tickPath: V52_PIN.tickPath,
         script: "scripts/disdex_v52_aster_only_live_engine.py",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH", "/var/lib/disdex/v52-aster-only/runner-live.json"),
         heartbeatFile: "v52.json",
@@ -150,10 +178,12 @@ const RUNNERS = [
     {
         key: "QUALITY102_CAUSAL_V1",
         runnerId: "QUALITY102_CAUSAL_V1",
-        unit: `disdex-quality102-causal-v1@${Q102_PIN.expectedSha}.service`,
+        unit: Q102_PIN.serviceUnit || `disdex-quality102-causal-v1@${Q102_PIN.expectedSha}.service`,
         expectedSha: Q102_PIN.expectedSha,
         releaseRoot: Q102_PIN.releaseRoot,
         evidenceMode: Q102_PIN.evidenceMode,
+    healthPath: Q102_PIN.healthPath,
+    tickPath: Q102_PIN.tickPath,
         script: "scripts/disdex-quality102-causal-v1-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH", "/var/lib/disdex/quality102-causal-v1/state.json"),
         heartbeatFile: "quality102-causal-v1.json",
@@ -163,10 +193,12 @@ const RUNNERS = [
     {
         key: "FET_BRK48_RESIDUAL",
         runnerId: "FET_BRK48_RESIDUAL",
-        unit: `disdex-fet-brk48@${FET_PIN.expectedSha}.service`,
+        unit: FET_PIN.serviceUnit || `disdex-fet-brk48@${FET_PIN.expectedSha}.service`,
         expectedSha: FET_PIN.expectedSha,
         releaseRoot: FET_PIN.releaseRoot,
         evidenceMode: FET_PIN.evidenceMode,
+    healthPath: FET_PIN.healthPath,
+    tickPath: FET_PIN.tickPath,
         script: "scripts/disdex-fet-brk48-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH", "/var/lib/disdex/fet-brk48-residual/state.json"),
         heartbeatFile: "fet-brk48-residual.json",
@@ -176,10 +208,12 @@ const RUNNERS = [
     {
         key: "HYPE_TREND_LONG",
         runnerId: "HYPE_TREND_LONG",
-        unit: `disdex-hype-long@${HYPE_PIN.expectedSha}.service`,
+        unit: HYPE_PIN.serviceUnit || `disdex-hype-long@${HYPE_PIN.expectedSha}.service`,
         expectedSha: HYPE_PIN.expectedSha,
         releaseRoot: HYPE_PIN.releaseRoot,
         evidenceMode: HYPE_PIN.evidenceMode,
+    healthPath: HYPE_PIN.healthPath,
+    tickPath: HYPE_PIN.tickPath,
         script: "scripts/disdex-hype-trend-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH", "/var/lib/disdex/hype-zec-long/runner.json"),
         heartbeatFile: "hype-trend-long.json",
@@ -189,10 +223,12 @@ const RUNNERS = [
     {
         key: "IDLE_PRIORITY_SHORT",
         runnerId: "IDLE_PRIORITY_SHORT",
-        unit: `disdex-idle-priority-short@${IDLE_PIN.expectedSha}.service`,
+        unit: IDLE_PIN.serviceUnit || `disdex-idle-priority-short@${IDLE_PIN.expectedSha}.service`,
         expectedSha: IDLE_PIN.expectedSha,
         releaseRoot: IDLE_PIN.releaseRoot,
         evidenceMode: IDLE_PIN.evidenceMode,
+    healthPath: IDLE_PIN.healthPath,
+    tickPath: IDLE_PIN.tickPath,
         script: "scripts/disdex-idle-priority-short-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH", "/var/lib/disdex/idle-priority/state.json"),
         parityCertificatePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_PARITY_CERT_PATH", "/var/lib/disdex/shared/idle-priority-parity-cert.json"),
@@ -323,7 +359,7 @@ export async function readRunnerTickHeartbeat(runner, now) {
             reason: "LEGACY_STATE_TIMESTAMP_COMPATIBILITY",
         };
     }
-    const path = `${TICK_ROOT}/${runner.runnerId}.json`;
+    const path = runner.tickPath || `${TICK_ROOT}/${runner.runnerId}.json`;
     let raw;
     try {
         raw = await readFile(path, "utf8");
@@ -780,7 +816,7 @@ async function main() {
     const runnerSnapshots = {};
     for (const runner of RUNNERS) {
         const { heartbeat, diagnostics, observability } = await buildHeartbeat(runner, now, globalBlockReason);
-        await atomicJson(`${HEALTH_ROOT}/heartbeats/${runner.heartbeatFile}`, heartbeat);
+        await atomicJson(runner.healthPath || `${HEALTH_ROOT}/heartbeats/${runner.heartbeatFile}`, heartbeat);
         results.push({ runner: runner.key, safetyState: heartbeat.safetyState, stateAt: heartbeat.lastTickAt, ...diagnostics });
         runnerSnapshots[runner.key] = {
             runnerId: runner.runnerId,
