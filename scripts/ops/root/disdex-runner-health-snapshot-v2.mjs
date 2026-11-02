@@ -207,7 +207,7 @@ export async function runSnapshot({manifestPath="/etc/disdex/runner-pins.json",n
   const results=[];
   for(const [runnerId,pin] of Object.entries(manifest.runners)){
     if(pin.evidenceMode!=="heartbeat_v1"){
-      results.push({runnerId,status:"LEGACY_SKIPPED",tradingMutation:0});
+      results.push({runnerId,status:"BLOCKED",reason:"RUNNER_TICK_EVIDENCE_NOT_SUPPORTED",newOrdersAllowed:false,tradingMutation:0});
       continue;
     }
     try{
@@ -230,6 +230,7 @@ export async function runSnapshot({manifestPath="/etc/disdex/runner-pins.json",n
   return {
     schema:"disdex-runner-health-snapshot/v2",
     checkedAt:now,
+    overallStatus:results.length>0&&results.every((row)=>row.status==="HEALTHY")?"HEALTHY":"BLOCKED",
     target:manifest.target,
     operatorTarget:manifest.operatorTarget,
     results,
