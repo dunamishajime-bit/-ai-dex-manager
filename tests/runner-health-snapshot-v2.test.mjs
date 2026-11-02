@@ -7,6 +7,7 @@ import {
   validateRunnerTick,
   buildSupervisorHeartbeat,
   atomicJson,
+  validateSafetySnapshots,
 } from "../scripts/ops/root/disdex-runner-health-snapshot-v2.mjs";
 
 const SHA="4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81";
@@ -81,4 +82,41 @@ test("atomic heartbeat write leaves no temp file",async()=>{
   } finally {
     await fs.rm(dir,{recursive:true,force:true});
   }
+});
+
+test("shared safety requires current 7.5% UTC risk, healthy margin and no pending",()=>{
+  const now=Date.UTC(2026,10,2,10,0,0);
+  const current={
+    kill:{active:false},
+    risk:{sourceComplete:true,tripped:false,utcDay:"2026-11-02",updatedAt:now-1000,maximumLossPct:7.5},
+    margin:{stage:"HEALTHY",ordersAllowed:true,checkedAt:now-1000},
+    pending:{schema:"disdex-pending-exposure/v1",entries:[{status:"RELEASED"}]},
+  };
+  assert.equal(validateSafetySnapshots(current,now),true);
+  for(const row of [
+    {kill:{active:true}},
+    {risk:{...current.risk,utcDay:"2026-11-01"}},
+    {risk:{...current.risk,updatedAt:now-900001}},
+    {risk:{...current.risk,maximumLossPct:8}},
+    {risk:{...current.risk,maximumLossPct:undefined}},
+    {risk:{...current.risk,tripped:null}},
+    {margin:{...current.margin,checkedAt:now+5000}},
+    {margin:{...current.margin,ordersAllowed:false}},
+    {pending:{...current.pending,entries:[{status:"ACTIVE"}]}},
+    {pending:{...current.pending,entries:[null]}},
+  ]) {
+    assert.throws(()=>validateSafetySnapshots({...current,...row},now),/RISK|MARGIN|PENDING|KILL/);
+  }
+});
+
+test("concurrent atomic heartbeat writes never corrupt the destination",async()=>{
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),"health-v2-atomic-"));
+  try{
+    const file=path.join(dir,"v52.json");
+    await Promise.all(Array.from({length:80},(_,i)=>atomicJson(file,{i,data:"x".repeat(128)})));
+    const final=JSON.parse(await fs.readFile(file,"utf8"));
+    assert.ok(Number.isInteger(final.i) && final.i>=0 && final.i<80);
+    assert.equal(final.data.length,128);
+    assert.deepEqual(await fs.readdir(dir),["v52.json"]);
+  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
