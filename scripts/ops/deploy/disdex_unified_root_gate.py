@@ -331,16 +331,32 @@ def legacy_release_marker(sha: str, releases=RELEASES):
     release = releases / sha
     directory = release.lstat()
     if (not stat.S_ISDIR(directory.st_mode) or release.is_symlink()
-            or directory.st_mode & 0o022):
+            or directory.st_uid != 0 or directory.st_mode & 0o022):
         raise ValueError("legacy release directory is writable or invalid")
     marker = release / ".disdex-release-sha"
     marker_stat = marker.lstat()
     if (not stat.S_ISREG(marker_stat.st_mode) or marker.is_symlink()
-            or marker_stat.st_uid != directory.st_uid
+            or marker_stat.st_uid != 0
             or marker_stat.st_mode & 0o222):
         raise ValueError("legacy release marker is untrusted")
     if marker.read_text(encoding="ascii").strip() != sha:
         raise ValueError("legacy release marker SHA mismatch")
+    dependency = release / "node_modules"
+    if dependency.is_symlink():
+        resolved = dependency.resolve(strict=True)
+        if (resolved.parent != releases or not SHA.fullmatch(resolved.name)
+                or resolved == release):
+            raise ValueError("legacy dependency symlink escapes release lineage")
+        target = resolved.lstat()
+        target_marker = resolved / ".disdex-release-sha"
+        target_marker_stat = target_marker.lstat()
+        if (not stat.S_ISDIR(target.st_mode) or target.st_uid != 0
+                or target.st_mode & 0o022
+                or not stat.S_ISREG(target_marker_stat.st_mode)
+                or target_marker_stat.st_uid != 0
+                or target_marker_stat.st_mode & 0o222
+                or target_marker.read_text(encoding="ascii").strip() != resolved.name):
+            raise ValueError("legacy dependency target is not immutable")
     return release
 
 def auxiliary_release_marker(sha: str, release_root: Path, *, root_uid=None):
@@ -615,14 +631,19 @@ class RootDeploymentExecutor:
         self.sleep_fn = sleep_fn
         self.audit_reader = audit_reader
 
-    def _read_current_sha(self) -> str:
+    def _read_current_sha(self, *, allow_legacy=False) -> str:
         link = self.paths.current.lstat()
         if not stat.S_ISLNK(link.st_mode):
             raise ValueError("production current is not symlink")
         resolved = self.paths.current.resolve(strict=True)
         if resolved.parent != self.paths.releases or not SHA.fullmatch(resolved.name):
             raise ValueError("production current symlink escapes immutable releases")
-        release_marker(resolved.name, self.paths.releases, root_uid=self.root_uid)
+        try:
+            release_marker(resolved.name, self.paths.releases, root_uid=self.root_uid)
+        except ValueError:
+            if not allow_legacy:
+                raise
+            legacy_release_marker(resolved.name, self.paths.releases)
         return resolved.name
 
     def _verify_token(self, args, token: str, *, nonce_dir=None):
@@ -709,7 +730,7 @@ class RootDeploymentExecutor:
         current = read_root_json(paths.current_plan, root_uid=self.root_uid)
         raw_pins = read_root_json(paths.pins, root_uid=self.root_uid, private=False)
         pins = parse_live_pins(raw_pins, releases=paths.releases)
-        current_sha = self._read_current_sha()
+        current_sha = self._read_current_sha(allow_legacy=True)
         validate(current)
         validate(desired)
         plan_hash = hashlib.sha256(canonical(desired)).hexdigest()
