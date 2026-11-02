@@ -37,6 +37,10 @@ test("refresh service owns a private writable runtime directory for its flock lo
   assert.doesNotMatch(service, /flock -n \/run\/lock\/disdex-v4-evidence-refresh\.lock/);
 });
 
+test("refresh service permits only the local IPC family required by the release-local tsx loader", () => {
+  assert.match(service, /^RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6$/m);
+});
+
 test("refresh timer is periodic and keeps monitor separate", () => {
   assert.match(timer, /OnCalendar=\*:0\/30/);
   assert.match(timer, /Unit=disdex-v4-dynamic-evidence-refresh@%i\.service/);
