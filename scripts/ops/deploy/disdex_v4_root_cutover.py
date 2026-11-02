@@ -272,7 +272,6 @@ class V4RootExecutor:
             raise ValueError("V4 owner nonce changed")
 
         journal = paths.journal or paths.root / "transaction.json"
-        from disdex_unified_root_gate import _atomic_json
         changes_started = False
         try:
             _atomic_json(journal, {
