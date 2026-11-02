@@ -1,0 +1,45 @@
+name: DisDex All-Runner Order Enable Prep CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-allrunner-order-enable-prep.yml"
+      - ".github/workflows/disdex-allrunner-order-enable-prep-ci.yml"
+      - ".github/workflows/disdex-v4-hp-approval-request.yml"
+      - "lib/deploy-approval-token.ts"
+      - "scripts/ops/deploy/disdex_allrunner_order_enable_prep.py"
+      - "scripts/ops/root/disdex-allrunner-order-enable-prep"
+      - "scripts/ops/root/install-disdex-allrunner-order-enable"
+      - "tests/test_allrunner_order_enable_prep.py"
+      - "tests/allrunner-order-enable-prep-source.test.mjs"
+      - "tests/deploy-approval-operation-separation.test.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Python prep contract
+        run: |
+          python3 -m py_compile scripts/ops/deploy/disdex_allrunner_order_enable_prep.py
+          python3 -m unittest tests.test_allrunner_order_enable_prep -v
+      - name: Approval and workflow source contract
+        run: |
+          node --test tests/allrunner-order-enable-prep-source.test.mjs tests/deploy-approval-operation-separation.test.mjs
+      - name: Shell syntax
+        run: |
+          sh -n scripts/ops/root/disdex-allrunner-order-enable-prep
+          sh -n scripts/ops/root/install-disdex-allrunner-order-enable
+      - name: Safety boundary
+        run: |
+          ! grep -Eiq 'create_order|place_order|cancel_order|test_order|systemctl.*(start|stop|restart)' scripts/ops/deploy/disdex_allrunner_order_enable_prep.py
+          grep -Fq 'orders-enabled false' .github/workflows/disdex-allrunner-order-enable-prep.yml
+          ! grep -Fq 'orders-enabled true' .github/workflows/disdex-allrunner-order-enable-prep.yml
+          echo TRADING_MUTATION=0
