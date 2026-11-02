@@ -67,11 +67,20 @@ test("Aster client exposes shared-budget owner, priority and wait diagnostics", 
   process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS = "50";
   process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = "5000";
   try {
+    // Seed a future permit so the client must emit a deterministic wait
+    // diagnostic; two immediate requests alone can race the 50ms interval
+    // on a busy CI runner and make this observability assertion flaky.
+    await reserveAsterGlobalRateSlot({
+      path,
+      minIntervalMs: 1_000,
+      maxQueueMs: 5_000,
+      nowMs: Date.now(),
+      priority: "MARKET_DATA",
+    });
     const client = new AsterV3Client({
       fetchImpl: async () => new Response("{}", { status: 200 }),
       onRateBudgetDiagnostic: (event) => events.push(event),
     });
-    await client.ping();
     await client.ping();
     assert.ok(events.some((event) => event.event === "SLOT_WAIT"));
     assert.ok(events.every((event) => event.schema === "disdex-aster-rate-budget-event/v1"));
