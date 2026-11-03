@@ -1,7 +1,7 @@
 import copy,hashlib,sys,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation,validate_real_tick,run_scoped_transaction,scoped_configuration_bytes,layered_monitor_pin_changes,validate_unchanged_caps
+from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation,validate_real_tick,run_scoped_transaction,scoped_configuration_bytes,layered_monitor_pin_changes,validate_unchanged_caps,classify_candidate_failure
 
 IDS=['V12_V4','QUALITY102_CAUSAL_V1','V52','PENGU_V8','FET_BRK48_RESIDUAL','HYPE_TREND_LONG','IDLE_PRIORITY_SHORT','SHARED_CRYPTO_RISK','MARGIN_GUARD']
 
@@ -11,6 +11,11 @@ def plans():
  return current,desired
 
 class ScopedRootContractTest(unittest.TestCase):
+ def test_candidate_failure_reports_only_allowlisted_category_never_raw_http_or_signature(self):
+  self.assertEqual(classify_candidate_failure('Reference quote stale for TSLA user=secret signature=secret'),'STOCK_REFERENCE_STALE')
+  self.assertEqual(classify_candidate_failure('ASTER_GLOBAL_RATE_BUDGET_SATURATED:123?signature=secret'),'SHARED_RATE_BUDGET_DEFERRED')
+  self.assertEqual(classify_candidate_failure('unknown https://host/?signature=secret'),'UNCLASSIFIED')
+
  def test_gross_contract_comes_from_existing_source_and_cannot_change_or_accept_nan(self):
   source='class StrictPortfolioCaps:\n crypto_gross: float = 3.0\n stock_gross: float = 4.0\n total_gross: float = 4.25\n stock_slot_gross: float = 2.0\n'
   report=dict(caps=dict(crypto=3.,stock=4.,portfolio=4.25,v11=2.,v50=2.))

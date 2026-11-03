@@ -34,6 +34,19 @@ def canonical(row):return json.dumps(row,sort_keys=True,separators=(',',':'),ens
 def plan_hash(plan):return hashlib.sha256(canonical(plan)).hexdigest()
 
 
+def classify_candidate_failure(output):
+    for needles,category in [
+        (['ASTER_GLOBAL_RATE_BUDGET_SATURATED','ASTER_RATE_BUDGET','ASTER_GLOBAL_RATE_BUDGET_COOLDOWN'],'SHARED_RATE_BUDGET_DEFERRED'),
+        (['Reference quote stale','REFERENCE_STALE','LOCAL_REFERENCE_STALE'],'STOCK_REFERENCE_STALE'),
+        (['ACCOUNT_LOCK','account lock'],'ACCOUNT_LOCK_DEFERRED'),
+        (['QUALITY102_STATE','Q102_PEER'],'Q102_PEER_STATE_REJECTED'),
+        (['HTTP Error 429','HTTP Error 418'],'VENUE_RATE_LIMIT'),
+        (['ModuleNotFoundError','ImportError'],'RELEASE_DEPENDENCY_ERROR'),
+    ]:
+        if any(needle in output for needle in needles):return category
+    return 'UNCLASSIFIED'
+
+
 def validate_unchanged_caps(old_source,new_source,report):
     def constants(source):
         tree=ast.parse(source)
@@ -260,7 +273,7 @@ class V52ScopedOperations:
             '--mode','live','--preflight-readonly'],cwd=self.release,env=env,user=self.deploy.pw_uid,
             group=self.deploy.pw_gid,extra_groups=[],capture_output=True,text=True,timeout=70)
         # No raw error/output URLs, response bodies or environment are logged.
-        require(result.returncode==0,'CANDIDATE_GET_ONLY_PREFLIGHT_BLOCKED')
+        require(result.returncode==0,'CANDIDATE_GET_ONLY_PREFLIGHT_BLOCKED:'+classify_candidate_failure(result.stderr+result.stdout))
         rows=[json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
         require(len(rows)==1 and rows[0].get('readOnly') is True and rows[0].get('ordersSent') is False,
                 'CANDIDATE_PREFLIGHT_CONTRACT')
