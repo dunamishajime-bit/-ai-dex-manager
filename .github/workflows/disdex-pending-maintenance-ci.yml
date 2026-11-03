@@ -1,0 +1,48 @@
+name: DisDex no-order pending maintenance certification
+on:
+  pull_request:
+    paths:
+      - 'lib/aster-readonly-evidence-fetch.ts'
+      - 'lib/disdex-pending-owned-venue.ts'
+      - 'lib/disdex-pending-owner-evidence.ts'
+      - 'scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts'
+      - 'scripts/ops/deploy/disdex_pending_*.py'
+      - 'tests/pending-*.test.ts'
+      - 'tests/aster-readonly-evidence-fetch.test.ts'
+      - 'tests/test_pending_maintenance*.py'
+      - 'tests/test_pending_refresh_executor.py'
+      - '.github/workflows/disdex-pending-maintenance-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-order-maintenance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: GET-only grant and owner proof rejection
+        run: >-
+          npx --no-install tsx --test
+          tests/aster-readonly-evidence-fetch.test.ts
+          tests/pending-refresh-root-grant.test.ts
+          tests/pending-exposure-readonly-reconcile.test.ts
+          tests/pending-owned-venue.test.ts
+          tests/pending-owner-metadata.test.ts
+          tests/account-lock-renew.test.ts
+          tests/account-lock-release-race.test.ts
+          tests/disdex-expired-account-lock-recovery.test.ts
+      - name: Root service rejection and isolated crash-recovery fixtures
+        run: sudo /usr/bin/python3 -m unittest discover -s tests -p 'test_pending_maintenance*.py' -v
+      - run: python -m unittest discover -s tests -p test_pending_refresh_executor.py -v
+      - run: npx --no-install tsc --noEmit --pretty false --incremental false
