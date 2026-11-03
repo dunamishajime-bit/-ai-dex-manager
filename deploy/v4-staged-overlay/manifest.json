@@ -69,6 +69,10 @@
     {
       "source": "files/lib/v12-v4-refresh-commit.ts.src",
       "target": "lib/v12-v4-refresh-commit.ts"
+    },
+    {
+      "source": "files/lib/v12-v4-execution-phase.ts.src",
+      "target": "lib/v12-v4-execution-phase.ts"
     }
   ]
 }
