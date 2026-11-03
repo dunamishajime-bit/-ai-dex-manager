@@ -614,6 +614,7 @@ def run_monitor_only_daemon(runner: "V52AsterOnlyEngine", daemon: bool) -> None:
     tick_path=Path(os.getenv("DISDEX_V52_MONITOR_TICK_PATH", "/var/lib/disdex/v52-monitor/tick.json"))
     health_path=Path(os.getenv("DISDEX_V52_MONITOR_HEALTH_PATH", "/var/lib/disdex/v52-monitor/heartbeat.json"))
     interval=max(5_000, int(os.getenv("DISDEX_V52_MONITOR_INTERVAL_MS","30000")))
+    last_completed_tick_at=None
     while not runner.stop_requested:
         started=base.now_ms()
         try:
@@ -621,7 +622,8 @@ def run_monitor_only_daemon(runner: "V52AsterOnlyEngine", daemon: bool) -> None:
             completed=base.now_ms()
             tick=build_v52_monitor_tick(result,started_at=started,completed_at=completed)
             _atomic_monitor_json(tick_path,tick)
-            _atomic_monitor_json(health_path,{**tick,"schema":"disdex-v52-monitor-heartbeat/v1","heartbeatAt":completed})
+            last_completed_tick_at=completed
+            _atomic_monitor_json(health_path,{**tick,"schema":"disdex-v52-monitor-heartbeat/v1","heartbeatAt":completed,"lastTickAt":last_completed_tick_at})
             print(json.dumps({"mode":"MONITOR_ONLY","status":"observing","eventTs":completed,
                               "runtimeSha":tick["runtimeSha"],"positions":tick["positionCount"],
                               "ordersSent":0,"cancelsSent":0,"positionChangesSent":0},
@@ -633,7 +635,7 @@ def run_monitor_only_daemon(runner: "V52AsterOnlyEngine", daemon: bool) -> None:
                 "schema":"disdex-v52-monitor-heartbeat/v1","runnerId":"V52_MONITOR",
                 "runtimeSha":sha,"expectedSha":sha,"mainPid":os.getpid(),
                 "workingDirectory":os.getenv("DISDEX_RELEASE_ROOT") or os.getcwd(),
-                "heartbeatAt":completed,"lastTickAt":None,"status":"blocked",
+                "heartbeatAt":completed,"lastTickAt":last_completed_tick_at,"status":"blocked",
                 "reason":"V52_MONITOR_READ_FAILED:"+str(error)[:240],
                 "newOrdersAllowed":False,"ordersSent":0,"cancelsSent":0,"positionChangesSent":0,
             })

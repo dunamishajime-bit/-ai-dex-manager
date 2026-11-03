@@ -44,6 +44,26 @@ class TickWriterTest(unittest.TestCase):
    self.assertEqual(path.read_bytes(),before);self.assertEqual(len(list(path.parent.iterdir())),1)
 
 class WrapperCompletionTest(unittest.TestCase):
+ def test_monitor_read_failure_retains_last_actual_tick_without_inventing_a_new_one(self):
+  tree=ast.parse(Path('scripts/disdex_v52_aster_only_live_engine.py').read_text(encoding='utf-8-sig'))
+  nodes=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in ['build_v52_monitor_tick','run_monitor_only_daemon']]
+  writes=[];clock=iter([1000,1100,2000,2100]);count=0
+  class Runner:
+   stop_requested=False
+   def preflight(self,read_only):
+    nonlocal count
+    count+=1
+    if count==2:self.stop_requested=True;raise RuntimeError('reference stale')
+    return dict(positions={})
+  env=dict(os=os,Path=Path,json=json,base=SimpleNamespace(now_ms=lambda:next(clock),bool_env=lambda key,default=False:key=='DISDEX_V52_MONITOR_ONLY'),
+   time=SimpleNamespace(sleep=lambda seconds:None),_atomic_monitor_json=lambda path,value:writes.append((path,value)))
+  with patch.dict(os.environ,{'DISDEX_RELEASE_SHA':SHA}),patch('builtins.print'):
+   exec(compile(ast.Module(body=nodes,type_ignores=[]),'actual-monitor-loop','exec'),env)
+   env['run_monitor_only_daemon'](Runner(),True)
+  health=[value for path,value in writes if value.get('schema')=='disdex-v52-monitor-heartbeat/v1']
+  self.assertEqual(len(health),2);self.assertEqual(health[0]['lastTickAt'],1100)
+  self.assertEqual(health[1]['lastTickAt'],1100);self.assertEqual(health[1]['heartbeatAt'],2100)
+
  def test_actual_wrapper_methods_emit_only_after_engine_and_state_persistence_complete(self):
   tree=ast.parse(Path('scripts/disdex_v52_aster_only_live_engine.py').read_text(encoding='utf-8-sig'))
   original=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=='V52AsterOnlyEngine')
