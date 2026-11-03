@@ -584,17 +584,8 @@ def self_test() -> None:
 
 
 def _atomic_monitor_json(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True, mode=0o750)
-    temporary = path.with_name(f".{path.name}.{os.getpid()}.{base.now_ms()}.tmp")
-    try:
-        temporary.write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
-        os.chmod(temporary, 0o640)
-        os.replace(temporary, path)
-    finally:
-        try:
-            temporary.unlink()
-        except FileNotFoundError:
-            pass
+    from disdex_runner_tick_heartbeat import atomic_runner_health_json
+    atomic_runner_health_json(path,payload)
 
 
 def build_v52_monitor_tick(result: dict, *, started_at: int, completed_at: int) -> dict:

@@ -5,11 +5,19 @@ from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 from types import SimpleNamespace
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from disdex_runner_tick_heartbeat import write_completed_runner_tick
+from disdex_runner_tick_heartbeat import write_completed_runner_tick,atomic_runner_health_json
 
 SHA='a'*40
 
 class TickWriterTest(unittest.TestCase):
+ def test_monitor_state_writer_also_survives_eighty_same_pid_collisions(self):
+  with tempfile.TemporaryDirectory() as folder:
+   path=Path(folder)/'health.json'
+   with ThreadPoolExecutor(max_workers=16) as pool:
+    list(pool.map(lambda n:atomic_runner_health_json(path,dict(sequence=n)),range(80)))
+   self.assertIn(json.loads(path.read_text())['sequence'],range(80))
+   self.assertEqual([p.name for p in Path(folder).iterdir()],['health.json'])
+
  def test_real_identity_and_atomic_eighty_same_pid_same_millisecond_writes(self):
   with tempfile.TemporaryDirectory() as folder:
    now=time.time_ns()//1000000

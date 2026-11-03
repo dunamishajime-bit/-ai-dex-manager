@@ -20,11 +20,20 @@ def write_completed_runner_tick(*,root,runner_id,sha,service_unit,started_at,com
         serviceUnit=service_unit,mainPid=os.getpid(),workingDirectory=os.getcwd(),
         tickStartedAt=started_at,tickCompletedAt=completed_at,status=status.strip(),outcome=status.strip(),reason=reason,
         newOrdersAllowed=new_orders_allowed,permissionEvaluation='FINAL_PREORDER_GATES_SEPARATE')
-    fd,name=tempfile.mkstemp(prefix='.v52.json.',suffix='.tmp',dir=directory);temporary=Path(name)
+    atomic_runner_health_json(destination,marker)
+    return marker
+
+
+def atomic_runner_health_json(destination,payload):
+    destination=Path(destination);directory=destination.parent
+    directory.mkdir(parents=True,exist_ok=True,mode=0o750)
+    if directory.is_symlink() or destination.is_symlink():raise ValueError('RUNNER_HEALTH_PATH_UNTRUSTED')
+    if destination.exists() and not stat.S_ISREG(destination.lstat().st_mode):raise ValueError('RUNNER_HEALTH_TARGET_UNTRUSTED')
+    fd,name=tempfile.mkstemp(prefix='.'+destination.name+'.',suffix='.tmp',dir=directory);temporary=Path(name)
     try:
         with os.fdopen(fd,'w',encoding='utf-8') as stream:
             if os.name!='nt':os.fchmod(stream.fileno(),0o640)
-            json.dump(marker,stream,sort_keys=True);stream.write('\n');stream.flush();os.fsync(stream.fileno())
+            json.dump(payload,stream,sort_keys=True,allow_nan=False);stream.write('\n');stream.flush();os.fsync(stream.fileno())
         for attempt in range(40):
             try:os.replace(temporary,destination);break
             except PermissionError:
@@ -35,4 +44,3 @@ def write_completed_runner_tick(*,root,runner_id,sha,service_unit,started_at,com
             try:os.fsync(directory_fd)
             finally:os.close(directory_fd)
     finally:temporary.unlink(missing_ok=True)
-    return marker
