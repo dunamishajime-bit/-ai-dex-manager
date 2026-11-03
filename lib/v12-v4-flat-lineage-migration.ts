@@ -1,5 +1,6 @@
 import { appendV4ExecutionEvent, type V4ExecutionDocument } from "./v12-v4-execution-store";
-import { createProductionState, type ForeignExposure } from "./v12-v4-production-lifecycle";
+import { type ForeignExposure } from "./v12-v4-production-lifecycle";
+import { rebindV4ActiveLineage } from "./v12-v4-active-lineage-rebind";
 import type { PendingExposureEntry } from "./disdex-pending-exposure-registry";
 
 const SHA = /^[a-f0-9]{40}$/;
@@ -119,19 +120,10 @@ export function migrateFlatV4State(args: {
         throw new Error("V4_FLAT_LINEAGE_PENDING_EXPOSURE");
     assertVenueMatchesForeign(args.observed, args.evidence);
 
-    const initial = createProductionState({
-        equityUsd: args.observed.state.equityUsd,
-        foreign: structuredClone(args.observed.state.foreign),
-        holdProtected: false,
-    });
-    const base: V4ExecutionDocument = {
-        schema: 2,
-        releaseSha: args.newSha,
-        revision: 0,
-        state: initial,
-        intents: {},
-        protections: {},
-    };
+    // Flat means no active exposure, not no history. Retain closed legs,
+    // terminal intents, STOP client ids, PnL, cooldown and the full journal.
+    // Legacy IDs remain bound to their actual original release SHA.
+    const base = rebindV4ActiveLineage(args.observed,args.expectedOldSha,args.newSha);
     const marked = appendV4ExecutionEvent(base, {
         type: "ACCOUNT_MARK",
         eventId: `v4-flat-lineage-migration:${args.newSha}:${args.evidence.observedAt}`,

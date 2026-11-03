@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import {createHash} from 'node:crypto';
 import {PRODUCTION_EXIT_CATALOG} from "../lib/v12-v4-production-lifecycle";
 import {V12_V4_V2_POLICY} from "../lib/v12-v4-v2-shadow";
-import {validateV4ProductionCertificate,readV4ProductionCertificate,assertV4CertifiedOrder,validateV4SharedExecutionEvidencePayloads} from "../lib/v12-v4-certified-gates";
+import {validateV4ProductionCertificate,readV4ProductionCertificate,assertV4CertifiedOrder,validateV4SharedExecutionEvidencePayloads,resolveV4EvidenceDigests} from "../lib/v12-v4-certified-gates";
 import {V12_V4_CERTIFIED_GROSS_CONTRACT} from "../lib/v12-v4-production-contract";
 const sha="a".repeat(40),proof="b".repeat(64),now=Date.parse("2026-10-10T02:00:00Z");
 const valid={
@@ -70,6 +71,25 @@ test("current-SHA evidence payloads are content-validated before hashing grants 
  },sha,now),/STALE/);
 });
 
+test('only the explicit bounded-refresh contract reuses sealed release-static evidence beyond 24h',()=>{
+ const old={...evidencePayloads,
+  routeSourceParity:{...evidencePayloads.routeSourceParity,capturedAt:'2026-10-01T00:00:00Z'},
+  v4ExecutionTests:{...evidencePayloads.v4ExecutionTests,capturedAt:'2026-10-01T00:00:00Z'}};
+ assert.throws(()=>validateV4SharedExecutionEvidencePayloads(old,sha,now),/STALE/);
+ assert.doesNotThrow(()=>validateV4SharedExecutionEvidencePayloads(old,sha,now,true));
+ assert.throws(()=>validateV4SharedExecutionEvidencePayloads({...old,
+  signedAsterAccount:{...old.signedAsterAccount,capturedAt:'2026-10-01T00:00:00Z'}},sha,now,true),/STALE/);
+});
+
+test('certificate evidence never coerces missing or boolean counters into zero',()=>{
+ for(const bad of [null,undefined,'',false,true,' ']){
+  assert.throws(()=>validateV4SharedExecutionEvidencePayloads({...evidencePayloads,
+   sharedRiskAndPeers:{...evidencePayloads.sharedRiskAndPeers,pendingCount:bad}},sha,now),/FIELD_INVALID/);
+  assert.throws(()=>validateV4SharedExecutionEvidencePayloads({...evidencePayloads,
+   signedAsterAccount:{...evidencePayloads.signedAsterAccount,mutationCalls:bad}},sha,now),/FIELD_INVALID/);
+ }
+});
+
 test("missing or expired ENTRY certificate cannot trap already signed existing position",async()=>{
  const doc:any={releaseSha:sha,state:{legs:{l1:{id:"l1",status:"OPEN",qty:3,
   candidate:{symbol:"ETHUSDT",effectiveSide:"LONG"}}}}};
@@ -100,6 +120,29 @@ const establishedSharedHistory={
  risksAcknowledged:{v4FirstLiveFillNotYetObserved:true,weakIndependentForwardPerformance:true},
  operatorAcknowledgement:"I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS",
 } as const;
+
+test('bounded refresh requires a new explicit certificate contract; legacy hashes stay sealed',()=>{
+ const v4={...establishedSharedHistory,schema:'disdex-v12-v4-production-certification/v4',
+  operatorAcknowledgement:'I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS_WITH_BOUNDED_DYNAMIC_REFRESH',
+  dynamicRefreshPolicy:'BOUNDED_ROOT_REFRESH_V1'};
+ assert.equal(validateV4ProductionCertificate(v4,sha,now).schema,v4.schema);
+ assert.throws(()=>validateV4ProductionCertificate({...v4,dynamicRefreshPolicy:undefined},sha,now),/CERTIFICATE_INVALID/);
+ assert.throws(()=>validateV4ProductionCertificate({...v4,operatorAcknowledgement:establishedSharedHistory.operatorAcknowledgement},sha,now),/CERTIFICATE_INVALID/);
+ const commit={schema:'disdex-v4-dynamic-evidence-commit/v1',sha,
+  scope:'V4_EVIDENCE_REFRESH_ONLY',ordersEnabled:false,authorizesTrading:false,
+  refreshGeneration:'g',capturedAt:new Date(now-1000).toISOString(),leaseId:'c'.repeat(32),
+  leaseApprovedAt:Math.floor(now/1000)-60,leaseExpiresAt:Math.floor(now/1000)+3600,
+  planSha256:'d'.repeat(64),evidencePayloads:{establishedAsterOrders:{value:1},signedAsterAccount:{value:1},sharedRiskAndPeers:{value:1}},
+  evidenceSha256:Object.fromEntries(['establishedAsterOrders','signedAsterAccount','sharedRiskAndPeers'].map(k=>[k,createHash('sha256').update(JSON.stringify({value:1},null,2)+'\n').digest('hex')]))};
+ const sealed=validateV4ProductionCertificate(establishedSharedHistory,sha,now);
+ const bounded=validateV4ProductionCertificate(v4,sha,now);
+ assert.deepEqual(resolveV4EvidenceDigests(sealed as any,commit,now),establishedSharedHistory.evidenceSha256);
+ const hashes=resolveV4EvidenceDigests(bounded as any,commit,now);
+ assert.equal(hashes.routeSourceParity,establishedSharedHistory.evidenceSha256.routeSourceParity);
+ assert.equal(hashes.v4ExecutionTests,establishedSharedHistory.evidenceSha256.v4ExecutionTests);
+ assert.equal(hashes.signedAsterAccount,commit.evidenceSha256.signedAsterAccount);
+ assert.throws(()=>resolveV4EvidenceDigests(bounded as any,{...commit,ordersEnabled:true},now),/REFRESH_COMMIT_INVALID/);
+});
 test("new full LIVE production evidence accepts authentic shared Aster history without demanding nonexistent V4 fill",()=>{
  assert.equal(validateV4ProductionCertificate(establishedSharedHistory,sha,now).schema,
    "disdex-v12-v4-production-certification/v3");

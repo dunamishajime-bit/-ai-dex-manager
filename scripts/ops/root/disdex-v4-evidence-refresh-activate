@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+[[ "$(id -u)" == "0" ]] || { echo "DISDEX_ROOT_REQUIRED" >&2; exit 1; }
+
+sha=""
+sha_seen=0
+for ((index = 1; index <= $#; index += 1)); do
+  case "${!index}" in
+    --sha)
+      ((sha_seen += 1))
+      [[ "$sha_seen" == "1" ]] || { echo "DISDEX_REFRESH_SHA_DUPLICATE" >&2; exit 1; }
+      next=$((index + 1))
+      [[ "$next" -le "$#" ]] || { echo "DISDEX_REFRESH_SHA_REQUIRED" >&2; exit 1; }
+      sha="${!next}"
+      ;;
+  esac
+done
+[[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "DISDEX_REFRESH_SHA_INVALID" >&2; exit 1; }
+unit="disdex-v4-dynamic-evidence-refresh@${sha}.timer"
+service_template=/etc/systemd/system/disdex-v4-dynamic-evidence-refresh@.service
+timer_template=/etc/systemd/system/disdex-v4-dynamic-evidence-refresh@.timer
+[[ -f "$service_template" && ! -L "$service_template" ]] || {
+  echo "DISDEX_REFRESH_SERVICE_NOT_STAGED" >&2
+  exit 1
+}
+[[ -f "$timer_template" && ! -L "$timer_template" ]] || {
+  echo "DISDEX_REFRESH_TIMER_NOT_STAGED" >&2
+  exit 1
+}
+for staged in "$service_template" "$timer_template"; do
+  [[ "$(stat -c '%U:%G' "$staged")" == "root:root" ]] || {
+    echo "DISDEX_REFRESH_UNIT_OWNER_INVALID" >&2
+    exit 1
+  }
+  staged_mode="$(stat -c '%a' "$staged")"
+  (( (0$staged_mode & 022) == 0 )) || {
+    echo "DISDEX_REFRESH_UNIT_WRITABLE" >&2
+    exit 1
+  }
+done
+
+/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_v4_evidence_refresh_activation.py "$@"
+/usr/bin/systemctl enable --now "$unit"
+/usr/bin/systemctl start --wait "disdex-v4-dynamic-evidence-refresh@${sha}.service"
