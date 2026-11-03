@@ -5,6 +5,15 @@ export const V4_MONITOR_FUTURE_GRACE_MS = 1_000;
 
 type JsonRecord = Record<string, any>;
 
+/** The legacy proof is a stale-registry fallback, not fresh source evidence. */
+export async function readV4StalePendingProofIfNeeded<T>(pending:JsonRecord,now:number,readProof:()=>Promise<T>):Promise<T|undefined>{
+ const at=pending.updatedAt;
+ if(typeof at!=='number'||!Number.isSafeInteger(at)||at<=0||at>now+V4_MONITOR_FUTURE_GRACE_MS){
+  throw Error('V4_MONITOR_PENDING_TIMESTAMP_INVALID');
+ }
+ return now-at>V4_MONITOR_RUNTIME_MAX_AGE_MS?await readProof():undefined;
+}
+
 /** Do not queue heavy private GETs alongside the market-data burst. */
 export async function collectV4MonitorReads<P,O,D>(reads: {
   positions: () => Promise<P>; openOrders: () => Promise<O>; decision: () => Promise<D>;
