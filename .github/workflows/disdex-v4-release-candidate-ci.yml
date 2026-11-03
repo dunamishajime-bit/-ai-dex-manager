@@ -14,7 +14,7 @@ jobs:
           node-version: '20'
       - run: npm ci --ignore-scripts
       - name: Fetch exact reviewed preview source
-        run: git fetch --no-tags --depth=1 origin e555fff456f8106cd997ce9d13bbfe9a443f39cf
+        run: git fetch --no-tags --depth=1 origin a5c52b348e1a3cf6a58a90e31318caa1d3478b2e
       - name: Fetch reviewed root refresh helpers
         run: git fetch --no-tags --depth=1 origin 3524e3676848b9260f53164e07257acdda7bcc5c
       - name: Verify candidate source lineage

@@ -1,6 +1,6 @@
 ﻿import "dotenv/config";
 import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
-import {v4ExecutionPhase,v4MonitorIdentity} from "../lib/v12-v4-execution-phase";
+import {v4ExecutionPhase,v4MonitorIdentity,v4ReadOnlyRuntimeSha} from "../lib/v12-v4-execution-phase";
 import {dirname} from "node:path";
 import {AsterV3Client} from "../lib/aster-v3-client";
 import {V12AsterLiveAdapter} from "../lib/v12-aster-live-adapter";
@@ -420,7 +420,7 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
 async function main(){
  // No store, adapter or trading engine is constructed in the read-only phase.
  if(v4ExecutionPhase(process.argv.slice(2),process.env)==="MONITOR_ONLY"){
-  const identity=v4MonitorIdentity(requireReleaseSha(),true,process.env);
+  const identity=v4MonitorIdentity(v4ReadOnlyRuntimeSha(process.env),true,process.env);
   const {runV4ReadOnlyMonitor}=await import("./v12-v4-monitor-only-runner");
   await runV4ReadOnlyMonitor(identity);
   return;

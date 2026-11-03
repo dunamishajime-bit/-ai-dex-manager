@@ -3,6 +3,15 @@ type Environment=Readonly<Record<string,string|undefined>>;
 export type V4MonitorIdentity={runnerId:'V12_V4'|'V12_V4_MONITOR';serviceUnit:string;
  healthPath:string;healthSchema:string};
 
+export function v4ReadOnlyRuntimeSha(env:Environment):string{
+ const sha=env.DISDEX_RELEASE_SHA;
+ if(typeof sha!=='string'||!/^[a-f0-9]{40}$/.test(sha)||env.DISDEX_RUNTIME_COMMIT_SHA!==sha
+   ||env.DISDEX_RELEASE_ROOT!=='/home/deploy/disdex-trading/releases/'+sha){
+  throw Error('V4_MONITOR_PHASE_RUNTIME_IDENTITY_MISMATCH');
+ }
+ return sha;
+}
+
 export function v4ExecutionPhase(argv:readonly string[],env:Environment):'MONITOR_ONLY'|'PRODUCTION'{
  if(env.V12_V4_ORDERS_ENABLED!==undefined&&!['true','false'].includes(env.V12_V4_ORDERS_ENABLED)){
   throw Error('V4_EXPLICIT_ORDER_PERMISSION_INVALID');

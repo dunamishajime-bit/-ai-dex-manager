@@ -1,10 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {v4ExecutionPhase,v4MonitorIdentity} from '../lib/v12-v4-execution-phase';
+import {v4ExecutionPhase,v4MonitorIdentity,v4ReadOnlyRuntimeSha} from '../lib/v12-v4-execution-phase';
 
 const sha='a'.repeat(40);
 const env={V12_V4_OPERATION_MODE:'MONITOR_ONLY',V12_V4_ORDERS_ENABLED:'false'};
+
+test('monitor phase verifies actual release identity without importing a LIVE acknowledgement',()=>{
+ const runtime={DISDEX_RELEASE_SHA:sha,DISDEX_RUNTIME_COMMIT_SHA:sha,
+  DISDEX_RELEASE_ROOT:'/home/deploy/disdex-trading/releases/'+sha};
+ assert.equal(v4ReadOnlyRuntimeSha(runtime),sha);
+ assert.equal(v4ReadOnlyRuntimeSha({...runtime,V12_V4_LIVE_ACK:'not-a-trading-approval'}),sha);
+ for(const change of [{DISDEX_RUNTIME_COMMIT_SHA:'b'.repeat(40)},
+  {DISDEX_RELEASE_ROOT:'/home/deploy/disdex-trading/current'},{DISDEX_RELEASE_SHA:''}]){
+  assert.throws(()=>v4ReadOnlyRuntimeSha({...runtime,...change}));
+ }
+ const source=readFileSync('scripts/v12-v4-production-runner.ts','utf8');
+ const branch=source.slice(source.indexOf('async function main(){'),source.indexOf(' const once=process.argv.includes("--once")'));
+ assert.match(branch,/v4ReadOnlyRuntimeSha\(process\.env\)/);
+ assert.doesNotMatch(branch,/requireReleaseSha\(/);
+});
 
 test('production read-only phase requires three explicit matching switches',()=>{
  assert.equal(v4ExecutionPhase(['--monitor-only','--daemon'],env),'MONITOR_ONLY');
