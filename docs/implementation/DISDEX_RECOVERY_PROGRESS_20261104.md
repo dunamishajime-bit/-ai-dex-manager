@@ -227,3 +227,38 @@ are still open implementation tasks. Full LIVE remains unverified.
 Production read-only check2026-11-03T22:18:55Z: V4b346 PID2131810,
 V520416 PID2195629, Risk2737 PID2017780; all active/NRestarts0.
 Disk48G/40G used/8.2G available83%. Remote master still6bb84dc9.
+
+
+## Conservative full-LIVE failure recovery and refresh path alignment
+
+A failing Linux test reproduced the old executor restarting the old V4 SHA
+after a new full-LIVE process had run. This cannot prove STOP/intent ownership
+compatibility. After any candidate start attempt, the corrected executor stops
+and masks the candidate, keeps the old unit masked, retains candidate pins,
+ledger and runtime identity, and records RECOVERY_REQUIRED_PROTECTED. It issues
+no venue mutation and never restores an old approval artifact to authorize a
+new lineage. A failed start is also ambiguous and uses the same isolation.
+Automatic old-source restart remains possible only before candidate execution
+has been attempted. A compatible recovery or re-enable still requires fresh
+venue, durable lineage and exact-scope authority; this change does not pretend
+that an arbitrary old release is a certified trading rollback.
+
+The refresh-only approval helper's outputPath now matches candidate9da6's
+root-managed /var/lib/disdex/unified-deploy/v4-evidence/evidence-refresh-last.json,
+not the runner-writable state directory. This changes the exact refresh plan
+hash; existing approvals/leases are not rewritten or copied. This source helper
+must be installed together with the matching candidate worker/contract. It has
+not replaced the currently installed Production refresh helper.
+
+Linux isolated suites after these changes: V4 cutover40, venue8, refresh lease11,
+static3, monitor-only7, common root gate42; all pass, no Linux skips. Executions
+include imported shared fixtures; do not interpret the sum as unique test cases.
+Test archive1be374d84953d35fdb2d864e978e204bdd73a450bfdbed7ea64aea974558290f.
+Isolated source /var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/v4-recovery-green-1be374d8.
+
+Fresh normal-budget signed GET verifiedAt1793744719705: positions0/openOrders0;
+orders/cancels/positionChangesSent0; pending beforeHash==afterHash. Root audit:
+/var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/current-readonly-venue-1793744719756.json.
+Risk7.5%, sourceComplete=true, UTC2026-11-03, risk age13834ms, tripped=false.
+Existing shared Kill remains active with the exact V52/Q102 mismatch reason.
+No trading authority or service state changed during this read-only diagnosis.

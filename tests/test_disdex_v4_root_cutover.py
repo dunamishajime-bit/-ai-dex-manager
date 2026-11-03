@@ -311,7 +311,7 @@ class V4CutoverTransactionTest(unittest.TestCase):
         evidence["heartbeatVerified"]=False
         _write_secure_json(self.fx.after_venue,evidence)
         sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False)
-        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+        with self.assertRaisesRegex(RuntimeError,"recovery required"):
             self._executor(sysd).execute(self._args(),"signed-token")
         self.assertFalse(sysd.is_active(self.new_unit))
 
@@ -331,23 +331,38 @@ class V4CutoverTransactionTest(unittest.TestCase):
 
     def test_failed_candidate_from_failed_baseline_does_not_resurrect_old_v4(self):
         sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False,fail_new_start=True)
-        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+        with self.assertRaisesRegex(RuntimeError,"recovery required"):
             self._executor(sysd).execute(self._args(),"signed-token")
         self.assertFalse(sysd.is_active(self.old_unit))
         self.assertFalse(sysd.is_active(self.new_unit))
         self.assertNotIn(("start",self.old_unit),sysd.calls)
 
-    def test_failed_start_rolls_back_without_unprotected_window(self):
+    def test_failed_start_does_not_copy_old_approval_or_restart_ambiguous_old_code(self):
         old_approval={"approvedSha":OLD}
         _write_secure_json(self.runtime,old_approval)
         sysd=FakeSystemd(self.old_unit,self.new_unit,fail_new_start=True)
-        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+        with self.assertRaisesRegex(RuntimeError,"recovery required"):
             self._executor(sysd).execute(self._args(),"signed-token")
-        self.assertTrue(sysd.is_active(self.old_unit))
+        self.assertFalse(sysd.is_active(self.old_unit))
         self.assertFalse(sysd.is_active(self.new_unit))
-        self.assertEqual(json.loads(self.runtime.read_text()),old_approval)
-        self.assertEqual(json.loads(self.fx.pins_path.read_text())["runners"][V4_SCOPE]["sha"],OLD)
+        self.assertTrue(sysd.is_masked(self.new_unit))
+        self.assertEqual(json.loads(self.runtime.read_text())["approvedSha"],NEW)
+        self.assertEqual(json.loads(self.fx.pins_path.read_text())["runners"][V4_SCOPE]["sha"],NEW)
         self.assertEqual(self.fx.current.resolve(),self.fx.releases/OLD)
+
+    def test_failed_live_audit_never_restarts_old_code_over_possible_new_ownership(self):
+        sysd=FakeSystemd(self.old_unit,self.new_unit)
+        executor=self._executor(sysd)
+        def failure(*args,**kwargs):raise RuntimeError("SIGNED_READ_UNAVAILABLE")
+        executor.decision_observer=failure
+        with self.assertRaises(RuntimeError):executor.execute(self._args(),"signed-token")
+        self.assertNotIn(("start",self.old_unit),sysd.calls)
+        self.assertFalse(sysd.is_active(self.new_unit))
+        self.assertTrue(sysd.is_masked(self.new_unit))
+        self.assertEqual(json.loads(self.fx.pins_path.read_text())["runners"][V4_SCOPE]["sha"],NEW)
+        journal=json.loads((executor.common.paths.journal or self.fx.root/"transaction.json").read_text())
+        self.assertEqual(journal["phase"],"RECOVERY_REQUIRED_PROTECTED")
+        self.assertFalse(journal["oldSourceRestartAuthorized"])
 
     def test_repeated_decision_tick_cannot_be_three_audit_cycles(self):
         sysd=FakeSystemd(self.old_unit,self.new_unit)

@@ -401,6 +401,7 @@ class V4RootExecutor:
 
         journal = paths.journal or paths.root / "transaction.json"
         changes_started = False
+        candidate_start_attempted = False
         try:
             _atomic_json(journal, {
                 "schema": "disdex-unified-deploy-transaction/v1",
@@ -424,6 +425,7 @@ class V4RootExecutor:
             if old_enabled:
                 c.systemd.enable(new_unit)
             audit_started_at_ms = c.clock()*1000
+            candidate_start_attempted = True
             c.systemd.start(new_unit)
             if c.systemd.is_active(old_unit) or not c.systemd.is_active(new_unit):
                 raise RuntimeError("V4 writer mutual exclusion failed")
@@ -484,6 +486,34 @@ class V4RootExecutor:
         except Exception as exc:
             if not changes_started:
                 raise
+            # Once a full-LIVE start was attempted, exit code/GET failure does
+            # not prove the new process never submitted an order. Keep its
+            # ownership/state binding intact and block both processes until a
+            # fresh venue + durable compatibility recovery is approved. Never
+            # copy an old runtime artifact or restart an old SHA over unknown
+            # new STOP/intent ownership. Native protection orders are untouched.
+            if candidate_start_attempted:
+                try:
+                    if c.systemd.is_active(new_unit):
+                        c.systemd.stop(new_unit)
+                    if c.systemd.is_enabled(new_unit):
+                        c.systemd.disable(new_unit)
+                    c.systemd.mask(new_unit)
+                    if c.systemd.is_active(old_unit) or c.systemd.is_active(new_unit):
+                        raise RuntimeError("V4 recovery process still active")
+                    _atomic_json(journal, {
+                        "schema": "disdex-unified-deploy-transaction/v1",
+                        "phase": "RECOVERY_REQUIRED_PROTECTED", "scope": V4_SCOPE,
+                        "reason": str(exc)[:240], "oldSha": old_sha, "newSha": args.sha,
+                        "oldUnit": old_unit, "newUnit": new_unit,
+                        "oldSourceRestartAuthorized": False,
+                        "candidateOwnershipRetained": True,
+                        "requiresFreshVenueAndDurableCompatibility": True,
+                        "venueMutationsByRecovery": False,
+                    }, root_uid=c.root_uid)
+                except Exception as recovery_error:
+                    raise RuntimeError("V4 recovery isolation failed: " + str(recovery_error)) from exc
+                raise RuntimeError("V4 cutover failed closed; recovery required: " + str(exc)) from exc
             try:
                 if c.systemd.is_active(new_unit):
                     c.systemd.stop(new_unit)

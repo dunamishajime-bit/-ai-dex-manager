@@ -46,7 +46,7 @@ PLAN_HASH = re.compile(r"[0-9a-f]{64}\Z")
 HEX32 = re.compile(r"[0-9a-f]{32}\Z")
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 LEASE_ROOT = Path("/var/lib/disdex/unified-deploy/refresh-leases/v4")
-REFRESH_OUTPUT_PATH = "/var/lib/disdex/v12-v4/evidence-refresh-last.json"
+REFRESH_OUTPUT_PATH = "/var/lib/disdex/unified-deploy/v4-evidence/evidence-refresh-last.json"
 LEASE_FIELDS = frozenset({
     "schema", "repository", "deploymentTarget", "operatorTarget", "scope", "route",
     "approvedSha", "approvedRunner", "approvedRunners", "approvedShaByRunner",

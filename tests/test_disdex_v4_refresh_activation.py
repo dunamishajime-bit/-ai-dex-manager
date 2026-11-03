@@ -8,6 +8,7 @@ sys.path.insert(0, str(ROOT / "scripts" / "ops" / "deploy"))
 
 from disdex_v4_evidence_refresh_activation import (  # noqa: E402
     REFRESH_SCOPE,
+    refresh_plan,
     build_refresh_lease,
     require_fresh_refresh_approval,
     refresh_plan_sha256,
@@ -43,6 +44,13 @@ def approval(**overrides):
 
 
 class RefreshLeaseTest(unittest.TestCase):
+    def test_refresh_output_is_root_managed_and_not_runner_writable_state(self):
+        plan=refresh_plan(SHA)
+        self.assertEqual(plan["outputPath"],
+            "/var/lib/disdex/unified-deploy/v4-evidence/evidence-refresh-last.json")
+        self.assertFalse(plan["ordersEnabled"])
+        self.assertEqual(build_refresh_lease(approval(),now=NOW)["outputPath"],plan["outputPath"])
+
     def test_owner_verified_approval_derives_exact_refresh_lease(self):
         result = build_refresh_lease(approval(), now=NOW)
         self.assertEqual(result["schema"], "disdex-v4-evidence-refresh-lease/v1")
