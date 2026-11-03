@@ -139,6 +139,8 @@ async function atomicPreserveMetadata(path: string, raw: string, uid: number, gi
       await fd.close();
     }
     await rename(temporary, path);
+    const directory=await open(dirname(path),constants.O_RDONLY);
+    try {await directory.sync();} finally {await directory.close();}
   } catch (error) {
     await unlink(temporary).catch(() => undefined);
     throw error;
@@ -152,13 +154,57 @@ export function parsePendingReconcileArgs(argv: readonly string[]) {
   return { apply: argv[0] === "--apply-refresh" };
 }
 
-export function assertPendingApplyCertified(apply: boolean): void {
-  if (apply) throw new Error("PENDING_RECONCILE_APPLY_NOT_CERTIFIED");
+type PendingGrantContext = {now:number;sha:string;registryHash:string;parentPid:number};
+
+export function validatePendingRefreshGrant(value: unknown, context: PendingGrantContext): void {
+  const g=value as JsonRecord;
+  const fields=['schema','scope','repository','target','route','authorizationMethod','ordersEnabled',
+    'sourceSha','registryHash','parentPid','nonce','issuedAt','expiresAt'];
+  if (!g || typeof g!=='object' || Array.isArray(g)
+    || Object.keys(g).sort().join('|')!==fields.sort().join('|')
+    || g.schema!=='disdex-pending-refresh-root-grant/v1' || g.scope!=='PENDING_RECONCILE_ONLY'
+    || g.repository!=='dunamishajime-bit/-ai-dex-manager' || g.target!=='DD1296_FINAL_ALLIN_10BPS'
+    || g.route!=='CODEX_SSH' || g.authorizationMethod!=='ROOT_SSH_SESSION' || g.ordersEnabled!==false
+    || !/^[a-f0-9]{40}$/.test(g.sourceSha) || g.sourceSha!==context.sha
+    || !/^[a-f0-9]{64}$/.test(g.registryHash) || g.registryHash!==context.registryHash
+    || typeof g.nonce!=='string' || !/^[a-f0-9]{32}$/.test(g.nonce) || !Number.isSafeInteger(g.parentPid) || g.parentPid<=0
+    || g.parentPid!==context.parentPid || !Number.isSafeInteger(context.now)
+    || !Number.isSafeInteger(g.issuedAt) || !Number.isSafeInteger(g.expiresAt)
+    || g.issuedAt>context.now || g.expiresAt<=context.now || g.expiresAt-g.issuedAt>60_000) {
+    throw new Error('PENDING_REFRESH_GRANT_INVALID');
+  }
+}
+
+async function rootRefreshGrant(): Promise<JsonRecord> {
+  const path=String(process.env.DISDEX_PENDING_REFRESH_GRANT_PATH||'');
+  if (!/^\/run\/disdex-pending-refresh\/[a-f0-9]{32}\.json$/.test(path)) {
+    throw new Error('PENDING_RECONCILE_APPLY_NOT_CERTIFIED');
+  }
+  const parent=await lstat(dirname(path));
+  if (!parent.isDirectory() || parent.isSymbolicLink() || parent.uid!==0 || (parent.mode&0o027)!==0) {
+    throw new Error('PENDING_REFRESH_GRANT_UNTRUSTED');
+  }
+  const fd=await open(path,constants.O_RDONLY|(constants.O_NOFOLLOW??0));
+  try {
+    const st=await fd.stat();
+    if (!st.isFile() || st.uid!==0 || (st.mode&0o777)!==0o640 || st.size>8192) {
+      throw new Error('PENDING_REFRESH_GRANT_UNTRUSTED');
+    }
+    const g=JSON.parse(await fd.readFile('utf8'));
+    if (path!==`/run/disdex-pending-refresh/${g.nonce}.json`) throw new Error('PENDING_REFRESH_GRANT_INVALID');
+    return g;
+  } finally {await fd.close();}
+}
+
+export function assertPendingApplyCertified(apply: boolean, grant?:unknown, context?:PendingGrantContext): void {
+  if (!apply) return;
+  if (!grant || !context) throw new Error("PENDING_RECONCILE_APPLY_NOT_CERTIFIED");
+  validatePendingRefreshGrant(grant,context);
 }
 
 async function main() {
   const { apply } = parsePendingReconcileArgs(process.argv.slice(2));
-  assertPendingApplyCertified(apply);
+  const grant=apply?await rootRefreshGrant():undefined;
   assertV4SharedRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
   const deploy = await readDeployIds();
   if (typeof process.getuid !== "function" || typeof process.getgid !== "function") {
@@ -187,11 +233,13 @@ async function main() {
   try {
     await handle.renew();
     const before = await trustedRegistry(pendingPath);
-    const [positions, openOrders, balances] = await Promise.all([
-      client.getPositions(),
-      client.getOpenOrders(),
-      client.getBalances(),
-    ]);
+    const grantContext=()=>({now:Date.now(),sha:String(process.env.DISDEX_RELEASE_SHA||''),
+      registryHash:sha256(before.raw),parentPid:process.ppid});
+    assertPendingApplyCertified(apply,grant,grantContext());
+    // Sequential signed reads avoid self-saturating the shared priority queue.
+    const positions=await client.getPositions();
+    const openOrders=await client.getOpenOrders();
+    const balances=await client.getBalances();
     if (!Array.isArray(balances)) throw new Error("PENDING_RECONCILE_BALANCE_SNAPSHOT_INVALID");
     const checked = validatePendingReadonlyReconcile({
       registry: before.parsed,
@@ -208,6 +256,7 @@ async function main() {
     let afterHash = sha256(before.raw);
     if (apply) {
       await handle.renew();
+      assertPendingApplyCertified(true,grant,grantContext());
       const next = buildPendingReconciledRegistry(before.parsed, verifiedAt);
       const raw = JSON.stringify(next, null, 2) + "\n";
       await atomicPreserveMetadata(
