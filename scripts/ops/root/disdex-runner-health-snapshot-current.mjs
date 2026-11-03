@@ -426,7 +426,7 @@ async function runnerOperatorGateReason(runner) {
 }
 
 export async function buildHeartbeat(runner, now, globalBlockReason, dependencies={}) {
-    const {readJson=json,snapshot=serviceSnapshot,readTick=readObservedRunnerTick}=dependencies;
+    const {readJson=json,snapshot=serviceSnapshot,readTick=readObservedRunnerTick,clock=()=>Math.max(now,Date.now())}=dependencies;
     if (runner.disabled) {
         const reason = runner.disabledReason || `${runner.key} is intentionally disabled`;
         const heartbeat = {
@@ -533,7 +533,7 @@ export async function buildHeartbeat(runner, now, globalBlockReason, dependencie
         Number(state?.initialDaemonReconciliation?.completedAt || 0),
     );
     const stateFresh = updatedAt > 0 && now >= updatedAt && now - updatedAt <= runner.maxStateAgeMs;
-    const observedTick = await readTick(runner,service,now);
+    const observedTick = await readTick(runner,service,clock());
     const phase = runner.key === "V12_V4" ? observedV4Phase(runner,service,state,observedTick) : {monitorOnly:false};
     const observedIdentity = phase.monitorOnly ? phase.valid : stateIdentityMatches(runner,state);
     const tickBlocked = !observedTick.legacy && !observedTick.valid;
@@ -577,7 +577,7 @@ export async function buildHeartbeat(runner, now, globalBlockReason, dependencie
         limitedLive: String(state?.operationMode || "").toUpperCase() === "CANARY",
         orderPermission: blockedReason ? "DENIED_BLOCKED" : phase.monitorOnly ? "DENIED_MONITOR_ONLY" : "ALLOWED",
         newOrdersAllowed: !blockedReason && !phase.monitorOnly,
-        heartbeatAt: now,
+        heartbeatAt: clock(),
         lastTickAt: observedTick.legacy ? (updatedAt > 0 ? updatedAt : null) : observedTick.lastTickAt,
         actualLastTickAt: observedTick.valid ? observedTick.lastTickAt : null,
         tickVerified: observedTick.valid === true,

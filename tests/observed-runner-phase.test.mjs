@@ -25,7 +25,7 @@ test('actual snapshot reports a healthy monitor separately from order permission
  const {buildHeartbeat}=await import('../scripts/ops/root/disdex-runner-health-snapshot-current.mjs');
  const liveService={...service,active:true,command:'scripts/v12-v4-production-runner.ts --monitor-only --daemon',execStart:runner.releaseRoot+'/scripts/v12-v4-production-runner.ts',nRestarts:0};
  const state={schema:'disdex-v12-v4-runner-heartbeat/v1',strategyId:'V12_V4',mode:'MONITOR_ONLY',operationMode:'MONITOR_ONLY',liveEnabled:false,newOrdersAllowed:false,runtimeSha:sha,mainPid:123,workingDirectory:runner.releaseRoot,lastTickAt:marker.tickCompletedAt,heartbeatAt:now-1};
- const dependencies={readJson:async()=>state,snapshot:async()=>liveService,readTick:async()=>validateObservedTick(runner,liveService,marker,now)};
+ const dependencies={clock:()=>now,readJson:async()=>state,snapshot:async()=>liveService,readTick:async()=>validateObservedTick(runner,liveService,marker,now)};
  const result=await buildHeartbeat(runner,now,'',dependencies);
  assert.equal(result.heartbeat.mode,'MONITOR_ONLY');assert.equal(result.heartbeat.liveEnabled,false);
  assert.equal(result.heartbeat.safetyState,'MONITOR_ONLY',JSON.stringify(result));assert.equal(result.heartbeat.orderPermission,'DENIED_MONITOR_ONLY');assert.equal(result.heartbeat.newOrdersAllowed,false);
@@ -46,6 +46,7 @@ test('missing marker never borrows current time, legacy stays unverified, and SH
   await writeFile(join(folder,'v4.json'),JSON.stringify(marker));assert.equal((await readObservedRunnerTick(r,service,now,{manifestPath,ticksRoot})).valid,true);
   await pins({evidenceMode:'legacy'});const legacy=await readObservedRunnerTick(r,service,now,{manifestPath,ticksRoot});assert.equal(legacy.valid,false);assert.equal(legacy.legacy,true);assert.equal(legacy.lastTickAt,null);
   await pins({sha:'b'.repeat(40)});assert.equal((await readObservedRunnerTick(r,service,now,{manifestPath,ticksRoot})).reason,'OBSERVED_PIN_IDENTITY');
+  await pins({evidenceMode:'unknown'});assert.equal((await readObservedRunnerTick(r,service,now,{manifestPath,ticksRoot})).reason,'OBSERVED_PIN_EVIDENCE_MODE_INVALID');
  }finally{await chmod(manifestPath,0o600).catch(()=>{});await rm(folder,{recursive:true,force:true});}
 });
 test('preserved Q102 gate cannot enable historical selector flags',async()=>{
