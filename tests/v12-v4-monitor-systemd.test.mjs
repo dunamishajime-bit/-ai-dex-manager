@@ -4,6 +4,13 @@ import { readFileSync } from "node:fs";
 
 const source = readFileSync("deploy/systemd/disdex-v12-v4-monitor@.service", "utf8");
 
+test("monitor loader override keeps the tick writer in the systemd MainPID", () => {
+  const override=readFileSync("deploy/systemd/disdex-v12-v4-monitor@.service.d/60-same-pid-loader.conf","utf8");
+  assert.match(override,/^ExecStart=$/m);
+  assert.match(override,/^ExecStart=\/usr\/bin\/node --import \/home\/deploy\/disdex-trading\/releases\/%i\/node_modules\/tsx\/dist\/loader\.mjs \/home\/deploy\/disdex-trading\/releases\/%i\/scripts\/v12-v4-monitor-only-runner\.ts --daemon$/m);
+  assert.doesNotMatch(override,/cli\.mjs|v12-v4-production-runner/);
+});
+
 test("V4 monitor systemd unit is read-only and has no production activation gate", () => {
   assert.match(source, /scripts\/v12-v4-monitor-only-runner\.ts --daemon/);
   assert.doesNotMatch(source, /scripts\/v12-v4-production-runner\.ts/);

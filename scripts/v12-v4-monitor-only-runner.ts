@@ -6,7 +6,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { loadV4ClosedCandles, buildV4LiveDecisionBatch } from "../lib/v12-v4-live-candidate-builder";
 import { attachV4NativeCoreCandidates } from "../lib/v12-v4-core-candidate";
 import { assertV4EntrySafety } from "../lib/v12-v4-entry-safety";
-import { assertV4MonitorRateBudget, blockedV4MonitorRead, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
+import { assertV4MonitorRateBudget, blockedV4MonitorRead, collectV4MonitorReads, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
 import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 
 type JsonRecord=Record<string,any>;
@@ -69,16 +69,18 @@ async function cycle(now=Date.now()){
  const entrySafetyError=await assertV4EntrySafety().then(()=>null,(error)=>safeReason(error));
  const pendingPath=process.env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH||"/var/lib/disdex/shared/pending-exposure.json";
  const proofPath=process.env.V12_V4_PENDING_READONLY_PROOF_PATH||"/var/lib/disdex/v12-v4/monitor/pending-proof.json";
- const [risk,margin,killSwitch,pendingSource,pendingProof,positions,openOrders,market]=await Promise.all([
+ const {positions,openOrders,decision:market}=await collectV4MonitorReads({
+  positions:()=>client.getPositions(),openOrders:()=>client.getOpenOrders(),decision:()=>decision(client,now),
+ });
+ const [risk,margin,killSwitch,pendingSource,pendingProof]=await Promise.all([
   trustedJson(process.env.DISDEX_V4_DYNAMIC_SHARED_RISK_PATH||"/var/lib/disdex/shared/crypto-daily-risk.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_MARGIN_PATH||"/var/lib/disdex/shared/margin-risk/guard-live.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_KILL_SWITCH_PATH||"/var/lib/disdex/shared/kill-switch.json"),
   trustedJsonWithHash(pendingPath),
   trustedJson(proofPath,0),
-  client.getPositions(),client.getOpenOrders(),decision(client,now),
  ]);
  return {sha,result:evaluateV4MonitorCompletedDecision({
-  now,risk,margin,killSwitch,pending:pendingSource.value,runtimeSha:sha,
+  now:Date.now(),risk,margin,killSwitch,pending:pendingSource.value,runtimeSha:sha,
   pendingHash:pendingSource.hash,pendingProof,
   positions:positions as unknown as JsonRecord[],openOrders:openOrders as unknown as JsonRecord[],
   decision:market as unknown as JsonRecord,
