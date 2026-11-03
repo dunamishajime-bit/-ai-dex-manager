@@ -164,3 +164,12 @@ root refresh contract deployment/lease continuity; exact protected-hold
 recovery; remaining Runner decision-to-order/API/Gross safety verification;
 authenticated HP and notification delivery; per-Runner order enable and final
 three LIVE cycles. Economic changes remain separate and unadopted.
+
+Post-monitor Shared Risk restart continuity was also checked without restarting
+the Writer. The first bare SSH invocation lacked the guard's required
+systemd environment and correctly returned SHARED_RISK_PRESTART_ENVIRONMENT_MISMATCH.
+Reading only the two non-secret required values from the actual pinned Writer
+PID/CWD and using them in the read-only guard produced
+SHARED_RISK_COMMITTED_NO_ORDER_RESTART_READY, inheritedLatchTripped=false,
+inheritedRiskUpdatedAt1793740783977, ordersEnabled=false, limit7.5% retained.
+No approval timestamp, receipt, state or service was changed by that check.
