@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -147,10 +148,12 @@ def normalize_inventory(d: dict) -> dict:
             "SIGNED_GET_ARRAYS_INVALID")
     for row in raw_positions:
         require(isinstance(row, dict), "POSITION_NOT_OBJECT")
+        require(type(row.get('positionAmt')) in (str,int,float), 'POSITION_AMT_INVALID')
         try:
             amount = float(row.get("positionAmt"))
         except (TypeError, ValueError):
             raise RuntimeError("POSITION_AMT_INVALID") from None
+        require(math.isfinite(amount), 'POSITION_AMT_INVALID')
         if abs(amount) < 1e-15:
             continue
         positions.append({
@@ -534,10 +537,12 @@ def execute(run_id: str) -> None:
         require(PIN.read_bytes() == old, "PIN_CHANGED_BEFORE_CUTOVER")
         run("systemctl","stop",OLD_UNIT,timeout=90)
         require(not service_active(OLD_UNIT), "OLD_V52_STILL_ACTIVE")
+        # Every attempted metadata publication must enter rollback, including
+        # failure between the first pin write and the final current-plan write.
+        switched = True
         atomic_pin(new_pin(old),uid,gid,mode)
         atomic_root_file(RUNNER_PINS, next_runner_pins(old_runner_pins), runner_pins_mode)
         atomic_root_file(CURRENT_PLAN, next_current_plan(old_plan), current_plan_mode)
-        switched = True
         cutover_started = int(time.time()) - 2
         run("systemctl","start",NEW_UNIT,timeout=100)
         wait_unit(NEW_UNIT,str(BASE/NEW))
