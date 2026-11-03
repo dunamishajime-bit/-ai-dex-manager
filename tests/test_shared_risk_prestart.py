@@ -22,6 +22,26 @@ def inputs():
     return dict(sha=SHA,plan=plan,activation=auth,pins=plan['runners'],active_writers=[],now=NOW)
 
 class PrestartTest(unittest.TestCase):
+    def test_completed_deployment_can_restart_without_redeeming_or_redating_expired_approval(self):
+        data=inputs();data['now']=NOW+3600
+        plan=data['plan'];digest=hashlib.sha256(canonical(plan)).hexdigest()
+        receipt=dict(status='SHARED_RISK_CUTOVER_VERIFIED',scope='SHARED_CRYPTO_RISK_ONLY',
+            targetSha=SHA,planSha256=digest,ordersEnabled=False,route='CODEX_SSH',nonceDigest='a'*64,
+            ordersSent=0,cancelsSent=0,positionChangesSent=0,
+            auditCycles=[dict(status='SHARED_RISK_REAL_REFRESH_VERIFIED',runtimeSha=SHA,ordersEnabled=False,
+                riskSnapshot=dict(updatedAt=NOW*1000+i)) for i in range(3)])
+        # A later authenticated peer deployment does not change the deployed
+        # no-order Risk component's identity or grant it trading permission.
+        current={**plan,'runners':{**plan['runners'],'V52':'b'*40}}
+        data['pins']=current['runners']
+        result=m.validate_prestart(**data,committed_receipt=receipt,current_plan=current)
+        self.assertEqual(result['status'],'SHARED_RISK_COMMITTED_NO_ORDER_RESTART_READY')
+        self.assertEqual(data['activation']['expiresAt'],NOW+300)
+        for patch in [dict(ordersEnabled=True),dict(targetSha=OLD),dict(planSha256='b'*64),
+                      dict(auditCycles=receipt['auditCycles'][:2]),dict(ordersSent=False)]:
+            with self.assertRaises(ValueError):m.validate_prestart(**data,committed_receipt={**receipt,**patch},current_plan=current)
+        with self.assertRaises(ValueError):m.validate_prestart(**data,current_plan=current)
+
     def test_no_order_scope_does_not_require_or_issue_trading_authority_to_any_peer(self):
         self.assertEqual(m.validate_prestart(**inputs())['ordersEnabled'],False)
         data=inputs();data['active_writers']=['disdex-shared-crypto-risk@'+SHA+'.service']

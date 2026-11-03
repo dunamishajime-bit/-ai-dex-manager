@@ -581,8 +581,8 @@ def _validate_venue_evidence(value: dict, *, now: int, label: str,
     return value
 
 
-def _validate_scoped_activation(activation: dict, args, desired: dict,
-                                plan_hash: str, *, now: int) -> dict:
+def _validate_scoped_activation_binding(activation: dict, args, desired: dict,
+                                       plan_hash: str) -> dict:
     required = {
         "schema", "repository", "deploymentTarget", "operatorTarget", "scope",
         "approvedSha", "approvedShaByRunner", "approvedRunners", "planSha256",
@@ -610,9 +610,17 @@ def _validate_scoped_activation(activation: dict, args, desired: dict,
     approved_at = activation["approvedAt"]
     expires_at = activation["expiresAt"]
     if (type(approved_at) is not int or type(expires_at) is not int
-        or approved_at > now + 5 or expires_at < now
+        or approved_at <= 0
         or not 1 <= expires_at - approved_at <= 86_400):
-        raise ValueError("operator activation artifact is expired or future dated")
+        raise ValueError("operator activation artifact time fields invalid")
+    return activation
+
+
+def _validate_scoped_activation(activation: dict, args, desired: dict,
+                                plan_hash: str, *, now: int) -> dict:
+    _validate_scoped_activation_binding(activation,args,desired,plan_hash)
+    if activation['approvedAt'] > now+5 or activation['expiresAt'] <= now:
+        raise ValueError('operator activation artifact is expired or future dated')
     return activation
 
 

@@ -21,6 +21,13 @@ def health():
         kill=dict(active=True,action='HOLD_PROTECTED'))
 
 class WitnessTest(unittest.TestCase):
+    def test_historical_latch_is_validated_for_writer_bootstrap_without_claiming_freshness(self):
+        row=health()['risk'];row.update(updatedAt=NOW-86400000,utcDay='2026-11-02',stateHash='a'*64,tripped=True)
+        m.validate_inherited_risk(row,now_ms=NOW)
+        for patch in [dict(updatedAt=NOW+1),dict(tripped='true'),dict(maximumLossPct=8),
+                      dict(stateHash=None),dict(fees=None),dict(utcDay='2026-11-03')]:
+            with self.assertRaises(ValueError):m.validate_inherited_risk({**row,**patch},now_ms=NOW)
+
     def test_writer_inventory_rejects_a_second_or_unknown_active_writer(self):
         expected='disdex-shared-crypto-risk@'+'c'*40+'.service'
         m.validate_writer_inventory([expected],expected)

@@ -142,6 +142,22 @@ def validate_writer_inventory(units,expected_unit):
             'SHARED_RISK_NOT_EXACTLY_ONE_PINNED_WRITER')
 
 
+def validate_inherited_risk(row,*,now_ms):
+    require(type(row.get('updatedAt')) is int and 0<row['updatedAt']<=now_ms,
+            'SHARED_RISK_INHERITED_TIMESTAMP_INVALID')
+    day=datetime.fromtimestamp(row['updatedAt']/1000,timezone.utc).date().isoformat()
+    require(row.get('utcDay')==day and row.get('maximumLossPct')==7.5
+            and type(row.get('tripped')) is bool and row.get('sourceComplete') is True
+            and isinstance(row.get('stateHash'),str) and len(row['stateHash'])==64
+            and all(c in '0123456789abcdef' for c in row['stateHash']),
+            'SHARED_RISK_INHERITED_IDENTITY_OR_LATCH_INVALID')
+    fields=['lossPct','referenceEquity','realizedPnl','unrealizedPnl','fees','funding','netDailyPnl']
+    require(all(numeric(row.get(k)) for k in fields) and row['referenceEquity']>0
+            and row['lossPct']>=0 and (row['lossPct']<7.5 or row['tripped'])
+            and abs(row['netDailyPnl']-sum(row[k] for k in ['realizedPnl','unrealizedPnl','fees','funding']))<=1e-6,
+            'SHARED_RISK_INHERITED_FINANCIAL_SOURCE_INVALID')
+
+
 class ProductionSharedRiskReader:
     def __init__(self):
         require(os.geteuid()==0,'SHARED_RISK_READER_ROOT_REQUIRED')
@@ -163,18 +179,25 @@ class ProductionSharedRiskReader:
         require(rows[0]['afterHash']==digest_file(PENDING),'SHARED_RISK_PENDING_CHANGED_AFTER_GET')
         return rows[0]
 
-    def read_risk(self):
+    def read_risk(self,*,allow_historical=False):
         # Use the real TS hash validator: Python JSON float formatting must not
         # invent a different canonical hash for an existing Risk snapshot.
-        script=("import {readSharedCryptoDailyRisk} from './lib/disdex-shared-crypto-daily-risk.ts';"
+        script=("import {readSharedCryptoDailyRisk,validateSharedCryptoDailyRisk} from './lib/disdex-shared-crypto-daily-risk.ts';"
+                + ("import {readFile} from 'node:fs/promises';"
+                   "const raw=JSON.parse(await readFile('/var/lib/disdex/shared/crypto-daily-risk.json','utf8'));"
+                   "if(!Number.isSafeInteger(raw.updatedAt)||raw.updatedAt>Date.now()||typeof raw.stateHash!=='string'||!/^[a-f0-9]{64}$/.test(raw.stateHash))process.exit(2);"
+                   "const r=validateSharedCryptoDailyRisk(raw,raw.updatedAt,0);" if allow_historical else
                 "const r=await readSharedCryptoDailyRisk('/var/lib/disdex/shared/crypto-daily-risk.json');"
+                )+
                 "if(!r.state||(!r.ok&&r.reason!=='DAILY_LOSS_TRIPPED'))process.exit(2);"
                 "console.log(JSON.stringify(r.state));")
         result=subprocess.run(['/usr/bin/node','--import',str(SDK/'node_modules/tsx/dist/loader.mjs'),
                 '--input-type=module','-e',script],cwd=SDK,env={'PATH':'/usr/bin:/bin'},
                 capture_output=True,text=True,timeout=12)
         require(result.returncode==0,'SHARED_RISK_HASH_OR_STATE_INVALID')
-        return json_object(result.stdout)
+        row=json_object(result.stdout)
+        if allow_historical:validate_inherited_risk(row,now_ms=time.time_ns()//1000000)
+        return row
 
     def read_context(self):
         from disdex_unified_root_gate import PREFIXES,STOP_OWNERS
