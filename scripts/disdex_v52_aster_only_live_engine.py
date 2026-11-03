@@ -6,6 +6,7 @@ import os
 import signal
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import disdex_v52_aster_only_legacy_engine as legacy
@@ -61,6 +62,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.save()
 
     def idle_tick(self, prepared: dict) -> None:
+        started=base.now_ms()
         super().idle_tick(prepared)
         # V52 is a stock sleeve, but Idle Priority is a 24/7 crypto sleeve.
         # Even while US equities are closed (or a safe prelock skip is used),
@@ -68,10 +70,34 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         # Idle can prove Formal > Idle priority without depending on stale stock
         # session state.
         self._refresh_idle_admission_heartbeat()
+        self._publish_completed_tick(started,prepared,'IDLE_DECISION_COMPLETE')
 
     def tick(self, prepared: dict | None = None) -> None:
+        started=base.now_ms()
         super().tick(prepared)
         self._refresh_idle_admission_heartbeat()
+        self._publish_completed_tick(started,prepared or {},'FULL_DECISION_COMPLETE')
+
+    def _publish_completed_tick(self,started: int,prepared: dict,stage: str) -> None:
+        # Opt in only when the new release and systemd tick write path are
+        # deployed together. Old Runner/pin monitoring remains legacy.
+        if not self.live or not base.bool_env('DISDEX_V52_REAL_TICK_ENABLED',False):
+            return
+        from disdex_runner_tick_heartbeat import write_completed_runner_tick
+        sha=os.getenv('DISDEX_RELEASE_SHA','')
+        if os.getenv('DISDEX_RUNTIME_COMMIT_SHA')!=sha:
+            raise RuntimeError('V52_TICK_RUNTIME_SHA_MISMATCH')
+        kill=self.kill_switch()
+        if kill:status,reason='held','KILL_SWITCH_'+str(kill.get('action') or 'ACTIVE')
+        elif prepared.get('marketClosed'):status,reason='market-closed','US_EQUITY_SESSION_CLOSED'
+        elif prepared.get('quoteStaleLocalHold'):status,reason='held','STOCK_REFERENCE_STALE'
+        elif prepared.get('rateBudgetDeferred'):status,reason='deferred','ASTER_RATE_BUDGET_DEFERRED'
+        else:status,reason='completed',stage
+        # This marker certifies processing only. Actual new-order authority is
+        # independently determined by the operator and final preorder gates.
+        write_completed_runner_tick(root=Path(os.getenv('DISDEX_RUNNER_TICK_HEARTBEAT_ROOT','/var/lib/disdex/runner-health')),
+            runner_id='V52',sha=sha,service_unit='disdex-v52-aster-only@'+sha+'.service',
+            started_at=started,completed_at=base.now_ms(),status=status,reason=reason,new_orders_allowed=False)
 
     def assert_gross_safe(self, snapshot=None) -> None:
         row = snapshot or self.gross_snapshot()
@@ -555,6 +581,73 @@ def self_test() -> None:
     print("V52_STRICT_ASTER_ONLY_SELFTEST_PASS")
 
 
+
+
+def _atomic_monitor_json(path: Path, payload: dict) -> None:
+    from disdex_runner_tick_heartbeat import atomic_runner_health_json
+    atomic_runner_health_json(path,payload)
+
+
+def build_v52_monitor_tick(result: dict, *, started_at: int, completed_at: int) -> dict:
+    sha=(os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+    if len(sha)!=40 or any(c not in "0123456789abcdef" for c in sha):
+        raise RuntimeError("V52_MONITOR_RELEASE_SHA_INVALID")
+    release_root=(os.getenv("DISDEX_RELEASE_ROOT") or os.getcwd()).strip()
+    service=(os.getenv("DISDEX_V52_MONITOR_SERVICE_UNIT") or f"disdex-v52-monitor@{sha}.service").strip()
+    return {
+        "schema":"disdex-runner-tick/v1","runnerId":"V52_MONITOR",
+        "runtimeSha":sha,"expectedSha":sha,"serviceUnit":service,
+        "mainPid":os.getpid(),"workingDirectory":release_root,
+        "tickStartedAt":started_at,"tickCompletedAt":completed_at,
+        "status":"observing","outcome":"V52_MONITOR_ONLY_READONLY_PREFLIGHT_PASS",
+        "reason":"V52_MONITOR_ONLY_READONLY_PREFLIGHT_PASS","newOrdersAllowed":False,
+        "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,
+        "positionCount":len(result.get("positions") or {}),
+    }
+
+
+def run_monitor_only_daemon(runner: "V52AsterOnlyEngine", daemon: bool) -> None:
+    if not base.bool_env("DISDEX_V52_MONITOR_ONLY", False):
+        raise RuntimeError("V52 monitor daemon requires DISDEX_V52_MONITOR_ONLY=true")
+    if base.bool_env("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", False):
+        raise RuntimeError("V52 monitor daemon requires LIVE_EXECUTION_ENABLED=false")
+    tick_path=Path(os.getenv("DISDEX_V52_MONITOR_TICK_PATH", "/var/lib/disdex/v52-monitor/tick.json"))
+    health_path=Path(os.getenv("DISDEX_V52_MONITOR_HEALTH_PATH", "/var/lib/disdex/v52-monitor/heartbeat.json"))
+    interval=max(5_000, int(os.getenv("DISDEX_V52_MONITOR_INTERVAL_MS","30000")))
+    last_completed_tick_at=None
+    while not runner.stop_requested:
+        started=base.now_ms()
+        try:
+            result=runner.preflight(read_only=True)
+            completed=base.now_ms()
+            tick=build_v52_monitor_tick(result,started_at=started,completed_at=completed)
+            _atomic_monitor_json(tick_path,tick)
+            last_completed_tick_at=completed
+            _atomic_monitor_json(health_path,{**tick,"schema":"disdex-v52-monitor-heartbeat/v1","heartbeatAt":completed,"lastTickAt":last_completed_tick_at})
+            print(json.dumps({"mode":"MONITOR_ONLY","status":"observing","eventTs":completed,
+                              "runtimeSha":tick["runtimeSha"],"positions":tick["positionCount"],
+                              "ordersSent":0,"cancelsSent":0,"positionChangesSent":0},
+                             separators=(",",":")),flush=True)
+        except Exception as error:
+            completed=base.now_ms()
+            sha=(os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+            _atomic_monitor_json(health_path,{
+                "schema":"disdex-v52-monitor-heartbeat/v1","runnerId":"V52_MONITOR",
+                "runtimeSha":sha,"expectedSha":sha,"mainPid":os.getpid(),
+                "workingDirectory":os.getenv("DISDEX_RELEASE_ROOT") or os.getcwd(),
+                "heartbeatAt":completed,"lastTickAt":last_completed_tick_at,"status":"blocked",
+                "reason":"V52_MONITOR_READ_FAILED:"+str(error)[:240],
+                "newOrdersAllowed":False,"ordersSent":0,"cancelsSent":0,"positionChangesSent":0,
+            })
+            print(json.dumps({"mode":"MONITOR_ONLY","status":"blocked","eventTs":completed,
+                              "reason":"V52_MONITOR_READ_FAILED:"+str(error)[:240],
+                              "ordersSent":0,"cancelsSent":0,"positionChangesSent":0},
+                             separators=(",",":")),flush=True)
+        if not daemon:
+            return
+        time.sleep(interval/1000.0)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=("paper", "live"), default=os.getenv("DISDEX_V52_ASTER_ONLY_RUNNER_MODE", "paper"))
@@ -562,6 +655,7 @@ def main() -> int:
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--preflight-readonly", action="store_true")
+    parser.add_argument("--monitor-only-daemon", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -576,6 +670,13 @@ def main() -> int:
     if args.preflight:
         print(json.dumps(runner.preflight(), indent=2, ensure_ascii=False))
         return 0
+    if args.monitor_only_daemon:
+        if args.mode != "live":
+            raise RuntimeError("V52 monitor-only daemon requires --mode live")
+        run_monitor_only_daemon(runner,args.daemon and not args.once)
+        return 0
+    if base.bool_env("DISDEX_V52_MONITOR_ONLY", False):
+        raise RuntimeError("V52 monitor-only environment cannot enter order-capable runner")
     runner.run(args.daemon and not args.once)
     return 0
 

@@ -5,18 +5,62 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import time
 
 
+def owner_ready(artifact, sha, runner):
+    return (isinstance(artifact, dict)
+            and artifact.get('schema') == 'disdex-live-operator-activation/v1'
+            and artifact.get('target') == 'DD1296_FINAL_ALLIN_10BPS'
+            and artifact.get('approvedSha') == sha
+            and artifact.get('ordersEnabled') is True
+            and artifact.get('operatorAcknowledgement') == 'I_ACK_REAL_MONEY_LIVE_ACTIVATION'
+            and isinstance(artifact.get('approvedRunners'), list)
+            and runner in artifact['approvedRunners']
+            and artifact.get('fetCorePreemptionReady') is True)
+
+
+def independent_approvals_ready(v52_artifact, fet_artifact, manifest, v52_sha):
+    if not isinstance(v52_sha,str) or not re.fullmatch(r'[0-9a-f]{40}',v52_sha):return False
+    if not isinstance(manifest,dict) or manifest.get('schema')!='disdex-runner-pin-manifest/v1':return False
+    runners=manifest.get('runners')
+    if not isinstance(runners,dict):return False
+    pin=runners.get('FET_BRK48_RESIDUAL')
+    if not isinstance(pin,dict):return False
+    fet_sha=pin.get('sha')
+    if (not isinstance(fet_sha,str) or not re.fullmatch(r'[0-9a-f]{40}',fet_sha)
+            or pin.get('serviceUnit')!='disdex-fet-brk48@'+fet_sha+'.service'
+            or pin.get('releaseRoot')!='/home/deploy/disdex-trading/releases/'+fet_sha
+            or pin.get('stopOwner')!='FET_BRK48_RESIDUAL'):return False
+    return owner_ready(v52_artifact,v52_sha,'V52') and owner_ready(fet_artifact,fet_sha,'FET_BRK48_RESIDUAL')
+
+
+def trusted_json(path, private):
+    path=Path(path);s=path.lstat()
+    if (path.is_symlink() or not stat.S_ISREG(s.st_mode) or s.st_uid!=0
+            or s.st_mode&(0o077 if private else 0o022)):
+        raise ValueError('FET_PREEMPTION_UNTRUSTED_PROOF')
+    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+    try:
+        actual=os.fstat(fd)
+        if (s.st_ino,s.st_dev)!=(actual.st_ino,actual.st_dev):raise ValueError('FET_PREEMPTION_PROOF_REPLACED')
+        def unique(pairs):
+            result={}
+            for key,value in pairs:
+                if key in result:raise ValueError('FET_PREEMPTION_DUPLICATE_PROOF_FIELD')
+                result[key]=value
+            return result
+        with os.fdopen(fd,'r',closefd=False) as stream:return json.load(stream,object_pairs_hook=unique)
+    finally:os.close(fd)
+
+
 def approved_ready(path, sha):
     try:
-        artifact = json.loads(Path(path).read_text())
-        return (artifact.get('approvedSha') == sha
-                and artifact.get('ordersEnabled') is True
-                and artifact.get('operatorAcknowledgement') == 'I_ACK_REAL_MONEY_LIVE_ACTIVATION'
-                and {'V52', 'FET_BRK48_RESIDUAL'}.issubset(artifact.get('approvedRunners', []))
-                and artifact.get('fetCorePreemptionReady') is True)
+        return independent_approvals_ready(trusted_json(path,True),
+            trusted_json('/var/lib/disdex/shared/operator-activation/current.json',True),
+            trusted_json('/etc/disdex/runner-pins.json',False),sha)
     except (OSError, ValueError, TypeError):
         return False
 
