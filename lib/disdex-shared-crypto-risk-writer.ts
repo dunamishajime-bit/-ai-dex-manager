@@ -28,9 +28,14 @@ export const SHARED_CRYPTO_SYMBOLS = new Set([
     ...QUALITY102_CAUSAL_V4_S34_SHARED_SYMBOLS,
 ]);
 
-function finite(value: unknown): number {
-    const number = Number(value);
-    return Number.isFinite(number) ? number : 0;
+function sourceNumber(value: unknown, field: string): number {
+    if ((typeof value !== "number" && typeof value !== "string")
+        || (typeof value === "string" && (!value.trim()
+            || !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(value.trim())))
+        || !Number.isFinite(Number(value))) {
+        throw new Error("SHARED_CRYPTO_RISK_SOURCE_NUMBER_INVALID:" + field);
+    }
+    return Number(value);
 }
 
 function utcStart(now: number): number {
@@ -41,7 +46,8 @@ function utcStart(now: number): number {
 async function priorTripForUtcDay(path: string, utcDay: string): Promise<boolean> {
     try {
         const raw = JSON.parse(await readFile(path, "utf8")) as Partial<SharedCryptoDailyRiskState>;
-        if (raw.schema !== SHARED_CRYPTO_DAILY_RISK_SCHEMA || raw.accountScope !== "ASTER_FUTURES" || typeof raw.utcDay !== "string") {
+        if (raw.schema !== SHARED_CRYPTO_DAILY_RISK_SCHEMA || raw.accountScope !== "ASTER_FUTURES" || typeof raw.utcDay !== "string"
+            || typeof raw.tripped !== "boolean") {
             throw new Error("SHARED_CRYPTO_RISK_PRIOR_STATE_SCHEMA_INVALID");
         }
         if (raw.utcDay !== utcDay) return false;
@@ -71,6 +77,7 @@ export async function refreshSharedCryptoDailyRisk(input: {
     runtimeSha?: string;
 }): Promise<SharedCryptoDailyRiskState & { portfolioDdGovernor?: PortfolioDdGovernorState }> {
     const now = input.now ?? Date.now();
+    if (!Number.isSafeInteger(now) || now <= 0) throw new Error("SHARED_CRYPTO_RISK_SOURCE_CLOCK_INVALID");
     const startTime = utcStart(now);
     const incomeStartTime = input.portfolioDdGovernorPath
         ? await governorIncomeStartTime(input.portfolioDdGovernorPath, now, startTime)
@@ -82,14 +89,29 @@ export async function refreshSharedCryptoDailyRisk(input: {
         input.client.getIncomeHistory({ startTime: incomeStartTime, endTime: now, limit: 1000 }),
         priorTripForUtcDay(input.path, utcDay),
     ]);
+    if (![balances, positions, income].every(Array.isArray)) throw new Error("SHARED_CRYPTO_RISK_SOURCE_ARRAY_INVALID");
     if (income.length >= 1000) throw new Error("SHARED_CRYPTO_RISK_INCOME_PAGE_INCOMPLETE");
+
+    // Validate before filtering: invalid timestamps or missing symbols must
+    // never silently remove a real loss from a sourceComplete snapshot.
+    for (const row of income) {
+        if (!row || typeof row.symbol !== "string") throw new Error("SHARED_CRYPTO_RISK_SOURCE_INCOME_SYMBOL_INVALID");
+        const at = sourceNumber(row.time, "income.time");
+        if (!Number.isSafeInteger(at) || at <= 0 || at > now) throw new Error("SHARED_CRYPTO_RISK_SOURCE_INCOME_TIME_INVALID");
+    }
+    for (const row of positions) {
+        if (!row || typeof row.symbol !== "string" || !row.symbol) throw new Error("SHARED_CRYPTO_RISK_SOURCE_POSITION_SYMBOL_INVALID");
+    }
+    for (const row of balances) {
+        if (!row || typeof row.asset !== "string" || !row.asset) throw new Error("SHARED_CRYPTO_RISK_SOURCE_BALANCE_ASSET_INVALID");
+    }
 
     const relevant = income.filter((row) => Number(row.time) >= startTime && SHARED_CRYPTO_SYMBOLS.has(String(row.symbol || "").toUpperCase()));
     let realizedPnl = 0;
     let fees = 0;
     let funding = 0;
     for (const row of relevant) {
-        const amount = finite(row.income);
+        const amount = sourceNumber(row.income, "income");
         if (row.incomeType === "REALIZED_PNL") realizedPnl += amount;
         else if (row.incomeType === "COMMISSION") fees += amount;
         else if (row.incomeType === "FUNDING_FEE") funding += amount;
@@ -97,10 +119,10 @@ export async function refreshSharedCryptoDailyRisk(input: {
 
     const unrealizedPnl = positions
         .filter((row) => SHARED_CRYPTO_SYMBOLS.has(String(row.symbol || "").toUpperCase()))
-        .reduce((sum, row) => sum + finite(row.unRealizedProfit ?? row.unrealizedProfit), 0);
+        .reduce((sum, row) => sum + sourceNumber(row.unRealizedProfit ?? row.unrealizedProfit, "unrealizedPnl"), 0);
     const walletBalance = balances
         .filter((row) => /^(USDT|USDC)$/i.test(String(row.asset || "")))
-        .reduce((sum, row) => sum + finite(row.balance), 0);
+        .reduce((sum, row) => sum + sourceNumber(row.balance, "balance"), 0);
     const settledToday = realizedPnl + fees + funding;
     const referenceEquity = walletBalance - settledToday;
     if (!(referenceEquity > 0)) throw new Error("SHARED_CRYPTO_RISK_REFERENCE_EQUITY_INVALID");

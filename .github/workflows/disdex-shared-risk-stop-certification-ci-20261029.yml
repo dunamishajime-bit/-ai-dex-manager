@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - lib/disdex-shared-crypto-daily-risk.ts
+      - lib/disdex-shared-crypto-risk-writer.ts
+      - tests/shared-risk-source-integrity.test.ts
       - lib/resident-stop-observation.ts
       - scripts/ops/root/disdex-current-runtime-wiring
       - scripts/ops/root/disdex-live-operator-activation-gate.mjs
@@ -50,6 +52,7 @@ jobs:
           tests/resident-stop-observation.test.ts
           tests/operator_activation_hardening.test.ts
           tests/shared-risk-writer-concurrency.test.ts
+          tests/shared-risk-source-integrity.test.ts
       - run: npx --no-install tsc --noEmit --pretty false
       - run: python -m unittest tests.test_risk_api_final_preflight_multisha -v
       - run: python scripts/ops/root/disdex-risk-api-final-preflight-20261028.py --self-test
