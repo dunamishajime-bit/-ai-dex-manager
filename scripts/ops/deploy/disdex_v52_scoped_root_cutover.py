@@ -248,7 +248,10 @@ class V52ScopedOperations:
         require(risk.get('sourceComplete') is True and risk.get('tripped') is False
             and risk.get('maximumLossPct')==7.5,'SHARED_RISK_NOT_HEALTHY')
         margin=json.loads(self.file(self.MARGIN));pending=json.loads(self.file(self.PENDING));kill=json.loads(self.file(self.KILL))
-        for value,age in [(margin.get('checkedAt'),120000),(pending.get('updatedAt'),300000)]:
+        # A protected-hold deployment uses the existing witness contract.
+        # Healthy Margin polls every five minutes; the trading engine still
+        # performs its independent fresh Margin check before any order.
+        for value,age in [(margin.get('checkedAt'),900000),(pending.get('updatedAt'),300000)]:
             require(type(value) is int and 0<=now-value<=age,'MARGIN_OR_PENDING_STALE')
         require(margin.get('stage')=='HEALTHY' and margin.get('ordersAllowed') is True,'MARGIN_BLOCKED')
         entries=pending.get('entries');require(isinstance(entries,list) and all(isinstance(e,dict) and e.get('status')=='RELEASED' for e in entries),'ACTIVE_OR_UNKNOWN_PENDING')

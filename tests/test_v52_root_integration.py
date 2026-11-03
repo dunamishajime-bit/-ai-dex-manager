@@ -7,6 +7,22 @@ import disdex_unified_root_gate as gate
 from disdex_v52_scoped_root_cutover import V52ScopedOperations
 
 class DispatchTest(unittest.TestCase):
+ def test_protected_hold_uses_existing_fifteen_minute_margin_contract_not_two_minute_order_gate(self):
+  now=2000000000000
+  parent=SimpleNamespace(paths=SimpleNamespace(root=Path('/fixture'),receipts=Path('/fixture')),systemd=None)
+  ops=V52ScopedOperations(parent,SimpleNamespace(sha='a'*40),'')
+  ops.reader=SimpleNamespace(read_risk=lambda:dict(sourceComplete=True,tripped=False,maximumLossPct=7.5))
+  import json
+  margin=dict(checkedAt=now-300000,stage='HEALTHY',ordersAllowed=True)
+  pending=dict(updatedAt=now-90000,entries=[dict(status='RELEASED')])
+  kill=dict(active=True,action='HOLD_PROTECTED',operator='disdex-v52-aster-only',recoverable=True,reason='V52 upstream state unavailable: QUALITY102_STATE_MISMATCH:runtimeCommitSha')
+  ops.file=lambda p:json.dumps(margin if p==ops.MARGIN else pending if p==ops.PENDING else kill).encode()
+  with patch('disdex_v52_scoped_root_cutover.time.time_ns',return_value=now*1000000):
+   ops.health()
+   for stamp in [now-900001,now+1]:
+    margin['checkedAt']=stamp
+    with self.assertRaisesRegex(ValueError,'MARGIN_OR_PENDING_STALE'):ops.health()
+
  def test_exact_v52_scope_dispatches_to_independent_executor(self):
   parent=gate.RootDeploymentExecutor(SimpleNamespace(),root_uid=os.getuid() if hasattr(os,'getuid') else 0)
   args=SimpleNamespace(scope='V52',orders_enabled='true',deployment_target=gate.DEPLOYMENT_TARGET,operator_target=gate.OPERATOR_TARGET)
