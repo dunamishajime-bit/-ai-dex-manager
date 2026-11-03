@@ -1,7 +1,7 @@
 import copy,hashlib,sys,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation,validate_real_tick,run_scoped_transaction,scoped_configuration_bytes,layered_monitor_pin_changes
+from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation,validate_real_tick,run_scoped_transaction,scoped_configuration_bytes,layered_monitor_pin_changes,validate_unchanged_caps
 
 IDS=['V12_V4','QUALITY102_CAUSAL_V1','V52','PENGU_V8','FET_BRK48_RESIDUAL','HYPE_TREND_LONG','IDLE_PRIORITY_SHORT','SHARED_CRYPTO_RISK','MARGIN_GUARD']
 
@@ -11,6 +11,13 @@ def plans():
  return current,desired
 
 class ScopedRootContractTest(unittest.TestCase):
+ def test_gross_contract_comes_from_existing_source_and_cannot_change_or_accept_nan(self):
+  source='class StrictPortfolioCaps:\n crypto_gross: float = 3.0\n stock_gross: float = 4.0\n total_gross: float = 4.25\n stock_slot_gross: float = 2.0\n'
+  report=dict(caps=dict(crypto=3.,stock=4.,portfolio=4.25,v11=2.,v50=2.))
+  validate_unchanged_caps(source,source,report)
+  for candidate,proof in [(source.replace('4.25','5.0'),report),(source,dict(caps={**report['caps'],'stock':1.5})),(source,dict(caps={**report['caps'],'crypto':float('nan')}))]:
+   with self.assertRaises(ValueError):validate_unchanged_caps(source,candidate,proof)
+
  def test_historical_monitor_layers_are_reconciled_only_after_effective_old_pin_matches(self):
   prefix='DISDEX_WATCHDOG_V52_';root='/home/deploy/disdex-trading/releases'
   def layer(sha):return prefix+'EXPECTED_SHA='+sha+'\n'+prefix+'RELEASE_ROOT='+root+'/'+sha+'\n'+prefix+'SERVICE_UNIT=disdex-v52-aster-only@'+sha+'.service\nPENGU_SHA=keep\n'

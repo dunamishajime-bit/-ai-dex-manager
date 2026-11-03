@@ -12,6 +12,8 @@ import os
 from pathlib import Path
 import subprocess
 import time
+import ast
+import math
 
 REPO='dunamishajime-bit/-ai-dex-manager'
 TARGET='professional-dismanager.net'
@@ -30,6 +32,24 @@ def canonical(row):return json.dumps(row,sort_keys=True,separators=(',',':'),ens
 
 
 def plan_hash(plan):return hashlib.sha256(canonical(plan)).hexdigest()
+
+
+def validate_unchanged_caps(old_source,new_source,report):
+    def constants(source):
+        tree=ast.parse(source)
+        classes=[n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=='StrictPortfolioCaps']
+        require(len(classes)==1,'GROSS_CONTRACT_CLASS')
+        values={n.target.id:ast.literal_eval(n.value) for n in classes[0].body
+            if isinstance(n,ast.AnnAssign) and isinstance(n.target,ast.Name)}
+        require(values and all(type(v) in [int,float] and math.isfinite(v) and v>0 for v in values.values()),'GROSS_CONTRACT_VALUES')
+        return values
+    old=constants(old_source);new=constants(new_source)
+    require(old==new,'ECONOMIC_GROSS_CHANGE_REQUIRES_SEPARATE_CERTIFICATION')
+    mapping=dict(crypto='crypto_gross',stock='stock_gross',portfolio='total_gross',v11='stock_slot_gross',v50='stock_slot_gross')
+    caps=report.get('caps')
+    require(isinstance(caps,dict) and set(caps)==set(mapping) and all(
+        type(caps.get(k)) in [int,float] and math.isfinite(caps[k]) and caps[k]==old.get(v)
+        for k,v in mapping.items()),'CANDIDATE_GROSS_DIFFERS_FROM_EXISTING_SOURCE')
 
 
 def scoped_configuration_bytes(raw,old,new,*,environment=False):
@@ -242,9 +262,11 @@ class V52ScopedOperations:
         # No raw error/output URLs, response bodies or environment are logged.
         require(result.returncode==0,'CANDIDATE_GET_ONLY_PREFLIGHT_BLOCKED')
         rows=[json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
-        require(len(rows)==1 and rows[0].get('readOnly') is True and rows[0].get('ordersSent') is False
-            and rows[0].get('caps',{}).get('crypto')==3.0 and rows[0].get('caps',{}).get('stock')==1.5
-            and rows[0].get('caps',{}).get('portfolio')==3.5,'CANDIDATE_PREFLIGHT_CONTRACT')
+        require(len(rows)==1 and rows[0].get('readOnly') is True and rows[0].get('ordersSent') is False,
+                'CANDIDATE_PREFLIGHT_CONTRACT')
+        relative='scripts/disdex_strict_portfolio_planner.py'
+        validate_unchanged_caps(self.file(self.paths.releases/self.OLD/relative).decode(),
+            self.file(self.release/relative).decode(),rows[0])
         return rows[0]
 
     def runtime_environment(self):
