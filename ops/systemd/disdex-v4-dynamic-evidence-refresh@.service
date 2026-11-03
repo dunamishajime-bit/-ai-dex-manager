@@ -2,6 +2,7 @@
 # The lease is installed only by the owner-signed refresh activation helper.
 [Unit]
 Description=DisDex V4 dynamic evidence refresh (%i)
+OnFailure=disdex-runner-health-alert.service
 After=network-online.target local-fs.target disdex-v4-rate-budget-broker@%i.service
 Requires=disdex-v4-rate-budget-broker@%i.service
 Wants=network-online.target

@@ -14,13 +14,13 @@ jobs:
           node-version: '20'
       - run: npm ci --ignore-scripts
       - name: Fetch exact reviewed preview source
-        run: git fetch --no-tags --depth=1 origin 715c45842477bd244c0aa95d49be60285788acea
+        run: git fetch --no-tags --depth=1 origin 622c67b47cbd2d79fd8ad8d372262f51d052bc19
       - name: Fetch reviewed root refresh helpers
         run: git fetch --no-tags --depth=1 origin 3524e3676848b9260f53164e07257acdda7bcc5c
       - name: Verify candidate source lineage
         run: python3 -m unittest tests.test_v4_release_candidate_source tests.test_v4_refresh_installer_contract tests.test_pending_refresh_executor -v
       - name: Test monitoring, evidence and shared API budget
-        run: npx tsx --test tests/v12-v4-monitor-only.test.ts tests/v4-dynamic-evidence-auth-boundary.test.ts tests/pending-exposure-readonly-reconcile.test.ts tests/pending-refresh-root-grant.test.ts tests/v4-rate-budget-proxy.test.ts tests/v4-rate-budget-proxy-integration.test.ts tests/v4-budget-shared-lock.test.ts tests/v12-v4-recoverable-safety.test.ts tests/v4-monitor-read-scheduling.test.ts
+        run: npx tsx --test tests/v12-v4-monitor-only.test.ts tests/v4-dynamic-evidence-auth-boundary.test.ts tests/v4-refresh-commit.test.ts tests/v4-refresh-publication.test.ts tests/pending-exposure-readonly-reconcile.test.ts tests/pending-refresh-root-grant.test.ts tests/v4-rate-budget-proxy.test.ts tests/v4-rate-budget-proxy-integration.test.ts tests/v4-budget-shared-lock.test.ts tests/v12-v4-recoverable-safety.test.ts tests/v4-monitor-read-scheduling.test.ts
       - name: Test V4 tick contract
         run: npx tsx --test --test-name-pattern='tick filenames|a V4 writer|writes an atomic|replaces an existing|requires explicit|same-PID|80 concurrent|rejects invalid' tests/runner-tick-heartbeat.test.ts
       - name: Test existing V4 execution, health and STOP contracts

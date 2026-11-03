@@ -13,6 +13,7 @@ import type {V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V4ExecutionDocument} from "./v12-v4-execution-store";
 import {V12_V4_V2_POLICY} from "./v12-v4-v2-shadow";
 import {V12_V4_CERTIFIED_GROSS_CONTRACT} from "./v12-v4-production-contract";
+import {V4_REFRESH_COMMIT_PATH,V4_DYNAMIC_EVIDENCE_KEYS,validateV4RefreshCommit} from './v12-v4-refresh-commit';
 export const V4_PRODUCTION_CERT_PATH="/etc/disdex/v12-v4-production-certification.json";
 const SHA=/^[a-f0-9]{40}$/;
 const DIGEST=/^[a-f0-9]{64}$/;
@@ -65,7 +66,13 @@ export type V4SharedExecutionCertificate={
  };
  operatorAcknowledgement:"I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS";
 };
-export type V4AnyProductionCertificate=V4ProductionCertificate|V4SharedExecutionCertificate;
+export type V4BoundedRefreshCertificate=Omit<V4SharedExecutionCertificate,'schema'|'operatorAcknowledgement'>&{
+ schema:'disdex-v12-v4-production-certification/v4';
+ operatorAcknowledgement:'I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS_WITH_BOUNDED_DYNAMIC_REFRESH';
+ dynamicRefreshPolicy:'BOUNDED_ROOT_REFRESH_V1';
+};
+type SharedCertificate=V4SharedExecutionCertificate|V4BoundedRefreshCertificate;
+export type V4AnyProductionCertificate=V4ProductionCertificate|SharedCertificate;
 const FULL_ROUTE_SET=new Set(PRODUCTION_EXIT_CATALOG.map(r=>r.route));
 function requireAllRoutes(routes:unknown){
  if(FULL_ROUTE_SET.size!==41||!Array.isArray(routes)||routes.length!==41||
@@ -78,20 +85,21 @@ function record(value:unknown,key:V4EvidenceKey):V4EvidenceRecord{
  return value as V4EvidenceRecord;
 }
 function numberField(value:unknown,key:string){
+ if((typeof value!=='number'&&typeof value!=='string')||(typeof value==='string'&&!value.trim()))throw Error(`V4_EVIDENCE_FIELD_INVALID:${key}`);
  const n=Number(value);if(!Number.isFinite(n))throw Error(`V4_EVIDENCE_FIELD_INVALID:${key}`);return n;
 }
-function assertCurrentEvidenceMetadata(value:V4EvidenceRecord,key:V4EvidenceKey,sha:string,now:number){
+function assertCurrentEvidenceMetadata(value:V4EvidenceRecord,key:V4EvidenceKey,sha:string,now:number,releaseBoundStatic=false){
  if(value.status!=="PASS")throw Error(`V4_EVIDENCE_STATUS_NOT_PASS:${key}`);
  if(value.candidateSha!==sha)throw Error(`V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:${key}`);
  const captured=Date.parse(String(value.capturedAt??""));
- if(!Number.isFinite(captured)||captured>now+5*60_000||now-captured>EVIDENCE_MAX_AGE_MS)
+ if(!Number.isFinite(captured)||captured<=0||captured>now+5*60_000||(!releaseBoundStatic&&now-captured>EVIDENCE_MAX_AGE_MS))
   throw Error(`V4_EVIDENCE_STALE:${key}`);
 }
 /** Validate redacted evidence content before its digest grants authority. */
-export function validateV4SharedExecutionEvidencePayloads(payloads:Record<V4EvidenceKey,unknown>,sha:string,now=Date.now()){
+export function validateV4SharedExecutionEvidencePayloads(payloads:Record<V4EvidenceKey,unknown>,sha:string,now=Date.now(),releaseBoundStatic=false){
  if(!SHA.test(sha))throw Error("V4_EVIDENCE_SHA_INVALID");
  for(const key of Object.keys(V4_SHARED_EXECUTION_EVIDENCE_PATHS) as V4EvidenceKey[])
-  assertCurrentEvidenceMetadata(record(payloads[key],key),key,sha,now);
+  assertCurrentEvidenceMetadata(record(payloads[key],key),key,sha,now,releaseBoundStatic&&(key==='routeSourceParity'||key==='v4ExecutionTests'));
  const route=record(payloads.routeSourceParity,"routeSourceParity");
  if(numberField(route.routeCount,"routeCount")!==41||route.sourceParity!==true)
   throw Error("V4_EVIDENCE_ROUTE_PARITY_INVALID");
@@ -109,12 +117,14 @@ export function validateV4SharedExecutionEvidencePayloads(payloads:Record<V4Evid
   throw Error("V4_EVIDENCE_HEALTH_NOT_PASS");
  return true as const;
 }
-function validateV4SharedExecutionCertificate(raw:Record<string,any>,sha:string,now:number):V4SharedExecutionCertificate{
+function validateV4SharedExecutionCertificate(raw:Record<string,any>,sha:string,now:number):SharedCertificate{
  const c=raw;
- if(c.schema!=="disdex-v12-v4-production-certification/v3"||
+ const bounded=c.schema==='disdex-v12-v4-production-certification/v4';
+ if((!bounded&&c.schema!=="disdex-v12-v4-production-certification/v3")||
     c.approvedSha!==sha||c.policyId!==V12_V4_V2_POLICY||
     c.venueEvidenceBasis!=="ESTABLISHED_ASTER_PRODUCTION_EXECUTION"||
-    c.operatorAcknowledgement!=="I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS"||
+    (bounded?(c.operatorAcknowledgement!=='I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS_WITH_BOUNDED_DYNAMIC_REFRESH'||c.dynamicRefreshPolicy!=='BOUNDED_ROOT_REFRESH_V1'):
+     c.operatorAcknowledgement!=="I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS")||
     c.risksAcknowledged?.v4FirstLiveFillNotYetObserved!==true||
     c.risksAcknowledged?.weakIndependentForwardPerformance!==true)
   throw Error("V4_SHARED_EXECUTION_CERTIFICATE_INVALID");
@@ -130,29 +140,56 @@ function validateV4SharedExecutionCertificate(raw:Record<string,any>,sha:string,
  if(!Number.isFinite(from)||!Number.isFinite(until)||from>now+300000||
    until<=now||until-from>7*86400000||until<=from)
   throw Error("V4_CERTIFICATE_EXPIRED_OR_FUTURE");
- return c as V4SharedExecutionCertificate;
+ return c as SharedCertificate;
+}
+export function resolveV4EvidenceDigests(c:SharedCertificate,commit:unknown,now=Date.now()):Record<V4EvidenceKey,string>{
+ if(c.schema!=='disdex-v12-v4-production-certification/v4')return {...c.evidenceSha256};
+ return {...c.evidenceSha256,...validateV4RefreshCommit(commit,c.approvedSha,now)};
 }
 /** Read and hash actual root-managed evidence bytes; a plausible hex string,
  * research document or writable paper log is NOT enough to issue authority. */
-export async function verifyV4SharedExecutionEvidence(c:V4SharedExecutionCertificate){
+export async function verifyV4SharedExecutionEvidence(c:SharedCertificate){
  const parent=await lstat("/etc/disdex/v12-v4-evidence");
  if(!parent.isDirectory()||parent.isSymbolicLink()||parent.uid!==0||
     (parent.mode&0o022)!==0)throw Error("V4_EVIDENCE_PARENT_UNTRUSTED");
- const payloads={} as Record<V4EvidenceKey,unknown>;
- for(const [key,path] of Object.entries(V4_SHARED_EXECUTION_EVIDENCE_PATHS) as [V4EvidenceKey,string][]){
+ const now=Date.now(),bounded=c.schema==='disdex-v12-v4-production-certification/v4';
+ let commit:Record<string,any>|undefined;
+ if(bounded){
+  const fd=await open(V4_REFRESH_COMMIT_PATH,constants.O_RDONLY|constants.O_NOFOLLOW);
+  try{
+   const st=await fd.stat();
+   if(!st.isFile()||st.uid!==0||(st.mode&0o022)!==0||st.size>1048576)throw Error('V4_REFRESH_COMMIT_UNTRUSTED');
+   commit=JSON.parse(await fd.readFile('utf8'));
+  }finally{await fd.close();}
+ }
+ const expected=resolveV4EvidenceDigests(c,commit,now);
+ const payloads={...(bounded?commit!.evidencePayloads:{})} as Record<V4EvidenceKey,unknown>;
+ // One atomically replaced root bundle supplies all mutable payloads. Never
+ // combine standalone files from two generations while refresh is publishing.
+ const files=Object.entries(V4_SHARED_EXECUTION_EVIDENCE_PATHS) as [V4EvidenceKey,string][];
+ for(const [key,path] of files.filter(([key])=>!bounded||key==='routeSourceParity'||key==='v4ExecutionTests')){
   const file=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
   try{
    const st=await file.stat();
    if(!st.isFile()||st.uid!==0||(st.mode&0o022)!==0)
     throw Error("V4_EVIDENCE_FILE_UNTRUSTED:"+key);
    const data=await file.readFile();
-   if(createHash("sha256").update(data).digest("hex")!==c.evidenceSha256[key])
+   if(createHash("sha256").update(data).digest("hex")!==expected[key])
     throw Error("V4_EVIDENCE_DIGEST_MISMATCH:"+key);
    try{payloads[key]=JSON.parse(data.toString("utf8"));}
    catch{throw Error("V4_EVIDENCE_CONTENT_INVALID:"+key);}
   }finally{await file.close();}
  }
- validateV4SharedExecutionEvidencePayloads(payloads,c.approvedSha);
+ if(bounded){
+  for(const key of V4_DYNAMIC_EVIDENCE_KEYS){
+   const p=payloads[key] as Record<string,any>;
+   if(p.refreshGeneration!==commit?.refreshGeneration||p.capturedAt!==commit?.capturedAt)throw Error('V4_REFRESH_GENERATION_MISMATCH');
+  }
+  for(const key of ['routeSourceParity','v4ExecutionTests'] as const){
+   if(Date.parse(String((payloads[key] as Record<string,any>).capturedAt))>Date.parse(c.approvedAt)+300000)throw Error('V4_STATIC_EVIDENCE_AFTER_CERTIFICATE');
+  }
+ }
+ validateV4SharedExecutionEvidencePayloads(payloads,c.approvedSha,now,bounded);
  return true;
 }
 
@@ -160,7 +197,7 @@ export function validateV4ProductionCertificate(raw:unknown,sha:string,now=Date.
  if(!raw||typeof raw!=="object"||Array.isArray(raw)||!SHA.test(sha))
   throw Error("V4_ROOT_CERTIFICATE_REQUIRED");
  const c=raw as Record<string,any>;
- if(c.schema==="disdex-v12-v4-production-certification/v3")return validateV4SharedExecutionCertificate(c,sha,now);
+ if(c.schema==="disdex-v12-v4-production-certification/v3"||c.schema==='disdex-v12-v4-production-certification/v4')return validateV4SharedExecutionCertificate(c,sha,now);
  if(c.schema!=="disdex-v12-v4-production-certification/v2"||
   c.approvedSha!==sha||c.policyId!==V12_V4_V2_POLICY||
   c.operatorAcknowledgement!=="I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS"||
@@ -201,7 +238,7 @@ export async function readV4ProductionCertificate(sha:string,
    (st.gid!==0&&st.gid!==process.getgid?.()))
     throw Error("V4_CERT_NOT_ROOT_SECURE");
   const cert=validateV4ProductionCertificate(JSON.parse(await f.readFile("utf8")),sha,now);
-  if(cert.schema==="disdex-v12-v4-production-certification/v3")await verifyV4SharedExecutionEvidence(cert);
+  if(cert.schema==="disdex-v12-v4-production-certification/v3"||cert.schema==='disdex-v12-v4-production-certification/v4')await verifyV4SharedExecutionEvidence(cert);
   return cert;
  }finally{await f.close();}
 }

@@ -5,6 +5,7 @@ import { buildV4HealthPayload, classifyV4RecoverableSafetyFailure } from "../scr
 
 test("stale dynamic evidence and an unavailable peer block orders and can retry", () => {
   for (const reason of ["V4_EVIDENCE_STALE:signedAsterAccount", "V4_EVIDENCE_STALE:sharedRiskAndPeers",
+    'V4_REFRESH_LEASE_EXPIRED','V4_REFRESH_COMMIT_STALE',
     "V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:peer.service"]) {
     const result=classifyV4RecoverableSafetyFailure(new Error(reason),1000);
     assert.equal(result?.status,"blocked"); assert.equal(result?.orderEnabled,false);
@@ -13,6 +14,7 @@ test("stale dynamic evidence and an unavailable peer block orders and can retry"
 
 test("tampering, static evidence drift and ambiguous order timeouts remain fatal", () => {
   for (const reason of ["V4_EVIDENCE_STALE:routeSourceParity", "V4_EVIDENCE_DIGEST_MISMATCH:signedAsterAccount",
+    'V4_REFRESH_COMMIT_INVALID','V4_REFRESH_COMMIT_UNTRUSTED','V4_REFRESH_GENERATION_MISMATCH',
     "V4_EVIDENCE_CANDIDATE_SHA_MISMATCH:signedAsterAccount", "Aster request timeout after 10000ms", "ECONNRESET", "UNKNOWN_FATAL"]) {
     assert.equal(classifyV4RecoverableSafetyFailure(new Error(reason),1000),undefined);
   }
