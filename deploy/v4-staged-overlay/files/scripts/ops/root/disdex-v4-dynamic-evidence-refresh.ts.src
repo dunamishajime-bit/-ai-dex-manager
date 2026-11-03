@@ -7,7 +7,7 @@
  * approval, enable orders, or call any order mutation endpoint.
  */
 import { createHash, randomUUID } from "node:crypto";
-import { chmod, lstat, mkdir, readFile, realpath, rename, unlink, writeFile } from "node:fs/promises";
+import { chmod, chown, open, lstat, mkdir, readFile, realpath, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 
 import {
@@ -16,8 +16,9 @@ import {
   type AsterOrderResponse,
   type AsterPositionRiskRow,
 } from "../../../lib/aster-v3-client";
-import { validateV4SharedExecutionEvidencePayloads } from "../../../lib/v12-v4-certified-gates";
+import { validateV4ProductionCertificate,validateV4SharedExecutionEvidencePayloads } from "../../../lib/v12-v4-certified-gates";
 import { assertV4MonitorRateBudget, createV4EvidenceFetch } from "../../../lib/v12-v4-monitor-only";
+import {validateV4RefreshCommit} from '../../../lib/v12-v4-refresh-commit';
 
 export function assertV4RefreshRateBudget(path: unknown, socket: unknown, sha: unknown): void {
   assertV4MonitorRateBudget(path, socket, sha);
@@ -200,7 +201,7 @@ export function validateDynamicRefreshTarget(existing: JsonRecord, sha: string) 
   assertSha(sha);
   const readOnly = existing.readOnly;
   const mutationCalls = existing.mutationCalls;
-  if (!SHA.test(String(existing.candidateSha || "").toLowerCase())
+  if (existing.candidateSha !== sha
       || existing.status !== "PASS"
       || (readOnly !== undefined && readOnly !== null && readOnly !== true)
       || (mutationCalls !== undefined && mutationCalls !== null && mutationCalls !== 0)) {
@@ -438,6 +439,8 @@ export async function collectV4DynamicEvidence(input: {
   runtime: V4DynamicRuntimeSnapshot;
   now?: number;
   refreshGeneration?: string;
+  readRuntime?:()=>Promise<V4DynamicRuntimeSnapshot>;
+  clock?:()=>number;
 }) {
   assertSha(input.sha);
   if (!input.client.hasTradingCredentials()) throw new Error("V4_DYNAMIC_REFRESH_CREDENTIALS_MISSING");
@@ -448,11 +451,12 @@ export async function collectV4DynamicEvidence(input: {
   const balances = await input.client.getBalances();
   const positions = await input.client.getPositions();
   const openOrders = await input.client.getOpenOrders();
+  const runtime=input.readRuntime?await input.readRuntime():input.runtime;
   return buildV4DynamicEvidence({
     sha: input.sha,
-    now: input.now,
+    now: input.clock?input.clock():input.now,
     refreshGeneration: input.refreshGeneration,
-    runtime: input.runtime,
+    runtime,
     aster: {
       serverTime: Number(serverTime.serverTime),
       balances,
@@ -474,7 +478,7 @@ export function buildV4DynamicRefreshPlan(input: {
   const now = input.now ?? Date.now();
   validateStaticReleaseEvidence({ sha, payloads: input.staticPayloads, now });
   const payloads = { ...input.staticPayloads, ...input.dynamicPayloads } as Record<EvidenceKey, unknown>;
-  validateV4SharedExecutionEvidencePayloads(payloads, sha, now);
+  validateV4SharedExecutionEvidencePayloads(payloads, sha, now, true);
   const generation = String((input.dynamicPayloads[DYNAMIC_KEYS[0]] as JsonRecord)?.refreshGeneration || "");
   if (!generation || DYNAMIC_KEYS.some((key) => String((input.dynamicPayloads[key] as JsonRecord)?.refreshGeneration || "") !== generation)) {
     throw new Error("V4_DYNAMIC_REFRESH_GENERATION_MISMATCH");
@@ -565,11 +569,16 @@ async function assertReleaseMarker(releaseRoot: string, sha: string) {
   return resolvedRoot;
 }
 
-async function stageJson(path: string, value: unknown) {
+export async function stageV4EvidenceJson(path: string, value: unknown, readableGid?:number) {
+  if(readableGid!==undefined&&(!Number.isSafeInteger(readableGid)||readableGid<0))throw new Error('V4_REFRESH_READER_GROUP_INVALID');
   const temporary = `${path}.${process.pid}.${randomUUID()}.tmp`;
-  await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o600, flag: "wx" });
-  await chmod(temporary, 0o600);
-  return temporary;
+  try{
+    await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", mode: 0o600, flag: "wx" });
+    if(readableGid!==undefined)await chown(temporary,process.getuid!(),readableGid);
+    await chmod(temporary, readableGid===undefined?0o600:0o640);
+    const fd=await open(temporary,'r');try{await fd.sync();}finally{await fd.close();}
+    return temporary;
+  }catch(error){await unlink(temporary).catch(()=>undefined);throw error;}
 }
 
 async function refreshDynamicFiles(input: {
@@ -588,13 +597,17 @@ async function refreshDynamicFiles(input: {
   const now = input.now ?? Date.now();
   const releaseRoot = await assertReleaseMarker(input.releaseRoot, sha);
   await assertTrustedDirectory(input.evidenceRoot, 0);
+  let refreshLease:JsonRecord|undefined;
   if (input.apply) {
+    const certificate=validateV4ProductionCertificate(await readTrustedJson('/etc/disdex/v12-v4-production-certification.json',0),sha,now);
+    if(certificate.schema!=='disdex-v12-v4-production-certification/v4')throw new Error('V4_REFRESH_BOUNDED_CERTIFICATE_REQUIRED');
     const leasePath = input.leasePath || `/var/lib/disdex/unified-deploy/refresh-leases/v4/${sha}.json`;
     if (leasePath !== `/var/lib/disdex/unified-deploy/refresh-leases/v4/${sha}.json`) {
       throw new Error("V4_DYNAMIC_REFRESH_LEASE_PATH_MISMATCH");
     }
     const lease = await readTrustedJson(leasePath, 0);
     const validatedLease = validateV4RefreshLease({ lease, sha, now: Math.floor(now / 1000) });
+    refreshLease=lease;
     if (validatedLease.releaseRoot !== releaseRoot || validatedLease.evidenceRoot !== input.evidenceRoot) {
       throw new Error("V4_DYNAMIC_REFRESH_LEASE_RUNTIME_PATH_MISMATCH");
     }
@@ -605,8 +618,9 @@ async function refreshDynamicFiles(input: {
   }
   const current = await readStaticPayloads(input.evidenceRoot);
   const runtime = await readRuntimeSnapshot();
-  const dynamic = await collectV4DynamicEvidence({ sha, client: input.client, runtime, now });
-  const plan = buildV4DynamicRefreshPlan({ sha, staticPayloads: current, dynamicPayloads: dynamic, now });
+  const dynamic = await collectV4DynamicEvidence({sha,client:input.client,runtime,now,
+    readRuntime:readRuntimeSnapshot,clock:()=>input.now??Date.now()});
+  const plan = buildV4DynamicRefreshPlan({ sha, staticPayloads: current, dynamicPayloads: dynamic, now:input.now??Date.now() });
   const apiBudgetDiagnostics = (input.budgetDiagnostics || []).map((event) => ({ ...event }));
   if (!input.apply) {
     return {
@@ -620,13 +634,23 @@ async function refreshDynamicFiles(input: {
 
   const staged: Array<{ key: (typeof DYNAMIC_KEYS)[number]; path: string; temporary: string }> = [];
   const dynamicRecord = dynamic as Record<string, JsonRecord>;
+  const hashes=Object.fromEntries(DYNAMIC_KEYS.map(key=>[key,createHash('sha256').update(JSON.stringify(dynamicRecord[key],null,2)+'\n').digest('hex')]));
+  const commit={schema:'disdex-v4-dynamic-evidence-commit/v1',sha,scope:V4_DYNAMIC_REFRESH_SCOPE,
+    ordersEnabled:false,authorizesTrading:false,refreshGeneration:plan.refreshGeneration,capturedAt:plan.capturedAt,
+    leaseId:refreshLease!.leaseId,leaseApprovedAt:refreshLease!.approvedAt,leaseExpiresAt:refreshLease!.expiresAt,
+    planSha256:refreshLease!.planSha256,evidenceSha256:hashes,evidencePayloads:dynamicRecord};
   try {
     for (const key of DYNAMIC_KEYS) {
       const path = join(input.evidenceRoot, evidenceFileName(key));
       const existing = await readTrustedJson(path, 0);
       validateDynamicRefreshTarget(existing, sha);
-      staged.push({ key, path, temporary: await stageJson(path, dynamicRecord[key]) });
+      staged.push({ key, path, temporary: await stageV4EvidenceJson(path, dynamicRecord[key],(await lstat(path)).gid) });
     }
+    // A slow GET or renewal must never extend an already-expired invocation.
+    const finalLease=await readTrustedJson(input.leasePath||`/var/lib/disdex/unified-deploy/refresh-leases/v4/${sha}.json`,0);
+    validateV4RefreshLease({lease:finalLease,sha,now:Math.floor((input.now??Date.now())/1000)});
+    if(finalLease.leaseId!==refreshLease!.leaseId)throw new Error('V4_REFRESH_LEASE_CHANGED_DURING_READ');
+    validateV4RefreshCommit(commit,sha,input.now??Date.now());
     // All payloads are validated and staged before the first target is
     // replaced.  A mixed generation is rejected by the runtime gate if the
     // host is interrupted between renames.
@@ -637,6 +661,11 @@ async function refreshDynamicFiles(input: {
         throw new Error(`V4_DYNAMIC_REFRESH_READBACK_MISMATCH:${item.key}`);
       }
     }
+    const commitPath=join(input.evidenceRoot,'refresh-commit.json');
+    try{await readTrustedJson(commitPath,0);}catch(error:any){if(error?.code!=='ENOENT')throw error;}
+    const gid=(await lstat(join(input.evidenceRoot,'route-source-parity.json'))).gid;
+    const commitTemporary=await stageV4EvidenceJson(commitPath,commit,gid);
+    try{await rename(commitTemporary,commitPath);}catch(error){await unlink(commitTemporary).catch(()=>undefined);throw error;}
   } catch (error) {
     for (const item of staged) await unlink(item.temporary).catch(() => undefined);
     throw error;
@@ -647,10 +676,10 @@ async function refreshDynamicFiles(input: {
     releaseRoot,
     evidenceRoot: input.evidenceRoot,
     apiBudgetDiagnostics,
-    evidenceSha256: Object.fromEntries(DYNAMIC_KEYS.map((key) => [key, createHash("sha256").update(JSON.stringify(dynamicRecord[key], null, 2) + "\n").digest("hex")])),
+    evidenceSha256: hashes,
   } as const;
   if (input.outputPath) {
-    const outputTemp = await stageJson(input.outputPath, applied);
+    const outputTemp = await stageV4EvidenceJson(input.outputPath, applied);
     try { await rename(outputTemp, input.outputPath); } catch (error) { await unlink(outputTemp).catch(() => undefined); throw error; }
   }
   return applied;

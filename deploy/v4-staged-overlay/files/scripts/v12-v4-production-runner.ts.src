@@ -121,7 +121,8 @@ export function classifyV4HealthSafetyState(result:{status:string;reason:string}
 // reclassified as safe without pending-order reconciliation.
 export function classifyV4RecoverableSafetyFailure(error:unknown,eventTs=Date.now()):V4TickResult|undefined{
  const reason=error instanceof Error?error.message:String(error);
- const stale=/^V4_EVIDENCE_STALE:(?:establishedAsterOrders|signedAsterAccount|sharedRiskAndPeers)$/.test(reason);
+ const stale=/^V4_EVIDENCE_STALE:(?:establishedAsterOrders|signedAsterAccount|sharedRiskAndPeers)$/.test(reason)
+  ||reason==='V4_REFRESH_LEASE_EXPIRED'||reason==='V4_REFRESH_COMMIT_STALE';
  const peer=/^V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:/.test(reason);
  if(!stale&&!peer)return;
  return {status:"blocked",reason:`${peer?"V4_PEER_ATTESTATION_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED"}:${reason}`,

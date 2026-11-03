@@ -61,6 +61,14 @@
     {
       "source": "files/ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer.src",
       "target": "ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer"
+    },
+    {
+      "source": "files/lib/v12-v4-certified-gates.ts.src",
+      "target": "lib/v12-v4-certified-gates.ts"
+    },
+    {
+      "source": "files/lib/v12-v4-refresh-commit.ts.src",
+      "target": "lib/v12-v4-refresh-commit.ts"
     }
   ]
 }
