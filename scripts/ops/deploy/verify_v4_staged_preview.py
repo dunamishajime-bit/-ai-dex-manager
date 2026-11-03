@@ -41,7 +41,7 @@ def main() -> int:
                  "runner-tick-heartbeat.test.ts", "v12-v4-monitor-systemd.test.mjs",
                  "pending-exposure-readonly-reconcile.test.ts", "v4-rate-budget-proxy.test.ts",
                  "v4-rate-budget-proxy-integration.test.ts", "v4-budget-shared-lock.test.ts",
-                 "v4-budget-broker-systemd.test.mjs", "v12-v4-recoverable-safety.test.ts")
+                 "v4-budget-broker-systemd.test.mjs", "v12-v4-recoverable-safety.test.ts", "v4-monitor-read-scheduling.test.ts")
         for name in names:
             dest = preview / "tests" / name
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -52,7 +52,7 @@ def main() -> int:
         shutil.copyfile(ROOT / snapshot, dest)
         env = os.environ.copy()
         env["NODE_PATH"] = str(NODE_MODULES) + (os.pathsep + env["NODE_PATH"] if env.get("NODE_PATH") else "")
-        for name in (names[0], names[1], names[4], names[5], names[6], names[7], names[9]):
+        for name in (names[0], names[1], names[4], names[5], names[6], names[7], names[9], names[10]):
             run(["node", str(tsx), str(preview / "tests" / name)], cwd=preview, env=env)
         run(["node", str(preview / "tests" / names[3])], cwd=preview, env=env)
         run(["node", str(preview / "tests" / names[8])], cwd=preview, env=env)

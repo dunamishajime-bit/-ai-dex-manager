@@ -5,6 +5,16 @@ export const V4_MONITOR_FUTURE_GRACE_MS = 1_000;
 
 type JsonRecord = Record<string, any>;
 
+/** Do not queue heavy private GETs alongside the market-data burst. */
+export async function collectV4MonitorReads<P,O,D>(reads: {
+  positions: () => Promise<P>; openOrders: () => Promise<O>; decision: () => Promise<D>;
+}): Promise<{positions:P;openOrders:O;decision:D}> {
+  const positions=await reads.positions();
+  const openOrders=await reads.openOrders();
+  const decision=await reads.decision();
+  return {positions,openOrders,decision};
+}
+
 export function assertV4SharedRateBudget(path: unknown): void {
   if (path !== "/var/lib/disdex/shared/aster-rate-budget.json") {
     throw new Error("V4_MONITOR_SHARED_RATE_BUDGET_REQUIRED");
