@@ -16,7 +16,7 @@ EnvironmentFile=/etc/disdex/disdex-v52-formal-approval.env
 EnvironmentFile=/etc/disdex/current-runtime/7688ed7c93a1918d8b44837339b7da5584a868f5.env
 EnvironmentFile=/etc/disdex/current-runtime/4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81-v52-overrides.env
 EnvironmentFile=/etc/disdex/current-runtime/4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81-market-closed-api-cadence.env
-Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+Environment=PYTHONPATH=/home/deploy/disdex-trading/releases/%i/.vendor-stock-site-packages
 Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json
 Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-82ec7885505ec7d523ea04c1b0a92570d53a2c21/budget.sock
 Environment=DISDEX_V52_MONITOR_BUDGET_BROKER_SHA=82ec7885505ec7d523ea04c1b0a92570d53a2c21
@@ -26,6 +26,8 @@ Environment=DISDEX_V52_MONITOR_HEALTH_PATH=/var/lib/disdex/v52-monitor/heartbeat
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/test -x /home/deploy/disdex-trading/releases/%i/.venv2/bin/python
+ExecStartPre=/usr/bin/test -d /home/deploy/disdex-trading/releases/%i/.vendor-stock-site-packages
+ExecStartPre=/usr/bin/test ! -L /home/deploy/disdex-trading/releases/%i/.vendor-stock-site-packages
 ExecStart=/bin/sh -ec 'export DISDEX_RELEASE_SHA=%i DISDEX_RUNTIME_COMMIT_SHA=%i DISDEX_RUNTIME_SHA=%i DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/releases/%i DISDEX_V52_MONITOR_ONLY=true DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=false; exec /home/deploy/disdex-trading/releases/%i/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon --monitor-only-daemon'
 Restart=on-failure
 RestartSec=30s
