@@ -93,6 +93,23 @@ class VenueWitnessContractTest(unittest.TestCase):
             "lastTickAt":now_ms-1_000,
         }
 
+    def test_full_live_healthy_no_signal_does_not_require_an_order(self):
+        now=2_000_000_000_000
+        pins=self._pins();pins["V12_V4"]=SHA
+        def systemd(unit,prop):
+            return "active" if prop=="ActiveState" else "4242"
+        def secure(path,*args,**kwargs):
+            if path==m.V4_HEARTBEAT:
+                return dict(schema="disdex-v12-v4-runner-heartbeat/v1",
+                    releaseSha=SHA,runtimeSha=SHA,expectedSha=SHA,
+                    serviceUnit=f"disdex-v12-v4@{SHA}.service",mainPid=4242,
+                    mode="LIVE",liveEnabled=True,limitedLive=False,safetyState="HEALTHY",
+                    orderEnabled=False,ordersAllowed=False,
+                    heartbeatAt=now-500,lastTickAt=now-1000)
+            return self._fake_hb(path,now)
+        with patch.object(m,"_systemd",side_effect=systemd),patch.object(m,"_secure_json",side_effect=secure):
+            m.validate_units_and_ticks(pins,"after",SHA,now)
+
     def test_before_requires_every_peer_active_and_fresh(self):
         now=2_000_000_000_000
         pins=self._pins()

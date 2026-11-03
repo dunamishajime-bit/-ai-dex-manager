@@ -315,7 +315,11 @@ def validate_units_and_ticks(expected_pins: dict[str, str], phase: str,
                 or hb.get("expectedSha") != candidate_sha
                 or hb.get("serviceUnit") != unit
                 or not pid.isdigit() or hb.get("mainPid") != int(pid)
-                or hb.get("orderEnabled") is not True):
+                or hb.get("mode") != "LIVE" or hb.get("liveEnabled") is not True
+                or hb.get("limitedLive") is not False
+                or hb.get("safetyState") != "HEALTHY"
+                or type(hb.get("orderEnabled")) is not bool
+                or hb.get("ordersAllowed") is not hb.get("orderEnabled")):
             raise ValueError("V4_DIRECT_HEARTBEAT_IDENTITY_MISMATCH")
         for field in ("heartbeatAt", "lastTickAt"):
             value = hb.get(field)

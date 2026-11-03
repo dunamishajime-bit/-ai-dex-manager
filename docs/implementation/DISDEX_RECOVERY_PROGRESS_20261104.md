@@ -173,3 +173,57 @@ PID/CWD and using them in the read-only guard produced
 SHARED_RISK_COMMITTED_NO_ORDER_RESTART_READY, inheritedLatchTripped=false,
 inheritedRiskUpdatedAt1793740783977, ordersEnabled=false, limit7.5% retained.
 No approval timestamp, receipt, state or service was changed by that check.
+
+
+## V4 lossless migration and fresh static certification (staging only)
+
+PR418 candidate9da6c2ce24d1a1920fa7b3e12b8ace2112730446 passed all five
+GitHub CI suites. Its immutable release is staged, not the running V4 source.
+The migration preserves historical legs, terminal intents, closed STOP records,
+realized PnL, cooldown and replay journal. Publication uses an exclusive UUID
+temporary, exact-byte backup, fsync and one atomic replace; crash/CAS tests
+preserve a valid old or new ledger. Signed migration transport is GET-only.
+No Production ledger rebind or migration apply has been performed.
+
+The static evidence helper now counts actual TAP passes, rejects missing/zero/
+ambiguous test summaries, disables incremental typecheck writes and uses the
+candidate's actual tsconfig.v4-release-candidate.json. Root staging generated
+41-route parity, 37 real test passes and successful typecheck for exact9da6.
+Source helperc907afeee2cc9cf8878af7afb20adfefd1bce389. Staging evidence:
+/var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/v4-9da6-static-evidence-1793744018569.
+No Production certificate, approval, lease or order permission was changed.
+
+Existing Production certificate remains schema v3, approvedSha53a0be39,
+validUntil2026-11-03T20:55:21.606Z (expired at observation). Five existing
+/etc/disdex/v12-v4-evidence files instead bind3524e367, not currentb346 or
+candidate9da6; refresh-commit.json is absent. These are genuine historic
+artifacts but cannot be re-labelled or re-dated as current approval.
+
+## V4 full cutover real decision audit correction (source only)
+
+The old full executor counted three signed GET captures one second apart as
+three audit cycles. It now waits for three distinct completed strategy ticks
+from the actual process, binds runtime/expected SHA, service, PID, systemd and
+/proc CWD, rejects restarts, old/pre-cutover/future/stale markers and checks
+heartbeat publication against lastTickAt. A bounded wait handles missing markers
+and the tick-before-heartbeat atomic publication window. It never writes a tick.
+Healthy full-LIVE NO_SIGNAL is accepted without requiring a test order;
+MONITOR_ONLY, CANARY and unhealthy states cannot certify full LIVE.
+Venue heartbeat validation likewise no longer demands orderEnabled=true for
+a healthy NO_SIGNAL. Order permission must still be a consistent boolean.
+
+Linux root isolated tests: full cutover39, venue8, static evidence3 and existing
+monitor-only7 all pass (57 tests, no Linux skips). Test archiveSHA256:
+37b78aa1ea5d5d7f33ca219ba497b5d7c345dce5a9de9c0f1f8b7345e66ad064.
+Staging test source:
+/var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/v4-real-decision-root-tests-37b78aa1.
+No active root helper or Runner unit was replaced by these tests.
+
+This is not certification of the remaining full executor: safe rollback after
+possible newly owned exposure, formally scoped ledger migration, bootstrap of
+the bounded v4 certificate/refresh contract and exact protected-hold recovery
+are still open implementation tasks. Full LIVE remains unverified.
+
+Production read-only check2026-11-03T22:18:55Z: V4b346 PID2131810,
+V520416 PID2195629, Risk2737 PID2017780; all active/NRestarts0.
+Disk48G/40G used/8.2G available83%. Remote master still6bb84dc9.
