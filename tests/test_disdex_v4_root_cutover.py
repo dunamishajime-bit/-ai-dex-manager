@@ -90,7 +90,7 @@ class V4DecisionWaitTest(V4DecisionAuditTest):
         self.tick["workingDirectory"]=self.release
         self.health["workingDirectory"]=self.release
 
-    def wait(self, health, tick, *, units=None, reads=None):
+    def wait(self, health, tick, *, units=None, reads=None, commandline=None):
         from disdex_v4_root_cutover import await_v4_decision_cycle
         from unittest.mock import Mock
         systemd=Mock()
@@ -98,6 +98,10 @@ class V4DecisionWaitTest(V4DecisionAuditTest):
         systemd.main_pid.return_value=4242
         systemd._state.side_effect=lambda unit,prop: "0" if prop=="NRestarts" else self.release
         if units:units(systemd)
+        if commandline is None:
+            commandline=["/usr/bin/node","--import",str(Path(self.release)/"node_modules/tsx/dist/loader.mjs"),
+                         str(Path(self.release)/"scripts/v12-v4-production-runner.ts"),"--daemon"]
+        commandline_bytes="\0".join(commandline).encode()+b"\0"
         times=iter([0,1,2,3,4,5,6])
         def reader(path,**kwargs):
             if reads is not None:return next(reads)
@@ -105,7 +109,8 @@ class V4DecisionWaitTest(V4DecisionAuditTest):
         with patch("disdex_v4_venue_witness._secure_json",side_effect=reader), \
              patch.object(Path,"stat",return_value=SimpleNamespace(st_uid=0)), \
              patch.object(Path,"lstat",return_value=SimpleNamespace(st_uid=0)), \
-             patch.object(Path,"resolve",return_value=Path(self.release)):
+             patch.object(Path,"resolve",return_value=Path(self.release)), \
+             patch.object(Path,"read_bytes",return_value=commandline_bytes):
             return await_v4_decision_cycle(systemd,sha=NEW,release=Path(self.release),pid=4242,
                 started_after_ms=self.now-3000,previous_tick=None,sleeper=lambda _:None,
                 clock=lambda:self.now/1000,monotonic=lambda:next(times),timeout=4)
@@ -118,6 +123,13 @@ class V4DecisionWaitTest(V4DecisionAuditTest):
                              (dict(self.health,lastTickAt=self.now-999),self.tick)]:
             with self.subTest(health=health),self.assertRaisesRegex(RuntimeError,"TIMEOUT"):
                 self.wait(health,tick)
+
+    def test_actual_command_must_use_same_release_loader_and_runner(self):
+        for command in [["/usr/bin/node","/tmp/other.ts"],
+            ["/usr/bin/node","--import",f"/releases/{OLD}/loader.mjs",
+             str(Path(self.release)/"scripts/v12-v4-production-runner.ts"),"--daemon"]]:
+            with self.subTest(command=command),self.assertRaisesRegex(RuntimeError,"EXECUTABLE"):
+                self.wait(self.health,self.tick,commandline=command)
 
     def test_pid_restart_or_effective_cwd_change_is_rejected(self):
         for mutation in [lambda s:setattr(s.main_pid,"return_value",4243),

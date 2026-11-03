@@ -93,6 +93,16 @@ def await_v4_decision_cycle(systemd, *, sha, release, pid, started_after_ms,
         if (systemd._state(unit, "WorkingDirectory") != str(release)
                 or Path("/proc", str(pid), "cwd").resolve(strict=True) != Path(release)):
             raise RuntimeError("V4_DECISION_ACTUAL_CWD_MISMATCH")
+        command = Path("/proc", str(pid), "cmdline").read_bytes().split(b"\0")
+        try:
+            command = [x.decode("utf-8", errors="strict") for x in command if x]
+        except UnicodeDecodeError:
+            raise RuntimeError("V4_DECISION_ACTUAL_EXECUTABLE_MISMATCH") from None
+        expected_command = ["/usr/bin/node", "--import",
+            str(Path(release)/"node_modules/tsx/dist/loader.mjs"),
+            str(Path(release)/"scripts/v12-v4-production-runner.ts"), "--daemon"]
+        if command != expected_command:
+            raise RuntimeError("V4_DECISION_ACTUAL_EXECUTABLE_MISMATCH")
         # Existing runner markers are deploy-owned, never group/world writable.
         # Ownership is checked against the actual process UID, not a fixed user.
         process_uid = Path("/proc", str(pid)).stat().st_uid

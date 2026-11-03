@@ -262,3 +262,15 @@ orders/cancels/positionChangesSent0; pending beforeHash==afterHash. Root audit:
 Risk7.5%, sourceComplete=true, UTC2026-11-03, risk age13834ms, tripped=false.
 Existing shared Kill remains active with the exact V52/Q102 mismatch reason.
 No trading authority or service state changed during this read-only diagnosis.
+
+
+The full decision reader additionally checks actual /proc/PID/cmdline against
+exact /usr/bin/node --import <release>/node_modules/tsx/dist/loader.mjs
+<release>/scripts/v12-v4-production-runner.ts --daemon. Same CWD and a claimed
+SHA cannot certify another executable/loader. A failing test showed the gap;
+Linux cutover41/venue8/refresh11/static3/monitor7/common42 now all pass.
+Test archive630eaeb6c7985e73773b2e50ee5c330c2a8c34170b7fbfa5a33181b288f7c797.
+The candidate full unit template is being aligned to this same-PID loader,
+pre-provisioned tick write access and matching budget broker. The active b346
+monitor-only unit is unchanged. This remains source preparation, not a full
+trading activation or certificate issuance.
