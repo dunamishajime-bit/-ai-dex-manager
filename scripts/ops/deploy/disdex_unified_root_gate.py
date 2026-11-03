@@ -686,13 +686,25 @@ class RootDeploymentExecutor:
         self.production_reader = production_reader
         self._risk_audit_reader = None
 
-    def _read_current_sha(self, *, allow_legacy=False) -> str:
+    def _read_current_sha(self, *, allow_legacy=False, unchanged_identity_only=False) -> str:
         link = self.paths.current.lstat()
         if not stat.S_ISLNK(link.st_mode):
             raise ValueError("production current is not symlink")
         resolved = self.paths.current.resolve(strict=True)
         if resolved.parent != self.paths.releases or not SHA.fullmatch(resolved.name):
             raise ValueError("production current symlink escapes immutable releases")
+        if unchanged_identity_only:
+            # No-order Writer switch never executes through current or changes
+            # this pointer. Prove its unchanged root-controlled identity only;
+            # the new explicit Writer root still requires full release_marker.
+            directory=resolved.lstat()
+            marker=resolved/'.disdex-release-sha'
+            metadata=assert_regular_secure(marker,root_uid=self.root_uid,private=False)
+            if (link.st_uid!=self.root_uid or directory.st_uid!=self.root_uid
+                    or directory.st_mode&0o022 or metadata.st_mode&0o222
+                    or marker.read_text(encoding='ascii').strip()!=resolved.name):
+                raise ValueError('unchanged current identity is untrusted')
+            return resolved.name
         try:
             release_marker(resolved.name, self.paths.releases, root_uid=self.root_uid)
         except ValueError:
@@ -932,7 +944,7 @@ class RootDeploymentExecutor:
         raw_pins = read_root_json(self.paths.pins,
                                   root_uid=self.root_uid, private=False)
         pins = parse_live_pins(raw_pins, releases=self.paths.releases)
-        current_sha = self._read_current_sha()
+        current_sha = self._read_current_sha(unchanged_identity_only=self.production_reader is not None)
         sha_hash, diff = validate_bootstrap_plan(desired, current_plan, pins, current_sha)
         if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
             raise ValueError("supplied SHA / plan hash differs from root plan")
@@ -1036,6 +1048,8 @@ class RootDeploymentExecutor:
             }, root_uid=self.root_uid)
             self.systemd.stop(old_unit)
             self.systemd.mask(old_unit)
+            if self.systemd.main_pid(old_unit)!=0:
+                raise RuntimeError('old Shared Risk writer still has a process after stop')
             _atomic_json(self.paths.pins, next_manifest, root_uid=self.root_uid,
                          private=False)
             _atomic_json(self.paths.current_plan, next_current_plan,

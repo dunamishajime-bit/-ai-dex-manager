@@ -689,6 +689,54 @@ class SharedRiskExecutorTest(unittest.TestCase):
              ("enable", self.new_unit), ("start", self.new_unit)],
         )
 
+    def test_production_reader_issues_fresh_root_native_no_order_activation_and_audits_real_updates(self):
+        from unittest.mock import patch
+        from datetime import datetime,timezone
+        activation_path=self.activations/'SHARED_CRYPTO_RISK_ONLY'/(self.new+'.json')
+        activation_path.unlink()
+        args=self._args();args.route='CODEX_SSH';args.owner=CODEX_SSH_OPERATOR
+        args._codex_ssh_authenticated=True
+        systemd=FakeSystemd(self.old_unit,self.new_unit)
+        now_ms=self.now*1000
+        holder=self
+        class Reader:
+            at=now_ms-30000
+            def read_risk(self):
+                self.at+=1000
+                return dict(updatedAt=self.at,utcDay=datetime.fromtimestamp(now_ms/1000,timezone.utc).date().isoformat(),
+                    maximumLossPct=7.5,sourceComplete=True,tripped=False)
+            def read_context(self):
+                sha=holder.old if systemd.is_active(holder.old_unit) else holder.new
+                return dict(writer=dict(sha=sha,markerSha=sha,pid=4242,activeState='active',
+                    cwd=str(holder.releases/sha),unit='disdex-shared-crypto-risk@'+sha+'.service'),
+                    peers={k:dict(sha=holder.old,pid=0 if k=='V12_V4' else 123)
+                        for k in IDS if k!='SHARED_CRYPTO_RISK'},killHash='a'*64,pendingHash='b'*64)
+            def capture(self):
+                return dict(witness=dict(signedFlatProof=dict(status='PENDING_READONLY_RECONCILE_VERIFIED',
+                    verifiedAt=now_ms-1,positionCount=0,openOrderCount=0,ordersSent=0,cancelsSent=0,
+                    positionChangesSent=0,beforeHash='b'*64,afterHash='b'*64)),
+                    context=self.read_context(),riskSnapshot=self.read_risk())
+        reader=Reader()
+        # Production's fixed release location is preserved by the real audit
+        # validator. This Linux fixture patches only that validator's writer
+        # CWD input, never systemd or venue operations on the actual VPS.
+        original=reader.read_context
+        def context():
+            row=original();row['writer']['cwd']='/home/deploy/disdex-trading/releases/'+row['writer']['sha'];return row
+        reader.read_context=context
+        executor=RootDeploymentExecutor(self.paths,root_uid=os.geteuid(),systemd=systemd,
+            clock=lambda:self.now,sleep_fn=lambda _:None,production_reader=reader)
+        with patch('disdex_unified_root_gate.time.time_ns',return_value=now_ms*1000000):
+            result=executor.execute(args,'')
+        self.assertEqual(result['status'],'SHARED_RISK_CUTOVER_VERIFIED')
+        self.assertEqual(len({r['tickCompletedAt'] for r in result['auditCycles']}),3)
+        activation=json.loads(activation_path.read_text())
+        self.assertFalse(activation['ordersEnabled'])
+        self.assertEqual(activation['approvedRunners'],['SHARED_CRYPTO_RISK'])
+        self.assertEqual(activation['operator'],CODEX_SSH_OPERATOR)
+        self.assertEqual(self.current.resolve(),self.releases/self.old)
+
+
     def test_codex_ssh_shared_risk_route_uses_root_session_without_token(self):
         args = self._args()
         args.route = "CODEX_SSH"
