@@ -8,6 +8,7 @@ import { attachV4NativeCoreCandidates } from "../lib/v12-v4-core-candidate";
 import { assertV4EntrySafety } from "../lib/v12-v4-entry-safety";
 import { assertV4MonitorRateBudget, blockedV4MonitorRead, collectV4MonitorReads, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
 import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
+import {v4MonitorIdentity,type V4MonitorIdentity} from "../lib/v12-v4-execution-phase";
 
 type JsonRecord=Record<string,any>;
 const SHA_RE=/^[0-9a-f]{40}$/i;
@@ -86,18 +87,16 @@ async function cycle(now=Date.now()){
   decision:market as unknown as JsonRecord,
  },entrySafetyError)};
 }
-async function health(sha:string,result:V4MonitorResult,at:number,lastTickAt:number|null){
- const path=String(process.env.V12_V4_MONITOR_HEALTH_STATE_PATH||"/var/lib/disdex/v12-v4/monitor/heartbeat.json");
- if(!path.startsWith("/var/lib/disdex/v12-v4/monitor/"))throw Error("V4_MONITOR_HEALTH_PATH_INVALID");
- await atomicJson(path,{schema:"disdex-v12-v4-monitor-heartbeat/v1",runnerId:"V12_V4_MONITOR",
-  serviceUnit:`disdex-v12-v4-monitor@${sha}.service`,expectedSha:sha,runtimeSha:sha,
+async function health(identity:V4MonitorIdentity,sha:string,result:V4MonitorResult,at:number,lastTickAt:number|null){
+ await atomicJson(identity.healthPath,{schema:identity.healthSchema,runnerId:identity.runnerId,
+  serviceUnit:identity.serviceUnit,expectedSha:sha,runtimeSha:sha,releaseSha:sha,strategyId:"V12_V4",
   workingDirectory:String(process.env.DISDEX_RELEASE_ROOT||process.cwd()),mainPid:process.pid,
-  heartbeatAt:at,lastTickAt,mode:"MONITOR_ONLY",liveEnabled:false,
+  heartbeatAt:at,updatedAt:at,lastTickAt,operationMode:"MONITOR_ONLY",mode:"MONITOR_ONLY",liveEnabled:false,
   safetyState:result.status==="blocked"?"BLOCKED":"OBSERVING",newOrdersAllowed:false,
   status:result.status,reason:result.reason,candidateCount:result.candidateCount,
   positionCount:result.positionCount,openOrderCount:result.openOrderCount,pendingCount:result.pendingCount});
 }
-async function main(){
+export async function runV4ReadOnlyMonitor(identity:V4MonitorIdentity){
  const daemon=process.argv.includes("--daemon"),once=process.argv.includes("--once");
  if(daemon===once)throw Error("V4_MONITOR_REQUIRES_EXACTLY_ONE_MODE");
  let stop=false;let lastTickAt:number|null=null;process.once("SIGINT",()=>{stop=true});process.once("SIGTERM",()=>{stop=true});
@@ -106,11 +105,11 @@ async function main(){
   const outcome=await runV4MonitorCycle({
    collect:async started=>(await cycle(started)).result,
    onError:(error,at)=>blockedV4MonitorRead(safeReason(error),at),
-   publishTick:async (result,started,completed)=>{await writeRunnerTickHeartbeat({runnerId:"V12_V4_MONITOR",runtimeSha:sha,
-    serviceUnit:`disdex-v12-v4-monitor@${sha}.service`,tickStartedAt:started,tickCompletedAt:completed,
+   publishTick:async (result,started,completed)=>{await writeRunnerTickHeartbeat({runnerId:identity.runnerId,runtimeSha:sha,
+    serviceUnit:identity.serviceUnit,tickStartedAt:started,tickCompletedAt:completed,
     status:result.status,reason:result.reason,newOrdersAllowed:false,
     ordersSent:0,cancelsSent:0,positionChangesSent:0});},
-   publishHealth:async (result,at,last)=>health(sha,result,at,last),clock:Date.now,lastTickAt,
+   publishHealth:async (result,at,last)=>health(identity,sha,result,at,last),clock:Date.now,lastTickAt,
   });
   lastTickAt=outcome.lastTickAt;const result=outcome.result;
   console.log(JSON.stringify({sha,mode:"MONITOR_ONLY",...result,ordersSent:0,cancelsSent:0,positionChangesSent:0}));
@@ -118,5 +117,6 @@ async function main(){
   await new Promise<void>(done=>setTimeout(done,Math.max(15000,Number(process.env.V12_V4_MONITOR_INTERVAL_MS||60000))));
  }while(!stop);
 }
-main().catch(error=>{console.error(JSON.stringify({status:"V4_MONITOR_FAILED_CLOSED",error:safeReason(error),
+if(process.argv[1]?.includes("v12-v4-monitor-only-runner"))
+ runV4ReadOnlyMonitor(v4MonitorIdentity(releaseSha(),false,process.env)).catch(error=>{console.error(JSON.stringify({status:"V4_MONITOR_FAILED_CLOSED",error:safeReason(error),
  ordersSent:0,cancelsSent:0,positionChangesSent:0}));process.exitCode=2;});
