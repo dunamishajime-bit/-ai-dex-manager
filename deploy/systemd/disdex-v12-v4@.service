@@ -1,7 +1,8 @@
 # Candidate template only. Do not install/enable before full V4 LIVE certification.
 [Unit]
 Description=DisDex V12 V4 production runner (%i)
-After=network-online.target
+After=network-online.target disdex-v4-rate-budget-broker@%i.service
+Requires=disdex-v4-rate-budget-broker@%i.service
 Wants=network-online.target
 StartLimitIntervalSec=300
 StartLimitBurst=3
@@ -16,25 +17,20 @@ EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=/etc/disdex/disdex-v12-v4.env
 EnvironmentFile=/etc/disdex/current-runtime/%i.env
 Environment=NODE_ENV=production
+Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json
+Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock
 Environment=DISDEX_RELEASE_SHA=%i
 Environment=V12_V4_LIVE_ACK=%i
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/bash /home/deploy/disdex-trading/releases/%i/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh %i runtime
-# Root prepares a deploy-readable runtime view without making the approval
-# artifact writable by deploy. Missing or symlinked permits still fail closed.
-ExecStartPre=+/usr/bin/test -f /etc/disdex/v12-v4-production-canary-permit.json
-ExecStartPre=+/usr/bin/test ! -L /etc/disdex/v12-v4-production-canary-permit.json
-ExecStartPre=+/usr/bin/chown root:deploy /etc/disdex/v12-v4-production-canary-permit.json
-ExecStartPre=+/usr/bin/chmod 0640 /etc/disdex/v12-v4-production-canary-permit.json
-# V4 reads the FET peer state during attestation. Normalize the deploy-owned
-# state path as root before the unprivileged V4 process can read it; this is a
-# permission repair only and never changes state contents or trading intent.
-ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
-ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json ]; then chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json && chmod 600 /var/lib/disdex/fet-brk48-residual/state.json; fi'
+# Full V4 does not modify peer state or a separate canary permit.
+# Required root-managed runtime/evidence paths are provisioned by the scoped
+# deployment transaction. Missing access fails before this process starts.
+ExecStartPre=/usr/bin/test -w /var/lib/disdex/runner-health/ticks
 # Separate V4 operator approval; never use existing X1-only acknowledgement.
 ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/%i --sha %i --runner V12_V4 --activation-path /var/lib/disdex/shared/operator-activation/v12-v4-full.json
-ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --daemon
+ExecStart=/usr/bin/node --import /home/deploy/disdex-trading/releases/%i/node_modules/tsx/dist/loader.mjs /home/deploy/disdex-trading/releases/%i/scripts/v12-v4-production-runner.ts --daemon
 Restart=on-failure
 RestartPreventExitStatus=2
 RestartSec=30s
@@ -45,7 +41,7 @@ PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
 ReadOnlyPaths=/home/deploy/disdex-trading/releases /home/deploy/ai-dex-manager-v96-paper/.runtime-state
-ReadWritePaths=/var/lib/disdex/v12-v4 /var/lib/disdex/shared
+ReadWritePaths=/var/lib/disdex/v12-v4 /var/lib/disdex/shared /var/lib/disdex/runner-health/ticks
 UMask=0077
 
 [Install]

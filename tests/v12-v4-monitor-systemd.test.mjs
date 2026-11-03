@@ -39,3 +39,20 @@ test("dynamic refresh uses the same production shared API budget", () => {
   assert.match(refresh, /^Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=\/var\/lib\/disdex\/shared\/aster-rate-budget\.json$/m);
   assert.match(refresh, /^Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=\/run\/disdex-v4-budget-%i\/budget\.sock$/m);
 });
+
+
+test("full V4 template uses same-PID release-local loader and real tick write path", () => {
+  const full=readFileSync("deploy/systemd/disdex-v12-v4@.service","utf8");
+  assert.match(full,/^ExecStart=\/usr\/bin\/node --import \/home\/deploy\/disdex-trading\/releases\/%i\/node_modules\/tsx\/dist\/loader\.mjs \/home\/deploy\/disdex-trading\/releases\/%i\/scripts\/v12-v4-production-runner\.ts --daemon$/m);
+  assert.match(full,/^ExecStartPre=\/usr\/bin\/test -w \/var\/lib\/disdex\/runner-health\/ticks$/m);
+  assert.match(full,/^ReadWritePaths=.*\/var\/lib\/disdex\/runner-health\/ticks/m);
+  assert.match(full,/^Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=\/var\/lib\/disdex\/shared\/aster-rate-budget\.json$/m);
+  assert.match(full,/^Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=\/run\/disdex-v4-budget-%i\/budget\.sock$/m);
+});
+
+test("full V4 startup does not rewrite peer state or canary authorization", () => {
+  const full=readFileSync("deploy/systemd/disdex-v12-v4@.service","utf8");
+  assert.doesNotMatch(full,/fet-brk48-residual|production-canary-permit|chown|chmod/);
+  assert.match(full,/--runner V12_V4 --activation-path \/var\/lib\/disdex\/shared\/operator-activation\/v12-v4-full\.json/);
+  assert.match(full,/^Requires=disdex-v4-rate-budget-broker@%i\.service$/m);
+});
