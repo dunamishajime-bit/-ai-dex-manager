@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: disdex-unified-production
+  group: ${{ github.event_name == 'workflow_dispatch' && 'disdex-unified-production' || format('disdex-v52-source-{0}', github.ref) }}
   cancel-in-progress: false
 
 jobs:
