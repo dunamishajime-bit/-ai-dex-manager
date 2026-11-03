@@ -3,7 +3,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-PREVIEW = "690ef2fb78913fb9e34b96808a72652e6896754b"
+PREVIEW = "715c45842477bd244c0aa95d49be60285788acea"
 REFRESH_HELPERS = "3524e3676848b9260f53164e07257acdda7bcc5c"
 
 def source(path):
