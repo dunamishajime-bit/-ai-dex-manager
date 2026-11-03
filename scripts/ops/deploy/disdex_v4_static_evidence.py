@@ -39,7 +39,17 @@ def _run(root: Path, argv: list[str]) -> dict:
     output = (result.stdout + "\n" + result.stderr).encode("utf8", errors="replace")
     if result.returncode:
         raise ValueError("STATIC_EVIDENCE_COMMAND_FAILED:" + argv[-1][:120])
-    return {"sha256": hashlib.sha256(output).hexdigest(), "returnCode": result.returncode}
+    passed=0
+    if '--test' in argv:
+        summary={}
+        for field in ['tests','pass','fail']:
+            rows=re.findall(r'^# '+field+r' (\d+)\s*$',result.stdout,re.MULTILINE)
+            if len(rows)!=1:raise ValueError('STATIC_EVIDENCE_TEST_SUMMARY_MISSING_OR_AMBIGUOUS')
+            summary[field]=int(rows[0])
+        if summary['tests']<=0 or summary['pass']<=0 or summary['fail']!=0 or summary['tests']<summary['pass']:
+            raise ValueError('STATIC_EVIDENCE_TEST_SUMMARY_NOT_PASS')
+        passed=summary['pass']
+    return {"sha256": hashlib.sha256(output).hexdigest(), "returnCode": result.returncode,"testsPassed":passed}
 
 def _atomic(path: Path, value: dict) -> None:
     parent = path.parent
@@ -74,14 +84,17 @@ def certify(sha: str) -> dict:
         if not Path(required).is_file():
             raise ValueError("CANDIDATE_RUNTIME_DEPENDENCY_MISSING:" + required)
     commands = [
-        [node, tsx, "--test",
+        [node, tsx, "--test", "--test-reporter=tap",
          "tests/v12-v4-independent-route-audit.test.ts",
          "tests/v12-v4-historical-all41-coverage.test.ts",
          "tests/v12-v4-direct-certified-without-mandatory-canary.test.ts"],
-        [node, tsx, "--test",
+        [node, tsx, "--test", "--test-reporter=tap",
          "tests/v12-v4-certified-gates.test.ts",
          "tests/v12-v4-recoverable-safety.test.ts",
-         "tests/v12-v4-evidence-preflight.test.mjs"],
+         "tests/v12-v4-evidence-preflight.test.mjs",
+         "tests/v12-v4-flat-lineage-migration.test.ts",
+         "tests/v12-v4-state-publication.test.ts",
+         "tests/v12-v4-migration-readonly.test.ts"],
         [node, tsc, "--noEmit", "-p", "tsconfig.v4-evidence-expiry.json", "--pretty", "false"],
     ]
     results = [_run(root, argv) for argv in commands]
@@ -96,14 +109,14 @@ def certify(sha: str) -> dict:
     tests = {
         "schema": "disdex-v12-v4-evidence/execution-tests-v1",
         "status": "PASS", "candidateSha": sha, "capturedAt": captured,
-        "testPasses": len(results), "failCount": 0, "typecheck": True,
+        "testPasses": sum(row['testsPassed'] for row in results), "commandCount":len(results), "failCount": 0, "typecheck": True,
         "proofSource": "IMMUTABLE_RELEASE_LOCAL_TESTS",
         "commandDigests": [row["sha256"] for row in results],
     }
     _atomic(EVIDENCE_ROOT / "route-source-parity.json", route)
     _atomic(EVIDENCE_ROOT / "v4-execution-tests.json", tests)
     return {"status": "V4_STATIC_EVIDENCE_CERTIFIED", "candidateSha": sha,
-            "routeCount": 41, "typecheck": True, "testPasses": len(results),
+            "routeCount": 41, "typecheck": True, "testPasses": tests['testPasses'],"commandCount":len(results),
             "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
 
 def main() -> int:
