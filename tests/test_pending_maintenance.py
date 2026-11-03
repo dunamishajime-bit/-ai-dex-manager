@@ -24,6 +24,9 @@ class MaintenanceTest(unittest.TestCase):
     def test_scheduled_execution_has_a_real_main_pid_and_does_not_import_fake_ssh_context(self):
         unit=m.render_service(SHA);timer=m.render_timer()
         self.assertIn('Type=exec',unit)
+        self.assertIn('Group=deploy',unit)
+        self.assertIn('RuntimeDirectory=disdex-pending-refresh',unit)
+        self.assertIn('RuntimeDirectoryPreserve=yes',unit)
         self.assertIn('/'+SHA+'/scripts/ops/deploy/disdex_pending_maintenance.py --service-cycle',unit)
         self.assertIn('EnvironmentFile=/etc/disdex/disdex-v12-aster-credentials.env',unit)
         self.assertNotIn('SSH_CONNECTION',unit)
