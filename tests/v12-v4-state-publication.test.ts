@@ -18,7 +18,7 @@ test('SHA publication keeps old state in place until one atomic replacement and 
  const f=await fixture(),rename=fs.rename;
  try{
   let replacements=0;
-  t.mock.method(fs,'rename',async(source,destination)=>{
+  t.mock.method(fs,'rename',async(source:Parameters<typeof fs.rename>[0],destination:Parameters<typeof fs.rename>[1])=>{
    if(String(destination)===f.path){replacements++;assert.deepEqual(await fs.readFile(f.path),f.before);
     const backups=await fs.readdir(join(f.directory,'migrations'));assert.equal(backups.length,1);
     assert.deepEqual(await fs.readFile(join(f.directory,'migrations',backups[0])),f.before);}
@@ -41,7 +41,7 @@ test('publication failure before rename leaves the original readable and cleans 
 test('an interruption after replacement keeps the new valid document and original backup for reconciliation',async(t)=>{
  const f=await fixture(),rename=fs.rename;
  try{
-  t.mock.method(fs,'rename',async(source,destination)=>{await rename(source,destination);throw new Error('fixture crash after replacement');});
+  t.mock.method(fs,'rename',async(source:Parameters<typeof fs.rename>[0],destination:Parameters<typeof fs.rename>[1])=>{await rename(source,destination);throw new Error('fixture crash after replacement');});
   await assert.rejects(publishV4MigratedState({statePath:f.path,expectedOldBytes:f.before,candidate:f.candidate}),/fixture crash after/);
   new V4ExecutionStore(f.path,newSha).read();
   const backups=await fs.readdir(join(f.directory,'migrations'));assert.equal(backups.length,1);
