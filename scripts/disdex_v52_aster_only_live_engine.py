@@ -62,6 +62,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         self.save()
 
     def idle_tick(self, prepared: dict) -> None:
+        started=base.now_ms()
         super().idle_tick(prepared)
         # V52 is a stock sleeve, but Idle Priority is a 24/7 crypto sleeve.
         # Even while US equities are closed (or a safe prelock skip is used),
@@ -69,10 +70,34 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         # Idle can prove Formal > Idle priority without depending on stale stock
         # session state.
         self._refresh_idle_admission_heartbeat()
+        self._publish_completed_tick(started,prepared,'IDLE_DECISION_COMPLETE')
 
     def tick(self, prepared: dict | None = None) -> None:
+        started=base.now_ms()
         super().tick(prepared)
         self._refresh_idle_admission_heartbeat()
+        self._publish_completed_tick(started,prepared or {},'FULL_DECISION_COMPLETE')
+
+    def _publish_completed_tick(self,started: int,prepared: dict,stage: str) -> None:
+        # Opt in only when the new release and systemd tick write path are
+        # deployed together. Old Runner/pin monitoring remains legacy.
+        if not self.live or not base.bool_env('DISDEX_V52_REAL_TICK_ENABLED',False):
+            return
+        from disdex_runner_tick_heartbeat import write_completed_runner_tick
+        sha=os.getenv('DISDEX_RELEASE_SHA','')
+        if os.getenv('DISDEX_RUNTIME_COMMIT_SHA')!=sha:
+            raise RuntimeError('V52_TICK_RUNTIME_SHA_MISMATCH')
+        kill=self.kill_switch()
+        if kill:status,reason='held','KILL_SWITCH_'+str(kill.get('action') or 'ACTIVE')
+        elif prepared.get('marketClosed'):status,reason='market-closed','US_EQUITY_SESSION_CLOSED'
+        elif prepared.get('quoteStaleLocalHold'):status,reason='held','STOCK_REFERENCE_STALE'
+        elif prepared.get('rateBudgetDeferred'):status,reason='deferred','ASTER_RATE_BUDGET_DEFERRED'
+        else:status,reason='completed',stage
+        # This marker certifies processing only. Actual new-order authority is
+        # independently determined by the operator and final preorder gates.
+        write_completed_runner_tick(root=Path(os.getenv('DISDEX_RUNNER_TICK_HEARTBEAT_ROOT','/var/lib/disdex/runner-health')),
+            runner_id='V52',sha=sha,service_unit='disdex-v52-aster-only@'+sha+'.service',
+            started_at=started,completed_at=base.now_ms(),status=status,reason=reason,new_orders_allowed=False)
 
     def assert_gross_safe(self, snapshot=None) -> None:
         row = snapshot or self.gross_snapshot()
