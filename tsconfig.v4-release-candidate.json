@@ -15,6 +15,9 @@
   },
   "files": [
     "lib/v12-v4-monitor-only.ts",
+    "scripts/v12-v4-flat-lineage-migration.ts",
+    "lib/v12-v4-state-publication.ts",
+    "lib/v12-v4-migration-readonly.ts",
     "lib/disdex-runner-tick-heartbeat.ts",
     "scripts/v12-v4-production-runner.ts",
     "scripts/v12-v4-monitor-only-runner.ts",

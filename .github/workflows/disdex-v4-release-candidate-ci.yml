@@ -21,6 +21,8 @@ jobs:
         run: python3 -m unittest tests.test_v4_release_candidate_source tests.test_v4_refresh_installer_contract tests.test_pending_refresh_executor -v
       - name: Test monitoring, evidence and shared API budget
         run: npx tsx --test tests/v12-v4-monitor-only.test.ts tests/v4-production-monitor-phase.test.ts tests/v4-monitor-pending-proof-read.test.ts tests/v4-dynamic-evidence-auth-boundary.test.ts tests/v4-refresh-commit.test.ts tests/v4-refresh-publication.test.ts tests/pending-exposure-readonly-reconcile.test.ts tests/pending-refresh-root-grant.test.ts tests/v4-rate-budget-proxy.test.ts tests/v4-rate-budget-proxy-integration.test.ts tests/v4-budget-shared-lock.test.ts tests/v12-v4-recoverable-safety.test.ts tests/v4-monitor-read-scheduling.test.ts
+      - name: Test lossless state lineage and crash-safe publication
+        run: npx tsx --test tests/v12-v4-flat-lineage-migration.test.ts tests/v12-v4-state-publication.test.ts tests/v12-v4-migration-readonly.test.ts tests/v12-v4-execution-store.test.ts
       - name: Test V4 tick contract
         run: npx tsx --test --test-name-pattern='tick filenames|a V4 writer|writes an atomic|replaces an existing|requires explicit|same-PID|80 concurrent|rejects invalid' tests/runner-tick-heartbeat.test.ts
       - name: Test existing V4 execution, health and STOP contracts
