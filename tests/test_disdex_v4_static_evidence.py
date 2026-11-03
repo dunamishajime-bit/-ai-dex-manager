@@ -19,7 +19,7 @@ class StaticEvidenceContractTest(unittest.TestCase):
                  {"sha256":"1"*64,"returnCode":0,"testsPassed":20},
                  {"sha256":"2"*64,"returnCode":0,"testsPassed":9},
                  {"sha256":"3"*64,"returnCode":0,"testsPassed":0},
-             ]), \
+             ]) as runner, \
              patch.object(m,"_atomic",side_effect=lambda path,value:writes.__setitem__(path.name,value)):
             result=m.certify(SHA)
         self.assertEqual(result["status"],"V4_STATIC_EVIDENCE_CERTIFIED")
@@ -31,6 +31,7 @@ class StaticEvidenceContractTest(unittest.TestCase):
         self.assertEqual(writes["v4-execution-tests.json"]["commandCount"],3)
         self.assertEqual(writes["v4-execution-tests.json"]["failCount"],0)
         self.assertTrue(writes["v4-execution-tests.json"]["typecheck"])
+        self.assertIn('tsconfig.v4-release-candidate.json',runner.call_args_list[-1].args[1])
 
     def test_zero_exit_without_a_positive_unambiguous_test_summary_is_not_certification(self):
         for stdout in ['', '# tests 0\n# pass 0\n# fail 0\n', '# tests 2\n# pass 1\n# fail 1\n']:
