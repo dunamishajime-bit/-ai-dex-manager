@@ -1,7 +1,7 @@
 import copy,hashlib,sys,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation
+from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation,validate_real_tick,run_scoped_transaction,scoped_configuration_bytes,layered_monitor_pin_changes
 
 IDS=['V12_V4','QUALITY102_CAUSAL_V1','V52','PENGU_V8','FET_BRK48_RESIDUAL','HYPE_TREND_LONG','IDLE_PRIORITY_SHORT','SHARED_CRYPTO_RISK','MARGIN_GUARD']
 
@@ -11,6 +11,58 @@ def plans():
  return current,desired
 
 class ScopedRootContractTest(unittest.TestCase):
+ def test_historical_monitor_layers_are_reconciled_only_after_effective_old_pin_matches(self):
+  prefix='DISDEX_WATCHDOG_V52_';root='/home/deploy/disdex-trading/releases'
+  def layer(sha):return prefix+'EXPECTED_SHA='+sha+'\n'+prefix+'RELEASE_ROOT='+root+'/'+sha+'\n'+prefix+'SERVICE_UNIT=disdex-v52-aster-only@'+sha+'.service\nPENGU_SHA=keep\n'
+  rows=[(Path('/older.env'),layer('6'*40)),(Path('/current.env'),layer('7'*40))]
+  changes=layered_monitor_pin_changes(rows,prefix,'7'*40,'a'*40,root)
+  self.assertEqual(len(changes),2)
+  self.assertEqual(changes[0][1][prefix+'EXPECTED_SHA'],'6'*40)
+  self.assertEqual(changes[1][1][prefix+'EXPECTED_SHA'],'7'*40)
+  for _path,old,new in changes:
+   self.assertEqual(new[prefix+'EXPECTED_SHA'],'a'*40);self.assertNotIn('PENGU_SHA',new)
+  with self.assertRaises(ValueError):layered_monitor_pin_changes(rows,prefix,'8'*40,'a'*40,root)
+  with self.assertRaises(ValueError):layered_monitor_pin_changes([(Path('/bad.env'),layer('7'*40).replace(root,'/outside'))],prefix,'7'*40,'a'*40,root)
+
+ def test_only_private_runtime_configuration_is_rebound_never_credentials_or_approvals(self):
+  old='7'*40;new='a'*40
+  raw=('DISDEX_RUNTIME_COMMIT_SHA='+old+'\nFET_OWNER_SHA='+'8'*40+'\n').encode()
+  self.assertEqual(scoped_configuration_bytes(raw,old,new,environment=True),raw.replace(old.encode(),new.encode()))
+  with self.assertRaises(ValueError):scoped_configuration_bytes(('ASTER_API_PRIVATE_KEY='+old+'\n').encode(),old,new,environment=True)
+  with self.assertRaises(ValueError):scoped_configuration_bytes(b'{"schema":"disdex-live-operator-activation/v1"}',old,new,environment=False)
+
+ def test_post_start_requires_real_tick_identity_and_preserved_protected_hold(self):
+  sha='a'*40;now=2000000000000
+  row=dict(schema='disdex-runner-tick/v1',runnerId='V52',runtimeSha=sha,expectedSha=sha,
+   serviceUnit='disdex-v52-aster-only@'+sha+'.service',mainPid=1234,workingDirectory='/home/deploy/disdex-trading/releases/'+sha,
+   tickStartedAt=now-1000,tickCompletedAt=now-1,newOrdersAllowed=False,status='held',reason='KILL_SWITCH_HOLD_PROTECTED')
+  self.assertEqual(validate_real_tick(row,sha=sha,pid=1234,now=now,previous=None),now-1)
+  for change in [dict(mainPid=99),dict(tickCompletedAt=now+1),dict(newOrdersAllowed=True),dict(runtimeSha='b'*40),dict(workingDirectory='/old')]:
+   with self.assertRaises(ValueError):validate_real_tick({**row,**change},sha=sha,pid=1234,now=now,previous=None)
+  with self.assertRaises(ValueError):validate_real_tick(row,sha=sha,pid=1234,now=now,previous=now-1)
+
+ def test_partial_cutover_or_audit_failure_rolls_back_only_after_authorization_was_consumed(self):
+  class Ops:
+   def __init__(self,fail=None):self.fail=fail;self.calls=[]
+   def call(self,name):
+    self.calls.append(name)
+    if self.fail==name:raise ValueError('fixture '+name)
+   def prepare(self):self.call('prepare')
+   def consume(self):self.call('consume')
+   def publish(self):self.call('publish')
+   def switch(self):self.call('switch')
+   def audit(self):self.call('audit');return [1000,2000,3000]
+   def commit(self,ticks):self.call('commit');return dict(status='V52_PROTECTED_HOLD_VERIFIED',ordersEnabled=True,effectiveNewOrdersAllowed=False)
+   def rollback(self):self.call('rollback')
+  success=Ops();self.assertFalse(run_scoped_transaction(success)['effectiveNewOrdersAllowed'])
+  for phase in ['publish','switch','audit','commit']:
+   failed=Ops(phase)
+   with self.assertRaises(ValueError):run_scoped_transaction(failed)
+   self.assertEqual(failed.calls[-1],'rollback')
+  failed=Ops('consume')
+  with self.assertRaises(ValueError):run_scoped_transaction(failed)
+  self.assertEqual(failed.calls,['prepare','consume'])
+
  def test_v52_approval_cannot_relabel_a_peer_or_expand_into_kill_clearance(self):
   current,desired=plans();hashed=validate_scoped_plan(desired,current,current['runners'])
   self.assertEqual(len(hashed),64)
