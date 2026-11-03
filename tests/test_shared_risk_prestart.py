@@ -39,8 +39,12 @@ class PrestartTest(unittest.TestCase):
     def test_dropin_is_instance_local_same_pid_and_explicit_no_order(self):
         value=m.render_dropin(SHA)
         self.assertIn('ExecStart=\nExecStart=/usr/bin/node --import ',value)
-        self.assertIn('DISDEX_RUNTIME_COMMIT_SHA='+SHA,value)
-        self.assertIn('DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5',value)
+        self.assertNotIn(OLD+'.env',value)
+        self.assertIn('EnvironmentFile=/etc/disdex/current-runtime/'+SHA+'-shared-risk-scoped.env',value)
+        env=m.render_environment(SHA)
+        self.assertIn('DISDEX_RUNTIME_COMMIT_SHA='+SHA,env)
+        self.assertIn('DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5',env)
+        self.assertIn('DISDEX_RUNNER_PIN_MANIFEST_PATH=/etc/disdex/runner-pins.json',env)
         self.assertIn('ExecStartPre=+/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_shared_risk_prestart.py --sha '+SHA,value)
         self.assertNotIn('ordersEnabled=true',value)
         for bad in ['../bad','C'*40,'a'*39]:

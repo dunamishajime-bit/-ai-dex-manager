@@ -37,23 +37,30 @@ def validate_prestart(*,sha,plan,activation,pins,active_writers,now):
 
 def render_dropin(sha):
     if not isinstance(sha,str) or not SHA.fullmatch(sha):raise ValueError('exact Shared Risk SHA required')
-    root=str(RELEASES/sha)
+    root=(RELEASES/sha).as_posix()
     # Provision ONLY under disdex-shared-crypto-risk@<sha>.service.d, never
     # under the template: existing Writer and other Runner units stay intact.
     return ('[Service]\n'
-        'EnvironmentFile=/etc/disdex/current-runtime/7688ed7c93a1918d8b44837339b7da5584a868f5.env\n'
-        'Environment=DISDEX_RELEASE_SHA='+sha+'\n'
-        'Environment=DISDEX_RUNTIME_COMMIT_SHA='+sha+'\n'
-        'Environment=DISDEX_RELEASE_ROOT='+root+'\n'
-        'Environment=DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH=/var/lib/disdex/shared/crypto-daily-risk.json\n'
-        'Environment=DISDEX_PORTFOLIO_DD_GOVERNOR_PATH=/var/lib/disdex/shared/portfolio-dd-governor.json\n'
-        'Environment=DISDEX_RESIDENT_STOP_OBSERVATION_PATH=/var/lib/disdex/shared/resident-stop-observation.json\n'
-        'Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json\n'
-        'Environment=DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5\n'
-        'Environment=DISDEX_SHARED_RISK_ORDERS_ENABLED=false\n'
+        'EnvironmentFile=/etc/disdex/current-runtime/'+sha+'-shared-risk-scoped.env\n'
         'ExecStartPre=+/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_shared_risk_prestart.py --sha '+sha+'\n'
         'ExecStart=\nExecStart=/usr/bin/node --import '+root+'/node_modules/tsx/dist/loader.mjs '
         +root+'/scripts/disdex-shared-crypto-risk-writer.ts --daemon\n')
+
+
+def render_environment(sha):
+    if not isinstance(sha,str) or not SHA.fullmatch(sha):raise ValueError('exact Shared Risk SHA required')
+    # EnvironmentFile takes precedence over Environment= in systemd. A new
+    # non-secret exact-instance file must be last; loading the old common
+    # file then using Environment=new would silently retain the old SHA.
+    values=dict(DISDEX_RELEASE_SHA=sha,DISDEX_RUNTIME_COMMIT_SHA=sha,
+        DISDEX_RELEASE_ROOT=(RELEASES/sha).as_posix(),
+        DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH='/var/lib/disdex/shared/crypto-daily-risk.json',
+        DISDEX_PORTFOLIO_DD_GOVERNOR_PATH='/var/lib/disdex/shared/portfolio-dd-governor.json',
+        DISDEX_RESIDENT_STOP_OBSERVATION_PATH='/var/lib/disdex/shared/resident-stop-observation.json',
+        DISDEX_RUNNER_PIN_MANIFEST_PATH='/etc/disdex/runner-pins.json',
+        DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH='/var/lib/disdex/shared/aster-rate-budget.json',
+        DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT='7.5',DISDEX_SHARED_RISK_ORDERS_ENABLED='false')
+    return ''.join(k+'='+v+'\n' for k,v in values.items())
 
 
 def main():
