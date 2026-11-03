@@ -19,6 +19,13 @@ def require(value,reason):
     if not value:raise ValueError('V4_MONITOR_'+reason)
 
 
+def systemd_environment_files(properties):
+    # systemctl repeats this property once per EnvironmentFile; dict() would
+    # silently discard every entry except the last, hiding unapproved inputs.
+    return [path for line in properties.splitlines() if line.startswith('EnvironmentFiles=')
+        for path in re.findall(r'/[^\s()]+',line.split('=',1)[1])]
+
+
 def run_monitor_transaction(operations):
     operations.prepare()
     operations.consume()
@@ -312,7 +319,7 @@ class V4MonitorOperations:
             and 'disdex_v4_monitor_cutover.py --prestart --sha '+self.args.sha in row['ExecStartPre']
             and '/var/lib/disdex/shared' not in row.get('ReadWritePaths','').split(),
             'EFFECTIVE_SYSTEMD_NO_ORDER_BOUNDARY')
-        files=re.findall(r'/[^\s()]+',row.get('EnvironmentFiles',''))
+        files=systemd_environment_files(execution)
         require(files==['/etc/disdex/disdex-v12-aster-credentials.env',str(self.env_path)],'UNEXPECTED_ENVIRONMENT_OVERRIDE')
 
     def _replace(self,path,raw):

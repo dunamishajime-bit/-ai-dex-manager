@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_v4_monitor_cutover import build_monitor_activation,validate_monitor_activation,validate_monitor_observation,render_monitor_unit,run_monitor_transaction,V4MonitorOperations
+from disdex_v4_monitor_cutover import build_monitor_activation,validate_monitor_activation,validate_monitor_observation,render_monitor_unit,run_monitor_transaction,V4MonitorOperations,systemd_environment_files
 from disdex_deployment_plan import IDS,canonical
 import hashlib
 
@@ -13,6 +13,11 @@ def plan():
  return dict(schema='disdex-unified-deployment-plan/v2',repository='dunamishajime-bit/-ai-dex-manager',deploymentTarget='professional-dismanager.net',operatorTarget='DD1296_FINAL_ALLIN_10BPS',sourceSha=SHA,scope='V12_V4',runners={k:SHA if k=='V12_V4' else '7'*40 for k in IDS},uiSha='7'*40,monitorSha='7'*40,releaseRoots=dict(runners='/home/deploy/disdex-trading/releases',ui='/srv/ui',monitor='/srv/monitor'),ordersEnabled=False)
 
 class V4MonitorContractTest(unittest.TestCase):
+ def test_all_systemd_environment_files_are_read_without_discarding_repeated_properties(self):
+  raw='User=deploy\nEnvironmentFiles=/etc/disdex/credentials.env (ignore_errors=no)\nEnvironmentFiles=/etc/disdex/monitor.env (ignore_errors=no)\n'
+  self.assertEqual(systemd_environment_files(raw),['/etc/disdex/credentials.env','/etc/disdex/monitor.env'])
+  self.assertEqual(systemd_environment_files(raw+'EnvironmentFiles=/unapproved.env (ignore_errors=no)\n')[-1],'/unapproved.env')
+
  def test_transaction_consumes_fresh_authority_before_scoped_publication_and_rolls_back_partial_start(self):
   class Ops:
    def __init__(self,fail=None):self.calls=[];self.fail=fail
