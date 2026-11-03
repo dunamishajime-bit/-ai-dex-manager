@@ -21,6 +21,12 @@ def health():
         kill=dict(active=True,action='HOLD_PROTECTED'))
 
 class WitnessTest(unittest.TestCase):
+    def test_writer_inventory_rejects_a_second_or_unknown_active_writer(self):
+        expected='disdex-shared-crypto-risk@'+'c'*40+'.service'
+        m.validate_writer_inventory([expected],expected)
+        for inventory in [[],[expected,expected],[expected,'unexpected.service']]:
+            with self.assertRaises(ValueError):m.validate_writer_inventory(inventory,expected)
+
     def test_explicit_no_order_proof_preserves_active_kill_without_claiming_v4_ticks(self):
         row=m.build_no_order_witness(proof(),health(),now_ms=NOW,pending_hash='b'*64)
         self.assertEqual(row['scope'],'SHARED_CRYPTO_RISK_ONLY')

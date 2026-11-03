@@ -137,6 +137,11 @@ def file_bytes(path):
 def digest_file(path):return hashlib.sha256(file_bytes(path)).hexdigest()
 
 
+def validate_writer_inventory(units,expected_unit):
+    require(isinstance(units,list) and units==[expected_unit],
+            'SHARED_RISK_NOT_EXACTLY_ONE_PINNED_WRITER')
+
+
 class ProductionSharedRiskReader:
     def __init__(self):
         require(os.geteuid()==0,'SHARED_RISK_READER_ROOT_REQUIRED')
@@ -201,6 +206,11 @@ class ProductionSharedRiskReader:
                 markerMetadata=[ms.st_uid,ms.st_gid,stat.S_IMODE(ms.st_mode)],
                 systemdExecutionDigest=hashlib.sha256((properties.get('ExecStart','')+'\n'+properties.get('ExecStartPre','')).encode()).hexdigest())
         writer=peers.pop('SHARED_CRYPTO_RISK')
+        active=subprocess.run(['systemctl','list-units','--no-legend','--plain','--no-pager',
+            '--type=service','--state=active,activating,deactivating','disdex-shared-crypto-risk@*.service'],
+            capture_output=True,text=True,timeout=12)
+        require(active.returncode==0,'SHARED_RISK_WRITER_INVENTORY_READ_FAILED')
+        validate_writer_inventory([line.split()[0] for line in active.stdout.splitlines() if line.strip()],writer['unit'])
         return dict(writer=writer,peers=peers,killHash=digest_file(KILL),pendingHash=digest_file(PENDING))
 
     def capture(self):
