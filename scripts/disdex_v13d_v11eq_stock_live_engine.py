@@ -554,6 +554,28 @@ def assert_v52_monitor_http(method: str, url: str, *, signed: bool = False) -> N
             raise RuntimeError("V52_MONITOR_HTTP_DESTINATION_FORBIDDEN")
 
 
+def redact_http_error_context(target,body):
+    """Keep operational error codes, never signed URLs or echoed auth data."""
+    sensitive={'signature','signer','user','useraddress','address','accountaddress','wallet','nonce',
+        'apikey','key','privatekey','secret','token','accesstoken','authorization'}
+    def secret_key(key):return re.sub('[^a-z]','',str(key).lower()) in sensitive
+    def safe_text(value):return re.sub(r'(?i)(?:0x[a-f0-9]{40,}|\b[a-f0-9]{64,}\b)','[REDACTED]',value)
+    parsed=urllib.parse.urlsplit(target)
+    query=urllib.parse.parse_qsl(parsed.query,keep_blank_values=True)
+    changed=any(secret_key(k) for k,_ in query)
+    safe_target=urllib.parse.urlunsplit(parsed._replace(query=urllib.parse.urlencode([
+        (key,'[REDACTED]' if secret_key(key) else safe_text(value)) for key,value in query]))) if changed else target
+    def redact(value):
+        if isinstance(value,dict):return {k:'[REDACTED]' if secret_key(k) else redact(v) for k,v in value.items()}
+        if isinstance(value,list):return [redact(v) for v in value]
+        return safe_text(value) if isinstance(value,str) else value
+    try:
+        decoded=json.loads(body);clean=redact(decoded)
+        safe_body=json.dumps(clean,separators=(',',':')) if clean!=decoded else body
+    except (ValueError,TypeError):safe_body=safe_text(body)
+    return safe_target,safe_body
+
+
 def http_json(
     url: str,
     *,
@@ -603,7 +625,8 @@ def http_json(
             defer_aster_global_rate_budget(max(minimum_cooldown_ms, retry_after_ms), error.code)
         if bool_env("DISDEX_V52_MONITOR_ONLY", False):
             raise RuntimeError(f"V52_MONITOR_HTTP_ERROR:{error.code}") from None
-        raise RuntimeError(f"HTTP {error.code} {target}: {body[:500]}") from error
+        safe_target,safe_body=redact_http_error_context(target,body)
+        raise RuntimeError(f"HTTP {error.code} {safe_target}: {safe_body[:500]}") from None
 
 
 def get_path(payload: Any, path: str) -> Any:
