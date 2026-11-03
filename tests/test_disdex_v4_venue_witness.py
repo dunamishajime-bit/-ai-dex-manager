@@ -65,6 +65,25 @@ class VenueWitnessContractTest(unittest.TestCase):
         self.assertNotEqual(proof["capturedAt"],now//1000)
         self.assertTrue(proof["signatureVerified"])
 
+    def test_quantity_coverage_and_nonempty_client_id_do_not_prove_stop_ownership(self):
+        now=2_000_000_000_000;raw=self.bounded_snapshot(now)
+        payloads=raw["evidencePayloads"]
+        position={"symbol":"DOGEUSDT","positionSide":"BOTH","positionAmt":"-226","entryPrice":"0.08"}
+        stop={"symbol":"DOGEUSDT","clientOrderId":"UNRECOGNIZED_OWNER","orderId":"123",
+            "side":"BUY","type":"STOP_MARKET","origQty":"226","executedQty":"0",
+            "reduceOnly":True,"status":"NEW","stopPrice":"0.09"}
+        for k in ["establishedAsterOrders","signedAsterAccount"]:
+            payloads[k].update(readOnly=True,mutationCalls=0,positions=[position],openOrders=[stop])
+        payloads["signedAsterAccount"]["signedGet"]=True
+        payloads["sharedRiskAndPeers"].update(sharedRiskHealthy=True,marginGuardHealthy=True,killSwitch=False,pendingCount=0)
+        with patch.object(m.os,"geteuid",return_value=0,create=True), \
+            patch.object(m,"_assert_release",return_value=m.RELEASES/SHA), \
+            patch.object(m,"refresh_and_preflight",return_value=raw), \
+            patch.object(m,"_assert_runtime_health",return_value=({"maximumLossPct":7.5},[])), \
+            patch.object(m,"validate_units_and_ticks"):
+            with self.assertRaisesRegex(ValueError,"OWNERSHIP_NOT_CERTIFIED"):
+                m.collect_v4_venue_evidence(sha=SHA,expected_pins={},phase="before",now=now//1000)
+
     def _peer_stop_approval(self, now):
         return {
             "schema": "disdex-peer-stop-approval/v1",

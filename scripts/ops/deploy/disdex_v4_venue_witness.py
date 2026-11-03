@@ -465,6 +465,12 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
         raise ValueError("SIGNED_POSITION_EVIDENCE_DIVERGED")
     if account_orders != order_orders:
         raise ValueError("SIGNED_ORDER_EVIDENCE_DIVERGED")
+    # Geometric coverage and a nonempty client ID cannot attribute a STOP.
+    # This full-cutover reader has not yet bound each nonflat order to the
+    # independent durable owner stores. Certify only the genuinely flat case;
+    # existing positions/STOPs must remain with their current approved owner.
+    if account_positions or account_orders:
+        raise ValueError("V4_NONFLAT_CUTOVER_STOP_OWNERSHIP_NOT_CERTIFIED")
     unknown, partial = protective_stop_counts(account_positions, account_orders)
     if unknown or partial:
         raise ValueError("PROTECTIVE_STOP_RECONCILIATION_FAILED")

@@ -353,3 +353,27 @@ Remaining substantive work, not merely an owner-approval request:
 6. Per-Runner final order enable, fresh venue evidence and three real LIVE
    decision cycles. No test trades are required or authorized.
 Full status remains BLOCKED_FULL_LIVE_NOT_VERIFIED.
+
+
+## Installed bounded snapshot component and explicit nonflat limitation
+
+Root component e299dfe0923862dec4871e08a405628da485cbe3 passed all five CI
+suites and is now installed (three component hashes verified). Actual bounded
+witness hash8e2d2fec712961e234102f6282330f112d6511ee24d4a158850e54e7da3e3f3c.
+Root backup /var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/root-v4-bounded-backup-1793746068230.
+Runner PIDs/restart counts/exec identities, pins, ledger, Kill and current
+symlink were unchanged. No trading certificate/lease/activation was issued.
+The staged final e299 test archive045928511800f82c21a1a90ed0b29a2a9f736a0d2b4b4b2e712d0fe48ea4600f
+passed all six Linux suites, including delayed authority-expiry checks.
+Active b346 monitor prestart again returned V4_MONITOR_PRESTART_NO_ORDER_READY.
+
+One more failing test demonstrated that geometric STOP coverage plus any
+nonempty clientOrderId was previously enough for this full-cutover collector
+to claim stopOwnershipReconciled. It is not durable ownership evidence.
+Until its independent per-owner store reader is integrated, this executor now
+certifies only a genuinely flat account with no open orders. Nonflat or unknown
+STOP cases fail V4_NONFLAT_CUTOVER_STOP_OWNERSHIP_NOT_CERTIFIED and leave the
+current owner/STOP unchanged. This does not replace or weaken the deployed
+Shared Risk Writer's independent multi-SHA STOP observer. Current signed
+account proofs are flat; do not assume future accounts remain flat. Full
+nonflat cutover and STOP-compatible trading rollback remain explicitly open.
