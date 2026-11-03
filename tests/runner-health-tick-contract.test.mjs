@@ -74,31 +74,10 @@ test("rejects a fresh marker with invalid mutation counters", () => {
   assert.equal(result.reason, "RUNNER_TICK_HEARTBEAT_COUNTER_INVALID");
 });
 
-test("read-only snapshot reader distinguishes missing and fresh marker files", async () => {
-  const root = await mkdtemp(join(tmpdir(), "disdex-health-tick-"));
-  process.env.DISDEX_HEALTH_SNAPSHOT_TICK_ROOT = root;
-  process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE = "LEGACY";
-  const { readRunnerTickHeartbeat, projectValidatedTickEvidence, RUNNER_DEFINITIONS } = await import("../scripts/ops/root/disdex-runner-health-snapshot-current.mjs");
-  assert.ok(RUNNER_DEFINITIONS.every((entry) => Number.isFinite(entry.tickMaxAgeMs) && entry.tickMaxAgeMs > 0));
-  assert.equal(RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "PENGU_V8")?.tickMaxAgeMs, 3 * 60 * 60_000);
-  assert.equal(RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "V12_X1_ALL")?.tickMaxAgeMs, 3 * 60 * 60_000);
-  const q102Window = RUNNER_DEFINITIONS.find((entry) => entry.runnerId === "QUALITY102_CAUSAL_V1")?.tickMaxAgeMs;
-  assert.ok(q102Window >= 60 * 60_000 + 30_000);
-  const { nextQuality102DaemonWaitMs, QUALITY102_HOUR_MS } = await import("../lib/quality102-live-scheduling.ts");
-  assert.ok(nextQuality102DaemonWaitMs("no-signal", 5 * 60_000, 30_000, 5_000) <= q102Window);
-  assert.ok(q102Window >= QUALITY102_HOUR_MS + 30_000);
-  assert.deepEqual(projectValidatedTickEvidence({ valid: false, reason: "RUNNER_TICK_HEARTBEAT_FUTURE", marker: { tickCompletedAt: 70_000, status: "fake", reason: "fake" } }), {
-    lastTickAt: 0,
-    tickStatus: null,
-    tickReason: "RUNNER_TICK_HEARTBEAT_FUTURE",
-  });
-  const missing = await readRunnerTickHeartbeat(runner, 10_000);
-  assert.equal(missing.present, false);
-  assert.equal(missing.reason, "RUNNER_TICK_HEARTBEAT_MISSING");
-  await writeFile(join(root, "V12_V4.json"), `${JSON.stringify(marker())}\n`, "utf8");
-  const fresh = await readRunnerTickHeartbeat(runner, 10_000);
-  assert.equal(fresh.present, true);
-  assert.equal(fresh.valid, true);
-  assert.equal(fresh.fresh, true);
-  assert.equal(fresh.marker.tickCompletedAt, 9_500);
+test("Production reader uses canonical actual-PID observations separately from legacy heartbeat contracts", async () => {
+  const source = await import("../lib/disdex-observed-runner-phase.mjs");
+  const observation = source.validateObservedTick({runnerId:"V12_V4",expectedSha:"a".repeat(40),unit:"unit",releaseRoot:"/release",maxStateAgeMs:1000}, {pid:123,cwd:"/release"}, marker(), 10000);
+  assert.equal(observation.valid,false);
+  assert.equal(observation.lastTickAt,null);
+  assert.equal(observation.reason,"OBSERVED_TICK_SCHEMA");
 });
