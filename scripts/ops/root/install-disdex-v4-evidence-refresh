@@ -63,6 +63,7 @@ marker_mode="$(stat -c '%a' "$marker")"
 for source in \
   scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts \
   scripts/ops/root/disdex-v4-evidence-refresh-activate \
+  scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py \
   ops/systemd/disdex-v4-dynamic-evidence-refresh@.service \
   ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer; do
   [[ -f "$release_root/$source" && ! -L "$release_root/$source" ]] || {
@@ -73,7 +74,11 @@ done
 
 # Stage the lease directory and the exact template units only. This command
 # never enables, starts, stops, restarts, or changes a trading Runner.
-install -d -o root -g root -m 0750 /var/lib/disdex/unified-deploy/refresh-leases/v4
+install -d -o root -g root -m 0700 /var/lib/disdex/unified-deploy/refresh-leases/v4
+install -d -o root -g root -m 0700 /var/lib/disdex/unified-deploy/v4-evidence
+install -o root -g root -m 0644 \
+  "$release_root/scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py" \
+  /usr/local/libexec/disdex-unified/disdex_v4_evidence_refresh_activation.py
 install -o root -g root -m 0644 \
   "$release_root/ops/systemd/disdex-v4-dynamic-evidence-refresh@.service" \
   /etc/systemd/system/disdex-v4-dynamic-evidence-refresh@.service

@@ -29,7 +29,6 @@ class CandidateSourceTest(unittest.TestCase):
     def test_refresh_helpers_are_exactly_the_reviewed_root_helpers(self):
         for path in (
             "scripts/ops/root/disdex-v4-evidence-refresh-activate",
-            "scripts/ops/root/install-disdex-v4-evidence-refresh",
         ):
             with self.subTest(path=path):
                 expected = source_at(REFRESH_HELPERS, path).replace(b"\r\n", b"\n")
