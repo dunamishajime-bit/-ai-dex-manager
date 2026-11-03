@@ -616,6 +616,52 @@ def _validate_scoped_activation(activation: dict, args, desired: dict,
     return activation
 
 
+def build_shared_risk_root_activation(args, desired, authorization, *, now):
+    """Issue new root-native scope authority, never copy an owner artifact.
+
+    The authenticated, exact-plan execute request supplies the authority. This
+    record is not represented as an owner signature and cannot enable orders.
+    The caller must consume that request's nonce before publishing it.
+    """
+    validate(desired)
+    if (args.route != 'CODEX_SSH' or args.owner != CODEX_SSH_OPERATOR
+        or getattr(args, '_codex_ssh_authenticated', False) is not True
+        or args.scope != SHARED_RISK_SCOPE or args.orders_enabled != 'false'
+        or desired['scope'] != SHARED_RISK_SCOPE or desired['ordersEnabled'] is not False
+        or desired['sourceSha'] != args.sha or desired['runners'][SHARED_RISK_RUNNER] != args.sha
+        or hashlib.sha256(canonical(desired)).hexdigest() != args.plan_sha256
+        or authorization.get('authorizationMethod') != 'ROOT_SSH_SESSION'
+        or authorization.get('signatureVerified') is not False
+        or authorization.get('operator') != args.owner or authorization.get('sourceSha') != args.sha
+        or authorization.get('planSha256') != args.plan_sha256
+        or authorization.get('scope') != SHARED_RISK_SCOPE
+        or authorization.get('ordersEnabled') is not False
+        or type(authorization.get('issuedAt')) is not int
+        or type(authorization.get('expiresAt')) is not int
+        or not authorization['issuedAt'] <= now < authorization['expiresAt']
+        or not 1 <= authorization['expiresAt']-authorization['issuedAt'] <= 300):
+        raise ValueError('Shared Risk root-native approval binding or expiry invalid')
+    return dict(schema=EXECUTION_ACTIVATION_SCHEMA,repository=REPO,
+        deploymentTarget=DEPLOYMENT_TARGET,operatorTarget=OPERATOR_TARGET,
+        scope=SHARED_RISK_SCOPE,approvedSha=args.sha,approvedShaByRunner=desired['runners'],
+        approvedRunners=[SHARED_RISK_RUNNER],planSha256=args.plan_sha256,ordersEnabled=False,
+        operator=CODEX_SSH_OPERATOR,approvedAt=authorization['issuedAt'],
+        expiresAt=authorization['expiresAt'],operatorAcknowledgement=SHARED_RISK_ACK)
+
+
+def _publish_new_root_activation(path, value, *, root_uid):
+    assert_private_dir(path.parent, root_uid=root_uid)
+    fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o400)
+    try:
+        os.fchown(fd,root_uid,-1)
+        with os.fdopen(fd,'w',closefd=False) as f:
+            json.dump(value,f,sort_keys=True);f.write('\n');f.flush();os.fsync(fd)
+    finally:os.close(fd)
+    directory=os.open(path.parent,os.O_RDONLY)
+    try:os.fsync(directory)
+    finally:os.close(directory)
+
+
 class RootDeploymentExecutor:
     """Fail-closed production executor for the first scoped cutover.
 
@@ -628,7 +674,8 @@ class RootDeploymentExecutor:
                  systemd=None, verify_fn: Callable = verify,
                  clock: Callable[[], int] = lambda: int(time.time()),
                  sleep_fn: Callable[[float], None] = time.sleep,
-                 audit_reader: Optional[Callable[[int], dict]] = None):
+                 audit_reader: Optional[Callable[[int], dict]] = None,
+                 production_reader=None):
         self.paths = paths
         self.root_uid = root_uid
         self.systemd = systemd or SystemdAdapter()
@@ -636,6 +683,8 @@ class RootDeploymentExecutor:
         self.clock = clock
         self.sleep_fn = sleep_fn
         self.audit_reader = audit_reader
+        self.production_reader = production_reader
+        self._risk_audit_reader = None
 
     def _read_current_sha(self, *, allow_legacy=False) -> str:
         link = self.paths.current.lstat()
@@ -657,6 +706,28 @@ class RootDeploymentExecutor:
             payload = getattr(args, "_codex_ssh_authorization", None)
             if payload is None:
                 payload = build_codex_ssh_authorization(args, now=self.clock())
+            now = self.clock()
+            if (getattr(args, '_codex_ssh_authenticated', False) is not True
+                or args.owner != CODEX_SSH_OPERATOR
+                or payload.get('repository') != REPO
+                or payload.get('deploymentTarget') != DEPLOYMENT_TARGET
+                or payload.get('operatorTarget') != OPERATOR_TARGET
+                or payload.get('route') != 'CODEX_SSH'
+                or payload.get('operator') != args.owner
+                or payload.get('sourceSha') != args.sha
+                or payload.get('scope') != args.scope
+                or payload.get('planSha256') != args.plan_sha256
+                or type(payload.get('ordersEnabled')) is not bool
+                or payload['ordersEnabled'] != (args.orders_enabled == 'true')
+                or payload.get('authorizationMethod') != 'ROOT_SSH_SESSION'
+                or payload.get('signatureVerified') is not False
+                or not isinstance(payload.get('nonce'), str)
+                or not re.fullmatch(r'[a-f0-9]{32}', payload['nonce'])
+                or type(payload.get('issuedAt')) is not int
+                or type(payload.get('expiresAt')) is not int
+                or not payload['issuedAt'] <= now < payload['expiresAt']
+                or not 1 <= payload['expiresAt']-payload['issuedAt'] <= 300):
+                raise ValueError('Codex SSH approval expired or exact binding changed')
             if nonce_dir is not None:
                 _consume_codex_ssh_nonce(
                     nonce_dir, payload["nonce"], root_uid=self.root_uid)
@@ -677,6 +748,13 @@ class RootDeploymentExecutor:
             orders_enabled=args.orders_enabled == "true",
         )
 
+    def _assert_expected_pins(self, expected_pins):
+        actual = parse_live_pins(read_root_json(
+            self.paths.pins, root_uid=self.root_uid, private=False),
+            releases=self.paths.releases)
+        if actual != expected_pins:
+            raise ValueError("runner-pin manifest changed outside approved scope")
+
     def _audit(self, expected_pins: dict, new_unit: str, old_unit: str,
                baseline: dict, *, cycles: int = 3) -> list[dict]:
         if cycles < 3:
@@ -684,6 +762,15 @@ class RootDeploymentExecutor:
         observations = []
         previous_capture = None
         for cycle in range(cycles):
+            if self.production_reader is not None:
+                if self._risk_audit_reader is None:
+                    raise ValueError('Shared Risk real audit baseline missing')
+                value = self._risk_audit_reader(cycle)
+                if self.systemd.is_active(old_unit) or not self.systemd.is_active(new_unit):
+                    raise ValueError('writer mutual exclusion failed during real audit')
+                self._assert_expected_pins(expected_pins)
+                observations.append(value)
+                continue
             if cycle:
                 self.sleep_fn(1)
             value = (self.audit_reader(cycle) if self.audit_reader is not None
@@ -696,11 +783,7 @@ class RootDeploymentExecutor:
             previous_capture = observed["capturedAt"]
             if self.systemd.is_active(old_unit) or not self.systemd.is_active(new_unit):
                 raise ValueError("writer mutual exclusion failed during audit")
-            actual = parse_live_pins(read_root_json(
-                self.paths.pins, root_uid=self.root_uid, private=False),
-                releases=self.paths.releases)
-            if actual != expected_pins:
-                raise ValueError("runner-pin manifest changed outside approved scope")
+            self._assert_expected_pins(expected_pins)
             observations.append({
                 "cycle": cycle + 1,
                 "capturedAt": observed["capturedAt"],
@@ -821,6 +904,11 @@ class RootDeploymentExecutor:
             return self._execute_pengu_peer_stop(args, token)
         if args.scope != SHARED_RISK_SCOPE:
             raise ValueError("unsupported execution scope: " + str(args.scope))
+        if self.production_reader is None and self.paths.root == ROOT:
+            if self.audit_reader is not None:
+                raise ValueError('Production cannot substitute a static venue audit reader')
+            from disdex_shared_risk_witness import ProductionSharedRiskReader
+            self.production_reader = ProductionSharedRiskReader()
         orders_enabled = args.orders_enabled == "true"
         validate_order_permission(args.scope, orders_enabled)
         if orders_enabled:
@@ -855,19 +943,38 @@ class RootDeploymentExecutor:
             raise ValueError("Shared Risk scope exceeds exact plan delta")
         validate_release_roots(desired, self.paths.releases,
                                root_uid=self.root_uid)
-        for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
+        # Only the new Writer is being deployed. Legacy peers are frozen by
+        # actual PID/CWD/marker/permission readback, not granted a new release
+        # certificate or converted to the new ownership convention.
+        releases_to_certify = ({args.sha} if self.production_reader is not None else
+                              set(desired["runners"].values()) | {desired["sourceSha"]})
+        for sha in releases_to_certify:
             release_marker(sha, self.paths.releases, root_uid=self.root_uid)
 
         activation_path = (self.paths.activation_dir / args.scope / f"{args.sha}.json")
         assert_private_dir(activation_path.parent, root_uid=self.root_uid)
-        activation = read_root_json(activation_path,
-                                    root_uid=self.root_uid, private=True)
-        _validate_scoped_activation(activation, args, desired, sha_hash,
-                                    now=self.clock())
-        before = _validate_venue_evidence(
-            read_root_json(self.paths.venue_before,
-                           root_uid=self.root_uid, private=True),
-            now=self.clock(), label="before")
+        issue_root_activation = (self.production_reader is not None and args.route == 'CODEX_SSH'
+                                 and not activation_path.exists() and not activation_path.is_symlink())
+        if not issue_root_activation:
+            activation = read_root_json(activation_path,root_uid=self.root_uid,private=True)
+            _validate_scoped_activation(activation,args,desired,sha_hash,now=self.clock())
+        if self.production_reader is not None:
+            from disdex_shared_risk_audit import SharedRiskAuditReader
+            captured = self.production_reader.capture()
+            before = captured['witness']
+            context = captured['context']
+            self._risk_audit_reader = SharedRiskAuditReader(
+                expected_sha=args.sha,previous_risk=captured['riskSnapshot'],
+                baseline_peers=context['peers'],kill_hash=context['killHash'],
+                pending_hash=context['pendingHash'],read_risk=self.production_reader.read_risk,
+                read_context=self.production_reader.read_context,
+                signed_flat_get=lambda:self.production_reader.capture()['witness']['signedFlatProof'],
+                clock_ms=lambda:time.time_ns()//1000000,monotonic=time.monotonic,sleep=self.sleep_fn)
+        else:
+            before = _validate_venue_evidence(
+                read_root_json(self.paths.venue_before,
+                               root_uid=self.root_uid, private=True),
+                now=self.clock(), label="before")
 
         payload = self._verify_token(args, token)
         if payload.get("nonce") is None:
@@ -906,6 +1013,12 @@ class RootDeploymentExecutor:
             raise ValueError("approval replay") from None
         if consumed.get("nonce") != payload.get("nonce"):
             raise ValueError("approval nonce changed during verification")
+        if issue_root_activation:
+            activation=build_shared_risk_root_activation(args,desired,consumed,now=self.clock())
+            _validate_scoped_activation(activation,args,desired,sha_hash,now=self.clock())
+            # O_EXCL: no copy, overwrite, re-dating or conversion of a prior
+            # approval. A failed/expired existing artifact remains fail-closed.
+            _publish_new_root_activation(activation_path,activation,root_uid=self.root_uid)
 
         try:
             journal_path = self.paths.journal or self.paths.root / "transaction.json"

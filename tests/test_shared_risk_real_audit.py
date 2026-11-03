@@ -112,4 +112,18 @@ class RealRiskAuditTest(unittest.TestCase):
                       dict(ordersSent=False),dict(afterHash='c'*64),dict(status='PASS')]:
             with self.assertRaises(ValueError):validate_signed_flat_result({**proof,**patch})
 
+    def test_root_executor_uses_real_risk_cycles_and_never_reads_the_legacy_static_file(self):
+        from disdex_unified_root_gate import RootDeploymentExecutor
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        reader,_=self.reader()
+        executor=RootDeploymentExecutor(SimpleNamespace(),production_reader=object(),
+            systemd=SimpleNamespace(is_active=lambda unit:unit=='new'),sleep_fn=lambda _:None)
+        executor._risk_audit_reader=reader
+        with (patch('disdex_unified_root_gate.read_root_json',side_effect=AssertionError('static file read')),
+              patch.object(executor,'_assert_expected_pins')):
+            rows=executor._audit({},'new','old',{})
+        self.assertEqual(len({row['tickCompletedAt'] for row in rows}),3)
+        self.assertTrue(all(row['ordersEnabled'] is False for row in rows))
+
 if __name__=='__main__':unittest.main()

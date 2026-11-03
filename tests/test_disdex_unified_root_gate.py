@@ -54,6 +54,37 @@ def pins(releases=RELEASES):
                             "stopOwner":STOP_OWNERS[key]} for key in IDS}}
 
 class RootGateTest(unittest.TestCase):
+    def test_fresh_shared_risk_root_activation_is_exact_scope_without_order_authority(self):
+        from disdex_unified_root_gate import build_shared_risk_root_activation,_validate_scoped_activation
+        args=SimpleNamespace(route='CODEX_SSH',owner=CODEX_SSH_OPERATOR,sha=NEW,
+            scope='SHARED_CRYPTO_RISK_ONLY',plan_sha256='a'*64,orders_enabled='false',
+            _codex_ssh_authenticated=True)
+        desired=plan(args.scope,'SHARED_CRYPTO_RISK')
+        import hashlib
+        from disdex_deployment_plan import canonical
+        args.plan_sha256=hashlib.sha256(canonical(desired)).hexdigest()
+        authorization=build_codex_ssh_authorization(args,now=2000000000)
+        activation=build_shared_risk_root_activation(args,desired,authorization,now=2000000001)
+        _validate_scoped_activation(activation,args,desired,args.plan_sha256,now=2000000001)
+        self.assertEqual(activation['approvedRunners'],['SHARED_CRYPTO_RISK'])
+        self.assertEqual(activation['expiresAt'],authorization['expiresAt'])
+        for change in [dict(orders_enabled='true'),dict(scope='V52'),dict(owner='other')]:
+            altered=SimpleNamespace(**{**vars(args),**change})
+            with self.assertRaises(ValueError):build_shared_risk_root_activation(altered,desired,authorization,now=2000000001)
+
+    def test_cached_root_ssh_approval_cannot_expire_during_venue_reads_or_change_scope(self):
+        args=SimpleNamespace(route='CODEX_SSH',owner=CODEX_SSH_OPERATOR,sha=NEW,
+            scope='SHARED_CRYPTO_RISK_ONLY',plan_sha256='a'*64,orders_enabled='false',
+            _codex_ssh_authenticated=True)
+        build_codex_ssh_authorization(args,now=2000000000)
+        executor=RootDeploymentExecutor(SimpleNamespace(),clock=lambda:2000000300)
+        with self.assertRaisesRegex(ValueError,'expired|binding'):
+            executor._verify_token(args,'')
+        executor.clock=lambda:2000000001
+        args.sha='b'*40
+        with self.assertRaisesRegex(ValueError,'binding'):
+            executor._verify_token(args,'')
+
     def test_codex_ssh_requires_sshd_connection_metadata(self):
         with self.assertRaisesRegex(ValueError, "authenticated Codex SSH"):
             assert_codex_ssh_session({})
