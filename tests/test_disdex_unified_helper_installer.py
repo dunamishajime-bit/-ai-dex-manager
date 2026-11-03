@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class UnifiedHelperInstallerContractTests(unittest.TestCase):
     def test_real_shared_risk_reader_dependencies_are_provisioned_together(self):
         installer=(ROOT/'scripts/ops/root/install-disdex-unified-deployment').read_text()
-        for module in ['disdex_shared_risk_audit.py','disdex_shared_risk_witness.py']:
+        for module in ['disdex_shared_risk_audit.py','disdex_shared_risk_witness.py','disdex_pending_maintenance_install.py']:
             self.assertIn('scripts/ops/deploy/'+module,installer)
             self.assertIn(module,installer.split('for source in disdex_deployment_contract.py',1)[1])
 

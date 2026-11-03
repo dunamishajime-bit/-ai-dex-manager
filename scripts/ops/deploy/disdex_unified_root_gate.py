@@ -916,6 +916,9 @@ class RootDeploymentExecutor:
         certify_live_executor()
         if args.deployment_target != DEPLOYMENT_TARGET or args.operator_target != OPERATOR_TARGET:
             raise ValueError("unapproved deployment target or identity")
+        if args.scope == 'PENDING_RECONCILE_ONLY':
+            from disdex_pending_maintenance_install import install
+            return install(self,args,token)
         if args.scope == "V12_V4":
             # Lazy import keeps the shared-risk and V4 mutation boundaries
             # independent; the owner-signed scope selects the only executor.
@@ -1222,6 +1225,19 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         raise ValueError("unapproved deployment target or identity")
     orders_enabled = args.orders_enabled == "true"
     validate_order_permission(args.scope, orders_enabled)
+    if args.scope == 'PENDING_RECONCILE_ONLY':
+        # Dedicated no-order scope freezes all existing deployment identities.
+        # Its source SHA identifies the GET-only maintenance SDK, not a Runner.
+        from types import SimpleNamespace
+        from disdex_pending_maintenance_install import prepare
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',
+            current=current,releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem')
+        parent=RootDeploymentExecutor(paths,root_uid=root_uid)
+        prepared=prepare(parent,args,token)
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=False,planSha256=args.plan_sha256,changedRunners=[],
+            unproven=['ROOT_SERVICE_INSTALLATION','THREE_DISTINCT_SCHEDULED_SIGNED_RECONCILIATIONS'],
+            verifiedContracts=['PINNED_GET_ONLY_MAINTENANCE_PREFLIGHT'])
     codex_ssh = args.route == "CODEX_SSH"
     if codex_ssh:
         if (args.owner != CODEX_SSH_OPERATOR
