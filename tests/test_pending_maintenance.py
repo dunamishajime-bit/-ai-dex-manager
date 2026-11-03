@@ -15,6 +15,12 @@ def receipt():
         authorizationIssuedAt=NOW-120,authorizationExpiresAt=NOW+180,committedAt=NOW-60)
 
 class MaintenanceTest(unittest.TestCase):
+    def test_server_credentials_are_parsed_as_data_and_never_executed_or_forwarded_wholesale(self):
+        text='export ASTER_USER_ADDRESS="0x'+'0'*40+'"\nASTER_API_PRIVATE_KEY="test-only-key"\nUNRELATED=discard\n'
+        value=m.parse_server_credentials(text)
+        self.assertEqual(set(value),{'ASTER_USER_ADDRESS','ASTER_API_PRIVATE_KEY'})
+        with self.assertRaises(ValueError):m.parse_server_credentials('ASTER_API_PRIVATE_KEY=$(touch /tmp/should-never-execute)\n')
+
     def test_scheduled_execution_has_a_real_main_pid_and_does_not_import_fake_ssh_context(self):
         unit=m.render_service(SHA);timer=m.render_timer()
         self.assertIn('Type=exec',unit)

@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import shlex
 import stat
 import subprocess
 import sys
@@ -125,20 +126,51 @@ def source_release():
     return release
 
 
-def child_environment(sha,home,grant_path=None):
-    env={k:os.environ[k] for k in ['ASTER_API_PRIVATE_KEY','ASTER_USER_ADDRESS','ASTER_FUTURES_BASE_URL'] if k in os.environ}
+def parse_server_credentials(text):
+    """Read the approved dotenv subset as data; never evaluate shell syntax."""
+    allowed={'ASTER_API_PRIVATE_KEY','ASTER_USER_ADDRESS','ASTER_FUTURES_BASE_URL'}
+    result={}
+    for line in text.splitlines():
+        line=line.strip()
+        if not line or line.startswith('#'):continue
+        if line.startswith('export '):line=line[7:].lstrip()
+        key,separator,value=line.partition('=')
+        key=key.strip()
+        if key not in allowed:continue
+        require(separator and key not in result,'PENDING_MAINTENANCE_CREDENTIAL_FORMAT')
+        require(not any(c in value for c in ['$', '`', '\x00', '\r', ';']),
+                'PENDING_MAINTENANCE_CREDENTIAL_FORMAT')
+        try:parts=shlex.split(value,comments=True,posix=True)
+        except ValueError:raise ValueError('PENDING_MAINTENANCE_CREDENTIAL_FORMAT') from None
+        require(len(parts)==1 and bool(parts[0]),'PENDING_MAINTENANCE_CREDENTIAL_FORMAT')
+        result[key]=parts[0]
+    require({'ASTER_API_PRIVATE_KEY','ASTER_USER_ADDRESS'}<=result.keys(),
+            'PENDING_MAINTENANCE_CREDENTIALS_MISSING')
+    return result
+
+
+def load_server_credentials():
+    path=Path('/etc/disdex/disdex-v12-aster-credentials.env')
+    secure(path,allowed_write=0o200)
+    require(stat.S_IMODE(path.stat().st_mode)==0o600,'PENDING_MAINTENANCE_CREDENTIAL_MODE')
+    return parse_server_credentials(path.read_text())
+
+
+def child_environment(sha,home,grant_path=None,credentials=None):
+    source=os.environ if credentials is None else credentials
+    env={k:source[k] for k in ['ASTER_API_PRIVATE_KEY','ASTER_USER_ADDRESS','ASTER_FUTURES_BASE_URL'] if k in source}
     env.update(PATH='/usr/bin:/bin',HOME=home,NODE_ENV='production',DISDEX_RELEASE_SHA=sha,
         DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH='/var/lib/disdex/shared/aster-rate-budget.json')
     if grant_path is not None:env['DISDEX_PENDING_REFRESH_GRANT_PATH']=str(grant_path)
     return env
 
 
-def run_signed_child(release,deploy,*,grant_path=None):
+def run_signed_child(release,deploy,*,grant_path=None,credentials=None):
     result=subprocess.run(['/usr/bin/node','--import',str(release/'node_modules/tsx/dist/loader.mjs'),
         str(release/'scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts'),
         '--apply-refresh' if grant_path is not None else '--verify-only'],cwd=release,
         user=deploy.pw_uid,group=deploy.pw_gid,extra_groups=[],
-        env=child_environment(release.name,deploy.pw_dir,grant_path),capture_output=True,text=True,timeout=55)
+        env=child_environment(release.name,deploy.pw_dir,grant_path,credentials),capture_output=True,text=True,timeout=55)
     # Deliberately do not print/store raw stderr, response URLs or credentials.
     if result.returncode:
         reason='PENDING_MAINTENANCE_SIGNED_READ_FAILED_OR_DEFERRED'
