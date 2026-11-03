@@ -696,6 +696,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
         args=self._args();args.route='CODEX_SSH';args.owner=CODEX_SSH_OPERATOR
         args._codex_ssh_authenticated=True
         with (patch('disdex_unified_root_gate.ROOT',self.root),
+              patch('disdex_shared_risk_monitor_wiring.SharedRiskMonitorWiring.production'),
               patch('disdex_shared_risk_witness.ProductionSharedRiskReader') as reader):
             reader.return_value.capture.return_value={}
             result=preflight(args,'',root=self.root,pins_path=self.pins_path,current=self.current,
@@ -772,8 +773,13 @@ class SharedRiskExecutorTest(unittest.TestCase):
 
     def test_shared_risk_start_failure_rolls_back_writer_and_manifest(self):
         systemd = FakeSystemd(self.old_unit, self.new_unit, fail_new_start=True)
+        from disdex_shared_risk_monitor_wiring import SharedRiskMonitorWiring
+        monitor=self.root/'fixture-health.env';monitor.write_text('PEER=unchanged\nRISK='+self.old+'\n');monitor.chmod(0o640)
+        executor=self._executor(systemd)
+        executor.monitor_wiring=SharedRiskMonitorWiring([(monitor,{'RISK':self.old},{'RISK':self.new})],root_uid=os.geteuid())
         with self.assertRaisesRegex(RuntimeError, "rolled back"):
-            self._executor(systemd).execute(self._args(), "signed-token")
+            executor.execute(self._args(), "signed-token")
+        self.assertEqual(monitor.read_text(),'PEER=unchanged\nRISK='+self.old+'\n')
         self.assertTrue(systemd.is_active(self.old_unit))
         self.assertFalse(systemd.is_active(self.new_unit))
         restored = json.loads(self.pins_path.read_text(encoding="utf-8"))

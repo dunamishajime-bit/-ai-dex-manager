@@ -685,6 +685,7 @@ class RootDeploymentExecutor:
         self.audit_reader = audit_reader
         self.production_reader = production_reader
         self._risk_audit_reader = None
+        self.monitor_wiring = None
 
     def _read_current_sha(self, *, allow_legacy=False, unchanged_identity_only=False) -> str:
         link = self.paths.current.lstat()
@@ -766,6 +767,8 @@ class RootDeploymentExecutor:
             releases=self.paths.releases)
         if actual != expected_pins:
             raise ValueError("runner-pin manifest changed outside approved scope")
+        if self.monitor_wiring is not None:
+            self.monitor_wiring.assert_applied()
 
     def _audit(self, expected_pins: dict, new_unit: str, old_unit: str,
                baseline: dict, *, cycles: int = 3) -> list[dict]:
@@ -994,6 +997,9 @@ class RootDeploymentExecutor:
         old_sha = pins[SHARED_RISK_RUNNER]
         old_unit = _unit_for_runner(SHARED_RISK_RUNNER, old_sha)
         new_unit = _unit_for_runner(SHARED_RISK_RUNNER, args.sha)
+        if self.production_reader is not None and self.paths.root == ROOT:
+            from disdex_shared_risk_monitor_wiring import SharedRiskMonitorWiring
+            self.monitor_wiring=SharedRiskMonitorWiring.production(old_sha,args.sha)
         if self.systemd.is_active(new_unit) or self.systemd.is_masked(new_unit):
             raise ValueError("new Shared Risk writer is already active or masked")
         if not self.systemd.is_active(old_unit) or self.systemd.is_masked(old_unit):
@@ -1045,6 +1051,7 @@ class RootDeploymentExecutor:
                 "currentSymlinkSha": current_sha,
                 "oldPins": raw_pins,
                 "oldPlan": current_plan,
+                "oldMonitorWiring": self.monitor_wiring.journal() if self.monitor_wiring is not None else [],
             }, root_uid=self.root_uid)
             self.systemd.stop(old_unit)
             self.systemd.mask(old_unit)
@@ -1054,6 +1061,8 @@ class RootDeploymentExecutor:
                          private=False)
             _atomic_json(self.paths.current_plan, next_current_plan,
                          root_uid=self.root_uid)
+            if self.monitor_wiring is not None:
+                self.monitor_wiring.apply()
             if old_enabled:
                 self.systemd.enable(new_unit)
             self.systemd.start(new_unit)
@@ -1112,6 +1121,8 @@ class RootDeploymentExecutor:
                              private=False)
                 _atomic_json(self.paths.current_plan, current_plan,
                              root_uid=self.root_uid)
+                if self.monitor_wiring is not None:
+                    self.monitor_wiring.restore()
                 if not self.systemd.is_active(old_unit):
                     self.systemd.start(old_unit)
                 journal_path = self.paths.journal or self.paths.root / "transaction.json"
@@ -1254,6 +1265,8 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         release_marker(args.sha,releases,root_uid=root_uid)
         validate_release_roots(desired,releases,root_uid=root_uid)
         from disdex_shared_risk_witness import ProductionSharedRiskReader
+        from disdex_shared_risk_monitor_wiring import SharedRiskMonitorWiring
+        SharedRiskMonitorWiring.production(pins[SHARED_RISK_RUNNER],args.sha)
         ProductionSharedRiskReader().capture()
     elif args.scope == "V12_V4":
         # V4 is a trust-boundary migration from legacy deploy-owned peer/current
