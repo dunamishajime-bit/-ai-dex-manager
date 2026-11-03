@@ -11,6 +11,60 @@ SHA="a"*40
 OLD="7"*40
 
 class VenueWitnessContractTest(unittest.TestCase):
+    def bounded_snapshot(self,now=2_000_000_000_000):
+        from datetime import datetime,timezone
+        captured=datetime.fromtimestamp((now-1000)/1000,timezone.utc).isoformat(timespec="milliseconds").replace("+00:00","Z")
+        keys=["establishedAsterOrders","signedAsterAccount","sharedRiskAndPeers"]
+        return dict(status="V4_BOUNDED_EVIDENCE_SNAPSHOT_VERIFIED",candidateSha=SHA,
+            certificateSchema="disdex-v12-v4-production-certification/v4",
+            certificateValidUntilMs=now+600000,leaseExpiresAtMs=now+60000,
+            capturedAt=captured,capturedAtMs=now-1000,refreshGeneration="generation-1",
+            evidencePayloads={k:dict(candidateSha=SHA,status="PASS",capturedAt=captured,
+                refreshGeneration="generation-1") for k in keys})
+
+    def test_bounded_snapshot_uses_one_real_source_generation(self):
+        raw=self.bounded_snapshot()
+        self.assertIs(m.validate_bounded_snapshot(raw,SHA,2_000_000_000_000),raw)
+
+    def test_bounded_snapshot_cannot_rewrap_old_wrong_sha_or_mixed_proofs_as_fresh(self):
+        now=2_000_000_000_000
+        for field,value in [("capturedAtMs",now-180001),("capturedAtMs",now+1),
+            ("candidateSha",OLD),("certificateSchema","disdex-v12-v4-production-certification/v3"),
+            ("status","PASS"),("leaseExpiresAtMs",now),("certificateValidUntilMs",now-1)]:
+            raw=self.bounded_snapshot();raw[field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):m.validate_bounded_snapshot(raw,SHA,now)
+        for field,value in [("refreshGeneration","generation-0"),("capturedAt","2000-01-01T00:00:00.000Z"),
+                             ("candidateSha",OLD),("status","FAIL")]:
+            raw=self.bounded_snapshot();raw["evidencePayloads"]["signedAsterAccount"][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):m.validate_bounded_snapshot(raw,SHA,now)
+
+    def test_preflight_reads_candidate_certificate_and_atomic_commit_not_legacy_files(self):
+        command=m.bounded_evidence_command(SHA,Path('/home/deploy/disdex-trading/releases')/SHA)
+        self.assertEqual(command[:2],["/usr/bin/node","--import"])
+        script=command[-2]
+        for required in ["readV4ProductionCertificate","validateV4RefreshCommit","refresh-commit.json","O_NOFOLLOW"]:
+            self.assertIn(required,script)
+        self.assertNotIn("disdex-v12-v4-evidence-preflight.mjs",command)
+
+    def test_collector_keeps_source_capture_time_and_never_reads_old_dynamic_files(self):
+        now=2_000_000_000_000;raw=self.bounded_snapshot(now)
+        payloads=raw["evidencePayloads"]
+        for k in ["establishedAsterOrders","signedAsterAccount"]:
+            payloads[k].update(readOnly=True,mutationCalls=0,positions=[],openOrders=[])
+        payloads["signedAsterAccount"]["signedGet"]=True
+        payloads["sharedRiskAndPeers"].update(sharedRiskHealthy=True,marginGuardHealthy=True,killSwitch=False,pendingCount=0)
+        with patch.object(m.os,"geteuid",return_value=0,create=True), \
+            patch.object(m,"_assert_release",return_value=m.RELEASES/SHA), \
+            patch.object(m,"refresh_and_preflight",return_value=raw), \
+            patch.object(m,"_assert_runtime_health",return_value=({"maximumLossPct":7.5},[])), \
+            patch.object(m,"validate_units_and_ticks"), \
+            patch.object(m,"_secure_json",side_effect=AssertionError("legacy dynamic file read")):
+            proof=m.collect_v4_venue_evidence(sha=SHA,expected_pins={},phase="before",now=now//1000)
+        self.assertEqual(proof["capturedAt"],(now-1000)//1000)
+        self.assertEqual(proof["expiresAt"],(now-1000)//1000+180)
+        self.assertNotEqual(proof["capturedAt"],now//1000)
+        self.assertTrue(proof["signatureVerified"])
+
     def _peer_stop_approval(self, now):
         return {
             "schema": "disdex-peer-stop-approval/v1",

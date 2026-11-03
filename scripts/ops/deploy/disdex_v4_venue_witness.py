@@ -328,23 +328,94 @@ def validate_units_and_ticks(expected_pins: dict[str, str], phase: str,
                 raise ValueError("V4_DIRECT_HEARTBEAT_STALE:" + field)
 
 
-def refresh_and_preflight(sha: str, release: Path) -> None:
+def bounded_evidence_command(sha: str, release: Path) -> list[str]:
+    if not SHA_RE.fullmatch(sha) or release != RELEASES / sha:
+        raise ValueError("BOUNDED_EVIDENCE_RELEASE_BINDING_INVALID")
+    script = r"""
+import {constants} from 'node:fs';
+import {open} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {readV4ProductionCertificate,validateV4SharedExecutionEvidencePayloads,V4_SHARED_EXECUTION_EVIDENCE_PATHS} from './lib/v12-v4-certified-gates.ts';
+import {validateV4RefreshCommit,V4_DYNAMIC_EVIDENCE_KEYS} from './lib/v12-v4-refresh-commit.ts';
+const sha=process.argv[1];
+const certificate=await readV4ProductionCertificate(sha);
+if(certificate.schema!=='disdex-v12-v4-production-certification/v4')throw Error('BOUNDED_CERTIFICATE_REQUIRED');
+async function trusted(path){
+ const fd=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
+ try{
+  const stat=await fd.stat();
+  if(!stat.isFile()||stat.uid!==0||(stat.mode&0o022)!==0||stat.size>1048576)throw Error('UNTRUSTED_EVIDENCE');
+  const bytes=await fd.readFile();return {bytes,payload:JSON.parse(bytes.toString('utf8'))};
+ }finally{await fd.close();}
+}
+const commit=(await trusted('/etc/disdex/v12-v4-evidence/refresh-commit.json')).payload;
+const now=Date.now();validateV4RefreshCommit(commit,sha,now);
+const payloads={...commit.evidencePayloads};
+for(const key of V4_DYNAMIC_EVIDENCE_KEYS){
+ if(payloads[key].refreshGeneration!==commit.refreshGeneration||payloads[key].capturedAt!==commit.capturedAt)
+  throw Error('MIXED_EVIDENCE_GENERATION');
+}
+for(const key of ['routeSourceParity','v4ExecutionTests']){
+ const row=await trusted(V4_SHARED_EXECUTION_EVIDENCE_PATHS[key]);
+ if(createHash('sha256').update(row.bytes).digest('hex')!==certificate.evidenceSha256[key])throw Error('STATIC_DIGEST_MISMATCH');
+ payloads[key]=row.payload;
+}
+validateV4SharedExecutionEvidencePayloads(payloads,sha,now,true);
+console.log(JSON.stringify({status:'V4_BOUNDED_EVIDENCE_SNAPSHOT_VERIFIED',candidateSha:sha,
+ certificateSchema:certificate.schema,certificateValidUntilMs:Date.parse(certificate.validUntil),
+ leaseExpiresAtMs:commit.leaseExpiresAt*1000,capturedAt:commit.capturedAt,capturedAtMs:Date.parse(commit.capturedAt),
+ refreshGeneration:commit.refreshGeneration,evidencePayloads:commit.evidencePayloads}));
+"""
+    return ["/usr/bin/node", "--import", str(release/"node_modules/tsx/dist/loader.mjs"),
+            "--input-type=module", "--eval", script, sha]
+
+
+def validate_bounded_snapshot(value: dict, sha: str, now_ms: int) -> dict:
+    from datetime import datetime
+    if (not isinstance(value,dict) or value.get("status")!="V4_BOUNDED_EVIDENCE_SNAPSHOT_VERIFIED"
+            or value.get("candidateSha")!=sha
+            or value.get("certificateSchema")!="disdex-v12-v4-production-certification/v4"):
+        raise ValueError("BOUNDED_SNAPSHOT_IDENTITY_INVALID")
+    for field in ["certificateValidUntilMs","leaseExpiresAtMs"]:
+        if type(value.get(field)) is not int or value[field]<=now_ms:
+            raise ValueError("BOUNDED_SNAPSHOT_AUTHORITY_EXPIRED")
+    captured=value.get("capturedAtMs");text=value.get("capturedAt")
+    if (type(captured) is not int or captured<=0 or not 0<=now_ms-captured<=180000
+            or not isinstance(text,str) or not text.endswith('Z')):
+        raise ValueError("BOUNDED_SNAPSHOT_SOURCE_STALE_OR_FUTURE")
+    try:parsed=round(datetime.fromisoformat(text.replace('Z','+00:00')).timestamp()*1000)
+    except (ValueError,OverflowError):raise ValueError("BOUNDED_SNAPSHOT_SOURCE_TIME_INVALID") from None
+    if parsed!=captured:raise ValueError("BOUNDED_SNAPSHOT_SOURCE_TIME_MISMATCH")
+    generation=value.get("refreshGeneration");payloads=value.get("evidencePayloads")
+    keys={"establishedAsterOrders","signedAsterAccount","sharedRiskAndPeers"}
+    if (not isinstance(generation,str) or not 0<len(generation)<=160
+            or not isinstance(payloads,dict) or set(payloads)!=keys):
+        raise ValueError("BOUNDED_SNAPSHOT_GENERATION_INVALID")
+    if any(not isinstance(row,dict) or row.get("refreshGeneration")!=generation
+            or row.get("capturedAt")!=text or row.get("candidateSha")!=sha or row.get("status")!="PASS"
+            for row in payloads.values()):
+        raise ValueError("BOUNDED_SNAPSHOT_MIXED_OR_INVALID_PROOFS")
+    return value
+
+
+def read_bounded_snapshot(sha: str, release: Path) -> dict:
+    result=subprocess.run(bounded_evidence_command(sha,release),cwd=release,
+        capture_output=True,text=True,check=False,timeout=60)
+    if result.returncode or len(result.stdout)>2*1048576:
+        raise ValueError("V4_BOUNDED_CERTIFICATE_EVIDENCE_PREFLIGHT_FAILED")
+    try:value=json.loads(result.stdout)
+    except (ValueError,TypeError):raise ValueError("V4_BOUNDED_EVIDENCE_OUTPUT_INVALID") from None
+    return validate_bounded_snapshot(value,sha,time.time_ns()//1000000)
+
+
+def refresh_and_preflight(sha: str, release: Path) -> dict:
     unit = f"disdex-v4-dynamic-evidence-refresh@{sha}.service"
     started = subprocess.run(
         ["/usr/bin/systemctl", "start", "--wait", unit],
         capture_output=True, text=True, check=False, timeout=90)
     if started.returncode:
-        raise ValueError("DYNAMIC_EVIDENCE_REFRESH_FAILED:" + started.stderr[-160:])
-    node = "/usr/bin/node"
-    tsx = str(release / "node_modules/tsx/dist/cli.mjs")
-    result = subprocess.run(
-        [node, tsx, "scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs",
-         "--sha", sha, "--release-root", str(release),
-         "--evidence-root", str(EVIDENCE_ROOT),
-         "--output", "/var/lib/disdex/v12-v4/evidence-preflight.json"],
-        cwd=release, capture_output=True, text=True, check=False, timeout=60)
-    if result.returncode:
-        raise ValueError("V4_EVIDENCE_PREFLIGHT_FAILED:" + result.stderr[-160:])
+        raise ValueError("DYNAMIC_EVIDENCE_REFRESH_FAILED")
+    return read_bounded_snapshot(sha,release)
 
 
 def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
@@ -356,19 +427,20 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
     if phase not in ("before", "after"):
         raise ValueError("WITNESS_PHASE_INVALID")
     release = _assert_release(sha)
-    if refresh:
-        refresh_and_preflight(sha, release)
-    now_s = int(time.time()) if now is None else now
-    now_ms = now_s * 1000
+    snapshot = refresh_and_preflight(sha, release) if refresh else read_bounded_snapshot(sha,release)
+    now_ms = time.time_ns()//1000000 if now is None else now*1000
+    now_s = now_ms//1000
     risk, active_pending = _assert_runtime_health(now_ms)
     validate_units_and_ticks(
         expected_pins, phase, sha, now_ms,
         peer_stop_approvals=peer_stop_approvals,
     )
 
-    orders_evidence = _secure_json(EVIDENCE_ROOT / "established-aster-orders.json")
-    account_evidence = _secure_json(EVIDENCE_ROOT / "signed-aster-account.json")
-    risk_evidence = _secure_json(EVIDENCE_ROOT / "shared-risk-and-peers.json")
+    snapshot=validate_bounded_snapshot(snapshot,sha,now_ms)
+    payloads=snapshot["evidencePayloads"]
+    orders_evidence=payloads["establishedAsterOrders"]
+    account_evidence=payloads["signedAsterAccount"]
+    risk_evidence=payloads["sharedRiskAndPeers"]
     for label, evidence in (
         ("orders", orders_evidence), ("account", account_evidence), ("risk", risk_evidence)):
         if evidence.get("status") != "PASS" or evidence.get("candidateSha") != sha:
@@ -399,7 +471,8 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
 
     return {
         "schema": VENUE_SCHEMA, "venue": "aster", "readOnly": True,
-        "capturedAt": now_s, "expiresAt": now_s + 180,
+        "capturedAt": snapshot["capturedAtMs"]//1000,
+        "expiresAt": snapshot["capturedAtMs"]//1000 + 180,
         "signatureVerified": True, "positionsReconciled": True,
         "protectiveStopsReconciled": True, "stopOwnershipReconciled": True,
         "pendingExposureReconciled": True, "grossReconciled": True,

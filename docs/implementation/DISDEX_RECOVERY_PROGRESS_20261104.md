@@ -274,3 +274,82 @@ The candidate full unit template is being aligned to this same-PID loader,
 pre-provisioned tick write access and matching budget broker. The active b346
 monitor-only unit is unchanged. This remains source preparation, not a full
 trading activation or certificate issuance.
+
+
+## Current V4 candidate, code-only root deployment and read-only migration proof
+
+Final V4 source candidate for this checkpoint:2a6f27c6d2896aee420cbc44fe1ab8103750376c
+(PR418). All five GitHub CI suites passed. Full template uses the exact direct
+Node/--import release-local loader, required matching budget broker, explicit
+shared budget/proxy paths and pre-provisioned tick access under ProtectSystem.
+V4 startup no longer rewrites FET state ownership or another canary permit.
+Seven systemd source tests and three broker tests pass on Linux. The reviewed
+18-file strategy/safety overlay source parity still passes; no economic rules
+were changed. Immutable archiveSHA256:
+8daa0dd70162a0dd67e79ccc47b51287978d45f3cc13719ba939c6faef0fb0c7.
+
+Actual immutable static certification for2a6:41 routes,37 test passes,typecheck.
+Evidence remains STAGING, not /etc or a trading certificate:
+/var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/v4-2a6-static-evidence-1793745207978.
+Source helper7fc58f01d5378d1bee1e960a4cde07643c4db1ce passed all five CI
+suites and was installed through the authenticated root SSH session with
+expected-old-hash CAS, exclusive deployment lock, root-only code backup,
+atomic file+directory fsync, import check and pre/post protected identity check.
+Installed code: full V4 executor, venue witness and truthful static helper.
+Descriptor /usr/local/libexec/disdex-unified/v4-safety-executor-current.json.
+Status V4_SAFETY_CODE_INSTALLED_NOT_LIVE_CERTIFIED, liveExecutorCertified=false.
+No Runner service/restart, pin, approval, production certificate, refresh
+helper, current symlink, ledger or Kill was changed by code installation.
+Backup /var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/root-v4-safety-backup-1793745429816.
+
+Signed read-only migration preflight against actual old53 ledger andcandidate2a6
+passed at1793745373507. Positions/openOrders/activePending0. Historical legs3,
+intents9,protections3 and revision10899 retained in the computed candidate.
+Actual before/after durable hash remains
+c3c44d9f5df6360bfef1f8789858f337714460a746837c64fb84db0d057ce1d6.
+No publication/apply and no order/cancel/position command. Proof:
+/var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/v4-lossless-readonly-1793745373507.json.
+
+## Atomic bounded evidence connection (additional source change)
+
+Root collection was still invoking the old independent-five-file preflight
+and reading dynamic files directly. For bounded v4 it now invokes the exact
+candidate's readV4ProductionCertificate, reads one root-owned O_NOFOLLOW atomic
+refresh commit, validates its payload hashes with the candidate's actual
+validateV4RefreshCommit, verifies static hashes and payload semantics, and
+returns one generation. Mixed generations/SHAs/timestamps, expired authority,
+old schemas and old standalone files cannot certify this route. No legacy
+fallback is used. Witness capturedAt/expiresAt derive from actual source
+capture rather than wrapping old content with the current read time.
+The cutover explicitly refreshes and requires source age<=180 seconds;
+the normal scheduled refresh freshness contract remains unchanged.
+Raw subprocess errors are not exposed in preflight failure messages.
+
+The first isolated Linux check passed cutover41/venue12/refresh11/static3/
+monitor7/root42 (test executions, including imported fixtures). Actual read-only
+certificate probe correctly rejected the expired/mismatched Production
+certificate without modifying any artifact. Delayed authority expiry rejection
+was then added to the snapshot validator. This bounded-source addition is not
+yet installed over the committed7fc code; CI and final isolated tests must be
+recorded separately. No new live activation was issued.
+
+Margin checkedAt/stage were read using the actual schema (not nonexistent
+updatedAt): healthy, ordersAllowed=true, failures0, normal poll300000ms.
+Snapshot generatedAt is the actual freshness field. HP Gross currently remains
+UNAVAILABLE/SIGNED_VENUE_POSITION_SNAPSHOT_REQUIRED; this is an open display
+source integration issue, not proof of available capital. Active pending0.
+FET NRestarts1 is historical and unchanged; the other seven listed trading
+services remained at their prior PID, source and restart counts.
+
+Remaining substantive work, not merely an owner-approval request:
+1. Formally scoped actual ledger publication and STOP-compatible recovery.
+2. Bounded certificate/bootstrap and matching root refresh component/lease
+   deployment; fresh separate refresh-only authority and bounded renewal.
+3. Exact shared HOLD recovery after remaining Runner decision-to-order/API/
+   Gross safety checks; no blanket global Kill clearance.
+4. Remaining legacy Runner true-tick writer migration and independent runtime
+   authorization; old state timestamps remain explicitly unverified.
+5. Authenticated HP/Gross source and notification delivery verification.
+6. Per-Runner final order enable, fresh venue evidence and three real LIVE
+   decision cycles. No test trades are required or authorized.
+Full status remains BLOCKED_FULL_LIVE_NOT_VERIFIED.
