@@ -919,6 +919,9 @@ class RootDeploymentExecutor:
         if args.scope == 'V52':
             from disdex_v52_scoped_root_cutover import V52ScopedRootExecutor
             return V52ScopedRootExecutor(self).execute(args,token)
+        if args.scope == 'API_MONITORS':
+            from disdex_monitor_snapshot_cutover import MonitorSnapshotRootExecutor
+            return MonitorSnapshotRootExecutor(self).execute(args,token)
         if args.scope == 'PENDING_RECONCILE_ONLY':
             from disdex_pending_maintenance_install import install
             return install(self,args,token)
@@ -1231,6 +1234,18 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         raise ValueError("unapproved deployment target or identity")
     orders_enabled = args.orders_enabled == "true"
     validate_order_permission(args.scope, orders_enabled)
+    if args.scope == 'API_MONITORS':
+        from types import SimpleNamespace
+        from disdex_monitor_snapshot_cutover import MonitorSnapshotOperations
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',current=current,
+            releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem',
+            activation_dir=root/'activations',receipts=root/'receipts')
+        operations=MonitorSnapshotOperations(RootDeploymentExecutor(paths,root_uid=root_uid),args,token)
+        operations.prepare()
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=False,authorizesTrading=False,planSha256=args.plan_sha256,
+            changedRunners=[],unproven=['HEALTH_SNAPSHOT_SERVICE_SOURCE_CUTOVER','THREE_REAL_SNAPSHOT_CYCLES'],
+            verifiedContracts=['NO_ORDER_MONITOR_PREVIEW_EXACT_RUNTIME_PINS'])
     if args.scope == 'V52':
         from types import SimpleNamespace
         from disdex_v52_scoped_root_cutover import V52ScopedOperations

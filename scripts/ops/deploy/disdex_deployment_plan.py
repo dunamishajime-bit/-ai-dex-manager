@@ -98,7 +98,7 @@ def approve_diff(desired, current):
                                 or desired["releaseRoots"]["ui"] != current["releaseRoots"]["ui"]):
         raise ValueError("HP-only scope modifies trading/runtime")
     if scope == "API_MONITORS" and (changed or ui_changed
-                                     or desired["releaseRoots"]["monitor"] != current["releaseRoots"]["monitor"]):
+                                     or any(desired["releaseRoots"][key] != current["releaseRoots"][key] for key in ("runners", "ui"))):
         raise ValueError("monitor-only scope modifies trading/UI")
     if not changed and not ui_changed and not monitor_changed and not maintenance:
         raise ValueError("no deployment differences")
