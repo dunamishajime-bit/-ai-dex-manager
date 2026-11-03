@@ -920,6 +920,9 @@ class RootDeploymentExecutor:
             from disdex_pending_maintenance_install import install
             return install(self,args,token)
         if args.scope == "V12_V4":
+            if args.orders_enabled == 'false':
+                from disdex_v4_monitor_cutover import V4MonitorRootExecutor
+                return V4MonitorRootExecutor(self).execute(args,token)
             # Lazy import keeps the shared-risk and V4 mutation boundaries
             # independent; the owner-signed scope selects the only executor.
             from disdex_v4_root_cutover import V4RootExecutor
@@ -1225,6 +1228,18 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         raise ValueError("unapproved deployment target or identity")
     orders_enabled = args.orders_enabled == "true"
     validate_order_permission(args.scope, orders_enabled)
+    if args.scope == 'V12_V4' and not orders_enabled:
+        from types import SimpleNamespace
+        from disdex_v4_monitor_cutover import V4MonitorOperations
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',current=current,
+            releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem',
+            activation_dir=root/'activations',receipts=root/'receipts')
+        operations=V4MonitorOperations(RootDeploymentExecutor(paths,root_uid=root_uid),args,token)
+        operations.prepare()
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=False,phase='MONITOR_ONLY',planSha256=args.plan_sha256,
+            changedRunners=['V12_V4'],unproven=['MONITOR_UNIT_CUTOVER','THREE_REAL_READONLY_DECISION_TICKS'],
+            verifiedContracts=['DORMANT_V4_SIGNED_FLAT_DURABLE_REPLAY_NO_ORDER_PREFLIGHT'])
     if args.scope == 'PENDING_RECONCILE_ONLY':
         # Dedicated no-order scope freezes all existing deployment identities.
         # Its source SHA identifies the GET-only maintenance SDK, not a Runner.
