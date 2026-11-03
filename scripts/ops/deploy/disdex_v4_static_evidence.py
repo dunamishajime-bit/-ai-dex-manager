@@ -95,7 +95,7 @@ def certify(sha: str) -> dict:
          "tests/v12-v4-flat-lineage-migration.test.ts",
          "tests/v12-v4-state-publication.test.ts",
          "tests/v12-v4-migration-readonly.test.ts"],
-        [node, tsc, "--noEmit", "-p", "tsconfig.v4-evidence-expiry.json", "--pretty", "false"],
+        [node, tsc, "--noEmit", "--incremental", "false", "-p", "tsconfig.v4-evidence-expiry.json", "--pretty", "false"],
     ]
     results = [_run(root, argv) for argv in commands]
     captured = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
