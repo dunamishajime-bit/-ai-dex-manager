@@ -4,6 +4,9 @@ export type V4MonitorIdentity={runnerId:'V12_V4'|'V12_V4_MONITOR';serviceUnit:st
  healthPath:string;healthSchema:string};
 
 export function v4ExecutionPhase(argv:readonly string[],env:Environment):'MONITOR_ONLY'|'PRODUCTION'{
+ if(env.V12_V4_ORDERS_ENABLED!==undefined&&!['true','false'].includes(env.V12_V4_ORDERS_ENABLED)){
+  throw Error('V4_EXPLICIT_ORDER_PERMISSION_INVALID');
+ }
  const requested=argv.includes('--monitor-only');
  const mode=env.V12_V4_OPERATION_MODE?.trim().toUpperCase();
  if(requested||mode==='MONITOR_ONLY'||env.V12_V4_ORDERS_ENABLED==='false'){
