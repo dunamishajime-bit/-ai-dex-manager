@@ -26,6 +26,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node --test tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs
+      - run: sudo "$(command -v node)" --test tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs tests/hp-runner-snapshot-consistency.test.ts
       - run: node scripts/ops/root/disdex-runner-health-snapshot-current.mjs --self-test
       - run: git diff --check
