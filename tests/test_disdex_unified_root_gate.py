@@ -689,6 +689,22 @@ class SharedRiskExecutorTest(unittest.TestCase):
              ("enable", self.new_unit), ("start", self.new_unit)],
         )
 
+    def test_production_shared_risk_preflight_uses_actual_reader_without_recertifying_untouched_dependencies(self):
+        from unittest.mock import patch
+        external=self.releases.parent/'old-dependencies';external.mkdir()
+        (self.releases/self.old/'node_modules').symlink_to(external,target_is_directory=True)
+        args=self._args();args.route='CODEX_SSH';args.owner=CODEX_SSH_OPERATOR
+        args._codex_ssh_authenticated=True
+        with (patch('disdex_unified_root_gate.ROOT',self.root),
+              patch('disdex_shared_risk_witness.ProductionSharedRiskReader') as reader):
+            reader.return_value.capture.return_value={}
+            result=preflight(args,'',root=self.root,pins_path=self.pins_path,current=self.current,
+                releases=self.releases,root_uid=os.geteuid())
+        self.assertEqual(result['status'],'READONLY_PREFLIGHT_PASS_NOT_LIVE')
+        self.assertFalse(result['ordersEnabled'])
+        reader.return_value.capture.assert_called_once()
+
+
     def test_production_reader_issues_fresh_root_native_no_order_activation_and_audits_real_updates(self):
         from unittest.mock import patch
         from datetime import datetime,timezone

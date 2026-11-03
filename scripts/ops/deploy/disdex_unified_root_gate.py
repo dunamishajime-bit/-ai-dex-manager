@@ -1241,7 +1241,21 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
             desired, current_plan, pins, resolved.name)
     if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
         raise ValueError("supplied SHA / plan hash differs from root plan")
-    if args.scope == "V12_V4":
+    if args.scope == SHARED_RISK_SCOPE and root == ROOT:
+        if (diff['changedRunners'] != [SHARED_RISK_RUNNER]
+            or diff['uiChanged'] or diff['monitorChanged'] or diff['releaseRootsChanged']
+            or desired['runners'].get(SHARED_RISK_RUNNER) != args.sha
+            or desired['releaseRoots']['runners'] != str(releases)):
+            raise ValueError('Shared Risk preflight exceeds exact no-order delta')
+        from types import SimpleNamespace
+        identity=RootDeploymentExecutor(SimpleNamespace(current=current,releases=releases),root_uid=root_uid)
+        if identity._read_current_sha(unchanged_identity_only=True) != resolved.name:
+            raise ValueError('unchanged current identity differs')
+        release_marker(args.sha,releases,root_uid=root_uid)
+        validate_release_roots(desired,releases,root_uid=root_uid)
+        from disdex_shared_risk_witness import ProductionSharedRiskReader
+        ProductionSharedRiskReader().capture()
+    elif args.scope == "V12_V4":
         # V4 is a trust-boundary migration from legacy deploy-owned peer/current
         # releases. Do not require rewriting unchanged peer/UI releases merely
         # to satisfy the new root-owned convention. The signed plan freezes
