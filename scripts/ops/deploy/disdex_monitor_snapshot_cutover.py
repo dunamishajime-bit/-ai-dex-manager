@@ -84,12 +84,14 @@ class MonitorSnapshotOperations:
         validate_observation(row,self.pins,time.time_ns()//1000000)
         self.protected();return row
     def prepare(self):
-        from disdex_unified_root_gate import _assert_execution_root,read_root_json,parse_live_pins,release_marker,assert_regular_secure,assert_private_dir
+        from disdex_unified_root_gate import _assert_execution_root,read_root_json,parse_live_pins,release_marker,assert_regular_secure,assert_private_dir,assert_root_trusted_dir
         from disdex_shared_risk_witness import ProductionSharedRiskReader
         from disdex_v4_monitor_cutover import systemd_environment_files
         _assert_execution_root(self.parent.root_uid)
         require(self.args.scope=='API_MONITORS' and self.args.orders_enabled=='false','NO_ORDER_SCOPE')
-        folder=self.paths.root/'plans/API_MONITORS';assert_private_dir(folder)
+        folder=self.paths.root/'plans/API_MONITORS'
+        for path in [self.paths.root,folder,self.paths.nonce_dir,self.paths.receipts]:assert_private_dir(path)
+        assert_root_trusted_dir(self.dropin.parent);assert_root_trusted_dir(self.env.parent)
         self.desired=read_root_json(folder/(self.args.sha+'.json'));self.current=read_root_json(self.paths.current_plan)
         self.pins=parse_live_pins(read_root_json(self.paths.pins,private=False),releases=self.paths.releases)
         require(validate_monitor_plan(self.desired,self.current,self.pins)==self.args.plan_sha256 and self.desired['sourceSha']==self.args.sha,'PLAN_HASH')
