@@ -3,10 +3,16 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_monitor_snapshot_cutover import validate_monitor_plan,validate_observation,run_transaction,MonitorSnapshotOperations
+from disdex_monitor_snapshot_cutover import validate_monitor_plan,validate_observation,run_transaction,MonitorSnapshotOperations,choose_snapshot_dropin
 from tests.test_disdex_deployment_plan import plan,OLD,NEW
 
 class ContractTest(unittest.TestCase):
+ def test_effective_dropin_sorts_after_every_existing_systemd_override(self):
+  existing=['/etc/systemd/system/disdex-runner-health-snapshot.service.d/'+('z'*55)+'-current.conf']
+  target=choose_snapshot_dropin(existing,NEW)
+  self.assertTrue(target.name.endswith('.conf'));self.assertGreater(target.name,Path(existing[0]).name)
+  self.assertEqual(target.parent,Path('/etc/systemd/system/disdex-runner-health-snapshot.service.d'))
+  with self.assertRaises(ValueError):choose_snapshot_dropin(['/tmp/untrusted.conf'],NEW)
  def plans(self):
   current=plan('FULL_PROJECT');current['sourceSha']=OLD
   desired=copy.deepcopy(current);desired.update(scope='API_MONITORS',sourceSha=NEW,monitorSha=NEW)
@@ -60,7 +66,7 @@ class RootRollbackTest(unittest.TestCase):
   from disdex_shared_risk_monitor_wiring import atomic_text
   with tempfile.TemporaryDirectory() as folder:
    base=Path(folder);current=base/'current-plan.json';current.write_bytes(b'old plan');current.chmod(0o600)
-   calls=[];parent=SimpleNamespace(paths=SimpleNamespace(root=base,current_plan=current,receipts=base),systemd=None)
+   calls=[];parent=SimpleNamespace(paths=SimpleNamespace(root=base,current_plan=current,receipts=base),systemd=None,clock=lambda:2000000001)
    ops=MonitorSnapshotOperations(parent,SimpleNamespace(sha=NEW,plan_sha256='f'*64),'')
    ops.current_raw=current.read_bytes();ops.current_meta=current.stat();ops.current={'fixture':'old'}
    ops.next_current={'fixture':'new'};ops.release=base/'release';ops.old_properties='old snapshot command'
@@ -79,6 +85,7 @@ class RootRollbackTest(unittest.TestCase):
    ops.rollback()
    self.assertEqual(current.read_bytes(),b'old plan');self.assertEqual(current.stat().st_mode&0o777,0o600)
    self.assertFalse(ops.env.exists());self.assertFalse(ops.dropin.exists());self.assertTrue(ops.journal.exists())
+   self.assertEqual(json.loads(ops.journal.with_suffix('.rollback.json').read_text())['status'],'ROLLED_BACK')
    self.assertFalse(any(command[0] in ['start','stop','restart','enable','disable'] for command in calls))
 
 if __name__=='__main__':unittest.main()

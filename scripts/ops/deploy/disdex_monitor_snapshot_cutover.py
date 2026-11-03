@@ -4,7 +4,7 @@ Runner pins, their services, trading approvals, current symlink and Kill state
 are frozen. A consumed scope-bound root/owner approval cannot arm trading.
 """
 import copy,hashlib,json,os,re,shlex,subprocess,time,uuid
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from disdex_deployment_plan import canonical,digest,validate
 
 SERVICE='disdex-runner-health-snapshot.service'
@@ -14,6 +14,21 @@ TRADING={'V12_V4','V52','PENGU_V8','QUALITY102_CAUSAL_V1','FET_BRK48_RESIDUAL','
 
 def require(value,reason):
     if not value:raise ValueError('MONITOR_SNAPSHOT_'+reason)
+
+def choose_snapshot_dropin(paths,sha):
+    require(re.fullmatch('[a-f0-9]{40}',sha),'DROPIN_SHA')
+    names=[]
+    for path in paths:
+        p=PurePosixPath(path)
+        require(p.is_absolute() and str(p).startswith('/etc/systemd/system/') and p.name.endswith('.conf')
+            and all(part not in ['.','..'] for part in p.parts),'UNTRUSTED_DROPIN_PATH')
+        names.append(p.name)
+    # Older installations have a near-NAME_MAX run of z characters. A new
+    # name must sort last without extending that filename past NAME_MAX.
+    for count in range(1,201):
+        name='~'*count+'disdex-observed-'+sha[:12]+'.conf'
+        if len(name.encode())<=255 and all(name>old for old in names):return DROPIN.parent/name
+    raise ValueError('MONITOR_SNAPSHOT_NO_SAFE_FINAL_DROPIN_NAME')
 
 def validate_monitor_plan(desired,current,pins):
     validate(desired);validate(current)
@@ -60,7 +75,7 @@ class MonitorSnapshotOperations:
         self.parent=parent;self.paths=parent.paths;self.args=args;self.token=token;self.created=[];self.current_replaced=False
         self.dropin=DROPIN;self.env=Path('/etc/disdex/current-runtime')/(args.sha+'-observed-health.env')
         self.receipt=self.paths.receipts/('monitor-snapshot-'+args.sha+'.json')
-        self.journal=self.paths.root/'monitor-transactions'/(args.sha+'.json')
+        self.journal=self.paths.root/'monitor-transactions'/(args.sha+'-'+uuid.uuid4().hex+'.json')
     def command(self,*args):
         result=subprocess.run(['/usr/bin/systemctl',*args],capture_output=True,text=True,timeout=40)
         require(result.returncode==0,'SYSTEMD_'+args[0].upper())
@@ -89,6 +104,10 @@ class MonitorSnapshotOperations:
         from disdex_v4_monitor_cutover import systemd_environment_files
         _assert_execution_root(self.parent.root_uid)
         require(self.args.scope=='API_MONITORS' and self.args.orders_enabled=='false','NO_ORDER_SCOPE')
+        properties=self.command('show',SERVICE,'-p','DropInPaths')
+        values=properties.split('=',1)[1].split() if '=' in properties else []
+        for path in values:assert_regular_secure(Path(path),private=False)
+        self.dropin=choose_snapshot_dropin(values,self.args.sha)
         folder=self.paths.root/'plans/API_MONITORS'
         for path in [self.paths.root,folder,self.paths.nonce_dir,self.paths.receipts]:assert_private_dir(path)
         assert_root_trusted_dir(self.dropin.parent);assert_root_trusted_dir(self.env.parent)
@@ -181,6 +200,15 @@ class MonitorSnapshotOperations:
             except Exception:errors.append(True)
         try:self.command('daemon-reload')
         except Exception:errors.append(True)
+        if self.journal.exists():
+            try:
+                from disdex_pending_maintenance_install import _new_file
+                outcome=dict(schema='disdex-monitor-rollback-outcome/v1',sourceSha=self.args.sha,
+                    status='RECONCILIATION_REQUIRED' if errors else 'ROLLED_BACK',
+                    recordedAt=self.parent.clock(),journalSha256=hashlib.sha256(self.file(self.journal)).hexdigest(),
+                    authorizesTrading=False,ordersSent=0,cancelsSent=0,positionChangesSent=0)
+                _new_file(self.journal.with_suffix('.rollback.json'),canonical(outcome)+b'\n',0o400,lambda:None)
+            except Exception:errors.append(True)
         if errors:raise RuntimeError('MONITOR_SNAPSHOT_ROLLBACK_INCOMPLETE')
 
 class MonitorSnapshotRootExecutor:
