@@ -916,6 +916,9 @@ class RootDeploymentExecutor:
         certify_live_executor()
         if args.deployment_target != DEPLOYMENT_TARGET or args.operator_target != OPERATOR_TARGET:
             raise ValueError("unapproved deployment target or identity")
+        if args.scope == 'V52':
+            from disdex_v52_scoped_root_cutover import V52ScopedRootExecutor
+            return V52ScopedRootExecutor(self).execute(args,token)
         if args.scope == 'PENDING_RECONCILE_ONLY':
             from disdex_pending_maintenance_install import install
             return install(self,args,token)
@@ -1228,6 +1231,19 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         raise ValueError("unapproved deployment target or identity")
     orders_enabled = args.orders_enabled == "true"
     validate_order_permission(args.scope, orders_enabled)
+    if args.scope == 'V52':
+        from types import SimpleNamespace
+        from disdex_v52_scoped_root_cutover import V52ScopedOperations
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',current=current,
+            releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem',
+            activation_dir=root/'activations',receipts=root/'receipts')
+        operations=V52ScopedOperations(RootDeploymentExecutor(paths,root_uid=root_uid),args,token)
+        operations.prepare()
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=True,effectiveNewOrdersAllowed=False,
+            phase='PROTECTED_HOLD',authorizesKillClearance=False,planSha256=args.plan_sha256,
+            changedRunners=['V52'],unproven=['SCOPED_SYSTEMD_CUTOVER','THREE_REAL_PROTECTED_HOLD_TICKS'],
+            verifiedContracts=['V52_INDEPENDENT_AUTHORITY_SIGNED_FLAT_READONLY_PREFLIGHT'])
     if args.scope == 'V12_V4' and not orders_enabled:
         from types import SimpleNamespace
         from disdex_v4_monitor_cutover import V4MonitorOperations

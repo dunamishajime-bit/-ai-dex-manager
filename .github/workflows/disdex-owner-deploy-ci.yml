@@ -21,6 +21,9 @@ on:
       - 'tests/test_pending_maintenance_install.py'
       - 'scripts/ops/deploy/disdex_v4_monitor_cutover.py'
       - 'tests/test_v4_monitor_cutover.py'
+      - 'scripts/ops/deploy/disdex_v52_scoped_root_cutover.py'
+      - 'tests/test_v52_scoped_root_contract.py'
+      - 'tests/test_v52_root_integration.py'
       - 'tests/test_shared_risk_monitor_wiring.py'
       - 'tests/test_shared_risk_prestart.py'
       - 'tests/test_shared_risk_witness.py'
@@ -64,6 +67,9 @@ on:
       - 'tests/test_pending_maintenance_install.py'
       - 'scripts/ops/deploy/disdex_v4_monitor_cutover.py'
       - 'tests/test_v4_monitor_cutover.py'
+      - 'scripts/ops/deploy/disdex_v52_scoped_root_cutover.py'
+      - 'tests/test_v52_scoped_root_contract.py'
+      - 'tests/test_v52_root_integration.py'
       - 'tests/test_shared_risk_monitor_wiring.py'
       - 'tests/test_shared_risk_prestart.py'
       - 'tests/test_shared_risk_witness.py'
@@ -111,6 +117,8 @@ jobs:
         run: sudo /usr/bin/python3 -m unittest discover -s tests -p test_pending_maintenance_install.py -v
       - name: Independent V4 no-order phase and partial-cutover rollback
         run: sudo /usr/bin/python3 -m unittest discover -s tests -p test_v4_monitor_cutover.py -v
+      - name: V52 independent authority and protected-hold rollback
+        run: sudo /usr/bin/python3 -m unittest tests.test_v52_scoped_root_contract tests.test_v52_root_integration -v
       - name: No-order Production signed reader boundary
         run: python3 -m unittest discover -s tests -p test_shared_risk_witness.py -v
       - name: Root-only Shared Risk no-order prestart
