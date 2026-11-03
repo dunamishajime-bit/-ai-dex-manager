@@ -803,7 +803,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
 
     def test_non_shared_execution_scope_is_not_silently_mutated(self):
         args = self._args()
-        args.scope = "V52"
+        args.scope = "HP_ONLY"
         with self.assertRaisesRegex(ValueError, "unsupported execution scope"):
             self._executor(FakeSystemd(self.old_unit, self.new_unit)).execute(args, "signed-token")
 
