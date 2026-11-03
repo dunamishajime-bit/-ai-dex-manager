@@ -6,7 +6,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { loadV4ClosedCandles, buildV4LiveDecisionBatch } from "../lib/v12-v4-live-candidate-builder";
 import { attachV4NativeCoreCandidates } from "../lib/v12-v4-core-candidate";
 import { assertV4EntrySafety } from "../lib/v12-v4-entry-safety";
-import { assertV4MonitorRateBudget, blockedV4MonitorRead, collectV4MonitorReads, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
+import { assertV4MonitorRateBudget, blockedV4MonitorRead, collectV4MonitorReads, createV4MonitorFetch, evaluateV4MonitorCompletedDecision, runV4MonitorCycle, readV4StalePendingProofIfNeeded, type V4MonitorResult } from "../lib/v12-v4-monitor-only";
 import { writeRunnerTickHeartbeat } from "../lib/disdex-runner-tick-heartbeat";
 import {v4MonitorIdentity,type V4MonitorIdentity} from "../lib/v12-v4-execution-phase";
 
@@ -73,13 +73,13 @@ async function cycle(now=Date.now()){
  const {positions,openOrders,decision:market}=await collectV4MonitorReads({
   positions:()=>client.getPositions(),openOrders:()=>client.getOpenOrders(),decision:()=>decision(client,now),
  });
- const [risk,margin,killSwitch,pendingSource,pendingProof]=await Promise.all([
+ const [risk,margin,killSwitch,pendingSource]=await Promise.all([
   trustedJson(process.env.DISDEX_V4_DYNAMIC_SHARED_RISK_PATH||"/var/lib/disdex/shared/crypto-daily-risk.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_MARGIN_PATH||"/var/lib/disdex/shared/margin-risk/guard-live.json"),
   trustedJson(process.env.DISDEX_V4_DYNAMIC_KILL_SWITCH_PATH||"/var/lib/disdex/shared/kill-switch.json"),
   trustedJsonWithHash(pendingPath),
-  trustedJson(proofPath,0),
  ]);
+ const pendingProof=await readV4StalePendingProofIfNeeded(pendingSource.value,Date.now(),()=>trustedJson(proofPath,0));
  return {sha,result:evaluateV4MonitorCompletedDecision({
   now:Date.now(),risk,margin,killSwitch,pending:pendingSource.value,runtimeSha:sha,
   pendingHash:pendingSource.hash,pendingProof,
