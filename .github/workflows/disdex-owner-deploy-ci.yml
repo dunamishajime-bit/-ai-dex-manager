@@ -3,6 +3,9 @@ name: DisDex Owner Deployment Authorization CI
 on:
   push:
     paths:
+      - 'lib/disdex-expired-account-lock-recovery.ts'
+      - 'scripts/disdex-account-order-lock-expired-recovery.ts'
+      - 'tests/disdex-expired-account-lock-recovery.test.ts'
       - 'scripts/ops/deploy/disdex_v4_priority_live.py'
       - 'scripts/ops/deploy/disdex_v4_refresh_exec.py'
       - 'tests/test_v4_refresh_exec.py'
@@ -218,3 +221,18 @@ jobs:
           assert '--owner $OWNER' in p
           print('DISDEX_OWNER_DEPLOY_POLICY_SOURCE_PASS')
           PY
+
+  expired-account-lock-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Dead-owner PID, exact hash and atomic archival tests (no venue)
+        run: npx --no-install tsx --test tests/disdex-expired-account-lock-recovery.test.ts
