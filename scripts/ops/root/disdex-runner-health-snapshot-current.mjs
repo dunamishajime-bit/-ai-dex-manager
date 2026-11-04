@@ -217,8 +217,7 @@ export function projectValidatedTickEvidence(tick) {
 }
 
 function finiteOrNull(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? number : null;
+    return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 async function pendingExposureStatus(now) {
@@ -270,7 +269,7 @@ function runnerObservability(runner, state, heartbeat) {
         q102: runner.key === "QUALITY102_CAUSAL_V1" ? {
             family: q102Source.family || null,
             layer: q102Source.layer || null,
-            score: finiteOrNull(q102Source.score || q102Source.quality102Score),
+            score: finiteOrNull(q102Source.score ?? q102Source.quality102Score),
             variant: q102Source.variant || null,
             finalDecision: state?.lastDecision?.reason || state?.reason || heartbeat.tickReason || null,
         } : null,
