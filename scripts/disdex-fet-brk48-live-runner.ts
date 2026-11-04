@@ -8,6 +8,7 @@ import { classifyAsterRateBudgetFailure, nextAsterRateBudgetRetryMs } from "../l
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 import { FET_BRK48_TRAILING_STOP_POLICY } from "../lib/fet-brk48-trailing-stop";
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
+import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -113,9 +114,7 @@ async function main() {
         priority: "RISK_READ",
         decision: "DEFER_NO_EXPOSURE",
         retryMs,
-        ordersSent: 0,
-        cancelsSent: 0,
-        positionChangesSent: 0,
+        ...runnerMutationTelemetry(),
       }));
       if (!daemon || stop) break;
       await delay.wait(retryMs);
