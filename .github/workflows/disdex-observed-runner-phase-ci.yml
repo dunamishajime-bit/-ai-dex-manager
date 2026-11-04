@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - 'lib/disdex-observed-runner-phase.mjs'
+      - 'lib/disdex-health-observability.mjs'
+      - 'tests/health-venue-observability.test.mjs'
       - 'lib/disdex-q102-health-gate.mjs'
       - 'scripts/ops/root/disdex-runner-health-snapshot-current.mjs'
       - 'tests/observed-runner-phase.test.mjs'
@@ -10,6 +12,8 @@ on:
   pull_request:
     paths:
       - 'lib/disdex-observed-runner-phase.mjs'
+      - 'lib/disdex-health-observability.mjs'
+      - 'tests/health-venue-observability.test.mjs'
       - 'lib/disdex-q102-health-gate.mjs'
       - 'scripts/ops/root/disdex-runner-health-snapshot-current.mjs'
       - 'tests/observed-runner-phase.test.mjs'
@@ -26,6 +30,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: sudo "$(command -v node)" --test tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs tests/hp-runner-snapshot-consistency.test.ts
+      - run: sudo "$(command -v node)" --test tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs tests/hp-runner-snapshot-consistency.test.ts tests/health-venue-observability.test.mjs
       - run: node scripts/ops/root/disdex-runner-health-snapshot-current.mjs --self-test
       - run: git diff --check

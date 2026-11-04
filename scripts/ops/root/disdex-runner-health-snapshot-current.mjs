@@ -7,6 +7,7 @@ import { observedV4Phase, readObservedRunnerTick } from "../../../lib/disdex-obs
 import { resolveQuality102OperatorGateReason } from "../../../lib/disdex-q102-health-gate.mjs";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
 import {evaluateOperatorActivationGate} from './disdex-live-operator-activation-gate.mjs';
+import {classifyPendingExposure,pendingBytesDigest,readSignedFlatGross,readV4Decision} from '../../../lib/disdex-health-observability.mjs';
 import { validateRunnerTickHeartbeat } from "./disdex-runner-tick-heartbeat.mjs";
 
 const execFile = promisify(execFileCallback);
@@ -222,37 +223,8 @@ function finiteOrNull(value) {
 
 async function pendingExposureStatus(now) {
     try {
-        const raw = await json(PENDING_EXPOSURE_PATH);
-        if (!raw || raw.schema !== "disdex-pending-exposure/v1" || raw.accountScope !== "ASTER_FUTURES" || !Array.isArray(raw.entries)) {
-            return { status: "BLOCKED", reason: "PENDING_EXPOSURE_STATE_INVALID", activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-        }
-        let cryptoGross = 0;
-        let stockGross = 0;
-        let activeCount = 0;
-        for (const entry of raw.entries) {
-            if (!["PENDING", "SUBMITTED", "UNKNOWN"].includes(String(entry?.status || ""))) continue;
-            const gross = Number(entry?.gross);
-            const updatedAt = Number(entry?.updatedAt);
-            if (!Number.isFinite(gross) || gross < 0 || !Number.isFinite(Number(entry?.notionalUsd)) || Number(entry.notionalUsd) < 0) {
-                return { status: "BLOCKED", reason: `PENDING_EXPOSURE_VALUE_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-            }
-            if (!Number.isFinite(updatedAt) || updatedAt > now + 5_000 || now - updatedAt > PENDING_EXPOSURE_MAX_AGE_MS) {
-                return { status: "BLOCKED", reason: `PENDING_EXPOSURE_FRESHNESS_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-            }
-            activeCount += 1;
-            if (String(entry?.sleeve || "") === "CRYPTO") cryptoGross += gross;
-            else if (String(entry?.sleeve || "") === "STOCK") stockGross += gross;
-            else return { status: "BLOCKED", reason: `PENDING_EXPOSURE_SLEEVE_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-        }
-        return {
-            status: "HEALTHY",
-            reason: "",
-            updatedAt: finiteOrNull(raw.updatedAt),
-            activeCount,
-            cryptoGross,
-            stockGross,
-            totalGross: cryptoGross + stockGross,
-        };
+        const text=await readFile(PENDING_EXPOSURE_PATH,'utf8');
+        return {...classifyPendingExposure(JSON.parse(text),Math.max(now,Date.now())),sourceDigest:pendingBytesDigest(text)};
     } catch (error) {
         return {
             status: error?.code === "ENOENT" ? "UNAVAILABLE" : "BLOCKED",
@@ -824,7 +796,8 @@ async function main() {
     const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, MARGIN_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
     const asterRateBudget = await sharedAsterRateBudgetStatus(now);
     const pending = await pendingExposureStatus(now);
-    const globalReasons = [targetReason, killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
+    const globalReasons = [targetReason, killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason,
+        pending.status==='HEALTHY'?'':pending.reason].filter(Boolean);
     const globalBlockReason = globalReasons.join("; ");
     const results = [];
     const runnerSnapshots = {};
@@ -859,6 +832,18 @@ async function main() {
             observability,
         };
     }
+    const gross=await readSignedFlatGross({v52Root:RUNNERS.find(x=>x.key==='V52')?.releaseRoot,
+        pending,pendingDigest:pending.sourceDigest,now:Date.now()});
+    const v4=runnerSnapshots.V12_V4;
+    if(v4?.processHealthy&&v4.tickVerified){
+        const ranking=await readV4Decision({runner:RUNNERS.find(x=>x.key==='V12_V4'),lastTickAt:v4.actualLastTickAt,now:Date.now(),pid:v4.diagnostics.mainPid});
+        v4.observability.ranking=ranking;
+        v4.observability.v4={...v4.observability.v4,symbolsEvaluated:ranking.symbolsEvaluated??null,routesEvaluated:ranking.routesEvaluated??null,
+            entrySourceRejections:ranking.status==='OBSERVED'?ranking.items.filter(x=>!x.eligible).map(x=>({symbol:x.symbol,reason:x.reason})):[]};
+    }
+    if(gross.status==='HEALTHY')for(const row of Object.values(runnerSnapshots)){
+        row.observability.stop={status:'NOT_REQUIRED_FLAT',protected:false,quantity:0,lastReconciledAt:gross.asOf,source:gross.source,sourceSha:gross.sourceSha};
+    }
     const overall = summarizeOverallSafety(globalReasons, results);
     const runnerOrderPermissions = Object.fromEntries(results.map((result) => [
         result.runner,
@@ -873,7 +858,7 @@ async function main() {
                 : "HEALTHY";
     const snapshot = {
         schema: "disdex-runner-health-snapshot/v1",
-        generatedAt: now,
+        generatedAt: Date.now(),
         heartbeatAt: now,
         authenticatedSourceRequired: true,
         targetIdentity: {
@@ -898,14 +883,7 @@ async function main() {
         marginGuardService,
         asterRateBudget,
         pending,
-        gross: {
-            status: "UNAVAILABLE",
-            reason: "SIGNED_VENUE_POSITION_SNAPSHOT_REQUIRED",
-            cryptoGross: null,
-            stockGross: null,
-            availableCryptoGross: null,
-            availableStockGross: null,
-        },
+        gross,
         overallSafetyState,
         newOrdersAllowed: overall.globalOrdersAllowed,
         globalOrdersAllowed: overall.globalOrdersAllowed,

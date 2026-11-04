@@ -6,6 +6,8 @@ on:
       - 'scripts/ops/**'
       - 'lib/disdex-v4-canonical-operator-binding.mjs'
       - 'lib/disdex-watchdog-audit-mode.mjs'
+      - 'lib/disdex-health-observability.mjs'
+      - 'tests/health-venue-observability.test.mjs'
       - 'tests/v4-canonical-monitor-activation.test.mjs'
       - 'tests/health-shared-risk-policy.test.mjs'
       - 'tests/watchdog-audit-only.test.mjs'
@@ -124,7 +126,7 @@ jobs:
 
       - name: Validate canonical V4 monitor gate and audit-only watchdog
         run: |
-          node --test tests/v4-canonical-monitor-activation.test.mjs tests/health-shared-risk-policy.test.mjs tests/watchdog-audit-only.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs tests/runner-health-tick-contract.test.mjs
+          node --test tests/v4-canonical-monitor-activation.test.mjs tests/health-shared-risk-policy.test.mjs tests/watchdog-audit-only.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs tests/runner-health-tick-contract.test.mjs tests/health-venue-observability.test.mjs
           # This filesystem fixture must create a genuinely root-owned pin.
           # Keep production uid=0 validation; match the dedicated phase CI.
           sudo "$(command -v node)" --test tests/observed-runner-phase.test.mjs
