@@ -6,6 +6,7 @@ import { buildV4HealthPayload, classifyV4RecoverableSafetyFailure } from "../scr
 test("stale dynamic evidence and an unavailable peer block orders and can retry", () => {
   for (const reason of ["V4_EVIDENCE_STALE:signedAsterAccount", "V4_EVIDENCE_STALE:sharedRiskAndPeers",
     'V4_REFRESH_LEASE_EXPIRED','V4_REFRESH_COMMIT_STALE',
+    'FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED','V4_SIGNED_ACCOUNT_READ_WINDOW_STALE',
     "V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:peer.service"]) {
     const result=classifyV4RecoverableSafetyFailure(new Error(reason),1000);
     assert.equal(result?.status,"blocked"); assert.equal(result?.orderEnabled,false);

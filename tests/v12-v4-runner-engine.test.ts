@@ -437,6 +437,57 @@ async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH
   get positionQty(){return positionQty},set positionQty(v:number){positionQty=v}};
 }
 
+test("slow cold decisions refresh signed account inputs instead of spending an expired account mark",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  let reads=0;const balances=h.engine.deps.client.getBalances.bind(h.engine.deps.client);
+  h.engine.deps.client.getBalances=async()=>{reads++;return balances();};
+  const decision=h.engine.deps.fetchDecision;
+  h.engine.deps.fetchDecision=async()=>{h.time+=31_000;return decision();};
+  const result=await h.engine.tick();
+  assert.equal(result.status,"submitted");assert.ok(reads>=2,"must refetch genuine signed account data, not redate a mark");
+  assert.equal(h.entrySends,1);assert.equal(h.stopSends,1);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("flat terminal history reuses its prepared decision without a second account-locked cold scan",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const old=h.store.read(),id=v4OrderIdentity(sha,"BTCUSDT:RETIRED:SHORT:1","EXIT",0);
+  h.store.commit(old.revision,{...old,intents:{[id]:{clientOrderId:id,legId:"BTCUSDT:RETIRED:SHORT:1",
+   action:"EXIT",sequence:0,stage:"PREPARED",createdAt:1,updatedAt:1,command:{legId:"BTCUSDT:RETIRED:SHORT:1",
+   action:"EXIT",sequence:0,symbol:"BTCUSDT",positionSide:"SHORT",quantity:1,price:100,signalTs:1}}}} as any);
+  const prepared=h.store.read();h.store.commit(prepared.revision,advanceV4Intent(prepared,id,"TERMINAL",2));
+  let scans=0;const fetch=h.engine.deps.fetchDecision;h.engine.deps.fetchDecision=async()=>{scans++;return fetch();};
+  const decision=await h.engine.prepareFlatMarketDecision();assert.equal(decision?.kind,"READY");
+  assert.equal((await h.engine.tick(decision)).status,"submitted");assert.equal(scans,1);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("slow entry preparation blocks before persisting a PREPARED intent and retains the 30 second guard",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.referencePrice=async()=>{h.time+=31_000;return 100;};
+  const result=await h.engine.tick();
+  assert.equal(result.status,"blocked");assert.equal(result.reason,"V4_ENTRY_ACCOUNT_LEDGER_REFRESH_REQUIRED");
+  assert.equal(result.orderEnabled,false);assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+  assert.equal(Object.keys(h.store.read().intents).length,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("an old positions response is not redated when a different signed account read finishes late",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const balances=h.engine.deps.client.getBalances.bind(h.engine.deps.client);
+  h.engine.deps.client.getBalances=async()=>{
+   await new Promise<void>(done=>setImmediate(done));h.time+=31_000;return balances();
+  };
+  await assert.rejects(h.engine.tick(),/V4_SIGNED_ACCOUNT_READ_WINDOW_STALE/);
+  assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+  assert.equal(h.store.read().state.journal.some(row=>row.type==="ACCOUNT_MARK"),false);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
 test("in-lease decision read keeps a protected non-flat store BLOCKED on rate saturation",async()=>{
  const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
  try{

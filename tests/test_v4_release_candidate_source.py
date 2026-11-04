@@ -34,6 +34,16 @@ class CandidateSourceTest(unittest.TestCase):
                     expected=expected.replace(absent,b'return false;',1)
                     expected=expected.replace(b'    } catch (error) {\n      return false;\n',
                         b'    } catch (error) {\n      // An absent generation was released; retry mkdir. Treating absence as\n      // stale can rename a different live generation created before eviction.\n      return false;\n',1)
+                if row['target']=='scripts/v12-v4-production-runner.ts':
+                    old=(b' const peer=/^V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:/.test(reason);\n'
+                         b' if(!stale&&!peer)return;\n'
+                         b' return {status:"blocked",reason:`${peer?"V4_PEER_ATTESTATION_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED"}:${reason}`,')
+                    new=(b' const peer=/^V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:/.test(reason);\n'
+                         b" const ledger=reason==='FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED'||reason==='V4_SIGNED_ACCOUNT_READ_WINDOW_STALE';\n"
+                         b' if(!stale&&!peer&&!ledger)return;\n'
+                         b' return {status:"blocked",reason:`${ledger?"V4_SHARED_ACCOUNT_REFRESH_REQUIRED":peer?"V4_PEER_ATTESTATION_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED"}:${reason}`,')
+                    self.assertEqual(expected.count(old),1)
+                    expected=expected.replace(old,new)
                 actual = Path(row["target"]).read_bytes().replace(b"\r\n", b"\n")
                 self.assertEqual(actual, expected)
 

@@ -51,6 +51,17 @@ test("shared reservation survives account-lock release and is not duplicated aft
  assert.equal(registry.entries[0].strategyId,"V12_V4");assert.equal(registry.entries[0].notionalUsd,500);
  }finally{rmSync(x.dir,{recursive:true,force:true});}
 });
+
+test("a recent journal append cannot hide an old signed account snapshot",async()=>{
+ const x=await setup();
+ try{
+  const d=x.store.read(),event={type:"ACCOUNT_MARK",eventId:"fresh-append-old-signed-source",ts:Date.now(),
+   equityUsd:1000,prices:{[x.command.symbol]:100},foreign:[],signedCapturedAt:x.at-31_000};
+  x.store.commit(d.revision,{...d,state:applyProductionEvent(d.state,event as any)});
+  await assert.rejects(x.manager.reserve(x.cid,x.command),/FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED/);
+  assert.equal((await readPendingExposureRegistry(x.pending)).entries.length,0);
+ }finally{await x.handle.release();rmSync(x.dir,{recursive:true,force:true});}
+});
 test("unknown submission retains shared exposure and cannot be released from an order ACK",async()=>{
  const x=await setup();
  try{
