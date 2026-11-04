@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { promisify } from "node:util";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { applyOperatorActivationGateToRestart, evaluateOperatorActivationGate } from "./disdex-live-operator-activation-gate.mjs";
+import {applyWatchdogAuditMode} from '../../../lib/disdex-watchdog-audit-mode.mjs';
 
 /**
  * Release-pinned, read-only runner health watchdog.
@@ -73,6 +74,7 @@ const OTHER_RUNNERS = [
         expectedShaEnv: "DISDEX_WATCHDOG_PENGU_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_PENGU_RELEASE_ROOT",
         evidenceModeEnv: "DISDEX_WATCHDOG_PENGU_EVIDENCE_MODE",
+        operatorActivationPathEnv: "DISDEX_WATCHDOG_PENGU_OPERATOR_ACTIVATION_PATH",
         heartbeatFile: "pengu-v8.json",
         unitEnv: "DISDEX_WATCHDOG_PENGU_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-pengu-dual-ls-v2@${sha}.service`,
@@ -87,6 +89,7 @@ const OTHER_RUNNERS = [
         expectedShaEnv: "DISDEX_WATCHDOG_V52_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_V52_RELEASE_ROOT",
         evidenceModeEnv: "DISDEX_WATCHDOG_V52_EVIDENCE_MODE",
+        operatorActivationPathEnv: "DISDEX_WATCHDOG_V52_OPERATOR_ACTIVATION_PATH",
         heartbeatFile: "v52.json",
         unitEnv: "DISDEX_WATCHDOG_V52_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-v52-aster-only@${sha}.service`,
@@ -106,6 +109,7 @@ const OTHER_RUNNERS = [
         expectedShaEnv: "DISDEX_WATCHDOG_Q102_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_Q102_RELEASE_ROOT",
         evidenceModeEnv: "DISDEX_WATCHDOG_Q102_EVIDENCE_MODE",
+        operatorActivationPathEnv: "DISDEX_WATCHDOG_Q102_OPERATOR_ACTIVATION_PATH",
         heartbeatFile: "quality102-causal-v1.json",
         unitEnv: "DISDEX_WATCHDOG_Q102_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-quality102-causal-v1@${sha}.service`,
@@ -120,6 +124,7 @@ const OTHER_RUNNERS = [
         expectedShaEnv: "DISDEX_WATCHDOG_FET_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_FET_RELEASE_ROOT",
         evidenceModeEnv: "DISDEX_WATCHDOG_FET_EVIDENCE_MODE",
+        operatorActivationPathEnv: "DISDEX_WATCHDOG_FET_OPERATOR_ACTIVATION_PATH",
         heartbeatFile: "fet-brk48-residual.json",
         unitEnv: "DISDEX_WATCHDOG_FET_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-fet-brk48@${sha}.service`,
@@ -134,6 +139,7 @@ const OTHER_RUNNERS = [
         expectedShaEnv: "DISDEX_WATCHDOG_HYPE_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_HYPE_RELEASE_ROOT",
         evidenceModeEnv: "DISDEX_WATCHDOG_HYPE_EVIDENCE_MODE",
+        operatorActivationPathEnv: "DISDEX_WATCHDOG_HYPE_OPERATOR_ACTIVATION_PATH",
         heartbeatFile: "hype-trend-long.json",
         unitEnv: "DISDEX_WATCHDOG_HYPE_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-hype-long@${sha}.service`,
@@ -148,6 +154,7 @@ const OTHER_RUNNERS = [
         expectedShaEnv: "DISDEX_WATCHDOG_IDLE_EXPECTED_SHA",
         releaseRootEnv: "DISDEX_WATCHDOG_IDLE_RELEASE_ROOT",
         evidenceModeEnv: "DISDEX_WATCHDOG_IDLE_EVIDENCE_MODE",
+        operatorActivationPathEnv: "DISDEX_WATCHDOG_IDLE_OPERATOR_ACTIVATION_PATH",
         heartbeatFile: "idle-priority-short.json",
         unitEnv: "DISDEX_WATCHDOG_IDLE_SERVICE_UNIT",
         expectedUnit: (sha) => `disdex-idle-priority-short@${sha}.service`,
@@ -338,7 +345,7 @@ function operatorActivationPathForRunner(runner, env, defaultPath) {
     const configuredPath = runner.operatorActivationPathEnv
         ? env[runner.operatorActivationPathEnv]
         : undefined;
-    if (runner.operatorActivationPathEnv && !configuredPath) {
+    if (runner.key === "V12_V4" && !configuredPath) {
         throw new Error(`${runner.key} dedicated operator activation path is required`);
     }
     const path = String(configuredPath || defaultPath).trim();
@@ -560,6 +567,11 @@ function pathToken(token, root, relativePath) {
 function commandMatches(config, runner, command) {
     if (!command) return false;
     const tokens = command.split(/\s+/);
+    if (runner.key === 'V12_V4' && tokens.includes('--import')) {
+        const expected=['/usr/bin/node','--import',join(runner.expectedCwd,'node_modules/tsx/dist/loader.mjs'),
+            join(runner.expectedCwd,'scripts/v12-v4-production-runner.ts'),'--daemon'];
+        return tokens.length===expected.length && tokens.every((token,index)=>token===expected[index]);
+    }
     const scripts = runner.script ? [runner.script] : runner.scripts;
     const scriptFound = scripts.some((script) => pathToken(tokens[tokens.indexOf(script)] || "", runner.expectedCwd, script) || tokens.some((token) => token === join(runner.expectedCwd, script)));
     const releaseLocalLoader = join(runner.expectedCwd, "node_modules/tsx/dist/cli.mjs");
@@ -683,7 +695,7 @@ async function evaluateSafetyDaemon(config, daemon, state, now) {
     return { result: decision("RESTART", reason, daemon), attempts, clearAttempts: false };
 }
 
-async function run(config) {
+async function run(config,{auditOnly=false}={}) {
     const now = Date.now();
     await assertRelease(config);
     const releaseLock = await acquireLock(config.lockPath);
@@ -699,7 +711,7 @@ async function run(config) {
             try {
                 const evaluated = await evaluateSafetyDaemon(config, daemon, state, now);
                 const attempts = evaluated.attempts;
-                let result = evaluated.result;
+                let result = applyWatchdogAuditMode(evaluated.result,auditOnly);
                 if (result.action === "RESTART") {
                     if (attempts.length >= MAX_ATTEMPTS) {
                         result = decision("HOLD_FAIL_CLOSED", "restart budget exhausted", daemon);
@@ -791,6 +803,7 @@ async function run(config) {
                     });
                     result = applyOperatorActivationGateToRestart(result, operatorGate, runner, decision);
                 }
+                result=applyWatchdogAuditMode(result,auditOnly);
                 if (result.action === "RESTART") {
                     if (attempts.length >= MAX_ATTEMPTS) {
                         result = decision("HOLD_FAIL_CLOSED", "restart budget exhausted", runner);
@@ -827,6 +840,7 @@ async function run(config) {
             v12DisabledReason: config.v12DisabledReason || null,
             exitCode: hasHardError ? 1 : 0,
             restartCalls,
+            auditOnly,
             decisions,
             dependencies: dependencyDecisions,
             errors,
@@ -924,6 +938,15 @@ function selfTest() {
         throw new Error("peer runner did not retain the shared operator artifact");
     }
     console.log("DISDEX_CURRENT_WATCHDOG_PER_RUNNER_OPERATOR_PATH_SELFTEST_PASS");
+    const peerPaths = buildConfig({...approvedEnv,
+        DISDEX_WATCHDOG_Q102_OPERATOR_ACTIVATION_PATH:join(process.cwd(),'self-test-operator-activation','q102.json'),
+        DISDEX_WATCHDOG_V52_OPERATOR_ACTIVATION_PATH:join(process.cwd(),'self-test-operator-activation','v52.json'),
+        DISDEX_WATCHDOG_FET_OPERATOR_ACTIVATION_PATH:join(process.cwd(),'self-test-operator-activation','fet.json')});
+    for(const [key,prefix] of [['QUALITY102_CAUSAL_V1','Q102'],['V52','V52'],['FET_BRK48_RESIDUAL','FET']]){
+        if(peerPaths.runnerConfig[key].operatorActivationPath!==join(process.cwd(),'self-test-operator-activation',prefix.toLowerCase()+'.json'))throw new Error('peer operator path binding failed');
+    }
+    if(peerPaths.runnerConfig.PENGU_V8.operatorActivationPath!==baseConfigEnv.DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH)throw new Error('legacy peer path fallback changed');
+    console.log("DISDEX_CURRENT_WATCHDOG_OPTIONAL_PEER_OPERATOR_PATH_SELFTEST_PASS");
     const marginGuardSha = "b".repeat(40);
     const marginGuardConfig = buildConfig({
         ...approvedEnv,
@@ -945,6 +968,11 @@ function selfTest() {
     const v4CrossReleaseLoader = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --daemon`;
     if (commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4CrossReleaseLoader)) throw new Error("V4 cross-release loader self-test accepted a .bin shim");
     console.log("DISDEX_CURRENT_WATCHDOG_V4_RELEASE_LOCAL_LOADER_SELFTEST_PASS");
+    const direct=['/usr/bin/node','--import',join(v4Pinned.expectedCwd,'node_modules/tsx/dist/loader.mjs'),join(v4Pinned.expectedCwd,'scripts/v12-v4-production-runner.ts'),'--daemon'];
+    if(!commandMatches({},v4Pinned,direct.join(' ')))throw Error('direct Node V4 command rejected');
+    for(const bad of [[...direct,'--once'],[direct[0],direct[1],'/tmp/loader.mjs',...direct.slice(3)],
+        [...direct.slice(0,4),'--once']])if(commandMatches({},v4Pinned,bad.join(' ')))throw Error('invalid direct Node V4 command accepted');
+    console.log('DISDEX_CURRENT_WATCHDOG_DIRECT_NODE_LOADER_SELFTEST_PASS');
     console.log("DISDEX_CURRENT_WATCHDOG_V12_V4_MODE_SELFTEST_PASS");
     const mismatchedApprovalSha = "f".repeat(40);
     try {
@@ -1081,7 +1109,7 @@ if (process.argv.includes("--self-test")) {
     try {
         const env = await loadEnv(envFile);
         const config = buildConfig({ ...env, ...process.env });
-        const result = await run(config);
+        const result = await run(config,{auditOnly:process.argv.includes('--audit-only')});
         console.log(`DISDEX_CURRENT_WATCHDOG_RESULT exitCode=${result.exitCode} restarts=${result.restartCalls.length}`);
         process.exitCode = result.exitCode;
     } catch (error) {

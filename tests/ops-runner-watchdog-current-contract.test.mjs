@@ -7,6 +7,16 @@ import { test } from "node:test";
 const execFileAsync = promisify(execFile);
 const watchdog = new URL("../scripts/ops/root/disdex-runner-watchdog-current.mjs", import.meta.url);
 
+test('watchdog preserves independently configured peer activation paths with legacy fallback',async()=>{
+  const {stdout}=await execFileAsync(process.execPath,[fileURLToPath(watchdog),'--self-test'],{encoding:'utf8',windowsHide:true});
+  assert.match(stdout,/DISDEX_CURRENT_WATCHDOG_OPTIONAL_PEER_OPERATOR_PATH_SELFTEST_PASS/);
+});
+
+test('current watchdog binds direct Node V4 to its own loader, exact script and daemon mode',async()=>{
+  const {stdout}=await execFileAsync(process.execPath,[fileURLToPath(watchdog),'--self-test'],{encoding:'utf8',windowsHide:true});
+  assert.match(stdout,/DISDEX_CURRENT_WATCHDOG_DIRECT_NODE_LOADER_SELFTEST_PASS/);
+});
+
 test("current watchdog accepts snapshot-only health-snapshot heartbeats", async () => {
   const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
     encoding: "utf8",

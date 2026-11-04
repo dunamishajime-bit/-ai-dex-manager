@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - 'scripts/ops/**'
+      - 'lib/disdex-v4-canonical-operator-binding.mjs'
+      - 'lib/disdex-watchdog-audit-mode.mjs'
+      - 'tests/v4-canonical-monitor-activation.test.mjs'
+      - 'tests/health-shared-risk-policy.test.mjs'
+      - 'tests/watchdog-audit-only.test.mjs'
       - 'ops/systemd/**'
       - 'lib/direct-trade-executor.ts'
       - 'scripts/disdex-v96-live-preflight.ts'
@@ -116,6 +121,11 @@ jobs:
           npx tsx --test tests/watchdog-release-lineage.test.ts
           grep -Fq 'disdex-v96-live.service' scripts/ops/root/disdex-current-runtime-wiring
           grep -Fq 'disdex-v96-live.service' scripts/ops/root/disdex-runner-watchdog-current.mjs
+
+      - name: Validate canonical V4 monitor gate and audit-only watchdog
+        run: |
+          node --test tests/v4-canonical-monitor-activation.test.mjs tests/health-shared-risk-policy.test.mjs tests/watchdog-audit-only.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs
+          python3 -m unittest discover -s tests -p test_runtime_health_snapshot_current.py
 
       - name: Validate no automatic LIVE mutation workflow
         shell: bash

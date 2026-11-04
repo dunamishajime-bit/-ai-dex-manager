@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 import { observedV4Phase, readObservedRunnerTick } from "../../../lib/disdex-observed-runner-phase.mjs";
 import { resolveQuality102OperatorGateReason } from "../../../lib/disdex-q102-health-gate.mjs";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
+import {evaluateOperatorActivationGate} from './disdex-live-operator-activation-gate.mjs';
 import { validateRunnerTickHeartbeat } from "./disdex-runner-tick-heartbeat.mjs";
 
 const execFile = promisify(execFileCallback);
@@ -444,14 +445,12 @@ async function safetyServiceStatus(label, unit, releaseRoot, scriptToken) {
     }
 }
 
-async function sharedRiskStatus(now) {
-    try {
-        const state = await json(SHARED_RISK_STATE_PATH);
-        const updatedAt = Number(state?.updatedAt || 0);
+export function classifySharedRiskHealth(state,now) {
+        const updatedAt = state?.updatedAt;
         const expectedDay = new Date(now).toISOString().slice(0, 10);
         const identityOk = state?.schema === "disdex-shared-crypto-daily-risk/v1"
             && String(state?.accountScope || "") === "ASTER_FUTURES";
-        const timestampOk = Number.isFinite(updatedAt) && updatedAt > 0 && updatedAt <= now + 60_000;
+        const timestampOk = Number.isSafeInteger(updatedAt) && updatedAt > 0 && updatedAt <= now;
         const fresh = timestampOk && now <= updatedAt + SHARED_RISK_FRESHNESS_GRACE_MS;
         const dayOk = String(state?.utcDay || "") === expectedDay;
         const sourceComplete = state?.sourceComplete === true;
@@ -462,18 +461,26 @@ async function sharedRiskStatus(now) {
         else if (!fresh) reason = "Shared Risk state is stale";
         else if (!dayOk) reason = "Shared Risk UTC day is stale";
         else if (!sourceComplete) reason = "Shared Risk source is incomplete";
+        else if (state.maximumLossPct!==7.5) reason = 'Shared Risk daily-loss limit is not 7.5 percent';
+        else if(typeof state.tripped!=='boolean'||typeof state.lossPct!=='number'||!Number.isFinite(state.lossPct)||state.lossPct<0
+            ||(state.lossPct>=7.5&&!tripped))reason='Shared Risk loss or latch is invalid';
         else if (tripped) reason = "Shared Risk daily-loss limit is tripped";
         return {
             safetyState: reason ? "BLOCKED" : "HEALTHY",
             reason,
-            updatedAt,
+            updatedAt: Number.isFinite(updatedAt)?updatedAt:0,
             fresh,
             utcDay: String(state?.utcDay || ""),
-            lossPct: Number(state?.lossPct || 0),
-            maximumLossPct: Number(state?.maximumLossPct || 0),
+            lossPct: Number.isFinite(state?.lossPct)?state.lossPct:null,
+            maximumLossPct: Number.isFinite(state?.maximumLossPct)?state.maximumLossPct:null,
             tripped,
             sourceComplete,
         };
+}
+async function sharedRiskStatus(now) {
+    try {
+        const state=await json(SHARED_RISK_STATE_PATH);
+        return classifySharedRiskHealth(state,Math.max(now,Date.now()));
     } catch {
         return {
             safetyState: "BLOCKED",
@@ -556,7 +563,12 @@ function stateIdentityMatches(runner, state) {
         || (runner.key === "IDLE_PRIORITY_SHORT" && state?.schema === "disdex-idle-priority-state/v2" && String(state?.runtimeSha || "").toLowerCase() === runner.expectedSha);
 }
 
-async function runnerOperatorGateReason(runner) {
+async function runnerOperatorGateReason(runner,phase) {
+    if(runner.key==='V12_V4'&&!phase?.monitorOnly){
+        const result=await evaluateOperatorActivationGate({runner:'V12_V4',releaseRoot:runner.releaseRoot,sha:runner.expectedSha,
+            activationPath:configuredPath('DISDEX_HEALTH_SNAPSHOT_V12_OPERATOR_ACTIVATION_PATH','/var/lib/disdex/shared/operator-activation/v12-v4-full.json')});
+        return result.allowed?'':result.reason;
+    }
     if (runner.key !== "QUALITY102_CAUSAL_V1") return "";
     try {
         // Read the effective environment of the already-running runner. This
@@ -701,7 +713,7 @@ export async function buildHeartbeat(runner, now, globalBlockReason, dependencie
     const tick = {...observedTick,fresh:observedTick.valid,ageMs:observedTick.valid ? clock()-observedTick.lastTickAt : null};
     const phase = runner.key === "V12_V4" ? observedV4Phase(runner,service,state,observedTick) : {monitorOnly:false};
     const observedIdentity = phase.monitorOnly ? phase.valid : stateIdentityMatches(runner,state);
-    const operatorGateReason = await runnerOperatorGateReason(runner);
+    const operatorGateReason = await runnerOperatorGateReason(runner,phase);
     const serviceActive = Boolean(service?.active);
     const processPresent = Boolean(service?.pid > 0);
     const cwdCurrent = Boolean(service?.cwd === runner.releaseRoot);
@@ -744,6 +756,7 @@ export async function buildHeartbeat(runner, now, globalBlockReason, dependencie
         formalCertification: String(state?.operationMode || "").toUpperCase() === "CERTIFIED",
         limitedLive: String(state?.operationMode || "").toUpperCase() === "CANARY",
         orderPermission: blockedReason ? "DENIED_BLOCKED" : phase.monitorOnly ? "DENIED_MONITOR_ONLY" : "ALLOWED",
+        decisionPermission: runner.key==='V12_V4'?String(state?.orderPermission||'UNKNOWN'):null,
         newOrdersAllowed: !blockedReason && !phase.monitorOnly,
         heartbeatAt: clock(),
         lastTickAt: observedTick.legacy ? decisionEvidence.lastTickAt : observedTick.lastTickAt,
@@ -778,7 +791,7 @@ export async function buildHeartbeat(runner, now, globalBlockReason, dependencie
     if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
-        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, evidenceMode: runner.evidenceMode, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: decisionEvidence.tickStatus, strategyOk: observedIdentity, orderPermission: blockedReason ? "DENIED_BLOCKED" : phase.monitorOnly ? "DENIED_MONITOR_ONLY" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
+        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, evidenceMode: tickMode, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: decisionEvidence.tickStatus, strategyOk: observedIdentity, orderPermission: blockedReason ? "DENIED_BLOCKED" : phase.monitorOnly ? "DENIED_MONITOR_ONLY" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
         observability: runnerObservability(runner, state, heartbeat),
     };
 }
@@ -832,6 +845,7 @@ async function main() {
             processHealthy: heartbeat.processHealthy,
             newOrdersAllowed: heartbeat.newOrdersAllowed,
             orderPermission: heartbeat.orderPermission,
+            decisionPermission: heartbeat.decisionPermission ?? null,
             healthReason: heartbeat.healthReason || "",
             heartbeatAt: heartbeat.heartbeatAt,
             lastTickAt: heartbeat.lastTickAt,
