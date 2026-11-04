@@ -12,6 +12,7 @@ import { readQuality102CausalV1Ownership, quality102OwnsPosition } from "./disde
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "./disdex-strict-portfolio-planner";
 import type { AccountLockHandle, FileAccountOrderLock } from "./disdex-account-order-lock";
 import type { DirectAccountSnapshot, DirectMarketQuote, DirectOpenOrder, DirectPosition, DirectTradeExecutor, DirectTradeResult } from "./direct-trade-executor";
+import { runnerMutationTelemetry } from "./disdex-runner-mutation-telemetry";
 import type { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
 import { buildHypeZecProtection, calculateHypeZecQuantity, evaluateHypeLongSignal, type HypeZecSignalResult } from "./hype-zec-long-sleeves";
 import { buildHypeTrendSignal, type HypeTrendCandle } from "./hype-trend-long-signal";
@@ -262,7 +263,7 @@ export class HypeZecLongRunner {
     state.manualReview = reason;
     state.failures = [...state.failures, { message: reason, occurredAt: this.now() }].slice(-100);
     await this.dependencies.stateStore.save(state);
-    this.log.error("hype-zec-live-manual-review", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+    this.log.error("hype-zec-live-manual-review", { reason, ...runnerMutationTelemetry() });
     return { status: "manual-review", message: reason };
   }
 

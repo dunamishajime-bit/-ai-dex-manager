@@ -8,6 +8,7 @@ on:
       - 'lib/idle-priority-short-state.ts'
       - 'lib/idle-residual-long-state.ts'
       - 'lib/disdex-runner-mutation-telemetry.ts'
+      - 'lib/hype-zec-long-runner.ts'
       - 'scripts/disdex-hype-zec-long-live-runner.ts'
       - 'tests/hype-runner-mutation-telemetry.test.ts'
       - 'tests/current-runtime-atomic-publications.test.ts'
