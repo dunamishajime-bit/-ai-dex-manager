@@ -7,6 +7,7 @@ import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { classifyAsterRateBudgetFailure, nextAsterRateBudgetRetryMs } from "../lib/disdex-aster-rate-budget-policy";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 import { FET_BRK48_TRAILING_STOP_POLICY } from "../lib/fet-brk48-trailing-stop";
+import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -95,7 +96,8 @@ async function main() {
   do {
     let result;
     try {
-      result = await runner.tick();
+      result = await observePeerDecisionCycle({ runnerId: "FET_BRK48_RESIDUAL",
+        runtimeSha, mode: "LIVE", operation: () => runner.tick() });
     } catch (error) {
       const deferred = classifyAsterRateBudgetFailure(error);
       if (!deferred) throw error;

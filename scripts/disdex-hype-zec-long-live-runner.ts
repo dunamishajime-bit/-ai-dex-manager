@@ -12,6 +12,7 @@ import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry";
+import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 
 function numberEnv(name: string, fallback: number) {
   const parsed = Number(process.env[name]);
@@ -88,7 +89,8 @@ async function main() {
   process.on("SIGINT", stop);
   process.on("SIGTERM", stop);
   do {
-    const result = await runner.tick();
+    const result = await observePeerDecisionCycle({ runnerId: "HYPE_TREND_LONG",
+      runtimeSha: runtimeSha(runtime.runtimeSha), mode: runtime.mode, operation: () => runner.tick() });
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "hype-zec-runner-tick", mode: runtime.mode, ...result, ...runnerMutationTelemetry(result) }));
     if (!daemon || stopping || result.status === "manual-review") break;
     const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs));
