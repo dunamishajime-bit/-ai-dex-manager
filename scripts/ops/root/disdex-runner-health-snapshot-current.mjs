@@ -1,9 +1,13 @@
 import { execFile as execFileCallback } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, readlink, rename, unlink, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, posix } from "node:path";
 import { promisify } from "node:util";
+import { observedV4Phase, readObservedRunnerTick } from "../../../lib/disdex-observed-runner-phase.mjs";
+import { resolveQuality102OperatorGateReason } from "../../../lib/disdex-q102-health-gate.mjs";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
+import {evaluateOperatorActivationGate} from './disdex-live-operator-activation-gate.mjs';
+import {classifyPendingExposure,pendingBytesDigest,readSignedFlatGross,readV4Decision} from '../../../lib/disdex-health-observability.mjs';
 import { validateRunnerTickHeartbeat } from "./disdex-runner-tick-heartbeat.mjs";
 
 const execFile = promisify(execFileCallback);
@@ -213,43 +217,13 @@ export function projectValidatedTickEvidence(tick) {
 }
 
 function finiteOrNull(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? number : null;
+    return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 async function pendingExposureStatus(now) {
     try {
-        const raw = await json(PENDING_EXPOSURE_PATH);
-        if (!raw || raw.schema !== "disdex-pending-exposure/v1" || raw.accountScope !== "ASTER_FUTURES" || !Array.isArray(raw.entries)) {
-            return { status: "BLOCKED", reason: "PENDING_EXPOSURE_STATE_INVALID", activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-        }
-        let cryptoGross = 0;
-        let stockGross = 0;
-        let activeCount = 0;
-        for (const entry of raw.entries) {
-            if (!["PENDING", "SUBMITTED", "UNKNOWN"].includes(String(entry?.status || ""))) continue;
-            const gross = Number(entry?.gross);
-            const updatedAt = Number(entry?.updatedAt);
-            if (!Number.isFinite(gross) || gross < 0 || !Number.isFinite(Number(entry?.notionalUsd)) || Number(entry.notionalUsd) < 0) {
-                return { status: "BLOCKED", reason: `PENDING_EXPOSURE_VALUE_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-            }
-            if (!Number.isFinite(updatedAt) || updatedAt > now + 5_000 || now - updatedAt > PENDING_EXPOSURE_MAX_AGE_MS) {
-                return { status: "BLOCKED", reason: `PENDING_EXPOSURE_FRESHNESS_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-            }
-            activeCount += 1;
-            if (String(entry?.sleeve || "") === "CRYPTO") cryptoGross += gross;
-            else if (String(entry?.sleeve || "") === "STOCK") stockGross += gross;
-            else return { status: "BLOCKED", reason: `PENDING_EXPOSURE_SLEEVE_INVALID:${String(entry?.reservationId || "UNKNOWN")}`, activeCount: null, cryptoGross: null, stockGross: null, totalGross: null };
-        }
-        return {
-            status: "HEALTHY",
-            reason: "",
-            updatedAt: finiteOrNull(raw.updatedAt),
-            activeCount,
-            cryptoGross,
-            stockGross,
-            totalGross: cryptoGross + stockGross,
-        };
+        const text=await readFile(PENDING_EXPOSURE_PATH,'utf8');
+        return {...classifyPendingExposure(JSON.parse(text),Math.max(now,Date.now())),sourceDigest:pendingBytesDigest(text)};
     } catch (error) {
         return {
             status: error?.code === "ENOENT" ? "UNAVAILABLE" : "BLOCKED",
@@ -295,7 +269,7 @@ function runnerObservability(runner, state, heartbeat) {
         q102: runner.key === "QUALITY102_CAUSAL_V1" ? {
             family: q102Source.family || null,
             layer: q102Source.layer || null,
-            score: finiteOrNull(q102Source.score || q102Source.quality102Score),
+            score: finiteOrNull(q102Source.score ?? q102Source.quality102Score),
             variant: q102Source.variant || null,
             finalDecision: state?.lastDecision?.reason || state?.reason || heartbeat.tickReason || null,
         } : null,
@@ -442,14 +416,12 @@ async function safetyServiceStatus(label, unit, releaseRoot, scriptToken) {
     }
 }
 
-async function sharedRiskStatus(now) {
-    try {
-        const state = await json(SHARED_RISK_STATE_PATH);
-        const updatedAt = Number(state?.updatedAt || 0);
+export function classifySharedRiskHealth(state,now) {
+        const updatedAt = state?.updatedAt;
         const expectedDay = new Date(now).toISOString().slice(0, 10);
         const identityOk = state?.schema === "disdex-shared-crypto-daily-risk/v1"
             && String(state?.accountScope || "") === "ASTER_FUTURES";
-        const timestampOk = Number.isFinite(updatedAt) && updatedAt > 0 && updatedAt <= now + 60_000;
+        const timestampOk = Number.isSafeInteger(updatedAt) && updatedAt > 0 && updatedAt <= now;
         const fresh = timestampOk && now <= updatedAt + SHARED_RISK_FRESHNESS_GRACE_MS;
         const dayOk = String(state?.utcDay || "") === expectedDay;
         const sourceComplete = state?.sourceComplete === true;
@@ -460,18 +432,26 @@ async function sharedRiskStatus(now) {
         else if (!fresh) reason = "Shared Risk state is stale";
         else if (!dayOk) reason = "Shared Risk UTC day is stale";
         else if (!sourceComplete) reason = "Shared Risk source is incomplete";
+        else if (state.maximumLossPct!==7.5) reason = 'Shared Risk daily-loss limit is not 7.5 percent';
+        else if(typeof state.tripped!=='boolean'||typeof state.lossPct!=='number'||!Number.isFinite(state.lossPct)||state.lossPct<0
+            ||(state.lossPct>=7.5&&!tripped))reason='Shared Risk loss or latch is invalid';
         else if (tripped) reason = "Shared Risk daily-loss limit is tripped";
         return {
             safetyState: reason ? "BLOCKED" : "HEALTHY",
             reason,
-            updatedAt,
+            updatedAt: Number.isFinite(updatedAt)?updatedAt:0,
             fresh,
             utcDay: String(state?.utcDay || ""),
-            lossPct: Number(state?.lossPct || 0),
-            maximumLossPct: Number(state?.maximumLossPct || 0),
+            lossPct: Number.isFinite(state?.lossPct)?state.lossPct:null,
+            maximumLossPct: Number.isFinite(state?.maximumLossPct)?state.maximumLossPct:null,
             tripped,
             sourceComplete,
         };
+}
+async function sharedRiskStatus(now) {
+    try {
+        const state=await json(SHARED_RISK_STATE_PATH);
+        return classifySharedRiskHealth(state,Math.max(now,Date.now()));
     } catch {
         return {
             safetyState: "BLOCKED",
@@ -534,7 +514,7 @@ async function atomicJson(path, value) {
 
 function releaseValid(runner) {
     return /^[0-9a-f]{40}$/.test(runner.expectedSha)
-        && resolve(runner.releaseRoot) === runner.releaseRoot
+        && posix.isAbsolute(runner.releaseRoot) && posix.resolve(runner.releaseRoot) === runner.releaseRoot
         && runner.releaseRoot.endsWith(`/${runner.expectedSha}`);
 }
 
@@ -554,7 +534,38 @@ function stateIdentityMatches(runner, state) {
         || (runner.key === "IDLE_PRIORITY_SHORT" && state?.schema === "disdex-idle-priority-state/v2" && String(state?.runtimeSha || "").toLowerCase() === runner.expectedSha);
 }
 
-async function buildHeartbeat(runner, now, globalBlockReason) {
+async function runnerOperatorGateReason(runner,phase) {
+    if(runner.key==='V12_V4'&&!phase?.monitorOnly){
+        const result=await evaluateOperatorActivationGate({runner:'V12_V4',releaseRoot:runner.releaseRoot,sha:runner.expectedSha,
+            activationPath:configuredPath('DISDEX_HEALTH_SNAPSHOT_V12_OPERATOR_ACTIVATION_PATH','/var/lib/disdex/shared/operator-activation/v12-v4-full.json')});
+        return result.allowed?'':result.reason;
+    }
+    if (runner.key !== "QUALITY102_CAUSAL_V1") return "";
+    try {
+        // Read the effective environment of the already-running runner. This
+        // includes EnvironmentFile values and Environment= overrides without
+        // printing or persisting any secret values. Historical selector flags
+        // remain fail-closed in the fixed resolver.
+        const { stdout: pidText } = await execFile(SYSTEMCTL, [
+            "show", runner.unit, "--property=MainPID", "--value", "--no-pager",
+        ], { timeout: 5_000, maxBuffer: 16 * 1024 });
+        const pid = Number(pidText.trim());
+        if (!Number.isInteger(pid) || pid <= 0) {
+            return "QUALITY102_OPERATOR_ENABLE_STATE_UNAVAILABLE";
+        }
+        const rawEnvironment = await readFile("/proc/" + pid + "/environ");
+        const environment = rawEnvironment.toString("utf8")
+            .split(String.fromCharCode(0))
+            .filter(Boolean)
+            .join(" ");
+        return resolveQuality102OperatorGateReason(environment);
+    } catch {
+        return "QUALITY102_OPERATOR_ENABLE_STATE_UNAVAILABLE";
+    }
+}
+
+export async function buildHeartbeat(runner, now, globalBlockReason, dependencies={}) {
+    const {readJson=json,snapshot=serviceSnapshot,readTick=readObservedRunnerTick,clock=()=>Math.max(now,Date.now())}=dependencies;
     if (runner.disabled) {
         const reason = runner.disabledReason || `${runner.key} is intentionally disabled`;
         const heartbeat = {
@@ -599,14 +610,14 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     let state;
     let stateError = "";
     try {
-        state = await json(runner.statePath);
+        state = await readJson(runner.statePath);
     } catch {
         stateError = `${runner.key} state unavailable`;
     }
     let service;
     let serviceError = "";
     try {
-        service = await serviceSnapshot(runner.unit);
+        service = await snapshot(runner.unit);
     } catch {
         serviceError = `${runner.key} service observation failed`;
     }
@@ -668,7 +679,12 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         Number(state?.initialDaemonReconciliation?.completedAt || 0),
     );
     const stateFresh = updatedAt > 0 && now - updatedAt <= runner.maxStateAgeMs;
-    const tick = await readRunnerTickHeartbeat(runner, now);
+    const observedTick = await readTick(runner,service,clock());
+    const tickMode = observedTick.legacy ? "legacy" : "tick-v1";
+    const tick = {...observedTick,fresh:observedTick.valid,ageMs:observedTick.valid ? clock()-observedTick.lastTickAt : null};
+    const phase = runner.key === "V12_V4" ? observedV4Phase(runner,service,state,observedTick) : {monitorOnly:false};
+    const observedIdentity = phase.monitorOnly ? phase.valid : stateIdentityMatches(runner,state);
+    const operatorGateReason = await runnerOperatorGateReason(runner,phase);
     const serviceActive = Boolean(service?.active);
     const processPresent = Boolean(service?.pid > 0);
     const cwdCurrent = Boolean(service?.cwd === runner.releaseRoot);
@@ -678,22 +694,22 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
     const tickEvidence = projectValidatedTickEvidence(tick);
-    const decisionEvidence = runner.evidenceMode === "tick-v1"
+    const decisionEvidence = tickMode === "tick-v1"
         ? tickEvidence
         : {
             lastTickAt: updatedAt > 0 ? updatedAt : 0,
             tickStatus: updatedAt > 0 ? String(state?.lastDecisionStatus || state?.lastEvaluationStatus || state?.status || "LEGACY_STATE_UPDATE") : null,
             tickReason: updatedAt > 0 ? String(state?.lastDecisionReason || state?.lastEvaluationReason || state?.reason || "LEGACY_STATE_TIMESTAMP") : "LEGACY_STATE_TIMESTAMP",
         };
-    const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
-        ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
+    const blockedReason = globalBlockReason || stateError || serviceError || parityReason || operatorGateReason || !releaseValid(runner)
+        ? (globalBlockReason || stateError || serviceError || parityReason || operatorGateReason || "release pin is invalid")
         : manualReviewReason
             ? manualReviewReason
             : !identityOk
                 ? `${runner.key} service identity is not current`
-                : !stateIdentityMatches(runner, state)
+                : !observedIdentity
                     ? `${runner.key} state identity is invalid`
-                    : runner.evidenceMode === "tick-v1" && !tick.fresh
+                    : tickMode === "tick-v1" && !tick.fresh
                         ? `${runner.key} tick heartbeat is not fresh: ${tick.reason}`
                         : "";
     const heartbeat = {
@@ -703,19 +719,24 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         runtimeSha: runner.expectedSha,
         expectedSha: runner.expectedSha,
         workingDirectory: runner.releaseRoot,
-        evidenceMode: runner.evidenceMode,
-        mode: String(state?.operationMode || "LIVE").toUpperCase() === "CANARY" ? "CANARY" : "LIVE",
-        liveEnabled: serviceActive,
-        safetyState: blockedReason ? "BLOCKED" : "HEALTHY",
+        evidenceMode: tickMode,
+        mode: phase.monitorOnly ? "MONITOR_ONLY" : String(state?.operationMode || "LIVE").toUpperCase() === "CANARY" ? "CANARY" : "LIVE",
+        liveEnabled: phase.monitorOnly ? false : serviceActive,
+        processHealthy: identityOk && observedIdentity && (observedTick.legacy || observedTick.valid),
+        safetyState: blockedReason ? "BLOCKED" : phase.monitorOnly ? "MONITOR_ONLY" : "HEALTHY",
         formalCertification: String(state?.operationMode || "").toUpperCase() === "CERTIFIED",
         limitedLive: String(state?.operationMode || "").toUpperCase() === "CANARY",
-        orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED",
-        newOrdersAllowed: !blockedReason,
-        heartbeatAt: now,
-        lastTickAt: decisionEvidence.lastTickAt,
+        orderPermission: blockedReason ? "DENIED_BLOCKED" : phase.monitorOnly ? "DENIED_MONITOR_ONLY" : "ALLOWED",
+        decisionPermission: runner.key==='V12_V4'?String(state?.orderPermission||'UNKNOWN'):null,
+        newOrdersAllowed: !blockedReason && !phase.monitorOnly,
+        heartbeatAt: clock(),
+        lastTickAt: observedTick.legacy ? decisionEvidence.lastTickAt : observedTick.lastTickAt,
+        actualLastTickAt: observedTick.valid ? observedTick.lastTickAt : null,
+        tickVerified: observedTick.valid === true,
+        lastTickSource: observedTick.legacy ? "LEGACY_STATE_TIMESTAMP_UNVERIFIED" : "RUNNER_DECISION_CYCLE",
         tickStatus: decisionEvidence.tickStatus,
         tickReason: decisionEvidence.tickReason,
-        tickAgeMs: runner.evidenceMode === "tick-v1" ? tick.ageMs : null,
+        tickAgeMs: tickMode === "tick-v1" ? tick.ageMs : null,
         mainPid: Number(service?.pid || 0),
         nRestarts: Number(service?.nRestarts || 0),
         serviceResult: String(service?.result || ""),
@@ -741,7 +762,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
-        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, evidenceMode: runner.evidenceMode, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: decisionEvidence.tickStatus, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
+        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, evidenceMode: tickMode, tickPresent: tick.present, tickValid: tick.valid, tickFresh: tick.fresh, tickAgeMs: tick.ageMs, tickStatus: decisionEvidence.tickStatus, strategyOk: observedIdentity, orderPermission: blockedReason ? "DENIED_BLOCKED" : phase.monitorOnly ? "DENIED_MONITOR_ONLY" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
         observability: runnerObservability(runner, state, heartbeat),
     };
 }
@@ -774,7 +795,8 @@ async function main() {
     const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, MARGIN_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
     const asterRateBudget = await sharedAsterRateBudgetStatus(now);
     const pending = await pendingExposureStatus(now);
-    const globalReasons = [targetReason, killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
+    const globalReasons = [targetReason, killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason,
+        pending.status==='HEALTHY'?'':pending.reason].filter(Boolean);
     const globalBlockReason = globalReasons.join("; ");
     const results = [];
     const runnerSnapshots = {};
@@ -790,10 +812,18 @@ async function main() {
             workingDirectory: heartbeat.workingDirectory,
             evidenceMode: heartbeat.evidenceMode,
             safetyState: heartbeat.safetyState,
+            mode: heartbeat.mode,
+            liveEnabled: heartbeat.liveEnabled,
+            processHealthy: heartbeat.processHealthy,
+            newOrdersAllowed: heartbeat.newOrdersAllowed,
             orderPermission: heartbeat.orderPermission,
+            decisionPermission: heartbeat.decisionPermission ?? null,
             healthReason: heartbeat.healthReason || "",
             heartbeatAt: heartbeat.heartbeatAt,
             lastTickAt: heartbeat.lastTickAt,
+            actualLastTickAt: heartbeat.actualLastTickAt ?? null,
+            tickVerified: heartbeat.tickVerified === true,
+            lastTickSource: heartbeat.lastTickSource || null,
             tickStatus: heartbeat.tickStatus || null,
             tickReason: heartbeat.tickReason || null,
             tickAgeMs: heartbeat.tickAgeMs,
@@ -801,10 +831,22 @@ async function main() {
             observability,
         };
     }
+    const gross=await readSignedFlatGross({v52Root:RUNNERS.find(x=>x.key==='V52')?.releaseRoot,
+        pending,pendingDigest:pending.sourceDigest,now:Date.now()});
+    const v4=runnerSnapshots.V12_V4;
+    if(v4?.processHealthy&&v4.tickVerified){
+        const ranking=await readV4Decision({runner:RUNNERS.find(x=>x.key==='V12_V4'),lastTickAt:v4.actualLastTickAt,now:Date.now(),pid:v4.diagnostics.mainPid});
+        v4.observability.ranking=ranking;
+        v4.observability.v4={...v4.observability.v4,symbolsEvaluated:ranking.symbolsEvaluated??null,routesEvaluated:ranking.routesEvaluated??null,
+            entrySourceRejections:ranking.status==='OBSERVED'?ranking.items.filter(x=>!x.eligible).map(x=>({symbol:x.symbol,reason:x.reason})):[]};
+    }
+    if(gross.status==='HEALTHY')for(const row of Object.values(runnerSnapshots)){
+        row.observability.stop={status:'NOT_REQUIRED_FLAT',protected:false,quantity:0,lastReconciledAt:gross.asOf,source:gross.source,sourceSha:gross.sourceSha};
+    }
     const overall = summarizeOverallSafety(globalReasons, results);
     const runnerOrderPermissions = Object.fromEntries(results.map((result) => [
         result.runner,
-        overall.globalOrdersAllowed && result.safetyState === "HEALTHY" ? "ALLOWED" : result.safetyState === "DISABLED" ? "DENIED_DISABLED" : "DENIED_BLOCKED",
+        overall.globalOrdersAllowed ? result.orderPermission : "DENIED_BLOCKED",
     ]));
     const overallSafetyState = overall.globalBlocked
         ? "BLOCKED"
@@ -815,7 +857,7 @@ async function main() {
                 : "HEALTHY";
     const snapshot = {
         schema: "disdex-runner-health-snapshot/v1",
-        generatedAt: now,
+        generatedAt: Date.now(),
         heartbeatAt: now,
         authenticatedSourceRequired: true,
         targetIdentity: {
@@ -829,7 +871,7 @@ async function main() {
             expectedSha: runner.expectedSha,
             releaseRoot: runner.releaseRoot,
             serviceUnit: runner.unit || null,
-            evidenceMode: runner.evidenceMode,
+            evidenceMode: runnerSnapshots[runner.key]?.evidenceMode || runner.evidenceMode,
         }])),
         runners: runnerSnapshots,
         runnerOrderPermissions,
@@ -840,14 +882,7 @@ async function main() {
         marginGuardService,
         asterRateBudget,
         pending,
-        gross: {
-            status: "UNAVAILABLE",
-            reason: "SIGNED_VENUE_POSITION_SNAPSHOT_REQUIRED",
-            cryptoGross: null,
-            stockGross: null,
-            availableCryptoGross: null,
-            availableStockGross: null,
-        },
+        gross,
         overallSafetyState,
         newOrdersAllowed: overall.globalOrdersAllowed,
         globalOrdersAllowed: overall.globalOrdersAllowed,

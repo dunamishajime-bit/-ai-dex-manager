@@ -1,6 +1,7 @@
 import { lstat, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import {validateV4CanonicalBinding} from '../../../lib/disdex-v4-canonical-operator-binding.mjs';
 
 const SHA = /^[0-9a-f]{40}$/;
 const SCHEMA = "disdex-live-operator-activation/v1";
@@ -205,6 +206,17 @@ export async function evaluateOperatorActivationGate(input) {
   }
   const metadata = validateOperatorActivationFileMetadata(stats);
   if (!metadata.allowed) return metadata;
+  if(runner==='V12_V4'){
+    let manifest;
+    try{
+      const path='/etc/disdex/runner-pins.json';
+      if(!validateOperatorActivationFileMetadata(await lstat(path)).allowed)return {allowed:false,reason:'OPERATOR_V4_CANONICAL_PIN_METADATA'};
+      manifest=JSON.parse(await readFile(path,'utf8'));
+    }catch{return {allowed:false,reason:'OPERATOR_V4_CANONICAL_PIN_UNAVAILABLE'};}
+    const binding=validateV4CanonicalBinding({artifact,manifest,readiness,sha});
+    if(!binding.allowed)return binding;
+    return validateOperatorActivationArtifact(artifact,{sha,target:binding.target,runner,requireRunnerShaMap:true,requiredRunners:binding.requiredRunners});
+  }
   return validateOperatorActivationArtifact(artifact, {
     sha,
     target: implementation.target,

@@ -1,0 +1,40 @@
+name: DisDex observed Runner phase and real tick
+on:
+  push:
+    paths:
+      - 'lib/disdex-observed-runner-phase.mjs'
+      - 'lib/disdex-health-observability.mjs'
+      - 'tests/health-venue-observability.test.mjs'
+      - 'lib/disdex-q102-health-gate.mjs'
+      - 'scripts/ops/root/disdex-runner-health-snapshot-current.mjs'
+      - 'tests/observed-runner-phase.test.mjs'
+      - 'scripts/ops/root/disdex-runner-watchdog-current.mjs'
+      - 'tests/watchdog-peer-direct-loader.test.mjs'
+      - 'tests/health-numeric-projection.test.mjs'
+      - '.github/workflows/disdex-observed-runner-phase-ci.yml'
+  pull_request:
+    paths:
+      - 'lib/disdex-observed-runner-phase.mjs'
+      - 'lib/disdex-health-observability.mjs'
+      - 'tests/health-venue-observability.test.mjs'
+      - 'lib/disdex-q102-health-gate.mjs'
+      - 'scripts/ops/root/disdex-runner-health-snapshot-current.mjs'
+      - 'tests/observed-runner-phase.test.mjs'
+      - '.github/workflows/disdex-observed-runner-phase-ci.yml'
+permissions:
+  contents: read
+jobs:
+  no-order-observability:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: sudo "$(command -v node)" --test tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs tests/hp-runner-snapshot-consistency.test.ts tests/health-venue-observability.test.mjs
+      - run: node scripts/ops/root/disdex-runner-health-snapshot-current.mjs --self-test
+      - run: node --test tests/watchdog-peer-direct-loader.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs
+      - run: node --test tests/health-numeric-projection.test.mjs
+      - run: git diff --check
