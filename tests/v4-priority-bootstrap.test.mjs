@@ -5,8 +5,18 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {validateGrant,validateObsoleteHold,atomicOwnedWrite,permitsSharedMarginMetadata} from '../scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs';
+import * as bootstrap from '../scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const NOW=2000000000000;
+
+test('a healthy LIVE upgrade may preserve inactive Kill but cannot clear or reinterpret an active Kill',()=>{
+ assert.equal(typeof bootstrap.validateKillPreparation,'function');
+ const plan={operation:'V4_SAFE_SOURCE_UPGRADE',preserveInactiveKill:true,oldLiveAuthorityVerified:true};
+ assert.equal(bootstrap.validateKillPreparation({active:false},plan),'PRESERVE_INACTIVE');
+ for(const kill of [{active:true},{},null])assert.throws(()=>bootstrap.validateKillPreparation(kill,plan));
+ assert.throws(()=>bootstrap.validateKillPreparation({active:false},{...plan,oldLiveAuthorityVerified:false}));
+ assert.throws(()=>bootstrap.validateKillPreparation({active:false},{...plan,preserveInactiveKill:false}));
+});
 test('only the canonical deploy-owned Margin Guard may have deploy-group write permission',()=>{
  const path='/var/lib/disdex/shared/margin-risk/guard-live.json';
  const metadata={uid:1000,gid:1000,mode:0o100660};

@@ -24,6 +24,101 @@ def facts():
         durableHash='d'*64,killHash='e'*64)
 
 class PriorityFactsTest(unittest.TestCase):
+    def test_upgrade_baseline_binds_prior_authority_before_any_stop(self):
+        from unittest.mock import patch
+        op=m.ProductionOperations(candidate_sha=SHA,static_root=Path('/tmp')/SHA)
+        op.pins={'V12_V4':OLD};op.plan={};op.prior_sha=OLD
+        row=dict(sha=OLD,pid=42,activeState='active',cwd=str(m.RELEASES/OLD))
+        approval={};implementation={};calls=[]
+        with patch('disdex_unified_root_gate.read_root_json',side_effect=[approval,implementation]),\
+             patch('disdex_v4_canonical_prestart.validate_activation',side_effect=lambda *a:calls.append('authority')),\
+             patch('disdex_v4_root_cutover.await_v4_decision_cycle',side_effect=lambda *a,**k:calls.append('tick') or {'tickCompletedAt':NOW}),\
+             patch.object(m,'bytes_at',return_value=b'authority'):
+            op._verify_upgrade_baseline(row)
+        self.assertEqual(calls,['authority','tick']);self.assertTrue(op.old_live_authority_verified)
+        self.assertEqual(op.runtime_approval_hash,m.digest(b'authority'))
+
+    def test_healthy_live_upgrade_requires_verified_old_authority_and_preserves_inactive_kill(self):
+        f=facts();f.update(monitorOnly=False,liveUpgradeAuthorized=True,oldLiveAuthorityVerified=True,
+                          priorRuntimeSha=OLD);f['oldStateSha']=OLD;f['kill']={'active':False}
+        self.assertTrue(m.validate_priority_evidence(f,NOW))
+        for delta in [dict(oldLiveAuthorityVerified=False),dict(priorRuntimeSha=SHA),dict(candidateSha=OLD)]:
+            with self.subTest(delta=delta),self.assertRaises(ValueError):m.validate_priority_evidence(dict(f,**delta),NOW)
+        bad=copy.deepcopy(f);bad['kill']['active']=True
+        with self.assertRaises(ValueError):m.validate_priority_evidence(bad,NOW)
+
+    def test_upgrade_candidate_identity_is_explicit_and_cannot_mix_recovery_modes(self):
+        op=m.ProductionOperations(candidate_sha=SHA,static_root=Path('/var/lib/disdex/ops-audit/run')/SHA)
+        self.assertEqual(op.candidate_sha,SHA);self.assertTrue(op.upgrade)
+        for bad in ['', 'latest', '../'+SHA]:
+            with self.assertRaises(ValueError):m.ProductionOperations(candidate_sha=bad,static_root=Path('/tmp')/SHA)
+        with self.assertRaises(ValueError):
+            m.ProductionOperations(recovery=True,candidate_sha=SHA,static_root=Path('/tmp')/SHA)
+
+    def test_upgrade_stop_changes_only_the_exact_old_v4_process(self):
+        before=dict(writer={'pid':5},killHash='a'*64,peerApprovalHashes={'peer':'b'*64},
+            peers={'V12_V4':dict(sha=OLD,pid=42,cwd='/release/'+OLD,activeState='active',nRestarts=0),
+                   'PENGU_V8':dict(pid=19,sha=SHA)})
+        stopped=copy.deepcopy(before)
+        stopped['peers']['V12_V4'].update(pid=0,cwd=None,activeState='inactive')
+        self.assertTrue(m.validate_stopped_upgrade_context(before,stopped,OLD))
+        for key,value in [('killHash','changed'),('writer',{'pid':6}),('peerApprovalHashes',{})]:
+            bad=copy.deepcopy(stopped);bad[key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError):m.validate_stopped_upgrade_context(before,bad,OLD)
+        for key,value in [('pid',43),('sha',SHA),('nRestarts',1),('activeState','active')]:
+            bad=copy.deepcopy(stopped);bad['peers']['V12_V4'][key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError):m.validate_stopped_upgrade_context(before,bad,OLD)
+
+    def test_upgrade_freeze_stops_before_signed_read_and_refuses_changed_journal(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        op=m.ProductionOperations(candidate_sha=SHA,static_root=Path('/tmp')/SHA)
+        before=dict(writer={'pid':5},killHash='a'*64,peerApprovalHashes={},
+            peers={'V12_V4':dict(sha=OLD,pid=42,cwd='/release/'+OLD,activeState='active',nRestarts=0)})
+        after=copy.deepcopy(before);after['peers']['V12_V4'].update(pid=0,cwd=None,activeState='inactive')
+        op.prior_sha=OLD;op.plan=dict(context=before,durableHash=m.digest(b'original'))
+        op.runtime_approval_path=Path('/approval');op.runtime_approval_hash=m.digest(b'authority')
+        contexts=iter([before,after,after]);op._context=lambda:next(contexts)
+        op.deploy=SimpleNamespace(pw_uid=1000,pw_gid=1000);op.credentials={};op.transaction=Path('/unused')
+        calls=[]
+        op.sdk=SimpleNamespace(source_release=lambda:None,run_signed_child=lambda *a,**k:calls.append('signed'))
+        with patch.object(m.subprocess,'run',side_effect=lambda *a,**k:calls.append('stop')),\
+             patch.object(m,'bytes_at',side_effect=lambda p:b'authority' if p==op.runtime_approval_path else b'changed'):
+            with self.assertRaisesRegex(ValueError,'DURABLE_CHANGED'):op._freeze_upgrade()
+        self.assertEqual(calls,['stop'])
+        self.assertTrue(op.upgrade_old_stopped)
+
+    def test_pre_migration_failure_can_restore_only_unchanged_old_authority(self):
+        from unittest.mock import patch,MagicMock
+        op=m.ProductionOperations(candidate_sha=SHA,static_root=Path('/tmp')/SHA)
+        op.prior_sha=OLD;op.upgrade_old_stopped=True;op.pins={'V12_V4':OLD}
+        op.runtime_approval_path=Path('/approval');op.runtime_approval_hash=m.digest(b'old')
+        op.plan=dict(certificateHash=m.digest(b'old'),killHash=m.digest(b'old'))
+        op.transaction=Path('/transaction');op._validate_upgrade_rollback=MagicMock()
+        document=dict(releaseSha=OLD)
+        with patch.object(m,'json_at',return_value=document),patch.object(m.subprocess,'run') as run,\
+             patch.object(m,'exclusive_json'):
+            op._restore_unmigrated_upgrade()
+        op._validate_upgrade_rollback.assert_called_once()
+        self.assertEqual(run.call_args.args[0],['/usr/bin/systemctl','start','disdex-v12-v4@'+OLD+'.service'])
+        op._validate_upgrade_rollback.reset_mock()
+        with patch.object(m,'json_at',return_value={'releaseSha':SHA}),patch.object(m.subprocess,'run') as run,\
+             patch.object(m,'exclusive_json'):
+            op._restore_unmigrated_upgrade()
+        self.assertEqual([call.args[0][1] for call in run.call_args_list],['disable','stop'])
+        self.assertTrue(all('disdex-v4-dynamic-evidence-refresh@'+OLD in ' '.join(call.args[0]) for call in run.call_args_list))
+        op._validate_upgrade_rollback.assert_not_called()
+
+    def test_v4_monitor_update_covers_every_layer_and_preserves_all_peer_keys(self):
+        from disdex_v52_scoped_root_cutover import layered_monitor_pin_changes
+        prefix='DISDEX_WATCHDOG_V12_';base='/home/deploy/disdex-trading/releases'
+        rows=[(Path('/old.env'),prefix+'EXPECTED_SHA='+('c'*40)+'\n'+prefix+'RELEASE_ROOT='+base+'/'+('c'*40)+'\nDISDEX_WATCHDOG_Q102_EXPECTED_SHA='+SHA+'\n'),
+              (Path('/effective.env'),prefix+'EXPECTED_SHA='+OLD+'\n'+prefix+'RELEASE_ROOT='+base+'/'+OLD+'\n'+prefix+'SERVICE_UNIT=disdex-v12-v4@'+OLD+'.service\n')]
+        changes=layered_monitor_pin_changes(rows,prefix,OLD,SHA,base)
+        self.assertEqual(len(changes),2)
+        self.assertEqual(changes[-1][2][prefix+'SERVICE_UNIT'],'disdex-v12-v4@'+SHA+'.service')
+        self.assertTrue(all(not any('Q102' in k for k in before) for _,before,_ in changes))
+
     def test_certified_unit_uses_shared_file_budget_not_the_readonly_monitor_proxy(self):
         raw=b'[Service]\nEnvironment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json\n'
         fixed=m.render_certified_budget_unit(raw)

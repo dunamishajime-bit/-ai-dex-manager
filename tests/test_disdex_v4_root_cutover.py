@@ -118,6 +118,21 @@ class V4DecisionWaitTest(V4DecisionAuditTest):
     def test_actual_reader_accepts_completed_matching_cycle(self):
         self.assertEqual(self.wait(self.health,self.tick)["tickCompletedAt"],self.now-1000)
 
+    def test_busy_account_lock_is_deferred_and_never_counted_as_healthy(self):
+        locked=dict(self.health,safetyState='BLOCKED',status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        tick=dict(self.tick,status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        rows=iter([locked,tick,self.health,self.tick])
+        self.assertEqual(self.wait(self.health,self.tick,reads=rows)['tickCompletedAt'],self.now-1000)
+        with self.assertRaisesRegex(RuntimeError,'TIMEOUT'):self.wait(locked,tick)
+
+    def test_busy_lock_does_not_hide_bad_identity_future_time_or_permission(self):
+        locked=dict(self.health,safetyState='BLOCKED',status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        tick=dict(self.tick,status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        for health,t in [(dict(locked,mainPid=4243),tick),(dict(locked,heartbeatAt=self.now+2000),tick),
+                         (dict(locked,ordersAllowed=True,orderEnabled=True),tick),
+                         (dict(locked,reason='OTHER_BLOCK'),tick)]:
+            with self.subTest(health=health),self.assertRaises(ValueError):self.wait(health,t)
+
     def test_same_release_recovery_waits_for_new_process_tick_not_the_retained_old_marker(self):
         old_health=dict(self.health,mainPid=4241,lastTickAt=self.now-5000)
         old_tick=dict(self.tick,mainPid=4241,tickStartedAt=self.now-6000,tickCompletedAt=self.now-5000)

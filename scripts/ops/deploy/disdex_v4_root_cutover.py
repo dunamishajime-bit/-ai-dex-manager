@@ -123,9 +123,28 @@ def await_v4_decision_cycle(systemd, *, sha, release, pid, started_after_ms,
                 or (previous_tick is not None and tick.get("tickCompletedAt") == previous_tick)):
             sleeper(2)
             continue
-        return validate_v4_decision_cycle(health, tick, sha=sha, pid=pid,
-            release=release, now_ms=int(clock()*1000), started_after_ms=started_after_ms,
-            previous_tick=previous_tick)
+        now_ms=int(clock()*1000)
+        try:
+            return validate_v4_decision_cycle(health, tick, sha=sha, pid=pid,
+                release=release, now_ms=now_ms, started_after_ms=started_after_ms,
+                previous_tick=previous_tick)
+        except ValueError as error:
+            # Identity/schema checks precede this exact error. A genuine
+            # completed lock-busy cycle stays BLOCKED and is never an audit
+            # success. Wait within the same deadline for a healthy cycle.
+            start,end,heartbeat=tick.get('tickStartedAt'),tick.get('tickCompletedAt'),health.get('heartbeatAt')
+            busy=(str(error)=='V4_DECISION_NOT_HEALTHY_FULL_LIVE'
+                and health.get('mode')=='LIVE' and health.get('liveEnabled') is True
+                and health.get('limitedLive') is False and health.get('safetyState')=='BLOCKED'
+                and all(row.get('status')=='locked' and row.get('reason')=='SHARED_ACCOUNT_LOCK_BUSY' for row in (health,tick))
+                and health.get('ordersAllowed') is False and health.get('orderEnabled') is False
+                and tick.get('newOrdersAllowed') is False
+                and all(type(t) is int and t>0 for t in (start,end,heartbeat))
+                and started_after_ms<=start<=end<=heartbeat<=now_ms+1000
+                and now_ms-end<=180000 and now_ms-heartbeat<=180000
+                and (previous_tick is None or (end>previous_tick and start>=previous_tick)))
+            if not busy:raise
+            sleeper(2)
     raise RuntimeError("V4_REAL_DECISION_CYCLE_TIMEOUT")
 
 

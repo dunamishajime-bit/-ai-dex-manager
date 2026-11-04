@@ -320,3 +320,45 @@ tests. Seven actual Linux Root tests pass, zero skips; default legacy API stays
 compatible. CI/install/staging are next. New-SHA cutover must preserve inactive
 Kill, stage certificates away from current LIVE, coordinate terminal state and
 pin/wiring under legitimate scoped authority, and audit three genuine ticks.
+
+Continuation checkpoint: the static helper a273391b passed all five CI families
+and was installed with a private backup and exact digest check. Candidate c168
+build2 contains 106 exact Git blobs, immutable existing dependencies and marker;
+private static evidence passed 37 tests, 41 routes and typecheck. This is staging
+evidence only and does not grant trading authority. Production is still 2a.
+
+Healthy-LIVE upgrade support is currently UNCOMMITTED and NOT INSTALLED. Local
+priority/scope Python tests: 27 run, four Windows-specific skips, no failures.
+Bootstrap Node tests: six run, four pass, two Windows-specific skips. Root Linux
+verification remains required for those filesystem cases. The new preserve-Kill
+branch rejects an active Kill. Effective layered monitor wiring now supports only
+the explicitly scoped V4/V52 prefixes, retaining unrelated values. Preflight,
+old-writer stop before durable migration, failure recovery and explicit CLI
+binding are not finished; do not execute this partial healthy-upgrade mode.
+
+Owner reaffirmed 120 seconds. This is signed account-ledger admission freshness,
+not API timeout, refresh-lease lifetime or permission to redate evidence. Candidate
+tests accept exactly 120000ms and reject 120001ms; genuine 65-second preparation
+remains admissible and 121-second preparation fails closed before intent creation.
+
+Further continuation: the source now binds an explicit candidate/private static
+directory, derives the old SHA from real pins, verifies the old FULL_LIVE
+activation and real decision process, and updates every effective V4 monitor
+layer without changing peer keys. New-source upgrade and protected same-source
+recovery are separate CLI modes. Old PID0 and unchanged protected context are
+required before signed-flat recheck and durable migration. Before migration,
+rollback can start only the original SHA with unchanged pins/approval/certificate,
+valid terminal history and fresh signed/risk proof. After state ownership changes,
+the old source must remain stopped; a protected recovery receipt records this.
+Inactive Kill is preserved, never cleared by this mode. The superseded V4 refresh
+timer is retired under the deployment lock after verified cutover (or retained
+stopped after a migrated failure), preventing two refresh generations publishing.
+
+The actual read-only preview exposed a separate audit-wait defect: a genuine
+SHARED_ACCOUNT_LOCK_BUSY cycle caused immediate failure. The reader now defers
+only a fresh, correctly identified, orders-disabled locked cycle within its
+existing deadline. Such a cycle never counts as a healthy audit. Unknown blocks,
+bad identity/permissions/future timestamps still reject. New tests failed first,
+then passed. Linux fixture upgrade-unit-final.log: 86/86, no skips. Bootstrap
+Linux tests: 6/6, no skips. Updated helper CI/install and final Production
+preview/cutover remain pending; these test results are not LIVE certification.

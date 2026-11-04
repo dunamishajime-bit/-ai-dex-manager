@@ -20,6 +20,14 @@ export function validateObsoleteHold(k){
  require(k?.active===true&&k.action==='HOLD_PROTECTED'&&k.operator==='disdex-v52-aster-only'
   &&k.recoverable===true&&k.reason===reason,'EXACT_OBSOLETE_HOLD_REQUIRED');return true;
 }
+export function validateKillPreparation(k,p){
+ if(p?.operation==='V4_SAFE_SOURCE_UPGRADE'){
+  require(p.preserveInactiveKill===true&&p.oldLiveAuthorityVerified===true&&k?.active===false,
+   'UPGRADE_MUST_PRESERVE_INACTIVE_KILL');
+  return 'PRESERVE_INACTIVE';
+ }
+ validateObsoleteHold(k);return 'CLEAR_EXACT_OBSOLETE_HOLD';
+}
 export function permitsSharedMarginMetadata(path,metadata,uid,gid){
  return path==='/var/lib/disdex/shared/margin-risk/guard-live.json'
   &&metadata.uid===uid&&metadata.gid===gid&&(metadata.mode&0o777)===0o660;
@@ -88,21 +96,25 @@ async function main(){
  const lock=new FileAccountOrderLock(shared+'/account-order.lock',120000,shared+'/pending-exposure.json');
  const lease=await lock.acquire('V4_PRIORITY_CERTIFICATE_BOOTSTRAP');require(lease,'ACCOUNT_LOCK_BUSY');
  let renewalError=false;const timer=setInterval(()=>{void lease.renew().catch(()=>{renewalError=true;});},30000);
- const killPath=shared+'/kill-switch.json';let cleared=null;let original;
+ const killPath=shared+'/kill-switch.json';let cleared=null;let original;let expectedKillHash;
  const liveAuthority=()=>{authority();require(!renewalError,'ACCOUNT_LEASE_RENEWAL_FAILED');};
  try{
   original=await regularBytes(killPath,[0,p.deployUid]);require(sha(original.bytes)===p.killHash,'KILL_CHANGED');
-  const kill=JSON.parse(original.bytes);validateObsoleteHold(kill);liveAuthority();
+  const kill=JSON.parse(original.bytes);const killPreparation=validateKillPreparation(kill,p);liveAuthority();
+  expectedKillHash=sha(original.bytes);
   require(Date.now()-g.signedVerifiedAt<=30000&&Date.now()>=g.signedVerifiedAt,'SIGNED_FLAT_PROOF_STALE');
   require(sha((await regularBytes('/var/lib/disdex/v12-v4/orders.json',[p.deployUid])).bytes)===g.migratedStateHash,'LEDGER_CHANGED');
   const refreshPath='/var/lib/disdex/unified-deploy/refresh-leases/v4/'+g.candidateSha+'.json';
   const refreshLease=JSON.parse((await regularBytes(refreshPath)).bytes);
   validateV4RefreshLease({lease:refreshLease,sha:g.candidateSha,now:Math.floor(Date.now()/1000)});
   // The authentic root grant authorizes only this exact obsolete cause.
-  const clearedKill={...kill,active:false,clearedAt:new Date().toISOString(),clearedBy:'codex-ssh',
-   recoveryPlanSha256:g.planSha256,recoveryNonceDigest:sha(Buffer.from(g.nonce))};
-  const clearedBytes=encode(clearedKill);
-  await atomicOwnedWrite(killPath,clearedBytes,{expectedHash:p.killHash,metadata:original.metadata});cleared=sha(clearedBytes);
+  if(killPreparation==='CLEAR_EXACT_OBSOLETE_HOLD'){
+   const clearedKill={...kill,active:false,clearedAt:new Date().toISOString(),clearedBy:'codex-ssh',
+    recoveryPlanSha256:g.planSha256,recoveryNonceDigest:sha(Buffer.from(g.nonce))};
+   const clearedBytes=encode(clearedKill);
+   await atomicOwnedWrite(killPath,clearedBytes,{expectedHash:p.killHash,metadata:original.metadata});cleared=sha(clearedBytes);
+   expectedKillHash=cleared;
+  }
   await assertV4EntrySafety({env:{DISDEX_SHARED_KILL_SWITCH_FILE:killPath}});
   const dynamic=await collectV4DynamicEvidence({sha:g.candidateSha,client,runtime:await runtime(),readRuntime:runtime,clock:Date.now});
   liveAuthority();
@@ -156,9 +168,9 @@ async function main(){
   }
   await readV4ProductionCertificate(g.candidateSha);
   await assertV4EntrySafety({env:{DISDEX_SHARED_KILL_SWITCH_FILE:killPath}});liveAuthority();
-  require(sha((await regularBytes(killPath,[0,p.deployUid])).bytes)===cleared,'KILL_CHANGED_AFTER_BOOTSTRAP');
+  require(sha((await regularBytes(killPath,[0,p.deployUid])).bytes)===expectedKillHash,'KILL_CHANGED_AFTER_BOOTSTRAP');
   console.log(JSON.stringify({status:'V4_BOOTSTRAP_READY_NOT_ORDER_ACTIVATED',candidateSha:g.candidateSha,
-   clearedKillHash:cleared,certificateApprovedAt:certificate.approvedAt,refreshLeaseExpiresAt:refreshLease.expiresAt,
+   clearedKillHash:cleared,killPreserved:killPreparation==='PRESERVE_INACTIVE',certificateApprovedAt:certificate.approvedAt,refreshLeaseExpiresAt:refreshLease.expiresAt,
    verifiedAt:Date.now(),ordersSent:0,cancelsSent:0,positionChangesSent:0}));
  }catch(error){
   if(cleared&&sha((await regularBytes(killPath,[0,p.deployUid])).bytes)===cleared)

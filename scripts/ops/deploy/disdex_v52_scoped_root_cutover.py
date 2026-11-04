@@ -85,9 +85,12 @@ def scoped_configuration_bytes(raw,old,new,*,environment=False):
 
 
 def layered_monitor_pin_changes(rows,prefix,old_sha,new_sha,releases_root):
-    require(prefix in ['DISDEX_HEALTH_SNAPSHOT_V52_','DISDEX_WATCHDOG_V52_'],'MONITOR_KEY_SCOPE')
-    effective={};changes=[]
+    units={'DISDEX_HEALTH_SNAPSHOT_V52_':'disdex-v52-aster-only','DISDEX_WATCHDOG_V52_':'disdex-v52-aster-only',
+           'DISDEX_HEALTH_SNAPSHOT_V12_':'disdex-v12-v4','DISDEX_WATCHDOG_V12_':'disdex-v12-v4'}
+    require(prefix in units,'MONITOR_KEY_SCOPE');unit_prefix=units[prefix]
+    effective={};changes=[];seen={}
     for path,text in rows:
+        if path in seen:require(seen[path]==text,'MONITOR_LAYER_CHANGED_DURING_READ')
         old={};new={}
         for line in text.splitlines():
             key,separator,value=line.partition('=')
@@ -99,13 +102,14 @@ def layered_monitor_pin_changes(rows,prefix,old_sha,new_sha,releases_root):
                 require(value.startswith(releases_root+'/') and re.fullmatch('[a-f0-9]{40}',value[len(releases_root)+1:]),'MONITOR_ROOT_ESCAPE')
                 replacement=releases_root+'/'+new_sha
             else:
-                require(re.fullmatch('disdex-v52-aster-only@[a-f0-9]{40}\\.service',value),'MONITOR_UNIT_SCOPE')
-                replacement='disdex-v52-aster-only@'+new_sha+'.service'
+                require(re.fullmatch(re.escape(unit_prefix)+r'@[a-f0-9]{40}\.service',value),'MONITOR_UNIT_SCOPE')
+                replacement=unit_prefix+'@'+new_sha+'.service'
             old[key]=value;new[key]=replacement;effective[key]=value
-        if old:changes.append((path,old,new))
+        if old and path not in seen:changes.append((path,old,new))
+        seen[path]=text
     require(effective.get(prefix+'EXPECTED_SHA')==old_sha
         and effective.get(prefix+'RELEASE_ROOT')==releases_root+'/'+old_sha
-        and (prefix+'SERVICE_UNIT' not in effective or effective[prefix+'SERVICE_UNIT']=='disdex-v52-aster-only@'+old_sha+'.service'),
+        and (prefix+'SERVICE_UNIT' not in effective or effective[prefix+'SERVICE_UNIT']==unit_prefix+'@'+old_sha+'.service'),
         'EFFECTIVE_MONITOR_PIN_DIFFERS_FROM_LIVE')
     return changes
 
