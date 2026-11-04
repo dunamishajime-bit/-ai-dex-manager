@@ -270,3 +270,53 @@ candidate release/certificate/state migration/cutover preparation, legacy tick
 writers plus monitor parity, remaining scope executors/rollback and complete
 decision-to-order/nonflat contracts. Authenticated HP owner session and Aster
 annual native source gaps remain distinct external evidence limitations.
+
+## 2026-11-05 V4 recurrence and owner-directed 120-second repair
+
+V4 is currently healthy/LIVE/ALLOWED at 2a, PID2813424, with actual ticks. Do not
+claim uninterrupted PID2501831: systemd history shows fatal exits at 01:01:43
+and 03:00:46 JST, both FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED. INJ SHORT candidates
+were present; two ENTRY intents never received venueOrderIds, recovered terminal
+with CANCELLED zero-quantity/zero-reservation legs. Native current positions and
+open orders zero in official signed proof. At preparation marks were 52,322ms
+and 47,624ms old; at fatal rejection about 68,230ms and 63,475ms.
+
+Candidate PR427 c16859dcfab218b4a8c14d691e756da8819f8845 now implements the
+owner's explicit 120-second account-ledger limit through one common constant.
+Also fixes terminal-history prefetch reuse, genuinely refreshes signed inputs
+after cold scans, preserves signed source timestamps independently of journal
+append time, blocks expired entry preparation before intent persistence, and
+retries exact read-only freshness errors without killing the daemon. All other
+economic files/caps/STOP rules are unchanged. Tests35/35 and typecheck passed;
+strict lineage3/3; all four GitHub CI families success. Not deployed: current
+Production 2a still has the old thirty-second source.
+
+Root refresh-only lease was genuinely renewed with a new Root-session nonce,
+same SHA and ordersEnabled=false. approvedAt1793822489, expiresAt1793908889,
+2026-11-06 05:01:29 JST. Trading activation dates/scope were not changed.
+
+Monitor snapshot AND watchdog 8ddce642869acce24ab7575307ff84105b9cd6ef are
+Production verified. Snapshot plan8beef613d2fa5fb79230c24247ba5bc5eb3b34a3a502be4a40ffb72d19549cc3,
+cycles1793800456998/1793800533113/1793800640596. Watchdog plan
+ee4112a8260657df0f63e362377ae48b5f481f03a8c337d546485f814eb14fcb,
+cycles1793800690214/1793800764633/1793800891090, bounded recovery restored,
+one stale read deferred/not counted. All frozen pins/permissions/peer PIDs were
+preserved at those cutovers. Current monitor source-only numeric fix31aa8fd8
+preserves unknown STOP/ranking values and real zero Q102 score; local9/9 passed.
+
+Peer PR428009a5349 contains actual 7688 atomic fixes, genuine completed tick
+wrappers for PENGU/FET/HYPE/IDLE and unknown-mutation logging corrections. All
+three CI families success; peer combined65/65 and individual new log RED/GREEN.
+Q102 PR42904f8b09a adds the same completion wrapper to its actual ef1 lineage,
+73/73 plus fatal-log RED/GREEN, all four CI families success. V52 PR430c4fc0041
+73Node+9Python, all three CI success. These remain SOURCE_READY_NOT_LIVE.
+
+The required V4 upgrade preparation is an internal implementation task, NOT
+missing owner authorization. The old priority helper assumes obsolete HOLD
+clearance and old static producer overwrites global /etc evidence. Do not use
+them unchanged for the healthy LIVE baseline. New source adds explicit Root
+private candidate-bound static staging, exclusive no-overwrite publication and
+tests. Seven actual Linux Root tests pass, zero skips; default legacy API stays
+compatible. CI/install/staging are next. New-SHA cutover must preserve inactive
+Kill, stage certificates away from current LIVE, coordinate terminal state and
+pin/wiring under legitimate scoped authority, and audit three genuine ticks.

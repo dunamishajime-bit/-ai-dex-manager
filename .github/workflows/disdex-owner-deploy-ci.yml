@@ -160,7 +160,7 @@ jobs:
       - name: V4 fresh venue witness contract tests
         run: python3 -m unittest discover -s tests -p test_disdex_v4_venue_witness.py -v
       - name: V4 immutable static evidence contract tests
-        run: python3 -m unittest discover -s tests -p test_disdex_v4_static_evidence.py -v
+        run: sudo env PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p test_disdex_v4_static_evidence.py -v
       - name: V4 priority root authority and canonical prestart
         run: |
           python3 -m unittest discover -s tests -p test_v4_priority_live.py -v

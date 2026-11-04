@@ -15,6 +15,29 @@ import sys
 SHA_RE = re.compile(r"^[a-f0-9]{40}$")
 RELEASES = Path("/home/deploy/disdex-trading/releases")
 EVIDENCE_ROOT = Path("/etc/disdex/v12-v4-evidence")
+STAGING_BASE = Path("/var/lib/disdex/ops-audit")
+
+
+def _assert_staging_output(sha: str, output: Path) -> Path:
+    if (not output.is_absolute() or '..' in output.parts or output.name != sha
+            or not output.is_relative_to(STAGING_BASE) or output == STAGING_BASE):
+        raise ValueError('STAGING_OUTPUT_UNTRUSTED')
+    if output.resolve(strict=True) != output:
+        raise ValueError('STAGING_OUTPUT_SYMLINK')
+    current = output
+    while True:
+        meta = current.lstat()
+        if (not stat.S_ISDIR(meta.st_mode) or current.is_symlink()
+                or meta.st_uid != 0 or meta.st_gid != 0 or meta.st_mode & 0o022
+                or (current == output and meta.st_mode & 0o077)):
+            raise ValueError('STAGING_OUTPUT_METADATA')
+        if current == STAGING_BASE:
+            break
+        current = current.parent
+    for name in ['route-source-parity.json', 'v4-execution-tests.json']:
+        if (output / name).exists() or (output / name).is_symlink():
+            raise ValueError('STAGING_OUTPUT_ALREADY_EXISTS')
+    return output
 
 def _assert_release(sha: str) -> Path:
     if os.geteuid() != 0:
@@ -51,7 +74,7 @@ def _run(root: Path, argv: list[str]) -> dict:
         passed=summary['pass']
     return {"sha256": hashlib.sha256(output).hexdigest(), "returnCode": result.returncode,"testsPassed":passed}
 
-def _atomic(path: Path, value: dict) -> None:
+def _atomic(path: Path, value: dict, *, exclusive: bool = False) -> None:
     parent = path.parent
     pst = parent.lstat()
     if (not stat.S_ISDIR(pst.st_mode) or parent.is_symlink()
@@ -69,14 +92,19 @@ def _atomic(path: Path, value: dict) -> None:
             handle.write("\n"); handle.flush(); os.fsync(handle.fileno())
         os.chown(temp, 0, pst.st_gid)
         os.chmod(temp, 0o640)
-        os.replace(temp, path)
+        if exclusive:
+            os.link(temp, path, follow_symlinks=False)
+            temp.unlink()
+        else:
+            os.replace(temp, path)
         os.chmod(path, 0o640)
     finally:
         try: temp.unlink()
         except FileNotFoundError: pass
 
-def certify(sha: str) -> dict:
+def certify(sha: str, *, output_root: Path | None = None) -> dict:
     root = _assert_release(sha)
+    destination = EVIDENCE_ROOT if output_root is None else _assert_staging_output(sha, output_root)
     node = "/usr/bin/node"
     tsx = str(root / "node_modules/tsx/dist/cli.mjs")
     tsc = str(root / "node_modules/typescript/bin/tsc")
@@ -113,18 +141,25 @@ def certify(sha: str) -> dict:
         "proofSource": "IMMUTABLE_RELEASE_LOCAL_TESTS",
         "commandDigests": [row["sha256"] for row in results],
     }
-    _atomic(EVIDENCE_ROOT / "route-source-parity.json", route)
-    _atomic(EVIDENCE_ROOT / "v4-execution-tests.json", tests)
-    return {"status": "V4_STATIC_EVIDENCE_CERTIFIED", "candidateSha": sha,
+    if output_root is None:
+        _atomic(destination / "route-source-parity.json", route)
+        _atomic(destination / "v4-execution-tests.json", tests)
+    else:
+        _assert_staging_output(sha, destination)
+        _atomic(destination / "route-source-parity.json", route, exclusive=True)
+        _atomic(destination / "v4-execution-tests.json", tests, exclusive=True)
+    return {"status": "V4_STATIC_EVIDENCE_CERTIFIED" if output_root is None else "V4_STATIC_EVIDENCE_STAGED_NOT_LIVE", "candidateSha": sha,
             "routeCount": 41, "typecheck": True, "testPasses": tests['testPasses'],"commandCount":len(results),
+            "authorizesTrading": False,
             "ordersSent": 0, "cancelsSent": 0, "positionChangesSent": 0}
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--sha", required=True)
+    parser.add_argument("--staging-output", type=Path)
     args = parser.parse_args()
     try:
-        print(json.dumps(certify(args.sha), sort_keys=True))
+        print(json.dumps(certify(args.sha, output_root=args.staging_output), sort_keys=True))
         return 0
     except Exception as exc:
         print(json.dumps({"status": "V4_STATIC_EVIDENCE_BLOCKED",
