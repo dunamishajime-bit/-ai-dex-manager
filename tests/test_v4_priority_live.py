@@ -137,7 +137,7 @@ class ProtectionRestoreTest(unittest.TestCase):
                 systemd.is_active.return_value=True;systemd.is_enabled.return_value=True
                 decisions=RuntimeError('AUDIT_FAILURE') if fail else [dict(tickCompletedAt=t) for t in [1,2,3]]
                 kwargs=dict(side_effect=decisions)
-                with patch.object(m,'V4LocalUnitSystemdAdapter',return_value=systemd),patch.object(m,'ROOT',root),\
+                with patch.object(m,'V4LocalUnitSystemdAdapter',return_value=systemd),patch.object(m,'ROOT',root),patch.object(m,'exclusive_json') as receipt,\
                     patch.object(m,'json_at',return_value=op.manifest),patch.object(m.subprocess,'run'),\
                     patch('disdex_unified_root_gate._atomic_json') as journal,\
                     patch('disdex_unified_root_gate._validate_venue_evidence',side_effect=lambda value,**kw:value),\
@@ -147,9 +147,11 @@ class ProtectionRestoreTest(unittest.TestCase):
                         with self.assertRaises(RuntimeError):op._activate_recovery()
                         systemd.stop.assert_called_once_with(unit);systemd.mask.assert_called_once_with(unit)
                         systemd.enable.assert_not_called();self.assertEqual(journal.call_args.args[1]['phase'],'RECOVERY_REQUIRED_PROTECTED')
+                        receipt.assert_not_called()
                     else:
                         r=op._activate_recovery();self.assertEqual([v['decisionCycle']['tickCompletedAt'] for v in r['auditCycles']],[1,2,3])
                         systemd.mask.assert_not_called();self.assertEqual(journal.call_args.args[1]['phase'],'COMMITTED')
+                        self.assertEqual(receipt.call_args.args[1]['status'],'V4_LIVE_CUTOVER_VERIFIED')
                     systemd.start.assert_called_once_with(unit)
     def test_scoped_mask_preserves_local_unit_and_restores_it_without_starting_anything(self):
         import tempfile,os
