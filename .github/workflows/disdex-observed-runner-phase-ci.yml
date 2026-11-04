@@ -8,6 +8,8 @@ on:
       - 'lib/disdex-q102-health-gate.mjs'
       - 'scripts/ops/root/disdex-runner-health-snapshot-current.mjs'
       - 'tests/observed-runner-phase.test.mjs'
+      - 'scripts/ops/root/disdex-runner-watchdog-current.mjs'
+      - 'tests/watchdog-peer-direct-loader.test.mjs'
       - '.github/workflows/disdex-observed-runner-phase-ci.yml'
   pull_request:
     paths:
@@ -32,4 +34,5 @@ jobs:
           node-version: 24
       - run: sudo "$(command -v node)" --test tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs tests/hp-runner-snapshot-consistency.test.ts tests/health-venue-observability.test.mjs
       - run: node scripts/ops/root/disdex-runner-health-snapshot-current.mjs --self-test
+      - run: node --test tests/watchdog-peer-direct-loader.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs
       - run: git diff --check

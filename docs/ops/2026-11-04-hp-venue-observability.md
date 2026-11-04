@@ -41,3 +41,19 @@ read-only reader preview obtained real flat Gross and exact current caps from
 existing signed proof, without credentials in the preview environment. The
 authenticated browser UI still requires an actual signed-in owner session;
 Root data checks and anonymous HTTP are not counted as that verification.
+# Peer same-PID loader migration prerequisite
+
+Production audit confirmed all five legacy Node peers currently use a tsx CLI
+MainPID; V4 already uses direct Node --import and V52 uses Python. New peer tick
+source must not forge the CLI parent's PID. It requires a separately approved
+same-PID release-local loader change plus state/activation/writable-path checks.
+
+The watchdog previously accepted direct Node only for V4. Its actual matcher
+failed the new five-peer fixture. Add strict per-runner script allowlist with
+exact /usr/bin/node, own release loader, own full entrypoint and --daemon, no
+extra flags. HYPE accepts TREND entrypoint only, never legacy sidecar. Existing
+legacy command compatibility remains until real source+unit cutovers occur.
+Eighteen watchdog/gate/audit-mode tests pass. This source change does not switch
+any peer, grant permission or label legacy ticks verified. It needs CI and its
+own immutable monitor transaction before future peer loader migration.
+

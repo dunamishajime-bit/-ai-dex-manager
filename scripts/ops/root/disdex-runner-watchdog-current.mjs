@@ -567,9 +567,17 @@ function pathToken(token, root, relativePath) {
 function commandMatches(config, runner, command) {
     if (!command) return false;
     const tokens = command.split(/\s+/);
-    if (runner.key === 'V12_V4' && tokens.includes('--import')) {
+    if (tokens.includes('--import')) {
+        const directScripts={V12_V4:'scripts/v12-v4-production-runner.ts',
+            PENGU_V8:'scripts/disdex-pengu-dual-ls-v2-live-runner.ts',
+            QUALITY102_CAUSAL_V1:'scripts/disdex-quality102-causal-v1-live-runner.ts',
+            FET_BRK48_RESIDUAL:'scripts/disdex-fet-brk48-live-runner.ts',
+            HYPE_TREND_LONG:'scripts/disdex-hype-trend-live-runner.ts',
+            IDLE_PRIORITY_SHORT:'scripts/disdex-idle-priority-short-live-runner.ts'};
+        const script=directScripts[runner.key];
+        if(!script||runner.script!==script)return false;
         const expected=['/usr/bin/node','--import',join(runner.expectedCwd,'node_modules/tsx/dist/loader.mjs'),
-            join(runner.expectedCwd,'scripts/v12-v4-production-runner.ts'),'--daemon'];
+            join(runner.expectedCwd,script),'--daemon'];
         return tokens.length===expected.length && tokens.every((token,index)=>token===expected[index]);
     }
     const scripts = runner.script ? [runner.script] : runner.scripts;
