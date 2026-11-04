@@ -11,6 +11,7 @@ import { resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
+import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry";
 
 function numberEnv(name: string, fallback: number) {
   const parsed = Number(process.env[name]);
@@ -88,7 +89,7 @@ async function main() {
   process.on("SIGTERM", stop);
   do {
     const result = await runner.tick();
-    console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "hype-zec-runner-tick", mode: runtime.mode, ...result, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
+    console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "hype-zec-runner-tick", mode: runtime.mode, ...result, ...runnerMutationTelemetry(result) }));
     if (!daemon || stopping || result.status === "manual-review") break;
     const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs));
     const lockRetryMs = numberEnv("DISDEX_HYPE_ZEC_LOCK_RETRY_MS", 5_000);
@@ -97,6 +98,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(JSON.stringify({ level: "fatal", event: "hype-zec-runner", message: error instanceof Error ? error.message : String(error), ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
+  console.error(JSON.stringify({ level: "fatal", event: "hype-zec-runner", message: error instanceof Error ? error.message : String(error), ...runnerMutationTelemetry() }));
   process.exitCode = 1;
 });

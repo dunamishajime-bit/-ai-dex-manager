@@ -7,6 +7,9 @@ on:
       - 'lib/hype-zec-long-runner-state.ts'
       - 'lib/idle-priority-short-state.ts'
       - 'lib/idle-residual-long-state.ts'
+      - 'lib/disdex-runner-mutation-telemetry.ts'
+      - 'scripts/disdex-hype-zec-long-live-runner.ts'
+      - 'tests/hype-runner-mutation-telemetry.test.ts'
       - 'tests/current-runtime-atomic-publications.test.ts'
       - '.github/workflows/current-runtime-atomic-publication-ci.yml'
   workflow_dispatch:
@@ -21,4 +24,5 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci --ignore-scripts
+      - run: npx tsx --test tests/hype-runner-mutation-telemetry.test.ts
       - run: npx tsx --test tests/current-runtime-atomic-publications.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/idle-priority-short-state.test.ts tests/idle-residual-long-state-migrate.test.ts tests/hype-zec-long-state.test.ts tests/hype-zec-stale-state-lifecycle.test.ts
