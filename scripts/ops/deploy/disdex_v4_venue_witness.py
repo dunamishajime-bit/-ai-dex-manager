@@ -399,7 +399,9 @@ def validate_bounded_snapshot(value: dict, sha: str, now_ms: int) -> dict:
 
 
 def read_bounded_snapshot(sha: str, release: Path) -> dict:
-    result=subprocess.run(bounded_evidence_command(sha,release),cwd=release,
+    import pwd
+    from disdex_v4_canonical_prestart import run_certificate_process
+    result=run_certificate_process(bounded_evidence_command(sha,release),deploy_gid=pwd.getpwnam('deploy').pw_gid,cwd=release,
         capture_output=True,text=True,check=False,timeout=60)
     if result.returncode or len(result.stdout)>2*1048576:
         raise ValueError("V4_BOUNDED_CERTIFICATE_EVIDENCE_PREFLIGHT_FAILED")

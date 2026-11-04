@@ -288,8 +288,9 @@ class ProductionOperations:
         exclusive_json(self.transaction/'grant.json',child_grant)
         env=self.sdk.child_environment(CANDIDATE_SHA,self.deploy.pw_dir,credentials=self.credentials)
         program=Path(__file__).with_name('disdex_v4_priority_bootstrap.mjs')
-        result=subprocess.run(['/usr/bin/node','--import',str(self.release/'node_modules/tsx/dist/loader.mjs'),str(program),'--grant',str(self.transaction/'grant.json')],
-            cwd=self.release,env=env,capture_output=True,text=True,timeout=180)
+        from disdex_v4_canonical_prestart import run_certificate_process
+        result=run_certificate_process(['/usr/bin/node','--import',str(self.release/'node_modules/tsx/dist/loader.mjs'),str(program),'--grant',str(self.transaction/'grant.json')],
+            deploy_gid=self.deploy.pw_gid,cwd=self.release,env=env,capture_output=True,text=True,timeout=180)
         if result.returncode:
             reason='REDACTED'
             try:

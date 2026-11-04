@@ -8,6 +8,12 @@ import hmac
 POLICY='V12_V4_V2_M150_D05_CORE_NATIVE'
 TARGET='DD1296_FINAL_ALLIN_10BPS'
 
+def run_certificate_process(command,*,deploy_gid,**kwargs):
+    # The immutable certificate reader binds gid to its primary process group.
+    # Keep root uid for root-only grants; use the certificate's existing group.
+    if type(deploy_gid) is not int or deploy_gid<=0:raise ValueError('V4_CANONICAL_DEPLOY_GROUP_REQUIRED')
+    return subprocess.run(command,group=deploy_gid,**kwargs)
+
 def credential_binding_valid(expected,actual):
     for key in ['ASTER_API_PRIVATE_KEY','ASTER_USER_ADDRESS','ASTER_FUTURES_BASE_URL']:
         default='https://fapi.asterdex.com' if key=='ASTER_FUTURES_BASE_URL' else ''
@@ -52,13 +58,13 @@ await readV4ProductionCertificate(process.argv[1]);
 await assertV4EntrySafety({env:{DISDEX_SHARED_KILL_SWITCH_FILE:'/var/lib/disdex/shared/kill-switch.json'}});
 console.log('V4_CANONICAL_CERTIFICATE_AND_SAFETY_READY');
 """
-    r=subprocess.run(['/usr/bin/node','--import',str(release/'node_modules/tsx/dist/loader.mjs'),
-        '--input-type=module','--eval',script,sha],cwd=release,capture_output=True,text=True,timeout=30)
+    import pwd
+    deploy=pwd.getpwnam('deploy')
+    r=run_certificate_process(['/usr/bin/node','--import',str(release/'node_modules/tsx/dist/loader.mjs'),
+        '--input-type=module','--eval',script,sha],deploy_gid=deploy.pw_gid,cwd=release,capture_output=True,text=True,timeout=30)
     if r.returncode or r.stdout.strip()!='V4_CANONICAL_CERTIFICATE_AND_SAFETY_READY':
         raise ValueError('V4_CANONICAL_CERTIFICATE_OR_SAFETY_BLOCKED')
     # Check TIME37 with the actual deploy group permission semantics separately.
-    import pwd
-    deploy=pwd.getpwnam('deploy')
     r=subprocess.run(['/usr/bin/node','--import',str(release/'node_modules/tsx/dist/loader.mjs'),
         '--input-type=module','--eval',"import {readV4TimeStopApproval} from './lib/v12-v4-time-stop-approval.ts';await readV4TimeStopApproval(process.argv[1]);",sha],
         cwd=release,user=deploy.pw_uid,group=deploy.pw_gid,extra_groups=[],capture_output=True,text=True,timeout=30)

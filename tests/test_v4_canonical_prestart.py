@@ -2,8 +2,16 @@ import sys,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
 from disdex_v4_canonical_prestart import validate_activation,credential_binding_valid
+import disdex_v4_canonical_prestart as m
 
 class CanonicalV4GateTest(unittest.TestCase):
+    def test_root_certificate_reader_uses_deploy_primary_group_without_changing_uid(self):
+        from unittest.mock import patch
+        with patch.object(m.subprocess,'run') as run:
+            m.run_certificate_process(['node','fixture'],deploy_gid=1000,capture_output=True)
+        self.assertEqual(run.call_args.kwargs['group'],1000)
+        self.assertNotIn('user',run.call_args.kwargs)
+        with self.assertRaises(ValueError):m.run_certificate_process(['node'],deploy_gid=0)
     def test_live_credentials_must_be_the_same_account_as_the_signed_witness(self):
         env=dict(ASTER_API_PRIVATE_KEY='fixture-only-key',ASTER_USER_ADDRESS='fixture-owner',ASTER_FUTURES_BASE_URL='https://fapi.asterdex.com')
         self.assertTrue(credential_binding_valid(env,env))

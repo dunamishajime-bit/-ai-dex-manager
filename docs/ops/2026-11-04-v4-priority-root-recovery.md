@@ -72,3 +72,12 @@ canonical Margin Guard path, uid/gid and 0660 mode only; root certificates, Kill
 other groups and world-writable files remain rejected. Linux bootstrap suite:
 5 passed. A subsequent attempt must use a new exact plan and nonce; the genuine
 migration receipt and still-valid refresh lease are reused without re-dating.
+
+Second preparation issued a genuine bounded certificate and dynamic generation,
+then correctly stopped before activation: the immutable certificate reader
+requires its primary gid to match the certificate's root:deploy 0640 group.
+Root gid 0 rejected that group even with supplementary deploy access. Keep all
+certificate permissions intact and run root preparation, canonical certificate
+prestart and bounded witness reads with deploy as primary gid (uid stays root).
+The regression failed before this fix and passes afterward. Linux suite now
+156 tests. Reuse the genuine certificate without changing its approval date.
