@@ -381,3 +381,33 @@ the Root audit base. Orphan bytes SHA256
 c9aeae65ca4191e62253a0e6c8296969aee602f178024544458732c343b5b3a7
 were unchanged through all reads. This is a recovery prerequisite, not three
 healthy V4 decision cycles. Orphan archival and new V4 cutover are still pending.
+
+Later checkpoint: orphan archival was completed by the formal reviewed helper
+after three new sequential signed reads and fresh risk/margin/pending checks.
+Receipt directory orphan-lock-root-recovery-75f6083587fd49a4aa3660b2944b670f;
+archived original hash exactly c9aeae65ca4191e62253a0e6c8296969aee602f178024544458732c343b5b3a7.
+Pins, old V4 activation, certificate and Kill hashes remained unchanged. No
+order/cancel/position mutation. An earlier parallel batch failed closed at GET2
+and did not archive anything. The existing valid 2a refresh-only service then
+succeeded, and the actual 2a runner returned HEALTHY/NO_FRESH_NON_DUPLICATE_CANDIDATE.
+
+Candidate build2 was unused and lacked the operator-gate mjs and mutual-exclusion
+shell preflight. Preserved it in rejected-unused-v4-builds/...-build2-ccaf4f343c40413d98ea69813779e7df,
+then staged build3:108 exact Git blobs, archive
+4661a6d2596ccd0fef99e3e8ad5c562c6f552416f6409f6d37d3ad7439e11391.
+New private static evidence cc5743cad4df4657a835a0a5c9d004d4/c168...:
+37 tests,41 routes,typecheck,operator-gate import and shell syntax all pass.
+
+Control modules a4ff359f installed with exact hash CAS and private backup
+v4-control-before-a4ff-1793832102420534805. All five CI families b5907ca3 passed,
+including the newly wired orphan recovery tests. V4 remains 2a, not c168.
+New-source attempt consumed its genuine Root nonce but stopped BEFORE stopping
+old V4: daemon-reload changed systemd's transient ExecStart telemetry. The old
+fingerprint also collapsed repeated ExecStartPre lines, losing earlier guards.
+New strict fingerprint retains every configured command/ignore-errors flag and
+strips only the exact runtime timestamp/PID/exit suffix. Real PID/state/restarts/
+cwd remain independently frozen. Malformed formats fail closed. Idempotent unit
+staging avoids unnecessary daemon-reload. Both defects reproduced RED then GREEN.
+Linux execution-fingerprint-tests.log:97/97,no skips; real all-nine systemd
+configuration parsing passes. Latest source CI and scoped two-module install
+remain pending. Existing old LIVE, terminal state and inactive Kill are intact.

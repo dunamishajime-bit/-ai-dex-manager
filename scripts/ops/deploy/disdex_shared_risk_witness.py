@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 import os
+import re
 from pathlib import Path
 import stat
 import subprocess
@@ -35,6 +36,26 @@ def require(test, code):
 
 def numeric(value):
     return type(value) in (int,float) and math.isfinite(value)
+
+
+def systemd_execution_digest(output):
+    """Bind all configured commands, not systemd's reload/exit telemetry.
+
+    ExecStartPre can occur on multiple property lines. Do not collapse these
+    into a dict and lose earlier protection gates. PID/state/restarts/cwd are
+    independently frozen in read_context; only this exact runtime suffix is
+    excluded from the configuration fingerprint.
+    """
+    commands={'ExecStart':[],'ExecStartPre':[]}
+    for line in output.splitlines():
+        key,separator,value=line.partition('=')
+        if key not in commands or not separator or not value:continue
+        static=re.sub(r' ; start_time=\[[^\]\n]*\] ; stop_time=\[[^\]\n]*\] ; pid=[0-9]+ ; code=[^;{}\n]+ ; status=[^;{}\n]+(?= \})','',value)
+        require(re.fullmatch(r'\{ path=[^\n]+ ; argv\[\]=[^\n]* ; ignore_errors=(?:yes|no) \}',static) is not None,
+            'SHARED_RISK_SYSTEMD_EXECUTION_FORMAT')
+        commands[key].append(static)
+    require(bool(commands['ExecStart']),'SHARED_RISK_SYSTEMD_EXECUTION_MISSING')
+    return hashlib.sha256(json.dumps(commands,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
 
 def fresh(row,key,now,age):
@@ -227,7 +248,7 @@ class ProductionSharedRiskReader:
             peers[key]=dict(sha=sha,markerSha=sha,unit=unit,pid=pid,activeState=state,cwd=cwd,
                 nRestarts=int(properties['NRestarts']),releaseMetadata=[s.st_uid,s.st_gid,stat.S_IMODE(s.st_mode)],
                 markerMetadata=[ms.st_uid,ms.st_gid,stat.S_IMODE(ms.st_mode)],
-                systemdExecutionDigest=hashlib.sha256((properties.get('ExecStart','')+'\n'+properties.get('ExecStartPre','')).encode()).hexdigest())
+                systemdExecutionDigest=systemd_execution_digest(proc.stdout))
         writer=peers.pop('SHARED_CRYPTO_RISK')
         active=subprocess.run(['systemctl','list-units','--no-legend','--plain','--no-pager',
             '--type=service','--state=active,activating,deactivating','disdex-shared-crypto-risk@*.service'],

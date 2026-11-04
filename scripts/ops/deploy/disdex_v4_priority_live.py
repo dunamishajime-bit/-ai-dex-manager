@@ -427,6 +427,7 @@ class ProductionOperations:
         refresh_unit=Path('/etc/systemd/system')/f'disdex-v4-dynamic-evidence-refresh@{sha}.service'
         legacy_refresh=targets[refresh_unit]
         targets[refresh_unit]=render_refresh_service(legacy_refresh,sha)
+        changed=False
         for path,raw in targets.items():
             if path.exists():
                 actual=bytes_at(path)
@@ -437,13 +438,14 @@ class ProductionOperations:
                     temp=path.with_name('.v4-refresh-'+self.authorization['nonce'])
                     fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o644)
                     with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
-                    require(bytes_at(path)==actual,'REFRESH_UNIT_CAS');os.replace(temp,path)
+                    require(bytes_at(path)==actual,'REFRESH_UNIT_CAS');os.replace(temp,path);changed=True
                 else:require(actual==raw,'EXISTING_SCOPED_CONFIG_DIFFERS')
             else:
                 fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600 if path.suffix=='.env' else 0o644)
                 with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
+                changed=True
         out=Path('/var/lib/disdex/unified-deploy/v4-evidence');out.mkdir(mode=0o750,exist_ok=True)
-        subprocess.run(['/usr/bin/systemctl','daemon-reload'],check=True,capture_output=True)
+        if changed:subprocess.run(['/usr/bin/systemctl','daemon-reload'],check=True,capture_output=True)
 
     def _freeze_upgrade(self):
         """Stop only the authorized old process before inspecting/migrating state."""

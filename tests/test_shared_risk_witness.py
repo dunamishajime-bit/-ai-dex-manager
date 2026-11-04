@@ -22,6 +22,19 @@ def health():
         kill=dict(active=True,action='HOLD_PROTECTED'))
 
 class WitnessTest(unittest.TestCase):
+    def test_execution_fingerprint_binds_every_command_but_not_runtime_telemetry(self):
+        first='ExecStart={ path=/usr/bin/node ; argv[]=/usr/bin/node /release/runner.ts ; ignore_errors=no ; start_time=[Thu 2026-11-05] ; stop_time=[n/a] ; pid=123 ; code=(null) ; status=0/0 }\n'
+        guard='ExecStartPre={ path=/usr/bin/grep ; argv[]=/usr/bin/grep -Fxq SHA marker ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }\n'
+        last='ExecStartPre={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /root/canonical-prestart.py ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }\n'
+        baseline=first+guard+last
+        after=baseline.replace('Thu 2026-11-05','n/a').replace('pid=123','pid=0').replace('code=(null)','code=exited')
+        self.assertEqual(m.systemd_execution_digest(baseline),m.systemd_execution_digest(after))
+        for changed in [baseline.replace('-Fxq SHA','-Fxq OTHER'),baseline.replace('ignore_errors=no','ignore_errors=yes',1),
+                        baseline.replace('/release/runner.ts','/other/runner.ts'),first+last]:
+            self.assertNotEqual(m.systemd_execution_digest(baseline),m.systemd_execution_digest(changed))
+        for malformed in ['', 'ExecStart=unparsed command', first.replace(' ; status=0/0',' ; unknown_field=0')]:
+            with self.assertRaises(ValueError):m.systemd_execution_digest(malformed)
+
     def test_historical_latch_is_validated_for_writer_bootstrap_without_claiming_freshness(self):
         row=health()['risk'];row.update(updatedAt=NOW-86400000,utcDay='2026-11-02',stateHash='a'*64,tripped=True)
         m.validate_inherited_risk(row,now_ms=NOW)

@@ -191,6 +191,26 @@ class FakeOperations:
     def protect_on_failure(self):self.stage('protect')
 
 class PrioritySequenceTest(unittest.TestCase):
+    def test_already_staged_unit_does_not_reload_or_change_peer_execution_fingerprints(self):
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);release=root/'release'/SHA
+            for sub in ['deploy/systemd','ops/systemd']:(release/sub).mkdir(parents=True,exist_ok=True)
+            (release/'deploy/systemd/disdex-v12-v4@.service').write_text('[Service]\nEnvironmentFile=/etc/disdex/current-runtime/%i.env\nExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs\nExecStart=/usr/bin/node /runner\n')
+            refresh='ExecStart=/usr/bin/flock -n /run/disdex-v4-evidence-refresh/refresh.lock /usr/bin/node /home/deploy/disdex-trading/releases/%i/node_modules/tsx/dist/cli.mjs /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts --sha %i --apply --lease /var/lib/disdex/unified-deploy/refresh-leases/v4/%i.json\n'
+            (release/'ops/systemd/disdex-v4-dynamic-evidence-refresh@.service').write_text(refresh)
+            (release/'ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer').write_text('[Timer]\nOnUnitActiveSec=10min\n')
+            for sub in ['etc/disdex/current-runtime','etc/systemd/system','var/lib/disdex/unified-deploy']:(root/sub).mkdir(parents=True,exist_ok=True)
+            op=m.ProductionOperations(candidate_sha=SHA,static_root=Path('/tmp')/SHA)
+            op.release=release;op.plan={'context':{}};op._context=lambda:{};op.authorization={'nonce':'a'*32}
+            def path(value):
+                text=str(value)
+                return root/text.lstrip('/') if text.startswith(('/etc/','/var/')) else Path(value)
+            with patch.object(m.os,'O_NOFOLLOW',getattr(m.os,'O_NOFOLLOW',0),create=True),patch.object(m,'Path',side_effect=path),patch.object(m,'bytes_at',side_effect=lambda p:p.read_bytes()),patch.object(m.subprocess,'run') as run:
+                op._stage_unit();self.assertEqual(run.call_count,1)
+                op._stage_unit();self.assertEqual(run.call_count,1)
+
     def test_authority_precedes_any_preparation_and_full_executor_owns_audit(self):
         op=FakeOperations();r=m.execute_priority(op)
         self.assertEqual(r['status'],'V4_LIVE_CUTOVER_VERIFIED')
