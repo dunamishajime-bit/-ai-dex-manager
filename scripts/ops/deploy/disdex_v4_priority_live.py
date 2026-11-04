@@ -35,6 +35,13 @@ ECONOMIC_FILES=('lib/v12-v4-production-lifecycle.ts','lib/v12-v4-v2-shadow.ts',
 
 def digest(raw):return hashlib.sha256(raw).hexdigest()
 def economic_source_equal(a,b):return a.replace(b'\r\n',b'\n')==b.replace(b'\r\n',b'\n')
+
+def render_refresh_service(raw,sha):
+    prefix='ExecStart=/usr/bin/flock -n /run/disdex-v4-evidence-refresh/refresh.lock '
+    release='/home/deploy/disdex-trading/releases/'+sha
+    old=prefix+'/usr/bin/node '+release+'/node_modules/tsx/dist/cli.mjs '+release+'/scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts --sha '+sha+' --apply --lease /var/lib/disdex/unified-deploy/refresh-leases/v4/'+sha+'.json'
+    require(raw.count(old.encode())==1,'EXACT_REFRESH_COMMAND_REQUIRED')
+    return raw.replace(old.encode(),(prefix+'/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_v4_refresh_exec.py --sha '+sha).encode())
 def canonical(value):return json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()
 def bytes_at(path):
     from disdex_shared_risk_witness import file_bytes
@@ -210,6 +217,7 @@ class ProductionOperations:
             timeApprovalTargetHash=optional(Path('/etc/disdex/v12-v4-time-stop-approvals')/(CANDIDATE_SHA+'.json')),
             bootstrapProgramSha256=digest(bytes_at(Path(__file__).with_suffix('.mjs').with_name('disdex_v4_priority_bootstrap.mjs'))),
             canonicalPrestartSha256=digest(bytes_at(Path(__file__).with_name('disdex_v4_canonical_prestart.py'))),
+            refreshSerializationSha256=digest(bytes_at(Path(__file__).with_name('disdex_v4_refresh_exec.py'))),
             executorProgramSha256=digest(bytes_at(__file__)))
         self.plan_hash=digest(canonical(self.plan));return dict(planSha256=self.plan_hash,plan=self.plan)
 
@@ -248,8 +256,21 @@ class ProductionOperations:
         lines.insert(lines.index(next(line for line in lines if line.startswith('ExecStart='))),
             'ExecStartPre=+/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_v4_canonical_prestart.py --sha '+sha)
         targets[unit]=('\n'.join(lines)+'\n').encode()
+        refresh_unit=Path('/etc/systemd/system')/f'disdex-v4-dynamic-evidence-refresh@{sha}.service'
+        legacy_refresh=targets[refresh_unit]
+        targets[refresh_unit]=render_refresh_service(legacy_refresh,sha)
         for path,raw in targets.items():
-            if path.exists():require(bytes_at(path)==raw,'EXISTING_SCOPED_CONFIG_DIFFERS')
+            if path.exists():
+                actual=bytes_at(path)
+                if path==refresh_unit and actual==legacy_refresh:
+                    # Only this immutable candidate's exact prior refresh unit
+                    # can receive the lossless serialization adapter.
+                    exclusive_json(self.transaction/'refresh-unit-replacement.json',dict(path=str(path),beforeSha256=digest(actual),afterSha256=digest(raw)))
+                    temp=path.with_name('.v4-refresh-'+self.authorization['nonce'])
+                    fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o644)
+                    with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
+                    require(bytes_at(path)==actual,'REFRESH_UNIT_CAS');os.replace(temp,path)
+                else:require(actual==raw,'EXISTING_SCOPED_CONFIG_DIFFERS')
             else:
                 fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600 if path.suffix=='.env' else 0o644)
                 with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())

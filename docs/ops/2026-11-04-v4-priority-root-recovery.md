@@ -81,3 +81,19 @@ certificate permissions intact and run root preparation, canonical certificate
 prestart and bounded witness reads with deploy as primary gid (uid stays root).
 The regression failed before this fix and passes afterward. Linux suite now
 156 tests. Reuse the genuine certificate without changing its approval date.
+
+Actual refresh next rejected a 282081-byte three-payload commit at its legacy
+256 KiB input boundary (644 zero-position symbol rows). The runtime reader
+already permits a 1 MiB bundle. Add a root serialization adapter before the
+unchanged immutable refresh CLI: losslessly compact the same JSON to 163400
+bytes, retaining all rows, values, embedded digests, timestamps and approvals.
+It preserves root ownership/mode, rejects symlinks/CAS conflicts and oversized
+compact output, and keeps the same flock, unit sandbox, shared API budget and
+official CLI lease/risk validation. It never manufactures new evidence.
+Linux suite: 160 passed, including actual-root atomic serialization; actual
+Production bundle compacted in memory was structurally identical (no write).
+
+The expired PENGU peer-stop artifact was formally retired by authenticated root
+SSH after verifying expiry, active PENGU PID and unchanged valid live approval.
+Its original bytes/dates remain archived under
+`retired-expired-peer-stop-1793762256`; no approval was renewed or broadened.

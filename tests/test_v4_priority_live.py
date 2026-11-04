@@ -24,6 +24,13 @@ def facts():
         durableHash='d'*64,killHash='e'*64)
 
 class PriorityFactsTest(unittest.TestCase):
+    def test_refresh_adapter_keeps_the_same_flock_and_exact_candidate(self):
+        sha='a'*40
+        old='ExecStart=/usr/bin/flock -n /run/disdex-v4-evidence-refresh/refresh.lock /usr/bin/node /home/deploy/disdex-trading/releases/'+sha+'/node_modules/tsx/dist/cli.mjs /home/deploy/disdex-trading/releases/'+sha+'/scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts --sha '+sha+' --apply --lease /var/lib/disdex/unified-deploy/refresh-leases/v4/'+sha+'.json\n'
+        updated=m.render_refresh_service(old.encode(),sha).decode()
+        self.assertIn('/usr/bin/flock -n /run/disdex-v4-evidence-refresh/refresh.lock',updated)
+        self.assertIn('disdex_v4_refresh_exec.py --sha '+sha,updated)
+        with self.assertRaises(ValueError):m.render_refresh_service(old.encode(),'b'*40)
     def test_economic_source_allows_only_line_endings_not_changed_logic(self):
         self.assertTrue(m.economic_source_equal(b'const stop=0.08;\n',b'const stop=0.08;\r\n'))
         self.assertFalse(m.economic_source_equal(b'const stop=0.08;\n',b'const stop=0.09;\r\n'))
