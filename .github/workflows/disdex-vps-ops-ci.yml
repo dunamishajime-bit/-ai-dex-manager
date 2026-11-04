@@ -124,7 +124,10 @@ jobs:
 
       - name: Validate canonical V4 monitor gate and audit-only watchdog
         run: |
-          node --test tests/v4-canonical-monitor-activation.test.mjs tests/health-shared-risk-policy.test.mjs tests/watchdog-audit-only.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs tests/observed-runner-phase.test.mjs tests/runner-health-tick-contract.test.mjs
+          node --test tests/v4-canonical-monitor-activation.test.mjs tests/health-shared-risk-policy.test.mjs tests/watchdog-audit-only.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs tests/runner-health-tick-contract.test.mjs
+          # This filesystem fixture must create a genuinely root-owned pin.
+          # Keep production uid=0 validation; match the dedicated phase CI.
+          sudo "$(command -v node)" --test tests/observed-runner-phase.test.mjs
           python3 -m unittest discover -s tests -p test_runtime_health_snapshot_current.py
 
       - name: Validate no automatic LIVE mutation workflow
