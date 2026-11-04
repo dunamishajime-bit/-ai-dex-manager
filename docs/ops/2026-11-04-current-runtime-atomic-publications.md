@@ -27,11 +27,15 @@ initial incomplete fixture runs failed for absent modules and were corrected,
 not hidden or counted as successful tests. Green log:
 `/var/lib/disdex/ops-audit/resume-7b5058a9-82ec7885/v4-common-concurrency-green/broad-green.log`.
 
-The frozen preview lineage check now permits exactly two explicit publication
-changes in the shared-budget file. Every other byte, including all proxy and
-budget enforcement code, must still equal the reviewed preview. All three
-lineage tests pass. CI adds the current-runtime regressions to the full existing
-V4 candidate suite.
+The frozen preview lineage check permits only explicit publication and
+absent-lock handoff deltas in the shared-budget file. All proxy routing,
+priorities, cooldown arithmetic and other reviewed bytes remain exact. A
+deterministic regression reproduced stale eviction being attempted after the
+old lock was released. Absence now means retry acquisition, not eviction of a
+possibly replaced generation. The stronger fixed-time eighty-permit test also
+checks the final serialized queue frontier. Related VPS tests now pass 120/120,
+and all three exact lineage tests pass. CI includes these regressions in the
+full existing V4 candidate suite.
 
 ## Production boundary
 

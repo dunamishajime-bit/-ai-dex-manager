@@ -118,7 +118,9 @@ async function lockIsStale(lockPath: string, trustFreshGeneration = false): Prom
       const metadata = await stat(lockPath);
       if (Date.now() - metadata.mtimeMs <= LOCK_RECOVERY_GRACE_MS) return false;
     } catch (error) {
-      return errorCode(error) === "ENOENT";
+      // An absent generation was released; retry mkdir. Treating absence as
+      // stale can rename a different live generation created before eviction.
+      return false;
     }
   }
 
@@ -135,7 +137,7 @@ async function lockIsStale(lockPath: string, trustFreshGeneration = false): Prom
     const metadata = await stat(lockPath);
     return Date.now() - metadata.mtimeMs > LOCK_RECOVERY_GRACE_MS;
   } catch (error) {
-    return errorCode(error) === "ENOENT";
+    return false;
   }
 }
 

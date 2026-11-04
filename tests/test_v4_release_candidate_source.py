@@ -28,6 +28,12 @@ class CandidateSourceTest(unittest.TestCase):
                     ]:
                         self.assertEqual(expected.count(old),1)
                         expected=expected.replace(old,new)
+                    absent=b'return errorCode(error) === "ENOENT";'
+                    self.assertEqual(expected.count(absent),2)
+                    expected=expected.replace(absent,b'return false;',1)
+                    expected=expected.replace(absent,b'return false;',1)
+                    expected=expected.replace(b'    } catch (error) {\n      return false;\n',
+                        b'    } catch (error) {\n      // An absent generation was released; retry mkdir. Treating absence as\n      // stale can rename a different live generation created before eviction.\n      return false;\n',1)
                 actual = Path(row["target"]).read_bytes().replace(b"\r\n", b"\n")
                 self.assertEqual(actual, expected)
 
