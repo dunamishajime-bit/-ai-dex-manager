@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { IDLE_RESIDUAL_LONG_POLICY, type IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
@@ -179,9 +180,9 @@ export async function writeIdleResidualLongState(path: string, state: IdleResidu
   await safe(path);
   const normalized = normalizeIdleResidualLongState({ ...state, updatedAt: Date.now() }, state.runtimeSha);
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-  const tmp = `${path}.${process.pid}.${Date.now()}.tmp`;
+  const tmp = `${path}.${randomUUID()}.tmp`;
   try {
-    await writeFile(tmp, JSON.stringify(normalized, null, 2) + "\n", { mode: 0o600 });
+    await writeFile(tmp, JSON.stringify(normalized, null, 2) + "\n", { mode: 0o600, flag: "wx" });
     await rename(tmp, path);
     await chmod(path, 0o600);
   } catch (error) {

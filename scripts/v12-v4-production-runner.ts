@@ -125,8 +125,9 @@ export function classifyV4RecoverableSafetyFailure(error:unknown,eventTs=Date.no
  const stale=/^V4_EVIDENCE_STALE:(?:establishedAsterOrders|signedAsterAccount|sharedRiskAndPeers)$/.test(reason)
   ||reason==='V4_REFRESH_LEASE_EXPIRED'||reason==='V4_REFRESH_COMMIT_STALE';
  const peer=/^V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:/.test(reason);
- if(!stale&&!peer)return;
- return {status:"blocked",reason:`${peer?"V4_PEER_ATTESTATION_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED"}:${reason}`,
+ const ledger=reason==='FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED'||reason==='V4_SIGNED_ACCOUNT_READ_WINDOW_STALE';
+ if(!stale&&!peer&&!ledger)return;
+ return {status:"blocked",reason:`${ledger?"V4_SHARED_ACCOUNT_REFRESH_REQUIRED":peer?"V4_PEER_ATTESTATION_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED"}:${reason}`,
   eventTs,candidateCount:0,orderEnabled:false};
 }
 function v4HealthPath(){

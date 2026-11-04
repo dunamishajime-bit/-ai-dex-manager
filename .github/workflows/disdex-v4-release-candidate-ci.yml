@@ -26,7 +26,9 @@ jobs:
       - name: Test V4 tick contract
         run: npx tsx --test --test-name-pattern='tick filenames|a V4 writer|writes an atomic|replaces an existing|requires explicit|same-PID|80 concurrent|rejects invalid' tests/runner-tick-heartbeat.test.ts
       - name: Test existing V4 execution, health and STOP contracts
-        run: npx tsx --test tests/v12-v4-idle-baseline-snapshot.test.ts tests/v12-v4-rate-budget-resilience.test.ts tests/v12-v4-execution-foundation.test.ts tests/v12-v4-certified-gates.test.ts tests/v12-v4-production-lifecycle.test.ts
+        run: npx tsx --test tests/v12-v4-idle-baseline-snapshot.test.ts tests/v12-v4-rate-budget-resilience.test.ts tests/v12-v4-execution-foundation.test.ts tests/v12-v4-certified-gates.test.ts tests/v12-v4-production-lifecycle.test.ts tests/v12-v4-runner-engine.test.ts
+      - name: Current runtime same-process atomic publication and shared budget regression
+        run: npx tsx --test tests/current-runtime-atomic-publications.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/idle-priority-short-state.test.ts tests/idle-residual-long-state-migrate.test.ts tests/hype-zec-long-state.test.ts tests/hype-zec-stale-state-lifecycle.test.ts tests/v12-v4-shared-reservations.test.ts
       - name: Test systemd source wiring
         run: |
           node tests/v12-v4-monitor-systemd.test.mjs
