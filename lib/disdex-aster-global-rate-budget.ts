@@ -203,9 +203,9 @@ async function readBudget(path: string): Promise<Partial<BudgetState>> {
   }
 }
 async function atomicWriteBudget(path: string, state: BudgetState) {
-  const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+  const temporary = `${path}.${randomUUID()}.tmp`;
   try {
-    await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o660 });
+    await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o660, flag: "wx" });
     // Root-owned diagnostics/recovery helpers must never steal the shared
     // rate-budget file from deploy-owned trading daemons via atomic rename.
     // When running as root, inherit the parent directory ownership before the

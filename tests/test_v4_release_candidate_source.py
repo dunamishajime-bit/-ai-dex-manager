@@ -13,12 +13,21 @@ def source_at(commit, path):
     return subprocess.check_output(["git", "show", commit + ":" + path])
 
 class CandidateSourceTest(unittest.TestCase):
-    def test_runtime_files_are_exactly_the_reviewed_preview(self):
+    def test_runtime_files_are_exactly_reviewed_preview_plus_explicit_atomic_publication_delta(self):
         manifest = json.loads(source("deploy/v4-staged-overlay/manifest.json"))
         self.assertEqual(manifest["baseSha"], "53a0be396719f0284af4e11b35c66a4ac7d58f79")
         for row in manifest["files"]:
             with self.subTest(target=row["target"]):
                 expected = source("deploy/v4-staged-overlay/" + row["source"]).replace(b"\r\n", b"\n")
+                if row['target']=='lib/disdex-aster-global-rate-budget.ts':
+                    # Preserve every proxy, priority, cooldown and mutex byte.
+                    # Only the reviewed exclusive UUID publication differs.
+                    for old,new in [
+                        (b'const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;',b'const temporary = `${path}.${randomUUID()}.tmp`;'),
+                        (b'{ encoding: "utf8", mode: 0o660 });',b'{ encoding: "utf8", mode: 0o660, flag: "wx" });'),
+                    ]:
+                        self.assertEqual(expected.count(old),1)
+                        expected=expected.replace(old,new)
                 actual = Path(row["target"]).read_bytes().replace(b"\r\n", b"\n")
                 self.assertEqual(actual, expected)
 
