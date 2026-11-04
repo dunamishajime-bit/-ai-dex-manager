@@ -225,3 +225,48 @@ Reuse the existing reference from 3bdcf63c; engine/config are byte-identical to
 latest 2f6777c917a725891b57cd5ff5145c11b914664f now has all three CI families
 success. It remains a source-only safety candidate; Bitget research parity is
 not Aster-native LIVE economic proof. Q102/V52 candidate deltas remain pending.
+
+## Authoritative checkpoint: 2026-11-04 13:30 UTC
+
+Later entries supersede historical incomplete statuses above; original failure
+evidence remains intact. V4 stays PID 2501831 / NRestarts 0, immutable 2a6f27c6,
+LIVE / ALLOWED / NO_SIGNAL with genuine fresh tick-v1. Latest refresh systemd
+completion observed 2026-11-04 22:16:43 JST, Result=success. No lease date edit.
+
+Snapshot 6e31626cf70a3bb8efb2568aca0493200fe691eb is now Production verified.
+Receipt: `/var/lib/disdex/unified-deploy/receipts/monitor-snapshot-6e31626cf70a3bb8efb2568aca0493200fe691eb.json`.
+Actual snapshot cycles: 1793798013332, 1793798065046, 1793798157813. Plan:
+72b5d99bd633f963fccaa0afd8f5705e293aa8dd117511c3499aaa64c511dd90.
+All peer PIDs, nine pins, actual operator hashes, single Risk Writer, Kill and
+prior trading authority preserved; deployment orders/cancels/position changes 0.
+The unit's effective prestart now checks its own immutable 6e marker, not an old
+V4/scoped release. Control e8a59a2c source is deployed and five CI families pass.
+Watchdog remains the separately certified 3c965981 source; it is not relabeled
+as 6e merely because the snapshot changed. Its reviewed program is compatible.
+
+Latest independent snapshot: all seven Runners HEALTHY/LIVE/ALLOWED; V4/V52 real
+ticks verified. Five legacy peers remain explicitly tick-unverified, with actual
+state update times and no fabricated tick marker. Fresh official signed proof
+shows flat/no open orders, pending activeCount 0, Gross 0/0, exact caps 3/4/4.25
+and stock slot 2. Shared Risk fresh UTC, loss 0, max 7.5, not tripped; Kill false.
+This does not certify the first nonflat fill or authenticated browser display.
+
+Q102 candidate PR429 head 8ea0065f207b37f380f80d0b461074e1369e0249, actual ef1
+base: baseline five RED / one pass; patched 66 Linux tests, zero skips. All three
+GitHub CI families success. Source only, actual Q102 remains ef1/PID805183.
+V52 candidate PR430 head c4fc0041e6526a458ba7d7193a5863c217f7aade, actual 0416
+base: baseline five RED / one pass; patched 73 Node plus nine Python tests,
+zero skips. CI pending at this checkpoint; source only, actual V52 unchanged.
+Both candidates preserve exact economic engine/config and independent pins.
+
+One broad public-source directory archive/transfer was rejected by automatic
+review because private-file exclusion was unproven. It was not executed. The
+safe continuation individually inspected six source/test files (zero sensitive
+literal matches), transferred only those, and copied required public dependencies
+locally on VPS through an explicit allowlist. No env/key/private config transfer.
+
+Remaining internal work is NOT an operator-auth blocker: independently approved
+candidate release/certificate/state migration/cutover preparation, legacy tick
+writers plus monitor parity, remaining scope executors/rollback and complete
+decision-to-order/nonflat contracts. Authenticated HP owner session and Aster
+annual native source gaps remain distinct external evidence limitations.
