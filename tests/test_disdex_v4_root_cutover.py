@@ -118,6 +118,12 @@ class V4DecisionWaitTest(V4DecisionAuditTest):
     def test_actual_reader_accepts_completed_matching_cycle(self):
         self.assertEqual(self.wait(self.health,self.tick)["tickCompletedAt"],self.now-1000)
 
+    def test_same_release_recovery_waits_for_new_process_tick_not_the_retained_old_marker(self):
+        old_health=dict(self.health,mainPid=4241,lastTickAt=self.now-5000)
+        old_tick=dict(self.tick,mainPid=4241,tickStartedAt=self.now-6000,tickCompletedAt=self.now-5000)
+        rows=iter([old_health,old_tick,self.health,self.tick])
+        self.assertEqual(self.wait(self.health,self.tick,reads=rows)['tickCompletedAt'],self.now-1000)
+
     def test_repeated_old_sha_or_partial_publication_has_bounded_timeout(self):
         for health,tick in [(self.health,dict(self.tick,runtimeSha=OLD)),
                              (dict(self.health,lastTickAt=self.now-999),self.tick)]:

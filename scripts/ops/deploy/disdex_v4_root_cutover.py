@@ -119,6 +119,7 @@ def await_v4_decision_cycle(systemd, *, sha, release, pid, started_after_ms,
         # count. They may resolve within the bounded startup deadline.
         if (tick.get("runtimeSha") != sha or health.get("runtimeSha") != sha
                 or health.get("lastTickAt") != tick.get("tickCompletedAt")
+                or (type(tick.get('tickCompletedAt')) is int and tick['tickCompletedAt']<started_after_ms)
                 or (previous_tick is not None and tick.get("tickCompletedAt") == previous_tick)):
             sleeper(2)
             continue

@@ -11,6 +11,13 @@ SHA="a"*40
 OLD="7"*40
 
 class VenueWitnessContractTest(unittest.TestCase):
+    def test_v4_health_is_owned_by_the_actual_deploy_process_not_the_supervisor(self):
+        from types import SimpleNamespace
+        with patch.object(Path,'lstat',return_value=SimpleNamespace(st_uid=1000)),patch.object(Path,'stat',return_value=SimpleNamespace(st_uid=1000)),patch.object(m,'_secure_json',return_value={'fixture':True}) as read:
+            self.assertEqual(m.read_v4_health(4242),{'fixture':True})
+        self.assertEqual(read.call_args.kwargs,{'require_root':False})
+        with patch.object(Path,'lstat',return_value=SimpleNamespace(st_uid=999)),patch.object(Path,'stat',return_value=SimpleNamespace(st_uid=1000)):
+            with self.assertRaises(ValueError):m.read_v4_health(4242)
     def test_shared_runtime_metadata_is_not_an_operator_artifact(self):
         good=dict(uid=1000,gid=1000,mode=0o100600,parent_uid=1000,parent_gid=1000,parent_mode=0o40770)
         for path in [m.RISK,m.MARGIN,m.KILL,m.PENDING]:
@@ -190,7 +197,7 @@ class VenueWitnessContractTest(unittest.TestCase):
                     orderEnabled=False,ordersAllowed=False,
                     heartbeatAt=now-500,lastTickAt=now-1000)
             return self._fake_hb(path,now)
-        with patch.object(m,"_systemd",side_effect=systemd),patch.object(m,"_secure_json",side_effect=secure):
+        with patch.object(m,"_systemd",side_effect=systemd),patch.object(m,"_secure_json",side_effect=secure),patch.object(m,"read_v4_health",side_effect=lambda pid:secure(m.V4_HEARTBEAT)):
             m.validate_units_and_ticks(pins,"after",SHA,now)
 
     def test_before_requires_every_peer_active_and_fresh(self):

@@ -93,6 +93,11 @@ def _shared_runtime_json(path):
     if not isinstance(d,dict):raise ValueError('SHARED_RUNTIME_NOT_OBJECT')
     return d
 
+def read_v4_health(pid):
+    if V4_HEARTBEAT.lstat().st_uid not in (0,Path('/proc',str(pid)).stat().st_uid):
+        raise ValueError('V4_DIRECT_HEARTBEAT_OWNER_MISMATCH')
+    return _secure_json(V4_HEARTBEAT,require_root=False)
+
 
 def _digest(value) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
@@ -334,7 +339,7 @@ def validate_units_and_ticks(expected_pins: dict[str, str], phase: str,
     if phase == "after":
         unit = f"{PREFIXES['V12_V4']}@{candidate_sha}.service"
         pid = _systemd(unit, "MainPID")
-        hb = _secure_json(V4_HEARTBEAT)
+        hb = read_v4_health(int(pid))
         if (hb.get("schema") != "disdex-v12-v4-runner-heartbeat/v1"
                 or hb.get("releaseSha") != candidate_sha
                 or hb.get("runtimeSha") != candidate_sha

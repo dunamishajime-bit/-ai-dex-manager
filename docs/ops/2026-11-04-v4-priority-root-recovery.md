@@ -114,3 +114,22 @@ parent, mode 0600/0660, no world access, no symlinks, bounded no-follow reads.
 All four actual runtime files now pass their ownership contract while the still
 active HOLD correctly blocks readiness. The metadata regression failed before
 the fix; Linux suite 162 passes. No V4 process/order activation occurred yet.
+
+The first actual V4 switch started PID 2405187 and completed a healthy real
+NO_NATIVE_ENTRY_CANDIDATES tick. The post-tick witness then incorrectly required
+root ownership of V4's deploy-owned direct heartbeat. Full protected recovery
+correctly stopped/masked the candidate, retained candidate pins/journal, and
+restored the HOLD. This was not a successful LIVE certification.
+
+Fix the direct reader by binding file ownership to the actual process UID.
+Add explicit `--recover-protected` for the same candidate, with a distinct
+recovery plan (not a fabricated deployment difference): existing exact live
+authority/pins, protected failure journal, fresh signed flat inventory, terminal
+compatible durable history, original root-owned unit backup and one-use root
+nonce are all mandatory. Preserve existing approval dates and all history.
+After a fresh before witness, start only that candidate and require three real
+post-start decision ticks plus fresh signed witnesses; fail back to candidate
+mask/protected state on error. Retained same-SHA markers before the new start
+are waited past, never accepted or rewritten. Final peer/PID/approval/Writer
+checks must remain unchanged. Linux suite: 167 passed, including successful
+and failed recovery orchestration and same-SHA retained-marker regression.

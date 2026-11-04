@@ -16,6 +16,7 @@ import subprocess
 import shlex
 import re
 import importlib.util
+import math
 from types import SimpleNamespace
 
 FIXED_V52_SHA='041653b7b808fd46be2fef408c8e41a1c6d3a55b'
@@ -43,6 +44,28 @@ def render_refresh_service(raw,sha):
     require(raw.count(old.encode())==1,'EXACT_REFRESH_COMMAND_REQUIRED')
     return raw.replace(old.encode(),(prefix+'/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_v4_refresh_exec.py --sha '+sha).encode())
 def canonical(value):return json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()
+
+def same_release_recovery_hash(current,pins,current_symlink_sha,sha):
+    require(current.get('runners')==pins and pins.get('V12_V4')==sha
+        and current.get('sourceSha')==current_symlink_sha and current.get('scope')==SCOPE
+        and current.get('ordersEnabled') is True,'RECOVERY_EXACT_EXISTING_PLAN')
+    return digest(canonical(dict(operation='V4_SAME_RELEASE_PROTECTED_RECOVERY',candidateSha=sha,
+        runners=pins,currentPlanSha256=digest(canonical(current)))))
+
+def validate_recovery_document(d,sha):
+    require(d.get('schema')==2 and d.get('releaseSha')==sha,'RECOVERY_LEDGER_SHA')
+    state=d.get('state',{})
+    require(state.get('initial',{}).get('holdProtected') is False and not state.get('executionReview')
+        and state.get('foreign')==[],'RECOVERY_LEDGER_REVIEW_OR_FOREIGN')
+    require(isinstance(d.get('intents'),dict) and all(x.get('stage')=='TERMINAL' for x in d['intents'].values())
+        and isinstance(d.get('protections'),dict) and all(x.get('phase')=='CLOSED' for x in d['protections'].values()),'RECOVERY_UNRESOLVED_ORDER')
+    require(isinstance(state.get('legs'),dict),'RECOVERY_LEGS_MISSING')
+    for leg in state['legs'].values():
+        require(leg.get('status') in ('CLOSED','CANCELLED'),'RECOVERY_ACTIVE_LEG')
+        for key in ['qty','entryNotional','reservationUsd','exitRemainingQty']:
+            value=leg.get(key)
+            require(type(value) in (float,int) and math.isfinite(value) and 0<=value<=1e-8,'RECOVERY_ACTIVE_OR_INVALID_QUANTITY')
+    return True
 def bytes_at(path):
     from disdex_shared_risk_witness import file_bytes
     return file_bytes(Path(path))
@@ -129,8 +152,9 @@ console.log(JSON.stringify({status:'V4_PRIORITY_PEERS_READY',verifiedAt:Date.now
 '''
 
 class ProductionOperations:
-    def __init__(self,expected_hash=None):
+    def __init__(self,expected_hash=None,recovery=False):
         self.expected_hash=expected_hash;self.bootstrap=None
+        self.recovery=recovery
         self.release=RELEASES/CANDIDATE_SHA
 
     def _node(self,program,*,env=None,timeout=60):
@@ -174,8 +198,12 @@ class ProductionOperations:
         self.current=read_root_json(ROOT/'current-plan.json')
         self.desired=json.loads(json.dumps(self.current));self.desired.update(sourceSha=CANDIDATE_SHA,scope=SCOPE,ordersEnabled=True)
         self.desired['runners']['V12_V4']=CANDIDATE_SHA
-        self.deployment_hash,_=validate_bootstrap_plan(self.desired,self.current,self.pins,
-            Path('/home/deploy/disdex-trading/current').resolve(strict=True).name)
+        current_link=Path('/home/deploy/disdex-trading/current').resolve(strict=True).name
+        if self.recovery:
+            from disdex_deployment_plan import validate
+            validate(self.current)
+            self.deployment_hash=same_release_recovery_hash(self.current,self.pins,current_link,CANDIDATE_SHA)
+        else:self.deployment_hash,_=validate_bootstrap_plan(self.desired,self.current,self.pins,current_link)
         self.reader=ProductionSharedRiskReader();self.gates=self._peer_gate_rows();context=self._context()
         from disdex_shared_risk_monitor_wiring import SharedRiskMonitorWiring
         base=Path('/etc/disdex/current-runtime');common='7688ed7c93a1918d8b44837339b7da5584a868f5'
@@ -188,8 +216,33 @@ class ProductionOperations:
             (base/(common+'.health-snapshot.env'),values(old,'DISDEX_HEALTH_SNAPSHOT_V12_'),values(CANDIDATE_SHA,'DISDEX_HEALTH_SNAPSHOT_V12_')),
             (base/(common+'.watchdog.env'),values(old,'DISDEX_WATCHDOG_V12_',True),values(CANDIDATE_SHA,'DISDEX_WATCHDOG_V12_',True))])
         v4=context['peers']['V12_V4'];now=time.time_ns()//1000000
-        health=json_at('/var/lib/disdex/v12-v4/heartbeat.json');tick=json_at('/var/lib/disdex/runner-health/ticks/v12-v4.json')
-        validate_monitor_observation(health,tick,sha=self.pins['V12_V4'],pid=v4['pid'],now=now,previous_tick=None)
+        if self.recovery:
+            journal=read_root_json(ROOT/'transaction.json')
+            require(journal.get('phase')=='RECOVERY_REQUIRED_PROTECTED' and journal.get('newSha')==CANDIDATE_SHA
+                and journal.get('candidateOwnershipRetained') is True and self.pins['V12_V4']==CANDIDATE_SHA
+                and v4['pid']==0 and v4['activeState'] in ('inactive','failed'),'PROTECTED_RECOVERY_BASELINE')
+            from disdex_v4_canonical_prestart import validate_activation
+            self.runtime_approval_path=SHARED/'operator-activation/v12-v4-full.json'
+            approval=read_root_json(self.runtime_approval_path)
+            implementation=read_root_json(self.release/'docs/production/v12-v4-implementation-readiness.json',private=False)
+            validate_activation(approval,CANDIDATE_SHA,self.pins,implementation,int(time.time()))
+            self.recovery_journal_hash=digest(bytes_at(ROOT/'transaction.json'))
+            self.runtime_approval_hash=digest(bytes_at(self.runtime_approval_path))
+            unit=f'disdex-v12-v4@{CANDIDATE_SHA}.service'
+            self.recovery_unit_path=Path('/etc/systemd/system')/unit
+            require(self.recovery_unit_path.is_symlink() and str(self.recovery_unit_path.readlink())=='/dev/null','RECOVERY_CANDIDATE_NOT_MASKED')
+            backups=list((ROOT/'v4-priority/transactions').glob('*/'+unit+'.original'))
+            require(bool(backups),'RECOVERY_UNIT_BACKUP_MISSING')
+            self.recovery_unit_backup=max(backups,key=lambda p:p.stat().st_mtime_ns)
+            s=self.recovery_unit_backup.lstat()
+            require(s.st_uid==0 and not s.st_mode&0o077,'RECOVERY_UNIT_BACKUP_METADATA')
+            self.recovery_unit_bytes=bytes_at(self.recovery_unit_backup)
+            require(str(self.release).encode() in self.recovery_unit_bytes and b'disdex_v4_canonical_prestart.py' in self.recovery_unit_bytes
+                and b' --daemon' in self.recovery_unit_bytes and b'--monitor-only' not in self.recovery_unit_bytes,'RECOVERY_EXACT_FULL_UNIT')
+            require(subprocess.check_output(['/usr/bin/systemctl','show',journal['oldUnit'],'-p','MainPID','--value'],text=True).strip()=='0','RECOVERY_OLD_WRITER_ALIVE')
+        else:
+            health=json_at('/var/lib/disdex/v12-v4/heartbeat.json');tick=json_at('/var/lib/disdex/runner-health/ticks/v12-v4.json')
+            validate_monitor_observation(health,tick,sha=self.pins['V12_V4'],pid=v4['pid'],now=now,previous_tick=None)
         paths={}
         for line in bytes_at('/etc/disdex/disdex-v12-v4.env').decode().splitlines():
             if line.startswith('V12_V4_PEER_STATE_PATHS_JSON='):paths=json.loads(' '.join(shlex.split(line.split('=',1)[1])))
@@ -231,12 +284,17 @@ class ProductionOperations:
         document=json_at(STATE);state_hash=digest(bytes_at(STATE))
         self.reuse_migration=document.get('releaseSha')==CANDIDATE_SHA
         self.migration_receipt=ROOT/'v4-priority/migrations'/(CANDIDATE_SHA+'.json')
-        if self.reuse_migration:
+        if self.recovery:
+            validate_recovery_document(document,CANDIDATE_SHA)
+            probe=self._node("import {V4ExecutionStore} from './lib/v12-v4-execution-store.ts';new V4ExecutionStore('/var/lib/disdex/v12-v4/orders.json',process.env.DISDEX_RELEASE_SHA).read();console.log(JSON.stringify({status:'DURABLE_COMPATIBILITY_VERIFIED'}));")
+            require(probe.get('status')=='DURABLE_COMPATIBILITY_VERIFIED','RECOVERY_DURABLE_COMPATIBILITY')
+        elif self.reuse_migration:
             prior=read_root_json(self.migration_receipt)
             require(prior.get('afterStateSha256')==state_hash and prior.get('newSha')==CANDIDATE_SHA,'MIGRATION_RECEIPT_MISMATCH')
         else:require(document.get('releaseSha')==PRIOR_SHA,'OLD_LEDGER_SHA')
         require(not any(x.get('status')!='RELEASED' for x in pending['entries']),'ACTIVE_PENDING')
-        self.facts=dict(candidateSha=CANDIDATE_SHA,oldStateSha=PRIOR_SHA,monitorOnly=True,
+        self.facts=dict(candidateSha=CANDIDATE_SHA,oldStateSha=PRIOR_SHA,monitorOnly=not self.recovery,
+            recoveryAuthorized=self.recovery,sameSourceProtected=self.recovery,
             positions=signed['positionCount'],openOrders=signed['openOrderCount'],activePending=0,signedVerifiedAt=signed['verifiedAt'],
             risk=risk,margin=margin,kill=kill,v52Sha=self.pins['V52'],q102Sha=self.pins['QUALITY102_CAUSAL_V1'],
             allPeersAttested=True,peerPermissionsUnchanged=True,economicsIdentical=True,time37PriorApprovalVerified=True,
@@ -264,6 +322,8 @@ class ProductionOperations:
             canonicalPrestartSha256=digest(bytes_at(Path(__file__).with_name('disdex_v4_canonical_prestart.py'))),
             refreshSerializationSha256=digest(bytes_at(Path(__file__).with_name('disdex_v4_refresh_exec.py'))),
             executorProgramSha256=digest(bytes_at(__file__)))
+        if self.recovery:self.plan.update(sameReleaseRecovery=True,recoveryJournalHash=self.recovery_journal_hash,
+            existingRuntimeApprovalHash=self.runtime_approval_hash,unitBackupPath=str(self.recovery_unit_backup),unitBackupHash=digest(self.recovery_unit_bytes))
         self.plan_hash=digest(canonical(self.plan));return dict(planSha256=self.plan_hash,plan=self.plan)
 
     def authorize(self,plan):
@@ -325,7 +385,17 @@ class ProductionOperations:
     def prepare(self,grant):
         from disdex_unified_root_gate import assert_private_dir
         require(int(time.time())<grant['expiresAt'],'PREPARATION_AUTHORITY_EXPIRED')
-        self._stage_unit()
+        if self.recovery:
+            require(digest(bytes_at(ROOT/'transaction.json'))==self.recovery_journal_hash and digest(bytes_at(STATE))==self.plan['durableHash']
+                and digest(bytes_at(self.runtime_approval_path))==self.runtime_approval_hash,'RECOVERY_BASELINE_CHANGED')
+            require(self.recovery_unit_path.is_symlink() and str(self.recovery_unit_path.readlink())=='/dev/null'
+                and digest(bytes_at(self.recovery_unit_backup))==self.plan['unitBackupHash'],'RECOVERY_UNIT_CAS')
+            temp=self.recovery_unit_path.with_name('.recovery-'+grant['nonce'])
+            fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o644)
+            with os.fdopen(fd,'wb') as f:f.write(self.recovery_unit_bytes);f.flush();os.fsync(f.fileno())
+            os.replace(temp,self.recovery_unit_path)
+            subprocess.run(['/usr/bin/systemctl','daemon-reload'],check=True,capture_output=True)
+        else:self._stage_unit()
         if not self.reuse_migration:
             require(digest(bytes_at(STATE))==self.plan['durableHash'],'DURABLE_CHANGED')
             env=self.sdk.child_environment(CANDIDATE_SHA,self.deploy.pw_dir,credentials=self.credentials)
@@ -368,6 +438,7 @@ class ProductionOperations:
         exclusive_json(self.transaction/'bootstrap.json',self.bootstrap)
 
     def activate(self):
+        if self.recovery:return self._activate_recovery()
         from disdex_unified_root_gate import (RootDeploymentExecutor,default_execution_paths,assert_private_dir,_atomic_json)
         require(self.bootstrap is not None,'BOOTSTRAP_REQUIRED')
         directory=ROOT/'plans'/SCOPE;assert_private_dir(directory,root_uid=0)
@@ -384,6 +455,57 @@ class ProductionOperations:
         subprocess.run(['/usr/bin/systemctl','enable','--now',f'disdex-v4-dynamic-evidence-refresh@{CANDIDATE_SHA}.timer'],check=True,capture_output=True)
         exclusive_json(self.transaction/'live-receipt.json',result);return result
 
+    def _activate_recovery(self):
+        from disdex_unified_root_gate import _atomic_json,_validate_venue_evidence
+        from disdex_v4_root_cutover import await_v4_decision_cycle
+        from disdex_v4_venue_witness import collect_v4_venue_evidence
+        unit=f'disdex-v12-v4@{CANDIDATE_SHA}.service'
+        systemd=V4LocalUnitSystemdAdapter({unit},self.transaction)
+        require(systemd.main_pid(unit)==0 and not systemd.is_masked(unit),'RECOVERY_START_BASELINE')
+        require(digest(bytes_at(self.runtime_approval_path))==self.runtime_approval_hash
+            and json_at('/etc/disdex/runner-pins.json')==self.manifest,'RECOVERY_AUTHORITY_OR_PINS_CHANGED')
+        before=_validate_venue_evidence(collect_v4_venue_evidence(sha=CANDIDATE_SHA,expected_pins=self.pins,phase='before'),
+            now=int(time.time()),label='recovery-before',require_v4_runtime=False)
+        started=int(time.time()*1000);attempted=False
+        try:
+            attempted=True;systemd.start(unit);pid=systemd.main_pid(unit)
+            _atomic_json(ROOT/'transaction.json',dict(schema='disdex-unified-deploy-transaction/v1',phase='ACTIVE_AWAITING_AUDIT',
+                scope=SCOPE,newSha=CANDIDATE_SHA,newUnit=unit,sameReleaseRecovery=True),root_uid=0)
+            rows=[];previous=None
+            for cycle in range(3):
+                decision=await_v4_decision_cycle(systemd,sha=CANDIDATE_SHA,release=self.release,pid=pid,
+                    started_after_ms=started,previous_tick=previous)
+                previous=decision['tickCompletedAt']
+                after=_validate_venue_evidence(collect_v4_venue_evidence(sha=CANDIDATE_SHA,expected_pins=self.pins,phase='after'),
+                    now=int(time.time()),label='recovery-after-'+str(cycle+1),baseline=before)
+                after['decisionCycle']=decision;rows.append(after)
+            now_context=self._context()
+            for key,value in self.plan['context']['peers'].items():
+                if key!='V12_V4':require(now_context['peers'][key]==value,'RECOVERY_PEER_CHANGED')
+            require(now_context['writer']==self.plan['context']['writer']
+                and now_context['peerApprovalHashes']==self.plan['context']['peerApprovalHashes'],'RECOVERY_SHARED_WRITER_OR_PEER_AUTHORITY_CHANGED')
+            require(digest(bytes_at(self.runtime_approval_path))==self.runtime_approval_hash
+                and json_at('/etc/disdex/runner-pins.json')==self.manifest,'RECOVERY_FINAL_AUTHORITY_OR_PINS_CHANGED')
+            result=dict(schema='disdex-unified-deploy-receipt/v1',status='V4_LIVE_CUTOVER_VERIFIED',targetSha=CANDIDATE_SHA,
+                scope=SCOPE,ordersEnabled=True,route='CODEX_SSH',sameReleaseRecovery=True,planSha256=self.plan_hash,newUnit=unit,
+                repository=self.plan['repository'],deploymentTarget=self.plan['deploymentTarget'],operatorTarget=self.plan['operatorTarget'],
+                approvedRunners=['V12_V4'],approvedShaByRunner=self.pins,authorizationMethod='ROOT_SSH_SESSION',
+                nonceDigest=digest(self.authorization['nonce'].encode()),auditCycles=rows,ordersSent=0,cancelsSent=0,positionChangesSent=0)
+            exclusive_json(self.transaction/'live-receipt.json',result)
+            systemd.enable(unit)
+            subprocess.run(['/usr/bin/systemctl','enable','--now',f'disdex-v4-dynamic-evidence-refresh@{CANDIDATE_SHA}.timer'],check=True,capture_output=True)
+            _atomic_json(ROOT/'transaction.json',dict(schema='disdex-unified-deploy-transaction/v1',phase='COMMITTED',scope=SCOPE,
+                newSha=CANDIDATE_SHA,newUnit=unit,receipt=str(self.transaction/'live-receipt.json'),sameReleaseRecovery=True),root_uid=0)
+            return result
+        except Exception:
+            if attempted and systemd.is_active(unit):systemd.stop(unit)
+            if systemd.is_enabled(unit):systemd.disable(unit)
+            systemd.mask(unit)
+            _atomic_json(ROOT/'transaction.json',dict(schema='disdex-unified-deploy-transaction/v1',phase='RECOVERY_REQUIRED_PROTECTED',
+                scope=SCOPE,newSha=CANDIDATE_SHA,newUnit=unit,oldUnit='disdex-v12-v4@b3468849cfee0f334b8a1b6a545dbd6c2e48da9a.service',
+                candidateOwnershipRetained=True,oldSourceRestartAuthorized=False,requiresFreshVenueAndDurableCompatibility=True),root_uid=0)
+            raise
+
     def protect_on_failure(self):
         # Child failures restore only their own cleared hash. A failed full
         # executor keeps new ownership/state and masks the failed candidate.
@@ -393,6 +515,12 @@ class ProductionOperations:
             and row.get('clearedBy')=='codex-ssh' and row.get('reason')==REASON)
         if ours:
             restore_owned_hold(SHARED/'kill-switch.json',digest(actual),self.original_kill)
+        if self.recovery:
+            unit=f'disdex-v12-v4@{CANDIDATE_SHA}.service'
+            systemd=V4LocalUnitSystemdAdapter({unit},self.transaction)
+            if systemd.is_active(unit):systemd.stop(unit)
+            if systemd.is_enabled(unit):systemd.disable(unit)
+            systemd.mask(unit)
         # Only a failure before the V4 ownership switch can restore old pins.
         if hasattr(self,'wiring') and json_at('/etc/disdex/runner-pins.json')['runners']['V12_V4']['sha']==self.pins['V12_V4']:
             self.wiring.restore()
@@ -401,11 +529,11 @@ def main():
     import argparse,fcntl
     parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--preview',action='store_true');mode.add_argument('--apply',action='store_true')
-    parser.add_argument('--plan-sha256');args=parser.parse_args()
+    parser.add_argument('--plan-sha256');parser.add_argument('--recover-protected',action='store_true');args=parser.parse_args()
     lock=os.open(ROOT/'deployment-execution.lock',os.O_RDWR)
     try:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-        op=ProductionOperations(args.plan_sha256)
+        op=ProductionOperations(args.plan_sha256,recovery=args.recover_protected)
         if args.preview:result=op.preflight();print(json.dumps(result,sort_keys=True));return
         require(args.plan_sha256 is not None,'EXACT_PLAN_REQUIRED')
         print(json.dumps(execute_priority(op),sort_keys=True))
@@ -421,7 +549,9 @@ def require(value,reason):
 
 def validate_priority_evidence(f,now_ms):
     require(isinstance(f,dict),'FACTS')
-    for key in ['monitorOnly','allPeersAttested','peerPermissionsUnchanged',
+    require(f.get('monitorOnly') is True or (f.get('recoveryAuthorized') is True
+        and f.get('sameSourceProtected') is True),'MONITOR_OR_PROTECTED_SAME_SOURCE_REQUIRED')
+    for key in ['allPeersAttested','peerPermissionsUnchanged',
                 'economicsIdentical','time37PriorApprovalVerified']:
         require(f.get(key) is True,key.upper())
     for key in ['positions','openOrders','activePending']:

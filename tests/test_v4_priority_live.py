@@ -24,6 +24,23 @@ def facts():
         durableHash='d'*64,killHash='e'*64)
 
 class PriorityFactsTest(unittest.TestCase):
+    def test_recovery_plan_keeps_exact_existing_pins_and_authority(self):
+        current=dict(runners={'V12_V4':SHA},sourceSha=OLD,scope='V12_V4',ordersEnabled=True)
+        self.assertEqual(len(m.same_release_recovery_hash(current,current['runners'],OLD,SHA)),64)
+        for bad in [dict(current,ordersEnabled=False),dict(current,sourceSha=SHA),dict(current,runners={'V12_V4':OLD})]:
+            with self.assertRaises(ValueError):m.same_release_recovery_hash(bad,{'V12_V4':SHA},OLD,SHA)
+    def test_same_source_recovery_requires_flat_terminal_durable_history(self):
+        d=dict(schema=2,releaseSha=SHA,state=dict(initial=dict(holdProtected=False),foreign=[],legs={}),intents={},protections={})
+        self.assertTrue(m.validate_recovery_document(d,SHA))
+        for key,value in [('releaseSha',OLD),('intents',{'x':{'stage':'UNKNOWN'}}),('protections',{'x':{'phase':'STOP_CONFIRMED'}})]:
+            with self.assertRaises(ValueError):m.validate_recovery_document(dict(d,**{key:value}),SHA)
+        for leg in [dict(status='OPEN',qty=1),dict(status='CLOSED',qty=float('nan'))]:
+            bad=copy.deepcopy(d);bad['state']['legs']={'x':leg}
+            with self.assertRaises(ValueError):m.validate_recovery_document(bad,SHA)
+        f=facts();f['monitorOnly']=False
+        with self.assertRaises(ValueError):m.validate_priority_evidence(f,NOW)
+        f.update(recoveryAuthorized=True,sameSourceProtected=True)
+        self.assertTrue(m.validate_priority_evidence(f,NOW))
     def test_refresh_adapter_keeps_the_same_flock_and_exact_candidate(self):
         sha='a'*40
         old='ExecStart=/usr/bin/flock -n /run/disdex-v4-evidence-refresh/refresh.lock /usr/bin/node /home/deploy/disdex-trading/releases/'+sha+'/node_modules/tsx/dist/cli.mjs /home/deploy/disdex-trading/releases/'+sha+'/scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts --sha '+sha+' --apply --lease /var/lib/disdex/unified-deploy/refresh-leases/v4/'+sha+'.json\n'
@@ -103,6 +120,37 @@ class PrioritySequenceTest(unittest.TestCase):
 
 @unittest.skipIf(sys.platform=='win32','POSIX owner-preserving restoration')
 class ProtectionRestoreTest(unittest.TestCase):
+    def test_same_source_recovery_audits_three_cycles_or_masks_candidate_without_old_restart(self):
+        import tempfile,json
+        from unittest.mock import patch,MagicMock
+        for fail in [False,True]:
+            with self.subTest(fail=fail),tempfile.TemporaryDirectory(prefix='disdex-v4-recovery-test-') as folder:
+                root=Path(folder);approval=root/'activation.json';approval.write_text('{}');approval.chmod(0o600)
+                op=m.ProductionOperations(recovery=True);op.transaction=root;op.runtime_approval_path=approval
+                op.runtime_approval_hash=m.digest(approval.read_bytes());op.manifest={'fixture':True};op.pins={'V12_V4':m.CANDIDATE_SHA}
+                op.plan_hash='a'*64;op.authorization={'nonce':'b'*32}
+                context=dict(peers={},writer={'pid':4},peerApprovalHashes={})
+                op.plan=dict(context=context,repository='fixture',deploymentTarget='fixture',operatorTarget='fixture')
+                op._context=lambda:context
+                unit='disdex-v12-v4@'+m.CANDIDATE_SHA+'.service';systemd=MagicMock()
+                systemd.main_pid.side_effect=[0,4242];systemd.is_masked.return_value=False
+                systemd.is_active.return_value=True;systemd.is_enabled.return_value=True
+                decisions=RuntimeError('AUDIT_FAILURE') if fail else [dict(tickCompletedAt=t) for t in [1,2,3]]
+                kwargs=dict(side_effect=decisions)
+                with patch.object(m,'V4LocalUnitSystemdAdapter',return_value=systemd),patch.object(m,'ROOT',root),\
+                    patch.object(m,'json_at',return_value=op.manifest),patch.object(m.subprocess,'run'),\
+                    patch('disdex_unified_root_gate._atomic_json') as journal,\
+                    patch('disdex_unified_root_gate._validate_venue_evidence',side_effect=lambda value,**kw:value),\
+                    patch('disdex_v4_venue_witness.collect_v4_venue_evidence',side_effect=lambda **kw:{}),\
+                    patch('disdex_v4_root_cutover.await_v4_decision_cycle',**kwargs):
+                    if fail:
+                        with self.assertRaises(RuntimeError):op._activate_recovery()
+                        systemd.stop.assert_called_once_with(unit);systemd.mask.assert_called_once_with(unit)
+                        systemd.enable.assert_not_called();self.assertEqual(journal.call_args.args[1]['phase'],'RECOVERY_REQUIRED_PROTECTED')
+                    else:
+                        r=op._activate_recovery();self.assertEqual([v['decisionCycle']['tickCompletedAt'] for v in r['auditCycles']],[1,2,3])
+                        systemd.mask.assert_not_called();self.assertEqual(journal.call_args.args[1]['phase'],'COMMITTED')
+                    systemd.start.assert_called_once_with(unit)
     def test_scoped_mask_preserves_local_unit_and_restores_it_without_starting_anything(self):
         import tempfile,os
         from unittest.mock import patch
