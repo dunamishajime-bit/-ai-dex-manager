@@ -21,6 +21,7 @@ import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition } f
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
+import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry";
 import { nextQuality102DaemonWaitMs } from "../lib/quality102-live-scheduling";
 import { readQuality102CausalV1Ownership } from "../lib/disdex-quality102-causal-v1-ownership";
 import {
@@ -674,7 +675,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
             message: isAsterDepositRequirementError(error)
                 ? "ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED"
                 : error instanceof Error ? error.message : String(error),
-            ordersSent: 0,
+            ...runnerMutationTelemetry(),
             syntheticOrders: 0,
             testOrders: 0,
         }));
