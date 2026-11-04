@@ -10,24 +10,31 @@ from disdex_deployment_plan import canonical,digest,validate
 SERVICE='disdex-runner-health-snapshot.service'
 DROPIN=Path('/etc/systemd/system')/(SERVICE+'.d/zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-observed-source.conf')
 SCRIPT='scripts/ops/root/disdex-runner-health-snapshot-current.mjs'
+WATCHDOG='disdex-runner-watchdog.service'
+WATCHDOG_SCRIPT='scripts/ops/root/disdex-runner-watchdog-current.mjs'
 TRADING={'V12_V4','V52','PENGU_V8','QUALITY102_CAUSAL_V1','FET_BRK48_RESIDUAL','HYPE_TREND_LONG','IDLE_PRIORITY_SHORT'}
 
 def require(value,reason):
     if not value:raise ValueError('MONITOR_SNAPSHOT_'+reason)
 
 def choose_snapshot_dropin(paths,sha):
+    return choose_monitor_dropin(paths,sha,SERVICE)
+
+def choose_monitor_dropin(paths,sha,service):
+    require(service in [SERVICE,WATCHDOG],'MONITOR_SERVICE_ALLOWLIST')
+    parent=PurePosixPath('/etc/systemd/system')/(service+'.d')
     require(re.fullmatch('[a-f0-9]{40}',sha),'DROPIN_SHA')
     names=[]
     for path in paths:
         p=PurePosixPath(path)
-        require(p.is_absolute() and str(p).startswith('/etc/systemd/system/') and p.name.endswith('.conf')
+        require(p.is_absolute() and str(p.parent)==str(parent) and p.name.endswith('.conf')
             and all(part not in ['.','..'] for part in p.parts),'UNTRUSTED_DROPIN_PATH')
         names.append(p.name)
     # Older installations have a near-NAME_MAX run of z characters. A new
     # name must sort last without extending that filename past NAME_MAX.
     for count in range(1,201):
         name='~'*count+'disdex-observed-'+sha[:12]+'.conf'
-        if len(name.encode())<=255 and all(name>old for old in names):return DROPIN.parent/name
+        if len(name.encode())<=255 and all(name>old for old in names):return Path(str(parent/name))
     raise ValueError('MONITOR_SNAPSHOT_NO_SAFE_FINAL_DROPIN_NAME')
 
 def validate_monitor_plan(desired,current,pins):
@@ -59,6 +66,37 @@ def validate_observation(row,pins,now):
     v4=runners['V12_V4'];require(v4.get('mode')=='MONITOR_ONLY' and v4.get('liveEnabled') is False,'V4_MUST_REMAIN_MONITOR_ONLY')
     return stamp
 
+def protected_monitor_context(context):
+    # Pending maintenance legitimately advances its timestamps under the shared
+    # lock. This reader neither authorizes nor changes pending reservations.
+    return {k:v for k,v in context.items() if k!='pendingHash'}
+
+def validate_live_observation(row,pins,now,baseline):
+    require(row.get('schema')=='disdex-runner-health-snapshot/v1' and row.get('readOnly') is True,'SNAPSHOT_CONTRACT')
+    identity=row.get('targetIdentity',{})
+    require(identity.get('valid') is True and identity.get('deploymentTarget')=='professional-dismanager.net'
+        and identity.get('operatorTarget')=='DD1296_FINAL_ALLIN_10BPS','TARGET_IDENTITY')
+    stamp=row.get('generatedAt');require(type(stamp) is int and 0<=now-stamp<=60000,'SNAPSHOT_FRESHNESS')
+    require(row.get('sharedKillSwitchActive') is False and baseline.get('sharedKillSwitchActive') is False,'LIVE_KILL_CHANGED')
+    risk=row.get('sharedRisk',{})
+    require(risk.get('maximumLossPct')==7.5 and risk.get('safetyState')=='HEALTHY'
+        and risk.get('sourceComplete') is True and risk.get('fresh') is True and risk.get('tripped') is False,'LIVE_SHARED_RISK')
+    runners=row.get('runners');require(isinstance(runners,dict) and set(runners)==TRADING,'RUNNER_INVENTORY')
+    for key,runner in runners.items():
+        old=baseline.get('runners',{}).get(key,{})
+        require(runner.get('runtimeSha')==pins[key] and runner.get('expectedSha')==pins[key],'RUNNER_PIN')
+        require(all(runner.get(k)==old.get(k) for k in ['newOrdersAllowed','orderPermission','mode','liveEnabled']),
+            'LIVE_PERMISSION_MUST_NOT_CHANGE')
+        require(runner.get('processHealthy') is True,'LIVE_PROCESS_UNHEALTHY')
+        if key in ['V12_V4','V52']:
+            actual=runner.get('actualLastTickAt')
+            require(runner.get('tickVerified') is True and type(actual) is int and 0<=now-actual<=180000
+                and runner.get('lastTickAt')==actual,'GENUINE_CURRENT_TICK_REQUIRED')
+        else:require(runner.get('tickVerified') is False and runner.get('actualLastTickAt') is None,'LEGACY_NOT_CERTIFIED_AS_TICK')
+    v4=runners['V12_V4']
+    require(v4.get('mode')=='LIVE' and v4.get('liveEnabled') is True and v4.get('newOrdersAllowed') is True,'EXISTING_V4_LIVE_REQUIRED')
+    return stamp
+
 def run_transaction(ops):
     ops.prepare();ops.consume()
     try:
@@ -84,7 +122,11 @@ class MonitorSnapshotOperations:
         from disdex_shared_risk_witness import file_bytes
         return file_bytes(path)
     def protected(self):
-        require(self.reader.read_context()==self.context,'PEERS_RISK_KILL_PENDING_CHANGED')
+        current=self.reader.read_context()
+        if getattr(self,'live_preserving',False):
+            require(protected_monitor_context(current)==protected_monitor_context(self.context),'LIVE_PEERS_RISK_KILL_CHANGED')
+            require(self.approval_hashes()==self.frozen_approvals,'LIVE_OPERATOR_APPROVAL_CHANGED')
+        else:require(current==self.context,'PEERS_RISK_KILL_PENDING_CHANGED')
         self.parent._assert_expected_pins(self.pins)
         require(self.parent._read_current_sha(unchanged_identity_only=True)==self.current['sourceSha'],'CURRENT_SYMLINK_CHANGED')
     def observe(self,folder):
@@ -92,12 +134,19 @@ class MonitorSnapshotOperations:
             'DISDEX_HEALTH_SNAPSHOT_DEPLOYMENT_TARGET':'professional-dismanager.net',
             'DISDEX_HEALTH_SNAPSHOT_OPERATOR_TARGET':'DD1296_FINAL_ALLIN_10BPS',
             'DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT':str(folder),
+            'DISDEX_HEALTH_SNAPSHOT_TICK_ROOT':'/var/lib/disdex/runner-health/ticks',
             'DISDEX_HEALTH_SNAPSHOT_CANONICAL_PATH':str(folder/'current.json')}
         result=subprocess.run(['/usr/bin/node',str(self.release/SCRIPT)],cwd=self.release,env=env,capture_output=True,text=True,timeout=40)
         require(result.returncode==0,'CANDIDATE_READONLY_PREVIEW_FAILED')
         row=json.loads(self.file(folder/'current.json'))
-        validate_observation(row,self.pins,time.time_ns()//1000000)
+        self.validate_row(row)
         self.protected();return row
+    def validate_row(self,row):
+        now=time.time_ns()//1000000
+        if getattr(self,'live_preserving',False):return validate_live_observation(row,self.pins,now,self.live_baseline)
+        return validate_observation(row,self.pins,now)
+    def approval_hashes(self):
+        return {str(path):hashlib.sha256(self.file(path)).hexdigest() for path in self.approval_paths}
     def prepare(self):
         from disdex_unified_root_gate import _assert_execution_root,read_root_json,parse_live_pins,release_marker,assert_regular_secure,assert_private_dir,assert_root_trusted_dir
         from disdex_shared_risk_witness import ProductionSharedRiskReader
@@ -119,7 +168,21 @@ class MonitorSnapshotOperations:
             require(not assert_regular_secure(path,private=False).st_mode&0o222,'IMMUTABLE_CANDIDATE_REQUIRED')
         for path in [self.dropin,self.env,self.receipt,self.journal]:require(not path.exists() and not path.is_symlink(),'EXISTING_TARGET_REQUIRES_RECONCILIATION')
         self.parent._verify_token(self.args,self.token)
-        self.reader=ProductionSharedRiskReader();self.context=self.reader.read_context();self.protected()
+        self.reader=ProductionSharedRiskReader();self.context=self.reader.read_context()
+        self.live_baseline=json.loads(self.file(Path('/var/lib/disdex/runner-health/current.json')))
+        self.live_preserving=(self.live_baseline.get('sharedKillSwitchActive') is False
+            and self.live_baseline.get('runners',{}).get('V12_V4',{}).get('newOrdersAllowed') is True)
+        if self.live_preserving:
+            self.approval_paths=set()
+            manifest=read_root_json(self.paths.pins,private=False)
+            for entry in manifest['runners'].values():
+                props=self.command('show',entry['serviceUnit'],'-p','ExecStartPre')
+                self.approval_paths.update(Path(x) for x in re.findall(r'--activation-path\s+([^\s;]+)',props))
+            self.approval_paths.add(Path('/var/lib/disdex/shared/operator-activation/v12-v4-full.json'))
+            for path in self.approval_paths:assert_regular_secure(path,private=False)
+            self.frozen_approvals=self.approval_hashes()
+            self.validate_row(self.live_baseline)
+        self.protected()
         self.current_raw=self.file(self.paths.current_plan);self.current_meta=self.paths.current_plan.stat()
         self.next_current={**self.current,'monitorSha':self.desired['monitorSha'],'releaseRoots':self.desired['releaseRoots'].copy()}
         self.environment={}
@@ -167,12 +230,12 @@ class MonitorSnapshotOperations:
         atomic_text(self.paths.current_plan,canonical(self.next_current)+b'\n',
             (self.current_meta.st_uid,self.current_meta.st_gid,self.current_meta.st_mode&0o777))
     def audit(self):
-        times=[];pairs=[];deadline=time.monotonic()+240
+        times=[];pairs=[];deadline=time.monotonic()+600
         while len(times)<3:
             require(time.monotonic()<deadline,'REAL_CYCLE_AUDIT_TIMEOUT');self.protected()
             self.command('start',SERVICE)
             row=json.loads(self.file(Path('/var/lib/disdex/runner-health/current.json')))
-            stamp=validate_observation(row,self.pins,time.time_ns()//1000000)
+            stamp=self.validate_row(row)
             pair=[row['runners'][key]['actualLastTickAt'] for key in ['V12_V4','V52']]
             if stamp not in times and (not pairs or all(pair[i]>pairs[-1][i] for i in range(2))):
                 times.append(stamp);pairs.append(pair)
@@ -186,6 +249,8 @@ class MonitorSnapshotOperations:
             authorizesTrading=False,authorizesKillClearance=False,runnerMap=self.pins,serviceUnit=SERVICE,
             deploymentAuthorizedAt=self.authorized_at,committedAt=self.parent.clock(),auditSnapshotTimes=times,
             journal=str(self.journal),ordersSent=0,cancelsSent=0,positionChangesSent=0)
+        if getattr(self,'live_preserving',False):row.update(livePreserving=True,priorTradingAuthorityPreserved=True,
+            protectedOperatorArtifactHashes=self.frozen_approvals)
         _new_file(self.receipt,canonical(row)+b'\n',0o400,lambda:self.created.append(self.receipt));return row
     def rollback(self):
         from disdex_shared_risk_monitor_wiring import atomic_text
