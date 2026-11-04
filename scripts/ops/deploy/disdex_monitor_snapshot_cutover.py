@@ -29,9 +29,10 @@ def validate_snapshot_prestart(properties):
     commands=re.findall(r'argv\[\]=(.*?) ; ignore_errors=',properties)
     require(not properties.strip() or bool(commands),'UNPARSEABLE_SNAPSHOT_PRESTART')
     for command in commands:
-        marker=r'/home/deploy/disdex-trading/releases/[a-f0-9]{40}/\.disdex-release-sha'
+        roots=r'/home/deploy/disdex-trading/(?:releases|runner-health-snapshot/scoped-v52)'
+        marker=roots+r'/[a-f0-9]{40}/\.disdex-release-sha'
         allowed=bool(re.fullmatch(r'/usr/bin/test -f '+marker,command))
-        match=re.fullmatch(r'/usr/bin/grep -Fxq ([a-f0-9]{40}) /home/deploy/disdex-trading/releases/([a-f0-9]{40})/\.disdex-release-sha',command)
+        match=re.fullmatch(r'/usr/bin/grep -Fxq ([a-f0-9]{40}) '+roots+r'/([a-f0-9]{40})/\.disdex-release-sha',command)
         require(allowed or bool(match and match[1]==match[2]),'UNKNOWN_SNAPSHOT_PRESTART_MUST_BE_PRESERVED')
 
 def choose_snapshot_dropin(paths,sha):

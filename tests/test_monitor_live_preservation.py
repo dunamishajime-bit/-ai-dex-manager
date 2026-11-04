@@ -9,6 +9,7 @@ class LivePreservationTest(unittest.TestCase):
   row='ExecStartPre={ path=/usr/bin/grep ; argv[]=/usr/bin/grep -Fxq '+sha+' '+marker+' ; ignore_errors=no ; }'
   validate_snapshot_prestart(row)
   validate_snapshot_prestart('ExecStartPre=')
+  validate_snapshot_prestart(row.replace('/releases/','/runner-health-snapshot/scoped-v52/'))
   for bad in ['ExecStartPre={ argv[]=/usr/bin/python3 /root/authorization-guard.py ; ignore_errors=no ; }',row.replace(' -Fxq '+sha,' -Fxq '+'b'*40)]:
    with self.assertRaises(ValueError):validate_snapshot_prestart(bad)
  def test_snapshot_prestart_binds_to_its_own_release_not_the_old_v4_release(self):

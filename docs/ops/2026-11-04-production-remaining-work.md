@@ -199,3 +199,29 @@ trade 9 entry-time equality by one hour. Its unchanged parity harness downloads
 Bitget research data for 2025-08-10..2026-08-10; this is not Aster certification.
 Investigate the exact baseline/data/reference discrepancy; do not alter trading
 rules or golden metrics just to mark CI green. No new PENGU source is deployed.
+
+### Follow-up verified fixes
+
+Control 53cc30d17ea083e5be75c17a974925faf1dc00d3 passed all five CI families
+and was deployed as four explicitly versioned control modules, not a blanket
+Runner SHA. Actual kernel coexistence was verified by keeping the monitor
+shared lease while the official pending service completed signed reconciliation
+at 1793797376367. The service is Type=exec: systemctl start confirms launch,
+not completion. Wait for the actual completed source timestamp before reporting
+success, rather than reading its previous health record as the current result.
+
+The snapshot prestart was actually pinned to the old scoped monitor marker
+`runner-health-snapshot/scoped-v52/0b480f0e...`, rather than the release directory.
+The new migration guard initially rejected this unreviewed root. Inspection
+confirmed only the legacy marker test/grep pair. Add that exact legacy root
+pattern to the reviewed migration allowance; unrelated guards still reject.
+The new unit checks only its own immutable release marker. Linux suite remains
+246/246. This last source correction still needs CI/control deployment.
+
+PENGU parity discrepancy resolved without runtime logic changes: the reviewed
+independent reference already corrected the missing adopted 2% SHORT re-break.
+Reuse the existing reference from 3bdcf63c; engine/config are byte-identical to
+7688. Exact reference replay passed on 9,263 Bitget bars per symbol. PR428
+latest 2f6777c917a725891b57cd5ff5145c11b914664f now has all three CI families
+success. It remains a source-only safety candidate; Bitget research parity is
+not Aster-native LIVE economic proof. Q102/V52 candidate deltas remain pending.
