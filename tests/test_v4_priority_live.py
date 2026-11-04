@@ -24,6 +24,11 @@ def facts():
         durableHash='d'*64,killHash='e'*64)
 
 class PriorityFactsTest(unittest.TestCase):
+    def test_certified_unit_uses_shared_file_budget_not_the_readonly_monitor_proxy(self):
+        raw=b'[Service]\nEnvironment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json\n'
+        fixed=m.render_certified_budget_unit(raw)
+        self.assertIn(b'UnsetEnvironment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS',fixed)
+        self.assertIn(raw,fixed);self.assertEqual(m.render_certified_budget_unit(fixed),fixed)
     def test_recovery_plan_keeps_exact_existing_pins_and_authority(self):
         current=dict(runners={'V12_V4':SHA},sourceSha=OLD,scope='V12_V4',ordersEnabled=True)
         self.assertEqual(len(m.same_release_recovery_hash(current,current['runners'],OLD,SHA)),64)

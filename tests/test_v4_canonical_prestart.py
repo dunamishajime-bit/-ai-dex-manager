@@ -5,6 +5,12 @@ from disdex_v4_canonical_prestart import validate_activation,credential_binding_
 import disdex_v4_canonical_prestart as m
 
 class CanonicalV4GateTest(unittest.TestCase):
+    def test_certified_budget_keeps_the_canonical_file_lock_and_same_limits(self):
+        env=dict(DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH='/var/lib/disdex/shared/aster-rate-budget.json',DISDEX_ACCOUNT_LOCK_PATH='/var/lib/disdex/shared/account-order.lock')
+        self.assertTrue(m.budget_binding_valid(env))
+        for key,value in [('DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET','/readonly/socket'),('DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH',''),
+            ('DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS','1'),('DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS','30000'),('DISDEX_ACCOUNT_LOCK_PATH','/other')]:
+            self.assertFalse(m.budget_binding_valid(dict(env,**{key:value})))
     def test_root_certificate_reader_uses_deploy_primary_group_without_changing_uid(self):
         from unittest.mock import patch
         with patch.object(m.subprocess,'run') as run:

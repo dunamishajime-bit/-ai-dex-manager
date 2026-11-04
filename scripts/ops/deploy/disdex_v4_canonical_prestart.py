@@ -8,6 +8,13 @@ import hmac
 POLICY='V12_V4_V2_M150_D05_CORE_NATIVE'
 TARGET='DD1296_FINAL_ALLIN_10BPS'
 
+def budget_binding_valid(env):
+    return (env.get('DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH')=='/var/lib/disdex/shared/aster-rate-budget.json'
+        and env.get('DISDEX_ACCOUNT_LOCK_PATH')=='/var/lib/disdex/shared/account-order.lock'
+        and not env.get('DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET')
+        and str(env.get('DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS','50'))=='50'
+        and str(env.get('DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS','5000'))=='5000')
+
 def run_certificate_process(command,*,deploy_gid,**kwargs):
     # The immutable certificate reader binds gid to its primary process group.
     # Keep root uid for root-only grants; use the certificate's existing group.
@@ -47,6 +54,7 @@ def prestart(sha):
     validate_activation(a,sha,pins,implementation,int(time.time()))
     from disdex_pending_maintenance_install import _load_sdk
     import os
+    if not budget_binding_valid(os.environ):raise ValueError('V4_CANONICAL_SHARED_FILE_BUDGET_BINDING_REQUIRED')
     sdk=_load_sdk(RELEASES/'7b7719c65d2c6116d02463fc4603200f28e20762')
     if not credential_binding_valid(sdk.load_server_credentials(),os.environ):
         raise ValueError('V4_CANONICAL_CREDENTIAL_ACCOUNT_BINDING_MISMATCH')

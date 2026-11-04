@@ -133,3 +133,20 @@ mask/protected state on error. Retained same-SHA markers before the new start
 are waited past, never accepted or rewritten. Final peer/PID/approval/Writer
 checks must remain unchanged. Linux suite: 167 passed, including successful
 and failed recovery orchestration and same-SHA retained-marker regression.
+
+The next actual recovery started PID 2496552 but exited before a tick with
+V4_BUDGET_PROXY_RESPONSE_INVALID. Investigation found the full-LIVE unit had
+inherited a deliberately read-only broker (only MARKET_DATA/RECONCILIATION/
+RISK_READ); it also cannot carry PROTECTIVE or NEW_EXPOSURE priorities. This is
+a deployment routing defect, not a reason to disable API limits or to weaken
+the read-only broker.
+
+Full V4 now uses the existing certified SDK shared-file budget and mutex, exactly
+like other trading Runners: canonical budget and account-lock paths, the same
+50ms/5000ms defaults and all normal priority/cooldown rules. Unset the monitor
+proxy and interval overrides in the full unit only; the refresh unit keeps its
+read-only proxy. Canonical prestart explicitly verifies this binding. The
+derived unit hash and route/limits are in the exact root-approved recovery plan.
+No strategy source/economic SHA changes are introduced. Linux 169 root/control
+tests pass; the actual immutable candidate's 19 flat-budget resilience tests and
+19 shared-file/priority tests also pass without HTTP orders or venue mutations.

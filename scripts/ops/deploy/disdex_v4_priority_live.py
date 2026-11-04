@@ -37,6 +37,14 @@ ECONOMIC_FILES=('lib/v12-v4-production-lifecycle.ts','lib/v12-v4-v2-shadow.ts',
 def digest(raw):return hashlib.sha256(raw).hexdigest()
 def economic_source_equal(a,b):return a.replace(b'\r\n',b'\n')==b.replace(b'\r\n',b'\n')
 
+def render_certified_budget_unit(raw):
+    # The monitor broker deliberately admits GET priorities only. Full LIVE
+    # must retain the canonical shared SDK file/lock budget for protective and
+    # new-exposure priorities too. SDK defaults are exactly broker 50/5000.
+    line=b'UnsetEnvironment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS'
+    if line in raw:return raw
+    return raw.rstrip()+b'\n\n[Service]\n'+line+b'\n'
+
 def render_refresh_service(raw,sha):
     prefix='ExecStart=/usr/bin/flock -n /run/disdex-v4-evidence-refresh/refresh.lock '
     release='/home/deploy/disdex-trading/releases/'+sha
@@ -323,7 +331,10 @@ class ProductionOperations:
             refreshSerializationSha256=digest(bytes_at(Path(__file__).with_name('disdex_v4_refresh_exec.py'))),
             executorProgramSha256=digest(bytes_at(__file__)))
         if self.recovery:self.plan.update(sameReleaseRecovery=True,recoveryJournalHash=self.recovery_journal_hash,
-            existingRuntimeApprovalHash=self.runtime_approval_hash,unitBackupPath=str(self.recovery_unit_backup),unitBackupHash=digest(self.recovery_unit_bytes))
+            existingRuntimeApprovalHash=self.runtime_approval_hash,unitBackupPath=str(self.recovery_unit_backup),unitBackupHash=digest(self.recovery_unit_bytes),
+            derivedUnitSha256=digest(render_certified_budget_unit(self.recovery_unit_bytes)))
+        self.plan['certifiedBudget']=dict(route='CANONICAL_SHARED_FILE_LOCK',path=str(SHARED/'aster-rate-budget.json'),
+            accountLock=str(SHARED/'account-order.lock'),minIntervalMs=50,maxQueueMs=5000,refreshRemainsReadOnlyProxy=True)
         self.plan_hash=digest(canonical(self.plan));return dict(planSha256=self.plan_hash,plan=self.plan)
 
     def authorize(self,plan):
@@ -360,7 +371,7 @@ class ProductionOperations:
         require(len(lines)==len(original.splitlines())-1,'ONE_LEGACY_POLICY_GATE_EXPECTED')
         lines.insert(lines.index(next(line for line in lines if line.startswith('ExecStart='))),
             'ExecStartPre=+/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_v4_canonical_prestart.py --sha '+sha)
-        targets[unit]=('\n'.join(lines)+'\n').encode()
+        targets[unit]=render_certified_budget_unit(('\n'.join(lines)+'\n').encode())
         refresh_unit=Path('/etc/systemd/system')/f'disdex-v4-dynamic-evidence-refresh@{sha}.service'
         legacy_refresh=targets[refresh_unit]
         targets[refresh_unit]=render_refresh_service(legacy_refresh,sha)
@@ -392,7 +403,9 @@ class ProductionOperations:
                 and digest(bytes_at(self.recovery_unit_backup))==self.plan['unitBackupHash'],'RECOVERY_UNIT_CAS')
             temp=self.recovery_unit_path.with_name('.recovery-'+grant['nonce'])
             fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o644)
-            with os.fdopen(fd,'wb') as f:f.write(self.recovery_unit_bytes);f.flush();os.fsync(f.fileno())
+            derived=render_certified_budget_unit(self.recovery_unit_bytes)
+            require(digest(derived)==self.plan['derivedUnitSha256'],'RECOVERY_BUDGET_UNIT_HASH')
+            with os.fdopen(fd,'wb') as f:f.write(derived);f.flush();os.fsync(f.fileno())
             os.replace(temp,self.recovery_unit_path)
             subprocess.run(['/usr/bin/systemctl','daemon-reload'],check=True,capture_output=True)
         else:self._stage_unit()
