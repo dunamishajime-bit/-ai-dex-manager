@@ -20,6 +20,7 @@ import { classifyAsterRateBudgetFailure } from "../lib/disdex-aster-rate-budget-
 import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 import { nextQuality102DaemonWaitMs } from "../lib/quality102-live-scheduling";
 import { readQuality102CausalV1Ownership } from "../lib/disdex-quality102-causal-v1-ownership";
 import {
@@ -620,7 +621,9 @@ async function main(): Promise<void> {
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
     do {
-        const result = await built.runner.tick();
+        const result = await observePeerDecisionCycle({ runnerId: "QUALITY102_CAUSAL_V1",
+            runtimeSha: built.config.runtimeCommitSha, mode: built.config.mode,
+            operation: () => built.runner.tick() });
         const tickTimestamp = new Date().toISOString();
         console.log(JSON.stringify({ timestamp: tickTimestamp, ...result }));
         // Read-only decision evidence for HP. A write failure never changes

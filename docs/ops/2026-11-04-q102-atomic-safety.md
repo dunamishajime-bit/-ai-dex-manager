@@ -31,3 +31,19 @@ Logs: `red.log` and `full-green.log`. These are offline tests, not venue orders.
 State: SOURCE_READY_NOT_LIVE. Q102 runtime/approval/pin remain ef1. Promotion
 requires a separately validated immutable release, exact owner map and normal
 Root deployment gates; do not edit the old activation's SHA.
+
+## Actual tick source continuation
+
+Reuse the reviewed 2a6f tick writer unchanged and the peer completion wrapper.
+Only the existing `built.runner.tick()` is wrapped, using Q102's own
+`built.config.runtimeCommitSha`. It does not choose a shared or peer SHA.
+Preflight, slot/BASE_NOT_IDLE, selector, scoring, STOP and wait scheduling stay
+unchanged. Exceptions do not refresh lastTick; lock/held/no-signal completed
+results do. Unknown mutation counts are omitted, not asserted zero. The legacy
+result does not attest permission, so the marker does not grant orders.
+
+Q102 wiring test ran RED before connection; combined actual ef1 fixture now
+passes 73/73, zero skips, log `q102-tick-full-green.log`. Source is not LIVE.
+Future migration must certify the same-PID release-local Node loader, actual
+systemd write permissions and exact marker SHA/service/CWD/PID together. A tsx
+CLI child PID must never be substituted or forged to satisfy MainPID matching.
