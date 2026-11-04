@@ -11,6 +11,16 @@ SHA="a"*40
 OLD="7"*40
 
 class VenueWitnessContractTest(unittest.TestCase):
+    def test_shared_runtime_metadata_is_not_an_operator_artifact(self):
+        good=dict(uid=1000,gid=1000,mode=0o100600,parent_uid=1000,parent_gid=1000,parent_mode=0o40770)
+        for path in [m.RISK,m.MARGIN,m.KILL,m.PENDING]:
+            self.assertTrue(m.validate_shared_runtime_metadata(path,**good,deploy_uid=1000,deploy_gid=1000))
+            self.assertTrue(m.validate_shared_runtime_metadata(path,**dict(good,mode=0o100660),deploy_uid=1000,deploy_gid=1000))
+        for key,value in [('uid',999),('gid',999),('mode',0o100666),('parent_uid',999),('parent_mode',0o40777)]:
+            with self.subTest(key=key),self.assertRaises(ValueError):
+                m.validate_shared_runtime_metadata(m.MARGIN,**dict(good,**{key:value}),deploy_uid=1000,deploy_gid=1000)
+        with self.assertRaises(ValueError):
+            m.validate_shared_runtime_metadata(Path('/etc/disdex/approval.json'),**good,deploy_uid=1000,deploy_gid=1000)
     def bounded_snapshot(self,now=2_000_000_000_000):
         from datetime import datetime,timezone
         captured=datetime.fromtimestamp((now-1000)/1000,timezone.utc).isoformat(timespec="milliseconds").replace("+00:00","Z")

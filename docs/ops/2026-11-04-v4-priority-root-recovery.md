@@ -106,3 +106,11 @@ it, and restore its exact monitor-only bytes on an authorized pre-start rollback
 It never starts anything itself and rejects peers/active processes. The new
 actual Linux filesystem regression failed before implementation and passes
 afterward. Current Linux suite total: 161.
+
+Full venue witness also incorrectly required root ownership for all four
+deploy-writer runtime records. Keep the root artifact reader unchanged and add
+a separate four-path shared-runtime reader: exact deploy uid/gid, owner-matching
+parent, mode 0600/0660, no world access, no symlinks, bounded no-follow reads.
+All four actual runtime files now pass their ownership contract while the still
+active HOLD correctly blocks readiness. The metadata regression failed before
+the fix; Linux suite 162 passes. No V4 process/order activation occurred yet.

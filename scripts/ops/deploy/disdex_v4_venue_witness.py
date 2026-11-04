@@ -67,6 +67,32 @@ def _secure_json(path: Path, *, require_root=True, max_bytes=524288) -> dict:
         raise ValueError("JSON_NOT_OBJECT:" + str(path))
     return value
 
+def validate_shared_runtime_metadata(path,*,uid,gid,mode,parent_uid,parent_gid,parent_mode,deploy_uid,deploy_gid):
+    if (path not in (RISK,MARGIN,KILL,PENDING) or uid!=deploy_uid or gid!=deploy_gid
+            or parent_uid!=uid or parent_gid!=gid or not stat.S_ISREG(mode)
+            or stat.S_IMODE(mode) not in (0o600,0o660) or parent_mode&0o007):
+        raise ValueError('UNTRUSTED_SHARED_RUNTIME_METADATA:'+str(path))
+    return True
+
+def _shared_runtime_json(path):
+    import pwd
+    deploy=pwd.getpwnam('deploy');s=path.lstat();parent=path.parent.lstat()
+    if path.is_symlink() or path.parent.is_symlink() or not stat.S_ISDIR(parent.st_mode):
+        raise ValueError('UNTRUSTED_SHARED_RUNTIME_PATH')
+    validate_shared_runtime_metadata(path,uid=s.st_uid,gid=s.st_gid,mode=s.st_mode,
+        parent_uid=parent.st_uid,parent_gid=parent.st_gid,parent_mode=parent.st_mode,
+        deploy_uid=deploy.pw_uid,deploy_gid=deploy.pw_gid)
+    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+    with os.fdopen(fd,'rb') as f:
+        actual=os.fstat(f.fileno())
+        if (actual.st_dev,actual.st_ino,actual.st_uid,actual.st_gid,actual.st_mode)!=(s.st_dev,s.st_ino,s.st_uid,s.st_gid,s.st_mode):
+            raise ValueError('SHARED_RUNTIME_CHANGED_DURING_READ')
+        raw=f.read(524289)
+    if len(raw)>524288:raise ValueError('OVERSIZED_SHARED_RUNTIME')
+    d=json.loads(raw)
+    if not isinstance(d,dict):raise ValueError('SHARED_RUNTIME_NOT_OBJECT')
+    return d
+
 
 def _digest(value) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
@@ -230,23 +256,23 @@ def _assert_release(sha: str) -> Path:
 
 
 def _assert_runtime_health(now_ms: int) -> tuple[dict, list[dict]]:
-    risk = _secure_json(RISK)
-    if risk.get("sourceComplete") is not True or risk.get("tripped") is True:
+    risk = _shared_runtime_json(RISK)
+    if risk.get("sourceComplete") is not True or risk.get("tripped") is not False:
         raise ValueError("SHARED_RISK_NOT_HEALTHY")
     limit = _dec(risk.get("maximumLossPct"), "maximumLossPct") / Decimal("100")
     if limit != Decimal("0.075"):
         raise ValueError("SHARED_RISK_DAILY_LIMIT_MISMATCH")
-    margin = _secure_json(MARGIN)
+    margin = _shared_runtime_json(MARGIN)
     if margin.get("stage") != "HEALTHY" or margin.get("ordersAllowed") is not True:
         raise ValueError("MARGIN_GUARD_NOT_HEALTHY")
     checked = margin.get("checkedAt")
     if (type(checked) not in (int, float) or checked > now_ms + 1000
             or now_ms - checked > 15 * 60_000):
         raise ValueError("MARGIN_GUARD_STALE")
-    kill = _secure_json(KILL)
+    kill = _shared_runtime_json(KILL)
     if kill.get("active") is not False:
         raise ValueError("SHARED_KILL_SWITCH_ACTIVE")
-    pending = _secure_json(PENDING)
+    pending = _shared_runtime_json(PENDING)
     entries = pending.get("entries")
     if not isinstance(entries, list):
         raise ValueError("PENDING_EXPOSURE_INVALID")
