@@ -14,6 +14,11 @@ from disdex_monitor_snapshot_cutover import (TRADING,WATCHDOG,WATCHDOG_SCRIPT,re
 ROOT=Path('/var/lib/disdex/unified-deploy')
 HEALTH=Path('/var/lib/disdex/runner-health')
 
+def snapshot_ready_for_audit(row,now):
+    stamp=row.get('generatedAt')
+    require(type(stamp) is int and 0<stamp<=now,'WATCHDOG_SNAPSHOT_TIMESTAMP_INVALID')
+    return now-stamp<=60000
+
 def validate_audit(row,sha,now,*,audit_only):
     require(row.get('auditOnly') is audit_only and row.get('releaseSha')==sha
         and row.get('exitCode')==0 and row.get('restartCalls')==[] and row.get('errors')==[],'WATCHDOG_AUDIT_IDENTITY')
@@ -129,12 +134,15 @@ class Operations:
             _new_file(p,raw,mode,lambda p=p:self.created.append(p))
         self.command('daemon-reload');self.published=True;self.protected()
     def audit(self):
-        times=[];ticks=[];deadline=time.monotonic()+600
+        times=[];ticks=[];deadline=time.monotonic()+600;self.deferred_snapshot_reads=0
         while len(times)<3:
             require(time.monotonic()<deadline,'WATCHDOG_REAL_CYCLE_TIMEOUT');self.protected();self.command('start',WATCHDOG)
             row=json.loads(self.file(HEALTH/'private/watchdog-current-audit.json'))
             at=validate_audit(row,self.sha,time.time_ns()//1000000,audit_only=True)
-            health=json.loads(self.file(HEALTH/'current.json'));validate_live_observation(health,self.pins,time.time_ns()//1000000,self.baseline)
+            health=json.loads(self.file(HEALTH/'current.json'));now=time.time_ns()//1000000
+            if not snapshot_ready_for_audit(health,now):
+                self.deferred_snapshot_reads+=1;time.sleep(10);continue
+            validate_live_observation(health,self.pins,now,self.baseline)
             tick=health['runners']['V12_V4']['actualLastTickAt']
             if at not in times and (not ticks or tick>ticks[-1]):times.append(at);ticks.append(tick)
             if len(times)<3:time.sleep(10)
@@ -154,7 +162,8 @@ class Operations:
         self.protected();row=dict(schema='disdex-watchdog-scoped-receipt/v1',status='WATCHDOG_LIVE_PRESERVING_VERIFIED',
             sourceSha=self.sha,scope='API_MONITORS',ordersEnabled=False,authorizesTrading=False,planSha256=self.plan_hash,
             runnerMap=self.pins,serviceUnits=[WATCHDOG],auditTimes=times,boundedRecoveryRestored=True,
-            recordedAt=int(time.time()),journal=str(self.journal),ordersSent=0,cancelsSent=0,positionChangesSent=0)
+            recordedAt=int(time.time()),journal=str(self.journal),ordersSent=0,cancelsSent=0,positionChangesSent=0,
+            deferredStaleSnapshotReads=getattr(self,'deferred_snapshot_reads',0))
         path=ROOT/'receipts'/('watchdog-'+self.auth['nonce']+'.json');_new_file(path,canonical(row)+b'\n',0o400,lambda:None)
         return row
     def rollback(self):
@@ -163,6 +172,12 @@ class Operations:
             elif path==self.env_path:require(self.file(path)==self.env_raw,'WATCHDOG_ROLLBACK_CAS')
             path.unlink()
         self.command('daemon-reload')
+        if getattr(self,'journal',None):
+            from disdex_pending_maintenance_install import _new_file
+            row=dict(schema='disdex-watchdog-rollback/v1',status='ROLLED_BACK_WATCHDOG_ONLY',sourceSha=self.sha,
+                planSha256=self.plan_hash,journalSha256=hashlib.sha256(self.file(self.journal)).hexdigest(),
+                recordedAt=int(time.time()),runnerMap=self.pins,ordersSent=0,cancelsSent=0,positionChangesSent=0)
+            _new_file(self.journal.with_suffix('.rollback.json'),canonical(row)+b'\n',0o400,lambda:None)
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--plan-sha256');parser.add_argument('--execute',action='store_true');a=parser.parse_args()

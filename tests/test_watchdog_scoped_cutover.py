@@ -1,9 +1,14 @@
 import copy,os,sys,tempfile,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_watchdog_scoped_cutover import validate_audit,render_watchdog_unit,run_transaction,Operations
+from disdex_watchdog_scoped_cutover import validate_audit,render_watchdog_unit,run_transaction,Operations,snapshot_ready_for_audit
 
 class WatchdogScopeTest(unittest.TestCase):
+ def test_stale_snapshot_waits_without_counting_a_cycle_or_extending_freshness(self):
+  self.assertTrue(snapshot_ready_for_audit({'generatedAt':1000},61000))
+  self.assertFalse(snapshot_ready_for_audit({'generatedAt':1000},61001))
+  for stamp in [0,True,None,10001]:
+   with self.assertRaises(ValueError):snapshot_ready_for_audit({'generatedAt':stamp},10000)
  def test_systemd_boundary_rejects_all_trading_service_mutations(self):
   ops=Operations(None)
   for args in [('restart','disdex-v12-v4@fixture.service'),('start','disdex-v52-aster-only@fixture.service'),('stop','disdex-runner-watchdog.service'),('unmask','disdex-runner-watchdog.service')]:

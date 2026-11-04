@@ -107,6 +107,33 @@ transaction is being added: watchdog-only config allowlist, audit-only first,
 three real V4 tick cycles, then restore existing bounded recovery. It cannot
 start/restart/stop a trading service from the deployment control boundary.
 New source and installer fixtures passed in the Linux Root suite, 239/239.
+
+### Latest source-backed HP observations and safe continuation
+
+Snapshot source 3c965981224c3eb9658e88873ae3381d42ea3c3f passed eight CI
+families and completed scoped Production snapshot cycles 1793794541554,
+1793794562127, 1793794644342. V4 is still PID 2501831 / NRestarts 0 / LIVE.
+The canonical projection now reads existing signed maintenance proof: actual
+flat Gross 0/0, available 3.0 crypto / 4.0 stock within total 4.25, pending 0,
+STOP NOT_REQUIRED_FLAT and 14 genuine ineligible V4 symbol observations. This
+does not certify an authenticated browser screen or a nonflat trade.
+
+The subsequent watchdog-only alignment to 3c965981 failed closed on a canonical
+snapshot older than the unchanged 60-second audit freshness bound. Its new
+config files were removed; the previously verified de1f1631 bounded watchdog
+and the 3c965981 snapshot/V4 LIVE remained in place. Fix: wait for a genuinely
+fresh snapshot within the existing transaction deadline and do not count stale
+reads as audit cycles. Invalid/future timestamps still reject. Rollback now also
+emits a separate immutable outcome record. Linux Root suite: 240/240 passed.
+
+Actual deployed atomic source audit found UUID/exclusive publication fixes in
+Shared Risk 2737c30e but older implementations in V4/7688/Q102/V52. PR 427 is a
+minimal V4 candidate based exactly on current 2a6f27c6, with 119 local VPS
+fixture tests and all three GitHub CI families successful. PR 428 is a separate
+7688 peer candidate, with four RED collision regressions, deterministic absent
+lock handoff RED and 53 GREEN tests; source/CI/cutover remain separate. No new
+Runner SHA has yet been activated for either candidate. Q102/V52 need minimal
+hunks against their exact independent baselines; do not copy older whole files.
 6. **Shared API/state concurrency:** 80-writer tests, real multi-Runner contention,
    crash/recovery, unique temp files, cooldown/backlog/lock ownership diagnostics.
    Preserve budgets, STOP monitoring priority and unknown/pending fail-closed.
