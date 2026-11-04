@@ -1,0 +1,38 @@
+name: Current runtime atomic publication safety
+on:
+  pull_request:
+    paths:
+      - 'lib/disdex-aster-global-rate-budget.ts'
+      - 'lib/disdex-shared-crypto-daily-risk.ts'
+      - 'lib/hype-zec-long-runner-state.ts'
+      - 'lib/idle-priority-short-state.ts'
+      - 'lib/idle-residual-long-state.ts'
+      - 'lib/disdex-runner-mutation-telemetry.ts'
+      - 'lib/hype-zec-long-runner.ts'
+      - 'scripts/disdex-hype-zec-long-live-runner.ts'
+      - 'tests/hype-runner-mutation-telemetry.test.ts'
+      - 'lib/disdex-peer-decision-cycle.ts'
+      - 'lib/disdex-runner-tick-heartbeat.ts'
+      - 'scripts/disdex-pengu-dual-ls-v2-live-runner.ts'
+      - 'scripts/disdex-fet-brk48-live-runner.ts'
+      - 'scripts/disdex-idle-priority-short-live-runner.ts'
+      - 'tests/peer-decision-cycle-observation.test.ts'
+      - 'tests/fet-deferred-mutation-telemetry.test.ts'
+      - 'tests/current-runtime-atomic-publications.test.ts'
+      - '.github/workflows/current-runtime-atomic-publication-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  current-runtime-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --ignore-scripts
+      - run: npx tsx --test tests/hype-runner-mutation-telemetry.test.ts
+      - run: npx tsx --test tests/peer-decision-cycle-observation.test.ts
+      - run: npx tsx --test tests/fet-deferred-mutation-telemetry.test.ts
+      - run: npx tsx --test tests/current-runtime-atomic-publications.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/idle-priority-short-state.test.ts tests/idle-residual-long-state-migrate.test.ts tests/hype-zec-long-state.test.ts tests/hype-zec-stale-state-lifecycle.test.ts
