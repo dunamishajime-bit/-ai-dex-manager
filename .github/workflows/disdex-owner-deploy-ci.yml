@@ -3,6 +3,12 @@ name: DisDex Owner Deployment Authorization CI
 on:
   push:
     paths:
+      - 'scripts/ops/deploy/disdex_v4_priority_live.py'
+      - 'scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs'
+      - 'scripts/ops/deploy/disdex_v4_canonical_prestart.py'
+      - 'tests/test_v4_priority_live.py'
+      - 'tests/test_v4_canonical_prestart.py'
+      - 'tests/v4-priority-bootstrap.test.mjs'
       - 'scripts/ops/deploy/disdex_owner_approval.py'
       - 'scripts/ops/deploy/disdex_deployment_contract.py'
       - 'tests/test_disdex_owner_approval.py'
@@ -51,6 +57,12 @@ on:
       - 'docs/superpowers/plans/2026-10-30-pr302-route-neutral-deployment.md'
   pull_request:
     paths:
+      - 'scripts/ops/deploy/disdex_v4_priority_live.py'
+      - 'scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs'
+      - 'scripts/ops/deploy/disdex_v4_canonical_prestart.py'
+      - 'tests/test_v4_priority_live.py'
+      - 'tests/test_v4_canonical_prestart.py'
+      - 'tests/v4-priority-bootstrap.test.mjs'
       - 'scripts/ops/deploy/disdex_owner_approval.py'
       - 'scripts/ops/deploy/disdex_deployment_contract.py'
       - 'tests/test_disdex_owner_approval.py'
@@ -139,6 +151,11 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_disdex_v4_venue_witness.py -v
       - name: V4 immutable static evidence contract tests
         run: python3 -m unittest discover -s tests -p test_disdex_v4_static_evidence.py -v
+      - name: V4 priority root authority and canonical prestart
+        run: |
+          python3 -m unittest discover -s tests -p test_v4_priority_live.py -v
+          python3 -m unittest discover -s tests -p test_v4_canonical_prestart.py -v
+          node --test tests/v4-priority-bootstrap.test.mjs
       - name: V4 exact-scope rollback and owner approval tests
         run: python3 -m unittest discover -s tests -p test_disdex_v4_root_cutover.py -v
       - name: Root helper installer contract tests

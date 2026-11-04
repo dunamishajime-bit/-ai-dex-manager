@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from disdex_deployment_plan import IDS
 from disdex_shared_risk_audit import validate_signed_flat_result
 
-SDK_SHA='5304c793bb272f913f80232b6ab6a8e2ea9ee847'
+SDK_SHA='7b7719c65d2c6116d02463fc4603200f28e20762'
 RELEASES=Path('/home/deploy/disdex-trading/releases')
 SDK=RELEASES/SDK_SHA
 PINS=Path('/etc/disdex/runner-pins.json')

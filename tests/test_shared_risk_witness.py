@@ -1,6 +1,7 @@
 """No venue calls: exercise the no-order Production evidence boundary."""
 import sys
 import unittest
+
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
 import disdex_shared_risk_witness as m
@@ -83,5 +84,13 @@ class WitnessTest(unittest.TestCase):
         self.assertNotIn('SSH_CONNECTION',env)
         self.assertNotIn('EVIL',env)
         self.assertEqual(env['DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH'],'/var/lib/disdex/shared/aster-rate-budget.json')
+
+    def test_readonly_sdk_is_the_committed_pending_maintenance_release(self):
+        # This release is retained by the active immutable maintenance unit;
+        # the retired, missing 5304 diagnostic tree must not be a prerequisite.
+        current='7b7719c65d2c6116d02463fc4603200f28e20762'
+        self.assertEqual(m.SDK_SHA,current)
+        command=m.signed_get_command()
+        self.assertTrue(all('/releases/'+current+'/' in value.replace('\\','/') for value in [command[2],command[3]]))
 
 if __name__=='__main__':unittest.main()
