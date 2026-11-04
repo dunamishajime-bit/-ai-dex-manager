@@ -8,6 +8,7 @@ import type {AccountLockHandle,FileAccountOrderLock} from "./disdex-account-orde
 import {readPendingExposureRegistry,type PendingExposureRegistry} from "./disdex-pending-exposure-registry";
 import {V4ExecutionStore,advanceV4Protection,advanceV4Intent,type V4ExecutionDocument,type V4OrderIntent,type V4ProtectionPhase} from "./v12-v4-execution-store";
 import {V4SharedReservations,bindV4SharedDispatchGuards,hasFreshV4SharedAccountLedger} from "./v12-v4-shared-reservations";
+import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
 import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4OrderCycle} from "./v12-v4-order-cycle";
@@ -345,7 +346,7 @@ export class V4RunnerEngine{
   if(!(equityUsd>0)||!Number.isFinite(Number(usdt?.availableBalance)))
    throw Error("V4_SIGNED_USDT_ACCOUNT_UNAVAILABLE");
   const observedAt=this.now(),signedCapturedAt=Math.min(...captured);
-  if(captured.length!==3||signedCapturedAt>observedAt||observedAt-signedCapturedAt>30000)
+  if(captured.length!==3||signedCapturedAt>observedAt||observedAt-signedCapturedAt>V4_SIGNED_ACCOUNT_MAX_AGE_MS)
    throw Error("V4_SIGNED_ACCOUNT_READ_WINDOW_STALE");
   const mark:V4SignedMark={capturedAt:signedCapturedAt,equityUsd,
    positions:positions.map(p=>({symbol:String(p.symbol).toUpperCase(),
@@ -397,8 +398,9 @@ export class V4RunnerEngine{
     eventTs:this.now(),candidateCount:0,orderEnabled:false};
   }
   let decision:V4LiveDecisionSnapshot;
+  const preparedDecision=reusable&&prepared?.kind==="READY"?prepared.decision:undefined;
   try{
-   decision=reusable&&prepared?.kind==="READY"?prepared.decision:await d.fetchDecision();
+   decision=preparedDecision??await d.fetchDecision();
   }catch(error){
    const readFailure=classifyV4MarketDataReadFailure(error,this.now(),d.store.read());
    if(readFailure)return readFailure;
@@ -415,7 +417,7 @@ export class V4RunnerEngine{
     eventTs:this.now(),candidateCount:0,orderEnabled:false};
   if(!decision.candidates.length)
    return {status:"observing",reason:"NO_NATIVE_ENTRY_CANDIDATES",eventTs:this.now(),candidateCount:0,orderEnabled:false};
-  if(!hasFreshV4SharedAccountLedger(d.store.read(),this.now())){
+  if(!preparedDecision||!hasFreshV4SharedAccountLedger(d.store.read(),this.now())){
    await reserv.assertAccountLease();
    await this.refreshSignedAccountLedger();
   }

@@ -464,10 +464,10 @@ test("flat terminal history reuses its prepared decision without a second accoun
  }finally{rmSync(h.dir,{recursive:true,force:true});}
 });
 
-test("slow entry preparation blocks before persisting a PREPARED intent and retains the 30 second guard",async()=>{
+test("slow entry preparation blocks before persisting a PREPARED intent beyond the approved 120 seconds",async()=>{
  const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
  try{
-  h.engine.deps.referencePrice=async()=>{h.time+=31_000;return 100;};
+  h.engine.deps.referencePrice=async()=>{h.time+=121_000;return 100;};
   const result=await h.engine.tick();
   assert.equal(result.status,"blocked");assert.equal(result.reason,"V4_ENTRY_ACCOUNT_LEDGER_REFRESH_REQUIRED");
   assert.equal(result.orderEnabled,false);assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
@@ -480,11 +480,20 @@ test("an old positions response is not redated when a different signed account r
  try{
   const balances=h.engine.deps.client.getBalances.bind(h.engine.deps.client);
   h.engine.deps.client.getBalances=async()=>{
-   await new Promise<void>(done=>setImmediate(done));h.time+=31_000;return balances();
+   await new Promise<void>(done=>setImmediate(done));h.time+=121_000;return balances();
   };
   await assert.rejects(h.engine.tick(),/V4_SIGNED_ACCOUNT_READ_WINDOW_STALE/);
   assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
   assert.equal(h.store.read().state.journal.some(row=>row.type==="ACCOUNT_MARK"),false);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("entry preparation lasting 65 seconds remains admissible under the owner-approved 120 seconds",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.referencePrice=async()=>{h.time+=65_000;return 100;};
+  assert.equal((await h.engine.tick()).status,"submitted");
+  assert.equal(h.entrySends,1);assert.equal(h.stopSends,1);
  }finally{rmSync(h.dir,{recursive:true,force:true});}
 });
 

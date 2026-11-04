@@ -1,10 +1,11 @@
 import {v4PeerOwners,type V4PeerSource,type V4PeerLineageMode} from "./v12-v4-peer-state-owners";
+import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
 import {addV4PeerPending} from "./v12-v4-peer-pending";
 import type {Event,State} from "./v12-v4-production-lifecycle";
 import type {PendingExposureRegistry} from "./disdex-pending-exposure-registry";
 export type V4SignedMark={capturedAt:number;equityUsd:number;positions:Array<{symbol:string;quantity:number;markPrice:number}>};
 export function buildV4AccountMark(x:{sources:V4PeerSource[];venue:V4SignedMark;registry:PendingExposureRegistry;state:State;expectedPeerSha:string;now:number;eventId:string;peerLineageMode?:V4PeerLineageMode}){
- if(x.venue.capturedAt>x.now||x.now-x.venue.capturedAt>30000||!(x.venue.equityUsd>0))throw Error("SIGNED_ACCOUNT_MARK_STALE");
+ if(x.venue.capturedAt>x.now||x.now-x.venue.capturedAt>V4_SIGNED_ACCOUNT_MAX_AGE_MS||!(x.venue.equityUsd>0))throw Error("SIGNED_ACCOUNT_MARK_STALE");
  const owned=v4PeerOwners(x.sources,x.expectedPeerSha,x.now,x.peerLineageMode);
  const v4BySymbol=new Map<string,{side:string;qty:number}>();
  for(const leg of Object.values(x.state.legs).filter(l=>l.qty>0&&l.status!=="CLOSED"&&l.status!=="CANCELLED")){

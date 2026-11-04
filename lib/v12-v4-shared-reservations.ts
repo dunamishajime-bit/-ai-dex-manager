@@ -11,6 +11,7 @@ import {V4ExecutionStore,type V4ExecutionDocument} from "./v12-v4-execution-stor
 import type {V4DurableOrderCommand,V4DispatchGuards} from "./v12-v4-durable-orders";
 import {productionGross} from "./v12-v4-production-lifecycle";
 import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
+import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
 export const V4_SHARED_OWNER="V12_V4";
 /** The journal append time cannot make an older signed response fresh. */
 export function hasFreshV4SharedAccountLedger(doc:V4ExecutionDocument,now:number):boolean{
@@ -19,7 +20,7 @@ export function hasFreshV4SharedAccountLedger(doc:V4ExecutionDocument,now:number
  const signed=(mark as typeof mark&{signedCapturedAt?:unknown});
  const capturedAt="signedCapturedAt" in signed?signed.signedCapturedAt:mark.ts;
  return typeof capturedAt==="number"&&Number.isFinite(capturedAt)&&capturedAt>0&&
-  capturedAt<=mark.ts&&capturedAt<=now&&now-capturedAt<=30000;
+  capturedAt<=mark.ts&&capturedAt<=now&&now-capturedAt<=V4_SIGNED_ACCOUNT_MAX_AGE_MS;
 }
 const active=(x:PendingExposureEntry)=>x.status!=="RELEASED";
 function bucket(symbol:string,side:string,crypto:boolean){return [symbol,side,crypto?"CRYPTO":"STOCK"].join("|");}
