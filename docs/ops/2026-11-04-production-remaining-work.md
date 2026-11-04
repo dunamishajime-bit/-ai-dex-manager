@@ -362,3 +362,22 @@ bad identity/permissions/future timestamps still reject. New tests failed first,
 then passed. Linux fixture upgrade-unit-final.log: 86/86, no skips. Bootstrap
 Linux tests: 6/6, no skips. Updated helper CI/install and final Production
 preview/cutover remain pending; these test results are not LIVE certification.
+
+The actual preflight correctly timed out without a healthy tick. Investigation
+found an orphan lock, not a legitimate long-running owner: ownerId
+IDLE_PRIORITY_SHORT:2866857:1793823882471, acquired1793823882472,
+expired1793824002472, reservations empty, /proc/2866857 absent. The existing
+recovery parser treated the trailing timestamp as the PID. New parser recognizes
+this exact reviewed IDLE format and rejects oversized/ambiguous PID forms.
+Recovery apply additionally requires Root and an exact approved file SHA256;
+archive checks the inode/metadata/bytes again before rename. It does not disable
+the account lock or restore a live/unknown owner. Isolated baseline tests fail
+for PID parsing and wrong approved hash; patched Linux tests7/7, no skips.
+
+Independent signed native GETs at1793831818597/1793831820574/1793831824930
+confirmed positions0/openOrders0, each with zero orders/cancels/position mutations.
+Raw original responses remain in orphan-lock-native-1793831814694928409 under
+the Root audit base. Orphan bytes SHA256
+c9aeae65ca4191e62253a0e6c8296969aee602f178024544458732c343b5b3a7
+were unchanged through all reads. This is a recovery prerequisite, not three
+healthy V4 decision cycles. Orphan archival and new V4 cutover are still pending.
