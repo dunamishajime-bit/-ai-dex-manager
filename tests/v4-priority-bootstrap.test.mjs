@@ -4,9 +4,18 @@ import {mkdtemp,writeFile,readFile,rm,symlink,stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
-import {validateGrant,validateObsoleteHold,atomicOwnedWrite} from '../scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs';
+import {validateGrant,validateObsoleteHold,atomicOwnedWrite,permitsSharedMarginMetadata} from '../scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const NOW=2000000000000;
+test('only the canonical deploy-owned Margin Guard may have deploy-group write permission',()=>{
+ const path='/var/lib/disdex/shared/margin-risk/guard-live.json';
+ const metadata={uid:1000,gid:1000,mode:0o100660};
+ assert.equal(permitsSharedMarginMetadata(path,metadata,1000,1000),true);
+ for(const [p,m] of [[path,{...metadata,uid:999}],[path,{...metadata,gid:999}],
+  [path,{...metadata,mode:0o100666}],['/etc/disdex/v12-v4-production-certification.json',metadata],
+  ['/var/lib/disdex/shared/kill-switch.json',metadata]])
+  assert.equal(permitsSharedMarginMetadata(p,m,1000,1000),false);
+});
 const grant=()=>({schema:'disdex-v4-priority-root-grant/v1',repository:'dunamishajime-bit/-ai-dex-manager',
  deploymentTarget:'professional-dismanager.net',operatorTarget:'DD1296_FINAL_ALLIN_10BPS',
  candidateSha:'a'.repeat(40),scope:'V12_V4_PREPARATION_ONLY',ordersEnabled:false,authorizesTrading:false,

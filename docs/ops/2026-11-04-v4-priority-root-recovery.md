@@ -63,3 +63,12 @@ V4-only environment pin updates do not certify the entire watchdog. HP login
 verification and other Runner repairs remain distinct from V4 backend authority.
 The bounded refresh lease requires a genuine fresh root renewal when it expires;
 editing expiry or copying a previous lease is forbidden.
+
+First authorized preparation migrated the flat durable journal without deleting
+its history. Certificate bootstrap then rejected the existing deploy:deploy 0660
+Margin Guard file and restored the original HOLD. No runtime order activation
+or V4 process switch occurred. A RED-to-GREEN regression now allows that exact
+canonical Margin Guard path, uid/gid and 0660 mode only; root certificates, Kill,
+other groups and world-writable files remain rejected. Linux bootstrap suite:
+5 passed. A subsequent attempt must use a new exact plan and nonce; the genuine
+migration receipt and still-valid refresh lease are reused without re-dating.

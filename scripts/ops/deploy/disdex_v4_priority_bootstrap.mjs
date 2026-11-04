@@ -20,9 +20,13 @@ export function validateObsoleteHold(k){
  require(k?.active===true&&k.action==='HOLD_PROTECTED'&&k.operator==='disdex-v52-aster-only'
   &&k.recoverable===true&&k.reason===reason,'EXACT_OBSOLETE_HOLD_REQUIRED');return true;
 }
-async function regularBytes(path,allowed=[0]){
+export function permitsSharedMarginMetadata(path,metadata,uid,gid){
+ return path==='/var/lib/disdex/shared/margin-risk/guard-live.json'
+  &&metadata.uid===uid&&metadata.gid===gid&&(metadata.mode&0o777)===0o660;
+}
+async function regularBytes(path,allowed=[0],sharedGroup=null){
  const before=await lstat(path);require(before.isFile()&&!before.isSymbolicLink()&&allowed.includes(before.uid)
-  &&(before.mode&0o022)===0,'UNTRUSTED_FILE');
+  &&((before.mode&0o022)===0||(sharedGroup&&permitsSharedMarginMetadata(path,before,sharedGroup.uid,sharedGroup.gid))),'UNTRUSTED_FILE');
  const fd=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
  try{const s=await fd.stat();require(s.dev===before.dev&&s.ino===before.ino&&s.size<=16*1048576,'FILE_CHANGED');
   return {bytes:await fd.readFile(),metadata:s};}finally{await fd.close();}
@@ -68,7 +72,7 @@ async function main(){
  const {V12_V4_TIME_EMERGENCY_RESEARCH_ID}=await from('lib/v12-v4-time-emergency-stop-research.ts');
  const {assertV4EntrySafety}=await from('lib/v12-v4-entry-safety.ts');
  const shared='/var/lib/disdex/shared';
- const json=async path=>JSON.parse((await regularBytes(path,[0,p.deployUid])).bytes);
+ const json=async path=>JSON.parse((await regularBytes(path,[0,p.deployUid],{uid:p.deployUid,gid:p.deployGid})).bytes);
  const runtime=async()=>({sharedRisk:await json(shared+'/crypto-daily-risk.json'),marginGuard:await json(shared+'/margin-risk/guard-live.json'),
   killSwitch:await json(shared+'/kill-switch.json'),pendingExposure:await json(shared+'/pending-exposure.json')});
  const actualFetch=globalThis.fetch;
