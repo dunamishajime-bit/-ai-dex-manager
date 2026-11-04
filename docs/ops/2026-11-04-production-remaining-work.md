@@ -158,3 +158,44 @@ hunks against their exact independent baselines; do not copy older whole files.
 
 Do not convert source-ready, tests or successful V4 backend cutover into a claim
 that all groups or authenticated HP/all Runner LIVE certification are complete.
+
+## Continuation checkpoint: 2026-11-04 evening JST
+
+Watchdog 3c965981 is now formally verified after bounded freshness waiting:
+cycles 1793795706032, 1793795831635, 1793795894299, two stale reads deferred
+without being counted. Receipt journal d33293480eb64d08ba9d6f3343fbcdf1,
+plan e3d916c6c7e30718430a2d419bae9a92fa898ab2ae2c0ac50cba2731cc0e5b12.
+All Runner PIDs/pins/permissions were preserved and bounded recovery restored.
+
+Pending maintenance later reported ACCOUNT_LOCK_BUSY and its timestamp aged
+about eight minutes. No account lock was removed. One normal official service
+cycle succeeded once free, signed/native reconciliation updated the timestamp,
+and V4's HP ALLOWED state recovered. Backend V4 stayed PID 2501831 / no restarts
+/ CERTIFIED NO_SIGNAL throughout. Source audit also found the global deployment
+exclusive lock pauses the SDK's shared maintenance lock during monitor audits.
+New kernel serialization keeps API monitor mutations exclusive to one monitor
+transaction and excludes every trading cutover, while allowing the existing
+shared read-only maintenance lease. Account lock and API budget are unchanged.
+All non-monitor deployment scopes retain the exclusive global lock. Four actual
+Linux Root kernel tests prove these boundaries; full suite 246/246 passed.
+This serialization change is source-tested, not yet deployed at this checkpoint.
+
+The HP classifier had incorrectly added a five-minute header requirement even
+when every entry was RELEASED. Fix 6e31626cf70a3bb8efb2568aca0493200fe691eb
+separates closed history from unresolved pending, preserves actual timestamps,
+and keeps unresolved stale/UNKNOWN/nonfinite/future values blocked. Gross/STOP
+still need the separate fresh signed receipt. Node 34/Python13 passed; all eight
+CI families success. Stage and deploy this no-order monitor revision next.
+
+Snapshot renderer now binds its prestart to its own new marker instead of the
+old 53 release. Unknown prestart guards are rejected for review, never erased.
+These tests are included in the 246-test control suite.
+
+PR427 head 43c8cb75547cef810be7e398a716f227d842c087: V4 atomic + absent-lock
+retry, 120 fixture tests and all three CI families passed; not LIVE. PR428 head
+4999977da8e5fae4431692923ef2b381f5d1dd8d: 7688 minimal safety candidate,
+53 fixture tests and atomic/V12 CI passed, but legacy PENGU parity CI failed
+trade 9 entry-time equality by one hour. Its unchanged parity harness downloads
+Bitget research data for 2025-08-10..2026-08-10; this is not Aster certification.
+Investigate the exact baseline/data/reference discrepancy; do not alter trading
+rules or golden metrics just to mark CI green. No new PENGU source is deployed.

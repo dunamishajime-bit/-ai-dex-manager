@@ -183,14 +183,11 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--plan-sha256');parser.add_argument('--execute',action='store_true');a=parser.parse_args()
     from disdex_unified_root_gate import assert_codex_ssh_session,assert_private_dir,assert_regular_secure
     assert_codex_ssh_session();assert_private_dir(ROOT,root_uid=0)
-    import fcntl
-    fd=os.open(ROOT/'deployment-execution.lock',os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600)
-    try:
-        assert_regular_secure(ROOT/'deployment-execution.lock',private=True);fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+    from disdex_deployment_serialization import deployment_lock
+    with deployment_lock(ROOT,'API_MONITORS',False):
         op=Operations(a.plan_sha256)
         if a.execute:result=run_transaction(op)
         else:op.prepare();result=dict(status='WATCHDOG_READONLY_PREFLIGHT_PASS_NOT_LIVE',planSha256=op.plan_hash,plan=op.plan)
         print(json.dumps(result,sort_keys=True))
-    finally:os.close(fd)
 
 if __name__=='__main__':main()

@@ -36,6 +36,7 @@ on:
       - 'tests/test_monitor_snapshot_cutover.py'
       - 'tests/test_monitor_live_preservation.py'
       - 'tests/test_watchdog_scoped_cutover.py'
+      - 'tests/test_deployment_serialization.py'
       - 'tests/test_shared_risk_monitor_wiring.py'
       - 'tests/test_shared_risk_prestart.py'
       - 'tests/test_shared_risk_witness.py'
@@ -94,6 +95,7 @@ on:
       - 'tests/test_monitor_snapshot_cutover.py'
       - 'tests/test_monitor_live_preservation.py'
       - 'tests/test_watchdog_scoped_cutover.py'
+      - 'tests/test_deployment_serialization.py'
       - 'tests/test_shared_risk_monitor_wiring.py'
       - 'tests/test_shared_risk_prestart.py'
       - 'tests/test_shared_risk_witness.py'
@@ -144,7 +146,7 @@ jobs:
       - name: V52 independent authority and protected-hold rollback
         run: sudo /usr/bin/python3 -m unittest tests.test_v52_scoped_root_contract tests.test_v52_root_integration -v
       - name: Independent no-order health snapshot transaction
-        run: sudo /usr/bin/python3 -m unittest tests.test_monitor_snapshot_cutover tests.test_monitor_live_preservation tests.test_watchdog_scoped_cutover -v
+        run: sudo /usr/bin/python3 -m unittest tests.test_monitor_snapshot_cutover tests.test_monitor_live_preservation tests.test_watchdog_scoped_cutover tests.test_deployment_serialization -v
       - name: No-order Production signed reader boundary
         run: python3 -m unittest discover -s tests -p test_shared_risk_witness.py -v
       - name: Root-only Shared Risk no-order prestart

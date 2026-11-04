@@ -1,9 +1,20 @@
 import copy,sys,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_monitor_snapshot_cutover import validate_live_observation,protected_monitor_context,choose_monitor_dropin
+from disdex_monitor_snapshot_cutover import validate_live_observation,protected_monitor_context,choose_monitor_dropin,render_snapshot_unit,validate_snapshot_prestart
 
 class LivePreservationTest(unittest.TestCase):
+ def test_prestart_migration_rejects_unknown_guards_instead_of_removing_them(self):
+  sha='a'*40;marker='/home/deploy/disdex-trading/releases/'+sha+'/.disdex-release-sha'
+  row='ExecStartPre={ path=/usr/bin/grep ; argv[]=/usr/bin/grep -Fxq '+sha+' '+marker+' ; ignore_errors=no ; }'
+  validate_snapshot_prestart(row)
+  validate_snapshot_prestart('ExecStartPre=')
+  for bad in ['ExecStartPre={ argv[]=/usr/bin/python3 /root/authorization-guard.py ; ignore_errors=no ; }',row.replace(' -Fxq '+sha,' -Fxq '+'b'*40)]:
+   with self.assertRaises(ValueError):validate_snapshot_prestart(bad)
+ def test_snapshot_prestart_binds_to_its_own_release_not_the_old_v4_release(self):
+  sha='b'*40;root='/home/deploy/disdex-trading/releases/'+sha;unit=render_snapshot_unit(root,'/etc/disdex/current-runtime/'+sha+'-observed-health.env',sha)
+  self.assertIn('ExecStartPre=\n',unit);self.assertIn('ExecStartPre=/usr/bin/grep -Fxq '+sha+' '+root+'/.disdex-release-sha\n',unit)
+  self.assertIn('WorkingDirectory='+root,unit);self.assertIn('ExecStart=/usr/bin/node '+root+'/scripts/ops/root/disdex-runner-health-snapshot-current.mjs',unit)
  def fixture(self):
   keys=['V12_V4','V52','PENGU_V8','QUALITY102_CAUSAL_V1','FET_BRK48_RESIDUAL','HYPE_TREND_LONG','IDLE_PRIORITY_SHORT']
   pins={key:'a'*40 for key in keys}

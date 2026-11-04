@@ -17,6 +17,23 @@ TRADING={'V12_V4','V52','PENGU_V8','QUALITY102_CAUSAL_V1','FET_BRK48_RESIDUAL','
 def require(value,reason):
     if not value:raise ValueError('MONITOR_SNAPSHOT_'+reason)
 
+def render_snapshot_unit(release,environment,sha):
+    return ('[Service]\nEnvironmentFile='+str(environment)+'\nWorkingDirectory='+str(release)+'\n'
+        'ExecStartPre=\nExecStartPre=/usr/bin/test -f '+str(release)+'/.disdex-release-sha\n'
+        'ExecStartPre=/usr/bin/grep -Fxq '+sha+' '+str(release)+'/.disdex-release-sha\n'
+        'ExecStart=\nExecStart=/usr/bin/node '+str(release)+'/'+SCRIPT+'\n'
+        'ReadWritePaths=/var/lib/disdex/runner-health\nReadOnlyPaths=/var/lib/disdex/runner-health/ticks\n')
+
+def validate_snapshot_prestart(properties):
+    if properties.strip() in ['', 'ExecStartPre=']:return
+    commands=re.findall(r'argv\[\]=(.*?) ; ignore_errors=',properties)
+    require(not properties.strip() or bool(commands),'UNPARSEABLE_SNAPSHOT_PRESTART')
+    for command in commands:
+        marker=r'/home/deploy/disdex-trading/releases/[a-f0-9]{40}/\.disdex-release-sha'
+        allowed=bool(re.fullmatch(r'/usr/bin/test -f '+marker,command))
+        match=re.fullmatch(r'/usr/bin/grep -Fxq ([a-f0-9]{40}) /home/deploy/disdex-trading/releases/([a-f0-9]{40})/\.disdex-release-sha',command)
+        require(allowed or bool(match and match[1]==match[2]),'UNKNOWN_SNAPSHOT_PRESTART_MUST_BE_PRESERVED')
+
 def choose_snapshot_dropin(paths,sha):
     return choose_monitor_dropin(paths,sha,SERVICE)
 
@@ -154,6 +171,7 @@ class MonitorSnapshotOperations:
         _assert_execution_root(self.parent.root_uid)
         require(self.args.scope=='API_MONITORS' and self.args.orders_enabled=='false','NO_ORDER_SCOPE')
         properties=self.command('show',SERVICE,'-p','DropInPaths')
+        validate_snapshot_prestart(self.command('show',SERVICE,'-p','ExecStartPre'))
         values=properties.split('=',1)[1].split() if '=' in properties else []
         for path in values:assert_regular_secure(Path(path),private=False)
         self.dropin=choose_snapshot_dropin(values,self.args.sha)
@@ -217,9 +235,7 @@ class MonitorSnapshotOperations:
         env=('DISDEX_HEALTH_SNAPSHOT_DEPLOYMENT_TARGET=professional-dismanager.net\n'
              'DISDEX_HEALTH_SNAPSHOT_OPERATOR_TARGET=DD1296_FINAL_ALLIN_10BPS\n'
              'DISDEX_HEALTH_SNAPSHOT_CANONICAL_PATH=/var/lib/disdex/runner-health/current.json\n')
-        unit=('[Service]\nEnvironmentFile='+str(self.env)+'\nWorkingDirectory='+str(self.release)+'\n'
-            'ExecStart=\nExecStart=/usr/bin/node '+str(self.release/SCRIPT)+'\n'
-            'ReadWritePaths=/var/lib/disdex/runner-health\nReadOnlyPaths=/var/lib/disdex/runner-health/ticks\n')
+        unit=render_snapshot_unit(self.release,self.env,self.args.sha)
         for path,raw,mode in [(self.env,env.encode(),0o600),(self.dropin,unit.encode(),0o644)]:
             _new_file(path,raw,mode,lambda p=path:self.created.append(p))
         self.command('daemon-reload')

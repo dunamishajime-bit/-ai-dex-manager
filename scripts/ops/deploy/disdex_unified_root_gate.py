@@ -1449,24 +1449,12 @@ def main():
             if len(raw) > 16384:
                 raise ValueError("owner approval too large")
         if args.execute:
-            # Exclusive root-owned lock across GitHub Actions / CODEX_SSH paths.
-            # An Actions concurrency group alone cannot serialize VPS writers.
-            import fcntl
-            assert_private_dir(ROOT, root_uid=0)
-            lock_path = ROOT / "deployment-execution.lock"
-            if lock_path.is_symlink():
-                raise ValueError("untrusted deployment lock symlink")
-            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
-            try:
-                assert_regular_secure(lock_path, root_uid=0, private=True)
-                try:
-                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                except BlockingIOError:
-                    raise ValueError("another root deployment is in progress") from None
+            from disdex_deployment_serialization import deployment_lock
+            # API monitor writers remain exclusive with each other and with
+            # trading cutovers, but must not starve shared no-order maintenance.
+            with deployment_lock(ROOT,args.scope,args.orders_enabled=='true'):
                 result = RootDeploymentExecutor(default_execution_paths()).execute(
                     args, raw.strip())
-            finally:
-                os.close(fd)
         else:
             result = preflight(args, raw.strip())
         print(json.dumps(result, sort_keys=True))
