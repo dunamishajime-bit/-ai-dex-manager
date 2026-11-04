@@ -22,6 +22,14 @@ null/string/nonfinite/negative gross/notional, unknown reservation status,
 unreconciled UNKNOWN and future timestamps. Invalid pending is a monitor-side
 order-permission block, not an exchange, Kill or runtime-state mutation.
 
+Follow-up correction: the five-minute pending limit applies to unresolved
+records, not closed RELEASED history. Terminal-only history reports zero pending
+with its real timestamp and sourceFresh flag; it does not fabricate fresh venue
+evidence. Gross and flat STOP display still require the separate current signed
+receipt and exact pending digest. Future/invalid header timestamps and every
+unresolved stale/UNKNOWN record remain rejected. This restores the prior LIVE
+contract instead of adding a periodic timestamp dependency for closed history.
+
 V4 observation rankings come from the actual Runner-owned gate telemetry, with
 exact PID owner, runtime SHA, completed tick and freshness checks. Entry-source
 rejections remain explicitly ineligible observations. The static 41-route count

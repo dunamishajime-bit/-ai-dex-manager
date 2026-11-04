@@ -12,6 +12,9 @@ test('pending health rejects missing, coerced, negative, nonfinite, future, stal
  }
  assert.equal(classifyPendingExposure({...pending(),updatedAt:now+1},now).status,'BLOCKED');
  assert.equal(classifyPendingExposure(pending([{...entry,status:'UNKNOWN'}]),now).status,'BLOCKED');
+ const old=pending([{...entry,status:'RELEASED',updatedAt:now-900000}]);old.updatedAt=now-900000;
+ const terminal=classifyPendingExposure(old,now);assert.equal(terminal.status,'HEALTHY');assert.equal(terminal.activeCount,0);assert.equal(terminal.sourceFresh,false);
+ assert.equal(classifyPendingExposure({...old,entries:[{...entry,updatedAt:now-900000}]},now).status,'BLOCKED');
 });
 test('flat Gross comes only from current genuine no-order maintenance proof and unchanged pending bytes',()=>{
  const caps={cryptoGross:3,stockGross:4,totalGross:4.25,stockSlotGross:2};const input={report:report(),sdkSha:sdk,pending:classifyPendingExposure(pending(),now),pendingDigest:hash,caps,now};
