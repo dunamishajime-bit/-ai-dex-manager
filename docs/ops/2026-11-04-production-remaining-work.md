@@ -86,6 +86,27 @@ digest is excluded from identity equality; monitor neither grants nor mutates
 pending or trading authority. Protected-hold validation remains unchanged.
 Existing and new Linux Root fixtures: 234 tests passed. This is source/test
 verification, not yet a monitor Production cutover or whole-project completion.
+
+### Canonical monitor Production cutover completed
+
+The monitor-only source `de1f163180ded8ffbe31af462152abb10deb6231` passed all
+eight GitHub CI families and was staged as a Root-owned immutable role release
+(archive SHA256 f462b77e2043e0e307b80c83c07d771d89c63d0653dd051345a7758868f50024).
+Root no-order API_MONITORS approval bound to plan
+20eb513bf5ac5b7bb52342884ed8f727df06dd0469c55fb41ab45bd0962cd0c9
+was consumed once. The official monitor receipt records distinct actual tick
+snapshot cycles 1793779559702, 1793779641864, 1793779744556. V4 stays LIVE and
+ALLOWED with decisionPermission NO_SIGNAL; diagnostic evidenceMode is tick-v1.
+All peer PIDs/pins/approvals, current symlink, single risk Writer and Kill stayed
+unchanged. Orders/cancels/position mutations by this deployment: 0.
+
+Watchdog read-only preview using that immutable source produced NOOP for all
+seven Runners plus both safety daemons, no errors/restarts/trading effects. The
+old watchdog has not yet switched. A separate exact-plan Root SSH scoped
+transaction is being added: watchdog-only config allowlist, audit-only first,
+three real V4 tick cycles, then restore existing bounded recovery. It cannot
+start/restart/stop a trading service from the deployment control boundary.
+New source and installer fixtures passed in the Linux Root suite, 239/239.
 6. **Shared API/state concurrency:** 80-writer tests, real multi-Runner contention,
    crash/recovery, unique temp files, cooldown/backlog/lock ownership diagnostics.
    Preserve budgets, STOP monitoring priority and unknown/pending fail-closed.
