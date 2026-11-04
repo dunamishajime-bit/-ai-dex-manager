@@ -97,3 +97,12 @@ The expired PENGU peer-stop artifact was formally retired by authenticated root
 SSH after verifying expiry, active PENGU PID and unchanged valid live approval.
 Its original bytes/dates remain archived under
 `retired-expired-peer-stop-1793762256`; no approval was renewed or broadened.
+
+Before the first V4 process switch, inspection found the old monitor unit is
+an actual local instance file, which plain systemctl mask cannot overwrite.
+The priority executor now supplies a V4-only adapter for the exact old/new unit
+names: require stopped PID 0, preserve the root-owned original, atomically mask
+it, and restore its exact monitor-only bytes on an authorized pre-start rollback.
+It never starts anything itself and rejects peers/active processes. The new
+actual Linux filesystem regression failed before implementation and passes
+afterward. Current Linux suite total: 161.

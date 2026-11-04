@@ -59,6 +59,51 @@ def exclusive_json(path,value):
     with os.fdopen(fd,'wb') as handle:
         handle.write(canonical(value));handle.flush();os.fsync(handle.fileno())
 
+class V4LocalUnitSystemdAdapter:
+    """Preserve local instance files when masking the exact stopped V4 units."""
+    def __init__(self,allowed,backups,*,unit_root=Path('/etc/systemd/system'),root_uid=0):
+        from disdex_unified_root_gate import SystemdAdapter
+        self.backend=SystemdAdapter();self.allowed=allowed;self.backups=backups
+        self.unit_root=unit_root;self.root_uid=root_uid;self.originals={}
+    def __getattr__(self,name):return getattr(self.backend,name)
+    def _check_unit(self,unit):
+        require(unit in self.allowed and re.fullmatch(r'disdex-v12-v4@[a-f0-9]{40}\.service',unit),'UNIT_MASK_SCOPE')
+        require(self.active_state(unit) in ('inactive','failed') and self.main_pid(unit)==0,'UNIT_MASK_REQUIRES_STOPPED_PID')
+    def _reload(self):subprocess.run(['/usr/bin/systemctl','daemon-reload'],check=True,capture_output=True)
+    def _sync(self):
+        fd=os.open(self.unit_root,os.O_RDONLY|os.O_DIRECTORY)
+        try:os.fsync(fd)
+        finally:os.close(fd)
+    def mask(self,unit):
+        import stat,uuid
+        self._check_unit(unit);path=self.unit_root/unit
+        if path.is_symlink():
+            require(str(path.readlink())=='/dev/null','UNIT_MASK_LINK_TARGET')
+        elif path.exists():
+            s=path.lstat();parent=self.unit_root.lstat()
+            require(stat.S_ISREG(s.st_mode) and s.st_uid==self.root_uid and not s.st_mode&0o022
+                and parent.st_uid==self.root_uid and not parent.st_mode&0o022,'UNIT_MASK_METADATA')
+            raw=bytes_at(path);backup=self.backups/(unit+'.original')
+            fd=os.open(backup,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o400)
+            with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
+            self.originals[unit]=(raw,s)
+            temp=self.unit_root/('.v4-mask-'+uuid.uuid4().hex);os.symlink('/dev/null',temp)
+            require(bytes_at(path)==raw and path.lstat().st_ino==s.st_ino,'UNIT_MASK_CAS')
+            os.replace(temp,path);self._sync();self._reload()
+        self._run('mask',unit)
+    def unmask(self,unit):
+        import stat,uuid
+        self._check_unit(unit)
+        if unit not in self.originals:return self._run('unmask',unit)
+        path=self.unit_root/unit;raw,s=self.originals[unit]
+        require(path.is_symlink() and str(path.readlink())=='/dev/null','UNIT_UNMASK_CAS')
+        temp=self.unit_root/('.v4-restore-'+uuid.uuid4().hex)
+        fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,stat.S_IMODE(s.st_mode))
+        with os.fdopen(fd,'wb') as f:
+            f.write(raw);os.fchown(f.fileno(),s.st_uid,s.st_gid);f.flush();os.fsync(f.fileno())
+        require(path.is_symlink() and str(path.readlink())=='/dev/null','UNIT_UNMASK_CAS')
+        os.replace(temp,path);self._sync();self._reload()
+
 PROBE=r'''
 import {readFile,lstat} from 'node:fs/promises';
 import {v4PeerOwners} from './lib/v12-v4-peer-state-owners.ts';
@@ -331,7 +376,8 @@ class ProductionOperations:
         else:exclusive_json(path,self.desired)
         args=SimpleNamespace(deployment_target=self.plan['deploymentTarget'],operator_target=self.plan['operatorTarget'],
             sha=CANDIDATE_SHA,scope=SCOPE,route='CODEX_SSH',owner='codex-ssh',orders_enabled='true',plan_sha256=self.deployment_hash,_codex_ssh_authenticated=True)
-        executor=RootDeploymentExecutor(default_execution_paths())
+        units={f'disdex-v12-v4@{s}.service' for s in [self.pins['V12_V4'],CANDIDATE_SHA]}
+        executor=RootDeploymentExecutor(default_execution_paths(),systemd=V4LocalUnitSystemdAdapter(units,self.transaction))
         self.wiring.apply()
         result=executor.execute(args,'')
         # The refresh-only timer cannot grant order authority.

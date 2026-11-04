@@ -103,6 +103,20 @@ class PrioritySequenceTest(unittest.TestCase):
 
 @unittest.skipIf(sys.platform=='win32','POSIX owner-preserving restoration')
 class ProtectionRestoreTest(unittest.TestCase):
+    def test_scoped_mask_preserves_local_unit_and_restores_it_without_starting_anything(self):
+        import tempfile,os
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory(prefix='disdex-v4-mask-test-') as folder:
+            root=Path(folder);units=root/'units';units.mkdir();backups=root/'backups';backups.mkdir(mode=0o700)
+            unit='disdex-v12-v4@'+'a'*40+'.service';path=units/unit;raw=b'[Service]\nExecStart=/fixture/monitor-only\n';path.write_bytes(raw)
+            adapter=m.V4LocalUnitSystemdAdapter({unit},backups,unit_root=units,root_uid=os.getuid())
+            with patch.object(adapter,'active_state',return_value='inactive'),patch.object(adapter,'main_pid',return_value=0),patch.object(adapter,'_run') as run,patch.object(m.subprocess,'run'):
+                adapter.mask(unit);self.assertTrue(path.is_symlink());self.assertEqual(str(path.readlink()),'/dev/null')
+                adapter.unmask(unit);self.assertEqual(path.read_bytes(),raw)
+                self.assertFalse(any(call.args[0] in ('start','restart') for call in run.call_args_list))
+                with self.assertRaises(ValueError):adapter.mask('disdex-other.service')
+            with patch.object(adapter,'active_state',return_value='active'):
+                with self.assertRaises(ValueError):adapter.mask(unit)
     def test_a_killed_child_before_receipt_is_still_recovered_and_new_trip_is_preserved(self):
         import tempfile,json
         from unittest.mock import patch
