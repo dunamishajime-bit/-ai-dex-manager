@@ -1,0 +1,25 @@
+name: Current runtime atomic publication safety
+on:
+  pull_request:
+    paths:
+      - 'lib/disdex-aster-global-rate-budget.ts'
+      - 'lib/disdex-shared-crypto-daily-risk.ts'
+      - 'lib/hype-zec-long-runner-state.ts'
+      - 'lib/idle-priority-short-state.ts'
+      - 'lib/idle-residual-long-state.ts'
+      - 'tests/current-runtime-atomic-publications.test.ts'
+      - '.github/workflows/current-runtime-atomic-publication-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  current-runtime-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci --ignore-scripts
+      - run: npx tsx --test tests/current-runtime-atomic-publications.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/idle-priority-short-state.test.ts tests/hype-zec-long-state.test.ts tests/hype-zec-stale-state-lifecycle.test.ts tests/pending-exposure-registry.test.ts tests/idle-residual-v52-owner-sha.test.ts tests/v52-idle-owner-recovery.test.ts
+      - run: python3 -B tests/test_v52_real_tick.py && python3 -B tests/test_v52_stock_quote_local_hold_20261027.py

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
@@ -110,9 +110,9 @@ export async function writeSharedCryptoDailyRisk(path: string, state: SharedCryp
     }
     if (state.stateHash && state.stateHash !== hashState(state)) throw new Error("SHARED_CRYPTO_RISK_WRITE_HASH_MISMATCH");
     await mkdir(dirname(path), { recursive: true });
-    const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+    const temporary = `${path}.${randomUUID()}.tmp`;
     try {
-        await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o600, flag: "wx" });
         await rename(temporary, path);
     } catch (error) {
         await unlink(temporary).catch(() => undefined);
