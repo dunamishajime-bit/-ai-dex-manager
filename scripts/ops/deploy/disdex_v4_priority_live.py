@@ -58,7 +58,12 @@ def validate_stopped_upgrade_context(before,after,old_sha):
     old=expected['peers']['V12_V4']
     require(old.get('sha')==old_sha and type(old.get('pid')) is int and old['pid']>0
         and old.get('activeState')=='active','UPGRADE_OLD_PROCESS_BASELINE')
-    old.update(pid=0,cwd=None,activeState='inactive')
+    state=after.get('peers',{}).get('V12_V4',{}).get('activeState')
+    require(state in ('inactive','failed'),'UPGRADE_OLD_PROCESS_NOT_STOPPED')
+    # A timed-out graceful stop can finish in failed/PID0. This is not a
+    # healthy claim: fresh signed flat and terminal-journal reconciliation
+    # remain mandatory before migration, as in the canonical full executor.
+    old.update(pid=0,cwd=None,activeState=state)
     require(after==expected,'UPGRADE_STOP_CHANGED_PROTECTED_CONTEXT')
     return True
 

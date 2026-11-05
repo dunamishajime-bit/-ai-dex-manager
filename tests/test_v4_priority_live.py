@@ -62,6 +62,8 @@ class PriorityFactsTest(unittest.TestCase):
         stopped=copy.deepcopy(before)
         stopped['peers']['V12_V4'].update(pid=0,cwd=None,activeState='inactive')
         self.assertTrue(m.validate_stopped_upgrade_context(before,stopped,OLD))
+        failed=copy.deepcopy(stopped);failed['peers']['V12_V4']['activeState']='failed'
+        self.assertTrue(m.validate_stopped_upgrade_context(before,failed,OLD))
         for key,value in [('killHash','changed'),('writer',{'pid':6}),('peerApprovalHashes',{})]:
             bad=copy.deepcopy(stopped);bad[key]=value
             with self.subTest(key=key),self.assertRaises(ValueError):m.validate_stopped_upgrade_context(before,bad,OLD)
