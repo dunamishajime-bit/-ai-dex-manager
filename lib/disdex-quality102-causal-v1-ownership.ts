@@ -55,7 +55,7 @@ export async function readQuality102CausalV1Ownership(options: {
         throw new Error("QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH");
     }
     const store = options.required
-        ? new MemoryQuality102CausalV1StateStore(raw as Quality102CausalV1State, "LIVE", expectedSha || stateSha)
+        ? new MemoryQuality102CausalV1StateStore(raw as unknown as Quality102CausalV1State, "LIVE", expectedSha || stateSha)
         : new FileQuality102CausalV1StateStore(pathValue, "LIVE", expectedSha || stateSha);
     const state = await store.load();
     return { state, position: state.position, pending: state.pending };
