@@ -72,7 +72,8 @@ async function main(){
  const {FileAccountOrderLock}=await from('lib/disdex-account-order-lock.ts');
  const {AsterV3Client}=await from('lib/aster-v3-client.ts');
  const {collectV4DynamicEvidence,validateV4RefreshLease}=await from('scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts');
- const {validateV4ProductionCertificate,validateV4SharedExecutionEvidencePayloads,readV4ProductionCertificate}=await from('lib/v12-v4-certified-gates.ts');
+ const {validateV4ProductionCertificate,validateV4SharedExecutionEvidencePayloads,readV4ProductionCertificate,
+  V4_BOUNDED_CERTIFICATE_VALIDITY_MS=7*86400000}=await from('lib/v12-v4-certified-gates.ts');
  const {validateV4RefreshCommit}=await from('lib/v12-v4-refresh-commit.ts');
  const {PRODUCTION_EXIT_CATALOG}=await from('lib/v12-v4-production-lifecycle.ts');
  const {V12_V4_V2_POLICY}=await from('lib/v12-v4-v2-shadow.ts');
@@ -132,7 +133,7 @@ async function main(){
   require(sha(certOld.bytes)===p.certificateHash,'CERTIFICATE_CHANGED');
   const prior=JSON.parse(certOld.bytes);const reuse=prior.approvedSha===g.candidateSha;
   const certificate=reuse?prior:{schema:'disdex-v12-v4-production-certification/v4',approvedSha:g.candidateSha,
-   policyId:V12_V4_V2_POLICY,approvedAt,validUntil:new Date(Date.parse(approvedAt)+7*86400000).toISOString(),
+   policyId:V12_V4_V2_POLICY,approvedAt,validUntil:new Date(Date.parse(approvedAt)+V4_BOUNDED_CERTIFICATE_VALIDITY_MS).toISOString(),
    verifiedRoutes:PRODUCTION_EXIT_CATALOG.map(x=>x.route),venueEvidenceBasis:'ESTABLISHED_ASTER_PRODUCTION_EXECUTION',
    evidenceSha256:hashes,approvedGross:V12_V4_CERTIFIED_GROSS_CONTRACT,
    risksAcknowledged:{v4FirstLiveFillNotYetObserved:true,weakIndependentForwardPerformance:true},

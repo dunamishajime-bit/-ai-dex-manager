@@ -1,6 +1,7 @@
 """Owner-to-refresh-lease boundary tests; no real key or VPS access."""
 import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +45,21 @@ def approval(**overrides):
 
 
 class RefreshLeaseTest(unittest.TestCase):
+    def test_release_policy_binds_long_lease_to_its_approval_plan(self):
+        old = approval()
+        with patch("disdex_v4_evidence_refresh_activation.refresh_lease_limit",
+                   return_value=30 * 86400):
+            fresh = approval()
+            self.assertNotEqual(fresh["planSha256"], old["planSha256"])
+            self.assertEqual(refresh_plan(SHA)["leaseTtlSeconds"], 30 * 86400)
+            with self.assertRaisesRegex(ValueError, "plan mismatch"):
+                build_refresh_lease(old, now=NOW)
+            issued = build_refresh_lease(fresh, now=NOW)
+            self.assertEqual(issued["expiresAt"] - issued["approvedAt"], 30 * 86400)
+            validate_refresh_lease(issued, sha=SHA, now=NOW)
+            with self.assertRaisesRegex(ValueError, "expired or future"):
+                validate_refresh_lease({**issued, "expiresAt": issued["expiresAt"] + 1}, sha=SHA, now=NOW)
+
     def test_refresh_output_is_root_managed_and_not_runner_writable_state(self):
         plan=refresh_plan(SHA)
         self.assertEqual(plan["outputPath"],

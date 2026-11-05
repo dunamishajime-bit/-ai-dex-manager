@@ -173,6 +173,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_v4_priority_live.py -v
           python3 -m unittest discover -s tests -p test_v4_canonical_prestart.py -v
           python3 -m unittest discover -s tests -p test_v4_refresh_exec.py -v
+          python3 -m unittest discover -s tests -p test_disdex_v4_refresh_activation.py -v
           node --test tests/v4-priority-bootstrap.test.mjs
       - name: V4 exact-scope rollback and owner approval tests
         run: python3 -m unittest discover -s tests -p test_disdex_v4_root_cutover.py -v
