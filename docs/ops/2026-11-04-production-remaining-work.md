@@ -4,6 +4,55 @@ Owner direction: finish V4 LIVE first, then continue all remaining repairs and
 verification. Use actual authenticated root SSH; no subagents; preserve existing
 strategy economics, positions, STOPs, shared loss limit, budgets and account lock.
 
+## 2026-11-05 late JST V4 Production cutover and peer staging
+
+V4 is LIVE_VERIFIED on `866b21bf01cdbb757248a2faad926d36faee1d7f`, PID
+3443037 with no restarts. PR 433 passed all seven checks. The immutable
+118-file role archive SHA256 is
+`a3f9f3bf1a4d17a2a644c900d97832ae7dd473740699f153b2cdd6471f6e1256`.
+Static VPS verification passed 38 tests, typecheck and parity for 41 routes.
+The real order-time Margin Guard CLI passed signed evaluation under the V4
+systemd restrictions with readOnly=true and zero order, cancel or position
+mutations. The V4 service reads canonical Margin Guard state. The dedicated
+Margin Guard service retains publication and emergency action.
+
+Root SSH V4-only cutover receipt
+`/var/lib/disdex/unified-deploy/receipts/v12_v4-866b21bf01cdbb757248a2faad926d36faee1d7f-f8da904f.json`.
+Actual advancing tick timestamps were 1793890142524, 1793890254305 and
+1793890363703. Each passed signed Aster reconciliation of positions, STOPs,
+pending, Gross, account lock, 7.5% daily loss limit, and Kill. All cutover
+mutation counters were zero. The old process stopped with systemd timeout
+and PID0. A fresh signed flat check and terminal durable-state verification
+after it stopped passed before ownership migration. Graceful interruption of
+the daemon's idle wait is a separate follow-up.
+
+Formal V4 trading authority is FULL_LIVE/ordersEnabled=true. The 30-day
+certificate expires 2026-12-05 23:47:52 JST. The independent 30-day
+V4_EVIDENCE_REFRESH_ONLY lease has ordersEnabled=false and expires
+2026-12-05 23:47:50 JST. The first scheduled timer trigger at 23:52:49 JST
+published signed read-only evidence at 23:52:51 JST. The evidence age limit
+remains 15 minutes. Authenticated HP home showed LIVE confirmed with the new
+SHA, and the backend reported order permission ALLOWED and decision NO_SIGNAL.
+No live fill was forced or used as deployment evidence.
+
+The other six trading Runners, Margin Guard and Shared Risk retained their
+existing PIDs and SHA pins. All six had canonical order permission ALLOWED.
+Q102, PENGU, FET, HYPE and IDLE still have legacy monitor evidence without
+certified runner-owned ticks. PRs 428, 429 and 430 passed CI and now have
+Root-owned immutable releases under `/home/deploy/disdex-trading/releases`.
+The V52 release includes its exact Git requirements file and verified
+release-local Python dependencies. Its signed read-only preflight passed
+against the existing Production account and broker, with healthy reference
+data, zero positions and unchanged crypto/stock/portfolio caps.
+
+Remaining production gaps: independently certified healthy-LIVE peer
+cutovers and state handovers for these six Runners. The existing V52
+executor still requires the historical protected-hold state and old SHA.
+Authenticated HP works, but its serving root b882bd1b is deploy-owned while
+the deployment registry still lists 737ec050. Immutable UI staging and
+registered HP-only cutover remain open. Annual native Aster evidence gaps
+and uncertified economic changes are separate.
+
 ## Current V4 Production checkpoint (2026-11-05 evening JST)
 
 V4 is LIVE_VERIFIED on 7e94ad83286af1f4c8f65f17b0c1bdd017a3c650, PID3247958,
