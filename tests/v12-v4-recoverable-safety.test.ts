@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { buildV4HealthPayload, classifyV4RecoverableSafetyFailure } from "../scripts/v12-v4-production-runner";
+import { buildV4HealthPayload, classifyV4RecoverableSafetyFailure, waitForV4Daemon } from "../scripts/v12-v4-production-runner";
+
+test("V4 shutdown interrupts an idle wait and handles shutdown before the wait", {timeout: 1000}, async () => {
+  const shutdown = new AbortController();
+  const sleeping = waitForV4Daemon(60_000, shutdown.signal);
+  shutdown.abort();
+  await sleeping;
+  await waitForV4Daemon(60_000, shutdown.signal);
+});
 
 test("stale dynamic evidence and an unavailable peer block orders and can retry", () => {
   for (const reason of ["V4_EVIDENCE_STALE:signedAsterAccount", "V4_EVIDENCE_STALE:sharedRiskAndPeers",

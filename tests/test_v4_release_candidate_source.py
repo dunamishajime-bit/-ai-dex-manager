@@ -56,6 +56,68 @@ class CandidateSourceTest(unittest.TestCase):
                     ]:
                         self.assertEqual(expected.count(old),1)
                         expected=expected.replace(old,new)
+                    # Permit only the reviewed idle-wait and shutdown changes.
+                    for old, new in [
+                        (
+                         b'import {dirname} from "node:path";\n',
+                         b'import {dirname} from "node:path";\n'
+                         b'import {setTimeout as delay} from "node:timers/promises";\n',
+                        ),
+                        (
+                         b'const V4_GATE_TELEMETRY_SCHEMA="disdex-v12-v4-gate-telemetry/v1";\n',
+                         b'const V4_GATE_TELEMETRY_SCHEMA="disdex-v12-v4-gate-telemetry/v1";\n'
+                         b'export async function waitForV4Daemon(ms:number,signal:AbortSignal):Promise<void>{\n'
+                         b' try{await delay(ms,undefined,{signal});}\n'
+                         b' catch(error){\n'
+                         b'  if(!signal.aborted||!(error instanceof Error)||error.name!=="AbortError")throw error;\n'
+                         b' }\n'
+                         b'}\n',
+                        ),
+                        (
+                         b' let stopping=false;\n'
+                         b' process.once("SIGINT",()=>{stopping=true;});\n'
+                         b' process.once("SIGTERM",()=>{stopping=true;});\n',
+                         b' const shutdown=new AbortController();\n'
+                         b' const stop=()=>shutdown.abort();\n'
+                         b' process.once("SIGINT",stop);\n'
+                         b' process.once("SIGTERM",stop);\n',
+                        ),
+                        (
+                         b' for(;;){\n',
+                         b' while(!shutdown.signal.aborted){\n',
+                        ),
+                        (
+                         b'   if(!daemon||stopping)return;\n'
+                         b'   await new Promise<void>(done=>setTimeout(done,retryAfterMs));\n',
+                         b'   if(!daemon||shutdown.signal.aborted)return;\n'
+                         b'   await waitForV4Daemon(retryAfterMs,shutdown.signal);\n',
+                        ),
+                        (
+                         b' if(!runtime)return;\n',
+                         b' if(!runtime||shutdown.signal.aborted)return;\n',
+                        ),
+                        (
+                         b'    await writeV4IdleBaselineSnapshot(releaseSha,prepared);\n',
+                         b'    await writeV4IdleBaselineSnapshot(releaseSha,prepared);\n'
+                         b'    if(shutdown.signal.aborted)break;\n',
+                        ),
+                        (
+                         b'     attempts:10,retryMs:750,shouldStop:()=>stopping,\n',
+                         b'     attempts:10,retryMs:750,shouldStop:()=>shutdown.signal.aborted,\n',
+                        ),
+                        (
+                         b'  if(!daemon||stopping)break;\n',
+                         b'  if(!daemon||shutdown.signal.aborted)break;\n',
+                        ),
+                        (
+                         b'  await new Promise<void>(done=>setTimeout(done,nextDelay));\n'
+                         b' }while(!stopping);\n',
+                         b'  await waitForV4Daemon(nextDelay,shutdown.signal);\n'
+                         b' }while(!shutdown.signal.aborted);\n',
+                        ),
+                    ]:
+                        self.assertEqual(expected.count(old),1)
+                        expected=expected.replace(old,new)
                 validity_delta = {
                     "lib/v12-v4-certified-gates.ts": [
                         (b'import {createHash} from "node:crypto";\n',
