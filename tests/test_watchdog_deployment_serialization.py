@@ -29,6 +29,12 @@ class WatchdogSerializationTest(unittest.TestCase):
    deploy,releases,release,lock=self.fixture(Path(folder));calls=[]
    def child(command,**kwargs):
     calls.append((command,kwargs))
+    held=[]
+    for entry in Path('/proc/self/fd').iterdir():
+     try:
+      if entry.resolve(strict=True)==lock:held.append(fcntl.fcntl(int(entry.name),fcntl.F_GETFL)&os.O_ACCMODE)
+     except FileNotFoundError:pass
+    self.assertEqual(held,[os.O_RDONLY],'watchdog must open deployment lock read-only under ProtectSystem')
     with lock.open('r+') as other:
      with self.assertRaises(BlockingIOError):fcntl.flock(other,fcntl.LOCK_EX|fcntl.LOCK_NB)
     return SimpleNamespace(returncode=0)

@@ -22,7 +22,7 @@ def run_watchdog(sha,*,deployment_root=ROOT,releases=RELEASES,audit_only=False,r
     assert_root_trusted_dir(deployment_root,root_uid=0)
     lock=deployment_root/'deployment-execution.lock'
     before=assert_regular_secure(lock,root_uid=0,private=True)
-    fd=os.open(lock,os.O_RDWR|os.O_NOFOLLOW)
+    fd=os.open(lock,os.O_RDONLY|os.O_NOFOLLOW)
     try:
         opened=os.fstat(fd)
         if (before.st_dev,before.st_ino)!=(opened.st_dev,opened.st_ino):raise ValueError('WATCHDOG_DEPLOYMENT_LOCK_CHANGED')
