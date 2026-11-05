@@ -85,6 +85,24 @@ def write_exclusive(path, raw, mode):
         os.fsync(file.fileno())
 
 
+def swap_dropin(path, raw, metadata):
+    # The effective legacy drop-in already uses all 255 filename bytes.
+    temporary = path.with_name(".disdex-hp-" + secrets.token_hex(12) + ".tmp")
+    uid, gid, mode = metadata
+    write_exclusive(temporary, raw, 0o600)
+    try:
+        os.chown(temporary, uid, gid)
+        os.chmod(temporary, mode)
+        os.replace(temporary, path)
+        fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def ensure_session_key():
     if not SESSION.exists() and not SESSION.is_symlink():
         write_exclusive(SESSION, ("DISDEX_OWNER_SESSION_HMAC_KEY=" + secrets.token_urlsafe(48) + "\n").encode(), 0o600)
@@ -187,8 +205,8 @@ def cutover(sha, archive_hash, expected_plan_hash):
     try:
         require(trading_context() == context and current_path.read_bytes() == current_raw
                 and path.read_bytes() == before and int(property_value("MainPID")) == pid, "BASELINE_CHANGED")
-        atomic_text(path, after, metadata)
         changed = True
+        swap_dropin(path, after, metadata)
         systemctl("daemon-reload")
         require(property_value("WorkingDirectory") == str(target)
                 and str(target / "server.js") in property_value("ExecStart"), "EFFECTIVE_TARGET")
@@ -202,10 +220,12 @@ def cutover(sha, archive_hash, expected_plan_hash):
             require(actual_registry in (current_raw, registry_after), "ROLLBACK_REGISTRY_CHANGED")
             if actual_registry == registry_after:
                 atomic_text(current_path, current_raw, registry_meta)
-            require(path.read_bytes() == after, "ROLLBACK_DROPIN_CHANGED")
-            atomic_text(path, before, metadata)
-            systemctl("daemon-reload")
-            systemctl("restart", UNIT)
+            actual_dropin = path.read_bytes()
+            require(actual_dropin in (before, after), "ROLLBACK_DROPIN_CHANGED")
+            if actual_dropin == after:
+                swap_dropin(path, before, metadata)
+                systemctl("daemon-reload")
+                systemctl("restart", UNIT)
         raise
     result = dict(status="HP_ONLY_PRODUCTION_HTTP_VERIFIED", uiSha=sha, uiPid=new_pid,
         planSha256=plan_hash, ordersEnabled=False, ordersSent=0, cancelsSent=0, positionChangesSent=0,
