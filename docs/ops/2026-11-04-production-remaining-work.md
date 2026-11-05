@@ -434,3 +434,53 @@ rejection. Two unrelated complete-installer checks could not run in this reused
 fixture (missing public example and legacy CRLF fixture); full Git CI must check
 those. Wrapper CI, Root scoped installation and actual deferred/native execution
 evidence remain pending. No V4 c168 LIVE claim is made.
+
+V4 LIVE checkpoint (Nov5 JST): all five CI families4f21a6e8 passed. The three
+Root helpers were CAS installed under a genuine API_MONITORS/ordersEnabled=false
+Root-session approval. Watchdog serialization receipt:
+watchdog-serialization-44578ccd3e62412c94b56d4d812f0768/receipt.json;
+plan891a872f430d4ae4656f3ff602d754a17b18a0ed9836b44e94c69a9e2b1a8e30.
+Actual systemd invocation deferred under exclusive deployment lock without
+executing the native child or advancing its marker; all peer processes unchanged,
+watchdog timer restored. Later three native watchdog journal invocations completed
+with exit0/restarts0; latest all seven decisions and both dependencies NOOP.
+
+V4 c168 build3 was formally deployed through Root issuer/full executor. Parent
+plan9b1161e669fe0940e044bf0b34a1cfcad7d19db47043d68bf1f82a23f806e731;
+full executor plan15a73db5192f4f9ad4d58f0db9432f549a4ae5d7419dde3aa541ee2137ed210d.
+Receipt v4-reviewed-root-upgrade-1793846156446242421.json:
+V4_LIVE_CUTOVER_VERIFIED, targetc16859dcfab218b4a8c14d691e756da8819f8845,
+PID3066811,NRestarts0. Genuine advancing decision ticks:
+1793846280109 /1793846388106 /1793846497334
+(11:38:00.109 /11:39:48.106 /11:41:37.334 JST). Each corresponding signed venue
+proof reconciles empty positions/protective orders/pending, unknownStops0,
+partialStops0, dailyLossLimit0.075, healthy Margin/Kill/account lock/Gross and
+exact runner map. All deployment order/cancel/position mutation counters0.
+Old2a is PID0/masked; current symlink remains7688; all eight other pins unchanged.
+Fresh Root-owned0600 activation targets DD1296_FINAL_ALLIN_10BPS, V12_V4 only,
+FULL_LIVE/ordersEnabled=true, ROOT_SSH_SESSION, approved02:36:52 UTC. It was
+genuinely issued, not an owner Ed25519 signature/copy. HP backend snapshot verifies
+tick/actualSHA and separates ALLOWED authority from NO_SIGNAL decision.
+
+Separate genuine refresh-only lease targets c168, ordersEnabled=false, expires
+1793932610 (Nov6 11:36:50 JST). New timer active, old timer inactive. However the
+first scheduled refresh rounds failed: broker logs explicitly record
+ASTER_GLOBAL_RATE_BUDGET_SATURATED:4519 /:4250 on weight40 reconciliation;
+the old proxy renders its negative response as V4_BUDGET_PROXY_RESPONSE_INVALID.
+No malformed response was accepted. At 15-minute commit expiry, entry correctly
+became BLOCKED while the same daemon stayed alive. Formal read-only refresh under
+maintenance serialization succeeded at03:10:34.666 UTC; no date was fabricated.
+Do NOT claim continuous automatic refresh yet. New Root-control source retries
+only rejected, explicitly readOnly/no-trading rounds at most3 times with15/30s
+backoff plus0..5s jitter. Every attempt invokes the same immutable validating CLI;
+lease/SHA/risk/unknown failures stop immediately, including expiry after a prior
+deferral. No budget/lock/sandbox/approval is relaxed and failed partial data is
+never republished. Linux111/111 tests pass, zero skips. CI/install/natural scheduled
+refresh proof for this last control fix remain pending; actual runner code staysc168.
+
+Remaining source-only peers: PR428009a5349 (PENGU/FET/HYPE/IDLE),
+PR42904f8b09a (Q102), PR430c4fc0041 (V52), and PR42631aa8fd8 numeric projection.
+Authenticated owner browser UI remains unverified. Latest backend ranking also
+shows an extra INJUSDTUSDT observation row; audit its projection vs true decision
+inputs before fixing. Do not alter trading conditions/terminal deduplication to
+force a trade. Annual native history gaps and uncertified economics remain separate.

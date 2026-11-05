@@ -5,8 +5,55 @@ The three-payload atomic bundle can exceed the legacy per-document pretty JSON
 limit. Compact the same root-owned JSON before that reader; retain every value,
 payload digest, source timestamp and approval. No evidence is generated here.
 """
-import json,hashlib,os,re,stat,subprocess,uuid
+import json,hashlib,os,re,stat,subprocess,uuid,time,secrets,sys
 from pathlib import Path
+
+def public_refresh_failure(result):
+    for line in result.stderr.splitlines():
+        try:event=json.loads(line)
+        except ValueError:continue
+        reason=event.get('reason') if isinstance(event,dict) else None
+        if isinstance(reason,str) and re.fullmatch(r'(?:V4|ASTER|PENDING)_[A-Z0-9_]+(?::[0-9.]+)?',reason):return reason
+    return 'CHILD_ERROR_REDACTED'
+
+def readonly_refresh_deferral(result):
+    events=[]
+    for line in (result.stdout+'\n'+result.stderr).splitlines():
+        try:value=json.loads(line)
+        except ValueError:continue
+        if isinstance(value,dict):events.append(value)
+    if len(events)!=1:return None
+    event=events[0];effects=event.get('tradingEffects',{})
+    if (event.get('status')!='V4_DYNAMIC_EVIDENCE_REFRESH_BLOCKED'
+        or event.get('readOnly') is not True or event.get('authorizesTrading') is not False
+        or not isinstance(effects,dict) or set(effects)!=set(['ordersSent','cancelsSent','positionChangesSent'])
+        or not all(type(v) is int and v==0 for v in effects.values())):return None
+    reason=event.get('reason')
+    if reason=='V4_BUDGET_PROXY_RESPONSE_INVALID':return reason
+    if isinstance(reason,str) and re.fullmatch(r'ASTER_GLOBAL_RATE_BUDGET_SATURATED:[0-9]+(?:\.[0-9]+)?',reason):return reason
+    return None
+
+def run_refresh_child(command,*,cwd,runner=None,wait=None,jitter=None,emit=None):
+    """Retry only rejected read-only rounds, never reuse their partial output.
+
+    Every attempt is the same immutable CLI: it rechecks the original lease,
+    actual signed data, runtime freshness, static hashes and atomic commit.
+    The outer systemd flock spans all attempts. Budget/lock limits stay intact.
+    """
+    runner=subprocess.run if runner is None else runner
+    wait=time.sleep if wait is None else wait
+    jitter=(lambda:secrets.randbelow(5001)/1000) if jitter is None else jitter
+    emit=(lambda value:print(json.dumps(value),flush=True)) if emit is None else emit
+    for attempt in range(3):
+        result=runner(command,cwd=cwd,check=False,capture_output=True,text=True)
+        reason=readonly_refresh_deferral(result) if result.returncode else None
+        if result.returncode==0 or reason is None or attempt==2:return result
+        extra=jitter()
+        if type(extra) not in (int,float) or not 0<=extra<=5:raise ValueError('V4_REFRESH_RETRY_JITTER_INVALID')
+        delay=(15 if attempt==0 else 30)+extra
+        emit(dict(status='V4_REFRESH_READONLY_RETRY_DEFERRED',attempt=attempt+1,
+                  retryAfterSeconds=delay,reason=reason,authorizesTrading=False))
+        wait(delay)
 
 def compact_document(raw,sha):
     if len(raw)>1048576:raise ValueError('V4_REFRESH_SERIALIZATION_INPUT_LIMIT')
@@ -55,9 +102,15 @@ def main():
     compact_file(Path('/etc/disdex/v12-v4-evidence/refresh-commit.json'),sha)
     # The official CLI still validates root lease, expiry, static/dynamic hashes,
     # risk, Kill and API budget. Inherit the unit's existing sandbox and env.
-    return subprocess.run(['/usr/bin/node',str(release/'node_modules/tsx/dist/cli.mjs'),
+    result=run_refresh_child(['/usr/bin/node',str(release/'node_modules/tsx/dist/cli.mjs'),
         str(release/'scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts'),'--sha',sha,'--apply',
-        '--lease','/var/lib/disdex/unified-deploy/refresh-leases/v4/'+sha+'.json'],cwd=release).returncode
+        '--lease','/var/lib/disdex/unified-deploy/refresh-leases/v4/'+sha+'.json'],cwd=release)
+    if result.returncode==0:sys.stdout.write(result.stdout)
+    else:
+        # Do not echo raw child stderr or a credential-bearing upstream URL.
+        print(json.dumps(dict(status='V4_REFRESH_CHILD_FAILED_CLOSED',
+            reason=public_refresh_failure(result))))
+    return result.returncode
 
 if __name__=='__main__':
     try:raise SystemExit(main())
