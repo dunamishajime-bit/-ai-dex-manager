@@ -42,6 +42,7 @@ class WatchdogScopeTest(unittest.TestCase):
   root='/home/deploy/disdex-trading/releases/'+'a'*40;env='/etc/disdex/current-runtime/'+'a'*40+'-watchdog.env'
   unit=render_watchdog_unit(root,env,'a'*40,audit_only=True)
   self.assertIn('ExecStartPre=\n',unit);self.assertIn('/usr/bin/grep -Fxq '+'a'*40,unit)
+  self.assertIn('/usr/local/libexec/disdex-unified/disdex_watchdog_exec.py --sha '+'a'*40,unit)
   self.assertIn(' --audit-only\n',unit);self.assertNotIn(' --audit-only\n',render_watchdog_unit(root,env,'a'*40,audit_only=False))
   for bad in ['/tmp/foreign',root+'/../other',root+';bad']:
    with self.assertRaises(ValueError):render_watchdog_unit(bad,env,'a'*40,audit_only=True)

@@ -411,3 +411,26 @@ staging avoids unnecessary daemon-reload. Both defects reproduced RED then GREEN
 Linux execution-fingerprint-tests.log:97/97,no skips; real all-nine systemd
 configuration parsing passes. Latest source CI and scoped two-module install
 remain pending. Existing old LIVE, terminal state and inactive Kill are intact.
+
+Control c453a597 subsequently passed all five CI families and its two modules
+were installed with CAS backup v4-control-before-c453-1793833466544619207.
+The next command was not executed because automatic approval review reached its
+usage limit; no alternate route was used. On Nov5 11:02 JST, after the stated
+10:00 reset, normal Root SSH review resumed. Pins were unchanged; existing 2a
+had automatically recovered under a newer PID, and its marker briefly belonged
+to the prior process, so the old marker was not accepted as current proof.
+
+Fresh preflight then approved exact V4 plan739be78f..., but systemctl stop was
+cancelled/replaced and old V4 was active again with another PID. Pin, certificate
+and durable state all remained 2a. The real watchdog service still executed the
+immutable8dd Node script directly, without the common deployment flock; this
+left a recovery/cutover race. New Root wrapper holds shared deployment lock for
+the full native watchdog child; an exclusive formal transaction defers without
+running recovery or writing a fake marker. Normal bounded recovery, approvals,
+sourceSHA and audit-only mode are unchanged. Future watchdog cutover rendering
+uses the wrapper and binds its hash; installer provisions it too. Linux focused
+tests104/104,no skips, including real kernel flock and malformed-path/permissions
+rejection. Two unrelated complete-installer checks could not run in this reused
+fixture (missing public example and legacy CRLF fixture); full Git CI must check
+those. Wrapper CI, Root scoped installation and actual deferred/native execution
+evidence remain pending. No V4 c168 LIVE claim is made.

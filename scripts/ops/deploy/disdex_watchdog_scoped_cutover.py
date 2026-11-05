@@ -36,7 +36,7 @@ def render_watchdog_unit(root,env,sha,*,audit_only):
     return ('[Service]\nEnvironmentFile='+env+'\nWorkingDirectory='+root+'\n'
         'ExecStartPre=\nExecStartPre=/usr/bin/test -f '+root+'/.disdex-release-sha\n'
         'ExecStartPre=/usr/bin/grep -Fxq '+sha+' '+root+'/.disdex-release-sha\n'
-        'ExecStart=\nExecStart=/usr/bin/node '+root+'/'+WATCHDOG_SCRIPT+(' --audit-only' if audit_only else '')+'\n')
+        'ExecStart=\nExecStart=/usr/bin/python3 /usr/local/libexec/disdex-unified/disdex_watchdog_exec.py --sha '+sha+(' --audit-only' if audit_only else '')+'\n')
 
 def run_transaction(ops):
     ops.prepare();ops.authorize()
@@ -72,7 +72,7 @@ class Operations:
         self.baseline=json.loads(self.file(HEALTH/'current.json'));validate_live_observation(self.baseline,self.pins,time.time_ns()//1000000,self.baseline)
         self.reader=ProductionSharedRiskReader();self.context=protected_monitor_context(self.reader.read_context())
         self.current_link=Path('/home/deploy/disdex-trading/current').readlink()
-        self.freeze_files={ROOT/'current-plan.json',Path('/etc/disdex/runner-pins.json'),Path(__file__)}
+        self.freeze_files={ROOT/'current-plan.json',Path('/etc/disdex/runner-pins.json'),Path(__file__),Path(__file__).with_name('disdex_watchdog_exec.py')}
         self.env_path=Path('/etc/disdex/current-runtime')/(self.sha+'-watchdog.env')
         props=self.command('show',WATCHDOG,'-p','DropInPaths','-p','EnvironmentFiles','-p','FragmentPath','-p','ExecStart','-p','WorkingDirectory')
         self.before_properties=props;properties=dict(x.split('=',1) for x in props.splitlines() if '=' in x)
