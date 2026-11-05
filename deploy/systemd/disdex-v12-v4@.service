@@ -17,6 +17,7 @@ EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=/etc/disdex/disdex-v12-v4.env
 EnvironmentFile=/etc/disdex/current-runtime/%i.env
 Environment=NODE_ENV=production
+Environment=DISDEX_V4_PREORDER_MARGIN_GUARD_READONLY=1
 Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json
 Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock
 Environment=DISDEX_RELEASE_SHA=%i
