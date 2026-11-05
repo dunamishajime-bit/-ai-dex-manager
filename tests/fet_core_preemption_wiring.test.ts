@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("FET Core preemption is wired through all four Core families", async () => {
+test("Crypto Core retains FET ownership checks and V52 preserves peer protection", async () => {
   const [planner, v12, pengu, q102, v52, managed, wiring] = await Promise.all([
     readFile("lib/disdex-strict-portfolio-planner.ts", "utf8"),
     readFile("lib/v12-strict-live-adapter.ts", "utf8"),
@@ -29,12 +29,9 @@ test("FET Core preemption is wired through all four Core families", async () => 
   }
   assert.match(managed, /export function findManagedFetBrk48ProtectiveOrders/);
 
-  const fet = v52.indexOf("_prepare_fet_for_stock_entry");
-  const open = v52.indexOf("def open_basis_position", fet);
-  const callFet = v52.indexOf("self._prepare_fet_for_stock_entry", open);
-  const callQ102 = v52.indexOf("self._prepare_quality102_for_stock_entry", open);
-  const callV12 = v52.indexOf("self._prepare_v12_dynamic_for_stock_entry", open);
-  assert.ok(fet >= 0 && callFet > open && callQ102 > callFet && callV12 > callQ102, "V52 must preempt FET before Q102/V12 residual preparation");
+  const v52Entry = v52.slice(v52.indexOf("def open_basis_position"), v52.indexOf("def preflight"));
+  assert.match(v52Entry, /plan_v52_stock_capacity[\s\S]*_submit_basis_position/);
+  assert.doesNotMatch(v52Entry, /self\._prepare_.*_for_stock_entry/);
   assert.match(v52, /scripts\/disdex-fet-brk48-core-preempt\.ts/);
 
   // The root guard derives readiness from exact-SHA external approval.

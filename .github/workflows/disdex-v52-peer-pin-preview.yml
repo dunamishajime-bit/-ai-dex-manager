@@ -5,6 +5,7 @@ on:
       - scripts/v52_q102_independent_pin.py
       - scripts/ops/root/disdex-fet-preemption-readiness-guard.py
       - tests/test_v52_fet_independent_approvals.py
+      - tests/test_v52_preserve_peer_protection.py
       - scripts/ops/deploy/build_v52_q102_preview.py
       - tests/test_v52_q102_independent_pin.py
       - tests/test_v52_q102_preview.py
@@ -35,3 +36,5 @@ jobs:
         run: git fetch --no-tags --depth=1 origin 4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81
       - name: Test independent runner pins and existing planner
         run: python -m unittest tests.test_v52_q102_independent_pin tests.test_v52_q102_preview tests.test_v52_release_candidate_source tests.test_q102_resident_state tests.test_fet_v52_ownership tests.test_disdex_v52_idle_owned_position tests.test_final_dynamic_gross_strict_caps tests.test_v52_monitor_only tests.test_v52_monitor_transport tests.test_v52_fet_independent_approvals tests.test_v52_real_tick tests.test_v52_http_error_redaction -v
+      - name: Verify V52 entry preserves peer positions and STOPs
+        run: python -m unittest tests.test_v52_preserve_peer_protection -v
