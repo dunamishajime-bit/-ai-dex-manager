@@ -13,6 +13,26 @@ import disdex_v4_static_evidence as m
 SHA="a"*40
 
 class StaticEvidenceContractTest(unittest.TestCase):
+    @unittest.skipUnless(os.name == "posix" and getattr(os, "geteuid", lambda: 1)() == 0,
+                         "actual Linux Root filesystem required")
+    def test_certification_rejects_a_missing_or_untrusted_margin_runtime_before_running_tests(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            scripts = root / "scripts"
+            scripts.mkdir(mode=0o755)
+            entrypoint = scripts / "disdex_v96_v52_margin_guard_runtime.py"
+            with patch.object(m, "_assert_release", return_value=root), \
+                 patch.object(m.Path, "is_file", return_value=True), \
+                 patch.object(m, "_run") as run, patch.object(m, "_atomic") as write:
+                with self.assertRaisesRegex(ValueError, "MARGIN_RUNTIME_MISSING"):
+                    m.certify(SHA)
+                entrypoint.write_text("")
+                scripts.chmod(0o555)
+                with self.assertRaisesRegex(ValueError, "MARGIN_RUNTIME_UNTRUSTED"):
+                    m.certify(SHA)
+            run.assert_not_called()
+            write.assert_not_called()
+
     @unittest.skipUnless(os.name=='posix' and getattr(os,'geteuid',lambda:1)()==0,'actual Linux Root filesystem required')
     def test_actual_root_staging_rejects_links_mutable_paths_and_existing_evidence(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -42,6 +62,7 @@ class StaticEvidenceContractTest(unittest.TestCase):
         writes=[];target=Path('/var/lib/disdex/ops-audit/v4-upgrade/run')/SHA
         with patch.object(m,'_assert_release',return_value=Path('/candidate')), \
              patch.object(m,'_assert_staging_output',return_value=target,create=True), \
+             patch.object(m,'_margin_source_digests',return_value={}), \
              patch.object(m.Path,'is_file',return_value=True), \
              patch.object(m,'_run',side_effect=[dict(sha256='1'*64,returnCode=0,testsPassed=20),dict(sha256='2'*64,returnCode=0,testsPassed=9),dict(sha256='3'*64,returnCode=0,testsPassed=0)]), \
              patch.object(m,'_atomic',side_effect=lambda path,value,**kwargs:writes.append(path)):
@@ -62,6 +83,7 @@ class StaticEvidenceContractTest(unittest.TestCase):
     def test_certification_is_candidate_bound_and_requires_all_commands(self):
         writes={}
         with patch.object(m,"_assert_release",return_value=Path("/candidate")), \
+             patch.object(m,"_margin_source_digests",return_value={"margin.py":"4"*64}), \
              patch.object(m.Path,"is_file",return_value=True), \
              patch.object(m,"_run",side_effect=[
                  {"sha256":"1"*64,"returnCode":0,"testsPassed":20},
@@ -79,6 +101,7 @@ class StaticEvidenceContractTest(unittest.TestCase):
         self.assertEqual(writes["v4-execution-tests.json"]["commandCount"],3)
         self.assertEqual(writes["v4-execution-tests.json"]["failCount"],0)
         self.assertTrue(writes["v4-execution-tests.json"]["typecheck"])
+        self.assertEqual(writes["v4-execution-tests.json"]["marginRuntimeSourceSha256"],{"margin.py":"4"*64})
         self.assertIn('tsconfig.v4-release-candidate.json',runner.call_args_list[-1].args[1])
 
     def test_zero_exit_without_a_positive_unambiguous_test_summary_is_not_certification(self):

@@ -16,6 +16,30 @@ SHA_RE = re.compile(r"^[a-f0-9]{40}$")
 RELEASES = Path("/home/deploy/disdex-trading/releases")
 EVIDENCE_ROOT = Path("/etc/disdex/v12-v4-evidence")
 STAGING_BASE = Path("/var/lib/disdex/ops-audit")
+MARGIN_RUNTIME_SOURCES = (
+    "disdex_v96_v52_margin_guard_runtime.py",
+    "disdex_v96_v52_margin_guard.py",
+    "disdex_v96_v52_margin_risk_policy.py",
+    "disdex_v13d_v11eq_stock_live_engine.py",
+)
+
+
+def _margin_source_digests(root: Path) -> dict[str, str]:
+    scripts = root / "scripts"
+    digests = {}
+    for name in MARGIN_RUNTIME_SOURCES:
+        path = scripts / name
+        try:
+            parent = scripts.lstat()
+            metadata = path.lstat()
+        except FileNotFoundError as error:
+            raise ValueError("MARGIN_RUNTIME_MISSING:" + name) from error
+        if (not stat.S_ISDIR(parent.st_mode) or parent.st_uid != 0
+                or parent.st_mode & 0o222 or not stat.S_ISREG(metadata.st_mode)
+                or metadata.st_uid != 0 or metadata.st_mode & 0o222):
+            raise ValueError("MARGIN_RUNTIME_UNTRUSTED:" + name)
+        digests[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return digests
 
 
 def _assert_staging_output(sha: str, output: Path) -> Path:
@@ -105,6 +129,7 @@ def _atomic(path: Path, value: dict, *, exclusive: bool = False) -> None:
 def certify(sha: str, *, output_root: Path | None = None) -> dict:
     root = _assert_release(sha)
     destination = EVIDENCE_ROOT if output_root is None else _assert_staging_output(sha, output_root)
+    margin_sources = _margin_source_digests(root)
     node = "/usr/bin/node"
     tsx = str(root / "node_modules/tsx/dist/cli.mjs")
     tsc = str(root / "node_modules/typescript/bin/tsc")
@@ -139,6 +164,7 @@ def certify(sha: str, *, output_root: Path | None = None) -> dict:
         "status": "PASS", "candidateSha": sha, "capturedAt": captured,
         "testPasses": sum(row['testsPassed'] for row in results), "commandCount":len(results), "failCount": 0, "typecheck": True,
         "proofSource": "IMMUTABLE_RELEASE_LOCAL_TESTS",
+        "marginRuntimeSourceSha256": margin_sources,
         "commandDigests": [row["sha256"] for row in results],
     }
     if output_root is None:
