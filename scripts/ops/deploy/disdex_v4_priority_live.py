@@ -238,7 +238,8 @@ class ProductionOperations:
         return rows
 
     def _context(self):
-        value=self.reader.read_context();value.pop('pendingHash')
+        options={'masked_v4_sha':self.candidate_sha} if self.current_release_recovery else {}
+        value=self.reader.read_context(**options);value.pop('pendingHash')
         value['peerApprovalHashes']={row['path']:digest(bytes_at(row['path'])) for row in self.gates}
         return value
 

@@ -287,6 +287,7 @@ class ProtectionRestoreTest(unittest.TestCase):
             with self.subTest(fail=fail),tempfile.TemporaryDirectory(prefix='disdex-v4-recovery-test-') as folder:
                 root=Path(folder);approval=root/'activation.json';approval.write_text('{}');approval.chmod(0o600)
                 op=m.ProductionOperations(recovery=True);op.transaction=root;op.runtime_approval_path=approval
+                op.recovery_prior_unit='disdex-v12-v4@'+m.PRIOR_SHA+'.service'
                 op.runtime_approval_hash=m.digest(approval.read_bytes());op.manifest={'fixture':True};op.pins={'V12_V4':m.CANDIDATE_SHA}
                 op.plan_hash='a'*64;op.authorization={'nonce':'b'*32}
                 context=dict(peers={},writer={'pid':4},peerApprovalHashes={})
@@ -307,6 +308,7 @@ class ProtectionRestoreTest(unittest.TestCase):
                         with self.assertRaises(RuntimeError):op._activate_recovery()
                         systemd.stop.assert_called_once_with(unit);systemd.mask.assert_called_once_with(unit)
                         systemd.enable.assert_not_called();self.assertEqual(journal.call_args.args[1]['phase'],'RECOVERY_REQUIRED_PROTECTED')
+                        self.assertEqual(journal.call_args.args[1]['oldUnit'],op.recovery_prior_unit)
                         receipt.assert_not_called()
                     else:
                         r=op._activate_recovery();self.assertEqual([v['decisionCycle']['tickCompletedAt'] for v in r['auditCycles']],[1,2,3])

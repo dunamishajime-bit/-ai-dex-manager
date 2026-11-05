@@ -220,7 +220,7 @@ class ProductionSharedRiskReader:
         if allow_historical:validate_inherited_risk(row,now_ms=time.time_ns()//1000000)
         return row
 
-    def read_context(self):
+    def read_context(self,*,masked_v4_sha=None):
         from disdex_unified_root_gate import PREFIXES,STOP_OWNERS
         manifest=json_object(file_bytes(PINS))
         require(manifest.get('schema')=='disdex-runner-pin-manifest/v1'
@@ -245,10 +245,17 @@ class ProductionSharedRiskReader:
             cwd=str(Path('/proc',str(pid),'cwd').resolve(strict=True)) if pid else None
             require(not pid or cwd==str(root),'SHARED_RISK_PEER_CWD')
             s=root.stat();ms=marker.stat()
+            if key=='V12_V4' and sha==masked_v4_sha and pid==0 and not properties.get('ExecStart'):
+                mask=Path('/etc/systemd/system')/unit
+                require(mask.is_symlink() and mask.readlink()==Path('/dev/null') and mask.lstat().st_uid==0,
+                    'SHARED_RISK_RECOVERY_MASK_REQUIRED')
+                execution_digest=None
+            else:
+                execution_digest=systemd_execution_digest(proc.stdout)
             peers[key]=dict(sha=sha,markerSha=sha,unit=unit,pid=pid,activeState=state,cwd=cwd,
                 nRestarts=int(properties['NRestarts']),releaseMetadata=[s.st_uid,s.st_gid,stat.S_IMODE(s.st_mode)],
                 markerMetadata=[ms.st_uid,ms.st_gid,stat.S_IMODE(ms.st_mode)],
-                systemdExecutionDigest=systemd_execution_digest(proc.stdout))
+                systemdExecutionDigest=execution_digest)
         writer=peers.pop('SHARED_CRYPTO_RISK')
         active=subprocess.run(['systemctl','list-units','--no-legend','--plain','--no-pager',
             '--type=service','--state=active,activating,deactivating','disdex-shared-crypto-risk@*.service'],
