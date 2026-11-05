@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Activity, ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
-import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { V12V4RuntimePanel } from "@/components/features/V12V4RuntimePanel";
@@ -58,7 +57,6 @@ function V52Top2Summary() {
 }
 
 export default function HomePage() {
-  const { wallet } = useOperationalWallet();
   const { snapshot, loading: liveLoading, error: liveError } = useLivePortfolio();
   const { snapshot: productionRuntime, error: productionRuntimeError } = useProductionRuntime();
   const { formatPrice } = useCurrency();
@@ -68,8 +66,9 @@ export default function HomePage() {
   const pengu = productionRuntime?.pengu;
   const v52 = productionRuntime?.v52;
   const lineageDisplay = productionRuntime ? buildRuntimeLineageDisplay(productionRuntime) : null;
-  const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
-  const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
+  // Display only verified live Aster balances; never silently substitute cached wallet values.
+  const balance = snapshot?.account.balanceUsd ?? null;
+  const available = snapshot?.account.availableUsd ?? null;
   const positions = snapshot?.positions ?? [];
 
   return (
@@ -93,7 +92,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <SummaryCard title="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? "Aster account balance unavailable" : `Available ${formatPrice(available)}`} tone="profit" />
+            <SummaryCard title="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? (liveError || (liveLoading ? "口座情報を取得中" : "Aster account balance unavailable")) : `Available ${formatPrice(available)}`} tone="profit" />
             <SummaryCard title="実建玉 / 未決済注文" value={snapshot ? `${positions.length} / ${snapshot.orders.count}` : "UNAVAILABLE"} detail={snapshot ? `保護注文 ${snapshot.orders.protectionCount} / ${snapshot.capturedAt.replace("T", " ").slice(0, 16)} UTC` : liveError || "Aster live state unavailable"} />
           </div>
         </section>

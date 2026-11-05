@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Copy, Loader2, Plus, QrCode, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 
 function formatUsd(value?: number) {
   return `$${Number(value || 0).toFixed(2)}`;
@@ -137,6 +138,7 @@ function StatCard({
 export default function WalletsPage() {
   const { user } = useAuth();
   const { wallet, loading, refresh } = useOperationalWallet();
+  const { snapshot: livePortfolio } = useLivePortfolio();
 
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
@@ -156,11 +158,11 @@ export default function WalletsPage() {
       .sort((a, b) => Number(b.usdValue || 0) - Number(a.usdValue || 0));
   }, [wallet?.trackedHoldings]);
 
-  const hasAsterSnapshot = asterAccountVerified(wallet || undefined);
-  const totalHoldingsUsd = wallet && hasAsterSnapshot
-    ? Number(wallet.lastAsterAccountBalanceUsd ?? wallet.lastPortfolioUsd ?? 0)
-    : null;
-  const availableBalanceUsd = typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null;
+  // The operational wallet is a separate on-chain record, not current Aster futures equity.
+  // Current Aster values must come from the same signed read-only source as the dashboard.
+  const hasAsterSnapshot = livePortfolio !== null;
+  const totalHoldingsUsd = livePortfolio?.account.balanceUsd ?? null;
+  const availableBalanceUsd = livePortfolio?.account.availableUsd ?? null;
 
   useEffect(() => {
     let mounted = true;
@@ -496,25 +498,25 @@ export default function WalletsPage() {
               <StatCard
                 title="ウォレット状態"
                 value={walletDisplayStatus(wallet || undefined)}
-                note={hasAsterSnapshot ? `Aster口座確認済み ${formatDate(wallet?.lastAsterAccountVerifiedAt || wallet?.lastAsterBalanceUpdatedAt)}` : wallet?.backupConfirmed ? "バックアップ確認済み" : "Aster口座確認待ち"}
+                note={hasAsterSnapshot ? `Aster口座確認済み ${formatDate(livePortfolio?.capturedAt)}` : wallet?.backupConfirmed ? "バックアップ確認済み" : "Aster口座確認待ち"}
                 tone={hasAsterSnapshot && wallet?.status !== "paused" ? "profit" : wallet?.status === "paused" ? "loss" : "default"}
               />
               <StatCard
                 title="総評価額"
                 value={totalHoldingsUsd === null ? "取得待ち" : formatUsd(totalHoldingsUsd)}
-                note={availableBalanceUsd === null ? "Aster account balance unavailable" : `Available ${availableBalanceUsd.toFixed(8)} USD / ${wallet?.lastAsterAccountSource || "AsterDEX"}`}
+                note={availableBalanceUsd === null ? "Aster account balance unavailable" : `Available ${availableBalanceUsd.toFixed(8)} USD / ${"AsterDEX signed read-only"}`}
                 tone={totalHoldingsUsd !== null && totalHoldingsUsd > 0 ? "profit" : "default"}
               />
               <StatCard
                 title="Aster口座接続"
                 value={hasAsterSnapshot ? "確認済み" : "取得待ち"}
-                note={hasAsterSnapshot ? formatDate(wallet?.lastAsterAccountVerifiedAt || wallet?.lastAsterBalanceUpdatedAt) : "Aster口座情報を取得しています"}
+                note={hasAsterSnapshot ? formatDate(livePortfolio?.capturedAt) : "Aster口座情報を取得しています"}
                 tone={hasAsterSnapshot ? "profit" : "default"}
               />
               <StatCard
                 title="Aster残高更新"
                 value={hasAsterSnapshot ? "最新" : "取得待ち"}
-                note={hasAsterSnapshot ? formatDate(wallet?.lastAsterBalanceUpdatedAt || wallet?.lastAsterAccountVerifiedAt) : "Aster口座情報を取得しています"}
+                note={hasAsterSnapshot ? formatDate(livePortfolio?.capturedAt) : "Aster口座情報を取得しています"}
                 tone={hasAsterSnapshot ? "profit" : "default"}
               />
             </div>
