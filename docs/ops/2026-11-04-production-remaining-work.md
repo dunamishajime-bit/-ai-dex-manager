@@ -63,8 +63,29 @@ These are SOURCE_READY_NOT_LIVE. The V52 executor still assumes a historical
 protected hold and old4d33 SHA; it is incompatible with today's healthy 0416
 baseline. Generic peer scoped execution and independent dependent-pin handover
 remain internal implementation work. The five legacy peers still lack
-Production-certified runner-owned ticks. Authenticated HP browser is at login,
-so actual owner browser rendering is pending.
+Production-certified runner-owned ticks.
+
+After the owner logged in, the real HP showed a false SHA_MISMATCH. Its
+SHA-bound V12 primary compatibility file still named retired53a although
+the exact current V4 unit, heartbeat and canonical approval matched7e94.
+The formal monitor-only CAS transaction changed only PRIMARY_SHA. Receipt
+hp-primary-pin-1793868980551734713/receipt.json, plan
+815eefd9b1c30a27f1b7eadec6000845cdb08b8ec08eb95eb9ef934df1e82fba.
+Authenticated home and decision-status now show LIVE confirmed7e94; all
+eleven checked desktop navigation links rendered in the authenticated session.
+The observed actual UI service CWD/marker is b882bd1b, while current-plan
+registers737ec050. The legacy live UI directory failed the existing Root
+immutable-release check; the stale registry was not overwritten with that
+unverified root. Proper immutable UI staging/registry reconciliation remains.
+
+Control f2c3c740 passed all CI. Its scoped V4 upgrade helper now adds the
+HP compatibility pin to the same planned CAS wiring and refuses a mismatched
+legacy baseline. HP_ONLY plan validation permits UI-root changes while rejecting
+any change of runner or monitor root. Linux V4 tests25/25 and plan tests17/17.
+Both modules installed under genuine no-order Root authorization, receipt
+hp-pin-controls-install-1793869381554527388/receipt.json. Installed V4 helper
+verified read-only against the actual corrected HP config. Trading and UI
+processes were not restarted by the HP configuration/control repairs.
 
 ## Earlier verified milestone (2026-11-05 daytime)
 
