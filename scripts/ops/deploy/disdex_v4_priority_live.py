@@ -92,6 +92,14 @@ def same_release_recovery_hash(current,pins,current_symlink_sha,sha):
     return digest(canonical(dict(operation='V4_SAME_RELEASE_PROTECTED_RECOVERY',candidateSha=sha,
         runners=pins,currentPlanSha256=digest(canonical(current)))))
 
+
+def retry_recovery_witness(collect,*,sleep=time.sleep):
+    for attempt in range(12):
+        try:return collect()
+        except ValueError as error:
+            if str(error)!='ACCOUNT_LOCK_PRESENT' or attempt==11:raise
+            sleep(2)
+
 def validate_recovery_document(d,sha):
     require(d.get('schema')==2 and d.get('releaseSha')==sha,'RECOVERY_LEDGER_SHA')
     state=d.get('state',{})
@@ -195,11 +203,13 @@ class ProductionOperations:
     def __init__(self,expected_hash=None,recovery=False,*,candidate_sha=None,static_root=None):
         self.expected_hash=expected_hash;self.bootstrap=None
         self.recovery=recovery
-        require(not (recovery and candidate_sha is not None),'UPGRADE_AND_RECOVERY_ARE_DISTINCT')
         self.upgrade=candidate_sha is not None and not recovery
+        self.current_release_recovery=recovery and candidate_sha is not None
         if candidate_sha is not None:
             require(isinstance(candidate_sha,str) and re.fullmatch('[a-f0-9]{40}',candidate_sha),'EXPLICIT_CANDIDATE_SHA')
-            require(isinstance(static_root,Path) and static_root.name==candidate_sha,'EXPLICIT_STATIC_EVIDENCE_ROOT')
+            require(isinstance(static_root,Path) and static_root.name==candidate_sha
+                and (not self.current_release_recovery or static_root.is_relative_to(Path('/var/lib/disdex/ops-audit'))),
+                'EXPLICIT_STATIC_EVIDENCE_ROOT')
         self.candidate_sha=CANDIDATE_SHA if candidate_sha is None else candidate_sha
         self.prior_sha=PRIOR_SHA
         self.static_root=STATIC if static_root is None else static_root
@@ -258,7 +268,7 @@ class ProductionOperations:
         from disdex_v4_monitor_cutover import validate_monitor_observation
         _assert_execution_root(0);assert_codex_ssh_session()
         self.deploy=pwd.getpwnam('deploy');release_marker(self.candidate_sha,RELEASES,root_uid=0)
-        if self.upgrade:
+        if self.upgrade or self.current_release_recovery:
             from disdex_unified_root_gate import assert_private_dir
             require(self.static_root.is_relative_to(Path('/var/lib/disdex/ops-audit'))
                 and '..' not in self.static_root.parts,'UPGRADE_STATIC_EVIDENCE_SCOPE')
@@ -302,6 +312,10 @@ class ProductionOperations:
             require(journal.get('phase')=='RECOVERY_REQUIRED_PROTECTED' and journal.get('newSha')==self.candidate_sha
                 and journal.get('candidateOwnershipRetained') is True and self.pins['V12_V4']==self.candidate_sha
                 and v4['pid']==0 and v4['activeState'] in ('inactive','failed'),'PROTECTED_RECOVERY_BASELINE')
+            self.recovery_prior_unit=journal.get('oldUnit')
+            prior=re.fullmatch(r'disdex-v12-v4@([a-f0-9]{40})\.service',self.recovery_prior_unit or '')
+            require(prior is not None and prior[1]!=self.candidate_sha,'RECOVERY_PRIOR_UNIT')
+            if self.current_release_recovery:self.prior_sha=prior[1]
             from disdex_v4_canonical_prestart import validate_activation
             self.runtime_approval_path=SHARED/'operator-activation/v12-v4-full.json'
             approval=read_root_json(self.runtime_approval_path)
@@ -320,7 +334,7 @@ class ProductionOperations:
             self.recovery_unit_bytes=bytes_at(self.recovery_unit_backup)
             require(str(self.release).encode() in self.recovery_unit_bytes and b'disdex_v4_canonical_prestart.py' in self.recovery_unit_bytes
                 and b' --daemon' in self.recovery_unit_bytes and b'--monitor-only' not in self.recovery_unit_bytes,'RECOVERY_EXACT_FULL_UNIT')
-            require(subprocess.check_output(['/usr/bin/systemctl','show',journal['oldUnit'],'-p','MainPID','--value'],text=True).strip()=='0','RECOVERY_OLD_WRITER_ALIVE')
+            require(subprocess.check_output(['/usr/bin/systemctl','show',self.recovery_prior_unit,'-p','MainPID','--value'],text=True).strip()=='0','RECOVERY_OLD_WRITER_ALIVE')
         elif self.upgrade:self._verify_upgrade_baseline(v4)
         else:
             health=json_at('/var/lib/disdex/v12-v4/heartbeat.json');tick=json_at('/var/lib/disdex/runner-health/ticks/v12-v4.json')
@@ -378,6 +392,7 @@ class ProductionOperations:
         self.facts=dict(candidateSha=self.candidate_sha,oldStateSha=self.prior_sha,monitorOnly=not self.recovery and not self.upgrade,
             liveUpgradeAuthorized=self.upgrade,oldLiveAuthorityVerified=getattr(self,'old_live_authority_verified',False),priorRuntimeSha=self.prior_sha,
             recoveryAuthorized=self.recovery,sameSourceProtected=self.recovery,
+            preserveInactiveKill=self.current_release_recovery,
             positions=signed['positionCount'],openOrders=signed['openOrderCount'],activePending=0,signedVerifiedAt=signed['verifiedAt'],
             risk=risk,margin=margin,kill=kill,v52Sha=self.pins['V52'],q102Sha=self.pins['QUALITY102_CAUSAL_V1'],
             allPeersAttested=True,peerPermissionsUnchanged=True,economicsIdentical=True,time37PriorApprovalVerified=True,
@@ -408,6 +423,7 @@ class ProductionOperations:
         if self.recovery:self.plan.update(sameReleaseRecovery=True,recoveryJournalHash=self.recovery_journal_hash,
             existingRuntimeApprovalHash=self.runtime_approval_hash,unitBackupPath=str(self.recovery_unit_backup),unitBackupHash=digest(self.recovery_unit_bytes),
             derivedUnitSha256=digest(render_certified_budget_unit(self.recovery_unit_bytes)))
+        if self.current_release_recovery:self.plan.update(preserveInactiveKill=True)
         if self.upgrade:self.plan.update(operation='V4_SAFE_SOURCE_UPGRADE',preserveInactiveKill=True,
             oldLiveAuthorityVerified=True,existingRuntimeApprovalHash=self.runtime_approval_hash,
             priorRuntimeSha=self.prior_sha,
@@ -592,7 +608,8 @@ class ProductionOperations:
         require(systemd.main_pid(unit)==0 and not systemd.is_masked(unit),'RECOVERY_START_BASELINE')
         require(digest(bytes_at(self.runtime_approval_path))==self.runtime_approval_hash
             and json_at('/etc/disdex/runner-pins.json')==self.manifest,'RECOVERY_AUTHORITY_OR_PINS_CHANGED')
-        before=_validate_venue_evidence(collect_v4_venue_evidence(sha=self.candidate_sha,expected_pins=self.pins,phase='before'),
+        before=_validate_venue_evidence(retry_recovery_witness(lambda:collect_v4_venue_evidence(
+            sha=self.candidate_sha,expected_pins=self.pins,phase='before')),
             now=int(time.time()),label='recovery-before',require_v4_runtime=False)
         started=int(time.time()*1000);attempted=False
         try:
@@ -604,7 +621,8 @@ class ProductionOperations:
                 decision=await_v4_decision_cycle(systemd,sha=self.candidate_sha,release=self.release,pid=pid,
                     started_after_ms=started,previous_tick=previous)
                 previous=decision['tickCompletedAt']
-                after=_validate_venue_evidence(collect_v4_venue_evidence(sha=self.candidate_sha,expected_pins=self.pins,phase='after'),
+                after=_validate_venue_evidence(retry_recovery_witness(lambda:collect_v4_venue_evidence(
+                    sha=self.candidate_sha,expected_pins=self.pins,phase='after')),
                     now=int(time.time()),label='recovery-after-'+str(cycle+1),baseline=before)
                 after['decisionCycle']=decision;rows.append(after)
             now_context=self._context()
@@ -612,6 +630,8 @@ class ProductionOperations:
                 if key!='V12_V4':require(now_context['peers'][key]==value,'RECOVERY_PEER_CHANGED')
             require(now_context['writer']==self.plan['context']['writer']
                 and now_context['peerApprovalHashes']==self.plan['context']['peerApprovalHashes'],'RECOVERY_SHARED_WRITER_OR_PEER_AUTHORITY_CHANGED')
+            if self.current_release_recovery:
+                require(now_context['killHash']==self.plan['killHash'],'RECOVERY_KILL_CHANGED')
             require(digest(bytes_at(self.runtime_approval_path))==self.runtime_approval_hash
                 and json_at('/etc/disdex/runner-pins.json')==self.manifest,'RECOVERY_FINAL_AUTHORITY_OR_PINS_CHANGED')
             result=dict(schema='disdex-unified-deploy-receipt/v1',status='V4_LIVE_CUTOVER_VERIFIED',targetSha=self.candidate_sha,
@@ -630,7 +650,7 @@ class ProductionOperations:
             if systemd.is_enabled(unit):systemd.disable(unit)
             systemd.mask(unit)
             _atomic_json(ROOT/'transaction.json',dict(schema='disdex-unified-deploy-transaction/v1',phase='RECOVERY_REQUIRED_PROTECTED',
-                scope=SCOPE,newSha=self.candidate_sha,newUnit=unit,oldUnit='disdex-v12-v4@b3468849cfee0f334b8a1b6a545dbd6c2e48da9a.service',
+                scope=SCOPE,newSha=self.candidate_sha,newUnit=unit,oldUnit=self.recovery_prior_unit,
                 candidateOwnershipRetained=True,oldSourceRestartAuthorized=False,requiresFreshVenueAndDurableCompatibility=True),root_uid=0)
             raise
 
@@ -706,7 +726,6 @@ def main():
     parser.add_argument('--plan-sha256');parser.add_argument('--recover-protected',action='store_true')
     parser.add_argument('--candidate-sha');parser.add_argument('--static-root',type=Path);args=parser.parse_args()
     if bool(args.candidate_sha)!=bool(args.static_root):parser.error('--candidate-sha and --static-root must be supplied together')
-    if args.recover_protected and args.candidate_sha:parser.error('new-source upgrade and protected same-source recovery are distinct')
     lock=os.open(ROOT/'deployment-execution.lock',os.O_RDWR)
     try:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -751,7 +770,9 @@ def validate_priority_evidence(f,now_ms):
     for obj,key,age in [(risk,'updatedAt',120000),(margin,'checkedAt',360000)]:
         require(type(obj.get(key)) in (int,float) and 0<=now_ms-obj[key]<=age,'SOURCE_FRESHNESS')
     require(margin.get('stage')=='HEALTHY' and margin.get('ordersAllowed') is True,'MARGIN')
-    if upgrade:require(kill.get('active') is False,'UPGRADE_MUST_PRESERVE_INACTIVE_KILL')
+    preserve_recovery=(f.get('recoveryAuthorized') is True and f.get('sameSourceProtected') is True
+        and f.get('preserveInactiveKill') is True)
+    if upgrade or preserve_recovery:require(kill.get('active') is False,'UPGRADE_MUST_PRESERVE_INACTIVE_KILL')
     else:
         require(kill.get('active') is True and kill.get('action')=='HOLD_PROTECTED'
             and kill.get('operator')=='disdex-v52-aster-only' and kill.get('recoverable') is True

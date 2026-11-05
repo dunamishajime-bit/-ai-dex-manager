@@ -76,6 +76,23 @@ class PriorityFactsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.ProductionOperations(recovery=True,candidate_sha=SHA,static_root=Path('/tmp')/SHA)
 
+        recovery=m.ProductionOperations(recovery=True,candidate_sha=SHA,
+            static_root=Path('/var/lib/disdex/ops-audit/run')/SHA)
+        self.assertEqual(recovery.candidate_sha,SHA)
+        self.assertTrue(recovery.recovery)
+        self.assertFalse(recovery.upgrade)
+
+    def test_recovery_witness_retries_only_account_lock_contention(self):
+        from unittest.mock import Mock
+        witness=Mock(side_effect=[ValueError('ACCOUNT_LOCK_PRESENT'),{'signed':True}])
+        sleep=Mock()
+        self.assertEqual(m.retry_recovery_witness(witness,sleep=sleep),{'signed':True})
+        sleep.assert_called_once_with(2)
+        unsafe=Mock(side_effect=ValueError('PENDING_EXPOSURE_ACTIVE'))
+        with self.assertRaisesRegex(ValueError,'PENDING_EXPOSURE_ACTIVE'):
+            m.retry_recovery_witness(unsafe,sleep=sleep)
+        unsafe.assert_called_once()
+
     def test_upgrade_stop_changes_only_the_exact_old_v4_process(self):
         before=dict(writer={'pid':5},killHash='a'*64,peerApprovalHashes={'peer':'b'*64},
             peers={'V12_V4':dict(sha=OLD,pid=42,cwd='/release/'+OLD,activeState='active',nRestarts=0),

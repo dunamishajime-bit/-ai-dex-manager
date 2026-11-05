@@ -21,6 +21,11 @@ export function validateObsoleteHold(k){
   &&k.recoverable===true&&k.reason===reason,'EXACT_OBSOLETE_HOLD_REQUIRED');return true;
 }
 export function validateKillPreparation(k,p){
+ if(p?.sameReleaseRecovery===true&&p.preserveInactiveKill===true){
+  require(/^[a-f0-9]{64}$/.test(p.recoveryJournalHash)&&/^[a-f0-9]{64}$/.test(p.existingRuntimeApprovalHash)
+   &&k?.active===false,'RECOVERY_MUST_PRESERVE_INACTIVE_KILL');
+  return 'PRESERVE_INACTIVE';
+ }
  if(p?.operation==='V4_SAFE_SOURCE_UPGRADE'){
   require(p.preserveInactiveKill===true&&p.oldLiveAuthorityVerified===true&&k?.active===false,
    'UPGRADE_MUST_PRESERVE_INACTIVE_KILL');

@@ -16,6 +16,11 @@ test('a healthy LIVE upgrade may preserve inactive Kill but cannot clear or rein
  for(const kill of [{active:true},{},null])assert.throws(()=>bootstrap.validateKillPreparation(kill,plan));
  assert.throws(()=>bootstrap.validateKillPreparation({active:false},{...plan,oldLiveAuthorityVerified:false}));
  assert.throws(()=>bootstrap.validateKillPreparation({active:false},{...plan,preserveInactiveKill:false}));
+ const recovery={sameReleaseRecovery:true,preserveInactiveKill:true,
+  recoveryJournalHash:"a".repeat(64),existingRuntimeApprovalHash:"b".repeat(64)};
+ assert.equal(bootstrap.validateKillPreparation({active:false},recovery),"PRESERVE_INACTIVE");
+ assert.throws(()=>bootstrap.validateKillPreparation({active:true},recovery));
+ assert.throws(()=>bootstrap.validateKillPreparation({active:false},{...recovery,recoveryJournalHash:""}));
 });
 test('only the canonical deploy-owned Margin Guard may have deploy-group write permission',()=>{
  const path='/var/lib/disdex/shared/margin-risk/guard-live.json';
