@@ -81,6 +81,7 @@ async function main() {
     const makeLock = () => new FileAccountOrderLock(runtime.lockPath, numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000), runtime.pendingExposurePath);
     const runner = new IdlePriorityShortRunner({
         marketData,
+        renderLegacyAdverseEnabled: process.env.DISDEX_RENDER_LEGACY_ADVERSE_LIVE_CERTIFIED === "true",
         executor,
         adapter,
         client,

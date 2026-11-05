@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
+import { validateRenderAdverse, type RenderAdverseState } from "./idle-render-adverse";
 
 export const IDLE_STATE_SCHEMA="disdex-idle-priority-state/v2" as const;
 export type IdlePendingPhase="planned"|"submitted"|"manual_review";
@@ -27,6 +28,7 @@ export type IdleOwnedPosition={
   bestConfirmed5mGainPct?: number;
   trailingStopPrice?: number;
   lastConfirmed5mTs?: number;
+  renderAdverse?: RenderAdverseState;
 };
 
 export type IdlePending={
@@ -94,6 +96,7 @@ function validatePosition(p:IdleOwnedPosition){
  for(const value of [p.bestConfirmed5mGainPct,p.trailingStopPrice,p.lastConfirmed5mTs])if(value!==undefined&&!Number.isFinite(value))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(p.trailingStopPrice!==undefined&&!trailingStop)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(trailingStop && Math.abs(p.stopPrice-p.trailingStopPrice!)>Math.max(1e-10,Math.abs(p.stopPrice)*1e-9))throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(p.renderAdverse!==undefined)validateRenderAdverse(p,p.renderAdverse);
 }
 
 function validatePending(p:IdlePending){

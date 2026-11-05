@@ -19,6 +19,8 @@ on:
       - 'tests/peer-decision-cycle-observation.test.ts'
       - 'tests/fet-deferred-mutation-telemetry.test.ts'
       - 'tests/current-runtime-atomic-publications.test.ts'
+      - 'lib/idle-render-adverse.ts'
+      - 'tests/idle-render-adverse.test.mjs'
       - '.github/workflows/current-runtime-atomic-publication-ci.yml'
   workflow_dispatch:
 permissions:
@@ -35,4 +37,5 @@ jobs:
       - run: npx tsx --test tests/hype-runner-mutation-telemetry.test.ts
       - run: npx tsx --test tests/peer-decision-cycle-observation.test.ts
       - run: npx tsx --test tests/fet-deferred-mutation-telemetry.test.ts
+      - run: npx tsx --test tests/idle-render-adverse.test.mjs tests/idle-priority-short-live-path.test.ts
       - run: npx tsx --test tests/current-runtime-atomic-publications.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/idle-priority-short-state.test.ts tests/idle-residual-long-state-migrate.test.ts tests/hype-zec-long-state.test.ts tests/hype-zec-stale-state-lifecycle.test.ts
