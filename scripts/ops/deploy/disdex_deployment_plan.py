@@ -94,8 +94,9 @@ def approve_diff(desired, current):
     if scope in INDIVIDUAL and (changed - {INDIVIDUAL[scope]} or ui_changed
                                 or monitor_changed or release_roots_changed):
         raise ValueError("scope exceeds approved runner")
-    if scope == "HP_ONLY" and (changed or monitor_changed
-                                or desired["releaseRoots"]["ui"] != current["releaseRoots"]["ui"]):
+    if scope == "HP_ONLY" and (changed or monitor_changed or any(
+            desired["releaseRoots"][role] != current["releaseRoots"][role]
+            for role in ("runners", "monitor"))):
         raise ValueError("HP-only scope modifies trading/runtime")
     if scope == "API_MONITORS" and (changed or ui_changed
                                      or any(desired["releaseRoots"][key] != current["releaseRoots"][key] for key in ("runners", "ui"))):
