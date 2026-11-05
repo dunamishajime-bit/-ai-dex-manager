@@ -187,12 +187,12 @@ export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prep
  const symbols=Array.from(new Set([
   ...(decision.observedCandidates??[]).map(candidate=>candidate.symbol),
   ...(decision.nativeSources??[]).map(source=>source.source.symbol.replace(/USDT$/,"")),
-  ...decision.candidates.map(candidate=>candidate.symbol),
-  ...decision.filtered.map(candidate=>candidate.symbol),
+  ...decision.candidates.map(candidate=>candidate.symbol?.replace(/USDT$/,"")),
+  ...decision.filtered.map(candidate=>candidate.symbol?.replace(/USDT$/,"")),
  ])).sort().map(symbol=>{
   const source=sourceBySymbol.get(symbol);
   const observed=observedBySymbol.get(symbol);
-  const candidate=decision.candidates.find(row=>row.symbol===symbol);
+  const candidate=decision.candidates.find(row=>row.symbol?.replace(/USDT$/,"")===symbol);
   const side=source?.source.side??observed?.side??(candidate as any)?.effectiveSide??(candidate as any)?.side??null;
   const eligible=Boolean(source);
   return {symbol:symbol+"USDT",nativeSide:side,sourceEligible:eligible,
