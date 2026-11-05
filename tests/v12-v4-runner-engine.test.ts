@@ -169,7 +169,9 @@ test("runner keeps signed reconciliation alive while the shared switch blocks ne
     sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[],candidates:hasCandidate?[{} as any]:[],filtered:[],
     orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0}),
    assertAuthority:async()=>{mutationCalls++;throw Error("AUTHORITY_FORBIDDEN")},
-   assertEntrySafety:async()=>{await assertSharedKillSwitchAllowsNewEntry({DISDEX_SHARED_KILL_SWITCH_FILE:killPath});},
+   assertEntrySafety:async()=>{await assertSharedKillSwitchAllowsNewEntry({
+    NODE_ENV:"test",DISDEX_SHARED_KILL_SWITCH_FILE:killPath,
+   });},
    assertSourceParity:async()=>{throw Error("SOURCE_PARITY_NOT_PROVEN")},
    requiredResidentStop:async()=>{throw Error("STOP_NOT_CERTIFIED")},
    quantityNormalizer:{} as any,referencePrice:async()=>{throw Error("NO_PRICE")},
