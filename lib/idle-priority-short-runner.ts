@@ -24,6 +24,7 @@ import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-da
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { advanceRenderAdverse, RENDER_ADVERSE_BAR_MS, RENDER_ADVERSE_EXIT_REASON, startRenderAdverse } from "./idle-render-adverse";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -77,7 +78,12 @@ export type IdlePriorityShortTickResult = {
 };
 
 export type IdlePriorityShortRunnerDependencies = {
-    marketData: { load(): Promise<IdlePriorityMarketSnapshot>; loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar> };
+    marketData: {
+        load(): Promise<IdlePriorityMarketSnapshot>;
+        loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar>;
+        loadFiveMinuteSince?(symbol: IdlePrioritySymbol, startTs: number, endTs: number): Promise<ConfirmedFiveMinuteBar[]>;
+    };
+    renderLegacyAdverseEnabled?: boolean;
     executor: AsterDirectTradeExecutor;
     adapter: V12AsterLiveAdapter;
     client: AsterV3Client;
@@ -466,6 +472,10 @@ export class IdlePriorityShortRunner {
     private async exitPosition(state: IdleState, owned: IdleOwnedPosition, actual: DirectPosition, lock: AccountLockHandle, reason: string): Promise<IdlePriorityShortTickResult> {
         const quote = await this.dependencies.executor.getMarketQuote(owned.symbol);
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_EXIT_QUOTE_STALE:${owned.symbol}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        if (reason === RENDER_ADVERSE_EXIT_REASON && quote.askPrice < owned.entryPrice * 1.01) {
+            return { status: "held", message: "IDLE_RENDER_ADVERSE_PRICE_RECOVERED", symbol: owned.symbol,
+                ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
         const clientOrderId = deterministicIdleClientOrderId({ action: "EXIT", symbol: owned.symbol, signalTs: owned.signalTs });
         const pending: IdlePending = { action: "EXIT", phase: "planned", symbol: owned.symbol, route: owned.route, clientOrderId, idempotencyKey: clientOrderId, quantity: positionQuantity(actual), expectedPrice: quote.askPrice, signalTs: owned.signalTs, decisionTs: this.now(), holdHours: owned.holdHours, createdAt: this.now(), updatedAt: this.now(), reason };
         state.pending = pending;
@@ -699,6 +709,7 @@ export class IdlePriorityShortRunner {
             if (ownershipIssue) return this.manualReview(state, ownershipIssue);
             const pendingRegistry = await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath);
             let pendingAggregate = aggregatePendingExposure(pendingRegistry);
+            let renderAdverseBlocked = false;
             for (const owned of state.positions) {
                 const actual = activePosition(positions, owned.symbol);
                 if (!actual) return this.manualReview(state, `IDLE_POSITION_MISSING:${owned.symbol}`);
@@ -736,9 +747,36 @@ export class IdlePriorityShortRunner {
                     owned.lastConfirmed5mTs = trail.state.lastConfirmedBarTs;
                     await this.dependencies.stateStore.save(state);
                 }
-                const exitReason = trailExit ? "PROFIT_TRAIL_3_GIVEBACK_1P5" : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
+                let exitReason = trailExit ? "PROFIT_TRAIL_3_GIVEBACK_1P5" : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
+                if (!exitReason && this.dependencies.renderLegacyAdverseEnabled) {
+                    let watch = owned.renderAdverse ?? startRenderAdverse(owned);
+                    const now = this.now();
+                    const latestClose = Math.floor(now / RENDER_ADVERSE_BAR_MS) * RENDER_ADVERSE_BAR_MS;
+                    if (watch && watch.nextBarTs < latestClose) {
+                        try {
+                            const bars = await this.dependencies.marketData.loadFiveMinuteSince?.(owned.symbol, watch.nextBarTs, now);
+                            if (!bars?.length || bars.at(-1)!.timestampMs + RENDER_ADVERSE_BAR_MS !== latestClose) {
+                                throw Error("RENDER_ADVERSE_WINDOW_INCOMPLETE");
+                            }
+                            for (const bar of bars) watch = advanceRenderAdverse(watch, bar, now);
+                        } catch {
+                            renderAdverseBlocked = true;
+                            this.log.warn("IDLE_RENDER_ADVERSE_M5_UNAVAILABLE");
+                            continue;
+                        }
+                        owned.renderAdverse = watch;
+                        await this.dependencies.stateStore.save(state);
+                    }
+                    if (watch?.completed && quoteFresh(quote, this.now()) && quote.askPrice >= owned.entryPrice * 1.01) {
+                        exitReason = RENDER_ADVERSE_EXIT_REASON;
+                    }
+                }
                 if (exitReason && this.dependencies.runtime.mode === "LIVE") return await this.exitPosition(state, owned, actual, lock, exitReason);
                 if (exitReason) return { status: "shadow", message: `IDLE_SHADOW_EXIT:${owned.symbol}:${exitReason}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            if (renderAdverseBlocked) {
+                return { status: "held", message: "IDLE_RENDER_ADVERSE_M5_UNAVAILABLE", symbol: "RENDERUSDT",
+                    ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
             // LIVE cooldown is consumed by a filled SHORT entry, never by a
             // generic candidate or a route/risk/capacity rejection.
