@@ -1,7 +1,7 @@
 import copy,hashlib,sys,unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts/ops/deploy'))
-from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation,validate_real_tick,run_scoped_transaction,scoped_configuration_bytes,layered_monitor_pin_changes,validate_unchanged_caps,classify_candidate_failure
+from disdex_v52_scoped_root_cutover import validate_scoped_plan,build_runtime_activation,validate_real_tick,run_scoped_transaction,scoped_configuration_bytes,layered_monitor_pin_changes,validate_unchanged_caps,classify_candidate_failure,validate_flat_ownership_state
 
 IDS=['V12_V4','QUALITY102_CAUSAL_V1','V52','PENGU_V8','FET_BRK48_RESIDUAL','HYPE_TREND_LONG','IDLE_PRIORITY_SHORT','SHARED_CRYPTO_RISK','MARGIN_GUARD']
 
@@ -11,6 +11,19 @@ def plans():
  return current,desired
 
 class ScopedRootContractTest(unittest.TestCase):
+ def test_v52_rollback_rejects_new_exposure_pending_or_ledger_drift(self):
+  old='7'*40;new='a'*40
+  ledger={'netPnlUsd':0}
+  flat=dict(schemaVersion=3,strategyId='DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96',
+   runtimeCommitSha=new,positions={},pendingOrder=None,v52Ledger=ledger)
+  validate_flat_ownership_state(flat,{old,new},ledger)
+  for patch in [dict(runtimeCommitSha='b'*40),dict(positions={'AMZN':{}}),
+                dict(pendingOrder={}),dict(v52Ledger={'netPnlUsd':1}),dict(schemaVersion=True)]:
+   with self.assertRaises(ValueError):validate_flat_ownership_state({**flat,**patch},{old,new},ledger)
+  for field in ('pendingOrder','v52Ledger'):
+   incomplete={k:v for k,v in flat.items() if k!=field}
+   with self.assertRaises(ValueError):validate_flat_ownership_state(incomplete,{old,new},ledger)
+
  def test_candidate_failure_reports_only_allowlisted_category_never_raw_http_or_signature(self):
   self.assertEqual(classify_candidate_failure('Reference quote stale for TSLA user=secret signature=secret'),'STOCK_REFERENCE_STALE')
   self.assertEqual(classify_candidate_failure('ASTER_GLOBAL_RATE_BUDGET_SATURATED:123?signature=secret'),'SHARED_RATE_BUDGET_DEFERRED')

@@ -65,6 +65,16 @@ def validate_unchanged_caps(old_source,new_source,report):
         for k,v in mapping.items()),'CANDIDATE_GROSS_DIFFERS_FROM_EXISTING_SOURCE')
 
 
+def validate_flat_ownership_state(state,allowed_shas,ledger):
+    require(isinstance(state,dict) and state.get('schemaVersion')==3
+        and state.get('strategyId')=='DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96'
+        and state.get('runtimeCommitSha') in allowed_shas
+        and state.get('positions')=={} and 'pendingOrder' in state and state['pendingOrder'] is None,
+        'FLAT_DURABLE_STATE_REQUIRED')
+    require(isinstance(ledger,dict) and isinstance(state.get('v52Ledger'),dict)
+        and canonical(state['v52Ledger'])==canonical(ledger),'DURABLE_LEDGER_CHANGED')
+
+
 def scoped_configuration_bytes(raw,old,new,*,environment=False):
     require(isinstance(raw,bytes) and re.fullmatch('[a-f0-9]{40}',old) and re.fullmatch('[a-f0-9]{40}',new),
             'CONFIGURATION_INPUT')
@@ -245,6 +255,9 @@ class V52ScopedOperations:
             and all(type(proof.get(k)) is int and proof[k]==0 for k in
                 ['positionCount','openOrderCount','ordersSent','cancelsSent','positionChangesSent']),
             'FRESH_SIGNED_FLAT_REQUIRED')
+        captured=proof.get('verifiedAt')
+        require(type(captured) is int and 0<=time.time_ns()//1000000-captured<=30000,
+            'SIGNED_FLAT_PROOF_STALE')
         return proof
 
     def health(self):
@@ -338,11 +351,9 @@ class V52ScopedOperations:
         self.inventory_digest=hashlib.sha256(canonical(dict(accountIdentitySha256=self.account_hash,positionCount=0,openOrderCount=0))).hexdigest()
         self.candidate_readonly();self.check_protected();self.health()
         state=json.loads(self.file(self.STATE))
-        require(state.get('schemaVersion')==3 and state.get('runtimeCommitSha')==self.OLD
-            and state.get('strategyId')=='DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96'
-            and state.get('positions')=={} and state.get('pendingOrder') is None,'FLAT_DURABLE_STATE_REQUIRED')
-        self.ledger_before=state.get('v52Ledger');self.old_enabled=self.systemd.is_enabled(self.old_unit)
-        self.old_tick=(self.file(self.TICK),self.TICK.stat()) if self.TICK.exists() else None
+        self.ledger_before=state.get('v52Ledger')
+        validate_flat_ownership_state(state,{self.OLD},self.ledger_before)
+        self.old_enabled=self.systemd.is_enabled(self.old_unit)
         self.baselines={path:(self.file(path),path.stat()) for path in [self.paths.pins,self.paths.current_plan]}
         self.next_manifest=json.loads(json.dumps(self.manifest));self.next_manifest['runners']['V52'].update(
             sha=self.args.sha,serviceUnit=self.new_unit,releaseRoot=str(self.release),evidenceMode='tick-v1')
@@ -412,7 +423,13 @@ class V52ScopedOperations:
         from disdex_shared_risk_monitor_wiring import atomic_text
         self.check_protected();self.health()
         self.old_stopped=True;self.systemd.stop(self.old_unit)
-        require(not self.systemd.is_active(self.old_unit),'OLD_V52_STILL_ACTIVE')
+        require(self.systemd.main_pid(self.old_unit)==0 and not self.systemd.is_active(self.old_unit),
+            'OLD_V52_STILL_ACTIVE')
+        old_raw=self.file(self.STATE);old_meta=self.STATE.lstat()
+        validate_flat_ownership_state(json.loads(old_raw),{self.OLD},self.ledger_before)
+        self.health();self.signed_flat()
+        require(self.file(self.STATE)==old_raw,'STOPPED_V52_STATE_CHANGED')
+        self.stopped_state_metadata=(old_meta.st_uid,old_meta.st_gid,old_meta.st_mode&0o777)
         for path,raw in [(self.paths.pins,canonical(self.next_manifest)+b'\n'),(self.paths.current_plan,canonical(self.next_current)+b'\n')]:
             before,meta=self.baselines[path];require(self.file(path)==before,'METADATA_CAS_CONFLICT')
             self.replaced.append((path,raw));atomic_text(path,raw,(meta.st_uid,meta.st_gid,meta.st_mode&0o777))
@@ -432,8 +449,7 @@ class V52ScopedOperations:
             except FileNotFoundError:self.parent.sleep_fn(2);continue
             if row.get('runtimeSha')!=self.args.sha or row.get('tickCompletedAt') in ticks:self.parent.sleep_fn(2);continue
             stamp=validate_real_tick(row,sha=self.args.sha,pid=pid,now=time.time_ns()//1000000,previous=ticks[-1] if ticks else None)
-            state=json.loads(self.file(self.STATE));require(state.get('runtimeCommitSha')==self.args.sha and state.get('positions')=={}
-                and state.get('pendingOrder') is None and state.get('v52Ledger')==self.ledger_before,'DURABLE_RECONCILIATION_OR_LEDGER_CHANGED')
+            validate_flat_ownership_state(json.loads(self.file(self.STATE)),{self.args.sha},self.ledger_before)
             self.signed_flat();self.check_protected();ticks.append(stamp);next_observation=time.monotonic()+30
         return ticks
 
@@ -457,23 +473,29 @@ class V52ScopedOperations:
         def attempt(fn):
             try:fn()
             except Exception:errors.append(True)
-        if self.new_started:attempt(lambda:self.systemd.stop(self.new_unit));attempt(lambda:self.systemd.disable(self.new_unit))
+        if self.new_started:
+            self.systemd.stop(self.new_unit)
+            require(self.systemd.main_pid(self.new_unit)==0 and not self.systemd.is_active(self.new_unit),
+                'ROLLBACK_NEW_WRITER_STILL_ACTIVE')
+            current=self.file(self.STATE);state=json.loads(current)
+            validate_flat_ownership_state(state,{self.OLD,self.args.sha},self.ledger_before)
+            self.health();self.signed_flat()
+            require(self.file(self.STATE)==current,'ROLLBACK_V52_STATE_CHANGED')
+            if state['runtimeCommitSha']==self.args.sha:
+                restored=canonical({**state,'runtimeCommitSha':self.OLD})+b'\n'
+                atomic_text(self.STATE,restored,self.stopped_state_metadata)
+                require(self.file(self.STATE)==restored,'ROLLBACK_V52_STATE_READBACK')
+            attempt(lambda:self.systemd.disable(self.new_unit))
         if hasattr(self,'wiring'):attempt(self.wiring.restore)
         for path,expected in reversed(self.replaced):
             def restore(p=path,wanted=expected):
                 old,meta=self.baselines[p];require(self.file(p) in [old,wanted],'ROLLBACK_CAS_CONFLICT')
                 atomic_text(p,old,(meta.st_uid,meta.st_gid,meta.st_mode&0o777))
             attempt(restore)
-        if self.new_started and self.TICK.exists():
-            def restore_tick():
-                if json.loads(self.file(self.TICK)).get('runtimeSha')!=self.args.sha:return
-                if self.old_tick:
-                    raw,meta=self.old_tick;atomic_text(self.TICK,raw,(meta.st_uid,meta.st_gid,meta.st_mode&0o777))
-                else:self.TICK.unlink()
-            attempt(restore_tick)
         for path in reversed(self.created):attempt(lambda p=path:p.unlink(missing_ok=True))
         if self.created_directory and self.dropin_dir.exists():attempt(self.dropin_dir.rmdir)
         attempt(lambda:self.command('daemon-reload'))
+        if errors:raise RuntimeError('V52_SCOPED_ROLLBACK_INCOMPLETE')
         if self.old_stopped:
             if self.old_enabled:attempt(lambda:self.systemd.enable(self.old_unit))
             attempt(lambda:self.systemd.start(self.old_unit))

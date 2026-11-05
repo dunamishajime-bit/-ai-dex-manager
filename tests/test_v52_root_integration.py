@@ -1,4 +1,4 @@
-import os, sys, tempfile, unittest
+import json, os, sys, tempfile, unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -35,6 +35,8 @@ class RollbackTest(unittest.TestCase):
   with tempfile.TemporaryDirectory() as folder:
    base=Path(folder);calls=[]
    systemd=SimpleNamespace(**{name:(lambda unit,n=name:calls.append((n,unit))) for name in ['start','stop','enable','disable']})
+   systemd.main_pid=lambda unit:0
+   systemd.is_active=lambda unit:False
    parent=SimpleNamespace(paths=SimpleNamespace(root=base,receipts=base),systemd=systemd)
    ops=V52ScopedOperations(parent,SimpleNamespace(sha='a'*40),'')
    ops.command=lambda *args:calls.append(args);ops.old_enabled=True
@@ -43,14 +45,25 @@ class RollbackTest(unittest.TestCase):
    current=base/'current';current.write_bytes(b'old current');current.chmod(0o600)
    ops.baselines={pins:(b'old',pins.stat()),current:(b'old current',current.stat())}
    ops.replaced=[(pins,b'new'),(current,b'new current')]
-   journal=base/'state';journal.write_bytes(b'closed history retained by runner')
+   journal=base/'state'
+   ops.ledger_before={'netPnlUsd':0}
+   state=dict(schemaVersion=3,strategyId='DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96',
+    runtimeCommitSha=ops.args.sha,positions={},pendingOrder=None,v52Ledger=ops.ledger_before,
+    closedHistory=['retained by runner'])
+   journal.write_text(json.dumps(state))
+   ops.stopped_state_metadata=(os.getuid(),os.getgid(),0o600)
+   ops.health=lambda:None
+   ops.signed_flat=lambda:calls.append(('signed_flat',None))
    ops.STATE=journal;ops.TICK=base/'missing-tick'
    own=base/'created';own.write_bytes(b'unit');ops.created=[own]
    ops.rollback()
    self.assertEqual(pins.read_bytes(),b'old');self.assertEqual(current.read_bytes(),b'old current')
    self.assertEqual(pins.stat().st_mode&0o777,0o644);self.assertEqual(current.stat().st_mode&0o777,0o600)
-   self.assertEqual(journal.read_bytes(),b'closed history retained by runner');self.assertFalse(own.exists())
+   self.assertEqual(json.loads(journal.read_bytes()),{**state,'runtimeCommitSha':ops.OLD})
+   self.assertFalse(own.exists())
    self.assertIn(('enable',ops.old_unit),calls);self.assertIn(('start',ops.old_unit),calls)
+   self.assertLess(calls.index(('stop',ops.new_unit)),calls.index(('signed_flat',None)))
+   self.assertLess(calls.index(('signed_flat',None)),calls.index(('start',ops.old_unit)))
    self.assertFalse(any('kill' in str(call).lower() for call in calls))
 
 if __name__=='__main__':unittest.main()
