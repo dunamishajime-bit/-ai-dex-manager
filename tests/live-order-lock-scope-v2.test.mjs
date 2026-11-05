@@ -40,8 +40,8 @@ test("V52 runs a fresh preorder Margin Guard before opening exposure", async () 
   const text = await source("../scripts/disdex_v52_aster_only_live_engine.py");
   const open = text.slice(text.indexOf("    def open_basis_position"));
   const guard = open.indexOf("self.require_fresh_preorder_margin_guard()");
-  const parentOpen = open.indexOf("super().open_basis_position");
-  assert.ok(guard >= 0 && parentOpen >= 0 && guard < parentOpen);
+  const submit = open.indexOf("self._submit_basis_position");
+  assert.ok(guard >= 0 && submit > guard);
 });
 
 test("HYPE preloads flat signal history before taking the shared account lock", async () => {
