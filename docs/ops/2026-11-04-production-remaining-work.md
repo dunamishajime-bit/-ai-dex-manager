@@ -4,7 +4,37 @@ Owner direction: finish V4 LIVE first, then continue all remaining repairs and
 verification. Use actual authenticated root SSH; no subagents; preserve existing
 strategy economics, positions, STOPs, shared loss limit, budgets and account lock.
 
-## Verified milestone
+## Latest verified milestone (2026-11-05, supersedes historical checkpoints below)
+
+V4 is LIVE_VERIFIED on c16859dcfab218b4a8c14d691e756da8819f8845,
+PID3066811, NRestarts0. Formal scoped Root activation is FULL_LIVE/ordersEnabled=true.
+The three advancing actual ticks and signed venue proofs are recorded in
+v4-reviewed-root-upgrade-1793846156446242421.json. All other runner pins and
+the current symlink are unchanged. This does not certify a first live fill.
+
+Refresh-control79ab07e41fec26450a3927a33effff054906bb37 passed all five Git CI
+families and Linux111/111. Its one Root helper was CAS-installed under genuine
+API_MONITORS/ordersEnabled=false authority at1793849218030. Installed digest
+99b3b39b34bf4eac9d4352685ade52195781ae3f5ef42ee5621f7122662e9353;
+receipt directory refresh-control-e89b7e58c4d54556843a398df7ff7b9f.
+The natural timer trigger12:30:51 JST published genuinely fresh evidence at
+03:30:55.987 UTC. The next actual healthy decision tick1793849491896 followed
+on the same PID without a restart. Root-private receipt:
+v4-automatic-refresh-baecb26d458f418ab4139cc9f4f755e5.json,
+AUTOMATIC_REFRESH_AND_NEXT_REAL_TICK_VERIFIED. Verification sent zero orders,
+cancels or position mutations. Lease expires Nov6 11:36:50 JST; this successful
+scheduled cycle is not an indefinite self-renewal claim. Normal budget saturation
+can still defer entries; it does not revoke the existing Root activation.
+
+Independent telemetry audit reproduced INJUSDTUSDT/AVAXUSDTUSDT in the gate
+projection: base-symbol observations were joined with quote-qualified execution
+pairs. PR431/ac4a19ef fixes only that join, stacked on the exact deployed V4
+branch. Linux test RED before fix, GREEN4/4 after fix; input snapshots and actual
+candidate direction remain unchanged. SOURCE_READY_NOT_LIVE pending CI and any
+separate scoped deployment. Live native LONG source and derived SHORT route
+must not be conflated or changed to force an entry.
+
+## Historical verified milestone
 
 V4 **LIVE_VERIFIED for the backend scoped cutover** on immutable source
 `2a6f27c6d2896aee420cbc44fe1ab8103750376c`, PID 2501831, NRestarts 0, enabled.
