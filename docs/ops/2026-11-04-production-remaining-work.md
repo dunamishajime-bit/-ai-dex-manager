@@ -34,6 +34,94 @@ candidate direction remain unchanged. SOURCE_READY_NOT_LIVE pending CI and any
 separate scoped deployment. Live native LONG source and derived SHORT route
 must not be conflated or changed to force an entry.
 
+Continuation: PR431 now7e94ad83 passed all three CI jobs. Its strict source-parity
+test permits exactly the three telemetry join replacements, with occurrence
+counts, while preserving every other reviewed runtime byte. No blanket lineage
+check was removed. Production V4 remains c168; display-source repair is not LIVE.
+
+Monitor31aa8fd88e27cac6c848937f39007ade19976b7c passed all eight CI families,
+Linux21 tests and formal Root API_MONITORS preflight. Immutable role archive
+ecae53f30e6dacc1bb45a7fb08312d3efa9892ff61662bcedb4027d03afe7c4b.
+The formal no-order monitor transaction completed with plan
+12e88cd7b91374faefd37756e6581b9a0c07ad80ad5091717792e6cc4a090996,
+three snapshots1793850047355/1793850089040/1793850206723. Both real V4/V52 ticks
+advanced between counted snapshots. All runner PIDs/pins, approval hashes, Kill,
+and current symlink remained unchanged; own mutations0. Receipt under
+/var/lib/disdex/unified-deploy/receipts/monitor-snapshot-31aa8fd88e27cac6c848937f39007ade19976b7c.json.
+
+A subsequent direct signed SDK read failed/deferred and was NOT reported PASS.
+Rather than bypass budgets or repeatedly call the exchange, waited for the next
+regular10-minute timer. Fresh native capture1793850700 then passed the existing
+formal bounded witness validator without another API call. Receipt
+post-monitor-natural-signed-witness-1793850701912013293.json: empty positions,
+orders and pending, unknownStops0/partialStops0, loss limit0.075, healthy Margin,
+Kill, account lock and exact runner map. Source capturedAt/expiresAt preserved.
+
+Q102 root-cause audit: actual ef1a runner already publishes decision-snapshot.json
+and last-tick.json, but monitor reads pending/position only. Flat latest reason
+was therefore LEGACY_STATE_TIMESTAMP instead of QUALITY102_CAUSAL_V4_NO_SIGNAL.
+PR432/c5e9da24 adds a no-follow, producer-owner/SHA/freshness checked reader.
+It explicitly preserves tickVerified=false and authorizesTrading=false; real
+selection metadata and final execution reason are separate. No proximity score
+is invented as a strategy score. Four regressions RED/GREEN; Linux29/29 including
+existing monitor contracts and actual ef1a read-only preview passed; all CI jobs
+passed. Immutable archive52644aba134f38749a1ec6fa9fe2bf382bc6aed858481152470ef4a653e68c43.
+Formal preflight passed with plan
+11bd994771cd603165ebaee69441ba08342c0122a65e1fc68240a27c3a47f2d2.
+The formal monitored transaction completed: MONITOR_SNAPSHOT_VERIFIED_NOT_TRADING_AUTHORITY,
+snapshots1793850745337/1793850755832/1793850882230, both real V4/V52 ticks
+advancing, priorTradingAuthorityPreserved=true, livePreserving=true, mutation
+counters0. Receipt /var/lib/disdex/unified-deploy/receipts/monitor-snapshot-c5e9da24faf960050a6bc0785b45f60fb8d3115d.json.
+Current health snapshot service source is c5e9da24; watchdog remains8dd with the
+certified serialization wrapper, unchanged by this snapshot-only transaction.
+Actual public Q102 projection now reports the correct completed no-signal reason
+with sourceShaef1a, authorizesTrading=false, tickVerified=false. No-signal has no
+selected family/layer/score; these remain null instead of invented values.
+
+Actual peer decisions at this checkpoint: PENGU base Long/Short conditions inactive;
+HYPE TREND_ALIGNMENT_NOT_MET; FET FET_NO_BRK48_R72_SIGNAL;
+IDLE GENERIC_CANDIDATE_NOT_SELECTED_ROUTE; V52 US_EQUITY_SESSION_CLOSED.
+All seven trading services are active with ALLOWED canonical authority, but five
+legacy writers are not yet certified as real ticks. These are observed reasons,
+not a claim that every no-entry period in history had the same cause.
+
+Final identity read this checkpoint: all nine services active, NRestarts0,
+marker/CWD/pinnedSHA match. PIDs: V43066811; Q102805183; V522195629;
+PENGU1384509; FET2869793; HYPE544225; IDLE2881468;
+SharedRisk2017780; Margin3064744. V4 actualtick1793850875594,
+heartbeat1793850944361, canonical ALLOWED / decision NO_SIGNAL. Disk48G total,
+39G used,9G available,82% (read earlier this continuation; no new cleanup claimed).
+
+### Remaining six work groups (not an owner-authorization-only blocker)
+
+1. Implement and test healthy-LIVE scoped peer upgrade executors, including
+   independent activation-map/consumer bindings and lossless state handover.
+   Q102/FET/HYPE/IDLE generic executor absence is internal unfinished engineering,
+   not missing owner consent. Never call the obsolete protected-hold-only V52
+   path against the current healthy baseline or clear Kill to fit its assumptions.
+2. Stage and independently certify peer safety sources PR428/429/430, then deploy
+   only with their matching formal scope contract, current venue/state proof and
+   three actual ticks. They remain SOURCE_READY_NOT_LIVE; approved old sources
+   currently continue with their existing authorities.
+3. Upgrade the five legacy real-tick writers together with their direct Node
+   systemd loaders and monitoring; never flip monitoring alone to tick-v1.
+4. Deploy PR431 producer telemetry join in a separately verified V4 release when
+   performing the next required runtime change; no cosmetic hot-edit/restart of
+   the newly stable immutable c168 release. Source tests/CI are already complete.
+5. Complete actual authenticated owner UI inspection. Backend snapshot proofs
+   are complete; no owner cookie/session/login was fabricated. Main UI worktree
+   changes remain untouched. Do not call anonymous200 authenticated UI evidence.
+6. Continue regular shared API-load/cooldown accounting and bounded refresh
+   operation. Refresh now works naturally and rejects stale evidence, but occasional
+   budget deferrals still occur. The c168 refresh lease expires1793932610
+   (Nov6 11:36:50 JST); genuine new Root SSH approval can renew only inside the
+   existing final12-hour window. Never edit dates, spoof SSH context or schedule
+   an indefinitely self-authorizing renewal. This is an operational renewal
+   condition, not a claim of perpetual authorization.
+
+Separate research/economic blockers: missing native annual warmup and unapproved
+Gross/timing changes remain outside these safety deployments; not blanket V4 gates.
+
 ## Historical verified milestone
 
 V4 **LIVE_VERIFIED for the backend scoped cutover** on immutable source
