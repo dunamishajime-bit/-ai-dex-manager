@@ -8,6 +8,9 @@ on:
       - 'lib/idle-priority-short-state.ts'
       - 'lib/idle-residual-long-state.ts'
       - 'tests/current-runtime-atomic-publications.test.ts'
+      - 'scripts/disdex-fet-brk48-core-preempt.ts'
+      - 'lib/fet-preempt-owner-pins.ts'
+      - 'tests/fet-preempt-owner-pins.test.mjs'
       - '.github/workflows/current-runtime-atomic-publication-ci.yml'
   workflow_dispatch:
 permissions:
@@ -21,5 +24,6 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci --ignore-scripts
+      - run: npx tsx --test tests/fet-preempt-owner-pins.test.mjs tests/fet-core-preemption.test.ts
       - run: npx tsx --test tests/current-runtime-atomic-publications.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/idle-priority-short-state.test.ts tests/hype-zec-long-state.test.ts tests/hype-zec-stale-state-lifecycle.test.ts tests/pending-exposure-registry.test.ts tests/idle-residual-v52-owner-sha.test.ts tests/v52-idle-owner-recovery.test.ts
       - run: python3 -B tests/test_v52_real_tick.py && python3 -B tests/test_v52_stock_quote_local_hold_20261027.py

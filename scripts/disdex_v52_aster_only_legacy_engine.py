@@ -839,7 +839,12 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
             return False
         target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
-        snapshot = self.gross_snapshot()
+        return self._submit_basis_position(slot, candidate, target_gross)
+
+    def _submit_basis_position(self, slot: str, candidate: dict, target_gross: float, *, snapshot: Optional[dict] = None) -> bool:
+        if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
+            return False
+        snapshot = self.gross_snapshot() if snapshot is None else snapshot
         self.assert_gross_safe(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
         target_gross = min(

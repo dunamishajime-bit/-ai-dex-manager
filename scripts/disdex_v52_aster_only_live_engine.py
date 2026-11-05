@@ -162,23 +162,17 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         return max(0.0, dynamic_notional / equity)
 
     def available_slot_gross(self, slot: str):
-        available, snapshot = super().available_slot_gross(slot)
+        _, snapshot = super().available_slot_gross(slot)
         snapshot = self._pending_adjusted_snapshot(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
-        reclaimable = self._v12_dynamic_marked_gross(snapshot)
-        planning_snapshot = {
-            **snapshot,
-            "cryptoGross": max(0.0, snapshot["cryptoGross"] - reclaimable),
-            "totalGross": max(0.0, snapshot["totalGross"] - reclaimable),
-        }
         provisional = min(
             slot_cap,
             max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
-            max(0.0, self.portfolio_gross_cap - planning_snapshot["totalGross"]),
+            max(0.0, self.portfolio_gross_cap - snapshot["totalGross"]),
         )
         max_slippage_bps = max(0.0, base.float_env("DISDEX_V52_MAX_SLIPPAGE_BPS", 20.0))
         strict_plan = plan_v52_stock_capacity(
-            planning_snapshot,
+            snapshot,
             provisional,
             slot_cap,
             candidate_worst_case_gross=provisional * (1.0 + max_slippage_bps / 10_000.0),
@@ -186,8 +180,8 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         accepted = min(max(0.0, provisional), strict_plan["acceptedGross"])
         return accepted, {
             **snapshot,
-            "v12DynamicReclaimGross": reclaimable,
-            "strictPortfolioPlanningGross": planning_snapshot,
+            "v12DynamicReclaimGross": 0.0,
+            "strictPortfolioPlanningGross": snapshot,
             "strictPortfolioPlan": strict_plan,
         }
 
@@ -472,16 +466,14 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         # Set only for a block that happened before any V52 order was submitted.
         # The tick loop may safely retry such a decision inside the same entry window.
         self._v52_last_entry_blocked_before_order = False
-        if self.live:
-            target_gross = self._prepare_idle_residual_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_hype_zec_for_stock_entry(slot, candidate, target_gross)
         snapshot = self._pending_adjusted_snapshot(self.gross_snapshot())
         self.assert_gross_safe(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
-        strict_plan = plan_v52_stock_capacity(snapshot, target_gross, slot_cap)
+        max_slippage_bps = max(0.0, base.float_env("DISDEX_V52_MAX_SLIPPAGE_BPS", 20.0))
+        strict_plan = plan_v52_stock_capacity(
+            snapshot, target_gross, slot_cap,
+            candidate_worst_case_gross=target_gross * (1.0 + max_slippage_bps / 10_000.0),
+        )
         if strict_plan["status"] != "planned" or target_gross > strict_plan["acceptedGross"] + EPSILON:
             self.log(
                 "v52-strict-portfolio-capacity-blocked",
@@ -492,7 +484,8 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             self._v52_last_entry_blocked_before_order = True
             return False
         self.require_fresh_preorder_margin_guard()
-        return super().open_basis_position(slot, candidate, target_gross)
+        # Peer releases require an independently certified executable transfer.
+        return self._submit_basis_position(slot, candidate, target_gross, snapshot=snapshot)
 
     def preflight(self, read_only: bool = False) -> dict:
         checks = super().preflight(read_only=read_only)
@@ -548,7 +541,6 @@ def self_test() -> None:
 
     engine.live = True
     engine._quality102_document = lambda: None
-    engine._v12_dynamic_marked_gross = lambda _snapshot: 0.40
     engine.gross_snapshot = lambda: {
         "equityUsd": 100.0,
         "cryptoNotionalUsd": 290.0,
@@ -557,13 +549,9 @@ def self_test() -> None:
         "stockGross": 0.50,
         "totalGross": 3.40,
     }
-    reclaimed, reclaimed_snapshot = engine.available_slot_gross(V11_SLOT)
-    # Under the final 4.25x total cap, the live planner can reclaim the
-    # dynamic V12 gross before calculating stock capacity.  The nominal
-    # room is 1.25x, then the 20bps worst-case fill buffer is reserved before
-    # returning executable capacity.
-    assert abs(reclaimed - (1.25 / 1.002)) < EPSILON
-    assert abs(reclaimed_snapshot["v12DynamicReclaimGross"] - 0.40) < EPSILON
+    available, live_snapshot = engine.available_slot_gross(V11_SLOT)
+    assert abs(available - (0.85 / 1.002)) < EPSILON
+    assert live_snapshot["v12DynamicReclaimGross"] == 0
 
     assert transient_reference_error("iex_quote_stale META")
     assert not transient_reference_error("Managed Stock position reconciliation mismatch")

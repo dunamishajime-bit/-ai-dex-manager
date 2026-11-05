@@ -74,7 +74,8 @@ test("all formal runners preserve priority over residual LONG", async () => {
     assert.match(source,/releaseIdleResidualLongForFormalEntry/);
   }
   assert.match(v52,/_prepare_idle_residual_for_stock_entry/);
-  assert.match(v52,/target_gross = self\._prepare_idle_residual_for_stock_entry\(slot, target_gross\)/);
+  const v52Entry = v52.slice(v52.indexOf("def open_basis_position"), v52.indexOf("def preflight"));
+  assert.doesNotMatch(v52Entry,/self\._prepare_idle_residual_for_stock_entry/);
   assert.match(helper,/caller!==\"V52_CORE\"/);
   assert.match(helper,/releaseIdleResidualLongForFormalEntry/);
 });
