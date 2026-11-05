@@ -24,6 +24,8 @@ on:
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
       - 'scripts/ops/deploy/disdex_deployment_plan.py'
       - 'tests/test_disdex_deployment_plan.py'
+      - 'tests/test_hp_standalone_cutover.py'
+      - 'scripts/ops/deploy/disdex_hp_standalone_cutover.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
       - 'scripts/ops/deploy/disdex_shared_risk_audit.py'
@@ -85,6 +87,8 @@ on:
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
       - 'scripts/ops/deploy/disdex_deployment_plan.py'
       - 'tests/test_disdex_deployment_plan.py'
+      - 'tests/test_hp_standalone_cutover.py'
+      - 'scripts/ops/deploy/disdex_hp_standalone_cutover.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
       - 'scripts/ops/deploy/disdex_shared_risk_audit.py'
@@ -141,7 +145,7 @@ jobs:
       - name: Verify Ed25519 grant rejection cases
         run: python3 -m unittest discover -s tests -p test_disdex_owner_approval.py -v
       - name: Verify multi-SHA exact-scope plans
-        run: python3 -m unittest discover -s tests -p test_disdex_deployment_plan.py -v
+        run: python3 -m unittest tests.test_disdex_deployment_plan tests.test_hp_standalone_cutover -v
       - name: Root-side read-only preflight and forced-command tests
         run: python3 -m unittest discover -s tests -p test_disdex_unified_root_gate.py -v
       - name: Real Shared Risk refresh audit invariants
