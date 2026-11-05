@@ -447,11 +447,43 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         # The tick loop may safely retry such a decision inside the same entry window.
         self._v52_last_entry_blocked_before_order = False
         if self.live:
-            target_gross = self._prepare_idle_residual_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
-            target_gross = self._prepare_hype_zec_for_stock_entry(slot, candidate, target_gross)
+            # After each successful reduction, re-observe real capacity BEFORE
+            # considering the next sleeve. Otherwise IDLE can release enough
+            # Gross yet the following FET/Q102 helper would still liquidate
+            # an unrelated, fully protected position without necessity.
+            preemption_stages = (
+                ("IDLE_RESIDUAL", lambda gross: self._prepare_idle_residual_for_stock_entry(slot, gross)),
+                ("FET", lambda gross: self._prepare_fet_for_stock_entry(slot, gross)),
+                ("Q102", lambda gross: self._prepare_quality102_for_stock_entry(slot, gross)),
+                ("V12", lambda gross: self._prepare_v12_dynamic_for_stock_entry(slot, gross)),
+                ("HYPE_ZEC", lambda gross: self._prepare_hype_zec_for_stock_entry(slot, candidate, gross)),
+            )
+            slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
+            slippage = max(0.0, base.float_env("DISDEX_V52_MAX_SLIPPAGE_BPS", 20.0))
+            for stage_name, release_capacity in preemption_stages:
+                snapshot_before = self._pending_adjusted_snapshot(self.gross_snapshot())
+                self.assert_gross_safe(snapshot_before)
+                prior = plan_v52_stock_capacity(
+                    snapshot_before, target_gross, slot_cap,
+                    candidate_worst_case_gross=target_gross * (1.0 + slippage / 10_000.0),
+                )
+                if target_gross <= prior["acceptedGross"] + EPSILON:
+                    # Enough free Gross already: preserve all existing STOPs.
+                    break
+                if prior["acceptedGross"] > EPSILON:
+                    # A partial spare Gross is still available. Do not force
+                    # an unrelated closure to fill the entire requested size.
+                    self._v52_last_entry_blocked_before_order = True
+                    self.log("v52-entry-partial-gross-blocked-without-preemption",
+                             slot=slot, requestedGross=target_gross, acceptedGross=prior["acceptedGross"])
+                    return False
+                if prior["stockResidualGross"] + EPSILON < target_gross * (1.0 + slippage / 10_000.0):
+                    # Closing a CRYPTO position cannot repair a STOCK cap.
+                    self._v52_last_entry_blocked_before_order = True
+                    self.log("v52-entry-stock-cap-blocked-before-any-preemption",
+                             slot=slot, requestedGross=target_gross, stage=stage_name)
+                    return False
+                target_gross = release_capacity(target_gross)
         snapshot = self._pending_adjusted_snapshot(self.gross_snapshot())
         self.assert_gross_safe(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap

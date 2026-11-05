@@ -573,7 +573,7 @@ export class Quality102CausalV1Runner {
             causeIdempotencyKey,
             statePath: process.env.FET_BRK48_STATE_PATH,
             maxSlippageBps: this.dependencies.config.maxSlippageBps,
-            expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+            expectedRuntimeSha: process.env.FET_BRK48_RUNTIME_SHA,
             now: this.now,
         });
         if (result.status === "blocked") throw new Error(`QUALITY102_FET_PREEMPT_BLOCKED:${result.message}`);

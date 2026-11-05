@@ -1210,7 +1210,7 @@ export class PenguDualLsV2PortfolioRunner {
                             causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
                             statePath: process.env.FET_BRK48_STATE_PATH,
                             maxSlippageBps: this.dependencies.config.maxSlippageBps,
-                            expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                            expectedRuntimeSha: process.env.FET_BRK48_RUNTIME_SHA,
                             now: this.now,
                         });
                         if (reduced.status !== "reduced") throw new Error(`PENGU_FET_PREEMPT_BLOCKED:${reduced.message}`);

@@ -458,7 +458,7 @@ test("V12 active position over per-position 1.0x fails closed", () => {
 });
 
 
-test("Core intents fully preempt FET residual before capacity allocation", () => {
+test("Core intents never preempt a protected FET when Gross is available", () => {
     for (const [strategy, symbol, gross] of [
         ["V12", "ETHUSDT", 1.0],
         ["PENGU_DUAL_LS_V2", "PENGUUSDT", 0.85],
@@ -466,25 +466,69 @@ test("Core intents fully preempt FET residual before capacity allocation", () =>
         ["QUALITY102_CAUSAL_V1", "SOLUSDT", 1.0],
     ] as const) {
         const fet = position({
-            id: `fet-${strategy}`,
-            strategy: "FET_RESIDUAL",
-            symbol: "FETUSDT",
-            quantity: 10,
-            entryPrice: 90,
-            markPrice: 100,
-            entryTs: NOW - HOUR,
-            updatedAt: NOW,
-            markSource: "LIVE_MARKET_QUOTE",
+            id: "fet-" + strategy, strategy: "FET_RESIDUAL", symbol: "FETUSDT",
+            quantity: 10, entryPrice: 90, markPrice: 100,
+            entryTs: NOW - HOUR, updatedAt: NOW, markSource: "LIVE_MARKET_QUOTE",
             markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 100, crossChecked: true },
         });
         const result = plan([fet], [intent(strategy, gross, symbol)]);
-        assert.equal(result.status, "planned");
-        assert.equal(result.reductions[0]?.strategy, "FET_RESIDUAL");
-        assert.equal(result.reductions[0]?.reducedQuantity, 10);
-        assert.equal(result.reductions[0]?.remainingQuantity, 0);
-        assert.equal(result.activePositions.some((row) => row.strategy === "FET_RESIDUAL"), false);
+        assert.equal(result.status, "planned", strategy);
+        assert.equal(result.reductions.length, 0, strategy);
+        assert.equal(result.activePositions.some(row => row.strategy === "FET_RESIDUAL"), true);
         assert.equal(result.accepted[0]?.strategy, strategy);
     }
+});
+
+test("Core FET preemption only when crypto Gross is exhausted and FET removal admits entry", () => {
+    const fet = position({
+        id: "fet-necessary", strategy: "FET_RESIDUAL", symbol: "FETUSDT",
+        quantity: 10, entryPrice: 100, markPrice: 100,
+        entryTs: NOW - HOUR, updatedAt: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 100, crossChecked: true },
+    });
+    const existingV12 = [
+        cryptoPosition("V12", 1, "BTCUSDT"),
+        { ...cryptoPosition("V12", 1, "ETHUSDT"), id:"V12-ETH-distinct" },
+    ];
+    const result = plan([fet, ...existingV12], [intent("QUALITY102_CAUSAL_V1", 0.5, "SOLUSDT")]);
+    assert.equal(result.status, "planned");
+    assert.equal(result.reductions.length, 1);
+    assert.equal(result.reductions[0]?.strategy, "FET_RESIDUAL");
+    assert.equal(result.reductions[0]?.remainingQuantity, 0);
+    assert.equal(result.accepted[0]?.strategy, "QUALITY102_CAUSAL_V1");
+    assert.ok(result.totals.cryptoGross <= 3 + 1e-9);
+});
+
+test("Positive spare crypto Gross is used before touching FET", () => {
+    const fet = position({
+        id: "fet-spare", strategy: "FET_RESIDUAL", symbol: "FETUSDT",
+        quantity: 10, entryPrice: 100, markPrice: 100,
+        entryTs: NOW - HOUR, updatedAt: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 100, crossChecked: true },
+    });
+    const active = [fet, cryptoPosition("V12", 1, "BTCUSDT"), cryptoPosition("PENGU_DUAL_LS_V2", 0.85)];
+    const result = plan(active, [intent("QUALITY102_CAUSAL_V1", 1, "SOLUSDT")]);
+    assert.equal(result.status, "planned");
+    assert.equal(result.reductions.length, 0);
+    assert.ok((result.accepted[0]?.gross ?? 0) > 0);
+    assert.ok((result.accepted[0]?.gross ?? 0) <= 0.15 + 1e-8);
+});
+
+test("FET stays protected when the core entry cannot be admitted even after removal", () => {
+    const fet = position({
+        id: "fet-not-the-cause", strategy: "FET_RESIDUAL", symbol: "FETUSDT",
+        quantity: 10, entryPrice: 100, markPrice: 100,
+        entryTs: NOW - HOUR, updatedAt: NOW,
+        markSource: "LIVE_MARKET_QUOTE",
+        markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: NOW, price: 100, crossChecked: true },
+    });
+    const active = [fet, cryptoPosition("V12", 1, "BTCUSDT"), { ...cryptoPosition("V12", 1, "ETHUSDT"), id:"V12-ETH-distinct" }];
+    const result = plan(active, [intent("V12", 1, "SOLUSDT")]);
+    assert.equal(result.reductions.length, 0);
+    assert.equal(result.activePositions.some(row => row.strategy === "FET_RESIDUAL"), true);
+    assert.equal(result.accepted.length, 0);
 });
 
 test("FET residual intent does not preempt itself", () => {

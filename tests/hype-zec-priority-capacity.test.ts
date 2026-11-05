@@ -89,3 +89,32 @@ test("an unknown active position never authorizes sidecar reduction", () => {
     totalEntryCap: 4.25,
   }), false);
 });
+
+test("shared capacity sole-cause proof refuses poisoned pending and position values", () => {
+  const base = {
+    positions: [position("HYPEUSDT", 1_000)],
+    equityUsd: 1_000,
+    pendingCryptoGross: 0,
+    pendingTotalGross: 0,
+    candidateGross: 2.5,
+    candidateSymbol: "ETHUSDT",
+    candidateStrategy: "V12" as const,
+    cryptoEntryCap: 3,
+    totalEntryCap: 4.25,
+  };
+  const poison = [
+    { pendingCryptoGross: Number.NaN },
+    { pendingTotalGross: Number.POSITIVE_INFINITY },
+    { pendingCryptoGross: -0.1 },
+    { cryptoEntryCap: Number.NaN },
+    { totalEntryCap: Number.POSITIVE_INFINITY },
+    { equityUsd: Number.NaN },
+    { positions: [{ ...base.positions[0], notionalUsd: Number.NaN }] },
+    { positions: [{ ...base.positions[0], markPrice: Number.NaN }] },
+    { positions: [{ ...base.positions[0], notionalUsd: 0 }] },
+    { positions: [{ ...base.positions[0], quantity: Number.POSITIVE_INFINITY }] },
+  ];
+  for (const bad of poison) {
+    assert.equal(isHypeZecSoleSharedCapacityCause({ ...base, ...bad }), false, JSON.stringify(bad));
+  }
+});

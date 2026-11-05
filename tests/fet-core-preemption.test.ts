@@ -42,7 +42,9 @@ test("FET Core preemption is reduce-only, cancels protection, clears state, and 
   const oldQ102Sha = process.env.DISDEX_Q102_RUNTIME_SHA;
   delete process.env.QUALITY102_CAUSAL_V1_STATE_PATH;
   delete process.env.DISDEX_QUALITY102_CAUSAL_V1_STATE_PATH;
-  delete process.env.DISDEX_Q102_RUNTIME_SHA;
+  // Pin the independent Q102 owner, never accept the FET runner's SHA
+  // as a substitute for Q102 ownership verification.
+  process.env.DISDEX_Q102_RUNTIME_SHA = "c".repeat(40);
 
   try {
     const state = emptyFetBrk48State(SHA, now);
@@ -145,5 +147,32 @@ test("FET Core preemption is reduce-only, cancels protection, clears state, and 
     if (oldQ102Sha === undefined) delete process.env.DISDEX_Q102_RUNTIME_SHA;
     else process.env.DISDEX_Q102_RUNTIME_SHA = oldQ102Sha;
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("FET preemption requires both independent immutable owner SHAs before any venue I/O", async () => {
+  const oldQ = process.env.DISDEX_Q102_RUNTIME_SHA;
+  const oldF = process.env.FET_BRK48_RUNTIME_SHA;
+  let reads = 0;
+  try {
+    delete process.env.DISDEX_Q102_RUNTIME_SHA;
+    delete process.env.FET_BRK48_RUNTIME_SHA;
+    const dummy: any = { getPositions: async () => { reads++; return []; } };
+    const request = {
+      executor: dummy, adapter: dummy, causeIdempotencyKey:"SAFETY_ONLY",
+      maxSlippageBps:20,
+    };
+    const noFet = await reduceFetBrk48ForCoreConflict(request);
+    assert.equal(noFet.status,"blocked");
+    assert.equal(noFet.message,"FET_CORE_PREEMPT_FET_OWNER_SHA_PIN_REQUIRED");
+    const noQ102 = await reduceFetBrk48ForCoreConflict({ ...request, expectedRuntimeSha: SHA });
+    assert.equal(noQ102.status,"blocked");
+    assert.equal(noQ102.message,"FET_CORE_PREEMPT_Q102_OWNER_SHA_PIN_REQUIRED");
+    assert.equal(reads,0);
+  } finally {
+    if (oldQ === undefined) delete process.env.DISDEX_Q102_RUNTIME_SHA;
+    else process.env.DISDEX_Q102_RUNTIME_SHA = oldQ;
+    if (oldF === undefined) delete process.env.FET_BRK48_RUNTIME_SHA;
+    else process.env.FET_BRK48_RUNTIME_SHA = oldF;
   }
 });
