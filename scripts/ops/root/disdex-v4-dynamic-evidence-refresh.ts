@@ -3,12 +3,13 @@
  *
  * This helper has one deliberately narrow responsibility: revalidate mutable
  * account/risk evidence from the official read-only sources before its
- * 24-hour deadline.  It cannot refresh release-bound proofs, create an
+ * evidence freshness deadline. It cannot refresh release-bound proofs, create an
  * approval, enable orders, or call any order mutation endpoint.
  */
 import { createHash, randomUUID } from "node:crypto";
 import { chmod, chown, open, lstat, mkdir, readFile, realpath, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import validity from "../../../config/v12-v4-evidence-validity.json";
 
 import {
   AsterV3Client,
@@ -45,7 +46,7 @@ const EVIDENCE_CLASSES = {
 const SHA = /^[a-f0-9]{40}$/;
 export const V4_DYNAMIC_REFRESH_SCOPE = "V4_EVIDENCE_REFRESH_ONLY" as const;
 const REFRESH_LEASE_SCHEMA = "disdex-v4-evidence-refresh-lease/v1" as const;
-const REFRESH_MAX_LEASE_SECONDS = 24 * 60 * 60;
+const REFRESH_MAX_LEASE_SECONDS = validity.refreshLeaseDays * 24 * 60 * 60;
 const REFRESH_MAX_APPROVAL_SECONDS = 300;
 const REFRESH_OUTPUT_PATH = "/var/lib/disdex/unified-deploy/v4-evidence/evidence-refresh-last.json";
 const MAX_JSON_BYTES = 256 * 1024;

@@ -89,6 +89,13 @@ test("Codex SSH refresh lease uses root-session authorization without a signatur
   assert.equal(validateV4RefreshLease({ lease: value, sha: SHA, now: NOW }).route, "CODEX_SSH");
 });
 
+test("the 30-day lease boundary does not extend the five-minute approval window", () => {
+  const long = lease({approvedAt: NOW, expiresAt: NOW + 30 * 86400});
+  assert.equal(validateV4RefreshLease({lease: long, sha: SHA, now: NOW}).expiresAt, long.expiresAt);
+  assert.throws(() => validateV4RefreshLease({lease: {...long, expiresAt: Number(long.expiresAt) + 1}, sha: SHA, now: NOW}), /EXPIRED/);
+  assert.throws(() => validateV4RefreshLease({lease: {...long, approvalExpiresAt: Number(long.approvalIssuedAt) + 301}, sha: SHA, now: NOW}), /EXPIRED/);
+});
+
 test("runtime refresh leases use Unix seconds while evidence timestamps use milliseconds", () => {
   const now = Math.floor(Date.now() / 1000);
   const value = lease({

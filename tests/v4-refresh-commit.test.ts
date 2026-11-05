@@ -16,10 +16,15 @@ const commit={schema:'disdex-v4-dynamic-evidence-commit/v1',sha,
 test('a root-published refresh commit binds exactly the three mutable evidence files',()=>{
  assert.deepEqual(validateV4RefreshCommit(commit,sha,now),hashes);
 });
+test('a 30-day lease still requires evidence no older than 15 minutes',()=>{
+ const extended={...commit,leaseExpiresAt:commit.leaseApprovedAt+30*86400};
+ assert.deepEqual(validateV4RefreshCommit(extended,sha,now),hashes);
+ assert.throws(()=>validateV4RefreshCommit(extended,sha,now+900000),/COMMIT_STALE/);
+});
 test('expired, stale, future, wrong-SHA and widened refresh commits fail closed',()=>{
  for(const patch of [{sha:'e'.repeat(40)},{ordersEnabled:true},{authorizesTrading:true},
   {scope:'FULL_PROJECT'},{leaseExpiresAt:Math.floor(now/1000)},
-  {leaseApprovedAt:Math.floor(now/1000)+1},{leaseExpiresAt:Math.floor(now/1000)+86401},
+  {leaseApprovedAt:Math.floor(now/1000)+1},{leaseExpiresAt:commit.leaseApprovedAt+30*86400+1},
   {capturedAt:new Date(now-900001).toISOString()},{capturedAt:new Date(now+1).toISOString()},
   {refreshGeneration:''},{leaseId:''},{planSha256:'invalid'},
   {evidenceSha256:{...hashes,routeSourceParity:hash}},
