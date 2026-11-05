@@ -472,6 +472,10 @@ export class IdlePriorityShortRunner {
     private async exitPosition(state: IdleState, owned: IdleOwnedPosition, actual: DirectPosition, lock: AccountLockHandle, reason: string): Promise<IdlePriorityShortTickResult> {
         const quote = await this.dependencies.executor.getMarketQuote(owned.symbol);
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_EXIT_QUOTE_STALE:${owned.symbol}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        if (reason === RENDER_ADVERSE_EXIT_REASON && quote.askPrice < owned.entryPrice * 1.01) {
+            return { status: "held", message: "IDLE_RENDER_ADVERSE_PRICE_RECOVERED", symbol: owned.symbol,
+                ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
         const clientOrderId = deterministicIdleClientOrderId({ action: "EXIT", symbol: owned.symbol, signalTs: owned.signalTs });
         const pending: IdlePending = { action: "EXIT", phase: "planned", symbol: owned.symbol, route: owned.route, clientOrderId, idempotencyKey: clientOrderId, quantity: positionQuantity(actual), expectedPrice: quote.askPrice, signalTs: owned.signalTs, decisionTs: this.now(), holdHours: owned.holdHours, createdAt: this.now(), updatedAt: this.now(), reason };
         state.pending = pending;
