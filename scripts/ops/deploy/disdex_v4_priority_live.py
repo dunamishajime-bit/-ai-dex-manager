@@ -37,6 +37,24 @@ ECONOMIC_FILES=('lib/v12-v4-production-lifecycle.ts','lib/v12-v4-v2-shadow.ts',
 def digest(raw):return hashlib.sha256(raw).hexdigest()
 def economic_source_equal(a,b):return a.replace(b'\r\n',b'\n')==b.replace(b'\r\n',b'\n')
 
+
+def hp_primary_pin_change(raw, common_sha, old_v4_sha, new_v4_sha):
+    require(all(re.fullmatch('[a-f0-9]{40}', sha) for sha in
+                (common_sha, old_v4_sha, new_v4_sha))
+            and old_v4_sha != new_v4_sha, 'HP_PRIMARY_PIN_SHA')
+    key = 'DISDEX_V12_V4_PRIMARY_SHA'
+    expected = {
+        'DISDEX_PRIMARY_V12_RUNNER': 'V4',
+        key: old_v4_sha,
+        'DISDEX_V12_V4_PEER_SHA': common_sha,
+        'DISDEX_V12_V4_OPERATION_MODE': 'CERTIFIED',
+    }
+    lines = [line for line in raw.splitlines() if line.strip() and not line.lstrip().startswith('#')]
+    require(len(lines) == len(expected) and set(lines) ==
+            {f'{name}={value}' for name, value in expected.items()}, 'HP_PRIMARY_PIN_BASELINE')
+    return {key: old_v4_sha}, {key: new_v4_sha}
+
+
 def render_certified_budget_unit(raw):
     # The monitor broker deliberately admits GET priorities only. Full LIVE
     # must retain the canonical shared SDK file/lock budget for protective and
@@ -272,6 +290,11 @@ class ProductionOperations:
                 if path not in changes:changes[path]=({}, {})
                 for target,values in zip(changes[path],(before,after)):
                     require(not set(target)&set(values),'OVERLAPPING_MONITOR_LAYER_CHANGE');target.update(values)
+        if self.upgrade:
+            primary = Path('/etc/disdex/current-runtime') / f'{current_link}.v12-primary.env'
+            require(primary not in changes, 'OVERLAPPING_HP_PRIMARY_PIN_CHANGE')
+            changes[primary] = hp_primary_pin_change(
+                bytes_at(primary).decode(), current_link, old, self.candidate_sha)
         self.wiring=SharedRiskMonitorWiring([(path,*pair) for path,pair in changes.items()])
         v4=context['peers']['V12_V4'];now=time.time_ns()//1000000
         if self.recovery:

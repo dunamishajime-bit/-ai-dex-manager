@@ -24,6 +24,27 @@ def facts():
         durableHash='d'*64,killHash='e'*64)
 
 class PriorityFactsTest(unittest.TestCase):
+    def test_hp_primary_rebind_changes_only_the_verified_v4_key(self):
+        common = "c" * 40
+        source = (
+            "# HP compatibility\n"
+            "DISDEX_PRIMARY_V12_RUNNER=V4\n"
+            f"DISDEX_V12_V4_PRIMARY_SHA={OLD}\n"
+            f"DISDEX_V12_V4_PEER_SHA={common}\n"
+            "DISDEX_V12_V4_OPERATION_MODE=CERTIFIED\n"
+        )
+        before, after = m.hp_primary_pin_change(source, common, OLD, SHA)
+        from disdex_shared_risk_monitor_wiring import replace_values
+        self.assertEqual(replace_values(source, before, after), source.replace(OLD, SHA))
+        for invalid in [
+            source.replace(OLD, "d" * 40),
+            source.replace(common, "d" * 40),
+            source.replace("CERTIFIED", "CANARY"),
+            source + f"DISDEX_V12_V4_PRIMARY_SHA={OLD}\n",
+        ]:
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                m.hp_primary_pin_change(invalid, common, OLD, SHA)
+
     def test_upgrade_baseline_binds_prior_authority_before_any_stop(self):
         from unittest.mock import patch
         op=m.ProductionOperations(candidate_sha=SHA,static_root=Path('/tmp')/SHA)
