@@ -4,7 +4,69 @@ Owner direction: finish V4 LIVE first, then continue all remaining repairs and
 verification. Use actual authenticated root SSH; no subagents; preserve existing
 strategy economics, positions, STOPs, shared loss limit, budgets and account lock.
 
-## Latest verified milestone (2026-11-05, supersedes historical checkpoints below)
+## Current V4 Production checkpoint (2026-11-05 evening JST)
+
+V4 is LIVE_VERIFIED on 7e94ad83286af1f4c8f65f17b0c1bdd017a3c650, PID3247958,
+NRestarts0, FULL_LIVE/ordersEnabled=true. All nine services active with real
+PID/CWD/SHA identity. The old c168 instance is PID0. The scoped transaction
+kept the existing eight peer pins, current symlink and Kill unchanged.
+
+Incident: c168 passed its no-signal cycles but first real INJUSDT entry reached
+a relative Margin Guard Python path missing from its role release. Its order
+dispatcher conservatively stored UNKNOWN; bounded watchdog restarts also
+stopped because the same client order ID was unresolved. Existing signed recovery
+proved that v12-v4-94d14d04a7ca1d696fd02c2545d9 had no execution, and resolved
+that specific intent to TERMINAL/CANCELLED/CLOSED with pending RELEASED.
+The helper initially hit EACCES writing its historical audit file after signed
+reads; the Root-owned original was preserved in
+unknown-entry-recovery-historical-1793866481599616856.jsonl, then the helper ran
+with its deploy-owned 0600 audit file and canonical shared budget. No order,
+cancel, or position change was sent by recovery.
+
+The same SHA was first restored with its own absolute Margin Guard override
+pointing to the unchanged verified 2a source, after deploy-user signed preflight
+HEALTHY. The first canonical start failed its certificate/safety check; a
+read-only reproduction passed and a bounded retry passed the actual prestart.
+Three actual c168 recovery ticks passed under PID3235013. Receipt:
+v4-margin-wiring-recovery-1793866730879033908/tick-audit.json.
+
+PR431 was then deployed with a complete 114-file Git-exact release, including
+the missing Margin Guard entrypoint/imports and existing unknown-entry tools.
+Archive fdda9b9c99250eea3a4b4069dc673cab30b306fe598d8fbb884331fcd446932f.
+Release-local Margin Guard self-test and deploy-user signed read-only preflight
+HEALTHY; execution/route certification 37 tests, 41 routes, typecheck, plus
+8 display/unknown-entry regressions. Parent plan
+1e2b0f045a617e8321d7558442fa48e2da78f8b06a6df4e519d4bc92667dcfa3.
+Full plan 2b4fd03cf01d6605f1179c03bf9d681939d3b6993bb6876db3655c131faab82d.
+Formal receipt /var/lib/disdex/unified-deploy/receipts/v12_v4-7e94ad83286af1f4c8f65f17b0c1bdd017a3c650-68febed5.json.
+Actual advancing ticks1793868180922/1793868291610/1793868411131.
+All three signed witness rounds flat with zero positions/orders/pending and
+7.5% Shared Risk, no unknown/partial STOP, no audit mutations. Actual backend
+ALLOWED / NO_SIGNAL with current SHA and 14 ranking observations, none with
+the duplicate USDT suffix. No live fill was forced or claimed.
+
+New SHA has an independent, genuine refresh-only lease through Nov6 17:41:39
+JST. The 17:46:56 JST natural timer trigger ran successfully and published
+signed evidence at17:47:01.610 JST; refresh-only never granted orders.
+The scheduled task checks the current pin and lease dynamically.
+
+Prevention: PR422/fc7fa9dd now rejects missing, writable or non-Root Margin
+Guard sources before the static certificate can be published. Linux8/8, all
+required GitHub CI successful; installed helper SHA256
+99e0b6ab768c76ca6eaf242024886813046d52d2169b5e1129a91e6bf99f810c.
+No-order install receipt static-margin-contract-install-1793868533683102241/receipt.json.
+
+PR428/429/430 are staged under peer-source-staging in the Root-private audit
+area. All three archives match exact Git blobs and the validated dependency
+lock. Isolated Linux tests passed: crypto66, Q10274, V5273 Node plus9 Python.
+These are SOURCE_READY_NOT_LIVE. The V52 executor still assumes a historical
+protected hold and old4d33 SHA; it is incompatible with today's healthy 0416
+baseline. Generic peer scoped execution and independent dependent-pin handover
+remain internal implementation work. The five legacy peers still lack
+Production-certified runner-owned ticks. Authenticated HP browser is at login,
+so actual owner browser rendering is pending.
+
+## Earlier verified milestone (2026-11-05 daytime)
 
 V4 is LIVE_VERIFIED on c16859dcfab218b4a8c14d691e756da8819f8845,
 PID3066811, NRestarts0. Formal scoped Root activation is FULL_LIVE/ordersEnabled=true.
