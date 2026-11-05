@@ -3,6 +3,7 @@ import "dotenv/config";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { reduceFetBrk48ForCoreConflict } from "../lib/fet-brk48-live-reduction";
+import { readFetCoreOwnerPins } from "../lib/fet-preempt-owner-pins";
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(name);
@@ -26,6 +27,7 @@ async function main() {
   }
   const cause = String(arg("--cause") || "").trim();
   if (!cause) throw new Error("FET_CORE_PREEMPT_CAUSE_REQUIRED");
+  const owners = await readFetCoreOwnerPins();
 
   const client = new AsterV3Client({
     baseUrl: process.env.ASTER_FUTURES_BASE_URL,
@@ -49,11 +51,8 @@ async function main() {
     causeIdempotencyKey: cause,
     statePath: arg("--state-path") || process.env.FET_BRK48_STATE_PATH,
     maxSlippageBps: numberEnv("FET_BRK48_MAX_SLIPPAGE_BPS", 20),
-    // The helper is invoked by another runner (V12/PENGU/Q102/V52), so the
-    // caller's release SHA is not the FET runner's state-owner SHA.  Keep the
-    // old fallback for existing deployments, but allow the production wiring
-    // to pin the independently running FET release explicitly.
-    expectedRuntimeSha: process.env.FET_BRK48_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
+    expectedRuntimeSha: owners.fet,
+    expectedQ102RuntimeSha: owners.q102,
   });
   console.log(JSON.stringify({ caller, cause, ...result }));
   if (result.status === "blocked") process.exitCode = 2;
