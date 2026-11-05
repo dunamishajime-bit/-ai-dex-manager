@@ -143,6 +143,6 @@ jobs:
           set -Eeuo pipefail
           python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
           grep -Fq 'export DISDEX_V96_MAX_GROSS=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Fq 'export DISDEX_V52_STOCK_GROSS_CAP=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
-          grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_STOCK_GROSS_CAP=4.0' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25' scripts/ops/disdex-v96-v52-live-policy.sh
           echo 'HISTORICAL_V96_V52_COMPATIBILITY_CHECK_COMPLETE'
