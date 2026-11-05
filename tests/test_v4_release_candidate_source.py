@@ -44,6 +44,18 @@ class CandidateSourceTest(unittest.TestCase):
                          b' return {status:"blocked",reason:`${ledger?"V4_SHARED_ACCOUNT_REFRESH_REQUIRED":peer?"V4_PEER_ATTESTATION_RETRY_REQUIRED":"V4_EVIDENCE_REFRESH_REQUIRED"}:${reason}`,')
                     self.assertEqual(expected.count(old),1)
                     expected=expected.replace(old,new)
+                    # The telemetry-only join uses base symbols; execution
+                    # candidates retain their original quote-qualified keys.
+                    for old, new in [
+                        (b'...decision.candidates.map(candidate=>candidate.symbol),',
+                         b'...decision.candidates.map(candidate=>candidate.symbol?.replace(/USDT$/,"")),'),
+                        (b'...decision.filtered.map(candidate=>candidate.symbol),',
+                         b'...decision.filtered.map(candidate=>candidate.symbol?.replace(/USDT$/,"")),'),
+                        (b'const candidate=decision.candidates.find(row=>row.symbol===symbol);',
+                         b'const candidate=decision.candidates.find(row=>row.symbol?.replace(/USDT$/,"")===symbol);'),
+                    ]:
+                        self.assertEqual(expected.count(old),1)
+                        expected=expected.replace(old,new)
                 actual = Path(row["target"]).read_bytes().replace(b"\r\n", b"\n")
                 self.assertEqual(actual, expected)
 
