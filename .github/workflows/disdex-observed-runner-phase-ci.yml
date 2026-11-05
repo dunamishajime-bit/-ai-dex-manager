@@ -11,12 +11,14 @@ on:
       - 'scripts/ops/root/disdex-runner-watchdog-current.mjs'
       - 'tests/watchdog-peer-direct-loader.test.mjs'
       - 'tests/health-numeric-projection.test.mjs'
+      - 'tests/q102-decision-observation.test.mjs'
       - '.github/workflows/disdex-observed-runner-phase-ci.yml'
   pull_request:
     paths:
       - 'lib/disdex-observed-runner-phase.mjs'
       - 'lib/disdex-health-observability.mjs'
       - 'tests/health-venue-observability.test.mjs'
+      - 'tests/q102-decision-observation.test.mjs'
       - 'lib/disdex-q102-health-gate.mjs'
       - 'scripts/ops/root/disdex-runner-health-snapshot-current.mjs'
       - 'tests/observed-runner-phase.test.mjs'
@@ -37,4 +39,5 @@ jobs:
       - run: node scripts/ops/root/disdex-runner-health-snapshot-current.mjs --self-test
       - run: node --test tests/watchdog-peer-direct-loader.test.mjs tests/ops-runner-watchdog-current-contract.test.mjs
       - run: node --test tests/health-numeric-projection.test.mjs
+      - run: node --test tests/q102-decision-observation.test.mjs
       - run: git diff --check

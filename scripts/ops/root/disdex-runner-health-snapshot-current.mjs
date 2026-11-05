@@ -7,7 +7,7 @@ import { observedV4Phase, readObservedRunnerTick } from "../../../lib/disdex-obs
 import { resolveQuality102OperatorGateReason } from "../../../lib/disdex-q102-health-gate.mjs";
 import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
 import {evaluateOperatorActivationGate} from './disdex-live-operator-activation-gate.mjs';
-import {classifyPendingExposure,pendingBytesDigest,readSignedFlatGross,readV4Decision} from '../../../lib/disdex-health-observability.mjs';
+import {classifyPendingExposure,pendingBytesDigest,readSignedFlatGross,readV4Decision,readQ102Decision} from '../../../lib/disdex-health-observability.mjs';
 import { validateRunnerTickHeartbeat } from "./disdex-runner-tick-heartbeat.mjs";
 
 const execFile = promisify(execFileCallback);
@@ -830,6 +830,12 @@ async function main() {
             diagnostics,
             observability,
         };
+    }
+    const q102=runnerSnapshots.QUALITY102_CAUSAL_V1;
+    if(q102?.processHealthy){
+        const decision=await readQ102Decision({runner:RUNNERS.find(x=>x.key==='QUALITY102_CAUSAL_V1'),
+            now:Date.now(),pid:q102.diagnostics.mainPid});
+        q102.observability.q102=decision;
     }
     const gross=await readSignedFlatGross({v52Root:RUNNERS.find(x=>x.key==='V52')?.releaseRoot,
         pending,pendingDigest:pending.sourceDigest,now:Date.now()});
