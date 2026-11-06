@@ -7,7 +7,6 @@ import {
   AlertCircle,
   ArrowRight,
   Fingerprint,
-  KeyRound,
   Lock,
   LogIn,
   Mail,
@@ -15,6 +14,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import type { SecurityMethod } from "@/lib/security-utils";
 import {
   PUBLIC_REGISTER_ENABLED,
   PUBLIC_RESET_PASSWORD_ENABLED,
@@ -23,18 +23,27 @@ import {
 
 type LoginStep = "login" | "second-factor";
 
+const LOGIN_FACTOR_ORDER: SecurityMethod[] = ["passkey", "totp", "email"];
+const LOGIN_FACTOR_LABEL: Record<SecurityMethod, string> = {
+  passkey: "指紋認証 / パスキー",
+  totp: "Google Authenticator",
+  email: "メール認証",
+};
+
+
 function LoginContent() {
   const {
     login,
-    loginWithPasskey,
     verify2FA,
     verifyTOTP,
     verifyPasskeySecondFactor,
     resendEmailCode,
+    switchSecondFactor,
     resetSecondFactorFlow,
     isAuthenticated,
     pending2FAEmail,
     pendingSecondFactors,
+    availableSecondFactors,
     completedSecondFactors,
   } = useAuth();
   const router = useRouter();
@@ -48,11 +57,12 @@ function LoginContent() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPasskeySubmitting, setIsPasskeySubmitting] = useState(false);
   const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
   const [isResendingEmail, setIsResendingEmail] = useState(false);
   const [isTotpSubmitting, setIsTotpSubmitting] = useState(false);
   const [isSecondPasskeySubmitting, setIsSecondPasskeySubmitting] = useState(false);
+  const [showFactorPicker, setShowFactorPicker] = useState(false);
+  const [isSwitchingFactor, setIsSwitchingFactor] = useState(false);
 
   const nextPath = useMemo(() => {
     const raw = searchParams.get("next");
@@ -64,6 +74,11 @@ function LoginContent() {
   const remainingFactors = useMemo(
     () => pendingSecondFactors.filter((method) => !completedSecondFactors.includes(method)),
     [completedSecondFactors, pendingSecondFactors],
+  );
+  const activeFactor = remainingFactors[0] || pendingSecondFactors[0] || null;
+  const orderedAvailableFactors = useMemo(
+    () => LOGIN_FACTOR_ORDER.filter((method) => availableSecondFactors.includes(method)),
+    [availableSecondFactors],
   );
 
   useEffect(() => {
@@ -84,6 +99,7 @@ function LoginContent() {
   useEffect(() => {
     if (pendingSecondFactors.length > 0) {
       setStep("second-factor");
+      setShowFactorPicker(false);
       setError(null);
     }
   }, [pendingSecondFactors]);
@@ -103,7 +119,7 @@ function LoginContent() {
 
       if (result.requiresSecondFactor) {
         setStep("second-factor");
-        setNotice("有効な認証方法をすべて完了してください。");
+        setNotice("優先順位に従って認証方法を選択しました。必要なら他の認証方法へ切り替えられます。");
         return;
       }
 
@@ -165,30 +181,6 @@ function LoginContent() {
     }
   };
 
-  const handlePasskeyLogin = async () => {
-    if (!email.trim()) {
-      setError("先にメールアドレスを入力してください。");
-      return;
-    }
-
-    setError(null);
-    setNotice(null);
-    setIsPasskeySubmitting(true);
-
-    try {
-      const result = await loginWithPasskey(email.trim());
-      if (!result.success) {
-        setError(result.error || "パスキー認証に失敗しました。");
-        return;
-      }
-      router.replace(nextPath);
-    } catch (err: any) {
-      setError(err?.message || "パスキー認証に失敗しました。");
-    } finally {
-      setIsPasskeySubmitting(false);
-    }
-  };
-
   const handleSecondPasskeyVerify = async () => {
     setError(null);
     setIsSecondPasskeySubmitting(true);
@@ -209,6 +201,35 @@ function LoginContent() {
       setError(err?.message || "端末認証に失敗しました。");
     } finally {
       setIsSecondPasskeySubmitting(false);
+    }
+  };
+
+  const handleSwitchFactor = async (method: SecurityMethod) => {
+    if (method === activeFactor) {
+      setShowFactorPicker(false);
+      return;
+    }
+    setError(null);
+    setNotice(null);
+    setIsSwitchingFactor(true);
+    try {
+      const result = await switchSecondFactor(method);
+      if (!result.success) {
+        setError(result.error || "認証方法を切り替えできませんでした。");
+        return;
+      }
+      setEmailCode("");
+      setTotpCode("");
+      setShowFactorPicker(false);
+      if (method === "email") {
+        setNotice("メール認証に切り替えました。6桁コードを送信しました。");
+      } else if (method === "totp") {
+        setNotice("Google Authenticator に切り替えました。");
+      } else {
+        setNotice("指紋認証 / パスキーに切り替えました。");
+      }
+    } finally {
+      setIsSwitchingFactor(false);
     }
   };
 
@@ -300,16 +321,6 @@ function LoginContent() {
               <ArrowRight className="h-4 w-4" />
             </button>
 
-            <button
-              type="button"
-              onClick={handlePasskeyLogin}
-              disabled={isPasskeySubmitting}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gold-400/20 bg-white/5 px-4 py-3 font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Fingerprint className="h-4 w-4" />
-              {isPasskeySubmitting ? "パスキー認証中..." : "パスキーでログイン"}
-            </button>
-
             <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-white">
                 <ShieldCheck className="h-4 w-4 text-gold-300" />
@@ -317,16 +328,16 @@ function LoginContent() {
               </div>
               <div className="mt-3 grid gap-2 text-xs leading-6 text-white/68">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 text-gold-200" />
-                  メール認証コード
+                  <Fingerprint className="h-3.5 w-3.5 text-gold-200" />
+                  1. 指紋認証 / パスキー
                 </div>
                 <div className="flex items-center gap-2">
                   <Smartphone className="h-3.5 w-3.5 text-gold-200" />
-                  Google Authenticator
+                  2. Google Authenticator
                 </div>
                 <div className="flex items-center gap-2">
-                  <KeyRound className="h-3.5 w-3.5 text-gold-200" />
-                  パスキー / 端末認証
+                  <Mail className="h-3.5 w-3.5 text-gold-200" />
+                  3. メール認証コード
                 </div>
               </div>
             </div>
@@ -346,15 +357,67 @@ function LoginContent() {
         {step === "second-factor" ? (
           <div className="space-y-5">
             <div className="rounded-2xl border border-gold-400/16 bg-gold-500/10 p-4 text-sm leading-7 text-gold-100">
-              有効な認証方法をすべて完了してください。完了済み:{" "}
-              {completedSecondFactors.length ? completedSecondFactors.join(" / ") : "まだありません"}
+              2段階認証を1つ完了してください。優先順は「指紋認証 → Google Authenticator → メール認証」です。
             </div>
 
-            {remainingFactors.includes("email") ? (
-              <form onSubmit={handleEmailCodeVerify} className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <div className="text-sm font-semibold text-white">メール認証</div>
+            {activeFactor === "passkey" ? (
+              <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <Fingerprint className="h-4 w-4 text-gold-200" />
+                  指紋認証 / パスキー
+                </div>
                 <div className="text-xs leading-6 text-white/70">
-                  {pending2FAEmail ? `${pending2FAEmail} に送信した6桁コードを入力してください。` : "メール認証コードを入力してください。"}
+                  Windows Hello、Face ID、指紋認証など、登録済みの端末認証を使用します。
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSecondPasskeyVerify}
+                  disabled={isSecondPasskeySubmitting}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(180deg,#f6d878,#d6a63a)] px-4 py-3 font-bold text-black disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Fingerprint className="h-4 w-4" />
+                  {isSecondPasskeySubmitting ? "指紋認証中..." : "指紋認証を開始"}
+                </button>
+              </div>
+            ) : null}
+
+            {activeFactor === "totp" ? (
+              <form onSubmit={handleTotpVerify} className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <Smartphone className="h-4 w-4 text-gold-200" />
+                  Google Authenticator
+                </div>
+                <div className="text-xs leading-6 text-white/70">
+                  Google Authenticator に表示される6桁コードを入力してください。
+                </div>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={totpCode}
+                  onChange={(event) => setTotpCode(event.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                  required
+                  className="w-full rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-gold-400/40"
+                  placeholder="123456"
+                />
+                <button
+                  type="submit"
+                  disabled={isTotpSubmitting}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(180deg,#f6d878,#d6a63a)] px-4 py-3 font-bold text-black disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isTotpSubmitting ? "確認中..." : "Authenticator で認証"}
+                </button>
+              </form>
+            ) : null}
+
+            {activeFactor === "email" ? (
+              <form onSubmit={handleEmailCodeVerify} className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <Mail className="h-4 w-4 text-gold-200" />
+                  メール認証
+                </div>
+                <div className="text-xs leading-6 text-white/70">
+                  {pending2FAEmail ? pending2FAEmail + " に送信した6桁コードを入力してください。" : "登録メールに送信した6桁コードを入力してください。"}
                 </div>
                 <div className="flex gap-2">
                   <input
@@ -376,16 +439,8 @@ function LoginContent() {
                       setIsResendingEmail(true);
                       try {
                         const result = await resendEmailCode();
-                        if (result.success) {
-                          const stamp = new Date().toLocaleTimeString("ja-JP", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                          });
-                          setNotice(`メール認証コードを再送しました。 ${stamp}`);
-                        } else {
-                          setError(result.error || "コード再送に失敗しました。");
-                        }
+                        if (result.success) setNotice("メール認証コードを再送しました。");
+                        else setError(result.error || "コード再送に失敗しました。");
                       } finally {
                         setIsResendingEmail(false);
                       }
@@ -400,52 +455,44 @@ function LoginContent() {
                   disabled={isEmailSubmitting}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(180deg,#f6d878,#d6a63a)] px-4 py-3 font-bold text-black disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isEmailSubmitting ? "確認中..." : "メール認証を完了"}
+                  {isEmailSubmitting ? "確認中..." : "メールコードで認証"}
                 </button>
               </form>
             ) : null}
 
-            {remainingFactors.includes("totp") ? (
-              <form onSubmit={handleTotpVerify} className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <div className="text-sm font-semibold text-white">Google Authenticator</div>
-                <div className="text-xs leading-6 text-white/70">
-                  Google Authenticator に表示される6桁コードを入力してください。
-                </div>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={totpCode}
-                  onChange={(event) => setTotpCode(event.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
-                  required
-                  className="w-full rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-gold-400/40"
-                  placeholder="123456"
-                />
-                <button
-                  type="submit"
-                  disabled={isTotpSubmitting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(180deg,#f6d878,#d6a63a)] px-4 py-3 font-bold text-black disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isTotpSubmitting ? "確認中..." : "Authenticator を完了"}
-                </button>
-              </form>
-            ) : null}
+            <button
+              type="button"
+              onClick={() => setShowFactorPicker((value) => !value)}
+              className="w-full rounded-2xl border border-gold-400/20 bg-gold-400/[0.06] px-4 py-3 text-sm font-semibold text-gold-100 transition hover:bg-gold-400/[0.10]"
+            >
+              {showFactorPicker ? "認証方法の選択を閉じる" : "他の認証方法へ切り替える"}
+            </button>
 
-            {remainingFactors.includes("passkey") ? (
-              <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <div className="text-sm font-semibold text-white">端末認証 / パスキー</div>
-                <div className="text-xs leading-6 text-white/70">
-                  Windows Hello、Face ID、指紋認証など、この端末で登録済みの認証を完了してください。
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSecondPasskeyVerify}
-                  disabled={isSecondPasskeySubmitting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(180deg,#f6d878,#d6a63a)] px-4 py-3 font-bold text-black disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <Fingerprint className="h-4 w-4" />
-                  {isSecondPasskeySubmitting ? "端末認証中..." : "端末認証を完了"}
-                </button>
+            {showFactorPicker ? (
+              <div className="space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="text-xs font-semibold text-white/70">認証方法を選択</div>
+                {LOGIN_FACTOR_ORDER.map((method, index) => {
+                  const available = orderedAvailableFactors.includes(method);
+                  const selected = activeFactor === method;
+                  const Icon = method === "passkey" ? Fingerprint : method === "totp" ? Smartphone : Mail;
+                  return (
+                    <button
+                      key={method}
+                      type="button"
+                      disabled={!available || selected || isSwitchingFactor}
+                      onClick={() => void handleSwitchFactor(method)}
+                      className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-left text-sm text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-gold-200" />
+                        {index + 1}. {LOGIN_FACTOR_LABEL[method]}
+                      </span>
+                      <span className="text-xs text-white/55">
+                        {selected ? "使用中" : available ? "切り替え" : "未登録"}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             ) : null}
 
@@ -456,6 +503,7 @@ function LoginContent() {
                 setStep("login");
                 setEmailCode("");
                 setTotpCode("");
+                setShowFactorPicker(false);
                 setNotice(null);
               }}
               className="w-full rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/80 transition hover:bg-white/5"

@@ -101,6 +101,8 @@ jobs:
           node --import tsx --test tests/user-login-otp-store.test.ts
       - name: Resume interrupted second-factor UI without bypassing owner login
         run: node --test tests/hp-resume-pending-factor.test.mjs
+      - name: Ordered switchable login factors and server-bound passkey
+        run: node --test tests/hp-login-factor-order-switch.test.mjs
       - name: Production HP build
         run: |
           npm run build

@@ -9,7 +9,7 @@ test("pending 2FA recovery exposes only a method, never authentication cookies o
  assert.match(s,/getActiveOtpChallenge\(challengeId, "USER_LOGIN"\)/);
  assert.match(s,/request\.cookies\.get\(USER_LOGIN_OTP_COOKIE\)/);
  assert.match(s,/if \(!user \|\| !user\.isApproved\)/);
- assert.match(s,/pending: true, method: loginFactorFor\(user\)/);
+ assert.match(s,/pending: true, method, availableMethods/);
  assert.doesNotMatch(s,/issueOwnerSession|OWNER_SESSION_COOKIE|passwordHash|totpSecret|codeHash|email:/);
 });
 test("client restores only a pending factor on unauthenticated initialization, never a USER session",()=>{
@@ -26,7 +26,8 @@ test("client restores only a pending factor on unauthenticated initialization, n
 });
 test("login screen returns to 2FA step and clears stale wrong-password error",()=>{
  const s=load("components/features/LoginPage.tsx");
- assert.match(s,/if \(pendingSecondFactors\.length > 0\) \{\s*setStep\("second-factor"\);\s*setError\(null\);/);
- assert.match(s,/remainingFactors\.includes\("totp"\)/);
- assert.match(s,/remainingFactors\.includes\("email"\)/);
+ assert.match(s,/if \(pendingSecondFactors\.length > 0\) \{\s*setStep\("second-factor"\);\s*setShowFactorPicker\(false\);\s*setError\(null\);/);
+ assert.match(s,/activeFactor === "passkey"/);
+ assert.match(s,/activeFactor === "totp"/);
+ assert.match(s,/activeFactor === "email"/);
 });

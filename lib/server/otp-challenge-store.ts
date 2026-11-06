@@ -8,6 +8,7 @@ export type OtpChallenge = {
   id: string;
   purpose: OtpChallengePurpose;
   subject: string;
+  factor?: "email" | "totp" | "passkey";
   codeHash: string;
   createdAt: number;
   expiresAt: number;
@@ -77,6 +78,7 @@ function safeHashEqual(a: string, b: string) {
 export async function createOtpChallenge(input: {
   purpose: OtpChallengePurpose;
   subject: string;
+  factor?: "email" | "totp" | "passkey";
   codeHash: string;
   now?: number;
   expiresAt: number;
@@ -98,6 +100,7 @@ export async function createOtpChallenge(input: {
       id: crypto.randomUUID(),
       purpose: input.purpose,
       subject: input.subject,
+      factor: input.factor,
       codeHash: input.codeHash.toLowerCase(),
       createdAt: now,
       expiresAt: input.expiresAt,

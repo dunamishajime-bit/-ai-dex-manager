@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       success: true,
       requiresSecondFactor: true,
       method: challenge.factor,
+      availableMethods: challenge.availableMethods,
     }, { headers });
     setLoginChallengeCookie(response, challenge.challengeId);
     // Full USER owner session is issued ONLY in /api/auth/login/verify.
