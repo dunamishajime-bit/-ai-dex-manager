@@ -893,11 +893,8 @@ class HypeScopedOperations:
             # Never re-enable or restart it as a rollback action.
             attempt(lambda:self.systemd.disable(self.old_unit))
         if self.plan_mode == "resume":
-            self.health()
-            current_state = _safe_bytes(STATE)
-            validate_flat_hype_state(json.loads(current_state), self.args.sha)
-            self.signed_flat()
-            require(_safe_bytes(STATE) == current_state, "RESUME_ROLLBACK_LEDGER_RACE")
+            # Revoke this stopped unit's approval even if a subsequent venue
+            # read is unavailable. Keep the ledger untouched until reconciled.
             if self.activation_written:
                 activation_now = _safe_bytes(self.approval)
                 require(activation_now == self.approval_bytes, "RESUME_ROLLBACK_ACTIVATION_RACE")
@@ -911,6 +908,11 @@ class HypeScopedOperations:
                     _atomic(self.override, before, metadata)
                     require(_safe_bytes(self.override) == before, "RESUME_ROLLBACK_DROPIN_READBACK")
             attempt(lambda:self.command("daemon-reload"))
+            self.health()
+            current_state = _safe_bytes(STATE)
+            validate_flat_hype_state(json.loads(current_state), self.args.sha)
+            self.signed_flat()
+            require(_safe_bytes(STATE) == current_state, "RESUME_ROLLBACK_LEDGER_RACE")
             if errors:
                 raise RuntimeError("HYPE_SCOPED_ROLLBACK_INCOMPLETE:" + ",".join(errors))
             return

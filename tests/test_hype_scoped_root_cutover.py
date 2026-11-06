@@ -30,6 +30,17 @@ class HypeJobEntrypointTests(unittest.TestCase):
         self.assertEqual(receipt["failedAt"], 123)
         self.assertNotIn("secret filesystem path", json.dumps(receipt))
 
+    def test_failure_receipt_preserves_fixed_gate_codes_from_rollback_chain(self):
+        error = RuntimeError("V52_SCOPED_ROLLBACK_REQUIRES_RECONCILIATION")
+        error.__cause__ = ValueError("HYPE_SCOPED_TICK_IDENTITY_OR_AUTHORITY")
+        error.__context__ = PermissionError("secret fixture")
+        receipt = job.build_failure_receipt("a" * 32, {}, error, failed_at=123)
+        self.assertEqual(receipt["failureGateCodes"], [
+            "V52_SCOPED_ROLLBACK_REQUIRES_RECONCILIATION",
+            "HYPE_SCOPED_TICK_IDENTITY_OR_AUTHORITY",
+        ])
+        self.assertNotIn("secret fixture", json.dumps(receipt))
+
     def test_hype_runner_does_not_get_broad_shared_state_write_access(self):
         v4_sha = "a" * 40
         operations = object.__new__(h.HypeScopedOperations)

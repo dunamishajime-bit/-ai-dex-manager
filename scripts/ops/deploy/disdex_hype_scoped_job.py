@@ -28,6 +28,21 @@ JOB_SCHEMA = "disdex-hype-scoped-job/v1"
 JOB_DIR = Path("/var/lib/disdex/unified-deploy/jobs/hype")
 RECEIPTS = Path("/var/lib/disdex/unified-deploy/receipts")
 FAILURE_PHASES = frozenset({"worker", "prepare", "consume", "publish", "switch", "audit", "commit"})
+RECEIPT_GATE_CODES = frozenset({
+    "V52_SCOPED_ROLLBACK_REQUIRES_RECONCILIATION",
+    "HYPE_SCOPED_TICK_IDENTITY_OR_AUTHORITY", "HYPE_SCOPED_TICK_TIME_NOT_ADVANCING",
+    "HYPE_SCOPED_TICK_RUNNER_FAIL_CLOSED", "HYPE_SCOPED_TICK_MUTATION_TELEMETRY",
+    "HYPE_SCOPED_DUPLICATE_HYPE", "HYPE_SCOPED_OLD_UNIT_ENABLED_DURING_AUDIT",
+    "HYPE_SCOPED_NEW_UNIT_STOPPED", "HYPE_SCOPED_PID_CHANGED",
+    "HYPE_SCOPED_RUNNER_RESTARTED", "HYPE_SCOPED_PID_CWD_MISMATCH",
+    "HYPE_SCOPED_SHARED_RISK_BLOCK", "HYPE_SCOPED_MARGIN_UNHEALTHY",
+    "HYPE_SCOPED_PENDING_UNRECONCILED", "HYPE_SCOPED_KILL_CHANGED",
+    "HYPE_SCOPED_LEDGER_NOT_FLAT", "HYPE_SCOPED_LEDGER_LINEAGE",
+    "HYPE_SCOPED_WORKER_SIGNED_READ_FAILED_OR_DEFERRED",
+    "HYPE_SCOPED_FRESH_SIGNED_FLAT_REQUIRED", "HYPE_SCOPED_SIGNED_PROOF_STALE",
+    "HYPE_SCOPED_RESUME_ROLLBACK_ACTIVATION_RACE", "HYPE_SCOPED_RESUME_ROLLBACK_DROPIN_RACE",
+    "HYPE_SCOPED_RESUME_ROLLBACK_LEDGER_RACE",
+})
 
 
 def require(condition, reason):
@@ -121,6 +136,18 @@ def build_failure_receipt(job_id, row, error, *, failed_at=None):
     source_sha = row.get("sourceSha")
     plan_sha = row.get("planSha256")
     route = row.get("route")
+    gate_codes = []
+    chain = [error]
+    seen = set()
+    while chain and len(seen) < 8:
+        cause = chain.pop(0)
+        if cause is None or id(cause) in seen:
+            continue
+        seen.add(id(cause))
+        gate_code = str(cause)
+        if gate_code in RECEIPT_GATE_CODES and gate_code not in gate_codes:
+            gate_codes.append(gate_code)
+        chain.extend((cause.__cause__, cause.__context__))
     return {
         "schema": "disdex-hype-scoped-job-receipt/v1",
         "status": "HYPE_SCOPED_JOB_FAILED_NO_COMMIT",
@@ -131,6 +158,7 @@ def build_failure_receipt(job_id, row, error, *, failed_at=None):
         "route": route if route in ("CODEX_SSH", "GITHUB_ACTIONS") else None,
         "failurePhase": phase,
         "failureCode": code,
+        "failureGateCodes": gate_codes,
         "failedAt": int(time.time()) if failed_at is None else int(failed_at),
     }
 
