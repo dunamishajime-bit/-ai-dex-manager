@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-export type OtpChallengePurpose = "ADMIN_LOGIN" | "DEPLOY_APPROVAL";
+export type OtpChallengePurpose = "ADMIN_LOGIN" | "DEPLOY_APPROVAL" | "USER_LOGIN";
 
 export type OtpChallenge = {
   id: string;
@@ -89,7 +89,11 @@ export async function createOtpChallenge(input: {
     throw new Error("OTP_CHALLENGE_INPUT_INVALID");
   }
   return withLock(() => {
-    const rows = load().filter((row) => row.expiresAt >= now - 60 * 60 * 1000);
+    const rows = load().filter((row) => {
+      if (row.expiresAt < now - 60 * 60 * 1000) return false;
+      // Only one pending USER_LOGIN per subject. Issuing another invalidates earlier codes.
+      return !(input.purpose === "USER_LOGIN" && row.purpose === "USER_LOGIN" && row.subject === input.subject);
+    });
     const challenge: OtpChallenge = {
       id: crypto.randomUUID(),
       purpose: input.purpose,
@@ -146,4 +150,12 @@ export async function consumeOtpChallenge(input: {
     void _codeHash;
     return { ok: true, challenge: safe };
   });
+}
+
+/** Server-only read for pending login, never expose codeHash or subject to the browser. */
+export function getActiveOtpChallenge(id: string, purpose: OtpChallengePurpose, now = Date.now()): OtpChallenge | null {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const row = load().find((item) => item.id === id && item.purpose === purpose);
+  if (!row || row.consumedAt || row.expiresAt <= now || row.attemptsRemaining < 1) return null;
+  return row;
 }
