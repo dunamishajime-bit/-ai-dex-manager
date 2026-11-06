@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -84,6 +84,7 @@ function LoginContent() {
   useEffect(() => {
     if (pendingSecondFactors.length > 0) {
       setStep("second-factor");
+      setError(null);
     }
   }, [pendingSecondFactors]);
 

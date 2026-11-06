@@ -286,6 +286,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setCurrentUser(null);
           localStorage.removeItem(AUTH_KEY);
           setUser(null);
+          // A successful password step may have created a server-side 2FA
+          // challenge before a reload or another tab interrupted the UI.
+          // Restore only the pending factor, never a fully authenticated user.
+          const pendingResponse = await fetch("/api/auth/login/challenge", {
+            cache: "no-store",
+            credentials: "same-origin",
+          });
+          if (!alive) return;
+          if (pendingResponse.ok) {
+            const challenge = await pendingResponse.json().catch(() => null);
+            if (challenge?.pending === true && (challenge.method === "email" || challenge.method === "totp")) {
+              setPending2FAUser(null);
+              setPending2FACode(null);
+              setPending2FAEmail(null);
+              setPendingSecondFactors([challenge.method]);
+              setCompletedSecondFactors([]);
+            }
+          }
           return;
         }
         await syncUsers();
