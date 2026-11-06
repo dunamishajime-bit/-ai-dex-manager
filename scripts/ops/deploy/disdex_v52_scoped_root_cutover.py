@@ -212,6 +212,26 @@ def build_runtime_activation(plan,authorization,now,*,inventory_digest):
             'Existing protected hold is maintained. This artifact does not authorize FET or Kill clearance.')
 
 
+FET_INCIDENT_OLD_SHA = '041653b7b808fd46be2fef408c8e41a1c6d3a55b'
+FET_INCIDENT_NEW_SHA = '8495daf24e53a6cf0dd5e38f022008fa8f78c688'
+FET_HOLD_REASON_SHA256 = '549071c23fd4f8616bf627db3f7863218144a3c0b300214d0d419490ff414c65'
+
+
+def validate_v52_protected_hold(hold, old_sha, new_sha):
+    require(hold.get('active') is True and hold.get('action') == 'HOLD_PROTECTED'
+        and hold.get('operator') == 'disdex-v52-aster-only' and hold.get('recoverable') is True,
+        'EXACT_EXISTING_PROTECTED_HOLD_REQUIRED')
+    reason = hold.get('reason')
+    if old_sha == FET_INCIDENT_OLD_SHA:
+        require(new_sha == FET_INCIDENT_NEW_SHA and hold.get('scope') == 'GLOBAL'
+            and isinstance(reason, str) and hashlib.sha256(reason.encode()).hexdigest() == FET_HOLD_REASON_SHA256,
+            'EXACT_FET_INCIDENT_AND_FIX_REQUIRED')
+    else:
+        require(reason == 'V52 upstream state unavailable: QUALITY102_STATE_MISMATCH:runtimeCommitSha',
+            'EXACT_EXISTING_PROTECTED_HOLD_REQUIRED')
+    return True
+
+
 class V52ScopedOperations:
     """Fixed Production paths; the canonical root gate holds the global lock."""
     OLD='4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81'
@@ -223,6 +243,8 @@ class V52ScopedOperations:
     TICK=Path('/var/lib/disdex/runner-health/ticks/v52.json')
     def __init__(self,parent,args,token):
         self.parent=parent;self.paths=parent.paths;self.args=args;self.token=token;self.systemd=parent.systemd
+        if args.sha == FET_INCIDENT_NEW_SHA:
+            self.OLD = FET_INCIDENT_OLD_SHA
         self.old_unit='disdex-v52-aster-only@'+self.OLD+'.service'
         self.new_unit='disdex-v52-aster-only@'+args.sha+'.service'
         self.approval=Path('/var/lib/disdex/shared/operator-activation')/('v52-'+args.sha+'.json')
@@ -272,10 +294,7 @@ class V52ScopedOperations:
             require(type(value) is int and 0<=now-value<=age,'MARGIN_OR_PENDING_STALE')
         require(margin.get('stage')=='HEALTHY' and margin.get('ordersAllowed') is True,'MARGIN_BLOCKED')
         entries=pending.get('entries');require(isinstance(entries,list) and all(isinstance(e,dict) and e.get('status')=='RELEASED' for e in entries),'ACTIVE_OR_UNKNOWN_PENDING')
-        require(kill.get('active') is True and kill.get('action')=='HOLD_PROTECTED'
-            and kill.get('operator')=='disdex-v52-aster-only' and kill.get('recoverable') is True
-            and kill.get('reason')=='V52 upstream state unavailable: QUALITY102_STATE_MISMATCH:runtimeCommitSha',
-            'EXACT_EXISTING_PROTECTED_HOLD_REQUIRED')
+        validate_v52_protected_hold(kill, self.OLD, self.args.sha)
 
     def _trusted_source(self,path):
         from disdex_unified_root_gate import assert_regular_secure
@@ -327,6 +346,8 @@ class V52ScopedOperations:
         self.pins=parse_live_pins(self.manifest,releases=self.paths.releases)
         require(validate_scoped_plan(self.desired,self.current,self.pins)==self.args.plan_sha256
             and self.desired['sourceSha']==self.args.sha and self.pins['V52']==self.OLD,'ROOT_PLAN_BINDING')
+        if self.OLD == FET_INCIDENT_OLD_SHA:
+            require(self.pins['FET_BRK48_RESIDUAL'] == self.COMMON, 'FET_INCIDENT_PEER_PIN_CHANGED')
         require(self.parent._read_current_sha(unchanged_identity_only=True)==self.current['sourceSha'],'CURRENT_SYMLINK_IDENTITY')
         self.release=release_marker(self.args.sha,self.paths.releases)
         vendor=self.release/'.vendor-stock-site-packages'
@@ -404,7 +425,10 @@ class V52ScopedOperations:
             'ExecStartPre=+/usr/bin/python3 '+str(self.release/'scripts/ops/root/disdex-fet-preemption-readiness-guard.py')
             +' --prestart --sha '+self.args.sha+' --activation-path '+str(self.approval)+'\n'
             'ReadWritePaths=/var/lib/disdex/runner-health/ticks\n').encode()
-        extra=self.dropin_dir/'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-certified-source.conf'
+        final_name = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-certified-source.conf'
+        while any(path.name == final_name for path, _, _ in self.prepared_files):
+            final_name = 'z' + final_name
+        extra = self.dropin_dir / final_name
         for path,raw,mode in [*self.prepared_files,(self.env_path,env,0o600),
                 (extra,final,0o644),(self.approval,canonical(self.activation)+b'\n',0o600)]:
             _new_file(path,raw,mode,lambda p=path:self.created.append(p))

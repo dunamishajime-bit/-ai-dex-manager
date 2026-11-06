@@ -11,6 +11,19 @@ def plans():
  return current,desired
 
 class ScopedRootContractTest(unittest.TestCase):
+ def test_current_fet_incident_requires_exact_target_and_preserves_hold_scope(self):
+  import disdex_v52_scoped_root_cutover as m
+  from unittest.mock import patch
+  hold=dict(active=True,action='HOLD_PROTECTED',scope='GLOBAL',
+            operator='disdex-v52-aster-only',recoverable=True,reason='observed FET failure')
+  with patch.object(m,'FET_HOLD_REASON_SHA256',hashlib.sha256(hold['reason'].encode()).hexdigest()):
+   self.assertTrue(m.validate_v52_protected_hold(hold,m.FET_INCIDENT_OLD_SHA,m.FET_INCIDENT_NEW_SHA))
+   for bad in [dict(reason='changed'),dict(scope='V52_REFERENCE_ONLY'),dict(action='FLATTEN_MANAGED'),dict(recoverable=False)]:
+    with self.assertRaises(ValueError):
+     m.validate_v52_protected_hold({**hold,**bad},m.FET_INCIDENT_OLD_SHA,m.FET_INCIDENT_NEW_SHA)
+   with self.assertRaises(ValueError):
+    m.validate_v52_protected_hold(hold,m.FET_INCIDENT_OLD_SHA,'f'*40)
+
  def test_v52_rollback_rejects_new_exposure_pending_or_ledger_drift(self):
   old='7'*40;new='a'*40
   ledger={'netPnlUsd':0}
