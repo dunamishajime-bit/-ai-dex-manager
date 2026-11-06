@@ -11,8 +11,7 @@ Group=root
 WorkingDirectory=/
 Environment=DISDEX_HYPE_JOB_ID=%i
 ExecStart=/usr/bin/python3 -I /usr/local/libexec/disdex-unified/disdex_hype_scoped_job.py --job-id %i
-TimeoutStartSec=0
-RuntimeMaxSec=1h10min
+TimeoutStartSec=1h10min
 TimeoutStopSec=30s
 Restart=no
 KillMode=control-group

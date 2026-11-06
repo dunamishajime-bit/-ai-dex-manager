@@ -19,6 +19,12 @@ from disdex_deployment_contract import REPO, DEPLOYMENT_TARGET, OPERATOR_TARGET
 
 
 class HypeJobEntrypointTests(unittest.TestCase):
+    def test_oneshot_worker_has_a_real_start_deadline(self):
+        unit = (Path(__file__).resolve().parents[1]
+                / "ops/systemd/disdex-hype-scoped-cutover@.service").read_text()
+        self.assertIn("TimeoutStartSec=1h10min", unit)
+        self.assertNotIn("RuntimeMaxSec=", unit)
+
     def test_job_entrypoint_imports_installed_sibling_modules_under_isolated_python(self):
         script = Path(__file__).resolve().parents[1] / "scripts/ops/deploy/disdex_hype_scoped_job.py"
         result = subprocess.run(
@@ -251,9 +257,8 @@ class HypeSafetyTests(unittest.TestCase):
                 sleep_fn=lambda elapsed:now.__setitem__(0,now[0]+elapsed),
                 clock_fn=lambda:now[0],deadline_seconds=0.5)
 
-    def test_scoped_job_service_is_detached_and_time_bounded(self):
+    def test_scoped_job_service_is_detached_and_hardened(self):
         unit=(Path(__file__).resolve().parents[1]/"ops/systemd/disdex-hype-scoped-cutover@.service").read_text()
-        self.assertIn("RuntimeMaxSec=1h10min",unit)
         self.assertIn("ProtectSystem=strict",unit)
         self.assertIn("NoNewPrivileges=yes",unit)
         self.assertIn("StandardOutput=null",unit)
