@@ -1,11 +1,10 @@
 import { lstat, readFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 
 const execFileAsync = promisify(execFile);
-const CURRENT = "/home/deploy/disdex-trading/current";
-const SHA_PATH = CURRENT + "/.disdex-release-sha";
-const POLICY = CURRENT + "/config/hypeZecLongPolicy.ts";
+const RELEASES = "/home/deploy/disdex-trading/releases";
 const STATE = "/var/lib/disdex/hype-zec-long/runner.json";
 const KILL = "/var/lib/disdex/shared/kill-switch.json";
 const FIFTEEN_MS = 15 * 60_000;
@@ -118,11 +117,13 @@ async function serviceActive(sha:string):Promise<boolean>{
     return r.stdout.trim()==="active"; }catch {return false;}
 }
 export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<HypeZecOverview>{
-  const releaseSha=(await readFile(SHA_PATH,"utf8")).trim();
-  if(!SHA.test(releaseSha))throw new Error("CURRENT_RUNTIME_SHA_INVALID");
+  const currentRuntime=await loadCurrentProductionRuntime();
+  const releaseSha=currentRuntime.productionReleaseShas.hype;
+  if(!SHA.test(releaseSha))throw new Error("HYPE_RUNTIME_SHA_INVALID");
+  const releaseRoot=RELEASES+"/"+releaseSha;
   const capturedAt=new Date(now).toISOString();
-  const source=await readFile(POLICY,"utf8").catch(()=>null);
-  const riskSource=source?await readFile(CURRENT+"/config/integratedProductionRiskPolicy.ts","utf8").catch(()=>null):null;
+  const source=await readFile(releaseRoot+"/config/hypeZecLongPolicy.ts","utf8").catch(()=>null);
+  const riskSource=source?await readFile(releaseRoot+"/config/integratedProductionRiskPolicy.ts","utf8").catch(()=>null):null;
   const riskValue=(name:string)=>{
     const match=riskSource?.match(new RegExp("\\b"+name+"\\s*:\\s*([-+]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+))"));
     return match?num(match[1]):undefined;
