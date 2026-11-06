@@ -141,6 +141,28 @@ class HypeJobEntrypointTests(unittest.TestCase):
         self.assertIn("TimeoutStartSec=1h10min", unit)
         self.assertNotIn("RuntimeMaxSec=", unit)
 
+    def test_worker_signed_get_uses_separate_deploy_sandbox_and_stdin(self):
+        release = PurePosixPath("/releases") / ("a" * 40)
+        deploy = SimpleNamespace(pw_uid=1000, pw_gid=1000)
+        env = {"ASTER_API_PRIVATE_KEY": "fixture-secret"}
+        calls = []
+        def run(command, **options):
+            calls.append((command, options))
+            return SimpleNamespace(returncode=0, stdout='{"positionCount":0}\n', stderr="")
+
+        self.assertEqual(h.run_worker_signed_read(release, deploy, env, run=run),
+                         {"positionCount": 0})
+        command, options = calls[0]
+        self.assertEqual(command[0], "/usr/bin/systemd-run")
+        self.assertIn("NoNewPrivileges=yes", command)
+        self.assertIn("ReadWritePaths=/var/lib/disdex/shared", command)
+        self.assertIn("--clear-groups", command)
+        self.assertIn("--reuid=1000", command)
+        self.assertIn("--regid=1000", command)
+        self.assertEqual(command[-1], "--verify-only")
+        self.assertNotIn("fixture-secret", " ".join(command))
+        self.assertEqual(json.loads(options["input"]), env)
+
     def test_job_entrypoint_imports_installed_sibling_modules_under_isolated_python(self):
         script = Path(__file__).resolve().parents[1] / "scripts/ops/deploy/disdex_hype_scoped_job.py"
         result = subprocess.run(

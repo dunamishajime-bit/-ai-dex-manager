@@ -71,6 +71,40 @@ def validate_v4_budget_proxy_sources(budget_source, proxy_source):
     return True
 
 
+def run_worker_signed_read(release, deploy, environment, *, run=subprocess.run):
+    # The canonical lock creates, renews, and unlinks its file in shared/.
+    # Give that mount to the short-lived read-only CLI, not the cutover worker.
+    # systemd receives only fixed argv; credentials travel through the pipe.
+    bootstrap = (
+        "import json, os, sys\n"
+        "environment = json.loads(sys.stdin.read(16385))\n"
+        "os.execve(sys.argv[1], sys.argv[1:], environment)\n"
+    )
+    command = [
+        "/usr/bin/systemd-run", "--quiet", "--wait", "--pipe", "--collect",
+        "--service-type=exec", f"--working-directory={release}",
+        "-p", "NoNewPrivileges=yes", "-p", "ProtectSystem=strict",
+        "-p", "ProtectHome=read-only", "-p", "PrivateTmp=yes",
+        "-p", "PrivateDevices=yes", "-p", "LimitCORE=0",
+        "-p", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
+        "-p", "RuntimeMaxSec=50s", "-p", "TimeoutStopSec=3s",
+        "-p", "ReadWritePaths=/var/lib/disdex/shared",
+        "-p", f"ReadOnlyPaths={PENDING} {KILL} {MARGIN}",
+        "/usr/bin/setpriv", f"--reuid={deploy.pw_uid}", f"--regid={deploy.pw_gid}",
+        "--clear-groups", "--no-new-privs", "/usr/bin/python3", "-I", "-c", bootstrap,
+        "/usr/bin/node", "--import", str(release / "node_modules/tsx/dist/loader.mjs"),
+        str(release / "scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts"),
+        "--verify-only",
+    ]
+    payload = json.dumps(environment)
+    require(len(payload) <= 16384, "SIGNED_READ_ENVIRONMENT_TOO_LARGE")
+    result = run(command, input=payload, capture_output=True, text=True, timeout=57)
+    require(result.returncode == 0, "WORKER_SIGNED_READ_FAILED_OR_DEFERRED")
+    rows = [json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")]
+    require(len(rows) == 1 and isinstance(rows[0], dict), "WORKER_SIGNED_READ_RESULT_INVALID")
+    return rows[0]
+
+
 def validate_hype_budget_broker(v4_sha, unit, *, process_cwd, process_argv, marker_sha,
                                 socket_info, directory_info, deploy_uid, deploy_gid,
                                 release_root="/home/deploy/disdex-trading/releases"):
@@ -537,7 +571,12 @@ class HypeScopedOperations:
         return validated
 
     def signed_flat(self):
-        result = self.sdk.run_signed_child(self.venue_release, self.deploy, credentials=self.credentials)
+        if getattr(getattr(self, "args", None), "_hype_job_worker", False):
+            environment = self.sdk.child_environment(
+                self.venue_release.name, self.deploy.pw_dir, credentials=self.credentials)
+            result = run_worker_signed_read(self.venue_release, self.deploy, environment)
+        else:
+            result = self.sdk.run_signed_child(self.venue_release, self.deploy, credentials=self.credentials)
         require(result.get("status") == "PENDING_READONLY_RECONCILE_VERIFIED"
                 and all(type(result.get(key)) is int and result[key] == 0
                     for key in ("positionCount", "openOrderCount", "ordersSent", "cancelsSent",
