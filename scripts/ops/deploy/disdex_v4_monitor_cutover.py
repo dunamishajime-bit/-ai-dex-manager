@@ -15,6 +15,20 @@ FIELDS={'schema','repository','deploymentTarget','operatorTarget','scope','appro
     'route','authorizationMethod','nonceDigest','approvedAt','expiresAt','durableStateSha256'}
 
 
+V4_MONITOR_REQUIRE_FLAT_LEDGER = (
+    "if(Object.values(d.state.legs).some(x=>x.qty!==0||!['CLOSED','CANCELLED'].includes(x.status))||"
+    "Object.values(d.intents).some(x=>x.stage!=='TERMINAL')||"
+    "Object.values(d.protections).some(x=>x.phase!=='CLOSED'))process.exit(2);"
+)
+
+
+def make_old_v4_mask_adapter(unit, root):
+    import tempfile
+    from disdex_v4_priority_live import V4LocalUnitSystemdAdapter
+    backup = Path(tempfile.mkdtemp(prefix='v4-monitor-old-unit-', dir=root))
+    return V4LocalUnitSystemdAdapter({unit}, backup), backup
+
+
 def require(value,reason):
     if not value:raise ValueError('V4_MONITOR_'+reason)
 
@@ -265,9 +279,8 @@ class V4MonitorOperations:
         # validator. read() never initializes, rewrites or migrates the store.
         script=("import {V4ExecutionStore} from './lib/v12-v4-execution-store.ts';"
             "const d=new V4ExecutionStore('/var/lib/disdex/v12-v4/orders.json',"+json.dumps(self.pins['V12_V4'])+").read();"
-            "if(Object.values(d.state.legs).some(x=>x.qty!==0||x.status!=='CLOSED')||"
-            "Object.values(d.intents).some(x=>x.stage!=='TERMINAL')||Object.values(d.protections).some(x=>x.phase!=='CLOSED'))process.exit(2);"
-            "console.log(JSON.stringify({durableReplayValidated:true,revision:d.revision}));")
+            + V4_MONITOR_REQUIRE_FLAT_LEDGER
+            + "console.log(JSON.stringify({durableReplayValidated:true,revision:d.revision}));")
         result=subprocess.run(['/usr/bin/node','--import',str(self.release/'node_modules/tsx/dist/loader.mjs'),
             '--input-type=module','-e',script],cwd=self.release,env={'PATH':'/usr/bin:/bin','HOME':self.deploy.pw_dir},
             user=self.deploy.pw_uid,group=self.deploy.pw_gid,extra_groups=[],capture_output=True,text=True,timeout=15)
@@ -332,7 +345,9 @@ class V4MonitorOperations:
         self._assert_protected()
         if self.old_monitor_active:
             self.stopped_old_monitor=True;self.systemd.stop(self.old_monitor)
-        self.old_masked_by_us=True;self.systemd.mask(self.old_unit)
+        self.old_mask_adapter,self.old_mask_backup=make_old_v4_mask_adapter(
+            self.old_unit,self.paths.root)
+        self.old_masked_by_us=True;self.old_mask_adapter.mask(self.old_unit)
         self._replace(self.paths.pins,canonical(self.next_manifest)+b'\n')
         self._replace(self.paths.current_plan,canonical(self.next_current)+b'\n')
         self.wiring.apply()
@@ -372,6 +387,7 @@ class V4MonitorOperations:
             deploymentAuthorizedAt=self.authorized_at,committedAt=self.parent.clock(),auditTickTimes=ticks,
             ordersEnabled=False,authorizesTrading=False,authorizesEvidenceRefresh=False,
             durableStateSha256=self.protected['durableStateHash'],ordersSent=0,cancelsSent=0,positionChangesSent=0)
+        result['oldUnitBackupDirectory']=str(self.old_mask_backup)
         self._assert_protected()
         _new_file(self.receipt_path,canonical(result)+b'\n',0o400,lambda:self.created.append(self.receipt_path))
         self.systemd.enable(self.unit);self.systemd.enable(self.broker)
@@ -403,7 +419,10 @@ class V4MonitorOperations:
                 attempt(restore_health)
         for path in reversed(self.created):attempt(lambda p=path:p.unlink(missing_ok=True))
         attempt(lambda:self._command('daemon-reload'))
-        if self.old_masked_by_us:attempt(lambda:self.systemd.unmask(self.old_unit))
+        if self.old_masked_by_us:
+            old_path=self.old_mask_adapter.unit_root/self.old_unit
+            if old_path.is_symlink() and str(old_path.readlink())=='/dev/null':
+                attempt(lambda:self.old_mask_adapter.unmask(self.old_unit))
         if self.stopped_old_monitor:attempt(lambda:self.systemd.start(self.old_monitor))
         # The original trading unit was dormant: never restart it on rollback.
         if errors:raise RuntimeError('V4_MONITOR_ROLLBACK_INCOMPLETE')

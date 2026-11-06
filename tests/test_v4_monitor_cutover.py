@@ -1,4 +1,4 @@
-import copy,sys,unittest,os,tempfile,json
+import copy,sys,unittest,os,tempfile,json,subprocess
 from types import SimpleNamespace
 from unittest.mock import patch
 from pathlib import Path
@@ -13,6 +13,33 @@ def plan():
  return dict(schema='disdex-unified-deployment-plan/v2',repository='dunamishajime-bit/-ai-dex-manager',deploymentTarget='professional-dismanager.net',operatorTarget='DD1296_FINAL_ALLIN_10BPS',sourceSha=SHA,scope='V12_V4',runners={k:SHA if k=='V12_V4' else '7'*40 for k in IDS},uiSha='7'*40,monitorSha='7'*40,releaseRoots=dict(runners='/home/deploy/disdex-trading/releases',ui='/srv/ui',monitor='/srv/monitor'),ordersEnabled=False)
 
 class V4MonitorContractTest(unittest.TestCase):
+ def test_old_instance_mask_uses_scoped_backup_adapter(self):
+  from disdex_v4_monitor_cutover import make_old_v4_mask_adapter
+  root=Path('/var/lib/disdex/unified-deploy')
+  old='disdex-v12-v4@'+'d'*40+'.service'
+  expected=root/'v4-monitor-old-unit-test'
+  with patch('disdex_v4_priority_live.V4LocalUnitSystemdAdapter') as adapter, \
+       patch('tempfile.mkdtemp',return_value=str(expected)) as mkdir:
+   mask,backup=make_old_v4_mask_adapter(old,root)
+  self.assertIs(mask,adapter.return_value)
+  self.assertEqual(backup,expected)
+  mkdir.assert_called_once_with(prefix='v4-monitor-old-unit-',dir=root)
+  adapter.assert_called_once_with({old},backup)
+
+ def test_durable_flat_gate_accepts_cancelled_history_and_rejects_exposure(self):
+  import disdex_v4_monitor_cutover as module
+  base=dict(state=dict(legs={'cancelled':dict(qty=0,status='CANCELLED')}),intents={},protections={})
+  for document,expected in (
+    (base,0),
+    ({**base,'state':{'legs':{'leg':{'qty':1,'status':'CANCELLED'}}}},2),
+    ({**base,'state':{'legs':{'leg':{'qty':0,'status':'PENDING_ENTRY'}}}},2),
+    ({**base,'intents':{'entry':{'stage':'UNKNOWN'}}},2),
+    ({**base,'protections':{'stop':{'phase':'LIVE'}}},2),
+  ):
+   script='const d='+json.dumps(document)+';'+module.V4_MONITOR_REQUIRE_FLAT_LEDGER
+   result=subprocess.run(['node','-e',script],capture_output=True,text=True,timeout=10)
+   self.assertEqual(result.returncode,expected,result.stderr)
+
  def test_all_systemd_environment_files_are_read_without_discarding_repeated_properties(self):
   raw='User=deploy\nEnvironmentFiles=/etc/disdex/credentials.env (ignore_errors=no)\nEnvironmentFiles=/etc/disdex/monitor.env (ignore_errors=no)\n'
   self.assertEqual(systemd_environment_files(raw),['/etc/disdex/credentials.env','/etc/disdex/monitor.env'])
@@ -107,12 +134,15 @@ class V4RollbackFixtureTest(unittest.TestCase):
    own=base/'own-unit';own.write_text('fixture');ops.created=[own]
    ops.new_started=ops.broker_started=ops.old_masked_by_us=ops.stopped_old_monitor=True
    ops.old_unit='disdex-v12-v4@'+'7'*40+'.service'
+   (base/ops.old_unit).symlink_to('/dev/null')
+   ops.old_mask_adapter=SimpleNamespace(unit_root=base,unmask=operation('unmask'))
    ops._command=lambda *args:calls.append(tuple(args))
    ops.rollback()
    self.assertEqual(pins.read_bytes(),b'old pins');self.assertEqual(current.read_bytes(),b'old current')
    self.assertEqual(orders.read_bytes(),b'preserved history');self.assertFalse(own.exists());self.assertFalse(ops.tick.exists())
    self.assertEqual(pins.stat().st_mode&0o777,0o644);self.assertEqual(current.stat().st_mode&0o777,0o600)
    self.assertIn(('start',ops.old_monitor),calls);self.assertNotIn(('start',ops.old_unit),calls)
+   self.assertIn(('unmask',ops.old_unit),calls)
 
  def test_audit_does_not_accept_a_new_pid_as_three_cycles_from_one_process(self):
   with tempfile.TemporaryDirectory() as folder:
