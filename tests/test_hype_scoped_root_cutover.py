@@ -161,6 +161,20 @@ class HypeJobEntrypointTests(unittest.TestCase):
         self.assertIsNone(h.read_hype_audit_tick(prior, prior))
         self.assertEqual(h.read_hype_audit_tick(current, prior)["mainPid"], 456)
 
+    def test_audit_accepts_only_fresh_signed_proof_bound_to_stale_released_ledger(self):
+        now = 2_000_000
+        ledger = b'{"updatedAt":1000000,"entries":[{"status":"RELEASED"}]}'
+        proof = {"verifiedAt": now - 1000, "afterHash": hashlib.sha256(ledger).hexdigest()}
+        h.validate_hype_pending(ledger, now, proof=proof)
+        for raw, witness in (
+            (ledger, None),
+            (ledger + b"\n", proof),
+            (ledger, {**proof, "verifiedAt": now - 900001}),
+            (ledger.replace(b"RELEASED", b"UNKNOWN"), proof),
+        ):
+            with self.assertRaisesRegex(ValueError, "PENDING_UNRECONCILED"):
+                h.validate_hype_pending(raw, now, proof=witness)
+
     def test_worker_signed_get_uses_separate_deploy_sandbox_and_stdin(self):
         release = PurePosixPath("/releases") / ("a" * 40)
         deploy = SimpleNamespace(pw_uid=1000, pw_gid=1000)

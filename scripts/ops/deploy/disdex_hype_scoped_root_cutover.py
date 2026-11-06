@@ -325,6 +325,23 @@ def valid_hold(row):
     return row
 
 
+def validate_hype_pending(raw, now, *, proof=None):
+    pending = json.loads(raw)
+    updated = pending.get("updatedAt")
+    require(type(updated) is int and 0 < updated <= now
+            and isinstance(pending.get("entries"), list)
+            and all(isinstance(x, dict) and x.get("status") == "RELEASED"
+                    for x in pending["entries"]), "PENDING_UNRECONCILED")
+    if now - updated <= 900000:
+        return
+    # The cutover lock defers the scheduled pending writer. Keep the same
+    # freshness limit using a real signed, account-locked read of this file.
+    require(isinstance(proof, dict) and type(proof.get("verifiedAt")) is int
+            and 0 <= now - proof["verifiedAt"] <= 900000
+            and proof.get("afterHash") == hashlib.sha256(raw).hexdigest(),
+            "PENDING_UNRECONCILED")
+
+
 def read_hype_audit_tick(raw, prior):
     if raw == prior:
         return None
@@ -633,9 +650,10 @@ class HypeScopedOperations:
         verified = result.get("verifiedAt")
         require(type(verified) is int and 0 <= time.time_ns()//1000000 - verified <= 30000,
                 "SIGNED_PROOF_STALE")
+        self.last_signed_flat = result
         return result
 
-    def health(self):
+    def health(self, *, pending_proof=None):
         risk = self.reader.read_risk()
         require(risk.get("sourceComplete") is True and risk.get("tripped") is False
                 and risk.get("maximumLossPct") == 7.5
@@ -643,15 +661,10 @@ class HypeScopedOperations:
                 and 0 <= risk["lossPct"] < 7.5, "SHARED_RISK_BLOCK")
         now = time.time_ns() // 1000000
         margin = json.loads(_safe_bytes(MARGIN))
-        pending = json.loads(_safe_bytes(PENDING))
         require(margin.get("stage") == "HEALTHY" and margin.get("ordersAllowed") is True
                 and type(margin.get("checkedAt")) is int
                 and 0 <= now-margin["checkedAt"] <= 900000, "MARGIN_UNHEALTHY")
-        require(type(pending.get("updatedAt")) is int
-                and 0 <= now-pending["updatedAt"] <= 900000
-                and isinstance(pending.get("entries"), list)
-                and all(isinstance(x, dict) and x.get("status") == "RELEASED"
-                        for x in pending["entries"]), "PENDING_UNRECONCILED")
+        validate_hype_pending(_safe_bytes(PENDING), now, proof=pending_proof)
         raw = _safe_bytes(KILL)
         valid_hold(json.loads(raw))
         require(hashlib.sha256(raw).hexdigest() == self.hold_hash, "KILL_CHANGED")
@@ -870,7 +883,9 @@ class HypeScopedOperations:
             require(Path("/proc",str(pid),"cwd").resolve(strict=True)==self.release,
                     "PID_CWD_MISMATCH")
             self.parent._assert_expected_pins(self.desired["runners"])
-            self.health()
+            self.health(pending_proof=self.last_signed_flat)
+            if time.time_ns() // 1000000 - self.last_signed_flat["verifiedAt"] >= 480000:
+                self.signed_flat()
             state=json.loads(_safe_bytes(STATE))
             validate_flat_hype_state(state,self.args.sha)
             try:
@@ -889,7 +904,7 @@ class HypeScopedOperations:
 
     def commit(self, stamps):
         self.failure_phase = "commit"
-        self.health()
+        self.health(pending_proof=self.last_signed_flat)
         self.parent._assert_expected_pins(self.desired["runners"])
         receipt = {
             "status":"HYPE_PROTECTED_HOLD_VERIFIED_NOT_ORDER_ENABLED",
@@ -940,10 +955,10 @@ class HypeScopedOperations:
                     _atomic(self.override, before, metadata)
                     require(_safe_bytes(self.override) == before, "RESUME_ROLLBACK_DROPIN_READBACK")
             attempt(lambda:self.command("daemon-reload"))
-            self.health()
             current_state = _safe_bytes(STATE)
             validate_flat_hype_state(json.loads(current_state), self.args.sha)
-            self.signed_flat()
+            proof = self.signed_flat()
+            self.health(pending_proof=proof)
             require(_safe_bytes(STATE) == current_state, "RESUME_ROLLBACK_LEDGER_RACE")
             if errors:
                 raise RuntimeError("HYPE_SCOPED_ROLLBACK_INCOMPLETE:" + ",".join(errors))
