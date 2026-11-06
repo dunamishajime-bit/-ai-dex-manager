@@ -123,6 +123,12 @@ class HypeSafetyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             h._runtime_env(b"A=1\nA=2\n",h.OLD,self.NEW,Path("/releases")/self.NEW)
 
+    def test_env_deduplicates_identical_legacy_paths(self):
+        raw=b"FET_BRK48_STATE_PATH=/var/lib/disdex/fet/state.json\nFET_BRK48_STATE_PATH=/var/lib/disdex/fet/state.json\n"
+        out=h._runtime_env(raw,h.OLD,self.NEW,PurePosixPath("/releases")/self.NEW).decode()
+        self.assertEqual(out.count("FET_BRK48_STATE_PATH="),1)
+
+
     def authority(self):
         t=int(time.time())
         return dict(schema="disdex-codex-ssh-root-auth/v1",route="CODEX_SSH",

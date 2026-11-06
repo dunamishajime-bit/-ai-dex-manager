@@ -123,7 +123,7 @@ def _runtime_env(old_raw, old_sha, new_sha, release):
         "DISDEX_RUNNER_TICK_HEARTBEAT_ROOT": "/var/lib/disdex/runner-health",
     }
     lines = old_raw.decode("utf8").splitlines()
-    seen = set()
+    seen = {}
     out = []
     for line in lines:
         key, sep, value = line.partition("=")
@@ -133,8 +133,10 @@ def _runtime_env(old_raw, old_sha, new_sha, release):
         require(not any(name in key.upper() for name in
                     ("PRIVATE_KEY", "API_SECRET", "PASSWORD", "ACCESS_TOKEN", "AUTH_TOKEN")),
                 "CREDENTIAL_IN_RUNTIME_OVERRIDE")
-        require(key not in seen, "DUPLICATE_ENVIRONMENT_KEY")
-        seen.add(key)
+        if key in seen:
+            require(seen[key] == value, "CONFLICTING_DUPLICATE_ENVIRONMENT_KEY")
+            continue
+        seen[key] = value
         if key == "DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT":
             value = value.replace("/" + old_sha + "/", "/" + new_sha + "/")
         if key in values:
