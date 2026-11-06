@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFile, readlink } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import {
-  loadRunnerPinManifest,
-  type RunnerPin,
-  type RunnerPinId,
-} from "@/lib/server/runner-pin-manifest";
+import { type RunnerPin, type RunnerPinId } from "@/lib/server/runner-pin-manifest";
+import { loadReadOnlyRunnerPins } from "@/lib/server/read-only-runner-pin-telemetry";
 import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 
 export const runtime = "nodejs";
@@ -160,7 +157,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, readOnly: true, error: "Authentication required" }, { status: 401 });
   }
   try {
-    const manifest = await loadRunnerPinManifest(undefined, { requireRootOwned: true });
+    const manifest = await loadReadOnlyRunnerPins();
     const now = Date.now();
     const units = await Promise.all(runners.map((item) => inspect(item, manifest.runners[item.pinId], now)));
     return NextResponse.json(
@@ -171,6 +168,8 @@ export async function GET(req: NextRequest) {
         source: "ROOT_OWNED_RUNNER_PIN_MANIFEST",
         checkedAt: new Date(now).toISOString(),
         operatorTarget: manifest.operatorTarget,
+        manifestSchema: manifest.schema,
+        legacyIdentityOnly: manifest.legacy,
         units,
       },
       { headers: { "Cache-Control": "private, no-store, max-age=0" } },
