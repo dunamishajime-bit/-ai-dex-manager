@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import {
     FileQuality102CausalV1StateStore,
+    MemoryQuality102CausalV1StateStore,
     type Quality102CausalV1State,
 } from "@/lib/disdex-quality102-causal-v1-state";
 import type { DirectOpenOrder, DirectPosition } from "@/lib/direct-trade-executor";
@@ -32,14 +33,18 @@ function isMissing(error: unknown): boolean {
 export async function readQuality102CausalV1Ownership(options: {
     path?: string;
     expectedRuntimeSha?: string;
+    required?: boolean;
 } = {}): Promise<Quality102CausalV1OwnershipSnapshot | undefined> {
     const pathValue = configuredPath(options.path);
-    if (!pathValue) return undefined;
+    if (!pathValue) {
+        if (options.required) throw Error("QUALITY102_OWNERSHIP_STATE_REQUIRED");
+        return undefined;
+    }
     let raw: Record<string, unknown>;
     try {
         raw = JSON.parse(await readFile(pathValue, "utf8")) as Record<string, unknown>;
     } catch (error) {
-        if (isMissing(error)) return undefined;
+        if (isMissing(error) && !options.required) return undefined;
         throw error;
     }
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("QUALITY102_OWNERSHIP_STATE_MALFORMED");
@@ -49,7 +54,9 @@ export async function readQuality102CausalV1Ownership(options: {
     if (expectedSha && (!RUNTIME_SHA.test(expectedSha) || expectedSha.toLowerCase() !== stateSha.toLowerCase())) {
         throw new Error("QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH");
     }
-    const store = new FileQuality102CausalV1StateStore(pathValue, "LIVE", expectedSha || stateSha);
+    const store = options.required
+        ? new MemoryQuality102CausalV1StateStore(raw as unknown as Quality102CausalV1State, "LIVE", expectedSha || stateSha)
+        : new FileQuality102CausalV1StateStore(pathValue, "LIVE", expectedSha || stateSha);
     const state = await store.load();
     return { state, position: state.position, pending: state.pending };
 }
@@ -74,4 +81,3 @@ export function quality102OwnsOrder(
         && order.symbol.toUpperCase() === pending.symbol.toUpperCase()
         && order.clientOrderId === pending.clientOrderId);
 }
-
