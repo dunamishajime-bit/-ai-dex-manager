@@ -7,6 +7,7 @@ import {open,lstat} from "node:fs/promises";
 import {constants} from "node:fs";
 import {dirname} from "node:path";
 import {createHash} from "node:crypto";
+import validity from "../config/v12-v4-evidence-validity.json";
 import {PRODUCTION_EXIT_CATALOG} from "./v12-v4-production-lifecycle";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 import type {V4DurableOrderCommand} from "./v12-v4-durable-orders";
@@ -18,6 +19,7 @@ export const V4_PRODUCTION_CERT_PATH="/etc/disdex/v12-v4-production-certificatio
 const SHA=/^[a-f0-9]{40}$/;
 const DIGEST=/^[a-f0-9]{64}$/;
 const EVIDENCE_MAX_AGE_MS=24*60*60*1000;
+export const V4_BOUNDED_CERTIFICATE_VALIDITY_MS=validity.certificateDays*86400000;
 export type V4ProductionCertificate={
  schema:"disdex-v12-v4-production-certification/v2";
  approvedSha:string;policyId:typeof V12_V4_V2_POLICY;
@@ -138,7 +140,7 @@ function validateV4SharedExecutionCertificate(raw:Record<string,any>,sha:string,
   throw Error("V4_SHARED_RISK_CAP_MISMATCH");
  const from=Date.parse(String(c.approvedAt)),until=Date.parse(String(c.validUntil));
  if(!Number.isFinite(from)||!Number.isFinite(until)||from>now+300000||
-   until<=now||until-from>7*86400000||until<=from)
+   until<=now||until-from>(bounded?V4_BOUNDED_CERTIFICATE_VALIDITY_MS:7*86400000)||until<=from)
   throw Error("V4_CERTIFICATE_EXPIRED_OR_FUTURE");
  return c as SharedCertificate;
 }

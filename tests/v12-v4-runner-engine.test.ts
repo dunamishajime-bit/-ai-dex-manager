@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {mkdtempSync,rmSync} from "node:fs";
+import {mkdtempSync,rmSync,writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
+import {assertSharedKillSwitchAllowsNewEntry} from "../lib/disdex-shared-kill-switch";
 import {V4ExecutionStore,advanceV4Intent,v4OrderIdentity} from "../lib/v12-v4-execution-store";
 import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure,classifyV4AccountLeaseRenewalFailure,classifyV4MarketDataReadFailure} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
@@ -148,7 +149,7 @@ function attestedPeers(observedAt:number,updatedAt:number){return families.map(k
  {schema:"fet-brk48-residual-state/v1",strategyId:"FET_BRK48_RESIDUAL",position:null})},
  service:{unit:`peer@${sha}.service`,active:true,retiredV12:false,observedAt,mainPid:123}
  }));}
-test("runner takes real shared lock and signed account mark, then stays non-ordering with no signals",async()=>{
+test("runner keeps signed reconciliation alive while the shared switch blocks new entry",async()=>{
  const dir=mkdtempSync(join(tmpdir(),"v4-engine-"));const now=Date.now();
  try{
   const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
@@ -158,16 +159,19 @@ test("runner takes real shared lock and signed account mark, then stays non-orde
   const client:any={getBalances:async()=>{apiReads++;return [{asset:"USDT",balance:"1000",availableBalance:"1000"}]},
    getPositions:async()=>[],getOpenOrders:async()=>[],
    getUserTrades:async()=>[],getIncomeHistory:async()=>[]};
-  let time=now;
+  let time=now,hasCandidate=false;
+  const killPath=join(dir,"kill.json");
   const engine=new V4RunnerEngine({store,accountLock:lock,adapter:{} as any,client,
    pendingRegistryPath:join(dir,"pending.json"),fetchPeers:async()=>peers(time),
    fetchExitFeed:async()=>({closed:[]}),
    fetchDecision:async()=>({schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
-    decisionTs:time-5000,capturedAtMs:time,sourceFingerprint:"1",candidateCount:0,filteredCount:0,
-    sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[],candidates:[],filtered:[],
+    decisionTs:time-5000,capturedAtMs:time,sourceFingerprint:"1",candidateCount:hasCandidate?1:0,filteredCount:0,
+    sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[],candidates:hasCandidate?[{} as any]:[],filtered:[],
     orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0}),
    assertAuthority:async()=>{mutationCalls++;throw Error("AUTHORITY_FORBIDDEN")},
-   assertEntrySafety:async()=>{},
+   assertEntrySafety:async()=>{await assertSharedKillSwitchAllowsNewEntry({
+    NODE_ENV:"test",DISDEX_SHARED_KILL_SWITCH_FILE:killPath,
+   });},
    assertSourceParity:async()=>{throw Error("SOURCE_PARITY_NOT_PROVEN")},
    requiredResidentStop:async()=>{throw Error("STOP_NOT_CERTIFIED")},
    quantityNormalizer:{} as any,referencePrice:async()=>{throw Error("NO_PRICE")},
@@ -180,6 +184,23 @@ test("runner takes real shared lock and signed account mark, then stays non-orde
   time+=1000;
   assert.equal((await engine.tick()).status,"observing");
   assert.equal(store.read().state.journal.length,2);
+  for(const action of ["HOLD_PROTECTED","FLATTEN_MANAGED"]){
+   writeFileSync(killPath,JSON.stringify({active:true,scope:"GLOBAL",action,reason:"shared incident"}));
+   hasCandidate=true;
+   time+=1000;
+   const tick=await engine.tick();
+   assert.equal(tick.status,"blocked");
+   assert.equal(tick.reason,"SHARED_KILL_SWITCH_ACTIVE:shared incident");
+   assert.equal(tick.orderEnabled,false);
+   assert.equal(mutationCalls,0);
+  }
+  writeFileSync(killPath,JSON.stringify({active:true,action:"UNKNOWN"}));
+  time+=1000;
+  await assert.rejects(engine.tick(),/SHARED_KILL_SWITCH_MALFORMED/);
+  writeFileSync(killPath,JSON.stringify({active:false}));
+  hasCandidate=false;
+  time+=1000;
+  assert.equal((await engine.tick()).status,"observing");
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test("market-data prefetch failure stays fail-closed without terminating the V4 tick loop",async()=>{

@@ -14,6 +14,12 @@ export interface SharedKillSwitchView {
 
 export type SharedKillSwitchConsumer = "GLOBAL" | "V4_CRYPTO";
 
+export class SharedKillSwitchActiveError extends Error {
+    constructor(reason: string) {
+        super(`SHARED_KILL_SWITCH_ACTIVE:${reason}`);
+    }
+}
+
 /**
  * A stale US-equity reference quote is a V52 stock-sleeve hold.  It must be
  * explicitly scoped and attributable; an unscoped or malformed hold remains
@@ -87,6 +93,6 @@ export async function assertSharedKillSwitchAllowsNewEntry(
 ) {
     const state = await readSharedKillSwitch(env);
     const scopedV52Hold = options.consumer === "V4_CRYPTO" && isV52ReferenceOnlyHold(state);
-    if (state.active && !scopedV52Hold) throw new Error(`SHARED_KILL_SWITCH_ACTIVE:${state.reason || "UNSPECIFIED"}`);
+    if (state.active && !scopedV52Hold) throw new SharedKillSwitchActiveError(state.reason || "UNSPECIFIED");
     return state;
 }

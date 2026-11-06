@@ -21,6 +21,7 @@ import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 import {classifyAsterRateBudgetFailure} from "./disdex-aster-rate-budget-policy";
+import {SharedKillSwitchActiveError} from "./disdex-shared-kill-switch";
 export type V4PreparedDecision =
  | {kind:"READY";preparedAtMs:number;decision:V4LiveDecisionSnapshot}
  | {kind:"FAILED";preparedAtMs:number;reason:string};
@@ -514,7 +515,13 @@ export class V4RunnerEngine{
   const d=this.deps,now=this.now();
   // Existing positions are reconciled and exited before this point. These
   // global controls gate new ENTRY only and therefore never strand protection.
-  await d.assertEntrySafety();
+  try{
+   await d.assertEntrySafety();
+  }catch(error){
+   if(!(error instanceof SharedKillSwitchActiveError))throw error;
+   return {status:"blocked",reason:error.message,eventTs:this.now(),
+    candidateCount:decision.candidateCount,orderEnabled:false};
+  }
   // This is a source-level *independent* proof, not the shadow boolean.
   await d.assertSourceParity(decision);
   // A Production canary is deliberately one-entry-only. Historical durable

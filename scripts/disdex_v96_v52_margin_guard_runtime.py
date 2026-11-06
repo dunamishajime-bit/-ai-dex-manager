@@ -252,6 +252,14 @@ def main() -> int:
     if args.self_test:
         self_test()
         return 0
+    v4_readonly = (
+        args.mode == "live" and args.preorder_check
+        and os.getenv("DISDEX_V4_PREORDER_MARGIN_GUARD_READONLY") == "1"
+    )
+    if v4_readonly:
+        # The separate Margin Guard service owns publication and emergency action.
+        # V4 evaluates fresh venue data against that service's canonical state.
+        os.environ["DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR"] = "/var/lib/disdex/shared/margin-risk"
     guard = SerializedMarginGuard(args.mode)
     signal.signal(signal.SIGINT, lambda *_: setattr(guard, "stop_requested", True))
     signal.signal(signal.SIGTERM, lambda *_: setattr(guard, "stop_requested", True))
@@ -270,7 +278,7 @@ def main() -> int:
             **result,
         }, ensure_ascii=False, separators=(",", ":")))
         return 0
-    if args.preflight_readonly:
+    if args.preflight_readonly or v4_readonly:
         print(json.dumps(
             guard.require_healthy(write_state=False, allow_kill_switch=False, requested_symbol=args.symbol),
             ensure_ascii=False,

@@ -56,8 +56,100 @@ class CandidateSourceTest(unittest.TestCase):
                     ]:
                         self.assertEqual(expected.count(old),1)
                         expected=expected.replace(old,new)
+                    # Permit only the reviewed idle-wait and shutdown changes.
+                    for old, new in [
+                        (
+                         b'import {dirname} from "node:path";\n',
+                         b'import {dirname} from "node:path";\n'
+                         b'import {setTimeout as delay} from "node:timers/promises";\n',
+                        ),
+                        (
+                         b'const V4_GATE_TELEMETRY_SCHEMA="disdex-v12-v4-gate-telemetry/v1";\n',
+                         b'const V4_GATE_TELEMETRY_SCHEMA="disdex-v12-v4-gate-telemetry/v1";\n'
+                         b'export async function waitForV4Daemon(ms:number,signal:AbortSignal):Promise<void>{\n'
+                         b' try{await delay(ms,undefined,{signal});}\n'
+                         b' catch(error){\n'
+                         b'  if(!signal.aborted||!(error instanceof Error)||error.name!=="AbortError")throw error;\n'
+                         b' }\n'
+                         b'}\n',
+                        ),
+                        (
+                         b' let stopping=false;\n'
+                         b' process.once("SIGINT",()=>{stopping=true;});\n'
+                         b' process.once("SIGTERM",()=>{stopping=true;});\n',
+                         b' const shutdown=new AbortController();\n'
+                         b' const stop=()=>shutdown.abort();\n'
+                         b' process.once("SIGINT",stop);\n'
+                         b' process.once("SIGTERM",stop);\n',
+                        ),
+                        (
+                         b' for(;;){\n',
+                         b' while(!shutdown.signal.aborted){\n',
+                        ),
+                        (
+                         b'   if(!daemon||stopping)return;\n'
+                         b'   await new Promise<void>(done=>setTimeout(done,retryAfterMs));\n',
+                         b'   if(!daemon||shutdown.signal.aborted)return;\n'
+                         b'   await waitForV4Daemon(retryAfterMs,shutdown.signal);\n',
+                        ),
+                        (
+                         b' if(!runtime)return;\n',
+                         b' if(!runtime||shutdown.signal.aborted)return;\n',
+                        ),
+                        (
+                         b'    await writeV4IdleBaselineSnapshot(releaseSha,prepared);\n',
+                         b'    await writeV4IdleBaselineSnapshot(releaseSha,prepared);\n'
+                         b'    if(shutdown.signal.aborted)break;\n',
+                        ),
+                        (
+                         b'     attempts:10,retryMs:750,shouldStop:()=>stopping,\n',
+                         b'     attempts:10,retryMs:750,shouldStop:()=>shutdown.signal.aborted,\n',
+                        ),
+                        (
+                         b'  if(!daemon||stopping)break;\n',
+                         b'  if(!daemon||shutdown.signal.aborted)break;\n',
+                        ),
+                        (
+                         b'  await new Promise<void>(done=>setTimeout(done,nextDelay));\n'
+                         b' }while(!stopping);\n',
+                         b'  await waitForV4Daemon(nextDelay,shutdown.signal);\n'
+                         b' }while(!shutdown.signal.aborted);\n',
+                        ),
+                    ]:
+                        self.assertEqual(expected.count(old),1)
+                        expected=expected.replace(old,new)
+                validity_delta = {
+                    "lib/v12-v4-certified-gates.ts": [
+                        (b'import {createHash} from "node:crypto";\n',
+                         b'import {createHash} from "node:crypto";\nimport validity from "../config/v12-v4-evidence-validity.json";\n'),
+                        (b'const EVIDENCE_MAX_AGE_MS=24*60*60*1000;\n',
+                         b'const EVIDENCE_MAX_AGE_MS=24*60*60*1000;\nexport const V4_BOUNDED_CERTIFICATE_VALIDITY_MS=validity.certificateDays*86400000;\n'),
+                        (b'until<=now||until-from>7*86400000||until<=from)\n',
+                         b'until<=now||until-from>(bounded?V4_BOUNDED_CERTIFICATE_VALIDITY_MS:7*86400000)||until<=from)\n'),
+                    ],
+                    "lib/v12-v4-refresh-commit.ts": [
+                        (b"import {createHash} from 'node:crypto';\n",
+                         b"import {createHash} from 'node:crypto';\nimport validity from '../config/v12-v4-evidence-validity.json';\n"),
+                        (b'c.leaseExpiresAt-c.leaseApprovedAt>86400',
+                         b'c.leaseExpiresAt-c.leaseApprovedAt>validity.refreshLeaseDays*86400'),
+                    ],
+                    "scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts": [
+                        (b'24-hour deadline.  It cannot refresh', b'evidence freshness deadline. It cannot refresh'),
+                        (b'import { dirname, join, resolve } from "node:path";\n',
+                         b'import { dirname, join, resolve } from "node:path";\nimport validity from "../../../config/v12-v4-evidence-validity.json";\n'),
+                        (b'const REFRESH_MAX_LEASE_SECONDS = 24 * 60 * 60;',
+                         b'const REFRESH_MAX_LEASE_SECONDS = validity.refreshLeaseDays * 24 * 60 * 60;'),
+                    ],
+                }
+                for old, new in validity_delta.get(row["target"], []):
+                    self.assertEqual(expected.count(old), 1)
+                    expected = expected.replace(old, new)
                 actual = Path(row["target"]).read_bytes().replace(b"\r\n", b"\n")
                 self.assertEqual(actual, expected)
+
+    def test_extended_validity_is_exactly_thirty_days(self):
+        self.assertEqual(json.loads(Path("config/v12-v4-evidence-validity.json").read_text()),
+                         {"certificateDays": 30, "refreshLeaseDays": 30})
 
     def test_supervisor_fixture_is_the_reviewed_integration_version(self):
         expected = source("scripts/ops/root/disdex-runner-health-snapshot-v2.mjs").replace(b"\r\n", b"\n")

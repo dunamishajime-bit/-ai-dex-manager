@@ -56,3 +56,10 @@ test("full V4 startup does not rewrite peer state or canary authorization", () =
   assert.match(full,/--runner V12_V4 --activation-path \/var\/lib\/disdex\/shared\/operator-activation\/v12-v4-full\.json/);
   assert.match(full,/^Requires=disdex-v4-rate-budget-broker@%i\.service$/m);
 });
+
+test("full V4 requires a read-only order-time Margin Guard inside its sandbox", () => {
+  const full=readFileSync("deploy/systemd/disdex-v12-v4@.service","utf8");
+  assert.match(full,/^Environment=DISDEX_V4_PREORDER_MARGIN_GUARD_READONLY=1$/m);
+  assert.match(full,/^ProtectSystem=strict$/m);
+  assert.doesNotMatch(full,/^ReadWritePaths=.*\/home\/deploy/m);
+});

@@ -143,6 +143,16 @@ test('bounded refresh requires a new explicit certificate contract; legacy hashe
  assert.equal(hashes.signedAsterAccount,commit.evidenceSha256.signedAsterAccount);
  assert.throws(()=>resolveV4EvidenceDigests(bounded as any,{...commit,ordersEnabled:true},now),/REFRESH_COMMIT_INVALID/);
 });
+test("bounded v4 certificates allow exactly 30 days while legacy certificates retain seven days", () => {
+ const validUntil = new Date(now + 30 * 86400000).toISOString();
+ const legacy = {...establishedSharedHistory, approvedAt: new Date(now).toISOString(), validUntil};
+ const bounded = {...legacy, schema:"disdex-v12-v4-production-certification/v4",
+  operatorAcknowledgement:"I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS_WITH_BOUNDED_DYNAMIC_REFRESH",
+  dynamicRefreshPolicy:"BOUNDED_ROOT_REFRESH_V1"};
+ assert.equal(validateV4ProductionCertificate(bounded,sha,now).validUntil,validUntil);
+ assert.throws(()=>validateV4ProductionCertificate({...bounded,validUntil:new Date(now+30*86400000+1).toISOString()},sha,now),/EXPIRED_OR_FUTURE/);
+ assert.throws(()=>validateV4ProductionCertificate(legacy,sha,now),/EXPIRED_OR_FUTURE/);
+});
 test("new full LIVE production evidence accepts authentic shared Aster history without demanding nonexistent V4 fill",()=>{
  assert.equal(validateV4ProductionCertificate(establishedSharedHistory,sha,now).schema,
    "disdex-v12-v4-production-certification/v3");

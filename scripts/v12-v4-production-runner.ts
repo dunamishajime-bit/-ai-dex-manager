@@ -2,6 +2,7 @@
 import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
 import {v4ExecutionPhase,v4MonitorIdentity,v4ReadOnlyRuntimeSha} from "../lib/v12-v4-execution-phase";
 import {dirname} from "node:path";
+import {setTimeout as delay} from "node:timers/promises";
 import {AsterV3Client} from "../lib/aster-v3-client";
 import {V12AsterLiveAdapter} from "../lib/v12-aster-live-adapter";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
@@ -26,6 +27,12 @@ const H2=7200000;
 const V4_HEALTH_SCHEMA="disdex-v12-v4-runner-heartbeat/v1";
 const V4_REALTIME_DECISION_SCHEMA="v12-v4-live-decision/v1";
 const V4_GATE_TELEMETRY_SCHEMA="disdex-v12-v4-gate-telemetry/v1";
+export async function waitForV4Daemon(ms:number,signal:AbortSignal):Promise<void>{
+ try{await delay(ms,undefined,{signal});}
+ catch(error){
+  if(!signal.aborted||!(error instanceof Error)||error.name!=="AbortError")throw error;
+ }
+}
 export type V4RateBudgetDefer={reason:string;waitMs:number};
 export function classifyV4RateBudgetDefer(error:unknown,doc:V4ExecutionDocument):V4RateBudgetDefer|undefined{
  const rate=classifyAsterRateBudgetFailure(error);
@@ -434,11 +441,12 @@ async function main(){
   return;
  }
  if(!once&&!daemon&&!initialize)throw Error("V4_RUNNER_REQUIRES_MODE");
- let stopping=false;
- process.once("SIGINT",()=>{stopping=true;});
- process.once("SIGTERM",()=>{stopping=true;});
+ const shutdown=new AbortController();
+ const stop=()=>shutdown.abort();
+ process.once("SIGINT",stop);
+ process.once("SIGTERM",stop);
  let runtime:Awaited<ReturnType<typeof buildV4ProductionRuntime>>|undefined;
- for(;;){
+ while(!shutdown.signal.aborted){
   try{
    runtime=await buildV4ProductionRuntime();
    break;
@@ -452,11 +460,11 @@ async function main(){
    await writeV4Health(releaseSha,operationMode,startup,null);
    const retryAfterMs=startup.retryAfterMs??15000;
    console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...startup,retryAfterMs,startup:true}));
-   if(!daemon||stopping)return;
-   await new Promise<void>(done=>setTimeout(done,retryAfterMs));
+   if(!daemon||shutdown.signal.aborted)return;
+   await waitForV4Daemon(retryAfterMs,shutdown.signal);
   }
  }
- if(!runtime)return;
+ if(!runtime||shutdown.signal.aborted)return;
  const {engine,store,releaseSha,operationMode}=runtime;
  if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  let lastCompletedTickAt:number|null=null;
@@ -487,10 +495,11 @@ async function main(){
    }else{
     prepared=await engine.prepareFlatMarketDecision();
     await writeV4IdleBaselineSnapshot(releaseSha,prepared);
+    if(shutdown.signal.aborted)break;
     result=await executeV4WithContentionAudit({
      operation:()=>engine.tick(prepared),releaseSha,operationMode,
      accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
-     attempts:10,retryMs:750,shouldStop:()=>stopping,
+     attempts:10,retryMs:750,shouldStop:()=>shutdown.signal.aborted,
      onContention:()=>{hadLockContention=true;},
     });
     tickCompleted=true;
@@ -539,15 +548,15 @@ async function main(){
   await writeV4Health(releaseSha,operationMode,result,lastCompletedTickAt);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result,
    ...(deferredWaitMs?{retryAfterMs:deferredWaitMs}:{}),hadLockContention}));
-  if(!daemon||stopping)break;
+  if(!daemon||shutdown.signal.aborted)break;
   // Persistent lock contention retries quickly, while a resolved collision gets
   // one phase-shifted normal tick so V4 does not re-align with the same peer.
   const normalWait=Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
   const nextDelay=result.status==="locked"?15000:
    deferredWaitMs>0?Math.max(1000,deferredWaitMs):
    normalWait+(hadLockContention?7000:0);
-  await new Promise<void>(done=>setTimeout(done,nextDelay));
- }while(!stopping);
+  await waitForV4Daemon(nextDelay,shutdown.signal);
+ }while(!shutdown.signal.aborted);
 }
 if(process.argv[1]?.includes("v12-v4-production-runner"))
  main().catch(error=>{
