@@ -14,6 +14,10 @@ import time
 import uuid
 from types import SimpleNamespace
 
+# The systemd worker uses Python isolated mode. Re-enable imports from this
+# root-owned helper bundle explicitly so sibling modules remain available.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from disdex_deployment_contract import (
     CODEX_SSH_AUTH_SCHEMA, CODEX_SSH_OPERATOR, DEPLOYMENT_TARGET,
     OPERATOR_TARGET, REPO, SHA, PLAN_HASH,

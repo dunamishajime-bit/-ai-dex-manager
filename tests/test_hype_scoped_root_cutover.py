@@ -3,6 +3,7 @@ import copy
 from contextlib import contextmanager
 import hashlib
 import json
+import subprocess
 import sys
 import tempfile
 import time
@@ -15,6 +16,17 @@ import disdex_hype_scoped_root_cutover as h
 import disdex_hype_scoped_job as job
 from disdex_deployment_plan import canonical, IDS, SCHEMA
 from disdex_deployment_contract import REPO, DEPLOYMENT_TARGET, OPERATOR_TARGET
+
+
+class HypeJobEntrypointTests(unittest.TestCase):
+    def test_job_entrypoint_imports_installed_sibling_modules_under_isolated_python(self):
+        script = Path(__file__).resolve().parents[1] / "scripts/ops/deploy/disdex_hype_scoped_job.py"
+        result = subprocess.run(
+            [sys.executable, "-I", str(script), "--help"],
+            cwd=script.parents[2], capture_output=True, text=True, timeout=15,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--job-id", result.stdout)
 
 
 def plan(sha, scope="V12_V4", orders=True):
