@@ -467,11 +467,14 @@ class HypeScopedOperations:
         release = self.paths.releases / v4_sha
         release_marker(v4_sha, self.paths.releases)
         reconcile = release / "scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts"
+        broker_source = release / "scripts/ops/root/disdex-v4-rate-budget-broker.ts"
         loader = release / "node_modules/tsx/dist/loader.mjs"
         budget_source = release / "lib/disdex-aster-global-rate-budget.ts"
         proxy_source = release / "lib/disdex-v4-rate-budget-proxy.ts"
         try:
-            require(reconcile.is_file() and loader.is_file(), "V4_SIGNED_GET_SOURCE_MISSING")
+            require(reconcile.is_file() and not reconcile.is_symlink()
+                    and broker_source.is_file() and not broker_source.is_symlink()
+                    and loader.is_file(), "V4_SIGNED_GET_SOURCE_MISSING")
             validate_v4_budget_proxy_sources(
                 budget_source.read_text(encoding="utf8"),
                 proxy_source.read_text(encoding="utf8"),
