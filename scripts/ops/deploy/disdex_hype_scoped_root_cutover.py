@@ -71,22 +71,28 @@ def validate_v4_budget_proxy_sources(budget_source, proxy_source):
     return True
 
 
-def validate_hype_budget_broker(v4_sha, unit, *, process_cwd, marker_sha,
+def validate_hype_budget_broker(v4_sha, unit, *, process_cwd, process_argv, marker_sha,
                                 socket_info, directory_info, deploy_uid, deploy_gid,
                                 release_root="/home/deploy/disdex-trading/releases"):
     require(isinstance(v4_sha, str) and SHA.fullmatch(v4_sha), "V4_BUDGET_PIN_INVALID")
     require(isinstance(release_root, str) and release_root.startswith("/"),
             "V4_BUDGET_RELEASE_ROOT_INVALID")
     release = f"{release_root.rstrip('/')}/{v4_sha}"
-    broker_script = release + "/scripts/ops/root/disdex-v4-rate-budget-broker.ts"
     require(isinstance(unit, dict) and unit.get("ActiveState") == "active"
             and unit.get("SubState") == "running" and unit.get("User") == "deploy"
             and unit.get("WorkingDirectory") == release
             and isinstance(unit.get("ExecStart"), str)
-            and broker_script in unit["ExecStart"]
             and isinstance(unit.get("MainPID"), str) and unit["MainPID"].isdigit()
             and int(unit["MainPID"]) > 1 and process_cwd == release
             and marker_sha == v4_sha, "V4_BUDGET_BROKER_LINEAGE")
+    argv_field = re.search(r"(?:^|;\s*)argv\[\]=([^;]+)", unit["ExecStart"])
+    configured_argv = argv_field[1].split() if argv_field else []
+    launcher = ["/usr/bin/node", f"{release}/node_modules/tsx/dist/cli.mjs"]
+    script = "scripts/ops/root/disdex-v4-rate-budget-broker.ts"
+    expected_scripts = (script, f"{release}/{script}")
+    for argv in (configured_argv, process_argv):
+        require(len(argv) >= 3 and argv[:2] == launcher and argv[2] in expected_scripts,
+                "V4_BUDGET_BROKER_LINEAGE")
     require(isinstance(directory_info, dict) and directory_info.get("is_dir") is True
             and directory_info.get("is_symlink") is False
             and directory_info.get("uid") == deploy_uid and directory_info.get("gid") == deploy_gid
@@ -499,15 +505,13 @@ class HypeScopedOperations:
             process_argv = [arg.decode("utf8", errors="replace") for arg in
                             (Path("/proc") / unit["MainPID"] / "cmdline").read_bytes().split(b"\0")
                             if arg]
-            expected_broker_script = str(release / "scripts/ops/root/disdex-v4-rate-budget-broker.ts")
-            require(any(expected_broker_script in arg for arg in process_argv),
-                    "V4_BUDGET_BROKER_PROCESS_SOURCE")
             socket = Path(socket_path)
             socket_stat = socket.lstat()
             directory_stat = socket.parent.lstat()
             deploy = self.deploy
             validated = validate_hype_budget_broker(
-                v4_sha, unit, process_cwd=process_cwd, marker_sha=marker_sha,
+                v4_sha, unit, process_cwd=process_cwd, process_argv=process_argv,
+                marker_sha=marker_sha,
                 socket_info={
                     "uid": socket_stat.st_uid, "gid": socket_stat.st_gid,
                     "mode": stat.S_IMODE(socket_stat.st_mode),
@@ -936,4 +940,3 @@ class HypeScopedRootExecutor:
             except Exception:
                 pass
             raise
-

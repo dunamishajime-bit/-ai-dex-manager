@@ -82,17 +82,25 @@ class HypeJobEntrypointTests(unittest.TestCase):
     def test_budget_broker_requires_active_exact_v4_release_and_private_socket(self):
         sha = "a" * 40
         release = f"/home/deploy/disdex-trading/releases/{sha}"
+        script = "scripts/ops/root/disdex-v4-rate-budget-broker.ts"
+        process_argv = ["/usr/bin/node", f"{release}/node_modules/tsx/dist/cli.mjs", script]
         unit = {"ActiveState": "active", "SubState": "running", "MainPID": "123",
                 "User": "deploy", "WorkingDirectory": release,
-                "ExecStart": f"/usr/bin/node {release}/scripts/ops/root/disdex-v4-rate-budget-broker.ts"}
+                "ExecStart": "{ path=/usr/bin/node ; argv[]=" + " ".join(process_argv) + " ; }"}
         socket = {"uid": 1000, "gid": 1000, "mode": 0o660,
                   "is_socket": True, "is_symlink": False}
         directory = {"uid": 1000, "gid": 1000, "mode": 0o750,
                      "is_dir": True, "is_symlink": False}
         expected = h.hype_budget_proxy_socket(sha)
         self.assertEqual(h.validate_hype_budget_broker(
-            sha, unit, process_cwd=release, marker_sha=sha, socket_info=socket,
+            sha, unit, process_cwd=release, process_argv=process_argv, marker_sha=sha, socket_info=socket,
             directory_info=directory, deploy_uid=1000, deploy_gid=1000), expected)
+        with self.assertRaisesRegex(ValueError, "V4_BUDGET_BROKER_LINEAGE"):
+            h.validate_hype_budget_broker(
+                sha, unit, process_cwd=release,
+                process_argv=[*process_argv[:2], "/untrusted/" + script, script],
+                marker_sha=sha, socket_info=socket, directory_info=directory,
+                deploy_uid=1000, deploy_gid=1000)
         for changed_unit, changed_socket, changed_dir, cwd, marker in (
             ({**unit, "ActiveState": "inactive"}, socket, directory, release, sha),
             ({**unit, "MainPID": "0"}, socket, directory, release, sha),
@@ -106,7 +114,7 @@ class HypeJobEntrypointTests(unittest.TestCase):
                               directory=changed_dir, cwd=cwd, marker=marker):
                 with self.assertRaises(ValueError):
                     h.validate_hype_budget_broker(
-                        sha, changed_unit, process_cwd=cwd, marker_sha=marker,
+                        sha, changed_unit, process_cwd=cwd, process_argv=process_argv, marker_sha=marker,
                         socket_info=changed_socket, directory_info=changed_dir,
                         deploy_uid=1000, deploy_gid=1000)
 
@@ -535,4 +543,3 @@ class HypeSafetyTests(unittest.TestCase):
 
 if __name__=="__main__":
     unittest.main()
-
