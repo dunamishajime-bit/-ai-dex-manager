@@ -134,12 +134,15 @@ class V4RollbackFixtureTest(unittest.TestCase):
    own=base/'own-unit';own.write_text('fixture');ops.created=[own]
    ops.new_started=ops.broker_started=ops.old_masked_by_us=ops.stopped_old_monitor=True
    ops.old_unit='disdex-v12-v4@'+'7'*40+'.service'
+   (base/ops.old_unit).symlink_to('/dev/null')
+   ops.old_mask_adapter=SimpleNamespace(unit_root=base,unmask=operation('unmask'))
    ops._command=lambda *args:calls.append(tuple(args))
    ops.rollback()
    self.assertEqual(pins.read_bytes(),b'old pins');self.assertEqual(current.read_bytes(),b'old current')
    self.assertEqual(orders.read_bytes(),b'preserved history');self.assertFalse(own.exists());self.assertFalse(ops.tick.exists())
    self.assertEqual(pins.stat().st_mode&0o777,0o644);self.assertEqual(current.stat().st_mode&0o777,0o600)
    self.assertIn(('start',ops.old_monitor),calls);self.assertNotIn(('start',ops.old_unit),calls)
+   self.assertIn(('unmask',ops.old_unit),calls)
 
  def test_audit_does_not_accept_a_new_pid_as_three_cycles_from_one_process(self):
   with tempfile.TemporaryDirectory() as folder:
