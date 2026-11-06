@@ -1,0 +1,37 @@
+[Unit]
+Description=DisDex HYPE scoped cutover transaction %i
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/var/lib/disdex/unified-deploy/jobs/hype/%i.json
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/
+Environment=DISDEX_HYPE_JOB_ID=%i
+ExecStart=/usr/bin/python3 -I /usr/local/libexec/disdex-unified/disdex_hype_scoped_job.py --job-id %i
+TimeoutStartSec=0
+RuntimeMaxSec=1h10min
+TimeoutStopSec=30s
+Restart=no
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/disdex/unified-deploy
+ReadWritePaths=/var/lib/disdex/hype-zec-long
+ReadWritePaths=/var/lib/disdex/shared/operator-activation
+ReadWritePaths=/etc/disdex/runner-pins.json
+ReadWritePaths=/etc/disdex/current-runtime
+ReadWritePaths=/etc/systemd/system
+StandardOutput=null
+StandardError=null

@@ -15,7 +15,7 @@ import re
 import subprocess
 import time
 
-from disdex_deployment_plan import canonical, digest
+from disdex_deployment_plan import IDS, canonical, digest, validate
 
 RUNNER = "HYPE_TREND_LONG"
 OLD = "7688ed7c93a1918d8b44837339b7da5584a868f5"
@@ -25,6 +25,7 @@ KILL = Path("/var/lib/disdex/shared/kill-switch.json")
 MARGIN = Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
 PENDING = Path("/var/lib/disdex/shared/pending-exposure.json")
 TICK = Path("/var/lib/disdex/runner-health/ticks/hype-trend-long.json")
+JOB_DIR = Path("/var/lib/disdex/unified-deploy/jobs/hype")
 SDK_SHA = "7b7719c65d2c6116d02463fc4603200f28e20762"
 SHA = re.compile(r"^[a-f0-9]{40}$")
 
@@ -35,17 +36,91 @@ def require(condition, reason):
 
 
 def validate_hype_plan(desired, current, pins, target_sha):
-    plan_hash, changes = digest(desired, current)
+    validate(desired)
+    validate(current)
     require(desired["scope"] == RUNNER and desired["ordersEnabled"] is True,
             "LIVE_SCOPE_AND_PERMISSION")
     require(desired["sourceSha"] == target_sha == desired["runners"][RUNNER],
             "EXACT_SOURCE_SHA")
-    require(current["runners"] == pins and pins[RUNNER] == OLD,
-            "PIN_BASELINE_CHANGED")
-    require(changes["changedRunners"] == [RUNNER]
-            and not changes["uiChanged"] and not changes["monitorChanged"]
-            and not changes["releaseRootsChanged"], "HYPE_ONLY_DELTA")
-    return plan_hash
+    require(current["runners"] == pins, "PIN_BASELINE_CHANGED")
+    require(desired["uiSha"] == current["uiSha"]
+            and desired["monitorSha"] == current["monitorSha"]
+            and desired["releaseRoots"] == current["releaseRoots"], "HYPE_ONLY_DELTA")
+    require(all(desired["runners"][runner] == pins[runner]
+                for runner in IDS if runner != RUNNER), "HYPE_ONLY_DELTA")
+    require(pins[RUNNER] in (OLD, target_sha), "PIN_BASELINE_CHANGED")
+    if pins[RUNNER] == OLD:
+        require(current["runners"][RUNNER] == OLD
+                and desired["runners"][RUNNER] == target_sha, "HYPE_ONLY_DELTA")
+    else:
+        require(current["runners"][RUNNER] == target_sha
+                and desired["runners"][RUNNER] == target_sha, "HYPE_RESUME_PLAN_MISMATCH")
+    return hashlib.sha256(canonical(desired)).hexdigest()
+
+
+def classify_hype_plan(desired, current, pins, target_sha):
+    """Distinguish a first cutover from the one exact interrupted state."""
+    validate_hype_plan(desired, current, pins, target_sha)
+    return "fresh" if pins[RUNNER] == OLD else "resume"
+
+
+def rebase_hype_state_for_rollback(current, candidate_baseline, old_sha, new_sha):
+    """Revert only the runtime SHA while retaining legitimate held decisions.
+
+    The runner can update decision timestamps and its decision/failure journal
+    between service start and a failed deployment audit. All other state must
+    remain byte-semantically equal to the pre-start candidate baseline.
+    """
+    validate_flat_hype_state(candidate_baseline, new_sha)
+    validate_flat_hype_state(current, new_sha)
+    mutable = {"runtimeCommitSha", "updatedAt", "lastDecisionTs", "lastDecision", "failures"}
+    baseline_fixed = {key: value for key, value in candidate_baseline.items() if key not in mutable}
+    current_fixed = {key: value for key, value in current.items() if key not in mutable}
+    require(current_fixed == baseline_fixed, "ROLLBACK_UNRECOGNIZED_LEDGER_CHANGE")
+    require(type(current.get("updatedAt")) is int
+            and current["updatedAt"] >= candidate_baseline["updatedAt"], "ROLLBACK_LEDGER_TIME_REGRESSED")
+    base_decision_ts = candidate_baseline.get("lastDecisionTs")
+    current_decision_ts = current.get("lastDecisionTs")
+    if current_decision_ts is not None:
+        require(type(current_decision_ts) is int and current_decision_ts > 0
+                and (base_decision_ts is None or current_decision_ts >= base_decision_ts),
+                "ROLLBACK_DECISION_TIME_REGRESSED")
+    decision_changed = (current_decision_ts != base_decision_ts
+                        or current.get("lastDecision") != candidate_baseline.get("lastDecision"))
+    if decision_changed:
+        decision = current.get("lastDecision")
+        require(type(current_decision_ts) is int
+                and (base_decision_ts is None or current_decision_ts > base_decision_ts)
+                and isinstance(decision, dict) and decision.get("accepted") is False,
+                "ROLLBACK_NEW_DECISION_NOT_HELD")
+    before = candidate_baseline.get("failures", [])
+    after = current.get("failures", [])
+    require(isinstance(before, list) and isinstance(after, list) and len(after) <= 100,
+            "ROLLBACK_FAILURE_HISTORY_INVALID")
+    if len(before) < 100:
+        require(len(after) >= len(before) and after[:len(before)] == before,
+                "ROLLBACK_FAILURE_HISTORY_REWRITTEN")
+        appended_rows = after[len(before):]
+        for row in appended_rows:
+            require(isinstance(row, dict) and type(row.get("occurredAt")) is int
+                    and row["occurredAt"] >= candidate_baseline["updatedAt"],
+                    "ROLLBACK_FAILURE_HISTORY_INVALID")
+    elif after != before:
+        require(len(after) == 100, "ROLLBACK_FAILURE_HISTORY_TRUNCATED")
+        appended_rows = None
+        for dropped in range(1, 101):
+            prefix_length = 100 - dropped
+            if after[:prefix_length] == before[dropped:]:
+                appended_rows = after[prefix_length:]
+                break
+        require(appended_rows, "ROLLBACK_FAILURE_HISTORY_REWRITTEN")
+        for row in appended_rows:
+            require(isinstance(row, dict) and type(row.get("occurredAt")) is int
+                    and row["occurredAt"] >= candidate_baseline["updatedAt"],
+                    "ROLLBACK_FAILURE_HISTORY_INVALID")
+    restored = dict(current, runtimeCommitSha=old_sha)
+    validate_flat_hype_state(restored, old_sha)
+    return restored
 
 
 def validate_flat_hype_state(row, expected):
@@ -58,6 +133,49 @@ def validate_flat_hype_state(row, expected):
     require(type(row.get("updatedAt")) is int and row["updatedAt"] > 0,
             "LEDGER_TIMESTAMP")
     return row
+
+
+def validate_hype_candidate_sources(runner, cycle, heartbeat, entrypoint):
+    """Validate candidate source text for entry HOLD and real tick contracts."""
+    require('import { readSharedKillSwitch } from "./disdex-shared-kill-switch"' in runner
+            and "private async sharedEntryHold(" in runner
+            and '"/var/lib/disdex/shared/kill-switch.json"' in runner
+            and "if (!kill.active) return;" in runner
+            and 'const reason = "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE";' in runner,
+            "CANDIDATE_SHARED_HOLD_GATE_MISSING")
+    first_hold = runner.find("const entryHold = await this.sharedEntryHold(state, signal);")
+    pre_order_hold = runner.find("const preOrderHold = await this.sharedEntryHold(state, signal);")
+    market_order = runner.find("this.dependencies.executor.executeMarket(", pre_order_hold)
+    require(first_hold >= 0 and pre_order_hold > first_hold and market_order > pre_order_hold
+            and "if (preOrderHold) return preOrderHold;" in runner,
+            "CANDIDATE_PREORDER_HOLD_GATE_MISSING")
+    require('"disdex-runner-tick/v1"' in heartbeat
+            and all(field in heartbeat for field in (
+                "newOrdersAllowed", "expectedSha", "mainPid", "workingDirectory",
+                "tickStartedAt", "tickCompletedAt", "ordersSent", "cancelsSent",
+                "positionChangesSent")), "CANDIDATE_TICK_CONTRACT_MISMATCH")
+    require("await writeRunnerTickHeartbeat" in cycle
+            and 'HYPE_TREND_LONG' in cycle and "newOrdersAllowed:false" in cycle
+            and 'disdex-hype-long' in cycle,
+            "CANDIDATE_TICK_WRITER_MISSING")
+    require("observePeerDecisionCycle" in entrypoint
+            and 'runnerId: "HYPE_TREND_LONG"' in entrypoint
+            and "operation: () => runner.tick()" in entrypoint,
+            "CANDIDATE_DECISION_CYCLE_NOT_CONNECTED")
+    return True
+
+
+def validate_hype_candidate_safety(release):
+    """Require the immutable HYPE candidate's protected-entry and tick path."""
+    try:
+        return validate_hype_candidate_sources(
+            (release / "lib/hype-zec-long-runner.ts").read_text(encoding="utf8"),
+            (release / "lib/disdex-peer-decision-cycle.ts").read_text(encoding="utf8"),
+            (release / "lib/disdex-runner-tick-heartbeat.ts").read_text(encoding="utf8"),
+            (release / "scripts/disdex-hype-zec-long-live-runner.ts").read_text(encoding="utf8"),
+        )
+    except (OSError, UnicodeError):
+        raise ValueError("HYPE_SCOPED_CANDIDATE_SAFETY_SOURCE_MISSING") from None
 
 
 def valid_hold(row):
@@ -208,6 +326,60 @@ class HypeScopedOperations:
         self.dropin_created = False
         self.state_changed = False
         self.new_started = False
+        self.activation_written = False
+        self.approval_replaced = False
+
+    def unit_override_bytes(self):
+        root = str(self.release)
+        sha = self.args.sha
+        prestart = [
+            "ExecStartPre=",
+            "ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/hype-zec-long",
+            "ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/hype-zec-long/runner.json ]; then chown deploy:deploy /var/lib/disdex/hype-zec-long/runner.json && chmod 600 /var/lib/disdex/hype-zec-long/runner.json; fi'",
+            "ExecStartPre=/usr/bin/test -f " + root + "/.disdex-release-sha",
+            "ExecStartPre=/usr/bin/grep -Fxq " + sha + " " + root + "/.disdex-release-sha",
+            "ExecStartPre=" + root + "/node_modules/.bin/tsx scripts/disdex-current-live-target-readiness.ts --require-implementation-ready",
+            "ExecStartPre=+/usr/bin/node " + root + "/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root " + root + " --sha " + sha + " --runner " + RUNNER + " --activation-path " + str(self.approval),
+        ]
+        return ("\n".join(["[Service]",
+            "EnvironmentFile=" + str(self.env),
+            "EnvironmentFile=" + str(self.operator_env),
+            *prestart,
+            "ReadWritePaths=/var/lib/disdex/runner-health/ticks",
+            ""])).encode()
+
+    def validate_staged_resume_files(self, assert_regular_secure):
+        import stat
+        from disdex_unified_root_gate import read_root_json
+        require(self.dropin.is_dir() and not self.dropin.is_symlink(), "RESUME_DROPIN_MISSING")
+        drop_meta = self.dropin.lstat()
+        require(drop_meta.st_uid == self.parent.root_uid
+                and stat.S_IMODE(drop_meta.st_mode) == 0o755, "RESUME_DROPIN_METADATA")
+        override_meta = assert_regular_secure(self.override, root_uid=self.parent.root_uid, private=False)
+        require(stat.S_IMODE(override_meta.st_mode) == 0o644
+                and _safe_bytes(self.override) == self.unit_override_bytes(), "RESUME_DROPIN_CONTENT")
+        for path, expected in ((self.env, self.runtime_bytes),
+                               (self.operator_env, self.operator_bytes)):
+            info = assert_regular_secure(path, root_uid=self.parent.root_uid, private=True)
+            require(stat.S_IMODE(info.st_mode) == 0o600
+                    and _safe_bytes(path) == expected, "RESUME_ENVIRONMENT_CONTENT")
+        require(not self.approval.is_symlink(), "RESUME_ACTIVATION_SYMLINK")
+        if self.approval.exists():
+            info = assert_regular_secure(self.approval, root_uid=self.parent.root_uid, private=True)
+            require(stat.S_IMODE(info.st_mode) == 0o600, "RESUME_ACTIVATION_METADATA")
+            previous = read_root_json(self.approval, root_uid=self.parent.root_uid)
+            require(previous.get("schema") == "disdex-live-operator-activation/v1"
+                    and previous.get("target") == "DD1296_FINAL_ALLIN_10BPS"
+                    and previous.get("approvedSha") == self.args.sha
+                    and previous.get("approvedRunners") == [RUNNER]
+                    and previous.get("approvedShaByRunner") == {RUNNER: self.args.sha}
+                    and previous.get("planSha256") == self.args.plan_sha256
+                    and previous.get("ordersEnabled") is True
+                    and previous.get("authorizesKillClearance") is False,
+                    "RESUME_OLD_ACTIVATION_SCOPE_MISMATCH")
+            self.prior_activation_sha256 = hashlib.sha256(_safe_bytes(self.approval)).hexdigest()
+        else:
+            self.prior_activation_sha256 = None
 
     def command(self, *args):
         proc = subprocess.run(["/usr/bin/systemctl", *args], text=True, capture_output=True, timeout=50)
@@ -261,6 +433,7 @@ class HypeScopedOperations:
         self.current = read_root_json(self.paths.current_plan)
         self.manifest = read_root_json(self.paths.pins, private=False)
         self.pins = parse_live_pins(self.manifest, releases=self.paths.releases)
+        self.plan_mode = classify_hype_plan(self.desired, self.current, self.pins, self.args.sha)
         require(validate_hype_plan(self.desired, self.current, self.pins, self.args.sha)
                 == self.args.plan_sha256, "PLAN_HASH_MISMATCH")
         require(self.parent._read_current_sha(unchanged_identity_only=True)
@@ -269,15 +442,22 @@ class HypeScopedOperations:
         for relative in ("scripts/disdex-hype-trend-live-runner.ts",
                          "scripts/disdex-hype-zec-long-live-runner.ts",
                          "lib/hype-zec-long-runner.ts",
+                         "lib/disdex-peer-decision-cycle.ts",
+                         "lib/disdex-runner-tick-heartbeat.ts",
                          "scripts/ops/root/disdex-live-operator-activation-gate.mjs"):
             require((self.release/relative).is_file(), "CANDIDATE_SOURCE_MISSING")
+        validate_hype_candidate_safety(self.release)
         require(not self.systemd.is_active(self.old_unit)
                 and self.systemd.main_pid(self.old_unit) == 0
                 and not self.systemd.is_active(self.new_unit)
                 and self.systemd.main_pid(self.new_unit) == 0, "HYPE_ALREADY_ACTIVE")
-        for path in (self.dropin, self.env, self.operator_env, self.approval, self.receipt):
-            require(not path.exists() and not path.is_symlink(), "TARGET_ALREADY_EXISTS")
+        require(not self.receipt.exists() and not self.receipt.is_symlink(), "TARGET_ALREADY_EXISTS")
         self.old_enabled = self.systemd.is_enabled(self.old_unit)
+        self.new_enabled = self.systemd.is_enabled(self.new_unit)
+        require(not self.new_enabled, "NEW_UNIT_MUST_START_DISABLED")
+        if self.plan_mode == "fresh":
+            for path in (self.dropin, self.env, self.operator_env, self.approval):
+                require(not path.exists() and not path.is_symlink(), "TARGET_ALREADY_EXISTS")
         self.hold_hash = hashlib.sha256(_safe_bytes(KILL)).hexdigest()
         valid_hold(json.loads(_safe_bytes(KILL)))
         self.reader = ProductionSharedRiskReader()
@@ -295,7 +475,9 @@ class HypeScopedOperations:
         })).hexdigest()
         self.state_before = _safe_bytes(STATE)
         self.state_stat = STATE.lstat()
-        validate_flat_hype_state(json.loads(self.state_before), OLD)
+        self.state_before_row = json.loads(self.state_before)
+        expected_state_sha = OLD if self.plan_mode == "fresh" else self.args.sha
+        validate_flat_hype_state(self.state_before_row, expected_state_sha)
         self.baselines = {p: (_safe_bytes(p), p.lstat())
                           for p in (self.paths.pins, self.paths.current_plan)}
         self.next_manifest = copy.deepcopy(self.manifest)
@@ -319,6 +501,8 @@ class HypeScopedOperations:
                           if not line.startswith("DISDEX_HYPE_ZEC_OPERATOR_ARMED=")]
         operator_lines.append("DISDEX_HYPE_ZEC_OPERATOR_ARMED=true")
         self.operator_bytes = ("\n".join(operator_lines) + "\n").encode()
+        if self.plan_mode == "resume":
+            self.validate_staged_resume_files(assert_regular_secure)
         self.health()
 
     def consume(self):
@@ -334,32 +518,31 @@ class HypeScopedOperations:
                 "VENUE_CHANGED")
 
     def publish(self):
-        self.dropin.mkdir(mode=0o755)
-        self.dropin_created = True
-        self.dropin.chmod(0o755)
-        root = str(self.release)
-        sha = self.args.sha
-        prestart = [
-            "ExecStartPre=",
-            "ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/hype-zec-long",
-            "ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/hype-zec-long/runner.json ]; then chown deploy:deploy /var/lib/disdex/hype-zec-long/runner.json && chmod 600 /var/lib/disdex/hype-zec-long/runner.json; fi'",
-            "ExecStartPre=/usr/bin/test -f " + root + "/.disdex-release-sha",
-            "ExecStartPre=/usr/bin/grep -Fxq " + sha + " " + root + "/.disdex-release-sha",
-            "ExecStartPre=" + root + "/node_modules/.bin/tsx scripts/disdex-current-live-target-readiness.ts --require-implementation-ready",
-            "ExecStartPre=+/usr/bin/node " + root + "/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root " + root + " --sha " + sha + " --runner " + RUNNER + " --activation-path " + str(self.approval),
-        ]
-        unit = ("\n".join(["[Service]",
-            "EnvironmentFile=" + str(self.env),
-            "EnvironmentFile=" + str(self.operator_env),
-            *prestart,
-            "ReadWritePaths=/var/lib/disdex/runner-health/ticks",
-            ""])).encode()
-        for path, content, mode in (
-            (self.env, self.runtime_bytes, 0o600),
-            (self.operator_env, self.operator_bytes, 0o600),
-            (self.approval, canonical(self.activation)+b"\n", 0o600),
-            (self.override, unit, 0o644)):
-            _root_file(path, content, mode, self.created)
+        self.approval_bytes = canonical(self.activation)+b"\n"
+        if self.plan_mode == "fresh":
+            self.dropin.mkdir(mode=0o755)
+            self.dropin_created = True
+            self.dropin.chmod(0o755)
+            for path, content, mode in (
+                (self.env, self.runtime_bytes, 0o600),
+                (self.operator_env, self.operator_bytes, 0o600),
+                (self.approval, self.approval_bytes, 0o600),
+                (self.override, self.unit_override_bytes(), 0o644)):
+                _root_file(path, content, mode, self.created)
+            self.activation_written = True
+        else:
+            # The interrupted transaction may have left a stale activation.
+            # Replace it only with the fresh, just-consumed authorization.
+            if self.approval.exists():
+                old = _safe_bytes(self.approval)
+                metadata = self.approval.lstat()
+                self.approval_replaced = True
+                _atomic(self.approval, self.approval_bytes, metadata)
+                require(_safe_bytes(self.approval) == self.approval_bytes,
+                        "RESUME_ACTIVATION_READBACK")
+            else:
+                _root_file(self.approval, self.approval_bytes, 0o600, self.created)
+            self.activation_written = True
         self.command("daemon-reload")
         proc = subprocess.run(["/usr/bin/systemd-analyze","verify",self.new_unit],
                               capture_output=True, text=True, timeout=45)
@@ -367,6 +550,7 @@ class HypeScopedOperations:
         show = self.command("show",self.new_unit,"-p","ExecStartPre",
                             "-p","ExecStart","-p","WorkingDirectory","-p","User")
         require(str(self.release) in show and str(self.approval) in show
+                and "WorkingDirectory=" + str(self.release) in show
                 and "User=deploy" in show and OLD not in show,
                 "EFFECTIVE_UNIT_MISMATCH")
         self.health()
@@ -377,33 +561,46 @@ class HypeScopedOperations:
         require(_safe_bytes(STATE)==self.state_before, "LEDGER_RACE")
         self.health()
         self.signed_flat()
-        new_state = dict(json.loads(self.state_before),
-                         runtimeCommitSha=self.args.sha,
-                         updatedAt=int(time.time()*1000))
-        self.state_after = json.dumps(new_state, sort_keys=True,
-                                      separators=(",", ":")).encode()+b"\n"
-        validate_flat_hype_state(new_state, self.args.sha)
-        _atomic(STATE, self.state_after, self.state_stat)
-        self.state_changed = True
-        for path, raw in ((self.paths.pins, canonical(self.next_manifest)+b"\n"),
-                          (self.paths.current_plan,canonical(self.next_current)+b"\n")):
-            old,meta=self.baselines[path]
-            require(_safe_bytes(path)==old, "PIN_OR_PLAN_CAS")
-            self.replaced.append((path,raw))
-            _atomic(path, raw, meta)
+        if self.plan_mode == "fresh":
+            new_state = dict(self.state_before_row,
+                             runtimeCommitSha=self.args.sha,
+                             updatedAt=int(time.time()*1000))
+            self.state_after = json.dumps(new_state, sort_keys=True,
+                                          separators=(",", ":")).encode()+b"\n"
+            validate_flat_hype_state(new_state, self.args.sha)
+            self.candidate_state_baseline = new_state
+            _atomic(STATE, self.state_after, self.state_stat)
+            self.state_changed = True
+            for path, raw in ((self.paths.pins, canonical(self.next_manifest)+b"\n"),
+                              (self.paths.current_plan,canonical(self.next_current)+b"\n")):
+                old,meta=self.baselines[path]
+                require(_safe_bytes(path)==old, "PIN_OR_PLAN_CAS")
+                self.replaced.append((path,raw))
+                _atomic(path, raw, meta)
+        else:
+            self.state_after = self.state_before
+            self.candidate_state_baseline = self.state_before_row
+            require(self.parent._assert_expected_pins(self.desired["runners"]) is None,
+                    "RESUME_PIN_READBACK")
         self.parent._assert_expected_pins(self.desired["runners"])
         self.health()
+        # Keep the unsafe legacy instance from returning on reboot while the
+        # candidate collects three actual decision-cycle ticks.
+        self.systemd.disable(self.old_unit)
+        require(not self.systemd.is_enabled(self.old_unit), "OLD_UNIT_NOT_DISABLED")
         self.new_started=True
         self.systemd.start(self.new_unit)
 
     def audit(self):
         stamps=[]
-        deadline=time.monotonic()+2200
+        deadline=time.monotonic()+3600
         pid=None
         while len(stamps)<3:
             require(time.monotonic()<deadline,"THREE_TICKS_TIMEOUT")
             require(not self.systemd.is_active(self.old_unit),
                     "DUPLICATE_HYPE")
+            require(not self.systemd.is_enabled(self.old_unit),
+                    "OLD_UNIT_ENABLED_DURING_AUDIT")
             require(self.systemd.active_state(self.new_unit)=="active",
                     "NEW_UNIT_STOPPED")
             new_pid=self.systemd.main_pid(self.new_unit)
@@ -436,17 +633,19 @@ class HypeScopedOperations:
         receipt = {
             "status":"HYPE_PROTECTED_HOLD_VERIFIED_NOT_ORDER_ENABLED",
             "scope": RUNNER, "sourceSha":self.args.sha,
+            "recoveryMode":self.plan_mode,
             "planSha256":self.args.plan_sha256,
             "runtimeLive":True,"effectiveNewOrdersAllowed":False,
             "protectedHoldPreserved":True,"authorizesKillClearance":False,
+            "priorActivationSha256":getattr(self,"prior_activation_sha256",None),
             "threeRealTickTimes":stamps,
+            "oldServiceEnabled":False,
             "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,
             "committedAt":self.parent.clock(),
         }
         _root_file(self.receipt, canonical(receipt)+b"\n", 0o400, self.created)
         self.systemd.enable(self.new_unit)
-        if self.old_enabled:
-            self.systemd.disable(self.old_unit)
+        require(not self.systemd.is_enabled(self.old_unit), "OLD_UNIT_NOT_DISABLED_AT_COMMIT")
         return receipt
 
     def rollback(self):
@@ -460,12 +659,36 @@ class HypeScopedOperations:
                     not self.systemd.is_active(self.new_unit),
                     "ROLLBACK_NEW_UNIT_STILL_RUNNING")
             attempt(lambda:self.systemd.disable(self.new_unit))
+        if self.old_enabled:
+            # The old HYPE release does not enforce the current shared HOLD.
+            # Never re-enable or restart it as a rollback action.
+            attempt(lambda:self.systemd.disable(self.old_unit))
+        if self.plan_mode == "resume":
+            self.health()
+            current_state = _safe_bytes(STATE)
+            validate_flat_hype_state(json.loads(current_state), self.args.sha)
+            self.signed_flat()
+            require(_safe_bytes(STATE) == current_state, "RESUME_ROLLBACK_LEDGER_RACE")
+            if self.activation_written:
+                activation_now = _safe_bytes(self.approval)
+                require(activation_now == self.approval_bytes, "RESUME_ROLLBACK_ACTIVATION_RACE")
+                self.approval.unlink()
+                self.activation_written = False
+            attempt(lambda:self.command("daemon-reload"))
+            if errors:
+                raise RuntimeError("HYPE_SCOPED_ROLLBACK_INCOMPLETE:" + ",".join(errors))
+            return
         if self.state_changed:
             cur=_safe_bytes(STATE)
-            require(cur==self.state_after, "ROLLBACK_LEDGER_CHANGED")
-            validate_flat_hype_state(json.loads(cur),self.args.sha)
+            current_state=json.loads(cur)
+            restored_state=rebase_hype_state_for_rollback(
+                current_state,self.candidate_state_baseline,OLD,self.args.sha)
+            restored=canonical(restored_state)+b"\n"
+            metadata=STATE.lstat()
             self.signed_flat()
-            attempt(lambda:_atomic(STATE,self.state_before,self.state_stat))
+            require(_safe_bytes(STATE)==cur,"ROLLBACK_LEDGER_RACE")
+            _atomic(STATE,restored,metadata)
+            require(_safe_bytes(STATE)==restored,"ROLLBACK_LEDGER_READBACK")
         for path, written in reversed(self.replaced):
             old,meta=self.baselines[path]
             def undo(p=path,w=written,b=old,m=meta):
@@ -477,8 +700,6 @@ class HypeScopedOperations:
         if self.dropin_created:
             attempt(self.dropin.rmdir)
         attempt(lambda:self.command("daemon-reload"))
-        if self.old_enabled:
-            attempt(lambda:self.systemd.enable(self.old_unit))
         if errors:
             raise RuntimeError("HYPE_SCOPED_ROLLBACK_INCOMPLETE:" + ",".join(errors))
 
@@ -486,6 +707,70 @@ class HypeScopedOperations:
 class HypeScopedRootExecutor:
     def __init__(self, parent):
         self.parent=parent
+
+    def submit(self, args, token):
+        from disdex_unified_root_gate import assert_private_dir
+        require(args.scope == RUNNER and args.orders_enabled == "true"
+                and args.deployment_target == "professional-dismanager.net"
+                and args.operator_target == "DD1296_FINAL_ALLIN_10BPS",
+                "EXACT_SCOPED_SUBMISSION_REQUIRED")
+        for directory in (JOB_DIR.parent, JOB_DIR):
+            if not directory.exists():
+                directory.mkdir(mode=0o700)
+                os.chown(directory, self.parent.root_uid, self.parent.root_uid)
+                directory.chmod(0o700)
+            assert_private_dir(directory, root_uid=self.parent.root_uid)
+        payload = self.parent._verify_token(args, token)
+        nonce = payload.get("nonce")
+        require(isinstance(nonce,str) and re.fullmatch(r"[a-f0-9]{32}",nonce),
+                "FRESH_APPROVAL_NONCE_REQUIRED")
+        row = {
+            "schema": "disdex-hype-scoped-job/v1", "jobId": nonce,
+            "deploymentTarget": args.deployment_target,
+            "operatorTarget": args.operator_target,
+            "sourceSha": args.sha, "scope": args.scope,
+            "ordersEnabled": True, "planSha256": args.plan_sha256,
+            "route": args.route, "owner": args.owner,
+        }
+        if args.route == "CODEX_SSH":
+            row["authorization"] = payload
+        else:
+            require(isinstance(token,str) and 0 < len(token) <= 16384,
+                    "OWNER_SIGNED_TOKEN_REQUIRED")
+            row["approvalToken"] = token
+        job_path = JOB_DIR/(nonce+".json")
+        flags = os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,"O_NOFOLLOW",0)
+        fd = os.open(job_path,flags,0o600)
+        try:
+            os.fchown(fd,self.parent.root_uid,self.parent.root_uid)
+            data = canonical(row)+b"\n"
+            view = memoryview(data)
+            while view:
+                written = os.write(fd,view)
+                require(written > 0,"JOB_REQUEST_SHORT_WRITE")
+                view = view[written:]
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        directory = os.open(JOB_DIR,os.O_RDONLY|getattr(os,"O_DIRECTORY",0))
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+        unit = "disdex-hype-scoped-cutover@"+nonce+".service"
+        proc = subprocess.run(["/usr/bin/systemctl","start","--no-block",unit],
+                              capture_output=True,text=True,timeout=20)
+        require(proc.returncode == 0,"PERSISTENT_JOB_START_FAILED")
+        return {
+            "status":"HYPE_SCOPED_JOB_QUEUED_NOT_LIVE",
+            "jobId":nonce,"scope":RUNNER,"sourceSha":args.sha,
+            "planSha256":args.plan_sha256,"route":args.route,
+            "ordersEnabled":True,"workerUnit":unit,
+            "receiptPath":"/var/lib/disdex/unified-deploy/receipts/hype-protected-hold-"+args.sha+".json",
+        }
+
     def execute(self, args, token):
         from disdex_v52_scoped_root_cutover import run_scoped_transaction
+        if not getattr(args,"_hype_job_worker",False):
+            return self.submit(args,token)
         return run_scoped_transaction(HypeScopedOperations(self.parent,args,token))
