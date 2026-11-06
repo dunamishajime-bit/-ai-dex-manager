@@ -24,6 +24,37 @@ def facts():
         durableHash='d'*64,killHash='e'*64)
 
 class PriorityFactsTest(unittest.TestCase):
+    def test_stopped_upgrade_requires_dormant_identity_and_does_not_accept_active_hold(self):
+        baseline={'peers':{'V12_V4':{'sha':OLD,'pid':0,'cwd':None,'activeState':'failed'},
+                           'V52':{'sha':m.REPAIRED_FET_V52_SHA,'pid':42}},'killHash':'b'*64}
+        self.assertTrue(m.validate_dormant_upgrade_context(baseline,copy.deepcopy(baseline),OLD))
+        for delta in [dict(pid=7),dict(sha=SHA),dict(activeState='activating')]:
+            changed=copy.deepcopy(baseline);changed['peers']['V12_V4'].update(delta)
+            with self.assertRaises(ValueError):
+                m.validate_dormant_upgrade_context(changed,changed,OLD)
+        changed=copy.deepcopy(baseline);changed['peers']['V52']['pid']=43
+        with self.assertRaises(ValueError):
+            m.validate_dormant_upgrade_context(baseline,changed,OLD)
+        f=dict(facts(),monitorOnly=False,liveUpgradeAuthorized=True,oldLiveAuthorityVerified=True,
+            stoppedUpgrade=True,oldDormantIdentityVerified=True,priorRuntimeSha=OLD,
+            v52Sha=m.REPAIRED_FET_V52_SHA,kill={'active':False})
+        self.assertTrue(m.validate_priority_evidence(f,NOW))
+        for delta in [dict(oldDormantIdentityVerified=False),dict(kill={'active':True}),dict(positions=1)]:
+            with self.assertRaises(ValueError):
+                m.validate_priority_evidence(dict(f,**delta),NOW)
+
+    def test_stopped_upgrade_rollback_keeps_original_writer_stopped(self):
+        from unittest.mock import patch
+        op=m.ProductionOperations(candidate_sha=SHA,static_root=Path('/var/lib/disdex/ops-audit/run')/SHA,
+                                  stopped_upgrade=True)
+        op.prior_sha=OLD
+        context={'peers':{'V12_V4':{'sha':OLD,'pid':0,'cwd':None,'activeState':'failed'}}}
+        op.plan={'context':context}
+        with patch.object(m,'json_at',return_value={'releaseSha':OLD}),\
+             patch.object(op,'_context',return_value=context),patch.object(m.subprocess,'run') as systemctl:
+            op._restore_unmigrated_upgrade()
+        systemctl.assert_not_called()
+
     def test_hp_primary_rebind_changes_only_the_verified_v4_key(self):
         common = "c" * 40
         source = (

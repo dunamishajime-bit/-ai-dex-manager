@@ -20,6 +20,8 @@ import math
 from types import SimpleNamespace
 
 FIXED_V52_SHA='041653b7b808fd46be2fef408c8e41a1c6d3a55b'
+REPAIRED_FET_V52_SHA='8495daf24e53a6cf0dd5e38f022008fa8f78c688'
+FET_V52_TRANSITION_PLAN='77313fbbef8644b6ee6e327422b4f5b6ec1d9fef37fbf2f14c4ffd7986b535b0'
 Q102_SHA='ef1ab178e26a7bf5bddb6473467765edba242e1d'
 REASON='V52 upstream state unavailable: QUALITY102_STATE_MISMATCH:runtimeCommitSha'
 SCOPE='V12_V4'
@@ -83,6 +85,15 @@ def validate_stopped_upgrade_context(before,after,old_sha):
     # remain mandatory before migration, as in the canonical full executor.
     old.update(pid=0,cwd=None,activeState=state)
     require(after==expected,'UPGRADE_STOP_CHANGED_PROTECTED_CONTEXT')
+    return True
+
+
+def validate_dormant_upgrade_context(before, after, old_sha):
+    old = before['peers']['V12_V4']
+    require(old.get('sha') == old_sha and type(old.get('pid')) is int and old['pid'] == 0
+        and old.get('cwd') is None and old.get('activeState') in ('inactive', 'failed'),
+        'DORMANT_UPGRADE_OLD_PROCESS_BASELINE')
+    require(after == before, 'DORMANT_UPGRADE_CONTEXT_CHANGED')
     return True
 
 def same_release_recovery_hash(current,pins,current_symlink_sha,sha):
@@ -200,10 +211,12 @@ console.log(JSON.stringify({status:'V4_PRIORITY_PEERS_READY',verifiedAt:Date.now
 '''
 
 class ProductionOperations:
-    def __init__(self,expected_hash=None,recovery=False,*,candidate_sha=None,static_root=None):
+    def __init__(self,expected_hash=None,recovery=False,*,candidate_sha=None,static_root=None,stopped_upgrade=False):
         self.expected_hash=expected_hash;self.bootstrap=None
         self.recovery=recovery
         self.upgrade=candidate_sha is not None and not recovery
+        require(not stopped_upgrade or self.upgrade, 'DORMANT_UPGRADE_REQUIRES_EXPLICIT_CANDIDATE')
+        self.stopped_upgrade=stopped_upgrade
         self.current_release_recovery=recovery and candidate_sha is not None
         if candidate_sha is not None:
             require(isinstance(candidate_sha,str) and re.fullmatch('[a-f0-9]{40}',candidate_sha),'EXPLICIT_CANDIDATE_SHA')
@@ -259,6 +272,39 @@ class ProductionOperations:
             release=RELEASES/self.prior_sha,pid=row['pid'],started_after_ms=0,previous_tick=None)
         require(digest(bytes_at(self.runtime_approval_path))==self.runtime_approval_hash,'UPGRADE_OLD_AUTHORITY_CHANGED')
         self.old_live_authority_verified=True
+
+    def _verify_dormant_upgrade_baseline(self, context):
+        from disdex_unified_root_gate import read_root_json
+        from disdex_v4_canonical_prestart import validate_activation
+        validate_dormant_upgrade_context(context, context, self.prior_sha)
+        require(self.pins['V52'] == REPAIRED_FET_V52_SHA, 'DORMANT_UPGRADE_V52_PIN')
+        receipt_path=ROOT/'receipts'/('v52-protected-hold-'+REPAIRED_FET_V52_SHA+'.json')
+        receipt_bytes=bytes_at(receipt_path)
+        receipt=read_root_json(receipt_path)
+        ticks=receipt.get('auditTickTimes')
+        require(receipt.get('status')=='V52_PROTECTED_HOLD_VERIFIED_NOT_FULL_LIVE'
+            and receipt.get('sourceSha')==REPAIRED_FET_V52_SHA
+            and receipt.get('planSha256')==FET_V52_TRANSITION_PLAN
+            and receipt.get('protectedHoldPreserved') is True
+            and receipt.get('effectiveNewOrdersAllowed') is False
+            and isinstance(ticks,list) and len(ticks)==3 and all(type(t) is int and t>0 for t in ticks)
+            and ticks==sorted(set(ticks))
+            and all(type(receipt.get(k)) is int and receipt[k]==0 for k in
+                ('ordersSent','cancelsSent','positionChangesSent')),
+            'DORMANT_UPGRADE_V52_RECEIPT')
+        require(bytes_at(receipt_path)==receipt_bytes,'DORMANT_UPGRADE_V52_RECEIPT_CHANGED')
+        self.v52_transition_receipt=(receipt_path,digest(receipt_bytes))
+        self.runtime_approval_path=SHARED/'operator-activation/v12-v4-full.json'
+        approval_bytes=bytes_at(self.runtime_approval_path)
+        approval=read_root_json(self.runtime_approval_path)
+        implementation=read_root_json(RELEASES/self.prior_sha/'docs/production/v12-v4-implementation-readiness.json',private=False)
+        # Validate the previous authority against its historical runner map.
+        # The new approval is independently issued against the current pins.
+        validate_activation(approval,self.prior_sha,{**self.pins,'V52':FIXED_V52_SHA},implementation,int(time.time()))
+        require(bytes_at(self.runtime_approval_path)==approval_bytes,'UPGRADE_OLD_AUTHORITY_CHANGED')
+        self.runtime_approval_hash=digest(approval_bytes)
+        self.old_live_authority_verified=True
+        self.old_dormant_identity_verified=True
 
     def preflight(self):
         import pwd
@@ -336,6 +382,7 @@ class ProductionOperations:
             require(str(self.release).encode() in self.recovery_unit_bytes and b'disdex_v4_canonical_prestart.py' in self.recovery_unit_bytes
                 and b' --daemon' in self.recovery_unit_bytes and b'--monitor-only' not in self.recovery_unit_bytes,'RECOVERY_EXACT_FULL_UNIT')
             require(subprocess.check_output(['/usr/bin/systemctl','show',self.recovery_prior_unit,'-p','MainPID','--value'],text=True).strip()=='0','RECOVERY_OLD_WRITER_ALIVE')
+        elif self.stopped_upgrade:self._verify_dormant_upgrade_baseline(context)
         elif self.upgrade:self._verify_upgrade_baseline(v4)
         else:
             health=json_at('/var/lib/disdex/v12-v4/heartbeat.json');tick=json_at('/var/lib/disdex/runner-health/ticks/v12-v4.json')
@@ -389,9 +436,11 @@ class ProductionOperations:
             prior=read_root_json(self.migration_receipt)
             require(prior.get('afterStateSha256')==state_hash and prior.get('newSha')==self.candidate_sha,'MIGRATION_RECEIPT_MISMATCH')
         else:require(document.get('releaseSha')==self.prior_sha,'OLD_LEDGER_SHA')
+        if self.stopped_upgrade:validate_recovery_document(document,self.prior_sha)
         require(not any(x.get('status')!='RELEASED' for x in pending['entries']),'ACTIVE_PENDING')
         self.facts=dict(candidateSha=self.candidate_sha,oldStateSha=self.prior_sha,monitorOnly=not self.recovery and not self.upgrade,
             liveUpgradeAuthorized=self.upgrade,oldLiveAuthorityVerified=getattr(self,'old_live_authority_verified',False),priorRuntimeSha=self.prior_sha,
+            stoppedUpgrade=self.stopped_upgrade,oldDormantIdentityVerified=getattr(self,'old_dormant_identity_verified',False),
             recoveryAuthorized=self.recovery,sameSourceProtected=self.recovery,
             preserveInactiveKill=self.current_release_recovery,
             positions=signed['positionCount'],openOrders=signed['openOrderCount'],activePending=0,signedVerifiedAt=signed['verifiedAt'],
@@ -430,6 +479,7 @@ class ProductionOperations:
             priorRuntimeSha=self.prior_sha,
             sourceManifestSha256=digest(bytes_at(self.release/'.disdex-source-manifest.json')),
             runtimeRoleSha256=digest(bytes_at(self.release/'.disdex-runtime-role.json')))
+        if self.stopped_upgrade:self.plan.update(stoppedUpgrade=True,v52TransitionReceiptSha256=self.v52_transition_receipt[1])
         self.plan['certifiedBudget']=dict(route='CANONICAL_SHARED_FILE_LOCK',path=str(SHARED/'aster-rate-budget.json'),
             accountLock=str(SHARED/'account-order.lock'),minIntervalMs=50,maxQueueMs=5000,refreshRemainsReadOnlyProxy=True)
         self.plan_hash=digest(canonical(self.plan));return dict(planSha256=self.plan_hash,plan=self.plan)
@@ -497,11 +547,17 @@ class ProductionOperations:
         require(self.upgrade and self._context()==self.plan['context'],'UPGRADE_FREEZE_CONTEXT_CHANGED')
         require(digest(bytes_at(self.runtime_approval_path))==self.runtime_approval_hash,'UPGRADE_OLD_AUTHORITY_CHANGED')
         unit='disdex-v12-v4@'+self.prior_sha+'.service'
-        self.upgrade_stop_requested=True
-        subprocess.run(['/usr/bin/systemctl','stop',unit],check=True,capture_output=True,timeout=45)
-        self.upgrade_old_stopped=True
-        stopped=self._context()
-        validate_stopped_upgrade_context(self.plan['context'],stopped,self.prior_sha)
+        if self.stopped_upgrade:
+            receipt_path, receipt_hash = self.v52_transition_receipt
+            require(digest(bytes_at(receipt_path))==receipt_hash,'DORMANT_UPGRADE_V52_RECEIPT_CHANGED')
+            stopped=self._context()
+            validate_dormant_upgrade_context(self.plan['context'],stopped,self.prior_sha)
+        else:
+            self.upgrade_stop_requested=True
+            subprocess.run(['/usr/bin/systemctl','stop',unit],check=True,capture_output=True,timeout=45)
+            self.upgrade_old_stopped=True
+            stopped=self._context()
+            validate_stopped_upgrade_context(self.plan['context'],stopped,self.prior_sha)
         require(digest(bytes_at(STATE))==self.plan['durableHash'],'DURABLE_CHANGED')
         validate_recovery_document(json_at(STATE),self.prior_sha)
         signed=self.sdk.run_signed_child(self.sdk.source_release(),self.deploy,credentials=self.credentials)
@@ -673,7 +729,8 @@ class ProductionOperations:
         # Only a failure before the V4 ownership switch can restore old pins.
         if hasattr(self,'wiring') and json_at('/etc/disdex/runner-pins.json')['runners']['V12_V4']['sha']==self.pins['V12_V4']:
             self.wiring.restore()
-        if self.upgrade and getattr(self,'upgrade_old_stopped',False):self._restore_unmigrated_upgrade()
+        if self.upgrade and (self.stopped_upgrade or getattr(self,'upgrade_old_stopped',False)):
+            self._restore_unmigrated_upgrade()
 
     def _validate_upgrade_rollback(self):
         from disdex_unified_root_gate import read_root_json,parse_live_pins
@@ -713,6 +770,9 @@ class ProductionOperations:
                 status='UPGRADE_RECOVERY_REQUIRED_PROTECTED',candidateSha=self.candidate_sha,
                 oldSourceRestartAuthorized=False,observedStateSha=document.get('releaseSha')))
             return
+        if self.stopped_upgrade:
+            validate_dormant_upgrade_context(self.plan['context'],self._context(),self.prior_sha)
+            return
         self._validate_upgrade_rollback()
         subprocess.run(['/usr/bin/systemctl','start','disdex-v12-v4@'+self.prior_sha+'.service'],
             check=True,capture_output=True,timeout=90)
@@ -725,13 +785,14 @@ def main():
     parser=argparse.ArgumentParser();mode=parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--preview',action='store_true');mode.add_argument('--apply',action='store_true')
     parser.add_argument('--plan-sha256');parser.add_argument('--recover-protected',action='store_true')
+    parser.add_argument('--stopped-upgrade',action='store_true')
     parser.add_argument('--candidate-sha');parser.add_argument('--static-root',type=Path);args=parser.parse_args()
     if bool(args.candidate_sha)!=bool(args.static_root):parser.error('--candidate-sha and --static-root must be supplied together')
     lock=os.open(ROOT/'deployment-execution.lock',os.O_RDWR)
     try:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         op=ProductionOperations(args.plan_sha256,recovery=args.recover_protected,
-            candidate_sha=args.candidate_sha,static_root=args.static_root)
+            candidate_sha=args.candidate_sha,static_root=args.static_root,stopped_upgrade=args.stopped_upgrade)
         if args.preview:result=op.preflight();print(json.dumps(result,sort_keys=True));return
         require(args.plan_sha256 is not None,'EXACT_PLAN_REQUIRED')
         print(json.dumps(execute_priority(op),sort_keys=True))
@@ -748,6 +809,8 @@ def require(value,reason):
 def validate_priority_evidence(f,now_ms):
     require(isinstance(f,dict),'FACTS')
     upgrade=f.get('liveUpgradeAuthorized') is True
+    stopped=f.get('stoppedUpgrade') is True
+    if stopped:require(upgrade and f.get('oldDormantIdentityVerified') is True,'DORMANT_UPGRADE_UNVERIFIED')
     if upgrade:
         require(f.get('oldLiveAuthorityVerified') is True and f.get('priorRuntimeSha')==f.get('oldStateSha')
             and isinstance(f.get('candidateSha'),str) and re.fullmatch('[a-f0-9]{40}',f['candidateSha'])
@@ -762,7 +825,8 @@ def validate_priority_evidence(f,now_ms):
         require(type(f.get(key)) is int and f[key]==0,'SIGNED_FLAT_REQUIRED')
     timestamp=f.get('signedVerifiedAt')
     require(type(timestamp) is int and 0<=now_ms-timestamp<=30000,'SIGNED_PROOF_FRESHNESS')
-    require(f.get('v52Sha')==FIXED_V52_SHA and f.get('q102Sha')==Q102_SHA,'REPAIRED_PEER_SHA')
+    expected_v52=REPAIRED_FET_V52_SHA if stopped else FIXED_V52_SHA
+    require(f.get('v52Sha')==expected_v52 and f.get('q102Sha')==Q102_SHA,'REPAIRED_PEER_SHA')
     risk=f.get('risk',{});margin=f.get('margin',{});kill=f.get('kill',{})
     require(risk.get('maximumLossPct')==7.5 and risk.get('tripped') is False
         and risk.get('sourceComplete') is True,'SHARED_RISK')
