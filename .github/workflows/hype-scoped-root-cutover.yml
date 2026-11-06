@@ -1,0 +1,44 @@
+name: HYPE scoped root cutover (no-order fixtures)
+on:
+  push:
+    branches:
+      - fix/hype-root-scoped-cutover-20261106
+    paths:
+      - 'scripts/ops/deploy/disdex_hype_scoped_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_hype_scoped_job.py'
+      - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'ops/systemd/disdex-hype-scoped-cutover@.service'
+      - 'scripts/ops/root/install-disdex-hype-scoped-cutover'
+      - 'scripts/ops/root/install-disdex-unified-deployment'
+      - 'tests/test_hype_scoped_root_cutover.py'
+      - '.github/workflows/hype-scoped-root-cutover.yml'
+  pull_request:
+    paths:
+      - 'scripts/ops/deploy/disdex_hype_scoped_root_cutover.py'
+      - 'scripts/ops/deploy/disdex_hype_scoped_job.py'
+      - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'ops/systemd/disdex-hype-scoped-cutover@.service'
+      - 'scripts/ops/root/install-disdex-hype-scoped-cutover'
+      - 'scripts/ops/root/install-disdex-unified-deployment'
+      - 'tests/test_hype_scoped_root_cutover.py'
+      - '.github/workflows/hype-scoped-root-cutover.yml'
+permissions:
+  contents: read
+jobs:
+  offline-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and non-order safety fixtures
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_unified_root_gate.py scripts/ops/deploy/disdex_hype_scoped_root_cutover.py scripts/ops/deploy/disdex_hype_scoped_job.py
+          bash -n scripts/ops/root/install-disdex-hype-scoped-cutover
+          bash -n scripts/ops/root/install-disdex-unified-deployment
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_hype_scoped_root_cutover.py' -v
+      - name: Existing root executor contracts
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_disdex_unified_root_gate.py'
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_disdex_unified_helper_installer.py'

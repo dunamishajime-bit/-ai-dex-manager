@@ -919,6 +919,9 @@ class RootDeploymentExecutor:
         if args.scope == 'V52':
             from disdex_v52_scoped_root_cutover import V52ScopedRootExecutor
             return V52ScopedRootExecutor(self).execute(args,token)
+        if args.scope == 'HYPE_TREND_LONG':
+            from disdex_hype_scoped_root_cutover import HypeScopedRootExecutor
+            return HypeScopedRootExecutor(self).execute(args, token)
         if args.scope == 'API_MONITORS':
             from disdex_monitor_snapshot_cutover import MonitorSnapshotRootExecutor
             return MonitorSnapshotRootExecutor(self).execute(args,token)
@@ -1246,6 +1249,20 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
             targetSha=args.sha,ordersEnabled=False,authorizesTrading=False,planSha256=args.plan_sha256,
             changedRunners=[],unproven=['HEALTH_SNAPSHOT_SERVICE_SOURCE_CUTOVER','THREE_REAL_SNAPSHOT_CYCLES'],
             verifiedContracts=['NO_ORDER_MONITOR_PREVIEW_EXACT_RUNTIME_PINS'])
+    if args.scope == 'HYPE_TREND_LONG':
+        from types import SimpleNamespace
+        from disdex_hype_scoped_root_cutover import HypeScopedOperations
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',current=current,
+            releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem',
+            activation_dir=root/'activations',receipts=root/'receipts')
+        operations=HypeScopedOperations(RootDeploymentExecutor(paths,root_uid=root_uid),args,token)
+        operations.prepare()
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=True,effectiveNewOrdersAllowed=False,
+            phase='PROTECTED_HOLD',authorizesKillClearance=False,planSha256=args.plan_sha256,
+            changedRunners=['HYPE_TREND_LONG'],
+            unproven=['HYPE_SCOPED_SYSTEMD_CUTOVER','THREE_REAL_HYPE_DECISION_TICKS'],
+            verifiedContracts=['HYPE_GET_ONLY_FLAT_PROTECTED_HOLD_PREFLIGHT'])
     if args.scope == 'V52':
         from types import SimpleNamespace
         from disdex_v52_scoped_root_cutover import V52ScopedOperations

@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 077
+
+[[ "$(id -u)" == "0" ]] || { echo "DISDEX_ROOT_REQUIRED" >&2; exit 1; }
+[[ $# -eq 2 && "$1" == "--release-root" ]] || {
+  echo "usage: install-disdex-hype-scoped-cutover --release-root /home/deploy/disdex-trading/releases/<sha>" >&2
+  exit 2
+}
+release_root="$2"
+[[ "$release_root" =~ ^/home/deploy/disdex-trading/releases/[0-9a-f]{40}$ ]] || {
+  echo "DISDEX_RELEASE_ROOT_INVALID" >&2; exit 1;
+}
+sha="${release_root##*/}"
+[[ -d "$release_root" && ! -L "$release_root" ]] || { echo "DISDEX_RELEASE_DIRECTORY_INVALID" >&2; exit 1; }
+[[ "$(realpath -e -- "$release_root")" == "$release_root" ]] || {
+  echo "DISDEX_RELEASE_PATH_NOT_CANONICAL" >&2; exit 1;
+}
+[[ "$(stat -c '%U:%G' "$release_root")" == "root:root" ]] || { echo "DISDEX_RELEASE_OWNER_INVALID" >&2; exit 1; }
+release_mode="$(stat -c '%a' "$release_root")"
+(( (0$release_mode & 0222) == 0 )) || { echo "DISDEX_RELEASE_DIRECTORY_WRITABLE" >&2; exit 1; }
+marker="$release_root/.disdex-release-sha"
+[[ -f "$marker" && ! -L "$marker" ]] || { echo "DISDEX_RELEASE_MARKER_INVALID" >&2; exit 1; }
+[[ "$(stat -c '%U:%G' "$marker")" == "root:root" ]] || {
+  echo "DISDEX_RELEASE_MARKER_OWNER_INVALID" >&2; exit 1;
+}
+marker_mode="$(stat -c '%a' "$marker")"
+(( (0$marker_mode & 0222) == 0 )) || { echo "DISDEX_RELEASE_MARKER_WRITABLE" >&2; exit 1; }
+[[ "$(tr -d '\r\n' < "$marker")" == "$sha" ]] || {
+  echo "DISDEX_RELEASE_MARKER_MISMATCH" >&2; exit 1;
+}
+
+for source in \
+  scripts/ops/deploy/disdex_hype_scoped_root_cutover.py \
+  scripts/ops/deploy/disdex_hype_scoped_job.py \
+  ops/systemd/disdex-hype-scoped-cutover@.service; do
+  [[ -f "$release_root/$source" && ! -L "$release_root/$source" ]] || {
+    echo "DISDEX_HYPE_HELPER_SOURCE_MISSING:$source" >&2; exit 1;
+  }
+  [[ "$(stat -c '%U' "$release_root/$source")" == "root" ]] || {
+    echo "DISDEX_HYPE_HELPER_SOURCE_OWNER_INVALID:$source" >&2; exit 1;
+  }
+  mode="$(stat -c '%a' "$release_root/$source")"
+  (( (0$mode & 0222) == 0 )) || { echo "DISDEX_HYPE_HELPER_SOURCE_WRITABLE:$source" >&2; exit 1; }
+done
+
+libdir="/usr/local/libexec/disdex-unified"
+unit_path="/etc/systemd/system/disdex-hype-scoped-cutover@.service"
+lock="/var/lib/disdex/unified-deploy/deployment-execution.lock"
+[[ -d /var/lib/disdex/unified-deploy && ! -L /var/lib/disdex/unified-deploy \
+  && "$(stat -c '%U:%G' /var/lib/disdex/unified-deploy)" == "root:root" ]] || {
+  echo "DISDEX_DEPLOYMENT_ROOT_INVALID" >&2; exit 1;
+}
+[[ -f "$lock" && ! -L "$lock" ]] || { echo "DISDEX_DEPLOYMENT_LOCK_UNTRUSTED" >&2; exit 1; }
+[[ "$(stat -c '%U:%G:%a' "$lock")" == "root:root:600" ]] || {
+  echo "DISDEX_DEPLOYMENT_LOCK_METADATA_INVALID" >&2; exit 1;
+}
+
+exec 9<>"$lock"
+flock -xn 9 || { echo "DISDEX_DEPLOYMENT_BUSY" >&2; exit 1; }
+for unit in \
+  disdex-hype-long@7688ed7c93a1918d8b44837339b7da5584a868f5.service \
+  disdex-hype-long@d6bcc94512a6416189cd92d7203b9ac3b2c98e70.service; do
+  if /usr/bin/systemctl is-active --quiet "$unit"; then
+    echo "DISDEX_HYPE_RUNNER_ACTIVE_DURING_INSTALL" >&2; exit 1;
+  fi
+done
+
+[[ -d "$libdir" && ! -L "$libdir" && "$(stat -c '%U:%G' "$libdir")" == "root:root" ]] || {
+  echo "DISDEX_LIBEXEC_DIRECTORY_UNTRUSTED" >&2; exit 1;
+}
+systemd_dir="$(dirname "$unit_path")"
+[[ -d "$systemd_dir" && ! -L "$systemd_dir" && "$(stat -c '%U:%G' "$systemd_dir")" == "root:root" ]] || {
+  echo "DISDEX_SYSTEMD_DIRECTORY_UNTRUSTED" >&2; exit 1;
+}
+job_tmp="$(mktemp "$libdir/.disdex_hype_scoped_job.py.XXXXXX")"
+install -o root -g root -m 0644 \
+  "$release_root/scripts/ops/deploy/disdex_hype_scoped_job.py" "$job_tmp"
+mv -T -- "$job_tmp" "$libdir/disdex_hype_scoped_job.py"
+unit_tmp="$(mktemp "$systemd_dir/.disdex-hype-scoped-cutover@.service.XXXXXX")"
+install -o root -g root -m 0644 \
+  "$release_root/ops/systemd/disdex-hype-scoped-cutover@.service" "$unit_tmp"
+mv -T -- "$unit_tmp" "$unit_path"
+/usr/bin/systemctl daemon-reload
+helper_tmp="$(mktemp "$libdir/.disdex_hype_scoped_root_cutover.py.XXXXXX")"
+install -o root -g root -m 0644 \
+  "$release_root/scripts/ops/deploy/disdex_hype_scoped_root_cutover.py" "$helper_tmp"
+mv -T -- "$helper_tmp" \
+  "$libdir/disdex_hype_scoped_root_cutover.py"
+sync -f "$libdir"
+sync -f "$systemd_dir"
+echo "DISDEX_HYPE_SCOPED_HELPERS_INSTALLED:$sha"
