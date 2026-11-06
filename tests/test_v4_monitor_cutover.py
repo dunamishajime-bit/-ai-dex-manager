@@ -1,4 +1,4 @@
-import copy,sys,unittest,os,tempfile,json
+import copy,sys,unittest,os,tempfile,json,subprocess
 from types import SimpleNamespace
 from unittest.mock import patch
 from pathlib import Path
@@ -13,6 +13,20 @@ def plan():
  return dict(schema='disdex-unified-deployment-plan/v2',repository='dunamishajime-bit/-ai-dex-manager',deploymentTarget='professional-dismanager.net',operatorTarget='DD1296_FINAL_ALLIN_10BPS',sourceSha=SHA,scope='V12_V4',runners={k:SHA if k=='V12_V4' else '7'*40 for k in IDS},uiSha='7'*40,monitorSha='7'*40,releaseRoots=dict(runners='/home/deploy/disdex-trading/releases',ui='/srv/ui',monitor='/srv/monitor'),ordersEnabled=False)
 
 class V4MonitorContractTest(unittest.TestCase):
+ def test_durable_flat_gate_accepts_cancelled_history_and_rejects_exposure(self):
+  import disdex_v4_monitor_cutover as module
+  base=dict(state=dict(legs={'cancelled':dict(qty=0,status='CANCELLED')}),intents={},protections={})
+  for document,expected in (
+    (base,0),
+    ({**base,'state':{'legs':{'leg':{'qty':1,'status':'CANCELLED'}}}},2),
+    ({**base,'state':{'legs':{'leg':{'qty':0,'status':'PENDING_ENTRY'}}}},2),
+    ({**base,'intents':{'entry':{'stage':'UNKNOWN'}}},2),
+    ({**base,'protections':{'stop':{'phase':'LIVE'}}},2),
+  ):
+   script='const d='+json.dumps(document)+';'+module.V4_MONITOR_REQUIRE_FLAT_LEDGER
+   result=subprocess.run(['node','-e',script],capture_output=True,text=True,timeout=10)
+   self.assertEqual(result.returncode,expected,result.stderr)
+
  def test_all_systemd_environment_files_are_read_without_discarding_repeated_properties(self):
   raw='User=deploy\nEnvironmentFiles=/etc/disdex/credentials.env (ignore_errors=no)\nEnvironmentFiles=/etc/disdex/monitor.env (ignore_errors=no)\n'
   self.assertEqual(systemd_environment_files(raw),['/etc/disdex/credentials.env','/etc/disdex/monitor.env'])

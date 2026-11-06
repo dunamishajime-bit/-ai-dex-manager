@@ -15,6 +15,13 @@ FIELDS={'schema','repository','deploymentTarget','operatorTarget','scope','appro
     'route','authorizationMethod','nonceDigest','approvedAt','expiresAt','durableStateSha256'}
 
 
+V4_MONITOR_REQUIRE_FLAT_LEDGER = (
+    "if(Object.values(d.state.legs).some(x=>x.qty!==0||!['CLOSED','CANCELLED'].includes(x.status))||"
+    "Object.values(d.intents).some(x=>x.stage!=='TERMINAL')||"
+    "Object.values(d.protections).some(x=>x.phase!=='CLOSED'))process.exit(2);"
+)
+
+
 def require(value,reason):
     if not value:raise ValueError('V4_MONITOR_'+reason)
 
@@ -265,9 +272,8 @@ class V4MonitorOperations:
         # validator. read() never initializes, rewrites or migrates the store.
         script=("import {V4ExecutionStore} from './lib/v12-v4-execution-store.ts';"
             "const d=new V4ExecutionStore('/var/lib/disdex/v12-v4/orders.json',"+json.dumps(self.pins['V12_V4'])+").read();"
-            "if(Object.values(d.state.legs).some(x=>x.qty!==0||x.status!=='CLOSED')||"
-            "Object.values(d.intents).some(x=>x.stage!=='TERMINAL')||Object.values(d.protections).some(x=>x.phase!=='CLOSED'))process.exit(2);"
-            "console.log(JSON.stringify({durableReplayValidated:true,revision:d.revision}));")
+            + V4_MONITOR_REQUIRE_FLAT_LEDGER
+            + "console.log(JSON.stringify({durableReplayValidated:true,revision:d.revision}));")
         result=subprocess.run(['/usr/bin/node','--import',str(self.release/'node_modules/tsx/dist/loader.mjs'),
             '--input-type=module','-e',script],cwd=self.release,env={'PATH':'/usr/bin:/bin','HOME':self.deploy.pw_dir},
             user=self.deploy.pw_uid,group=self.deploy.pw_gid,extra_groups=[],capture_output=True,text=True,timeout=15)
