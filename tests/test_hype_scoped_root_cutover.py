@@ -42,6 +42,9 @@ class HypeJobEntrypointTests(unittest.TestCase):
         unit = operations.unit_override_bytes().decode()
         self.assertIn("ReadWritePaths=/var/lib/disdex/runner-health/ticks", unit)
         self.assertNotIn("ReadWritePaths=/var/lib/disdex/shared", unit)
+        self.assertIn("ExecStart=/usr/bin/node --import " + str(operations.release)
+                      + "/node_modules/tsx/dist/loader.mjs ", unit)
+        self.assertNotIn("ExecStart=/usr/bin/node", operations.unit_override_bytes(legacy=True).decode())
 
     def test_sdk_readonly_child_keeps_canonical_budget_and_uses_v4_proxy(self):
         socket = "/run/disdex-v4-budget-" + "a" * 40 + "/budget.sock"

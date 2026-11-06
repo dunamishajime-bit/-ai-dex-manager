@@ -447,9 +447,14 @@ class HypeScopedOperations:
         self.new_started = False
         self.activation_written = False
         self.approval_replaced = False
+        self.resume_override_replaced = False
         self.failure_phase = "prepare"
 
-    def unit_override_bytes(self):
+    def runner_exec_start(self):
+        return (f"/usr/bin/node --import {self.release}/node_modules/tsx/dist/loader.mjs "
+                f"{self.release}/scripts/disdex-hype-trend-live-runner.ts --daemon")
+
+    def unit_override_bytes(self, *, legacy=False):
         root = str(self.release)
         sha = self.args.sha
         prestart = [
@@ -465,6 +470,7 @@ class HypeScopedOperations:
             "EnvironmentFile=" + str(self.env),
             "EnvironmentFile=" + str(self.operator_env),
             *prestart,
+            *([] if legacy else ["ExecStart=", "ExecStart=" + self.runner_exec_start()]),
             "ReadWritePaths=/var/lib/disdex/runner-health/ticks",
             ""])).encode()
 
@@ -476,8 +482,11 @@ class HypeScopedOperations:
         require(drop_meta.st_uid == self.parent.root_uid
                 and stat.S_IMODE(drop_meta.st_mode) == 0o755, "RESUME_DROPIN_METADATA")
         override_meta = assert_regular_secure(self.override, root_uid=self.parent.root_uid, private=False)
+        prior_override = _safe_bytes(self.override)
         require(stat.S_IMODE(override_meta.st_mode) == 0o644
-                and _safe_bytes(self.override) == self.unit_override_bytes(), "RESUME_DROPIN_CONTENT")
+                and prior_override in (self.unit_override_bytes(), self.unit_override_bytes(legacy=True)),
+                "RESUME_DROPIN_CONTENT")
+        self.resume_override_before = (prior_override, override_meta)
         for path, expected in ((self.env, self.runtime_bytes),
                                (self.operator_env, self.operator_bytes)):
             info = assert_regular_secure(path, root_uid=self.parent.root_uid, private=True)
@@ -638,6 +647,7 @@ class HypeScopedOperations:
                 == self.current["sourceSha"], "CURRENT_SYMLINK_CHANGED")
         release_marker(self.args.sha, self.paths.releases)
         for relative in ("scripts/disdex-hype-trend-live-runner.ts",
+                         "node_modules/tsx/dist/loader.mjs",
                          "scripts/disdex-hype-zec-long-live-runner.ts",
                          "lib/hype-zec-long-runner.ts",
                          "lib/disdex-peer-decision-cycle.ts",
@@ -733,6 +743,13 @@ class HypeScopedOperations:
                 _root_file(path, content, mode, self.created)
             self.activation_written = True
         else:
+            old_override, metadata = self.resume_override_before
+            new_override = self.unit_override_bytes()
+            require(_safe_bytes(self.override) == old_override, "RESUME_DROPIN_RACE")
+            if old_override != new_override:
+                self.resume_override_replaced = True
+                _atomic(self.override, new_override, metadata)
+                require(_safe_bytes(self.override) == new_override, "RESUME_DROPIN_READBACK")
             # The interrupted transaction may have left a stale activation.
             # Replace it only with the fresh, just-consumed authorization.
             if self.approval.exists():
@@ -752,6 +769,7 @@ class HypeScopedOperations:
         show = self.command("show",self.new_unit,"-p","ExecStartPre",
                             "-p","ExecStart","-p","WorkingDirectory","-p","User")
         require(str(self.release) in show and str(self.approval) in show
+                and "argv[]=" + self.runner_exec_start() + " ;" in show
                 and "WorkingDirectory=" + str(self.release) in show
                 and "User=deploy" in show and OLD not in show,
                 "EFFECTIVE_UNIT_MISMATCH")
@@ -885,6 +903,13 @@ class HypeScopedOperations:
                 require(activation_now == self.approval_bytes, "RESUME_ROLLBACK_ACTIVATION_RACE")
                 self.approval.unlink()
                 self.activation_written = False
+            if self.resume_override_replaced:
+                before, metadata = self.resume_override_before
+                current = _safe_bytes(self.override)
+                require(current in (before, self.unit_override_bytes()), "RESUME_ROLLBACK_DROPIN_RACE")
+                if current != before:
+                    _atomic(self.override, before, metadata)
+                    require(_safe_bytes(self.override) == before, "RESUME_ROLLBACK_DROPIN_READBACK")
             attempt(lambda:self.command("daemon-reload"))
             if errors:
                 raise RuntimeError("HYPE_SCOPED_ROLLBACK_INCOMPLETE:" + ",".join(errors))
