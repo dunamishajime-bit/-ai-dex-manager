@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import time
 
@@ -29,6 +30,69 @@ TICK = Path("/var/lib/disdex/runner-health/ticks/hype-trend-long.json")
 JOB_DIR = Path("/var/lib/disdex/unified-deploy/jobs/hype")
 SDK_SHA = "7b7719c65d2c6116d02463fc4603200f28e20762"
 SHA = re.compile(r"^[a-f0-9]{40}$")
+SHARED_RATE_BUDGET = "/var/lib/disdex/shared/aster-rate-budget.json"
+
+
+def hype_budget_proxy_socket(v4_sha):
+    require(isinstance(v4_sha, str) and SHA.fullmatch(v4_sha), "V4_BUDGET_PIN_INVALID")
+    return f"/run/disdex-v4-budget-{v4_sha}/budget.sock"
+
+
+def bind_hype_budget_proxy(sdk, socket_path):
+    match = (re.fullmatch(r"/run/disdex-v4-budget-([a-f0-9]{40})/budget\.sock", socket_path)
+             if isinstance(socket_path, str) else None)
+    require(match is not None and hype_budget_proxy_socket(match.group(1)) == socket_path,
+            "V4_BUDGET_PROXY_SOCKET_INVALID")
+    original = getattr(sdk, "child_environment", None)
+    require(callable(original), "V4_BUDGET_CHILD_ENVIRONMENT_MISSING")
+
+    def child_environment(*args, **kwargs):
+        environment = original(*args, **kwargs)
+        require(isinstance(environment, dict)
+                and environment.get("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH") == SHARED_RATE_BUDGET,
+                "V4_BUDGET_CANONICAL_PATH_REQUIRED")
+        result = dict(environment)
+        result["DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET"] = socket_path
+        return result
+
+    sdk.child_environment = child_environment
+    return sdk
+
+
+def validate_v4_budget_proxy_sources(budget_source, proxy_source):
+    require(isinstance(budget_source, str)
+            and "DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET" in budget_source
+            and "requestV4BudgetProxy" in budget_source,
+            "V4_BUDGET_CLIENT_PROXY_MISSING")
+    require(isinstance(proxy_source, str)
+            and '"disdex-v4-budget-proxy/v1"' in proxy_source
+            and all(priority in proxy_source for priority in ("RECONCILIATION", "RISK_READ", "MARKET_DATA")),
+            "V4_BUDGET_PROXY_PROTOCOL_MISMATCH")
+    return True
+
+
+def validate_hype_budget_broker(v4_sha, unit, *, process_cwd, marker_sha,
+                                socket_info, directory_info, deploy_uid, deploy_gid,
+                                release_root="/home/deploy/disdex-trading/releases"):
+    require(isinstance(v4_sha, str) and SHA.fullmatch(v4_sha), "V4_BUDGET_PIN_INVALID")
+    require(isinstance(release_root, str) and release_root.startswith("/"),
+            "V4_BUDGET_RELEASE_ROOT_INVALID")
+    release = f"{release_root.rstrip('/')}/{v4_sha}"
+    require(isinstance(unit, dict) and unit.get("ActiveState") == "active"
+            and unit.get("SubState") == "running" and unit.get("User") == "deploy"
+            and unit.get("WorkingDirectory") == release
+            and isinstance(unit.get("MainPID"), str) and unit["MainPID"].isdigit()
+            and int(unit["MainPID"]) > 1 and process_cwd == release
+            and marker_sha == v4_sha, "V4_BUDGET_BROKER_LINEAGE")
+    require(isinstance(directory_info, dict) and directory_info.get("is_dir") is True
+            and directory_info.get("is_symlink") is False
+            and directory_info.get("uid") == deploy_uid and directory_info.get("gid") == deploy_gid
+            and directory_info.get("mode") == 0o750, "V4_BUDGET_SOCKET_DIRECTORY")
+    require(isinstance(socket_info, dict) and socket_info.get("is_socket") is True
+            and socket_info.get("is_symlink") is False
+            and socket_info.get("uid") == deploy_uid and socket_info.get("gid") == deploy_gid
+            and socket_info.get("mode") == 0o660, "V4_BUDGET_SOCKET_METADATA")
+    return hype_budget_proxy_socket(v4_sha)
 
 
 def require(condition, reason):
@@ -394,8 +458,70 @@ class HypeScopedOperations:
         require(proc.returncode == 0, "SYSTEMD_" + args[0].upper())
         return proc.stdout
 
+    def verify_v4_budget_broker(self, release_marker):
+        v4_sha = self.pins.get("V12_V4")
+        socket_path = hype_budget_proxy_socket(v4_sha)
+        release = self.paths.releases / v4_sha
+        release_marker(v4_sha, self.paths.releases)
+        reconcile = release / "scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts"
+        loader = release / "node_modules/tsx/dist/loader.mjs"
+        budget_source = release / "lib/disdex-aster-global-rate-budget.ts"
+        proxy_source = release / "lib/disdex-v4-rate-budget-proxy.ts"
+        try:
+            require(reconcile.is_file() and loader.is_file(), "V4_SIGNED_GET_SOURCE_MISSING")
+            validate_v4_budget_proxy_sources(
+                budget_source.read_text(encoding="utf8"),
+                proxy_source.read_text(encoding="utf8"),
+            )
+            marker_sha = (release / ".disdex-release-sha").read_text(encoding="ascii").strip()
+        except (OSError, UnicodeError):
+            raise ValueError("HYPE_SCOPED_V4_BUDGET_PROXY_SOURCE_MISSING") from None
+
+        unit_name = f"disdex-v4-rate-budget-broker@{v4_sha}.service"
+        properties = ("ActiveState", "SubState", "MainPID", "User", "WorkingDirectory")
+
+        def read_unit():
+            output = self.command("show", unit_name,
+                                  *[arg for key in properties for arg in ("-p", key)])
+            return dict(line.split("=", 1) for line in output.splitlines() if "=" in line)
+
+        unit = read_unit()
+        require(isinstance(unit.get("MainPID"), str) and unit["MainPID"].isdigit()
+                and int(unit["MainPID"]) > 1, "V4_BUDGET_BROKER_PID")
+        try:
+            process_cwd = str((Path("/proc") / unit["MainPID"] / "cwd").resolve(strict=True))
+            socket = Path(socket_path)
+            socket_stat = socket.lstat()
+            directory_stat = socket.parent.lstat()
+            deploy = self.deploy
+            validated = validate_hype_budget_broker(
+                v4_sha, unit, process_cwd=process_cwd, marker_sha=marker_sha,
+                socket_info={
+                    "uid": socket_stat.st_uid, "gid": socket_stat.st_gid,
+                    "mode": stat.S_IMODE(socket_stat.st_mode),
+                    "is_socket": stat.S_ISSOCK(socket_stat.st_mode),
+                    "is_symlink": stat.S_ISLNK(socket_stat.st_mode),
+                },
+                directory_info={
+                    "uid": directory_stat.st_uid, "gid": directory_stat.st_gid,
+                    "mode": stat.S_IMODE(directory_stat.st_mode),
+                    "is_dir": stat.S_ISDIR(directory_stat.st_mode),
+                    "is_symlink": stat.S_ISLNK(directory_stat.st_mode),
+                },
+                deploy_uid=deploy.pw_uid, deploy_gid=deploy.pw_gid,
+                release_root=str(self.paths.releases),
+            )
+        except OSError:
+            raise ValueError("HYPE_SCOPED_V4_BUDGET_BROKER_FILESYSTEM") from None
+        after = read_unit()
+        require(all(after.get(key) == unit.get(key) for key in properties),
+                "V4_BUDGET_BROKER_CHANGED_DURING_PREFLIGHT")
+        self.venue_release = release
+        self.budget_proxy_socket = validated
+        return validated
+
     def signed_flat(self):
-        result = self.sdk.run_signed_child(self.sdk_release, self.deploy, credentials=self.credentials)
+        result = self.sdk.run_signed_child(self.venue_release, self.deploy, credentials=self.credentials)
         require(result.get("status") == "PENDING_READONLY_RECONCILE_VERIFIED"
                 and all(type(result.get(key)) is int and result[key] == 0
                     for key in ("positionCount", "openOrderCount", "ordersSent", "cancelsSent",
@@ -474,6 +600,8 @@ class HypeScopedOperations:
         self.sdk = _load_sdk(self.sdk_release)
         self.credentials = self.sdk.load_server_credentials()
         self.deploy = pwd.getpwnam("deploy")
+        self.budget_proxy_socket = self.verify_v4_budget_broker(release_marker)
+        bind_hype_budget_proxy(self.sdk, self.budget_proxy_socket)
         self.parent._verify_token(self.args, self.token)
         self.health()
         self.before_proof = self.signed_flat()
@@ -796,3 +924,4 @@ class HypeScopedRootExecutor:
             except Exception:
                 pass
             raise
+

@@ -30,6 +30,101 @@ class HypeJobEntrypointTests(unittest.TestCase):
         self.assertEqual(receipt["failedAt"], 123)
         self.assertNotIn("secret filesystem path", json.dumps(receipt))
 
+    def test_hype_runner_does_not_get_broad_shared_state_write_access(self):
+        v4_sha = "a" * 40
+        operations = object.__new__(h.HypeScopedOperations)
+        operations.release = PurePosixPath("/releases") / ("d" * 40)
+        operations.args = SimpleNamespace(sha="d" * 40)
+        operations.pins = {"V12_V4": v4_sha}
+        operations.approval = PurePosixPath("/var/lib/disdex/shared/operator-activation/hype-test.json")
+        operations.env = PurePosixPath("/etc/disdex/current-runtime/test.env")
+        operations.operator_env = PurePosixPath("/etc/disdex/current-runtime/test.operator.env")
+        unit = operations.unit_override_bytes().decode()
+        self.assertIn("ReadWritePaths=/var/lib/disdex/runner-health/ticks", unit)
+        self.assertNotIn("ReadWritePaths=/var/lib/disdex/shared", unit)
+
+    def test_sdk_readonly_child_keeps_canonical_budget_and_uses_v4_proxy(self):
+        socket = "/run/disdex-v4-budget-" + "a" * 40 + "/budget.sock"
+        sdk = SimpleNamespace(child_environment=lambda sha, home, grant_path=None,
+                              credentials=None: {
+                                  "DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH": "/var/lib/disdex/shared/aster-rate-budget.json",
+                                  "HOME": home,
+                                  "DISDEX_RELEASE_SHA": sha,
+                              })
+        h.bind_hype_budget_proxy(sdk, socket)
+        env = sdk.child_environment("b" * 40, "/home/deploy")
+        self.assertEqual(env["DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH"],
+                         "/var/lib/disdex/shared/aster-rate-budget.json")
+        self.assertEqual(env["DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET"], socket)
+        incompatible = SimpleNamespace(child_environment=lambda *a, **k: {
+            "DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH": "/tmp/private-budget.json"})
+        h.bind_hype_budget_proxy(incompatible, socket)
+        with self.assertRaises(ValueError):
+            incompatible.child_environment("b" * 40, "/home/deploy")
+
+    def test_budget_proxy_socket_is_exactly_bound_to_v4_pin(self):
+        sha = "a" * 40
+        self.assertEqual(h.hype_budget_proxy_socket(sha),
+                         f"/run/disdex-v4-budget-{sha}/budget.sock")
+        with self.assertRaises(ValueError):
+            h.hype_budget_proxy_socket("../" + sha)
+        with self.assertRaises(ValueError):
+            h.bind_hype_budget_proxy(SimpleNamespace(child_environment=lambda *a, **k: {}),
+                                     "/run/disdex-v4-budget-" + "b" * 40 + "/other.sock")
+
+    def test_budget_proxy_requires_the_pinned_v4_client_and_read_priorities(self):
+        budget = "DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET requestV4BudgetProxy"
+        proxy = '"disdex-v4-budget-proxy/v1" RECONCILIATION RISK_READ MARKET_DATA'
+        self.assertTrue(h.validate_v4_budget_proxy_sources(budget, proxy))
+        with self.assertRaises(ValueError):
+            h.validate_v4_budget_proxy_sources(budget, '"wrong-schema" RECONCILIATION')
+
+    def test_budget_broker_requires_active_exact_v4_release_and_private_socket(self):
+        sha = "a" * 40
+        release = f"/home/deploy/disdex-trading/releases/{sha}"
+        unit = {"ActiveState": "active", "SubState": "running", "MainPID": "123",
+                "User": "deploy", "WorkingDirectory": release}
+        socket = {"uid": 1000, "gid": 1000, "mode": 0o660,
+                  "is_socket": True, "is_symlink": False}
+        directory = {"uid": 1000, "gid": 1000, "mode": 0o750,
+                     "is_dir": True, "is_symlink": False}
+        expected = h.hype_budget_proxy_socket(sha)
+        self.assertEqual(h.validate_hype_budget_broker(
+            sha, unit, process_cwd=release, marker_sha=sha, socket_info=socket,
+            directory_info=directory, deploy_uid=1000, deploy_gid=1000), expected)
+        for changed_unit, changed_socket, changed_dir, cwd, marker in (
+            ({**unit, "ActiveState": "inactive"}, socket, directory, release, sha),
+            ({**unit, "MainPID": "0"}, socket, directory, release, sha),
+            (unit, {**socket, "mode": 0o666}, directory, release, sha),
+            (unit, socket, {**directory, "mode": 0o770}, release, sha),
+            (unit, socket, directory, "/wrong/release", sha),
+            (unit, socket, directory, release, "b" * 40),
+        ):
+            with self.subTest(unit=changed_unit, socket=changed_socket,
+                              directory=changed_dir, cwd=cwd, marker=marker):
+                with self.assertRaises(ValueError):
+                    h.validate_hype_budget_broker(
+                        sha, changed_unit, process_cwd=cwd, marker_sha=marker,
+                        socket_info=changed_socket, directory_info=changed_dir,
+                        deploy_uid=1000, deploy_gid=1000)
+
+    def test_signed_flat_uses_the_proxy_capable_pinned_v4_release(self):
+        v4_sha = "a" * 40
+        calls = []
+        proof = {"status": "PENDING_READONLY_RECONCILE_VERIFIED", "verifiedAt": time.time_ns() // 1_000_000,
+                 "positionCount": 0, "openOrderCount": 0, "ordersSent": 0,
+                 "cancelsSent": 0, "positionChangesSent": 0}
+        operations = object.__new__(h.HypeScopedOperations)
+        operations.pins = {"V12_V4": v4_sha}
+        operations.paths = SimpleNamespace(releases=PurePosixPath("/releases"))
+        operations.venue_release = PurePosixPath("/releases") / v4_sha
+        operations.sdk = SimpleNamespace(run_signed_child=lambda release, deploy, **kwargs:
+            calls.append((release, deploy, kwargs)) or proof)
+        operations.deploy = object()
+        operations.credentials = {"ASTER_USER_ADDRESS": "unused-in-test"}
+        operations.signed_flat()
+        self.assertEqual(calls[0][0], PurePosixPath("/releases") / v4_sha)
+
     def test_oneshot_worker_has_a_real_start_deadline(self):
         unit = (Path(__file__).resolve().parents[1]
                 / "ops/systemd/disdex-hype-scoped-cutover@.service").read_text()
@@ -438,3 +533,4 @@ class HypeSafetyTests(unittest.TestCase):
 
 if __name__=="__main__":
     unittest.main()
+
