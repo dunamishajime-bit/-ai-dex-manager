@@ -41,8 +41,11 @@ test("wallet page reads Aster equity from the signed live portfolio, not its on-
 
 test("owner session lifetime and session HMAC implementation remain unchanged", () => {
   const login = source("app/api/auth/login/route.ts");
+  const verify = source("app/api/auth/login/verify/route.ts");
   const owner = source("lib/server/owner-session.ts");
-  assert.match(login, /ttlMs:\s*10 \* 60 \* 1000/);
+  assert.doesNotMatch(login, /issueOwnerSession/);
+  assert.match(verify, /ttlMs:\s*10 \* 60 \* 1000/);
+  assert.match(verify, /consumeOtpChallenge/);
   assert.match(owner, /crypto\.createHmac\("sha256"/);
   assert.match(owner, /timingSafeEqual/);
 });

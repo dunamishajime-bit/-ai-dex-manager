@@ -2,14 +2,14 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { DEFAULT_SECURITY_SETTINGS, normalizeSecuritySettings, type SecurityMethod, type SecuritySettings } from "@/lib/security-utils";
+import { normalizeSecuritySettings, type SecurityMethod, type SecuritySettings } from "@/lib/security-utils";
 import {
   deleteUser as deleteUserFromStore,
   getAllUsers,
   getCurrentUser,
   saveUser,
   setCurrentUser,
-  verifyUserCredential,
+
   type UserProfile,
 } from "@/lib/user-store";
 
@@ -274,42 +274,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let alive = true;
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(toAuthUser(currentUser));
-    }
-    if (alive) setIsLoading(false);
-
     void (async () => {
       try {
+        // Local storage is only UI cache; a verified signed server session is mandatory.
+        const response = await fetch("/api/system/owner-session-probe", {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (!alive) return;
+        if (response.status !== 204) {
+          setCurrentUser(null);
+          localStorage.removeItem(AUTH_KEY);
+          setUser(null);
+          return;
+        }
         await syncUsers();
         if (!alive) return;
-
-        if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-          const latestCurrent = getCurrentUser();
-          if (!latestCurrent) {
-            const all = getAllUsers();
-            const dev = all.find((entry) => entry.isApproved) || all[0];
-            if (dev) {
-              finalizeLogin(dev);
-              return;
-            }
-          }
+        const current = getCurrentUser();
+        if (current) setUser(toAuthUser(current));
+      } catch {
+        if (alive) {
+          setCurrentUser(null);
+          localStorage.removeItem(AUTH_KEY);
+          setUser(null);
         }
-
-        const syncedCurrentUser = getCurrentUser();
-        if (syncedCurrentUser) {
-          setUser(toAuthUser(syncedCurrentUser));
-        }
-      } catch (error) {
-        console.error("Auth bootstrap sync failed:", error);
+      } finally {
+        if (alive) setIsLoading(false);
       }
     })();
-
-    return () => {
-      alive = false;
-    };
-  }, [finalizeLogin, syncUsers]);
+    return () => { alive = false; };
+  }, [syncUsers]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -420,110 +414,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [completedSecondFactors, finalizeLogin, pending2FAUser, pendingSecondFactors, pushProfileToServer, resetSecondFactorFlow]);
 
   const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
-    let matched: any = null;
-
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const json = await response.json();
-      if (json.success && json.user) {
-        matched = json.user;
-        saveUser(matched);
+      const json = await response.json().catch(() => null);
+      if (!response.ok || !json?.success) {
+        return { success: false, error: json?.error || "ログイン認証を開始できませんでした。" };
       }
-    } catch {
-      // fallback below
-    }
-
-    if (
-      !matched &&
-      typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-    ) {
-      matched = verifyUserCredential(email, password);
-    }
-
-    if (!matched) {
-      return { success: false, error: "メールアドレスまたはパスワードが正しくありません。" };
-    }
-
-    if (!matched.isApproved) {
-      return { success: false, error: "承認待ちのアカウントです。管理者承認後にログインしてください。" };
-    }
-
-    const security = normalizeSecuritySettings(matched.securitySettings || DEFAULT_SECURITY_SETTINGS);
-    if (!security.enabled) {
-      finalizeLogin(matched);
-      await pushProfileToServer({ ...matched, lastLogin: Date.now() });
-      return { success: true };
-    }
-
-    const factors: SecurityMethod[] = [];
-    if (security.methods.email && matched.email) {
-      factors.push("email");
-    }
-    if (security.methods.totp && matched.isTotpEnabled && matched.totpSecret) {
-      factors.push("totp");
-    }
-    if (security.methods.passkey && Array.isArray(matched.webAuthnCredentials) && matched.webAuthnCredentials.length > 0) {
-      factors.push("passkey");
-    }
-
-    const requiredFactors = uniqueMethods(factors);
-    if (requiredFactors.length === 0) {
-      finalizeLogin(matched);
-      await pushProfileToServer({ ...matched, lastLogin: Date.now() });
-      return { success: true };
-    }
-
-    setPending2FAUser(matched);
-    setPendingSecondFactors(requiredFactors);
-    setCompletedSecondFactors([]);
-
-    if (requiredFactors.includes("email")) {
-      await issueEmailCodeForPendingUser(matched, "login");
-    } else {
-      setPending2FAEmail(null);
+      // A password alone must never finalize local or server login.
+      if (json.requiresSecondFactor !== true || (json.method !== "email" && json.method !== "totp")) {
+        return { success: false, error: "サーバー側の2段階認証が確認できません。" };
+      }
+      setPending2FAUser(null);
       setPending2FACode(null);
+      setPending2FAEmail(json.method === "email" ? email.trim() : null);
+      setPendingSecondFactors([json.method]);
+      setCompletedSecondFactors([]);
+      return { success: true, requiresSecondFactor: true };
+    } catch {
+      return { success: false, error: "ログインAPIに接続できませんでした。" };
     }
+  }, []);
 
-    return { success: true, requiresSecondFactor: true };
-  }, [finalizeLogin, issueEmailCodeForPendingUser, pushProfileToServer]);
-
-  const verify2FA = useCallback(async (code: string): Promise<VerifyResult> => {
-    if (!pending2FAUser || !pendingSecondFactors.includes("email")) {
-      return { success: false, error: "メール認証セッションが見つかりません。" };
+  async function verifyServerFactor(code: string): Promise<VerifyResult> {
+    try {
+      const response = await fetch("/api/auth/login/verify", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const json = await response.json().catch(() => null);
+      if (!response.ok || !json?.success || !json?.user) {
+        return { success: false, error: json?.error || "認証コードの確認に失敗しました。" };
+      }
+      finalizeLogin(json.user);
+      resetSecondFactorFlow();
+      return { success: true, remainingFactors: [] };
+    } catch {
+      return { success: false, error: "2段階認証APIに接続できませんでした。" };
     }
-    if (!pending2FACode) {
-      return { success: false, error: "メール認証コードを再送してください。" };
-    }
-    if (code.trim() !== pending2FACode) {
-      return { success: false, error: "メール認証コードが正しくありません。" };
-    }
+  }
 
-    setPending2FACode(null);
-    return completeSecondFactor("email");
-  }, [completeSecondFactor, pending2FACode, pending2FAUser, pendingSecondFactors]);
-
-  const verifyTOTP = useCallback(async (token: string): Promise<VerifyResult> => {
-    if (!pending2FAUser?.totpSecret || !pendingSecondFactors.includes("totp")) {
-      return { success: false, error: "Google Authenticator の認証設定が見つかりません。" };
+  const verify2FA = async (code: string): Promise<VerifyResult> => {
+    if (!pendingSecondFactors.includes("email")) {
+      return { success: false, error: "メール認証の開始が必要です。" };
     }
+    return verifyServerFactor(code.trim());
+  };
 
-    const response = await fetch("/api/settings/totp/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: token.trim(), secret: pending2FAUser.totpSecret }),
-    });
-    const json = await response.json();
-    if (!json.success || !json.isValid) {
-      return { success: false, error: "Google Authenticator のコードが正しくありません。" };
+  const verifyTOTP = async (code: string): Promise<VerifyResult> => {
+    if (!pendingSecondFactors.includes("totp")) {
+      return { success: false, error: "Authenticator認証の開始が必要です。" };
     }
-
-    return completeSecondFactor("totp");
-  }, [completeSecondFactor, pending2FAUser, pendingSecondFactors]);
+    return verifyServerFactor(code.trim());
+  };
 
   const verifyPasskeySecondFactor = useCallback(async (): Promise<VerifyResult> => {
     if (!pending2FAUser || !pendingSecondFactors.includes("passkey")) {
@@ -576,61 +525,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [completeSecondFactor, pending2FAUser, pendingSecondFactors]);
 
   const resendEmailCode = useCallback(async () => {
-    if (!pending2FAUser || !pendingSecondFactors.includes("email")) {
-      return { success: false, error: "メール認証の再送対象が見つかりません。" };
+    if (!pendingSecondFactors.includes("email")) {
+      return { success: false, error: "メール認証を開始してください。" };
     }
-
     try {
-      await issueEmailCodeForPendingUser(pending2FAUser, "login");
-      return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error?.message || "メール認証コードの再送に失敗しました。" };
-    }
-  }, [issueEmailCodeForPendingUser, pending2FAUser, pendingSecondFactors]);
-
-  const loginWithPasskey = useCallback(async (email: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const users = getAllUsers();
-      const foundUser = users.find((entry) => entry.email.toLowerCase() === email.trim().toLowerCase());
-      if (!foundUser || !foundUser.webAuthnCredentials?.length) {
-        return { success: false, error: "このメールにはパスキーが登録されていません。" };
-      }
-
-      const optionsRes = await fetch("/api/auth/webauthn/generate-authentication-options", {
+      const response = await fetch("/api/auth/login/resend", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credentials: foundUser.webAuthnCredentials }),
+        credentials: "same-origin",
       });
-      const options = await optionsRes.json();
-      if (options.error) {
-        return { success: false, error: options.error };
-      }
-
-      const { startAuthentication } = await import("@simplewebauthn/browser");
-      const authResp = await startAuthentication(options);
-      const credential = foundUser.webAuthnCredentials.find((entry: any) => entry.id === authResp.id);
-
-      const verifyRes = await fetch("/api/auth/webauthn/verify-authentication", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ authenticationResponse: authResp, credential, userId: foundUser.id }),
-      });
-      const result = await verifyRes.json();
-      if (!result.verified) {
-        return { success: false, error: "パスキー認証に失敗しました。" };
-      }
-
-      if (credential && result.newCounter !== undefined) {
-        credential.counter = result.newCounter;
-      }
-
-      finalizeLogin(foundUser);
-      await pushProfileToServer({ ...foundUser, lastLogin: Date.now() });
-      return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error?.message || "パスキー認証に失敗しました。" };
+      const json = await response.json().catch(() => null);
+      return response.ok && json?.success
+        ? { success: true }
+        : { success: false, error: json?.error || "メール認証コードを再送できませんでした。" };
+    } catch {
+      return { success: false, error: "認証メールAPIへ接続できませんでした。" };
     }
-  }, [finalizeLogin, pushProfileToServer]);
+  }, [pendingSecondFactors]);
+
+  const loginWithPasskey = useCallback(async (_email: string): Promise<{ success: boolean; error?: string }> => {
+    return {
+      success: false,
+      error: "パスキー単独ログインはサーバー認証の整備中です。パスワードと2段階認証をご利用ください。",
+    };
+  }, []);
 
   const register = useCallback(async (email: string, password: string, nickname: string) => {
     const response = await fetch("/api/auth/register", {

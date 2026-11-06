@@ -7,6 +7,12 @@ export async function POST(req: NextRequest) {
     try {
         const { email, code, type } = await req.json();
 
+        if (type !== "register") {
+            return NextResponse.json(
+                { success: false, error: "ログイン認証コードはサーバーで発行します。" },
+                { status: 403 },
+            );
+        }
         if (!email || !code) {
             console.error("[2FA API] Missing email or code");
             return NextResponse.json({ success: false, error: "Email and code are required" }, { status: 400 });

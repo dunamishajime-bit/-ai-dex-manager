@@ -95,6 +95,10 @@ jobs:
         run: |
           node --test tests/hp-independent-owner-probe.test.mjs tests/hp-live-portfolio-session-expiry.test.mjs
           bash -n scripts/ops/disdex-hp-independent-owner-probe-nginx-cutover.sh
+      - name: Fail-closed user login second-factor source and runtime contracts
+        run: |
+          node --test tests/hp-server-side-user-login-2fa.test.mjs
+          node --import tsx --test tests/user-login-otp-store.test.ts
       - name: Production HP build
         run: |
           npm run build
