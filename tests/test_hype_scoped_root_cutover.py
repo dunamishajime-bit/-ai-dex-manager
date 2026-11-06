@@ -156,6 +156,7 @@ class HypeJobEntrypointTests(unittest.TestCase):
         self.assertEqual(command[0], "/usr/bin/systemd-run")
         self.assertIn("NoNewPrivileges=yes", command)
         self.assertIn("ReadWritePaths=/var/lib/disdex/shared", command)
+        self.assertFalse(any(str(h.PENDING) in arg for arg in command))
         self.assertIn("--clear-groups", command)
         self.assertIn("--reuid=1000", command)
         self.assertIn("--regid=1000", command)

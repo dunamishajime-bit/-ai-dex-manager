@@ -89,7 +89,7 @@ def run_worker_signed_read(release, deploy, environment, *, run=subprocess.run):
         "-p", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
         "-p", "RuntimeMaxSec=50s", "-p", "TimeoutStopSec=3s",
         "-p", "ReadWritePaths=/var/lib/disdex/shared",
-        "-p", f"ReadOnlyPaths={PENDING} {KILL} {MARGIN}",
+        "-p", f"ReadOnlyPaths={KILL} {MARGIN}",
         "/usr/bin/setpriv", f"--reuid={deploy.pw_uid}", f"--regid={deploy.pw_gid}",
         "--clear-groups", "--no-new-privs", "/usr/bin/python3", "-I", "-c", bootstrap,
         "/usr/bin/node", "--import", str(release / "node_modules/tsx/dist/loader.mjs"),
