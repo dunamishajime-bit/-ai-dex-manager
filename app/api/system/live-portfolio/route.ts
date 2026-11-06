@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { deriveAsterAccountMetrics } from "@/lib/server/aster-account-metrics";
 
@@ -111,8 +112,14 @@ async function readV12Usage() {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const responseHeaders = { "Cache-Control": "private, no-store, max-age=0" };
+  // Defense-in-depth: deny direct Node access as well as public Nginx access.
+  if (!requestHasSignedOwnerSession(request)) {
+    return NextResponse.json({ ok: false, error: "Authentication required." }, {
+      status: 401, headers: responseHeaders,
+    });
+  }
   let config: ReturnType<typeof loadAsterDexClientConfig>;
   try {
     config = loadAsterDexClientConfig();
