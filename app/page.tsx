@@ -67,9 +67,12 @@ export default function HomePage() {
   const v52 = productionRuntime?.v52;
   const lineageDisplay = productionRuntime ? buildRuntimeLineageDisplay(productionRuntime) : null;
   // Display only verified live Aster balances; never silently substitute cached wallet values.
-  const balance = snapshot?.account.balanceUsd ?? null;
-  const available = snapshot?.account.availableUsd ?? null;
-  const positions = snapshot?.positions ?? [];
+  const accountAvailable = snapshot?.availability.account === true;
+  const positionsAvailable = snapshot?.availability.positions === true;
+  const ordersAvailable = snapshot?.availability.orders === true;
+  const balance = accountAvailable ? snapshot!.account.balanceUsd : null;
+  const available = accountAvailable ? snapshot!.account.availableUsd : null;
+  const positions = positionsAvailable ? snapshot!.positions : [];
 
   return (
     <main className="relative min-w-0 min-h-full overflow-x-hidden overflow-y-visible rounded-[28px] border border-gold-400/16 bg-[#03050a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.06)] md:p-4">
@@ -93,7 +96,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <SummaryCard title="Aster balance" value={balance === null ? "UNAVAILABLE" : formatPrice(balance)} detail={available === null ? (liveError || (liveLoading ? "口座情報を取得中" : "Aster account balance unavailable")) : `Available ${formatPrice(available)}`} tone="profit" />
-            <SummaryCard title="実建玉 / 未決済注文" value={snapshot ? `${positions.length} / ${snapshot.orders.count}` : "UNAVAILABLE"} detail={snapshot ? `保護注文 ${snapshot.orders.protectionCount} / ${snapshot.capturedAt.replace("T", " ").slice(0, 16)} UTC` : liveError || "Aster live state unavailable"} />
+            <SummaryCard title="実建玉 / 未決済注文" value={positionsAvailable ? String(positions.length) + " / " + (ordersAvailable ? String(snapshot!.orders.count) : "UNAVAILABLE") : "UNAVAILABLE"} detail={positionsAvailable && snapshot ? ["Aster", snapshot.positionSource, snapshot.capturedAt.slice(0, 16) + " UTC", ordersAvailable ? "protection " + snapshot.orders.protectionCount : "orders unavailable"].join(" / ") : liveError || "Aster positions unavailable"} />
           </div>
         </section>
         <V12V4RuntimePanel />
@@ -113,9 +116,9 @@ export default function HomePage() {
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
           <div className="mt-3 space-y-2">
-            {positions.length ? positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">数量 {position.quantity.toFixed(6)} / 建玉評価額 {formatPrice(position.notionalUsd)}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice > 0 ? position.entryPrice.toFixed(6) : "—"} / Mark {position.markPrice > 0 ? position.markPrice.toFixed(6) : "—"}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : "Aster実建玉を取得できません。"}</div>}
+            {positionsAvailable && positions.length ? positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">数量 {position.quantity.toFixed(6)} / 建玉評価額 {position.markVerified ? formatPrice(position.notionalUsd) : "UNAVAILABLE"}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{position.pnlVerified ? formatPrice(position.unrealizedPnlUsd) : "UNAVAILABLE"}</div><div className="text-xs text-white/55">Entry {position.entryPrice > 0 ? position.entryPrice.toFixed(6) : "—"} / Mark {position.markPrice > 0 ? position.markPrice.toFixed(6) : "—"}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">{positionsAvailable ? "現在、Asterで確認できる実建玉はありません。" : liveError || "Aster建玉を取得できません。建玉ゼロとは判定しません。"}</div>}
           </div>
-          <p className="mt-3 text-[11px] leading-5 text-white/55">この表示はAsterの読み取り結果です。HPから注文・取消・決済・建玉変更は行いません。</p>
+          <p className="mt-3 text-[11px] leading-5 text-white/55">Aster署名付き読取結果。{snapshot?.positionSource === "ACCOUNT_DISCREPANCY" ? "口座とpositionRiskの建玉に差分があります。要照合。" : snapshot?.positionSource === "ACCOUNT_SNAPSHOT" ? "positionRiskが取得できず、口座snapshotの建玉を表示。" : "HPから注文・決済しません。"}</p>
         </section>
       </div>
     </main>

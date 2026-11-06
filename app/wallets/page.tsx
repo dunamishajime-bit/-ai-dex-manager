@@ -160,9 +160,9 @@ export default function WalletsPage() {
 
   // The operational wallet is a separate on-chain record, not current Aster futures equity.
   // Current Aster values must come from the same signed read-only source as the dashboard.
-  const hasAsterSnapshot = livePortfolio !== null;
-  const totalHoldingsUsd = livePortfolio?.account.balanceUsd ?? null;
-  const availableBalanceUsd = livePortfolio?.account.availableUsd ?? null;
+  const hasAsterSnapshot = livePortfolio?.availability.account === true;
+  const totalHoldingsUsd = hasAsterSnapshot ? livePortfolio!.account.balanceUsd : null;
+  const availableBalanceUsd = hasAsterSnapshot ? livePortfolio!.account.availableUsd : null;
 
   useEffect(() => {
     let mounted = true;

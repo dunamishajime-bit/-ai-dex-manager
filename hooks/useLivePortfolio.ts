@@ -11,11 +11,17 @@ export type LivePosition = {
   markPrice: number;
   notionalUsd: number;
   unrealizedPnlUsd: number;
+  markVerified: boolean;
+  pnlVerified: boolean;
 };
 
 export type LivePortfolioSnapshot = {
   ok: true;
   capturedAt: string;
+  readOnly: true;
+  partial: boolean;
+  positionSource: "POSITION_RISK" | "ACCOUNT_SNAPSHOT" | "ACCOUNT_DISCREPANCY" | "UNAVAILABLE";
+  availability: { account: boolean; positions: boolean; orders: boolean };
   account: {
     balanceUsd: number;
     availableUsd: number;

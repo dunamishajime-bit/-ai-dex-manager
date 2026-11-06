@@ -6,7 +6,6 @@ import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, TrendingUp } from "
 import { LivePerformanceOverviewCharts } from "@/components/features/LivePerformanceOverviewCharts";
 import { Card } from "@/components/ui/Card";
 import { useCurrency } from "@/context/CurrencyContext";
-import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { cn } from "@/lib/utils";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
@@ -185,7 +184,6 @@ function toneClass(value: number) {
 
 export default function PerformancePage() {
   const { formatPrice } = useCurrency();
-  const { wallet } = useOperationalWallet();
   const { snapshot: livePortfolio } = useLivePortfolio();
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -250,10 +248,9 @@ export default function PerformancePage() {
     [closedTrades, monthCursor],
   );
 
-  const portfolioUsd = livePortfolio?.account.balanceUsd
-    ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number"
-      ? wallet.lastAsterAccountBalanceUsd
-      : typeof wallet?.lastPortfolioUsd === "number" ? wallet.lastPortfolioUsd : null);
+  const portfolioUsd = livePortfolio?.availability.account === true
+    ? livePortfolio.account.balanceUsd
+    : null;
   const historyLabel = historySource === "aster"
     ? "Aster公式決済履歴"
     : historySource === "local-fallback"
@@ -285,7 +282,7 @@ export default function PerformancePage() {
           <div className="text-xs uppercase tracking-[0.2em] text-gray-500">Current Portfolio</div>
           <div className="mt-2 text-2xl font-semibold text-white">{portfolioUsd === null ? "\u53d6\u5f97\u4e0d\u80fd" : formatPrice(portfolioUsd)}</div>
           <div className="mt-1 text-sm text-gray-400">
-            {livePortfolio ? "Aster口座評価額（最新取得）" : "Aster口座評価額（保存済みスナップショット）"}
+            {portfolioUsd !== null ? "Aster口座評価額（最新取得）" : "Aster口座評価額（現在値を取得できません）"}
           </div>
         </Card>
         <Card glow="gold" noHover>
