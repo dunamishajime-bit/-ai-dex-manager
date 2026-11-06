@@ -33,6 +33,7 @@ export type CurrentProductionRuntime = {
     v52: string;
     fet: string;
     hype: string;
+    idle: string;
   };
   runtimeLineage: {
     synchronized: boolean;
@@ -263,6 +264,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     v52: readOnlyPins?.runners.V52.sha ?? releaseSha,
     fet: readOnlyPins?.runners.FET_BRK48_RESIDUAL.sha ?? releaseSha,
     hype: readOnlyPins?.runners.HYPE_TREND_LONG.sha ?? releaseSha,
+    idle: readOnlyPins?.runners.IDLE_PRIORITY_SHORT.sha ?? releaseSha,
   };
 
   const q102Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "integratedProductionRiskPolicy.ts"), "utf8");
