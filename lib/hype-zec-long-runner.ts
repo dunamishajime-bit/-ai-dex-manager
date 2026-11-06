@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { assertHypeZecLiveGate, type HypeZecLongRuntime } from "../config/hypeZecLongRuntime";
+import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
 import { HYPE_ZEC_LONG_POLICY, type HypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
 import { calculateWalletRiskStop, moreProtectiveStop } from "./disdex-exit-overlay-contract";
@@ -338,8 +339,24 @@ export class HypeZecLongRunner {
     return { status: "completed", message: `HYPE_ZEC_EXIT_COMPLETED:${owned.symbol}`, strategy: owned.strategy };
   }
 
+  private async sharedEntryHold(state: HypeZecLongRunnerState, signal: HypeZecSignalResult): Promise<HypeZecLongTickResult | undefined> {
+    if (this.dependencies.runtime.mode !== "LIVE") return;
+    const kill = await readSharedKillSwitch({
+      ...process.env,
+      DISDEX_SHARED_KILL_SWITCH_FILE: process.env.DISDEX_SHARED_KILL_SWITCH_FILE || "/var/lib/disdex/shared/kill-switch.json",
+    });
+    if (!kill.active) return;
+    const reason = "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE";
+    state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason };
+    state.lastDecisionTs = this.now();
+    await this.dependencies.stateStore.save(state);
+    return { status: "held", message: reason, strategy: signal.strategy };
+  }
+
   private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
     if (!signal.accepted || !signal.entryPrice || !signal.stopPrice || !signal.signalTs) return { status: "no-change", message: signal.reason, strategy: signal.strategy };
+    const entryHold = await this.sharedEntryHold(state, signal);
+    if (entryHold) return entryHold;
     const sharedRisk = await readSharedCryptoDailyRisk(this.dependencies.runtime.sharedRiskPath, this.now());
     if (!sharedRisk.ok) {
       state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: `SHARED_CRYPTO_RISK:${sharedRisk.reason || "INVALID"}` };
@@ -407,6 +424,8 @@ export class HypeZecLongRunner {
     if (this.dependencies.runtime.mode !== "LIVE") { await this.dependencies.stateStore.save(state); return { status: "shadow", message: `HYPE_ZEC_SHADOW_ENTRY:${symbol}`, strategy: signal.strategy }; }
     const quantity = await this.dependencies.executor.normalizeMarketQuantity(symbol, sizing.quantity * (accepted.gross / Math.max(candidate.gross, EPSILON)), signal.entryPrice);
     if (!(quantity.quantity > 0) || quantity.notional < 1) { await this.dependencies.stateStore.save(state); return { status: "held", message: `HYPE_ZEC_NORMALIZED_MINIMUM_BLOCKED:${symbol}`, strategy: signal.strategy }; }
+    const preOrderHold = await this.sharedEntryHold(state, signal);
+    if (preOrderHold) return preOrderHold;
     const idempotencyKey = hashId([signal.strategy, signal.signalTs, symbol, quantity.quantity], "hz-entry");
     const pendingEntry = { idempotencyKey, clientOrderId: idempotencyKey, action: "ENTRY" as const, strategy: signal.strategy, symbol, side: "BUY" as const, quantity: quantity.quantity, expectedPrice: signal.entryPrice, phase: "planned" as const, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason };
     state.pending = pendingEntry;
@@ -632,7 +651,8 @@ export class HypeZecLongRunner {
       for (const signal of signals) {
         if (existingStrategies.has(signal.strategy)) continue;
         const result = await this.enter(state, signal, account, positions, lock);
-        if (result.status === "completed" || result.status === "manual-review") return result;
+        if (result.status === "completed" || result.status === "manual-review" ||
+            result.message === "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE") return result;
       }
       await this.dependencies.stateStore.save(refreshHypeZecNoEntryDecision(state, signals, priorLastDecisionTs, this.now()));
       return { status: "no-change", message: "HYPE_ZEC_NO_ACCEPTED_ENTRY" };

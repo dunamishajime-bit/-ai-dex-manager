@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -8,6 +8,35 @@ import { HypeZecLongRunner } from "../lib/hype-zec-long-runner";
 import { evaluateZecLongSignal, type HypeZecCandle } from "../lib/hype-zec-long-sleeves";
 
 const SHA = "a".repeat(40);
+
+test("HYPE live entry records the shared hold before reading a quote or reserving exposure", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "hype-shared-hold-"));
+  const kill = join(dir, "kill.json");
+  const prior = process.env.DISDEX_SHARED_KILL_SWITCH_FILE;
+  try {
+    process.env.DISDEX_SHARED_KILL_SWITCH_FILE = kill;
+    await writeFile(kill, JSON.stringify({ active: true, action: "HOLD_PROTECTED", scope: "GLOBAL" }));
+    const now = Date.now();
+    const runner = new HypeZecLongRunner({
+      runtime: { mode: "LIVE", sharedRiskPath: join(dir, "must-not-read.json") },
+      stateStore: { async save() {} },
+      executor: { async getMarketQuote() { throw Error("QUOTE_MUST_NOT_RUN"); } },
+      now: () => now,
+    } as any);
+    const state: any = {};
+    const result = await (runner as any).enter(state, {
+      accepted: true, strategy: "HYPE_LONG", signalTs: now, symbol: "HYPEUSDT", entryPrice: 10, stopPrice: 9,
+    }, {}, [], {});
+    assert.equal(result.status, "held");
+    assert.equal(result.message, "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE");
+    assert.equal(state.lastDecision.accepted, false);
+    assert.equal(state.pending, undefined);
+  } finally {
+    if (prior === undefined) delete process.env.DISDEX_SHARED_KILL_SWITCH_FILE;
+    else process.env.DISDEX_SHARED_KILL_SWITCH_FILE = prior;
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 
 test("LIVE HYPE runner fails closed on legacy ZEC residuals before any ZEC mutation", async () => {
   const now = Date.now();
