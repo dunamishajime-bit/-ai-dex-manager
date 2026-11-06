@@ -54,6 +54,37 @@ def pins(releases=RELEASES):
                             "stopOwner":STOP_OWNERS[key]} for key in IDS}}
 
 class RootGateTest(unittest.TestCase):
+    def test_fresh_shared_risk_root_activation_is_exact_scope_without_order_authority(self):
+        from disdex_unified_root_gate import build_shared_risk_root_activation,_validate_scoped_activation
+        args=SimpleNamespace(route='CODEX_SSH',owner=CODEX_SSH_OPERATOR,sha=NEW,
+            scope='SHARED_CRYPTO_RISK_ONLY',plan_sha256='a'*64,orders_enabled='false',
+            _codex_ssh_authenticated=True)
+        desired=plan(args.scope,'SHARED_CRYPTO_RISK')
+        import hashlib
+        from disdex_deployment_plan import canonical
+        args.plan_sha256=hashlib.sha256(canonical(desired)).hexdigest()
+        authorization=build_codex_ssh_authorization(args,now=2000000000)
+        activation=build_shared_risk_root_activation(args,desired,authorization,now=2000000001)
+        _validate_scoped_activation(activation,args,desired,args.plan_sha256,now=2000000001)
+        self.assertEqual(activation['approvedRunners'],['SHARED_CRYPTO_RISK'])
+        self.assertEqual(activation['expiresAt'],authorization['expiresAt'])
+        for change in [dict(orders_enabled='true'),dict(scope='V52'),dict(owner='other')]:
+            altered=SimpleNamespace(**{**vars(args),**change})
+            with self.assertRaises(ValueError):build_shared_risk_root_activation(altered,desired,authorization,now=2000000001)
+
+    def test_cached_root_ssh_approval_cannot_expire_during_venue_reads_or_change_scope(self):
+        args=SimpleNamespace(route='CODEX_SSH',owner=CODEX_SSH_OPERATOR,sha=NEW,
+            scope='SHARED_CRYPTO_RISK_ONLY',plan_sha256='a'*64,orders_enabled='false',
+            _codex_ssh_authenticated=True)
+        build_codex_ssh_authorization(args,now=2000000000)
+        executor=RootDeploymentExecutor(SimpleNamespace(),clock=lambda:2000000300)
+        with self.assertRaisesRegex(ValueError,'expired|binding'):
+            executor._verify_token(args,'')
+        executor.clock=lambda:2000000001
+        args.sha='b'*40
+        with self.assertRaisesRegex(ValueError,'binding'):
+            executor._verify_token(args,'')
+
     def test_codex_ssh_requires_sshd_connection_metadata(self):
         with self.assertRaisesRegex(ValueError, "authenticated Codex SSH"):
             assert_codex_ssh_session({})
@@ -658,6 +689,71 @@ class SharedRiskExecutorTest(unittest.TestCase):
              ("enable", self.new_unit), ("start", self.new_unit)],
         )
 
+    def test_production_shared_risk_preflight_uses_actual_reader_without_recertifying_untouched_dependencies(self):
+        from unittest.mock import patch
+        external=self.releases.parent/'old-dependencies';external.mkdir()
+        (self.releases/self.old/'node_modules').symlink_to(external,target_is_directory=True)
+        args=self._args();args.route='CODEX_SSH';args.owner=CODEX_SSH_OPERATOR
+        args._codex_ssh_authenticated=True
+        with (patch('disdex_unified_root_gate.ROOT',self.root),
+              patch('disdex_shared_risk_monitor_wiring.SharedRiskMonitorWiring.production'),
+              patch('disdex_shared_risk_witness.ProductionSharedRiskReader') as reader):
+            reader.return_value.capture.return_value={}
+            result=preflight(args,'',root=self.root,pins_path=self.pins_path,current=self.current,
+                releases=self.releases,root_uid=os.geteuid())
+        self.assertEqual(result['status'],'READONLY_PREFLIGHT_PASS_NOT_LIVE')
+        self.assertFalse(result['ordersEnabled'])
+        reader.return_value.capture.assert_called_once()
+
+
+    def test_production_reader_issues_fresh_root_native_no_order_activation_and_audits_real_updates(self):
+        from unittest.mock import patch
+        from datetime import datetime,timezone
+        activation_path=self.activations/'SHARED_CRYPTO_RISK_ONLY'/(self.new+'.json')
+        activation_path.unlink()
+        args=self._args();args.route='CODEX_SSH';args.owner=CODEX_SSH_OPERATOR
+        args._codex_ssh_authenticated=True
+        systemd=FakeSystemd(self.old_unit,self.new_unit)
+        now_ms=self.now*1000
+        holder=self
+        class Reader:
+            at=now_ms-30000
+            def read_risk(self):
+                self.at+=1000
+                return dict(updatedAt=self.at,utcDay=datetime.fromtimestamp(now_ms/1000,timezone.utc).date().isoformat(),
+                    maximumLossPct=7.5,sourceComplete=True,tripped=False)
+            def read_context(self):
+                sha=holder.old if systemd.is_active(holder.old_unit) else holder.new
+                return dict(writer=dict(sha=sha,markerSha=sha,pid=4242,activeState='active',
+                    cwd=str(holder.releases/sha),unit='disdex-shared-crypto-risk@'+sha+'.service'),
+                    peers={k:dict(sha=holder.old,pid=0 if k=='V12_V4' else 123)
+                        for k in IDS if k!='SHARED_CRYPTO_RISK'},killHash='a'*64,pendingHash='b'*64)
+            def capture(self):
+                return dict(witness=dict(signedFlatProof=dict(status='PENDING_READONLY_RECONCILE_VERIFIED',
+                    verifiedAt=now_ms-1,positionCount=0,openOrderCount=0,ordersSent=0,cancelsSent=0,
+                    positionChangesSent=0,beforeHash='b'*64,afterHash='b'*64)),
+                    context=self.read_context(),riskSnapshot=self.read_risk())
+        reader=Reader()
+        # Production's fixed release location is preserved by the real audit
+        # validator. This Linux fixture patches only that validator's writer
+        # CWD input, never systemd or venue operations on the actual VPS.
+        original=reader.read_context
+        def context():
+            row=original();row['writer']['cwd']='/home/deploy/disdex-trading/releases/'+row['writer']['sha'];return row
+        reader.read_context=context
+        executor=RootDeploymentExecutor(self.paths,root_uid=os.geteuid(),systemd=systemd,
+            clock=lambda:self.now,sleep_fn=lambda _:None,production_reader=reader)
+        with patch('disdex_unified_root_gate.time.time_ns',return_value=now_ms*1000000):
+            result=executor.execute(args,'')
+        self.assertEqual(result['status'],'SHARED_RISK_CUTOVER_VERIFIED')
+        self.assertEqual(len({r['tickCompletedAt'] for r in result['auditCycles']}),3)
+        activation=json.loads(activation_path.read_text())
+        self.assertFalse(activation['ordersEnabled'])
+        self.assertEqual(activation['approvedRunners'],['SHARED_CRYPTO_RISK'])
+        self.assertEqual(activation['operator'],CODEX_SSH_OPERATOR)
+        self.assertEqual(self.current.resolve(),self.releases/self.old)
+
+
     def test_codex_ssh_shared_risk_route_uses_root_session_without_token(self):
         args = self._args()
         args.route = "CODEX_SSH"
@@ -677,8 +773,13 @@ class SharedRiskExecutorTest(unittest.TestCase):
 
     def test_shared_risk_start_failure_rolls_back_writer_and_manifest(self):
         systemd = FakeSystemd(self.old_unit, self.new_unit, fail_new_start=True)
+        from disdex_shared_risk_monitor_wiring import SharedRiskMonitorWiring
+        monitor=self.root/'fixture-health.env';monitor.write_text('PEER=unchanged\nRISK='+self.old+'\n');monitor.chmod(0o640)
+        executor=self._executor(systemd)
+        executor.monitor_wiring=SharedRiskMonitorWiring([(monitor,{'RISK':self.old},{'RISK':self.new})],root_uid=os.geteuid())
         with self.assertRaisesRegex(RuntimeError, "rolled back"):
-            self._executor(systemd).execute(self._args(), "signed-token")
+            executor.execute(self._args(), "signed-token")
+        self.assertEqual(monitor.read_text(),'PEER=unchanged\nRISK='+self.old+'\n')
         self.assertTrue(systemd.is_active(self.old_unit))
         self.assertFalse(systemd.is_active(self.new_unit))
         restored = json.loads(self.pins_path.read_text(encoding="utf-8"))
@@ -702,7 +803,7 @@ class SharedRiskExecutorTest(unittest.TestCase):
 
     def test_non_shared_execution_scope_is_not_silently_mutated(self):
         args = self._args()
-        args.scope = "V52"
+        args.scope = "HP_ONLY"
         with self.assertRaisesRegex(ValueError, "unsupported execution scope"):
             self._executor(FakeSystemd(self.old_unit, self.new_unit)).execute(args, "signed-token")
 

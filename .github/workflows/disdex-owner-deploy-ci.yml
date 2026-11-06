@@ -3,6 +3,19 @@ name: DisDex Owner Deployment Authorization CI
 on:
   push:
     paths:
+      - 'scripts/ops/deploy/disdex_watchdog_exec.py'
+      - 'tests/test_watchdog_deployment_serialization.py'
+      - 'lib/disdex-expired-account-lock-recovery.ts'
+      - 'scripts/disdex-account-order-lock-expired-recovery.ts'
+      - 'tests/disdex-expired-account-lock-recovery.test.ts'
+      - 'scripts/ops/deploy/disdex_v4_priority_live.py'
+      - 'scripts/ops/deploy/disdex_v4_refresh_exec.py'
+      - 'tests/test_v4_refresh_exec.py'
+      - 'scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs'
+      - 'scripts/ops/deploy/disdex_v4_canonical_prestart.py'
+      - 'tests/test_v4_priority_live.py'
+      - 'tests/test_v4_canonical_prestart.py'
+      - 'tests/v4-priority-bootstrap.test.mjs'
       - 'scripts/ops/deploy/disdex_owner_approval.py'
       - 'scripts/ops/deploy/disdex_deployment_contract.py'
       - 'tests/test_disdex_owner_approval.py'
@@ -11,8 +24,30 @@ on:
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
       - 'scripts/ops/deploy/disdex_deployment_plan.py'
       - 'tests/test_disdex_deployment_plan.py'
+      - 'tests/test_hp_standalone_cutover.py'
+      - 'scripts/ops/deploy/disdex_hp_standalone_cutover.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_audit.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_witness.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_prestart.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_monitor_wiring.py'
+      - 'scripts/ops/deploy/disdex_pending_maintenance_install.py'
+      - 'tests/test_pending_maintenance_install.py'
+      - 'scripts/ops/deploy/disdex_v4_monitor_cutover.py'
+      - 'tests/test_v4_monitor_cutover.py'
+      - 'scripts/ops/deploy/disdex_v52_scoped_root_cutover.py'
+      - 'tests/test_v52_scoped_root_contract.py'
+      - 'tests/test_v52_root_integration.py'
+      - 'scripts/ops/deploy/disdex_monitor_snapshot_cutover.py'
+      - 'tests/test_monitor_snapshot_cutover.py'
+      - 'tests/test_monitor_live_preservation.py'
+      - 'tests/test_watchdog_scoped_cutover.py'
+      - 'tests/test_deployment_serialization.py'
+      - 'tests/test_shared_risk_monitor_wiring.py'
+      - 'tests/test_shared_risk_prestart.py'
+      - 'tests/test_shared_risk_witness.py'
+      - 'tests/test_shared_risk_real_audit.py'
       - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
       - 'scripts/ops/deploy/disdex_v4_venue_witness.py'
       - 'scripts/ops/deploy/disdex_v4_static_evidence.py'
@@ -34,6 +69,16 @@ on:
       - 'docs/superpowers/plans/2026-10-30-pr302-route-neutral-deployment.md'
   pull_request:
     paths:
+      - 'scripts/ops/deploy/disdex_watchdog_exec.py'
+      - 'tests/test_watchdog_deployment_serialization.py'
+      - 'scripts/ops/deploy/disdex_v4_priority_live.py'
+      - 'scripts/ops/deploy/disdex_v4_refresh_exec.py'
+      - 'tests/test_v4_refresh_exec.py'
+      - 'scripts/ops/deploy/disdex_v4_priority_bootstrap.mjs'
+      - 'scripts/ops/deploy/disdex_v4_canonical_prestart.py'
+      - 'tests/test_v4_priority_live.py'
+      - 'tests/test_v4_canonical_prestart.py'
+      - 'tests/v4-priority-bootstrap.test.mjs'
       - 'scripts/ops/deploy/disdex_owner_approval.py'
       - 'scripts/ops/deploy/disdex_deployment_contract.py'
       - 'tests/test_disdex_owner_approval.py'
@@ -42,8 +87,30 @@ on:
       - 'scripts/ops/deploy/audit_legacy_deploy_paths.py'
       - 'scripts/ops/deploy/disdex_deployment_plan.py'
       - 'tests/test_disdex_deployment_plan.py'
+      - 'tests/test_hp_standalone_cutover.py'
+      - 'scripts/ops/deploy/disdex_hp_standalone_cutover.py'
       - 'scripts/ops/deploy/disdex_codex_ssh.py'
       - 'scripts/ops/deploy/disdex_unified_root_gate.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_audit.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_witness.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_prestart.py'
+      - 'scripts/ops/deploy/disdex_shared_risk_monitor_wiring.py'
+      - 'scripts/ops/deploy/disdex_pending_maintenance_install.py'
+      - 'tests/test_pending_maintenance_install.py'
+      - 'scripts/ops/deploy/disdex_v4_monitor_cutover.py'
+      - 'tests/test_v4_monitor_cutover.py'
+      - 'scripts/ops/deploy/disdex_v52_scoped_root_cutover.py'
+      - 'tests/test_v52_scoped_root_contract.py'
+      - 'tests/test_v52_root_integration.py'
+      - 'scripts/ops/deploy/disdex_monitor_snapshot_cutover.py'
+      - 'tests/test_monitor_snapshot_cutover.py'
+      - 'tests/test_monitor_live_preservation.py'
+      - 'tests/test_watchdog_scoped_cutover.py'
+      - 'tests/test_deployment_serialization.py'
+      - 'tests/test_shared_risk_monitor_wiring.py'
+      - 'tests/test_shared_risk_prestart.py'
+      - 'tests/test_shared_risk_witness.py'
+      - 'tests/test_shared_risk_real_audit.py'
       - 'scripts/ops/deploy/disdex_v4_root_cutover.py'
       - 'scripts/ops/deploy/disdex_v4_venue_witness.py'
       - 'scripts/ops/deploy/disdex_v4_static_evidence.py'
@@ -78,9 +145,25 @@ jobs:
       - name: Verify Ed25519 grant rejection cases
         run: python3 -m unittest discover -s tests -p test_disdex_owner_approval.py -v
       - name: Verify multi-SHA exact-scope plans
-        run: python3 -m unittest discover -s tests -p test_disdex_deployment_plan.py -v
+        run: python3 -m unittest tests.test_disdex_deployment_plan tests.test_hp_standalone_cutover -v
       - name: Root-side read-only preflight and forced-command tests
         run: python3 -m unittest discover -s tests -p test_disdex_unified_root_gate.py -v
+      - name: Real Shared Risk refresh audit invariants
+        run: python3 -m unittest discover -s tests -p test_shared_risk_real_audit.py -v
+      - name: No-order maintenance exact scope and root rollback fixtures
+        run: sudo /usr/bin/python3 -m unittest discover -s tests -p test_pending_maintenance_install.py -v
+      - name: Independent V4 no-order phase and partial-cutover rollback
+        run: sudo /usr/bin/python3 -m unittest discover -s tests -p test_v4_monitor_cutover.py -v
+      - name: V52 independent authority and protected-hold rollback
+        run: sudo /usr/bin/python3 -m unittest tests.test_v52_scoped_root_contract tests.test_v52_root_integration -v
+      - name: Independent no-order health snapshot transaction
+        run: sudo /usr/bin/python3 -m unittest tests.test_monitor_snapshot_cutover tests.test_monitor_live_preservation tests.test_watchdog_scoped_cutover tests.test_deployment_serialization tests.test_watchdog_deployment_serialization -v
+      - name: No-order Production signed reader boundary
+        run: python3 -m unittest discover -s tests -p test_shared_risk_witness.py -v
+      - name: Root-only Shared Risk no-order prestart
+        run: python3 -m unittest discover -s tests -p test_shared_risk_prestart.py -v
+      - name: Shared Risk monitor key CAS and rollback
+        run: python3 -m unittest discover -s tests -p test_shared_risk_monitor_wiring.py -v
       - name: Strict flat IDLE residual venue witness tests
         run: python3 -m unittest discover -s tests -p test_disdex_idle_flat_stale_recovery.py -v
       - name: Read-only live-readiness inventory fail-closed test
@@ -88,7 +171,14 @@ jobs:
       - name: V4 fresh venue witness contract tests
         run: python3 -m unittest discover -s tests -p test_disdex_v4_venue_witness.py -v
       - name: V4 immutable static evidence contract tests
-        run: python3 -m unittest discover -s tests -p test_disdex_v4_static_evidence.py -v
+        run: sudo env PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p test_disdex_v4_static_evidence.py -v
+      - name: V4 priority root authority and canonical prestart
+        run: |
+          python3 -m unittest discover -s tests -p test_v4_priority_live.py -v
+          python3 -m unittest discover -s tests -p test_v4_canonical_prestart.py -v
+          python3 -m unittest discover -s tests -p test_v4_refresh_exec.py -v
+          python3 -m unittest discover -s tests -p test_disdex_v4_refresh_activation.py -v
+          node --test tests/v4-priority-bootstrap.test.mjs
       - name: V4 exact-scope rollback and owner approval tests
         run: python3 -m unittest discover -s tests -p test_disdex_v4_root_cutover.py -v
       - name: Root helper installer contract tests
@@ -140,3 +230,18 @@ jobs:
           assert '--owner $OWNER' in p
           print('DISDEX_OWNER_DEPLOY_POLICY_SOURCE_PASS')
           PY
+
+  expired-account-lock-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Dead-owner PID, exact hash and atomic archival tests (no venue)
+        run: npx --no-install tsx --test tests/disdex-expired-account-lock-recovery.test.ts

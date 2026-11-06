@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import {
   archiveExpiredAccountOrderLock,
   inspectExpiredAccountOrderLock,
+  accountLockOwnerPid,
 } from "../lib/disdex-expired-account-lock-recovery";
 
 const OWNER = "Q102_PENDING_RECOVERY:12345";
@@ -19,6 +20,14 @@ const BASE = {
   expiresAt: 2_000,
   reservations: [],
 };
+
+test('timestamped IDLE owner uses its real PID rather than the trailing timestamp',()=>{
+  assert.equal(accountLockOwnerPid('IDLE_PRIORITY_SHORT:2866857:1793823882471'),2866857);
+  assert.equal(accountLockOwnerPid(OWNER),12345);
+  for(const owner of ['IDLE_PRIORITY_SHORT:0:1793823882471','IDLE_PRIORITY_SHORT:2866857:bad',
+      'UNREVIEWED:2866857:1793823882471','Q102_PENDING_RECOVERY:1793823882471'])
+    assert.throws(()=>accountLockOwnerPid(owner),/ACCOUNT_LOCK_OWNER_PID/);
+});
 
 test("expired lock with a dead owner and no reservations is eligible", () => {
   assert.deepEqual(
@@ -97,6 +106,14 @@ test("missing owner pid is eligible only with an explicit external absence proof
       ownerPidMissing: true,
     },
   );
+});
+
+test('a mismatched approved lock hash rejects before archiving',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'disdex-expired-lock-hash-'));
+ const lockPath=join(root,'account-order.lock');const raw=JSON.stringify(BASE);await writeFile(lockPath,raw,{mode:0o600});
+ await assert.rejects(()=>archiveExpiredAccountOrderLock({lockPath,archiveDir:join(root,'archive'),
+   expectedOwnerId:OWNER,ownerAlive:false,now:3000,requestId:'hash-test',expectedSha256:'0'.repeat(64)}),/EXPECTED_HASH_MISMATCH/);
+ assert.equal(await readFile(lockPath,'utf8'),raw);
 });
 
 test("archive is atomic, preserves exact bytes, and rejects symlinks", async (t) => {

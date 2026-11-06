@@ -22,6 +22,144 @@ from disdex_v4_root_cutover import (
     V4RootExecutor, V4_SCOPE, V4_ACK, validate_v4_activation, runtime_activation,
 )
 
+class V4DecisionAuditTest(unittest.TestCase):
+    def setUp(self):
+        self.now=2_000_000_000_000
+        self.sha=NEW
+        self.release="/home/deploy/disdex-trading/releases/"+NEW
+        self.identity=dict(runnerId="V12_V4",runtimeSha=NEW,expectedSha=NEW,
+            serviceUnit=f"disdex-v12-v4@{NEW}.service",mainPid=4242,workingDirectory=self.release)
+        self.tick=dict(self.identity,schema="disdex-runner-tick/v1",
+            tickStartedAt=self.now-2000,tickCompletedAt=self.now-1000,
+            status="observing",reason="NO_SIGNAL",newOrdersAllowed=False)
+        self.health=dict(self.identity,schema="disdex-v12-v4-runner-heartbeat/v1",
+            releaseSha=NEW,mode="LIVE",liveEnabled=True,limitedLive=False,
+            safetyState="HEALTHY",lastTickAt=self.now-1000,heartbeatAt=self.now-500,
+            orderEnabled=False,ordersAllowed=False)
+
+    def validate(self,**changes):
+        from disdex_v4_root_cutover import validate_v4_decision_cycle
+        args=dict(sha=NEW,pid=4242,release=self.release,now_ms=self.now,
+            started_after_ms=self.now-3000,previous_tick=None)
+        args.update(changes)
+        return validate_v4_decision_cycle(self.health,self.tick,**args)
+
+    def test_healthy_no_signal_is_a_real_cycle_without_test_order(self):
+        self.assertEqual(self.validate()["tickCompletedAt"],self.now-1000)
+
+    def test_repeated_or_pre_cutover_tick_is_not_a_new_cycle(self):
+        for changes in [dict(previous_tick=self.now-1000),dict(started_after_ms=self.now-1000)]:
+            with self.subTest(changes=changes),self.assertRaisesRegex(ValueError,"TICK"):
+                self.validate(**changes)
+
+    def test_wrong_schema_sha_pid_cwd_or_service_fails(self):
+        for target in [self.tick,self.health]:
+            original=dict(target)
+            for field,value in [("schema","disdex-runner-tick-heartbeat/v1"),
+                ("runtimeSha",OLD),("expectedSha",OLD),("mainPid",4243),
+                ("workingDirectory","/tmp/other"),("serviceUnit",f"other@{NEW}.service")]:
+                with self.subTest(field=field,target=target is self.tick):
+                    target[field]=value
+                    with self.assertRaises(ValueError):self.validate()
+                    target.clear();target.update(original)
+
+    def test_stale_future_malformed_and_partial_publication_fails(self):
+        for target,field,value in [(self.tick,"tickStartedAt",True),
+            (self.tick,"tickStartedAt",self.now),
+            (self.tick,"tickCompletedAt",self.now+2000),
+            (self.health,"heartbeatAt",self.now+2000),
+            (self.health,"heartbeatAt",self.now-180001),
+            (self.health,"lastTickAt",self.now-1001)]:
+            original=target[field];target[field]=value
+            with self.subTest(field=field,value=value),self.assertRaises(ValueError):self.validate()
+            target[field]=original
+        with self.assertRaises(ValueError):self.validate(now_ms=self.now+180001)
+
+    def test_monitor_canary_or_blocked_cycle_cannot_certify_live(self):
+        for field,value in [("mode","MONITOR_ONLY"),("limitedLive",True),
+            ("liveEnabled",False),("safetyState","BLOCKED")]:
+            original=self.health[field];self.health[field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):self.validate()
+            self.health[field]=original
+
+
+class V4DecisionWaitTest(V4DecisionAuditTest):
+    def setUp(self):
+        super().setUp()
+        self.release=str(Path(self.release))
+        self.tick["workingDirectory"]=self.release
+        self.health["workingDirectory"]=self.release
+
+    def wait(self, health, tick, *, units=None, reads=None, commandline=None):
+        from disdex_v4_root_cutover import await_v4_decision_cycle
+        from unittest.mock import Mock
+        systemd=Mock()
+        systemd.active_state.return_value="active"
+        systemd.main_pid.return_value=4242
+        systemd._state.side_effect=lambda unit,prop: "0" if prop=="NRestarts" else self.release
+        if units:units(systemd)
+        if commandline is None:
+            commandline=["/usr/bin/node","--import",str(Path(self.release)/"node_modules/tsx/dist/loader.mjs"),
+                         str(Path(self.release)/"scripts/v12-v4-production-runner.ts"),"--daemon"]
+        commandline_bytes="\0".join(commandline).encode()+b"\0"
+        times=iter([0,1,2,3,4,5,6])
+        def reader(path,**kwargs):
+            if reads is not None:return next(reads)
+            return health if path.name=="heartbeat.json" else tick
+        with patch("disdex_v4_venue_witness._secure_json",side_effect=reader), \
+             patch.object(Path,"stat",return_value=SimpleNamespace(st_uid=0)), \
+             patch.object(Path,"lstat",return_value=SimpleNamespace(st_uid=0)), \
+             patch.object(Path,"resolve",return_value=Path(self.release)), \
+             patch.object(Path,"read_bytes",return_value=commandline_bytes):
+            return await_v4_decision_cycle(systemd,sha=NEW,release=Path(self.release),pid=4242,
+                started_after_ms=self.now-3000,previous_tick=None,sleeper=lambda _:None,
+                clock=lambda:self.now/1000,monotonic=lambda:next(times),timeout=4)
+
+    def test_actual_reader_accepts_completed_matching_cycle(self):
+        self.assertEqual(self.wait(self.health,self.tick)["tickCompletedAt"],self.now-1000)
+
+    def test_busy_account_lock_is_deferred_and_never_counted_as_healthy(self):
+        locked=dict(self.health,safetyState='BLOCKED',status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        tick=dict(self.tick,status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        rows=iter([locked,tick,self.health,self.tick])
+        self.assertEqual(self.wait(self.health,self.tick,reads=rows)['tickCompletedAt'],self.now-1000)
+        with self.assertRaisesRegex(RuntimeError,'TIMEOUT'):self.wait(locked,tick)
+
+    def test_busy_lock_does_not_hide_bad_identity_future_time_or_permission(self):
+        locked=dict(self.health,safetyState='BLOCKED',status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        tick=dict(self.tick,status='locked',reason='SHARED_ACCOUNT_LOCK_BUSY')
+        for health,t in [(dict(locked,mainPid=4243),tick),(dict(locked,heartbeatAt=self.now+2000),tick),
+                         (dict(locked,ordersAllowed=True,orderEnabled=True),tick),
+                         (dict(locked,reason='OTHER_BLOCK'),tick)]:
+            with self.subTest(health=health),self.assertRaises(ValueError):self.wait(health,t)
+
+    def test_same_release_recovery_waits_for_new_process_tick_not_the_retained_old_marker(self):
+        old_health=dict(self.health,mainPid=4241,lastTickAt=self.now-5000)
+        old_tick=dict(self.tick,mainPid=4241,tickStartedAt=self.now-6000,tickCompletedAt=self.now-5000)
+        rows=iter([old_health,old_tick,self.health,self.tick])
+        self.assertEqual(self.wait(self.health,self.tick,reads=rows)['tickCompletedAt'],self.now-1000)
+
+    def test_repeated_old_sha_or_partial_publication_has_bounded_timeout(self):
+        for health,tick in [(self.health,dict(self.tick,runtimeSha=OLD)),
+                             (dict(self.health,lastTickAt=self.now-999),self.tick)]:
+            with self.subTest(health=health),self.assertRaisesRegex(RuntimeError,"TIMEOUT"):
+                self.wait(health,tick)
+
+    def test_actual_command_must_use_same_release_loader_and_runner(self):
+        for command in [["/usr/bin/node","/tmp/other.ts"],
+            ["/usr/bin/node","--import",f"/releases/{OLD}/loader.mjs",
+             str(Path(self.release)/"scripts/v12-v4-production-runner.ts"),"--daemon"]]:
+            with self.subTest(command=command),self.assertRaisesRegex(RuntimeError,"EXECUTABLE"):
+                self.wait(self.health,self.tick,commandline=command)
+
+    def test_pid_restart_or_effective_cwd_change_is_rejected(self):
+        for mutation in [lambda s:setattr(s.main_pid,"return_value",4243),
+                         lambda s:setattr(s._state,"side_effect",lambda unit,prop:"1" if prop=="NRestarts" else self.release),
+                         lambda s:setattr(s._state,"side_effect",lambda unit,prop:"0" if prop=="NRestarts" else "/tmp/other")]:
+            with self.subTest(mutation=mutation),self.assertRaises(RuntimeError):
+                self.wait(self.health,self.tick,units=mutation)
+
+
 class V4ApprovalTest(unittest.TestCase):
     def setUp(self):
         self.args = SimpleNamespace(sha=NEW, owner="owner")
@@ -144,9 +282,13 @@ class V4CutoverTransactionTest(unittest.TestCase):
             value["expiresAt"]=self.now+300+calls["after"]
             value["peerStopApprovalsVerified"] = sorted(kwargs.get("peer_stop_approvals", {}))
             return value
+        def decision(systemd, *, previous_tick, started_after_ms, **kwargs):
+            completed = (previous_tick or started_after_ms) + 60000
+            return dict(tickStartedAt=completed-1000,tickCompletedAt=completed,
+                        mainPid=systemd.main_pid(self.new_unit))
         return V4RootExecutor(
             self.fx._executor(sysd), runtime_approval=self.runtime,
-            witness_collector=witness, sleeper=lambda _: None)
+            witness_collector=witness, sleeper=lambda _: None, decision_observer=decision)
 
     def test_v4_preflight_accepts_legacy_writable_current_but_certifies_new_release(self):
         # Legacy current/peer releases predate the root-owned immutable boundary.
@@ -202,7 +344,7 @@ class V4CutoverTransactionTest(unittest.TestCase):
         evidence["heartbeatVerified"]=False
         _write_secure_json(self.fx.after_venue,evidence)
         sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False)
-        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+        with self.assertRaisesRegex(RuntimeError,"recovery required"):
             self._executor(sysd).execute(self._args(),"signed-token")
         self.assertFalse(sysd.is_active(self.new_unit))
 
@@ -222,23 +364,58 @@ class V4CutoverTransactionTest(unittest.TestCase):
 
     def test_failed_candidate_from_failed_baseline_does_not_resurrect_old_v4(self):
         sysd=FakeSystemd(self.old_unit,self.new_unit,old_active=False,fail_new_start=True)
-        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+        with self.assertRaisesRegex(RuntimeError,"recovery required"):
             self._executor(sysd).execute(self._args(),"signed-token")
         self.assertFalse(sysd.is_active(self.old_unit))
         self.assertFalse(sysd.is_active(self.new_unit))
         self.assertNotIn(("start",self.old_unit),sysd.calls)
 
-    def test_failed_start_rolls_back_without_unprotected_window(self):
+    def test_failed_start_does_not_copy_old_approval_or_restart_ambiguous_old_code(self):
         old_approval={"approvedSha":OLD}
         _write_secure_json(self.runtime,old_approval)
         sysd=FakeSystemd(self.old_unit,self.new_unit,fail_new_start=True)
-        with self.assertRaisesRegex(RuntimeError,"rolled back"):
+        with self.assertRaisesRegex(RuntimeError,"recovery required"):
             self._executor(sysd).execute(self._args(),"signed-token")
-        self.assertTrue(sysd.is_active(self.old_unit))
+        self.assertFalse(sysd.is_active(self.old_unit))
         self.assertFalse(sysd.is_active(self.new_unit))
-        self.assertEqual(json.loads(self.runtime.read_text()),old_approval)
-        self.assertEqual(json.loads(self.fx.pins_path.read_text())["runners"][V4_SCOPE]["sha"],OLD)
+        self.assertTrue(sysd.is_masked(self.new_unit))
+        self.assertEqual(json.loads(self.runtime.read_text())["approvedSha"],NEW)
+        self.assertEqual(json.loads(self.fx.pins_path.read_text())["runners"][V4_SCOPE]["sha"],NEW)
         self.assertEqual(self.fx.current.resolve(),self.fx.releases/OLD)
+
+    def test_failed_live_audit_never_restarts_old_code_over_possible_new_ownership(self):
+        sysd=FakeSystemd(self.old_unit,self.new_unit)
+        executor=self._executor(sysd)
+        def failure(*args,**kwargs):raise RuntimeError("SIGNED_READ_UNAVAILABLE")
+        executor.decision_observer=failure
+        with self.assertRaises(RuntimeError):executor.execute(self._args(),"signed-token")
+        self.assertNotIn(("start",self.old_unit),sysd.calls)
+        self.assertFalse(sysd.is_active(self.new_unit))
+        self.assertTrue(sysd.is_masked(self.new_unit))
+        self.assertEqual(json.loads(self.fx.pins_path.read_text())["runners"][V4_SCOPE]["sha"],NEW)
+        journal=json.loads((executor.common.paths.journal or self.fx.root/"transaction.json").read_text())
+        self.assertEqual(journal["phase"],"RECOVERY_REQUIRED_PROTECTED")
+        self.assertFalse(journal["oldSourceRestartAuthorized"])
+
+    def test_repeated_decision_tick_cannot_be_three_audit_cycles(self):
+        sysd=FakeSystemd(self.old_unit,self.new_unit)
+        executor=self._executor(sysd)
+        executor.decision_observer=lambda *args,**kwargs:dict(tickCompletedAt=self.now*1000+1000)
+        with self.assertRaisesRegex(RuntimeError,"did not advance"):
+            executor.execute(self._args(),"signed-token")
+        self.assertFalse(sysd.is_active(self.new_unit))
+        self.assertFalse(list(self.fx.receipts.glob("v12_v4-*.json")))
+
+    def test_missing_real_tick_times_out_without_live_receipt(self):
+        sysd=FakeSystemd(self.old_unit,self.new_unit)
+        executor=self._executor(sysd)
+        def timeout(*args,**kwargs):
+            raise RuntimeError("V4_REAL_DECISION_CYCLE_TIMEOUT")
+        executor.decision_observer=timeout
+        with self.assertRaisesRegex(RuntimeError,"REAL_DECISION_CYCLE_TIMEOUT"):
+            executor.execute(self._args(),"signed-token")
+        self.assertFalse(sysd.is_active(self.new_unit))
+        self.assertFalse(list(self.fx.receipts.glob("v12_v4-*.json")))
 
     def test_expired_activation_never_stops_old(self):
         d=json.loads(self.grant_file.read_text("utf8"))

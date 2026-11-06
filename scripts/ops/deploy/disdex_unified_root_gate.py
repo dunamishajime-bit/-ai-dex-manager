@@ -581,8 +581,8 @@ def _validate_venue_evidence(value: dict, *, now: int, label: str,
     return value
 
 
-def _validate_scoped_activation(activation: dict, args, desired: dict,
-                                plan_hash: str, *, now: int) -> dict:
+def _validate_scoped_activation_binding(activation: dict, args, desired: dict,
+                                       plan_hash: str) -> dict:
     required = {
         "schema", "repository", "deploymentTarget", "operatorTarget", "scope",
         "approvedSha", "approvedShaByRunner", "approvedRunners", "planSha256",
@@ -610,10 +610,64 @@ def _validate_scoped_activation(activation: dict, args, desired: dict,
     approved_at = activation["approvedAt"]
     expires_at = activation["expiresAt"]
     if (type(approved_at) is not int or type(expires_at) is not int
-        or approved_at > now + 5 or expires_at < now
+        or approved_at <= 0
         or not 1 <= expires_at - approved_at <= 86_400):
-        raise ValueError("operator activation artifact is expired or future dated")
+        raise ValueError("operator activation artifact time fields invalid")
     return activation
+
+
+def _validate_scoped_activation(activation: dict, args, desired: dict,
+                                plan_hash: str, *, now: int) -> dict:
+    _validate_scoped_activation_binding(activation,args,desired,plan_hash)
+    if activation['approvedAt'] > now+5 or activation['expiresAt'] <= now:
+        raise ValueError('operator activation artifact is expired or future dated')
+    return activation
+
+
+def build_shared_risk_root_activation(args, desired, authorization, *, now):
+    """Issue new root-native scope authority, never copy an owner artifact.
+
+    The authenticated, exact-plan execute request supplies the authority. This
+    record is not represented as an owner signature and cannot enable orders.
+    The caller must consume that request's nonce before publishing it.
+    """
+    validate(desired)
+    if (args.route != 'CODEX_SSH' or args.owner != CODEX_SSH_OPERATOR
+        or getattr(args, '_codex_ssh_authenticated', False) is not True
+        or args.scope != SHARED_RISK_SCOPE or args.orders_enabled != 'false'
+        or desired['scope'] != SHARED_RISK_SCOPE or desired['ordersEnabled'] is not False
+        or desired['sourceSha'] != args.sha or desired['runners'][SHARED_RISK_RUNNER] != args.sha
+        or hashlib.sha256(canonical(desired)).hexdigest() != args.plan_sha256
+        or authorization.get('authorizationMethod') != 'ROOT_SSH_SESSION'
+        or authorization.get('signatureVerified') is not False
+        or authorization.get('operator') != args.owner or authorization.get('sourceSha') != args.sha
+        or authorization.get('planSha256') != args.plan_sha256
+        or authorization.get('scope') != SHARED_RISK_SCOPE
+        or authorization.get('ordersEnabled') is not False
+        or type(authorization.get('issuedAt')) is not int
+        or type(authorization.get('expiresAt')) is not int
+        or not authorization['issuedAt'] <= now < authorization['expiresAt']
+        or not 1 <= authorization['expiresAt']-authorization['issuedAt'] <= 300):
+        raise ValueError('Shared Risk root-native approval binding or expiry invalid')
+    return dict(schema=EXECUTION_ACTIVATION_SCHEMA,repository=REPO,
+        deploymentTarget=DEPLOYMENT_TARGET,operatorTarget=OPERATOR_TARGET,
+        scope=SHARED_RISK_SCOPE,approvedSha=args.sha,approvedShaByRunner=desired['runners'],
+        approvedRunners=[SHARED_RISK_RUNNER],planSha256=args.plan_sha256,ordersEnabled=False,
+        operator=CODEX_SSH_OPERATOR,approvedAt=authorization['issuedAt'],
+        expiresAt=authorization['expiresAt'],operatorAcknowledgement=SHARED_RISK_ACK)
+
+
+def _publish_new_root_activation(path, value, *, root_uid):
+    assert_private_dir(path.parent, root_uid=root_uid)
+    fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o400)
+    try:
+        os.fchown(fd,root_uid,-1)
+        with os.fdopen(fd,'w',closefd=False) as f:
+            json.dump(value,f,sort_keys=True);f.write('\n');f.flush();os.fsync(fd)
+    finally:os.close(fd)
+    directory=os.open(path.parent,os.O_RDONLY)
+    try:os.fsync(directory)
+    finally:os.close(directory)
 
 
 class RootDeploymentExecutor:
@@ -628,7 +682,8 @@ class RootDeploymentExecutor:
                  systemd=None, verify_fn: Callable = verify,
                  clock: Callable[[], int] = lambda: int(time.time()),
                  sleep_fn: Callable[[float], None] = time.sleep,
-                 audit_reader: Optional[Callable[[int], dict]] = None):
+                 audit_reader: Optional[Callable[[int], dict]] = None,
+                 production_reader=None):
         self.paths = paths
         self.root_uid = root_uid
         self.systemd = systemd or SystemdAdapter()
@@ -636,14 +691,29 @@ class RootDeploymentExecutor:
         self.clock = clock
         self.sleep_fn = sleep_fn
         self.audit_reader = audit_reader
+        self.production_reader = production_reader
+        self._risk_audit_reader = None
+        self.monitor_wiring = None
 
-    def _read_current_sha(self, *, allow_legacy=False) -> str:
+    def _read_current_sha(self, *, allow_legacy=False, unchanged_identity_only=False) -> str:
         link = self.paths.current.lstat()
         if not stat.S_ISLNK(link.st_mode):
             raise ValueError("production current is not symlink")
         resolved = self.paths.current.resolve(strict=True)
         if resolved.parent != self.paths.releases or not SHA.fullmatch(resolved.name):
             raise ValueError("production current symlink escapes immutable releases")
+        if unchanged_identity_only:
+            # No-order Writer switch never executes through current or changes
+            # this pointer. Prove its unchanged root-controlled identity only;
+            # the new explicit Writer root still requires full release_marker.
+            directory=resolved.lstat()
+            marker=resolved/'.disdex-release-sha'
+            metadata=assert_regular_secure(marker,root_uid=self.root_uid,private=False)
+            if (link.st_uid!=self.root_uid or directory.st_uid!=self.root_uid
+                    or directory.st_mode&0o022 or metadata.st_mode&0o222
+                    or marker.read_text(encoding='ascii').strip()!=resolved.name):
+                raise ValueError('unchanged current identity is untrusted')
+            return resolved.name
         try:
             release_marker(resolved.name, self.paths.releases, root_uid=self.root_uid)
         except ValueError:
@@ -657,6 +727,28 @@ class RootDeploymentExecutor:
             payload = getattr(args, "_codex_ssh_authorization", None)
             if payload is None:
                 payload = build_codex_ssh_authorization(args, now=self.clock())
+            now = self.clock()
+            if (getattr(args, '_codex_ssh_authenticated', False) is not True
+                or args.owner != CODEX_SSH_OPERATOR
+                or payload.get('repository') != REPO
+                or payload.get('deploymentTarget') != DEPLOYMENT_TARGET
+                or payload.get('operatorTarget') != OPERATOR_TARGET
+                or payload.get('route') != 'CODEX_SSH'
+                or payload.get('operator') != args.owner
+                or payload.get('sourceSha') != args.sha
+                or payload.get('scope') != args.scope
+                or payload.get('planSha256') != args.plan_sha256
+                or type(payload.get('ordersEnabled')) is not bool
+                or payload['ordersEnabled'] != (args.orders_enabled == 'true')
+                or payload.get('authorizationMethod') != 'ROOT_SSH_SESSION'
+                or payload.get('signatureVerified') is not False
+                or not isinstance(payload.get('nonce'), str)
+                or not re.fullmatch(r'[a-f0-9]{32}', payload['nonce'])
+                or type(payload.get('issuedAt')) is not int
+                or type(payload.get('expiresAt')) is not int
+                or not payload['issuedAt'] <= now < payload['expiresAt']
+                or not 1 <= payload['expiresAt']-payload['issuedAt'] <= 300):
+                raise ValueError('Codex SSH approval expired or exact binding changed')
             if nonce_dir is not None:
                 _consume_codex_ssh_nonce(
                     nonce_dir, payload["nonce"], root_uid=self.root_uid)
@@ -677,6 +769,15 @@ class RootDeploymentExecutor:
             orders_enabled=args.orders_enabled == "true",
         )
 
+    def _assert_expected_pins(self, expected_pins):
+        actual = parse_live_pins(read_root_json(
+            self.paths.pins, root_uid=self.root_uid, private=False),
+            releases=self.paths.releases)
+        if actual != expected_pins:
+            raise ValueError("runner-pin manifest changed outside approved scope")
+        if self.monitor_wiring is not None:
+            self.monitor_wiring.assert_applied()
+
     def _audit(self, expected_pins: dict, new_unit: str, old_unit: str,
                baseline: dict, *, cycles: int = 3) -> list[dict]:
         if cycles < 3:
@@ -684,6 +785,15 @@ class RootDeploymentExecutor:
         observations = []
         previous_capture = None
         for cycle in range(cycles):
+            if self.production_reader is not None:
+                if self._risk_audit_reader is None:
+                    raise ValueError('Shared Risk real audit baseline missing')
+                value = self._risk_audit_reader(cycle)
+                if self.systemd.is_active(old_unit) or not self.systemd.is_active(new_unit):
+                    raise ValueError('writer mutual exclusion failed during real audit')
+                self._assert_expected_pins(expected_pins)
+                observations.append(value)
+                continue
             if cycle:
                 self.sleep_fn(1)
             value = (self.audit_reader(cycle) if self.audit_reader is not None
@@ -696,11 +806,7 @@ class RootDeploymentExecutor:
             previous_capture = observed["capturedAt"]
             if self.systemd.is_active(old_unit) or not self.systemd.is_active(new_unit):
                 raise ValueError("writer mutual exclusion failed during audit")
-            actual = parse_live_pins(read_root_json(
-                self.paths.pins, root_uid=self.root_uid, private=False),
-                releases=self.paths.releases)
-            if actual != expected_pins:
-                raise ValueError("runner-pin manifest changed outside approved scope")
+            self._assert_expected_pins(expected_pins)
             observations.append({
                 "cycle": cycle + 1,
                 "capturedAt": observed["capturedAt"],
@@ -810,7 +916,19 @@ class RootDeploymentExecutor:
         certify_live_executor()
         if args.deployment_target != DEPLOYMENT_TARGET or args.operator_target != OPERATOR_TARGET:
             raise ValueError("unapproved deployment target or identity")
+        if args.scope == 'V52':
+            from disdex_v52_scoped_root_cutover import V52ScopedRootExecutor
+            return V52ScopedRootExecutor(self).execute(args,token)
+        if args.scope == 'API_MONITORS':
+            from disdex_monitor_snapshot_cutover import MonitorSnapshotRootExecutor
+            return MonitorSnapshotRootExecutor(self).execute(args,token)
+        if args.scope == 'PENDING_RECONCILE_ONLY':
+            from disdex_pending_maintenance_install import install
+            return install(self,args,token)
         if args.scope == "V12_V4":
+            if args.orders_enabled == 'false':
+                from disdex_v4_monitor_cutover import V4MonitorRootExecutor
+                return V4MonitorRootExecutor(self).execute(args,token)
             # Lazy import keeps the shared-risk and V4 mutation boundaries
             # independent; the owner-signed scope selects the only executor.
             from disdex_v4_root_cutover import V4RootExecutor
@@ -821,6 +939,11 @@ class RootDeploymentExecutor:
             return self._execute_pengu_peer_stop(args, token)
         if args.scope != SHARED_RISK_SCOPE:
             raise ValueError("unsupported execution scope: " + str(args.scope))
+        if self.production_reader is None and self.paths.root == ROOT:
+            if self.audit_reader is not None:
+                raise ValueError('Production cannot substitute a static venue audit reader')
+            from disdex_shared_risk_witness import ProductionSharedRiskReader
+            self.production_reader = ProductionSharedRiskReader()
         orders_enabled = args.orders_enabled == "true"
         validate_order_permission(args.scope, orders_enabled)
         if orders_enabled:
@@ -844,7 +967,7 @@ class RootDeploymentExecutor:
         raw_pins = read_root_json(self.paths.pins,
                                   root_uid=self.root_uid, private=False)
         pins = parse_live_pins(raw_pins, releases=self.paths.releases)
-        current_sha = self._read_current_sha()
+        current_sha = self._read_current_sha(unchanged_identity_only=self.production_reader is not None)
         sha_hash, diff = validate_bootstrap_plan(desired, current_plan, pins, current_sha)
         if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
             raise ValueError("supplied SHA / plan hash differs from root plan")
@@ -855,19 +978,38 @@ class RootDeploymentExecutor:
             raise ValueError("Shared Risk scope exceeds exact plan delta")
         validate_release_roots(desired, self.paths.releases,
                                root_uid=self.root_uid)
-        for sha in set(desired["runners"].values()) | {desired["sourceSha"]}:
+        # Only the new Writer is being deployed. Legacy peers are frozen by
+        # actual PID/CWD/marker/permission readback, not granted a new release
+        # certificate or converted to the new ownership convention.
+        releases_to_certify = ({args.sha} if self.production_reader is not None else
+                              set(desired["runners"].values()) | {desired["sourceSha"]})
+        for sha in releases_to_certify:
             release_marker(sha, self.paths.releases, root_uid=self.root_uid)
 
         activation_path = (self.paths.activation_dir / args.scope / f"{args.sha}.json")
         assert_private_dir(activation_path.parent, root_uid=self.root_uid)
-        activation = read_root_json(activation_path,
-                                    root_uid=self.root_uid, private=True)
-        _validate_scoped_activation(activation, args, desired, sha_hash,
-                                    now=self.clock())
-        before = _validate_venue_evidence(
-            read_root_json(self.paths.venue_before,
-                           root_uid=self.root_uid, private=True),
-            now=self.clock(), label="before")
+        issue_root_activation = (self.production_reader is not None and args.route == 'CODEX_SSH'
+                                 and not activation_path.exists() and not activation_path.is_symlink())
+        if not issue_root_activation:
+            activation = read_root_json(activation_path,root_uid=self.root_uid,private=True)
+            _validate_scoped_activation(activation,args,desired,sha_hash,now=self.clock())
+        if self.production_reader is not None:
+            from disdex_shared_risk_audit import SharedRiskAuditReader
+            captured = self.production_reader.capture()
+            before = captured['witness']
+            context = captured['context']
+            self._risk_audit_reader = SharedRiskAuditReader(
+                expected_sha=args.sha,previous_risk=captured['riskSnapshot'],
+                baseline_peers=context['peers'],kill_hash=context['killHash'],
+                pending_hash=context['pendingHash'],read_risk=self.production_reader.read_risk,
+                read_context=self.production_reader.read_context,
+                signed_flat_get=lambda:self.production_reader.capture()['witness']['signedFlatProof'],
+                clock_ms=lambda:time.time_ns()//1000000,monotonic=time.monotonic,sleep=self.sleep_fn)
+        else:
+            before = _validate_venue_evidence(
+                read_root_json(self.paths.venue_before,
+                               root_uid=self.root_uid, private=True),
+                now=self.clock(), label="before")
 
         payload = self._verify_token(args, token)
         if payload.get("nonce") is None:
@@ -875,6 +1017,9 @@ class RootDeploymentExecutor:
         old_sha = pins[SHARED_RISK_RUNNER]
         old_unit = _unit_for_runner(SHARED_RISK_RUNNER, old_sha)
         new_unit = _unit_for_runner(SHARED_RISK_RUNNER, args.sha)
+        if self.production_reader is not None and self.paths.root == ROOT:
+            from disdex_shared_risk_monitor_wiring import SharedRiskMonitorWiring
+            self.monitor_wiring=SharedRiskMonitorWiring.production(old_sha,args.sha)
         if self.systemd.is_active(new_unit) or self.systemd.is_masked(new_unit):
             raise ValueError("new Shared Risk writer is already active or masked")
         if not self.systemd.is_active(old_unit) or self.systemd.is_masked(old_unit):
@@ -906,6 +1051,12 @@ class RootDeploymentExecutor:
             raise ValueError("approval replay") from None
         if consumed.get("nonce") != payload.get("nonce"):
             raise ValueError("approval nonce changed during verification")
+        if issue_root_activation:
+            activation=build_shared_risk_root_activation(args,desired,consumed,now=self.clock())
+            _validate_scoped_activation(activation,args,desired,sha_hash,now=self.clock())
+            # O_EXCL: no copy, overwrite, re-dating or conversion of a prior
+            # approval. A failed/expired existing artifact remains fail-closed.
+            _publish_new_root_activation(activation_path,activation,root_uid=self.root_uid)
 
         try:
             journal_path = self.paths.journal or self.paths.root / "transaction.json"
@@ -920,13 +1071,18 @@ class RootDeploymentExecutor:
                 "currentSymlinkSha": current_sha,
                 "oldPins": raw_pins,
                 "oldPlan": current_plan,
+                "oldMonitorWiring": self.monitor_wiring.journal() if self.monitor_wiring is not None else [],
             }, root_uid=self.root_uid)
             self.systemd.stop(old_unit)
             self.systemd.mask(old_unit)
+            if self.systemd.main_pid(old_unit)!=0:
+                raise RuntimeError('old Shared Risk writer still has a process after stop')
             _atomic_json(self.paths.pins, next_manifest, root_uid=self.root_uid,
                          private=False)
             _atomic_json(self.paths.current_plan, next_current_plan,
                          root_uid=self.root_uid)
+            if self.monitor_wiring is not None:
+                self.monitor_wiring.apply()
             if old_enabled:
                 self.systemd.enable(new_unit)
             self.systemd.start(new_unit)
@@ -985,6 +1141,8 @@ class RootDeploymentExecutor:
                              private=False)
                 _atomic_json(self.paths.current_plan, current_plan,
                              root_uid=self.root_uid)
+                if self.monitor_wiring is not None:
+                    self.monitor_wiring.restore()
                 if not self.systemd.is_active(old_unit):
                     self.systemd.start(old_unit)
                 journal_path = self.paths.journal or self.paths.root / "transaction.json"
@@ -1076,6 +1234,56 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
         raise ValueError("unapproved deployment target or identity")
     orders_enabled = args.orders_enabled == "true"
     validate_order_permission(args.scope, orders_enabled)
+    if args.scope == 'API_MONITORS':
+        from types import SimpleNamespace
+        from disdex_monitor_snapshot_cutover import MonitorSnapshotOperations
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',current=current,
+            releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem',
+            activation_dir=root/'activations',receipts=root/'receipts')
+        operations=MonitorSnapshotOperations(RootDeploymentExecutor(paths,root_uid=root_uid),args,token)
+        operations.prepare()
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=False,authorizesTrading=False,planSha256=args.plan_sha256,
+            changedRunners=[],unproven=['HEALTH_SNAPSHOT_SERVICE_SOURCE_CUTOVER','THREE_REAL_SNAPSHOT_CYCLES'],
+            verifiedContracts=['NO_ORDER_MONITOR_PREVIEW_EXACT_RUNTIME_PINS'])
+    if args.scope == 'V52':
+        from types import SimpleNamespace
+        from disdex_v52_scoped_root_cutover import V52ScopedOperations
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',current=current,
+            releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem',
+            activation_dir=root/'activations',receipts=root/'receipts')
+        operations=V52ScopedOperations(RootDeploymentExecutor(paths,root_uid=root_uid),args,token)
+        operations.prepare()
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=True,effectiveNewOrdersAllowed=False,
+            phase='PROTECTED_HOLD',authorizesKillClearance=False,planSha256=args.plan_sha256,
+            changedRunners=['V52'],unproven=['SCOPED_SYSTEMD_CUTOVER','THREE_REAL_PROTECTED_HOLD_TICKS'],
+            verifiedContracts=['V52_INDEPENDENT_AUTHORITY_SIGNED_FLAT_READONLY_PREFLIGHT'])
+    if args.scope == 'V12_V4' and not orders_enabled:
+        from types import SimpleNamespace
+        from disdex_v4_monitor_cutover import V4MonitorOperations
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',current=current,
+            releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem',
+            activation_dir=root/'activations',receipts=root/'receipts')
+        operations=V4MonitorOperations(RootDeploymentExecutor(paths,root_uid=root_uid),args,token)
+        operations.prepare()
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=False,phase='MONITOR_ONLY',planSha256=args.plan_sha256,
+            changedRunners=['V12_V4'],unproven=['MONITOR_UNIT_CUTOVER','THREE_REAL_READONLY_DECISION_TICKS'],
+            verifiedContracts=['DORMANT_V4_SIGNED_FLAT_DURABLE_REPLAY_NO_ORDER_PREFLIGHT'])
+    if args.scope == 'PENDING_RECONCILE_ONLY':
+        # Dedicated no-order scope freezes all existing deployment identities.
+        # Its source SHA identifies the GET-only maintenance SDK, not a Runner.
+        from types import SimpleNamespace
+        from disdex_pending_maintenance_install import prepare
+        paths=SimpleNamespace(root=root,pins=pins_path,current_plan=root/'current-plan.json',
+            current=current,releases=releases,nonce_dir=root/'nonces',public_key=root/'owner-approval-public.pem')
+        parent=RootDeploymentExecutor(paths,root_uid=root_uid)
+        prepared=prepare(parent,args,token)
+        return dict(status='READONLY_PREFLIGHT_PASS_NOT_LIVE',scope=args.scope,route=args.route,
+            targetSha=args.sha,ordersEnabled=False,planSha256=args.plan_sha256,changedRunners=[],
+            unproven=['ROOT_SERVICE_INSTALLATION','THREE_DISTINCT_SCHEDULED_SIGNED_RECONCILIATIONS'],
+            verifiedContracts=['PINNED_GET_ONLY_MAINTENANCE_PREFLIGHT'])
     codex_ssh = args.route == "CODEX_SSH"
     if codex_ssh:
         if (args.owner != CODEX_SSH_OPERATOR
@@ -1114,7 +1322,23 @@ def preflight(args, token, *, root=ROOT, pins_path=PINS, current=CURRENT,
             desired, current_plan, pins, resolved.name)
     if sha_hash != args.plan_sha256 or desired["sourceSha"] != args.sha:
         raise ValueError("supplied SHA / plan hash differs from root plan")
-    if args.scope == "V12_V4":
+    if args.scope == SHARED_RISK_SCOPE and root == ROOT:
+        if (diff['changedRunners'] != [SHARED_RISK_RUNNER]
+            or diff['uiChanged'] or diff['monitorChanged'] or diff['releaseRootsChanged']
+            or desired['runners'].get(SHARED_RISK_RUNNER) != args.sha
+            or desired['releaseRoots']['runners'] != str(releases)):
+            raise ValueError('Shared Risk preflight exceeds exact no-order delta')
+        from types import SimpleNamespace
+        identity=RootDeploymentExecutor(SimpleNamespace(current=current,releases=releases),root_uid=root_uid)
+        if identity._read_current_sha(unchanged_identity_only=True) != resolved.name:
+            raise ValueError('unchanged current identity differs')
+        release_marker(args.sha,releases,root_uid=root_uid)
+        validate_release_roots(desired,releases,root_uid=root_uid)
+        from disdex_shared_risk_witness import ProductionSharedRiskReader
+        from disdex_shared_risk_monitor_wiring import SharedRiskMonitorWiring
+        SharedRiskMonitorWiring.production(pins[SHARED_RISK_RUNNER],args.sha)
+        ProductionSharedRiskReader().capture()
+    elif args.scope == "V12_V4":
         # V4 is a trust-boundary migration from legacy deploy-owned peer/current
         # releases. Do not require rewriting unchanged peer/UI releases merely
         # to satisfy the new root-owned convention. The signed plan freezes
@@ -1225,24 +1449,12 @@ def main():
             if len(raw) > 16384:
                 raise ValueError("owner approval too large")
         if args.execute:
-            # Exclusive root-owned lock across GitHub Actions / CODEX_SSH paths.
-            # An Actions concurrency group alone cannot serialize VPS writers.
-            import fcntl
-            assert_private_dir(ROOT, root_uid=0)
-            lock_path = ROOT / "deployment-execution.lock"
-            if lock_path.is_symlink():
-                raise ValueError("untrusted deployment lock symlink")
-            fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
-            try:
-                assert_regular_secure(lock_path, root_uid=0, private=True)
-                try:
-                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                except BlockingIOError:
-                    raise ValueError("another root deployment is in progress") from None
+            from disdex_deployment_serialization import deployment_lock
+            # API monitor writers remain exclusive with each other and with
+            # trading cutovers, but must not starve shared no-order maintenance.
+            with deployment_lock(ROOT,args.scope,args.orders_enabled=='true'):
                 result = RootDeploymentExecutor(default_execution_paths()).execute(
                     args, raw.strip())
-            finally:
-                os.close(fd)
         else:
             result = preflight(args, raw.strip())
         print(json.dumps(result, sort_keys=True))

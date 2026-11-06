@@ -104,6 +104,18 @@ class PlanTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "HP-only"):
             digest(wanted, current)
 
+    def test_hp_only_allows_a_new_ui_release_root_and_rejects_non_ui_roots(self):
+        current = plan("FULL_PROJECT")
+        wanted = plan("HP_ONLY")
+        wanted["uiSha"] = NEW
+        wanted["releaseRoots"]["ui"] = "/home/deploy/disdex-trading/ui-releases/next-ui"
+        self.assertTrue(digest(wanted, current)[1]["releaseRootsChanged"])
+        for role in ("runners", "monitor"):
+            altered = copy.deepcopy(wanted)
+            altered["releaseRoots"][role] += "-other"
+            with self.subTest(role=role), self.assertRaisesRegex(ValueError, "HP-only"):
+                digest(altered, current)
+
     def test_monitor_only(self):
         current = plan("FULL_PROJECT")
         wanted = plan("API_MONITORS")

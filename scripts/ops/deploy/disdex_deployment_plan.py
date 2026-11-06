@@ -86,18 +86,22 @@ def approve_diff(desired, current):
     monitor_changed = desired["monitorSha"] != current["monitorSha"]
     release_roots_changed = desired["releaseRoots"] != current["releaseRoots"]
     scope = desired["scope"]
+    maintenance = scope == "PENDING_RECONCILE_ONLY"
+    if maintenance and (changed or ui_changed or monitor_changed or release_roots_changed):
+        raise ValueError("pending maintenance cannot modify deployment pins or roots")
     if scope == "V4_EVIDENCE_REFRESH_ONLY" and (changed or ui_changed or monitor_changed or release_roots_changed):
         raise ValueError("refresh-only scope cannot modify deployment pins")
     if scope in INDIVIDUAL and (changed - {INDIVIDUAL[scope]} or ui_changed
                                 or monitor_changed or release_roots_changed):
         raise ValueError("scope exceeds approved runner")
-    if scope == "HP_ONLY" and (changed or monitor_changed
-                                or desired["releaseRoots"]["ui"] != current["releaseRoots"]["ui"]):
+    if scope == "HP_ONLY" and (changed or monitor_changed or any(
+            desired["releaseRoots"][role] != current["releaseRoots"][role]
+            for role in ("runners", "monitor"))):
         raise ValueError("HP-only scope modifies trading/runtime")
     if scope == "API_MONITORS" and (changed or ui_changed
-                                     or desired["releaseRoots"]["monitor"] != current["releaseRoots"]["monitor"]):
+                                     or any(desired["releaseRoots"][key] != current["releaseRoots"][key] for key in ("runners", "ui"))):
         raise ValueError("monitor-only scope modifies trading/UI")
-    if not changed and not ui_changed and not monitor_changed:
+    if not changed and not ui_changed and not monitor_changed and not maintenance:
         raise ValueError("no deployment differences")
     return dict(changedRunners=sorted(changed), uiChanged=ui_changed,
                 monitorChanged=monitor_changed,

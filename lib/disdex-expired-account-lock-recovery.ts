@@ -27,6 +27,7 @@ type RecoveryInput = RecoveryInspectionOptions & {
   lockPath: string;
   archiveDir: string;
   requestId: string;
+  expectedSha256?: string;
 };
 
 function object(value: unknown): Record<string, unknown> {
@@ -86,6 +87,9 @@ export async function archiveExpiredAccountOrderLock(input: RecoveryInput): Prom
   const metadata = await lstat(lockPath);
   if (!metadata.isFile() || metadata.isSymbolicLink()) throw new Error("ACCOUNT_LOCK_NOT_REGULAR_FILE");
   const bytes = await readFile(lockPath);
+  if(input.expectedSha256!==undefined && (!/^[a-f0-9]{64}$/.test(input.expectedSha256)
+    || createHash('sha256').update(bytes).digest('hex')!==input.expectedSha256))
+    throw new Error('ACCOUNT_LOCK_EXPECTED_HASH_MISMATCH');
   const raw = JSON.parse(bytes.toString("utf8")) as unknown;
   const inspection = inspectExpiredAccountOrderLock(raw, input);
   await mkdir(archiveDir, { recursive: true, mode: 0o700 });
@@ -94,6 +98,10 @@ export async function archiveExpiredAccountOrderLock(input: RecoveryInput): Prom
     archiveDir,
     `${new Date(input.now).toISOString().replace(/[:.]/g, "-")}-${safeRequestId(input.requestId)}-${randomUUID()}.json`,
   );
+  const current=await lstat(lockPath);
+  if(current.dev!==metadata.dev||current.ino!==metadata.ino||current.uid!==metadata.uid
+    ||current.gid!==metadata.gid||current.mode!==metadata.mode||current.size!==metadata.size
+    ||!(await readFile(lockPath)).equals(bytes))throw new Error('ACCOUNT_LOCK_CHANGED_BEFORE_ARCHIVE');
   await rename(lockPath, archivePath);
   await chmod(archivePath, 0o600);
   const archived = await readFile(archivePath);
@@ -113,10 +121,13 @@ export async function archiveExpiredAccountOrderLock(input: RecoveryInput): Prom
 }
 
 export function accountLockOwnerPid(ownerId: string): number {
-  const match = /:([0-9]+)$/.exec(ownerId);
+  const idle = /^IDLE_PRIORITY_SHORT:([1-9][0-9]*):([1-9][0-9]*)$/.exec(ownerId);
+  if(idle && (!Number.isSafeInteger(Number(idle[2]))||Number(idle[2])<1_000_000_000_000))
+    throw new Error('ACCOUNT_LOCK_OWNER_PID_INVALID');
+  const match = idle ?? /^[A-Z0-9_]+:([0-9]+)$/.exec(ownerId);
   if (!match) throw new Error("ACCOUNT_LOCK_OWNER_PID_MISSING");
   const pid = Number(match[1]);
-  if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error("ACCOUNT_LOCK_OWNER_PID_INVALID");
+  if (!Number.isSafeInteger(pid) || pid <= 0 || pid>2_147_483_647) throw new Error("ACCOUNT_LOCK_OWNER_PID_INVALID");
   return pid;
 }
 

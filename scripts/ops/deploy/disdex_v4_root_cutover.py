@@ -38,6 +38,116 @@ RUNTIME_SCHEMA = "disdex-live-operator-activation/v1"
 RUNTIME_TARGET = "DD1296_FINAL_ALLIN_10BPS"
 RUNTIME_APPROVAL = Path("/var/lib/disdex/shared/operator-activation/v12-v4-full.json")
 
+def validate_v4_decision_cycle(health, tick, *, sha, pid, release, now_ms,
+                               started_after_ms, previous_tick):
+    """Bind one completed strategy cycle to the current immutable process.
+
+    A healthy NO_SIGNAL is sufficient; this check never requires a test trade.
+    Supervisor timestamps and repeated GET witnesses are not decision cycles.
+    """
+    if not isinstance(health, dict) or not isinstance(tick, dict) or type(pid) is not int or pid <= 0:
+        raise ValueError("V4_DECISION_PROCESS_INVALID")
+    identity = dict(runnerId=V4_RUNNER, runtimeSha=sha, expectedSha=sha,
+                    serviceUnit=_unit_for_runner(V4_RUNNER, sha), mainPid=pid,
+                    workingDirectory=str(release))
+    if any(row.get(k) != v for row in (health, tick) for k, v in identity.items()):
+        raise ValueError("V4_DECISION_IDENTITY_MISMATCH")
+    if (tick.get("schema") != "disdex-runner-tick/v1"
+            or health.get("schema") != "disdex-v12-v4-runner-heartbeat/v1"
+            or health.get("releaseSha") != sha):
+        raise ValueError("V4_DECISION_SCHEMA_MISMATCH")
+    if (health.get("mode") != "LIVE" or health.get("liveEnabled") is not True
+            or health.get("limitedLive") is not False
+            or health.get("safetyState") != "HEALTHY"):
+        raise ValueError("V4_DECISION_NOT_HEALTHY_FULL_LIVE")
+    start, end, heartbeat = (tick.get("tickStartedAt"), tick.get("tickCompletedAt"),
+                             health.get("heartbeatAt"))
+    if (any(type(t) is not int or t <= 0 for t in (start, end, heartbeat))
+            or not started_after_ms <= start <= end <= heartbeat <= now_ms + 1000
+            or now_ms - end > 180000 or now_ms - heartbeat > 180000
+            or (previous_tick is not None and (end <= previous_tick or start < previous_tick))
+            or health.get("lastTickAt") != end):
+        raise ValueError("V4_DECISION_TICK_INVALID_OR_NOT_ADVANCED")
+    if (type(tick.get("newOrdersAllowed")) is not bool
+            or type(health.get("ordersAllowed")) is not bool
+            or health.get("orderEnabled") is not health.get("ordersAllowed")
+            or tick["newOrdersAllowed"] is not health["ordersAllowed"]):
+        raise ValueError("V4_DECISION_PERMISSION_MISMATCH")
+    return dict(tickStartedAt=start, tickCompletedAt=end, heartbeatAt=heartbeat,
+                mainPid=pid, runtimeSha=sha, serviceUnit=identity["serviceUnit"],
+                workingDirectory=str(release), ordersAllowed=health["ordersAllowed"])
+
+
+def await_v4_decision_cycle(systemd, *, sha, release, pid, started_after_ms,
+                             previous_tick, sleeper=time.sleep, clock=time.time,
+                             monotonic=time.monotonic, timeout=180):
+    """Read actual files/proc only; never manufacture or advance a marker."""
+    from disdex_v4_venue_witness import _secure_json, V4_HEARTBEAT
+    tick_path = Path("/var/lib/disdex/runner-health/ticks/v12-v4.json")
+    unit = _unit_for_runner(V4_RUNNER, sha)
+    deadline = monotonic() + timeout
+    while monotonic() < deadline:
+        if (systemd.active_state(unit) != "active" or systemd.main_pid(unit) != pid
+                or systemd._state(unit, "NRestarts") != "0"):
+            raise RuntimeError("V4_DECISION_PROCESS_RESTARTED_OR_INACTIVE")
+        if (systemd._state(unit, "WorkingDirectory") != str(release)
+                or Path("/proc", str(pid), "cwd").resolve(strict=True) != Path(release)):
+            raise RuntimeError("V4_DECISION_ACTUAL_CWD_MISMATCH")
+        command = Path("/proc", str(pid), "cmdline").read_bytes().split(b"\0")
+        try:
+            command = [x.decode("utf-8", errors="strict") for x in command if x]
+        except UnicodeDecodeError:
+            raise RuntimeError("V4_DECISION_ACTUAL_EXECUTABLE_MISMATCH") from None
+        expected_command = ["/usr/bin/node", "--import",
+            str(Path(release)/"node_modules/tsx/dist/loader.mjs"),
+            str(Path(release)/"scripts/v12-v4-production-runner.ts"), "--daemon"]
+        if command != expected_command:
+            raise RuntimeError("V4_DECISION_ACTUAL_EXECUTABLE_MISMATCH")
+        # Existing runner markers are deploy-owned, never group/world writable.
+        # Ownership is checked against the actual process UID, not a fixed user.
+        process_uid = Path("/proc", str(pid)).stat().st_uid
+        try:
+            for path in (V4_HEARTBEAT, tick_path):
+                if path.lstat().st_uid not in (0, process_uid):
+                    raise ValueError("V4_DECISION_MARKER_OWNER_MISMATCH")
+            health = _secure_json(V4_HEARTBEAT, require_root=False)
+            tick = _secure_json(tick_path, require_root=False)
+        except FileNotFoundError:
+            sleeper(2)
+            continue
+        # Old markers and the tick-before-heartbeat publication window do not
+        # count. They may resolve within the bounded startup deadline.
+        if (tick.get("runtimeSha") != sha or health.get("runtimeSha") != sha
+                or health.get("lastTickAt") != tick.get("tickCompletedAt")
+                or (type(tick.get('tickCompletedAt')) is int and tick['tickCompletedAt']<started_after_ms)
+                or (previous_tick is not None and tick.get("tickCompletedAt") == previous_tick)):
+            sleeper(2)
+            continue
+        now_ms=int(clock()*1000)
+        try:
+            return validate_v4_decision_cycle(health, tick, sha=sha, pid=pid,
+                release=release, now_ms=now_ms, started_after_ms=started_after_ms,
+                previous_tick=previous_tick)
+        except ValueError as error:
+            # Identity/schema checks precede this exact error. A genuine
+            # completed lock-busy cycle stays BLOCKED and is never an audit
+            # success. Wait within the same deadline for a healthy cycle.
+            start,end,heartbeat=tick.get('tickStartedAt'),tick.get('tickCompletedAt'),health.get('heartbeatAt')
+            busy=(str(error)=='V4_DECISION_NOT_HEALTHY_FULL_LIVE'
+                and health.get('mode')=='LIVE' and health.get('liveEnabled') is True
+                and health.get('limitedLive') is False and health.get('safetyState')=='BLOCKED'
+                and all(row.get('status')=='locked' and row.get('reason')=='SHARED_ACCOUNT_LOCK_BUSY' for row in (health,tick))
+                and health.get('ordersAllowed') is False and health.get('orderEnabled') is False
+                and tick.get('newOrdersAllowed') is False
+                and all(type(t) is int and t>0 for t in (start,end,heartbeat))
+                and started_after_ms<=start<=end<=heartbeat<=now_ms+1000
+                and now_ms-end<=180000 and now_ms-heartbeat<=180000
+                and (previous_tick is None or (end>previous_tick and start>=previous_tick)))
+            if not busy:raise
+            sleeper(2)
+    raise RuntimeError("V4_REAL_DECISION_CYCLE_TIMEOUT")
+
+
 def _legacy_transition_current_sha(paths) -> str:
     """Read exact production current SHA without blessing legacy ownership.
 
@@ -153,11 +263,12 @@ class V4RootExecutor:
 
     def __init__(self, common, *, runtime_approval=RUNTIME_APPROVAL,
                  witness_collector=collect_v4_venue_evidence,
-                 sleeper=time.sleep):
+                 sleeper=time.sleep, decision_observer=None):
         self.common = common
         self.runtime_approval = Path(runtime_approval)
         self.witness_collector = witness_collector
         self.sleeper = sleeper
+        self.decision_observer = decision_observer or await_v4_decision_cycle
 
     def _peer_stop_approvals(self, pins, now):
         """Load only the owner-derived certificate for an inactive PENGU peer."""
@@ -320,6 +431,7 @@ class V4RootExecutor:
 
         journal = paths.journal or paths.root / "transaction.json"
         changes_started = False
+        candidate_start_attempted = False
         try:
             _atomic_json(journal, {
                 "schema": "disdex-unified-deploy-transaction/v1",
@@ -342,6 +454,8 @@ class V4RootExecutor:
                          root_uid=c.root_uid, trusted_parent=True)
             if old_enabled:
                 c.systemd.enable(new_unit)
+            audit_started_at_ms = c.clock()*1000
+            candidate_start_attempted = True
             c.systemd.start(new_unit)
             if c.systemd.is_active(old_unit) or not c.systemd.is_active(new_unit):
                 raise RuntimeError("V4 writer mutual exclusion failed")
@@ -353,8 +467,18 @@ class V4RootExecutor:
             }, root_uid=c.root_uid)
             observed = []
             previous_captured = before["capturedAt"]
+            previous_tick = None
+            audited_pid = c.systemd.main_pid(new_unit)
             for cycle in range(3):
-                self.sleeper(1)
+                if c.systemd.is_active(old_unit):
+                    raise RuntimeError("V4 duplicate writer during decision audit")
+                decision = self.decision_observer(c.systemd, sha=args.sha,
+                    release=release, pid=audited_pid, started_after_ms=audit_started_at_ms,
+                    previous_tick=previous_tick, sleeper=self.sleeper, clock=c.clock)
+                if (type(decision.get("tickCompletedAt")) is not int
+                        or (previous_tick is not None and decision["tickCompletedAt"] <= previous_tick)):
+                    raise RuntimeError("V4 decision observer did not advance")
+                previous_tick = decision["tickCompletedAt"]
                 after = _validate_venue_evidence(
                     self.witness_collector(
                         sha=args.sha, expected_pins=expected, phase="after",
@@ -367,6 +491,7 @@ class V4RootExecutor:
                     raise RuntimeError("V4 post-cutover witness did not advance")
                 previous_captured = after["capturedAt"]
                 _atomic_json(paths.venue_after, after, root_uid=c.root_uid)
+                after["decisionCycle"] = decision
                 observed.append(after)
             receipt = {
                 "schema": "disdex-unified-deploy-receipt/v1",
@@ -391,6 +516,34 @@ class V4RootExecutor:
         except Exception as exc:
             if not changes_started:
                 raise
+            # Once a full-LIVE start was attempted, exit code/GET failure does
+            # not prove the new process never submitted an order. Keep its
+            # ownership/state binding intact and block both processes until a
+            # fresh venue + durable compatibility recovery is approved. Never
+            # copy an old runtime artifact or restart an old SHA over unknown
+            # new STOP/intent ownership. Native protection orders are untouched.
+            if candidate_start_attempted:
+                try:
+                    if c.systemd.is_active(new_unit):
+                        c.systemd.stop(new_unit)
+                    if c.systemd.is_enabled(new_unit):
+                        c.systemd.disable(new_unit)
+                    c.systemd.mask(new_unit)
+                    if c.systemd.is_active(old_unit) or c.systemd.is_active(new_unit):
+                        raise RuntimeError("V4 recovery process still active")
+                    _atomic_json(journal, {
+                        "schema": "disdex-unified-deploy-transaction/v1",
+                        "phase": "RECOVERY_REQUIRED_PROTECTED", "scope": V4_SCOPE,
+                        "reason": str(exc)[:240], "oldSha": old_sha, "newSha": args.sha,
+                        "oldUnit": old_unit, "newUnit": new_unit,
+                        "oldSourceRestartAuthorized": False,
+                        "candidateOwnershipRetained": True,
+                        "requiresFreshVenueAndDurableCompatibility": True,
+                        "venueMutationsByRecovery": False,
+                    }, root_uid=c.root_uid)
+                except Exception as recovery_error:
+                    raise RuntimeError("V4 recovery isolation failed: " + str(recovery_error)) from exc
+                raise RuntimeError("V4 cutover failed closed; recovery required: " + str(exc)) from exc
             try:
                 if c.systemd.is_active(new_unit):
                     c.systemd.stop(new_unit)

@@ -11,6 +11,96 @@ SHA="a"*40
 OLD="7"*40
 
 class VenueWitnessContractTest(unittest.TestCase):
+    def test_v4_health_is_owned_by_the_actual_deploy_process_not_the_supervisor(self):
+        from types import SimpleNamespace
+        with patch.object(Path,'lstat',return_value=SimpleNamespace(st_uid=1000)),patch.object(Path,'stat',return_value=SimpleNamespace(st_uid=1000)),patch.object(m,'_secure_json',return_value={'fixture':True}) as read:
+            self.assertEqual(m.read_v4_health(4242),{'fixture':True})
+        self.assertEqual(read.call_args.kwargs,{'require_root':False})
+        with patch.object(Path,'lstat',return_value=SimpleNamespace(st_uid=999)),patch.object(Path,'stat',return_value=SimpleNamespace(st_uid=1000)):
+            with self.assertRaises(ValueError):m.read_v4_health(4242)
+    def test_shared_runtime_metadata_is_not_an_operator_artifact(self):
+        good=dict(uid=1000,gid=1000,mode=0o100600,parent_uid=1000,parent_gid=1000,parent_mode=0o40770)
+        for path in [m.RISK,m.MARGIN,m.KILL,m.PENDING]:
+            self.assertTrue(m.validate_shared_runtime_metadata(path,**good,deploy_uid=1000,deploy_gid=1000))
+            self.assertTrue(m.validate_shared_runtime_metadata(path,**dict(good,mode=0o100660),deploy_uid=1000,deploy_gid=1000))
+        for key,value in [('uid',999),('gid',999),('mode',0o100666),('parent_uid',999),('parent_mode',0o40777)]:
+            with self.subTest(key=key),self.assertRaises(ValueError):
+                m.validate_shared_runtime_metadata(m.MARGIN,**dict(good,**{key:value}),deploy_uid=1000,deploy_gid=1000)
+        with self.assertRaises(ValueError):
+            m.validate_shared_runtime_metadata(Path('/etc/disdex/approval.json'),**good,deploy_uid=1000,deploy_gid=1000)
+    def bounded_snapshot(self,now=2_000_000_000_000):
+        from datetime import datetime,timezone
+        captured=datetime.fromtimestamp((now-1000)/1000,timezone.utc).isoformat(timespec="milliseconds").replace("+00:00","Z")
+        keys=["establishedAsterOrders","signedAsterAccount","sharedRiskAndPeers"]
+        return dict(status="V4_BOUNDED_EVIDENCE_SNAPSHOT_VERIFIED",candidateSha=SHA,
+            certificateSchema="disdex-v12-v4-production-certification/v4",
+            certificateValidUntilMs=now+600000,leaseExpiresAtMs=now+60000,
+            capturedAt=captured,capturedAtMs=now-1000,refreshGeneration="generation-1",
+            evidencePayloads={k:dict(candidateSha=SHA,status="PASS",capturedAt=captured,
+                refreshGeneration="generation-1") for k in keys})
+
+    def test_bounded_snapshot_uses_one_real_source_generation(self):
+        raw=self.bounded_snapshot()
+        self.assertIs(m.validate_bounded_snapshot(raw,SHA,2_000_000_000_000),raw)
+
+    def test_bounded_snapshot_cannot_rewrap_old_wrong_sha_or_mixed_proofs_as_fresh(self):
+        now=2_000_000_000_000
+        for field,value in [("capturedAtMs",now-180001),("capturedAtMs",now+1),
+            ("candidateSha",OLD),("certificateSchema","disdex-v12-v4-production-certification/v3"),
+            ("status","PASS"),("leaseExpiresAtMs",now),("certificateValidUntilMs",now-1)]:
+            raw=self.bounded_snapshot();raw[field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):m.validate_bounded_snapshot(raw,SHA,now)
+        for field,value in [("refreshGeneration","generation-0"),("capturedAt","2000-01-01T00:00:00.000Z"),
+                             ("candidateSha",OLD),("status","FAIL")]:
+            raw=self.bounded_snapshot();raw["evidencePayloads"]["signedAsterAccount"][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):m.validate_bounded_snapshot(raw,SHA,now)
+
+    def test_preflight_reads_candidate_certificate_and_atomic_commit_not_legacy_files(self):
+        command=m.bounded_evidence_command(SHA,Path('/home/deploy/disdex-trading/releases')/SHA)
+        self.assertEqual(command[:2],["/usr/bin/node","--import"])
+        script=command[-2]
+        for required in ["readV4ProductionCertificate","validateV4RefreshCommit","refresh-commit.json","O_NOFOLLOW"]:
+            self.assertIn(required,script)
+        self.assertNotIn("disdex-v12-v4-evidence-preflight.mjs",command)
+
+    def test_collector_keeps_source_capture_time_and_never_reads_old_dynamic_files(self):
+        now=2_000_000_000_000;raw=self.bounded_snapshot(now)
+        payloads=raw["evidencePayloads"]
+        for k in ["establishedAsterOrders","signedAsterAccount"]:
+            payloads[k].update(readOnly=True,mutationCalls=0,positions=[],openOrders=[])
+        payloads["signedAsterAccount"]["signedGet"]=True
+        payloads["sharedRiskAndPeers"].update(sharedRiskHealthy=True,marginGuardHealthy=True,killSwitch=False,pendingCount=0)
+        with patch.object(m.os,"geteuid",return_value=0,create=True), \
+            patch.object(m,"_assert_release",return_value=m.RELEASES/SHA), \
+            patch.object(m,"refresh_and_preflight",return_value=raw), \
+            patch.object(m,"_assert_runtime_health",return_value=({"maximumLossPct":7.5},[])), \
+            patch.object(m,"validate_units_and_ticks"), \
+            patch.object(m,"_secure_json",side_effect=AssertionError("legacy dynamic file read")):
+            proof=m.collect_v4_venue_evidence(sha=SHA,expected_pins={},phase="before",now=now//1000)
+        self.assertEqual(proof["capturedAt"],(now-1000)//1000)
+        self.assertEqual(proof["expiresAt"],(now-1000)//1000+180)
+        self.assertNotEqual(proof["capturedAt"],now//1000)
+        self.assertTrue(proof["signatureVerified"])
+
+    def test_quantity_coverage_and_nonempty_client_id_do_not_prove_stop_ownership(self):
+        now=2_000_000_000_000;raw=self.bounded_snapshot(now)
+        payloads=raw["evidencePayloads"]
+        position={"symbol":"DOGEUSDT","positionSide":"BOTH","positionAmt":"-226","entryPrice":"0.08"}
+        stop={"symbol":"DOGEUSDT","clientOrderId":"UNRECOGNIZED_OWNER","orderId":"123",
+            "side":"BUY","type":"STOP_MARKET","origQty":"226","executedQty":"0",
+            "reduceOnly":True,"status":"NEW","stopPrice":"0.09"}
+        for k in ["establishedAsterOrders","signedAsterAccount"]:
+            payloads[k].update(readOnly=True,mutationCalls=0,positions=[position],openOrders=[stop])
+        payloads["signedAsterAccount"]["signedGet"]=True
+        payloads["sharedRiskAndPeers"].update(sharedRiskHealthy=True,marginGuardHealthy=True,killSwitch=False,pendingCount=0)
+        with patch.object(m.os,"geteuid",return_value=0,create=True), \
+            patch.object(m,"_assert_release",return_value=m.RELEASES/SHA), \
+            patch.object(m,"refresh_and_preflight",return_value=raw), \
+            patch.object(m,"_assert_runtime_health",return_value=({"maximumLossPct":7.5},[])), \
+            patch.object(m,"validate_units_and_ticks"):
+            with self.assertRaisesRegex(ValueError,"OWNERSHIP_NOT_CERTIFIED"):
+                m.collect_v4_venue_evidence(sha=SHA,expected_pins={},phase="before",now=now//1000)
+
     def _peer_stop_approval(self, now):
         return {
             "schema": "disdex-peer-stop-approval/v1",
@@ -92,6 +182,23 @@ class VenueWitnessContractTest(unittest.TestCase):
             "heartbeatAt":now_ms-(180_000 if stale else 1_000),
             "lastTickAt":now_ms-1_000,
         }
+
+    def test_full_live_healthy_no_signal_does_not_require_an_order(self):
+        now=2_000_000_000_000
+        pins=self._pins();pins["V12_V4"]=SHA
+        def systemd(unit,prop):
+            return "active" if prop=="ActiveState" else "4242"
+        def secure(path,*args,**kwargs):
+            if path==m.V4_HEARTBEAT:
+                return dict(schema="disdex-v12-v4-runner-heartbeat/v1",
+                    releaseSha=SHA,runtimeSha=SHA,expectedSha=SHA,
+                    serviceUnit=f"disdex-v12-v4@{SHA}.service",mainPid=4242,
+                    mode="LIVE",liveEnabled=True,limitedLive=False,safetyState="HEALTHY",
+                    orderEnabled=False,ordersAllowed=False,
+                    heartbeatAt=now-500,lastTickAt=now-1000)
+            return self._fake_hb(path,now)
+        with patch.object(m,"_systemd",side_effect=systemd),patch.object(m,"_secure_json",side_effect=secure),patch.object(m,"read_v4_health",side_effect=lambda pid:secure(m.V4_HEARTBEAT)):
+            m.validate_units_and_ticks(pins,"after",SHA,now)
 
     def test_before_requires_every_peer_active_and_fresh(self):
         now=2_000_000_000_000

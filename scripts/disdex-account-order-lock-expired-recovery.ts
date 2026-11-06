@@ -60,6 +60,9 @@ async function main() {
   const apply = process.argv.includes("--apply");
   const verifyOnly = process.argv.includes("--verify-only");
   if (apply === verifyOnly) throw new Error("EXPIRED_ACCOUNT_LOCK_RECOVERY_REQUIRES_EXACTLY_ONE_MODE");
+  if(apply && process.getuid?.()!==0)throw Error('EXPIRED_ACCOUNT_LOCK_RECOVERY_ROOT_REQUIRED');
+  const expectedSha256=arg('--expected-sha256');
+  if(apply && !/^[a-f0-9]{64}$/.test(expectedSha256))throw Error('EXPIRED_ACCOUNT_LOCK_RECOVERY_EXPECTED_HASH_REQUIRED');
   const allowMissingOwnerPid = process.argv.includes("--allow-missing-owner-pid");
   if (apply && arg("--ack") !== ACK && arg("--ack") !== MISSING_PID_ACK) throw new Error("EXPIRED_ACCOUNT_LOCK_RECOVERY_ACK_REQUIRED");
 
@@ -97,6 +100,7 @@ async function main() {
   }
 
   const result = await archiveExpiredAccountOrderLock({
+    expectedSha256,
     lockPath,
     archiveDir,
     expectedOwnerId,

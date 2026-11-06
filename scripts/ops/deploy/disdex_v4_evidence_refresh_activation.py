@@ -31,13 +31,14 @@ from disdex_deployment_contract import (
     validate_order_permission,
 )
 from disdex_owner_approval import verify
-from disdex_unified_root_gate import assert_codex_ssh_session
+from disdex_unified_root_gate import RELEASES, assert_codex_ssh_session, release_marker
 
 REFRESH_SCOPE = "V4_EVIDENCE_REFRESH_ONLY"
 REFRESH_LEASE_SCHEMA = "disdex-v4-evidence-refresh-lease/v1"
 REFRESH_PLAN_SCHEMA = "disdex-v4-evidence-refresh-plan/v1"
 REFRESH_RUNNER = "V12_V4"
 MAX_LEASE_SECONDS = 24 * 60 * 60
+EXTENDED_LEASE_SECONDS = 30 * 24 * 60 * 60
 # A new independently signed grant can renew the bounded lease before expiry.
 # Never allow early renewal outside the final warning window.
 EARLY_RENEWAL_WINDOW_SECONDS = 12 * 60 * 60
@@ -46,7 +47,7 @@ PLAN_HASH = re.compile(r"[0-9a-f]{64}\Z")
 HEX32 = re.compile(r"[0-9a-f]{32}\Z")
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 LEASE_ROOT = Path("/var/lib/disdex/unified-deploy/refresh-leases/v4")
-REFRESH_OUTPUT_PATH = "/var/lib/disdex/v12-v4/evidence-refresh-last.json"
+REFRESH_OUTPUT_PATH = "/var/lib/disdex/unified-deploy/v4-evidence/evidence-refresh-last.json"
 LEASE_FIELDS = frozenset({
     "schema", "repository", "deploymentTarget", "operatorTarget", "scope", "route",
     "approvedSha", "approvedRunner", "approvedRunners", "approvedShaByRunner",
@@ -70,10 +71,35 @@ def _unique_json(pairs):
     return result
 
 
+def refresh_lease_limit(sha: str) -> int:
+    if not isinstance(sha, str) or not SHA.fullmatch(sha):
+        raise ValueError("refresh plan SHA invalid")
+    policy = RELEASES / sha / "config/v12-v4-evidence-validity.json"
+    try:
+        metadata = policy.lstat()
+    except FileNotFoundError:
+        return MAX_LEASE_SECONDS
+    release_marker(sha, RELEASES, root_uid=0)
+    parent = policy.parent.lstat()
+    if (not stat.S_ISDIR(parent.st_mode) or parent.st_uid != 0 or parent.st_mode & 0o222
+            or not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != 0
+            or metadata.st_mode & 0o222 or metadata.st_size > 512
+            or policy.resolve(strict=True) != policy):
+        raise ValueError("refresh release validity policy is untrusted")
+    with os.fdopen(os.open(policy, os.O_RDONLY | os.O_NOFOLLOW), "rb") as handle:
+        opened = os.fstat(handle.fileno())
+        if (opened.st_dev, opened.st_ino) != (metadata.st_dev, metadata.st_ino):
+            raise ValueError("refresh release validity policy changed")
+        value = json.loads(handle.read(513), object_pairs_hook=_unique_json)
+    if value != {"certificateDays": 30, "refreshLeaseDays": 30}:
+        raise ValueError("refresh release validity policy invalid")
+    return EXTENDED_LEASE_SECONDS
+
+
 def refresh_plan(sha: str) -> dict:
     if not isinstance(sha, str) or not SHA.fullmatch(sha):
         raise ValueError("refresh plan SHA invalid")
-    return {
+    plan = {
         "schema": REFRESH_PLAN_SCHEMA,
         "repository": REPO,
         "deploymentTarget": DEPLOYMENT_TARGET,
@@ -88,6 +114,10 @@ def refresh_plan(sha: str) -> dict:
         "outputPath": REFRESH_OUTPUT_PATH,
         "ordersEnabled": False,
     }
+    limit = refresh_lease_limit(sha)
+    if limit != MAX_LEASE_SECONDS:
+        plan["leaseTtlSeconds"] = limit
+    return plan
 
 
 def refresh_plan_sha256(sha: str) -> str:
@@ -134,16 +164,18 @@ def _assert_approval_shape(approval: dict) -> None:
 
 
 def build_refresh_lease(approval: dict, *, now: int | None = None,
-                        ttl: int = MAX_LEASE_SECONDS) -> dict:
+                        ttl: int | None = None) -> dict:
     _assert_approval_shape(approval)
     now = int(time.time()) if now is None else now
     if type(now) is not int or now <= 0:
         raise ValueError("refresh lease time invalid")
-    if type(ttl) is not int or not 1 <= ttl <= MAX_LEASE_SECONDS:
+    sha = approval["sourceSha"]
+    limit = refresh_lease_limit(sha)
+    ttl = limit if ttl is None else ttl
+    if type(ttl) is not int or not 1 <= ttl <= limit:
         raise ValueError("refresh lease TTL invalid")
     if approval["expiresAt"] <= now:
         raise ValueError("refresh approval expired")
-    sha = approval["sourceSha"]
     return {
         "schema": REFRESH_LEASE_SCHEMA,
         "repository": REPO,
@@ -212,7 +244,7 @@ def validate_refresh_lease(lease: dict, *, sha: str, now: int | None = None,
             or approved_at <= 0 or expires_at <= 0
             or approved_at > now + 30 or expires_at <= approved_at
             or (not allow_expired and expires_at <= now)
-            or expires_at - approved_at > MAX_LEASE_SECONDS):
+            or expires_at - approved_at > refresh_lease_limit(sha)):
         raise ValueError("refresh lease expired or future dated")
     if (type(approval_issued) is not int or type(approval_expires) is not int
             or approval_issued <= 0 or approval_expires <= 0

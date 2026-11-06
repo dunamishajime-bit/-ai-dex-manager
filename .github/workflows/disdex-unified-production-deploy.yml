@@ -15,6 +15,7 @@ on:
         required: true
         options:
           - SHARED_CRYPTO_RISK_ONLY
+          - PENDING_RECONCILE_ONLY
           - V12_V4
           - QUALITY102_CAUSAL_V1
           - V52

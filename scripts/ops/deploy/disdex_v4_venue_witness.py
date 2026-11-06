@@ -67,6 +67,37 @@ def _secure_json(path: Path, *, require_root=True, max_bytes=524288) -> dict:
         raise ValueError("JSON_NOT_OBJECT:" + str(path))
     return value
 
+def validate_shared_runtime_metadata(path,*,uid,gid,mode,parent_uid,parent_gid,parent_mode,deploy_uid,deploy_gid):
+    if (path not in (RISK,MARGIN,KILL,PENDING) or uid!=deploy_uid or gid!=deploy_gid
+            or parent_uid!=uid or parent_gid!=gid or not stat.S_ISREG(mode)
+            or stat.S_IMODE(mode) not in (0o600,0o660) or parent_mode&0o007):
+        raise ValueError('UNTRUSTED_SHARED_RUNTIME_METADATA:'+str(path))
+    return True
+
+def _shared_runtime_json(path):
+    import pwd
+    deploy=pwd.getpwnam('deploy');s=path.lstat();parent=path.parent.lstat()
+    if path.is_symlink() or path.parent.is_symlink() or not stat.S_ISDIR(parent.st_mode):
+        raise ValueError('UNTRUSTED_SHARED_RUNTIME_PATH')
+    validate_shared_runtime_metadata(path,uid=s.st_uid,gid=s.st_gid,mode=s.st_mode,
+        parent_uid=parent.st_uid,parent_gid=parent.st_gid,parent_mode=parent.st_mode,
+        deploy_uid=deploy.pw_uid,deploy_gid=deploy.pw_gid)
+    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+    with os.fdopen(fd,'rb') as f:
+        actual=os.fstat(f.fileno())
+        if (actual.st_dev,actual.st_ino,actual.st_uid,actual.st_gid,actual.st_mode)!=(s.st_dev,s.st_ino,s.st_uid,s.st_gid,s.st_mode):
+            raise ValueError('SHARED_RUNTIME_CHANGED_DURING_READ')
+        raw=f.read(524289)
+    if len(raw)>524288:raise ValueError('OVERSIZED_SHARED_RUNTIME')
+    d=json.loads(raw)
+    if not isinstance(d,dict):raise ValueError('SHARED_RUNTIME_NOT_OBJECT')
+    return d
+
+def read_v4_health(pid):
+    if V4_HEARTBEAT.lstat().st_uid not in (0,Path('/proc',str(pid)).stat().st_uid):
+        raise ValueError('V4_DIRECT_HEARTBEAT_OWNER_MISMATCH')
+    return _secure_json(V4_HEARTBEAT,require_root=False)
+
 
 def _digest(value) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
@@ -230,23 +261,23 @@ def _assert_release(sha: str) -> Path:
 
 
 def _assert_runtime_health(now_ms: int) -> tuple[dict, list[dict]]:
-    risk = _secure_json(RISK)
-    if risk.get("sourceComplete") is not True or risk.get("tripped") is True:
+    risk = _shared_runtime_json(RISK)
+    if risk.get("sourceComplete") is not True or risk.get("tripped") is not False:
         raise ValueError("SHARED_RISK_NOT_HEALTHY")
     limit = _dec(risk.get("maximumLossPct"), "maximumLossPct") / Decimal("100")
     if limit != Decimal("0.075"):
         raise ValueError("SHARED_RISK_DAILY_LIMIT_MISMATCH")
-    margin = _secure_json(MARGIN)
+    margin = _shared_runtime_json(MARGIN)
     if margin.get("stage") != "HEALTHY" or margin.get("ordersAllowed") is not True:
         raise ValueError("MARGIN_GUARD_NOT_HEALTHY")
     checked = margin.get("checkedAt")
     if (type(checked) not in (int, float) or checked > now_ms + 1000
             or now_ms - checked > 15 * 60_000):
         raise ValueError("MARGIN_GUARD_STALE")
-    kill = _secure_json(KILL)
+    kill = _shared_runtime_json(KILL)
     if kill.get("active") is not False:
         raise ValueError("SHARED_KILL_SWITCH_ACTIVE")
-    pending = _secure_json(PENDING)
+    pending = _shared_runtime_json(PENDING)
     entries = pending.get("entries")
     if not isinstance(entries, list):
         raise ValueError("PENDING_EXPOSURE_INVALID")
@@ -308,14 +339,18 @@ def validate_units_and_ticks(expected_pins: dict[str, str], phase: str,
     if phase == "after":
         unit = f"{PREFIXES['V12_V4']}@{candidate_sha}.service"
         pid = _systemd(unit, "MainPID")
-        hb = _secure_json(V4_HEARTBEAT)
+        hb = read_v4_health(int(pid))
         if (hb.get("schema") != "disdex-v12-v4-runner-heartbeat/v1"
                 or hb.get("releaseSha") != candidate_sha
                 or hb.get("runtimeSha") != candidate_sha
                 or hb.get("expectedSha") != candidate_sha
                 or hb.get("serviceUnit") != unit
                 or not pid.isdigit() or hb.get("mainPid") != int(pid)
-                or hb.get("orderEnabled") is not True):
+                or hb.get("mode") != "LIVE" or hb.get("liveEnabled") is not True
+                or hb.get("limitedLive") is not False
+                or hb.get("safetyState") != "HEALTHY"
+                or type(hb.get("orderEnabled")) is not bool
+                or hb.get("ordersAllowed") is not hb.get("orderEnabled")):
             raise ValueError("V4_DIRECT_HEARTBEAT_IDENTITY_MISMATCH")
         for field in ("heartbeatAt", "lastTickAt"):
             value = hb.get(field)
@@ -324,23 +359,96 @@ def validate_units_and_ticks(expected_pins: dict[str, str], phase: str,
                 raise ValueError("V4_DIRECT_HEARTBEAT_STALE:" + field)
 
 
-def refresh_and_preflight(sha: str, release: Path) -> None:
+def bounded_evidence_command(sha: str, release: Path) -> list[str]:
+    if not SHA_RE.fullmatch(sha) or release != RELEASES / sha:
+        raise ValueError("BOUNDED_EVIDENCE_RELEASE_BINDING_INVALID")
+    script = r"""
+import {constants} from 'node:fs';
+import {open} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {readV4ProductionCertificate,validateV4SharedExecutionEvidencePayloads,V4_SHARED_EXECUTION_EVIDENCE_PATHS} from './lib/v12-v4-certified-gates.ts';
+import {validateV4RefreshCommit,V4_DYNAMIC_EVIDENCE_KEYS} from './lib/v12-v4-refresh-commit.ts';
+const sha=process.argv[1];
+const certificate=await readV4ProductionCertificate(sha);
+if(certificate.schema!=='disdex-v12-v4-production-certification/v4')throw Error('BOUNDED_CERTIFICATE_REQUIRED');
+async function trusted(path){
+ const fd=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
+ try{
+  const stat=await fd.stat();
+  if(!stat.isFile()||stat.uid!==0||(stat.mode&0o022)!==0||stat.size>1048576)throw Error('UNTRUSTED_EVIDENCE');
+  const bytes=await fd.readFile();return {bytes,payload:JSON.parse(bytes.toString('utf8'))};
+ }finally{await fd.close();}
+}
+const commit=(await trusted('/etc/disdex/v12-v4-evidence/refresh-commit.json')).payload;
+const now=Date.now();validateV4RefreshCommit(commit,sha,now);
+const payloads={...commit.evidencePayloads};
+for(const key of V4_DYNAMIC_EVIDENCE_KEYS){
+ if(payloads[key].refreshGeneration!==commit.refreshGeneration||payloads[key].capturedAt!==commit.capturedAt)
+  throw Error('MIXED_EVIDENCE_GENERATION');
+}
+for(const key of ['routeSourceParity','v4ExecutionTests']){
+ const row=await trusted(V4_SHARED_EXECUTION_EVIDENCE_PATHS[key]);
+ if(createHash('sha256').update(row.bytes).digest('hex')!==certificate.evidenceSha256[key])throw Error('STATIC_DIGEST_MISMATCH');
+ payloads[key]=row.payload;
+}
+validateV4SharedExecutionEvidencePayloads(payloads,sha,now,true);
+console.log(JSON.stringify({status:'V4_BOUNDED_EVIDENCE_SNAPSHOT_VERIFIED',candidateSha:sha,
+ certificateSchema:certificate.schema,certificateValidUntilMs:Date.parse(certificate.validUntil),
+ leaseExpiresAtMs:commit.leaseExpiresAt*1000,capturedAt:commit.capturedAt,capturedAtMs:Date.parse(commit.capturedAt),
+ refreshGeneration:commit.refreshGeneration,evidencePayloads:commit.evidencePayloads}));
+"""
+    return ["/usr/bin/node", "--import", str(release/"node_modules/tsx/dist/loader.mjs"),
+            "--input-type=module", "--eval", script, sha]
+
+
+def validate_bounded_snapshot(value: dict, sha: str, now_ms: int) -> dict:
+    from datetime import datetime
+    if (not isinstance(value,dict) or value.get("status")!="V4_BOUNDED_EVIDENCE_SNAPSHOT_VERIFIED"
+            or value.get("candidateSha")!=sha
+            or value.get("certificateSchema")!="disdex-v12-v4-production-certification/v4"):
+        raise ValueError("BOUNDED_SNAPSHOT_IDENTITY_INVALID")
+    for field in ["certificateValidUntilMs","leaseExpiresAtMs"]:
+        if type(value.get(field)) is not int or value[field]<=now_ms:
+            raise ValueError("BOUNDED_SNAPSHOT_AUTHORITY_EXPIRED")
+    captured=value.get("capturedAtMs");text=value.get("capturedAt")
+    if (type(captured) is not int or captured<=0 or not 0<=now_ms-captured<=180000
+            or not isinstance(text,str) or not text.endswith('Z')):
+        raise ValueError("BOUNDED_SNAPSHOT_SOURCE_STALE_OR_FUTURE")
+    try:parsed=round(datetime.fromisoformat(text.replace('Z','+00:00')).timestamp()*1000)
+    except (ValueError,OverflowError):raise ValueError("BOUNDED_SNAPSHOT_SOURCE_TIME_INVALID") from None
+    if parsed!=captured:raise ValueError("BOUNDED_SNAPSHOT_SOURCE_TIME_MISMATCH")
+    generation=value.get("refreshGeneration");payloads=value.get("evidencePayloads")
+    keys={"establishedAsterOrders","signedAsterAccount","sharedRiskAndPeers"}
+    if (not isinstance(generation,str) or not 0<len(generation)<=160
+            or not isinstance(payloads,dict) or set(payloads)!=keys):
+        raise ValueError("BOUNDED_SNAPSHOT_GENERATION_INVALID")
+    if any(not isinstance(row,dict) or row.get("refreshGeneration")!=generation
+            or row.get("capturedAt")!=text or row.get("candidateSha")!=sha or row.get("status")!="PASS"
+            for row in payloads.values()):
+        raise ValueError("BOUNDED_SNAPSHOT_MIXED_OR_INVALID_PROOFS")
+    return value
+
+
+def read_bounded_snapshot(sha: str, release: Path) -> dict:
+    import pwd
+    from disdex_v4_canonical_prestart import run_certificate_process
+    result=run_certificate_process(bounded_evidence_command(sha,release),deploy_gid=pwd.getpwnam('deploy').pw_gid,cwd=release,
+        capture_output=True,text=True,check=False,timeout=60)
+    if result.returncode or len(result.stdout)>2*1048576:
+        raise ValueError("V4_BOUNDED_CERTIFICATE_EVIDENCE_PREFLIGHT_FAILED")
+    try:value=json.loads(result.stdout)
+    except (ValueError,TypeError):raise ValueError("V4_BOUNDED_EVIDENCE_OUTPUT_INVALID") from None
+    return validate_bounded_snapshot(value,sha,time.time_ns()//1000000)
+
+
+def refresh_and_preflight(sha: str, release: Path) -> dict:
     unit = f"disdex-v4-dynamic-evidence-refresh@{sha}.service"
     started = subprocess.run(
         ["/usr/bin/systemctl", "start", "--wait", unit],
         capture_output=True, text=True, check=False, timeout=90)
     if started.returncode:
-        raise ValueError("DYNAMIC_EVIDENCE_REFRESH_FAILED:" + started.stderr[-160:])
-    node = "/usr/bin/node"
-    tsx = str(release / "node_modules/tsx/dist/cli.mjs")
-    result = subprocess.run(
-        [node, tsx, "scripts/ops/root/disdex-v12-v4-evidence-preflight.mjs",
-         "--sha", sha, "--release-root", str(release),
-         "--evidence-root", str(EVIDENCE_ROOT),
-         "--output", "/var/lib/disdex/v12-v4/evidence-preflight.json"],
-        cwd=release, capture_output=True, text=True, check=False, timeout=60)
-    if result.returncode:
-        raise ValueError("V4_EVIDENCE_PREFLIGHT_FAILED:" + result.stderr[-160:])
+        raise ValueError("DYNAMIC_EVIDENCE_REFRESH_FAILED")
+    return read_bounded_snapshot(sha,release)
 
 
 def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
@@ -352,19 +460,20 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
     if phase not in ("before", "after"):
         raise ValueError("WITNESS_PHASE_INVALID")
     release = _assert_release(sha)
-    if refresh:
-        refresh_and_preflight(sha, release)
-    now_s = int(time.time()) if now is None else now
-    now_ms = now_s * 1000
+    snapshot = refresh_and_preflight(sha, release) if refresh else read_bounded_snapshot(sha,release)
+    now_ms = time.time_ns()//1000000 if now is None else now*1000
+    now_s = now_ms//1000
     risk, active_pending = _assert_runtime_health(now_ms)
     validate_units_and_ticks(
         expected_pins, phase, sha, now_ms,
         peer_stop_approvals=peer_stop_approvals,
     )
 
-    orders_evidence = _secure_json(EVIDENCE_ROOT / "established-aster-orders.json")
-    account_evidence = _secure_json(EVIDENCE_ROOT / "signed-aster-account.json")
-    risk_evidence = _secure_json(EVIDENCE_ROOT / "shared-risk-and-peers.json")
+    snapshot=validate_bounded_snapshot(snapshot,sha,now_ms)
+    payloads=snapshot["evidencePayloads"]
+    orders_evidence=payloads["establishedAsterOrders"]
+    account_evidence=payloads["signedAsterAccount"]
+    risk_evidence=payloads["sharedRiskAndPeers"]
     for label, evidence in (
         ("orders", orders_evidence), ("account", account_evidence), ("risk", risk_evidence)):
         if evidence.get("status") != "PASS" or evidence.get("candidateSha") != sha:
@@ -389,13 +498,20 @@ def collect_v4_venue_evidence(*, sha: str, expected_pins: dict[str, str],
         raise ValueError("SIGNED_POSITION_EVIDENCE_DIVERGED")
     if account_orders != order_orders:
         raise ValueError("SIGNED_ORDER_EVIDENCE_DIVERGED")
+    # Geometric coverage and a nonempty client ID cannot attribute a STOP.
+    # This full-cutover reader has not yet bound each nonflat order to the
+    # independent durable owner stores. Certify only the genuinely flat case;
+    # existing positions/STOPs must remain with their current approved owner.
+    if account_positions or account_orders:
+        raise ValueError("V4_NONFLAT_CUTOVER_STOP_OWNERSHIP_NOT_CERTIFIED")
     unknown, partial = protective_stop_counts(account_positions, account_orders)
     if unknown or partial:
         raise ValueError("PROTECTIVE_STOP_RECONCILIATION_FAILED")
 
     return {
         "schema": VENUE_SCHEMA, "venue": "aster", "readOnly": True,
-        "capturedAt": now_s, "expiresAt": now_s + 180,
+        "capturedAt": snapshot["capturedAtMs"]//1000,
+        "expiresAt": snapshot["capturedAtMs"]//1000 + 180,
         "signatureVerified": True, "positionsReconciled": True,
         "protectiveStopsReconciled": True, "stopOwnershipReconciled": True,
         "pendingExposureReconciled": True, "grossReconciled": True,

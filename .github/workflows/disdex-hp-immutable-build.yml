@@ -1,0 +1,55 @@
+name: DisDex immutable HP build
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/disdex-hp-immutable-build.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-hp:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      HP_SOURCE_SHA: 6bb84dc988dc0911d9faed137f540b292affefa9
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HP_SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Verify and build the signed-session HP revision
+        run: |
+          set -Eeuo pipefail
+          test "$(git rev-parse HEAD)" = "$HP_SOURCE_SHA"
+          npm ci --ignore-scripts --no-audit --no-fund
+          ./node_modules/.bin/tsx --test tests/owner-session-hardening.test.ts tests/password-hash-hardening.test.ts
+          node --test tests/auth-boundary-source.test.mjs
+          ./node_modules/.bin/tsc --noEmit
+          DISDEX_UI_VERIFIED_TSC=1 npm run build
+      - name: Package verified standalone output
+        run: |
+          set -Eeuo pipefail
+          test -s .next/standalone/server.js
+          test -s .next/standalone/.next/BUILD_ID
+          mkdir -p "$RUNNER_TEMP/hp-artifacts"
+          mkdir -p .next/standalone/.next/static
+          cp -a .next/static/. .next/standalone/.next/static/
+          cp -a public .next/standalone/
+          printf '%s\n' "$HP_SOURCE_SHA" > .next/standalone/.disdex-release-sha
+          tar -czf "$RUNNER_TEMP/hp-artifacts/hp-standalone.tar.gz" -C .next/standalone .
+          cd "$RUNNER_TEMP/hp-artifacts"
+          sha256sum hp-standalone.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hp-standalone-signed-session
+          path: ${{ runner.temp }}/hp-artifacts/
+          if-no-files-found: error
+          retention-days: 3
