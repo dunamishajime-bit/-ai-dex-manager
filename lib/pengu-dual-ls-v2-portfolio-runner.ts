@@ -44,6 +44,7 @@ import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
+import { readFetCoreOwnerPins } from "@/lib/fet-preempt-owner-pins";
 import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
@@ -1203,13 +1204,15 @@ export class PenguDualLsV2PortfolioRunner {
                     const fetReduction = strictPlan.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
                     if (fetReduction) {
                         if (!this.dependencies.v12DynamicAdapter) throw new Error("PENGU_FET_PREEMPT_ADAPTER_REQUIRED");
+                        const owners = await readFetCoreOwnerPins();
                         const reduced = await reduceFetBrk48ForCoreConflict({
                             executor: this.dependencies.executor,
                             adapter: this.dependencies.v12DynamicAdapter,
                             causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
                             statePath: process.env.FET_BRK48_STATE_PATH,
                             maxSlippageBps: this.dependencies.config.maxSlippageBps,
-                            expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                            expectedRuntimeSha: owners.fet,
+                            expectedQ102RuntimeSha: owners.q102,
                             now: this.now,
                         });
                         if (reduced.status !== "reduced") throw new Error(`PENGU_FET_PREEMPT_BLOCKED:${reduced.message}`);
