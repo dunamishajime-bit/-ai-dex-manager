@@ -332,6 +332,7 @@ class HypeScopedOperations:
         self.new_started = False
         self.activation_written = False
         self.approval_replaced = False
+        self.failure_phase = "prepare"
 
     def unit_override_bytes(self):
         root = str(self.release)
@@ -426,6 +427,7 @@ class HypeScopedOperations:
         require(hashlib.sha256(raw).hexdigest() == self.hold_hash, "KILL_CHANGED")
 
     def prepare(self):
+        self.failure_phase = "prepare"
         import pwd
         from disdex_unified_root_gate import (assert_private_dir, read_root_json,
             parse_live_pins, release_marker, assert_regular_secure)
@@ -513,6 +515,7 @@ class HypeScopedOperations:
         self.health()
 
     def consume(self):
+        self.failure_phase = "consume"
         self.parent._assert_expected_pins(self.pins)
         self.health()
         proof = self.signed_flat()
@@ -525,6 +528,7 @@ class HypeScopedOperations:
                 "VENUE_CHANGED")
 
     def publish(self):
+        self.failure_phase = "publish"
         self.approval_bytes = canonical(self.activation)+b"\n"
         if self.plan_mode == "fresh":
             self.dropin.mkdir(mode=0o755)
@@ -563,6 +567,7 @@ class HypeScopedOperations:
         self.health()
 
     def switch(self):
+        self.failure_phase = "switch"
         require(self.systemd.main_pid(self.old_unit)==0 and
                 not self.systemd.is_active(self.old_unit), "OLD_UNIT_RACE")
         require(_safe_bytes(STATE)==self.state_before, "LEDGER_RACE")
@@ -599,6 +604,7 @@ class HypeScopedOperations:
         self.systemd.start(self.new_unit)
 
     def audit(self):
+        self.failure_phase = "audit"
         stamps=[]
         deadline=time.monotonic()+3600
         pid=None
@@ -635,6 +641,7 @@ class HypeScopedOperations:
         return stamps
 
     def commit(self, stamps):
+        self.failure_phase = "commit"
         self.health()
         self.parent._assert_expected_pins(self.desired["runners"])
         receipt = {
@@ -780,4 +787,12 @@ class HypeScopedRootExecutor:
         from disdex_v52_scoped_root_cutover import run_scoped_transaction
         if not getattr(args,"_hype_job_worker",False):
             return self.submit(args,token)
-        return run_scoped_transaction(HypeScopedOperations(self.parent,args,token))
+        operations = HypeScopedOperations(self.parent,args,token)
+        try:
+            return run_scoped_transaction(operations)
+        except Exception as error:
+            try:
+                error.hype_failure_phase = operations.failure_phase
+            except Exception:
+                pass
+            raise

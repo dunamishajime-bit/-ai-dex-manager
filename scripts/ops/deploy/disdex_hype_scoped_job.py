@@ -27,6 +27,7 @@ from disdex_deployment_plan import canonical
 JOB_SCHEMA = "disdex-hype-scoped-job/v1"
 JOB_DIR = Path("/var/lib/disdex/unified-deploy/jobs/hype")
 RECEIPTS = Path("/var/lib/disdex/unified-deploy/receipts")
+FAILURE_PHASES = frozenset({"worker", "prepare", "consume", "publish", "switch", "audit", "commit"})
 
 
 def require(condition, reason):
@@ -109,22 +110,35 @@ def _unlink_request(path):
         os.close(fd)
 
 
-def _failure_receipt(job_id, row, error):
-    from disdex_unified_root_gate import assert_private_dir
-    assert_private_dir(RECEIPTS, root_uid=0)
-    raw = str(error).split(":", 1)[0]
-    code = raw if re.fullmatch(r"[A-Z][A-Z0-9_]{1,100}", raw) else type(error).__name__.upper()
-    receipt = {
+def build_failure_receipt(job_id, row, error, *, failed_at=None):
+    phase = getattr(error, "hype_failure_phase", "worker")
+    if phase not in FAILURE_PHASES:
+        phase = "worker"
+    code = type(error).__name__.upper()
+    if not re.fullmatch(r"[A-Z][A-Z0-9_]{1,100}", code):
+        code = "ERROR"
+    row = row if isinstance(row, dict) else {}
+    source_sha = row.get("sourceSha")
+    plan_sha = row.get("planSha256")
+    route = row.get("route")
+    return {
         "schema": "disdex-hype-scoped-job-receipt/v1",
         "status": "HYPE_SCOPED_JOB_FAILED_NO_COMMIT",
         "jobId": job_id,
         "scope": "HYPE_TREND_LONG",
-        "sourceSha": row.get("sourceSha") if isinstance(row, dict) else None,
-        "planSha256": row.get("planSha256") if isinstance(row, dict) else None,
-        "route": row.get("route") if isinstance(row, dict) else None,
+        "sourceSha": source_sha if isinstance(source_sha, str) and SHA.fullmatch(source_sha) else None,
+        "planSha256": plan_sha if isinstance(plan_sha, str) and PLAN_HASH.fullmatch(plan_sha) else None,
+        "route": route if route in ("CODEX_SSH", "GITHUB_ACTIONS") else None,
+        "failurePhase": phase,
         "failureCode": code,
-        "failedAt": int(time.time()),
+        "failedAt": int(time.time()) if failed_at is None else int(failed_at),
     }
+
+
+def _failure_receipt(job_id, row, error):
+    from disdex_unified_root_gate import assert_private_dir
+    assert_private_dir(RECEIPTS, root_uid=0)
+    receipt = build_failure_receipt(job_id, row, error)
     path = RECEIPTS / ("hype-job-" + job_id + ".json")
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o400)
     try:

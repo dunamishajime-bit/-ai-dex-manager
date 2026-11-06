@@ -19,6 +19,17 @@ from disdex_deployment_contract import REPO, DEPLOYMENT_TARGET, OPERATOR_TARGET
 
 
 class HypeJobEntrypointTests(unittest.TestCase):
+    def test_failure_receipt_records_phase_without_exception_details(self):
+        error = PermissionError("secret filesystem path")
+        error.hype_failure_phase = "publish"
+        receipt = job.build_failure_receipt(
+            "a" * 32, {"scope": h.RUNNER, "sourceSha": "d" * 40}, error, failed_at=123,
+        )
+        self.assertEqual(receipt["failurePhase"], "publish")
+        self.assertEqual(receipt["failureCode"], "PERMISSIONERROR")
+        self.assertEqual(receipt["failedAt"], 123)
+        self.assertNotIn("secret filesystem path", json.dumps(receipt))
+
     def test_oneshot_worker_has_a_real_start_deadline(self):
         unit = (Path(__file__).resolve().parents[1]
                 / "ops/systemd/disdex-hype-scoped-cutover@.service").read_text()
