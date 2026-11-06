@@ -83,7 +83,8 @@ class HypeJobEntrypointTests(unittest.TestCase):
         sha = "a" * 40
         release = f"/home/deploy/disdex-trading/releases/{sha}"
         unit = {"ActiveState": "active", "SubState": "running", "MainPID": "123",
-                "User": "deploy", "WorkingDirectory": release}
+                "User": "deploy", "WorkingDirectory": release,
+                "ExecStart": f"/usr/bin/node {release}/scripts/ops/root/disdex-v4-rate-budget-broker.ts"}
         socket = {"uid": 1000, "gid": 1000, "mode": 0o660,
                   "is_socket": True, "is_symlink": False}
         directory = {"uid": 1000, "gid": 1000, "mode": 0o750,
@@ -95,6 +96,7 @@ class HypeJobEntrypointTests(unittest.TestCase):
         for changed_unit, changed_socket, changed_dir, cwd, marker in (
             ({**unit, "ActiveState": "inactive"}, socket, directory, release, sha),
             ({**unit, "MainPID": "0"}, socket, directory, release, sha),
+            ({**unit, "ExecStart": "/usr/bin/node /untrusted/broker.ts"}, socket, directory, release, sha),
             (unit, {**socket, "mode": 0o666}, directory, release, sha),
             (unit, socket, {**directory, "mode": 0o770}, release, sha),
             (unit, socket, directory, "/wrong/release", sha),

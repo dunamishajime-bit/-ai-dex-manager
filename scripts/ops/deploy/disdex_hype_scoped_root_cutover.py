@@ -78,9 +78,12 @@ def validate_hype_budget_broker(v4_sha, unit, *, process_cwd, marker_sha,
     require(isinstance(release_root, str) and release_root.startswith("/"),
             "V4_BUDGET_RELEASE_ROOT_INVALID")
     release = f"{release_root.rstrip('/')}/{v4_sha}"
+    broker_script = release + "/scripts/ops/root/disdex-v4-rate-budget-broker.ts"
     require(isinstance(unit, dict) and unit.get("ActiveState") == "active"
             and unit.get("SubState") == "running" and unit.get("User") == "deploy"
             and unit.get("WorkingDirectory") == release
+            and isinstance(unit.get("ExecStart"), str)
+            and broker_script in unit["ExecStart"]
             and isinstance(unit.get("MainPID"), str) and unit["MainPID"].isdigit()
             and int(unit["MainPID"]) > 1 and process_cwd == release
             and marker_sha == v4_sha, "V4_BUDGET_BROKER_LINEAGE")
@@ -478,7 +481,7 @@ class HypeScopedOperations:
             raise ValueError("HYPE_SCOPED_V4_BUDGET_PROXY_SOURCE_MISSING") from None
 
         unit_name = f"disdex-v4-rate-budget-broker@{v4_sha}.service"
-        properties = ("ActiveState", "SubState", "MainPID", "User", "WorkingDirectory")
+        properties = ("ActiveState", "SubState", "MainPID", "User", "WorkingDirectory", "ExecStart")
 
         def read_unit():
             output = self.command("show", unit_name,
@@ -490,6 +493,12 @@ class HypeScopedOperations:
                 and int(unit["MainPID"]) > 1, "V4_BUDGET_BROKER_PID")
         try:
             process_cwd = str((Path("/proc") / unit["MainPID"] / "cwd").resolve(strict=True))
+            process_argv = [arg.decode("utf8", errors="replace") for arg in
+                            (Path("/proc") / unit["MainPID"] / "cmdline").read_bytes().split(b"\0")
+                            if arg]
+            expected_broker_script = str(release / "scripts/ops/root/disdex-v4-rate-budget-broker.ts")
+            require(any(expected_broker_script in arg for arg in process_argv),
+                    "V4_BUDGET_BROKER_PROCESS_SOURCE")
             socket = Path(socket_path)
             socket_stat = socket.lstat()
             directory_stat = socket.parent.lstat()
