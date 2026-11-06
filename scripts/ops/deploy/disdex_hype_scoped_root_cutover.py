@@ -293,7 +293,15 @@ def valid_hold(row):
     return row
 
 
-def validate_hype_tick(row, *, sha, pid, release, previous=None):
+def read_hype_audit_tick(raw, prior):
+    if raw == prior:
+        return None
+    tick = json.loads(raw)
+    require(isinstance(tick, dict), "TICK_RECORD_INVALID")
+    return tick
+
+
+def validate_hype_tick(row, *, sha, pid, release, previous=None, started_after=0):
     now = time.time_ns() // 1000000
     require(isinstance(row, dict) and row.get("schema") == "disdex-runner-tick/v1"
             and row.get("runnerId") == RUNNER and row.get("runtimeSha") == sha
@@ -305,7 +313,7 @@ def validate_hype_tick(row, *, sha, pid, release, previous=None):
             "TICK_IDENTITY_OR_AUTHORITY")
     started, completed = row.get("tickStartedAt"), row.get("tickCompletedAt")
     require(type(started) is int and type(completed) is int
-            and started <= completed and 0 <= now - completed <= 120000
+            and started_after <= started <= completed and 0 <= now - completed <= 120000
             and (previous is None or completed > previous), "TICK_TIME_NOT_ADVANCING")
     require(row.get("status") not in ("manual-review", "fatal", "")
             and isinstance(row.get("status"), str), "TICK_RUNNER_FAIL_CLOSED")
@@ -783,6 +791,11 @@ class HypeScopedOperations:
         # candidate collects three actual decision-cycle ticks.
         self.systemd.disable(self.old_unit)
         require(not self.systemd.is_enabled(self.old_unit), "OLD_UNIT_NOT_DISABLED")
+        try:
+            self.pre_start_tick = _safe_bytes(TICK)
+        except FileNotFoundError:
+            self.pre_start_tick = None
+        self.tick_start_boundary = time.time_ns() // 1000000
         self.new_started=True
         self.systemd.start(self.new_unit)
 
@@ -811,13 +824,14 @@ class HypeScopedOperations:
             state=json.loads(_safe_bytes(STATE))
             validate_flat_hype_state(state,self.args.sha)
             try:
-                tick=json.loads(_safe_bytes(TICK))
+                tick=read_hype_audit_tick(_safe_bytes(TICK), self.pre_start_tick)
             except FileNotFoundError:
                 self.parent.sleep_fn(3);continue
-            if tick.get("runtimeSha")!=self.args.sha or tick.get("tickCompletedAt") in stamps:
+            if tick is None or tick.get("tickCompletedAt") in stamps:
                 self.parent.sleep_fn(3);continue
             stamp=validate_hype_tick(tick,sha=self.args.sha,pid=pid,release=self.release,
-                                     previous=stamps[-1] if stamps else None)
+                                     previous=stamps[-1] if stamps else None,
+                                     started_after=self.tick_start_boundary)
             self.signed_flat()
             stamps.append(stamp)
             self.parent.sleep_fn(3)

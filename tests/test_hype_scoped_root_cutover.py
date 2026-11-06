@@ -141,6 +141,12 @@ class HypeJobEntrypointTests(unittest.TestCase):
         self.assertIn("TimeoutStartSec=1h10min", unit)
         self.assertNotIn("RuntimeMaxSec=", unit)
 
+    def test_audit_waits_for_writer_to_replace_the_pre_start_tick(self):
+        prior = b'{"runtimeSha":"same-candidate","mainPid":123,"tickCompletedAt":100}'
+        current = b'{"runtimeSha":"same-candidate","mainPid":456,"tickCompletedAt":200}'
+        self.assertIsNone(h.read_hype_audit_tick(prior, prior))
+        self.assertEqual(h.read_hype_audit_tick(current, prior)["mainPid"], 456)
+
     def test_worker_signed_get_uses_separate_deploy_sandbox_and_stdin(self):
         release = PurePosixPath("/releases") / ("a" * 40)
         deploy = SimpleNamespace(pw_uid=1000, pw_gid=1000)
