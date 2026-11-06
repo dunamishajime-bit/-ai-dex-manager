@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: disdex-hp-approval-ui-production
+  group: disdex-hp-standard-approval-ui-production
   cancel-in-progress: false
 
 jobs:
@@ -17,7 +17,8 @@ jobs:
       github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
       github.event.issue.number == 317 &&
       github.actor == 'dunamishajime-bit' &&
-      github.event.comment.author_association == 'OWNER'
+      github.event.comment.author_association == 'OWNER' &&
+      startsWith(github.event.comment.body, 'DISDEX_HP_STANDARD_APPROVAL_UI_DEPLOY ')
     environment:
       name: disdex-production
     runs-on: ubuntu-24.04
@@ -320,12 +321,11 @@ jobs:
           for _ in $(seq 1 40); do
             if [[ "$(systemctl is-active "$svc" 2>/dev/null || true)" == "active" ]]; then
               code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
-              approval_headers="$(mktemp)"
-              approval_code="$(curl -sS -o /dev/null -D "$approval_headers" -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/production-approval || true)"
-              approval_location="$(awk 'BEGIN{IGNORECASE=1} /^location:/{sub(/^[^:]*:[[:space:]]*/,""); sub(/\r$/,""); print; exit}' "$approval_headers")"
-              rm -f -- "$approval_headers"
-              if [[ "$code" == "200" && "$approval_code" =~ ^30[1278]$ && "$approval_location" == *"/login"* && "$approval_location" == *"production-approval"* ]]; then
-                echo "APPROVAL_ROUTE_PROTECTED=$approval_code location=$approval_location"
+              approval_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/production-approval || true)"
+              owner_probe_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/api/system/owner-session-probe || true)"
+              realtime_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/api/system/realtime-ranking || true)"
+              if [[ "$code" == "200" && "$approval_code" == "200" && "$owner_probe_code" == "401" && "$realtime_code" == "401" ]]; then
+                echo "HP_AUTH_CONTRACT_VERIFIED=root:$code approval:$approval_code owner_probe:$owner_probe_code realtime:$realtime_code"
                 ok=true
                 break
               fi
