@@ -70,6 +70,8 @@ export type V52Top2Observability = {
   capturedAt: string;
   updatedAt?: number;
   runtimeSha?: string;
+  expectedRuntimeSha?: string;
+  releaseShaVerified?: boolean;
   mode?: string;
   reason?: string;
   referenceHealth?: { ready: boolean; reason: string };
@@ -268,6 +270,8 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
 
     const updatedAt = finite(state.updatedAt);
     const runtimeSha = text(state.runtimeSha ?? state.runtimeCommitSha);
+    const expectedRuntimeSha = currentRuntime?.productionReleaseShas.v52;
+    const releaseShaVerified = Boolean(runtimeSha && expectedRuntimeSha && runtimeSha === expectedRuntimeSha);
     const ageMs = updatedAt === undefined ? undefined : Math.max(0, Date.now() - updatedAt);
     const killSwitch = object(state.killSwitch);
     const killSwitchActive = Boolean(killSwitch?.active ?? state.killSwitchActive);
@@ -299,11 +303,13 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
         ? "CURRENT_DAY"
         : "MISSING";
     const referenceHealth = await readReferenceHealth();
-    const baseLive = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive && dailyDiagnosticsFresh;
+    const baseLive = updatedAt !== undefined && ageMs !== undefined && ageMs <= STALE_AFTER_MS && !killSwitchActive && dailyDiagnosticsFresh && releaseShaVerified;
     const status = baseLive && (referenceHealth?.ready ?? true) ? "LIVE" : "STALE";
     const stateReferenceOrdersAllowed = bool(state.referenceOrdersAllowed);
     const referenceOrdersAllowed = stateReferenceOrdersAllowed === true && (referenceHealth?.ready ?? true);
-    const reason = killSwitchActive
+    const reason = !releaseShaVerified
+      ? `V52 runtime SHAをProduction pinと照合できません（actual=${runtimeSha || "未取得"} / expected=${expectedRuntimeSha || "未取得"}）。`
+      : killSwitchActive
       ? "V52共有Kill Switchが有効です。"
       : referenceHealth && !referenceHealth.ready
         ? "V52発注Gate停止：" + referenceHealth.reason
@@ -323,6 +329,8 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       capturedAt,
       updatedAt,
       runtimeSha,
+      expectedRuntimeSha,
+      releaseShaVerified,
       mode: text(state.mode),
       reason,
       referenceHealth,
@@ -341,7 +349,7 @@ export async function loadV52Top2Observability(): Promise<V52Top2Observability> 
       rejectionCounters,
       positions,
       windows,
-      errors: [],
+      errors: releaseShaVerified ? [] : ["V52_RUNTIME_SHA_MISMATCH"],
     };
   } catch (error) {
     return unavailable(capturedAt, true, error instanceof Error ? error.message : "V52 runner state を読み取れません。", thresholds, windowsNy);

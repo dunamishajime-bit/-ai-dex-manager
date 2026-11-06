@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
         errors: [observabilityError instanceof Error ? observabilityError.message : "V12 observability failed."],
       };
     }
-    const expectedRuntimeSha = snapshot.runtime.units[0]?.releaseSha;
+    const expectedRuntimeSha = snapshot.runtime.units.find((unit) => unit.id === "FET_BRK48_RESIDUAL")?.releaseSha;
     const [v52Top2Observability, penguRuntime, quality102Runtime, fetRuntime] = await Promise.all([
       loadV52Top2Observability(),
       loadPenguRuntimeObservability(),
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       ...snapshot.runtime,
       units: snapshot.runtime.units.map((unit) => {
         if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, updatedAt: v12UpdatedAt, reason: v12Fresh ? "V12 runner state更新済み、mode=LIVE、Kill Switch inactiveを確認しました。" : v12Observability.errors[0] || "V12 runner stateが未接続・停止・古いためLIVE確認できません。" };
-        if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
+        if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, releaseSha: penguRuntime.releaseSha || unit.releaseSha, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
         if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, releaseSha: quality102Runtime.runtimeSha || unit.releaseSha, status: quality102Runtime.status, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };
         if (unit.id === "FET_BRK48_RESIDUAL") return { ...unit, releaseSha: fetRuntime.runtimeSha || unit.releaseSha, status: fetRuntime.status, updatedAt: fetRuntime.updatedAt, reason: fetRuntime.reason };
         if (unit.id === "HYPE_TREND_LONG") return unit;
