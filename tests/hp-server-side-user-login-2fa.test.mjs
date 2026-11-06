@@ -47,12 +47,13 @@ test("browser login never validates OTP client side or authenticates local cache
  assert.match(s,/\/api\/auth\/login\/verify/);
  assert.match(s,/\/api\/system\/owner-session-probe/);
  assert.match(s,/response\.status !== 204/);
- assert.match(s,/if \(json\.requiresSecondFactor !== true/);
+ assert.match(s,/json\.requiresSecondFactor !== true/);
  assert.doesNotMatch(s,/code\.trim\(\) !== pending2FACode/);
  const factor=s.indexOf('const response = await fetch("/api/auth/login/verify"');
  const final=s.indexOf("finalizeLogin(json.user)");
  assert.ok(factor>0 && final>factor);
- assert.match(s,/パスキー単独ログインはサーバー認証の整備中/);
+ assert.match(s,/\/api\/auth\/login\/passkey\/options/);
+ assert.match(s,/\/api\/auth\/login\/passkey\/verify/);
 });
 test("generic email endpoint rejects browser-supplied login codes",()=>{
  const s=read("app/api/auth/2fa/route.ts");

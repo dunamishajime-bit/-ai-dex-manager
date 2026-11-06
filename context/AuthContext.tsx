@@ -36,6 +36,7 @@ type LoginResult = {
   success: boolean;
   error?: string;
   requiresSecondFactor?: boolean;
+  availableFactors?: SecurityMethod[];
 };
 
 type VerifyResult = {
@@ -55,6 +56,7 @@ interface AuthContextType {
   verifyTOTP: (token: string) => Promise<VerifyResult>;
   verifyPasskeySecondFactor: () => Promise<VerifyResult>;
   resendEmailCode: () => Promise<{ success: boolean; error?: string }>;
+  switchSecondFactor: (method: SecurityMethod) => Promise<{ success: boolean; error?: string; method?: SecurityMethod }>;
   resetSecondFactorFlow: () => void;
   logout: () => void;
   updateAvatar: (avatarUrl: string) => void;
@@ -62,6 +64,7 @@ interface AuthContextType {
   pending2FAEmail: string | null;
   pending2FACode: string | null;
   pendingSecondFactors: SecurityMethod[];
+  availableSecondFactors: SecurityMethod[];
   completedSecondFactors: SecurityMethod[];
   registeredUsers: AuthUser[];
   refreshUsers: () => Promise<void>;
@@ -159,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [pending2FACode, setPending2FACode] = useState<string | null>(null);
   const [pending2FAUser, setPending2FAUser] = useState<UserProfile | null>(null);
   const [pendingSecondFactors, setPendingSecondFactors] = useState<SecurityMethod[]>([]);
+  const [availableSecondFactors, setAvailableSecondFactors] = useState<SecurityMethod[]>([]);
   const [completedSecondFactors, setCompletedSecondFactors] = useState<SecurityMethod[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<AuthUser[]>([]);
   const router = useRouter();
@@ -168,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPending2FACode(null);
     setPending2FAUser(null);
     setPendingSecondFactors([]);
+    setAvailableSecondFactors([]);
     setCompletedSecondFactors([]);
   }, []);
 
@@ -296,11 +301,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!alive) return;
           if (pendingResponse.ok) {
             const challenge = await pendingResponse.json().catch(() => null);
-            if (challenge?.pending === true && (challenge.method === "email" || challenge.method === "totp")) {
+            if (
+              challenge?.pending === true
+              && (challenge.method === "passkey" || challenge.method === "totp" || challenge.method === "email")
+            ) {
+              const available = Array.isArray(challenge.availableMethods)
+                ? challenge.availableMethods.filter((method: unknown): method is SecurityMethod =>
+                    method === "passkey" || method === "totp" || method === "email")
+                : [challenge.method];
               setPending2FAUser(null);
               setPending2FACode(null);
               setPending2FAEmail(null);
               setPendingSecondFactors([challenge.method]);
+              setAvailableSecondFactors(uniqueMethods(available));
               setCompletedSecondFactors([]);
             }
           }
@@ -444,15 +457,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: json?.error || "ログイン認証を開始できませんでした。" };
       }
       // A password alone must never finalize local or server login.
-      if (json.requiresSecondFactor !== true || (json.method !== "email" && json.method !== "totp")) {
+      if (
+        json.requiresSecondFactor !== true
+        || (json.method !== "passkey" && json.method !== "totp" && json.method !== "email")
+      ) {
         return { success: false, error: "サーバー側の2段階認証が確認できません。" };
       }
+      const available = Array.isArray(json.availableMethods)
+        ? json.availableMethods.filter((method: unknown): method is SecurityMethod =>
+            method === "passkey" || method === "totp" || method === "email")
+        : [json.method];
       setPending2FAUser(null);
       setPending2FACode(null);
       setPending2FAEmail(json.method === "email" ? email.trim() : null);
       setPendingSecondFactors([json.method]);
+      setAvailableSecondFactors(uniqueMethods(available));
       setCompletedSecondFactors([]);
-      return { success: true, requiresSecondFactor: true };
+      return { success: true, requiresSecondFactor: true, availableFactors: uniqueMethods(available) };
     } catch {
       return { success: false, error: "ログインAPIに接続できませんでした。" };
     }
@@ -493,54 +514,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const verifyPasskeySecondFactor = useCallback(async (): Promise<VerifyResult> => {
-    if (!pending2FAUser || !pendingSecondFactors.includes("passkey")) {
-      return { success: false, error: "端末認証セッションが見つかりません。" };
+    if (!pendingSecondFactors.includes("passkey")) {
+      return { success: false, error: "指紋・端末認証を選択してください。" };
     }
-
-    const credentials = pending2FAUser.webAuthnCredentials || [];
-    if (!credentials.length) {
-      return { success: false, error: "このアカウントでは端末認証が未登録です。" };
-    }
-
     try {
-      const optionsRes = await fetch("/api/auth/webauthn/generate-authentication-options", {
+      const optionsRes = await fetch("/api/auth/login/passkey/options", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credentials }),
+        credentials: "same-origin",
       });
-      const options = await optionsRes.json();
-      if (options.error) {
-        return { success: false, error: options.error };
+      const options = await optionsRes.json().catch(() => null);
+      if (!optionsRes.ok || !options || options.error) {
+        return { success: false, error: options?.error || "指紋・端末認証を開始できません。" };
       }
-
       const { startAuthentication } = await import("@simplewebauthn/browser");
-      const authResp = await startAuthentication(options);
-      const credential = credentials.find((entry: any) => entry.id === authResp.id);
-
-      const verifyRes = await fetch("/api/auth/webauthn/verify-authentication", {
+      const authenticationResponse = await startAuthentication(options);
+      const verifyRes = await fetch("/api/auth/login/passkey/verify", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          authenticationResponse: authResp,
-          credential,
-          userId: pending2FAUser.id,
-          purpose: "login-2fa",
-        }),
+        body: JSON.stringify({ authenticationResponse }),
       });
-      const result = await verifyRes.json();
-      if (!result.verified) {
-        return { success: false, error: result.error || "端末認証に失敗しました。" };
+      const result = await verifyRes.json().catch(() => null);
+      if (!verifyRes.ok || !result?.success || !result?.user) {
+        return { success: false, error: result?.error || "指紋・端末認証に失敗しました。" };
       }
-
-      if (credential && result.newCounter !== undefined) {
-        credential.counter = result.newCounter;
-      }
-
-      return completeSecondFactor("passkey");
+      finalizeLogin(result.user);
+      resetSecondFactorFlow();
+      return { success: true, remainingFactors: [] };
     } catch (error: any) {
-      return { success: false, error: error?.message || "端末認証に失敗しました。" };
+      return { success: false, error: error?.message || "指紋・端末認証に失敗しました。" };
     }
-  }, [completeSecondFactor, pending2FAUser, pendingSecondFactors]);
+  }, [finalizeLogin, pendingSecondFactors, resetSecondFactorFlow]);
+
+  const switchSecondFactor = useCallback(async (method: SecurityMethod) => {
+    if (method !== "passkey" && method !== "totp" && method !== "email") {
+      return { success: false, error: "認証方法が不正です。" };
+    }
+    try {
+      const response = await fetch("/api/auth/login/method", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ method }),
+      });
+      const json = await response.json().catch(() => null);
+      if (!response.ok || !json?.success) {
+        return { success: false, error: json?.error || "認証方法を切り替えできませんでした。" };
+      }
+      const available = Array.isArray(json.availableMethods)
+        ? json.availableMethods.filter((entry: unknown): entry is SecurityMethod =>
+            entry === "passkey" || entry === "totp" || entry === "email")
+        : [method];
+      setPendingSecondFactors([method]);
+      setAvailableSecondFactors(uniqueMethods(available));
+      setCompletedSecondFactors([]);
+      setPending2FACode(null);
+      setPending2FAEmail(method === "email" ? pending2FAEmail : null);
+      return { success: true, method };
+    } catch {
+      return { success: false, error: "認証方法を切り替えできませんでした。" };
+    }
+  }, [pending2FAEmail]);
 
   const resendEmailCode = useCallback(async () => {
     if (!pendingSecondFactors.includes("email")) {
@@ -666,6 +700,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyTOTP,
     verifyPasskeySecondFactor,
     resendEmailCode,
+    switchSecondFactor,
     resetSecondFactorFlow,
     logout,
     updateAvatar,
@@ -673,6 +708,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     pending2FAEmail,
     pending2FACode,
     pendingSecondFactors,
+    availableSecondFactors,
     completedSecondFactors,
     registeredUsers,
     refreshUsers,
@@ -680,6 +716,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     approveUser: approveUserAsync,
   }), [
     approveUserAsync,
+    availableSecondFactors,
     completedSecondFactors,
     deleteUserAsync,
     isLoading,
@@ -694,6 +731,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     registeredUsers,
     resendEmailCode,
     resetSecondFactorFlow,
+    switchSecondFactor,
     updateAvatar,
     updateNickname,
     user,

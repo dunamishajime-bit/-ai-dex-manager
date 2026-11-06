@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
     if (!user || !user.isApproved) {
       return NextResponse.json({ success: false, error: "ログインできません。" }, { status: 401, headers: noStore() });
     }
-    const method = loginFactorFor(user);
+    const method = challenge.factor || loginFactorFor(user);
+    if (method === "passkey") {
+      return NextResponse.json({ success: false, error: "指紋・端末認証を実行してください。" }, { status: 409, headers: noStore() });
+    }
     const valid = method === "totp"
       ? Boolean(user.totpSecret) && await verifyTOTPToken(String(code), user.totpSecret!)
       : otpHashForUser(user.id, String(code)) === challenge.codeHash;
