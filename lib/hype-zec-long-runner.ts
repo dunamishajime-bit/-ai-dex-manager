@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 
 import { assertHypeZecLiveGate, type HypeZecLongRuntime } from "../config/hypeZecLongRuntime";
+import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
+import { readFile, lstat } from "node:fs/promises";
+import { V4ExecutionStore, type V4ExecutionDocument } from "./v12-v4-execution-store";
+import { verifyV4ResidentStops } from "./v12-v4-resident-stop-owners";
 import { HYPE_ZEC_LONG_POLICY, type HypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
 import { calculateWalletRiskStop, moreProtectiveStop } from "./disdex-exit-overlay-contract";
@@ -151,8 +155,31 @@ function hashId(parts: readonly unknown[], prefix: string) { return `${prefix}-$
 function active(order: DirectOpenOrder) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase()); }
 function hasExposure(result: DirectTradeResult) { return ["FILLED", "PARTIALLY_FILLED"].includes(result.status) && result.executedQuantity > EPSILON; }
 
-export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
+export function verifiedHypeV4Stops(openOrders: DirectOpenOrder[], positions: DirectPosition[], doc: V4ExecutionDocument) {
+  const venue = openOrders.map(order => ({
+    symbol: order.symbol, clientOrderId: order.clientOrderId, side: order.side, type: order.type,
+    reduceOnly: order.reduceOnly, status: order.status, stopPrice: String(order.stopPrice),
+    origQty: String(order.quantity), executedQty: String(order.executedQuantity),
+  }));
+  const proof = verifyV4ResidentStops(doc.state, doc.intents, venue);
+  const legs = Object.values(doc.state.legs).filter(leg => leg.qty > 0);
+  if (proof.verifiedLegs !== legs.length) throw Error("HYPE_V4_STOP_PROOF_INCOMPLETE");
+  for (const symbol of new Set(legs.map(leg => leg.candidate.symbol))) {
+    const expected = legs.filter(leg => leg.candidate.symbol === symbol).reduce(
+      (sum, leg) => sum + leg.qty * (leg.candidate.effectiveSide === "LONG" ? 1 : -1), 0);
+    const matching = positions.filter(position => position.symbol === symbol);
+    if (matching.length !== 1 || !Number.isFinite(matching[0].quantity) ||
+        Math.abs(matching[0].quantity - expected) > Math.max(1e-8, Math.abs(expected) * 1e-7))
+      throw Error("HYPE_V4_POSITION_OWNER_MISMATCH");
+  }
+  const ids = new Set(Object.values(doc.intents).filter(intent => intent.action === "STOP" &&
+    legs.some(leg => leg.id === intent.legId)).map(intent => intent.clientOrderId));
+  return openOrders.filter(order => ids.has(order.clientOrderId));
+}
+
+export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[], v4Stops: readonly DirectOpenOrder[] = []) {
   const managed = new Set<DirectOpenOrder>([
+    ...v4Stops,
     ...findManagedHypeZecProtectiveOrders(openOrders, positions),
     ...findManagedOrdinaryResidentStops(openOrders, positions),
     ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
@@ -256,7 +283,17 @@ export class HypeZecLongRunner {
   }
 
   private async unmanagedOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
-    return unmanagedHypeZecOrders(openOrders, positions);
+    const candidates = openOrders.filter(order => /^v12-v4-[0-9a-f]{28}$/i.test(order.clientOrderId));
+    if (!candidates.length) return unmanagedHypeZecOrders(openOrders, positions);
+    const pinPath = "/etc/disdex/runner-pins.json";
+    const metadata = await lstat(pinPath);
+    if (!metadata.isFile() || metadata.isSymbolicLink() || metadata.uid !== 0 || (metadata.mode & 0o022) !== 0)
+      throw Error("HYPE_V4_PIN_UNTRUSTED");
+    const manifest = JSON.parse(await readFile(pinPath, "utf8"));
+    const sha = manifest?.runners?.V12_V4?.sha;
+    if (!/^[0-9a-f]{40}$/.test(sha ?? "")) throw Error("HYPE_V4_PIN_INVALID");
+    const doc = new V4ExecutionStore("/var/lib/disdex/v12-v4/orders.json", sha).read();
+    return unmanagedHypeZecOrders(openOrders, positions, verifiedHypeV4Stops(openOrders, positions, doc));
   }
 
   private async manualReview(state: HypeZecLongRunnerState, reason: string): Promise<HypeZecLongTickResult> {
@@ -338,8 +375,24 @@ export class HypeZecLongRunner {
     return { status: "completed", message: `HYPE_ZEC_EXIT_COMPLETED:${owned.symbol}`, strategy: owned.strategy };
   }
 
+  private async sharedEntryHold(state: HypeZecLongRunnerState, signal: HypeZecSignalResult): Promise<HypeZecLongTickResult | undefined> {
+    if (this.dependencies.runtime.mode !== "LIVE") return;
+    const kill = await readSharedKillSwitch({
+      ...process.env,
+      DISDEX_SHARED_KILL_SWITCH_FILE: process.env.DISDEX_SHARED_KILL_SWITCH_FILE || "/var/lib/disdex/shared/kill-switch.json",
+    });
+    if (!kill.active) return;
+    const reason = "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE";
+    state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason };
+    state.lastDecisionTs = this.now();
+    await this.dependencies.stateStore.save(state);
+    return { status: "held", message: reason, strategy: signal.strategy };
+  }
+
   private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
     if (!signal.accepted || !signal.entryPrice || !signal.stopPrice || !signal.signalTs) return { status: "no-change", message: signal.reason, strategy: signal.strategy };
+    const entryHold = await this.sharedEntryHold(state, signal);
+    if (entryHold) return entryHold;
     const sharedRisk = await readSharedCryptoDailyRisk(this.dependencies.runtime.sharedRiskPath, this.now());
     if (!sharedRisk.ok) {
       state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: `SHARED_CRYPTO_RISK:${sharedRisk.reason || "INVALID"}` };
@@ -407,6 +460,8 @@ export class HypeZecLongRunner {
     if (this.dependencies.runtime.mode !== "LIVE") { await this.dependencies.stateStore.save(state); return { status: "shadow", message: `HYPE_ZEC_SHADOW_ENTRY:${symbol}`, strategy: signal.strategy }; }
     const quantity = await this.dependencies.executor.normalizeMarketQuantity(symbol, sizing.quantity * (accepted.gross / Math.max(candidate.gross, EPSILON)), signal.entryPrice);
     if (!(quantity.quantity > 0) || quantity.notional < 1) { await this.dependencies.stateStore.save(state); return { status: "held", message: `HYPE_ZEC_NORMALIZED_MINIMUM_BLOCKED:${symbol}`, strategy: signal.strategy }; }
+    const preOrderHold = await this.sharedEntryHold(state, signal);
+    if (preOrderHold) return preOrderHold;
     const idempotencyKey = hashId([signal.strategy, signal.signalTs, symbol, quantity.quantity], "hz-entry");
     const pendingEntry = { idempotencyKey, clientOrderId: idempotencyKey, action: "ENTRY" as const, strategy: signal.strategy, symbol, side: "BUY" as const, quantity: quantity.quantity, expectedPrice: signal.entryPrice, phase: "planned" as const, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason };
     state.pending = pendingEntry;
@@ -632,7 +687,8 @@ export class HypeZecLongRunner {
       for (const signal of signals) {
         if (existingStrategies.has(signal.strategy)) continue;
         const result = await this.enter(state, signal, account, positions, lock);
-        if (result.status === "completed" || result.status === "manual-review") return result;
+        if (result.status === "completed" || result.status === "manual-review" ||
+            result.message === "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE") return result;
       }
       await this.dependencies.stateStore.save(refreshHypeZecNoEntryDecision(state, signals, priorLastDecisionTs, this.now()));
       return { status: "no-change", message: "HYPE_ZEC_NO_ACCEPTED_ENTRY" };
