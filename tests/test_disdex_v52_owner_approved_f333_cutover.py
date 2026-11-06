@@ -8,6 +8,52 @@ spec=importlib.util.spec_from_file_location("v52f333",PATH)
 m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 
 class V52F333CutoverContractTest(unittest.TestCase):
+    def test_nonfinite_or_boolean_position_amount_never_becomes_venue_evidence(self):
+        for amount in ['NaN','Infinity','-Infinity',float('nan'),float('inf'),True,False]:
+            with self.subTest(amount=amount),self.assertRaisesRegex(RuntimeError,'POSITION_AMT_INVALID'):
+                m.normalize_inventory({'positions':[{'symbol':'DOGEUSDT','positionAmt':amount}],'openOrders':[]})
+
+    def test_partial_metadata_publish_restores_every_already_changed_file(self):
+        import json,tempfile
+        from unittest.mock import patch
+        from contextlib import ExitStack
+        scratch=ROOT/'.verification'
+        scratch.mkdir(exist_ok=True)
+        self.assertFalse(scratch.is_symlink())
+        self.assertTrue(scratch.resolve().is_relative_to(ROOT.resolve()))
+        with tempfile.TemporaryDirectory(dir=scratch) as directory,ExitStack() as stack:
+            base=Path(directory);pin=base/'pin.env';rp=base/'pins.json';cp=base/'plan.json';kill=base/'kill.json'
+            old_pin=f'DISDEX_V52_RUNTIME_SHA={m.OLD}\nDISDEX_V52_RUNTIME_ROOT={m.BASE/m.OLD}\n'.encode()
+            old_rp=json.dumps({'runners':{'V52':{'sha':m.OLD,'serviceUnit':m.OLD_UNIT,'releaseRoot':str(m.BASE/m.OLD)}}}).encode()
+            old_cp=json.dumps({'ordersEnabled':False,'runners':{'V52':m.OLD}}).encode()
+            for path,data in [(pin,old_pin),(rp,old_rp),(cp,old_cp),(kill,b'{"active":true}')]:path.write_bytes(data)
+            for name,value in dict(PIN=pin,RUNNER_PINS=rp,CURRENT_PLAN=cp,KILL=kill,BACKUP_DIR=base/'backups').items():
+                stack.enter_context(patch.object(m,name,value))
+            active={m.OLD_UNIT:True,m.NEW_UNIT:False}
+            def command(*args,**kwargs):
+                if len(args)>2 and args[0]=='systemctl' and args[1] in ['start','stop']:
+                    active[args[2]]=args[1]=='start'
+                return ''
+            failed={'once':False}
+            def publish(path,data,mode):
+                if path==cp and not failed['once']:
+                    failed['once']=True;raise RuntimeError('INJECTED_CURRENT_PLAN_PUBLISH_FAILURE')
+                path.write_bytes(data)
+            original_require=m.require
+            # This fixture exercises transaction ordering, not real root/ACL authority.
+            stack.enter_context(patch.object(m,'require',lambda cond,msg:None if msg=='BACKUP_DIR_UNSAFE' else original_require(cond,msg)))
+            mocks=dict(all_preflight=lambda:(old_pin,0,0,0o600,{},'a'*64),
+                root_metadata_baseline=lambda:(old_rp,0o644,old_cp,0o600),risk_snapshot=lambda **kw:None,
+                is_enabled=lambda unit:unit==m.OLD_UNIT,service_active=lambda unit:active.get(unit,False),
+                run=command,wait_unit=lambda *a,**kw:None,atomic_pin=lambda data,*a:pin.write_bytes(data),
+                atomic_root_file=publish)
+            for name,value in mocks.items():stack.enter_context(patch.object(m,name,value))
+            with self.assertRaisesRegex(RuntimeError,'V52_CUTOVER_BLOCKED'):m.execute('12345')
+            self.assertEqual(pin.read_bytes(),old_pin)
+            self.assertEqual(rp.read_bytes(),old_rp)
+            self.assertEqual(cp.read_bytes(),old_cp)
+            self.assertTrue(active[m.OLD_UNIT]);self.assertFalse(active[m.NEW_UNIT])
+
     def test_inventory_ignores_mark_only_changes_but_binds_protection(self):
         a={"positions":[{"symbol":"DOGEUSDT","positionAmt":"-2","positionSide":"BOTH",
                          "entryPrice":"1","markPrice":"2","updateTime":1}],
