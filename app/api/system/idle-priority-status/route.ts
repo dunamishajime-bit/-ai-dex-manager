@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -28,7 +29,8 @@ export async function GET(req: NextRequest) {
   const v4BaselinePath = process.env.V12_V4_IDLE_BASELINE_SNAPSHOT_PATH || "/var/lib/disdex/v12-v4/idle-baseline-snapshot.json";
   const heartbeatPath = process.env.DISDEX_IDLE_PRIORITY_HEARTBEAT_PATH || "/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json";
 
-  const [releaseSha, details, state, residualState, rawBaseline, v4BaselineRaw, heartbeat] = await Promise.all([
+  const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
+  const [fallbackReleaseSha, details, state, residualState, rawBaseline, v4BaselineRaw, heartbeat] = await Promise.all([
     textFile(releaseShaPath),
     jsonFile(detailsPath),
     jsonFile(statePath),
@@ -37,15 +39,18 @@ export async function GET(req: NextRequest) {
     jsonFile(v4BaselinePath),
     jsonFile(heartbeatPath),
   ]);
+  const releaseSha = currentRuntime?.productionReleaseShas.idle || fallbackReleaseSha;
+  const v4ReleaseSha = currentRuntime?.productionReleaseShas.v12 || fallbackReleaseSha;
   const baselineCurrent = rawBaseline?.runtimeSha === releaseSha && rawBaseline?.decisionTs === details?.decisionTs;
   const baseline = baselineCurrent ? rawBaseline : null;
-  const v4Baseline = v4BaselineRaw?.runtimeSha === releaseSha ? v4BaselineRaw : null;
+  const v4Baseline = v4BaselineRaw?.runtimeSha === v4ReleaseSha ? v4BaselineRaw : null;
   const baselineStatus = baselineCurrent ? "EVALUATED" : details ? "NOT_EVALUATED_THIS_CYCLE" : "UNAVAILABLE";
 
   return NextResponse.json({
     ok: true,
     status: heartbeat?.status || heartbeat?.safetyState || (heartbeat ? "LIVE" : "UNKNOWN"),
     releaseSha,
+    v4ReleaseSha,
     heartbeat,
     baseline,
     baselineStatus,
