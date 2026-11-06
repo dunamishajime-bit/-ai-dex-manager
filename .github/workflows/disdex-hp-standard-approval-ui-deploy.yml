@@ -364,6 +364,22 @@ jobs:
           echo 'ORDERS_SENT_BY_DEPLOY=0'
           REMOTE
 
+      - name: Switch to independent signed owner-session auth probe
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          bash -n scripts/ops/disdex-hp-independent-owner-probe-nginx-cutover.sh
+          ssh -T -i "$HOME/.ssh/id_vps_root" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10 \
+            -p "$PORT" "root@$SSH_HOST" \
+            "TARGET_SHA='$TARGET_SHA' bash -s" \
+            < scripts/ops/disdex-hp-independent-owner-probe-nginx-cutover.sh
       - name: Verify public HP surface
         shell: bash
         run: |

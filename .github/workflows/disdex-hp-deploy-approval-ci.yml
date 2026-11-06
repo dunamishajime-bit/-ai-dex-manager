@@ -91,6 +91,10 @@ jobs:
       - name: Authentication boundary source contracts
         run: node --test tests/auth-boundary-source.test.mjs
 
+      - name: Signed owner-session probe and portfolio display security
+        run: |
+          node --test tests/hp-independent-owner-probe.test.mjs tests/hp-live-portfolio-session-expiry.test.mjs
+          bash -n scripts/ops/disdex-hp-independent-owner-probe-nginx-cutover.sh
       - name: Production HP build
         run: |
           npm run build
