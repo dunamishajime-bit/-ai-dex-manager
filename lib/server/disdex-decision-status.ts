@@ -90,6 +90,7 @@ export function runtimeSnapshot(
   currentRuntime: CurrentProductionRuntime | null,
 ): DecisionStatusSnapshot["runtime"] {
   const releaseSha = currentRuntime?.releaseSha ?? "UNAVAILABLE";
+  const releaseShas = currentRuntime?.productionReleaseShas;
   const caps = currentRuntime?.caps;
   const v12 = currentRuntime?.v12;
   const pengu = currentRuntime?.pengu;
@@ -119,7 +120,7 @@ export function runtimeSnapshot(
         id: pengu?.strategyId ?? "PENGU_DUAL_LS_V2_FINAL",
         label: pengu?.strategyId ?? "PENGU runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: releaseShas?.pengu ?? releaseSha,
         venue: "Aster PENGUUSDT",
         timeframe: "closed PENGU/BTC H1",
         entryPolicy: pengu && caps
@@ -135,7 +136,7 @@ export function runtimeSnapshot(
         id: "QUALITY102_CAUSAL_V1",
         label: q102 ? `Q102 ${q102.selectorMode}` : "Q102 runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: releaseShas?.quality102 ?? releaseSha,
         venue: "Aster Futures crypto sleeve",
         timeframe: "causal LIVE data only",
         entryPolicy: q102 && caps
@@ -151,7 +152,7 @@ export function runtimeSnapshot(
         id: "FET_BRK48_RESIDUAL",
         label: "FET BRK48 Residual",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: releaseShas?.fet ?? releaseSha,
         venue: "Aster Futures FETUSDT",
         timeframe: "BRK48 residual signal",
         entryPolicy: "FET BRK48の確定データだけを評価し、Core entryと競合時はpreemptibleな残余枠で判定",
@@ -169,7 +170,7 @@ export function runtimeSnapshot(
             : hype.matchesCurrent && hype.mode?.toUpperCase() === "LIVE"
               ? "LIVE"
               : "UNCONFIRMED",
-        releaseSha: hype?.runtimeSha || releaseSha,
+        releaseSha: hype?.runtimeSha || releaseShas?.hype || releaseSha,
         venue: "Aster Futures HYPEUSDT",
         timeframe: "closed H1 trend / breakout",
         entryPolicy: "HYPE Trend Long Production runner / current heartbeat authoritative",
@@ -184,7 +185,7 @@ export function runtimeSnapshot(
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
         label: v52 ? `V52 ${v52.policyId}` : "V52 runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: releaseShas?.v52 ?? releaseSha,
         venue: "Aster-only stock sleeves",
         timeframe: "US stock V11_EQ / V50 windows",
         entryPolicy: v52
