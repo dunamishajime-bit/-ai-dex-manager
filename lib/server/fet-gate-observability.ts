@@ -4,7 +4,6 @@ import { evaluateFet, fetObservationExpiry, FET_POLICY, type Gate } from '@/lib/
 import { loadCurrentProductionRuntime } from './current-production-runtime';
 import { loadFetRuntimeObservability } from './fet-runtime-observability';
 
-const ROOT='/home/deploy/disdex-trading/current';
 const CONFIG_SHA='59a3b754b7041387a4e3c783877fd9aa948cbe285554fb87e6e2955c27b07d51';
 const SIGNAL_SHA='73a1aa519b7db69ac8f4771f422530a6d40d2ec712116be806fdebc58911f30f';
 async function json(path:string):Promise<Record<string,unknown>|null>{try{const s=await readFile(path,'utf8');if(s.length>512*1024)return null;return JSON.parse(s);}catch{return null;}}
@@ -13,9 +12,10 @@ let inflight:Promise<Awaited<ReturnType<typeof observe>>>|undefined;
 async function observe(){
  const now=Date.now(),runtime=await loadCurrentProductionRuntime();
  const fetExpectedSha=runtime.productionReleaseShas.fet;
+ const fetReleaseRoot='/home/deploy/disdex-trading/releases/'+fetExpectedSha;
  const fet=await loadFetRuntimeObservability({now,expectedReleaseSha:fetExpectedSha});
  const [config,source,state,kill,risk]=await Promise.all([
-  readFile(ROOT+'/config/fetBrk48Runtime.ts','utf8').catch(()=>''),readFile(ROOT+'/lib/fet-brk48-signal.ts','utf8').catch(()=>''),
+  readFile(fetReleaseRoot+'/config/fetBrk48Runtime.ts','utf8').catch(()=>''),readFile(fetReleaseRoot+'/lib/fet-brk48-signal.ts','utf8').catch(()=>''),
   json(process.env.FET_BRK48_RESIDUAL_STATE_PATH||'/var/lib/disdex/fet-brk48-residual/state.json'),
   json(process.env.DISDEX_SHARED_KILL_SWITCH_PATH||'/var/lib/disdex/shared/kill-switch.json'),
   json(process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH||'/var/lib/disdex/shared/crypto-daily-risk.json')]);
