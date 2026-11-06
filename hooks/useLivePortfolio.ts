@@ -11,11 +11,17 @@ export type LivePosition = {
   markPrice: number;
   notionalUsd: number;
   unrealizedPnlUsd: number;
+  markVerified: boolean;
+  pnlVerified: boolean;
 };
 
 export type LivePortfolioSnapshot = {
   ok: true;
   capturedAt: string;
+  readOnly: true;
+  partial: boolean;
+  positionSource: "POSITION_RISK" | "ACCOUNT_SNAPSHOT" | "ACCOUNT_DISCREPANCY" | "UNAVAILABLE";
+  availability: { account: boolean; positions: boolean; orders: boolean };
   account: {
     balanceUsd: number;
     availableUsd: number;
@@ -54,7 +60,15 @@ export function useLivePortfolio() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/system/live-portfolio", { cache: "no-store" });
+      const response = await fetch("/api/system/live-portfolio", { cache: "no-store", credentials: "same-origin" });
+      if (response.status === 401) {
+        setSnapshot(null);
+        window.dispatchEvent(new Event("disdex-owner-session-expired"));
+        throw new Error("HPのログイン認証が期限切れです。再ログインしてください。");
+      }
+      if (!response.headers.get("content-type")?.includes("application/json")) {
+        throw new Error("Live portfolio API returned a non-JSON response.");
+      }
       const data = (await response.json()) as LivePortfolioSnapshot | { ok?: false; error?: string };
       if (!response.ok || !data.ok) {
         throw new Error("error" in data && data.error ? data.error : "Aster live state unavailable.");
@@ -63,6 +77,8 @@ export function useLivePortfolio() {
       setError(null);
       return data;
     } catch (nextError) {
+      // Never show a previously successful balance as though it were current.
+      setSnapshot(null);
       setError(nextError instanceof Error ? nextError.message : "Aster live state unavailable.");
       return null;
     } finally {

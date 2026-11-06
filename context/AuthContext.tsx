@@ -264,6 +264,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 0);
   }, [resetSecondFactorFlow, router]);
 
+  // A signed owner session can expire while the client still has local user state.
+  // Require the existing login flow again; never bypass or renew authentication.
+  useEffect(() => {
+    const onSessionExpired = () => triggerLogout();
+    window.addEventListener("disdex-owner-session-expired", onSessionExpired);
+    return () => window.removeEventListener("disdex-owner-session-expired", onSessionExpired);
+  }, [triggerLogout]);
+
   useEffect(() => {
     let alive = true;
     const currentUser = getCurrentUser();
