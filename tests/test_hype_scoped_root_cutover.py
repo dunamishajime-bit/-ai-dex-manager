@@ -184,6 +184,29 @@ class HypeJobEntrypointTests(unittest.TestCase):
         self.assertNotIn("fixture-secret", " ".join(command))
         self.assertEqual(json.loads(options["input"]), env)
 
+    def test_worker_retries_proxy_rejection_but_never_retries_unknown_errors(self):
+        release = PurePosixPath("/releases") / ("a" * 40)
+        deploy = SimpleNamespace(pw_uid=1000, pw_gid=1000)
+        delays = []
+        denied = SimpleNamespace(returncode=2, stdout="", stderr=json.dumps({
+            "status": "PENDING_READONLY_RECONCILE_FAIL_CLOSED",
+            "error": "V4_BUDGET_PROXY_RESPONSE_INVALID",
+        }))
+        accepted = SimpleNamespace(returncode=0, stdout='{"positionCount":0}\n', stderr="")
+        results = iter([denied, accepted])
+        self.assertEqual(h.run_worker_signed_read(
+            release, deploy, {}, run=lambda *a, **k: next(results), sleep=delays.append,
+            retry_allowed=lambda: True), {"positionCount": 0})
+        self.assertEqual(delays, [3])
+        for rejected, may_retry in (
+            (denied, False),
+            (SimpleNamespace(returncode=2, stdout="", stderr="unexpected fixture"), True),
+        ):
+            with self.assertRaisesRegex(ValueError, "WORKER_SIGNED_READ_FAILED_OR_DEFERRED"):
+                h.run_worker_signed_read(release, deploy, {}, run=lambda *a, **k: rejected,
+                                         sleep=lambda s: self.fail("unexpected retry"),
+                                         retry_allowed=lambda: may_retry)
+
     def test_job_entrypoint_imports_installed_sibling_modules_under_isolated_python(self):
         script = Path(__file__).resolve().parents[1] / "scripts/ops/deploy/disdex_hype_scoped_job.py"
         result = subprocess.run(

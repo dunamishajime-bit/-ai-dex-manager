@@ -71,7 +71,19 @@ def validate_v4_budget_proxy_sources(budget_source, proxy_source):
     return True
 
 
-def run_worker_signed_read(release, deploy, environment, *, run=subprocess.run):
+def worker_read_retry_allowed():
+    try:
+        budget = json.loads(_safe_bytes(Path(SHARED_RATE_BUDGET)))
+    except (OSError, ValueError):
+        return False
+    if not isinstance(budget, dict) or budget.get("schema") != "disdex-aster-rate-budget/v1":
+        return False
+    cooldown = budget.get("cooldownUntil")
+    return cooldown is None or (type(cooldown) is int and cooldown <= time.time_ns() // 1000000)
+
+
+def run_worker_signed_read(release, deploy, environment, *, run=subprocess.run,
+                           sleep=time.sleep, retry_allowed=worker_read_retry_allowed):
     # The canonical lock creates, renews, and unlinks its file in shared/.
     # Give that mount to the short-lived read-only CLI, not the cutover worker.
     # systemd receives only fixed argv; credentials travel through the pipe.
@@ -98,8 +110,28 @@ def run_worker_signed_read(release, deploy, environment, *, run=subprocess.run):
     ]
     payload = json.dumps(environment)
     require(len(payload) <= 16384, "SIGNED_READ_ENVIRONMENT_TOO_LARGE")
-    result = run(command, input=payload, capture_output=True, text=True, timeout=57)
-    require(result.returncode == 0, "WORKER_SIGNED_READ_FAILED_OR_DEFERRED")
+    for delay in (3, 6, None):
+        result = run(command, input=payload, capture_output=True, text=True, timeout=57)
+        if result.returncode == 0:
+            break
+        retryable = False
+        for line in result.stderr.splitlines():
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(row, dict) or row.get("status") != "PENDING_READONLY_RECONCILE_FAIL_CLOSED":
+                continue
+            error = row.get("error")
+            retryable = isinstance(error, str) and (
+                error in ("V4_BUDGET_PROXY_RESPONSE_INVALID", "PENDING_RECONCILE_ACCOUNT_LOCK_BUSY")
+                or re.fullmatch(r"ASTER_GLOBAL_RATE_BUDGET_SATURATED(?::[0-9]{1,12})?", error)
+            )
+            break
+        require(delay is not None and retryable and retry_allowed(),
+                "WORKER_SIGNED_READ_FAILED_OR_DEFERRED")
+        sleep(delay)
+        require(retry_allowed(), "WORKER_SIGNED_READ_FAILED_OR_DEFERRED")
     rows = [json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")]
     require(len(rows) == 1 and isinstance(rows[0], dict), "WORKER_SIGNED_READ_RESULT_INVALID")
     return rows[0]
