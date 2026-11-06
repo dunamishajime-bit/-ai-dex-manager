@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { loadReadOnlyRunnerPins } from "@/lib/server/read-only-runner-pin-telemetry";
 
 const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha";
 const CURRENT_RELEASE_ROOT = "/home/deploy/disdex-trading/current";
@@ -167,11 +168,18 @@ type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
 async function loadRuntimeLineage(
   releaseSha: string,
   env: EnvMap,
-  v4PrimarySha?: string,
+  productionReleaseShas: CurrentProductionRuntime["productionReleaseShas"],
 ): Promise<CurrentProductionRuntime["runtimeLineage"]> {
   const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
   const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
-  const v12ExpectedSha = v12PrimaryMode === "V4" ? (v4PrimarySha ?? releaseSha) : releaseSha;
+  const expectedByUnit: Record<RuntimeUnitKey, string> = {
+    v12: productionReleaseShas.v12,
+    pengu: productionReleaseShas.pengu,
+    quality102: productionReleaseShas.quality102,
+    v52: productionReleaseShas.v52,
+    fet: productionReleaseShas.fet,
+    hype: productionReleaseShas.hype,
+  };
   const heartbeatPaths = {
     ...HEARTBEAT_PATHS,
     v12: v12PrimaryMode === "V4" ? V12_V4_HEARTBEAT_PATH : LEGACY_V12_HEARTBEAT_PATH,
@@ -181,8 +189,10 @@ async function loadRuntimeLineage(
       const raw = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
       const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
         : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
-      const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim()
-        : unit === "fet" || (unit === "v12" && v12PrimaryMode === "V4") ? (unit === "v12" ? v12ExpectedSha : releaseSha) : undefined;
+      const pinnedSha = expectedByUnit[unit];
+      const expectedSha = typeof raw.expectedSha === "string" && raw.expectedSha.trim()
+        ? raw.expectedSha.trim()
+        : pinnedSha;
       units[unit] = {
         runtimeSha,
         expectedSha,
@@ -200,9 +210,7 @@ async function loadRuntimeLineage(
             ? Number(raw.updatedAt)
             : undefined,
         healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
-        matchesCurrent: unit === "v12" && v12PrimaryMode === "V4"
-          ? runtimeSha === v12ExpectedSha && expectedSha === v12ExpectedSha
-          : runtimeSha === releaseSha && expectedSha === releaseSha,
+        matchesCurrent: runtimeSha === pinnedSha && expectedSha === pinnedSha,
       };
     } catch (error) {
       units[unit] = {
@@ -247,6 +255,16 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     }
   }
 
+  const readOnlyPins = await loadReadOnlyRunnerPins().catch(() => null);
+  const productionReleaseShas: CurrentProductionRuntime["productionReleaseShas"] = {
+    v12: v12PrimaryMode === "V4" ? (readOnlyPins?.runners.V12_V4.sha ?? v4PrimarySha ?? releaseSha) : releaseSha,
+    pengu: readOnlyPins?.runners.PENGU_V8.sha ?? releaseSha,
+    quality102: readOnlyPins?.runners.QUALITY102_CAUSAL_V1.sha ?? releaseSha,
+    v52: readOnlyPins?.runners.V52.sha ?? releaseSha,
+    fet: readOnlyPins?.runners.FET_BRK48_RESIDUAL.sha ?? releaseSha,
+    hype: readOnlyPins?.runners.HYPE_TREND_LONG.sha ?? releaseSha,
+  };
+
   const q102Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "integratedProductionRiskPolicy.ts"), "utf8");
   const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
@@ -254,7 +272,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const runtimeLineage = await loadRuntimeLineage(
     releaseSha,
     env,
-    v12PrimaryMode === "V4" ? v4PrimarySha : undefined,
+    productionReleaseShas,
   );
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
@@ -272,14 +290,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     checkedAt,
     source: "VPS_CURRENT_RUNTIME",
     releaseSha,
-    productionReleaseShas: {
-      v12: releaseSha,
-      pengu: releaseSha,
-      quality102: releaseSha,
-      v52: releaseSha,
-      fet: releaseSha,
-      hype: releaseSha,
-    },
+    productionReleaseShas,
     runtimeLineage,
     caps: {
       v12BaseGross: requiredNumber(env, "V12_BASE_GROSS_CAP"),
