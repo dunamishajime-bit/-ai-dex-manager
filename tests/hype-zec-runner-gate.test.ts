@@ -2,7 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { assertHypeZecLiveGate, resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
-import { isRecoverableHypeZecMarketDataFailure, refreshHypeZecNoEntryDecision, unmanagedHypeZecOrders } from "../lib/hype-zec-long-runner";
+import { isRecoverableHypeZecMarketDataFailure, refreshHypeZecNoEntryDecision, unmanagedHypeZecOrders, verifiedHypeV4Stops } from "../lib/hype-zec-long-runner";
+
+test("HYPE accepts a V4 STOP only when its durable owner and venue quantity match", () => {
+  const cid = "v12-v4-" + "a".repeat(28);
+  const order: any = { symbol:"NEARUSDT", clientOrderId:cid, side:"BUY", status:"NEW", type:"STOP_MARKET",
+    reduceOnly:true, quantity:4, executedQuantity:0, stopPrice:4 };
+  const position: any = { symbol:"NEARUSDT", quantity:-4 };
+  const doc: any = { state:{ legs:{ L:{id:"L",qty:4,candidate:{symbol:"NEARUSDT",effectiveSide:"SHORT"}} }},
+    intents:{ [cid]:{clientOrderId:cid,legId:"L",action:"STOP",stage:"ACKNOWLEDGED",command:{price:4}} }};
+  assert.deepEqual(verifiedHypeV4Stops([order],[position],doc),[order]);
+  assert.throws(()=>verifiedHypeV4Stops([{...order,quantity:3}],[position],doc));
+  assert.throws(()=>verifiedHypeV4Stops([{...order,clientOrderId:"v12-v4-"+"b".repeat(28)}],[position],doc));
+  assert.throws(()=>verifiedHypeV4Stops([order],[{...position,quantity:-3}],doc));
+});
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 
 test("only the known malformed market row is a retryable HYPE data failure", () => {

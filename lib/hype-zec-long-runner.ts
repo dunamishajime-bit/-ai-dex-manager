@@ -2,6 +2,9 @@ import { createHash } from "node:crypto";
 
 import { assertHypeZecLiveGate, type HypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
+import { readFile, lstat } from "node:fs/promises";
+import { V4ExecutionStore, type V4ExecutionDocument } from "./v12-v4-execution-store";
+import { verifyV4ResidentStops } from "./v12-v4-resident-stop-owners";
 import { HYPE_ZEC_LONG_POLICY, type HypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
 import { calculateWalletRiskStop, moreProtectiveStop } from "./disdex-exit-overlay-contract";
@@ -152,8 +155,31 @@ function hashId(parts: readonly unknown[], prefix: string) { return `${prefix}-$
 function active(order: DirectOpenOrder) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase()); }
 function hasExposure(result: DirectTradeResult) { return ["FILLED", "PARTIALLY_FILLED"].includes(result.status) && result.executedQuantity > EPSILON; }
 
-export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
+export function verifiedHypeV4Stops(openOrders: DirectOpenOrder[], positions: DirectPosition[], doc: V4ExecutionDocument) {
+  const venue = openOrders.map(order => ({
+    symbol: order.symbol, clientOrderId: order.clientOrderId, side: order.side, type: order.type,
+    reduceOnly: order.reduceOnly, status: order.status, stopPrice: String(order.stopPrice),
+    origQty: String(order.quantity), executedQty: String(order.executedQuantity),
+  }));
+  const proof = verifyV4ResidentStops(doc.state, doc.intents, venue);
+  const legs = Object.values(doc.state.legs).filter(leg => leg.qty > 0);
+  if (proof.verifiedLegs !== legs.length) throw Error("HYPE_V4_STOP_PROOF_INCOMPLETE");
+  for (const symbol of new Set(legs.map(leg => leg.candidate.symbol))) {
+    const expected = legs.filter(leg => leg.candidate.symbol === symbol).reduce(
+      (sum, leg) => sum + leg.qty * (leg.candidate.effectiveSide === "LONG" ? 1 : -1), 0);
+    const matching = positions.filter(position => position.symbol === symbol);
+    if (matching.length !== 1 || !Number.isFinite(matching[0].quantity) ||
+        Math.abs(matching[0].quantity - expected) > Math.max(1e-8, Math.abs(expected) * 1e-7))
+      throw Error("HYPE_V4_POSITION_OWNER_MISMATCH");
+  }
+  const ids = new Set(Object.values(doc.intents).filter(intent => intent.action === "STOP" &&
+    legs.some(leg => leg.id === intent.legId)).map(intent => intent.clientOrderId));
+  return openOrders.filter(order => ids.has(order.clientOrderId));
+}
+
+export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[], v4Stops: readonly DirectOpenOrder[] = []) {
   const managed = new Set<DirectOpenOrder>([
+    ...v4Stops,
     ...findManagedHypeZecProtectiveOrders(openOrders, positions),
     ...findManagedOrdinaryResidentStops(openOrders, positions),
     ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
@@ -257,7 +283,17 @@ export class HypeZecLongRunner {
   }
 
   private async unmanagedOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
-    return unmanagedHypeZecOrders(openOrders, positions);
+    const candidates = openOrders.filter(order => /^v12-v4-[0-9a-f]{28}$/i.test(order.clientOrderId));
+    if (!candidates.length) return unmanagedHypeZecOrders(openOrders, positions);
+    const pinPath = "/etc/disdex/runner-pins.json";
+    const metadata = await lstat(pinPath);
+    if (!metadata.isFile() || metadata.isSymbolicLink() || metadata.uid !== 0 || (metadata.mode & 0o022) !== 0)
+      throw Error("HYPE_V4_PIN_UNTRUSTED");
+    const manifest = JSON.parse(await readFile(pinPath, "utf8"));
+    const sha = manifest?.runners?.V12_V4?.sha;
+    if (!/^[0-9a-f]{40}$/.test(sha ?? "")) throw Error("HYPE_V4_PIN_INVALID");
+    const doc = new V4ExecutionStore("/var/lib/disdex/v12-v4/orders.json", sha).read();
+    return unmanagedHypeZecOrders(openOrders, positions, verifiedHypeV4Stops(openOrders, positions, doc));
   }
 
   private async manualReview(state: HypeZecLongRunnerState, reason: string): Promise<HypeZecLongTickResult> {
