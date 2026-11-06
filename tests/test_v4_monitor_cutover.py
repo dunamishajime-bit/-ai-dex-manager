@@ -13,6 +13,19 @@ def plan():
  return dict(schema='disdex-unified-deployment-plan/v2',repository='dunamishajime-bit/-ai-dex-manager',deploymentTarget='professional-dismanager.net',operatorTarget='DD1296_FINAL_ALLIN_10BPS',sourceSha=SHA,scope='V12_V4',runners={k:SHA if k=='V12_V4' else '7'*40 for k in IDS},uiSha='7'*40,monitorSha='7'*40,releaseRoots=dict(runners='/home/deploy/disdex-trading/releases',ui='/srv/ui',monitor='/srv/monitor'),ordersEnabled=False)
 
 class V4MonitorContractTest(unittest.TestCase):
+ def test_old_instance_mask_uses_scoped_backup_adapter(self):
+  from disdex_v4_monitor_cutover import make_old_v4_mask_adapter
+  root=Path('/var/lib/disdex/unified-deploy')
+  old='disdex-v12-v4@'+'d'*40+'.service'
+  expected=root/'v4-monitor-old-unit-test'
+  with patch('disdex_v4_priority_live.V4LocalUnitSystemdAdapter') as adapter, \
+       patch('tempfile.mkdtemp',return_value=str(expected)) as mkdir:
+   mask,backup=make_old_v4_mask_adapter(old,root)
+  self.assertIs(mask,adapter.return_value)
+  self.assertEqual(backup,expected)
+  mkdir.assert_called_once_with(prefix='v4-monitor-old-unit-',dir=root)
+  adapter.assert_called_once_with({old},backup)
+
  def test_durable_flat_gate_accepts_cancelled_history_and_rejects_exposure(self):
   import disdex_v4_monitor_cutover as module
   base=dict(state=dict(legs={'cancelled':dict(qty=0,status='CANCELLED')}),intents={},protections={})
