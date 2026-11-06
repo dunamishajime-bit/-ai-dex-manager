@@ -8,6 +8,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import { migrateFlatV4State, type V4FlatLineageEvidence } from "../lib/v12-v4-flat-lineage-migration";
 import { parseMigrationArgs } from "../scripts/v12-v4-flat-lineage-migration";
+import { reconcileV4ExternalFlatClose } from "../lib/v12-v4-venue-exit";
 
 const OLD_SHA = "a".repeat(40);
 const NEW_SHA = "b".repeat(40);
@@ -55,6 +56,46 @@ function evidence(overrides: Partial<V4FlatLineageEvidence> = {}): V4FlatLineage
         ...overrides,
     };
 }
+
+test("signed manual close retires only the matched expired STOP and preserves an unrelated review",async()=>{
+ const doc=flatObserved(),ts=200*HOUR;
+ doc.state=createProductionState({equityUsd:72,foreign:[],holdProtected:false});
+ const base=evaluateV12V4Routes({symbol:'ETHUSDT',sourceSide:'SHORT',sourceSignalTs:ts,age:2,volRatio:.5,er24:.5})[0];
+ const candidate={...base,route:'REC_X01_TIME_24H',family:'RECOVERY_X' as const,symbol:'ETHUSDT',requestedGross:.1,effectiveSide:'LONG' as const};
+ const reserve=await planProductionEntry(doc.state,{candidate,ts,eventId:'reserve',referencePrice:30,minimumOrderNotionalUsd:5,entryAtr:2,
+  quantityNormalizer:{normalizeMarketQuantity:async()=>({quantity:.2,notional:6,stepSize:.01})} as any});
+ const id=reserve.leg.id,entry=v4OrderIdentity(OLD_SHA,id,'ENTRY',0),stop=v4OrderIdentity(OLD_SHA,id,'STOP',0);
+ doc.state=applyProductionEvent(doc.state,reserve);
+ doc.state=applyProductionEvent(doc.state,{type:'ENTRY_FILL',id,eventId:'entry',ts:ts+1,qty:.2,price:30.01,feeUsd:.02});
+ doc.state=applyProductionEvent(doc.state,{type:'ENTRY_TERMINAL',id,eventId:'terminal',ts:ts+2});
+ doc.state.executionReview='ENTRY_FILL_OVER_RESERVED_NOTIONAL:historical-leg';
+ doc.intents={
+  [entry]:{clientOrderId:entry,legId:id,action:'ENTRY',sequence:0,stage:'TERMINAL',createdAt:ts,updatedAt:ts+2,venueOrderId:'91'},
+  [stop]:{clientOrderId:stop,legId:id,action:'STOP',sequence:0,stage:'ACKNOWLEDGED',createdAt:ts+2,updatedAt:ts+2,venueOrderId:'92'},
+ };
+ doc.protections[id]={legId:id,phase:'STOP_CONFIRMED',protectedQty:.2,updatedAt:ts+2,stopClientOrderId:stop};
+ const trades=[
+  {id:1,orderId:91,symbol:'ETHUSDT',side:'BUY' as const,qty:'.2',price:'30.01',time:ts+1,commission:'.02',commissionAsset:'USDT'},
+  {id:2,orderId:93,symbol:'ETHUSDT',side:'SELL' as const,qty:'.2',price:'31',time:ts+10,commission:'.03',commissionAsset:'USDT'},
+ ];
+ const proof={positions:[{positionAmt:'0'}],openOrders:[],pendingCount:0,trades,
+  stop:{clientOrderId:stop,orderId:92,symbol:'ETHUSDT',status:'EXPIRED',type:'STOP_MARKET',side:'SELL' as const,reduceOnly:true,origQty:'.2',executedQty:'0'},
+  funding:[{symbol:'ETHUSDT',incomeType:'FUNDING_FEE',asset:'USDT',time:ts+5,income:'.01',tranId:'fund1'}],
+  observedAt:ts+11};
+ const next=reconcileV4ExternalFlatClose(doc,proof);
+ assert.equal(next.state.legs[id].status,'CLOSED');
+ assert.equal(next.state.legs[id].fundingUsd,.01);
+ assert.equal(next.state.legs[id].feesUsd,.05);
+ assert.ok(doc.state.executionReview);
+ assert.equal(next.state.executionReview,doc.state.executionReview);
+ assert.equal(next.intents[stop].stage,'TERMINAL');
+ assert.equal(next.protections[id].phase,'CLOSED');
+ assert.deepEqual(next.state.journal.slice(0,doc.state.journal.length),doc.state.journal);
+ for(const bad of [{pendingCount:1},{positions:[{positionAmt:'.2'}]},{openOrders:[{}]},
+  {stop:{...proof.stop,status:'NEW'}},{trades:[...trades,trades[1]]},{trades:[trades[0],{...trades[1],qty:'.1'}]}]){
+  assert.throws(()=>reconcileV4ExternalFlatClose(doc,{...proof,...bad}));
+ }
+});
 
 test("flat SHA migration retains closed trade PnL, cooldown, journal, legacy client IDs and terminal STOP history",async()=>{
  const observed=flatObserved();const ts=200*HOUR;
