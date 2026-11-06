@@ -15,6 +15,7 @@ import re
 import subprocess
 import time
 
+from disdex_deployment_contract import DEPLOYMENT_TARGET, OPERATOR_TARGET, REPO
 from disdex_deployment_plan import IDS, canonical, digest, validate
 
 RUNNER = "HYPE_TREND_LONG"
@@ -278,7 +279,10 @@ def build_activation(desired, authority, inventory_digest, at):
             "EXACT_FRESH_APPROVAL_REQUIRED")
     return {
         "schema": "disdex-live-operator-activation/v1",
-        "target": "DD1296_FINAL_ALLIN_10BPS",
+        "repository": REPO,
+        "deploymentTarget": DEPLOYMENT_TARGET,
+        "target": OPERATOR_TARGET,
+        "scope": RUNNER,
         "approvedSha": sha,
         "approvedRunners": [RUNNER],
         "approvedShaByRunner": {RUNNER: sha},
@@ -369,7 +373,10 @@ class HypeScopedOperations:
             require(stat.S_IMODE(info.st_mode) == 0o600, "RESUME_ACTIVATION_METADATA")
             previous = read_root_json(self.approval, root_uid=self.parent.root_uid)
             require(previous.get("schema") == "disdex-live-operator-activation/v1"
-                    and previous.get("target") == "DD1296_FINAL_ALLIN_10BPS"
+                    and previous.get("target") == OPERATOR_TARGET
+                    and previous.get("repository", REPO) == REPO
+                    and previous.get("deploymentTarget", DEPLOYMENT_TARGET) == DEPLOYMENT_TARGET
+                    and previous.get("scope", RUNNER) == RUNNER
                     and previous.get("approvedSha") == self.args.sha
                     and previous.get("approvedRunners") == [RUNNER]
                     and previous.get("approvedShaByRunner") == {RUNNER: self.args.sha}
