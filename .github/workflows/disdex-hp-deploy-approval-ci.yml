@@ -99,6 +99,8 @@ jobs:
         run: |
           node --test tests/hp-server-side-user-login-2fa.test.mjs
           node --import tsx --test tests/user-login-otp-store.test.ts
+      - name: Resume interrupted second-factor UI without bypassing owner login
+        run: node --test tests/hp-resume-pending-factor.test.mjs
       - name: Production HP build
         run: |
           npm run build
