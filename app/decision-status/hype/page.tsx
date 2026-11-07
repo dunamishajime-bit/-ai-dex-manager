@@ -5,7 +5,7 @@ export default function HypeDecisionPage(){
     <header className="panel-gold rounded-[28px] p-4 md:p-6">
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-gold-100/70">Read-only Production / HYPE_LONG</p>
       <h1 className="gold-heading mt-2 text-2xl font-black md:text-3xl">HYPE 発火判定・稼働状態</h1>
-      <p className="mt-3 text-sm leading-6 text-white/70">BTC、通貨のモメンタム、EMA20乖離、1分足のブレイク確認を並列表示します。公開足Gateと実発注可能判定は分けて表示します。</p>
+      <p className="mt-3 text-sm leading-6 text-white/70">現行HYPE Trend Longは確定1時間足のEMA12/48・長期レジームEMA240・ブレイクおよびATR STOPを評価します。実Runnerが停止・manualReviewの場合は、その理由を表示し、発注可能とは判定しません。</p>
     </header>
     <HypeDecisionPanel strategy="HYPE_LONG" />
     <section className="min-w-0 rounded-[28px] border border-white/10 bg-black/20 p-3">
