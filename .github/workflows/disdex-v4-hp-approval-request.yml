@@ -122,13 +122,14 @@ jobs:
               operation = "HYPE_TREND_LONG_SHA_RESTORE"
               scope = "HYPE_TREND_LONG"
               orders_enabled = "true"
-              context = (
-                  "HYPE_SHA_RESTORE_V1\\n"
-                  "d6bcc94512a6416189cd92d7203b9ac3b2c98e70\\n"
-                  + target +
-                  "\\nXRPUSDT_SHORT_13.3_STOP_v12-v4-231ed20b6835c4148b5314d8da7e\\n"
-              )
-              plan = hashlib.sha256(context.replace("\\n", "\n").encode("ascii")).hexdigest()
+              context = chr(10).join([
+                  "HYPE_SHA_RESTORE_V1",
+                  "d6bcc94512a6416189cd92d7203b9ac3b2c98e70",
+                  target,
+                  "XRPUSDT_SHORT_13.3_STOP_v12-v4-231ed20b6835c4148b5314d8da7e",
+                  "",
+              ])
+              plan = hashlib.sha256(context.encode("ascii")).hexdigest()
           else:
               raise SystemExit("request comment does not match a protected production request grammar")
 
