@@ -28,13 +28,20 @@ test("workflows never synthesize or send the retired fixed auth cookie", () => {
   }
 });
 
-test("HP approval UI post-deploy check verifies protected redirect without an auth artifact", () => {
+test("HP deploy verifies protected signed owner-session API gates without an auth artifact", () => {
   const source = fs.readFileSync(
     ".github/workflows/disdex-hp-standard-approval-ui-deploy.yml",
     "utf8",
   );
-  assert.match(source, /APPROVAL_ROUTE_PROTECTED/);
-  assert.match(source, /location:/i);
+  // Current owner auth deliberately uses HTTP 401 on unauthenticated API
+  // routes and an independent signed-session cutover, not a retired redirect
+  // or fixed cookie. Keep this fail-closed protection contract explicit.
+  assert.match(source, /owner_probe_code=.*owner-session-probe/);
+  assert.match(source, /realtime_code=.*realtime-ranking/);
+  assert.match(source, /"\$owner_probe_code" == "401"/);
+  assert.match(source, /"\$realtime_code" == "401"/);
+  assert.match(source, /HP_AUTH_CONTRACT_VERIFIED/);
+  assert.match(source, /disdex-hp-independent-owner-probe-nginx-cutover\.sh/);
   assert.doesNotMatch(source, /Cookie:\s*disdex_auth/);
 });
 

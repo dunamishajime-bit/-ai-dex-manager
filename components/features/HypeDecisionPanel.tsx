@@ -6,13 +6,14 @@ import type { HypeOverview, HypeSleeve } from "@/lib/server/hype-runtime-observa
 type Strategy="HYPE_LONG";
 const badge=(s:HypeSleeve["status"])=>s==="LIVE"?"border-emerald-400/40 bg-emerald-500/10 text-emerald-200":
   s==="SHADOW"?"border-sky-400/40 bg-sky-500/10 text-sky-200":
+  s==="STOPPED"?"border-rose-400/45 bg-rose-500/15 text-rose-100":
   "border-amber-400/40 bg-amber-500/10 text-amber-200";
 const tone=(s:string)=>s==="PASS"?"border-emerald-400/25 bg-emerald-500/10 text-emerald-100":
   s==="BLOCKED"?"border-rose-400/25 bg-rose-500/10 text-rose-100":
   "border-amber-400/25 bg-amber-500/10 text-amber-100";
 function dt(v?:number|string){if(v===undefined)return "未取得";const n=typeof v==="number"?v:Date.parse(v);return Number.isFinite(n)?new Date(n).toLocaleString("ja-JP"):"未取得";}
 const labels:Record<HypeSleeve["status"],string>={
-  LIVE:"LIVE（実Runner確認）",SHADOW:"SHADOW（注文停止）",STALE:"更新停止",
+  LIVE:"LIVE（実Runner確認）",SHADOW:"SHADOW（注文停止）",STALE:"更新停止",STOPPED:"停止・手動確認",
   BLOCKED:"本番SHA不一致",NOT_DEPLOYED:"本番未実装",UNCONFIRMED:"稼働未確認 / 要確認",
 };
 export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
@@ -53,7 +54,7 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
           ["実設定Gross上限",row?.maxGross===undefined?"未取得":row.maxGross+"x"],
           ["実設定STOPリスク",row?.riskPct===undefined?"未取得":row.riskPct+"%"],
           ["state更新",dt(row?.stateUpdatedAt)],
-          ["本番サービス",row?.serviceActive?"active":"未確認"],
+          ["本番サービス",row?.serviceActive===true?"active":row?.serviceActive===false?"停止（inactive）":"未取得"],
           ["Shared Kill Switch",data?.sharedKillActive==null?"未取得":data?.sharedKillActive?"ON":"OFF"],
           ["公開足の発火条件",row?.publicSignalEligible===null?"未取得":row?.publicSignalEligible?"成立（発注とは別）":"未成立"],
           ["実Runner最終判定",row?.lastDecision?.reason||"対象通貨の最新記録なし"],

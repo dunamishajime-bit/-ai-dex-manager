@@ -89,3 +89,25 @@ test("active pending work is not certified by the display-only observer", () => 
   assert.equal(result.safetyState, "REVIEW_REQUIRED");
   assert.equal(result.liveEnabled, false);
 });
+
+test("inactive pinned HYPE surfaces stopped manual-review reason, not an unknown status", () => {
+  const d = data();
+  Object.assign(d.state, { manualReview: "HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT" });
+  const result = assess(d, {
+    ...SERVICE, activeState: "inactive", subState: "dead", mainPid: 0, processCwd: "",
+  });
+  assert.equal(result.safetyState, "STOPPED");
+  assert.equal(result.error, "HYPE_PIN_SERVICE_STOPPED_MANUAL_REVIEW");
+  assert.equal(result.liveEnabled, false);
+  assert.equal(result.matchesCurrent, false);
+  assert.equal(result.mainPid, 0);
+  assert.match(result.healthReason || "", /UNKNOWN_JOURNAL_EVENT/);
+});
+test("stopped HYPE with mismatched pin remains an identity error", () => {
+  const d = data(); d.tick.expectedSha = OLD;
+  const result = assess(d, {
+    ...SERVICE, activeState: "inactive", subState: "dead", mainPid: 0, processCwd: "",
+  });
+  assert.equal(result.error, "HYPE_PIN_TICK_IDENTITY_MISMATCH");
+  assert.notEqual(result.safetyState, "STOPPED");
+});

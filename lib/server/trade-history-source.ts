@@ -1,5 +1,6 @@
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 import { deriveTradeHistoryAttribution } from "@/lib/trade-history-attribution";
+import { tradeHistoryDedupKeys } from "@/lib/server/trade-history-fill-dedup";
 
 export type TradeHistorySource = "aster" | "local-fallback" | "empty";
 
@@ -54,6 +55,13 @@ export function mergeTradeHistoryEntries(
   const merged: TradeHistoryEntry[] = [];
   const seen = new Set<string>();
   const localByIdentity = new Map<string, TradeHistoryEntry>();
+  // One exchange order can generate several fills. An orderId is an
+  // attribution link, NOT a deduplication key for exchange userTrades.
+  const officialOrderIds = new Set(
+    officialEntries
+      .filter((entry) => entry.orderId && entry.provider === "AsterDex")
+      .map((entry) => entry.orderId!),
+  );
 
   for (const entry of localEntries) {
     for (const key of identityKeys(entry)) {
@@ -66,14 +74,18 @@ export function mergeTradeHistoryEntries(
       .map((key) => localByIdentity.get(key))
       .find(Boolean);
     const entry = localMatch ? enrichOfficialEntry(rawEntry, localMatch) : rawEntry;
-    const keys = identityKeys(entry);
+    const keys = tradeHistoryDedupKeys(entry);
     if (keys.some((key) => seen.has(key))) continue;
     merged.push(entry);
     keys.forEach((key) => seen.add(key));
   }
 
   for (const rawEntry of localEntries) {
-    const keys = identityKeys(rawEntry);
+    // A local order-level ledger row must not double-count official fills.
+    // Keep each distinct official fill, including partial fills sharing one
+    // order ID, and prefer the venue for executed notional.
+    if (rawEntry.orderId && officialOrderIds.has(rawEntry.orderId)) continue;
+    const keys = tradeHistoryDedupKeys(rawEntry);
     if (keys.some((key) => seen.has(key))) continue;
     merged.push({
       ...rawEntry,
