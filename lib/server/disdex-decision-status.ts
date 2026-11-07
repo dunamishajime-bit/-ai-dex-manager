@@ -36,7 +36,7 @@ export type DecisionStatusSnapshot = {
     units: Array<{
       id: string;
       label: string;
-      status: "LIVE" | "STALE" | "UNAVAILABLE" | "UNCONFIRMED";
+      status: "LIVE" | "STALE" | "STOPPED" | "UNAVAILABLE" | "UNCONFIRMED";
       releaseSha: string;
       venue: string;
       timeframe: string;
@@ -166,7 +166,9 @@ export function runtimeSnapshot(
         // A v1 tick can verify that the process and decision data are present,
         // but must never certify new orders. Show UNCONFIRMED rather than the
         // incorrect "未取得" from the retired parent-SHA heartbeat.
-        status: hype?.safetyState === "STALE"
+        status: hype?.safetyState === "STOPPED"
+          ? "STOPPED"
+          : hype?.safetyState === "STALE"
           ? "STALE"
           : !hype || !hype.matchesCurrent || !hype.mainPid || hype.safetyState === "BLOCKED"
             ? "UNAVAILABLE"
