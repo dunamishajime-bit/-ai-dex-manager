@@ -18,7 +18,7 @@ type Obj = Record<string, unknown>;
 export type HypeZecGate = { key: string; label: string; status: "PASS" | "BLOCKED" | "UNKNOWN";
   actual?: number | string; threshold?: number | string; reason: string; source: "PUBLIC_CANDLES" | "RUNNER_STATE" | "EXECUTION" };
 export type HypeZecSleeve = { strategy: Key; symbol: "HYPEUSDT" | "ZECUSDT";
-  status: "LIVE" | "SHADOW" | "STALE" | "BLOCKED" | "NOT_DEPLOYED" | "UNCONFIRMED";
+  status: "LIVE" | "SHADOW" | "STALE" | "STOPPED" | "BLOCKED" | "NOT_DEPLOYED" | "UNCONFIRMED";
   runtimeSha: string; stateSha?: string; stateMode?: string; serviceActive?: boolean;
   stateUpdatedAt?: number; lastDecision?: { accepted: boolean; reason: string; at?: number };
   position?: { quantity: number; entryPrice: number; stopPrice: number; takeProfitPrice: number };
@@ -124,6 +124,13 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
   const capturedAt=new Date(now).toISOString();
   const source=await readFile(releaseRoot+"/config/hypeZecLongPolicy.ts","utf8").catch(()=>null);
   const riskSource=source?await readFile(releaseRoot+"/config/integratedProductionRiskPolicy.ts","utf8").catch(()=>null):null;
+  // The deployed HYPE_TREND_LONG unit uses this H1/EMA/ATR contract, not
+  // legacy HYPE/ZEC 15m momentum/1m breakout conditions.
+  const trendSource=source?await readFile(releaseRoot+"/config/hypeTrendLongPolicy.ts","utf8").catch(()=>null):null;
+  const trendNumber=(name:string)=>{
+    const match=trendSource?.match(new RegExp("\\b"+name+"\\s*:\\s*([-+]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+))"));
+    return match?num(match[1]):undefined;
+  };
   const riskValue=(name:string)=>{
     const match=riskSource?.match(new RegExp("\\b"+name+"\\s*:\\s*([-+]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+))"));
     return match?num(match[1]):undefined;
@@ -144,15 +151,16 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
   const results={} as Record<Key,HypeZecSleeve>;
   for(const key of ["HYPE_LONG","ZEC_LONG"] as const){
     const symbol=key==="HYPE_LONG"?"HYPEUSDT":"ZECUSDT";
-    const p=source?parseHypeZecPolicyFromSource(source,key):null;
+    const trendHype=key==="HYPE_LONG" && trendSource!==null;
+    const p=source&&!trendHype?parseHypeZecPolicyFromSource(source,key):null;
     const positions=Array.isArray(state?.positions)?state.positions.map(obj).filter((x):x is Obj=>x!==null):[];
     const pos=positions.find(x=>x.strategy===key && x.symbol===symbol);
     const last=obj(state?.lastDecision);
     const specific=last?.strategy===key?last:null;
     const fresh=ageMs!==null&&ageMs>=-60_000&&ageMs<=180_000;
     const status: HypeZecSleeve["status"]=!sourceDeployed||!stateAvailable?"NOT_DEPLOYED":
-      !shaOk?"BLOCKED":!fresh?"STALE":mode!=="LIVE"?"SHADOW":
-      !active||!cleanState||killActive!==false?"UNCONFIRMED":"LIVE";
+      !shaOk?"BLOCKED":!active?"STOPPED":!fresh?"STALE":mode!=="LIVE"?"SHADOW":
+      !cleanState||killActive!==false?"UNCONFIRMED":"LIVE";
     const gates:HypeZecGate[]=[
       go("DEPLOYED","本番ソース・Runner接続",sourceDeployed&&stateAvailable&&shaOk&&active,active?"active":"未起動",
         "新SHA・systemd active・state一致","判定と発注可能性は別物","RUNNER_STATE"),
@@ -163,10 +171,18 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
         stateAvailable?cleanState?"なし":"あり":"未取得","なし","共有注文・手動レビュー状態","RUNNER_STATE"),
     ];
     let publicSignalEligible:boolean|null=null,publicReferenceTs:number|undefined;
-    if(p && market){
+    if(trendHype){
+      gates.push(go("HYPE_TREND_POLICY","H1 Trend Long実装",
+        null,"H1 / EMA"+trendNumber("fastEmaPeriod")+"/"+trendNumber("slowEmaPeriod")+" / regime EMA"+trendNumber("regimeEmaPeriod"),
+        "確定H1・EMA整列・24hブレイク・ATR保護",
+        "現行pinのTrendポリシーを取得。市場条件成立と発注許可は別です。","RUNNER_STATE"));
+      gates.push(go("HYPE_TREND_DECISION","直近の実Runner H1判定",
+        null,str(specific?.reason)||"判定データなし","現行のHYPE Trend Long Signal",
+        "確定H1の判定理由は台帳にありますが、停止・manualReview時は発注できません。","RUNNER_STATE"));
+    }else if(p && market){
       const evaluation=evaluateHypeZecMarketGates(market,key,p,now);
       gates.push(...evaluation.gates);publicSignalEligible=evaluation.accepted;publicReferenceTs=evaluation.reference;
-    }else for(const [g,label] of [["DATA_FRESHNESS","確定15分足・鮮度"],["BTC_15M_MOVE","BTC 15分足"],["BTC_ACCEL","BTC加速度"],
+    }else if(!trendHype) for(const [g,label] of [["DATA_FRESHNESS","確定15分足・鮮度"],["BTC_15M_MOVE","BTC 15分足"],["BTC_ACCEL","BTC加速度"],
       ["SYMBOL_MOMENTUM","対象通貨モメンタム"],["SYMBOL_ACCEL","対象通貨加速度"],["EMA20_DISTANCE","EMA20乖離"],
       ["BREAKOUT_1M","1分足ブレイク確認"]] as const)
       gates.push(go(g,label,null,undefined,undefined,!p?"Productionの実設定待ち":marketError||"公開15分足待機"));
@@ -178,12 +194,12 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
       position:pos?{quantity:num(pos.quantity)||0,entryPrice:num(pos.entryPrice)||0,
         stopPrice:num(pos.stopPrice)||0,takeProfitPrice:num(pos.takeProfitPrice)||0}:undefined,
       pending:!!state?.pending,manualReview:str(state?.manualReview),
-      maxGross:riskValue("hypeZecMaximumGross"),
-      riskPct:riskValue(key==="HYPE_LONG"?"hypeLongRiskPct":"zecLongRiskPct"),
+      maxGross:trendHype?trendNumber("maximumGross"):riskValue("hypeZecMaximumGross"),
+      riskPct:trendHype?trendNumber("riskPct"):riskValue(key==="HYPE_LONG"?"hypeLongRiskPct":"zecLongRiskPct"),
       publicSignalEligible,publicReferenceTs,publicError:marketError,
       gates,note:!sourceDeployed?"現在のProduction releaseにHYPEソースがありません。GitHubの研究ブランチはLIVEではありません。":
         !stateAvailable?"実Runner stateが見つかりません。":!shaOk?"stateのSHAがProductionと一致しません。":
-        !active?"HYPEの実行サービスを確認できません。":
+        !active?("HYPE Runner停止中。"+(str(state?.manualReview)?" 手動確認: "+str(state?.manualReview):"")+" 発注は未許可です。") :
         mode!=="LIVE"?"SHADOW/PAPERモードのため実注文は無効です。":
         "発火には公開足Gate以外にRisk・5x Cross・口座ロック・保護注文の実Runner判定が必要です。"};
   }
