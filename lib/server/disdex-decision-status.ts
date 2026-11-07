@@ -163,11 +163,14 @@ export function runtimeSnapshot(
       {
         id: "HYPE_TREND_LONG",
         label: "HYPE Trend Long",
-        status: !hype
-          ? "UNAVAILABLE"
-          : hype.safetyState === "BLOCKED" || hype.liveEnabled === false || hype.mainPid === 0
+        // A v1 tick can verify that the process and decision data are present,
+        // but must never certify new orders. Show UNCONFIRMED rather than the
+        // incorrect "未取得" from the retired parent-SHA heartbeat.
+        status: hype?.safetyState === "STALE"
+          ? "STALE"
+          : !hype || !hype.matchesCurrent || !hype.mainPid || hype.safetyState === "BLOCKED"
             ? "UNAVAILABLE"
-            : hype.matchesCurrent && hype.mode?.toUpperCase() === "LIVE"
+            : hype.mode?.toUpperCase() === "LIVE" && hype.liveEnabled === true
               ? "LIVE"
               : "UNCONFIRMED",
         releaseSha: hype?.runtimeSha || releaseShas?.hype || releaseSha,

@@ -1,4 +1,5 @@
 import { lstat, readFile } from "node:fs/promises";
+import { acceptsV1ReadOnlyEvidenceMode } from "@/lib/server/read-only-pin-evidence-mode";
 import {
   RUNNER_PIN_MANIFEST_PATH,
   RUNNER_PIN_PREFIX,
@@ -57,7 +58,7 @@ export async function loadReadOnlyRunnerPins(
     const serviceUnit = String(pin.serviceUnit ?? "");
     if (!SHA.test(sha) || releaseRoot !== `/home/deploy/disdex-trading/releases/${sha}`
       || serviceUnit !== `${RUNNER_PIN_PREFIX[id]}@${sha}.service`
-      || !["legacy", "heartbeat_v1", "tick_v1"].includes(String(pin.evidenceMode))) {
+      || !acceptsV1ReadOnlyEvidenceMode(pin.evidenceMode)) {
       throw new Error(`RUNNER_PIN_IDENTITY_INVALID:${id}`);
     }
     // v1 has no trustworthy healthPath/tickPath. Never synthesize evidence.
