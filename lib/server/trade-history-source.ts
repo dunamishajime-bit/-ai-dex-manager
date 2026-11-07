@@ -1,5 +1,6 @@
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 import { deriveTradeHistoryAttribution } from "@/lib/trade-history-attribution";
+import { tradeHistoryDedupKeys } from "@/lib/server/trade-history-fill-dedup";
 
 export type TradeHistorySource = "aster" | "local-fallback" | "empty";
 
@@ -73,9 +74,7 @@ export function mergeTradeHistoryEntries(
       .map((key) => localByIdentity.get(key))
       .find(Boolean);
     const entry = localMatch ? enrichOfficialEntry(rawEntry, localMatch) : rawEntry;
-    const keys = entry.tradeId
-      ? [`fill:${entry.provider || "unknown"}:${entry.sourceSymbol}:${entry.destSymbol}:${entry.tradeId}`]
-      : identityKeys(entry);
+    const keys = tradeHistoryDedupKeys(entry);
     if (keys.some((key) => seen.has(key))) continue;
     merged.push(entry);
     keys.forEach((key) => seen.add(key));
@@ -86,9 +85,7 @@ export function mergeTradeHistoryEntries(
     // Keep each distinct official fill, including partial fills sharing one
     // order ID, and prefer the venue for executed notional.
     if (rawEntry.orderId && officialOrderIds.has(rawEntry.orderId)) continue;
-    const keys = rawEntry.tradeId
-      ? [`fill:${rawEntry.provider || "unknown"}:${rawEntry.sourceSymbol}:${rawEntry.destSymbol}:${rawEntry.tradeId}`]
-      : identityKeys(rawEntry);
+    const keys = tradeHistoryDedupKeys(rawEntry);
     if (keys.some((key) => seen.has(key))) continue;
     merged.push({
       ...rawEntry,
