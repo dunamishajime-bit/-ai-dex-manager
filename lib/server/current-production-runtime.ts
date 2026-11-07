@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { loadReadOnlyRunnerPins } from "@/lib/server/read-only-runner-pin-telemetry";
+import { loadPinnedHypeTickObservation } from "@/lib/server/hype-pinned-tick-observability";
 
 const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha";
 const CURRENT_RELEASE_ROOT = "/home/deploy/disdex-trading/current";
@@ -187,6 +188,13 @@ async function loadRuntimeLineage(
   };
   for (const [unit, path] of Object.entries(heartbeatPaths) as Array<[RuntimeUnitKey, string]>) {
     try {
+      // HYPE uses an independently pinned runner. The old shared heartbeat
+      // writer still follows the parent SHA, so validate the real pinned
+      // process + natural decision tick for *display only* instead.
+      if (unit === "hype") {
+        units.hype = await loadPinnedHypeTickObservation(expectedByUnit.hype);
+        continue;
+      }
       const raw = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
       const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
         : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
