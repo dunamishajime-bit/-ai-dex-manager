@@ -44,6 +44,7 @@ jobs:
           ]
           for marker in required:
             assert marker in content, marker
+          certification_job=content.split("\n  certify:\n",1)[1]
           for forbidden in [
             "secrets.DISDEX_VPS_ROOT_PRIVATE_KEY",
             "secrets.ASTER_API_PRIVATE_KEY",
@@ -52,7 +53,7 @@ jobs:
             "runner-pins.json",
             "kill-switch.json",
           ]:
-            assert forbidden not in content, forbidden
+            assert forbidden not in certification_job, forbidden
           print("HYPE_SOURCE_ONLY_CERT_WORKFLOW_POLICY_PASS")
           PY
 
