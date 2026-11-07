@@ -113,7 +113,7 @@ type DecisionStatusItem = {
 type RuntimeUnit = {
   id: string;
   label: string;
-  status: "LIVE" | "STALE" | "UNAVAILABLE" | "UNCONFIRMED";
+  status: "LIVE" | "STALE" | "STOPPED" | "UNAVAILABLE" | "UNCONFIRMED";
   releaseSha: string;
   venue: string;
   timeframe: string;
@@ -255,6 +255,7 @@ function candidateOrderStatus(candidate: CandidateDetail, decision: NonNullable<
 function runtimeStatusClass(status: RuntimeUnit["status"]) {
   if (status === "LIVE") return "border-emerald-400/30 bg-emerald-500/10 text-emerald-100";
   if (status === "STALE") return "border-amber-400/30 bg-amber-500/10 text-amber-100";
+  if (status === "STOPPED") return "border-rose-400/40 bg-rose-500/15 text-rose-100";
   if (status === "UNCONFIRMED") return "border-slate-400/30 bg-slate-500/10 text-slate-200";
   return "border-rose-400/30 bg-rose-500/10 text-rose-100";
 }
@@ -277,7 +278,7 @@ function RuntimeSummary({ runtime }: { runtime: Snapshot["runtime"] }) {
   const verified = liveCount === runtime.units.length;
   const badge = verified ? "全runner LIVE確認済み" : liveCount > 0 ? `${liveCount}/${runtime.units.length} runner LIVE確認` : "LIVE未確認";
   const badgeClass = verified ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : liveCount > 0 ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
-  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><ServerCog className="h-5 w-5 text-gold-100" />VPS実稼働ロジック（互換runnerを含む観測）</div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}>{badge}</span></div><p className="mt-2 text-xs leading-5 text-white/55">確認時刻：{time(runtime.checkedAt)} / runnerごとに実stateの更新時刻・mode・保護状態を判定します。V12 X1.00 ALLはLegacy/互換runnerとして表示され、V12 V4のLIVE確認とは別です。ここから発注操作は行いません。</p><div className="mt-4 grid gap-3 xl:grid-cols-3">{runtime.units.map((unit) => { const isLegacyV12 = unit.id === "V12_X1.00_ALL"; const label = isLegacyV12 ? `Legacy V12 X1.00 ALL（互換runner）` : unit.label; return <article key={unit.id} className="rounded-2xl border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-2"><div><div className="font-bold text-white">{label}</div><div className="mt-1 text-[11px] text-white/45">{unit.venue} / {unit.timeframe}</div></div><span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${runtimeStatusClass(unit.status)}`}>{unit.status === "UNAVAILABLE" ? "未取得" : unit.status === "UNCONFIRMED" ? "未確認" : unit.status === "STALE" ? "要確認" : "LIVE"}</span></div><div className="mt-3 space-y-2 text-xs leading-5 text-white/72"><p><span className="text-white/45">判定：</span>{unit.entryPolicy}</p><p><span className="text-white/45">保護：</span>{unit.protection}</p><p className="text-white/50">{unit.note}</p><p className="text-amber-100/80">状態根拠：{unit.reason || "未取得"}</p></div><div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">release {shortSha(unit.releaseSha)}… / state更新 {time(unit.updatedAt)}</div></article>; })}</div></section>;
+  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><ServerCog className="h-5 w-5 text-gold-100" />VPS実稼働ロジック（互換runnerを含む観測）</div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}>{badge}</span></div><p className="mt-2 text-xs leading-5 text-white/55">確認時刻：{time(runtime.checkedAt)} / runnerごとに実stateの更新時刻・mode・保護状態を判定します。V12 X1.00 ALLはLegacy/互換runnerとして表示され、V12 V4のLIVE確認とは別です。ここから発注操作は行いません。</p><div className="mt-4 grid gap-3 xl:grid-cols-3">{runtime.units.map((unit) => { const isLegacyV12 = unit.id === "V12_X1.00_ALL"; const label = isLegacyV12 ? `Legacy V12 X1.00 ALL（互換runner）` : unit.label; return <article key={unit.id} className="rounded-2xl border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-2"><div><div className="font-bold text-white">{label}</div><div className="mt-1 text-[11px] text-white/45">{unit.venue} / {unit.timeframe}</div></div><span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${runtimeStatusClass(unit.status)}`}>{unit.status === "UNAVAILABLE" ? "未取得" : unit.status === "STOPPED" ? "停止・要確認" : unit.status === "UNCONFIRMED" ? "未確認" : unit.status === "STALE" ? "要確認" : "LIVE"}</span></div><div className="mt-3 space-y-2 text-xs leading-5 text-white/72"><p><span className="text-white/45">判定：</span>{unit.entryPolicy}</p><p><span className="text-white/45">保護：</span>{unit.protection}</p><p className="text-white/50">{unit.note}</p><p className="text-amber-100/80">状態根拠：{unit.reason || "未取得"}</p></div><div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">release {shortSha(unit.releaseSha)}… / state更新 {time(unit.updatedAt)}</div></article>; })}</div></section>;
 }
 
 function FetRuntimeDetail({ details }: { details?: FetRuntimeStatus }) {
