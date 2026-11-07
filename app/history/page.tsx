@@ -18,6 +18,8 @@ type TradeHistoryEntry = {
   chainId: number;
   txHash: string;
   provider?: string;
+  orderId?: string;
+  tradeId?: string;
   action: "BUY" | "SELL";
   sourceSymbol: string;
   destSymbol: string;
@@ -169,6 +171,9 @@ export default function HistoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [historyNotice, setHistoryNotice] = useState<string | null>(null);
+  const [historySource, setHistorySource] = useState<string>("確認中");
+  const [officialCount, setOfficialCount] = useState(0);
+  const [sourceIncomplete, setSourceIncomplete] = useState(false);
 
   const loadEntries = async () => {
     setIsLoading(true);
@@ -179,6 +184,9 @@ export default function HistoryPage() {
       const data = await response.json();
       setEntries(Array.isArray(data.entries) ? data.entries : []);
       setHistoryNotice(typeof data.historyNotice === "string" ? data.historyNotice : null);
+      setHistorySource(typeof data.source === "string" ? data.source : "未取得");
+      setOfficialCount(Number(data.officialTradeCount || 0));
+      setSourceIncomplete(data.sourceIncomplete === true);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "履歴の読み込みに失敗しました。");
     } finally {
@@ -194,6 +202,19 @@ export default function HistoryPage() {
     () => entries.filter((entry) => Number(entry.sourceAmount || 0) > 0.0000001 || Number(entry.destAmount || 0) > 0.0000001),
     [entries],
   );
+
+  // Aster returns one row per fill. Group rows with an identical venue orderId
+  // for the visible order sum; it is not the requested order size or leverage.
+  const fillOrderTotals = useMemo(() => {
+    const sums = new Map<string, number>();
+    for (const entry of visibleEntries) {
+      if (!entry.orderId || entry.provider !== "AsterDex") continue;
+      const key = entry.orderId + ":" + entry.action + ":" + entry.sourceSymbol + ":" + entry.destSymbol;
+      const value = Math.max(Number(entry.sourceUsdValue || 0), Number(entry.destUsdValue || 0));
+      if (Number.isFinite(value) && value >= 0) sums.set(key, (sums.get(key) || 0) + value);
+    }
+    return sums;
+  }, [visibleEntries]);
 
   const summary = useMemo(() => {
     const sells = visibleEntries
@@ -351,16 +372,25 @@ export default function HistoryPage() {
           </div>
         ) : null}
 
+        <div className="mb-3 text-xs text-white/60">
+          履歴ソース: {historySource === "aster" ? "Aster取引所 約定履歴" : "ローカル台帳（取引所との一致未確認）"}
+          {" / "}取引所確認済み約定: {officialCount}件
+          {sourceIncomplete ? " / 一部未取得の可能性があります" : ""}
+          {" / "}1行は1約定です。同じ注文IDの行は部分約定を含みます。
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1380px] text-left text-sm">
+          <table className="w-full min-w-[1720px] text-left text-sm">
             <thead className="border-b border-white/10 text-xs uppercase text-gray-400">
               <tr>
                 <th className="px-3 py-3">日時</th>
+                <th className="px-3 py-3">建玉・履歴状態</th>
                 <th className="px-3 py-3">売買</th>
                 <th className="px-3 py-3">通貨</th>
                 <th className="px-3 py-3">発火ロジック / 経路</th>
                 <th className="px-3 py-3">決済原因</th>
                 <th className="px-3 py-3">数量</th>
+                <th className="px-3 py-3">1約定の金額</th>
+                <th className="px-3 py-3">同注文の約定合計</th>
                 <th className="px-3 py-3">取得単価</th>
                 <th className="px-3 py-3">売却単価</th>
                 <th className="px-3 py-3">損益額</th>
@@ -400,6 +430,16 @@ export default function HistoryPage() {
                     <div className="mt-1 text-gray-500">
                       → {formatNumber(entry.destAmount, 6)} {entry.destSymbol}
                     </div>
+                  </td>
+                  <td className="px-3 py-4 font-mono text-xs text-white">
+                    {formatNumber(Math.max(Number(entry.sourceUsdValue || 0), Number(entry.destUsdValue || 0)), 4)} USDT
+                    <div className="mt-1 text-white/45">{formatJpyFromUsd(Math.max(Number(entry.sourceUsdValue || 0), Number(entry.destUsdValue || 0)), jpyRate)}</div>
+                  </td>
+                  <td className="px-3 py-4 font-mono text-xs text-white/75">
+                    {entry.orderId && entry.provider === "AsterDex"
+                      ? formatNumber(fillOrderTotals.get(entry.orderId + ":" + entry.action + ":" + entry.sourceSymbol + ":" + entry.destSymbol), 4) + " USDT"
+                      : "注文ID未取得"}
+                    <div className="mt-1 text-white/40">表示済み約定の合計。注文要求数量ではありません。</div>
                   </td>
                   <td className="px-3 py-4 font-mono text-xs text-white">{formatJpyFromUsd(entry.entryPriceUsd, jpyRate, 2)}</td>
                   <td className="px-3 py-4 font-mono text-xs text-white">{formatJpyFromUsd(entry.exitPriceUsd, jpyRate, 2)}</td>
@@ -446,7 +486,7 @@ export default function HistoryPage() {
               ))}
               {!isLoading && visibleEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-3 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={14} className="px-3 py-10 text-center text-sm text-gray-500">
                     表示できるトレード履歴がありません。
                   </td>
                 </tr>
