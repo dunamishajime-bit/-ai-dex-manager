@@ -38,11 +38,11 @@ test("HP deploy verifies protected signed owner-session API gates without an aut
   // or fixed cookie. Keep this fail-closed protection contract explicit.
   assert.match(source, /owner_probe_code=.*owner-session-probe/);
   assert.match(source, /realtime_code=.*realtime-ranking/);
-  assert.match(source, /"\\$owner_probe_code" == "401"/);
-  assert.match(source, /"\\$realtime_code" == "401"/);
+  assert.match(source, /"\$owner_probe_code" == "401"/);
+  assert.match(source, /"\$realtime_code" == "401"/);
   assert.match(source, /HP_AUTH_CONTRACT_VERIFIED/);
-  assert.match(source, /disdex-hp-independent-owner-probe-nginx-cutover\\.sh/);
-  assert.doesNotMatch(source, /Cookie:\\s*disdex_auth/);
+  assert.match(source, /disdex-hp-independent-owner-probe-nginx-cutover\.sh/);
+  assert.doesNotMatch(source, /Cookie:\s*disdex_auth/);
 });
 
 test("HP deployment workflow has no bare carriage return that splits a YAML block scalar", () => {
