@@ -33,6 +33,30 @@ test("a confirmed adverse-price fill is recorded before overrun blocks subsequen
  await assert.rejects(()=>plan(state,{...c(),eligibleEntryTs:T+HOUR}),/UNRESOLVED_EXECUTION_REVIEW/);
 });
 
+test("a closed overrun can be resolved only by a journaled, evidence-bound review",async()=>{
+ const initial={equityUsd:1000,foreign:[],holdProtected:false};
+ let state=createProductionState(initial);
+ const reserve=await plan(state),id=reserve.leg.id;
+ state=applyProductionEvent(state,reserve);
+ state=applyProductionEvent(state,{type:"ENTRY_FILL",eventId:"entry",ts:T,id,qty:5,price:102,feeUsd:.51});
+ state=applyProductionEvent(state,{type:"ENTRY_TERMINAL",eventId:"terminal",ts:T,id});
+ const review={type:"EXECUTION_REVIEW_RESOLVED" as const,eventId:"review",ts:T+1,id,
+  expectedReview:"ENTRY_FILL_OVER_RESERVED_NOTIONAL:"+id,evidenceSha256:"e".repeat(64)};
+ assert.throws(()=>applyProductionEvent(state,review),/V4_EXECUTION_REVIEW_RESOLUTION_INVALID/);
+ state=applyProductionEvent(state,{type:"EXIT_REQUEST",eventId:"close-request",ts:T+1,id,qty:5});
+ state=applyProductionEvent(state,{type:"EXIT_FILL",eventId:"close",ts:T+1,id,qty:5,price:103,feeUsd:.52,cooldownUntil:T+1});
+ for(const patch of [{evidenceSha256:"invalid"},{expectedReview:"unrelated"},{id:"another-leg"}]){
+  assert.throws(()=>applyProductionEvent(state,{...review,...patch}),/V4_EXECUTION_REVIEW_RESOLUTION_INVALID/);
+ }
+ const resolved=applyProductionEvent(state,review);
+ assert.equal(resolved.executionReview,undefined);
+ assert.equal(resolved.legs[id].realizedUsd,state.legs[id].realizedUsd);
+ assert.deepEqual(replayProductionJournal(initial,resolved.journal),resolved);
+ assert.equal(applyProductionEvent(resolved,review),resolved);
+ assert.throws(()=>applyProductionEvent(resolved,{...review,eventId:"replay"}),/V4_EXECUTION_REVIEW_RESOLUTION_INVALID/);
+ await assert.doesNotReject(()=>plan(resolved,{...c(),eligibleEntryTs:T+HOUR}));
+});
+
 test("fresh pending gross uses refreshed equity rather than startup equity",async()=>{
  let state=createProductionState({equityUsd:1000,foreign:[],holdProtected:false});
  state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"new-equity",ts:T,equityUsd:2000,prices:{PENGUUSDT:1},foreign:[{owner:"PENGU",symbol:"PENGUUSDT",side:"SHORT",qty:0,gross:0,crypto:true,pendingGross:3.25}]});
