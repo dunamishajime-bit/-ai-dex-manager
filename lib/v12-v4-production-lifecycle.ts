@@ -97,6 +97,7 @@ export type Event = EntryEvent |
   { type: "EXIT_REQUEST"; eventId: string; ts: number; id: string; qty: number } |
   { type: "EXIT_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number; cooldownUntil: number; cooldownKey?:string; actualFillTs?:number; routeCooldown?:boolean } |
   { type: "FUNDING"; eventId: string; ts: number; id: string; amountUsd: number } |
+  { type: "EXECUTION_REVIEW_RESOLVED"; eventId: string; ts: number; id: string; expectedReview: string; evidenceSha256: string } |
   { type: "FUNDING_SCAN"; eventId: string; ts: number; fromMs: number; throughMs: number };
 export type State = { initial: InitialState; foreign:ForeignExposure[]; foreignBasisEquityUsd:number; executionReview?:string; equityUsd:number; equityPeakUsd:number; maxDrawdown:number; prices:Record<string,number>; legs: Record<string, Leg>; journal: Event[]; cooldown: Record<string, number> };
 function validateForeignExposures(rows:ForeignExposure[]) {
@@ -225,6 +226,16 @@ export function applyProductionEvent(state: State, event: Event): State {
     if(last?.type==="FUNDING_SCAN"&&event.fromMs>last.throughMs&&
        Object.values(state.legs).some(l=>l.qty>0&&l.entryTs<event.fromMs))
       throw Error("V4_FUNDING_SCAN_GAP_WITH_OPEN_LEG");
+  } else if (event.type==="EXECUTION_REVIEW_RESOLVED") {
+    const leg=next.legs[event.id];
+    if(!leg||leg.status!=="CLOSED"||leg.qty!==0||leg.entryNotional!==0||leg.reservationUsd!==0||
+       leg.exitRemainingQty!==0||next.initial.holdProtected||next.foreign.length!==0||
+       Object.values(next.legs).some(row=>row.status!=="CLOSED"&&row.status!=="CANCELLED")||
+       !/^[a-f0-9]{64}$/.test(event.evidenceSha256)||
+       event.expectedReview!=="ENTRY_FILL_OVER_RESERVED_NOTIONAL:"+event.id||
+       next.executionReview!==event.expectedReview)
+      throw Error("V4_EXECUTION_REVIEW_RESOLUTION_INVALID");
+    delete next.executionReview;
   } else if (event.type==="RESERVE") {
     const l=event.leg,c=l.candidate, catalog=V12_V4_ROUTE_CATALOG.find(x=>x.route===c.route);
     positive(l.requestedQty,"RESERVED_QTY");positive(l.reservationUsd,"RESERVED_USD");
