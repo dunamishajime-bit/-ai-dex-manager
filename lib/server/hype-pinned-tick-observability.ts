@@ -76,6 +76,24 @@ export function assessPinnedHypeTick(
   }
   if (!state || state.schema !== "disdex-hype-zec-long/v1" ||
     state.runtimeCommitSha !== expectedSha) return deny("HYPE_PIN_STATE_IDENTITY_MISMATCH");
+  // A pinned service that is cleanly stopped is not "data unavailable".
+  // Preserve its exact manual-review reason. Do not claim it is live, even
+  // when its last tick and signed release markers match the expected SHA.
+  if (service.activeState === "inactive" && service.subState === "dead" &&
+    service.mainPid === 0 && service.workingDirectory === root) {
+    const manualReview = typeof state.manualReview === "string" ? state.manualReview.trim() : "";
+    return {
+      ...observed,
+      safetyState: "STOPPED",
+      liveEnabled: false,
+      matchesCurrent: false,
+      mainPid: 0,
+      healthReason: manualReview
+        ? `HYPE Runner停止・手動確認: ${manualReview}。新規発注は未許可。実行SHAはpin/台帳と照合済み。`
+        : "HYPE Runner停止中（systemd inactive/dead）。新規発注は未許可。",
+      error: manualReview ? "HYPE_PIN_SERVICE_STOPPED_MANUAL_REVIEW" : "HYPE_PIN_SERVICE_STOPPED",
+    };
+  }
   if (service.activeState !== "active" || service.subState !== "running" ||
     !Number.isSafeInteger(service.mainPid) || service.mainPid <= 0 ||
     service.workingDirectory !== root || service.processCwd !== root ||
