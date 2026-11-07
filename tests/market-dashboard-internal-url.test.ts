@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { marketDashboardInternalRefreshUrl } from "../lib/server/market-dashboard-internal-url";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { marketDashboardInternalRefreshUrl } = require("../lib/server/market-dashboard-internal-url.ts") as typeof import("../lib/server/market-dashboard-internal-url");
 
 test("standalone production uses the actual bound listener on 3001", () => {
   assert.equal(
