@@ -151,10 +151,10 @@ async function atomicPreserveMetadata(path: string, raw: string, uid: number, gi
 }
 
 export function parsePendingReconcileArgs(argv: readonly string[]) {
-  if (argv.length !== 1 || !["--verify-only", "--apply-refresh"].includes(argv[0])) {
+  if (argv.length !== 1 || !["--verify-only", "--verify-owned", "--apply-refresh"].includes(argv[0])) {
     throw new Error("PENDING_RECONCILE_MODE_REQUIRED_OR_CONFLICT");
   }
-  return { apply: argv[0] === "--apply-refresh" };
+  return argv[0] === "--verify-owned" ? {apply:false,verifyOwned:true} : { apply: argv[0] === "--apply-refresh" };
 }
 
 type PendingGrantContext = {now:number;sha:string;registryHash:string;parentPid:number};
@@ -222,7 +222,7 @@ export function assertPendingApplyCertified(apply: boolean, grant?:unknown, cont
 }
 
 async function main() {
-  const { apply } = parsePendingReconcileArgs(process.argv.slice(2));
+  const { apply,verifyOwned } = parsePendingReconcileArgs(process.argv.slice(2));
   const grant=apply?await rootRefreshGrant():undefined;
   assertSharedAsterReadBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
   const deploy = await readDeployIds();
@@ -262,7 +262,7 @@ async function main() {
     if (!Array.isArray(balances)) throw new Error("PENDING_RECONCILE_BALANCE_SNAPSHOT_INVALID");
     const service=grant?.schema==='disdex-pending-refresh-root-grant/v2';
     const nonFlat=(positions as JsonRecord[]).some(row=>Number(row.positionAmt)!==0)||openOrders.length>0;
-    const ownership=service&&nonFlat?await collectPendingOwnerEvidence(positions as JsonRecord[],openOrders as JsonRecord[],String(process.env.DISDEX_RELEASE_SHA||'')):undefined;
+    const ownership=(service||verifyOwned)&&nonFlat?await collectPendingOwnerEvidence(positions as JsonRecord[],openOrders as JsonRecord[],String(process.env.DISDEX_RELEASE_SHA||'')):undefined;
     const checked = validatePendingReadonlyReconcile({
       registry: before.parsed,
       positions: positions as unknown as JsonRecord[],

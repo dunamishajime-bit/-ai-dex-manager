@@ -58,6 +58,7 @@ test("a verified pending refresh preserves every existing registry and entry fie
 test("pending reconciliation accepts only explicit mutually exclusive CLI modes", () => {
   assert.deepEqual(parsePendingReconcileArgs(["--verify-only"]), {apply:false});
   assert.deepEqual(parsePendingReconcileArgs(["--apply-refresh"]), {apply:true});
+  assert.deepEqual(parsePendingReconcileArgs(["--verify-owned"]), {apply:false, verifyOwned:true});
   for (const args of [[],["--verify-only","--apply-refresh"],["--verify-only","--other"],["--apply-refresh","--apply-refresh"]]) {
     assert.throws(()=>parsePendingReconcileArgs(args),/PENDING_RECONCILE_MODE/);
   }
