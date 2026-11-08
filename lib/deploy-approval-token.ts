@@ -22,6 +22,7 @@ export const DEPLOY_APPROVAL_OPERATIONS = [
   "V4_DOGE_MISSED_TIME_EXIT",
   "IDLE_FLAT_STALE_REPAIR",
   "HYPE_TREND_LONG_SHA_RESTORE",
+  "V4_HYPE_PEER_PIN_CONTINUITY",
   "ALL_RUNNERS_LIVE_RESTORE",
   "ALL_RUNNERS_ORDER_ENABLE_PREP",
   "ALL_RUNNERS_ORDER_ENABLE",
@@ -68,6 +69,11 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "HYPE_TREND_LONG",
     ordersEnabled: true,
     label: "HYPE専用SHA復旧（厳格なV4台帳・Aster三重照合後のみLIVE）",
+  },
+  V4_HYPE_PEER_PIN_CONTINUITY: {
+    scope: "V12_V4",
+    ordersEnabled: true,
+    label: "V4再起動承認の更新（V4の稼働SHAと発注範囲は維持し、HYPEだけを新SHAへ）",
   },
   ALL_RUNNERS_LIVE_RESTORE: {
     scope: "FULL_PROJECT",

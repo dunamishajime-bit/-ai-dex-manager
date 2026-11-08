@@ -15,8 +15,8 @@ from types import SimpleNamespace
 
 from disdex_hype_sha_restore_contract import (
     CANDIDATE, COMMAND, HOST, LEGACY, OPERATION, OPERATOR_TARGET, OWNER, PLAN,
-    REPOSITORY, RUNNER, XRP_STOP, parse_command, proposed_pins, require, validate_forced_command,
-    verify_peer_authority, verify_result,
+    REPOSITORY, RUNNER, V4_SCOPE, XRP_STOP, build_v4_continuity_activation, parse_command,
+    proposed_pins, require, v4_continuity_plan, validate_forced_command, verify_result,
 )
 
 STATE = Path("/var/lib/disdex/hype-zec-long/runner.json")
@@ -78,11 +78,11 @@ def monitoring(release):
     return SharedRiskMonitorWiring(files)
 
 
-def verify_approval(paths, token, *, consume=False):
+def verify_approval(paths, token, *, sha=CANDIDATE, scope=RUNNER, plan=PLAN, consume=False):
     from disdex_owner_approval import verify
     from disdex_unified_root_gate import assert_regular_secure
     assert_regular_secure(paths.public_key,root_uid=0,private=False)
-    authority=verify(token,paths.public_key,REPOSITORY,CANDIDATE,RUNNER,OWNER,PLAN,
+    authority=verify(token,paths.public_key,REPOSITORY,sha,scope,OWNER,plan,
         route="GITHUB_ACTIONS",deployment_target=HOST,operator_target=OPERATOR_TARGET,
         orders_enabled=True,nonce_dir=paths.nonce_dir if consume else None)
     require(authority["issuedAt"]<=int(time.time())<authority["expiresAt"],"EXPIRED_APPROVAL")
@@ -181,16 +181,18 @@ class Restore:
         assert_regular_secure(prestart,root_uid=0,private=False)
         require(str(prestart) in self.systemd._state(self.manifest["runners"]["V12_V4"]["serviceUnit"],"ExecStartPre"),
                 "V4_GATE_IDENTITY")
-        approval_path=SHARED/"operator-activation/v12-v4-full.json"
-        approval=read_root_json(approval_path)
-        readiness=read_root_json(self.paths.releases/sha/"docs/production/v12-v4-implementation-readiness.json",private=False)
-        verify_peer_authority(self.pins,self.desired,
-            lambda pins:validate_activation(approval,sha,pins,readiness,int(time.time())))
-        self.v4_approval_hash=digest(file_bytes(approval_path))
+        self.v4_approval_path=SHARED/"operator-activation/v12-v4-full.json"
+        self.v4_approval_before=file_bytes(self.v4_approval_path)
+        approval=read_root_json(self.v4_approval_path)
+        require(file_bytes(self.v4_approval_path)==self.v4_approval_before,"V4_APPROVAL_CHANGED")
+        self.v4_readiness=read_root_json(self.paths.releases/sha/"docs/production/v12-v4-implementation-readiness.json",private=False)
+        validate_activation(approval,sha,self.pins,self.v4_readiness,int(time.time()))
+        self.v4_approval_hash=digest(self.v4_approval_before)
+        self.v4_plan=v4_continuity_plan(self.pins,self.desired,self.v4_approval_hash)
         self.health()
         self.wiring=monitoring(self.release)
         return dict(status="HYPE_SHA_RESTORE_PREFLIGHT_PASS",candidateSha=CANDIDATE,
-                    planSha256=PLAN,journalCount=self.journal_count,**ZERO)
+                    planSha256=PLAN,v4Sha=sha,v4PlanSha256=self.v4_plan,journalCount=self.journal_count,**ZERO)
 
     def node(self, args, env, *, deploy=True):
         opts=dict(user=self.deploy.pw_uid,group=self.deploy.pw_gid,extra_groups=[]) if deploy else {}
@@ -201,13 +203,15 @@ class Restore:
             raise ValueError("HYPE_SHA_RESTORE_CHILD_BLOCKED"+(":"+codes[-1] if codes else ""))
         return json.loads(out.stdout.strip().splitlines()[-1])
 
-    def apply(self, run_id, token):
+    def apply(self, run_id, token, v4_token):
         from disdex_hype_scoped_root_cutover import _atomic, _root_file, _runtime_env
         from disdex_pending_maintenance_install import _load_sdk
         from disdex_shared_risk_witness import file_bytes
         from disdex_unified_root_gate import assert_private_dir, assert_regular_secure
         verify_approval(self.paths,token)
         self.preview()
+        v4_verify=dict(sha=self.pins[V4_SCOPE],scope=V4_SCOPE,plan=self.v4_plan)
+        verify_approval(self.paths,v4_token,**v4_verify)
         tx=self.paths.receipts/f"hype-sha-restore-{run_id}"
         assert_private_dir(self.paths.receipts,root_uid=0)
         for p in (self.legacy.env,self.legacy.operator_env,self.legacy.dropin,self.legacy.approval,tx):
@@ -221,13 +225,18 @@ class Restore:
         require(not any(re.search(r"PRIVATE_KEY|API_SECRET|PASSWORD|TOKEN",l.partition("=")[0],re.I)
                         for l in operator),"OPERATOR_ENV_HAS_SECRET")
         operator_bytes=("\n".join([*operator,"DISDEX_HYPE_ZEC_OPERATOR_ARMED=true"])+"\n").encode()
-        baseline={p:(file_bytes(p),p.lstat()) for p in (self.paths.pins,self.paths.current_plan)}
+        baseline={p:(file_bytes(p),p.lstat()) for p in (self.paths.pins,self.paths.current_plan,self.v4_approval_path)}
+        require(baseline[self.v4_approval_path][0]==self.v4_approval_before,"V4_APPROVAL_CHANGED")
         self.health()
         require(file_bytes(STATE)==self.state,"STATE_CAS")
         auth=verify_approval(self.paths,token,consume=True)
+        v4_auth=verify_approval(self.paths,v4_token,consume=True,**v4_verify)
+        v4_activation=build_v4_continuity_activation(v4_auth,self.pins,self.desired,self.v4_approval_hash,int(time.time()))
+        from disdex_v4_canonical_prestart import validate_activation
+        validate_activation(v4_activation,self.pins[V4_SCOPE],self.desired,self.v4_readiness,int(time.time()))
         tx.mkdir(mode=0o700)
         for name,raw in (("state.before",self.state),("pins.before",baseline[self.paths.pins][0]),
-                         ("plan.before",baseline[self.paths.current_plan][0]),
+                         ("plan.before",baseline[self.paths.current_plan][0]),("v4-activation.before",self.v4_approval_before),
                          ("monitor-wiring.json",json_bytes(self.wiring.journal()))):
             _root_file(tx/name,raw,0o400,[])
         before_enable=self.systemd.is_enabled(self.old)
@@ -245,8 +254,8 @@ class Restore:
             venue_digest=verify_result(evidence)
             self.check_ledger()
             self.health()
-            require(int(time.time())<auth["expiresAt"],"APPROVAL_EXPIRED_BEFORE_START")
-            require(digest(file_bytes(SHARED/"operator-activation/v12-v4-full.json"))==self.v4_approval_hash,
+            require(int(time.time())<min(auth["expiresAt"],v4_auth["expiresAt"]),"APPROVAL_EXPIRED_BEFORE_START")
+            require(digest(file_bytes(self.v4_approval_path))==self.v4_approval_hash,
                     "V4_APPROVAL_CHANGED")
             activation=dict(schema="disdex-live-operator-activation/v1",repository=REPOSITORY,
                 deploymentTarget=HOST,target=OPERATOR_TARGET,scope=RUNNER,operation=OPERATION,
@@ -264,7 +273,8 @@ class Restore:
             require(check.returncode==0,"UNIT_VERIFY")
             m=copy.deepcopy(self.manifest)
             m["runners"][RUNNER].update(sha=CANDIDATE,serviceUnit=self.new,releaseRoot=str(self.release),evidenceMode="tick-v1")
-            for p,row in ((self.paths.pins,m),(self.paths.current_plan,{**self.current,"runners":self.desired})):
+            for p,row in ((self.paths.pins,m),(self.paths.current_plan,{**self.current,"runners":self.desired}),
+                          (self.v4_approval_path,v4_activation)):
                 raw=json_bytes(row)
                 require(file_bytes(p)==baseline[p][0],"PIN_CAS")
                 self.installed.append((p,raw))
@@ -273,8 +283,11 @@ class Restore:
             self.systemd.disable(self.old)
             self.only_writer()
             self.parent._assert_expected_pins(self.desired)
+            from disdex_unified_root_gate import read_root_json
+            validate_activation(read_root_json(self.v4_approval_path),self.pins[V4_SCOPE],self.desired,
+                                self.v4_readiness,int(time.time()))
             self.health()
-            require(int(time.time())<auth["expiresAt"],"APPROVAL_EXPIRED_BEFORE_START")
+            require(int(time.time())<min(auth["expiresAt"],v4_auth["expiresAt"]),"APPROVAL_EXPIRED_BEFORE_START")
             started_at=time.time_ns()//1000000
             self.started=True
             self.systemd.start(self.new)
@@ -282,6 +295,7 @@ class Restore:
             self.systemd.enable(self.new)
             receipt={**result,"status":"HYPE_SHA_RESTORE_LIVE_VERIFIED","sourceSha":CANDIDATE,
                      "previousSha":LEGACY,"ordersEnabled":True,"githubRunId":run_id,"planSha256":PLAN,
+                     "v4PlanSha256":self.v4_plan,"v4PidPreserved":self.context["peers"][V4_SCOPE]["pid"],
                      "signedPreflightReads":evidence["signedVenueReads"],"reviewEvents":evidence["reviewEvents"],**ZERO}
             _root_file(tx/"receipt.json",json_bytes(receipt),0o400,[])
             return receipt
@@ -381,7 +395,11 @@ def main():
             fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
             restore=Restore()
             if preview:result=restore.preview()
-            else:result=restore.apply(run_id,sys.stdin.read(16385).strip())
+            else:
+                payload=json.loads(sys.stdin.read(32769))
+                require(isinstance(payload,dict) and set(payload)=={"hype","v4"}
+                        and all(isinstance(v,str) and 0<len(v)<=16384 for v in payload.values()),"APPROVAL_ENVELOPE")
+                result=restore.apply(run_id,payload["hype"],payload["v4"])
         print(json.dumps(result,sort_keys=True))
     except Exception as error:
         reason=str(error)

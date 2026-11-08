@@ -10,12 +10,32 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts/ops/deploy"))
 from disdex_hype_sha_restore_contract import (
-    CANDIDATE, COMMAND, LEGACY, OWNER, PLAN, REPOSITORY, RUNNER, parse_command, proposed_pins,
+    CANDIDATE, COMMAND, LEGACY, OWNER, PLAN, REPOSITORY, RUNNER, build_v4_continuity_activation,
+    parse_command, proposed_pins, v4_continuity_plan,
     validate_forced_command, verify_peer_authority, verify_result,
 )
 
 
 class HypeRestoreContract(unittest.TestCase):
+    def test_v4_continuity_is_independently_signed_and_changes_only_hype_peer(self):
+        original={RUNNER:LEGACY,"V12_V4":"c"*40,"V52":"d"*40}
+        desired=proposed_pins(original)
+        priorHash="1"*64
+        plan=v4_continuity_plan(original,desired,priorHash)
+        self.assertNotEqual(plan,PLAN)
+        self.assertNotEqual(plan,v4_continuity_plan(original,desired,"2"*64))
+        authority=dict(scope="V12_V4",sourceSha=original["V12_V4"],planSha256=plan,
+                       ordersEnabled=True,route="GITHUB_ACTIONS",operator=OWNER,issuedAt=1000,
+                       expiresAt=1030,nonce="e"*32)
+        artifact=build_v4_continuity_activation(authority,original,desired,priorHash,1010)
+        self.assertEqual(artifact["approvedRunners"],["V12_V4"])
+        self.assertEqual(artifact["approvedShaByRunner"],desired)
+        for patch in ({"scope":RUNNER},{"planSha256":PLAN},{"expiresAt":1010},{"ordersEnabled":False}):
+            with self.assertRaises(ValueError):
+                build_v4_continuity_activation(dict(authority,**patch),original,desired,priorHash,1010)
+        with self.assertRaises(ValueError):
+            v4_continuity_plan(original,{**desired,"V52":"9"*40},priorHash)
+
     @unittest.skipUnless(os.name=="posix" and shutil.which("openssl"),"requires POSIX and OpenSSL")
     def test_ed25519_exact_scope_expiration_and_replay(self):
         from disdex_owner_approval import issue, verify

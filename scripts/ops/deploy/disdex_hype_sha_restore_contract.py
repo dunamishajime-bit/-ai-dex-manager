@@ -1,6 +1,8 @@
 """Fixed scope shared by the HYPE root executor and SSH adapter."""
 import hashlib
+import json
 import re
+from datetime import datetime,timezone
 
 REPOSITORY = "dunamishajime-bit/-ai-dex-manager"
 HOST = "professional-dismanager.net"
@@ -8,6 +10,8 @@ OPERATOR_TARGET = "DD1296_FINAL_ALLIN_10BPS"
 OWNER = "dunamishajime-bit"
 RUNNER = "HYPE_TREND_LONG"
 OPERATION = "HYPE_TREND_LONG_SHA_RESTORE"
+V4_OPERATION = "V4_HYPE_PEER_PIN_CONTINUITY"
+V4_SCOPE = "V12_V4"
 LEGACY = "d6bcc94512a6416189cd92d7203b9ac3b2c98e70"
 CANDIDATE = "a7eee1f91d86d51f2333da117243d044ae1332dc"
 COMMAND = "/usr/local/sbin/disdex-hype-sha-owner-restore"
@@ -49,6 +53,35 @@ def verify_peer_authority(current, proposed, validate_v4):
         validate_v4(proposed)
     except ValueError:
         raise ValueError("HYPE_SHA_RESTORE_V4_RESTART_AUTHORITY_WOULD_BREAK") from None
+
+
+def v4_continuity_plan(current, proposed, prior_hash):
+    require(proposed==proposed_pins(current) and re.fullmatch(r"[0-9a-f]{64}",prior_hash)
+            and all(re.fullmatch(r"[0-9a-f]{40}",sha) for sha in current.values())
+            and V4_SCOPE in current,"V4_CONTINUITY_SCOPE")
+    bound=dict(schema="disdex-v4-hype-peer-pin-continuity/v1",repository=REPOSITORY,
+        deploymentTarget=HOST,operatorTarget=OPERATOR_TARGET,scope=V4_SCOPE,
+        sourceSha=current[V4_SCOPE],ordersEnabled=True,previousRunnerShas=current,
+        nextRunnerShas=proposed,previousApprovalSha256=prior_hash,hypePlanSha256=PLAN)
+    return hashlib.sha256(json.dumps(bound,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+
+
+def build_v4_continuity_activation(auth,current,proposed,prior_hash,now):
+    plan=v4_continuity_plan(current,proposed,prior_hash)
+    require(auth.get("scope")==V4_SCOPE and auth.get("sourceSha")==current[V4_SCOPE]
+            and auth.get("planSha256")==plan and auth.get("ordersEnabled") is True
+            and auth.get("route")=="GITHUB_ACTIONS" and auth.get("operator")==OWNER
+            and type(auth.get("issuedAt")) is int and type(auth.get("expiresAt")) is int
+            and auth["issuedAt"]<=now<auth["expiresAt"] and 1<=auth["expiresAt"]-auth["issuedAt"]<=300
+            and re.fullmatch(r"[0-9a-f]{32}",auth.get("nonce","")),"V4_CONTINUITY_APPROVAL")
+    return dict(schema="disdex-live-operator-activation/v1",repository=REPOSITORY,
+        deploymentTarget=HOST,target=OPERATOR_TARGET,scope=V4_SCOPE,operation=V4_OPERATION,
+        approvedSha=current[V4_SCOPE],approvedRunners=[V4_SCOPE],approvedShaByRunner=proposed,
+        ordersEnabled=True,activationClass="FULL_LIVE",route="GITHUB_ACTIONS",
+        authorizationMethod="OWNER_SIGNED_TOKEN",
+        approvedAt=datetime.fromtimestamp(auth["issuedAt"],timezone.utc).isoformat(),
+        operatorAcknowledgement="I_ACK_REAL_MONEY_LIVE_ACTIVATION",planSha256=plan,
+        nonceDigest=hashlib.sha256(auth["nonce"].encode()).hexdigest())
 
 
 def verify_result(result):
