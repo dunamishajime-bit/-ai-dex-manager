@@ -84,6 +84,15 @@ export function v4ProofsFromIndependentEvidence(
     || !Number.isFinite(Number(heartbeat?.lastTickAt)) || Number(heartbeat.lastTickAt) > now + 5000
     || now - Number(heartbeat.lastTickAt) > 180000
   ) return [];
+  return v4ProofsFromBoundLedger(orders, ledger, marker, sha);
+}
+
+/** Match exact durable V4 protection with signed venue orders after owner identity is independently established. */
+export function v4ProofsFromBoundLedger(
+  orders: any[], ledger: any, marker: string, expectedOwnerSha: string,
+): V4OwnerProof[] {
+  const sha = exactSha(expectedOwnerSha);
+  if (!sha || marker.trim() !== sha || ledger?.releaseSha !== sha) return [];
   const legs = ledger?.state?.legs;
   const protections = ledger?.protections;
   if (!legs || !protections || typeof legs !== "object" || typeof protections !== "object") return [];

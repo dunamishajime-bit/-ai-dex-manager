@@ -1,10 +1,13 @@
 import {constants} from 'node:fs';
-import {lstat,open,readFile} from 'node:fs/promises';
+import {execFile} from 'node:child_process';
+import {lstat,open,readFile,readlink} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {dirname} from 'node:path';
-import {resolveResidentStopOwnerPins,v4ProofsFromIndependentEvidence,q102ProofsFromIndependentEvidence,observeResidentProtection} from './resident-stop-observation';
+import {promisify} from 'node:util';
+import {resolveResidentStopOwnerPins,v4ProofsFromIndependentEvidence,v4ProofsFromBoundLedger,q102ProofsFromIndependentEvidence,observeResidentProtection} from './resident-stop-observation';
 import type {ResidentStopOwnerPins} from './resident-stop-observation';
 import type {validateOwnedPendingVenue} from './disdex-pending-owned-venue';
+import {parseV4SystemdShow} from './v12-v4-peer-service-attestation';
 
 type Row=Record<string,any>;
 const MANIFEST='/etc/disdex/runner-pins.json';
@@ -16,12 +19,56 @@ const PATHS:Record<string,string>={
  RESIDUAL:'/var/lib/disdex/idle-priority/residual-long-state.json',
  V4_LEDGER:'/var/lib/disdex/v12-v4/orders.json',
  V4_HEARTBEAT:'/var/lib/disdex/runner-health/heartbeats/v12-v4.json',
+ V4_RUNNER_HEARTBEAT:'/var/lib/disdex/v12-v4/heartbeat.json',
  Q102_STATE:'/var/lib/disdex/quality102-causal-v1/state.json',
  Q102_HEARTBEAT:'/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json',
  V52_STATE:'/var/lib/disdex/v52-aster-only/runner-live.json',
  MARGIN:'/var/lib/disdex/shared/margin-risk/guard-live.json',
 };
 function hash(raw:string){return createHash('sha256').update(raw).digest('hex');}
+const exec=promisify(execFile);
+type V4Runtime={unit:string;pid:number;cwd:string};
+
+/** A peer's entry block does not release or reassign a verified resident STOP. */
+export function pendingV4OwnerProofs(
+ orders:Row[],ledger:Row|undefined,heartbeat:Row|undefined,marker:string,now:number,sha:string,runtime:V4Runtime,
+){
+ const unit=`disdex-v12-v4@${sha}.service`,cwd=`/home/deploy/disdex-trading/releases/${sha}`;
+ const peerUnavailable=/^V4_PEER_ATTESTATION_RETRY_REQUIRED:V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:disdex-(?:pengu-dual-ls-v2|hype-long|idle-priority-short|quality102-causal-v1|v52-aster-only|fet-brk48)@[a-f0-9]{40}\.service$/;
+ if(!/^[a-f0-9]{40}$/.test(sha)||runtime.unit!==unit||runtime.cwd!==cwd||!Number.isSafeInteger(runtime.pid)||runtime.pid<1||
+   heartbeat?.schema!=='disdex-v12-v4-runner-heartbeat/v1'||heartbeat.releaseSha!==sha||
+   heartbeat.runtimeSha!==sha||heartbeat.expectedSha!==sha||heartbeat.serviceUnit!==unit||
+   heartbeat.workingDirectory!==cwd||heartbeat.mainPid!==runtime.pid||heartbeat.mode!=='LIVE'||
+   heartbeat.operationMode!=='CERTIFIED'||heartbeat.liveEnabled!==true||heartbeat.limitedLive!==false||
+   heartbeat.orderEnabled!==false||heartbeat.safetyState!=='BLOCKED'||!peerUnavailable.test(heartbeat.reason)||
+   !Number.isSafeInteger(heartbeat.heartbeatAt)||heartbeat.heartbeatAt>now||now-heartbeat.heartbeatAt>180000||
+   ledger?.schema!==2||ledger.state?.initial?.holdProtected!==false||ledger.state?.executionReview!=null)
+  return [];
+ return v4ProofsFromBoundLedger(orders,ledger,marker,sha).filter(proof=>{
+  const intent=ledger.intents?.[proof.stopClientOrderId];
+  const leg=ledger.state.legs?.[intent?.legId];
+  const order=orders.find(row=>row.clientOrderId===proof.stopClientOrderId);
+  return intent?.action==='STOP'&&intent.stage==='ACKNOWLEDGED'&&leg?.status==='OPEN'&&
+   leg.qty===proof.quantity&&ledger.protections?.[intent.legId]?.stopClientOrderId===proof.stopClientOrderId&&
+   order?.status==='NEW'&&Number(order.executedQty)===0;
+ });
+}
+
+async function observeV4Runtime(sha:string):Promise<V4Runtime>{
+ const unit=`disdex-v12-v4@${sha}.service`,cwd=`/home/deploy/disdex-trading/releases/${sha}`;
+ const {stdout}=await exec('/usr/bin/systemctl',['show',unit,'--no-pager',
+  '--property=Id,ActiveState,SubState,MainPID,WorkingDirectory,ExecStart'],{timeout:5000});
+ const {mainPid:pid}=parseV4SystemdShow(stdout,unit,Date.now());
+ const proc=`/proc/${pid}`;
+ const [dir,command,identity,mark]=await Promise.all([readlink(proc+'/cwd'),readFile(proc+'/cmdline','utf8'),
+  lstat(proc),lstat(cwd+'/.disdex-release-sha')]);
+ const expected=['/usr/bin/node','--import',cwd+'/node_modules/tsx/dist/loader.mjs',
+  cwd+'/scripts/v12-v4-production-runner.ts','--daemon'];
+ if(dir!==cwd||identity.uid!==process.getuid?.()||!mark.isFile()||mark.isSymbolicLink()||
+   mark.uid!==0||(mark.mode&0o222)!==0||command!==expected.join('\0')+'\0')
+  throw Error('PENDING_OWNER_V4_RUNTIME_UNVERIFIED');
+ return {unit,pid,cwd};
+}
 
 export function validatePendingPinMetadata(input:{uid:number;mode:number;regular:boolean;symlink:boolean;
  parentUid:number;parentMode:number;parentDirectory:boolean;parentSymlink:boolean}):void {
@@ -64,8 +111,15 @@ export async function collectPendingOwnerEvidence(positions:Row[],orders:Row[],r
  }));
  const now=Date.now();
  const states=Object.fromEntries(['PENGU','FET','HYPE','IDLE','RESIDUAL'].map(key=>[key,records[key].value??{}]));
- const v4Proofs=v4ProofsFromIndependentEvidence(orders,records.V4_LEDGER.value,records.V4_HEARTBEAT.value,
+ let v4Proofs=v4ProofsFromIndependentEvidence(orders,records.V4_LEDGER.value,records.V4_HEARTBEAT.value,
    records.V4_MARKER.raw??'',now,manifest.pins.V12);
+ let v4Runtime:V4Runtime|undefined;
+ if(v4Proofs.length===0&&orders.some(order=>/^v12-v4-[a-f0-9]{28}$/.test(order.clientOrderId??''))){
+  const runtime=await observeV4Runtime(manifest.pins.V12);
+  v4Proofs=pendingV4OwnerProofs(orders,records.V4_LEDGER.value,records.V4_RUNNER_HEARTBEAT.value,
+   records.V4_MARKER.raw??'',Date.now(),manifest.pins.V12,runtime);
+  if(v4Proofs.length>0)v4Runtime=runtime;
+ }
  const q102Proofs=q102ProofsFromIndependentEvidence(orders,records.Q102_STATE.value,records.Q102_HEARTBEAT.value,
    records.Q102_MARKER.raw??'',now,manifest.pins.Q102);
  const input={positions,orders,states,runtimeSha,ownerPins:manifest.pins as ResidentStopOwnerPins,now,
@@ -73,7 +127,7 @@ export async function collectPendingOwnerEvidence(positions:Row[],orders:Row[],r
  const observation=observeResidentProtection(positions,orders,states,runtimeSha,now,v4Proofs,q102Proofs,manifest.pins);
  const required=new Set<string>();
  for(const row of observation.positions){
-  if(row.strategy==='V12_V4')for(const key of ['V4_LEDGER','V4_HEARTBEAT','V4_MARKER'])required.add(key);
+  if(row.strategy==='V12_V4')for(const key of ['V4_LEDGER',v4Runtime?'V4_RUNNER_HEARTBEAT':'V4_HEARTBEAT','V4_MARKER'])required.add(key);
   else if(row.strategy==='Q102')for(const key of ['Q102_STATE','Q102_HEARTBEAT','Q102_MARKER'])required.add(key);
   else if(row.strategy==='V52')for(const key of ['V52_STATE','MARGIN'])required.add(key);
   else if(Object.hasOwn(records,row.strategy))required.add(row.strategy);
@@ -81,6 +135,10 @@ export async function collectPendingOwnerEvidence(positions:Row[],orders:Row[],r
  return {input,verifyUnchanged:async()=>{
   const current=await canonicalManifest();
   if(hash(current.raw)!==hash(manifest.raw))throw Error('PENDING_OWNER_PIN_CHANGED_DURING_PROOF');
+  if(v4Runtime){
+   const observed=await observeV4Runtime(manifest.pins.V12);
+   if(observed.pid!==v4Runtime.pid)throw Error('PENDING_OWNER_V4_RUNTIME_CHANGED_DURING_PROOF');
+  }
   for(const key of required){
    const record=records[key];
    if(record.raw===undefined||hash(await readFile(record.path,'utf8'))!==hash(record.raw)){

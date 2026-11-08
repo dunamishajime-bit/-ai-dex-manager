@@ -165,10 +165,10 @@ def child_environment(sha,home,grant_path=None,credentials=None):
     return env
 
 
-def run_signed_child(release,deploy,*,grant_path=None,credentials=None):
+def run_signed_child(release,deploy,*,grant_path=None,credentials=None,verify_owned=False):
     result=subprocess.run(['/usr/bin/node','--import',str(release/'node_modules/tsx/dist/loader.mjs'),
         str(release/'scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts'),
-        '--apply-refresh' if grant_path is not None else '--verify-only'],cwd=release,
+        '--apply-refresh' if grant_path is not None else '--verify-owned' if verify_owned else '--verify-only'],cwd=release,
         user=deploy.pw_uid,group=deploy.pw_gid,extra_groups=[],
         env=child_environment(release.name,deploy.pw_dir,grant_path,credentials),capture_output=True,text=True,timeout=55)
     # Deliberately do not print/store raw stderr, response URLs or credentials.
