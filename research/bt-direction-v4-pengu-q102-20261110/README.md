@@ -131,3 +131,15 @@ The controlling route-by-route status is now documented in V4_PENGU_DIRECTION_CL
 ### Forward shadow update (2026-11-10): H60 rejected
 
 Post-2026-10-01 Aster forward H1/M5 exists, but its original V4 replay states **BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06**. Only falsification tests are allowed, not independent OOS promotion. Among 20 forward Y06 cases, H60 changed 13 exits and made 11 worse, including 9 originally profitable natives; 4/4 disjoint episodes had negative H60 summed deltas. Mark **unconditional Y06 H60 REJECTED** in research; do not deploy. X05 composite had two forward triggers with no fully modeled native/opposite pairs; X07/X11 had no triggers. Their status remains unresolved. See [Y06 structural report](./Y06_NATIVE_EXITS_REGIME_AND_GROSS_STRESS_20261110.md) for source hashes, scripts and provenance.
+
+## 2026-11-10 V4/PENGU deep methodological audit — REQUIRED NEXT RESTART
+
+See [V4_PENGU_CAUSALITY_AND_TIMED_STOP_DEEP_AUDIT_20261110.md](./V4_PENGU_CAUSALITY_AND_TIMED_STOP_DEEP_AUDIT_20261110.md) for the controlling source, unit-return math, risk-gate and portfolio findings.
+
+1. **Do not claim historical V4 V2 priority OOS:** all 598 preperiod and 1,394 target raw intentions used a later outcome-ranked 41-route shadow policy; 15/127 forward intentions precede documented 2026-10-09 policy creation and 49/127 precede 2026-10-26 size changes. Every source tape was separately SHA/decision-timestamp reconciled.
+2. **PENGU V8**: blanket 2h flat and SHORT flips fail over 50 feasible cases; V20 blanket 2h opposite 12/40 positive only; V64 blanket opposite 10/25 positive only. V64's historical 7/7 conditional flags reconstruct from closed H1 but are only 5 independent episodes and fail a synthetic continued-bull counterexample.
+3. **PENGU SHORT V20 timed 3h/8h**: current saved pin has state/reason but no demonstrated executable invocation of the separate timed-stop module. Research overlay uses inconsistent SHORT PnL denominator (`entry/exit-1` vs pinned native `(entry-exit)/entry`); new independent M5 replay repairs this. 3h-only is negative (-0.20858 unit-return sum); 8h-only is positive +0.03387 but just 2 raw cases.
+4. **PENGU 8h-only integrated research 10/30bps**: both potentially improved raw cases are **SYMBOL_BUSY BLOCKS** and **zero portfolio effects**; original and 8h-only decisions/fills/equity/funding CSV hashes match. Gross capped stock1.5 sensitivity maxDD stays -50.37%/-60.67%. No adoption.
+5. **Still required**: current as-deployed SHA and call-site read-only verification; rigorous *as-of* V4 route-priority reconstruction; genuine prospective independent episode testing and full certified 10/30bps integration. No Production orders, merges, or LIVE changes in this research.
+
+Important **do not repeat** the earlier 3h/8h overlay bug by copying its PnL arithmetic into another BT.
