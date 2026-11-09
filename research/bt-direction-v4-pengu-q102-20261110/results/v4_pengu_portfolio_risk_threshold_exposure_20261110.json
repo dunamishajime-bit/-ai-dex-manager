@@ -1,0 +1,871 @@
+{
+  "status": "RESEARCH_ONLY_RISK_ATTRIBUTION_WITHOUT_EXACT_INCRMTM_BY_TRADE",
+  "model": "PINNED_RANK_STOCK_GROSS_1.5X_NATIVE_EXITS_20261110",
+  "method": "Find first DD threshold after same peak preceding global trough; classify existing and post-threshold modeled admissions. Do not treat full-lifetime PnL as interval contribution.",
+  "cost": {
+    "10": {
+      "peak_utc": "2026-07-20T07:00:00Z",
+      "trough_utc": "2026-09-28T05:00:00Z",
+      "peak_equity": 4058351.9243702483,
+      "trough_equity": 2014142.3274407994,
+      "peak_to_trough_drawdown_pct": -50.370436941509396,
+      "risk_trigger_levels": {
+        "10": {
+          "trigger_utc": "2026-07-22T16:00:00Z",
+          "equity": 3640100.6103451205,
+          "mtm_relative_to_peak": -10.305939992871116,
+          "existing_open_count": 1,
+          "existing_gross_x": 0.6000000000000001,
+          "existing_by_strategy": {
+            "V4": 1
+          },
+          "existing_positions": [
+            {
+              "id": "V4_01156",
+              "s": "V4",
+              "route": "REC_Y03_REV_D0_T36",
+              "symbol": "SOLUSDT",
+              "gross_x": 0.6000000000000001,
+              "entry": "2026-07-22T02:00:00Z",
+              "exit": "2026-07-23T14:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 141,
+          "closed_by_trough": 139,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 78,
+          "post_trigger_new_admission_by_strategy": {
+            "IDLE": {
+              "n": 26,
+              "closed_count": 25,
+              "closed_lifetime_pnl_jpy": -651811.2840451542
+            },
+            "V52": {
+              "n": 12,
+              "closed_count": 12,
+              "closed_lifetime_pnl_jpy": 352744.9414374074
+            },
+            "Q102": {
+              "n": 16,
+              "closed_count": 16,
+              "closed_lifetime_pnl_jpy": -495061.9166022315
+            },
+            "RESIDUAL": {
+              "n": 13,
+              "closed_count": 13,
+              "closed_lifetime_pnl_jpy": -170274.29596930824
+            },
+            "V4": {
+              "n": 53,
+              "closed_count": 52,
+              "closed_lifetime_pnl_jpy": -430537.3709941818
+            },
+            "PENGU": {
+              "n": 10,
+              "closed_count": 10,
+              "closed_lifetime_pnl_jpy": -479215.9610985031
+            },
+            "FET": {
+              "n": 4,
+              "closed_count": 4,
+              "closed_lifetime_pnl_jpy": 282690.60103943
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -59724.282097763346
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -1651189.568330305
+        },
+        "15": {
+          "trigger_utc": "2026-07-30T21:00:00Z",
+          "equity": 3396628.249343932,
+          "mtm_relative_to_peak": -16.305231467303038,
+          "existing_open_count": 1,
+          "existing_gross_x": 1,
+          "existing_by_strategy": {
+            "PENGU": 1
+          },
+          "existing_positions": [
+            {
+              "id": "PENGU_00088",
+              "s": "PENGU",
+              "route": "SHORT_V20",
+              "symbol": "PENGUUSDT",
+              "gross_x": 1,
+              "entry": "2026-07-28T10:00:00Z",
+              "exit": "2026-07-31T10:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 126,
+          "closed_by_trough": 124,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 70,
+          "post_trigger_new_admission_by_strategy": {
+            "V52": {
+              "n": 8,
+              "closed_count": 8,
+              "closed_lifetime_pnl_jpy": 282905.9240165142
+            },
+            "V4": {
+              "n": 49,
+              "closed_count": 48,
+              "closed_lifetime_pnl_jpy": -543286.5942047047
+            },
+            "RESIDUAL": {
+              "n": 12,
+              "closed_count": 12,
+              "closed_lifetime_pnl_jpy": -197614.27665046457
+            },
+            "FET": {
+              "n": 4,
+              "closed_count": 4,
+              "closed_lifetime_pnl_jpy": 282690.60103943
+            },
+            "IDLE": {
+              "n": 24,
+              "closed_count": 23,
+              "closed_lifetime_pnl_jpy": -567072.3531263296
+            },
+            "PENGU": {
+              "n": 8,
+              "closed_count": 8,
+              "closed_lifetime_pnl_jpy": -219505.03428271823
+            },
+            "Q102": {
+              "n": 14,
+              "closed_count": 14,
+              "closed_lifetime_pnl_jpy": -401474.9637177576
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -59724.282097763346
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -1423080.979023794
+        },
+        "20": {
+          "trigger_utc": "2026-08-15T00:00:00Z",
+          "equity": 3239633.9263493395,
+          "mtm_relative_to_peak": -20.173657023298997,
+          "existing_open_count": 2,
+          "existing_gross_x": 1.25,
+          "existing_by_strategy": {
+            "V4": 1,
+            "IDLE": 1
+          },
+          "existing_positions": [
+            {
+              "id": "V4_01179",
+              "s": "V4",
+              "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+              "symbol": "LTCUSDT",
+              "gross_x": 0.25,
+              "entry": "2026-08-14T20:00:00Z",
+              "exit": "2026-08-15T02:00:00Z"
+            },
+            {
+              "id": "IDLE_00146",
+              "s": "IDLE",
+              "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "symbol": "TAOUSDT",
+              "gross_x": 1,
+              "entry": "2026-08-14T15:00:00Z",
+              "exit": "2026-08-15T03:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 109,
+          "closed_by_trough": 107,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 62,
+          "post_trigger_new_admission_by_strategy": {
+            "RESIDUAL": {
+              "n": 10,
+              "closed_count": 10,
+              "closed_lifetime_pnl_jpy": -180005.42402466526
+            },
+            "V4": {
+              "n": 43,
+              "closed_count": 42,
+              "closed_lifetime_pnl_jpy": -492768.6337280153
+            },
+            "IDLE": {
+              "n": 21,
+              "closed_count": 20,
+              "closed_lifetime_pnl_jpy": -478207.7562985013
+            },
+            "V52": {
+              "n": 5,
+              "closed_count": 5,
+              "closed_lifetime_pnl_jpy": 217110.39549208217
+            },
+            "FET": {
+              "n": 3,
+              "closed_count": 3,
+              "closed_lifetime_pnl_jpy": 374178.93607360485
+            },
+            "Q102": {
+              "n": 14,
+              "closed_count": 14,
+              "closed_lifetime_pnl_jpy": -401474.9637177576
+            },
+            "PENGU": {
+              "n": 6,
+              "closed_count": 6,
+              "closed_lifetime_pnl_jpy": -156788.19407566896
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -59724.282097763346
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -1177679.9223766848
+        },
+        "25": {
+          "trigger_utc": "2026-09-05T12:00:00Z",
+          "equity": 3043447.248753429,
+          "mtm_relative_to_peak": -25.007803525425075,
+          "existing_open_count": 4,
+          "existing_gross_x": 2.1500000000000004,
+          "existing_by_strategy": {
+            "Q102": 1,
+            "V4": 3
+          },
+          "existing_positions": [
+            {
+              "id": "Q102S34_00189",
+              "s": "Q102",
+              "route": "FET|REV12_T0.05_H12",
+              "symbol": "FETUSDT",
+              "gross_x": 1.25,
+              "entry": "2026-09-05T05:00:00Z",
+              "exit": "2026-09-05T17:00:00Z"
+            },
+            {
+              "id": "V4_01277",
+              "s": "V4",
+              "route": "REC_Y06_REV_D0_T72",
+              "symbol": "ADAUSDT",
+              "gross_x": 0.30000000000000004,
+              "entry": "2026-09-04T06:00:00Z",
+              "exit": "2026-09-05T18:00:00Z"
+            },
+            {
+              "id": "V4_01267",
+              "s": "V4",
+              "route": "REC_Y06_REV_D0_T72",
+              "symbol": "AAVEUSDT",
+              "gross_x": 0.30000000000000004,
+              "entry": "2026-09-03T16:00:00Z",
+              "exit": "2026-09-06T16:00:00Z"
+            },
+            {
+              "id": "V4_01272",
+              "s": "V4",
+              "route": "REC_Y06_REV_D0_T72",
+              "symbol": "XRPUSDT",
+              "gross_x": 0.30000000000000004,
+              "entry": "2026-09-03T22:00:00Z",
+              "exit": "2026-09-06T22:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 62,
+          "closed_by_trough": 60,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 30,
+          "post_trigger_new_admission_by_strategy": {
+            "HYPE": {
+              "n": 4,
+              "closed_count": 4,
+              "closed_lifetime_pnl_jpy": 138408.60585184954
+            },
+            "V4": {
+              "n": 24,
+              "closed_count": 23,
+              "closed_lifetime_pnl_jpy": -467972.0403708014
+            },
+            "IDLE": {
+              "n": 13,
+              "closed_count": 12,
+              "closed_lifetime_pnl_jpy": -44452.74083310738
+            },
+            "PENGU": {
+              "n": 3,
+              "closed_count": 3,
+              "closed_lifetime_pnl_jpy": -199017.79036704454
+            },
+            "RESIDUAL": {
+              "n": 8,
+              "closed_count": 8,
+              "closed_lifetime_pnl_jpy": -44595.005950698345
+            },
+            "Q102": {
+              "n": 6,
+              "closed_count": 6,
+              "closed_lifetime_pnl_jpy": -425284.39803928725
+            },
+            "V52": {
+              "n": 2,
+              "closed_count": 2,
+              "closed_lifetime_pnl_jpy": 65937.87657128513
+            },
+            "FET": {
+              "n": 2,
+              "closed_count": 2,
+              "closed_lifetime_pnl_jpy": -10229.959477072902
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -987205.4526148771
+        },
+        "30": {
+          "trigger_utc": "2026-09-20T12:00:00Z",
+          "equity": 2820876.430429774,
+          "mtm_relative_to_peak": -30.492069613516794,
+          "existing_open_count": 3,
+          "existing_gross_x": 1.2000000000000002,
+          "existing_by_strategy": {
+            "V4": 3
+          },
+          "existing_positions": [
+            {
+              "id": "V4_01316",
+              "s": "V4",
+              "route": "REC_X10_TIME_48H",
+              "symbol": "ADAUSDT",
+              "gross_x": 0.30000000000000004,
+              "entry": "2026-09-19T06:00:00Z",
+              "exit": "2026-09-20T19:00:00Z"
+            },
+            {
+              "id": "V4_01326",
+              "s": "V4",
+              "route": "REC_Y03_REV_D0_T36",
+              "symbol": "AVAXUSDT",
+              "gross_x": 0.6000000000000001,
+              "entry": "2026-09-20T02:00:00Z",
+              "exit": "2026-09-21T14:00:00Z"
+            },
+            {
+              "id": "V4_01327",
+              "s": "V4",
+              "route": "REC_Y06_REV_D0_T72",
+              "symbol": "INJUSDT",
+              "gross_x": 0.30000000000000004,
+              "entry": "2026-09-20T06:00:00Z",
+              "exit": "2026-09-23T06:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 19,
+          "closed_by_trough": 17,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 10,
+          "post_trigger_new_admission_by_strategy": {
+            "V4": {
+              "n": 5,
+              "closed_count": 4,
+              "closed_lifetime_pnl_jpy": -66403.35362574157
+            },
+            "Q102": {
+              "n": 4,
+              "closed_count": 4,
+              "closed_lifetime_pnl_jpy": -89495.53323141065
+            },
+            "FET": {
+              "n": 1,
+              "closed_count": 1,
+              "closed_lifetime_pnl_jpy": -131479.59564888684
+            },
+            "IDLE": {
+              "n": 3,
+              "closed_count": 2,
+              "closed_lifetime_pnl_jpy": -264067.5505619933
+            },
+            "V52": {
+              "n": 1,
+              "closed_count": 1,
+              "closed_lifetime_pnl_jpy": 19309.785545122082
+            },
+            "RESIDUAL": {
+              "n": 5,
+              "closed_count": 5,
+              "closed_lifetime_pnl_jpy": -90393.5405841503
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -622529.7881070606
+        }
+      },
+      "trough_open_positions": [
+        {
+          "id": "IDLE_00180",
+          "strategy": "IDLE",
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "symbol": "TIAUSDT",
+          "side": "SHORT",
+          "gross_x": 1
+        },
+        {
+          "id": "V4_01392",
+          "strategy": "V4",
+          "route": "REC_X09_TIME_48H",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "gross_x": 0.25
+        }
+      ],
+      "trough_open_gross": 1.25,
+      "trough_open_counts_by_strategy": {
+        "IDLE": 1,
+        "V4": 1
+      },
+      "no_exact_runner_intratrade_mtm": [
+        "Full lifetime fill PnL is NOT the post-threshold drawdown contribution; entry or exit may straddle trigger and trough.",
+        "Partial protective exits and funding may cause separate event-level PnL; do not recompute exact risk attribution without per-tick open-book and position ledger.",
+        "Stock1.5, native exits and funded research engine still approximate venue fills, esp V52."
+      ]
+    },
+    "30": {
+      "peak_utc": "2026-07-20T07:00:00Z",
+      "trough_utc": "2026-09-28T19:00:00Z",
+      "peak_equity": 1622995.1556221265,
+      "trough_equity": 638318.3027199826,
+      "peak_to_trough_drawdown_pct": -60.6703507087609,
+      "risk_trigger_levels": {
+        "10": {
+          "trigger_utc": "2026-07-22T08:00:00Z",
+          "equity": 1460576.6367437867,
+          "mtm_relative_to_peak": -10.007332327254026,
+          "existing_open_count": 2,
+          "existing_gross_x": 1.35,
+          "existing_by_strategy": {
+            "Q102": 1,
+            "V4": 1
+          },
+          "existing_positions": [
+            {
+              "id": "Q102S34_00171",
+              "s": "Q102",
+              "route": "NEAR|BRK48_H48_V1.2",
+              "symbol": "NEARUSDT",
+              "gross_x": 0.75,
+              "entry": "2026-07-20T13:00:00Z",
+              "exit": "2026-07-22T13:00:00Z"
+            },
+            {
+              "id": "V4_01156",
+              "s": "V4",
+              "route": "REC_Y03_REV_D0_T36",
+              "symbol": "SOLUSDT",
+              "gross_x": 0.6000000000000001,
+              "entry": "2026-07-22T02:00:00Z",
+              "exit": "2026-07-23T14:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 142,
+          "closed_by_trough": 140,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 86,
+          "post_trigger_new_admission_by_strategy": {
+            "IDLE": {
+              "n": 26,
+              "closed_count": 25,
+              "closed_lifetime_pnl_jpy": -284545.0622130116
+            },
+            "V52": {
+              "n": 12,
+              "closed_count": 12,
+              "closed_lifetime_pnl_jpy": 82923.44969423022
+            },
+            "Q102": {
+              "n": 16,
+              "closed_count": 16,
+              "closed_lifetime_pnl_jpy": -202480.3258584201
+            },
+            "RESIDUAL": {
+              "n": 13,
+              "closed_count": 13,
+              "closed_lifetime_pnl_jpy": -86565.15108466677
+            },
+            "V4": {
+              "n": 53,
+              "closed_count": 52,
+              "closed_lifetime_pnl_jpy": -177497.54480591218
+            },
+            "PENGU": {
+              "n": 11,
+              "closed_count": 11,
+              "closed_lifetime_pnl_jpy": -236685.30671902312
+            },
+            "FET": {
+              "n": 4,
+              "closed_count": 4,
+              "closed_lifetime_pnl_jpy": 95221.78158554532
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -47559.40707220451
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -857187.5664734629
+        },
+        "15": {
+          "trigger_utc": "2026-07-28T16:00:00Z",
+          "equity": 1376956.393970537,
+          "mtm_relative_to_peak": -15.159549971501797,
+          "existing_open_count": 2,
+          "existing_gross_x": 1.3,
+          "existing_by_strategy": {
+            "V4": 1,
+            "PENGU": 1
+          },
+          "existing_positions": [
+            {
+              "id": "V4_01168",
+              "s": "V4",
+              "route": "REC_X08_TIME_48H",
+              "symbol": "ATOMUSDT",
+              "gross_x": 0.30000000000000004,
+              "entry": "2026-07-27T02:00:00Z",
+              "exit": "2026-07-29T02:00:00Z"
+            },
+            {
+              "id": "PENGU_00088",
+              "s": "PENGU",
+              "route": "SHORT_V20",
+              "symbol": "PENGUUSDT",
+              "gross_x": 1,
+              "entry": "2026-07-28T10:00:00Z",
+              "exit": "2026-07-31T10:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 130,
+          "closed_by_trough": 128,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 78,
+          "post_trigger_new_admission_by_strategy": {
+            "V52": {
+              "n": 9,
+              "closed_count": 9,
+              "closed_lifetime_pnl_jpy": 86511.980480747
+            },
+            "IDLE": {
+              "n": 25,
+              "closed_count": 24,
+              "closed_lifetime_pnl_jpy": -279359.8198595447
+            },
+            "Q102": {
+              "n": 15,
+              "closed_count": 15,
+              "closed_lifetime_pnl_jpy": -201794.2858481438
+            },
+            "V4": {
+              "n": 49,
+              "closed_count": 48,
+              "closed_lifetime_pnl_jpy": -216425.63735938745
+            },
+            "RESIDUAL": {
+              "n": 12,
+              "closed_count": 12,
+              "closed_lifetime_pnl_jpy": -94389.00531105182
+            },
+            "FET": {
+              "n": 4,
+              "closed_count": 4,
+              "closed_lifetime_pnl_jpy": 95221.78158554532
+            },
+            "PENGU": {
+              "n": 9,
+              "closed_count": 9,
+              "closed_lifetime_pnl_jpy": -129340.64027566908
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -47559.40707220451
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -787135.033659709
+        },
+        "20": {
+          "trigger_utc": "2026-08-06T10:00:00Z",
+          "equity": 1296644.7323273157,
+          "mtm_relative_to_peak": -20.107911115095977,
+          "existing_open_count": 2,
+          "existing_gross_x": 2,
+          "existing_by_strategy": {
+            "IDLE": 1,
+            "PENGU": 1
+          },
+          "existing_positions": [
+            {
+              "id": "IDLE_00144",
+              "s": "IDLE",
+              "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "symbol": "TAOUSDT",
+              "gross_x": 1,
+              "entry": "2026-08-06T10:00:00Z",
+              "exit": "2026-08-06T22:00:00Z"
+            },
+            {
+              "id": "PENGU_00092",
+              "s": "PENGU",
+              "route": "RECOVERY_V8",
+              "symbol": "PENGUUSDT",
+              "gross_x": 1,
+              "entry": "2026-08-05T19:00:00Z",
+              "exit": "2026-08-08T19:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 120,
+          "closed_by_trough": 118,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 72,
+          "post_trigger_new_admission_by_strategy": {
+            "V52": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": 70654.59557247454
+            },
+            "V4": {
+              "n": 47,
+              "closed_count": 46,
+              "closed_lifetime_pnl_jpy": -216684.7925627383
+            },
+            "RESIDUAL": {
+              "n": 11,
+              "closed_count": 11,
+              "closed_lifetime_pnl_jpy": -93501.0443366623
+            },
+            "IDLE": {
+              "n": 23,
+              "closed_count": 22,
+              "closed_lifetime_pnl_jpy": -245593.9654862805
+            },
+            "PENGU": {
+              "n": 8,
+              "closed_count": 8,
+              "closed_lifetime_pnl_jpy": -170875.04441918942
+            },
+            "FET": {
+              "n": 3,
+              "closed_count": 3,
+              "closed_lifetime_pnl_jpy": 132880.71325373306
+            },
+            "Q102": {
+              "n": 14,
+              "closed_count": 14,
+              "closed_lifetime_pnl_jpy": -160622.82649782585
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -47559.40707220451
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -731301.7715486933
+        },
+        "25": {
+          "trigger_utc": "2026-08-15T00:00:00Z",
+          "equity": 1212852.0994592914,
+          "mtm_relative_to_peak": -25.27075048511892,
+          "existing_open_count": 2,
+          "existing_gross_x": 1.25,
+          "existing_by_strategy": {
+            "V4": 1,
+            "IDLE": 1
+          },
+          "existing_positions": [
+            {
+              "id": "V4_01179",
+              "s": "V4",
+              "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+              "symbol": "LTCUSDT",
+              "gross_x": 0.25,
+              "entry": "2026-08-14T20:00:00Z",
+              "exit": "2026-08-15T02:00:00Z"
+            },
+            {
+              "id": "IDLE_00146",
+              "s": "IDLE",
+              "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "symbol": "TAOUSDT",
+              "gross_x": 1,
+              "entry": "2026-08-14T15:00:00Z",
+              "exit": "2026-08-15T03:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 110,
+          "closed_by_trough": 108,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 66,
+          "post_trigger_new_admission_by_strategy": {
+            "RESIDUAL": {
+              "n": 10,
+              "closed_count": 10,
+              "closed_lifetime_pnl_jpy": -82446.3798056189
+            },
+            "V4": {
+              "n": 43,
+              "closed_count": 42,
+              "closed_lifetime_pnl_jpy": -192874.22026171186
+            },
+            "IDLE": {
+              "n": 21,
+              "closed_count": 20,
+              "closed_lifetime_pnl_jpy": -205031.47146940505
+            },
+            "V52": {
+              "n": 5,
+              "closed_count": 5,
+              "closed_lifetime_pnl_jpy": 59725.65854774406
+            },
+            "FET": {
+              "n": 3,
+              "closed_count": 3,
+              "closed_lifetime_pnl_jpy": 132880.71325373306
+            },
+            "Q102": {
+              "n": 14,
+              "closed_count": 14,
+              "closed_lifetime_pnl_jpy": -160622.82649782585
+            },
+            "PENGU": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -100923.54660969789
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -47559.40707220451
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -596851.479914987
+        },
+        "30": {
+          "trigger_utc": "2026-08-18T05:00:00Z",
+          "equity": 1133592.6460138354,
+          "mtm_relative_to_peak": -30.154280369413257,
+          "existing_open_count": 2,
+          "existing_gross_x": 1.3,
+          "existing_by_strategy": {
+            "IDLE": 1,
+            "V4": 1
+          },
+          "existing_positions": [
+            {
+              "id": "IDLE_00147",
+              "s": "IDLE",
+              "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "symbol": "TAOUSDT",
+              "gross_x": 1,
+              "entry": "2026-08-18T03:00:00Z",
+              "exit": "2026-08-18T15:00:00Z"
+            },
+            {
+              "id": "V4_01184",
+              "s": "V4",
+              "route": "REC_X03_TIME_12H",
+              "symbol": "ATOMUSDT",
+              "gross_x": 0.30000000000000004,
+              "entry": "2026-08-18T04:00:00Z",
+              "exit": "2026-08-18T16:00:00Z"
+            }
+          ],
+          "existing_survive_to_trough": [],
+          "admitted_after_trigger": 103,
+          "closed_by_trough": 101,
+          "still_open_at_trough": 2,
+          "closed_after_trigger_negative": 61,
+          "post_trigger_new_admission_by_strategy": {
+            "V52": {
+              "n": 5,
+              "closed_count": 5,
+              "closed_lifetime_pnl_jpy": 59725.65854774406
+            },
+            "V4": {
+              "n": 39,
+              "closed_count": 38,
+              "closed_lifetime_pnl_jpy": -194780.6957819995
+            },
+            "FET": {
+              "n": 3,
+              "closed_count": 3,
+              "closed_lifetime_pnl_jpy": 132880.71325373306
+            },
+            "IDLE": {
+              "n": 20,
+              "closed_count": 19,
+              "closed_lifetime_pnl_jpy": -193047.5073221359
+            },
+            "Q102": {
+              "n": 14,
+              "closed_count": 14,
+              "closed_lifetime_pnl_jpy": -160622.82649782585
+            },
+            "PENGU": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -100923.54660969789
+            },
+            "HYPE": {
+              "n": 7,
+              "closed_count": 7,
+              "closed_lifetime_pnl_jpy": -47559.40707220451
+            },
+            "RESIDUAL": {
+              "n": 8,
+              "closed_count": 8,
+              "closed_lifetime_pnl_jpy": -27115.377518875684
+            }
+          },
+          "post_trigger_closed_full_lifetime_pnl_sum": -531442.9890012622
+        }
+      },
+      "trough_open_positions": [
+        {
+          "id": "IDLE_00180",
+          "strategy": "IDLE",
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "symbol": "TIAUSDT",
+          "side": "SHORT",
+          "gross_x": 1
+        },
+        {
+          "id": "V4_01392",
+          "strategy": "V4",
+          "route": "REC_X09_TIME_48H",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "gross_x": 0.25
+        }
+      ],
+      "trough_open_gross": 1.25,
+      "trough_open_counts_by_strategy": {
+        "IDLE": 1,
+        "V4": 1
+      },
+      "no_exact_runner_intratrade_mtm": [
+        "Full lifetime fill PnL is NOT the post-threshold drawdown contribution; entry or exit may straddle trigger and trough.",
+        "Partial protective exits and funding may cause separate event-level PnL; do not recompute exact risk attribution without per-tick open-book and position ledger.",
+        "Stock1.5, native exits and funded research engine still approximate venue fills, esp V52."
+      ]
+    }
+  },
+  "source_sha256": {
+    "10": "64e2b518e64601389b67981d446ae404a31668bf3dcfe943b224fdfcf7253d52",
+    "30": "a0563843e1da8ba687f8306041ff503432f86fef2ff5e2a62a4a40a501a7eb3c"
+  }
+}
