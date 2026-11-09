@@ -13,7 +13,7 @@ mode=os.environ.get("DISDEX_V4_SORT_MODE","")
 assert mode in ("SYMBOL","PINNED","ASOF"),mode
 risk_hours=int(os.environ["DISDEX_RESEARCH_RISK_WINDOW_HOURS"])
 risk_fraction=float(os.environ["DISDEX_RESEARCH_RISK_FRACTION"])
-assert risk_hours in (168,336,720) and risk_fraction in (0.10,0.12,0.15,0.18)
+assert risk_hours in (168,336,720) and risk_fraction in (0.04,0.06,0.08,0.10,0.12,0.15,0.18)
 assert mode=="PINNED"
 out_name=f"VPS_DD_V4_PINNED_RISKROLL_{risk_hours}H_{round(risk_fraction*100):02d}PCT_20261110"
 replaces=[
