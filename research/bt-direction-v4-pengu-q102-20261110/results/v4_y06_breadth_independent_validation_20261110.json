@@ -1,0 +1,248 @@
+{
+  "status": "UNRESOLVED_DATA_OR_SEPARATION",
+  "route": "REC_Y06_REV_D0_T72",
+  "source_runtime_sha": "3ad65403013b701db5d9e53e8814e6ab827a28e8",
+  "period": "2025-10-01T00:00:00Z/2026-10-01T00:00:00Z (end-exclusive)",
+  "events": 352,
+  "unique_entry_hours": 280,
+  "native_side": "SHORT",
+  "wrong_native_by_split": {
+    "train": {
+      "n": 211,
+      "wrong": 39,
+      "wrong_rate": 0.1848341232227488,
+      "first_utc": "2025-10-05T02:00:00+00:00",
+      "last_utc": "2026-06-15T00:00:00+00:00"
+    },
+    "validation": {
+      "n": 70,
+      "wrong": 33,
+      "wrong_rate": 0.4714285714285714,
+      "first_utc": "2026-06-15T10:00:00+00:00",
+      "last_utc": "2026-08-24T18:00:00+00:00"
+    },
+    "test": {
+      "n": 71,
+      "wrong": 48,
+      "wrong_rate": 0.676056338028169,
+      "first_utc": "2026-08-24T20:00:00+00:00",
+      "last_utc": "2026-09-23T14:00:00+00:00"
+    }
+  },
+  "source_sha256": {
+    "v4_internal_threeperiod_flat.jsonl": "787643c815e11b36e4175d5230c015e68a8a61974aa1ab9e0b64ed305c946921",
+    "market_breadth_feature_cache_20261110.json": "61f1c81753dee36e2a47b4b525597cb7c2f5f46b28182d0d7218280298fb82cd"
+  },
+  "h1_30symbol_hash_of_name_sha256_pairs": "d46b2f5c2c655b5ed84d5d1d08f94bfec8372e8eef3c5ec72cc89decae110713",
+  "closed_h1_feature_parity": {
+    "checked_events": 352,
+    "comparisons": 2816,
+    "max_abs_error_by_feature": {
+      "breadth_pos3": 0,
+      "breadth_mean3": 0,
+      "breadth_pos6": 0,
+      "breadth_mean6": 0,
+      "breadth_pos12": 0,
+      "breadth_mean12": 0,
+      "breadth_pos24": 0,
+      "breadth_mean24": 0
+    },
+    "live_bar_used": false,
+    "universe_excludes_btc": true
+  },
+  "strict_72h_purge": {
+    "train_fit_n": 208,
+    "validation_calibration_n": 54,
+    "train_last_fit_utc": "2026-05-10T20:00:00+00:00",
+    "validation_last_calibration_utc": "2026-08-21T08:00:00+00:00"
+  },
+  "models": {
+    "native_entry_only": {
+      "features": [
+        "if_sret6",
+        "if_btc6",
+        "if_btc24",
+        "if_rel24",
+        "if_volRatio",
+        "if_er24"
+      ],
+      "coefficients": [
+        -0.046762507297929516,
+        0.14739868930270786,
+        -0.057016415956941735,
+        -0.09688273632936364,
+        -0.06989883227174619,
+        0.167769980745975,
+        -0.1031410001117203
+      ],
+      "penalty": 0.25,
+      "score_cutoff_selected_using_validation": 0.5578063079479948,
+      "splits": {
+        "train": {
+          "n": 211,
+          "roc_auc": 0.6550387596899225,
+          "avg_precision": 0.36001927917132487,
+          "flags": 10,
+          "beneficial_flips": 6,
+          "harmful_flips": 4,
+          "sum_delta_uncompounded": -0.26228411802496154
+        },
+        "validation": {
+          "n": 70,
+          "roc_auc": 0.3808353808353808,
+          "avg_precision": 0.39622655219513,
+          "flags": 5,
+          "beneficial_flips": 0,
+          "harmful_flips": 5,
+          "sum_delta_uncompounded": -0.7207575579904453
+        },
+        "matured_validation": {
+          "n": 54,
+          "roc_auc": 0.385989010989011,
+          "avg_precision": 0.42167522066181934,
+          "flags": 0,
+          "beneficial_flips": 0,
+          "harmful_flips": 0,
+          "sum_delta_uncompounded": 0
+        },
+        "unseen_test": {
+          "n": 71,
+          "roc_auc": 0.6322463768115942,
+          "avg_precision": 0.787794631119834,
+          "flags": 7,
+          "beneficial_flips": 6,
+          "harmful_flips": 1,
+          "sum_delta_uncompounded": 0.21372812864171675
+        }
+      },
+      "unseen_cutoff_jitter": {
+        "0.95": {
+          "flags": 13,
+          "tp": 10,
+          "fp": 3
+        },
+        "1.0": {
+          "flags": 7,
+          "tp": 6,
+          "fp": 1
+        },
+        "1.05": {
+          "flags": 4,
+          "tp": 4,
+          "fp": 0
+        }
+      },
+      "accepted": false
+    },
+    "native_plus_cross_sectional_breadth": {
+      "features": [
+        "if_sret6",
+        "if_btc6",
+        "if_btc24",
+        "if_rel24",
+        "if_volRatio",
+        "if_er24",
+        "breadth_pos6",
+        "breadth_pos12",
+        "breadth_pos24"
+      ],
+      "coefficients": [
+        -0.05946481565165433,
+        0.12236709265342348,
+        -0.08185945908689868,
+        -0.10730015244871675,
+        -0.06408310584142524,
+        0.1722572813471492,
+        -0.11685642985872689,
+        0.04168873806696037,
+        0.1378717365207084,
+        -0.009272956985877455
+      ],
+      "penalty": 0.25,
+      "score_cutoff_selected_using_validation": 0.5742695860390475,
+      "splits": {
+        "train": {
+          "n": 211,
+          "roc_auc": 0.6689028026237328,
+          "avg_precision": 0.3625921378145732,
+          "flags": 12,
+          "beneficial_flips": 6,
+          "harmful_flips": 6,
+          "sum_delta_uncompounded": -0.3999293764609676
+        },
+        "validation": {
+          "n": 70,
+          "roc_auc": 0.32923832923832924,
+          "avg_precision": 0.374320846183676,
+          "flags": 5,
+          "beneficial_flips": 0,
+          "harmful_flips": 5,
+          "sum_delta_uncompounded": -0.7207575579904453
+        },
+        "matured_validation": {
+          "n": 54,
+          "roc_auc": 0.36813186813186816,
+          "avg_precision": 0.42008185271331955,
+          "flags": 0,
+          "beneficial_flips": 0,
+          "harmful_flips": 0,
+          "sum_delta_uncompounded": 0
+        },
+        "unseen_test": {
+          "n": 71,
+          "roc_auc": 0.6539855072463768,
+          "avg_precision": 0.7816170081164797,
+          "flags": 4,
+          "beneficial_flips": 3,
+          "harmful_flips": 1,
+          "sum_delta_uncompounded": 0.029091124891386544
+        }
+      },
+      "unseen_cutoff_jitter": {
+        "0.95": {
+          "flags": 7,
+          "tp": 6,
+          "fp": 1
+        },
+        "1.0": {
+          "flags": 4,
+          "tp": 3,
+          "fp": 1
+        },
+        "1.05": {
+          "flags": 2,
+          "tp": 2,
+          "fp": 0
+        }
+      },
+      "accepted": false
+    }
+  },
+  "breadth_pos12_ge_0p70": {
+    "train": {
+      "flags": 156,
+      "beneficial": 31,
+      "harmful": 125,
+      "sum_delta_uncompounded": -10.942491297346379
+    },
+    "validation": {
+      "flags": 47,
+      "beneficial": 21,
+      "harmful": 26,
+      "sum_delta_uncompounded": 0.05246822046107902
+    },
+    "test": {
+      "flags": 48,
+      "beneficial": 35,
+      "harmful": 13,
+      "sum_delta_uncompounded": 2.628417858047525
+    }
+  },
+  "conclusions": [
+    "No Gate accepted: chronological validation discrimination is not robust.",
+    "Market-breadth features are exactly reproducible from completed public Aster H1 candles.",
+    "A 72h label-availability embargo is required before supervised fitting and cutoff choice.",
+    "Large train/validation/test class-prevalence drift makes pooled 100%-precision claims unreliable.",
+    "Research-only: integrated 10bps/30bps backtest is not run because no new rule is accepted."
+  ]
+}
