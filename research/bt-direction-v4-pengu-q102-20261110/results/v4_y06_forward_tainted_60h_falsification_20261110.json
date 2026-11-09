@@ -1,0 +1,324 @@
+{
+  "status": "FALSIFICATION_ONLY_NOT_INDEPENDENT_OOS",
+  "source_manifest_strategy_status": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06",
+  "source_period": {
+    "start": 1790812800000,
+    "endExclusive": 1794168000000
+  },
+  "native_entry_sha": "b2c1a855d33daa93090b8438bdc8286bc381754eaa1e0722e6fd3d46eabe4d2b",
+  "forward_exit_lifecycle_sha256": "0b6159b44f4bca2f53be27758e1045b4ffe2c878ad431941b857dffd3b0c42a2",
+  "overall": {
+    "n": 20,
+    "native_gross_sum": 0.5543494517082852,
+    "native_wins": 13,
+    "candidate_changed": 13,
+    "candidate_gross_delta": -0.17714504215090843,
+    "improved": 2,
+    "damaged": 11,
+    "damaged_native_winners": 9
+  },
+  "episodes_count": 4,
+  "episodes": [
+    {
+      "begin": 1790920800000,
+      "end": 1791388800000,
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "n": 5,
+      "delta_sum": -0.02179139689797628
+    },
+    {
+      "begin": 1792569600000,
+      "end": 1792936800000,
+      "indices": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "n": 6,
+      "delta_sum": -0.12769869706319725
+    },
+    {
+      "begin": 1793181600000,
+      "end": 1793440800000,
+      "indices": [
+        11
+      ],
+      "n": 1,
+      "delta_sum": -0.003230214933532108
+    },
+    {
+      "begin": 1793808000000,
+      "end": 1794067200000,
+      "indices": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "n": 8,
+      "delta_sum": -0.02442473325620277
+    }
+  ],
+  "cases": [
+    {
+      "symbol": "AAVEUSDT",
+      "entryTs": 1790920800000,
+      "exitTs": 1791180000000,
+      "native_return": 0.005506607929515406,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 179.87,
+      "delta_vs_native": 0.0040198237885462115,
+      "native_won": true,
+      "entry_utc": "2026-10-02T06:00:00+00:00"
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "entryTs": 1790928000000,
+      "exitTs": 1791187200000,
+      "native_return": 0.0240773955106256,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 180,
+      "delta_vs_native": -0.002391434317082424,
+      "native_won": true,
+      "entry_utc": "2026-10-02T08:00:00+00:00"
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "entryTs": 1790942400000,
+      "exitTs": 1791201600000,
+      "native_return": 0.01538461538461533,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 179,
+      "delta_vs_native": 0.011524870888828479,
+      "native_won": true,
+      "entry_utc": "2026-10-02T12:00:00+00:00"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "entryTs": 1791122400000,
+      "exitTs": 1791381600000,
+      "native_return": 0.04528643050875325,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 118.92,
+      "delta_vs_native": -0.02268431001890366,
+      "native_won": true,
+      "entry_utc": "2026-10-04T14:00:00+00:00"
+    },
+    {
+      "symbol": "SOLUSDT",
+      "entryTs": 1791129600000,
+      "exitTs": 1791388800000,
+      "native_return": 0.03982555747552052,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 118.18,
+      "delta_vs_native": -0.012260347239364887,
+      "native_won": true,
+      "entry_utc": "2026-10-04T16:00:00+00:00"
+    },
+    {
+      "symbol": "BNBUSDT",
+      "entryTs": 1792569600000,
+      "exitTs": 1792828800000,
+      "native_return": 0.01628559967910137,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 742.13,
+      "delta_vs_native": -0.008570664527343137,
+      "native_won": true,
+      "entry_utc": "2026-10-21T08:00:00+00:00"
+    },
+    {
+      "symbol": "BNBUSDT",
+      "entryTs": 1792576800000,
+      "exitTs": 1792836000000,
+      "native_return": 0.020283813036158005,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 741.7,
+      "delta_vs_native": -0.011357866324594427,
+      "native_won": true,
+      "entry_utc": "2026-10-21T10:00:00+00:00"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "entryTs": 1792598400000,
+      "exitTs": 1792857600000,
+      "native_return": 0.182476331910154,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 4.636,
+      "delta_vs_native": -0.04306664191572304,
+      "native_won": true,
+      "entry_utc": "2026-10-21T16:00:00+00:00"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "entryTs": 1792605600000,
+      "exitTs": 1792864800000,
+      "native_return": 0.17492548435171384,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 4.62,
+      "delta_vs_native": -0.035581222056631834,
+      "native_won": true,
+      "entry_utc": "2026-10-21T18:00:00+00:00"
+    },
+    {
+      "symbol": "NEARUSDT",
+      "entryTs": 1792612800000,
+      "exitTs": 1792872000000,
+      "native_return": 0.15938206480783723,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 4.568,
+      "delta_vs_native": -0.019969856819894466,
+      "native_won": true,
+      "entry_utc": "2026-10-21T20:00:00+00:00"
+    },
+    {
+      "symbol": "BNBUSDT",
+      "entryTs": 1792677600000,
+      "exitTs": 1792936800000,
+      "native_return": -0.004562602999060195,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 744.3,
+      "delta_vs_native": -0.00915244541901035,
+      "native_won": false,
+      "entry_utc": "2026-10-22T14:00:00+00:00"
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "entryTs": 1793181600000,
+      "exitTs": 1793440800000,
+      "native_return": 0.06758603553236431,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 0.07531,
+      "delta_vs_native": -0.003230214933532108,
+      "native_won": true,
+      "entry_utc": "2026-10-28T10:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793808000000,
+      "exitTs": 1794067200000,
+      "native_return": -0.04177914899087276,
+      "native_exit_reason": "TIME",
+      "h60_changed": true,
+      "h60_open_price": 8.294,
+      "delta_vs_native": -0.02442473325620277,
+      "native_won": false,
+      "entry_utc": "2026-11-04T16:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793815200000,
+      "exitTs": 1793860500000,
+      "native_return": -0.027130301872372975,
+      "native_exit_reason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "h60_changed": false,
+      "h60_open_price": null,
+      "delta_vs_native": 0,
+      "native_won": false,
+      "entry_utc": "2026-11-04T18:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793829600000,
+      "exitTs": 1793873100000,
+      "native_return": -0.05960597314594063,
+      "native_exit_reason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "h60_changed": false,
+      "h60_open_price": null,
+      "delta_vs_native": 0,
+      "native_won": false,
+      "entry_utc": "2026-11-04T22:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793836800000,
+      "exitTs": 1793880300000,
+      "native_return": -0.05120443939967223,
+      "native_exit_reason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "h60_changed": false,
+      "h60_open_price": null,
+      "delta_vs_native": 0,
+      "native_won": false,
+      "entry_utc": "2026-11-05T00:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793844000000,
+      "exitTs": 1793887500000,
+      "native_return": -0.03642508449117532,
+      "native_exit_reason": "V4_SHORT_INITIAL_ADVERSE_CANDIDATE",
+      "h60_changed": false,
+      "h60_open_price": null,
+      "delta_vs_native": 0,
+      "native_won": false,
+      "entry_utc": "2026-11-05T02:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793865600000,
+      "exitTs": 1793908800000,
+      "native_return": -0.0006105006105006083,
+      "native_exit_reason": "V4_SHORT_PROFIT_GUARD_FILLED",
+      "h60_changed": false,
+      "h60_open_price": null,
+      "delta_vs_native": 0,
+      "native_won": false,
+      "entry_utc": "2026-11-05T08:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793872800000,
+      "exitTs": 1793926800000,
+      "native_return": 0.00855920114122688,
+      "native_exit_reason": "V4_SHORT_PROFIT_GUARD_FILLED",
+      "h60_changed": false,
+      "h60_open_price": null,
+      "delta_vs_native": 0,
+      "native_won": true,
+      "entry_utc": "2026-11-05T10:00:00+00:00"
+    },
+    {
+      "symbol": "INJUSDT",
+      "entryTs": 1793880000000,
+      "exitTs": 1793908800000,
+      "native_return": 0.01608836595029417,
+      "native_exit_reason": "V4_SHORT_PROFIT_GUARD_FILLED",
+      "h60_changed": false,
+      "h60_open_price": null,
+      "delta_vs_native": 0,
+      "native_won": true,
+      "entry_utc": "2026-11-05T12:00:00+00:00"
+    }
+  ],
+  "constraints": [
+    "Pinned V4 forward intention source is SHADOW_ONLY/BLOCKED_HINDSIGHT_LOOKAHEAD",
+    "Source flagged external Y06; cannot be accepted as independent causal OOS",
+    "V4 source plus modeled native STOP/guard exits; not actual signed venue fills",
+    "Gross fees/funding/portfolio admission not replayed in this standalone falsification",
+    "H60 was previously selected after seeing other historical splits; must not optimize thresholds against this sample"
+  ]
+}
