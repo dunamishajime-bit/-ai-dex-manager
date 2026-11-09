@@ -55,7 +55,7 @@ out={
           "Censor forward trades without complete exit horizon; do not count incomplete outcomes as zero or success."]}
 for label,p in SCRIPTS.items():
  if not p.exists():out["anomalies"][label]="missing_input";continue
- rows=[json.loads(z) for z in p.open(encoding="utf8-sig") if z.strip()]
+ rows=[json.loads(z) for z in p.open(encoding="utf-8-sig") if z.strip()]
  summary=json.loads(SUMMARIES[label].read_text(encoding="utf8")) if SUMMARIES[label].exists() else {}
  stamps=[int(r["entryTs"]) for r in rows]
  timestamps=[int(r.get("decisionTs",r["entryTs"])) for r in rows]
