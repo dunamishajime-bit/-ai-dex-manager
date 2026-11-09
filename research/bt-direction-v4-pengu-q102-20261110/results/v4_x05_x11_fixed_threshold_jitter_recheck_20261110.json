@@ -1,0 +1,962 @@
+{
+  "source": "direction_features_long_confirmation.jsonl",
+  "source_sha256": "979b0a6399f4e3ba00223e245cd9fb47ba47cf5e5b322da04deec933f6afa4f6",
+  "period": "2025-10-01 UTC to 2026-10-01 UTC (exclusive)",
+  "method": "Fixed diagnostic jitter grids; historical train/val/test not independent if thresholds were previously inspected. Test is descriptive, not fresh OOS.",
+  "routes": {
+    "REC_X05_TIME_36H": {
+      "features": [
+        "sym_vol72",
+        "sym_ret6"
+      ],
+      "ops": [
+        "<=",
+        ">"
+      ],
+      "n": 56,
+      "split_n": [
+        33,
+        11,
+        12
+      ],
+      "base": {
+        "threshold_a": 0.00658,
+        "threshold_b": 0,
+        "splits": {
+          "train": {
+            "flags": 1,
+            "beneficial": 1,
+            "harmful": 0,
+            "sum_delta_uncompounded": 0.004938927797646264,
+            "entries_utc": [
+              "2026-01-25T14:00:00+00:00"
+            ]
+          },
+          "validation": {
+            "flags": 2,
+            "beneficial": 2,
+            "harmful": 0,
+            "sum_delta_uncompounded": 0.09543088645860553,
+            "entries_utc": [
+              "2026-02-11T20:00:00+00:00",
+              "2026-03-08T12:00:00+00:00"
+            ]
+          },
+          "test": {
+            "flags": 1,
+            "beneficial": 1,
+            "harmful": 0,
+            "sum_delta_uncompounded": 0.03424673984922044,
+            "entries_utc": [
+              "2026-07-20T00:00:00+00:00"
+            ]
+          }
+        }
+      },
+      "grid": [
+        {
+          "threshold_a": 0.005264,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.04527919440216355,
+              "entries_utc": [
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.03424673984922044,
+              "entries_utc": [
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005264,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.04527919440216355,
+              "entries_utc": [
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.03424673984922044,
+              "entries_utc": [
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005264,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "validation": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "test": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005922,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.04527919440216355,
+              "entries_utc": [
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.03424673984922044,
+              "entries_utc": [
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005922,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.04527919440216355,
+              "entries_utc": [
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.03424673984922044,
+              "entries_utc": [
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005922,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "validation": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "test": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            }
+          }
+        },
+        {
+          "threshold_a": 0.00658,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.09543088645860553,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00",
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.03424673984922044,
+              "entries_utc": [
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.00658,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.09543088645860553,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00",
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.03424673984922044,
+              "entries_utc": [
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.00658,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.05015169205644199,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            }
+          }
+        },
+        {
+          "threshold_a": 0.007238,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.09543088645860553,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00",
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 3,
+              "beneficial": 1,
+              "harmful": 2,
+              "sum_delta_uncompounded": -0.04117671345044516,
+              "entries_utc": [
+                "2026-03-20T20:00:00+00:00",
+                "2026-06-24T22:00:00+00:00",
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.007238,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.004938927797646264,
+              "entries_utc": [
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.09543088645860553,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00",
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 2,
+              "beneficial": 1,
+              "harmful": 1,
+              "sum_delta_uncompounded": 0.0029658343595692083,
+              "entries_utc": [
+                "2026-06-24T22:00:00+00:00",
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.007238,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.05015169205644199,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 0,
+              "harmful": 1,
+              "sum_delta_uncompounded": -0.031280905489651234,
+              "entries_utc": [
+                "2026-06-24T22:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.007896,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 1,
+              "harmful": 1,
+              "sum_delta_uncompounded": -0.0016424428526690127,
+              "entries_utc": [
+                "2025-10-31T06:00:00+00:00",
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.09543088645860553,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00",
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 4,
+              "beneficial": 1,
+              "harmful": 3,
+              "sum_delta_uncompounded": -0.14471870287136068,
+              "entries_utc": [
+                "2026-03-20T20:00:00+00:00",
+                "2026-06-04T16:00:00+00:00",
+                "2026-06-24T22:00:00+00:00",
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.007896,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 1,
+              "harmful": 1,
+              "sum_delta_uncompounded": -0.0016424428526690127,
+              "entries_utc": [
+                "2025-10-31T06:00:00+00:00",
+                "2026-01-25T14:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.09543088645860553,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00",
+                "2026-03-08T12:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 3,
+              "beneficial": 1,
+              "harmful": 2,
+              "sum_delta_uncompounded": -0.10057615506134632,
+              "entries_utc": [
+                "2026-06-04T16:00:00+00:00",
+                "2026-06-24T22:00:00+00:00",
+                "2026-07-20T00:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.007896,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 1,
+              "beneficial": 0,
+              "harmful": 1,
+              "sum_delta_uncompounded": -0.006581370650315277,
+              "entries_utc": [
+                "2025-10-31T06:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.05015169205644199,
+              "entries_utc": [
+                "2026-02-11T20:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 2,
+              "beneficial": 0,
+              "harmful": 2,
+              "sum_delta_uncompounded": -0.13482289491056676,
+              "entries_utc": [
+                "2026-06-04T16:00:00+00:00",
+                "2026-06-24T22:00:00+00:00"
+              ]
+            }
+          }
+        }
+      ],
+      "grid_total": 15,
+      "no_fp_all_splits_with_test_flags": 6,
+      "zero_fp_train_val_test_fires": [
+        [
+          0.005264,
+          -0.005
+        ],
+        [
+          0.005264,
+          0
+        ],
+        [
+          0.005922,
+          -0.005
+        ],
+        [
+          0.005922,
+          0
+        ],
+        [
+          0.00658,
+          -0.005
+        ],
+        [
+          0.00658,
+          0
+        ]
+      ]
+    },
+    "REC_X11_TIME_48H": {
+      "features": [
+        "rel72",
+        "sym_ret12"
+      ],
+      "ops": [
+        ">",
+        ">"
+      ],
+      "n": 27,
+      "split_n": [
+        16,
+        5,
+        6
+      ],
+      "base": {
+        "threshold_a": 0,
+        "threshold_b": 0,
+        "splits": {
+          "train": {
+            "flags": 2,
+            "beneficial": 2,
+            "harmful": 0,
+            "sum_delta_uncompounded": 0.1016830743670244,
+            "entries_utc": [
+              "2025-11-07T02:00:00+00:00",
+              "2025-11-07T04:00:00+00:00"
+            ]
+          },
+          "validation": {
+            "flags": 1,
+            "beneficial": 1,
+            "harmful": 0,
+            "sum_delta_uncompounded": 0.07466424235557545,
+            "entries_utc": [
+              "2026-06-07T06:00:00+00:00"
+            ]
+          },
+          "test": {
+            "flags": 1,
+            "beneficial": 1,
+            "harmful": 0,
+            "sum_delta_uncompounded": 0.023761887450518215,
+            "entries_utc": [
+              "2026-06-07T10:00:00+00:00"
+            ]
+          }
+        }
+      },
+      "grid": [
+        {
+          "threshold_a": -0.005,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 5,
+              "beneficial": 3,
+              "harmful": 2,
+              "sum_delta_uncompounded": 0.01154437525102403,
+              "entries_utc": [
+                "2025-10-19T12:00:00+00:00",
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00",
+                "2026-01-11T14:00:00+00:00",
+                "2026-02-02T16:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 3,
+              "beneficial": 2,
+              "harmful": 1,
+              "sum_delta_uncompounded": -0.01518016111031606,
+              "entries_utc": [
+                "2026-02-06T20:00:00+00:00",
+                "2026-06-04T14:00:00+00:00",
+                "2026-06-07T06:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.029474861105700856,
+              "entries_utc": [
+                "2026-06-07T10:00:00+00:00",
+                "2026-06-07T10:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": -0.005,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 5,
+              "beneficial": 3,
+              "harmful": 2,
+              "sum_delta_uncompounded": 0.01154437525102403,
+              "entries_utc": [
+                "2025-10-19T12:00:00+00:00",
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00",
+                "2026-01-11T14:00:00+00:00",
+                "2026-02-02T16:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 3,
+              "beneficial": 2,
+              "harmful": 1,
+              "sum_delta_uncompounded": -0.01518016111031606,
+              "entries_utc": [
+                "2026-02-06T20:00:00+00:00",
+                "2026-06-04T14:00:00+00:00",
+                "2026-06-07T06:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.029474861105700856,
+              "entries_utc": [
+                "2026-06-07T10:00:00+00:00",
+                "2026-06-07T10:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": -0.005,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 5,
+              "beneficial": 3,
+              "harmful": 2,
+              "sum_delta_uncompounded": 0.01154437525102403,
+              "entries_utc": [
+                "2025-10-19T12:00:00+00:00",
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00",
+                "2026-01-11T14:00:00+00:00",
+                "2026-02-02T16:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 3,
+              "beneficial": 2,
+              "harmful": 1,
+              "sum_delta_uncompounded": -0.01518016111031606,
+              "entries_utc": [
+                "2026-02-06T20:00:00+00:00",
+                "2026-06-04T14:00:00+00:00",
+                "2026-06-07T06:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.029474861105700856,
+              "entries_utc": [
+                "2026-06-07T10:00:00+00:00",
+                "2026-06-07T10:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.1016830743670244,
+              "entries_utc": [
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.07466424235557545,
+              "entries_utc": [
+                "2026-06-07T06:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.023761887450518215,
+              "entries_utc": [
+                "2026-06-07T10:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.1016830743670244,
+              "entries_utc": [
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.07466424235557545,
+              "entries_utc": [
+                "2026-06-07T06:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.023761887450518215,
+              "entries_utc": [
+                "2026-06-07T10:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.1016830743670244,
+              "entries_utc": [
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.07466424235557545,
+              "entries_utc": [
+                "2026-06-07T06:00:00+00:00"
+              ]
+            },
+            "test": {
+              "flags": 1,
+              "beneficial": 1,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.023761887450518215,
+              "entries_utc": [
+                "2026-06-07T10:00:00+00:00"
+              ]
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005,
+          "threshold_b": -0.005,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.1016830743670244,
+              "entries_utc": [
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "test": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005,
+          "threshold_b": 0,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.1016830743670244,
+              "entries_utc": [
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "test": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            }
+          }
+        },
+        {
+          "threshold_a": 0.005,
+          "threshold_b": 0.005,
+          "splits": {
+            "train": {
+              "flags": 2,
+              "beneficial": 2,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0.1016830743670244,
+              "entries_utc": [
+                "2025-11-07T02:00:00+00:00",
+                "2025-11-07T04:00:00+00:00"
+              ]
+            },
+            "validation": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            },
+            "test": {
+              "flags": 0,
+              "beneficial": 0,
+              "harmful": 0,
+              "sum_delta_uncompounded": 0,
+              "entries_utc": []
+            }
+          }
+        }
+      ],
+      "grid_total": 9,
+      "no_fp_all_splits_with_test_flags": 3,
+      "zero_fp_train_val_test_fires": [
+        [
+          0,
+          -0.005
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0.005
+        ]
+      ]
+    }
+  }
+}
