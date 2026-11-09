@@ -1,0 +1,100 @@
+[
+  {
+    "delay": 15,
+    "status": "NONE"
+  },
+  {
+    "delay": 30,
+    "status": "UNCONFIRMED",
+    "conditions": [
+      [
+        "post_rel_ret30",
+        ">",
+        0.0034950893
+      ],
+      [
+        "btcx_green_ratio6",
+        ">",
+        0.8333333333
+      ]
+    ],
+    "rule": "post_rel_ret30>0.0034950893 AND btcx_green_ratio6>0.8333333333",
+    "train": {
+      "n": 30,
+      "wrong": 8,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 0.25,
+      "delta": 0.27460627565726997
+    },
+    "val": {
+      "n": 10,
+      "wrong": 4,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 0.25,
+      "delta": 0.1042317688324704
+    },
+    "test": {
+      "n": 10,
+      "wrong": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "precision": null,
+      "recall": 0.0,
+      "delta": 0
+    }
+  },
+  {
+    "delay": 60,
+    "status": "REJECT",
+    "conditions": [
+      [
+        "symx_vol6_vs24ret",
+        ">",
+        1.3309106859
+      ],
+      [
+        "m5b_vol3vs24b",
+        ">",
+        1.6151249505
+      ]
+    ],
+    "rule": "symx_vol6_vs24ret>1.3309106859 AND m5b_vol3vs24b>1.6151249505",
+    "train": {
+      "n": 30,
+      "wrong": 8,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 0.25,
+      "delta": 0.22153410255392664
+    },
+    "val": {
+      "n": 10,
+      "wrong": 5,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 0.4,
+      "delta": 0.1345001503157059
+    },
+    "test": {
+      "n": 10,
+      "wrong": 6,
+      "flagged": 1,
+      "tp": 0,
+      "fp": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "delta": -0.09067627284966187
+    }
+  }
+]

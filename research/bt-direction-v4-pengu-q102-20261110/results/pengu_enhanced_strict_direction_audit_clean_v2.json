@@ -1,0 +1,29 @@
+[
+  {
+    "route": "LONG_V64",
+    "status": "KEEP_NATIVE",
+    "rule": "NONE",
+    "train": null,
+    "val": null,
+    "test": null,
+    "alternatives": []
+  },
+  {
+    "route": "RECOVERY_V8",
+    "status": "KEEP_NATIVE",
+    "rule": "NONE",
+    "train": null,
+    "val": null,
+    "test": null,
+    "alternatives": []
+  },
+  {
+    "route": "SHORT_V20",
+    "status": "KEEP_NATIVE",
+    "rule": "NONE",
+    "train": null,
+    "val": null,
+    "test": null,
+    "alternatives": []
+  }
+]

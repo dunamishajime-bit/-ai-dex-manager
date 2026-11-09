@@ -1,0 +1,43 @@
+{
+  "btc24Min": -0.01,
+  "rel12Max": -0.035,
+  "semantics": "When BTC is not materially down over 24h but PENGU underperforms BTC by >=3.5pp over 12h, flip SHORT_V20 entry to LONG and use LONG management.",
+  "flips": [
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1761930000000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": 0.006259773671589919,
+      "rel12": -0.04296653178851262
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1762650000000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": -0.008792369166507497,
+      "rel12": -0.039248304868852224
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1766102400000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": -0.008495044267498253,
+      "rel12": -0.04143981653500628
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1784318400000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": -0.0018428904740929175,
+      "rel12": -0.0608380311788429
+    }
+  ]
+}

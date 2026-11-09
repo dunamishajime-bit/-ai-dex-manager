@@ -1,0 +1,46 @@
+{
+  "threshold": 0.12,
+  "semantics": "Native LONG_V64 entry remains the signal source; direction flips to SHORT and uses SHORT_V20 management when causal PENGU 12h return >= +12%.",
+  "flips": [
+    {
+      "strategy": "PENGU",
+      "route": "LONG_V64",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1762556400000,
+      "rule": "LONG_V64_OVERHEAT_SYM_RET12_GE_12PCT",
+      "sym_ret12": 0.1336685522732035
+    },
+    {
+      "strategy": "PENGU",
+      "route": "LONG_V64",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1764687600000,
+      "rule": "LONG_V64_OVERHEAT_SYM_RET12_GE_12PCT",
+      "sym_ret12": 0.13422120486942046
+    },
+    {
+      "strategy": "PENGU",
+      "route": "LONG_V64",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1765299600000,
+      "rule": "LONG_V64_OVERHEAT_SYM_RET12_GE_12PCT",
+      "sym_ret12": 0.12733983654099656
+    },
+    {
+      "strategy": "PENGU",
+      "route": "LONG_V64",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1765306800000,
+      "rule": "LONG_V64_OVERHEAT_SYM_RET12_GE_12PCT",
+      "sym_ret12": 0.159130893736805
+    },
+    {
+      "strategy": "PENGU",
+      "route": "LONG_V64",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1787349600000,
+      "rule": "LONG_V64_OVERHEAT_SYM_RET12_GE_12PCT",
+      "sym_ret12": 0.13532049591136897
+    }
+  ]
+}

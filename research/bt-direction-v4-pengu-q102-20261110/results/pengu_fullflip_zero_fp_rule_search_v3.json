@@ -1,0 +1,14 @@
+[
+  {
+    "route": "LONG_V64",
+    "rule": null
+  },
+  {
+    "route": "RECOVERY_V8",
+    "rule": null
+  },
+  {
+    "route": "SHORT_V20",
+    "rule": null
+  }
+]

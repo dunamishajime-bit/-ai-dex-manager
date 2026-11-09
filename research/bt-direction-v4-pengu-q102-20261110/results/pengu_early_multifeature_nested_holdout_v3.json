@@ -1,0 +1,701 @@
+[
+  {
+    "route": "RECOVERY_V8",
+    "status": "NESTED_CONFIRMED",
+    "h": 2,
+    "conditions": [
+      [
+        "sym_ret12",
+        ">",
+        0.0254491018
+      ],
+      [
+        "p_r2",
+        "<=",
+        -0.0039952058
+      ]
+    ],
+    "train": {
+      "n": 30,
+      "flagged": 3,
+      "tp": 3,
+      "fp": 0,
+      "wrong": 8,
+      "precision": 1.0,
+      "recall": 0.375
+    },
+    "val": {
+      "n": 10,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 5,
+      "precision": 1.0,
+      "recall": 0.4
+    },
+    "test": {
+      "n": 11,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 7,
+      "precision": 1.0,
+      "recall": 0.2857142857142857
+    },
+    "per_h": [
+      {
+        "h": 2,
+        "conditions": [
+          [
+            "sym_ret12",
+            ">",
+            0.0254491018
+          ],
+          [
+            "p_r2",
+            "<=",
+            -0.0039952058
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375
+        },
+        "val": {
+          "n": 10,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 5,
+          "precision": 1.0,
+          "recall": 0.4
+        }
+      },
+      {
+        "h": 6,
+        "conditions": [
+          [
+            "p_range6",
+            "<=",
+            0.0
+          ],
+          [
+            "btc_ret12",
+            ">",
+            0.0066807219
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.25
+        },
+        "val": {
+          "n": 10,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 5,
+          "precision": 1.0,
+          "recall": 0.4
+        }
+      },
+      {
+        "h": 12,
+        "conditions": [
+          [
+            "p_r12",
+            "<=",
+            -0.0051937675
+          ],
+          [
+            "sym_er24",
+            "<=",
+            0.0664819945
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 5,
+          "precision": 1.0,
+          "recall": 0.2
+        }
+      },
+      {
+        "h": 1,
+        "conditions": [
+          [
+            "sym_ret3",
+            ">",
+            0.0399872551
+          ],
+          [
+            "p_mae1",
+            "<=",
+            -0.010924249
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.25
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 5,
+          "precision": 1.0,
+          "recall": 0.2
+        }
+      },
+      {
+        "h": 3,
+        "conditions": [
+          [
+            "sym_er72",
+            ">",
+            0.1660869565
+          ],
+          [
+            "btc_ret12",
+            ">",
+            0.0066807219
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.25
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 5,
+          "precision": 1.0,
+          "recall": 0.2
+        }
+      },
+      {
+        "h": 4,
+        "conditions": [
+          [
+            "sym_er72",
+            ">",
+            0.1660869565
+          ],
+          [
+            "btc_ret12",
+            ">",
+            0.0066807219
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.25
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 5,
+          "precision": 1.0,
+          "recall": 0.2
+        }
+      },
+      {
+        "h": 8,
+        "conditions": [
+          [
+            "sym_er72",
+            ">",
+            0.1660869565
+          ],
+          [
+            "btc_ret12",
+            ">",
+            0.0066807219
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.25
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 5,
+          "precision": 1.0,
+          "recall": 0.2
+        }
+      }
+    ]
+  },
+  {
+    "route": "SHORT_V20",
+    "status": "NESTED_REJECT_TEST_FP",
+    "h": 2,
+    "conditions": [
+      [
+        "p_mae2",
+        "<=",
+        -0.0047254725
+      ],
+      [
+        "sym_ret3",
+        "<=",
+        -0.0108813928
+      ]
+    ],
+    "train": {
+      "n": 24,
+      "flagged": 6,
+      "tp": 6,
+      "fp": 0,
+      "wrong": 10,
+      "precision": 1.0,
+      "recall": 0.6
+    },
+    "val": {
+      "n": 8,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 4,
+      "precision": 1.0,
+      "recall": 0.5
+    },
+    "test": {
+      "n": 8,
+      "flagged": 1,
+      "tp": 0,
+      "fp": 1,
+      "wrong": 4,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    "per_h": [
+      {
+        "h": 2,
+        "conditions": [
+          [
+            "p_mae2",
+            "<=",
+            -0.0047254725
+          ],
+          [
+            "sym_ret3",
+            "<=",
+            -0.0108813928
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 6,
+          "tp": 6,
+          "fp": 0,
+          "wrong": 10,
+          "precision": 1.0,
+          "recall": 0.6
+        },
+        "val": {
+          "n": 8,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.5
+        }
+      },
+      {
+        "h": 12,
+        "conditions": [
+          [
+            "p_r12",
+            "<=",
+            -0.0072164948
+          ],
+          [
+            "sym_ret3",
+            "<=",
+            -0.0108813928
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 10,
+          "precision": 1.0,
+          "recall": 0.3
+        },
+        "val": {
+          "n": 8,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.5
+        }
+      },
+      {
+        "h": 1,
+        "conditions": [
+          [
+            "p_mae1",
+            "<=",
+            -0.0045214452
+          ],
+          [
+            "rec_btcReturn6hPct",
+            "<=",
+            0.2533514822
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 5,
+          "tp": 5,
+          "fp": 0,
+          "wrong": 10,
+          "precision": 1.0,
+          "recall": 0.5
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.25
+        }
+      },
+      {
+        "h": 4,
+        "conditions": [
+          [
+            "p_range4",
+            ">",
+            0.8810572687
+          ],
+          [
+            "sym_er24",
+            "<=",
+            0.2746508675
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 4,
+          "tp": 4,
+          "fp": 0,
+          "wrong": 10,
+          "precision": 1.0,
+          "recall": 0.4
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.25
+        }
+      },
+      {
+        "h": 3,
+        "conditions": [
+          [
+            "sym_ret3",
+            "<=",
+            -0.0220497151
+          ],
+          [
+            "rec_btcReturn6hPct",
+            "<=",
+            0.2533514822
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 10,
+          "precision": 1.0,
+          "recall": 0.3
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.25
+        }
+      },
+      {
+        "h": 6,
+        "conditions": [
+          [
+            "sym_ret3",
+            "<=",
+            -0.0220497151
+          ],
+          [
+            "rec_btcReturn6hPct",
+            "<=",
+            0.2533514822
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 10,
+          "precision": 1.0,
+          "recall": 0.3
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.25
+        }
+      },
+      {
+        "h": 8,
+        "conditions": [
+          [
+            "p_r8",
+            "<=",
+            -0.0160954365
+          ],
+          [
+            "sym_er24",
+            "<=",
+            0.2746508675
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 10,
+          "precision": 1.0,
+          "recall": 0.3
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.25
+        }
+      }
+    ]
+  },
+  {
+    "route": "LONG_V64",
+    "status": "NESTED_UNCONFIRMED",
+    "h": 6,
+    "conditions": [
+      [
+        "p_range6",
+        "<=",
+        0.4142857143
+      ],
+      [
+        "sym_ret12",
+        ">",
+        0.0996959166
+      ]
+    ],
+    "train": {
+      "n": 15,
+      "flagged": 3,
+      "tp": 3,
+      "fp": 0,
+      "wrong": 4,
+      "precision": 1.0,
+      "recall": 0.75
+    },
+    "val": {
+      "n": 5,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 1,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "test": {
+      "n": 5,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 2,
+      "precision": null,
+      "recall": 0.0
+    },
+    "per_h": [
+      {
+        "h": 6,
+        "conditions": [
+          [
+            "p_range6",
+            "<=",
+            0.4142857143
+          ],
+          [
+            "sym_ret12",
+            ">",
+            0.0996959166
+          ]
+        ],
+        "train": {
+          "n": 15,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.75
+        },
+        "val": {
+          "n": 5,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 1,
+          "precision": 1.0,
+          "recall": 1.0
+        }
+      },
+      {
+        "h": 8,
+        "conditions": [
+          [
+            "sym_ret12",
+            ">",
+            0.0996959166
+          ],
+          [
+            "p_range8",
+            "<=",
+            0.1689708141
+          ]
+        ],
+        "train": {
+          "n": 15,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.75
+        },
+        "val": {
+          "n": 5,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 1,
+          "precision": 1.0,
+          "recall": 1.0
+        }
+      },
+      {
+        "h": 12,
+        "conditions": [
+          [
+            "sym_ret12",
+            ">",
+            0.0996959166
+          ],
+          [
+            "p_range12",
+            "<=",
+            0.2977099237
+          ]
+        ],
+        "train": {
+          "n": 15,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 4,
+          "precision": 1.0,
+          "recall": 0.75
+        },
+        "val": {
+          "n": 5,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "wrong": 1,
+          "precision": 1.0,
+          "recall": 1.0
+        }
+      }
+    ]
+  }
+]

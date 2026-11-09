@@ -77,3 +77,16 @@ No result in this snapshot should be described as production-adopted unless a la
 - Q102 MR post-signal confirmation audit.
 
 Large raw market datasets, full fill CSV ledgers, and venue data are intentionally not committed here; the scripts/results preserve the research logic and compact evidence without bloating the production repository.
+
+## 2026-11-10 PENGU route reclassification addendum
+Rechecked the saved PENGU searches using the same rule: a candidate cannot be called confirmed if the final unseen split creates a false reversal.
+
+- LONG_V64 entry direction: KEEP_NATIVE. No stable entry-time zero-FP rule was found. A delayed 6h candidate had train 3/3 and validation 1/1 but zero test triggers, so it remains UNRESOLVED rather than accepted.
+- RECOVERY_V8 entry direction: KEEP_NATIVE. Entry-time frozen rule failed holdout (0 TP / 2 FP), so it is rejected as an entry gate.
+- RECOVERY_V8 2h rescue: RESEARCH-CANDIDATE CONFIRMED across the nested split. Condition: pre-entry PENGU 12h return > 2.54491018% AND post-entry 2h return <= -0.39952058%. Train 3/3, validation 2/2, test 2/2, zero FP in all three splits. This is a post-entry rescue/re-direction candidate, not an entry gate and not production-adopted.
+- SHORT_V20 entry direction: KEEP_NATIVE. The high-volatility rule fired only in train and had zero validation/test triggers, so it is not a generalizable direction gate.
+- SHORT_V20 2h rescue: REJECT. Train 6/6 and validation 2/2 were zero-FP, but final test flagged one correct native trade (0 TP / 1 FP).
+- SHORT_V20 idiosyncratic-exhaustion (BTC24 >= -1%, PENGU-vs-BTC 12h <= -3.5pp): retain as exploratory only until independent walk-forward/OOS evidence is sufficient.
+- LONG_V64 overheat (PENGU 12h >= +12%): retain as exploratory only; it is not promoted by the strict direction audit.
+
+Therefore PENGU is not considered fully solved yet. The only direction-management change currently strong enough to carry forward in research is the Recovery V8 two-hour rescue. LONG_V64 and SHORT_V20 remain native at entry.

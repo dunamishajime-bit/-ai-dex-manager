@@ -1,0 +1,294 @@
+[
+  {
+    "route": "LONG_V64",
+    "rule": null
+  },
+  {
+    "route": "RECOVERY_V8",
+    "rule": null
+  },
+  {
+    "route": "SHORT_V20",
+    "rule": [
+      [
+        "sym_vol24",
+        ">",
+        0.016572937105
+      ]
+    ],
+    "train": {
+      "n": 24,
+      "flagged": 3,
+      "tp": 3,
+      "fp": 0,
+      "wrong": 8,
+      "precision": 1.0,
+      "recall": 0.375,
+      "delta": 0.32248471467063544,
+      "ids": [
+        "PENGU_00034",
+        "PENGU_00035",
+        "PENGU_00051"
+      ]
+    },
+    "val": {
+      "n": 8,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 1,
+      "precision": null,
+      "recall": 0.0,
+      "delta": 0,
+      "ids": []
+    },
+    "test": {
+      "n": 8,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 4,
+      "precision": null,
+      "recall": 0.0,
+      "delta": 0,
+      "ids": []
+    },
+    "top": [
+      {
+        "rule": [
+          [
+            "sym_vol24",
+            ">",
+            0.016572937105
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375,
+          "delta": 0.32248471467063544,
+          "ids": [
+            "PENGU_00034",
+            "PENGU_00035",
+            "PENGU_00051"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "wrong": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta": 0,
+          "ids": []
+        }
+      },
+      {
+        "rule": [
+          [
+            "btc_vol72",
+            ">",
+            0.006254318492
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375,
+          "delta": 0.32248471467063544,
+          "ids": [
+            "PENGU_00034",
+            "PENGU_00035",
+            "PENGU_00051"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "wrong": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta": 0,
+          "ids": []
+        }
+      },
+      {
+        "rule": [
+          [
+            "sym_vol24",
+            ">",
+            0.016572937105
+          ],
+          [
+            "btc_vol72",
+            ">",
+            0.006254318492
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375,
+          "delta": 0.32248471467063544,
+          "ids": [
+            "PENGU_00034",
+            "PENGU_00035",
+            "PENGU_00051"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "wrong": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta": 0,
+          "ids": []
+        }
+      },
+      {
+        "rule": [
+          [
+            "sym_vol24",
+            ">",
+            0.016572937105
+          ],
+          [
+            "sym_vol72",
+            ">",
+            0.013812692419
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375,
+          "delta": 0.32248471467063544,
+          "ids": [
+            "PENGU_00034",
+            "PENGU_00035",
+            "PENGU_00051"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "wrong": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta": 0,
+          "ids": []
+        }
+      },
+      {
+        "rule": [
+          [
+            "btc_vol72",
+            ">",
+            0.006254318492
+          ],
+          [
+            "sym_vol72",
+            ">",
+            0.013812692419
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375,
+          "delta": 0.32248471467063544,
+          "ids": [
+            "PENGU_00034",
+            "PENGU_00035",
+            "PENGU_00051"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "wrong": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta": 0,
+          "ids": []
+        }
+      },
+      {
+        "rule": [
+          [
+            "sym_vol24",
+            ">",
+            0.016572937105
+          ],
+          [
+            "btc_vol72",
+            ">",
+            0.006254318492
+          ],
+          [
+            "sym_vol72",
+            ">",
+            0.013812692419
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "wrong": 8,
+          "precision": 1.0,
+          "recall": 0.375,
+          "delta": 0.32248471467063544,
+          "ids": [
+            "PENGU_00034",
+            "PENGU_00035",
+            "PENGU_00051"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "wrong": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta": 0,
+          "ids": []
+        }
+      }
+    ]
+  }
+]
