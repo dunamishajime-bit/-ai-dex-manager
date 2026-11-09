@@ -1,0 +1,1212 @@
+{
+  "study": "Y06 non-IID exposure episodes, descriptive regime shifts",
+  "source_sha256": "4a445133fd07a9945214e18c0420d0a552535e791a9a762dcbd9fb588841e72f",
+  "feature_source_sha256": "979b0a6399f4e3ba00223e245cd9fb47ba47cf5e5b322da04deec933f6afa4f6",
+  "events": 352,
+  "matched_feature_rows": 352,
+  "episode_bootstrap": {
+    "episode_count": 31,
+    "total_route_60h_delta_sum": 0.3443817490639689,
+    "episode_positive": 15,
+    "episode_negative": 14,
+    "episode_zero": 2,
+    "resampled_total_ci95_raw_return_sum": [
+      -0.8537441920968681,
+      1.5152842105267488
+    ],
+    "bootstrap_positive_fraction": 0.7206,
+    "assumption": "Illustrative IID-episode bootstrap; time/regime nonstationarity means this is NOT a validated confidence interval for future performance."
+  },
+  "split_episode_counts_nonexclusive": {
+    "train": 23,
+    "validation": 6,
+    "test": 4
+  },
+  "split_crossing_episodes": [
+    {
+      "start": "2026-06-14T14:00:00+00:00",
+      "end": "2026-06-19T10:00:00+00:00",
+      "count": 14
+    },
+    {
+      "start": "2026-08-20T00:00:00+00:00",
+      "end": "2026-08-30T16:00:00+00:00",
+      "count": 37
+    }
+  ],
+  "monthly": {
+    "2025-10": {
+      "n": 18,
+      "native_win": 13,
+      "native_return_sum": 0.2021401233224548,
+      "native_60h_delta_sum": 0.09378239813907496,
+      "pct_wrong_direction": 0.2777777777777778,
+      "btc24_mean": 0.018041723347589925,
+      "sym12_mean": 0.029188211408469094,
+      "btc_regime_count": {
+        "LONG": 18
+      },
+      "native_exit_reason": {
+        "TIME": 10,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 5,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3
+      }
+    },
+    "2025-11": {
+      "n": 31,
+      "native_win": 25,
+      "native_return_sum": 0.9453787022389928,
+      "native_60h_delta_sum": -0.09981830408499728,
+      "pct_wrong_direction": 0.1935483870967742,
+      "btc24_mean": 0.016472299549309663,
+      "sym12_mean": 0.025559635355349084,
+      "btc_regime_count": {
+        "LONG": 27,
+        "NEUTRAL": 4
+      },
+      "native_exit_reason": {
+        "V4_SHORT_PROFIT_GUARD_FILLED": 11,
+        "TIME": 19,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1
+      }
+    },
+    "2025-12": {
+      "n": 36,
+      "native_win": 29,
+      "native_return_sum": 1.8552417587429462,
+      "native_60h_delta_sum": -0.21478500611080478,
+      "pct_wrong_direction": 0.19444444444444445,
+      "btc24_mean": 0.01953633747474479,
+      "sym12_mean": 0.03026765970269339,
+      "btc_regime_count": {
+        "LONG": 32,
+        "NEUTRAL": 4
+      },
+      "native_exit_reason": {
+        "TIME": 28,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 2
+      }
+    },
+    "2026-01": {
+      "n": 36,
+      "native_win": 29,
+      "native_return_sum": 1.0658322317602207,
+      "native_60h_delta_sum": 0.11591711313766655,
+      "pct_wrong_direction": 0.19444444444444445,
+      "btc24_mean": 0.023691447378954945,
+      "sym12_mean": 0.033942432144397995,
+      "btc_regime_count": {
+        "NEUTRAL": 2,
+        "LONG": 34
+      },
+      "native_exit_reason": {
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 5,
+        "TIME": 29,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 2
+      }
+    },
+    "2026-02": {
+      "n": 25,
+      "native_win": 20,
+      "native_return_sum": 0.7051410118460038,
+      "native_60h_delta_sum": 0.3167461836871368,
+      "pct_wrong_direction": 0.2,
+      "btc24_mean": 0.027744808209885275,
+      "sym12_mean": 0.07325114623858119,
+      "btc_regime_count": {
+        "LONG": 25
+      },
+      "native_exit_reason": {
+        "TIME": 16,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 5,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 4
+      }
+    },
+    "2026-03": {
+      "n": 35,
+      "native_win": 24,
+      "native_return_sum": 0.9362933418170015,
+      "native_60h_delta_sum": 0.12438637849516308,
+      "pct_wrong_direction": 0.3142857142857143,
+      "btc24_mean": 0.02838154304622274,
+      "sym12_mean": 0.04173715154219421,
+      "btc_regime_count": {
+        "LONG": 35
+      },
+      "native_exit_reason": {
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 3,
+        "TIME": 27,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 5
+      }
+    },
+    "2026-04": {
+      "n": 20,
+      "native_win": 16,
+      "native_return_sum": 0.5986471867890585,
+      "native_60h_delta_sum": -0.027332804775076536,
+      "pct_wrong_direction": 0.2,
+      "btc24_mean": 0.02295765219951258,
+      "sym12_mean": 0.03731257748860205,
+      "btc_regime_count": {
+        "LONG": 19,
+        "NEUTRAL": 1
+      },
+      "native_exit_reason": {
+        "TIME": 15,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 4,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 1
+      }
+    },
+    "2026-05": {
+      "n": 7,
+      "native_win": 3,
+      "native_return_sum": -0.02416081973619133,
+      "native_60h_delta_sum": -0.06524906709413465,
+      "pct_wrong_direction": 0.5714285714285714,
+      "btc24_mean": 0.008838822850144716,
+      "sym12_mean": 0.06457459345244519,
+      "btc_regime_count": {
+        "LONG": 5,
+        "NEUTRAL": 2
+      },
+      "native_exit_reason": {
+        "TIME": 7
+      }
+    },
+    "2026-06": {
+      "n": 14,
+      "native_win": 12,
+      "native_return_sum": 0.7020855935803725,
+      "native_60h_delta_sum": -0.09190657083578407,
+      "pct_wrong_direction": 0.14285714285714285,
+      "btc24_mean": 0.018394523601214432,
+      "sym12_mean": 0.047131059348718606,
+      "btc_regime_count": {
+        "NEUTRAL": 2,
+        "LONG": 12
+      },
+      "native_exit_reason": {
+        "TIME": 7,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 2,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 5
+      }
+    },
+    "2026-07": {
+      "n": 29,
+      "native_win": 13,
+      "native_return_sum": -0.2976920171513032,
+      "native_60h_delta_sum": 0.02801637160840497,
+      "pct_wrong_direction": 0.5517241379310345,
+      "btc24_mean": 0.020220131768353588,
+      "sym12_mean": 0.024314169217124603,
+      "btc_regime_count": {
+        "LONG": 28,
+        "NEUTRAL": 1
+      },
+      "native_exit_reason": {
+        "TIME": 18,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 9,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 2
+      }
+    },
+    "2026-08": {
+      "n": 41,
+      "native_win": 20,
+      "native_return_sum": -0.3462380934580116,
+      "native_60h_delta_sum": 0.1882816494962997,
+      "pct_wrong_direction": 0.5121951219512195,
+      "btc24_mean": 0.02846215701914076,
+      "sym12_mean": 0.0459027040965651,
+      "btc_regime_count": {
+        "NEUTRAL": 4,
+        "LONG": 37
+      },
+      "native_exit_reason": {
+        "TIME": 28,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 6,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 7
+      }
+    },
+    "2026-09": {
+      "n": 60,
+      "native_win": 25,
+      "native_return_sum": -1.094692856960648,
+      "native_60h_delta_sum": -0.023656592598979894,
+      "pct_wrong_direction": 0.55,
+      "btc24_mean": 0.02969524031111328,
+      "sym12_mean": 0.04505134791820672,
+      "btc_regime_count": {
+        "LONG": 56,
+        "NEUTRAL": 4
+      },
+      "native_exit_reason": {
+        "TIME": 25,
+        "V4_SHORT_INITIAL_ADVERSE_CANDIDATE": 12,
+        "V4_SHORT_PROFIT_GUARD_FILLED": 23
+      }
+    }
+  },
+  "regime_bins": {
+    "btc24": {
+      "BTC24_ABOVE_PLUS1PCT": {
+        "n": 257,
+        "native_wins": 160,
+        "native_net_raw_sum": 3.277752850278424,
+        "native_60h_delta_sum": 0.6825896873709116
+      },
+      "BTC24_BELOW_MINUS1PCT": {
+        "n": 8,
+        "native_wins": 2,
+        "native_net_raw_sum": -0.10706182228561067,
+        "native_60h_delta_sum": -0.09179133105328129
+      },
+      "BTC24_NEAR_FLAT": {
+        "n": 87,
+        "native_wins": 67,
+        "native_net_raw_sum": 2.0772851347980836,
+        "native_60h_delta_sum": -0.24641660725366152
+      }
+    },
+    "sym12": {
+      "SYM12_ABOVE_PLUS1PCT": {
+        "n": 283,
+        "native_wins": 182,
+        "native_net_raw_sum": 4.020155921086952,
+        "native_60h_delta_sum": 0.3724966852266546
+      },
+      "SYM12_BELOW_MINUS1PCT": {
+        "n": 17,
+        "native_wins": 12,
+        "native_net_raw_sum": 0.23925145387052815,
+        "native_60h_delta_sum": 0.009724507075203108
+      },
+      "SYM12_NEAR_FLAT": {
+        "n": 52,
+        "native_wins": 35,
+        "native_net_raw_sum": 0.9885687878334164,
+        "native_60h_delta_sum": -0.03783944323788881
+      }
+    }
+  },
+  "episodes": [
+    {
+      "start": 1759629600000,
+      "end": 1759910400000,
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "n": 3,
+      "start_utc": "2025-10-05T02:00:00+00:00",
+      "end_utc": "2025-10-08T08:00:00+00:00",
+      "native_return_sum": 0.11620092859198561,
+      "h60_delta_sum": 0.0011390869892044068,
+      "negative_native": 0,
+      "y06_symbols": [
+        "ETHUSDT",
+        "LTCUSDT"
+      ]
+    },
+    {
+      "start": 1760968800000,
+      "end": 1761062400000,
+      "members": [
+        3
+      ],
+      "n": 1,
+      "start_utc": "2025-10-20T14:00:00+00:00",
+      "end_utc": "2025-10-21T16:00:00+00:00",
+      "native_return_sum": 0.012574976323266429,
+      "h60_delta_sum": 0,
+      "negative_native": 0,
+      "y06_symbols": [
+        "LINKUSDT"
+      ]
+    },
+    {
+      "start": 1761062400000,
+      "end": 1761321600000,
+      "members": [
+        4,
+        5,
+        6
+      ],
+      "n": 3,
+      "start_utc": "2025-10-21T16:00:00+00:00",
+      "end_utc": "2025-10-24T16:00:00+00:00",
+      "native_return_sum": 0.08257136046725566,
+      "h60_delta_sum": -0.0018600097895253437,
+      "negative_native": 0,
+      "y06_symbols": [
+        "DOGEUSDT"
+      ]
+    },
+    {
+      "start": 1761472800000,
+      "end": 1761804000000,
+      "members": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "n": 11,
+      "start_utc": "2025-10-26T10:00:00+00:00",
+      "end_utc": "2025-10-30T06:00:00+00:00",
+      "native_return_sum": -0.009207142060052909,
+      "h60_delta_sum": 0.09450332093939591,
+      "negative_native": 5,
+      "y06_symbols": [
+        "BNBUSDT",
+        "LTCUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1762718400000,
+      "end": 1763064000000,
+      "members": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "n": 17,
+      "start_utc": "2025-11-09T20:00:00+00:00",
+      "end_utc": "2025-11-13T20:00:00+00:00",
+      "native_return_sum": 0.697114267323693,
+      "h60_delta_sum": 0.08886681580538044,
+      "negative_native": 0,
+      "y06_symbols": [
+        "AVAXUSDT",
+        "DOGEUSDT",
+        "ETHUSDT",
+        "INJUSDT",
+        "LINKUSDT",
+        "NEARUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1764036000000,
+      "end": 1764583200000,
+      "members": [
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48
+      ],
+      "n": 14,
+      "start_utc": "2025-11-25T02:00:00+00:00",
+      "end_utc": "2025-12-01T10:00:00+00:00",
+      "native_return_sum": 0.24826443491529981,
+      "h60_delta_sum": -0.18868511989037773,
+      "negative_native": 6,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "AVAXUSDT",
+        "DOGEUSDT",
+        "INJUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1764734400000,
+      "end": 1765188000000,
+      "members": [
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "n": 20,
+      "start_utc": "2025-12-03T04:00:00+00:00",
+      "end_utc": "2025-12-08T10:00:00+00:00",
+      "native_return_sum": 0.7399854601229483,
+      "h60_delta_sum": 0.10352054324850721,
+      "negative_native": 3,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ADAUSDT",
+        "BNBUSDT",
+        "ETHUSDT",
+        "LINKUSDT",
+        "SOLUSDT"
+      ]
+    },
+    {
+      "start": 1765296000000,
+      "end": 1765620000000,
+      "members": [
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81
+      ],
+      "n": 13,
+      "start_utc": "2025-12-09T16:00:00+00:00",
+      "end_utc": "2025-12-13T10:00:00+00:00",
+      "native_return_sum": 1.1018742465608886,
+      "h60_delta_sum": -0.3262697106335778,
+      "negative_native": 3,
+      "y06_symbols": [
+        "ADAUSDT",
+        "AVAXUSDT",
+        "DOGEUSDT",
+        "ETHUSDT"
+      ]
+    },
+    {
+      "start": 1766872800000,
+      "end": 1767139200000,
+      "members": [
+        82,
+        83,
+        84
+      ],
+      "n": 3,
+      "start_utc": "2025-12-27T22:00:00+00:00",
+      "end_utc": "2025-12-31T00:00:00+00:00",
+      "native_return_sum": 0.013382052059109473,
+      "h60_delta_sum": 0.007964161274265797,
+      "negative_native": 1,
+      "y06_symbols": [
+        "AVAXUSDT",
+        "LTCUSDT"
+      ]
+    },
+    {
+      "start": 1767362400000,
+      "end": 1767960000000,
+      "members": [
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107
+      ],
+      "n": 23,
+      "start_utc": "2026-01-02T14:00:00+00:00",
+      "end_utc": "2026-01-09T12:00:00+00:00",
+      "native_return_sum": 0.34368961042609303,
+      "h60_delta_sum": -0.0017198326814164382,
+      "negative_native": 7,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ADAUSDT",
+        "AVAXUSDT",
+        "DOGEUSDT",
+        "ETHUSDT",
+        "NEARUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1768320000000,
+      "end": 1768651200000,
+      "members": [
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120
+      ],
+      "n": 13,
+      "start_utc": "2026-01-13T16:00:00+00:00",
+      "end_utc": "2026-01-17T12:00:00+00:00",
+      "native_return_sum": 0.7221426213341278,
+      "h60_delta_sum": 0.11763694581908299,
+      "negative_native": 0,
+      "y06_symbols": [
+        "ADAUSDT",
+        "DOGEUSDT",
+        "NEARUSDT",
+        "SOLUSDT"
+      ]
+    },
+    {
+      "start": 1771070400000,
+      "end": 1771408800000,
+      "members": [
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140
+      ],
+      "n": 20,
+      "start_utc": "2026-02-14T12:00:00+00:00",
+      "end_utc": "2026-02-18T10:00:00+00:00",
+      "native_return_sum": 0.39343041464701456,
+      "h60_delta_sum": 0.03306393509046404,
+      "negative_native": 5,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ADAUSDT",
+        "AVAXUSDT",
+        "DOGEUSDT",
+        "LTCUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1772049600000,
+      "end": 1772330400000,
+      "members": [
+        141,
+        142,
+        143,
+        144,
+        145
+      ],
+      "n": 5,
+      "start_utc": "2026-02-25T20:00:00+00:00",
+      "end_utc": "2026-03-01T02:00:00+00:00",
+      "native_return_sum": 0.3117105971989892,
+      "h60_delta_sum": 0.2836822485966728,
+      "negative_native": 0,
+      "y06_symbols": [
+        "ADAUSDT",
+        "NEARUSDT",
+        "SOLUSDT"
+      ]
+    },
+    {
+      "start": 1772467200000,
+      "end": 1772906400000,
+      "members": [
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156
+      ],
+      "n": 11,
+      "start_utc": "2026-03-02T16:00:00+00:00",
+      "end_utc": "2026-03-07T18:00:00+00:00",
+      "native_return_sum": 0.23976918290446447,
+      "h60_delta_sum": -0.042167182888367905,
+      "negative_native": 3,
+      "y06_symbols": [
+        "ETHUSDT",
+        "NEARUSDT",
+        "SOLUSDT"
+      ]
+    },
+    {
+      "start": 1773158400000,
+      "end": 1773676800000,
+      "members": [
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168
+      ],
+      "n": 12,
+      "start_utc": "2026-03-10T16:00:00+00:00",
+      "end_utc": "2026-03-16T16:00:00+00:00",
+      "native_return_sum": -0.1680014016294975,
+      "h60_delta_sum": 0.21141693132107733,
+      "negative_native": 8,
+      "y06_symbols": [
+        "AVAXUSDT",
+        "DOGEUSDT",
+        "ETHUSDT",
+        "SOLUSDT"
+      ]
+    },
+    {
+      "start": 1773676800000,
+      "end": 1774065600000,
+      "members": [
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180
+      ],
+      "n": 12,
+      "start_utc": "2026-03-16T16:00:00+00:00",
+      "end_utc": "2026-03-21T04:00:00+00:00",
+      "native_return_sum": 0.8645255605420346,
+      "h60_delta_sum": -0.04486336993754633,
+      "negative_native": 0,
+      "y06_symbols": [
+        "ADAUSDT",
+        "DOGEUSDT",
+        "ETHUSDT",
+        "NEARUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1775037600000,
+      "end": 1775296800000,
+      "members": [
+        181
+      ],
+      "n": 1,
+      "start_utc": "2026-04-01T10:00:00+00:00",
+      "end_utc": "2026-04-04T10:00:00+00:00",
+      "native_return_sum": 0.04027537114222823,
+      "h60_delta_sum": -0.003793377979674925,
+      "negative_native": 0,
+      "y06_symbols": [
+        "ETHUSDT"
+      ]
+    },
+    {
+      "start": 1775606400000,
+      "end": 1776063600000,
+      "members": [
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190
+      ],
+      "n": 9,
+      "start_utc": "2026-04-08T00:00:00+00:00",
+      "end_utc": "2026-04-13T07:00:00+00:00",
+      "native_return_sum": 0.052299827195554816,
+      "h60_delta_sum": -0.021059640976296257,
+      "negative_native": 2,
+      "y06_symbols": [
+        "ADAUSDT",
+        "NEARUSDT",
+        "SOLUSDT"
+      ]
+    },
+    {
+      "start": 1776124800000,
+      "end": 1776736800000,
+      "members": [
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199
+      ],
+      "n": 9,
+      "start_utc": "2026-04-14T00:00:00+00:00",
+      "end_utc": "2026-04-21T02:00:00+00:00",
+      "native_return_sum": 0.5448277766534095,
+      "h60_delta_sum": 0.060032797229012204,
+      "negative_native": 1,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "DOGEUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1777240800000,
+      "end": 1777500000000,
+      "members": [
+        200
+      ],
+      "n": 1,
+      "start_utc": "2026-04-26T22:00:00+00:00",
+      "end_utc": "2026-04-29T22:00:00+00:00",
+      "native_return_sum": -0.0387557882021341,
+      "h60_delta_sum": -0.06251258304811756,
+      "negative_native": 1,
+      "y06_symbols": [
+        "DOGEUSDT"
+      ]
+    },
+    {
+      "start": 1778054400000,
+      "end": 1778342400000,
+      "members": [
+        201,
+        202,
+        203,
+        204,
+        205
+      ],
+      "n": 5,
+      "start_utc": "2026-05-06T08:00:00+00:00",
+      "end_utc": "2026-05-09T16:00:00+00:00",
+      "native_return_sum": -0.05866735359852937,
+      "h60_delta_sum": -0.04857856415305608,
+      "negative_native": 3,
+      "y06_symbols": [
+        "DOGEUSDT",
+        "NEARUSDT"
+      ]
+    },
+    {
+      "start": 1778407200000,
+      "end": 1778702400000,
+      "members": [
+        206,
+        207
+      ],
+      "n": 2,
+      "start_utc": "2026-05-10T10:00:00+00:00",
+      "end_utc": "2026-05-13T20:00:00+00:00",
+      "native_return_sum": 0.03450653386233804,
+      "h60_delta_sum": -0.01667050294107857,
+      "negative_native": 1,
+      "y06_symbols": [
+        "LTCUSDT",
+        "SOLUSDT"
+      ]
+    },
+    {
+      "start": 1781445600000,
+      "end": 1781863200000,
+      "members": [
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221
+      ],
+      "n": 14,
+      "start_utc": "2026-06-14T14:00:00+00:00",
+      "end_utc": "2026-06-19T10:00:00+00:00",
+      "native_return_sum": 0.7020855935803725,
+      "h60_delta_sum": -0.09190657083578407,
+      "negative_native": 2,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ADAUSDT",
+        "BNBUSDT",
+        "INJUSDT",
+        "NEARUSDT"
+      ]
+    },
+    {
+      "start": 1782964800000,
+      "end": 1783641600000,
+      "members": [
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249
+      ],
+      "n": 28,
+      "start_utc": "2026-07-02T04:00:00+00:00",
+      "end_utc": "2026-07-10T00:00:00+00:00",
+      "native_return_sum": -0.3787860670553339,
+      "h60_delta_sum": 0.035214068345449025,
+      "negative_native": 16,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ADAUSDT",
+        "BNBUSDT",
+        "ETHUSDT",
+        "LINKUSDT",
+        "NEARUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1784124000000,
+      "end": 1784383200000,
+      "members": [
+        250
+      ],
+      "n": 1,
+      "start_utc": "2026-07-15T14:00:00+00:00",
+      "end_utc": "2026-07-18T14:00:00+00:00",
+      "native_return_sum": 0.08109404990403069,
+      "h60_delta_sum": -0.007197696737044054,
+      "negative_native": 0,
+      "y06_symbols": [
+        "NEARUSDT"
+      ]
+    },
+    {
+      "start": 1785686400000,
+      "end": 1785952800000,
+      "members": [
+        251,
+        252
+      ],
+      "n": 2,
+      "start_utc": "2026-08-02T16:00:00+00:00",
+      "end_utc": "2026-08-05T18:00:00+00:00",
+      "native_return_sum": 0.02937800250178213,
+      "h60_delta_sum": 0.032185636755263064,
+      "negative_native": 0,
+      "y06_symbols": [
+        "INJUSDT"
+      ]
+    },
+    {
+      "start": 1786240800000,
+      "end": 1786528800000,
+      "members": [
+        253,
+        254
+      ],
+      "n": 2,
+      "start_utc": "2026-08-09T02:00:00+00:00",
+      "end_utc": "2026-08-12T10:00:00+00:00",
+      "native_return_sum": 0.029693127794769625,
+      "h60_delta_sum": 0.008254907669067713,
+      "negative_native": 0,
+      "y06_symbols": [
+        "LTCUSDT"
+      ]
+    },
+    {
+      "start": 1787184000000,
+      "end": 1788105600000,
+      "members": [
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291
+      ],
+      "n": 37,
+      "start_utc": "2026-08-20T00:00:00+00:00",
+      "end_utc": "2026-08-30T16:00:00+00:00",
+      "native_return_sum": -0.40530922375456335,
+      "h60_delta_sum": 0.1478411050719689,
+      "negative_native": 21,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ATOMUSDT",
+        "AVAXUSDT",
+        "BNBUSDT",
+        "DOGEUSDT",
+        "ETHUSDT",
+        "INJUSDT",
+        "LINKUSDT",
+        "LTCUSDT",
+        "NEARUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1788451200000,
+      "end": 1788933600000,
+      "members": [
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305
+      ],
+      "n": 14,
+      "start_utc": "2026-09-03T16:00:00+00:00",
+      "end_utc": "2026-09-09T06:00:00+00:00",
+      "native_return_sum": -0.01569412427021888,
+      "h60_delta_sum": -0.07587076688276634,
+      "negative_native": 6,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ADAUSDT",
+        "AVAXUSDT",
+        "DOGEUSDT",
+        "ETHUSDT",
+        "NEARUSDT",
+        "XRPUSDT"
+      ]
+    },
+    {
+      "start": 1789408800000,
+      "end": 1789588800000,
+      "members": [
+        306
+      ],
+      "n": 1,
+      "start_utc": "2026-09-14T18:00:00+00:00",
+      "end_utc": "2026-09-16T20:00:00+00:00",
+      "native_return_sum": 0.017801857585139413,
+      "h60_delta_sum": 0,
+      "negative_native": 0,
+      "y06_symbols": [
+        "NEARUSDT"
+      ]
+    },
+    {
+      "start": 1789711200000,
+      "end": 1790395200000,
+      "members": [
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351
+      ],
+      "n": 45,
+      "start_utc": "2026-09-18T06:00:00+00:00",
+      "end_utc": "2026-09-26T04:00:00+00:00",
+      "native_return_sum": -1.0968005902755684,
+      "h60_delta_sum": 0.05221417428378644,
+      "negative_native": 27,
+      "y06_symbols": [
+        "AAVEUSDT",
+        "ADAUSDT",
+        "ATOMUSDT",
+        "AVAXUSDT",
+        "BNBUSDT",
+        "DOGEUSDT",
+        "INJUSDT",
+        "LINKUSDT",
+        "LTCUSDT",
+        "NEARUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ]
+    }
+  ],
+  "warnings": [
+    "Cannot treat each trade as an independent trial",
+    "Bootstrap cannot validate a preselected H60 hypothesis on already inspected data",
+    "Gross, funding, fee and portfolio path effects excluded: refer to integrated A/B",
+    "Actual native STOP/profit guard model exits were preserved"
+  ]
+}
