@@ -34,3 +34,4 @@ c9c42ac1e54f598a088a37aa5a270299e095135faf1b36b771c24fc29941b7f6  research/bt-di
 ff1d4a4949427c82bfd00668b96495cd07b00faa022510ba808f0b5d1dda0508  research/bt-direction-v4-pengu-q102-20261110/scripts/v4-native-lifecycle-exit-all-flipped-20261109.mjs
 cfd1df739596fd950ea47882d0c6a0323d4ccc2e4b0285499d025f9d5a553401  research/bt-direction-v4-pengu-q102-20261110/scripts/v4-native-lifecycle-exit-final-strict-20261109.mjs
 389a6a868de3d318c68ee74e2fcfe81fdfdd8f4cd616ffaa11ba5bb509abf2a0  research/bt-direction-v4-pengu-q102-20261110/SYNTHETIC_SIGNAL_STRESS_20261110.md
+287b917d9a7ec58445bdaf393ab1887fa9225bdead27f94e94a0b6c8a658dc0a  research/bt-direction-v4-pengu-q102-20261110/V4_PENGU_DEEP_VALIDATION_PLAN_20261110.md
