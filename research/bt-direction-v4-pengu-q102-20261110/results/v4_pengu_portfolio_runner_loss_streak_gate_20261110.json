@@ -1,0 +1,82 @@
+{
+  "status": "EXPLORATORY_NOT_OOS",
+  "mechanism": "Last two strictly closed fills of a watched runner negative within 72h or 168h; quarantine that runner for matching duration; native exits and protective STOP retained",
+  "source_production_evidence": "Research-only model, no current as-deployed confirmation",
+  "baseline": {
+    "10": {
+      "final_jpy": 2111834.8400109867,
+      "maxdd_percent": -50.370436941509396,
+      "fills": 852
+    },
+    "30": {
+      "final_jpy": 667697.913985803,
+      "maxdd_percent": -60.6703507087609,
+      "fills": 852
+    }
+  },
+  "scenarios": {
+    "V4_PENGU_72H": {
+      "10": {
+        "final_jpy": 1659493.469265465,
+        "maxdd_percent": -43.55789035109062,
+        "fills": 751,
+        "runner_quarantine_block_count": 449,
+        "csv_sha256": "9d7a9e8d95b3c4ae5d354fe25a145f37ed730b0d235b0769aed2473cb5d9cf71",
+        "summary_sha256": "0356b2f7e2cf304ddc29a01ebe2f5ced8c793af9ce2c2a7c1c27403543dfe65e",
+        "maxdd_le20": false
+      },
+      "30": {
+        "final_jpy": 515981.3327913931,
+        "maxdd_percent": -54.18982912534738,
+        "fills": 741,
+        "runner_quarantine_block_count": 466,
+        "csv_sha256": "9de72bca196f2913fbec25e7b4a04a273390af493eca090593fa2685fe3dc4bb",
+        "summary_sha256": "6527817cebc09823bef07d8e908b6f7144a21e2fa9084e794a1edb0fad47ee23",
+        "maxdd_le20": false
+      },
+      "joint_dd20_pass": false
+    },
+    "V4_PENGU_168H": {
+      "10": {
+        "final_jpy": 1183578.596367099,
+        "maxdd_percent": -45.20615389776664,
+        "fills": 689,
+        "runner_quarantine_block_count": 624,
+        "csv_sha256": "67a06724248a0c7e1030f97090189c2ca164ee1ac93319e52c62948fe96540de",
+        "summary_sha256": "6728dd2f69ac8397fb94297bee6cf10956b4b064117c5193fd4e2bfba3cc5906",
+        "maxdd_le20": false
+      },
+      "30": {
+        "final_jpy": 302356.5691090745,
+        "maxdd_percent": -59.109999533754184,
+        "fills": 681,
+        "runner_quarantine_block_count": 652,
+        "csv_sha256": "bdb301eded1ac791963d81810736869535af44be388ce8cc3c752920ab0c095c",
+        "summary_sha256": "4cc48682eb4e090f71b50da7c6ed7851b62427de7595606d74c688b46a530ff7",
+        "maxdd_le20": false
+      },
+      "joint_dd20_pass": false
+    },
+    "CRYPTO_72H": {
+      "10": {
+        "final_jpy": 1282797.5413799891,
+        "maxdd_percent": -41.38144234832419,
+        "fills": 724,
+        "runner_quarantine_block_count": 522,
+        "csv_sha256": "f2d292eda2e5aa70b7ebfda2f935cd5d64c0298d6c7b81f1b4d8ee67e9bf6ed3",
+        "summary_sha256": "d64d753f3026f9999fb34798cd15211c8a07efe99bcab350e4a85b0488865057",
+        "maxdd_le20": false
+      },
+      "30": {
+        "final_jpy": 390863.7802235566,
+        "maxdd_percent": -51.94402511152023,
+        "fills": 699,
+        "runner_quarantine_block_count": 586,
+        "csv_sha256": "3c22dee8a7c749c0a9155fa4d8dd1a68ff9600c3348d033d1abc3e684e316135",
+        "summary_sha256": "f0a1bd55d53028fcc9dfd482f0ad7391313697ae8b85b1fa5291177abcfe8d6f",
+        "maxdd_le20": false
+      },
+      "joint_dd20_pass": false
+    }
+  }
+}
