@@ -115,3 +115,15 @@ FET BRK24 is intentionally excluded from the frozen synthetic-gate set until one
 ## 2026-11-10 deep V4/PENGU revalidation
 
 The controlling route-by-route status is now documented in V4_PENGU_DIRECTION_CLASSIFICATION_20261110.md. This later revalidation supersedes earlier optimistic wording for standalone V4 X05/X07/X11 and the selected-subset PENGU V8 2h result where they conflict.
+
+## 2026-11-10 Y06 structural/portfolio continuation (latest)
+
+**Read [Y06_NATIVE_EXITS_REGIME_AND_GROSS_STRESS_20261110.md](./Y06_NATIVE_EXITS_REGIME_AND_GROSS_STRESS_20261110.md) before any further Y06 or integrated direction BT.** It supersedes any earlier inference that the 60h Y06 exit or historic positive standalone signals are robust, adoptable direction rules.
+
+- The complete 352-event Y06 sample preserves 229 timed exits, 70 profit guards, and 53 early adverse exits. Existing STOP/guard fills are not replaced with hourly opens.
+- 114 causal early-exit rules, 65 settled-shadow skip rules, 66 time/conditional exit rules, and 10bps/30bps integrated stock cap 4x vs 1.5x sensitivity have been tested. None reaches an acceptable stable <=20% portfolio drawdown.
+- Only **31** non-overlapping exposure episodes under the conservative overlap merge, with train/validation/test contamination across two episode boundaries. Trade-level 100% historical precision is not IID confirmation.
+- A 60h Y06 time exit gives higher terminal equity in the research A/B but DD is roughly unchanged/worse and remains far outside the 20% target; do **not** adopt.
+- Study [source-backed checkpoint JSON](./results/v4_y06_structural_deep_audit_checkpoint_20261110.json) and [episode/regime result](./results/v4_y06_episodes_non_iid_regime_audit_20261110.json); replay scripts are in [scripts](./scripts).
+- **Full Production parity is not certified** because the research portfolio engine still uses price/venue approximations for other components, especially V52. No Production, LIVE, order, STOP, or Kill Switch changes were made.
+- The next validation must use *fresh source-proven post-2026-10-01 market data* and leave entire overlapping position episodes out of fitting/threshold selection, then full 10/30bps integrated BT.
