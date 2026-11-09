@@ -143,3 +143,15 @@ See [V4_PENGU_CAUSALITY_AND_TIMED_STOP_DEEP_AUDIT_20261110.md](./V4_PENGU_CAUSAL
 5. **Still required**: current as-deployed SHA and call-site read-only verification; rigorous *as-of* V4 route-priority reconstruction; genuine prospective independent episode testing and full certified 10/30bps integration. No Production orders, merges, or LIVE changes in this research.
 
 Important **do not repeat** the earlier 3h/8h overlay bug by copying its PnL arithmetic into another BT.
+
+## Latest 2026-11-10: As-of route rank and shared-risk causal stress (most recent)
+
+**Mandatory full checkpoint:** [V4_PENGU_ASOF_PORTFOLIO_CAUSAL_RISK_STRESS_20261110.md](./V4_PENGU_ASOF_PORTFOLIO_CAUSAL_RISK_STRESS_20261110.md).
+
+- V4 native priority was hindsight selected on full development-year outcomes; original research portfolio also incorrectly sorted simultaneous V4 candidates by symbol rather than pinned route rank. Verified mechanical mature-only 72h-embargo re-ranking; 153/438 simultaneous V4 batches change top candidate.
+- Integrated 10/30bps stock1.5 A/B (symbol vs pinned vs as-of): profits differ materially, but maxDD stays **-50.37%/-60.67%**; between July 20 peak and Sep 28 trough, **zero admission decisions differ**, equity curves are exactly proportional at each half-hour.
+- Nine research rolling MTM peak new-entry locks (7/14/30-day window, 4–12% drawdown threshold tested), and three strictly causal two-loss-runner quarantines were **all unable to achieve maxDD ≤20% in both 10bps and 30bps**. This is a research no-promotion result, not a parametrized optimization candidate.
+- At initial -10% DD (July 22, 2026), the existing portfolio had only 1 position at 10bps / 2 at 30bps; another **141/142** fills respectively were admitted before the September trough. Portfolio-level loss clustering and post-trigger admissions, not a single Y06 stop, need forensic attention.
+- Found separate PENGU risk-accounting SHORT return basis disagreement (entry/exit-1 vs native linear short (entry-exit)/entry). Research correction changes only a BLOCK reason for PENGU_00112; all modeled FILLS/EQUITY/FUNDING CSV hashes are unchanged. This does **not** establish Production parity or safety across future paths.
+- The complete 1,394-signal as-of rank map and 438-conflict + full three-way admission audits are GitHub archived as deterministic `results/*.json.gz.base64` with original SHA256 in the report. Decode using `gzip.decompress(base64.b64decode(contents))` or reproduce using the checked-in scripts. Do not reselect on the already inspected historical target/forward outcomes.
+- The full current Production as-deployed proof, clean native V4 signal population, V52 executable price evidence, episode-disjoint prospective validation and combined DD20% remain **OPEN**. No LIVE/STOP/orders modified.
