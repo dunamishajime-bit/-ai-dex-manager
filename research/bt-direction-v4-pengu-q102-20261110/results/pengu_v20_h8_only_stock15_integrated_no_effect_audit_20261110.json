@@ -1,0 +1,110 @@
+{
+  "status": "RESEARCH_ONLY_NOT_FULL_PARITY",
+  "mode": "Native stock1.5 portfolio Y06 intact, PENGU V20 ONLY 8h rule added on two formerly modeled raw signals",
+  "candidate_pengu_tape_sha256": "1ff67bec1b46f3d8d1ae7fa1e49cfdca1b74b5af239754f221bc11cf432c6202",
+  "native_pengu_tape_sha256": "c71272aa910ef4d8a2cfe6cf44fe285fee7e2e59c9f340040af7dbdede4a65ab",
+  "changed_source_ids": [
+    "PENGU_00014",
+    "PENGU_00035"
+  ],
+  "assumption_issues": [
+    "All PENGU source events are pre-account natural intentions; 8h rule cannot affect blocked candidates",
+    "No V52 executable book history; larger integrated price model not Production parity",
+    "PENGU overlay pin module runtime wiring unavailable; only research exit tape changed",
+    "Existing portfolio engine order priority, gross and funding approximations inherited"
+  ],
+  "costs": {
+    "10": {
+      "baseline_final_jpy": 1810430.4305201115,
+      "h8_final_jpy": 1810430.4305201115,
+      "baseline_dd_pct": -50.37043694150933,
+      "h8_dd_pct": -50.37043694150933,
+      "admission_of_changed_ids": [
+        {
+          "signal_id": "PENGU_00014",
+          "strategy": "PENGU",
+          "utc": "2025-11-09T10:00:00Z",
+          "decision": "BLOCK",
+          "reason": "SYMBOL_BUSY",
+          "requested_gross": "1.0"
+        },
+        {
+          "signal_id": "PENGU_00035",
+          "strategy": "PENGU",
+          "utc": "2025-12-19T00:00:00Z",
+          "decision": "BLOCK",
+          "reason": "SYMBOL_BUSY",
+          "requested_gross": "1.0"
+        }
+      ],
+      "evidence_checksums": {
+        "DECISIONS.csv": {
+          "baseline_sha256": "0e7dc1ca516f9bf15c1821ebf6ec89ed1dbd0d081510cfaf7e2911a3e512e538",
+          "h8_sha256": "0e7dc1ca516f9bf15c1821ebf6ec89ed1dbd0d081510cfaf7e2911a3e512e538",
+          "identical": true
+        },
+        "EQUITY_30MIN.csv": {
+          "baseline_sha256": "79eb5970180b7509dfae7ed6df7ab25a9adf4a4e42c8e269cf51a59b19b88847",
+          "h8_sha256": "79eb5970180b7509dfae7ed6df7ab25a9adf4a4e42c8e269cf51a59b19b88847",
+          "identical": true
+        },
+        "FILLS.csv": {
+          "baseline_sha256": "73103c2ffa811ec8057fdd0b665113c2a54c131e2d4a11b106ecf7ad805459b8",
+          "h8_sha256": "73103c2ffa811ec8057fdd0b665113c2a54c131e2d4a11b106ecf7ad805459b8",
+          "identical": true
+        },
+        "FUNDING.csv": {
+          "baseline_sha256": "bdfff57590e9b5c01f05cfef33f7417b1949a68f559a42f442416fb33212bf59",
+          "h8_sha256": "bdfff57590e9b5c01f05cfef33f7417b1949a68f559a42f442416fb33212bf59",
+          "identical": true
+        }
+      }
+    },
+    "30": {
+      "baseline_final_jpy": 574924.9774830842,
+      "h8_final_jpy": 574924.9774830842,
+      "baseline_dd_pct": -60.67035070876082,
+      "h8_dd_pct": -60.67035070876082,
+      "admission_of_changed_ids": [
+        {
+          "signal_id": "PENGU_00014",
+          "strategy": "PENGU",
+          "utc": "2025-11-09T10:00:00Z",
+          "decision": "BLOCK",
+          "reason": "SYMBOL_BUSY",
+          "requested_gross": "1.0"
+        },
+        {
+          "signal_id": "PENGU_00035",
+          "strategy": "PENGU",
+          "utc": "2025-12-19T00:00:00Z",
+          "decision": "BLOCK",
+          "reason": "SYMBOL_BUSY",
+          "requested_gross": "1.0"
+        }
+      ],
+      "evidence_checksums": {
+        "DECISIONS.csv": {
+          "baseline_sha256": "0e7dc1ca516f9bf15c1821ebf6ec89ed1dbd0d081510cfaf7e2911a3e512e538",
+          "h8_sha256": "0e7dc1ca516f9bf15c1821ebf6ec89ed1dbd0d081510cfaf7e2911a3e512e538",
+          "identical": true
+        },
+        "EQUITY_30MIN.csv": {
+          "baseline_sha256": "4429a6f03179bfba0db70e0d4b7224fb89c233c7fa2e78cd75c58ea5959bd183",
+          "h8_sha256": "4429a6f03179bfba0db70e0d4b7224fb89c233c7fa2e78cd75c58ea5959bd183",
+          "identical": true
+        },
+        "FILLS.csv": {
+          "baseline_sha256": "93fd6e298c4dc5c403bf1c378517727194406d371ee4cf0926fade7e4796b641",
+          "h8_sha256": "93fd6e298c4dc5c403bf1c378517727194406d371ee4cf0926fade7e4796b641",
+          "identical": true
+        },
+        "FUNDING.csv": {
+          "baseline_sha256": "17205c0655ea8bad047ffc06f5a264bbcca047f30a59b293520bbf4628475c2e",
+          "h8_sha256": "17205c0655ea8bad047ffc06f5a264bbcca047f30a59b293520bbf4628475c2e",
+          "identical": true
+        }
+      }
+    }
+  }
+}
