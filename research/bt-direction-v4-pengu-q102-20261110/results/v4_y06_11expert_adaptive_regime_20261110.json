@@ -1,0 +1,498 @@
+{
+  "status": "RESEARCH_ONLY_NOT_ACCEPTED",
+  "route": "REC_Y06_REV_D0_T72",
+  "n": 352,
+  "source_runtime_sha": "3ad65403013b701db5d9e53e8814e6ab827a28e8",
+  "training_strategy": "none: predeclared patterns, no test-selected thresholds",
+  "temporal_guard": "last-30 preceding Y06 cases, only labels where decisionTs+72h<=now",
+  "source_sha256": {
+    "v4_internal_threeperiod_flat.jsonl": "787643c815e11b36e4175d5230c015e68a8a61974aa1ab9e0b64ed305c946921",
+    "market_breadth_feature_cache_20261110.json": "61f1c81753dee36e2a47b4b525597cb7c2f5f46b28182d0d7218280298fb82cd"
+  },
+  "experts": {
+    "LONG_broad_trend": {
+      "train": {
+        "n": 73,
+        "favorable": 12,
+        "adverse": 61,
+        "unweighted_delta_vs_native": -5.385495324254476
+      },
+      "validation": {
+        "n": 20,
+        "favorable": 10,
+        "adverse": 10,
+        "unweighted_delta_vs_native": 0.7146436215700591
+      },
+      "test": {
+        "n": 17,
+        "favorable": 12,
+        "adverse": 5,
+        "unweighted_delta_vs_native": 0.9347931492982391
+      }
+    },
+    "LONG_bull_continuation": {
+      "train": {
+        "n": 90,
+        "favorable": 17,
+        "adverse": 73,
+        "unweighted_delta_vs_native": -7.077376081076744
+      },
+      "validation": {
+        "n": 27,
+        "favorable": 12,
+        "adverse": 15,
+        "unweighted_delta_vs_native": 0.11718674635859627
+      },
+      "test": {
+        "n": 29,
+        "favorable": 19,
+        "adverse": 10,
+        "unweighted_delta_vs_native": 1.5468397386196346
+      }
+    },
+    "LONG_pullback_resume": {
+      "train": {
+        "n": 9,
+        "favorable": 2,
+        "adverse": 7,
+        "unweighted_delta_vs_native": -0.9239532897249327
+      },
+      "validation": {
+        "n": 2,
+        "favorable": 0,
+        "adverse": 2,
+        "unweighted_delta_vs_native": -0.46003182198801995
+      },
+      "test": {
+        "n": 0,
+        "favorable": 0,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      }
+    },
+    "LONG_relative_breakout": {
+      "train": {
+        "n": 33,
+        "favorable": 9,
+        "adverse": 24,
+        "unweighted_delta_vs_native": -2.1290425553355155
+      },
+      "validation": {
+        "n": 10,
+        "favorable": 5,
+        "adverse": 5,
+        "unweighted_delta_vs_native": 0.2916599829761468
+      },
+      "test": {
+        "n": 12,
+        "favorable": 9,
+        "adverse": 3,
+        "unweighted_delta_vs_native": 1.1839584783757346
+      }
+    },
+    "SHORT_breadth_divergence": {
+      "train": {
+        "n": 4,
+        "favorable": 4,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      },
+      "validation": {
+        "n": 1,
+        "favorable": 0,
+        "adverse": 1,
+        "unweighted_delta_vs_native": 0
+      },
+      "test": {
+        "n": 0,
+        "favorable": 0,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      }
+    },
+    "SHORT_exhaustion": {
+      "train": {
+        "n": 5,
+        "favorable": 5,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      },
+      "validation": {
+        "n": 1,
+        "favorable": 1,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      },
+      "test": {
+        "n": 1,
+        "favorable": 1,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      }
+    },
+    "SHORT_fake_breakout": {
+      "train": {
+        "n": 10,
+        "favorable": 9,
+        "adverse": 1,
+        "unweighted_delta_vs_native": 0
+      },
+      "validation": {
+        "n": 2,
+        "favorable": 0,
+        "adverse": 2,
+        "unweighted_delta_vs_native": 0
+      },
+      "test": {
+        "n": 6,
+        "favorable": 3,
+        "adverse": 3,
+        "unweighted_delta_vs_native": 0
+      }
+    },
+    "SHORT_market_bear": {
+      "train": {
+        "n": 2,
+        "favorable": 0,
+        "adverse": 2,
+        "unweighted_delta_vs_native": 0
+      },
+      "validation": {
+        "n": 0,
+        "favorable": 0,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      },
+      "test": {
+        "n": 0,
+        "favorable": 0,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      }
+    },
+    "SHORT_relative_weakness": {
+      "train": {
+        "n": 2,
+        "favorable": 2,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      },
+      "validation": {
+        "n": 0,
+        "favorable": 0,
+        "adverse": 0,
+        "unweighted_delta_vs_native": 0
+      },
+      "test": {
+        "n": 1,
+        "favorable": 0,
+        "adverse": 1,
+        "unweighted_delta_vs_native": 0
+      }
+    }
+  },
+  "policies": {
+    "native_SHORT": {
+      "train": {
+        "LONG": {
+          "n": 0,
+          "favorable": 0,
+          "adverse": 0,
+          "unweighted_delta_vs_native": 0
+        },
+        "SHORT": {
+          "n": 211,
+          "favorable": 172,
+          "adverse": 39,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": 6.352472942889324,
+        "native_raw_sum": 6.352472942889324
+      },
+      "validation": {
+        "LONG": {
+          "n": 0,
+          "favorable": 0,
+          "adverse": 0,
+          "unweighted_delta_vs_native": 0
+        },
+        "SHORT": {
+          "n": 70,
+          "favorable": 37,
+          "adverse": 33,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": -0.1398019754020967,
+        "native_raw_sum": -0.1398019754020967
+      },
+      "test": {
+        "LONG": {
+          "n": 0,
+          "favorable": 0,
+          "adverse": 0,
+          "unweighted_delta_vs_native": 0
+        },
+        "SHORT": {
+          "n": 71,
+          "favorable": 23,
+          "adverse": 48,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": -0.9646948046963304,
+        "native_raw_sum": -0.9646948046963304
+      }
+    },
+    "experts_LONG_else_SHORT": {
+      "train": {
+        "LONG": {
+          "n": 72,
+          "favorable": 14,
+          "adverse": 58,
+          "unweighted_delta_vs_native": -6.030985781783404
+        },
+        "SHORT": {
+          "n": 139,
+          "favorable": 114,
+          "adverse": 25,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": 0.3214871611059199,
+        "native_raw_sum": 6.352472942889324
+      },
+      "validation": {
+        "LONG": {
+          "n": 21,
+          "favorable": 10,
+          "adverse": 11,
+          "unweighted_delta_vs_native": 0.26171595913025825
+        },
+        "SHORT": {
+          "n": 49,
+          "favorable": 26,
+          "adverse": 23,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": 0.12191398372816153,
+        "native_raw_sum": -0.1398019754020967
+      },
+      "test": {
+        "LONG": {
+          "n": 19,
+          "favorable": 14,
+          "adverse": 5,
+          "unweighted_delta_vs_native": 1.42290267223468
+        },
+        "SHORT": {
+          "n": 52,
+          "favorable": 18,
+          "adverse": 34,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": 0.45820786753834963,
+        "native_raw_sum": -0.9646948046963304
+      }
+    },
+    "experts_LONG_else_ABSTAIN": {
+      "train": {
+        "LONG": {
+          "n": 72,
+          "favorable": 14,
+          "adverse": 58,
+          "unweighted_delta_vs_native": -6.030985781783404
+        },
+        "SHORT": {
+          "n": 14,
+          "favorable": 11,
+          "adverse": 3,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 125
+        },
+        "raw_sum_modeled_noncompounded": -2.964923318719514,
+        "native_raw_sum": 6.352472942889324
+      },
+      "validation": {
+        "LONG": {
+          "n": 21,
+          "favorable": 10,
+          "adverse": 11,
+          "unweighted_delta_vs_native": 0.26171595913025825
+        },
+        "SHORT": {
+          "n": 3,
+          "favorable": 1,
+          "adverse": 2,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 46
+        },
+        "raw_sum_modeled_noncompounded": 0.09865813368255882,
+        "native_raw_sum": -0.1398019754020967
+      },
+      "test": {
+        "LONG": {
+          "n": 19,
+          "favorable": 14,
+          "adverse": 5,
+          "unweighted_delta_vs_native": 1.42290267223468
+        },
+        "SHORT": {
+          "n": 7,
+          "favorable": 3,
+          "adverse": 4,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 45
+        },
+        "raw_sum_modeled_noncompounded": 0.8551799634972271,
+        "native_raw_sum": -0.9646948046963304
+      }
+    },
+    "online60_LONG_else_SHORT": {
+      "train": {
+        "LONG": {
+          "n": 0,
+          "favorable": 0,
+          "adverse": 0,
+          "unweighted_delta_vs_native": 0
+        },
+        "SHORT": {
+          "n": 211,
+          "favorable": 172,
+          "adverse": 39,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": 6.352472942889324,
+        "native_raw_sum": 6.352472942889324
+      },
+      "validation": {
+        "LONG": {
+          "n": 0,
+          "favorable": 0,
+          "adverse": 0,
+          "unweighted_delta_vs_native": 0
+        },
+        "SHORT": {
+          "n": 70,
+          "favorable": 37,
+          "adverse": 33,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": -0.1398019754020967,
+        "native_raw_sum": -0.1398019754020967
+      },
+      "test": {
+        "LONG": {
+          "n": 2,
+          "favorable": 1,
+          "adverse": 1,
+          "unweighted_delta_vs_native": 0.049783808543634844
+        },
+        "SHORT": {
+          "n": 69,
+          "favorable": 22,
+          "adverse": 47,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": -0.9149109961526956,
+        "native_raw_sum": -0.9646948046963304
+      }
+    },
+    "online50_breadth70_LONG_else_SHORT": {
+      "train": {
+        "LONG": {
+          "n": 0,
+          "favorable": 0,
+          "adverse": 0,
+          "unweighted_delta_vs_native": 0
+        },
+        "SHORT": {
+          "n": 211,
+          "favorable": 172,
+          "adverse": 39,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": 6.352472942889324,
+        "native_raw_sum": 6.352472942889324
+      },
+      "validation": {
+        "LONG": {
+          "n": 3,
+          "favorable": 0,
+          "adverse": 3,
+          "unweighted_delta_vs_native": -0.44090964800823884
+        },
+        "SHORT": {
+          "n": 67,
+          "favorable": 34,
+          "adverse": 33,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": -0.5807116234103356,
+        "native_raw_sum": -0.1398019754020967
+      },
+      "test": {
+        "LONG": {
+          "n": 19,
+          "favorable": 14,
+          "adverse": 5,
+          "unweighted_delta_vs_native": 1.42290267223468
+        },
+        "SHORT": {
+          "n": 52,
+          "favorable": 18,
+          "adverse": 34,
+          "unweighted_delta_vs_native": 0
+        },
+        "ABSTAIN": {
+          "n": 0
+        },
+        "raw_sum_modeled_noncompounded": 0.45820786753834963,
+        "native_raw_sum": -0.9646948046963304
+      }
+    }
+  },
+  "notes": [
+    "test was previously observed in older Y06 research, not a clean future blind OOS",
+    "pattern conjunctions and adaptive prior are exploratory; no Gate accepted",
+    "raw modeled trade returns are not actual fills or integrated 10/30bps portfolio returns",
+    "ABSTAIN saves no-entry return 0 but does not reproduce capital allocation/competition",
+    "online prior calculated from 72h-settled counterfactual shadows, never future labels"
+  ]
+}
