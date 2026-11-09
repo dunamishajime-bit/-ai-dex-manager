@@ -1,0 +1,67 @@
+{
+  "study": "PENGU modeled risk overlay SHORT unit-return denominator price-model parity",
+  "status": "RESEARCH_ONLY",
+  "source": "dd_strict_v2_plus_v4q102_pengu_recovery_reversal_20261109.py",
+  "original_formula": "Entry/Exit-1",
+  "corrected_formula": "(Entry-Exit)/Entry",
+  "actual_cash_pnl_formula": "Notional*(Entry-Exit)/Entry, on linear SHORT",
+  "source_sha256": "c3b72a5d0ad3ebcbac31f74f4464314d3225820bface8b6225d7eb3ee687caf7",
+  "cost": {
+    "10": {
+      "baseline_final_jpy": 2111834.8400109867,
+      "corrected_final_jpy": 2111834.8400109867,
+      "baseline_dd_pct": -50.370436941509396,
+      "corrected_dd_pct": -50.370436941509396,
+      "hashes": {
+        "DECISIONS": {
+          "old_sha256": "aeb70a098ab45064c2fd5af625e0c88470dc112c458f8db901b9a0fffc4d0d22",
+          "corrected_sha256": "02e593e2a972068572c43784d794692e9b5fa98b0ded1b093839433d9f54e0ea",
+          "identical": false
+        },
+        "FILLS": {
+          "old_sha256": "b1a2f36a9ab3bb9f391c2a6d46124c18494cbacf163c3bdff40d3b714ab1f6dc",
+          "corrected_sha256": "b1a2f36a9ab3bb9f391c2a6d46124c18494cbacf163c3bdff40d3b714ab1f6dc",
+          "identical": true
+        },
+        "EQUITY_30MIN": {
+          "old_sha256": "64e2b518e64601389b67981d446ae404a31668bf3dcfe943b224fdfcf7253d52",
+          "corrected_sha256": "64e2b518e64601389b67981d446ae404a31668bf3dcfe943b224fdfcf7253d52",
+          "identical": true
+        },
+        "FUNDING": {
+          "old_sha256": "084a6f8ebc4dcda46d7ae034627fbd6208eb0fe72ea7088eac513415c197d0b5",
+          "corrected_sha256": "084a6f8ebc4dcda46d7ae034627fbd6208eb0fe72ea7088eac513415c197d0b5",
+          "identical": true
+        }
+      }
+    },
+    "30": {
+      "baseline_final_jpy": 667697.913985803,
+      "corrected_final_jpy": 667697.913985803,
+      "baseline_dd_pct": -60.6703507087609,
+      "corrected_dd_pct": -60.6703507087609,
+      "hashes": {
+        "DECISIONS": {
+          "old_sha256": "aeb70a098ab45064c2fd5af625e0c88470dc112c458f8db901b9a0fffc4d0d22",
+          "corrected_sha256": "02e593e2a972068572c43784d794692e9b5fa98b0ded1b093839433d9f54e0ea",
+          "identical": false
+        },
+        "FILLS": {
+          "old_sha256": "67d0f96a8e2c15f6a1ff38a9e687686129b5e729167361ceaa3fedcf757c0d81",
+          "corrected_sha256": "67d0f96a8e2c15f6a1ff38a9e687686129b5e729167361ceaa3fedcf757c0d81",
+          "identical": true
+        },
+        "EQUITY_30MIN": {
+          "old_sha256": "a0563843e1da8ba687f8306041ff503432f86fef2ff5e2a62a4a40a501a7eb3c",
+          "corrected_sha256": "a0563843e1da8ba687f8306041ff503432f86fef2ff5e2a62a4a40a501a7eb3c",
+          "identical": true
+        },
+        "FUNDING": {
+          "old_sha256": "51ce6485f6e7b52465008cffbbe4026b47dcddd4cfd452fdfeb7c77d1412d0ea",
+          "corrected_sha256": "51ce6485f6e7b52465008cffbbe4026b47dcddd4cfd452fdfeb7c77d1412d0ea",
+          "identical": true
+        }
+      }
+    }
+  }
+}
