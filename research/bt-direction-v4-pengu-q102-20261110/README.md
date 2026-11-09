@@ -90,3 +90,24 @@ Rechecked the saved PENGU searches using the same rule: a candidate cannot be ca
 - LONG_V64 overheat (PENGU 12h >= +12%): retain as exploratory only; it is not promoted by the strict direction audit.
 
 Therefore PENGU is not considered fully solved yet. The only direction-management change currently strong enough to carry forward in research is the Recovery V8 two-hour rescue. LONG_V64 and SHORT_V20 remain native at entry.
+
+## 2026-11-10 synthetic signal stress
+
+A deterministic synthetic feature-space stress harness was added to test whether saved candidate gates fire exactly where their mathematical conditions say they should.
+
+Covered rules:
+- V4 REC_X05_TIME_36H
+- V4 REC_X07_TIME_6H
+- V4 REC_X11_TIME_48H
+- PENGU Recovery V8 two-hour rescue
+- Q102 FET PB168
+- exploratory PENGU SHORT V20 exhaustion
+- exploratory PENGU LONG V64 overheat
+
+The harness tests exact-threshold inclusion/exclusion, just-below/just-above behavior, multi-condition AND behavior, monotonic strengthening/weakening, and 20,000 deterministic random synthetic feature vectors per rule.
+
+Current result: 7 rules, 39 explicit boundary cases, 0 boundary failures, 0 metamorphic failures; logic-shape PASS.
+
+Important limitation: synthetic feature-space PASS is not profitability evidence and not OOS evidence. Random activation rates are properties of the artificial sampling ranges, not estimated real-market trigger frequencies. Candidate promotion still requires historical walk-forward/OOS, threshold-jitter stability, regime splits, false-positive accounting, and integrated 10bps/30bps portfolio BT.
+
+FET BRK24 is intentionally excluded from the frozen synthetic-gate set until one final causal rule is selected; the saved snapshot currently proves high DD impact but not a final robust threshold gate.

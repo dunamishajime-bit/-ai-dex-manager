@@ -1,0 +1,589 @@
+{
+  "seed": 20261110,
+  "random_cases_per_rule": 20000,
+  "purpose": "synthetic feature-space signal stress; not profitability evidence",
+  "rules": {
+    "V4_REC_X05_TIME_36H": {
+      "status": "candidate",
+      "source": "README.md high-precision candidate",
+      "conditions": [
+        {
+          "feature": "vol72",
+          "op": "<=",
+          "threshold": 0.00658
+        }
+      ],
+      "boundary": {
+        "cases": 3,
+        "failures": 0,
+        "details": [
+          {
+            "case": "vol72:below",
+            "features": {
+              "vol72": 0.0065799
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "vol72:equal",
+            "features": {
+              "vol72": 0.00658
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "vol72:above",
+            "features": {
+              "vol72": 0.0065801
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          }
+        ]
+      },
+      "metamorphic": {
+        "failures": 0,
+        "details": []
+      },
+      "random": {
+        "n": 20000,
+        "fired": 4436,
+        "activation_rate": 0.2218
+      }
+    },
+    "V4_REC_X07_TIME_6H": {
+      "status": "candidate",
+      "source": "README.md high-precision candidate",
+      "conditions": [
+        {
+          "feature": "sym_ret3",
+          "op": ">",
+          "threshold": -0.01401
+        },
+        {
+          "feature": "btc_ret3",
+          "op": ">",
+          "threshold": -0.00588
+        }
+      ],
+      "boundary": {
+        "cases": 9,
+        "failures": 0,
+        "details": [
+          {
+            "case": "sym_ret3:below|btc_ret3:below",
+            "features": {
+              "sym_ret3": -0.0140101,
+              "btc_ret3": -0.0058801
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:below|btc_ret3:equal",
+            "features": {
+              "sym_ret3": -0.0140101,
+              "btc_ret3": -0.00588
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:below|btc_ret3:above",
+            "features": {
+              "sym_ret3": -0.0140101,
+              "btc_ret3": -0.0058798999999999995
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:equal|btc_ret3:below",
+            "features": {
+              "sym_ret3": -0.01401,
+              "btc_ret3": -0.0058801
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:equal|btc_ret3:equal",
+            "features": {
+              "sym_ret3": -0.01401,
+              "btc_ret3": -0.00588
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:equal|btc_ret3:above",
+            "features": {
+              "sym_ret3": -0.01401,
+              "btc_ret3": -0.0058798999999999995
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:above|btc_ret3:below",
+            "features": {
+              "sym_ret3": -0.0140099,
+              "btc_ret3": -0.0058801
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:above|btc_ret3:equal",
+            "features": {
+              "sym_ret3": -0.0140099,
+              "btc_ret3": -0.00588
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "sym_ret3:above|btc_ret3:above",
+            "features": {
+              "sym_ret3": -0.0140099,
+              "btc_ret3": -0.0058798999999999995
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          }
+        ]
+      },
+      "metamorphic": {
+        "failures": 0,
+        "details": []
+      },
+      "random": {
+        "n": 20000,
+        "fired": 6500,
+        "activation_rate": 0.325
+      }
+    },
+    "V4_REC_X11_TIME_48H": {
+      "status": "candidate",
+      "source": "README.md high-precision candidate",
+      "conditions": [
+        {
+          "feature": "rel72",
+          "op": ">",
+          "threshold": 0.0
+        }
+      ],
+      "boundary": {
+        "cases": 3,
+        "failures": 0,
+        "details": [
+          {
+            "case": "rel72:below",
+            "features": {
+              "rel72": -1e-07
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "rel72:equal",
+            "features": {
+              "rel72": 0.0
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "rel72:above",
+            "features": {
+              "rel72": 1e-07
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          }
+        ]
+      },
+      "metamorphic": {
+        "failures": 0,
+        "details": []
+      },
+      "random": {
+        "n": 20000,
+        "fired": 9970,
+        "activation_rate": 0.4985
+      }
+    },
+    "PENGU_RECOVERY_V8_2H_RESCUE": {
+      "status": "research-candidate",
+      "source": "README.md PENGU reclassification addendum",
+      "conditions": [
+        {
+          "feature": "pre12",
+          "op": ">",
+          "threshold": 0.0254491018
+        },
+        {
+          "feature": "post2",
+          "op": "<=",
+          "threshold": -0.0039952058
+        }
+      ],
+      "boundary": {
+        "cases": 9,
+        "failures": 0,
+        "details": [
+          {
+            "case": "pre12:below|post2:below",
+            "features": {
+              "pre12": 0.0254490018,
+              "post2": -0.0039953058000000005
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "pre12:below|post2:equal",
+            "features": {
+              "pre12": 0.0254490018,
+              "post2": -0.0039952058
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "pre12:below|post2:above",
+            "features": {
+              "pre12": 0.0254490018,
+              "post2": -0.0039951058
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "pre12:equal|post2:below",
+            "features": {
+              "pre12": 0.0254491018,
+              "post2": -0.0039953058000000005
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "pre12:equal|post2:equal",
+            "features": {
+              "pre12": 0.0254491018,
+              "post2": -0.0039952058
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "pre12:equal|post2:above",
+            "features": {
+              "pre12": 0.0254491018,
+              "post2": -0.0039951058
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "pre12:above|post2:below",
+            "features": {
+              "pre12": 0.025449201799999998,
+              "post2": -0.0039953058000000005
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "pre12:above|post2:equal",
+            "features": {
+              "pre12": 0.025449201799999998,
+              "post2": -0.0039952058
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "pre12:above|post2:above",
+            "features": {
+              "pre12": 0.025449201799999998,
+              "post2": -0.0039951058
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          }
+        ]
+      },
+      "metamorphic": {
+        "failures": 0,
+        "details": []
+      },
+      "random": {
+        "n": 20000,
+        "fired": 5299,
+        "activation_rate": 0.26495
+      }
+    },
+    "Q102_FET_PB168": {
+      "status": "candidate-small-sample",
+      "source": "README.md high-priority finding",
+      "conditions": [
+        {
+          "feature": "ret14",
+          "op": ">",
+          "threshold": 0.098337
+        }
+      ],
+      "boundary": {
+        "cases": 3,
+        "failures": 0,
+        "details": [
+          {
+            "case": "ret14:below",
+            "features": {
+              "ret14": 0.09833689999999999
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "ret14:equal",
+            "features": {
+              "ret14": 0.098337
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "ret14:above",
+            "features": {
+              "ret14": 0.0983371
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          }
+        ]
+      },
+      "metamorphic": {
+        "failures": 0,
+        "details": []
+      },
+      "random": {
+        "n": 20000,
+        "fired": 9969,
+        "activation_rate": 0.49845
+      }
+    },
+    "PENGU_SHORT_V20_EXHAUSTION": {
+      "status": "exploratory",
+      "source": "README.md exploratory only",
+      "conditions": [
+        {
+          "feature": "btc24",
+          "op": ">=",
+          "threshold": -0.01
+        },
+        {
+          "feature": "rel12",
+          "op": "<=",
+          "threshold": -0.035
+        }
+      ],
+      "boundary": {
+        "cases": 9,
+        "failures": 0,
+        "details": [
+          {
+            "case": "btc24:below|rel12:below",
+            "features": {
+              "btc24": -0.0100001,
+              "rel12": -0.035000100000000006
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "btc24:below|rel12:equal",
+            "features": {
+              "btc24": -0.0100001,
+              "rel12": -0.035
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "btc24:below|rel12:above",
+            "features": {
+              "btc24": -0.0100001,
+              "rel12": -0.0349999
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "btc24:equal|rel12:below",
+            "features": {
+              "btc24": -0.01,
+              "rel12": -0.035000100000000006
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "btc24:equal|rel12:equal",
+            "features": {
+              "btc24": -0.01,
+              "rel12": -0.035
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "btc24:equal|rel12:above",
+            "features": {
+              "btc24": -0.01,
+              "rel12": -0.0349999
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "btc24:above|rel12:below",
+            "features": {
+              "btc24": -0.0099999,
+              "rel12": -0.035000100000000006
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "btc24:above|rel12:equal",
+            "features": {
+              "btc24": -0.0099999,
+              "rel12": -0.035
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "btc24:above|rel12:above",
+            "features": {
+              "btc24": -0.0099999,
+              "rel12": -0.0349999
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          }
+        ]
+      },
+      "metamorphic": {
+        "failures": 0,
+        "details": []
+      },
+      "random": {
+        "n": 20000,
+        "fired": 4581,
+        "activation_rate": 0.22905
+      }
+    },
+    "PENGU_LONG_V64_OVERHEAT": {
+      "status": "exploratory",
+      "source": "README.md exploratory only",
+      "conditions": [
+        {
+          "feature": "pre12",
+          "op": ">=",
+          "threshold": 0.12
+        }
+      ],
+      "boundary": {
+        "cases": 3,
+        "failures": 0,
+        "details": [
+          {
+            "case": "pre12:below",
+            "features": {
+              "pre12": 0.11999987999999999
+            },
+            "expected": false,
+            "actual": false,
+            "pass": true
+          },
+          {
+            "case": "pre12:equal",
+            "features": {
+              "pre12": 0.12
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          },
+          {
+            "case": "pre12:above",
+            "features": {
+              "pre12": 0.12000012
+            },
+            "expected": true,
+            "actual": true,
+            "pass": true
+          }
+        ]
+      },
+      "metamorphic": {
+        "failures": 0,
+        "details": []
+      },
+      "random": {
+        "n": 20000,
+        "fired": 9361,
+        "activation_rate": 0.46805
+      }
+    }
+  },
+  "summary": {
+    "rules": 7,
+    "boundary_cases": 39,
+    "boundary_failures": 0,
+    "metamorphic_failures": 0,
+    "logic_shape_pass": true
+  }
+}
