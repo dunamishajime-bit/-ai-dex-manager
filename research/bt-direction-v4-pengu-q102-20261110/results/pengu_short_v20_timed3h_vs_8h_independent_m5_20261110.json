@@ -1,0 +1,221 @@
+{
+  "status": "RESEARCH_ONLY_CANNOT_INFER_LIVE_WIRING",
+  "source_sha256": {
+    "native": "c71272aa910ef4d8a2cfe6cf44fe285fee7e2e59c9f340040af7dbdede4a65ab",
+    "original_timed_events": "10b44ee0887c2bcbc85a1a2cdda17c76d3fbc579ee7af7ebbcdee1b459bc20bf",
+    "m5_prefix": "daf02f259b0fa6fb4b422e243c1ab9ad3a5b971adda4c502eab3dbe53507daf4",
+    "m5_suffix": "d683acaec16b304a3b141ca5abd3509bb161cf62aab93ef7a15b1bfff3eeb14b"
+  },
+  "m5_count": 107136,
+  "short_v20_count": 40,
+  "parity": true,
+  "formula_diff": {
+    "cases": 5,
+    "sum_corrected_delta": -0.19190929914077137,
+    "sum_original_overlay_delta": -0.18470605139104013,
+    "sum_correction": -0.007203247749731245
+  },
+  "rules": {
+    "three_only": {
+      "summary": {
+        "triggers": 4,
+        "improved": 2,
+        "harmed": 2,
+        "gross_unit_delta_sum": -0.20857866236739786,
+        "native_winners_harmed": 2,
+        "ids": [
+          "PENGU_00009",
+          "PENGU_00014",
+          "PENGU_00029",
+          "PENGU_00051"
+        ]
+      },
+      "events": [
+        {
+          "id": "PENGU_00009",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.018302,
+          "observed_loss_pct": 2.7567233731963237,
+          "referenceTs": 1761941100000,
+          "hypothetical_next_m5_open": 0.018302,
+          "nativeExitReason": "SHORT_TRAILING_STOP",
+          "nativeRawReturn": 0.12711470439615968,
+          "proposedRawReturn": -0.027567233731963302,
+          "deltaRawReturn": -0.15468193812812298
+        },
+        {
+          "id": "PENGU_00014",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.014655,
+          "observed_loss_pct": 3.415425869733957,
+          "referenceTs": 1762693500000,
+          "hypothetical_next_m5_open": 0.014655,
+          "nativeExitReason": "SHORT_HARD_STOP",
+          "nativeRawReturn": -0.08000000000000007,
+          "proposedRawReturn": -0.034154258697339644,
+          "deltaRawReturn": 0.04584574130266043
+        },
+        {
+          "id": "PENGU_00029",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.010295,
+          "observed_loss_pct": 2.560270970312817,
+          "referenceTs": 1765904700000,
+          "hypothetical_next_m5_open": 0.010343,
+          "nativeExitReason": "SHORT_TRAILING_STOP",
+          "nativeRawReturn": 0.12317991631799163,
+          "proposedRawReturn": -0.03038453875273956,
+          "deltaRawReturn": -0.1535644550707312
+        },
+        {
+          "id": "PENGU_00051",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.006661,
+          "observed_loss_pct": 2.5716045580535862,
+          "referenceTs": 1772305500000,
+          "hypothetical_next_m5_open": 0.006664,
+          "nativeExitReason": "SHORT_HARD_STOP",
+          "nativeRawReturn": -0.08000000000000007,
+          "proposedRawReturn": -0.026178010471204192,
+          "deltaRawReturn": 0.05382198952879588
+        }
+      ]
+    },
+    "eight_only": {
+      "summary": {
+        "triggers": 2,
+        "improved": 2,
+        "harmed": 0,
+        "gross_unit_delta_sum": 0.03386504454763424,
+        "native_winners_harmed": 0,
+        "ids": [
+          "PENGU_00014",
+          "PENGU_00035"
+        ]
+      },
+      "events": [
+        {
+          "id": "PENGU_00014",
+          "hours": 8,
+          "threshold_pct": 4,
+          "source_m5_close": 0.015173,
+          "observed_loss_pct": 7.07077835015173,
+          "referenceTs": 1762711500000,
+          "hypothetical_next_m5_open": 0.015061,
+          "nativeExitReason": "SHORT_HARD_STOP",
+          "nativeRawReturn": -0.08000000000000007,
+          "proposedRawReturn": -0.06280431867899232,
+          "deltaRawReturn": 0.017195681321007752
+        },
+        {
+          "id": "PENGU_00035",
+          "hours": 8,
+          "threshold_pct": 4,
+          "source_m5_close": 0.009176,
+          "observed_loss_pct": 6.044146538772699,
+          "referenceTs": 1766131500000,
+          "hypothetical_next_m5_open": 0.009201,
+          "nativeExitReason": "SHORT_HARD_STOP",
+          "nativeRawReturn": -0.08000000000000007,
+          "proposedRawReturn": -0.06333063677337358,
+          "deltaRawReturn": 0.016669363226626488
+        }
+      ]
+    },
+    "three_then_eight": {
+      "summary": {
+        "triggers": 5,
+        "improved": 3,
+        "harmed": 2,
+        "gross_unit_delta_sum": -0.19190929914077137,
+        "native_winners_harmed": 2,
+        "ids": [
+          "PENGU_00009",
+          "PENGU_00014",
+          "PENGU_00029",
+          "PENGU_00035",
+          "PENGU_00051"
+        ]
+      },
+      "events": [
+        {
+          "id": "PENGU_00009",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.018302,
+          "observed_loss_pct": 2.7567233731963237,
+          "referenceTs": 1761941100000,
+          "hypothetical_next_m5_open": 0.018302,
+          "nativeExitReason": "SHORT_TRAILING_STOP",
+          "nativeRawReturn": 0.12711470439615968,
+          "proposedRawReturn": -0.027567233731963302,
+          "deltaRawReturn": -0.15468193812812298
+        },
+        {
+          "id": "PENGU_00014",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.014655,
+          "observed_loss_pct": 3.415425869733957,
+          "referenceTs": 1762693500000,
+          "hypothetical_next_m5_open": 0.014655,
+          "nativeExitReason": "SHORT_HARD_STOP",
+          "nativeRawReturn": -0.08000000000000007,
+          "proposedRawReturn": -0.034154258697339644,
+          "deltaRawReturn": 0.04584574130266043
+        },
+        {
+          "id": "PENGU_00029",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.010295,
+          "observed_loss_pct": 2.560270970312817,
+          "referenceTs": 1765904700000,
+          "hypothetical_next_m5_open": 0.010343,
+          "nativeExitReason": "SHORT_TRAILING_STOP",
+          "nativeRawReturn": 0.12317991631799163,
+          "proposedRawReturn": -0.03038453875273956,
+          "deltaRawReturn": -0.1535644550707312
+        },
+        {
+          "id": "PENGU_00035",
+          "hours": 8,
+          "threshold_pct": 4,
+          "source_m5_close": 0.009176,
+          "observed_loss_pct": 6.044146538772699,
+          "referenceTs": 1766131500000,
+          "hypothetical_next_m5_open": 0.009201,
+          "nativeExitReason": "SHORT_HARD_STOP",
+          "nativeRawReturn": -0.08000000000000007,
+          "proposedRawReturn": -0.06333063677337358,
+          "deltaRawReturn": 0.016669363226626488
+        },
+        {
+          "id": "PENGU_00051",
+          "hours": 3,
+          "threshold_pct": 2.5,
+          "source_m5_close": 0.006661,
+          "observed_loss_pct": 2.5716045580535862,
+          "referenceTs": 1772305500000,
+          "hypothetical_next_m5_open": 0.006664,
+          "nativeExitReason": "SHORT_HARD_STOP",
+          "nativeRawReturn": -0.08000000000000007,
+          "proposedRawReturn": -0.026178010471204192,
+          "deltaRawReturn": 0.05382198952879588
+        }
+      ]
+    }
+  },
+  "limits": [
+    "The separate timed overlay is not referenced by the saved core pinned PENGU executable code.",
+    "Research-only next-M5-open modeled fill at 3h+5m or 8h+5m; actual orderbook absent.",
+    "Native resident hard/trailing STOP always takes precedence if exited before check.",
+    "In A/B of same-direction earlier exit, explicit identical roundtrip bps mostly cancel; shorter holding funding not modeled.",
+    "Candidate counts are only 40 raw signals, not account-admitted positions; full portfolio 10/30bps required.",
+    "Do not promote based on hindsight inspected target samples."
+  ]
+}
