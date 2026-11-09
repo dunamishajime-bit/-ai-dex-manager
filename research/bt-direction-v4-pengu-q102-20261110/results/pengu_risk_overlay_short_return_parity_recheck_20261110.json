@@ -63,5 +63,36 @@
         }
       }
     }
-  }
+  },
+  "decision_change_details": {
+    "10": {
+      "number_of_different_decisions": 1,
+      "only_block_reason_diff": true,
+      "diff": [
+        {
+          "id": "PENGU_00112",
+          "utc": "2026-09-16T21:00:00Z",
+          "old_decision": "BLOCK",
+          "new_decision": "BLOCK",
+          "old_reason": "PENGU_ROUTE_QUARANTINE_60H",
+          "new_reason": "PENGU_REALIZED_DD_17PCT_HOLD_72H"
+        }
+      ]
+    },
+    "30": {
+      "number_of_different_decisions": 1,
+      "only_block_reason_diff": true,
+      "diff": [
+        {
+          "id": "PENGU_00112",
+          "utc": "2026-09-16T21:00:00Z",
+          "old_decision": "BLOCK",
+          "new_decision": "BLOCK",
+          "old_reason": "PENGU_ROUTE_QUARANTINE_60H",
+          "new_reason": "PENGU_REALIZED_DD_17PCT_HOLD_72H"
+        }
+      ]
+    }
+  },
+  "conclusion": "Only PENGU_00112 BLOCK reason changes from route quarantine to realized-DD hold. All FILLS, EQUITY_30MIN, FUNDING CSVs remain hash-identical; no economic difference in this historical sensitivity. Do not assume bug economically harmless in untested future periods."
 }
