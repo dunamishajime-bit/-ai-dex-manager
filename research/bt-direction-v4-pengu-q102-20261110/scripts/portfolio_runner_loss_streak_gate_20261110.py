@@ -101,7 +101,7 @@ inj=('  while _loss_fill_cursor<len(fills):\n'
 orig=orig.replace(_check,inj+_check)
 check="elif s==\"PENGU\" and t<pengu_overlay[\"global_hold_until\"]:"
 assert orig.count(check)==1
-orig=orig.replace(check,'elif s in _loss_watch and t<_loss_quarantine[s]:reason="RESEARCH_CAUSAL_RUNNER_LOSS2_QUARANTINE"\n    '+check)
+orig=orig.replace(check,'elif s in _loss_watch and t<_loss_quarantine[s]:reason="RESEARCH_CAUSAL_RUNNER_LOSS2_QUARANTINE"\n   '+check)
 # Residual preemption should not occur for a runner which the research quarantine will block.
 preempt='and c["model"] is not None):'
 assert orig.count(preempt)==1
