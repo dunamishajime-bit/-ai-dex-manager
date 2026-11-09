@@ -63,7 +63,11 @@ for x in records["three_then_eight"]["events"]:
  assert y is not None,x
  assert x["referenceTs"]==y["timedExitTs"],(x["id"],x["referenceTs"],y["timedExitTs"])
  assert abs(x["hypothetical_next_m5_open"]-y["timedExitPrice"])<1e-12,(x["id"],x["hypothetical_next_m5_open"],y["timedExitPrice"])
- assert abs(x["deltaRawReturn"]-y["unitReturnImprovement"])<1e-9,(x["id"],x["deltaRawReturn"],y["unitReturnImprovement"])
+ # The existing MJS overlay uses entry/exit-1 for SHORT, unlike the pinned native formula.
+ # Assert its logged formula while keeping our native-consistent result separate.
+ entry=next(z["entryPrice"] for z in shorts if z["id"]==x["id"])
+ assert abs((entry/x["hypothetical_next_m5_open"]-1)-y["timedRawReturn"])<1e-12
+ assert abs((entry-x["hypothetical_next_m5_open"])/entry-x["proposedRawReturn"])<1e-12
 result={"status":"RESEARCH_ONLY_CANNOT_INFER_LIVE_WIRING",
  "source_runtime_sha":"1657e173d250ad58f53e62f7bb0a3428fb405496",
  "source_sha256":{"native":hashlib.sha256(nat.read_bytes()).hexdigest(),
@@ -71,7 +75,14 @@ result={"status":"RESEARCH_ONLY_CANNOT_INFER_LIVE_WIRING",
  "m5_prefix":hashlib.sha256(pre.read_bytes()).hexdigest(),
  "m5_suffix":hashlib.sha256(suf.read_bytes()).hexdigest()},
  "m5_count":len(m5),"short_v20_count":len(shorts),
- "original_combined_event_parity_pass":True,
+ "original_combined_timestamp_and_price_parity_pass":True,
+ "source_overlay_short_pnl_formula":"Entry/Exit-1 (inconsistent with native SHORT directional price return)",
+ "correct_short_pnl_formula":"(Entry-Exit)/Entry",
+ "logged_formula_diff":{
+  "cases":len(original),
+  "sum_corrected_delta":sum(x["deltaRawReturn"] for x in records["three_then_eight"]["events"]),
+  "sum_original_overlay_delta":sum(x["unitReturnImprovement"] for x in original),
+  "sum_correction":sum(x["deltaRawReturn"] for x in records["three_then_eight"]["events"])-sum(x["unitReturnImprovement"] for x in original)},
  "rules":records,
  "limits":["The separate timed overlay is not referenced by the saved core pinned PENGU executable code.",
  "Research-only next-M5-open modeled fill at 3h+5m or 8h+5m; actual orderbook absent.",
