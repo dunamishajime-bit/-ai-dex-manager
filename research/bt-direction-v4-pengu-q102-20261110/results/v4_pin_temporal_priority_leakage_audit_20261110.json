@@ -1,0 +1,238 @@
+{
+  "name": "v4_pin_temporal_priority_leakage_audit_20261110.json",
+  "sha256_original": "663437570eb7a8fe9809611dbc54dbc784bc0a5a20e9d9d282c28d566f9b9847",
+  "report": {
+    "status": "METHODOLOGY_INVALID_FOR_CLAIMED_OOS_NOT_MARKET_DATA_FAILURE",
+    "v4_source_pin": "3ad65403013b701db5d9e53e8814e6ab827a28e8",
+    "source_files_sha256": {
+      "policy_code": "7e29adf061ec1dadde7e48504b6a0edaa28bbe14b4d9acdefedbd3f822c4e4f5",
+      "priority_ranking_json": "30f89625860c027c7ecb96da182263ca9d7c19a91e20504302dea6048e8bb4d5"
+    },
+    "policy_not_before_utc": "2026-10-09T00:00:00Z",
+    "later_gross_not_before_utc": "2026-10-26T00:00:00Z",
+    "policy_time_limits": "Dates are extracted from source comments and indicate reported changes, not independently authenticated deployment timestamps. Cannot infer LIVE activation.",
+    "full_development_year_hindsight_rankings": true,
+    "ranking_routes": 41,
+    "training_outcome_columns": [
+      "n30",
+      "wr30",
+      "pf30",
+      "mean_return30",
+      "net30_jpy"
+    ],
+    "periods": {
+      "preperiod": {
+        "count": 598,
+        "entry_first_utc": "2025-03-24T06:00:00+00:00",
+        "entry_last_utc": "2025-09-13T10:00:00+00:00",
+        "row_sha256": "14e2f35e9e5136b96dfddcd3da349c536e6a72fff4f552247d60d7f2212c54b5",
+        "manifest_status": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06",
+        "source_pin_matches": true,
+        "entry_before_policy_date": 598,
+        "entry_before_later_gross": 598,
+        "entry_minus_decision_ms_counts": {
+          "0": 598
+        },
+        "entry_before_decision": 0,
+        "entry_after_decision": 0,
+        "certification": {
+          "SHADOW_ONLY_HINDSIGHT_CANDIDATE_NOT_NATIVE_EXIT_OR_LIVE_ORDER": 598
+        },
+        "sides": {
+          "LONG": 95,
+          "SHORT": 503
+        },
+        "ranking_evaluation_clean_OOS": false,
+        "candidate_not_live": true,
+        "manifest_checked": 2316,
+        "manifest_errors": {
+          "SOLUSDT:INVALID_H1_BAR": 21,
+          "LTCUSDT:INVALID_H1_BAR": 8,
+          "BTCUSDT:INVALID_H1_BAR": 10,
+          "ETHUSDT:INVALID_H1_BAR": 19,
+          "DOGEUSDT:INVALID_H1_BAR": 5,
+          "BNBUSDT:INVALID_H1_BAR": 5,
+          "AVAXUSDT:INVALID_H1_BAR": 10,
+          "LINKUSDT:INVALID_H1_BAR": 7,
+          "ADAUSDT:INVALID_H1_BAR": 15,
+          "INJUSDT:INVALID_H1_BAR": 6,
+          "ATOMUSDT:INVALID_H1_BAR": 3,
+          "NEARUSDT:INVALID_H1_BAR": 2,
+          "XRPUSDT:INVALID_H1_BAR": 3
+        },
+        "manifest_count": 598,
+        "manifest_output_hash_matches": true,
+        "route_distribution": {
+          "REC_X10_TIME_48H": 18,
+          "REC_Y06_REV_D0_T72": 192,
+          "REC_Y01_REV_D0_T72": 23,
+          "REC_Y03_REV_D0_T36": 29,
+          "REC_X14_TIME_48H": 8,
+          "REC_X13_TP1.5_SL1_H24": 20,
+          "REC_X03_TIME_12H": 24,
+          "REC_X01_TIME_24H": 8,
+          "REC_Y15_REV_D0_T3": 7,
+          "REC_G2_EARLY_BTC_OPPOSE_VOL": 26,
+          "REC_X02_TIME_36H": 14,
+          "CONT_SHORT_MID_AGE24_48": 3,
+          "REC_X06_TIME_12H": 20,
+          "REC_X07_TIME_6H": 6,
+          "REC_G4_MATURE_REL_RANGE": 17,
+          "REC_X05_TIME_36H": 13,
+          "REC_X12_TIME_12H": 13,
+          "REC_Y11_REV_D0_T36": 6,
+          "REC_Y02_REV_D0_T12": 7,
+          "REC_G5_SLOW_TREND": 18,
+          "REC_X04_TIME_24H": 27,
+          "REC_Y16_REV_D0_T6": 5,
+          "REC_G3_LATE_BTC_REL": 11,
+          "REC_X11_TIME_48H": 7,
+          "REC_X09_TIME_48H": 41,
+          "REC_Y07_REV_D0_T72": 14,
+          "REC_Y08_REV_D0_T6": 10,
+          "REC_G1_MID_REL_LOWVOL": 6,
+          "REC_X08_TIME_48H": 2,
+          "REC_Y12_REV_D0_T24": 3
+        }
+      },
+      "target": {
+        "count": 1394,
+        "entry_first_utc": "2025-10-04T10:00:00+00:00",
+        "entry_last_utc": "2026-09-28T06:00:00+00:00",
+        "row_sha256": "d95c93bcaea37aeee51d6ac88f81675bd1100220e7613f5e57047c605e1c2a37",
+        "manifest_status": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06",
+        "source_pin_matches": true,
+        "entry_before_policy_date": 1394,
+        "entry_before_later_gross": 1394,
+        "entry_minus_decision_ms_counts": {
+          "0": 1394
+        },
+        "entry_before_decision": 0,
+        "entry_after_decision": 0,
+        "certification": {
+          "SHADOW_ONLY_HINDSIGHT_CANDIDATE_NOT_NATIVE_EXIT_OR_LIVE_ORDER": 1394
+        },
+        "sides": {
+          "LONG": 225,
+          "SHORT": 1169
+        },
+        "ranking_evaluation_clean_OOS": false,
+        "candidate_not_live": true,
+        "manifest_checked": 4380,
+        "manifest_errors": {
+          "AVAXUSDT:INVALID_H1_BAR": 6,
+          "SOLUSDT:INVALID_H1_BAR": 15,
+          "LINKUSDT:INVALID_H1_BAR": 8,
+          "DOGEUSDT:INVALID_H1_BAR": 6,
+          "AAVEUSDT:INVALID_H1_BAR": 1,
+          "BTCUSDT:INVALID_H1_BAR": 15,
+          "BNBUSDT:INVALID_H1_BAR": 7,
+          "ETHUSDT:INVALID_H1_BAR": 3,
+          "LTCUSDT:INVALID_H1_BAR": 1,
+          "NEARUSDT:INVALID_H1_BAR": 1,
+          "INJUSDT:INVALID_H1_BAR": 2
+        },
+        "manifest_count": 1394,
+        "manifest_output_hash_matches": true,
+        "route_distribution": {
+          "REC_X09_TIME_48H": 67,
+          "REC_Y06_REV_D0_T72": 352,
+          "REC_Y08_REV_D0_T6": 21,
+          "REC_X02_TIME_36H": 55,
+          "REC_G3_LATE_BTC_REL": 64,
+          "REC_X07_TIME_6H": 28,
+          "REC_X13_TP1.5_SL1_H24": 37,
+          "REC_Y12_REV_D0_T24": 15,
+          "REC_X03_TIME_12H": 52,
+          "REC_G5_SLOW_TREND": 53,
+          "REC_X05_TIME_36H": 56,
+          "REC_X12_TIME_12H": 43,
+          "REC_X11_TIME_48H": 27,
+          "REC_Y02_REV_D0_T12": 28,
+          "REC_X06_TIME_12H": 51,
+          "REC_G2_EARLY_BTC_OPPOSE_VOL": 51,
+          "CONT_SHORT_MID_AGE24_48": 19,
+          "REC_Y16_REV_D0_T6": 14,
+          "REC_G1_MID_REL_LOWVOL": 17,
+          "REC_X04_TIME_24H": 48,
+          "REC_Y11_REV_D0_T36": 22,
+          "REC_G4_MATURE_REL_RANGE": 32,
+          "REC_Y03_REV_D0_T36": 49,
+          "REC_Y07_REV_D0_T72": 32,
+          "REC_X10_TIME_48H": 35,
+          "REC_Y15_REV_D0_T3": 12,
+          "REC_X01_TIME_24H": 28,
+          "REC_X08_TIME_48H": 14,
+          "REC_X14_TIME_48H": 32,
+          "REC_Y01_REV_D0_T72": 40
+        }
+      },
+      "forward": {
+        "count": 127,
+        "entry_first_utc": "2026-10-02T06:00:00+00:00",
+        "entry_last_utc": "2026-11-08T18:00:00+00:00",
+        "row_sha256": "1e531d87ec23417b27c6bb237442304be04dfbcf2b1ed620d66b01279fe72f85",
+        "manifest_status": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06",
+        "source_pin_matches": true,
+        "entry_before_policy_date": 15,
+        "entry_before_later_gross": 49,
+        "entry_minus_decision_ms_counts": {
+          "0": 127
+        },
+        "entry_before_decision": 0,
+        "entry_after_decision": 0,
+        "certification": {
+          "SHADOW_ONLY_HINDSIGHT_CANDIDATE_NOT_NATIVE_EXIT_OR_LIVE_ORDER": 127
+        },
+        "sides": {
+          "SHORT": 119,
+          "LONG": 8
+        },
+        "ranking_evaluation_clean_OOS": null,
+        "candidate_not_live": true,
+        "manifest_checked": 466,
+        "manifest_errors": {},
+        "manifest_count": 127,
+        "manifest_output_hash_matches": true,
+        "route_distribution": {
+          "REC_Y06_REV_D0_T72": 20,
+          "REC_X10_TIME_48H": 4,
+          "REC_Y03_REV_D0_T36": 2,
+          "REC_X03_TIME_12H": 14,
+          "REC_X07_TIME_6H": 4,
+          "REC_Y15_REV_D0_T3": 2,
+          "REC_G4_MATURE_REL_RANGE": 12,
+          "REC_X08_TIME_48H": 5,
+          "REC_X05_TIME_36H": 8,
+          "REC_X11_TIME_48H": 3,
+          "REC_G3_LATE_BTC_REL": 8,
+          "REC_X06_TIME_12H": 7,
+          "REC_X04_TIME_24H": 6,
+          "REC_G5_SLOW_TREND": 15,
+          "REC_X01_TIME_24H": 2,
+          "REC_G2_EARLY_BTC_OPPOSE_VOL": 4,
+          "REC_X02_TIME_36H": 2,
+          "REC_X13_TP1.5_SL1_H24": 2,
+          "REC_G1_MID_REL_LOWVOL": 1,
+          "REC_X12_TIME_12H": 4,
+          "REC_Y11_REV_D0_T36": 1,
+          "REC_Y02_REV_D0_T12": 1
+        }
+      }
+    },
+    "anomalies": {},
+    "rules": [
+      "A candidate may be chronological on market input yet noncausal as an OOS claim because its policy was fitted on the evaluated period.",
+      "No conversion of frozen hindsight-ranked V2 to independent target-period OOS by simply splitting target rows.",
+      "Candidates in forward after Oct09 retain hindsight tuned parameters; they can be a temporal prospective simulation only if frozen from that date and never used in tuning; still marked SHADOW_ONLY.",
+      "The later Oct26 size changes make earlier forward entries counterfactual, not faithful historical as-of policy.",
+      "Any signal with entryTs earlier than its decisionTs or after feature capture requires additional explicit proof of execution feasibility.",
+      "Censor forward trades without complete exit horizon; do not count incomplete outcomes as zero or success."
+    ],
+    "time_assessment": {
+      "historical_202510_202610": "The V2 priority ranks had fitted full-year realized outcomes and were reported created Oct09 2026; the entire historical target is retrospective development/resubstitution, NOT an out-of-sample evaluation.",
+      "forward_202610_202611": "The forward window begins before documented V2 ranking date and before Oct26 gross changes. Replayed current pin is a counterfactual full-window policy; existing forward results have already been inspected. This cannot now be asserted to be an untouched prospective OOS test.",
+      "new_protocol": "Create replay with each policy/gross configuration frozen by an authentic earlier commit timestamp; where unavailable classify RESEARCH_HINDSIGHT until independent future unlabeled market data arrives."
+    }
+  }
+}
