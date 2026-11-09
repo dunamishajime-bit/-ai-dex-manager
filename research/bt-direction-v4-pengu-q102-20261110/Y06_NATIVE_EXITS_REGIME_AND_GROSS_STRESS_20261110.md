@@ -54,3 +54,17 @@ The original 4x-stock engine let **46 actually admitted Y06 positions** exit dif
 6. Keep X05/X07/X11 in unresolved research status and PENGU V8/V20 unresolved, V64 research candidate; **do not move to independent Q102 research until V4 and PENGU have documented route-level disposition**.
 
 **No candidate is Production-adopted.** Previous ORACLE DD below 20% is not an executable result; the causal integrated model remains above 20%.
+
+## Forward shadow falsification, 2026-10-01 through 2026-11-08
+
+The saved Aster H1/M5 forward dataset **exists** in `FORWARD_HOLDOUT_20261001_20261108`. Crucially, its pinned V4 source manifest explicitly declares `BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06` and `SHADOW_ONLY_HINDSIGHT`. It is **not an independently valid causal OOS sample**; use only to search for falsifying counterexamples, not for candidate promotion or threshold tuning.
+
+When replaying the previously specified Y06 60h time exit (always preserving any earlier native guard/STOP), 20 forward Y06 intentions yielded 13 changed exits: **2 beneficial, 11 harmful**, including **9 formerly profitable native shorts worsened**. Total unlevered summed directional-return difference was **-0.177145**, and all four distinct overlapping-position episodes had negative aggregate differences. This is decisive adverse evidence against adopting an unconditional H60 change, **subject to the forward-source leakage caveat**. Outcome for H60 is **REJECTED RESEARCH PROPOSAL**, not an accepted exit rule.
+
+[Forward Y06 replay script](./scripts/v4_y06_forward_tainted_h60_falsification_20261110.py); [results and data-provenance status](./results/v4_y06_forward_tainted_60h_falsification_20261110.json).
+
+The same forward source contained X05 8, X07 4 and X11 3 entry intentions. Independently recomputed completed-H1 features for the pre-registered composite rules: X05 fired twice but both lacked a complete paired native/opposite modeled lifecycle; X07 and X11 did not fire. **No composite rule gains usable OOS support from this shadow.**
+
+[Composite forward diagnostic script](./scripts/v4_x05_x07_x11_forward_tainted_falsification_20261110.py); [results](./results/v4_x05_x07_x11_tainted_forward_falsification_20261110.json).
+
+The next step remains clean untainted causal-intention reconstruction with a genuinely held-out date range (and case-level source/feature/exit provenance), followed by episode-purged tests and integrated current-pin 10/30bps.
