@@ -1,0 +1,4937 @@
+[
+  {
+    "family": "MR",
+    "hours": 1,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 18,
+        "tp": 9,
+        "fp": 9,
+        "wrong": 22,
+        "precision": 0.5,
+        "recall": 0.4090909090909091,
+        "delta": 0.2825184703058805,
+        "native": -0.01284977969926937,
+        "switched": 0.26966869060661114
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 38,
+        "tp": 13,
+        "fp": 25,
+        "wrong": 26,
+        "precision": 0.34210526315789475,
+        "recall": 0.5,
+        "delta": -0.10634544660700018,
+        "native": 1.1179706283469573,
+        "switched": 1.011625181739957
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.030221497977037992,
+        "native": 0.1152320115498876,
+        "switched": 0.1454535095269256
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 1,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 8,
+        "tp": 3,
+        "fp": 5,
+        "wrong": 22,
+        "precision": 0.375,
+        "recall": 0.13636363636363635,
+        "delta": -0.16696532387065965,
+        "native": -0.01284977969926937,
+        "switched": -0.17981510356992902
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 26,
+        "tp": 11,
+        "fp": 15,
+        "wrong": 26,
+        "precision": 0.4230769230769231,
+        "recall": 0.4230769230769231,
+        "delta": 0.3693457801394038,
+        "native": 1.1179706283469573,
+        "switched": 1.487316408486361
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.030221497977037992,
+        "native": 0.1152320115498876,
+        "switched": 0.1454535095269256
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 1,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.6,
+        "recall": 0.13636363636363635,
+        "delta": 0.06112614172204822,
+        "native": -0.01284977969926937,
+        "switched": 0.04827636202277885
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 18,
+        "tp": 8,
+        "fp": 10,
+        "wrong": 26,
+        "precision": 0.4444444444444444,
+        "recall": 0.3076923076923077,
+        "delta": 0.3548816283259524,
+        "native": 1.1179706283469573,
+        "switched": 1.4728522566729096
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 0.5,
+        "delta": 0.01193350141821603,
+        "native": 0.1152320115498876,
+        "switched": 0.12716551296810363
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 1,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.6,
+        "recall": 0.13636363636363635,
+        "delta": 0.06112614172204822,
+        "native": -0.01284977969926937,
+        "switched": 0.04827636202277885
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 15,
+        "tp": 6,
+        "fp": 9,
+        "wrong": 26,
+        "precision": 0.4,
+        "recall": 0.23076923076923078,
+        "delta": 0.3093182948959967,
+        "native": 1.1179706283469573,
+        "switched": 1.427288923242954
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 0.5,
+        "delta": 0.01193350141821603,
+        "native": 0.1152320115498876,
+        "switched": 0.12716551296810363
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 1,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 3,
+        "tp": 3,
+        "fp": 0,
+        "wrong": 22,
+        "precision": 1.0,
+        "recall": 0.13636363636363635,
+        "delta": 0.1841848116116952,
+        "native": -0.01284977969926937,
+        "switched": 0.17133503191242583
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 10,
+        "tp": 5,
+        "fp": 5,
+        "wrong": 26,
+        "precision": 0.5,
+        "recall": 0.19230769230769232,
+        "delta": 0.37197581175317707,
+        "native": 1.1179706283469573,
+        "switched": 1.4899464401001343
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 1,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 22,
+        "precision": 1.0,
+        "recall": 0.09090909090909091,
+        "delta": 0.12303960836671102,
+        "native": -0.01284977969926937,
+        "switched": 0.11018982866744165
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 4,
+        "tp": 3,
+        "fp": 1,
+        "wrong": 26,
+        "precision": 0.75,
+        "recall": 0.11538461538461539,
+        "delta": 0.44865885552210827,
+        "native": 1.1179706283469573,
+        "switched": 1.5666294838690655
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 1,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 22,
+        "precision": 1.0,
+        "recall": 0.045454545454545456,
+        "delta": 0.07042056074766345,
+        "native": -0.01284977969926937,
+        "switched": 0.05757078104839408
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 4,
+        "tp": 3,
+        "fp": 1,
+        "wrong": 26,
+        "precision": 0.75,
+        "recall": 0.11538461538461539,
+        "delta": 0.44865885552210827,
+        "native": 1.1179706283469573,
+        "switched": 1.5666294838690655
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 2,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 17,
+        "tp": 11,
+        "fp": 6,
+        "wrong": 22,
+        "precision": 0.6470588235294118,
+        "recall": 0.5,
+        "delta": 0.5490643084864777,
+        "native": -0.01284977969926937,
+        "switched": 0.5362145287872083
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 32,
+        "tp": 15,
+        "fp": 17,
+        "wrong": 26,
+        "precision": 0.46875,
+        "recall": 0.5769230769230769,
+        "delta": 0.6446398834051679,
+        "native": 1.1179706283469573,
+        "switched": 1.7626105117521251
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.030221497977037992,
+        "native": 0.1152320115498876,
+        "switched": 0.1454535095269256
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 2,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 14,
+        "tp": 9,
+        "fp": 5,
+        "wrong": 22,
+        "precision": 0.6428571428571429,
+        "recall": 0.4090909090909091,
+        "delta": 0.20519008171715658,
+        "native": -0.01284977969926937,
+        "switched": 0.1923403020178872
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 27,
+        "tp": 15,
+        "fp": 12,
+        "wrong": 26,
+        "precision": 0.5555555555555556,
+        "recall": 0.5769230769230769,
+        "delta": 0.725858164296473,
+        "native": 1.1179706283469573,
+        "switched": 1.8438287926434302
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.030221497977037992,
+        "native": 0.1152320115498876,
+        "switched": 0.1454535095269256
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 2,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 10,
+        "tp": 6,
+        "fp": 4,
+        "wrong": 22,
+        "precision": 0.6,
+        "recall": 0.2727272727272727,
+        "delta": 0.25161820659487666,
+        "native": -0.01284977969926937,
+        "switched": 0.2387684268956073
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 19,
+        "tp": 11,
+        "fp": 8,
+        "wrong": 26,
+        "precision": 0.5789473684210527,
+        "recall": 0.4230769230769231,
+        "delta": 0.7152964854270034,
+        "native": 1.1179706283469573,
+        "switched": 1.8332671137739607
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.030221497977037992,
+        "native": 0.1152320115498876,
+        "switched": 0.1454535095269256
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 2,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 8,
+        "tp": 6,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.75,
+        "recall": 0.2727272727272727,
+        "delta": 0.3247791396774228,
+        "native": -0.01284977969926937,
+        "switched": 0.3119293599781534
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 14,
+        "tp": 9,
+        "fp": 5,
+        "wrong": 26,
+        "precision": 0.6428571428571429,
+        "recall": 0.34615384615384615,
+        "delta": 0.7248196160914051,
+        "native": 1.1179706283469573,
+        "switched": 1.8427902444383624
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 2,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 7,
+        "tp": 5,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.7142857142857143,
+        "recall": 0.22727272727272727,
+        "delta": 0.1988992756958894,
+        "native": -0.01284977969926937,
+        "switched": 0.18604949599662002
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 12,
+        "tp": 9,
+        "fp": 3,
+        "wrong": 26,
+        "precision": 0.75,
+        "recall": 0.34615384615384615,
+        "delta": 0.7781605228637885,
+        "native": 1.1179706283469573,
+        "switched": 1.8961311512107457
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 2,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 3,
+        "tp": 2,
+        "fp": 1,
+        "wrong": 22,
+        "precision": 0.6666666666666666,
+        "recall": 0.09090909090909091,
+        "delta": 0.01264171327193564,
+        "native": -0.01284977969926937,
+        "switched": -0.0002080664273337307
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 8,
+        "tp": 8,
+        "fp": 0,
+        "wrong": 26,
+        "precision": 1.0,
+        "recall": 0.3076923076923077,
+        "delta": 0.6977088743741455,
+        "native": 1.1179706283469573,
+        "switched": 1.8156795027211028
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 2,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 3,
+        "tp": 2,
+        "fp": 1,
+        "wrong": 22,
+        "precision": 0.6666666666666666,
+        "recall": 0.09090909090909091,
+        "delta": 0.01264171327193564,
+        "native": -0.01284977969926937,
+        "switched": -0.0002080664273337307
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 6,
+        "tp": 6,
+        "fp": 0,
+        "wrong": 26,
+        "precision": 1.0,
+        "recall": 0.23076923076923078,
+        "delta": 0.6428897928586244,
+        "native": 1.1179706283469573,
+        "switched": 1.7608604212055816
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 3,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 18,
+        "tp": 14,
+        "fp": 4,
+        "wrong": 22,
+        "precision": 0.7777777777777778,
+        "recall": 0.6363636363636364,
+        "delta": 0.8766326695302196,
+        "native": -0.01284977969926937,
+        "switched": 0.8637828898309502
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 30,
+        "tp": 16,
+        "fp": 14,
+        "wrong": 26,
+        "precision": 0.5333333333333333,
+        "recall": 0.6153846153846154,
+        "delta": 0.9268023230559095,
+        "native": 1.1179706283469573,
+        "switched": 2.0447729514028667
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.030221497977037992,
+        "native": 0.1152320115498876,
+        "switched": 0.1454535095269256
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 3,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 13,
+        "tp": 11,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.8461538461538461,
+        "recall": 0.5,
+        "delta": 0.5873676582379688,
+        "native": -0.01284977969926937,
+        "switched": 0.5745178785386994
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 24,
+        "tp": 16,
+        "fp": 8,
+        "wrong": 26,
+        "precision": 0.6666666666666666,
+        "recall": 0.6153846153846154,
+        "delta": 1.0967702336361942,
+        "native": 1.1179706283469573,
+        "switched": 2.2147408619831515
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 0.5,
+        "delta": 0.01193350141821603,
+        "native": 0.1152320115498876,
+        "switched": 0.12716551296810363
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 3,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 8,
+        "tp": 6,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.75,
+        "recall": 0.2727272727272727,
+        "delta": 0.3247791396774228,
+        "native": -0.01284977969926937,
+        "switched": 0.3119293599781534
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 19,
+        "tp": 14,
+        "fp": 5,
+        "wrong": 26,
+        "precision": 0.7368421052631579,
+        "recall": 0.5384615384615384,
+        "delta": 1.0660316987233633,
+        "native": 1.1179706283469573,
+        "switched": 2.1840023270703206
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 0.5,
+        "delta": 0.01193350141821603,
+        "native": 0.1152320115498876,
+        "switched": 0.12716551296810363
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 3,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 8,
+        "tp": 6,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.75,
+        "recall": 0.2727272727272727,
+        "delta": 0.3247791396774228,
+        "native": -0.01284977969926937,
+        "switched": 0.3119293599781534
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 16,
+        "tp": 13,
+        "fp": 3,
+        "wrong": 26,
+        "precision": 0.8125,
+        "recall": 0.5,
+        "delta": 1.0671398139400088,
+        "native": 1.1179706283469573,
+        "switched": 2.185110442286966
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 2,
+        "precision": 1.0,
+        "recall": 0.5,
+        "delta": 0.01193350141821603,
+        "native": 0.1152320115498876,
+        "switched": 0.12716551296810363
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 3,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 7,
+        "tp": 5,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.7142857142857143,
+        "recall": 0.22727272727272727,
+        "delta": 0.1988992756958894,
+        "native": -0.01284977969926937,
+        "switched": 0.18604949599662002
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 15,
+        "tp": 13,
+        "fp": 2,
+        "wrong": 26,
+        "precision": 0.8666666666666667,
+        "recall": 0.5,
+        "delta": 1.0684700891693666,
+        "native": 1.1179706283469573,
+        "switched": 2.186440717516324
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 3,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 4,
+        "tp": 2,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.5,
+        "recall": 0.09090909090909091,
+        "delta": 0.08062337761791039,
+        "native": -0.01284977969926937,
+        "switched": 0.06777359791864102
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 10,
+        "tp": 10,
+        "fp": 0,
+        "wrong": 26,
+        "precision": 1.0,
+        "recall": 0.38461538461538464,
+        "delta": 0.9364966541825357,
+        "native": 1.1179706283469573,
+        "switched": 2.054467282529493
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "MR",
+    "hours": 3,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 41,
+        "flagged": 4,
+        "tp": 2,
+        "fp": 2,
+        "wrong": 22,
+        "precision": 0.5,
+        "recall": 0.09090909090909091,
+        "delta": 0.08062337761791039,
+        "native": -0.01284977969926937,
+        "switched": 0.06777359791864102
+      },
+      {
+        "period": "TARGET",
+        "n": 71,
+        "flagged": 9,
+        "tp": 9,
+        "fp": 0,
+        "wrong": 26,
+        "precision": 1.0,
+        "recall": 0.34615384615384615,
+        "delta": 0.8685602194681776,
+        "native": 1.1179706283469573,
+        "switched": 1.986530847815135
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 2,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1152320115498876,
+        "switched": 0.1152320115498876
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 1,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 13,
+        "tp": 9,
+        "fp": 4,
+        "wrong": 10,
+        "precision": 0.6923076923076923,
+        "recall": 0.9,
+        "delta": 0.4698270831465232,
+        "native": -0.014616793418421592,
+        "switched": 0.4552102897281016
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 50,
+        "tp": 21,
+        "fp": 29,
+        "wrong": 28,
+        "precision": 0.42,
+        "recall": 0.75,
+        "delta": -0.05409999067865323,
+        "native": 0.6695493338932498,
+        "switched": 0.6154493432145965
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 6,
+        "tp": 1,
+        "fp": 5,
+        "wrong": 3,
+        "precision": 0.16666666666666666,
+        "recall": 0.3333333333333333,
+        "delta": -0.0884227989137093,
+        "native": 0.12829295656156237,
+        "switched": 0.039870157647853066
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 1,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 6,
+        "tp": 3,
+        "fp": 3,
+        "wrong": 10,
+        "precision": 0.5,
+        "recall": 0.3,
+        "delta": 0.15159880334980136,
+        "native": -0.014616793418421592,
+        "switched": 0.13698200993137977
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 21,
+        "tp": 8,
+        "fp": 13,
+        "wrong": 28,
+        "precision": 0.38095238095238093,
+        "recall": 0.2857142857142857,
+        "delta": -0.01819928845863583,
+        "native": 0.6695493338932498,
+        "switched": 0.651350045434614
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 3,
+        "precision": 1.0,
+        "recall": 0.3333333333333333,
+        "delta": 0.015625832341921497,
+        "native": 0.12829295656156237,
+        "switched": 0.14391878890348386
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 1,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 10,
+        "precision": 0.6,
+        "recall": 0.3,
+        "delta": 0.195869818568722,
+        "native": -0.014616793418421592,
+        "switched": 0.1812530251503004
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 17,
+        "tp": 7,
+        "fp": 10,
+        "wrong": 28,
+        "precision": 0.4117647058823529,
+        "recall": 0.25,
+        "delta": 0.07740579898950062,
+        "native": 0.6695493338932498,
+        "switched": 0.7469551328827504
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 1,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 10,
+        "precision": 0.6,
+        "recall": 0.3,
+        "delta": 0.195869818568722,
+        "native": -0.014616793418421592,
+        "switched": 0.1812530251503004
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 11,
+        "tp": 5,
+        "fp": 6,
+        "wrong": 28,
+        "precision": 0.45454545454545453,
+        "recall": 0.17857142857142858,
+        "delta": 0.07017837843449959,
+        "native": 0.6695493338932498,
+        "switched": 0.7397277123277494
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 1,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 4,
+        "tp": 2,
+        "fp": 2,
+        "wrong": 10,
+        "precision": 0.5,
+        "recall": 0.2,
+        "delta": 0.10959069354837947,
+        "native": -0.014616793418421592,
+        "switched": 0.09497390012995788
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 28,
+        "precision": 0.6,
+        "recall": 0.10714285714285714,
+        "delta": 0.09066769286773402,
+        "native": 0.6695493338932498,
+        "switched": 0.7602170267609838
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 1,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 3,
+        "tp": 1,
+        "fp": 2,
+        "wrong": 10,
+        "precision": 0.3333333333333333,
+        "recall": 0.1,
+        "delta": 0.07091372115514427,
+        "native": -0.014616793418421592,
+        "switched": 0.05629692773672268
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 28,
+        "precision": 1.0,
+        "recall": 0.07142857142857142,
+        "delta": 0.10966597454184313,
+        "native": 0.6695493338932498,
+        "switched": 0.7792153084350929
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 1,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 2,
+        "tp": 1,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.5,
+        "recall": 0.1,
+        "delta": 0.07093884678328521,
+        "native": -0.014616793418421592,
+        "switched": 0.05632205336486362
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 28,
+        "precision": 1.0,
+        "recall": 0.03571428571428571,
+        "delta": 0.06160377358490554,
+        "native": 0.6695493338932498,
+        "switched": 0.7311531074781553
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 2,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 11,
+        "tp": 9,
+        "fp": 2,
+        "wrong": 10,
+        "precision": 0.8181818181818182,
+        "recall": 0.9,
+        "delta": 0.5407830885885423,
+        "native": -0.014616793418421592,
+        "switched": 0.5261662951701207
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 48,
+        "tp": 21,
+        "fp": 27,
+        "wrong": 28,
+        "precision": 0.4375,
+        "recall": 0.75,
+        "delta": -0.054514850881870025,
+        "native": 0.6695493338932498,
+        "switched": 0.6150344830113798
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 4,
+        "tp": 2,
+        "fp": 2,
+        "wrong": 3,
+        "precision": 0.5,
+        "recall": 0.6666666666666666,
+        "delta": -0.02011737392307411,
+        "native": 0.12829295656156237,
+        "switched": 0.10817558263848825
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 2,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 8,
+        "tp": 7,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.875,
+        "recall": 0.7,
+        "delta": 0.5177431431412579,
+        "native": -0.014616793418421592,
+        "switched": 0.5031263497228363
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 27,
+        "tp": 14,
+        "fp": 13,
+        "wrong": 28,
+        "precision": 0.5185185185185185,
+        "recall": 0.5,
+        "delta": 0.1861524589097593,
+        "native": 0.6695493338932498,
+        "switched": 0.8557017928030091
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 3,
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "delta": 0.02652509582493423,
+        "native": 0.12829295656156237,
+        "switched": 0.1548180523864966
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 2,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 6,
+        "tp": 5,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.8333333333333334,
+        "recall": 0.5,
+        "delta": 0.34444743581370396,
+        "native": -0.014616793418421592,
+        "switched": 0.32983064239528237
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 21,
+        "tp": 12,
+        "fp": 9,
+        "wrong": 28,
+        "precision": 0.5714285714285714,
+        "recall": 0.42857142857142855,
+        "delta": 0.18901805787772397,
+        "native": 0.6695493338932498,
+        "switched": 0.8585673917709737
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 2,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 6,
+        "tp": 5,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.8333333333333334,
+        "recall": 0.5,
+        "delta": 0.34444743581370396,
+        "native": -0.014616793418421592,
+        "switched": 0.32983064239528237
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 19,
+        "tp": 10,
+        "fp": 9,
+        "wrong": 28,
+        "precision": 0.5263157894736842,
+        "recall": 0.35714285714285715,
+        "delta": 0.13478748864896617,
+        "native": 0.6695493338932498,
+        "switched": 0.804336822542216
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 2,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 4,
+        "tp": 3,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.75,
+        "recall": 0.3,
+        "delta": 0.2790152448276998,
+        "native": -0.014616793418421592,
+        "switched": 0.2643984514092782
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 14,
+        "tp": 7,
+        "fp": 7,
+        "wrong": 28,
+        "precision": 0.5,
+        "recall": 0.25,
+        "delta": 0.17015763057522593,
+        "native": 0.6695493338932498,
+        "switched": 0.8397069644684757
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 2,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 3,
+        "tp": 2,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.6666666666666666,
+        "recall": 0.2,
+        "delta": 0.2403382724344646,
+        "native": -0.014616793418421592,
+        "switched": 0.225721479016043
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 8,
+        "tp": 4,
+        "fp": 4,
+        "wrong": 28,
+        "precision": 0.5,
+        "recall": 0.14285714285714285,
+        "delta": 0.1954979382336397,
+        "native": 0.6695493338932498,
+        "switched": 0.8650472721268895
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 2,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 10,
+        "precision": 1.0,
+        "recall": 0.2,
+        "delta": 0.24036339806260554,
+        "native": -0.014616793418421592,
+        "switched": 0.22574660464418395
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 3,
+        "tp": 2,
+        "fp": 1,
+        "wrong": 28,
+        "precision": 0.6666666666666666,
+        "recall": 0.07142857142857142,
+        "delta": 0.15416430747611465,
+        "native": 0.6695493338932498,
+        "switched": 0.8237136413693644
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 3,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 10,
+        "tp": 8,
+        "fp": 2,
+        "wrong": 10,
+        "precision": 0.8,
+        "recall": 0.8,
+        "delta": 0.49075796296040164,
+        "native": -0.014616793418421592,
+        "switched": 0.47614116954198005
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 50,
+        "tp": 23,
+        "fp": 27,
+        "wrong": 28,
+        "precision": 0.46,
+        "recall": 0.8214285714285714,
+        "delta": 0.12010593460573715,
+        "native": 0.6695493338932498,
+        "switched": 0.7896552684989869
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 3,
+        "tp": 1,
+        "fp": 2,
+        "wrong": 3,
+        "precision": 0.3333333333333333,
+        "recall": 0.3333333333333333,
+        "delta": -0.10277081446850445,
+        "native": 0.12829295656156237,
+        "switched": 0.02552214209305792
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 3,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 6,
+        "tp": 5,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.8333333333333334,
+        "recall": 0.5,
+        "delta": 0.3807014352059058,
+        "native": -0.014616793418421592,
+        "switched": 0.36608464178748423
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 33,
+        "tp": 18,
+        "fp": 15,
+        "wrong": 28,
+        "precision": 0.5454545454545454,
+        "recall": 0.6428571428571429,
+        "delta": 0.3691234776861433,
+        "native": 0.6695493338932498,
+        "switched": 1.038672811579393
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.09107829954187985,
+        "native": 0.12829295656156237,
+        "switched": 0.03721465701968252
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 3,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 5,
+        "tp": 4,
+        "fp": 1,
+        "wrong": 10,
+        "precision": 0.8,
+        "recall": 0.4,
+        "delta": 0.2944223101855633,
+        "native": -0.014616793418421592,
+        "switched": 0.2798055167671417
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 30,
+        "tp": 17,
+        "fp": 13,
+        "wrong": 28,
+        "precision": 0.5666666666666667,
+        "recall": 0.6071428571428571,
+        "delta": 0.46624558516332637,
+        "native": 0.6695493338932498,
+        "switched": 1.1357949190565761
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.09107829954187985,
+        "native": 0.12829295656156237,
+        "switched": 0.03721465701968252
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 3,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 3,
+        "tp": 3,
+        "fp": 0,
+        "wrong": 10,
+        "precision": 1.0,
+        "recall": 0.3,
+        "delta": 0.25577046342046905,
+        "native": -0.014616793418421592,
+        "switched": 0.24115367000204746
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 23,
+        "tp": 13,
+        "fp": 10,
+        "wrong": 28,
+        "precision": 0.5652173913043478,
+        "recall": 0.4642857142857143,
+        "delta": 0.33589378688836347,
+        "native": 0.6695493338932498,
+        "switched": 1.0054431207816132
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 3,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 3,
+        "tp": 3,
+        "fp": 0,
+        "wrong": 10,
+        "precision": 1.0,
+        "recall": 0.3,
+        "delta": 0.25577046342046905,
+        "native": -0.014616793418421592,
+        "switched": 0.24115367000204746
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 19,
+        "tp": 11,
+        "fp": 8,
+        "wrong": 28,
+        "precision": 0.5789473684210527,
+        "recall": 0.39285714285714285,
+        "delta": 0.3206583015719201,
+        "native": 0.6695493338932498,
+        "switched": 0.9902076354651699
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 3,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 3,
+        "tp": 3,
+        "fp": 0,
+        "wrong": 10,
+        "precision": 1.0,
+        "recall": 0.3,
+        "delta": 0.25577046342046905,
+        "native": -0.014616793418421592,
+        "switched": 0.24115367000204746
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 15,
+        "tp": 8,
+        "fp": 7,
+        "wrong": 28,
+        "precision": 0.5333333333333333,
+        "recall": 0.2857142857142857,
+        "delta": 0.24574734058582948,
+        "native": 0.6695493338932498,
+        "switched": 0.9152966744790793
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "REV",
+    "hours": 3,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 21,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 10,
+        "precision": 1.0,
+        "recall": 0.2,
+        "delta": 0.24036339806260554,
+        "native": -0.014616793418421592,
+        "switched": 0.22574660464418395
+      },
+      {
+        "period": "TARGET",
+        "n": 79,
+        "flagged": 8,
+        "tp": 4,
+        "fp": 4,
+        "wrong": 28,
+        "precision": 0.5,
+        "recall": 0.14285714285714285,
+        "delta": 0.17559215728115896,
+        "native": 0.6695493338932498,
+        "switched": 0.8451414911744087
+      },
+      {
+        "period": "FORWARD",
+        "n": 12,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 3,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.12829295656156237,
+        "switched": 0.12829295656156237
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 1,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 4,
+        "tp": 0,
+        "fp": 4,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.20596834324687585,
+        "native": 0.1830099488539565,
+        "switched": -0.022958394392919357
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 20,
+        "tp": 7,
+        "fp": 13,
+        "wrong": 14,
+        "precision": 0.35,
+        "recall": 0.5,
+        "delta": -0.34463154072556945,
+        "native": 0.1372979955872471,
+        "switched": -0.20733354513832236
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06693293891281504,
+        "native": 0.04961193952726528,
+        "switched": -0.017320999385549762
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 1,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 8,
+        "tp": 4,
+        "fp": 4,
+        "wrong": 14,
+        "precision": 0.5,
+        "recall": 0.2857142857142857,
+        "delta": -0.030303434469717616,
+        "native": 0.1372979955872471,
+        "switched": 0.10699456111752947
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -1.4027458750565103e-05,
+        "native": 0.04961193952726528,
+        "switched": 0.049597912068514716
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 1,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 8,
+        "tp": 4,
+        "fp": 4,
+        "wrong": 14,
+        "precision": 0.5,
+        "recall": 0.2857142857142857,
+        "delta": -0.030303434469717616,
+        "native": 0.1372979955872471,
+        "switched": 0.10699456111752947
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -1.4027458750565103e-05,
+        "native": 0.04961193952726528,
+        "switched": 0.049597912068514716
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 1,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.6,
+        "recall": 0.21428571428571427,
+        "delta": -0.04503436380758674,
+        "native": 0.1372979955872471,
+        "switched": 0.09226363177966035
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.04961193952726528,
+        "switched": 0.04961193952726528
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 1,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 4,
+        "tp": 2,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.5,
+        "recall": 0.14285714285714285,
+        "delta": -0.07115998915500199,
+        "native": 0.1372979955872471,
+        "switched": 0.0661380064322451
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.04961193952726528,
+        "switched": 0.04961193952726528
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 1,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.12710332888563125,
+        "native": 0.1372979955872471,
+        "switched": 0.01019466670161584
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.04961193952726528,
+        "switched": 0.04961193952726528
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 1,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 14,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0624408217954443,
+        "native": 0.1372979955872471,
+        "switched": 0.07485717379180279
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.04961193952726528,
+        "switched": 0.04961193952726528
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 2,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.05958947232760514,
+        "native": 0.1830099488539565,
+        "switched": 0.12342047652635135
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 18,
+        "tp": 7,
+        "fp": 11,
+        "wrong": 14,
+        "precision": 0.3888888888888889,
+        "recall": 0.5,
+        "delta": -0.19161876298612934,
+        "native": 0.1372979955872471,
+        "switched": -0.05432076739888225
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 3,
+        "tp": 1,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "delta": -0.01397130821737147,
+        "native": 0.04961193952726528,
+        "switched": 0.03564063130989381
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 2,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 14,
+        "tp": 6,
+        "fp": 8,
+        "wrong": 14,
+        "precision": 0.42857142857142855,
+        "recall": 0.42857142857142855,
+        "delta": -0.08629891196350903,
+        "native": 0.1372979955872471,
+        "switched": 0.05099908362373806
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 3,
+        "tp": 1,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "delta": -0.01397130821737147,
+        "native": 0.04961193952726528,
+        "switched": 0.03564063130989381
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 2,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 11,
+        "tp": 6,
+        "fp": 5,
+        "wrong": 14,
+        "precision": 0.5454545454545454,
+        "recall": 0.42857142857142855,
+        "delta": 0.03627908454789386,
+        "native": 0.1372979955872471,
+        "switched": 0.17357708013514095
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 2,
+        "tp": 1,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.5,
+        "recall": 1.0,
+        "delta": 0.05294760323669301,
+        "native": 0.04961193952726528,
+        "switched": 0.10255954276395829
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 2,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 10,
+        "tp": 5,
+        "fp": 5,
+        "wrong": 14,
+        "precision": 0.5,
+        "recall": 0.35714285714285715,
+        "delta": 0.0015585520085413807,
+        "native": 0.1372979955872471,
+        "switched": 0.13885654759578847
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 2,
+        "tp": 1,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.5,
+        "recall": 1.0,
+        "delta": 0.05294760323669301,
+        "native": 0.04961193952726528,
+        "switched": 0.10255954276395829
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 2,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 8,
+        "tp": 4,
+        "fp": 4,
+        "wrong": 14,
+        "precision": 0.5,
+        "recall": 0.2857142857142857,
+        "delta": -0.0189682631114646,
+        "native": 0.1372979955872471,
+        "switched": 0.11832973247578249
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 2,
+        "tp": 1,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.5,
+        "recall": 1.0,
+        "delta": 0.05294760323669301,
+        "native": 0.04961193952726528,
+        "switched": 0.10255954276395829
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 2,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 14,
+        "precision": 1.0,
+        "recall": 0.14285714285714285,
+        "delta": 0.1322511965421912,
+        "native": 0.1372979955872471,
+        "switched": 0.2695491921294383
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -1.4027458750565103e-05,
+        "native": 0.04961193952726528,
+        "switched": 0.049597912068514716
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 2,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 14,
+        "precision": 1.0,
+        "recall": 0.14285714285714285,
+        "delta": 0.1322511965421912,
+        "native": 0.1372979955872471,
+        "switched": 0.2695491921294383
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.04961193952726528,
+        "switched": 0.04961193952726528
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 3,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 14,
+        "tp": 8,
+        "fp": 6,
+        "wrong": 14,
+        "precision": 0.5714285714285714,
+        "recall": 0.5714285714285714,
+        "delta": 0.11419777775997131,
+        "native": 0.1372979955872471,
+        "switched": 0.2514957733472184
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 3,
+        "tp": 1,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "delta": -0.01397130821737147,
+        "native": 0.04961193952726528,
+        "switched": 0.03564063130989381
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 3,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 12,
+        "tp": 7,
+        "fp": 5,
+        "wrong": 14,
+        "precision": 0.5833333333333334,
+        "recall": 0.5,
+        "delta": 0.10577256164514526,
+        "native": 0.1372979955872471,
+        "switched": 0.24307055723239235
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 2,
+        "tp": 1,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.5,
+        "recall": 1.0,
+        "delta": 0.05294760323669301,
+        "native": 0.04961193952726528,
+        "switched": 0.10255954276395829
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 3,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 10,
+        "tp": 6,
+        "fp": 4,
+        "wrong": 14,
+        "precision": 0.6,
+        "recall": 0.42857142857142855,
+        "delta": 0.11127908454789393,
+        "native": 0.1372979955872471,
+        "switched": 0.24857708013514102
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 2,
+        "tp": 1,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.5,
+        "recall": 1.0,
+        "delta": 0.05294760323669301,
+        "native": 0.04961193952726528,
+        "switched": 0.10255954276395829
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 3,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 8,
+        "tp": 5,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.625,
+        "recall": 0.35714285714285715,
+        "delta": 0.13899937380398575,
+        "native": 0.1372979955872471,
+        "switched": 0.27629736939123284
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 2,
+        "tp": 1,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.5,
+        "recall": 1.0,
+        "delta": 0.05294760323669301,
+        "native": 0.04961193952726528,
+        "switched": 0.10255954276395829
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 3,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 8,
+        "tp": 5,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.625,
+        "recall": 0.35714285714285715,
+        "delta": 0.13899937380398575,
+        "native": 0.1372979955872471,
+        "switched": 0.27629736939123284
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 1,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.05296163069544357,
+        "native": 0.04961193952726528,
+        "switched": 0.10257357022270885
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 3,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 6,
+        "tp": 5,
+        "fp": 1,
+        "wrong": 14,
+        "precision": 0.8333333333333334,
+        "recall": 0.35714285714285715,
+        "delta": 0.18490744365362144,
+        "native": 0.1372979955872471,
+        "switched": 0.32220543924086853
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 1,
+        "precision": 1.0,
+        "recall": 1.0,
+        "delta": 0.05296163069544357,
+        "native": 0.04961193952726528,
+        "switched": 0.10257357022270885
+      }
+    ]
+  },
+  {
+    "family": "PB",
+    "hours": 3,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 6,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.1830099488539565,
+        "switched": 0.1830099488539565
+      },
+      {
+        "period": "TARGET",
+        "n": 33,
+        "flagged": 4,
+        "tp": 4,
+        "fp": 0,
+        "wrong": 14,
+        "precision": 1.0,
+        "recall": 0.2857142857142857,
+        "delta": 0.1914377658633244,
+        "native": 0.1372979955872471,
+        "switched": 0.3287357614505715
+      },
+      {
+        "period": "FORWARD",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 1,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": 0.04961193952726528,
+        "switched": 0.04961193952726528
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 1,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 3,
+        "tp": 3,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.75,
+        "delta": 0.06382204157259086,
+        "native": -0.0669227267135617,
+        "switched": -0.003100685140970838
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 13,
+        "tp": 8,
+        "fp": 5,
+        "wrong": 14,
+        "precision": 0.6153846153846154,
+        "recall": 0.5714285714285714,
+        "delta": 0.3349626871398128,
+        "native": -0.2112583093665481,
+        "switched": 0.1237043777732647
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06637495198125443,
+        "native": 0.09274608893533798,
+        "switched": 0.02637113695408355
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 1,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 9,
+        "tp": 5,
+        "fp": 4,
+        "wrong": 14,
+        "precision": 0.5555555555555556,
+        "recall": 0.35714285714285715,
+        "delta": 0.20753635595185693,
+        "native": -0.2112583093665481,
+        "switched": -0.0037219534146911704
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 1,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 7,
+        "tp": 4,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.5714285714285714,
+        "recall": 0.2857142857142857,
+        "delta": 0.1290599720006126,
+        "native": -0.2112583093665481,
+        "switched": -0.08219833736593551
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 1,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 7,
+        "tp": 4,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.5714285714285714,
+        "recall": 0.2857142857142857,
+        "delta": 0.1290599720006126,
+        "native": -0.2112583093665481,
+        "switched": -0.08219833736593551
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 1,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 6,
+        "tp": 3,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.5,
+        "recall": 0.21428571428571427,
+        "delta": 0.08740682798438526,
+        "native": -0.2112583093665481,
+        "switched": -0.12385148138216284
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 1,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 4,
+        "tp": 1,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.25,
+        "recall": 0.07142857142857142,
+        "delta": 0.04371048467698868,
+        "native": -0.2112583093665481,
+        "switched": -0.16754782468955942
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 1,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 14,
+        "precision": 1.0,
+        "recall": 0.07142857142857142,
+        "delta": 0.1672161172161173,
+        "native": -0.2112583093665481,
+        "switched": -0.044042192150430814
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.021848409748038256,
+        "native": 0.09274608893533798,
+        "switched": 0.07089767918729972
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 2,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 3,
+        "tp": 3,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.75,
+        "delta": 0.06382204157259086,
+        "native": -0.0669227267135617,
+        "switched": -0.003100685140970838
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 10,
+        "tp": 7,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.7,
+        "recall": 0.5,
+        "delta": 0.5348352186882439,
+        "native": -0.2112583093665481,
+        "switched": 0.3235769093216958
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 4,
+        "tp": 0,
+        "fp": 4,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06778344108136625,
+        "native": 0.09274608893533798,
+        "switched": 0.02496264785397173
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 2,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 10,
+        "tp": 7,
+        "fp": 3,
+        "wrong": 14,
+        "precision": 0.7,
+        "recall": 0.5,
+        "delta": 0.5348352186882439,
+        "native": -0.2112583093665481,
+        "switched": 0.3235769093216958
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06637495198125443,
+        "native": 0.09274608893533798,
+        "switched": 0.02637113695408355
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 2,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 7,
+        "tp": 5,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.7142857142857143,
+        "recall": 0.35714285714285715,
+        "delta": 0.49165622463798064,
+        "native": -0.2112583093665481,
+        "switched": 0.28039791527143254
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06637495198125443,
+        "native": 0.09274608893533798,
+        "switched": 0.02637113695408355
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 2,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 6,
+        "tp": 4,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.6666666666666666,
+        "recall": 0.2857142857142857,
+        "delta": 0.4573455084290414,
+        "native": -0.2112583093665481,
+        "switched": 0.24608719906249332
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06637495198125443,
+        "native": 0.09274608893533798,
+        "switched": 0.02637113695408355
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 2,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.25,
+        "delta": 2.998446804847177e-06,
+        "native": -0.0669227267135617,
+        "switched": -0.06691972826675685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 5,
+        "tp": 4,
+        "fp": 1,
+        "wrong": 14,
+        "precision": 0.8,
+        "recall": 0.2857142857142857,
+        "delta": 0.493059794143327,
+        "native": -0.2112583093665481,
+        "switched": 0.2818014847767789
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06637495198125443,
+        "native": 0.09274608893533798,
+        "switched": 0.02637113695408355
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 2,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 4,
+        "tp": 3,
+        "fp": 1,
+        "wrong": 14,
+        "precision": 0.75,
+        "recall": 0.21428571428571427,
+        "delta": 0.2889956230203323,
+        "native": -0.2112583093665481,
+        "switched": 0.07773731365378422
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 2,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 3,
+        "tp": 3,
+        "fp": 0,
+        "wrong": 14,
+        "precision": 1.0,
+        "recall": 0.21428571428571427,
+        "delta": 0.29551923906908795,
+        "native": -0.2112583093665481,
+        "switched": 0.08426092970253984
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 3,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 4,
+        "precision": 1.0,
+        "recall": 0.5,
+        "delta": 0.06381904312578601,
+        "native": -0.0669227267135617,
+        "switched": -0.003103683587775685
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 11,
+        "tp": 9,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.8181818181818182,
+        "recall": 0.6428571428571429,
+        "delta": 0.7389744638105613,
+        "native": -0.2112583093665481,
+        "switched": 0.5277161544440132
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 4,
+        "tp": 1,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.25,
+        "recall": 1.0,
+        "delta": -0.05945000389746724,
+        "native": 0.09274608893533798,
+        "switched": 0.03329608503787074
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 3,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 10,
+        "tp": 8,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.8,
+        "recall": 0.5714285714285714,
+        "delta": 0.6539744638105613,
+        "native": -0.2112583093665481,
+        "switched": 0.44271615444401324
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 4,
+        "tp": 1,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.25,
+        "recall": 1.0,
+        "delta": -0.05945000389746724,
+        "native": 0.09274608893533798,
+        "switched": 0.03329608503787074
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 3,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 7,
+        "tp": 5,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.7142857142857143,
+        "recall": 0.35714285714285715,
+        "delta": 0.5387562687368747,
+        "native": -0.2112583093665481,
+        "switched": 0.32749795937032655
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 4,
+        "tp": 1,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.25,
+        "recall": 1.0,
+        "delta": -0.05945000389746724,
+        "native": 0.09274608893533798,
+        "switched": 0.03329608503787074
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 3,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 6,
+        "tp": 4,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.6666666666666666,
+        "recall": 0.2857142857142857,
+        "delta": 0.5387562687368745,
+        "native": -0.2112583093665481,
+        "switched": 0.32749795937032644
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 4,
+        "tp": 1,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.25,
+        "recall": 1.0,
+        "delta": -0.05945000389746724,
+        "native": 0.09274608893533798,
+        "switched": 0.03329608503787074
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 3,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 14,
+        "precision": 0.6,
+        "recall": 0.21428571428571427,
+        "delta": 0.3738691244777972,
+        "native": -0.2112583093665481,
+        "switched": 0.16261081511124909
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.06637495198125443,
+        "native": 0.09274608893533798,
+        "switched": 0.02637113695408355
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 3,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 14,
+        "precision": 1.0,
+        "recall": 0.14285714285714285,
+        "delta": 0.21051923906908798,
+        "native": -0.2112583093665481,
+        "switched": -0.0007390702974601204
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "BRK",
+    "hours": 3,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 4,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "wrong": 4,
+        "precision": null,
+        "recall": 0.0,
+        "delta": 0.0,
+        "native": -0.0669227267135617,
+        "switched": -0.0669227267135617
+      },
+      {
+        "period": "TARGET",
+        "n": 22,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "wrong": 14,
+        "precision": 1.0,
+        "recall": 0.14285714285714285,
+        "delta": 0.21051923906908798,
+        "native": -0.2112583093665481,
+        "switched": -0.0007390702974601204
+      },
+      {
+        "period": "FORWARD",
+        "n": 6,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.09274608893533798,
+        "switched": 0.07087255355915878
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 1,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 38,
+        "tp": 21,
+        "fp": 17,
+        "wrong": 37,
+        "precision": 0.5526315789473685,
+        "recall": 0.5675675675675675,
+        "delta": 0.6101992517781187,
+        "native": 0.08862064902270383,
+        "switched": 0.6988199008008226
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 121,
+        "tp": 49,
+        "fp": 72,
+        "wrong": 82,
+        "precision": 0.4049586776859504,
+        "recall": 0.5975609756097561,
+        "delta": -0.17011429087140795,
+        "native": 1.7135596484609048,
+        "switched": 1.5434453575894969
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 13,
+        "tp": 3,
+        "fp": 10,
+        "wrong": 7,
+        "precision": 0.23076923076923078,
+        "recall": 0.42857142857142855,
+        "delta": -0.19150919183074078,
+        "native": 0.3858829965740532,
+        "switched": 0.19437380474331245
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 1,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 15,
+        "tp": 7,
+        "fp": 8,
+        "wrong": 37,
+        "precision": 0.4666666666666667,
+        "recall": 0.1891891891891892,
+        "delta": -0.015363522074053448,
+        "native": 0.08862064902270383,
+        "switched": 0.07325712694865039
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 64,
+        "tp": 28,
+        "fp": 36,
+        "wrong": 82,
+        "precision": 0.4375,
+        "recall": 0.34146341463414637,
+        "delta": 0.5283794131629083,
+        "native": 1.7135596484609048,
+        "switched": 2.241939061623813
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 6,
+        "tp": 3,
+        "fp": 3,
+        "wrong": 7,
+        "precision": 0.5,
+        "recall": 0.42857142857142855,
+        "delta": 0.023959767484029726,
+        "native": 0.3858829965740532,
+        "switched": 0.40984276405808295
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 1,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 11,
+        "tp": 7,
+        "fp": 4,
+        "wrong": 37,
+        "precision": 0.6363636363636364,
+        "recall": 0.1891891891891892,
+        "delta": 0.25699895873757506,
+        "native": 0.08862064902270383,
+        "switched": 0.3456196077602789
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 50,
+        "tp": 23,
+        "fp": 27,
+        "wrong": 82,
+        "precision": 0.46,
+        "recall": 0.2804878048780488,
+        "delta": 0.5310439648463479,
+        "native": 1.7135596484609048,
+        "switched": 2.2446036133072527
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 4,
+        "tp": 1,
+        "fp": 3,
+        "wrong": 7,
+        "precision": 0.25,
+        "recall": 0.14285714285714285,
+        "delta": -0.009954061416713733,
+        "native": 0.3858829965740532,
+        "switched": 0.3759289351573395
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 1,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 11,
+        "tp": 7,
+        "fp": 4,
+        "wrong": 37,
+        "precision": 0.6363636363636364,
+        "recall": 0.1891891891891892,
+        "delta": 0.25699895873757506,
+        "native": 0.08862064902270383,
+        "switched": 0.3456196077602789
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 38,
+        "tp": 18,
+        "fp": 20,
+        "wrong": 82,
+        "precision": 0.47368421052631576,
+        "recall": 0.21951219512195122,
+        "delta": 0.4635222815235218,
+        "native": 1.7135596484609048,
+        "switched": 2.1770819299844266
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 3,
+        "tp": 1,
+        "fp": 2,
+        "wrong": 7,
+        "precision": 0.3333333333333333,
+        "recall": 0.14285714285714285,
+        "delta": -0.009940033957963168,
+        "native": 0.3858829965740532,
+        "switched": 0.37594296261609006
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 1,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 8,
+        "tp": 6,
+        "fp": 2,
+        "wrong": 37,
+        "precision": 0.75,
+        "recall": 0.16216216216216217,
+        "delta": 0.2937785036068795,
+        "native": 0.08862064902270383,
+        "switched": 0.38239915262958335
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 25,
+        "tp": 13,
+        "fp": 12,
+        "wrong": 82,
+        "precision": 0.52,
+        "recall": 0.15853658536585366,
+        "delta": 0.4788903434502936,
+        "native": 1.7135596484609048,
+        "switched": 2.1924499919111984
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 7,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.3858829965740532,
+        "switched": 0.36400946119787403
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 1,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 5,
+        "tp": 3,
+        "fp": 2,
+        "wrong": 37,
+        "precision": 0.6,
+        "recall": 0.08108108108108109,
+        "delta": 0.1939533295218553,
+        "native": 0.08862064902270383,
+        "switched": 0.2825739785445591
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 12,
+        "tp": 6,
+        "fp": 6,
+        "wrong": 82,
+        "precision": 0.5,
+        "recall": 0.07317073170731707,
+        "delta": 0.47493198585530805,
+        "native": 1.7135596484609048,
+        "switched": 2.188491634316213
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 7,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.3858829965740532,
+        "switched": 0.36400946119787403
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 1,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 3,
+        "tp": 2,
+        "fp": 1,
+        "wrong": 37,
+        "precision": 0.6666666666666666,
+        "recall": 0.05405405405405406,
+        "delta": 0.14135940753094867,
+        "native": 0.08862064902270383,
+        "switched": 0.2299800565536525
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 7,
+        "tp": 5,
+        "fp": 2,
+        "wrong": 82,
+        "precision": 0.7142857142857143,
+        "recall": 0.06097560975609756,
+        "delta": 0.6150379245276845,
+        "native": 1.7135596484609048,
+        "switched": 2.3285975729885893
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 1,
+        "tp": 0,
+        "fp": 1,
+        "wrong": 7,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.021848409748038256,
+        "native": 0.3858829965740532,
+        "switched": 0.36403458682601497
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 2,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 32,
+        "tp": 23,
+        "fp": 9,
+        "wrong": 37,
+        "precision": 0.71875,
+        "recall": 0.6216216216216216,
+        "delta": 1.0940799663200056,
+        "native": 0.08862064902270383,
+        "switched": 1.1827006153427093
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 108,
+        "tp": 50,
+        "fp": 58,
+        "wrong": 82,
+        "precision": 0.46296296296296297,
+        "recall": 0.6097560975609756,
+        "delta": 0.9333414882254132,
+        "native": 1.7135596484609048,
+        "switched": 2.646901136686318
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 13,
+        "tp": 5,
+        "fp": 8,
+        "wrong": 7,
+        "precision": 0.38461538461538464,
+        "recall": 0.7142857142857143,
+        "delta": -0.07165062524477384,
+        "native": 0.3858829965740532,
+        "switched": 0.3142323713292794
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 2,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 23,
+        "tp": 17,
+        "fp": 6,
+        "wrong": 37,
+        "precision": 0.7391304347826086,
+        "recall": 0.4594594594594595,
+        "delta": 0.7229362233052193,
+        "native": 0.08862064902270383,
+        "switched": 0.8115568723279232
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 78,
+        "tp": 42,
+        "fp": 36,
+        "wrong": 82,
+        "precision": 0.5384615384615384,
+        "recall": 0.5121951219512195,
+        "delta": 1.3605469299309687,
+        "native": 1.7135596484609048,
+        "switched": 3.0741065783918735
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 10,
+        "tp": 5,
+        "fp": 5,
+        "wrong": 7,
+        "precision": 0.5,
+        "recall": 0.7142857142857143,
+        "delta": -0.023599666396653673,
+        "native": 0.3858829965740532,
+        "switched": 0.36228333017739955
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 2,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 17,
+        "tp": 12,
+        "fp": 5,
+        "wrong": 37,
+        "precision": 0.7058823529411765,
+        "recall": 0.32432432432432434,
+        "delta": 0.5960686408553855,
+        "native": 0.08862064902270383,
+        "switched": 0.6846892898780893
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 58,
+        "tp": 34,
+        "fp": 24,
+        "wrong": 82,
+        "precision": 0.5862068965517241,
+        "recall": 0.4146341463414634,
+        "delta": 1.4322498524906002,
+        "native": 1.7135596484609048,
+        "switched": 3.145809500951505
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 7,
+        "tp": 3,
+        "fp": 4,
+        "wrong": 7,
+        "precision": 0.42857142857142855,
+        "recall": 0.42857142857142855,
+        "delta": 0.016794149232476574,
+        "native": 0.3858829965740532,
+        "switched": 0.4026771458065298
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 2,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 15,
+        "tp": 12,
+        "fp": 3,
+        "wrong": 37,
+        "precision": 0.8,
+        "recall": 0.32432432432432434,
+        "delta": 0.6692295739379316,
+        "native": 0.08862064902270383,
+        "switched": 0.7578502229606354
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 49,
+        "tp": 28,
+        "fp": 21,
+        "wrong": 82,
+        "precision": 0.5714285714285714,
+        "recall": 0.34146341463414637,
+        "delta": 1.318511165177952,
+        "native": 1.7135596484609048,
+        "switched": 3.0320708136388568
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 5,
+        "tp": 1,
+        "fp": 4,
+        "wrong": 7,
+        "precision": 0.2,
+        "recall": 0.14285714285714285,
+        "delta": -0.013427348744561418,
+        "native": 0.3858829965740532,
+        "switched": 0.3724556478294918
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 2,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 12,
+        "tp": 9,
+        "fp": 3,
+        "wrong": 37,
+        "precision": 0.75,
+        "recall": 0.24324324324324326,
+        "delta": 0.47791751897039403,
+        "native": 0.08862064902270383,
+        "switched": 0.5665381679930979
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 39,
+        "tp": 24,
+        "fp": 15,
+        "wrong": 82,
+        "precision": 0.6153846153846154,
+        "recall": 0.2926829268292683,
+        "delta": 1.4224096844708753,
+        "native": 1.7135596484609048,
+        "switched": 3.13596933293178
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 5,
+        "tp": 1,
+        "fp": 4,
+        "wrong": 7,
+        "precision": 0.2,
+        "recall": 0.14285714285714285,
+        "delta": -0.013427348744561418,
+        "native": 0.3858829965740532,
+        "switched": 0.3724556478294918
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 2,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 6,
+        "tp": 4,
+        "fp": 2,
+        "wrong": 37,
+        "precision": 0.6666666666666666,
+        "recall": 0.10810810810810811,
+        "delta": 0.25297998570640023,
+        "native": 0.08862064902270383,
+        "switched": 0.34160063472910407
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 22,
+        "tp": 17,
+        "fp": 5,
+        "wrong": 82,
+        "precision": 0.7727272727272727,
+        "recall": 0.2073170731707317,
+        "delta": 1.3144536321703082,
+        "native": 1.7135596484609048,
+        "switched": 3.028013280631213
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 3,
+        "tp": 0,
+        "fp": 3,
+        "wrong": 7,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.021887562834929764,
+        "native": 0.3858829965740532,
+        "switched": 0.36399543373912346
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 2,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 5,
+        "tp": 4,
+        "fp": 1,
+        "wrong": 37,
+        "precision": 0.8,
+        "recall": 0.10810810810810811,
+        "delta": 0.2530051113345412,
+        "native": 0.08862064902270383,
+        "switched": 0.341625760357245
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 14,
+        "tp": 13,
+        "fp": 1,
+        "wrong": 82,
+        "precision": 0.9285714285714286,
+        "recall": 0.15853658536585366,
+        "delta": 1.2248245359460161,
+        "native": 1.7135596484609048,
+        "switched": 2.938384184406921
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 7,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.3858829965740532,
+        "switched": 0.36400946119787403
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 3,
+    "threshold": 0.0,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 30,
+        "tp": 24,
+        "fp": 6,
+        "wrong": 37,
+        "precision": 0.8,
+        "recall": 0.6486486486486487,
+        "delta": 1.4312096756164077,
+        "native": 0.08862064902270383,
+        "switched": 1.5198303246391114
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 105,
+        "tp": 56,
+        "fp": 49,
+        "wrong": 82,
+        "precision": 0.5333333333333333,
+        "recall": 0.6829268292682927,
+        "delta": 1.9000804992321807,
+        "native": 1.7135596484609048,
+        "switched": 3.6136401476930855
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 12,
+        "tp": 5,
+        "fp": 7,
+        "wrong": 7,
+        "precision": 0.4166666666666667,
+        "recall": 0.7142857142857143,
+        "delta": -0.14597062860630516,
+        "native": 0.3858829965740532,
+        "switched": 0.23991236796774806
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 3,
+    "threshold": 0.0025,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 19,
+        "tp": 16,
+        "fp": 3,
+        "wrong": 37,
+        "precision": 0.8421052631578947,
+        "recall": 0.43243243243243246,
+        "delta": 0.9680690934438746,
+        "native": 0.08862064902270383,
+        "switched": 1.0566897424665784
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 79,
+        "tp": 49,
+        "fp": 30,
+        "wrong": 82,
+        "precision": 0.620253164556962,
+        "recall": 0.5975609756097561,
+        "delta": 2.225640736778045,
+        "native": 1.7135596484609048,
+        "switched": 3.9392003852389497
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 8,
+        "tp": 3,
+        "fp": 5,
+        "wrong": 7,
+        "precision": 0.375,
+        "recall": 0.42857142857142855,
+        "delta": -0.08564719878443805,
+        "native": 0.3858829965740532,
+        "switched": 0.3002357977896152
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 3,
+    "threshold": 0.005,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 13,
+        "tp": 10,
+        "fp": 3,
+        "wrong": 37,
+        "precision": 0.7692307692307693,
+        "recall": 0.2702702702702703,
+        "delta": 0.6192014498629861,
+        "native": 0.08862064902270383,
+        "switched": 0.7078220988856899
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 66,
+        "tp": 42,
+        "fp": 24,
+        "wrong": 82,
+        "precision": 0.6363636363636364,
+        "recall": 0.5121951219512195,
+        "delta": 2.1823126371714583,
+        "native": 1.7135596484609048,
+        "switched": 3.895872285632363
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 8,
+        "tp": 3,
+        "fp": 5,
+        "wrong": 7,
+        "precision": 0.375,
+        "recall": 0.42857142857142855,
+        "delta": -0.08564719878443805,
+        "native": 0.3858829965740532,
+        "switched": 0.3002357977896152
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 3,
+    "threshold": 0.0075,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 11,
+        "tp": 9,
+        "fp": 2,
+        "wrong": 37,
+        "precision": 0.8181818181818182,
+        "recall": 0.24324324324324326,
+        "delta": 0.5805496030978918,
+        "native": 0.08862064902270383,
+        "switched": 0.6691702521205957
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 53,
+        "tp": 35,
+        "fp": 18,
+        "wrong": 82,
+        "precision": 0.660377358490566,
+        "recall": 0.4268292682926829,
+        "delta": 2.0807892433692325,
+        "native": 1.7135596484609048,
+        "switched": 3.794348891830137
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 7,
+        "tp": 3,
+        "fp": 4,
+        "wrong": 7,
+        "precision": 0.42857142857142855,
+        "recall": 0.42857142857142855,
+        "delta": 0.005431100757441798,
+        "native": 0.3858829965740532,
+        "switched": 0.391314097331495
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 3,
+    "threshold": 0.01,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 10,
+        "tp": 8,
+        "fp": 2,
+        "wrong": 37,
+        "precision": 0.8,
+        "recall": 0.21621621621621623,
+        "delta": 0.45466973911635844,
+        "native": 0.08862064902270383,
+        "switched": 0.5432903881390623
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 47,
+        "tp": 32,
+        "fp": 15,
+        "wrong": 82,
+        "precision": 0.6808510638297872,
+        "recall": 0.3902439024390244,
+        "delta": 1.9019968890230696,
+        "native": 1.7135596484609048,
+        "switched": 3.6155565374839744
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 4,
+        "tp": 1,
+        "fp": 3,
+        "wrong": 7,
+        "precision": 0.25,
+        "recall": 0.14285714285714285,
+        "delta": -0.013413321285810853,
+        "native": 0.3858829965740532,
+        "switched": 0.3724696752882424
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 3,
+    "threshold": 0.015,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 7,
+        "tp": 5,
+        "fp": 2,
+        "wrong": 37,
+        "precision": 0.7142857142857143,
+        "recall": 0.13513513513513514,
+        "delta": 0.33639384103837944,
+        "native": 0.08862064902270383,
+        "switched": 0.42501449006108327
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 33,
+        "tp": 25,
+        "fp": 8,
+        "wrong": 82,
+        "precision": 0.7575757575757576,
+        "recall": 0.3048780487804878,
+        "delta": 1.577670677491074,
+        "native": 1.7135596484609048,
+        "switched": 3.291230325951979
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 3,
+        "tp": 1,
+        "fp": 2,
+        "wrong": 7,
+        "precision": 0.3333333333333333,
+        "recall": 0.14285714285714285,
+        "delta": 0.031088095319264375,
+        "native": 0.3858829965740532,
+        "switched": 0.4169710918933176
+      }
+    ]
+  },
+  {
+    "family": "ALL",
+    "hours": 3,
+    "threshold": 0.02,
+    "mode": "CONTINUE_FLIP",
+    "results": [
+      {
+        "period": "PRE",
+        "n": 72,
+        "flagged": 6,
+        "tp": 4,
+        "fp": 2,
+        "wrong": 37,
+        "precision": 0.6666666666666666,
+        "recall": 0.10810810810810811,
+        "delta": 0.3209867756805159,
+        "native": 0.08862064902270383,
+        "switched": 0.40960742470321976
+      },
+      {
+        "period": "TARGET",
+        "n": 205,
+        "flagged": 23,
+        "tp": 19,
+        "fp": 4,
+        "wrong": 82,
+        "precision": 0.8260869565217391,
+        "recall": 0.23170731707317074,
+        "delta": 1.4461093816817463,
+        "native": 1.7135596484609048,
+        "switched": 3.159669030142651
+      },
+      {
+        "period": "FORWARD",
+        "n": 28,
+        "flagged": 2,
+        "tp": 0,
+        "fp": 2,
+        "wrong": 7,
+        "precision": 0.0,
+        "recall": 0.0,
+        "delta": -0.0218735353761792,
+        "native": 0.3858829965740532,
+        "switched": 0.36400946119787403
+      }
+    ]
+  }
+]

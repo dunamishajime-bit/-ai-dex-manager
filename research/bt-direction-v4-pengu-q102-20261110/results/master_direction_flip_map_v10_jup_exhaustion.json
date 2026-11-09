@@ -1,0 +1,1267 @@
+{
+  "summary": {
+    "V4_REC_Y_NOY08": {
+      "trainMaxDD": -0.44194690543751525,
+      "confirm": "BREADTH70",
+      "flips": 114,
+      "firstTriggerTs": 1787508000000
+    },
+    "Q102_MR": {
+      "trainMaxDD": -0.12620532090963532,
+      "confirm": "BTC_BULL",
+      "flips": 10,
+      "firstTriggerTs": 1787259600000
+    },
+    "IDLE_NON_TIA_DOT": {
+      "trainMaxDD": -0.3363494634057598,
+      "confirm": "BREADTH70",
+      "flips": 26,
+      "firstTriggerTs": 1787457600000
+    },
+    "TAO_REL6_EXHAUSTION": {
+      "threshold": -0.024,
+      "addedUniqueFlips": 8,
+      "semantics": "If TAO native SHORT signal fires while TAO underperforms BTC by >=2.4pp over causal 6h, research direction is LONG"
+    },
+    "PENGU_SHORT_V20_EXHAUSTION": {
+      "btc24Min": -0.01,
+      "rel12Max": -0.035,
+      "addedUniqueFlips": 4,
+      "management": "LONG_V64/LONG_V2_FINAL management"
+    },
+    "Q102_MR_STRONG_BTC_7D": {
+      "btc7dMin": 0.1,
+      "addedUniqueFlips": 3,
+      "semantics": "Native Q102 MR SHORT flips LONG when causal BTC 168h return >= +10%."
+    },
+    "PENGU_RECOVERY_LOWVOL_REVERSAL": {
+      "btcVol72Max": 0.0024,
+      "penguRet72Min": -0.05,
+      "addedUniqueFlips": 5,
+      "semantics": "RECOVERY_V8 LONG flips SHORT when causal BTC 72h hourly-log-return vol <=0.24% and PENGU 72h return > -5%; management uses SHORT_V20."
+    }
+  },
+  "flips": [
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ATOMUSDT",
+      "entryTs": 1787508000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ATOMUSDT",
+      "entryTs": 1787515200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "LTCUSDT",
+      "entryTs": 1787522400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ATOMUSDT",
+      "entryTs": 1787522400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1787529600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ETHUSDT",
+      "entryTs": 1787529600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "BNBUSDT",
+      "entryTs": 1787565600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787565600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "BNBUSDT",
+      "entryTs": 1787572800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787572800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1787580000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "BTCUSDT",
+      "entryTs": 1787587200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1787587200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y03_REV_D0_T36",
+      "symbol": "BNBUSDT",
+      "entryTs": 1787594400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y03_REV_D0_T36",
+      "symbol": "BTCUSDT",
+      "entryTs": 1787594400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1787594400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787601600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1787601600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787616000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1787623200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787623200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y03_REV_D0_T36",
+      "symbol": "ETHUSDT",
+      "entryTs": 1787630400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787630400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "ETHUSDT",
+      "entryTs": 1787637600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787637600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1787644800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1787673600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787824800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787846400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1787853600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1788451200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1788451200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1788458400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1788458400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1788465600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "XRPUSDT",
+      "entryTs": 1788472800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1788480000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1788487200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1788501600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1788508800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1788516000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1788523200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1788667200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ETHUSDT",
+      "entryTs": 1788674400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "BTCUSDT",
+      "entryTs": 1788746400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1789408800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "BNBUSDT",
+      "entryTs": 1789711200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "BNBUSDT",
+      "entryTs": 1789718400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ATOMUSDT",
+      "entryTs": 1789740000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1789761600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ATOMUSDT",
+      "entryTs": 1789768800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1789776000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "LTCUSDT",
+      "entryTs": 1789776000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1789783200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "LTCUSDT",
+      "entryTs": 1789783200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AAVEUSDT",
+      "entryTs": 1789790400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "LTCUSDT",
+      "entryTs": 1789790400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1789804800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1789812000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1789812000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1789819200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1789826400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1789840800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y03_REV_D0_T36",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1789848000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1789848000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y03_REV_D0_T36",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1789869600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1789884000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1789905600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "BTCUSDT",
+      "entryTs": 1789912800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1789912800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "BTCUSDT",
+      "entryTs": 1789920000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "ETHUSDT",
+      "entryTs": 1789920000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789920000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "BTCUSDT",
+      "entryTs": 1789927200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "ETHUSDT",
+      "entryTs": 1789927200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789927200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789934400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1789934400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1789941600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789941600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1789948800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "BTCUSDT",
+      "entryTs": 1789948800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y01_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789948800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1789956000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "BTCUSDT",
+      "entryTs": 1789963200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789963200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "LTCUSDT",
+      "entryTs": 1789970400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789970400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "SOLUSDT",
+      "entryTs": 1789977600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "XRPUSDT",
+      "entryTs": 1789977600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1790020800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1790028000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "LINKUSDT",
+      "entryTs": 1790035200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1790035200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1790042400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1790042400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1790049600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y03_REV_D0_T36",
+      "symbol": "ADAUSDT",
+      "entryTs": 1790071200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "XRPUSDT",
+      "entryTs": 1790078400000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1790085600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1790085600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1790092800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "XRPUSDT",
+      "entryTs": 1790092800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "LINKUSDT",
+      "entryTs": 1790100000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "ADAUSDT",
+      "entryTs": 1790107200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "XRPUSDT",
+      "entryTs": 1790107200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "INJUSDT",
+      "entryTs": 1790121600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y03_REV_D0_T36",
+      "symbol": "ADAUSDT",
+      "entryTs": 1790128800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1790136000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "LTCUSDT",
+      "entryTs": 1790136000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y07_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1790143200000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1790157600000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1790164800000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "V4",
+      "route": "REC_Y06_REV_D0_T72",
+      "symbol": "NEARUSDT",
+      "entryTs": 1790172000000,
+      "rule": "V4_REC_Y_NOY08"
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|MR24_Z1.5_H24",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1787259600000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "UNI|MR48_Z1.5_H24",
+      "symbol": "UNIUSDT",
+      "entryTs": 1787504400000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "UNI|MR48_Z1.5_H24",
+      "symbol": "UNIUSDT",
+      "entryTs": 1787518800000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|MR24_Z1.5_H24",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1787821200000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|MR24_Z1.5_H24",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1788411600000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR48_Z2.0_H12",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1788440400000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR48_Z2.0_H12",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1788469200000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "UNI|MR72_Z1.5_H24",
+      "symbol": "UNIUSDT",
+      "entryTs": 1789650000000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|MR24_Z1.5_H24",
+      "symbol": "AVAXUSDT",
+      "entryTs": 1789779600000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR72_Z1.5_H12",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1790038800000,
+      "rule": "Q102_MR"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "symbol": "RENDERUSDT",
+      "entryTs": 1787457600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1787461200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1787691600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1787965200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1788015600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1788134400000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "symbol": "RENDERUSDT",
+      "entryTs": 1788166800000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1788361200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1788789600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1788836400000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1788850800000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1788897600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "symbol": "RENDERUSDT",
+      "entryTs": 1788919200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1789038000000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1789084800000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1789272000000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1789333200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1789567200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1789916400000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1790049600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "symbol": "RENDERUSDT",
+      "entryTs": 1790168400000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1790215200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1790514000000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "symbol": "RENDERUSDT",
+      "entryTs": 1790589600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "symbol": "RENDERUSDT",
+      "entryTs": 1790643600000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1790647200000,
+      "rule": "IDLE_NON_TIA_DOT"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1769871600000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1770325200000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1777910400000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1778986800000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1780459200000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1784084400000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1786719600000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "symbol": "TAOUSDT",
+      "entryTs": 1787022000000,
+      "rule": "TAO_REL6_EXHAUSTION_REVERSAL_LE_-2P4"
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1761930000000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": 0.006259773671589919,
+      "rel12": -0.04296653178851262
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1762650000000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": -0.008792369166507497,
+      "rel12": -0.039248304868852224
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1766102400000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": -0.008495044267498253,
+      "rel12": -0.04143981653500628
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1784318400000,
+      "rule": "SHORT_V20_IDIOSYNCRATIC_EXHAUSTION_BTC24_GE_-1_REL12_LE_-3P5",
+      "btc_ret24": -0.0018428904740929175,
+      "rel12": -0.0608380311788429
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR72_Z1.5_H12",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1759770000000,
+      "rule": "Q102_MR_STRONG_BTC_7D_GE_10PCT",
+      "btc_ret168": 0.1042280500827053
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR48_Z2.0_H12",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1787216400000,
+      "rule": "Q102_MR_STRONG_BTC_7D_GE_10PCT",
+      "btc_ret168": 0.1223001041679741
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR72_Z1.5_H12",
+      "symbol": "DOGEUSDT",
+      "entryTs": 1787230800000,
+      "rule": "Q102_MR_STRONG_BTC_7D_GE_10PCT",
+      "btc_ret168": 0.1296676441070086
+    },
+    {
+      "strategy": "PENGU",
+      "route": "RECOVERY_V8",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1785002400000,
+      "rule": "RECOVERY_LOW_BTC72_VOL_NOT_DEEPLY_OVERSOLD",
+      "btc_vol72": 0.002358761333404065,
+      "pengu_ret72": -0.021564615142452337
+    },
+    {
+      "strategy": "PENGU",
+      "route": "RECOVERY_V8",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1786532400000,
+      "rule": "RECOVERY_LOW_BTC72_VOL_NOT_DEEPLY_OVERSOLD",
+      "btc_vol72": 0.0022462994019460188,
+      "pengu_ret72": 0.022306597057427657
+    },
+    {
+      "strategy": "PENGU",
+      "route": "RECOVERY_V8",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1786615200000,
+      "rule": "RECOVERY_LOW_BTC72_VOL_NOT_DEEPLY_OVERSOLD",
+      "btc_vol72": 0.0023497214430634275,
+      "pengu_ret72": -0.04594432804549531
+    },
+    {
+      "strategy": "PENGU",
+      "route": "RECOVERY_V8",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1789405200000,
+      "rule": "RECOVERY_LOW_BTC72_VOL_NOT_DEEPLY_OVERSOLD",
+      "btc_vol72": 0.0023473630442014098,
+      "pengu_ret72": -0.025842240562846786
+    },
+    {
+      "strategy": "PENGU",
+      "route": "RECOVERY_V8",
+      "symbol": "PENGUUSDT",
+      "entryTs": 1790600400000,
+      "rule": "RECOVERY_LOW_BTC72_VOL_NOT_DEEPLY_OVERSOLD",
+      "btc_vol72": 0.0023349131404531566,
+      "pengu_ret72": -0.004780876494024033
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "symbol": "JUPUSDT",
+      "entryTs": 1773097200000,
+      "rule": "JUP_BTCUP_RELWEAK_VOLUME10_EXHAUSTION",
+      "basis": "Pinned relative threshold 3% + BTC24 positive + order-of-magnitude quote-volume spike >=10x median; target 1/1 and true forward holdout 1/1, zero FP."
+    }
+  ],
+  "jupExhaustionRule": "btc24>0 && rel24<=-0.03 && volumeRatio>=10.0",
+  "jupExhaustionAdded": 1
+}

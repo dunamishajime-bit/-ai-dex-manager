@@ -1,0 +1,298 @@
+[
+  {
+    "route": "REC_Y06_REV_D0_T72",
+    "status": "UNCONFIRMED",
+    "conditions": [
+      [
+        "v2_compression",
+        ">",
+        1.674008810573
+      ],
+      [
+        "v2_btc6",
+        ">",
+        0.002263760789
+      ]
+    ],
+    "rule": "v2_compression>1.674008810573 AND v2_btc6>0.002263760789",
+    "train": {
+      "n": 211,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 39,
+      "precision": 1.0,
+      "recall": 0.05128205128205128,
+      "delta": 0.12066176644448734
+    },
+    "val": {
+      "n": 70,
+      "flagged": 3,
+      "tp": 3,
+      "fp": 0,
+      "wrong": 33,
+      "precision": 1.0,
+      "recall": 0.09090909090909091,
+      "delta": 0.0659844965804397
+    },
+    "test": {
+      "n": 71,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 48,
+      "precision": null,
+      "recall": 0.0,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X03_TIME_12H",
+    "status": "NONE"
+  },
+  {
+    "route": "REC_X05_TIME_36H",
+    "status": "REJECT",
+    "conditions": [
+      [
+        "nativeSourceScore",
+        ">",
+        0.323995244955
+      ],
+      [
+        "v2_btc6",
+        ">",
+        -0.002888461387
+      ],
+      [
+        "v2_clv",
+        "<=",
+        0.784722222222
+      ]
+    ],
+    "rule": "nativeSourceScore>0.323995244955 AND v2_btc6>-0.002888461387 AND v2_clv<=0.784722222222",
+    "train": {
+      "n": 33,
+      "flagged": 6,
+      "tp": 6,
+      "fp": 0,
+      "wrong": 15,
+      "precision": 1.0,
+      "recall": 0.4,
+      "delta": 0.19534870997662646
+    },
+    "val": {
+      "n": 11,
+      "flagged": 3,
+      "tp": 3,
+      "fp": 0,
+      "wrong": 6,
+      "precision": 1.0,
+      "recall": 0.5,
+      "delta": 0.2578205587235167
+    },
+    "test": {
+      "n": 12,
+      "flagged": 3,
+      "tp": 2,
+      "fp": 1,
+      "wrong": 5,
+      "precision": 0.6666666666666666,
+      "recall": 0.4,
+      "delta": 0.06461539037362618
+    }
+  },
+  {
+    "route": "REC_X14_TIME_48H",
+    "status": "REJECT",
+    "conditions": [
+      [
+        "v2_btc24",
+        ">",
+        0.017479064051
+      ],
+      [
+        "nativeSourceAtr",
+        "<=",
+        0.150967741935
+      ]
+    ],
+    "rule": "v2_btc24>0.017479064051 AND nativeSourceAtr<=0.150967741935",
+    "train": {
+      "n": 19,
+      "flagged": 4,
+      "tp": 4,
+      "fp": 0,
+      "wrong": 7,
+      "precision": 1.0,
+      "recall": 0.5714285714285714,
+      "delta": 0.2766784638190085
+    },
+    "val": {
+      "n": 6,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 4,
+      "precision": 1.0,
+      "recall": 0.5,
+      "delta": 0.03384872634737213
+    },
+    "test": {
+      "n": 7,
+      "flagged": 4,
+      "tp": 0,
+      "fp": 4,
+      "wrong": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "delta": -0.405876293423423
+    }
+  },
+  {
+    "route": "REC_X10_TIME_48H",
+    "status": "REJECT",
+    "conditions": [
+      [
+        "v2_compression",
+        "<=",
+        0.920863309353
+      ],
+      [
+        "v2_btc6",
+        "<=",
+        -0.000223746782
+      ],
+      [
+        "v2_volRatio",
+        "<=",
+        0.895735637232
+      ]
+    ],
+    "rule": "v2_compression<=0.920863309353 AND v2_btc6<=-0.000223746782 AND v2_volRatio<=0.895735637232",
+    "train": {
+      "n": 21,
+      "flagged": 3,
+      "tp": 3,
+      "fp": 0,
+      "wrong": 6,
+      "precision": 1.0,
+      "recall": 0.5,
+      "delta": 0.3780812443038515
+    },
+    "val": {
+      "n": 7,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 1,
+      "precision": 1.0,
+      "recall": 1.0,
+      "delta": 0.012200081333875623
+    },
+    "test": {
+      "n": 7,
+      "flagged": 1,
+      "tp": 0,
+      "fp": 1,
+      "wrong": 2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "delta": -0.2760041194644698
+    }
+  },
+  {
+    "route": "REC_Y03_REV_D0_T36",
+    "status": "REJECT",
+    "conditions": [
+      [
+        "v2_btc24",
+        "<=",
+        -0.025207105087
+      ],
+      [
+        "v2_bodyAtr",
+        "<=",
+        0.426085714869
+      ]
+    ],
+    "rule": "v2_btc24<=-0.025207105087 AND v2_bodyAtr<=0.426085714869",
+    "train": {
+      "n": 29,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 7,
+      "precision": 1.0,
+      "recall": 0.2857142857142857,
+      "delta": 0.062090071256453605
+    },
+    "val": {
+      "n": 10,
+      "flagged": 4,
+      "tp": 4,
+      "fp": 0,
+      "wrong": 7,
+      "precision": 1.0,
+      "recall": 0.5714285714285714,
+      "delta": 0.41800091303219955
+    },
+    "test": {
+      "n": 10,
+      "flagged": 2,
+      "tp": 0,
+      "fp": 2,
+      "wrong": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "delta": -0.05945865141956874
+    }
+  },
+  {
+    "route": "REC_X02_TIME_36H",
+    "status": "REJECT",
+    "conditions": [
+      [
+        "v2_pullback12Atr",
+        ">",
+        3.015520134228
+      ],
+      [
+        "v2_rel12",
+        "<=",
+        -0.003882170385
+      ]
+    ],
+    "rule": "v2_pullback12Atr>3.015520134228 AND v2_rel12<=-0.003882170385",
+    "train": {
+      "n": 33,
+      "flagged": 6,
+      "tp": 6,
+      "fp": 0,
+      "wrong": 11,
+      "precision": 1.0,
+      "recall": 0.5454545454545454,
+      "delta": 0.11882826919100253
+    },
+    "val": {
+      "n": 11,
+      "flagged": 4,
+      "tp": 4,
+      "fp": 0,
+      "wrong": 8,
+      "precision": 1.0,
+      "recall": 0.5,
+      "delta": 0.22750084277126348
+    },
+    "test": {
+      "n": 11,
+      "flagged": 1,
+      "tp": 0,
+      "fp": 1,
+      "wrong": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "delta": -0.00815771583956515
+    }
+  }
+]

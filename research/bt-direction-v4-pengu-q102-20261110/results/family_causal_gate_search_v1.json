@@ -1,0 +1,89 @@
+[
+  {
+    "group": "Q_REV",
+    "rule": "sx_ret72>0.022088353414 AND bx_up_ratio24>0.625",
+    "conditions": [
+      [
+        "sx_ret72",
+        ">",
+        0.022088353414
+      ],
+      [
+        "bx_up_ratio24",
+        ">",
+        0.625
+      ]
+    ],
+    "train": {
+      "n": 47,
+      "flagged": 6,
+      "tp": 5,
+      "fp": 1,
+      "wrong": 16,
+      "precision": 0.8333333333333334,
+      "recall": 0.3125,
+      "delta": 0.13681751598449698
+    },
+    "val": {
+      "n": 16,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 7,
+      "precision": 1.0,
+      "recall": 0.2857142857142857,
+      "delta": 0.09718660076521435
+    },
+    "test": {
+      "n": 16,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "precision": null,
+      "recall": 0.0,
+      "delta": 0.0
+    }
+  },
+  {
+    "group": "Q_PB",
+    "rule": "sx_pos72<=0.236625514403",
+    "conditions": [
+      [
+        "sx_pos72",
+        "<=",
+        0.236625514403
+      ]
+    ],
+    "train": {
+      "n": 19,
+      "flagged": 3,
+      "tp": 2,
+      "fp": 1,
+      "wrong": 5,
+      "precision": 0.6666666666666666,
+      "recall": 0.4,
+      "delta": -0.044329566944215304
+    },
+    "val": {
+      "n": 7,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "delta": 0.06901088163827174
+    },
+    "test": {
+      "n": 7,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 7,
+      "precision": 1.0,
+      "recall": 0.14285714285714285,
+      "delta": 0.07431791221826822
+    }
+  }
+]

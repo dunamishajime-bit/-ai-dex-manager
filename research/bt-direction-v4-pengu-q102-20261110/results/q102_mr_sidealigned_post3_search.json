@@ -1,0 +1,38 @@
+{
+  "threshold": 0.0025,
+  "condition": [
+    "sem_mean_slope_aligned",
+    ">",
+    0.042007637752
+  ],
+  "PRE": {
+    "n": 41,
+    "flagged": 10,
+    "tp": 10,
+    "fp": 0,
+    "wrong": 22,
+    "precision": 1.0,
+    "recall": 0.45454545454545453,
+    "delta": 0.5830933682213312
+  },
+  "TARGET": {
+    "n": 71,
+    "flagged": 11,
+    "tp": 9,
+    "fp": 2,
+    "wrong": 26,
+    "precision": 0.8181818181818182,
+    "recall": 0.34615384615384615,
+    "delta": 0.7899803169283203
+  },
+  "FORWARD": {
+    "n": 6,
+    "flagged": 0,
+    "tp": 0,
+    "fp": 0,
+    "wrong": 2,
+    "precision": null,
+    "recall": 0.0,
+    "delta": 0
+  }
+}
