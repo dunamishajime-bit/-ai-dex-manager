@@ -127,3 +127,7 @@ The controlling route-by-route status is now documented in V4_PENGU_DIRECTION_CL
 - Study [source-backed checkpoint JSON](./results/v4_y06_structural_deep_audit_checkpoint_20261110.json) and [episode/regime result](./results/v4_y06_episodes_non_iid_regime_audit_20261110.json); replay scripts are in [scripts](./scripts).
 - **Full Production parity is not certified** because the research portfolio engine still uses price/venue approximations for other components, especially V52. No Production, LIVE, order, STOP, or Kill Switch changes were made.
 - The next validation must use *fresh source-proven post-2026-10-01 market data* and leave entire overlapping position episodes out of fitting/threshold selection, then full 10/30bps integrated BT.
+
+### Forward shadow update (2026-11-10): H60 rejected
+
+Post-2026-10-01 Aster forward H1/M5 exists, but its original V4 replay states **BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06**. Only falsification tests are allowed, not independent OOS promotion. Among 20 forward Y06 cases, H60 changed 13 exits and made 11 worse, including 9 originally profitable natives; 4/4 disjoint episodes had negative H60 summed deltas. Mark **unconditional Y06 H60 REJECTED** in research; do not deploy. X05 composite had two forward triggers with no fully modeled native/opposite pairs; X07/X11 had no triggers. Their status remains unresolved. See [Y06 structural report](./Y06_NATIVE_EXITS_REGIME_AND_GROSS_STRESS_20261110.md) for source hashes, scripts and provenance.
