@@ -1,0 +1,87 @@
+[
+  {
+    "route": "LONG_V64",
+    "n": 25,
+    "wrong": 6,
+    "split": [
+      15,
+      5,
+      5
+    ],
+    "best": {
+      "status": "UNCONFIRMED",
+      "conditions": [
+        [
+          "rec_previousClose",
+          ">",
+          0.010843
+        ],
+        [
+          "pre_rel1",
+          ">",
+          0.023472796105682425
+        ]
+      ],
+      "train": {
+        "n": 15,
+        "flagged": 2,
+        "tp": 2,
+        "fp": 0,
+        "pos": 4,
+        "precision": 1.0,
+        "recall": 0.5,
+        "edge": 0.45083404772837443,
+        "ids": [
+          "PENGU_00023",
+          "PENGU_00024"
+        ]
+      },
+      "val": {
+        "n": 5,
+        "flagged": 1,
+        "tp": 1,
+        "fp": 0,
+        "pos": 1,
+        "precision": 1.0,
+        "recall": 1.0,
+        "edge": 0.09220059208755726,
+        "ids": [
+          "PENGU_00068"
+        ]
+      },
+      "test": {
+        "n": 5,
+        "flagged": 0,
+        "tp": 0,
+        "fp": 0,
+        "pos": 1,
+        "precision": null,
+        "recall": 0.0,
+        "edge": 0,
+        "ids": []
+      }
+    }
+  },
+  {
+    "route": "RECOVERY_V8",
+    "n": 50,
+    "wrong": 19,
+    "split": [
+      30,
+      10,
+      10
+    ],
+    "best": null
+  },
+  {
+    "route": "SHORT_V20",
+    "n": 40,
+    "wrong": 13,
+    "split": [
+      24,
+      8,
+      8
+    ],
+    "best": null
+  }
+]

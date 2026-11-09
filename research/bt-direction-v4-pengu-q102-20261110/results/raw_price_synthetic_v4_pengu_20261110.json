@@ -1,0 +1,556 @@
+{
+  "schema": "disdex-raw-price-synthetic-direction-stress/v1",
+  "status": "RESEARCH_ONLY_SYNTHETIC_NOT_PROFIT_EVIDENCE",
+  "formulas": {
+    "retN": "last_completed_close / close_N_hours_earlier - 1",
+    "vol72": "population standard deviation of 72 hourly log returns",
+    "V4_X05": "sym_vol72 <= 0.00658",
+    "V4_X07": "sym_ret3 > -0.0140114167 AND btc_ret3 > -0.0058802215",
+    "V4_X11": "sym_ret72 - btc_ret72 > 0.0",
+    "PENGU_V8_2H": "pre sym_ret12 > 0.0254491018 AND entry-to-2h-close return <= -0.0039952058"
+  },
+  "v4": {
+    "scenarios": [
+      {
+        "name": "low_vol_bull_continuation",
+        "description": "Low-volatility rising symbol/BTC and continued rise",
+        "features": {
+          "sym_ret3": 0.002430820837698855,
+          "btc_ret3": 0.001232375511451167,
+          "sym_ret12": 0.009758794179191677,
+          "btc_ret12": 0.004938622031197548,
+          "sym_ret72": 0.059999999999996056,
+          "btc_ret72": 0.030000000000002025,
+          "rel72": 0.02999999999999403,
+          "sym_vol72": 0.0
+        },
+        "future_return12": 0.04,
+        "synthetic_truth": "LONG",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          },
+          "REC_X11_TIME_48H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          }
+        }
+      },
+      {
+        "name": "low_vol_bear_continuation",
+        "description": "Low-volatility falling symbol/BTC and continued fall",
+        "features": {
+          "sym_ret3": -0.0025748212681928617,
+          "btc_ret3": -0.0012683286356822698,
+          "sym_ret12": -0.010259575082656847,
+          "btc_ret12": -0.005063670756198402,
+          "sym_ret72": -0.0599999999999965,
+          "btc_ret72": -0.029999999999997473,
+          "rel72": -0.029999999999999027,
+          "sym_vol72": 6.279146867227997e-17
+        },
+        "future_return12": -0.04,
+        "synthetic_truth": "SHORT",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X11_TIME_48H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "SHORT",
+            "direction_match": true
+          }
+        }
+      },
+      {
+        "name": "relative_strength_bear",
+        "description": "Symbol falls less than BTC (positive relative strength) but symbol keeps falling",
+        "features": {
+          "sym_ret3": -0.0008414252746163919,
+          "btc_ret3": -0.0034682055389798627,
+          "sym_ret12": -0.003361455501911803,
+          "btc_ret12": -0.013800818181815666,
+          "sym_ret72": -0.02000000000000124,
+          "btc_ret72": -0.07999999999999874,
+          "rel72": 0.0599999999999975,
+          "sym_vol72": 5.0100103570069304e-17
+        },
+        "future_return12": -0.05,
+        "synthetic_truth": "SHORT",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X11_TIME_48H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          }
+        }
+      },
+      {
+        "name": "mild_3h_decline_then_bear",
+        "description": "Last 3h decline is milder than X07 cutoffs, then decline continues",
+        "features": {
+          "sym_ret3": -0.009999999999999898,
+          "btc_ret3": -0.0039999999999997815,
+          "sym_ret12": -0.012605350146441263,
+          "btc_ret12": -0.006093214437663308,
+          "sym_ret72": -0.02979999999999794,
+          "btc_ret72": -0.01993599999999618,
+          "rel72": -0.00986400000000176,
+          "sym_vol72": 0.0006109328031586604
+        },
+        "future_return12": -0.05,
+        "synthetic_truth": "SHORT",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X11_TIME_48H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "SHORT",
+            "direction_match": true
+          }
+        }
+      },
+      {
+        "name": "strong_3h_decline_then_bear",
+        "description": "Last 3h decline exceeds X07 cutoffs and decline continues",
+        "features": {
+          "sym_ret3": -0.030000000000000027,
+          "btc_ret3": -0.014999999999999791,
+          "sym_ret12": -0.03384610666878829,
+          "btc_ret12": -0.01824742296824211,
+          "sym_ret72": -0.05909999999999693,
+          "btc_ret72": -0.03962500000000102,
+          "rel72": -0.019474999999995912,
+          "sym_vol72": 0.0019406394948468365
+        },
+        "future_return12": -0.05,
+        "synthetic_truth": "SHORT",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X07_TIME_6H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "SHORT",
+            "direction_match": true
+          },
+          "REC_X11_TIME_48H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "SHORT",
+            "direction_match": true
+          }
+        }
+      },
+      {
+        "name": "high_vol_bull_continuation",
+        "description": "Bullish endpoint but noisy/high-vol history and continued rise",
+        "features": {
+          "sym_ret3": -0.009526461829303612,
+          "btc_ret3": -0.004757032549221996,
+          "sym_ret12": 0.009758794179192787,
+          "btc_ret12": 0.004938622031197548,
+          "sym_ret72": 0.06000000000000383,
+          "btc_ret72": 0.030000000000002025,
+          "rel72": 0.030000000000001803,
+          "sym_vol72": 0.01200000000000003
+        },
+        "future_return12": 0.05,
+        "synthetic_truth": "LONG",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "LONG",
+            "direction_match": false
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          },
+          "REC_X11_TIME_48H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          }
+        }
+      },
+      {
+        "name": "symbol_bull_btc_stronger",
+        "description": "Symbol rises but BTC rises more; relative strength is negative",
+        "features": {
+          "sym_ret3": 0.001232375511451167,
+          "btc_ret3": 0.0039791533836268655,
+          "sym_ret12": 0.004938622031197548,
+          "btc_ret12": 0.016011867773388033,
+          "sym_ret72": 0.030000000000002025,
+          "btc_ret72": 0.10000000000000342,
+          "rel72": -0.0700000000000014,
+          "sym_vol72": 0.0
+        },
+        "future_return12": 0.05,
+        "synthetic_truth": "LONG",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          },
+          "REC_X11_TIME_48H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "LONG",
+            "direction_match": false
+          }
+        }
+      },
+      {
+        "name": "range_pre_breakdown",
+        "description": "Near-flat low-vol prehistory then bearish future",
+        "features": {
+          "sym_ret3": 4.16467144124244e-05,
+          "btc_ret3": 4.16467144124244e-05,
+          "sym_ret12": 0.00016659726463141844,
+          "btc_ret12": 0.00016659726463141844,
+          "sym_ret72": 0.0010000000000074394,
+          "btc_ret72": 0.0010000000000074394,
+          "rel72": 0.0,
+          "sym_vol72": 0.0
+        },
+        "future_return12": -0.05,
+        "synthetic_truth": "SHORT",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "SHORT",
+            "direction_match": false
+          },
+          "REC_X11_TIME_48H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "SHORT",
+            "direction_match": true
+          }
+        }
+      },
+      {
+        "name": "range_pre_breakout",
+        "description": "Near-flat low-vol prehistory then bullish future",
+        "features": {
+          "sym_ret3": 4.16467144124244e-05,
+          "btc_ret3": 4.16467144124244e-05,
+          "sym_ret12": 0.00016659726463141844,
+          "btc_ret12": 0.00016659726463141844,
+          "sym_ret72": 0.0010000000000074394,
+          "btc_ret72": 0.0010000000000074394,
+          "rel72": 0.0,
+          "sym_vol72": 0.0
+        },
+        "future_return12": 0.05,
+        "synthetic_truth": "LONG",
+        "routes": {
+          "REC_X05_TIME_36H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          },
+          "REC_X07_TIME_6H": {
+            "fire": true,
+            "action": "LONG",
+            "truth": "LONG",
+            "direction_match": true
+          },
+          "REC_X11_TIME_48H": {
+            "fire": false,
+            "action": "SHORT",
+            "truth": "LONG",
+            "direction_match": false
+          }
+        }
+      }
+    ],
+    "standalone_directional_contradictions": {
+      "REC_X05_TIME_36H": [
+        "low_vol_bear_continuation",
+        "relative_strength_bear",
+        "mild_3h_decline_then_bear",
+        "strong_3h_decline_then_bear",
+        "range_pre_breakdown"
+      ],
+      "REC_X07_TIME_6H": [
+        "low_vol_bear_continuation",
+        "relative_strength_bear",
+        "mild_3h_decline_then_bear",
+        "range_pre_breakdown"
+      ],
+      "REC_X11_TIME_48H": [
+        "relative_strength_bear"
+      ]
+    },
+    "standalone_missed_corrections": {
+      "REC_X05_TIME_36H": [
+        "high_vol_bull_continuation"
+      ],
+      "REC_X07_TIME_6H": [],
+      "REC_X11_TIME_48H": [
+        "symbol_bull_btc_stronger",
+        "range_pre_breakout"
+      ]
+    }
+  },
+  "pengu_recovery_v8": {
+    "scenarios": [
+      {
+        "name": "strong_pre_up_reversal_bear",
+        "description": "Strong 12h rise, first 2h reverse lower, then bearish continuation",
+        "calculated": {
+          "sym_ret12": 0.0400000000000007,
+          "p_r2": -0.009999999999999898
+        },
+        "specified": {
+          "sym_ret12": 0.04,
+          "p_r2": -0.01
+        },
+        "after_decision_return6": -0.05,
+        "synthetic_truth_after_2h": "SHORT",
+        "gate_fire": true,
+        "action": "SHORT",
+        "direction_match": true,
+        "calc_error": {
+          "sym_ret12": 7.008282842946301e-16,
+          "p_r2": 1.0234868508263162e-16
+        }
+      },
+      {
+        "name": "strong_pre_up_dip_then_bull",
+        "description": "Strong 12h rise, first 2h dip, then V-shaped bullish continuation",
+        "calculated": {
+          "sym_ret12": 0.0400000000000007,
+          "p_r2": -0.009999999999999898
+        },
+        "specified": {
+          "sym_ret12": 0.04,
+          "p_r2": -0.01
+        },
+        "after_decision_return6": 0.06,
+        "synthetic_truth_after_2h": "LONG",
+        "gate_fire": true,
+        "action": "SHORT",
+        "direction_match": false,
+        "calc_error": {
+          "sym_ret12": 7.008282842946301e-16,
+          "p_r2": 1.0234868508263162e-16
+        }
+      },
+      {
+        "name": "strong_pre_up_continuation",
+        "description": "Strong 12h rise, first 2h continue higher, then bullish continuation",
+        "calculated": {
+          "sym_ret12": 0.0400000000000007,
+          "p_r2": 0.010000000000000009
+        },
+        "specified": {
+          "sym_ret12": 0.04,
+          "p_r2": 0.01
+        },
+        "after_decision_return6": 0.05,
+        "synthetic_truth_after_2h": "LONG",
+        "gate_fire": false,
+        "action": "LONG",
+        "direction_match": true,
+        "calc_error": {
+          "sym_ret12": 7.008282842946301e-16,
+          "p_r2": 8.673617379884035e-18
+        }
+      },
+      {
+        "name": "weak_pre_up_reversal_bear",
+        "description": "Pre-rise below threshold, then sharp bearish reversal",
+        "calculated": {
+          "sym_ret12": 0.01499999999999968,
+          "p_r2": -0.010000000000000009
+        },
+        "specified": {
+          "sym_ret12": 0.015,
+          "p_r2": -0.01
+        },
+        "after_decision_return6": -0.05,
+        "synthetic_truth_after_2h": "SHORT",
+        "gate_fire": false,
+        "action": "LONG",
+        "direction_match": false,
+        "calc_error": {
+          "sym_ret12": 3.191891195797325e-16,
+          "p_r2": 8.673617379884035e-18
+        }
+      },
+      {
+        "name": "strong_pre_up_shallow_dip_bear",
+        "description": "Pre-rise passes but 2h dip is shallower than rescue threshold, then bear",
+        "calculated": {
+          "sym_ret12": 0.0400000000000007,
+          "p_r2": -0.0019999999999998908
+        },
+        "specified": {
+          "sym_ret12": 0.04,
+          "p_r2": -0.002
+        },
+        "after_decision_return6": -0.05,
+        "synthetic_truth_after_2h": "SHORT",
+        "gate_fire": false,
+        "action": "LONG",
+        "direction_match": false,
+        "calc_error": {
+          "sym_ret12": 7.008282842946301e-16,
+          "p_r2": 1.0928757898653885e-16
+        }
+      },
+      {
+        "name": "strong_pre_up_exact_boundary",
+        "description": "Pre-rise and 2h return exactly at research thresholds",
+        "calculated": {
+          "sym_ret12": 0.02544910179999893,
+          "p_r2": -0.003995205800000012
+        },
+        "specified": {
+          "sym_ret12": 0.0254491018,
+          "p_r2": -0.0039952058
+        },
+        "after_decision_return6": -0.04,
+        "synthetic_truth_after_2h": "SHORT",
+        "gate_fire": false,
+        "action": "LONG",
+        "direction_match": false,
+        "calc_error": {
+          "sym_ret12": 1.0685896612017132e-15,
+          "p_r2": 1.214306433183765e-17
+        }
+      },
+      {
+        "name": "pre_down_bear_continuation",
+        "description": "Already bearish before entry; 2h down and bear continuation",
+        "calculated": {
+          "sym_ret12": -0.03999999999999959,
+          "p_r2": -0.009999999999999898
+        },
+        "specified": {
+          "sym_ret12": -0.04,
+          "p_r2": -0.01
+        },
+        "after_decision_return6": -0.05,
+        "synthetic_truth_after_2h": "SHORT",
+        "gate_fire": false,
+        "action": "LONG",
+        "direction_match": false,
+        "calc_error": {
+          "sym_ret12": 4.0939474033052647e-16,
+          "p_r2": 1.0234868508263162e-16
+        }
+      },
+      {
+        "name": "pre_up_reversal_flat",
+        "description": "Strong pre-rise and 2h drop, then flat after rescue decision",
+        "calculated": {
+          "sym_ret12": 0.0400000000000007,
+          "p_r2": -0.009999999999999898
+        },
+        "specified": {
+          "sym_ret12": 0.04,
+          "p_r2": -0.01
+        },
+        "after_decision_return6": 0.0,
+        "synthetic_truth_after_2h": "FLAT",
+        "gate_fire": true,
+        "action": "SHORT",
+        "direction_match": true,
+        "calc_error": {
+          "sym_ret12": 7.008282842946301e-16,
+          "p_r2": 1.0234868508263162e-16
+        }
+      }
+    ],
+    "directional_contradictions": [
+      "strong_pre_up_dip_then_bull"
+    ],
+    "missed_bear_rescues": [
+      "weak_pre_up_reversal_bear",
+      "strong_pre_up_shallow_dip_bear",
+      "strong_pre_up_exact_boundary",
+      "pre_down_bear_continuation"
+    ]
+  },
+  "interpretation": {
+    "V4_X05": "A volatility-only flip is logically ambiguous: low-vol bear and range-breakdown paths can trigger LONG.",
+    "V4_X07": "The cutoffs permit mild 3h declines, so a continued-bear path can still trigger LONG.",
+    "V4_X11": "Positive relative strength can coexist with negative absolute symbol trend when BTC falls faster; standalone rel72>0 can therefore trigger LONG in a falling symbol.",
+    "PENGU_V8_2H": "The rule is more directionally structured because it requires a pre-rise followed by a realized 2h reversal, but a V-shaped recovery can still make a SHORT rescue wrong and threshold misses remain possible.",
+    "conclusion": "Synthetic raw-price tests show whether standalone gates are logically sufficient. They do not estimate real-market false-positive rates or profitability."
+  }
+}

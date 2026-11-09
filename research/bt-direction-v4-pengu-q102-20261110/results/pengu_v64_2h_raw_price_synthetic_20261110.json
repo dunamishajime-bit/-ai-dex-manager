@@ -1,0 +1,65 @@
+{
+  "rule": {
+    "btc_vol72_gt": 0.003308885226898718,
+    "pengu_minus_btc_ret12_gt": 0.07355376317477447,
+    "switch_after_hours": 2
+  },
+  "scenarios": [
+    {
+      "name": "highvol_strongrel_burst_then_reversal",
+      "btc_vol72": 0.004499999999999983,
+      "rel12": 0.09000000000000052,
+      "gate_fire": true,
+      "first2_return": 0.08,
+      "after_switch_return": -0.1,
+      "planned_long2h_then_short_gross": 0.17999999999999972,
+      "native_long_full_gross": -0.028000000000000358,
+      "planned_better": true
+    },
+    {
+      "name": "highvol_strongrel_continued_bull",
+      "btc_vol72": 0.004499999999999983,
+      "rel12": 0.09000000000000052,
+      "gate_fire": true,
+      "first2_return": 0.05,
+      "after_switch_return": 0.12,
+      "planned_long2h_then_short_gross": -0.0700000000000005,
+      "native_long_full_gross": 0.17600000000000104,
+      "planned_better": false
+    },
+    {
+      "name": "lowvol_strongrel_reversal",
+      "btc_vol72": 0.0020000000000000677,
+      "rel12": 0.09000000000000052,
+      "gate_fire": false,
+      "first2_return": 0.08,
+      "after_switch_return": -0.1,
+      "planned_long2h_then_short_gross": 0.18000000000000005,
+      "native_long_full_gross": -0.028000000000000358,
+      "planned_better": true
+    },
+    {
+      "name": "highvol_weakrel_reversal",
+      "btc_vol72": 0.004499999999999983,
+      "rel12": 0.04000000000000159,
+      "gate_fire": false,
+      "first2_return": 0.08,
+      "after_switch_return": -0.1,
+      "planned_long2h_then_short_gross": 0.17999999999999994,
+      "native_long_full_gross": -0.028000000000000247,
+      "planned_better": true
+    },
+    {
+      "name": "highvol_strongrel_immediate_bear",
+      "btc_vol72": 0.004499999999999983,
+      "rel12": 0.09000000000000052,
+      "gate_fire": true,
+      "first2_return": -0.05,
+      "after_switch_return": -0.1,
+      "planned_long2h_then_short_gross": 0.04999999999999993,
+      "native_long_full_gross": -0.14500000000000024,
+      "planned_better": true
+    }
+  ],
+  "interpretation": "Gate semantics behave as intended, but a continued-bull synthetic path is an explicit counterexample; real OOS evidence, jitter, and integrated BT remain controlling evidence."
+}

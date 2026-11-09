@@ -1,0 +1,8 @@
+{
+  "route": "REC_Y06_REV_D0_T72",
+  "n": 352,
+  "train_n": 211,
+  "val_n": 70,
+  "test_n": 71,
+  "candidates": []
+}

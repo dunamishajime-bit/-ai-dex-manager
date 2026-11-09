@@ -1,0 +1,22 @@
+{
+  "schema": "disdex-pengu-recovery-v8-nested2h-strict-feasible/v1",
+  "sourceCandidates": 116,
+  "reversals": 6,
+  "reversalIds": [
+    "PENGU_00037",
+    "PENGU_00043",
+    "PENGU_00087",
+    "PENGU_00089",
+    "PENGU_00094",
+    "PENGU_00110"
+  ],
+  "excludedInfeasible": [
+    "PENGU_00030"
+  ],
+  "outputSHA256": "2a3ce30f11ff2fed3a5b4c7de763949c770950f7616ceec32fe86b2aac4ffbbd",
+  "limitations": [
+    "Research-only reversal",
+    "No signed venue fills",
+    "One 2h trigger excluded because native hard stop exits at decision time"
+  ]
+}

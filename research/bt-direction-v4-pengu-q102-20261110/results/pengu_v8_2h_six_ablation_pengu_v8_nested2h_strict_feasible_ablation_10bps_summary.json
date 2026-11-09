@@ -1,0 +1,41 @@
+{
+  "case": "PENGU_V8_NESTED2H_STRICT_FEASIBLE_ABLATION",
+  "cost_bps_roundtrip": 10,
+  "initial_jpy": 10000.0,
+  "final_compounded_jpy": 2956954.006124002,
+  "net_return_pct": 29469.54006124002,
+  "max_hourly_dd_pct": -29.9004236145332,
+  "dd_time_utc": "2026-09-23T04:00:00Z",
+  "modeled_fills": 854,
+  "win_rate_pct": 63.70023419203748,
+  "profit_factor": 1.366711619222913,
+  "admitted_by_runner": {
+    "Q102": 104,
+    "RESIDUAL": 18,
+    "V52": 65,
+    "V4": 427,
+    "PENGU": 62,
+    "IDLE": 126,
+    "HYPE": 45,
+    "FET": 7
+  },
+  "blocked_by_reason": {
+    "CRYPTO_GROSS_CAP": 56,
+    "RESIDUAL_FORMAL_BASELINE_OPEN": 560,
+    "SYMBOL_BUSY": 628,
+    "TOTAL_GROSS_CAP": 26,
+    "RUNNER_SLOT_BUSY": 478,
+    "AVAX_VETO_CO_DECLINE": 60,
+    "AVAX_VETO_DIVERGENT_RALLY": 19,
+    "PENGU_ROUTE_QUARANTINE_60H": 11,
+    "DAILY_LOSS_7P5_GATE": 99,
+    "PENGU_REALIZED_DD_17PCT_HOLD_72H": 1,
+    "RESIDUAL_SIDECAR_OR_IDLE_SIGNAL_PRIORITY": 13
+  },
+  "source_intents": 2805,
+  "residual_priority_exits": 8,
+  "pengu_partial_events": 3,
+  "pengu_final_realized_dd_pct": -16.37147133232655,
+  "pengu_final_realized_index": 7.774177674029734,
+  "status": "RESEARCH_ONLY_V52_MISSING_V4_SHADOW_Q102_PARTIAL_EXIT_MODEL_APPROX"
+}

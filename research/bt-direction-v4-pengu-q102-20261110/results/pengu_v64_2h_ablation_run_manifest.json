@@ -1,0 +1,160 @@
+{
+  "status": "PENGU_V64_2H_NORMALIZED_GATE_ABLATION_RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
+  "period": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z"
+  ],
+  "results": [
+    {
+      "case": "PENGU_V64_2H_NORMALIZED_GATE_ABLATION",
+      "cost_bps_roundtrip": 10,
+      "initial_jpy": 10000.0,
+      "final_compounded_jpy": 3972843.8105238318,
+      "net_return_pct": 39628.43810523832,
+      "max_hourly_dd_pct": -38.2130439839814,
+      "dd_time_utc": "2026-09-23T04:00:00Z",
+      "modeled_fills": 852,
+      "win_rate_pct": 63.497652582159624,
+      "profit_factor": 1.319486215467657,
+      "admitted_by_runner": {
+        "Q102": 103,
+        "RESIDUAL": 18,
+        "V52": 64,
+        "V4": 427,
+        "PENGU": 62,
+        "IDLE": 126,
+        "HYPE": 45,
+        "FET": 7
+      },
+      "blocked_by_reason": {
+        "CRYPTO_GROSS_CAP": 58,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 563,
+        "SYMBOL_BUSY": 628,
+        "TOTAL_GROSS_CAP": 27,
+        "RUNNER_SLOT_BUSY": 466,
+        "AVAX_VETO_CO_DECLINE": 60,
+        "AVAX_VETO_DIVERGENT_RALLY": 19,
+        "PENGU_ROUTE_QUARANTINE_60H": 12,
+        "DAILY_LOSS_7P5_GATE": 107,
+        "RESIDUAL_SIDECAR_OR_IDLE_SIGNAL_PRIORITY": 13
+      },
+      "source_intents": 2805,
+      "residual_priority_exits": 8,
+      "pengu_partial_events": 6,
+      "pengu_final_realized_dd_pct": -22.046339531061598,
+      "pengu_final_realized_index": 11.843691863865075,
+      "status": "RESEARCH_ONLY_V52_MISSING_V4_SHADOW_Q102_PARTIAL_EXIT_MODEL_APPROX",
+      "v4_sizing": "NATIVE_GROSS",
+      "v4_per_position_cap": 1.35,
+      "v4_aggregate_cap": 2.0,
+      "crypto_cap": 3.0,
+      "stock_cap": 4.0,
+      "total_cap": 3.5,
+      "direction_overrides": {
+        "V4": [
+          "G4",
+          "X03",
+          "X05",
+          "X07",
+          "X11",
+          "Y07"
+        ],
+        "Q102": [
+          "FET_PB168",
+          "UNI_MR72"
+        ],
+        "IDLE": [],
+        "PENGU": [
+          "LONG_V64_2H_7_EVENTS"
+        ]
+      },
+      "v4_direction_override_candidates": 43,
+      "q102_direction_override_candidates": 9,
+      "pengu_timed_stops": true,
+      "q102_selected_native_modeled": 205,
+      "q102_selected_native_unresolved_failclosed": 66,
+      "q102_high_vol_missing": true,
+      "v4_native_lifecycle_modeled": 1394,
+      "v4_native_lifecycle_unresolved": 0
+    },
+    {
+      "case": "PENGU_V64_2H_NORMALIZED_GATE_ABLATION",
+      "cost_bps_roundtrip": 30,
+      "initial_jpy": 10000.0,
+      "final_compounded_jpy": 1176141.2006185031,
+      "net_return_pct": 11661.412006185032,
+      "max_hourly_dd_pct": -50.56680450974975,
+      "dd_time_utc": "2026-09-28T19:00:00Z",
+      "modeled_fills": 852,
+      "win_rate_pct": 60.44600938967136,
+      "profit_factor": 1.2350583095314702,
+      "admitted_by_runner": {
+        "Q102": 103,
+        "RESIDUAL": 18,
+        "V52": 64,
+        "V4": 427,
+        "PENGU": 62,
+        "IDLE": 126,
+        "HYPE": 45,
+        "FET": 7
+      },
+      "blocked_by_reason": {
+        "CRYPTO_GROSS_CAP": 58,
+        "RESIDUAL_FORMAL_BASELINE_OPEN": 562,
+        "SYMBOL_BUSY": 628,
+        "TOTAL_GROSS_CAP": 27,
+        "RUNNER_SLOT_BUSY": 464,
+        "AVAX_VETO_CO_DECLINE": 60,
+        "AVAX_VETO_DIVERGENT_RALLY": 19,
+        "PENGU_ROUTE_QUARANTINE_60H": 12,
+        "DAILY_LOSS_7P5_GATE": 110,
+        "RESIDUAL_SIDECAR_OR_IDLE_SIGNAL_PRIORITY": 13
+      },
+      "source_intents": 2805,
+      "residual_priority_exits": 8,
+      "pengu_partial_events": 6,
+      "pengu_final_realized_dd_pct": -22.046339531061598,
+      "pengu_final_realized_index": 11.843691863865075,
+      "status": "RESEARCH_ONLY_V52_MISSING_V4_SHADOW_Q102_PARTIAL_EXIT_MODEL_APPROX",
+      "v4_sizing": "NATIVE_GROSS",
+      "v4_per_position_cap": 1.35,
+      "v4_aggregate_cap": 2.0,
+      "crypto_cap": 3.0,
+      "stock_cap": 4.0,
+      "total_cap": 3.5,
+      "direction_overrides": {
+        "V4": [
+          "G4",
+          "X03",
+          "X05",
+          "X07",
+          "X11",
+          "Y07"
+        ],
+        "Q102": [
+          "FET_PB168",
+          "UNI_MR72"
+        ],
+        "IDLE": [],
+        "PENGU": [
+          "LONG_V64_2H_7_EVENTS"
+        ]
+      },
+      "v4_direction_override_candidates": 43,
+      "q102_direction_override_candidates": 9,
+      "pengu_timed_stops": true,
+      "q102_selected_native_modeled": 205,
+      "q102_selected_native_unresolved_failclosed": 66,
+      "q102_high_vol_missing": true,
+      "v4_native_lifecycle_modeled": 1394,
+      "v4_native_lifecycle_unresolved": 0
+    }
+  ],
+  "caveats": [
+    "Direction overrides only from strict zero-FP train/val/test candidates with full opposite exit replay for V4/Q102",
+    "V4 1394/1394 M5 lifecycle modeled; Q102 S34 205 modeled, 66 fail-closed, HIGH_VOL missing",
+    "IDLE direction candidates excluded because no adopted LONG exit contract",
+    "PENGU LONG V64 planned two-hour LONG-to-SHORT reversal on seven normalized-gate events; research-only",
+    "V52 supplemental price model; HYPE/IDLE assumed active; market fills/funding modeled"
+  ]
+}

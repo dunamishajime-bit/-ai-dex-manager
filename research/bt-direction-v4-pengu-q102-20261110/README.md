@@ -111,3 +111,7 @@ Current result: 7 rules, 39 explicit boundary cases, 0 boundary failures, 0 meta
 Important limitation: synthetic feature-space PASS is not profitability evidence and not OOS evidence. Random activation rates are properties of the artificial sampling ranges, not estimated real-market trigger frequencies. Candidate promotion still requires historical walk-forward/OOS, threshold-jitter stability, regime splits, false-positive accounting, and integrated 10bps/30bps portfolio BT.
 
 FET BRK24 is intentionally excluded from the frozen synthetic-gate set until one final causal rule is selected; the saved snapshot currently proves high DD impact but not a final robust threshold gate.
+
+## 2026-11-10 deep V4/PENGU revalidation
+
+The controlling route-by-route status is now documented in V4_PENGU_DIRECTION_CLASSIFICATION_20261110.md. This later revalidation supersedes earlier optimistic wording for standalone V4 X05/X07/X11 and the selected-subset PENGU V8 2h result where they conflict.

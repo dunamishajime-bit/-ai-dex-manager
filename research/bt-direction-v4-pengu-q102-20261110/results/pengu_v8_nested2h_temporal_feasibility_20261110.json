@@ -1,0 +1,121 @@
+[
+  {
+    "id": "PENGU_00030",
+    "original_entry_ts": 1765983600000,
+    "decision_2h_ts": 1765990800000,
+    "native_exit_ts": 1765990800000,
+    "native_exit_reason": "RECOVERY_V8_HARD_STOP",
+    "native_exit_before_or_at_2h": true,
+    "partials_before_2h": [],
+    "partials_at_2h": [],
+    "fresh_short_exit_ts": 1766250000000,
+    "fresh_short_raw_return": 0.050000000000000044,
+    "strict_full_qty_reversal_feasible": false,
+    "diagnostic": {
+      "sym_ret12": 0.028070873979693545,
+      "p_r2": -0.06392606142293245
+    }
+  },
+  {
+    "id": "PENGU_00037",
+    "original_entry_ts": 1767110400000,
+    "decision_2h_ts": 1767117600000,
+    "native_exit_ts": 1767207600000,
+    "native_exit_reason": "RECOVERY_V8_HARD_STOP",
+    "native_exit_before_or_at_2h": false,
+    "partials_before_2h": [],
+    "partials_at_2h": [],
+    "fresh_short_exit_ts": 1767330000000,
+    "fresh_short_raw_return": -0.08000000000000007,
+    "strict_full_qty_reversal_feasible": true,
+    "diagnostic": {
+      "sym_ret12": 0.03289994347088743,
+      "p_r2": -0.013018269335958843
+    }
+  },
+  {
+    "id": "PENGU_00043",
+    "original_entry_ts": 1767888000000,
+    "decision_2h_ts": 1767895200000,
+    "native_exit_ts": 1768147200000,
+    "native_exit_reason": "RECOVERY_V8_MAX_HOLD",
+    "native_exit_before_or_at_2h": false,
+    "partials_before_2h": [],
+    "partials_at_2h": [],
+    "fresh_short_exit_ts": 1768154400000,
+    "fresh_short_raw_return": 0.009091653698091617,
+    "strict_full_qty_reversal_feasible": true,
+    "diagnostic": {
+      "sym_ret12": 0.040960214873258405,
+      "p_r2": -0.021821708558959152
+    }
+  },
+  {
+    "id": "PENGU_00087",
+    "original_entry_ts": 1785002400000,
+    "decision_2h_ts": 1785009600000,
+    "native_exit_ts": 1785204000000,
+    "native_exit_reason": "RECOVERY_V8_HARD_STOP",
+    "native_exit_before_or_at_2h": false,
+    "partials_before_2h": [],
+    "partials_at_2h": [],
+    "fresh_short_exit_ts": 1785268800000,
+    "fresh_short_raw_return": 0.03946735119525102,
+    "strict_full_qty_reversal_feasible": true,
+    "diagnostic": {
+      "sym_ret12": 0.037902821840040124,
+      "p_r2": -0.01198274484741968
+    }
+  },
+  {
+    "id": "PENGU_00089",
+    "original_entry_ts": 1785254400000,
+    "decision_2h_ts": 1785261600000,
+    "native_exit_ts": 1785355200000,
+    "native_exit_reason": "RECOVERY_V8_HARD_STOP",
+    "native_exit_before_or_at_2h": false,
+    "partials_before_2h": [],
+    "partials_at_2h": [],
+    "fresh_short_exit_ts": 1785520800000,
+    "fresh_short_raw_return": -0.008002667555851994,
+    "strict_full_qty_reversal_feasible": true,
+    "diagnostic": {
+      "sym_ret12": 0.028953606501862517,
+      "p_r2": -0.007726450764425463
+    }
+  },
+  {
+    "id": "PENGU_00094",
+    "original_entry_ts": 1786615200000,
+    "decision_2h_ts": 1786622400000,
+    "native_exit_ts": 1786795200000,
+    "native_exit_reason": "RECOVERY_V8_HARD_STOP",
+    "native_exit_before_or_at_2h": false,
+    "partials_before_2h": [],
+    "partials_at_2h": [],
+    "fresh_short_exit_ts": 1786881600000,
+    "fresh_short_raw_return": 0.045172578336249436,
+    "strict_full_qty_reversal_feasible": true,
+    "diagnostic": {
+      "sym_ret12": 0.03222150259067358,
+      "p_r2": -0.012112631744533586
+    }
+  },
+  {
+    "id": "PENGU_00110",
+    "original_entry_ts": 1789135200000,
+    "decision_2h_ts": 1789142400000,
+    "native_exit_ts": 1789153200000,
+    "native_exit_reason": "RECOVERY_V8_HARD_STOP",
+    "native_exit_before_or_at_2h": false,
+    "partials_before_2h": [],
+    "partials_at_2h": [],
+    "fresh_short_exit_ts": 1789401600000,
+    "fresh_short_raw_return": 0.04525312206257548,
+    "strict_full_qty_reversal_feasible": true,
+    "diagnostic": {
+      "sym_ret12": 0.04278794402583408,
+      "p_r2": -0.03992248062015502
+    }
+  }
+]

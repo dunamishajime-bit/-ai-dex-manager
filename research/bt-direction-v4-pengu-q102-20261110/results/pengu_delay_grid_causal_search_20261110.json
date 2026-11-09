@@ -1,0 +1,6720 @@
+[
+  {
+    "route": "LONG_V64",
+    "h": 2,
+    "feasible": 25,
+    "better_both": 10,
+    "search": {
+      "n": 25,
+      "split": [
+        15,
+        5,
+        5
+      ],
+      "positives": [
+        7,
+        1,
+        2
+      ],
+      "feature_count": 83,
+      "best": {
+        "status": "UNCONFIRMED",
+        "conditions": [
+          [
+            "pre_b_vol72",
+            ">",
+            0.003308885226898718
+          ],
+          [
+            "rec_troughClose",
+            ">",
+            0.008687
+          ]
+        ],
+        "train": {
+          "n": 15,
+          "flagged": 5,
+          "tp": 5,
+          "fp": 0,
+          "pos": 7,
+          "precision": 1.0,
+          "recall": 0.7142857142857143,
+          "delta30": 0.6511206363714933,
+          "ids": [
+            "PENGU_00012",
+            "PENGU_00015",
+            "PENGU_00020",
+            "PENGU_00023",
+            "PENGU_00024"
+          ]
+        },
+        "val": {
+          "n": 5,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.22028889488195347,
+          "ids": [
+            "PENGU_00068"
+          ]
+        },
+        "test": {
+          "n": 5,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "pos": 2,
+          "precision": null,
+          "recall": 0.0,
+          "delta30": 0,
+          "ids": []
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_vol72",
+                ">",
+                0.003308885226898718
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 5,
+              "tp": 5,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.7142857142857143,
+              "delta30": 0.6511206363714933,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00020",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol24",
+                ">",
+                0.003757513723669498
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 5,
+              "tp": 5,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.7142857142857143,
+              "delta30": 0.6511206363714933,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00020",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ],
+              [
+                "post_p_range1",
+                ">",
+                0.025893472482032203
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.5714285714285714,
+              "delta30": 0.6480573279418325,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00020",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ],
+              [
+                "post_p_range2",
+                ">",
+                0.02689108780696273
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.5714285714285714,
+              "delta30": 0.6480573279418325,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00020",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ],
+              [
+                "pre_p_ret1",
+                ">",
+                0.021726215734532817
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.5714285714285714,
+              "delta30": 0.6480573279418325,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00020",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ],
+              [
+                "post_p_range2",
+                ">",
+                0.033080634045485995
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "delta30": 0.5339424846837176,
+              "ids": [
+                "PENGU_00020",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ],
+              [
+                "pre_rel1",
+                ">",
+                0.023472796105682425
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "delta30": 0.5339424846837176,
+              "ids": [
+                "PENGU_00020",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026383819951338205
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "delta30": 0.49173472512480976,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00020",
+                "PENGU_00023"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol72",
+                ">",
+                0.003308885226898718
+              ],
+              [
+                "pre_rel12",
+                ">",
+                0.08748757109333427
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "delta30": 0.2876842957413719,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00020",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.2454158100784214,
+              "ids": [
+                "PENGU_00098"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol24",
+                ">",
+                0.003757513723669498
+              ],
+              [
+                "pre_rel12",
+                ">",
+                0.08748757109333427
+              ]
+            ],
+            "train": {
+              "n": 15,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "delta30": 0.2876842957413719,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00020",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.22028889488195347,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.2454158100784214,
+              "ids": [
+                "PENGU_00098"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "LONG_V64",
+    "h": 4,
+    "feasible": 23,
+    "better_both": 8,
+    "search": {
+      "n": 23,
+      "split": [
+        13,
+        5,
+        5
+      ],
+      "positives": [
+        6,
+        1,
+        1
+      ],
+      "feature_count": 95,
+      "best": {
+        "status": "UNCONFIRMED",
+        "conditions": [
+          [
+            "pre_b_vol72",
+            ">",
+            0.0031356246819284543
+          ],
+          [
+            "rec_troughClose",
+            ">",
+            0.008687
+          ]
+        ],
+        "train": {
+          "n": 13,
+          "flagged": 4,
+          "tp": 4,
+          "fp": 0,
+          "pos": 6,
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "delta30": 0.5223901647066924,
+          "ids": [
+            "PENGU_00012",
+            "PENGU_00015",
+            "PENGU_00023",
+            "PENGU_00024"
+          ]
+        },
+        "val": {
+          "n": 5,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.20486249589478145,
+          "ids": [
+            "PENGU_00068"
+          ]
+        },
+        "test": {
+          "n": 5,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "pos": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta30": 0,
+          "ids": []
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_vol72",
+                ">",
+                0.0031356246819284543
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "delta30": 0.5223901647066924,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol24",
+                ">",
+                0.00367594347095221
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "delta30": 0.5223901647066924,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol72",
+                ">",
+                0.0031356246819284543
+              ],
+              [
+                "post_p_range2",
+                ">",
+                0.033080634045485995
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "delta30": 0.5100490344272224,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00047",
+                "PENGU_00049"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 4,
+              "tp": 1,
+              "fp": 3,
+              "pos": 1,
+              "precision": 0.25,
+              "recall": 1.0,
+              "delta30": -0.3602839310138707,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00098",
+                "PENGU_00113",
+                "PENGU_00115"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol24",
+                ">",
+                0.00367594347095221
+              ],
+              [
+                "post_p_range2",
+                ">",
+                0.033080634045485995
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "delta30": 0.5100490344272224,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00047",
+                "PENGU_00049"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 4,
+              "tp": 1,
+              "fp": 3,
+              "pos": 1,
+              "precision": 0.25,
+              "recall": 1.0,
+              "delta30": -0.3602839310138707,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00098",
+                "PENGU_00113",
+                "PENGU_00115"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range2",
+                ">",
+                0.033080634045485995
+              ],
+              [
+                "pre_b_vol72",
+                ">",
+                0.0025557342740937803
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "delta30": 0.5100490344272224,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00047",
+                "PENGU_00049"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 4,
+              "tp": 1,
+              "fp": 3,
+              "pos": 1,
+              "precision": 0.25,
+              "recall": 1.0,
+              "delta30": -0.3602839310138707,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00098",
+                "PENGU_00113",
+                "PENGU_00115"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range2",
+                ">",
+                0.033080634045485995
+              ],
+              [
+                "pre_b_vol24",
+                ">",
+                0.00318135179276754
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "delta30": 0.5100490344272224,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00047",
+                "PENGU_00049"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 4,
+              "tp": 1,
+              "fp": 3,
+              "pos": 1,
+              "precision": 0.25,
+              "recall": 1.0,
+              "delta30": -0.3602839310138707,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00098",
+                "PENGU_00113",
+                "PENGU_00115"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026126126126126154
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.4732491727923195,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ],
+              [
+                "post_p_range1",
+                ">",
+                0.025893472482032203
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.4732491727923195,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008687
+              ],
+              [
+                "pre_p_ret12",
+                ">",
+                0.09969591659426591
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.3947582548862457,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_ret3",
+                ">",
+                0.03687635574837311
+              ],
+              [
+                "pre_p_ret12",
+                ">",
+                0.09969591659426591
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 0.3456172629718728,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20486249589478145,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 2,
+              "tp": 1,
+              "fp": 1,
+              "pos": 1,
+              "precision": 0.5,
+              "recall": 1.0,
+              "delta30": 0.05857573444989106,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00098"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "LONG_V64",
+    "h": 6,
+    "feasible": 23,
+    "better_both": 10,
+    "search": {
+      "n": 23,
+      "split": [
+        13,
+        5,
+        5
+      ],
+      "positives": [
+        8,
+        1,
+        1
+      ],
+      "feature_count": 101,
+      "best": {
+        "status": "UNCONFIRMED",
+        "conditions": [
+          [
+            "rec_troughClose",
+            ">",
+            0.008614
+          ]
+        ],
+        "train": {
+          "n": 13,
+          "flagged": 6,
+          "tp": 6,
+          "fp": 0,
+          "pos": 8,
+          "precision": 1.0,
+          "recall": 0.75,
+          "delta30": 0.5906713703159935,
+          "ids": [
+            "PENGU_00001",
+            "PENGU_00012",
+            "PENGU_00015",
+            "PENGU_00023",
+            "PENGU_00024",
+            "PENGU_00042"
+          ]
+        },
+        "val": {
+          "n": 5,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.18766383260250408,
+          "ids": [
+            "PENGU_00068"
+          ]
+        },
+        "test": {
+          "n": 5,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "pos": 1,
+          "precision": null,
+          "recall": 0.0,
+          "delta30": 0,
+          "ids": []
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "rec_troughClose",
+                ">",
+                0.008614
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_previousClose",
+                ">",
+                0.010843
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_low",
+                ">",
+                0.010753
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_high",
+                ">",
+                0.011073
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_close",
+                ">",
+                0.011073
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_open",
+                ">",
+                0.010753
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_low",
+                ">",
+                0.010753
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_high",
+                ">",
+                0.011073
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_ema72",
+                ">",
+                0.009689565974381404
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_ema168",
+                ">",
+                0.009377983618374972
+              ]
+            ],
+            "train": {
+              "n": 13,
+              "flagged": 6,
+              "tp": 6,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.5906713703159935,
+              "ids": [
+                "PENGU_00001",
+                "PENGU_00012",
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 5,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.18766383260250408,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 1,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "LONG_V64",
+    "h": 8,
+    "feasible": 21,
+    "better_both": 6,
+    "search": {
+      "n": 21,
+      "split": [
+        12,
+        4,
+        5
+      ],
+      "positives": [
+        5,
+        1,
+        0
+      ],
+      "feature_count": 107,
+      "best": {
+        "status": "REJECT_TEST_FP",
+        "conditions": [
+          [
+            "pre_b_ret72",
+            ">",
+            0.022823092645069654
+          ],
+          [
+            "post_p_range4",
+            ">",
+            0.037427484249267035
+          ]
+        ],
+        "train": {
+          "n": 12,
+          "flagged": 4,
+          "tp": 4,
+          "fp": 0,
+          "pos": 5,
+          "precision": 1.0,
+          "recall": 0.8,
+          "delta30": 0.503259744609171,
+          "ids": [
+            "PENGU_00015",
+            "PENGU_00023",
+            "PENGU_00024",
+            "PENGU_00042"
+          ]
+        },
+        "val": {
+          "n": 4,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.1694742195625606,
+          "ids": [
+            "PENGU_00068"
+          ]
+        },
+        "test": {
+          "n": 5,
+          "flagged": 4,
+          "tp": 0,
+          "fp": 4,
+          "pos": 0,
+          "precision": 0.0,
+          "recall": null,
+          "delta30": -0.806432894128005,
+          "ids": [
+            "PENGU_00096",
+            "PENGU_00097",
+            "PENGU_00113",
+            "PENGU_00115"
+          ]
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_ret72",
+                ">",
+                0.022823092645069654
+              ],
+              [
+                "post_p_range4",
+                ">",
+                0.037427484249267035
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.8,
+              "delta30": 0.503259744609171,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 4,
+              "tp": 0,
+              "fp": 4,
+              "pos": 0,
+              "precision": 0.0,
+              "recall": null,
+              "delta30": -0.806432894128005,
+              "ids": [
+                "PENGU_00096",
+                "PENGU_00097",
+                "PENGU_00113",
+                "PENGU_00115"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_ret1",
+                ">",
+                0.021211841741215487
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008614
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.8,
+              "delta30": 0.503259744609171,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 0,
+              "precision": null,
+              "recall": null,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range4",
+                ">",
+                0.037427484249267035
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008614
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.8,
+              "delta30": 0.503259744609171,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 0,
+              "precision": null,
+              "recall": null,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_troughAgeHours",
+                ">",
+                39.0
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008614
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.8,
+              "delta30": 0.503259744609171,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 0,
+              "precision": null,
+              "recall": null,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026126126126126154
+              ],
+              [
+                "pre_b_ret72",
+                ">",
+                0.022823092645069654
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.6,
+              "delta30": 0.4567377703389556,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 3,
+              "tp": 0,
+              "fp": 3,
+              "pos": 0,
+              "precision": 0.0,
+              "recall": null,
+              "delta30": -0.6171548379066057,
+              "ids": [
+                "PENGU_00096",
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026126126126126154
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008614
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.6,
+              "delta30": 0.4567377703389556,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 0,
+              "precision": null,
+              "recall": null,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_ret72",
+                ">",
+                0.022823092645069654
+              ],
+              [
+                "post_p_range1",
+                ">",
+                0.025893472482032203
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.6,
+              "delta30": 0.4567377703389556,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 3,
+              "tp": 0,
+              "fp": 3,
+              "pos": 0,
+              "precision": 0.0,
+              "recall": null,
+              "delta30": -0.6171548379066057,
+              "ids": [
+                "PENGU_00096",
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.025893472482032203
+              ],
+              [
+                "rec_troughClose",
+                ">",
+                0.008614
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.6,
+              "delta30": 0.4567377703389556,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 0,
+              "precision": null,
+              "recall": null,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range4",
+                ">",
+                0.04720720720720722
+              ],
+              [
+                "pre_b_ret72",
+                ">",
+                0.022823092645069654
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.6,
+              "delta30": 0.3350768232843382,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 4,
+              "tp": 0,
+              "fp": 4,
+              "pos": 0,
+              "precision": 0.0,
+              "recall": null,
+              "delta30": -0.806432894128005,
+              "ids": [
+                "PENGU_00096",
+                "PENGU_00097",
+                "PENGU_00113",
+                "PENGU_00115"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range4",
+                ">",
+                0.04720720720720722
+              ],
+              [
+                "pre_p_ret12",
+                ">",
+                0.09969591659426591
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.6,
+              "delta30": 0.3350768232843382,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024",
+                "PENGU_00042"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.1694742195625606,
+              "ids": [
+                "PENGU_00068"
+              ]
+            },
+            "test": {
+              "n": 5,
+              "flagged": 2,
+              "tp": 0,
+              "fp": 2,
+              "pos": 0,
+              "precision": 0.0,
+              "recall": null,
+              "delta30": -0.37951124404916814,
+              "ids": [
+                "PENGU_00096",
+                "PENGU_00097"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "LONG_V64",
+    "h": 12,
+    "feasible": 20,
+    "better_both": 7,
+    "search": {
+      "n": 20,
+      "split": [
+        12,
+        4,
+        4
+      ],
+      "positives": [
+        4,
+        2,
+        1
+      ],
+      "feature_count": 113,
+      "best": {
+        "status": "REJECT_TEST_FP",
+        "conditions": [
+          [
+            "post_p_range1",
+            ">",
+            0.026126126126126154
+          ],
+          [
+            "pre_b_vol72",
+            ">",
+            0.003308885226898718
+          ]
+        ],
+        "train": {
+          "n": 12,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "pos": 4,
+          "precision": 1.0,
+          "recall": 0.75,
+          "delta30": 0.4634406893588573,
+          "ids": [
+            "PENGU_00015",
+            "PENGU_00023",
+            "PENGU_00024"
+          ]
+        },
+        "val": {
+          "n": 4,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "pos": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.20966558997724816,
+          "ids": [
+            "PENGU_00068",
+            "PENGU_00096"
+          ]
+        },
+        "test": {
+          "n": 4,
+          "flagged": 2,
+          "tp": 1,
+          "fp": 1,
+          "pos": 1,
+          "precision": 0.5,
+          "recall": 1.0,
+          "delta30": -0.11246808262906871,
+          "ids": [
+            "PENGU_00097",
+            "PENGU_00113"
+          ]
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026126126126126154
+              ],
+              [
+                "pre_b_vol72",
+                ">",
+                0.003308885226898718
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.4634406893588573,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 1,
+              "fp": 1,
+              "pos": 1,
+              "precision": 0.5,
+              "recall": 1.0,
+              "delta30": -0.11246808262906871,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026126126126126154
+              ],
+              [
+                "pre_b_vol24",
+                ">",
+                0.003757513723669498
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.4634406893588573,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 1,
+              "fp": 1,
+              "pos": 1,
+              "precision": 0.5,
+              "recall": 1.0,
+              "delta30": -0.11246808262906871,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol72",
+                ">",
+                0.003308885226898718
+              ],
+              [
+                "post_p_range1",
+                ">",
+                0.025893472482032203
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.4634406893588573,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 1,
+              "fp": 1,
+              "pos": 1,
+              "precision": 0.5,
+              "recall": 1.0,
+              "delta30": -0.11246808262906871,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol24",
+                ">",
+                0.003757513723669498
+              ],
+              [
+                "post_p_range1",
+                ">",
+                0.025893472482032203
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.4634406893588573,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 1,
+              "fp": 1,
+              "pos": 1,
+              "precision": 0.5,
+              "recall": 1.0,
+              "delta30": -0.11246808262906871,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_ret12",
+                ">",
+                0.012208345500931639
+              ],
+              [
+                "pre_p_ret12",
+                ">",
+                0.09969591659426591
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.3124553860318803,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.11027750526916658,
+              "ids": [
+                "PENGU_00097"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol72",
+                ">",
+                0.003308885226898718
+              ],
+              [
+                "pre_p_ret12",
+                ">",
+                0.09969591659426591
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.3124553860318803,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.11027750526916658,
+              "ids": [
+                "PENGU_00097"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_vol24",
+                ">",
+                0.003757513723669498
+              ],
+              [
+                "pre_p_ret12",
+                ">",
+                0.09969591659426591
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.75,
+              "delta30": 0.3124553860318803,
+              "ids": [
+                "PENGU_00012",
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.11027750526916658,
+              "ids": [
+                "PENGU_00097"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026383819951338205
+              ],
+              [
+                "pre_b_vol72",
+                ">",
+                0.003308885226898718
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.3415408855757949,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 1,
+              "fp": 1,
+              "pos": 1,
+              "precision": 0.5,
+              "recall": 1.0,
+              "delta30": -0.11246808262906871,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026383819951338205
+              ],
+              [
+                "pre_b_vol24",
+                ">",
+                0.003757513723669498
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.3415408855757949,
+              "ids": [
+                "PENGU_00015",
+                "PENGU_00023"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 1,
+              "fp": 1,
+              "pos": 1,
+              "precision": 0.5,
+              "recall": 1.0,
+              "delta30": -0.11246808262906871,
+              "ids": [
+                "PENGU_00097",
+                "PENGU_00113"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_range1",
+                ">",
+                0.026126126126126154
+              ],
+              [
+                "pre_p_ret12",
+                ">",
+                0.09969591659426591
+              ]
+            ],
+            "train": {
+              "n": 12,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.2804154454226079,
+              "ids": [
+                "PENGU_00023",
+                "PENGU_00024"
+              ]
+            },
+            "val": {
+              "n": 4,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.20966558997724816,
+              "ids": [
+                "PENGU_00068",
+                "PENGU_00096"
+              ]
+            },
+            "test": {
+              "n": 4,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.11027750526916658,
+              "ids": [
+                "PENGU_00097"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "RECOVERY_V8",
+    "h": 2,
+    "feasible": 50,
+    "better_both": 21,
+    "search": {
+      "n": 50,
+      "split": [
+        30,
+        10,
+        10
+      ],
+      "positives": [
+        10,
+        4,
+        7
+      ],
+      "feature_count": 83,
+      "best": {
+        "status": "CONFIRMED",
+        "conditions": [
+          [
+            "pre_p_ret12",
+            ">",
+            0.034786503433860805
+          ],
+          [
+            "pre_p_up24",
+            "<=",
+            0.3333333333333333
+          ]
+        ],
+        "train": {
+          "n": 30,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "pos": 10,
+          "precision": 1.0,
+          "recall": 0.2,
+          "delta30": 0.11592077533666628,
+          "ids": [
+            "PENGU_00043",
+            "PENGU_00056"
+          ]
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 4,
+          "precision": 1.0,
+          "recall": 0.25,
+          "delta30": 0.08231333298147886,
+          "ids": [
+            "PENGU_00087"
+          ]
+        },
+        "test": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 7,
+          "precision": 1.0,
+          "recall": 0.14285714285714285,
+          "delta30": 0.06439782490495272,
+          "ids": [
+            "PENGU_00110"
+          ]
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_p_ret12",
+                ">",
+                0.034786503433860805
+              ],
+              [
+                "pre_p_up24",
+                "<=",
+                0.3333333333333333
+              ]
+            ],
+            "train": {
+              "n": 30,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.11592077533666628,
+              "ids": [
+                "PENGU_00043",
+                "PENGU_00056"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.08231333298147886,
+              "ids": [
+                "PENGU_00087"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "delta30": 0.06439782490495272,
+              "ids": [
+                "PENGU_00110"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "RECOVERY_V8",
+    "h": 4,
+    "feasible": 49,
+    "better_both": 22,
+    "search": {
+      "n": 49,
+      "split": [
+        29,
+        10,
+        10
+      ],
+      "positives": [
+        10,
+        5,
+        7
+      ],
+      "feature_count": 95,
+      "best": {
+        "status": "REJECT_TEST_FP",
+        "conditions": [
+          [
+            "pre_b_up6",
+            ">",
+            0.6666666666666666
+          ],
+          [
+            "f_volumeRatio6OverPrior36",
+            ">",
+            2.820196528928097
+          ]
+        ],
+        "train": {
+          "n": 29,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "pos": 10,
+          "precision": 1.0,
+          "recall": 0.2,
+          "delta30": 0.1254086031608408,
+          "ids": [
+            "PENGU_00025",
+            "PENGU_00056"
+          ]
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 5,
+          "precision": 1.0,
+          "recall": 0.2,
+          "delta30": 0.005602869844143712,
+          "ids": [
+            "PENGU_00077"
+          ]
+        },
+        "test": {
+          "n": 10,
+          "flagged": 2,
+          "tp": 0,
+          "fp": 2,
+          "pos": 7,
+          "precision": 0.0,
+          "recall": 0.0,
+          "delta30": -0.16843402337684332,
+          "ids": [
+            "PENGU_00091",
+            "PENGU_00092"
+          ]
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_up6",
+                ">",
+                0.6666666666666666
+              ],
+              [
+                "f_volumeRatio6OverPrior36",
+                ">",
+                2.820196528928097
+              ]
+            ],
+            "train": {
+              "n": 29,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.1254086031608408,
+              "ids": [
+                "PENGU_00025",
+                "PENGU_00056"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.005602869844143712,
+              "ids": [
+                "PENGU_00077"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 2,
+              "tp": 0,
+              "fp": 2,
+              "pos": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.16843402337684332,
+              "ids": [
+                "PENGU_00091",
+                "PENGU_00092"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "RECOVERY_V8",
+    "h": 6,
+    "feasible": 48,
+    "better_both": 21,
+    "search": {
+      "n": 48,
+      "split": [
+        28,
+        10,
+        10
+      ],
+      "positives": [
+        10,
+        5,
+        6
+      ],
+      "feature_count": 101,
+      "best": {
+        "status": "CONFIRMED",
+        "conditions": [
+          [
+            "pre_rel72",
+            "<=",
+            -0.044982612714325354
+          ],
+          [
+            "pre_b_ret24",
+            ">",
+            0.011611625094354983
+          ]
+        ],
+        "train": {
+          "n": 28,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "pos": 10,
+          "precision": 1.0,
+          "recall": 0.2,
+          "delta30": 0.18353453469564385,
+          "ids": [
+            "PENGU_00002",
+            "PENGU_00048"
+          ]
+        },
+        "val": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 5,
+          "precision": 1.0,
+          "recall": 0.2,
+          "delta30": 0.08581339556719564,
+          "ids": [
+            "PENGU_00084"
+          ]
+        },
+        "test": {
+          "n": 10,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 6,
+          "precision": 1.0,
+          "recall": 0.16666666666666666,
+          "delta30": 0.1239119681834584,
+          "ids": [
+            "PENGU_00106"
+          ]
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_rel72",
+                "<=",
+                -0.044982612714325354
+              ],
+              [
+                "pre_b_ret24",
+                ">",
+                0.011611625094354983
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.18353453469564385,
+              "ids": [
+                "PENGU_00002",
+                "PENGU_00048"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08581339556719564,
+              "ids": [
+                "PENGU_00084"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.16666666666666666,
+              "delta30": 0.1239119681834584,
+              "ids": [
+                "PENGU_00106"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_rel72",
+                "<=",
+                -0.044982612714325354
+              ],
+              [
+                "f_btcReturn24h",
+                ">",
+                0.011611625094354983
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.18353453469564385,
+              "ids": [
+                "PENGU_00002",
+                "PENGU_00048"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08581339556719564,
+              "ids": [
+                "PENGU_00084"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 6,
+              "precision": 1.0,
+              "recall": 0.16666666666666666,
+              "delta30": 0.1239119681834584,
+              "ids": [
+                "PENGU_00106"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_atr24Ratio",
+                ">",
+                0.014541552944899326
+              ],
+              [
+                "pre_p_ret24",
+                "<=",
+                -0.03269409217445085
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.18661602468870686,
+              "ids": [
+                "PENGU_00003",
+                "PENGU_00025"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08146166648830899,
+              "ids": [
+                "PENGU_00074"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 6,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_atr24Ratio",
+                ">",
+                0.014541552944899326
+              ],
+              [
+                "f_penguReturn24h",
+                "<=",
+                -0.03269409217445085
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.18661602468870686,
+              "ids": [
+                "PENGU_00003",
+                "PENGU_00025"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08146166648830899,
+              "ids": [
+                "PENGU_00074"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 6,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_volumeRatio6OverPrior36",
+                ">",
+                2.820196528928097
+              ],
+              [
+                "pre_p_up24",
+                "<=",
+                0.3333333333333333
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.11404654209693288,
+              "ids": [
+                "PENGU_00025",
+                "PENGU_00056"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.14482291736679886,
+              "ids": [
+                "PENGU_00083"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 2,
+              "tp": 0,
+              "fp": 2,
+              "pos": 6,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.1005630551159391,
+              "ids": [
+                "PENGU_00091",
+                "PENGU_00092"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_atr24Ratio",
+                ">",
+                0.014541552944899326
+              ],
+              [
+                "post_p_mfe2",
+                ">",
+                0.023730422401518902
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.13431939586667307,
+              "ids": [
+                "PENGU_00002",
+                "PENGU_00025"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08146166648830899,
+              "ids": [
+                "PENGU_00074"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 6,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_atr24Ratio",
+                ">",
+                0.014541552944899326
+              ],
+              [
+                "post_p_mfe3",
+                ">",
+                0.026062674526838414
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.13431939586667307,
+              "ids": [
+                "PENGU_00002",
+                "PENGU_00025"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08146166648830899,
+              "ids": [
+                "PENGU_00074"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 6,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_atr24Ratio",
+                ">",
+                0.014541552944899326
+              ],
+              [
+                "post_p_range2",
+                ">",
+                0.02746703955253705
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.13431939586667307,
+              "ids": [
+                "PENGU_00002",
+                "PENGU_00025"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08146166648830899,
+              "ids": [
+                "PENGU_00074"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 6,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_atr24Ratio",
+                ">",
+                0.014541552944899326
+              ],
+              [
+                "post_p_mfe2",
+                ">",
+                0.01840215439856374
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.13431939586667307,
+              "ids": [
+                "PENGU_00002",
+                "PENGU_00025"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08146166648830899,
+              "ids": [
+                "PENGU_00074"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 6,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_atr24Ratio",
+                ">",
+                0.014541552944899326
+              ],
+              [
+                "pre_p_ret6",
+                ">",
+                0.03519590171710463
+              ]
+            ],
+            "train": {
+              "n": 28,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.13341659619066876,
+              "ids": [
+                "PENGU_00002",
+                "PENGU_00043"
+              ]
+            },
+            "val": {
+              "n": 10,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 5,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.08146166648830899,
+              "ids": [
+                "PENGU_00074"
+              ]
+            },
+            "test": {
+              "n": 10,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 6,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "RECOVERY_V8",
+    "h": 8,
+    "feasible": 46,
+    "better_both": 17,
+    "search": {
+      "n": 46,
+      "split": [
+        27,
+        9,
+        10
+      ],
+      "positives": [
+        7,
+        4,
+        6
+      ],
+      "feature_count": 107,
+      "best": null
+    }
+  },
+  {
+    "route": "RECOVERY_V8",
+    "h": 12,
+    "feasible": 40,
+    "better_both": 13,
+    "search": {
+      "n": 40,
+      "split": [
+        24,
+        8,
+        8
+      ],
+      "positives": [
+        7,
+        4,
+        2
+      ],
+      "feature_count": 113,
+      "best": {
+        "status": "REJECT_TEST_FP",
+        "conditions": [
+          [
+            "pre_p_vol72",
+            "<=",
+            0.006994441594443826
+          ],
+          [
+            "rec_high",
+            "<=",
+            0.006486
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "pos": 7,
+          "precision": 1.0,
+          "recall": 0.2857142857142857,
+          "delta30": 0.10950853751902423,
+          "ids": [
+            "PENGU_00056",
+            "PENGU_00058"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 4,
+          "precision": 1.0,
+          "recall": 0.25,
+          "delta30": 0.15523387085243162,
+          "ids": [
+            "PENGU_00087"
+          ]
+        },
+        "test": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 0,
+          "fp": 1,
+          "pos": 2,
+          "precision": 0.0,
+          "recall": 0.0,
+          "delta30": -0.022408701569211924,
+          "ids": [
+            "PENGU_00092"
+          ]
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_p_vol72",
+                "<=",
+                0.006994441594443826
+              ],
+              [
+                "rec_high",
+                "<=",
+                0.006486
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.10950853751902423,
+              "ids": [
+                "PENGU_00056",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.15523387085243162,
+              "ids": [
+                "PENGU_00087"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 0,
+              "fp": 1,
+              "pos": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.022408701569211924,
+              "ids": [
+                "PENGU_00092"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol72",
+                "<=",
+                0.006994441594443826
+              ],
+              [
+                "rec_close",
+                "<=",
+                0.006474
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.10950853751902423,
+              "ids": [
+                "PENGU_00056",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.15523387085243162,
+              "ids": [
+                "PENGU_00087"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 0,
+              "fp": 1,
+              "pos": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.022408701569211924,
+              "ids": [
+                "PENGU_00092"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol72",
+                "<=",
+                0.006994441594443826
+              ],
+              [
+                "f_high",
+                "<=",
+                0.006486
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.10950853751902423,
+              "ids": [
+                "PENGU_00056",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.15523387085243162,
+              "ids": [
+                "PENGU_00087"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 0,
+              "fp": 1,
+              "pos": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.022408701569211924,
+              "ids": [
+                "PENGU_00092"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol72",
+                "<=",
+                0.006994441594443826
+              ],
+              [
+                "f_close",
+                "<=",
+                0.006474
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.10950853751902423,
+              "ids": [
+                "PENGU_00056",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.15523387085243162,
+              "ids": [
+                "PENGU_00087"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 0,
+              "fp": 1,
+              "pos": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.022408701569211924,
+              "ids": [
+                "PENGU_00092"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol72",
+                "<=",
+                0.006994441594443826
+              ],
+              [
+                "f_priorHigh18h",
+                "<=",
+                0.006592
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.10950853751902423,
+              "ids": [
+                "PENGU_00056",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.15523387085243162,
+              "ids": [
+                "PENGU_00087"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 0,
+              "fp": 1,
+              "pos": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.022408701569211924,
+              "ids": [
+                "PENGU_00092"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_up24",
+                "<=",
+                0.2916666666666667
+              ],
+              [
+                "pre_b_ret1",
+                ">",
+                0.009731597742195675
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.05477442458814308,
+              "ids": [
+                "PENGU_00050",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.09839950661135372,
+              "ids": [
+                "PENGU_00084"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "rec_previousClose",
+                "<=",
+                0.006358
+              ],
+              [
+                "pre_b_ret1",
+                ">",
+                0.009731597742195675
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.05477442458814308,
+              "ids": [
+                "PENGU_00050",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.09839950661135372,
+              "ids": [
+                "PENGU_00084"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_ret1",
+                ">",
+                0.009731597742195675
+              ],
+              [
+                "pre_p_up12",
+                "<=",
+                0.3333333333333333
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.05477442458814308,
+              "ids": [
+                "PENGU_00050",
+                "PENGU_00058"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.09839950661135372,
+              "ids": [
+                "PENGU_00084"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up6",
+                ">",
+                0.6666666666666666
+              ],
+              [
+                "f_volumeRatio6OverPrior36",
+                ">",
+                2.1140104194593805
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.11546150416442436,
+              "ids": [
+                "PENGU_00025",
+                "PENGU_00056"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 4,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.0007256663454782179,
+              "ids": [
+                "PENGU_00077"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 2,
+              "tp": 0,
+              "fp": 2,
+              "pos": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.047860394591274766,
+              "ids": [
+                "PENGU_00091",
+                "PENGU_00092"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "SHORT_V20",
+    "h": 2,
+    "feasible": 40,
+    "better_both": 12,
+    "search": {
+      "n": 40,
+      "split": [
+        24,
+        8,
+        8
+      ],
+      "positives": [
+        9,
+        1,
+        2
+      ],
+      "feature_count": 83,
+      "best": {
+        "status": "UNCONFIRMED",
+        "conditions": [
+          [
+            "pre_b_ret24",
+            ">",
+            -0.0026274901013918495
+          ],
+          [
+            "f_btcEma168Distance",
+            ">",
+            -0.01238439526235291
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "pos": 9,
+          "precision": 1.0,
+          "recall": 0.2222222222222222,
+          "delta30": 0.22024029923141863,
+          "ids": [
+            "PENGU_00006",
+            "PENGU_00033"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.14608222808913407,
+          "ids": [
+            "PENGU_00086"
+          ]
+        },
+        "test": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "pos": 2,
+          "precision": null,
+          "recall": 0.0,
+          "delta30": 0,
+          "ids": []
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_ret24",
+                ">",
+                -0.0026274901013918495
+              ],
+              [
+                "f_btcEma168Distance",
+                ">",
+                -0.01238439526235291
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.2222222222222222,
+              "delta30": 0.22024029923141863,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00033"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.14608222808913407,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_btcReturn24h",
+                ">",
+                -0.0026274901013918495
+              ],
+              [
+                "f_btcEma168Distance",
+                ">",
+                -0.01238439526235291
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.2222222222222222,
+              "delta30": 0.22024029923141863,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00033"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.14608222808913407,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "SHORT_V20",
+    "h": 4,
+    "feasible": 40,
+    "better_both": 15,
+    "search": {
+      "n": 40,
+      "split": [
+        24,
+        8,
+        8
+      ],
+      "positives": [
+        10,
+        2,
+        3
+      ],
+      "feature_count": 95,
+      "best": {
+        "status": "REJECT_TEST_FP",
+        "conditions": [
+          [
+            "pre_b_ret72",
+            ">",
+            -0.011974219810040765
+          ],
+          [
+            "rec_low",
+            "<=",
+            0.008788
+          ]
+        ],
+        "train": {
+          "n": 24,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "pos": 10,
+          "precision": 1.0,
+          "recall": 0.3,
+          "delta30": 0.16483729439028316,
+          "ids": [
+            "PENGU_00034",
+            "PENGU_00035",
+            "PENGU_00057"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 2,
+          "precision": 1.0,
+          "recall": 0.5,
+          "delta30": 0.12876845946750126,
+          "ids": [
+            "PENGU_00086"
+          ]
+        },
+        "test": {
+          "n": 8,
+          "flagged": 3,
+          "tp": 2,
+          "fp": 1,
+          "pos": 3,
+          "precision": 0.6666666666666666,
+          "recall": 0.6666666666666666,
+          "delta30": 0.05693869896783477,
+          "ids": [
+            "PENGU_00088",
+            "PENGU_00103",
+            "PENGU_00104"
+          ]
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_ret72",
+                ">",
+                -0.011974219810040765
+              ],
+              [
+                "rec_low",
+                "<=",
+                0.008788
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.16483729439028316,
+              "ids": [
+                "PENGU_00034",
+                "PENGU_00035",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.12876845946750126,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 3,
+              "tp": 2,
+              "fp": 1,
+              "pos": 3,
+              "precision": 0.6666666666666666,
+              "recall": 0.6666666666666666,
+              "delta30": 0.05693869896783477,
+              "ids": [
+                "PENGU_00088",
+                "PENGU_00103",
+                "PENGU_00104"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_ret72",
+                ">",
+                -0.011974219810040765
+              ],
+              [
+                "rec_close",
+                "<=",
+                0.008849
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.16483729439028316,
+              "ids": [
+                "PENGU_00034",
+                "PENGU_00035",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.12876845946750126,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 3,
+              "tp": 2,
+              "fp": 1,
+              "pos": 3,
+              "precision": 0.6666666666666666,
+              "recall": 0.6666666666666666,
+              "delta30": 0.05693869896783477,
+              "ids": [
+                "PENGU_00088",
+                "PENGU_00103",
+                "PENGU_00104"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_ret72",
+                ">",
+                -0.011974219810040765
+              ],
+              [
+                "f_low",
+                "<=",
+                0.008788
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.16483729439028316,
+              "ids": [
+                "PENGU_00034",
+                "PENGU_00035",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.12876845946750126,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 3,
+              "tp": 2,
+              "fp": 1,
+              "pos": 3,
+              "precision": 0.6666666666666666,
+              "recall": 0.6666666666666666,
+              "delta30": 0.05693869896783477,
+              "ids": [
+                "PENGU_00088",
+                "PENGU_00103",
+                "PENGU_00104"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_ret72",
+                ">",
+                -0.011974219810040765
+              ],
+              [
+                "f_ema72",
+                "<=",
+                0.009765053715024199
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.16483729439028316,
+              "ids": [
+                "PENGU_00034",
+                "PENGU_00035",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.12876845946750126,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 3,
+              "tp": 2,
+              "fp": 1,
+              "pos": 3,
+              "precision": 0.6666666666666666,
+              "recall": 0.6666666666666666,
+              "delta30": 0.05693869896783477,
+              "ids": [
+                "PENGU_00088",
+                "PENGU_00103",
+                "PENGU_00104"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_ret72",
+                ">",
+                -0.011974219810040765
+              ],
+              [
+                "f_close",
+                "<=",
+                0.008849
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.16483729439028316,
+              "ids": [
+                "PENGU_00034",
+                "PENGU_00035",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.12876845946750126,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 3,
+              "tp": 2,
+              "fp": 1,
+              "pos": 3,
+              "precision": 0.6666666666666666,
+              "recall": 0.6666666666666666,
+              "delta30": 0.05693869896783477,
+              "ids": [
+                "PENGU_00088",
+                "PENGU_00103",
+                "PENGU_00104"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol6",
+                ">",
+                0.01273540511596606
+              ],
+              [
+                "signalTs",
+                ">",
+                1766055600000.0
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.2594546634311611,
+              "ids": [
+                "PENGU_00033",
+                "PENGU_00034",
+                "PENGU_00035"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.002826786308506749,
+              "ids": [
+                "PENGU_00080"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 3,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 1.2100991602870259e-05,
+              "ids": [
+                "PENGU_00103"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol6",
+                ">",
+                0.01273540511596606
+              ],
+              [
+                "rec_referenceTs",
+                ">",
+                1766055600000.0
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.2594546634311611,
+              "ids": [
+                "PENGU_00033",
+                "PENGU_00034",
+                "PENGU_00035"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.002826786308506749,
+              "ids": [
+                "PENGU_00080"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 3,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 1.2100991602870259e-05,
+              "ids": [
+                "PENGU_00103"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol6",
+                ">",
+                0.01273540511596606
+              ],
+              [
+                "rec_index",
+                ">",
+                2051.0
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.2594546634311611,
+              "ids": [
+                "PENGU_00033",
+                "PENGU_00034",
+                "PENGU_00035"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.002826786308506749,
+              "ids": [
+                "PENGU_00080"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 3,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 1.2100991602870259e-05,
+              "ids": [
+                "PENGU_00103"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_p_vol6",
+                ">",
+                0.01273540511596606
+              ],
+              [
+                "f_referenceTs",
+                ">",
+                1766055600000.0
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.3,
+              "delta30": 0.2594546634311611,
+              "ids": [
+                "PENGU_00033",
+                "PENGU_00034",
+                "PENGU_00035"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.002826786308506749,
+              "ids": [
+                "PENGU_00080"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 3,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 1.2100991602870259e-05,
+              "ids": [
+                "PENGU_00103"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "f_btcEma168Distance",
+                ">",
+                -0.01238439526235291
+              ],
+              [
+                "pre_b_ret24",
+                ">",
+                -0.0026274901013918495
+              ]
+            ],
+            "train": {
+              "n": 24,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 10,
+              "precision": 1.0,
+              "recall": 0.2,
+              "delta30": 0.32599828339829107,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00033"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 2,
+              "precision": 1.0,
+              "recall": 0.5,
+              "delta30": 0.12876845946750126,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 3,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "SHORT_V20",
+    "h": 6,
+    "feasible": 39,
+    "better_both": 11,
+    "search": {
+      "n": 39,
+      "split": [
+        23,
+        8,
+        8
+      ],
+      "positives": [
+        8,
+        1,
+        2
+      ],
+      "feature_count": 101,
+      "best": {
+        "status": "UNCONFIRMED",
+        "conditions": [
+          [
+            "f_btcEma168Distance",
+            ">",
+            -0.00986885474544208
+          ],
+          [
+            "pre_b_ret12",
+            ">",
+            0.01188818976557715
+          ]
+        ],
+        "train": {
+          "n": 23,
+          "flagged": 2,
+          "tp": 2,
+          "fp": 0,
+          "pos": 8,
+          "precision": 1.0,
+          "recall": 0.25,
+          "delta30": 0.23754266224617526,
+          "ids": [
+            "PENGU_00006",
+            "PENGU_00033"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.11238479948994529,
+          "ids": [
+            "PENGU_00086"
+          ]
+        },
+        "test": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "pos": 2,
+          "precision": null,
+          "recall": 0.0,
+          "delta30": 0,
+          "ids": []
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "f_btcEma168Distance",
+                ">",
+                -0.00986885474544208
+              ],
+              [
+                "pre_b_ret12",
+                ">",
+                0.01188818976557715
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 8,
+              "precision": 1.0,
+              "recall": 0.25,
+              "delta30": 0.23754266224617526,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00033"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.11238479948994529,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "SHORT_V20",
+    "h": 8,
+    "feasible": 39,
+    "better_both": 12,
+    "search": {
+      "n": 39,
+      "split": [
+        23,
+        8,
+        8
+      ],
+      "positives": [
+        9,
+        1,
+        2
+      ],
+      "feature_count": 107,
+      "best": {
+        "status": "UNCONFIRMED",
+        "conditions": [
+          [
+            "pre_b_up24",
+            ">",
+            0.5
+          ],
+          [
+            "post_rel2",
+            ">",
+            0.0
+          ]
+        ],
+        "train": {
+          "n": 23,
+          "flagged": 5,
+          "tp": 5,
+          "fp": 0,
+          "pos": 9,
+          "precision": 1.0,
+          "recall": 0.5555555555555556,
+          "delta30": 0.6926197339404508,
+          "ids": [
+            "PENGU_00006",
+            "PENGU_00014",
+            "PENGU_00021",
+            "PENGU_00032",
+            "PENGU_00057"
+          ]
+        },
+        "val": {
+          "n": 8,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.05475134892217127,
+          "ids": [
+            "PENGU_00086"
+          ]
+        },
+        "test": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "pos": 2,
+          "precision": null,
+          "recall": 0.0,
+          "delta30": 0,
+          "ids": []
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_rel2",
+                ">",
+                0.0
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 5,
+              "tp": 5,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.5555555555555556,
+              "delta30": 0.6926197339404508,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00014",
+                "PENGU_00021",
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_rel2",
+                ">",
+                -0.0009118371414178483
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 5,
+              "tp": 5,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.5555555555555556,
+              "delta30": 0.6926197339404508,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00014",
+                "PENGU_00021",
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_mae4",
+                ">",
+                -0.0034084453701950235
+              ],
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.4444444444444444,
+              "delta30": 0.5235961571763763,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021",
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_mae3",
+                ">",
+                -0.0034084453701950235
+              ],
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 4,
+              "tp": 4,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.4444444444444444,
+              "delta30": 0.5235961571763763,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021",
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_rel4",
+                ">",
+                0.007865898060031462
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 0.4602023260382935,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021",
+                "PENGU_00032"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_p_mae8",
+                ">",
+                -0.006642066420664339
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 0.37278522677682413,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_p_mae6",
+                ">",
+                -0.005003411416874992
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "delta30": 0.37278522677682413,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_rel8",
+                ">",
+                0.03260706176779271
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.2222222222222222,
+              "delta30": 0.3093913956387413,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_mae4",
+                ">",
+                -0.0034084453701950235
+              ],
+              [
+                "post_rel8",
+                ">",
+                0.03260706176779271
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.2222222222222222,
+              "delta30": 0.3093913956387413,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_mae3",
+                ">",
+                -0.0034084453701950235
+              ],
+              [
+                "post_rel8",
+                ">",
+                0.03260706176779271
+              ]
+            ],
+            "train": {
+              "n": 23,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 9,
+              "precision": 1.0,
+              "recall": 0.2222222222222222,
+              "delta30": 0.3093913956387413,
+              "ids": [
+                "PENGU_00014",
+                "PENGU_00021"
+              ]
+            },
+            "val": {
+              "n": 8,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.05475134892217127,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "route": "SHORT_V20",
+    "h": 12,
+    "feasible": 37,
+    "better_both": 10,
+    "search": {
+      "n": 37,
+      "split": [
+        22,
+        7,
+        8
+      ],
+      "positives": [
+        7,
+        1,
+        2
+      ],
+      "feature_count": 113,
+      "best": {
+        "status": "UNCONFIRMED",
+        "conditions": [
+          [
+            "pre_b_up24",
+            ">",
+            0.5
+          ],
+          [
+            "post_rel2",
+            ">",
+            0.0
+          ]
+        ],
+        "train": {
+          "n": 22,
+          "flagged": 3,
+          "tp": 3,
+          "fp": 0,
+          "pos": 7,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "delta30": 0.30933887655904513,
+          "ids": [
+            "PENGU_00006",
+            "PENGU_00032",
+            "PENGU_00057"
+          ]
+        },
+        "val": {
+          "n": 7,
+          "flagged": 1,
+          "tp": 1,
+          "fp": 0,
+          "pos": 1,
+          "precision": 1.0,
+          "recall": 1.0,
+          "delta30": 0.07392952906646089,
+          "ids": [
+            "PENGU_00086"
+          ]
+        },
+        "test": {
+          "n": 8,
+          "flagged": 0,
+          "tp": 0,
+          "fp": 0,
+          "pos": 2,
+          "precision": null,
+          "recall": 0.0,
+          "delta30": 0,
+          "ids": []
+        },
+        "alternatives": [
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_rel2",
+                ">",
+                0.0
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 3,
+              "tp": 3,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "delta30": 0.30933887655904513,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_p_mfe8",
+                ">",
+                0.0303845387527395
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.29732493486554257,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00032"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_p_mfe12",
+                ">",
+                0.0303845387527395
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.29732493486554257,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00032"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_rel12",
+                ">",
+                0.0017741533627013695
+              ],
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.17824278192100895,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_p_mae12",
+                ">",
+                -0.01353096401100451
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.17824278192100895,
+              "ids": [
+                "PENGU_00006",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_mae4",
+                ">",
+                -0.0034084453701950235
+              ],
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.14311003633153874,
+              "ids": [
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_p_mae3",
+                ">",
+                -0.0034084453701950235
+              ],
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.14311003633153874,
+              "ids": [
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "pre_b_up24",
+                ">",
+                0.5
+              ],
+              [
+                "post_p_mae4",
+                ">",
+                -0.006642066420664339
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.14311003633153874,
+              "ids": [
+                "PENGU_00032",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 0,
+              "tp": 0,
+              "fp": 0,
+              "pos": 2,
+              "precision": null,
+              "recall": 0.0,
+              "delta30": 0,
+              "ids": []
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_rel12",
+                ">",
+                0.0017741533627013695
+              ],
+              [
+                "pre_rel48",
+                ">",
+                -0.04437385172112629
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.13784718097800963,
+              "ids": [
+                "PENGU_00013",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 3,
+              "tp": 1,
+              "fp": 2,
+              "pos": 2,
+              "precision": 0.3333333333333333,
+              "recall": 0.5,
+              "delta30": -0.030532430753354316,
+              "ids": [
+                "PENGU_00101",
+                "PENGU_00103",
+                "PENGU_00104"
+              ]
+            }
+          },
+          {
+            "conditions": [
+              [
+                "post_rel12",
+                ">",
+                0.0017741533627013695
+              ],
+              [
+                "pre_p_ret72",
+                ">",
+                -0.05237466490617382
+              ]
+            ],
+            "train": {
+              "n": 22,
+              "flagged": 2,
+              "tp": 2,
+              "fp": 0,
+              "pos": 7,
+              "precision": 1.0,
+              "recall": 0.2857142857142857,
+              "delta30": 0.13784718097800963,
+              "ids": [
+                "PENGU_00013",
+                "PENGU_00057"
+              ]
+            },
+            "val": {
+              "n": 7,
+              "flagged": 1,
+              "tp": 1,
+              "fp": 0,
+              "pos": 1,
+              "precision": 1.0,
+              "recall": 1.0,
+              "delta30": 0.07392952906646089,
+              "ids": [
+                "PENGU_00086"
+              ]
+            },
+            "test": {
+              "n": 8,
+              "flagged": 2,
+              "tp": 0,
+              "fp": 2,
+              "pos": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "delta30": -0.0743481973557828,
+              "ids": [
+                "PENGU_00103",
+                "PENGU_00104"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+]

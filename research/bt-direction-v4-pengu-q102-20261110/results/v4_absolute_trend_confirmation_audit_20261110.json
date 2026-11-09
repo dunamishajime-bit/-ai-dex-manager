@@ -1,0 +1,485 @@
+[
+  {
+    "route": "REC_X05_TIME_36H",
+    "conditions": [
+      [
+        "sym_vol72",
+        "<=",
+        0.00658
+      ],
+      [
+        "sym_ret6",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 33,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 15,
+      "delta": 0.004945026040296785
+    },
+    "val": {
+      "n": 11,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 6,
+      "delta": 0.09349447192557081
+    },
+    "test": {
+      "n": 12,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0.03453992815694962
+    }
+  },
+  {
+    "route": "REC_X05_TIME_36H",
+    "conditions": [
+      [
+        "sym_vol72",
+        "<=",
+        0.00658
+      ],
+      [
+        "sym_ret12",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 33,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 15,
+      "delta": 0
+    },
+    "val": {
+      "n": 11,
+      "flagged": 3,
+      "tp": 3,
+      "fp": 0,
+      "wrong": 6,
+      "delta": 0.15914621940923324
+    },
+    "test": {
+      "n": 12,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X05_TIME_36H",
+    "conditions": [
+      [
+        "sym_vol72",
+        "<=",
+        0.00658
+      ],
+      [
+        "sym_ret24",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 33,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 15,
+      "delta": 0
+    },
+    "val": {
+      "n": 11,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 6,
+      "delta": 0
+    },
+    "test": {
+      "n": 12,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X05_TIME_36H",
+    "conditions": [
+      [
+        "sym_vol72",
+        "<=",
+        0.00658
+      ],
+      [
+        "sym_ret72",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 33,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 15,
+      "delta": 0
+    },
+    "val": {
+      "n": 11,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 6,
+      "delta": 0
+    },
+    "test": {
+      "n": 12,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0.03453992815694962
+    }
+  },
+  {
+    "route": "REC_X07_TIME_6H",
+    "conditions": [
+      [
+        "sym_ret3",
+        ">",
+        -0.0140114167
+      ],
+      [
+        "btc_ret3",
+        ">",
+        -0.0058802215
+      ],
+      [
+        "sym_ret6",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 9,
+      "delta": 0.05493094245731944
+    },
+    "val": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    },
+    "test": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 4,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X07_TIME_6H",
+    "conditions": [
+      [
+        "sym_ret3",
+        ">",
+        -0.0140114167
+      ],
+      [
+        "btc_ret3",
+        ">",
+        -0.0058802215
+      ],
+      [
+        "sym_ret12",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 9,
+      "delta": 0
+    },
+    "val": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    },
+    "test": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 4,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X07_TIME_6H",
+    "conditions": [
+      [
+        "sym_ret3",
+        ">",
+        -0.0140114167
+      ],
+      [
+        "btc_ret3",
+        ">",
+        -0.0058802215
+      ],
+      [
+        "sym_ret24",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 9,
+      "delta": 0
+    },
+    "val": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    },
+    "test": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 4,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X07_TIME_6H",
+    "conditions": [
+      [
+        "sym_ret3",
+        ">",
+        0.0
+      ],
+      [
+        "btc_ret3",
+        ">",
+        -0.0058802215
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 9,
+      "delta": 0.005764224618817426
+    },
+    "val": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    },
+    "test": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 4,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X11_TIME_48H",
+    "conditions": [
+      [
+        "rel72",
+        ">",
+        0.0
+      ],
+      [
+        "sym_ret12",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0.10347677380082221
+    },
+    "val": {
+      "n": 5,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 3,
+      "delta": 0.06909035023309018
+    },
+    "test": {
+      "n": 6,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0.02390303929336035
+    }
+  },
+  {
+    "route": "REC_X11_TIME_48H",
+    "conditions": [
+      [
+        "rel72",
+        ">",
+        0.0
+      ],
+      [
+        "sym_ret24",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0.08422929669061707
+    },
+    "val": {
+      "n": 5,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 3,
+      "delta": 0.06909035023309018
+    },
+    "test": {
+      "n": 6,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0.02390303929336035
+    }
+  },
+  {
+    "route": "REC_X11_TIME_48H",
+    "conditions": [
+      [
+        "rel72",
+        ">",
+        0.0
+      ],
+      [
+        "sym_ret48",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 2,
+      "tp": 2,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0.10347677380082221
+    },
+    "val": {
+      "n": 5,
+      "flagged": 1,
+      "tp": 1,
+      "fp": 0,
+      "wrong": 3,
+      "delta": 0.06909035023309018
+    },
+    "test": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    }
+  },
+  {
+    "route": "REC_X11_TIME_48H",
+    "conditions": [
+      [
+        "rel72",
+        ">",
+        0.0
+      ],
+      [
+        "sym_ret72",
+        ">",
+        0.0
+      ]
+    ],
+    "train": {
+      "n": 16,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    },
+    "val": {
+      "n": 5,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 3,
+      "delta": 0
+    },
+    "test": {
+      "n": 6,
+      "flagged": 0,
+      "tp": 0,
+      "fp": 0,
+      "wrong": 5,
+      "delta": 0
+    }
+  }
+]
