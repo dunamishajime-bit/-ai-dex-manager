@@ -1,0 +1,697 @@
+{
+  "status": "RESEARCH_ONLY_NO_RULE_PROMOTION",
+  "source_sha256": {
+    "native": "c71272aa910ef4d8a2cfe6cf44fe285fee7e2e59c9f340040af7dbdede4a65ab"
+  },
+  "method": "At 2h compare current native exit, close only at fresh opposite entry OPEN, or close+fresh opposite whose exit uses pinned opposite policy. Preserve earlier native STOP/partial, use gross response and incremental flip roundtrip cost.",
+  "limitations": [
+    "Modeled OHLC limit/stop, not venue fills; first-leg funding and opposite funding omitted",
+    "Native rawReturn may differ from actual filled/partially closed PnL, check per-route partial events",
+    "All 2025-2026 historical cases already used for strategy research; not independent OOS",
+    "Fixed V64 gate pre-btc72h vol and log-relative12h reproduced from CLOSED bars; same data were used to select threshold; synthetic bull case breaks it",
+    "Overlapping episodes are correlated; no integrated Gross/slots/DD"
+  ],
+  "routes": {
+    "LONG_V64": {
+      "total": {
+        "n": 25,
+        "n_feasible": 25,
+        "native_profit_count": 18,
+        "native_gross_sum": 1.3941504365989918,
+        "delta_10_flip": {
+          "sum": -1.1196325692068527,
+          "improved": 10,
+          "harmed": 15,
+          "mean": -0.04478530276827411
+        },
+        "delta_10_flat": {
+          "sum": -1.0737936895926572,
+          "improved": 7,
+          "harmed": 18,
+          "mean": -0.04295174758370629
+        },
+        "delta_30_flip": {
+          "sum": -1.1696325692068528,
+          "improved": 10,
+          "harmed": 15,
+          "mean": -0.04678530276827411
+        },
+        "delta_30_flat": {
+          "sum": -1.0737936895926572,
+          "improved": 7,
+          "harmed": 18,
+          "mean": -0.04295174758370629
+        }
+      },
+      "slices": {
+        "train": {
+          "n": 15,
+          "n_feasible": 15,
+          "native_profit_count": 11,
+          "native_gross_sum": 0.752676805579114,
+          "delta_10_flip": {
+            "sum": -0.5853024641558626,
+            "improved": 7,
+            "harmed": 8,
+            "mean": -0.039020164277057505
+          },
+          "delta_10_flat": {
+            "sum": -0.5892374285954813,
+            "improved": 4,
+            "harmed": 11,
+            "mean": -0.039282495239698755
+          },
+          "delta_30_flip": {
+            "sum": -0.6153024641558626,
+            "improved": 7,
+            "harmed": 8,
+            "mean": -0.04102016427705751
+          },
+          "delta_30_flat": {
+            "sum": -0.5892374285954813,
+            "improved": 4,
+            "harmed": 11,
+            "mean": -0.039282495239698755
+          }
+        },
+        "validation": {
+          "n": 5,
+          "n_feasible": 5,
+          "native_profit_count": 4,
+          "native_gross_sum": 0.40911324675964356,
+          "delta_10_flip": {
+            "sum": -0.39008710438299554,
+            "improved": 1,
+            "harmed": 4,
+            "mean": -0.0780174208765991
+          },
+          "delta_10_flat": {
+            "sum": -0.28208200798168004,
+            "improved": 1,
+            "harmed": 4,
+            "mean": -0.056416401596336006
+          },
+          "delta_30_flip": {
+            "sum": -0.40008710438299555,
+            "improved": 1,
+            "harmed": 4,
+            "mean": -0.0800174208765991
+          },
+          "delta_30_flat": {
+            "sum": -0.28208200798168004,
+            "improved": 1,
+            "harmed": 4,
+            "mean": -0.056416401596336006
+          }
+        },
+        "test": {
+          "n": 5,
+          "n_feasible": 5,
+          "native_profit_count": 3,
+          "native_gross_sum": 0.2323603842602343,
+          "delta_10_flip": {
+            "sum": -0.14424300066799456,
+            "improved": 2,
+            "harmed": 3,
+            "mean": -0.02884860013359891
+          },
+          "delta_10_flat": {
+            "sum": -0.20247425301549582,
+            "improved": 2,
+            "harmed": 3,
+            "mean": -0.04049485060309917
+          },
+          "delta_30_flip": {
+            "sum": -0.15424300066799457,
+            "improved": 2,
+            "harmed": 3,
+            "mean": -0.030848600133598914
+          },
+          "delta_30_flat": {
+            "sum": -0.20247425301549582,
+            "improved": 2,
+            "harmed": 3,
+            "mean": -0.04049485060309917
+          }
+        }
+      },
+      "episodes_count": 14,
+      "episodes": [
+        {
+          "begin": 1759312800000,
+          "end": 1759658400000,
+          "ids": [
+            "PENGU_00001"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.0906712175393326,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1762556400000,
+          "end": 1762617600000,
+          "ids": [
+            "PENGU_00012"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.005063308429660852,
+          "fixed_gate_hits": 1
+        },
+        {
+          "begin": 1762750800000,
+          "end": 1762891200000,
+          "ids": [
+            "PENGU_00015"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.11611484325811483,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1764687600000,
+          "end": 1764702000000,
+          "ids": [
+            "PENGU_00020"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.13029838449468834,
+          "fixed_gate_hits": 1
+        },
+        {
+          "begin": 1765299600000,
+          "end": 1765407600000,
+          "ids": [
+            "PENGU_00023",
+            "PENGU_00024"
+          ],
+          "n": 2,
+          "flip_delta_10": 0.4096441001890293,
+          "fixed_gate_hits": 2
+        },
+        {
+          "begin": 1767326400000,
+          "end": 1767661200000,
+          "ids": [
+            "PENGU_00038",
+            "PENGU_00039",
+            "PENGU_00040",
+            "PENGU_00041",
+            "PENGU_00042"
+          ],
+          "n": 5,
+          "flip_delta_10": -0.859122890229629,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1771084800000,
+          "end": 1771113600000,
+          "ids": [
+            "PENGU_00047"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.017814811012410003,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1772024400000,
+          "end": 1772060400000,
+          "ids": [
+            "PENGU_00049"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.06176349164946726,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1776164400000,
+          "end": 1776373200000,
+          "ids": [
+            "PENGU_00062"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.16872329490206983,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1776751200000,
+          "end": 1776859200000,
+          "ids": [
+            "PENGU_00065"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.20748400051820182,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1777255200000,
+          "end": 1777395600000,
+          "ids": [
+            "PENGU_00066"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.009660763011710483,
+          "fixed_gate_hits": 0
+        },
+        {
+          "begin": 1777982400000,
+          "end": 1778122800000,
+          "ids": [
+            "PENGU_00068"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.22228889488195347,
+          "fixed_gate_hits": 1
+        },
+        {
+          "begin": 1787281200000,
+          "end": 1787378400000,
+          "ids": [
+            "PENGU_00095",
+            "PENGU_00096",
+            "PENGU_00097",
+            "PENGU_00098",
+            "PENGU_00099"
+          ],
+          "n": 5,
+          "flip_delta_10": -0.07166883165414262,
+          "fixed_gate_hits": 2
+        },
+        {
+          "begin": 1790006400000,
+          "end": 1790114400000,
+          "ids": [
+            "PENGU_00113",
+            "PENGU_00114",
+            "PENGU_00115"
+          ],
+          "n": 3,
+          "flip_delta_10": -0.6752894052670905,
+          "fixed_gate_hits": 0
+        }
+      ],
+      "fixed_gate": {
+        "n": 7,
+        "score": {
+          "n": 7,
+          "n_feasible": 7,
+          "native_profit_count": 1,
+          "native_gross_sum": -0.3453115264797505,
+          "delta_10_flip": {
+            "sum": 1.2983410925944279,
+            "improved": 7,
+            "harmed": 0,
+            "mean": 0.18547729894206114
+          },
+          "delta_10_flat": {
+            "sum": 0.5393454357359422,
+            "improved": 6,
+            "harmed": 1,
+            "mean": 0.07704934796227746
+          },
+          "delta_30_flip": {
+            "sum": 1.2843410925944279,
+            "improved": 7,
+            "harmed": 0,
+            "mean": 0.18347729894206113
+          },
+          "delta_30_flat": {
+            "sum": 0.5393454357359422,
+            "improved": 6,
+            "harmed": 1,
+            "mean": 0.07704934796227746
+          }
+        },
+        "episodes_hit": 5,
+        "episode_groups": [
+          [
+            "PENGU_00012"
+          ],
+          [
+            "PENGU_00020"
+          ],
+          [
+            "PENGU_00023",
+            "PENGU_00024"
+          ],
+          [
+            "PENGU_00068"
+          ],
+          [
+            "PENGU_00095",
+            "PENGU_00096",
+            "PENGU_00097",
+            "PENGU_00098",
+            "PENGU_00099"
+          ]
+        ]
+      },
+      "row_count_in_full_source_file": 25
+    },
+    "SHORT_V20": {
+      "total": {
+        "n": 40,
+        "n_feasible": 40,
+        "native_profit_count": 24,
+        "native_gross_sum": 0.8809919094285098,
+        "delta_10_flip": {
+          "sum": -1.9024814037717677,
+          "improved": 12,
+          "harmed": 28,
+          "mean": -0.04756203509429419
+        },
+        "delta_10_flat": {
+          "sum": -0.7493341659495599,
+          "improved": 18,
+          "harmed": 22,
+          "mean": -0.018733354148738997
+        },
+        "delta_30_flip": {
+          "sum": -1.9824814037717677,
+          "improved": 12,
+          "harmed": 28,
+          "mean": -0.049562035094294195
+        },
+        "delta_30_flat": {
+          "sum": -0.7493341659495599,
+          "improved": 18,
+          "harmed": 22,
+          "mean": -0.018733354148738997
+        }
+      },
+      "slices": {
+        "train": {
+          "n": 24,
+          "n_feasible": 24,
+          "native_profit_count": 16,
+          "native_gross_sum": 0.908725081714568,
+          "delta_10_flip": {
+            "sum": -1.0815084890942068,
+            "improved": 9,
+            "harmed": 15,
+            "mean": -0.04506285371225862
+          },
+          "delta_10_flat": {
+            "sum": -0.737574077596194,
+            "improved": 10,
+            "harmed": 14,
+            "mean": -0.030732253233174748
+          },
+          "delta_30_flip": {
+            "sum": -1.1295084890942069,
+            "improved": 9,
+            "harmed": 15,
+            "mean": -0.04706285371225862
+          },
+          "delta_30_flat": {
+            "sum": -0.737574077596194,
+            "improved": 10,
+            "harmed": 14,
+            "mean": -0.030732253233174748
+          }
+        },
+        "validation": {
+          "n": 8,
+          "n_feasible": 8,
+          "native_profit_count": 4,
+          "native_gross_sum": 0.0829905914203436,
+          "delta_10_flip": {
+            "sum": -0.5263771193005226,
+            "improved": 1,
+            "harmed": 7,
+            "mean": -0.06579713991256532
+          },
+          "delta_10_flat": {
+            "sum": -0.08719913026401882,
+            "improved": 4,
+            "harmed": 4,
+            "mean": -0.010899891283002353
+          },
+          "delta_30_flip": {
+            "sum": -0.5423771193005226,
+            "improved": 1,
+            "harmed": 7,
+            "mean": -0.06779713991256532
+          },
+          "delta_30_flat": {
+            "sum": -0.08719913026401882,
+            "improved": 4,
+            "harmed": 4,
+            "mean": -0.010899891283002353
+          }
+        },
+        "test": {
+          "n": 8,
+          "n_feasible": 8,
+          "native_profit_count": 4,
+          "native_gross_sum": -0.1107237637064018,
+          "delta_10_flip": {
+            "sum": -0.2945957953770384,
+            "improved": 2,
+            "harmed": 6,
+            "mean": -0.0368244744221298
+          },
+          "delta_10_flat": {
+            "sum": 0.07543904191065287,
+            "improved": 4,
+            "harmed": 4,
+            "mean": 0.009429880238831609
+          },
+          "delta_30_flip": {
+            "sum": -0.3105957953770384,
+            "improved": 2,
+            "harmed": 6,
+            "mean": -0.0388244744221298
+          },
+          "delta_30_flat": {
+            "sum": 0.07543904191065287,
+            "improved": 4,
+            "harmed": 4,
+            "mean": 0.009429880238831609
+          }
+        }
+      },
+      "episodes_count": 22,
+      "episodes": [
+        {
+          "begin": 1760544000000,
+          "end": 1760695200000,
+          "ids": [
+            "PENGU_00004"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.2051986055356011
+        },
+        {
+          "begin": 1761156000000,
+          "end": 1761480000000,
+          "ids": [
+            "PENGU_00005",
+            "PENGU_00006"
+          ],
+          "n": 2,
+          "flip_delta_10": 0.31376592873626596
+        },
+        {
+          "begin": 1761678000000,
+          "end": 1761865200000,
+          "ids": [
+            "PENGU_00007"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.17484385506163613
+        },
+        {
+          "begin": 1761894000000,
+          "end": 1762293600000,
+          "ids": [
+            "PENGU_00008",
+            "PENGU_00009",
+            "PENGU_00010",
+            "PENGU_00011"
+          ],
+          "n": 4,
+          "flip_delta_10": -0.7215860469450374
+        },
+        {
+          "begin": 1762650000000,
+          "end": 1762736400000,
+          "ids": [
+            "PENGU_00013",
+            "PENGU_00014"
+          ],
+          "n": 2,
+          "flip_delta_10": 0.3574558434928733
+        },
+        {
+          "begin": 1763085600000,
+          "end": 1763344800000,
+          "ids": [
+            "PENGU_00017"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.12837468392086848
+        },
+        {
+          "begin": 1764439200000,
+          "end": 1764630000000,
+          "ids": [
+            "PENGU_00018"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.18008118081180813
+        },
+        {
+          "begin": 1765029600000,
+          "end": 1765069200000,
+          "ids": [
+            "PENGU_00021"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.12403830573529817
+        },
+        {
+          "begin": 1765771200000,
+          "end": 1766336400000,
+          "ids": [
+            "PENGU_00027",
+            "PENGU_00029",
+            "PENGU_00031",
+            "PENGU_00032",
+            "PENGU_00033",
+            "PENGU_00034",
+            "PENGU_00035"
+          ],
+          "n": 7,
+          "flip_delta_10": -0.21239404527399963
+        },
+        {
+          "begin": 1769806800000,
+          "end": 1769889600000,
+          "ids": [
+            "PENGU_00046"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.2612228792358424
+        },
+        {
+          "begin": 1772294400000,
+          "end": 1772312400000,
+          "ids": [
+            "PENGU_00051"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.16442933095334966
+        },
+        {
+          "begin": 1774540800000,
+          "end": 1774800000000,
+          "ids": [
+            "PENGU_00055"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.15540174039158805
+        },
+        {
+          "begin": 1775152800000,
+          "end": 1775412000000,
+          "ids": [
+            "PENGU_00057"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.00209486083561261
+        },
+        {
+          "begin": 1778673600000,
+          "end": 1779015600000,
+          "ids": [
+            "PENGU_00070",
+            "PENGU_00071",
+            "PENGU_00072"
+          ],
+          "n": 3,
+          "flip_delta_10": -0.43808462300788376
+        },
+        {
+          "begin": 1779966000000,
+          "end": 1780257600000,
+          "ids": [
+            "PENGU_00075",
+            "PENGU_00076"
+          ],
+          "n": 2,
+          "flip_delta_10": -0.11630805559043933
+        },
+        {
+          "begin": 1781841600000,
+          "end": 1782100800000,
+          "ids": [
+            "PENGU_00080"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.01308229130049976
+        },
+        {
+          "begin": 1782259200000,
+          "end": 1782518400000,
+          "ids": [
+            "PENGU_00081"
+          ],
+          "n": 1,
+          "flip_delta_10": -0.10698437749083378
+        },
+        {
+          "begin": 1784318400000,
+          "end": 1784548800000,
+          "ids": [
+            "PENGU_00086"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.14808222808913407
+        },
+        {
+          "begin": 1785232800000,
+          "end": 1785492000000,
+          "ids": [
+            "PENGU_00088"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.0591899297533478
+        },
+        {
+          "begin": 1788368400000,
+          "end": 1788451200000,
+          "ids": [
+            "PENGU_00101"
+          ],
+          "n": 1,
+          "flip_delta_10": 0.11831023342097668
+        },
+        {
+          "begin": 1788544800000,
+          "end": 1788663600000,
+          "ids": [
+            "PENGU_00103",
+            "PENGU_00104"
+          ],
+          "n": 2,
+          "flip_delta_10": -0.015908702060656865
+        },
+        {
+          "begin": 1788876000000,
+          "end": 1789326000000,
+          "ids": [
+            "PENGU_00105",
+            "PENGU_00107",
+            "PENGU_00108",
+            "PENGU_00109"
+          ],
+          "n": 4,
+          "flip_delta_10": -0.456187256490706
+        }
+      ],
+      "fixed_gate": null,
+      "row_count_in_full_source_file": 40
+    }
+  },
+  "original_sha256": "58c30d92559d8b01547108602710c7a3222d90069adb8af7dd12ec59fd15a48b"
+}
