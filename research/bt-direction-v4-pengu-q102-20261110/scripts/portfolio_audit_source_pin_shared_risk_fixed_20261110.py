@@ -59,23 +59,23 @@ _old='   cost=notional*fee;cash-=cost\n   pid='
 _new='   cost=notional*fee;cash-=cost\n   if s!="V52":crypto_settled_today-=cost\n   pid='
 assert orig.count(_old)==1;orig=orig.replace(_old,_new)
 # Insert exact modeled crypto unrealized/ref-equity gate and reset at UTC day boundary before events.
-_anchor='  for t in range(START,END+STEP,STEP):\n   while heap and heap[0][0]<=t:'
-_repl='''  def crypto_daily_trip(t):
-   unreal=0.0
-   for q in opened.values():
-    if q["s"]=="V52":continue
-    z=completed_h1(q["symbol"],t)
-    if z is None:return True
-    mark=q["entry"] if z[0]+H<=q.get("active_ts",q["ts"]) else z[4]
-    unreal+=q["notional"]*(1 if q["side"]=="LONG" else -1)*(mark/q["entry"]-1)
-   ref=cash-crypto_settled_today
-   if not (ref>0):return True
-   return max(0.0,-(crypto_settled_today+unreal)/ref)>=0.075-1e-15
-  for t in range(START,END+STEP,STEP):
-   curday=t//(24*H)
-   if day!=curday:
-    day=curday;crypto_settled_today=0.0;latched=False
-   while heap and heap[0][0]<=t:'''
+_anchor=' for t in range(START,END+STEP,STEP):\n  while heap and heap[0][0]<=t:'
+_repl=''' def crypto_daily_trip(t):
+  unreal=0.0
+  for q in opened.values():
+   if q["s"]=="V52":continue
+   z=completed_h1(q["symbol"],t)
+   if z is None:return True
+   mark=q["entry"] if z[0]+H<=q.get("active_ts",q["ts"]) else z[4]
+   unreal+=q["notional"]*(1 if q["side"]=="LONG" else -1)*(mark/q["entry"]-1)
+  ref=cash-crypto_settled_today
+  if not (ref>0):return True
+  return max(0.0,-(crypto_settled_today+unreal)/ref)>=0.075-1e-15
+ for t in range(START,END+STEP,STEP):
+  curday=t//(24*H)
+  if day!=curday:
+   day=curday;crypto_settled_today=0.0;latched=False
+  while heap and heap[0][0]<=t:'''
 assert orig.count(_anchor)==1;orig=orig.replace(_anchor,_repl)
 _old='   if day!=t//(24*H):day=t//(24*H);dayeq=eq;latched=False\n   peak=max(peak,eq)'
 _new='   peak=max(peak,eq)'
