@@ -26,9 +26,12 @@ for(const row of rows){
  if(ei<0)throw Error("ENTRY_BAR_MISSING:"+row.id);
  const entryPrice=a[ei].open;
  const bars=a.slice(ei,ei+72);
- if(bars.length<72)throw Error("EXIT_BARS_MISSING:"+row.id+":"+bars.length);
- const x=pipe.simulateQuality102HighVolExit({side:row.side,entryPrice,hardStop:row.hardStop,bars});
- out.push({...row,entryPrice,...x,sourceRuntimeSha:"ef1ab178e26a7bf5bddb6473467765edba242e1d",
+ let x=null;
+ try{x=pipe.simulateQuality102HighVolExit({side:row.side,entryPrice,hardStop:row.hardStop,bars});}
+ catch(e){
+   if(String(e?.message||e)!=="QUALITY102_HV_EXIT_BARS_INSUFFICIENT_FOR_72H")throw e;
+ }
+ out.push({...row,entryPrice,...(x??{status:"RIGHT_CENSORED_PERIOD_END"}),sourceRuntimeSha:"ef1ab178e26a7bf5bddb6473467765edba242e1d",
    exitEvidence:"PRODUCTION_PIN_simulateQuality102HighVolExit",adoptedExitPoliciesApplied:false});
 }
 fs.writeFileSync(OUT,out.map(x=>JSON.stringify(x)).join("\n")+"\n");
