@@ -158,6 +158,7 @@ _reason_code='''elif dynamic_concentration and s in ("PENGU","Q102","IDLE") and 
    elif s=="V4" and g>V4_POS_CAP+1e-8:reason="V4_PER_POSITION_CAP"'''
 orig=orig.replace(_reason_anchor,_reason_code)
 
+orig=orig.replace('used_fragile+g>fragcap+1e-8','used_fragile+g>'+repr(fragcap)+'+1e-8')
 print("WRAPPER_MODE",mode,"SOURCE_SHA256",hashlib.sha256(source.read_bytes()).hexdigest(),"TARGET",out_name,flush=True)
 exec(compile(orig,str(source)+"::Y06_AB_"+mode,"exec"),{"__name__":"__main__"})
 # Attest output and assumptions, explicitly distinguish this from full production parity.
