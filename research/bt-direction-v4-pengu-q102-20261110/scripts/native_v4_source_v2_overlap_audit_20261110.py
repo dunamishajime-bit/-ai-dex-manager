@@ -15,7 +15,7 @@ nkeys={(r["decisionTs"],r["symbol"],r["side"]) for r in native}
 nkey_prices={(r["decisionTs"],r["symbol"],r["side"]):r for r in native}
 assert len(nkeys)==len(native),(len(nkeys),len(native))
 assert len(old)==1394
-assert len(legacy)==(598+1394+127),len(legacy)
+assert len(legacy)==(598+1394+117),len(legacy)  # forward 10 outcome-right-censored not in feature-strength ledger
 assert all(r.get("sourceSignalTs") is not None and r.get("sourceSide") for r in legacy)
 reports={}
 for p,lo,hi in [("pre",1740787200000,target_start),("target",target_start,target_end)]:
