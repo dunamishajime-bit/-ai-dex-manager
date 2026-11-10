@@ -1,3 +1,13 @@
+## Latest checkpoint — 2026-11-10 causal/DD route decisions
+
+Start here before any further BT work:
+
+- [CAUSAL_RISK_CHECKPOINT_AND_ROUTE_DECISIONS_20261110.md](./CAUSAL_RISK_CHECKPOINT_AND_ROUTE_DECISIONS_20261110.md)
+- [Consolidated checkpoint archive](./results/BT_CAUSAL_RISK_RESEARCH_CHECKPOINT_20261110.json.gz.base64) — original JSON SHA256 `18b3b8209ba330db918abc76eabcb2b4c1dff09620e92d4750e8258d79ad9ee1`
+- Current strongest but **not production-approved** route candidate: IDLE JUP full suspension/removal; classification remains `UNRESOLVED_DATA_OR_SEPARATION`.
+- Do **not** remove PENGU V8, V4 Y06, Q102 FET PB168, or IDLE RENDER based on the inspected DD episode; their ablation/forward evidence rejects that simple action.
+- The current integrated research baseline still fails DD<=20% at both costs. No LIVE/Production mutation is authorized by this research.
+
 ﻿# DisDex direction research snapshot — V4 / PENGU / Q102
 
 Snapshot date: 2026-11-10 JST  
