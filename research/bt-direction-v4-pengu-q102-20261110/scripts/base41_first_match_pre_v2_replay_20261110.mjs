@@ -23,7 +23,7 @@ const [{resampleV12H1ToH2},{computeNativeV4Sources},{computeProductionH1Features
  import(pathToFileURL(join(PIN,"lib","v12-multilogic-v4-shadow.ts")).href),
  import(pathToFileURL(join(PIN,"config","v12X1AllRuntime.ts")).href)
 ]);
-const T0=Date.parse("2025-10-01T00:00:00Z"),T1=Date.parse("2026-10-01T00:00:00Z");
+const HOUR=3600000,T0=Date.parse("2025-10-01T00:00:00Z"),T1=Date.parse("2026-10-01T00:00:00Z");
 const syms=[...V12_X1_ALL.universe],h1={},h2={};
 for(const s of syms){
  const fn=s+"USDT-1h-";
@@ -50,10 +50,10 @@ for(let i=120;i<h2.BTC.length;i++){
  for(const n of sources){
   counts[period].source++;
   const s=n.source,symbol=s.symbol.replace(/USDT$/,"");
+  const rolling=(arr)=>{let last=-1;for(let q=arr.length-1;q>=0;q--){if(arr[q].openTs+HOUR<=t){last=q;break;}}return last<0?[]:arr.slice(Math.max(0,last-499),last+1);};
   let source;
-  try{ source=computeProductionH1Features(s.symbol,s.side,s.eligibleSourceEntryTs,t,h1[symbol],h1.BTC); }
-  catch(err){ counts[period].dataInvalid++; invo.write(JSON.stringify({period,decisionTs:t,symbol:s.symbol,side:s.side,reason:String(err instanceof Error?err.message:err)})+"\
-"); continue; }
+  try{ source=computeProductionH1Features(s.symbol,s.side,s.eligibleSourceEntryTs,t,rolling(h1[symbol]),rolling(h1.BTC)); }
+  catch(err){ counts[period].dataInvalid++; invo.write(JSON.stringify({period,decisionTs:t,symbol:s.symbol,side:s.side,reason:String(err instanceof Error?err.message:err)})+"\n"); continue; }
   const obs={...source.features,sourceSide:s.side,sourceSignalTs:s.eligibleSourceEntryTs,age:s.momentumConditionAgeHours,
     coreRequestedGross:s.coreRequestedGross,nativeDiagnosticRet6:s.nativeDiagnosticRet6,
     nativeDiagnosticEma12Atr:s.nativeDiagnosticEma12Atr,...s.failedBreak};
