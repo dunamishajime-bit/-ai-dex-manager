@@ -1,0 +1,463 @@
+{
+  "status": "RESEARCH_THRESHOLD_JITTER_FALSIFICATION_ONLY",
+  "baseRule": {
+    "volumeThreshold": 1.2568362211142174,
+    "rel24Threshold": -0.04089204262472046
+  },
+  "gridN": 25,
+  "stableN": 5,
+  "stableFraction": 0.2,
+  "grid": [
+    {
+      "volumeMultiplier": 0.8,
+      "relMultiplier": 0.8,
+      "volumeThreshold": 1.005468976891374,
+      "relThreshold": -0.032713634099776366,
+      "valid30": {
+        "n": 2,
+        "wr": 1,
+        "mean": 0.0022086218386115934,
+        "pf": null
+      },
+      "forward30": {
+        "n": 3,
+        "wr": 1,
+        "mean": 0.04463853800485399,
+        "pf": null
+      }
+    },
+    {
+      "volumeMultiplier": 0.8,
+      "relMultiplier": 0.9,
+      "volumeThreshold": 1.005468976891374,
+      "relThreshold": -0.036802838362248416,
+      "valid30": {
+        "n": 4,
+        "wr": 0.75,
+        "mean": -0.0040466573027123885,
+        "pf": 0.46380167793841953
+      },
+      "forward30": {
+        "n": 6,
+        "wr": 0.8333333333333334,
+        "mean": 0.0329144557916638,
+        "pf": 8.427509468912076
+      }
+    },
+    {
+      "volumeMultiplier": 0.8,
+      "relMultiplier": 1,
+      "volumeThreshold": 1.005468976891374,
+      "relThreshold": -0.04089204262472046,
+      "valid30": {
+        "n": 8,
+        "wr": 0.75,
+        "mean": 0.004741947350728126,
+        "pf": 2.1430591432711132
+      },
+      "forward30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.024005252373916312,
+        "pf": 3.9985938416906235
+      }
+    },
+    {
+      "volumeMultiplier": 0.8,
+      "relMultiplier": 1.1,
+      "volumeThreshold": 1.005468976891374,
+      "relThreshold": -0.04498124688719251,
+      "valid30": {
+        "n": 11,
+        "wr": 0.5454545454545454,
+        "mean": -0.016722316911715298,
+        "pf": 0.27883981047971135
+      },
+      "forward30": {
+        "n": 8,
+        "wr": 0.75,
+        "mean": 0.02119402792165404,
+        "pf": 4.025636966756764
+      }
+    },
+    {
+      "volumeMultiplier": 0.8,
+      "relMultiplier": 1.2,
+      "volumeThreshold": 1.005468976891374,
+      "relThreshold": -0.04907045114966455,
+      "valid30": {
+        "n": 17,
+        "wr": 0.4117647058823529,
+        "mean": -0.01585045443312965,
+        "pf": 0.22240483024103336
+      },
+      "forward30": {
+        "n": 10,
+        "wr": 0.7,
+        "mean": 0.01630458876002812,
+        "pf": 2.765870354820997
+      }
+    },
+    {
+      "volumeMultiplier": 0.9,
+      "relMultiplier": 0.8,
+      "volumeThreshold": 1.1311525990027957,
+      "relThreshold": -0.032713634099776366,
+      "valid30": {
+        "n": 2,
+        "wr": 1,
+        "mean": 0.0022086218386115934,
+        "pf": null
+      },
+      "forward30": {
+        "n": 3,
+        "wr": 1,
+        "mean": 0.04463853800485399,
+        "pf": null
+      }
+    },
+    {
+      "volumeMultiplier": 0.9,
+      "relMultiplier": 0.9,
+      "volumeThreshold": 1.1311525990027957,
+      "relThreshold": -0.036802838362248416,
+      "valid30": {
+        "n": 4,
+        "wr": 0.75,
+        "mean": -0.0040466573027123885,
+        "pf": 0.46380167793841953
+      },
+      "forward30": {
+        "n": 6,
+        "wr": 0.8333333333333334,
+        "mean": 0.0329144557916638,
+        "pf": 8.427509468912076
+      }
+    },
+    {
+      "volumeMultiplier": 0.9,
+      "relMultiplier": 1,
+      "volumeThreshold": 1.1311525990027957,
+      "relThreshold": -0.04089204262472046,
+      "valid30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.003391572667154066,
+        "pf": 1.7153542369741046
+      },
+      "forward30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.024005252373916312,
+        "pf": 3.9985938416906235
+      }
+    },
+    {
+      "volumeMultiplier": 0.9,
+      "relMultiplier": 1.1,
+      "volumeThreshold": 1.1311525990027957,
+      "relThreshold": -0.04498124688719251,
+      "valid30": {
+        "n": 9,
+        "wr": 0.5555555555555556,
+        "mean": -0.020250999036657967,
+        "pf": 0.2380087211203385
+      },
+      "forward30": {
+        "n": 8,
+        "wr": 0.75,
+        "mean": 0.02119402792165404,
+        "pf": 4.025636966756764
+      }
+    },
+    {
+      "volumeMultiplier": 0.9,
+      "relMultiplier": 1.2,
+      "volumeThreshold": 1.1311525990027957,
+      "relThreshold": -0.04907045114966455,
+      "valid30": {
+        "n": 15,
+        "wr": 0.4,
+        "mean": -0.017851415377617166,
+        "pf": 0.19015721032978114
+      },
+      "forward30": {
+        "n": 10,
+        "wr": 0.7,
+        "mean": 0.01630458876002812,
+        "pf": 2.765870354820997
+      }
+    },
+    {
+      "volumeMultiplier": 1,
+      "relMultiplier": 0.8,
+      "volumeThreshold": 1.2568362211142174,
+      "relThreshold": -0.032713634099776366,
+      "valid30": {
+        "n": 1,
+        "wr": 1,
+        "mean": 0.0016865846514352327,
+        "pf": null
+      },
+      "forward30": {
+        "n": 3,
+        "wr": 1,
+        "mean": 0.04463853800485399,
+        "pf": null
+      }
+    },
+    {
+      "volumeMultiplier": 1,
+      "relMultiplier": 0.9,
+      "volumeThreshold": 1.2568362211142174,
+      "relThreshold": -0.036802838362248416,
+      "valid30": {
+        "n": 3,
+        "wr": 0.6666666666666666,
+        "mean": -0.006305762745545836,
+        "pf": 0.3733458598259984
+      },
+      "forward30": {
+        "n": 6,
+        "wr": 0.8333333333333334,
+        "mean": 0.0329144557916638,
+        "pf": 8.427509468912076
+      }
+    },
+    {
+      "volumeMultiplier": 1,
+      "relMultiplier": 1,
+      "volumeThreshold": 1.2568362211142174,
+      "relThreshold": -0.04089204262472046,
+      "valid30": {
+        "n": 6,
+        "wr": 0.6666666666666666,
+        "mean": 0.0035017249407150847,
+        "pf": 1.633075150563976
+      },
+      "forward30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.024005252373916312,
+        "pf": 3.9985938416906235
+      }
+    },
+    {
+      "volumeMultiplier": 1,
+      "relMultiplier": 1.1,
+      "volumeThreshold": 1.2568362211142174,
+      "relThreshold": -0.04498124688719251,
+      "valid30": {
+        "n": 8,
+        "wr": 0.5,
+        "mean": -0.023123706294463708,
+        "pf": 0.22659233859752542
+      },
+      "forward30": {
+        "n": 8,
+        "wr": 0.75,
+        "mean": 0.02119402792165404,
+        "pf": 4.025636966756764
+      }
+    },
+    {
+      "volumeMultiplier": 1,
+      "relMultiplier": 1.2,
+      "volumeThreshold": 1.2568362211142174,
+      "relThreshold": -0.04907045114966455,
+      "valid30": {
+        "n": 14,
+        "wr": 0.35714285714285715,
+        "mean": -0.01932156354928896,
+        "pf": 0.1818986512695099
+      },
+      "forward30": {
+        "n": 10,
+        "wr": 0.7,
+        "mean": 0.01630458876002812,
+        "pf": 2.765870354820997
+      }
+    },
+    {
+      "volumeMultiplier": 1.1,
+      "relMultiplier": 0.8,
+      "volumeThreshold": 1.3825198432256394,
+      "relThreshold": -0.032713634099776366,
+      "valid30": {
+        "n": 1,
+        "wr": 1,
+        "mean": 0.0016865846514352327,
+        "pf": null
+      },
+      "forward30": {
+        "n": 3,
+        "wr": 1,
+        "mean": 0.04463853800485399,
+        "pf": null
+      }
+    },
+    {
+      "volumeMultiplier": 1.1,
+      "relMultiplier": 0.9,
+      "volumeThreshold": 1.3825198432256394,
+      "relThreshold": -0.036802838362248416,
+      "valid30": {
+        "n": 3,
+        "wr": 0.6666666666666666,
+        "mean": -0.006305762745545836,
+        "pf": 0.3733458598259984
+      },
+      "forward30": {
+        "n": 6,
+        "wr": 0.8333333333333334,
+        "mean": 0.0329144557916638,
+        "pf": 8.427509468912076
+      }
+    },
+    {
+      "volumeMultiplier": 1.1,
+      "relMultiplier": 1,
+      "volumeThreshold": 1.3825198432256394,
+      "relThreshold": -0.04089204262472046,
+      "valid30": {
+        "n": 6,
+        "wr": 0.6666666666666666,
+        "mean": 0.0035017249407150847,
+        "pf": 1.633075150563976
+      },
+      "forward30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.024005252373916312,
+        "pf": 3.9985938416906235
+      }
+    },
+    {
+      "volumeMultiplier": 1.1,
+      "relMultiplier": 1.1,
+      "volumeThreshold": 1.3825198432256394,
+      "relThreshold": -0.04498124688719251,
+      "valid30": {
+        "n": 8,
+        "wr": 0.5,
+        "mean": -0.023123706294463708,
+        "pf": 0.22659233859752542
+      },
+      "forward30": {
+        "n": 8,
+        "wr": 0.75,
+        "mean": 0.02119402792165404,
+        "pf": 4.025636966756764
+      }
+    },
+    {
+      "volumeMultiplier": 1.1,
+      "relMultiplier": 1.2,
+      "volumeThreshold": 1.3825198432256394,
+      "relThreshold": -0.04907045114966455,
+      "valid30": {
+        "n": 14,
+        "wr": 0.35714285714285715,
+        "mean": -0.01932156354928896,
+        "pf": 0.1818986512695099
+      },
+      "forward30": {
+        "n": 10,
+        "wr": 0.7,
+        "mean": 0.01630458876002812,
+        "pf": 2.765870354820997
+      }
+    },
+    {
+      "volumeMultiplier": 1.2,
+      "relMultiplier": 0.8,
+      "volumeThreshold": 1.5082034653370608,
+      "relThreshold": -0.032713634099776366,
+      "valid30": {
+        "n": 0,
+        "wr": null,
+        "mean": null,
+        "pf": null
+      },
+      "forward30": {
+        "n": 3,
+        "wr": 1,
+        "mean": 0.04463853800485399,
+        "pf": null
+      }
+    },
+    {
+      "volumeMultiplier": 1.2,
+      "relMultiplier": 0.9,
+      "volumeThreshold": 1.5082034653370608,
+      "relThreshold": -0.036802838362248416,
+      "valid30": {
+        "n": 1,
+        "wr": 0,
+        "mean": -0.030187765505522376,
+        "pf": 0
+      },
+      "forward30": {
+        "n": 6,
+        "wr": 0.8333333333333334,
+        "mean": 0.0329144557916638,
+        "pf": 8.427509468912076
+      }
+    },
+    {
+      "volumeMultiplier": 1.2,
+      "relMultiplier": 1,
+      "volumeThreshold": 1.5082034653370608,
+      "relThreshold": -0.04089204262472046,
+      "valid30": {
+        "n": 4,
+        "wr": 0.5,
+        "mean": 0.002434968093851411,
+        "pf": 1.2934777990336512
+      },
+      "forward30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.024005252373916312,
+        "pf": 3.9985938416906235
+      }
+    },
+    {
+      "volumeMultiplier": 1.2,
+      "relMultiplier": 1.1,
+      "volumeThreshold": 1.5082034653370608,
+      "relThreshold": -0.04498124688719251,
+      "valid30": {
+        "n": 6,
+        "wr": 0.3333333333333333,
+        "mean": -0.032710021270765756,
+        "pf": 0.1794725486489687
+      },
+      "forward30": {
+        "n": 8,
+        "wr": 0.75,
+        "mean": 0.02119402792165404,
+        "pf": 4.025636966756764
+      }
+    },
+    {
+      "volumeMultiplier": 1.2,
+      "relMultiplier": 1.2,
+      "volumeThreshold": 1.5082034653370608,
+      "relThreshold": -0.04907045114966455,
+      "valid30": {
+        "n": 11,
+        "wr": 0.2727272727272727,
+        "mean": -0.022319837289939456,
+        "pf": 0.16601541229480782
+      },
+      "forward30": {
+        "n": 10,
+        "wr": 0.7,
+        "mean": 0.01630458876002812,
+        "pf": 2.765870354820997
+      }
+    }
+  ],
+  "interpretation": "A candidate should not be promoted if only the exact trained cut survives. This grid perturbs both cuts by +/-20%; still not production approval."
+}
