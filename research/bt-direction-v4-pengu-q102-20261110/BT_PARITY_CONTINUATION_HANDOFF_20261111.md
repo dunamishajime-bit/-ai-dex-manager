@@ -256,3 +256,47 @@ Task A/Bで固定したcanonical baselineに対し:
 - 統合後、10/30bps二重実行のSHA一致を取ってから研究Gateへ戻る。
 
 この比較まで完了済み。次回は3本の監査スクリプトを最初から読み直さず、この統合から開始する。
+
+
+## Canonical checkpoint completed after Task A/B
+
+Task A/B are now complete.
+
+Canonical simulator:
+- `scripts/portfolio_effective_current_canonical_parity_20261111.py`
+
+Canonical result:
+- 10bps: JPY 235,605.78 / DD -58.0771% / 446 fills / Win 56.7265% / PF 1.1874
+- 30bps: JPY 77,865.09 / DD -65.0500% / 425 fills / Win 54.3529% / PF 1.1232
+- 21/21 output artifacts SHA256 matched across two full reruns.
+
+V4 21% DD hold was re-audited against pin 53a0be...:
+- maxDrawdown is computed from signed ACCOUNT_MARK whole-account equity versus account equity peak.
+- V4 shared reservation blocks new V4 risk once maxDrawdown > 0.21.
+- Therefore whole modeled account MTM equity is the correct BT analogue; do not replace this with V4-only DD.
+
+V4 gross semantics re-audited:
+- new crypto entry control requested cap 3.0;
+- existing crypto exposure allowance/recheck 3.5;
+- V12 3.0;
+- Recovery 2.5;
+- Total 4.75.
+
+Detailed checkpoint:
+- `CANONICAL_CURRENT_IMPLEMENTATION_PARITY_20261111.md`
+- `evidence/CANONICAL_PARITY_PASS1_SHA256_20261111.txt`
+- `evidence/CANONICAL_PARITY_PASS2_SHA256_20261111.txt`
+
+### New resume point
+
+Task A/Bをやり直さない。
+次は **Task C: canonical baseline上で研究Gate A/Bを再実行** する。
+
+対象:
+1. IDLE JUP
+2. PENGU V8 BTC24
+3. Q102 FET ret14
+4. pairwise
+5. THREE
+
+古い772-fill baselineの研究改善値は採用判断に使わない。
