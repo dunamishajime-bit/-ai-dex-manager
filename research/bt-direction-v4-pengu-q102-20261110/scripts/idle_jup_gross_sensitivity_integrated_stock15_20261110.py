@@ -53,13 +53,19 @@ assert orig.count("STOCK_CAP=4.0")>=1
 orig=orig.replace("STOCK_CAP=4.0","STOCK_CAP=1.5")
 assert orig.count("gross=2.0,v=z,")==1
 orig=orig.replace("gross=2.0,v=z,","gross=1.5,v=z,")
-# Research-only JUP gross sensitivity. Entry/side/exit are unchanged.
+# Research-only JUP gross sensitivity. Inject after the original raw candidate list exists.
+_raw_marker='# VPS priority research proxy:'
+assert orig.count(_raw_marker)==1
+_gross_block='''\
 raw_jup=[c for c in raw if c["s"]=="IDLE" and c["route"]=="IDLE_JUP_RELATIVE_SHORT"]
 assert len(raw_jup)==58,len(raw_jup)
 for c in raw_jup:
  assert abs(float(c["gross"])-1.0)<1e-12
- c["gross"]=jup_gross
-print("JUP_GROSS_RESEARCH",jup_gross,"rows",len(raw_jup),flush=True)
+ c["gross"]=${jup_gross}
+print("JUP_GROSS_RESEARCH",${jup_gross},"rows",len(raw_jup),flush=True)
+'''
+_gross_block=_gross_block.replace('${jup_gross}',repr(jup_gross))
+orig=orig.replace(_raw_marker,_gross_block+_raw_marker)
 
 # Repair research-only integrated model's intra-V4 sort for A/B, never changing original Production source.
 ranking_sort_original='a=sorted(raw,key=lambda c:(c["t"],priority[c["s"]],c["symbol"],c["id"]))'
