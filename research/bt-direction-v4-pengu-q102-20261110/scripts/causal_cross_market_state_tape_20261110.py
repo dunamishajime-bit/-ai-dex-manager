@@ -64,7 +64,7 @@ def logvol(s,t,h):
     return float(np.std(vals,ddof=0))
 def state_at(decision_t):
     # decision_t is candidate/open boundary. Last causal H1 closes at decision_t, so use bar open decision_t-H.
-    last=decision_t-H
+    last=(decision_t//H)*H-H  # most recent H1 whose close is strictly <= decision time
     if last not in bars["BTC"]:return None
     b24=ret("BTC",last,24);b72=ret("BTC",last,72);v24=logvol("BTC",last,24)
     rs=[]
