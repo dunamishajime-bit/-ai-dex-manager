@@ -16,9 +16,10 @@ risk_fraction=float(os.environ["DISDEX_RESEARCH_RISK_FRACTION"])
 assert risk_hours in (168,336,720) and risk_fraction in (0.04,0.06,0.08,0.10,0.12,0.15,0.18)
 assert mode=="PINNED"
 jup_case=os.environ["DISDEX_COMBINED_JUP_CASE"]
+drop_fet_rev12=os.environ.get("DISDEX_DROP_Q102_FET_REV12","0")=="1"
 assert jup_case in ("JUP_OFF","JUP_LONG025")
 assert risk_hours==720 and abs(risk_fraction-0.06)<1e-12
-out_name=f"VPS_DD_COMBINED_{jup_case}_RISKROLL_{risk_hours}H_{round(risk_fraction*100):02d}PCT_20261110"
+out_name=f"VPS_DD_COMBINED_{jup_case}_FETREV12_{int(drop_fet_rev12)}_RISKROLL_{risk_hours}H_{round(risk_fraction*100):02d}PCT_20261110"
 if jup_case=="JUP_LONG025":
  idle_old='p=N/("native-"+s+"-all-intent-modeled-5m-exit-audit.json")'
  idle_new='p=(R/"DIRECTION_RESEARCH_20261109"/"IDLE_JUP_ALL_LONG_ONLY_20261110"/"native-IDLE-all-intent-modeled-5m-exit-audit.json") if s=="IDLE" else N/("native-"+s+"-all-intent-modeled-5m-exit-audit.json")'
@@ -80,6 +81,13 @@ for c in raw_jup:
  assert abs(float(c["gross"])-1.0)<1e-12
  c["gross"]=0.25
 print("COMBINED_JUP_LONG025",58,flush=True)
+'''
+if drop_fet_rev12:
+ _jup_block += '''\
+_before_fet=len(raw)
+raw=[c for c in raw if not (c["s"]=="Q102" and c["route"]=="FET|REV12_T0.05_H12")]
+assert _before_fet-len(raw)==4
+print("COMBINED_DROP_Q102_FET_REV12",4,flush=True)
 '''
 orig=orig.replace(_raw_marker,_jup_block+_raw_marker)
 
@@ -143,7 +151,7 @@ m={"status":"RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
                    "PENGU":"PENGU_NATIVE_LIFECYCLE_EXIT_20261109",
                    "Q102":"Q102_S34_SELECTED_NATIVE_EXIT_M5COMPLETE_20261109"},
    "V4_sorting_rule":mode, "Y06_rule":"Native unchanged, no H60", "risk_window_hours":risk_hours,"risk_peak_fraction":risk_fraction,
-   "entry_decisions_unchanged":False,"mechanism":"30d 6pct entry-only rolling peak equity gate + IDLE JUP route intervention; existing positions untouched","jup_case":jup_case,
+   "entry_decisions_unchanged":False,"mechanism":"30d 6pct entry-only rolling peak equity gate + IDLE JUP route intervention; existing positions untouched","jup_case":jup_case,"drop_q102_fet_rev12":drop_fet_rev12,
    "fees_bps_roundtrip":[10,30],
    "omissions":["V52 missing historical executable book","shared risk and auxiliary logic approximations inherit original engine","H1 next-open is a modeled fill, not real venue order"],
    "source_native_Y06_count":352}
