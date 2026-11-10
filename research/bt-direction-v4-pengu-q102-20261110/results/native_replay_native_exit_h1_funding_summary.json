@@ -1,0 +1,197 @@
+{
+  "status": "RESEARCH_STANDALONE_NATIVE_46H_H1_PRICE_MODEL_FUNDING_PROXY_NOT_INTEGRATED_NOT_EXECUTABLE_NOT_OOS",
+  "periodStart": "2025-10-01T00:00:00Z",
+  "periodEndExclusive": "2026-10-01T00:00:00Z",
+  "nativeExitImplementation": "evaluateNativeProductionExit from pinned V4 production-lifecycle.ts with adapter route REC_G3_LATE_BTC_REL for NATIVE exit spec only",
+  "notSameAs": "V2 shadow 41-route conditional exit and current live deployed venue orderbook",
+  "entryFill": "next completed H2 boundary (same H1 open at decisionTs)",
+  "entryPreregisteredCostsBps": [
+    10,
+    30
+  ],
+  "fundingModel": "public funding rate and prior-completed H1 close / entry price, exclude events at entry or exit timestamp",
+  "limitations": [
+    "H1 stop-first model uses synthetic stop/TP fills at bar close timestamp, not signed venue fills; not M5 order execution",
+    "Each native candidate is independently simulated; overlapping signals, slots, Gross and compounding ignored",
+    "V12 native fixed 46h exit and core event separately; V2 41-route exit protocols have different economics",
+    "Only native signals with settled exit by period end are in win rate; right-censored are explicitly excluded",
+    "Frozen pin code in 2026 applied to 2025-2026 retrospectively: policy selection may still use historical information",
+    "Native only is not fully production-certified; final route acceptance requires 10/30bps integrated risk"
+  ],
+  "sections": {
+    "V12_NATIVE_SELECTED_BY_V2": {
+      "candidates": 1394,
+      "completed": 1394,
+      "rightCensored": 0,
+      "longCompleted": 628,
+      "shortCompleted": 766,
+      "byExitReason": {
+        "TRAILING_CROSSED_BEFORE_REPLACEMENT": 1087,
+        "STOP": 282,
+        "TAKE_PROFIT": 25
+      },
+      "10bps": {
+        "winCount": 626,
+        "lossCount": 768,
+        "winRate": 0.4490674318507891,
+        "summedIndependentUnitNetReturns": -0.3575486906178553,
+        "meanUnitNetReturn": -0.00025649116974021187,
+        "avgWin": 0.01135216310440598,
+        "avgLoss": -0.009718753637989559,
+        "profitFactor": 0.9520969243330928,
+        "netPositive": false
+      },
+      "30bps": {
+        "winCount": 506,
+        "lossCount": 888,
+        "winRate": 0.3629842180774749,
+        "summedIndependentUnitNetReturns": -3.145548690617816,
+        "meanUnitNetReturn": -0.0022564911697401835,
+        "avgWin": 0.011808994146486094,
+        "avgLoss": -0.010271283478310559,
+        "profitFactor": 0.6551273685526604,
+        "netPositive": false
+      }
+    },
+    "V12_NATIVE_NOT_SELECTED_BY_V2": {
+      "candidates": 624,
+      "completed": 624,
+      "rightCensored": 0,
+      "longCompleted": 277,
+      "shortCompleted": 347,
+      "byExitReason": {
+        "STOP": 125,
+        "TRAILING_CROSSED_BEFORE_REPLACEMENT": 492,
+        "TAKE_PROFIT": 7
+      },
+      "10bps": {
+        "winCount": 256,
+        "lossCount": 368,
+        "winRate": 0.41025641025641024,
+        "summedIndependentUnitNetReturns": -0.5986629544545594,
+        "meanUnitNetReturn": -0.0009593957603438452,
+        "avgWin": 0.00965223595341189,
+        "avgLoss": -0.008341400430782586,
+        "profitFactor": 0.8049726157892482,
+        "netPositive": false
+      },
+      "30bps": {
+        "winCount": 201,
+        "lossCount": 423,
+        "winRate": 0.32211538461538464,
+        "summedIndependentUnitNetReturns": -1.8466629544545323,
+        "meanUnitNetReturn": -0.002959395760343802,
+        "avgWin": 0.010058048662146695,
+        "avgLoss": -0.009144989918548539,
+        "profitFactor": 0.5226201995900742,
+        "netPositive": false
+      }
+    },
+    "V12_NATIVE_ALL": {
+      "candidates": 2018,
+      "completed": 2018,
+      "rightCensored": 0,
+      "longCompleted": 905,
+      "shortCompleted": 1113,
+      "byExitReason": {
+        "STOP": 407,
+        "TRAILING_CROSSED_BEFORE_REPLACEMENT": 1579,
+        "TAKE_PROFIT": 32
+      },
+      "10bps": {
+        "winCount": 882,
+        "lossCount": 1136,
+        "winRate": 0.4370664023785927,
+        "summedIndependentUnitNetReturns": -0.956211645072371,
+        "meanUnitNetReturn": -0.0004738412512747131,
+        "avgWin": 0.010858760212507482,
+        "avgLoss": -0.009272568796218296,
+        "profitFactor": 0.9092230403941605,
+        "netPositive": false
+      },
+      "30bps": {
+        "winCount": 707,
+        "lossCount": 1311,
+        "winRate": 0.3503468780971259,
+        "summedIndependentUnitNetReturns": -4.992211645072365,
+        "meanUnitNetReturn": -0.00247384125127471,
+        "avgWin": 0.011311200592946873,
+        "avgLoss": -0.009907879835458292,
+        "profitFactor": 0.6156653268414491,
+        "netPositive": false
+      }
+    },
+    "FAILED_BREAK_CORE_ALL": {
+      "candidates": 49,
+      "completed": 49,
+      "rightCensored": 0,
+      "longCompleted": 0,
+      "shortCompleted": 49,
+      "byExitReason": {
+        "STOP": 13,
+        "TRAILING_CROSSED_BEFORE_REPLACEMENT": 34,
+        "TAKE_PROFIT": 2
+      },
+      "10bps": {
+        "winCount": 30,
+        "lossCount": 19,
+        "winRate": 0.6122448979591837,
+        "summedIndependentUnitNetReturns": 0.1853097429750607,
+        "meanUnitNetReturn": 0.0037818314892869532,
+        "avgWin": 0.009586812879983126,
+        "avgLoss": -0.005383928601285953,
+        "profitFactor": 2.8115292919707215,
+        "netPositive": true
+      },
+      "30bps": {
+        "winCount": 24,
+        "lossCount": 25,
+        "winRate": 0.4897959183673469,
+        "summedIndependentUnitNetReturns": 0.08730974297506071,
+        "meanUnitNetReturn": 0.0017818314892869532,
+        "avgWin": 0.00975614885332088,
+        "avgLoss": -0.005873513180185618,
+        "profitFactor": 1.5945997926392768,
+        "netPositive": true
+      }
+    }
+  },
+  "inputHashes": {
+    "sourceNative": "feec4954d9e4e980b1fde8419549e330a89b05d9116fe96842ca29725a63734f",
+    "coreNative": "c6bab4264eb01cbd87d61e78d64659def87eb6c67e9a2fd845467952360d65b5",
+    "legacy": "b750863e86fe6f049ada0f4ca41aa64524d5fb483218e660c4968cc9478c4cf9",
+    "h1BySymbol": {
+      "AVAXUSDT": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1",
+      "SOLUSDT": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993",
+      "LINKUSDT": "a7f0886f1d62746cf40fbf4d918779be5cad4fb8e41dfa6a57e3502dc0b929bb",
+      "DOGEUSDT": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149",
+      "AAVEUSDT": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d",
+      "BTCUSDT": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+      "BNBUSDT": "9d0c1d0c1928238394d87e40dacb36a2068d34595a53b15906d2c352180e0ecc",
+      "ETHUSDT": "1fd9637951ba2f3f1c1584f1fbceea6a20c152fb1143398b5d81c8091d394e13",
+      "LTCUSDT": "e54442a796fb7503998be021704c64f33d8ce942bea214a3ed4353b4dbc99b53",
+      "NEARUSDT": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85",
+      "INJUSDT": "7e3a8dd793403afef57526de1177de785bcb72dfe86c155e034dffcb28849d42",
+      "XRPUSDT": "7e9274840c78e5c95ec39ff5f0101510f80abe7716d0892c03432494329e5f03",
+      "ADAUSDT": "121ba3e00a6b1c35b9146a7a36314f40e341e37f7ace31023e7286a5123bcb29",
+      "ATOMUSDT": "49d00cecb195b349a2b0d2dd18f7f4c97bc14ffa178ad7f77b2d38fc39074d6e"
+    },
+    "fundingBySymbol": {
+      "AVAXUSDT": "bb2aa500bd2efe72ea15d1bb95b489a743cfa91926913e00a06edb7105b03609",
+      "SOLUSDT": "c921824b1ed3c985ff2f73a2ef1a4cdd8ca706df7304e7c94a3fe03121558087",
+      "LINKUSDT": "79a9076726759360284df8e317afcd28b33a588be4738541487c427fc36129fd",
+      "DOGEUSDT": "7739cf0428261b6a0604857064cbe6335d4a0c2792cd8ac1d42be171710f9abd",
+      "AAVEUSDT": "8d1a7b0ea6d00d3bd5c5f5b8ce235612789e4756772393515472a5c95ee3964c",
+      "BTCUSDT": "5a9833a474a9895f04feb834f873b86a675ff4957cbfbffc93c803d8648b7dc6",
+      "BNBUSDT": "51f0b3918b20bcea938b2b122c46587b4a0a97f21596c7ed1446b234ad78582a",
+      "ETHUSDT": "33c53e28a577e83a72a46ff698ec6fd622b939c8464bfb664ff0dc9383062e59",
+      "LTCUSDT": "cfefe77b32cbc4404bd862c04ba22bea068ec2153563a6e7d1b263e9aff49ba0",
+      "NEARUSDT": "43ca42a1ae99fde56c56077d1b0b9c34ad0df38842183f6605e71d6272d298bb",
+      "INJUSDT": "307b45b88603dd225978fe59567abe4b979b3f18d4fd18b45580051d1fe93525",
+      "XRPUSDT": "b42d91529260580b80623a6cee51847e89282b5bb88f75028008d6709d33a3a8",
+      "ADAUSDT": "49ef99f552e31daccd8ad8525ccaa21d0709a8139244902355743ea3b873ae94",
+      "ATOMUSDT": "ff45ee06275d18720fb74a7341aa7d4e6bf5290f14d8a3c49798124ebc487b86"
+    }
+  },
+  "resultHash": "9860bcdef44c8cee641c3fd15bfdf4d2ceb3e9831ec01d04f9eaaf320cb2f933"
+}
