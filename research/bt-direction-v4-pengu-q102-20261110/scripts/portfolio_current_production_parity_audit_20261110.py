@@ -158,8 +158,8 @@ orig=orig.replace(anchor,anchor+'\n  if q["s"]=="FET":fet_cooldown_until=max(fet
 old='s=c["s"];g=c["gross"];reason=""'
 assert orig.count(old)==1
 new='''s=c["s"];g=c["gross"];reason=""
-    if s=="FET" and eq is not None and math.isfinite(used_crypto) and math.isfinite(used_total):
-     g=max(0.0,min(1.0,CRYPTO_CAP-used_crypto,TOTAL_CAP-used_total))'''
+   if s=="FET" and eq is not None and math.isfinite(used_crypto) and math.isfinite(used_total):
+    g=max(0.0,min(1.0,CRYPTO_CAP-used_crypto,TOTAL_CAP-used_total))'''
 orig=orig.replace(old,new)
 
 # Insert current runner-specific admission gates ahead of generic symbol/slot/cap checks.
