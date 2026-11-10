@@ -20,7 +20,9 @@ const out=[],errors={};
 for(let t=START;t<END;t+=H){
  for(const sym of symbols){
   try{
-   const f=sig.computeIdlePriorityFeatures(t,bars[sym],bars.BTCUSDT);
+   const si=Math.round((t-bars[sym][0].ts)/H),bi=Math.round((t-bars.BTCUSDT[0].ts)/H);
+   const sr=bars[sym].slice(Math.max(0,si-160),si),br=bars.BTCUSDT.slice(Math.max(0,bi-160),bi);
+   const f=sig.computeIdlePriorityFeatures(t,sr,br);
    const g=sig.evaluateIdleGenericCandidate(f);
    const d=sig.evaluateIdlePriorityShort(sym,f,g);
    if(d.accepted)out.push({strategy_id:"IDLE",source_runtime_sha:"7688ed7c93a1918d8b44837339b7da5584a868f5",
