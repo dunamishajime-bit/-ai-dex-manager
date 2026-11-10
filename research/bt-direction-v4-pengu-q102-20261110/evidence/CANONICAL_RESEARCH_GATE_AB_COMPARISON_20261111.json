@@ -1,0 +1,344 @@
+{
+  "canonicalWrapperSha256": "72b82db1e25273ba2358008c1ccd40b44dd33695b334d5ba9951802be0289701",
+  "researchHarnessSha256": "a3eb8b125e821877451b9f865f3019c4123823becaf02a81e9f4633c08d4d009",
+  "rows": [
+    {
+      "case": "BASELINE",
+      "cost_bps": 10,
+      "final_jpy": 235605.7768673373,
+      "max_dd_pct": -58.07708131360967,
+      "fills": 446,
+      "win_rate_pct": 56.72645739910314,
+      "profit_factor": 1.1873875380074532,
+      "shared_risk_trips": 18,
+      "v52_daily_trips": 133,
+      "source_intents": 2811,
+      "delta_final_jpy": 0.0,
+      "delta_final_pct_vs_baseline": 0.0,
+      "dd_improvement_pp": 0.0,
+      "win_rate_delta_pp": 0.0,
+      "pf_delta": 0.0
+    },
+    {
+      "case": "BASELINE",
+      "cost_bps": 30,
+      "final_jpy": 77865.08759310667,
+      "max_dd_pct": -65.04998632273649,
+      "fills": 425,
+      "win_rate_pct": 54.352941176470594,
+      "profit_factor": 1.1231949815437317,
+      "shared_risk_trips": 17,
+      "v52_daily_trips": 135,
+      "source_intents": 2811,
+      "delta_final_jpy": 0.0,
+      "delta_final_pct_vs_baseline": 0.0,
+      "dd_improvement_pp": 0.0,
+      "win_rate_delta_pp": 0.0,
+      "pf_delta": 0.0
+    },
+    {
+      "case": "IDLE_JUP",
+      "cost_bps": 10,
+      "final_jpy": 262375.27763270534,
+      "max_dd_pct": -59.0441545729236,
+      "fills": 445,
+      "win_rate_pct": 57.30337078651685,
+      "profit_factor": 1.2114566343648119,
+      "shared_risk_trips": 18,
+      "v52_daily_trips": 133,
+      "source_intents": 2598,
+      "delta_final_jpy": 26769.50076536805,
+      "delta_final_pct_vs_baseline": 11.361988284540736,
+      "dd_improvement_pp": -0.9670732593139348,
+      "win_rate_delta_pp": 0.5769133874137111,
+      "pf_delta": 0.024069096357358655
+    },
+    {
+      "case": "IDLE_JUP",
+      "cost_bps": 30,
+      "final_jpy": 87343.97572536464,
+      "max_dd_pct": -65.4222626744052,
+      "fills": 424,
+      "win_rate_pct": 54.71698113207547,
+      "profit_factor": 1.1404951897464537,
+      "shared_risk_trips": 17,
+      "v52_daily_trips": 135,
+      "source_intents": 2598,
+      "delta_final_jpy": 9478.88813225797,
+      "delta_final_pct_vs_baseline": 12.17347649024816,
+      "dd_improvement_pp": -0.37227635166871664,
+      "win_rate_delta_pp": 0.36403995560487346,
+      "pf_delta": 0.017300208202722045
+    },
+    {
+      "case": "PENGU_V8",
+      "cost_bps": 10,
+      "final_jpy": 293533.5450640349,
+      "max_dd_pct": -52.52374545907843,
+      "fills": 444,
+      "win_rate_pct": 57.432432432432435,
+      "profit_factor": 1.2207451171444719,
+      "shared_risk_trips": 17,
+      "v52_daily_trips": 132,
+      "source_intents": 2795,
+      "delta_final_jpy": 57927.76819669758,
+      "delta_final_pct_vs_baseline": 24.586735082185605,
+      "dd_improvement_pp": 5.553335854531241,
+      "win_rate_delta_pp": 0.7059750333292953,
+      "pf_delta": 0.033357579137018645
+    },
+    {
+      "case": "PENGU_V8",
+      "cost_bps": 30,
+      "final_jpy": 142450.37667081543,
+      "max_dd_pct": -59.48895523990869,
+      "fills": 439,
+      "win_rate_pct": 55.80865603644647,
+      "profit_factor": 1.1768417688474777,
+      "shared_risk_trips": 16,
+      "v52_daily_trips": 134,
+      "source_intents": 2795,
+      "delta_final_jpy": 64585.28907770876,
+      "delta_final_pct_vs_baseline": 82.94511837603898,
+      "dd_improvement_pp": 5.561031082827796,
+      "win_rate_delta_pp": 1.4557148599758776,
+      "pf_delta": 0.05364678730374606
+    },
+    {
+      "case": "Q102_FET",
+      "cost_bps": 10,
+      "final_jpy": 296278.6472276648,
+      "max_dd_pct": -56.253510108861036,
+      "fills": 449,
+      "win_rate_pct": 57.906458797327396,
+      "profit_factor": 1.2298703458136053,
+      "shared_risk_trips": 15,
+      "v52_daily_trips": 133,
+      "source_intents": 2786,
+      "delta_final_jpy": 60672.870360327535,
+      "delta_final_pct_vs_baseline": 25.751860233244894,
+      "dd_improvement_pp": 1.8235712047486317,
+      "win_rate_delta_pp": 1.180001398224256,
+      "pf_delta": 0.0424828078061521
+    },
+    {
+      "case": "Q102_FET",
+      "cost_bps": 30,
+      "final_jpy": 96356.62951351881,
+      "max_dd_pct": -56.50535950297443,
+      "fills": 424,
+      "win_rate_pct": 55.42452830188679,
+      "profit_factor": 1.1691639182953215,
+      "shared_risk_trips": 14,
+      "v52_daily_trips": 135,
+      "source_intents": 2786,
+      "delta_final_jpy": 18491.541920412143,
+      "delta_final_pct_vs_baseline": 23.748180978157897,
+      "dd_improvement_pp": 8.544626819762058,
+      "win_rate_delta_pp": 1.071587125416194,
+      "pf_delta": 0.04596893675158986
+    },
+    {
+      "case": "IDLE_JUP__PENGU_V8",
+      "cost_bps": 10,
+      "final_jpy": 359237.004484453,
+      "max_dd_pct": -49.00848989836252,
+      "fills": 443,
+      "win_rate_pct": 58.013544018058695,
+      "profit_factor": 1.2724165945887838,
+      "shared_risk_trips": 17,
+      "v52_daily_trips": 132,
+      "source_intents": 2582,
+      "delta_final_jpy": 123631.22761711571,
+      "delta_final_pct_vs_baseline": 52.47376752002513,
+      "dd_improvement_pp": 9.068591415247148,
+      "win_rate_delta_pp": 1.2870866189555557,
+      "pf_delta": 0.08502905658133053
+    },
+    {
+      "case": "IDLE_JUP__PENGU_V8",
+      "cost_bps": 30,
+      "final_jpy": 175820.8833279087,
+      "max_dd_pct": -55.88284124356894,
+      "fills": 438,
+      "win_rate_pct": 56.16438356164384,
+      "profit_factor": 1.220395013372568,
+      "shared_risk_trips": 16,
+      "v52_daily_trips": 134,
+      "source_intents": 2582,
+      "delta_final_jpy": 97955.79573480203,
+      "delta_final_pct_vs_baseline": 125.80194636995947,
+      "dd_improvement_pp": 9.167145079167547,
+      "win_rate_delta_pp": 1.811442385173244,
+      "pf_delta": 0.09720003182883641
+    },
+    {
+      "case": "IDLE_JUP__Q102_FET",
+      "cost_bps": 10,
+      "final_jpy": 426811.4083359141,
+      "max_dd_pct": -46.43893917211152,
+      "fills": 445,
+      "win_rate_pct": 58.651685393258425,
+      "profit_factor": 1.339031476326799,
+      "shared_risk_trips": 13,
+      "v52_daily_trips": 133,
+      "source_intents": 2573,
+      "delta_final_jpy": 191205.6314685768,
+      "delta_final_pct_vs_baseline": 81.15489951515029,
+      "dd_improvement_pp": 11.63814214149815,
+      "win_rate_delta_pp": 1.9252279941552857,
+      "pf_delta": 0.15164393831934575
+    },
+    {
+      "case": "IDLE_JUP__Q102_FET",
+      "cost_bps": 30,
+      "final_jpy": 140390.87885811043,
+      "max_dd_pct": -55.85808771295595,
+      "fills": 420,
+      "win_rate_pct": 55.952380952380956,
+      "profit_factor": 1.257992422141134,
+      "shared_risk_trips": 12,
+      "v52_daily_trips": 135,
+      "source_intents": 2573,
+      "delta_final_jpy": 62525.79126500376,
+      "delta_final_pct_vs_baseline": 80.30016172554735,
+      "dd_improvement_pp": 9.191898609780537,
+      "win_rate_delta_pp": 1.599439775910362,
+      "pf_delta": 0.1347974405974024
+    },
+    {
+      "case": "PENGU_V8__Q102_FET",
+      "cost_bps": 10,
+      "final_jpy": 327847.3797968568,
+      "max_dd_pct": -42.42371868930732,
+      "fills": 444,
+      "win_rate_pct": 58.333333333333336,
+      "profit_factor": 1.2808195842498598,
+      "shared_risk_trips": 15,
+      "v52_daily_trips": 132,
+      "source_intents": 2770,
+      "delta_final_jpy": 92241.60292951949,
+      "delta_final_pct_vs_baseline": 39.1508239551605,
+      "dd_improvement_pp": 15.653362624302346,
+      "win_rate_delta_pp": 1.606875934230196,
+      "pf_delta": 0.09343204624240653
+    },
+    {
+      "case": "PENGU_V8__Q102_FET",
+      "cost_bps": 30,
+      "final_jpy": 155488.91664559487,
+      "max_dd_pct": -49.70241623394168,
+      "fills": 438,
+      "win_rate_pct": 56.62100456621004,
+      "profit_factor": 1.222376665497989,
+      "shared_risk_trips": 14,
+      "v52_daily_trips": 134,
+      "source_intents": 2770,
+      "delta_final_jpy": 77623.8290524882,
+      "delta_final_pct_vs_baseline": 99.69015826209662,
+      "dd_improvement_pp": 15.347570088794804,
+      "win_rate_delta_pp": 2.2680633897394458,
+      "pf_delta": 0.09918168395425742
+    },
+    {
+      "case": "THREE",
+      "cost_bps": 10,
+      "final_jpy": 472102.9281158172,
+      "max_dd_pct": -42.423718689307435,
+      "fills": 440,
+      "win_rate_pct": 59.09090909090909,
+      "profit_factor": 1.4196842012427189,
+      "shared_risk_trips": 13,
+      "v52_daily_trips": 132,
+      "source_intents": 2557,
+      "delta_final_jpy": 236497.1512484799,
+      "delta_final_pct_vs_baseline": 100.37833299038526,
+      "dd_improvement_pp": 15.653362624302233,
+      "win_rate_delta_pp": 2.3644516918059537,
+      "pf_delta": 0.23229666323526565
+    },
+    {
+      "case": "THREE",
+      "cost_bps": 30,
+      "final_jpy": 226988.1847424149,
+      "max_dd_pct": -45.45959639683681,
+      "fills": 434,
+      "win_rate_pct": 57.14285714285714,
+      "profit_factor": 1.3377797067342487,
+      "shared_risk_trips": 12,
+      "v52_daily_trips": 134,
+      "source_intents": 2557,
+      "delta_final_jpy": 149123.09714930822,
+      "delta_final_pct_vs_baseline": 191.51471058321903,
+      "dd_improvement_pp": 19.59038992589968,
+      "win_rate_delta_pp": 2.7899159663865447,
+      "pf_delta": 0.21458472519051708
+    }
+  ],
+  "evidence": {
+    "BASELINE": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "1ec4dc12d5c1fafdad5fecd9b2484b669c468092a54e69119e9c8d94b04d9cc2",
+        "EFFECTIVE_CURRENT_CANONICAL_PARITY_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "7a20815e668db9ed57eb2ce9e1c710705dab021038af09ea5a770c73f0335bad",
+        "CURRENT_PARITY_ATTESTATION.json": "d4c3331f023f82fedbcc382fe8a613364389bad496efbbf391fcb59aaf86ebb5"
+      }
+    },
+    "IDLE_JUP": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "897864ca1383f1bbf4ab30e21a057513676c0c011d83eadee1a697e8cdf84f81",
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "39ec7f5f08dbfdf082e1f9b662ebe8c2e3caa8cadc11c3b6ab950b620177e7fc",
+        "RESEARCH_AB_ATTESTATION.json": "57777c36c271e7c9c02c76999d88391d35de062129d484b4f95da1e1b45f7a66"
+      }
+    },
+    "PENGU_V8": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_RESEARCH_PENGU_V8_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_PENGU_V8_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "3cace13ae9b39b0bc7c3ca9f47ae1124261a31909d2792d65a34bf9dde956105",
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_PENGU_V8_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "1db74da8de4e292cd1e6413b5c5f6fa56dd92e6feff811f9760ce5339568d8e4",
+        "RESEARCH_AB_ATTESTATION.json": "2ba316d03af128a763151f4fe9054d286f0f26110b9d5a44283f1bb29e3a48d6"
+      }
+    },
+    "Q102_FET": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_RESEARCH_Q102_FET_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_Q102_FET_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "596a92c5d446bb87f82d76978aee66fcd574d32d86f9d83451e1b6dffb7e29e9",
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_Q102_FET_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "7c57ab121c133ea06376f67a1e05d18b06875b103d6618767b03fc4922651d60",
+        "RESEARCH_AB_ATTESTATION.json": "f9dfd4a02de1ee8c65d5017f64258485deb087cb3b814d92d41ff3727d1dae66"
+      }
+    },
+    "IDLE_JUP__PENGU_V8": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP__PENGU_V8_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP__PENGU_V8_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "a9c4aa8d703364dfb03c8f94d07091d5046f12be2cf6b92eff71a2342070c3ad",
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP__PENGU_V8_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "39e45b1b8c1921610ddfd701b11ace8a125629764961081d7402959716a219e9",
+        "RESEARCH_AB_ATTESTATION.json": "4d27c00dcf706f29b374de3661a2a54b6fb9b2a080a99b327015399682ebcf8d"
+      }
+    },
+    "IDLE_JUP__Q102_FET": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP__Q102_FET_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP__Q102_FET_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "abff8685aee1675475b4f255497c8793dac0eee4a0defa6fc8c8f9e2d02ad951",
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_IDLE_JUP__Q102_FET_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "8f617c8c53db4c1c0275f834fa0a8995b918a149eccf40003d0b6a7eb94ae874",
+        "RESEARCH_AB_ATTESTATION.json": "3cfed5c056d19a74664bfaca1e74d208c199883c37eab2433d7415c32c53d463"
+      }
+    },
+    "PENGU_V8__Q102_FET": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_RESEARCH_PENGU_V8__Q102_FET_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_PENGU_V8__Q102_FET_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "269a56f2b37b63ce4f933c7c7a57b59696af0965241a780fba4be0e01864cb15",
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_PENGU_V8__Q102_FET_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "9e6d4fc76a6bab83079b9e910988e7201c3526264350a27f1925b0d4a1d64be4",
+        "RESEARCH_AB_ATTESTATION.json": "95488062e71af5b3c22ad11bebf989b6e077d0eec06b128514c154019a35e066"
+      }
+    },
+    "THREE": {
+      "directory": "VPS_EFFECTIVE_CURRENT_CANONICAL_RESEARCH_THREE_Q102_ADOPTED_ON_20261111",
+      "files": {
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_THREE_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "deec785ca719230b9e7520359708e7a6adab1f7ebeeb199d81fd5fe253317a9e",
+        "EFFECTIVE_CURRENT_CANONICAL_RESEARCH_THREE_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "b5004f3abddeffe38e9e7f87094f6d25a59392edba6fc16800069b032bde5c8b",
+        "RESEARCH_AB_ATTESTATION.json": "1fc6bc3e60e9c91689d6c3b73c8fde256fa18f35b0bad8f14e57a5de7212c841"
+      }
+    }
+  }
+}
