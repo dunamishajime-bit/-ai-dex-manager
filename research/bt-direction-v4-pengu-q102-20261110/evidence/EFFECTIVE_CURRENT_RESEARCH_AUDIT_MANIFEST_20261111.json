@@ -1,0 +1,23 @@
+{
+  "research/bt-direction-v4-pengu-q102-20261110/scripts/portfolio_effective_current_core_parity_audit_20261111.py": "af25b625c8accf7df97edda1cd7ad15c8aa4cabb9a8206d083f1512f2e352ece",
+  "research/bt-direction-v4-pengu-q102-20261110/scripts/portfolio_effective_current_core_threegate_ab_20261111.py": "df34a5ddaf342dc533055d686465faac9a03126bdc6a604ebac0d69f6e3109db",
+  "research/bt-direction-v4-pengu-q102-20261110/scripts/v11_price_evidence_envelope_audit_20261111.py": "c40dee0f9f05fb63a4e264e41969af9d36123dc9c646538f3c342f73a6f6eaec",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/EFFECTIVE_CURRENT_CORE_PASS1_SHA256_20261111.txt": "ea23ff7c84b6b6853bdbd54149dda5b510dea2a162c8bb6d54fd96cbfb889cb8",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/EFFECTIVE_CURRENT_CORE_PASS2_SHA256_20261111.txt": "ea23ff7c84b6b6853bdbd54149dda5b510dea2a162c8bb6d54fd96cbfb889cb8",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/EFFECTIVE_THREEGATE_AB_PASS1_SHA256_20261111.txt": "ef38597f7788e7d4639967f30aec821b2ef8b96a03a967a6590cc244f512e423",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/EFFECTIVE_THREEGATE_AB_PASS2_SHA256_20261111.txt": "ef38597f7788e7d4639967f30aec821b2ef8b96a03a967a6590cc244f512e423",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/EFFECTIVE_CURRENT_RESEARCH_COMPARISON_20261111.csv": "3080fb1e78570e048699de34fe540586b29a05803bc081e3d93b5dfbf7ee05d4",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/EFFECTIVE_CURRENT_RESEARCH_COMPARISON_20261111.json": "975ad3d1b2871044cc6ba057ec45ebac1a4746d03e80e21bf0b9f14dc78a61dc",
+  "external/V11_ASTER_5M_FULLPERIOD_20261111/MANIFEST.json": "c66c9ea7e0223dfcb17dfa0b69cee90ae291830a8f79904da06fb19e1165af23",
+  "external/V11_PRICE_EVIDENCE_ENVELOPE_20261111/v11-price-evidence-envelope.csv": "22c05d32af5a8b27ebc8519fd09d89ffd9254579b2e62d857eb6c9e4cd6870d6",
+  "external/V11_PRICE_EVIDENCE_ENVELOPE_20261111/SUMMARY.json": "ed75d2edc0d260c52ca3958fadb59f3c7890cd9bd23c6b5ab718cf5a9df17171",
+  "research/bt-direction-v4-pengu-q102-20261110/scripts/portfolio_effective_current_v11_uncertainty_modes_20261111.py": "268fdfb178dd253be9a7c3ade8ebe290b68e961eb666a406df94ab33d2fcf683",
+  "research/bt-direction-v4-pengu-q102-20261110/scripts/portfolio_effective_current_v11_threegate_sensitivity_20261111.py": "fb5d8c12bdc415e0a357b34d2a0256a1d78c21358bb1f4b47503ce225c1cd1bd",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/V11_THREEGATE_SENSITIVITY_PASS1_SHA256_20261111.txt": "2b129ccf3f86a588e45e9c0e871ff26ca8881b0af4f1cfeae2a1c95e232852bd",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/V11_THREEGATE_SENSITIVITY_PASS2_SHA256_20261111.txt": "2b129ccf3f86a588e45e9c0e871ff26ca8881b0af4f1cfeae2a1c95e232852bd",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/V11_THREEGATE_ROBUSTNESS_20261111.csv": "2f744fda776686263914791b59fd63797b8b65c0977f880dc40a39826db78698",
+  "research/bt-direction-v4-pengu-q102-20261110/evidence/V11_THREEGATE_ROBUSTNESS_20261111.json": "b9d96cfa303b36906caebe866f3fedc849cbe7667b8126491cfa32653726f239",
+  "research/bt-direction-v4-pengu-q102-20261110/EFFECTIVE_CURRENT_AND_RESEARCH_GATE_AUDIT_20261111.md": "26173aca9fb096c64a9ad032b3e6fbfd30ed27c597aa64a38bb0c92b95fc0a1a",
+  "external/V11_THREEGATE_ROBUSTNESS_20261111/comparison.csv": "2f744fda776686263914791b59fd63797b8b65c0977f880dc40a39826db78698",
+  "external/V11_THREEGATE_ROBUSTNESS_20261111/comparison.json": "b9d96cfa303b36906caebe866f3fedc849cbe7667b8126491cfa32653726f239"
+}
