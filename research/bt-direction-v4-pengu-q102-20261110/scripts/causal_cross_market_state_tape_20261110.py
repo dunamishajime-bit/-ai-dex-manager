@@ -122,11 +122,15 @@ summary={"status":"PRICE_ONLY_CAUSAL_STATE_THRESHOLDS_FIXED_FROM_PREPERIOD_DISTR
 (OUT/"state_thresholds.json").write_text(json.dumps(summary,indent=2,ensure_ascii=False)+"\n",encoding="utf8")
 # Build a state cache only for all candidate/fill timestamps from baseline and forward files.
 times=set()
+import csv
 for cost in [10,30]:
- p=R/"VPS_DD_V4_SORT_PINNED_STOCK15_20261110"/f"Y06_NATIVE_LIFECYCLE_M5_AB_{cost}BPS_FILLS.csv"
- import csv
+ folder=R/"VPS_DD_V4_SORT_PINNED_STOCK15_20261110"
+ p=folder/f"Y06_NATIVE_LIFECYCLE_M5_AB_{cost}BPS_FILLS.csv"
  with p.open(encoding="utf-8-sig",newline="") as f:
   for z in csv.DictReader(f):times.add(int(dt.datetime.fromisoformat(z["entry_utc"].replace("Z","+00:00")).timestamp()*1000))
+ d=folder/f"Y06_NATIVE_LIFECYCLE_M5_AB_{cost}BPS_DECISIONS.csv"
+ with d.open(encoding="utf-8-sig",newline="") as f:
+  for z in csv.DictReader(f):times.add(int(dt.datetime.fromisoformat(z["utc"].replace("Z","+00:00")).timestamp()*1000))
 # Add forward strategy event times
 for p in [
  R/"FORWARD_HOLDOUT_20261001_20261108"/"IDLE_DUALSIDE_LIFECYCLE"/"idle-forward-dualside.jsonl",
