@@ -1,0 +1,31 @@
+{
+  "status": "V52_STRATEGY_CAPITAL_PARITY_BUG_CONFIRMED",
+  "effectiveV52Source": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+  "effectiveMaxDailyLossPct": 3.5,
+  "v96Symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "BNBUSDT",
+    "SOLUSDT",
+    "LINKUSDT",
+    "AVAXUSDT",
+    "DOGEUSDT",
+    "INJUSDT",
+    "XRPUSDT",
+    "ADAUSDT",
+    "LTCUSDT",
+    "ATOMUSDT",
+    "AAVEUSDT",
+    "NEARUSDT",
+    "PENGUUSDT"
+  ],
+  "canonicalBug": "used all non-V52 crypto gross notional instead of V96_SYMBOLS-scoped marked notional",
+  "liveFormula": {
+    "strategyCapital": "max(minimum_entry_usd, portfolio_equity - current_v96_notional - max(minimum_reserve_usd, portfolio_equity*safety_reserve_pct/100))",
+    "safetyReservePctDefault": 10,
+    "minimumReserveUsdDefault": 5,
+    "pendingExposureIncluded": false
+  },
+  "action": "supersede previous canonical after corrected deterministic rerun",
+  "productionMutation": false
+}
