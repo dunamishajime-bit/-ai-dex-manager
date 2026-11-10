@@ -1,0 +1,57 @@
+{
+  "status": "CORRECTED_CAUSAL_THREE_DD_DECOMPOSITION_COMPLETE",
+  "maxDdWindow": {
+    "start": "2026-07-12T01:05:00Z",
+    "trough": "2026-09-22T11:00:00Z",
+    "10bps": {
+      "peakJpy": 2151911.283574393,
+      "troughJpy": 1262041.4310871526,
+      "ddPct": -41.35253433910799,
+      "closedPnlJpy": -689007.3685639162
+    },
+    "30bps": {
+      "peakJpy": 954758.3756868446,
+      "troughJpy": 471609.35677418957,
+      "ddPct": -50.60432369237735,
+      "closedPnlJpy": -397661.50736044324
+    }
+  },
+  "fullPeriod10bps": {
+    "Q102": {
+      "netJpy": -351769.31060564367,
+      "fills": 101,
+      "winRate": 0.5544554455445545,
+      "pf": 0.751879186046801
+    },
+    "HYPE": {
+      "netJpy": -30580.165079019265,
+      "fills": 49,
+      "winRate": 0.2653061224489796,
+      "pf": 0.9314339709493681
+    },
+    "IDLE": {
+      "netJpy": 128174.57524678616,
+      "fills": 112,
+      "winRate": 0.5535714285714286,
+      "pf": 1.1656956201520121
+    },
+    "PENGU": {
+      "netJpy": 600583.0671492898,
+      "fills": 56,
+      "winRate": 0.6785714285714286,
+      "pf": 1.8973988102595134
+    },
+    "V52": {
+      "netJpy": 934994.228829755,
+      "fills": 83,
+      "winRate": 0.8433734939759037,
+      "pf": 21.40443282966022
+    }
+  },
+  "nextTargets": [
+    "Q102 route-specific causal filters/exits",
+    "IDLE TAO causal admission",
+    "HYPE causal admission"
+  ],
+  "productionMutation": false
+}
