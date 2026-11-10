@@ -1,0 +1,47 @@
+{
+  "status": "LOCKED_CAUSAL_RESEARCH_ON_V52_SCOPE_CORRECTED_BASELINE",
+  "determinism42of42": true,
+  "baselineCommit": "38774e171a3523a404464a7e9bc6f38fc46d8ee8",
+  "metrics": {
+    "IDLE_JUP_ROBUST": {
+      "10": {
+        "final_compounded_jpy": 890372.2928591536,
+        "max_hourly_dd_pct": -51.894478142580326,
+        "modeled_fills": 526,
+        "win_rate_pct": 57.60456273764258,
+        "profit_factor": 1.2666825436040798,
+        "shared_risk_trip_count": 19,
+        "v52_daily_trip_count": 38
+      },
+      "30": {
+        "final_compounded_jpy": 329670.07940405956,
+        "max_hourly_dd_pct": -58.77128268102716,
+        "modeled_fills": 526,
+        "win_rate_pct": 56.27376425855514,
+        "profit_factor": 1.198430535909338,
+        "shared_risk_trip_count": 20,
+        "v52_daily_trip_count": 42
+      }
+    },
+    "CAUSAL_THREE": {
+      "10": {
+        "final_compounded_jpy": 1585699.804616248,
+        "max_hourly_dd_pct": -41.35253433910799,
+        "modeled_fills": 540,
+        "win_rate_pct": 59.62962962962963,
+        "profit_factor": 1.4313213415921826,
+        "shared_risk_trip_count": 16,
+        "v52_daily_trip_count": 14
+      },
+      "30": {
+        "final_compounded_jpy": 579086.3494997966,
+        "max_hourly_dd_pct": -50.60432369237735,
+        "modeled_fills": 539,
+        "win_rate_pct": 58.25602968460112,
+        "profit_factor": 1.3223017122850678,
+        "shared_risk_trip_count": 16,
+        "v52_daily_trip_count": 18
+      }
+    }
+  }
+}
