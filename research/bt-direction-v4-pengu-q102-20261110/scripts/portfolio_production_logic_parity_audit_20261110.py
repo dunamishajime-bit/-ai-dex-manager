@@ -47,9 +47,12 @@ assert len(raw)==2734,(len(raw),2734)
 '''
 orig=orig.replace(anchor,inject)
 # Permit one HIGH_VOL position to remain open beyond period end. Funding is only accrued through END.
-old='assert m["entryTs"]==c["t"] and START<=c["t"]<m["exitTs"]<=END\n   c["funding"]=funding(c["symbol"],c["t"],m["exitTs"],m["entryPrice"],c["side"])'
-new='assert m["entryTs"]==c["t"] and START<=c["t"]<m["exitTs"]<=END+72*H\n   c["funding"]=funding(c["symbol"],c["t"],min(m["exitTs"],END),m["entryPrice"],c["side"])'
-assert orig.count(old)==1,orig.count(old);orig=orig.replace(old,new)
+old1='assert m["entryTs"]==c["t"] and START<=c["t"]<m["exitTs"]<=END'
+new1='assert m["entryTs"]==c["t"] and START<=c["t"]<m["exitTs"]<=END+72*H'
+assert orig.count(old1)==1,orig.count(old1);orig=orig.replace(old1,new1)
+old2='c["funding"]=funding(c["symbol"],c["t"],m["exitTs"],m["entryPrice"],c["side"])'
+new2='c["funding"]=funding(c["symbol"],c["t"],min(m["exitTs"],END),m["entryPrice"],c["side"])'
+assert orig.count(old2)==1,orig.count(old2);orig=orig.replace(old2,new2)
 # Current replay label / metadata. Remove claims that HIGH_VOL is missing.
 orig=orig.replace('case="STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL"','case="PRODUCTION_LOGIC_PARITY_AUDIT"')
 orig=orig.replace('q102_high_vol_missing=True','q102_high_vol_missing=False')
