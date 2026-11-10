@@ -13,7 +13,7 @@ mode=os.environ.get("DISDEX_V4_SORT_MODE","")
 assert mode in ("SYMBOL","PINNED","ASOF"),mode
 assert mode=="PINNED"
 ab=os.environ["DISDEX_RESEARCH_ROUTE_ABLATION"]
-assert ab in ("PENGU_V8","PENGU_V20","IDLE_JUP","IDLE_TAO","IDLE_RENDER","V4_Y03","V4_Y06","Q102_FET_PB","Q102_AVAX_MR24","Q102_UNI_MR72","PENGU_V8_IDLE_JUP","TOP3","ALL_PENGU","ALL_IDLE")
+assert ab in ("PENGU_V8","PENGU_V20","IDLE_JUP","IDLE_TAO","IDLE_RENDER","V4_Y03","V4_Y06","V4_X12","Q102_FET_PB","Q102_FET_REV12","Q102_AVAX_MR24","Q102_UNI_MR72","PENGU_V8_IDLE_JUP","TOP3","ALL_PENGU","ALL_IDLE")
 out_name="VPS_DD_V4_PINNED_ROUTE_ABLATION_"+ab+"_STOCK15_20261110"
 replaces=[
  ('O=R/"VPS_DD_STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_20261109";O.mkdir(exist_ok=True)',
@@ -91,6 +91,8 @@ def _research_route_omitted(c):
  if _AB_CASE=="IDLE_RENDER":return s=="IDLE" and r=="IDLE_RENDER_RELATIVE_SHORT"
  if _AB_CASE=="V4_Y03":return s=="V4" and r=="REC_Y03_REV_D0_T36"
  if _AB_CASE=="V4_Y06":return s=="V4" and r=="REC_Y06_REV_D0_T72"
+ if _AB_CASE=="V4_X12":return s=="V4" and r=="REC_X12_TIME_12H"
+ if _AB_CASE=="Q102_FET_REV12":return s=="Q102" and r=="FET|REV12_T0.05_H12"
  if _AB_CASE=="Q102_AVAX_MR24":return s=="Q102" and r=="AVAX|MR24_Z1.5_H24"
  if _AB_CASE=="Q102_UNI_MR72":return s=="Q102" and r=="UNI|MR72_Z1.5_H24"
  if _AB_CASE=="IDLE_JUP":return s=="IDLE" and r=="IDLE_JUP_RELATIVE_SHORT"
