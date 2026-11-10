@@ -1,0 +1,320 @@
+{
+  "status": "RECONCILED",
+  "source": "research stock1.5 integrated model, pinned V4 order, V2 shadow candidate exits",
+  "accounting": "10K + closed net PnL + open marked partial/funding/fees = modeled equity",
+  "limitations": [
+    "Applies only to old integrated V2 research book, not a certified clean V4 or venue fill history",
+    "Runner allocation is arithmetic, not an independent causal proof",
+    "If any trade has a reversal before an observed peak or trough, entry snapshot must be rebuilt from reversal event"
+  ],
+  "cost": {
+    "10": {
+      "peak": {
+        "at": "2026-07-20T07:00:00+00:00",
+        "measuredEquity": 4058351.9243702483,
+        "reconstructedEquity": 4058351.924370256,
+        "difference": 7.450580596923828e-9,
+        "closedCount": 703,
+        "openCount": 3,
+        "futureEntries": 146,
+        "byRunnerTotalContribution": {
+          "Q102": 738224.4467508199,
+          "RESIDUAL": -10332.416123065552,
+          "V52": 544745.0042507477,
+          "PENGU": 830466.5104283369,
+          "V4": 1370385.0666040706,
+          "IDLE": -23665.89344651805,
+          "HYPE": 476192.91184453643,
+          "FET": 122336.29406132782
+        },
+        "openPositions": [
+          {
+            "id": "PENGU_00086",
+            "runner": "PENGU",
+            "symbol": "PENGUUSDT",
+            "side": "SHORT",
+            "entry": "2026-07-17T20:00:00Z",
+            "exit": "2026-07-20T12:00:00Z",
+            "contribution": -74404.36064020902,
+            "mark": 0.005999,
+            "entryPrice": 0.005885,
+            "open_notional": 3845735.771706511,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 2015.3429252608512,
+            "entry_fee": 1922.8678858532555,
+            "unrealized": -74496.83567961662
+          },
+          {
+            "id": "V4_01151",
+            "runner": "V4",
+            "symbol": "ETHUSDT",
+            "side": "SHORT",
+            "entry": "2026-07-19T14:00:00Z",
+            "exit": "2026-07-20T14:00:00Z",
+            "contribution": 27324.292550697544,
+            "mark": 1848.69,
+            "entryPrice": 1870.96,
+            "open_notional": 2369240.643213791,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 307.88819814201116,
+            "entry_fee": 1184.6203216068955,
+            "unrealized": 28201.02467416243
+          },
+          {
+            "id": "V4_01153",
+            "runner": "V4",
+            "symbol": "DOGEUSDT",
+            "side": "SHORT",
+            "entry": "2026-07-20T00:00:00Z",
+            "exit": "2026-07-21T12:00:00Z",
+            "contribution": 17074.839106976076,
+            "mark": 0.0713,
+            "entryPrice": 0.07238,
+            "open_notional": 1184005.5705185176,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 0,
+            "entry_fee": 592.0027852592589,
+            "unrealized": 17666.841892235334
+          }
+        ],
+        "byRunnerOpenContribution": {
+          "PENGU": -74404.36064020902,
+          "V4": 44399.13165767362
+        }
+      },
+      "trough": {
+        "at": "2026-09-28T05:00:00+00:00",
+        "measuredEquity": 2014142.3274407994,
+        "reconstructedEquity": 2014142.3274408116,
+        "difference": 1.210719347000122e-8,
+        "closedCount": 849,
+        "openCount": 2,
+        "futureEntries": 1,
+        "byRunnerTotalContribution": {
+          "Q102": 107183.95413693947,
+          "RESIDUAL": -180606.7120923738,
+          "V52": 935201.1743708997,
+          "PENGU": 116368.75728645525,
+          "V4": 901486.9236802981,
+          "IDLE": -696987.2947889381,
+          "HYPE": 416468.6297467731,
+          "FET": 405026.8951007578
+        },
+        "openPositions": [
+          {
+            "id": "IDLE_00180",
+            "runner": "IDLE",
+            "symbol": "TIAUSDT",
+            "side": "SHORT",
+            "entry": "2026-09-28T04:00:00Z",
+            "exit": "2026-09-29T04:00:00Z",
+            "contribution": -21510.117297265802,
+            "mark": 0.4784,
+            "entryPrice": 0.4736,
+            "open_notional": 2032203.3545556907,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 102.64000050880938,
+            "entry_fee": 1016.1016772778454,
+            "unrealized": -20596.655620496767
+          },
+          {
+            "id": "V4_01392",
+            "runner": "V4",
+            "symbol": "LINKUSDT",
+            "side": "LONG",
+            "entry": "2026-09-28T02:00:00Z",
+            "exit": "2026-09-30T02:00:00Z",
+            "contribution": -2142.6474337159493,
+            "mark": 13.98,
+            "entryPrice": 14.032,
+            "open_notional": 509448.77304294525,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 0,
+            "entry_fee": 254.72438652147264,
+            "unrealized": -1887.9230471944768
+          }
+        ],
+        "byRunnerOpenContribution": {
+          "IDLE": -21510.117297265802,
+          "V4": -2142.6474337159493
+        }
+      },
+      "delta": {
+        "byRunnerNetJPY": {
+          "FET": 282690.60103943,
+          "HYPE": -59724.282097763324,
+          "IDLE": -673321.4013424201,
+          "PENGU": -714097.7531418817,
+          "Q102": -631040.4926138804,
+          "RESIDUAL": -170274.29596930827,
+          "V4": -468898.14292377245,
+          "V52": 390456.17012015195
+        },
+        "sum": -2044209.5969294442,
+        "measured": -2044209.596929449,
+        "difference": 4.6566128730773926e-9
+      },
+      "maxDDPct": -50.370436941509396,
+      "sourceHashes": {
+        "fills": "b1a2f36a9ab3bb9f391c2a6d46124c18494cbacf163c3bdff40d3b714ab1f6dc",
+        "equity": "64e2b518e64601389b67981d446ae404a31668bf3dcfe943b224fdfcf7253d52",
+        "partials": "56250e1bf1e8891d0f719921035cc238d85ad7b3d5b9383a9be4cda1d5e03073",
+        "funding": "084a6f8ebc4dcda46d7ae034627fbd6208eb0fe72ea7088eac513415c197d0b5"
+      }
+    },
+    "30": {
+      "peak": {
+        "at": "2026-07-20T07:00:00+00:00",
+        "measuredEquity": 1622995.1556221265,
+        "reconstructedEquity": 1622995.1556221282,
+        "difference": 1.6298145055770874e-9,
+        "closedCount": 703,
+        "openCount": 3,
+        "futureEntries": 146,
+        "byRunnerTotalContribution": {
+          "Q102": 302275.9139778017,
+          "RESIDUAL": -8490.994970351814,
+          "V52": 202320.20227261807,
+          "PENGU": 415717.7250192125,
+          "V4": 568442.9259215221,
+          "IDLE": -102784.8767714357,
+          "HYPE": 179829.05568533426,
+          "FET": 55685.20448742715
+        },
+        "openPositions": [
+          {
+            "id": "PENGU_00086",
+            "runner": "PENGU",
+            "symbol": "PENGUUSDT",
+            "side": "SHORT",
+            "entry": "2026-07-17T20:00:00Z",
+            "exit": "2026-07-20T12:00:00Z",
+            "contribution": -31403.534078435856,
+            "mark": 0.005999,
+            "entryPrice": 0.005885,
+            "open_notional": 1543380.7739699476,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 808.8027125232579,
+            "entry_fee": 2315.0711609549217,
+            "unrealized": -29897.265630004193
+          },
+          {
+            "id": "V4_01151",
+            "runner": "V4",
+            "symbol": "ETHUSDT",
+            "side": "SHORT",
+            "entry": "2026-07-19T14:00:00Z",
+            "exit": "2026-07-20T14:00:00Z",
+            "contribution": 9990.70453667714,
+            "mark": 1848.69,
+            "entryPrice": 1870.96,
+            "open_notional": 948520.6975481142,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 123.26241713984477,
+            "entry_fee": 1422.7810463221713,
+            "unrealized": 11290.223165859466
+          },
+          {
+            "id": "V4_01153",
+            "runner": "V4",
+            "symbol": "DOGEUSDT",
+            "side": "SHORT",
+            "entry": "2026-07-20T00:00:00Z",
+            "exit": "2026-07-21T12:00:00Z",
+            "contribution": 6358.0132981837405,
+            "mark": 0.0713,
+            "entryPrice": 0.07238,
+            "open_notional": 473727.3941740952,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 0,
+            "entry_fee": 710.5910912611428,
+            "unrealized": 7068.604389444883
+          }
+        ],
+        "byRunnerOpenContribution": {
+          "PENGU": -31403.534078435856,
+          "V4": 16348.71783486088
+        }
+      },
+      "trough": {
+        "at": "2026-09-28T19:00:00+00:00",
+        "measuredEquity": 638318.3027199826,
+        "reconstructedEquity": 638318.3027199834,
+        "difference": 8.149072527885437e-10,
+        "closedCount": 850,
+        "openCount": 2,
+        "futureEntries": 0,
+        "byRunnerTotalContribution": {
+          "Q102": 43247.502705356805,
+          "RESIDUAL": -95056.14605501859,
+          "V52": 295775.49393379985,
+          "PENGU": 83225.66023899196,
+          "V4": 386096.0095947209,
+          "IDLE": -368146.85238396976,
+          "HYPE": 132269.64861312974,
+          "FET": 150906.98607297248
+        },
+        "openPositions": [
+          {
+            "id": "IDLE_00180",
+            "runner": "IDLE",
+            "symbol": "TIAUSDT",
+            "side": "SHORT",
+            "entry": "2026-09-28T04:00:00Z",
+            "exit": "2026-09-29T04:00:00Z",
+            "contribution": 19183.086600477644,
+            "mark": 0.4589,
+            "entryPrice": 0.4736,
+            "open_notional": 645152.8243814535,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": 126.01322216935463,
+            "entry_fee": 967.7292365721802,
+            "unrealized": 20024.802614880467
+          },
+          {
+            "id": "V4_01392",
+            "runner": "V4",
+            "symbol": "LINKUSDT",
+            "side": "LONG",
+            "entry": "2026-09-28T02:00:00Z",
+            "exit": "2026-09-30T02:00:00Z",
+            "contribution": 13743.99201076744,
+            "mark": 15.248,
+            "entryPrice": 14.032,
+            "open_notional": 161772.55533958564,
+            "partials_pnl_net": 0,
+            "funded_to_timestamp": -32.407543690106564,
+            "entry_fee": 242.65883300937847,
+            "unrealized": 14019.058387466926
+          }
+        ],
+        "byRunnerOpenContribution": {
+          "IDLE": 19183.086600477644,
+          "V4": 13743.99201076744
+        }
+      },
+      "delta": {
+        "byRunnerNetJPY": {
+          "FET": 95221.78158554532,
+          "HYPE": -47559.407072204514,
+          "IDLE": -265361.9756125341,
+          "PENGU": -332492.06478022056,
+          "Q102": -259028.41127244488,
+          "RESIDUAL": -86565.15108466678,
+          "V4": -182346.91632680118,
+          "V52": 93455.29166118178
+        },
+        "sum": -984676.8529021449,
+        "measured": -984676.852902144,
+        "difference": -9.313225746154785e-10
+      },
+      "maxDDPct": -60.6703507087609,
+      "sourceHashes": {
+        "fills": "67d0f96a8e2c15f6a1ff38a9e687686129b5e729167361ceaa3fedcf757c0d81",
+        "equity": "a0563843e1da8ba687f8306041ff503432f86fef2ff5e2a62a4a40a501a7eb3c",
+        "partials": "09a58098d9f94ac966696b586771101d504c5d83b3d7722a37003aa16dc84441",
+        "funding": "51ce6485f6e7b52465008cffbbe4026b47dcddd4cfd452fdfeb7c77d1412d0ea"
+      }
+    }
+  }
+}
