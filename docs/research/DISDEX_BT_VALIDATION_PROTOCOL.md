@@ -8,6 +8,21 @@ Scope: all future DisDex backtests, re-runs, logic revisions, and direction-corr
 
 Before starting or restarting a DisDex backtest, read this file and confirm that the current run follows the mandatory validation path below. Do not rely on conversational memory alone.
 
+## Permanent optimization objectives (revised 2026-11-10)
+
+**Do not set a CAGR, annualized-return, final-equity, or absolute-profit target as an acceptance threshold.** The portfolio compounds and its reported final wealth is sensitive to fill order, available Gross and timing. Profit-related outputs remain auditable *diagnostics*, never a target selected for maximization.
+
+Prioritize all strategy entry, exit, direction and integrated risk research in this order:
+
+1. **Integrated maximum drawdown first:** aim for **max DD <=20%** in *both* the separate 10bps and 30bps portfolio backtests. Explicitly reject the apparent achievement when it depends on a hindsight-selected threshold, unreliable fills or incomplete Production parity.
+2. **Win rate / directional correctness:** aim for **>=70% win rate** where feasible, at route and portfolio levels, **after the modeled fees**. Report native-correct trades accidentally flipped/closed, false entries, separation by LONG and SHORT, and independent episode-level denominators.
+3. **Do not destroy trading opportunity:** report trade count and frequency and do not artificially manufacture high win rate via eliminating almost all entries. Track lost profitable trades, admission/slot/Gross conflicts and false suppression.
+4. **Keep the trading edge sound, without profit targets:** inspect average win versus average loss, payoff asymmetry, net expectancy after fees/funding, tail losses, and PF. A higher win rate or lower DD does **not by itself mathematically guarantee** higher compound wealth if payoff ratios or trade count deteriorate. Flag negative net expectancy or severe degradation; do not set a numeric return/CAGR goal or optimize retrospectively for terminal capital.
+
+**Required reporting priority:** current implementation and leakage/parity confidence; 10bps/30bps max DD; win rate and number of independent trades/episodes; damaged originally-correct signals and worst loss; trade activity; net expectancy and costs as diagnostic; final equity only as secondary factual accounting.
+
+This changes **research acceptance criteria**, not Production policy, current running logic, position sizing, or owner-approved LIVE deployment.
+
 ## Mandatory validation path
 
 1. Reproduce the current/pinned implementation faithfully.
