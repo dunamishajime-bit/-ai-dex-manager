@@ -96,20 +96,20 @@ helper='''  return dict(crypto=crypto,stock=stock,total=crypto+stock,v4=v4)
    day=current_day;crypto_latched=False;v52_latched=False;crypto_daily_settled=0.;v52_daily_settled=0.'''
 assert orig.count(anchor)==1;orig=orig.replace(anchor,helper)
 # Funding accounting.
-old='''     cash+=amount;q["funded"]+=amount
-     funds.append'''
-new='''     cash+=amount;q["funded"]+=amount
-     if q["s"]=="V52":v52_daily_settled+=amount
-     else:crypto_daily_settled+=amount
-     funds.append'''
+old='''    cash+=amount;q["funded"]+=amount
+    funds.append'''
+new='''    cash+=amount;q["funded"]+=amount
+    if q["s"]=="V52":v52_daily_settled+=amount
+    else:crypto_daily_settled+=amount
+    funds.append'''
 assert orig.count(old)==1;orig=orig.replace(old,new)
 # Partial accounting.
-old='''     cash+=gm-xf
-     q["realized_gross_pnl"]'''
-new='''     cash+=gm-xf
-     if q["s"]=="V52":v52_daily_settled+=gm-xf
-     else:crypto_daily_settled+=gm-xf
-     q["realized_gross_pnl"]'''
+old='''    cash+=gm-xf
+    q["realized_gross_pnl"]'''
+new='''    cash+=gm-xf
+    if q["s"]=="V52":v52_daily_settled+=gm-xf
+    else:crypto_daily_settled+=gm-xf
+    q["realized_gross_pnl"]'''
 # occurs partial and reversal; replace all two occurrences.
 assert orig.count(old)==2,orig.count(old);orig=orig.replace(old,new)
 # Replace old daily gate calculation after mark_current.
