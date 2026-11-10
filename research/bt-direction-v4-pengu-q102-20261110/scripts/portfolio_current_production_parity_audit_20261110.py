@@ -181,32 +181,32 @@ assert orig.count(old)==1
 orig=orig.replace(old,old+'\n    if s=="IDLE":idle_cooldown_until[c["symbol"]]=t+12*H')
 
 # Terminal accounting: carry valid open positions to END without synthetic close/exit fee.
-old='''  assert j==len(a),(j,len(a))
-  assert not opened,("positions_still_open",len(opened))
-  assert len(entries)==len(a)
-  assert math.isclose(cash,10000+sum(x["net_pnl_jpy"] for x in fills),rel_tol=1e-9,abs_tol=1e-6)
-  pp=name+"_"+str(bps)+"BPS"'''
+old=''' assert j==len(a),(j,len(a))
+ assert not opened,("positions_still_open",len(opened))
+ assert len(entries)==len(a)
+ assert math.isclose(cash,10000+sum(x["net_pnl_jpy"] for x in fills),rel_tol=1e-9,abs_tol=1e-6)
+ pp=name+"_"+str(bps)+"BPS"'''
 assert orig.count(old)==1
-new='''  assert j==len(a),(j,len(a))
-  assert len(entries)==len(a)
-  terminal_eq=mark_current(END)
-  if terminal_eq is None:raise RuntimeError("TERMINAL_MTM_UNAVAILABLE")
-  peak=max(peak,terminal_eq)
-  if peak>0 and (terminal_eq/peak-1)*100<mdd:mdd=(terminal_eq/peak-1)*100;mddt=END
-  gs_end=mtm_gross_state(END,terminal_eq)
-  hourly.append(dict(utc=iso(END),compounded_mtm_equity_jpy=terminal_eq,wallet_cash_jpy=cash,
-                     open_count=len(opened),crypto_gross_x=(gs_end or {}).get("crypto"),
-                     stock_gross_x=(gs_end or {}).get("stock"),total_gross_x=(gs_end or {}).get("total"),
-                     v4_gross_x=(gs_end or {}).get("v4"),daily_gate_block=latched))
-  expected_cash=10000+sum(x["net_pnl_jpy"] for x in fills)
-  for q0 in opened.values():
-   expected_cash+=q0.get("realized_gross_pnl",0.0)-q0.get("exit_fee_accum",0.0)-q0["fee"]+q0["funded"]
-  assert math.isclose(cash,expected_cash,rel_tol=1e-9,abs_tol=1e-6),(cash,expected_cash)
-  terminal_open=[dict(strategy=q0["s"],symbol=q0["symbol"],side=q0["side"],route=q0["route"],
-                      entry_utc=iso(q0["ts"]),entry_price=q0["entry"],gross_x=q0["gross"],
-                      modeled_future_exit_utc=iso(next((cc["model"]["exitTs"] for cc in raw if cc["id"]==q0["sid"]),END)))
-                 for q0 in opened.values()]
-  pp=name+"_"+str(bps)+"BPS"'''
+new=''' assert j==len(a),(j,len(a))
+ assert len(entries)==len(a)
+ terminal_eq=mark_current(END)
+ if terminal_eq is None:raise RuntimeError("TERMINAL_MTM_UNAVAILABLE")
+ peak=max(peak,terminal_eq)
+ if peak>0 and (terminal_eq/peak-1)*100<mdd:mdd=(terminal_eq/peak-1)*100;mddt=END
+ gs_end=mtm_gross_state(END,terminal_eq)
+ hourly.append(dict(utc=iso(END),compounded_mtm_equity_jpy=terminal_eq,wallet_cash_jpy=cash,
+                    open_count=len(opened),crypto_gross_x=(gs_end or {}).get("crypto"),
+                    stock_gross_x=(gs_end or {}).get("stock"),total_gross_x=(gs_end or {}).get("total"),
+                    v4_gross_x=(gs_end or {}).get("v4"),daily_gate_block=latched))
+ expected_cash=10000+sum(x["net_pnl_jpy"] for x in fills)
+ for q0 in opened.values():
+  expected_cash+=q0.get("realized_gross_pnl",0.0)-q0.get("exit_fee_accum",0.0)-q0["fee"]+q0["funded"]
+ assert math.isclose(cash,expected_cash,rel_tol=1e-9,abs_tol=1e-6),(cash,expected_cash)
+ terminal_open=[dict(strategy=q0["s"],symbol=q0["symbol"],side=q0["side"],route=q0["route"],
+                    entry_utc=iso(q0["ts"]),entry_price=q0["entry"],gross_x=q0["gross"],
+                    modeled_future_exit_utc=iso(next((cc["model"]["exitTs"] for cc in raw if cc["id"]==q0["sid"]),END)))
+               for q0 in opened.values()]
+ pp=name+"_"+str(bps)+"BPS"'''
 orig=orig.replace(old,new)
 
 # Final summary should use END MTM equity, not wallet cash, and report open positions.
