@@ -46,7 +46,8 @@ const N=h2.BTC.length;
 if(syms.some(s=>h2[s].length!==N||h2[s].some((v,i)=>v.endTs!==h2.BTC[i].endTs)))throw Error("H2_UNIVERSE_MISALIGNED");
 const srcStream=createWriteStream(join(outdir,"asof-native-v12-source-signals.jsonl"),{encoding:"utf8"});
 const coreStream=createWriteStream(join(outdir,"asof-native-v4-core-events.jsonl"),{encoding:"utf8"});
-const sourceCounts={pre:0,target:0},coreCounts={pre:0,target:0},symbolCounts={pre:{},target:{}},gates={},maxSignals=0;
+const sourceCounts={pre:0,target:0},coreCounts={pre:0,target:0},symbolCounts={pre:{},target:{}},gates={};
+let maxSignals=0;
 const states=Object.fromEntries(syms.filter(s=>s!=="BTC").map(s=>[s,{lastDecisionTs:null,setup:null}]));
 let badEntryTimestamps=0,scanChecks=0;
 for(let i=120;i<N;i++){
