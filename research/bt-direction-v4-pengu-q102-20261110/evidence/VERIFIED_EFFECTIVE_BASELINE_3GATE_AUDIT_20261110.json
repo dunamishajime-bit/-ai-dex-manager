@@ -7,11 +7,11 @@
   },
   "effectiveRuntime": {
     "caps": {
-      "crypto": 3.0,
-      "stock": 4.0,
+      "crypto": 3,
+      "stock": 4,
       "total": 4.25,
       "sharedDailyLossPct": 7.5,
-      "v52Slot": 2.0,
+      "v52Slot": 2,
       "v52WorstCaseBufferBps": 20
     },
     "observedActiveSources": {
@@ -50,10 +50,10 @@
         "HYPE": 42,
         "FET": 8
       },
-      "deltaFinalPct": 0.0,
-      "ddImprovementPp": 0.0,
-      "winRateImprovementPp": 0.0,
-      "pfImprovement": 0.0,
+      "deltaFinalPct": 0,
+      "ddImprovementPp": 0,
+      "winRateImprovementPp": 0,
+      "pfImprovement": 0,
       "fillDelta": 0
     },
     "30": {
@@ -71,10 +71,10 @@
         "HYPE": 42,
         "FET": 8
       },
-      "deltaFinalPct": 0.0,
-      "ddImprovementPp": 0.0,
-      "winRateImprovementPp": 0.0,
-      "pfImprovement": 0.0,
+      "deltaFinalPct": 0,
+      "ddImprovementPp": 0,
+      "winRateImprovementPp": 0,
+      "pfImprovement": 0,
       "fillDelta": 0
     }
   },
@@ -289,7 +289,7 @@
         "baseWrPct": 44.83,
         "basePf": 0.279,
         "gateN": 10,
-        "gateWrPct": 70.0,
+        "gateWrPct": 70,
         "gatePf": 2.042
       },
       "forward30": {
@@ -305,7 +305,7 @@
       "threshold": 0.011611625094354983,
       "train30": {
         "baseN": 25,
-        "baseWrPct": 68.0,
+        "baseWrPct": 68,
         "basePf": 2.191,
         "gateN": 19,
         "gateWrPct": 73.68,
@@ -321,10 +321,10 @@
       },
       "forward30": {
         "baseN": 4,
-        "baseWrPct": 75.0,
+        "baseWrPct": 75,
         "basePf": 1.712,
         "gateN": 4,
-        "gateWrPct": 75.0,
+        "gateWrPct": 75,
         "gatePf": 1.712,
         "note": "all 4 forward rows pass; no forward discrimination"
       }
@@ -529,7 +529,7 @@
     {
       "label": "QR_0000",
       "variable": "Q102_FET_ret14",
-      "value": 0.0,
+      "value": 0,
       "results": {
         "10": {
           "finalMtmJpy": 4364712.162105404,
@@ -715,11 +715,11 @@
         },
         {
           "month": "2026-10",
-          "baseReturnPct": 0.0,
-          "threeReturnPct": 0.0,
-          "returnDeltaPp": 0.0,
-          "baseMonthDdPct": 0.0,
-          "threeMonthDdPct": 0.0
+          "baseReturnPct": 0,
+          "threeReturnPct": 0,
+          "returnDeltaPp": 0,
+          "baseMonthDdPct": 0,
+          "threeMonthDdPct": 0
         }
       ]
     },
@@ -826,11 +826,11 @@
         },
         {
           "month": "2026-10",
-          "baseReturnPct": 0.0,
-          "threeReturnPct": 0.0,
-          "returnDeltaPp": 0.0,
-          "baseMonthDdPct": 0.0,
-          "threeMonthDdPct": 0.0
+          "baseReturnPct": 0,
+          "threeReturnPct": 0,
+          "returnDeltaPp": 0,
+          "baseMonthDdPct": 0,
+          "threeMonthDdPct": 0
         }
       ]
     }
@@ -878,8 +878,8 @@
       "observedLiveWindowPossiblePriceCandidateDays": 2,
       "observedLiveWindowRobustPriceCandidateDays": 0,
       "actualLiveEvidence": {
-        "v11Decisions": 111,
-        "candidateNonNull": 1,
+        "v11Decisions": 25,
+        "candidateNonNull": 0,
         "positionOpen": 0
       },
       "unmodeledGates": [
@@ -891,7 +891,41 @@
         "depth>=2x",
         "adverse2s<=5bps",
         "postOnlyFill>=90%"
-      ]
+      ],
+      "observedLiveWindowPeriod": {
+        "start": "2026-09-07",
+        "end": "2026-09-30",
+        "relationToBacktest": "inside_backtest_period"
+      },
+      "allAvailableLiveLogEvidence": {
+        "v11Decisions": 111,
+        "candidateNonNull": 1,
+        "positionOpen": 0,
+        "onlyNonNullCandidate": {
+          "date": "2026-11-09",
+          "symbol": "TSLA",
+          "basisBps": 74.60106382978671,
+          "relationToBacktest": "after_2026-10-01_end"
+        }
+      },
+      "aster5mFullPeriodEvidence": {
+        "period": {
+          "start": "2025-10-01T00:00:00Z",
+          "endExclusive": "2026-10-01T00:00:00Z"
+        },
+        "barsPerSymbol": 105120,
+        "endpoint": "https://fapi.asterdex.com/fapi/v3/klines",
+        "manifestSha256": "c66c9ea7e0223dfcb17dfa0b69cee90ae291830a8f79904da06fb19e1165af23",
+        "filesSha256": {
+          "AMZNUSDT": "d84d4d5b7da27b155230f593a532bc384a6a485ca86fcf198fc7450709498d53",
+          "METAUSDT": "54e3f005206caa131511b8cccacc621bb5503d71b19c55aafdecfcbcf40b8368",
+          "MSFTUSDT": "8ef26027389a1b6c6943d63865fb2da05bf0fe5c260ead38bf1cc6cae58b10a6",
+          "NVDAUSDT": "a164a703b13ade1deeaa47cc3744e63eaf8bdf113b13a9a7d479ae7b76f4186d",
+          "TSLAUSDT": "ddbf9351faacd2777ab77a7bffe3ceb7f89ee86a7c6266af1902159e740a8e56"
+        },
+        "priceEnvelopeCsvSha256": "22c05d32af5a8b27ebc8519fd09d89ffd9254579b2e62d857eb6c9e4cd6870d6",
+        "correctedPriceEnvelopeSummarySha256": "ed75d2edc0d260c52ca3958fadb59f3c7890cd9bd23c6b5ab718cf5a9df17171"
+      }
     },
     "results": {
       "10": {
@@ -959,6 +993,7 @@
         "EFFECTIVE_CURRENT_VERIFIED_RESEARCH_THREE_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "8e32bd2feabc724bfaa910461d66bcdf30699fd9f3c9c9d31d42006820c116b2"
       },
       "rerunComparison": "8_of_8_identical_before_after_rerun_for_each_case"
-    }
+    },
+    "auditCorrection": "BT-overlap live evidence is 25 decisions / 0 candidates / 0 opens; the single non-null candidate in the 111-decision full log occurred 2026-11-09 after the backtest end."
   }
 }
