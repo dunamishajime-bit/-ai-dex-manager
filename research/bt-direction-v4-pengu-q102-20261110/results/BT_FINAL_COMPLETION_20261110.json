@@ -1,0 +1,254 @@
+{
+  "status": "BT_RESEARCH_COMPLETE_NOT_PRODUCTION_CERTIFIED",
+  "completedAtUtc": "2026-11-10T05:07:07.940594+00:00",
+  "period": {
+    "historical": [
+      "2025-10-01T00:00:00Z",
+      "2026-10-01T00:00:00Z"
+    ],
+    "forward": [
+      "2026-10-01T00:00:00Z",
+      "2026-11-08T20:00:00Z"
+    ]
+  },
+  "initialJpy": 10000,
+  "fixedProfitTargetUsed": false,
+  "evaluationPriority": [
+    "causality",
+    "max_drawdown",
+    "win_rate",
+    "profit_after_costs",
+    "trade_count"
+  ],
+  "implementationReplayBestBalanced": {
+    "status": "RETROSPECTIVE_V4_V2_CONTAMINATED_NOT_CAUSAL_CERTIFICATE",
+    "results": {
+      "10": {
+        "final_compounded_jpy": 2710806.7434953516,
+        "max_hourly_dd_pct": -25.19469476321111,
+        "win_rate_pct": 60.32338308457711,
+        "profit_factor": 1.664427722914376,
+        "modeled_fills": 804
+      },
+      "30": {
+        "final_compounded_jpy": 689399.8897690831,
+        "max_hourly_dd_pct": -28.89887454498028,
+        "win_rate_pct": 57.48129675810474,
+        "profit_factor": 1.4266609147175926,
+        "modeled_fills": 802
+      }
+    },
+    "rules": [
+      "IDLE JUP rel24 >= -0.04089204262472046",
+      "PENGU V8 btc24h <= 0.011611625094354983",
+      "Q102 FET ret14 <= 0.048722800378429465",
+      "V4 REC_Y concurrent gross cap 0.6x",
+      "portfolio DD <= -12% triggers PENGU+Q102+IDLE shared 2.0x cap"
+    ],
+    "use": "implementation/research comparison only"
+  },
+  "causalConservative": {
+    "status": "V4_V2_BODY_REMOVED_NATIVE_FAILED_BREAK_CORE_ONLY",
+    "withoutThreeGates": {
+      "10": {
+        "final_compounded_jpy": 377920.52703358734,
+        "max_hourly_dd_pct": -39.171881975754715,
+        "win_rate_pct": 56.50557620817844,
+        "profit_factor": 1.2200868573928667,
+        "modeled_fills": 538
+      },
+      "30": {
+        "final_compounded_jpy": 135883.7125971516,
+        "max_hourly_dd_pct": -50.384377858440274,
+        "win_rate_pct": 53.61781076066791,
+        "profit_factor": 1.158246407206379,
+        "modeled_fills": 539
+      }
+    },
+    "withThreeGates": {
+      "10": {
+        "final_compounded_jpy": 1173171.2114843028,
+        "max_hourly_dd_pct": -30.26228116577081,
+        "win_rate_pct": 58.252427184466015,
+        "profit_factor": 1.6125139898313432,
+        "modeled_fills": 515
+      },
+      "30": {
+        "final_compounded_jpy": 401286.1893673345,
+        "max_hourly_dd_pct": -36.25686219700619,
+        "win_rate_pct": 55.33980582524271,
+        "profit_factor": 1.4255509237340283,
+        "modeled_fills": 515
+      }
+    },
+    "v4": {
+      "legacyV2CandidatesRemoved": 1394,
+      "nativeCoreHistoricalAdded": 49,
+      "cleanForwardSourceCandidates": 184,
+      "cleanForwardSourceComplete": 181,
+      "cleanForwardSource": {
+        "candidates": 184,
+        "complete": 181,
+        "rightCensored": 3,
+        "long": 42,
+        "short": 139,
+        "exitReasons": {
+          "TRAILING_CROSSED_BEFORE_REPLACEMENT": 140,
+          "STOP": 41
+        },
+        "10bps": {
+          "n": 181,
+          "wins": 69,
+          "winRate": 0.3812154696132597,
+          "mean": -0.002241527594605453,
+          "sum": -0.405716494623587,
+          "pf": 0.49938439770616533
+        },
+        "30bps": {
+          "n": 181,
+          "wins": 52,
+          "winRate": 0.287292817679558,
+          "mean": -0.004241527594605453,
+          "sum": -0.7677164946235869,
+          "pf": 0.2722033085466839
+        }
+      },
+      "cleanForwardCore": {
+        "candidates": 8,
+        "complete": 8,
+        "rightCensored": 0,
+        "long": 0,
+        "short": 8,
+        "exitReasons": {
+          "TRAILING_CROSSED_BEFORE_REPLACEMENT": 6,
+          "STOP": 2
+        },
+        "10bps": {
+          "n": 8,
+          "wins": 5,
+          "winRate": 0.625,
+          "mean": 0.0048514474927286305,
+          "sum": 0.038811579941829044,
+          "pf": 6.688086022723447
+        },
+        "30bps": {
+          "n": 8,
+          "wins": 5,
+          "winRate": 0.625,
+          "mean": 0.0028514474927286313,
+          "sum": 0.02281157994182905,
+          "pf": 2.7789149726962115
+        }
+      }
+    }
+  },
+  "forwardGateEvidence": {
+    "IDLE_JUP": {
+      "baseline30": {
+        "n": 16,
+        "wr": 0.4375,
+        "mean": -0.007961967822791972,
+        "sum": -0.12739148516467155,
+        "pf": 0.6671845246903731
+      },
+      "gated30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.024005252373916312,
+        "sum": 0.16803676661741418,
+        "pf": 3.9985938416906235
+      },
+      "rule": [
+        {
+          "feature": "volumeRatio",
+          "op": ">=",
+          "threshold": 1.2568362211142174
+        },
+        {
+          "feature": "rel24",
+          "op": ">=",
+          "threshold": -0.04089204262472046
+        }
+      ]
+    },
+    "PENGU_V8": {
+      "baseline30": {
+        "n": 4,
+        "wr": 0.75,
+        "mean": 0.011216313360456226,
+        "sum": 0.044865253441824904,
+        "pf": 1.7121468800289674
+      },
+      "gated30": {
+        "n": 4,
+        "wr": 0.75,
+        "mean": 0.011216313360456226,
+        "sum": 0.044865253441824904,
+        "pf": 1.7121468800289674
+      },
+      "rule": [
+        {
+          "feature": "btc24h",
+          "op": "<=",
+          "threshold": 0.008748519159543111
+        }
+      ]
+    },
+    "Q102_FET": {
+      "baseline30": {
+        "n": 15,
+        "wr": 0.5333333333333333,
+        "mean": 0.004801408668548592,
+        "sum": 0.07202113002822888,
+        "pf": 1.4608588233575046
+      },
+      "gated30": {
+        "n": 14,
+        "wr": 0.5714285714285714,
+        "mean": 0.006115845481572126,
+        "sum": 0.08562183674200977,
+        "pf": 1.6001171706065325
+      },
+      "rule": {
+        "feature": "ret14",
+        "op": "<=",
+        "threshold": 0.048722800378429465
+      }
+    }
+  },
+  "determinism": {
+    "status": "PASS",
+    "expected": {
+      "10_SUMMARY.json": "76110ff4b2ebc4fc07de59f7cd8a508313b13c333142e45db09511d2bed4e8bc",
+      "10_FILLS.csv": "52ca76cab03d62cf20d3198600cee93a29affc5d1ebe86c309f9d47376b29303",
+      "10_EQUITY_30MIN.csv": "04ca7969acf880d78164479725102b0c74dd3a933f4449f08b19b3fc2b705cf0",
+      "10_DECISIONS.csv": "01197704630109ab1d3b55a325f0ec4048c09038183ea814e9a157c220243b0d",
+      "30_SUMMARY.json": "d58cb3f07f2fa6333d351b4274dac0d85a62c7cbc192a68894cf6ab73cadcdde",
+      "30_FILLS.csv": "a6be4a6f8af0c8b50e19923ddf9739074f55e40d2f51eedbc3f514ad914080df",
+      "30_EQUITY_30MIN.csv": "4403a6d228211fbb586e0c6341b630b7ac496b922eb47e7a96b725926c641eda",
+      "30_DECISIONS.csv": "9c750ee4ad5376cf63d42683a7d2599e57469eef2d585ff08ebe6bdcff19c359"
+    },
+    "actual": {
+      "10_SUMMARY.json": "76110ff4b2ebc4fc07de59f7cd8a508313b13c333142e45db09511d2bed4e8bc",
+      "10_FILLS.csv": "52ca76cab03d62cf20d3198600cee93a29affc5d1ebe86c309f9d47376b29303",
+      "10_EQUITY_30MIN.csv": "04ca7969acf880d78164479725102b0c74dd3a933f4449f08b19b3fc2b705cf0",
+      "10_DECISIONS.csv": "01197704630109ab1d3b55a325f0ec4048c09038183ea814e9a157c220243b0d",
+      "30_SUMMARY.json": "d58cb3f07f2fa6333d351b4274dac0d85a62c7cbc192a68894cf6ab73cadcdde",
+      "30_FILLS.csv": "a6be4a6f8af0c8b50e19923ddf9739074f55e40d2f51eedbc3f514ad914080df",
+      "30_EQUITY_30MIN.csv": "4403a6d228211fbb586e0c6341b630b7ac496b922eb47e7a96b725926c641eda",
+      "30_DECISIONS.csv": "9c750ee4ad5376cf63d42683a7d2599e57469eef2d585ff08ebe6bdcff19c359"
+    }
+  },
+  "acceptance": {
+    "ddLe20Both": false,
+    "winRateGe70Both": false,
+    "profitPositiveBoth": true
+  },
+  "knownNonParity": [
+    "V52 historical executable order book unavailable; price-model proxy remains",
+    "RESIDUAL has 79 historical exit-model gaps fail-closed/inherited",
+    "market fills remain modeled rather than signed venue fills",
+    "current V4 live-decision builder imports V2 shadow policy; V2 full-year filtering is retrospective and cannot be used as causal evidence"
+  ],
+  "conclusion": "Research BT is complete and reproducible. The implementation-replay variant materially improves DD but is not causal because V4 V2 candidates are retrospectively filtered. The causal-conservative variant removes all 1394 contaminated V4 body candidates and keeps only native FAILED_BREAK core. It remains profitable in both fee cases but does not meet DD<=20% or win-rate>=70%; therefore no LIVE adoption is justified by this BT alone."
+}
