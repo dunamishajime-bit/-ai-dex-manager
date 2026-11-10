@@ -54,7 +54,7 @@ for cost in (10,30):
    a=unix(z["entry_utc"]);b=unix(z["exit_utc"]);s=z["strategy"]
    if b<=t:
     v=float(z["net_pnl_jpy"]);classified[s]+=v;byroute[s+"|"+z["route"]+"|"+z["side"]]+=v;closed+=1
-   elif a<=t<b:
+   elif a<t<b:  # engine snapshots before processing candidates whose entryTs == t
     v,details=mtm_open(z,t,pmap,fmap)
     classified[s]+=v;openByRunner[s]+=v;byroute[s+"|"+z["route"]+"|"+z["side"]]+=v
     ongoing.append({"id":z["source_signal_id"],"runner":s,"symbol":z["symbol"],"side":z["side"],
