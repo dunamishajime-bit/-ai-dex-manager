@@ -11,7 +11,7 @@ source=R/"dd_strict_v2_plus_v4q102_pengu_recovery_reversal_20261109.py"
 orig=source.read_text(encoding="utf-8")
 mode="PINNED"
 gate=os.environ["DISDEX_IDLE_JUP_GATE"]
-assert gate in ("REL_ONLY","REL_VOL")
+assert gate in ("REL_ONLY","REL_VOL"),gate
 out_name="VPS_DD_IDLE_JUP_GATE_"+gate+"_STOCK15_20261110"
 replaces=[
  ('O=R/"VPS_DD_STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL_20261109";O.mkdir(exist_ok=True)',
@@ -52,22 +52,6 @@ assert orig.count("STOCK_CAP=4.0")>=1
 orig=orig.replace("STOCK_CAP=4.0","STOCK_CAP=1.5")
 assert orig.count("gross=2.0,v=z,")==1
 orig=orig.replace("gross=2.0,v=z,","gross=1.5,v=z,")
-# Train-only IDLE JUP research gate. Forward data was not used to choose these thresholds.
-_jup_gate_code='''_JUP_REL=-0.04089204262472046
-_JUP_VOL=1.2568362211142174
-_raw_before=len(raw)
-def _keep_idle_jup_research(c):
- if not (c["s"]=="IDLE" and c.get("route")=="IDLE_JUP_RELATIVE_SHORT"):return True
- f=c["v"].get("features") or {}
- if "rel24" not in f or "volumeRatio" not in f:raise RuntimeError("IDLE_JUP_FEATURE_MISSING")
- if '''+repr(gate)+'''=="REL_ONLY":return float(f["rel24"])>=_JUP_REL
- return float(f["rel24"])>=_JUP_REL and float(f["volumeRatio"])>=_JUP_VOL
-raw=[c for c in raw if _keep_idle_jup_research(c)]
-print("IDLE_JUP_RESEARCH_GATE",'''+repr(gate)+''',"removed",_raw_before-len(raw),flush=True)
-'''
-assert orig.count('P={"V52":0')==1
-orig=orig.replace('P={"V52":0',_jup_gate_code+'P={"V52":0')
-
 # Repair research-only integrated model's intra-V4 sort for A/B, never changing original Production source.
 ranking_sort_original='a=sorted(raw,key=lambda c:(c["t"],priority[c["s"]],c["symbol"],c["id"]))'
 assert orig.count(ranking_sort_original)==1
@@ -90,17 +74,36 @@ for v4c in raw:
 else:
  assert mode=="SYMBOL"
 
+
+# Inject a research-only JUP gate into the generated integrated source immediately
+# before the priority scheduler. Thresholds were selected on historical train-half.
+_gate_anchor='FORMAL_PRIORITY={"V4","Q102","PENGU","FET","V52"}'
+assert orig.count(_gate_anchor)==1,orig.count(_gate_anchor)
+_gate_code='''_JUP_REL=-0.04089204262472046
+_JUP_VOL=1.2568362211142174
+_raw_before_jup=len(raw)
+def _keep_idle_jup(c):
+ if not (c["s"]=="IDLE" and c.get("route")=="IDLE_JUP_RELATIVE_SHORT"):return True
+ f=c["v"].get("features") or {}
+ if not all(k in f for k in ("rel24","volumeRatio")):raise RuntimeError("IDLE_JUP_FEATURE_MISSING")
+ if gate=="REL_ONLY":return float(f["rel24"])>=_JUP_REL
+ return float(f["rel24"])>=_JUP_REL and float(f["volumeRatio"])>=_JUP_VOL
+raw=[c for c in raw if _keep_idle_jup(c)]
+print("IDLE_JUP_RESEARCH_GATE",gate,"removed",_raw_before_jup-len(raw),flush=True)
+'''
+orig=orig.replace(_gate_anchor,_gate_code+_gate_anchor)
+
 print("WRAPPER_MODE",mode,"SOURCE_SHA256",hashlib.sha256(source.read_bytes()).hexdigest(),"TARGET",out_name,flush=True)
 exec(compile(orig,str(source)+"::Y06_AB_"+mode,"exec"),{"__name__":"__main__"})
 # Attest output and assumptions, explicitly distinguish this from full production parity.
 folder=R/out_name
 m={"status":"RESEARCH_ONLY_NOT_FULL_PRODUCTION_PARITY",
-   "mode":mode,"idle_jup_gate":gate,"jup_rel_threshold":-0.04089204262472046,"jup_volume_threshold":1.2568362211142174,"source_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),
+   "mode":mode,"idle_jup_gate":gate,"source_sha256":hashlib.sha256(source.read_bytes()).hexdigest(),
    "native_tapes":{"V4":"V4_NATIVE_LIFECYCLE_EXIT_M5COMPLETE_20261109",
                    "PENGU":"PENGU_NATIVE_LIFECYCLE_EXIT_20261109",
                    "Q102":"Q102_S34_SELECTED_NATIVE_EXIT_M5COMPLETE_20261109"},
    "V4_sorting_rule":mode, "Y06_rule":"Native unchanged, no H60",
-   "entry_decisions_unchanged":False,"research_only_gate":True,"cannot_be_promoted_directly":True,
+   "entry_decisions_unchanged":False,"research_only_gate":True,
    "fees_bps_roundtrip":[10,30],
    "omissions":["V52 missing historical executable book","shared risk and auxiliary logic approximations inherit original engine","H1 next-open is a modeled fill, not real venue order"],
    "source_native_Y06_count":352}
