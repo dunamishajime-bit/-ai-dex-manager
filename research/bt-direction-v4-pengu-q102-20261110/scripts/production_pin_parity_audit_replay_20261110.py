@@ -128,25 +128,25 @@ new='''  eq=mark_current(t)
   daily=crypto_latched or v52_latched'''
 assert orig.count(old)==1;orig=orig.replace(old,new)
 # After residual preemption, refresh split risk instead of old latch.
-old='''      if eq is None or eq<=dayeq*.925:latched=True
-      daily=latched'''
-new='''      refresh_daily_latches(t,eq)
-      daily=crypto_latched or v52_latched'''
+old='''     if eq is None or eq<=dayeq*.925:latched=True
+     daily=latched'''
+new='''     refresh_daily_latches(t,eq)
+     daily=crypto_latched or v52_latched'''
 assert orig.count(old)==1;orig=orig.replace(old,new)
 # Per-candidate daily gate is runner scoped.
-old='''    s=c["s"];g=c["gross"];reason=""
-    if (s in FORMAL_PRIORITY'''
-new='''    s=c["s"];g=c["gross"];reason=""
-    daily=v52_latched if s=="V52" else crypto_latched
-    if (s in FORMAL_PRIORITY'''
+old='''   s=c["s"];g=c["gross"];reason=""
+   if (s in FORMAL_PRIORITY'''
+new='''   s=c["s"];g=c["gross"];reason=""
+   daily=v52_latched if s=="V52" else crypto_latched
+   if (s in FORMAL_PRIORITY'''
 assert orig.count(old)==1;orig=orig.replace(old,new)
 # Entry fee accounting.
-old='''    cost=notional*fee;cash-=cost
-    pid=name+"_"+str(bps)+"_"+c["id"]'''
-new='''    cost=notional*fee;cash-=cost
-    if s=="V52":v52_daily_settled-=cost
-    else:crypto_daily_settled-=cost
-    pid=name+"_"+str(bps)+"_"+c["id"]'''
+old='''   cost=notional*fee;cash-=cost
+   pid=name+"_"+str(bps)+"_"+c["id"]'''
+new='''   cost=notional*fee;cash-=cost
+   if s=="V52":v52_daily_settled-=cost
+   else:crypto_daily_settled-=cost
+   pid=name+"_"+str(bps)+"_"+c["id"]'''
 assert orig.count(old)==1;orig=orig.replace(old,new)
 # Remove stale variables if any.
 assert "dayeq" not in orig and "latched" not in orig.replace("crypto_latched","").replace("v52_latched",""),"STALE_DAILY_VARIABLE"
