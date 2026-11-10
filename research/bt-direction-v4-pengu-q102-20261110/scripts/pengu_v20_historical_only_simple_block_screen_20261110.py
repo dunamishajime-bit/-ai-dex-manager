@@ -49,18 +49,22 @@ F=R/"FORWARD_HOLDOUT_20261001_20261108"
 fraw=[json.loads(x) for x in (F/"PENGU_FORWARD"/"native-PENGU-raw-intentions.jsonl").open(encoding="utf8") if x.strip()]
 fexit=[json.loads(x) for x in (F/"PENGU_NATIVE_LIFECYCLE"/"pengu-native-lifecycle-modeled-exits.jsonl").open(encoding="utf8") if x.strip()]
 femap={(int(x["entryTs"]),x["route"]):x for x in fexit}
-forward=[]
+forward=[];forwardUnresolved=[]
 for x in fraw:
  if x["route"]!="SHORT_V20":continue
- e=femap[(int(x["entryTs"]),x["route"])]
+ k=(int(x["entryTs"]),x["route"])
+ if k not in femap:
+  forwardUnresolved.append({"entryTs":k[0],"route":k[1]})
+  continue
+ e=femap[k]
  forward.append({"entryTs":int(x["entryTs"]),"pengu72h":float(x["pengu72h"]),"btc24h":float(x["btc24h"]),"native":float(e["rawReturn"])})
-assert len(forward)==6
+assert len(forward)==6,(len(forward),len(forwardUnresolved))
 for z in stable:
  z["forward"]={str(c):ev(forward,z["feature"],z["op"],z["threshold"],c) for c in (10,30)}
  z["forwardPass"]=all(z["forward"][str(c)]["deltaSum"]>=-1e-12 and
                       z["forward"][str(c)]["wr"]+1e-12>=z["forward"][str(c)]["baselineWR"] for c in (10,30))
 report={"status":"PENGU_V20_HISTORICAL_ONLY_SIMPLE_BLOCK_SCREEN","splitSizes":{k:len(v) for k,v in parts.items()},
-"forwardN":len(forward),"thresholds":thresholds,
+"forwardN":len(forward),"forwardRightCensoredN":len(forwardUnresolved),"thresholds":thresholds,
 "selection":"TRAIN-only quartiles; one feature one threshold; block; improve 10/30 sum and non-decrease WR; validate VAL1+VAL2 unchanged threshold",
 "forwardCaveat":"V20 forward aggregate already inspected; falsification only, not virgin OOS",
 "candidateN":len(cands),"stableHistoricalN":len(stable),"stableAndForwardN":sum(z.get("forwardPass",False) for z in stable),
