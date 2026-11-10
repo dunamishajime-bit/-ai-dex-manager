@@ -80,14 +80,14 @@ assert orig.count(_anchor)==1;orig=orig.replace(_anchor,_repl)
 _old='   if day!=t//(24*H):day=t//(24*H);dayeq=eq;latched=False\n   peak=max(peak,eq)'
 _new='   peak=max(peak,eq)'
 assert orig.count(_old)==1;orig=orig.replace(_old,_new)
-_old='   if eq is None or dayeq<=0 or eq<=dayeq*.925:latched=True\n   daily=latched'
-_new='   if eq is None or crypto_daily_trip(t):latched=True\n   daily=latched'
+_old='  if eq is None or dayeq<=0 or eq<=dayeq*.925:latched=True\n  daily=latched'
+_new='  if eq is None or crypto_daily_trip(t):latched=True\n  daily=latched'
 assert orig.count(_old)==1;orig=orig.replace(_old,_new)
-_old='      if eq is None or eq<=dayeq*.925:latched=True\n      daily=latched'
-_new='      if eq is None or crypto_daily_trip(t):latched=True\n      daily=latched'
+_old='     if eq is None or eq<=dayeq*.925:latched=True\n     daily=latched'
+_new='     if eq is None or crypto_daily_trip(t):latched=True\n     daily=latched'
 assert orig.count(_old)==1;orig=orig.replace(_old,_new)
-_old='    elif daily:reason="DAILY_LOSS_7P5_GATE"'
-_new='    elif daily and s!="V52":reason="DAILY_LOSS_7P5_GATE"'
+_old='   elif daily:reason="DAILY_LOSS_7P5_GATE"'
+_new='   elif daily and s!="V52":reason="DAILY_LOSS_7P5_GATE"'
 assert orig.count(_old)==1;orig=orig.replace(_old,_new)
 
 print("AUDIT_STATIC_SOURCE_PIN",hashlib.sha256(source.read_bytes()).hexdigest(),flush=True)
