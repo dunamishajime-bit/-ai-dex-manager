@@ -40,9 +40,9 @@ function allocationOrder(route){
  const m=/^REC_([GXYZ])(\d+)/.exec(route);if(!m)return -1;
  return (m[1]==="G"?10:m[1]==="X"?30:60)+Number(m[2]);
 }
-const outp=join(DIR,"base41-first-match-pre-v2-candidates.jsonl"),defp=join(DIR,"base41-first-match-pre-v2-deferred.jsonl");
-const out=createWriteStream(outp,{encoding:"utf8"}),defo=createWriteStream(defp,{encoding:"utf8"});
-const counts={pre:{source:0,matched:0,emitted:0,deferred:0,noRoute:0},target:{source:0,matched:0,emitted:0,deferred:0,noRoute:0}};
+const outp=join(DIR,"base41-first-match-pre-v2-candidates.jsonl"),defp=join(DIR,"base41-first-match-pre-v2-deferred.jsonl"),invp=join(DIR,"base41-first-match-pre-v2-data-invalid.jsonl");
+const out=createWriteStream(outp,{encoding:"utf8"}),defo=createWriteStream(defp,{encoding:"utf8"}),invo=createWriteStream(invp,{encoding:"utf8"});
+const counts={pre:{source:0,matched:0,emitted:0,deferred:0,noRoute:0,dataInvalid:0},target:{source:0,matched:0,emitted:0,deferred:0,noRoute:0,dataInvalid:0}};
 const routes={pre:{},target:{}},deferredRoutes={pre:{},target:{}};
 for(let i=120;i<h2.BTC.length;i++){
  const t=h2.BTC[i].endTs;if(t>=T1)break;const period=t<T0?"pre":"target";
@@ -50,7 +50,10 @@ for(let i=120;i<h2.BTC.length;i++){
  for(const n of sources){
   counts[period].source++;
   const s=n.source,symbol=s.symbol.replace(/USDT$/,"");
-  const source=computeProductionH1Features(s.symbol,s.side,s.eligibleSourceEntryTs,t,h1[symbol],h1.BTC);
+  let source;
+  try{ source=computeProductionH1Features(s.symbol,s.side,s.eligibleSourceEntryTs,t,h1[symbol],h1.BTC); }
+  catch(err){ counts[period].dataInvalid++; invo.write(JSON.stringify({period,decisionTs:t,symbol:s.symbol,side:s.side,reason:String(err instanceof Error?err.message:err)})+"\
+"); continue; }
   const obs={...source.features,sourceSide:s.side,sourceSignalTs:s.eligibleSourceEntryTs,age:s.momentumConditionAgeHours,
     coreRequestedGross:s.coreRequestedGross,nativeDiagnosticRet6:s.nativeDiagnosticRet6,
     nativeDiagnosticEma12Atr:s.nativeDiagnosticEma12Atr,...s.failedBreak};
@@ -74,13 +77,14 @@ for(let i=120;i<h2.BTC.length;i++){
   }
  }
 }
-out.end();defo.end();await Promise.all([once(out,"finish"),once(defo,"finish")]);
+out.end();defo.end();invo.end();await Promise.all([once(out,"finish"),once(defo,"finish"),once(invo,"finish")]);
 const sha=p=>createHash("sha256").update(readFileSync(p)).digest("hex");
 const summary={status:"BASE41_FIRST_MATCH_PRE_V2_CAUSAL_FEATURE_REPLAY_RESEARCH_ONLY",counts,routes,deferredRoutes,
  sourcePin:"3ad65403013b701db5d9e53e8814e6ab827a28e8",
- hashes:{candidates:sha(outp),deferred:sha(defp)},
+ hashes:{candidates:sha(outp),deferred:sha(defp),dataInvalid:sha(invp)},
  caveats:["Route catalog itself was research-derived in 2026; this removes V2 repairs/ranking but is not virgin historical policy.",
  "Delayed candidates are reported exactly as deferred at source decision; no invented future-state scheduler.",
+ "One corrupt Aster BTC H1 bar at 2025-09-13T13:00Z is not cross-venue imputed; every feature window touching it fails closed.",
  "FAILED_BREAK core is excluded here and remains a separate native state-machine stream."]};
 writeFileSync(join(DIR,"base41_first_match_pre_v2_summary.json"),JSON.stringify(summary,null,2)+"\n");
 console.log(JSON.stringify(summary));
