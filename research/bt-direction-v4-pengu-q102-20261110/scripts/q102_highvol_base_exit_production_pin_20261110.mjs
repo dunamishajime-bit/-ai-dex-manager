@@ -34,13 +34,13 @@ for(const row of rows){
 fs.writeFileSync(OUT,out.map(x=>JSON.stringify(x)).join("\n")+"\n");
 const sec={};
 for(const bps of [10,30]){
- const vals=out.map(x=>x.grossReturn-bps/10000),w=vals.filter(x=>x>0),l=vals.filter(x=>x<=0);
+ const vals=out.filter(x=>Number.isFinite(x.grossReturn)).map(x=>x.grossReturn-bps/10000),w=vals.filter(x=>x>0),l=vals.filter(x=>x<=0);
  const gp=w.reduce((a,b)=>a+b,0),gl=-l.reduce((a,b)=>a+b,0);
  sec[bps+"bps"]={n:vals.length,wins:w.length,winRate:w.length/vals.length,mean:vals.reduce((a,b)=>a+b,0)/vals.length,pf:gl>0?gp/gl:null};
 }
 const sha=p=>crypto.createHash("sha256").update(fs.readFileSync(p)).digest("hex");
-const summary={status:"Q102_HIGH_VOL_BASE_EXIT_PRODUCTION_PIN_REPLAY",signals:rows.length,exits:out.length,
- sections:sec,exitReasons:Object.fromEntries([...new Set(out.map(x=>x.exitReason))].map(k=>[k,out.filter(x=>x.exitReason===k).length])),
+const summary={status:"Q102_HIGH_VOL_BASE_EXIT_PRODUCTION_PIN_REPLAY",signals:rows.length,exits:out.filter(x=>Number.isFinite(x.grossReturn)).length,rightCensored:out.filter(x=>!Number.isFinite(x.grossReturn)).length,
+ sections:sec,exitReasons:Object.fromEntries([...new Set(out.filter(x=>x.exitReason).map(x=>x.exitReason))].map(k=>[k,out.filter(x=>x.exitReason===k).length])),
  hashes:{input:sha(IN),output:sha(OUT)},adoptedExitPoliciesApplied:false};
 fs.writeFileSync(SUM,JSON.stringify(summary,null,2)+"\n");
 console.log(JSON.stringify(summary));
