@@ -28,7 +28,7 @@ assert orig.count(anchor)==1
 add=r'''hv_path=R/"Q102_CURRENT_PRODUCTION_REPLAY_AUDIT_20261110"/"q102-high-vol-base-exits.jsonl"
 hv_rows=list(jlines(hv_path));hv_added=0;hv_censored=0
 for z in hv_rows:
- if not Number_isfinite(z.get("grossReturn")):
+ if not (Number_isfinite(z.get("grossReturn"))):
   hv_censored+=1;continue
  t=int(z["entryTs"]);e=int(z["exitTs"])
  if not START<=t<e<=END:continue
@@ -42,7 +42,7 @@ print("Q102_HIGH_VOL_ADDED",hv_added,"RIGHT_CENSORED",hv_censored,flush=True)
 assert hv_added==18 and hv_censored==1,(hv_added,hv_censored)
 assert len(raw)==2733,(len(raw),2733)'''
 # Python source needs finite helper expression, not JS.
-add=add.replace('Number_isfinite(z.get("grossReturn"))','isinstance(z.get("grossReturn"),(int,float)) and math.isfinite(float(z.get("grossReturn")))')
+add=add.replace('Number_isfinite(z.get("grossReturn"))','(isinstance(z.get("grossReturn"),(int,float)) and math.isfinite(float(z.get("grossReturn"))))')
 orig=orig.replace(anchor,add)
 # Split daily-risk accounting. Initialize state.
 old='peak=10000.;mdd=0.;mddt=START;day=None;dayeq=10000.;latched=False;j=0'
