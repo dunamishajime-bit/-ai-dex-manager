@@ -1,0 +1,45 @@
+{
+  "status": "LOCKED_CURRENT_IMPLEMENTATION_PARITY_V52_STRATEGY_CAPITAL_CORRECTED",
+  "period": {
+    "start": "2025-10-01T00:00:00Z",
+    "endExclusive": "2026-10-01T00:00:00Z"
+  },
+  "initialJpy": 10000,
+  "q102Adopted": true,
+  "effectiveV52Source": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+  "v52MaxDailyLossPct": 3.5,
+  "results": {
+    "10bps": {
+      "finalMtmJpy": 887336.0597493979,
+      "maxDdPct": -56.31352272678358,
+      "closedFills": 537,
+      "winRatePct": 57.35567970204841,
+      "profitFactor": 1.222318886078152,
+      "sharedRiskTrips": 20,
+      "v52DailyTrips": 38,
+      "terminalOpen": 1
+    },
+    "30bps": {
+      "finalMtmJpy": 321161.9638593054,
+      "maxDdPct": -63.195789231699905,
+      "closedFills": 537,
+      "winRatePct": 56.23836126629422,
+      "profitFactor": 1.1677533074145783,
+      "sharedRiskTrips": 21,
+      "v52DailyTrips": 42,
+      "terminalOpen": 1
+    }
+  },
+  "sourceIntents": 2811,
+  "missingExitModels": 0,
+  "determinism": {
+    "pass1Artifacts": 21,
+    "pass2Artifacts": 21,
+    "sha256ExactMatch": true
+  },
+  "wrapperSha256": "eba62b627ae78929de28a3274e9afadaf5204af05527996c47ce7ef6b14018c6",
+  "generatedSimulatorSha256": "370a6066df383a1e5f5f89486a820089db3fddf2526ee42ccf37031f53fd610f",
+  "fixCommit": "a94458e23036dca9277dcb3bc0450a5b454719ac",
+  "supersedesPreV52CapitalScopeCanonical": true,
+  "productionMutation": false
+}
