@@ -180,3 +180,25 @@ Current research-only frontier:
 - Win rate remains below the >=70% goal.
 - No Production/LIVE change is authorized by these results.
 - Do not force additional in-sample parameter tuning to manufacture <=20%; next acceptance evidence must be independent/untouched and closer to Production parity.
+
+
+## BT final completion — 2026-11-10
+
+The current dataset is now closed as **BT_RESEARCH_COMPLETE_NOT_PRODUCTION_CERTIFIED**.
+
+Mandatory final references:
+
+- [BT_FINAL_COMPLETION_20261110.md](./BT_FINAL_COMPLETION_20261110.md)
+- [BT_FINAL_COMPLETION_20261110.json](./results/BT_FINAL_COMPLETION_20261110.json)
+- [DETERMINISM_RECHECK_20261110.json](./results/DETERMINISM_RECHECK_20261110.json)
+- [FORWARD_FUNDING_MANIFEST_20261110.json](./results/FORWARD_FUNDING_MANIFEST_20261110.json)
+
+Do not reuse the older high-return V4 V2 integrated result as causal-certified evidence. The final causal-conservative baseline removes the 1,394 retrospectively filtered V4 body candidates, retains only the native FAILED_BREAK core, and applies only the three train/validation/forward-checked gates.
+
+Final causal-conservative 3-gate result:
+- 10bps: JPY 1,173,171.21; max DD -30.26%; WR 58.25%; PF 1.613.
+- 30bps: JPY 401,286.19; max DD -36.26%; WR 55.34%; PF 1.426.
+- Deterministic rerun: PASS, all 8 key artifact hashes matched.
+- DD<=20%: not achieved.
+- WR>=70%: not achieved.
+- No LIVE/Production change authorized.
