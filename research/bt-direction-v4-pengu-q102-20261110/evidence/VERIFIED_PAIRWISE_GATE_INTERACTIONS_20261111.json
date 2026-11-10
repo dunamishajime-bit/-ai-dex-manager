@@ -1,0 +1,213 @@
+{
+  "schema": "disdex-verified-pairwise-gate-interactions/v1",
+  "baselineCommit": "65c1c748545ad201b88d845a68a0437cd475f7bb",
+  "period": {
+    "start": "2025-10-01T00:00:00Z",
+    "endExclusive": "2026-10-01T00:00:00Z",
+    "initialJpy": 10000
+  },
+  "effectiveRuntime": {
+    "caps": {
+      "crypto": 3,
+      "stock": 4,
+      "total": 4.25,
+      "sharedDailyLossPct": 7.5,
+      "v52Slot": 2,
+      "v52WorstCaseBufferBps": 20
+    },
+    "observedActiveSources": {
+      "PENGU": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+      "Q102": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+      "V52": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+      "SHARED_RISK": "2737c30e1f6d014d24a2c6d025e7f91332bf7962"
+    },
+    "sevenRunnerReplaySources": {
+      "V4": "53a0be396719f0284af4e11b35c66a4ac7d58f79",
+      "PENGU": "1657e173d250ad58f53e62f7bb0a3428fb405496",
+      "Q102": "ef1ab178e26a7bf5bddb6473467765edba242e1d",
+      "V52": "8495daf24e53a6cf0dd5e38f022008fa8f78c688",
+      "FET": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "HYPE": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+      "IDLE": "7688ed7c93a1918d8b44837339b7da5584a868f5"
+    },
+    "q102AdoptedExitPolicies": "ON_ACK_MATCHES_EF1",
+    "fetTrailing": "ON_FET_TRAIL_8P_GIVEBACK_4P",
+    "hypePreemption": false
+  },
+  "researchRules": {
+    "IDLE_JUP": {
+      "feature": "features.rel24",
+      "op": ">=",
+      "threshold": -0.04089204262472046
+    },
+    "PENGU_V8": {
+      "feature": "btc24h",
+      "op": "<=",
+      "threshold": 0.011611625094354983
+    },
+    "Q102_FET": {
+      "feature": "ret14",
+      "op": "<=",
+      "threshold": 0.048722800378429465
+    }
+  },
+  "pairwiseResults": [
+    {
+      "case": "IDLE_PENGU",
+      "bps": 10,
+      "final_mtm_jpy": 3944037.4155137646,
+      "max_dd_pct": -34.06598014971646,
+      "win_rate_pct": 61.730013106159895,
+      "profit_factor": 1.411765133775833,
+      "fills": 763,
+      "delta_final_pct_vs_baseline": 72.92544272421888,
+      "dd_improvement_pp_vs_baseline": 12.809648508657645,
+      "win_improvement_pp_vs_baseline": 0.7196504118593836,
+      "pf_improvement_vs_baseline": 0.1485746178553471,
+      "fill_delta_vs_baseline": -9,
+      "delta_final_pct_vs_three": -2.904753234105062,
+      "dd_delta_pp_vs_three": 0.4783159141039661,
+      "win_delta_pp_vs_three": -0.29363998188215845,
+      "pf_delta_vs_three": -0.055134732060626135,
+      "fill_delta_vs_three": 2
+    },
+    {
+      "case": "IDLE_PENGU",
+      "bps": 30,
+      "final_mtm_jpy": 1315894.7912392435,
+      "max_dd_pct": -45.240050883188886,
+      "win_rate_pct": 58.97771952817824,
+      "profit_factor": 1.3208925442430497,
+      "fills": 763,
+      "delta_final_pct_vs_baseline": 76.6538033165291,
+      "dd_improvement_pp_vs_baseline": 9.441311496117258,
+      "win_improvement_pp_vs_baseline": 0.6875640877637395,
+      "pf_improvement_vs_baseline": 0.12027758384869736,
+      "fill_delta_vs_baseline": -9,
+      "delta_final_pct_vs_three": -3.8251083577285905,
+      "dd_delta_pp_vs_three": -0.879024985327213,
+      "win_delta_pp_vs_three": -0.41781266630270864,
+      "pf_delta_vs_three": -0.04376049306426677,
+      "fill_delta_vs_three": 2
+    },
+    {
+      "case": "IDLE_Q102",
+      "bps": 10,
+      "final_mtm_jpy": 3035311.4448981453,
+      "max_dd_pct": -47.26101745003524,
+      "win_rate_pct": 61.53846153846154,
+      "profit_factor": 1.3581388537309271,
+      "fills": 767,
+      "delta_final_pct_vs_baseline": 33.08255478264199,
+      "dd_improvement_pp_vs_baseline": -0.3853887916611356,
+      "win_improvement_pp_vs_baseline": 0.528098844161029,
+      "pf_improvement_vs_baseline": 0.09494833781044121,
+      "fill_delta_vs_baseline": -5,
+      "delta_final_pct_vs_three": -25.275984301142852,
+      "dd_delta_pp_vs_three": -12.716721386214815,
+      "win_delta_pp_vs_three": -0.485191549580513,
+      "pf_delta_vs_three": -0.10876101210553202,
+      "fill_delta_vs_three": 6
+    },
+    {
+      "case": "IDLE_Q102",
+      "bps": 30,
+      "final_mtm_jpy": 1009199.99270095,
+      "max_dd_pct": -53.32849007301378,
+      "win_rate_pct": 58.93089960886571,
+      "profit_factor": 1.2769173568651733,
+      "fills": 767,
+      "delta_final_pct_vs_baseline": 35.48120883565626,
+      "dd_improvement_pp_vs_baseline": 1.3528723062923618,
+      "win_improvement_pp_vs_baseline": 0.6407441684512065,
+      "pf_improvement_vs_baseline": 0.07630239647082093,
+      "fill_delta_vs_baseline": -5,
+      "delta_final_pct_vs_three": -26.24053184982287,
+      "dd_delta_pp_vs_three": -8.96746417515211,
+      "win_delta_pp_vs_three": -0.46463258561524157,
+      "pf_delta_vs_three": -0.0877356804421432,
+      "fill_delta_vs_three": 6
+    },
+    {
+      "case": "PENGU_Q102",
+      "bps": 10,
+      "final_mtm_jpy": 3072320.0623302865,
+      "max_dd_pct": -35.21945604169444,
+      "win_rate_pct": 61.69934640522876,
+      "profit_factor": 1.3755707720276944,
+      "fills": 765,
+      "delta_final_pct_vs_baseline": 34.70518937756015,
+      "dd_improvement_pp_vs_baseline": 11.656172616679662,
+      "win_improvement_pp_vs_baseline": 0.6889837109282482,
+      "pf_improvement_vs_baseline": 0.11238025610720848,
+      "fill_delta_vs_baseline": -7,
+      "delta_final_pct_vs_three": -24.364897396159655,
+      "dd_delta_pp_vs_three": -0.6751599778740172,
+      "win_delta_pp_vs_three": -0.3243066828132939,
+      "pf_delta_vs_three": -0.09132909380876475,
+      "fill_delta_vs_three": 4
+    },
+    {
+      "case": "PENGU_Q102",
+      "bps": 30,
+      "final_mtm_jpy": 1052001.9289691702,
+      "max_dd_pct": -43.524493638149764,
+      "win_rate_pct": 58.954248366013076,
+      "profit_factor": 1.2957281476278777,
+      "fills": 765,
+      "delta_final_pct_vs_baseline": 41.22720379014051,
+      "dd_improvement_pp_vs_baseline": 11.15686874115638,
+      "win_improvement_pp_vs_baseline": 0.6640929255985739,
+      "pf_improvement_vs_baseline": 0.09511318723352535,
+      "fill_delta_vs_baseline": -7,
+      "delta_final_pct_vs_three": -23.112263837758775,
+      "dd_delta_pp_vs_three": 0.8365322597119089,
+      "win_delta_pp_vs_three": -0.4412838284678742,
+      "pf_delta_vs_three": -0.06892488967943877,
+      "fill_delta_vs_three": 4
+    }
+  ],
+  "determinism": {
+    "core24Sha256": {
+      "IDLE_PENGU": {
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "5924253cf0c627b8db71b5e8aea5aca3cded61f6530e3ee7996583ee24e95376",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv": "b4e4e846062d587ca20b1ea93c96f30a95e1a276da7cccfee7d59a4dda776bd7",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_10BPS_FILLS.csv": "b1d605c07ce156ba869ec55b5a3ea7f1351d70d808549af30431a59fa7e88b0b",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "76278b5eb65ccdcf876c0e3dd167bf7ce9c706e9df88c657989fd98973239b45",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "11a350e094745054d35c19a72f06fc500aa71be912b6bc0da555ec9f87cbcc55",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv": "ae580d292c2998cc7c39264860e4939e434dd24cef7ed84bf15c3975b9dfac91",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_30BPS_FILLS.csv": "8b4058544212c7306cc088fa8f677ca7a4952cf08ac2a44a879a581eef198419",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_PENGU_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "6ef050d8a7a2f070fe136e796387a2ab46ff4351c62f81598bc77dbb4d4011a8"
+      },
+      "IDLE_Q102": {
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "a8ac818f4e368e2572872c7a7a731967e382288a8478b38c2db04eedfca94d1b",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv": "0621f7fecd6993da7a12969fb7bf0d015572115b03a90c13cd7a310949d9254b",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_10BPS_FILLS.csv": "b67023c998ee906580ea80f66abdff562fd0c8ec5757a2100c945bf3bffbfd43",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "67972924ac85cf4981aae7fcea446da5a9ff893f3e8d73dd973879781e0d78fa",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "65ca2c3ef689ab7fdbec1fb0474a8efbaf07fc8582b1de4ac4b9b4f550895610",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv": "8b2a9019b9a8568a163a64d3f754e47c1ecfcaf5cb441bedd6ea8e3f221e3cce",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_30BPS_FILLS.csv": "138aaf7334adf90820ba249b7241585bd6b9b59ccd4f7c50412420bed59e05ee",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_IDLE_Q102_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "651bfdd7a74e32b5388cd33682b173f7488dbdd275fedf885c4905ca81cffab8"
+      },
+      "PENGU_Q102": {
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_10BPS_DECISIONS.csv": "3e098ee422584df0bf3ed0794c78904b3d332c94dca2111e83e00345d9b73d71",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_10BPS_EQUITY_30MIN.csv": "b2a6e04ad4b01a377b566650c4b2b590b1df3bb9d25c9053792c969a0c5d091f",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_10BPS_FILLS.csv": "63de85bd243d7636df6c9974a799c88fbfde7cd4937b2b18cf1c130a72a643b5",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_10BPS_SUMMARY.json": "4188b60cdb50e5bd6ed503893c07770403169abe4a498c78f77d6da326116ff6",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_30BPS_DECISIONS.csv": "0cb049cfd89c01ff80b7926658d1e961a724de3a34866e48e8d386e26e8fd89b",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_30BPS_EQUITY_30MIN.csv": "3af0b768596286d517ec88b33997a8e3a1fdae525ff442ab20e7c262dcefc730",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_30BPS_FILLS.csv": "69ac4f985ab195353862110fc477be979c16e92f876b89eb2c3eddb8f528c95b",
+        "EFFECTIVE_CURRENT_VERIFIED_PAIRWISE_PENGU_Q102_Q102_ADOPTED_ON_30BPS_SUMMARY.json": "6d47573f59fd72bb392c0928de2bbd442be626f4d67a34a9b3e728df9fc75ecf"
+      }
+    },
+    "rerunComparison": "24_of_24_identical_before_after_rerun"
+  },
+  "interpretation": {
+    "best10bpsDD": "IDLE_PENGU",
+    "best30bpsDD": "PENGU_Q102",
+    "bestFinalWinPf": "THREE",
+    "q102Interaction": "Adding Q102 to IDLE+PENGU worsens 10bps DD by 0.4783pp but improves 30bps DD by 0.8790pp while raising final/win/PF.",
+    "idleInteraction": "Adding IDLE to PENGU+Q102 improves 10bps DD by 0.6752pp but worsens 30bps DD by 0.8365pp while raising final/win/PF.",
+    "classification": "COST_REGIME_DEPENDENT_INTERACTION_NOT_UNIVERSAL_GATE_DOMINANCE"
+  }
+}
