@@ -86,11 +86,12 @@ def _keep_idle_jup(c):
  if not (c["s"]=="IDLE" and c.get("route")=="IDLE_JUP_RELATIVE_SHORT"):return True
  f=c["v"].get("features") or {}
  if not all(k in f for k in ("rel24","volumeRatio")):raise RuntimeError("IDLE_JUP_FEATURE_MISSING")
- if gate=="REL_ONLY":return float(f["rel24"])>=_JUP_REL
+ if __GATE__=="REL_ONLY":return float(f["rel24"])>=_JUP_REL
  return float(f["rel24"])>=_JUP_REL and float(f["volumeRatio"])>=_JUP_VOL
 raw=[c for c in raw if _keep_idle_jup(c)]
-print("IDLE_JUP_RESEARCH_GATE",gate,"removed",_raw_before_jup-len(raw),flush=True)
+print("IDLE_JUP_RESEARCH_GATE",__GATE__,"removed",_raw_before_jup-len(raw),flush=True)
 '''
+_gate_code=_gate_code.replace('__GATE__',repr(gate))
 orig=orig.replace(_gate_anchor,_gate_code+_gate_anchor)
 
 print("WRAPPER_MODE",mode,"SOURCE_SHA256",hashlib.sha256(source.read_bytes()).hexdigest(),"TARGET",out_name,flush=True)
