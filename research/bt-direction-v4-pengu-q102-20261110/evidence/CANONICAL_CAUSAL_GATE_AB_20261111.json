@@ -1,0 +1,45 @@
+{
+  "deterministic42of42": true,
+  "metrics": {
+    "IDLE_JUP_ROBUST": {
+      "10": {
+        "final_compounded_jpy": 277394.0434723533,
+        "max_hourly_dd_pct": -53.83642703479329,
+        "modeled_fills": 439,
+        "win_rate_pct": 57.1753986332574,
+        "profit_factor": 1.2360329044618052,
+        "shared_risk_trip_count": 16,
+        "v52_daily_trip_count": 133
+      },
+      "30": {
+        "final_compounded_jpy": 93123.88057686636,
+        "max_hourly_dd_pct": -60.84838652659714,
+        "modeled_fills": 418,
+        "win_rate_pct": 54.54545454545454,
+        "profit_factor": 1.157992797099427,
+        "shared_risk_trip_count": 15,
+        "v52_daily_trip_count": 135
+      }
+    },
+    "CAUSAL_THREE": {
+      "10": {
+        "final_compounded_jpy": 425519.6927166747,
+        "max_hourly_dd_pct": -42.423718689307435,
+        "modeled_fills": 436,
+        "win_rate_pct": 58.944954128440365,
+        "profit_factor": 1.4036143983706624,
+        "shared_risk_trip_count": 13,
+        "v52_daily_trip_count": 132
+      },
+      "30": {
+        "final_compounded_jpy": 206185.01003317576,
+        "max_hourly_dd_pct": -45.459596396836886,
+        "modeled_fills": 430,
+        "win_rate_pct": 56.97674418604651,
+        "profit_factor": 1.3243429650732945,
+        "shared_risk_trip_count": 12,
+        "v52_daily_trip_count": 134
+      }
+    }
+  }
+}
