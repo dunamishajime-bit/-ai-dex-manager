@@ -322,3 +322,15 @@ Do not repeat canonical parity or the 7-case A/B. Continue with:
 
 Goal status: DD <=20% / win ~70% is **not achieved** by THREE; more research is required.
 
+## Post-V52 strategy-capital fix checkpoint
+
+- Canonical script SHA256: eba62b627ae78929de28a3274e9afadaf5204af05527996c47ce7ef6b14018c6
+- Corrected canonical baseline:
+  - 10bps: JPY 887336.06, DD -56.3135%, fills 537, Win 57.3557%, PF 1.2223
+  - 30bps: JPY 321161.96, DD -63.1958%, fills 537, Win 56.2384%, PF 1.1678
+- Canonical determinism: 8/8 primary artifacts exact match.
+- Latest CAUSAL_THREE:
+  - 10bps: JPY 1585699.80, DD -41.3525%, fills 540, Win 59.6296%, PF 1.4313
+  - 30bps: JPY 579086.35, DD -50.6043%, fills 539, Win 58.2560%, PF 1.3223
+- Causal determinism: 42/42 artifacts exact match.
+- Resume from: analyze residual DD/loss concentration on corrected canonical + CAUSAL_THREE, then develop new causal gates using train/validation/forward only. Do not re-open old 772-fill baseline.
