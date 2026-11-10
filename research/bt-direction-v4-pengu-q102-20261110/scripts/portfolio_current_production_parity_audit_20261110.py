@@ -178,7 +178,7 @@ orig=orig.replace(old,new)
 # Cooldown is consumed only by a filled IDLE entry.
 old='opened[pid]=q'
 assert orig.count(old)==1
-orig=orig.replace(old,old+'\n    if s=="IDLE":idle_cooldown_until[c["symbol"]]=t+12*H')
+orig=orig.replace(old,old+'\n   if s=="IDLE":idle_cooldown_until[c["symbol"]]=t+12*H')
 
 # Terminal accounting: carry valid open positions to END without synthetic close/exit fee.
 old=''' assert j==len(a),(j,len(a))
