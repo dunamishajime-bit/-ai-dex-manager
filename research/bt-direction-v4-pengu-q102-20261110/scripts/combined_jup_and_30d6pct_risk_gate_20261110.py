@@ -17,12 +17,13 @@ assert risk_hours in (168,336,720) and risk_fraction in (0.04,0.06,0.08,0.10,0.1
 assert mode=="PINNED"
 jup_case=os.environ["DISDEX_COMBINED_JUP_CASE"]
 drop_fet_rev12=os.environ.get("DISDEX_DROP_Q102_FET_REV12","0")=="1"
-assert jup_case in ("JUP_OFF","JUP_LONG025")
+assert jup_case in ("JUP_OFF","JUP_LONG025","JUP_OFF_TAO_LONG")
 assert risk_hours==720 and abs(risk_fraction-0.06)<1e-12
 out_name=f"VPS_DD_COMBINED_{jup_case}_FETREV12_{int(drop_fet_rev12)}_RISKROLL_{risk_hours}H_{round(risk_fraction*100):02d}PCT_20261110"
-if jup_case=="JUP_LONG025":
+if jup_case in ("JUP_LONG025","JUP_OFF_TAO_LONG"):
  idle_old='p=N/("native-"+s+"-all-intent-modeled-5m-exit-audit.json")'
- idle_new='p=(R/"DIRECTION_RESEARCH_20261109"/"IDLE_JUP_ALL_LONG_ONLY_20261110"/"native-IDLE-all-intent-modeled-5m-exit-audit.json") if s=="IDLE" else N/("native-"+s+"-all-intent-modeled-5m-exit-audit.json")'
+ idle_dir="IDLE_JUP_ALL_LONG_ONLY_20261110" if jup_case=="JUP_LONG025" else "IDLE_TAO_LONG_ONLY_20261110"
+ idle_new='p=(R/"DIRECTION_RESEARCH_20261109"/'+repr(idle_dir)+'/"native-IDLE-all-intent-modeled-5m-exit-audit.json") if s=="IDLE" else N/("native-"+s+"-all-intent-modeled-5m-exit-audit.json")'
  assert orig.count(idle_old)==1
  orig=orig.replace(idle_old,idle_new)
 replaces=[
@@ -66,7 +67,7 @@ assert orig.count("gross=2.0,v=z,")==1
 orig=orig.replace("gross=2.0,v=z,","gross=1.5,v=z,")
 _raw_marker='# VPS priority research proxy:'
 assert orig.count(_raw_marker)==1
-if jup_case=="JUP_OFF":
+if jup_case in ("JUP_OFF","JUP_OFF_TAO_LONG"):
  _jup_block='''\
 _before_jup=len(raw)
 raw=[c for c in raw if not (c["s"]=="IDLE" and c["route"]=="IDLE_JUP_RELATIVE_SHORT")]
