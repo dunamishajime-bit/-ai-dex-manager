@@ -8,7 +8,13 @@ const cache={};
 function bars(sym){
  if(cache[sym])return cache[sym];
  const p=ROOT+"/aster-public-v3-h1-q102-warmup/"+sym+"-1h-20250301-20261001.jsonl.gz";
- const a=zlib.gunzipSync(fs.readFileSync(p)).toString("utf8").trim().split("\n").map(JSON.parse).map(x=>({
+ let rows=zlib.gunzipSync(fs.readFileSync(p)).toString("utf8").trim().split("\n").map(JSON.parse);
+ const extraJson=ROOT+"/FORWARD_HOLDOUT_20261001_20261108/q102-highvol-h1/"+sym+"-1h-20261001-20261004.json";
+ const extraGz=ROOT+"/FORWARD_HOLDOUT_20261001_20261108/aster-h1/"+sym+"-1h-20261001-20261108T20.jsonl.gz";
+ if(fs.existsSync(extraJson)) rows=rows.concat(JSON.parse(fs.readFileSync(extraJson,"utf8")));
+ else if(fs.existsSync(extraGz)) rows=rows.concat(zlib.gunzipSync(fs.readFileSync(extraGz)).toString("utf8").trim().split("\n").map(JSON.parse));
+ const dedup=new Map();for(const x of rows)dedup.set(+x[0],x);
+ const a=[...dedup.values()].sort((x,y)=>+x[0]-+y[0]).map(x=>({
   timestampMs:+x[0],open:+x[1],high:+x[2],low:+x[3],close:+x[4],quoteVolume:+x[7],baseVolume:+x[5]
  }));
  cache[sym]=a;return a;
