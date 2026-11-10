@@ -8,18 +8,21 @@ Scope: all future DisDex backtests, re-runs, logic revisions, and direction-corr
 
 Before starting or restarting a DisDex backtest, read this file and confirm that the current run follows the mandatory validation path below. Do not rely on conversational memory alone.
 
-## Permanent optimization objectives (revised 2026-11-10)
+## Permanent optimization objectives (revised 2026-11-10 — owner clarification)
 
-**Do not set a CAGR, annualized-return, final-equity, or absolute-profit target as an acceptance threshold.** The portfolio compounds and its reported final wealth is sensitive to fill order, available Gross and timing. Profit-related outputs remain auditable *diagnostics*, never a target selected for maximization.
+**No fixed numerical profit, CAGR, annualized-return, or final-capital target. Profitability is nevertheless essential, not optional.** Compounding makes final capital highly sensitive to the order, frequency, fees, Gross admission and timing of trades. Do not maximize an in-sample terminal amount at the expense of reliable direction or risk management.
 
-Prioritize all strategy entry, exit, direction and integrated risk research in this order:
+Assess all rule changes on three core dimensions, simultaneously:
 
-1. **Integrated maximum drawdown first:** aim for **max DD <=20%** in *both* the separate 10bps and 30bps portfolio backtests. Explicitly reject the apparent achievement when it depends on a hindsight-selected threshold, unreliable fills or incomplete Production parity.
-2. **Win rate / directional correctness:** aim for **>=70% win rate** where feasible, at route and portfolio levels, **after the modeled fees**. Report native-correct trades accidentally flipped/closed, false entries, separation by LONG and SHORT, and independent episode-level denominators.
-3. **Do not destroy trading opportunity:** report trade count and frequency and do not artificially manufacture high win rate via eliminating almost all entries. Track lost profitable trades, admission/slot/Gross conflicts and false suppression.
-4. **Keep the trading edge sound, without profit targets:** inspect average win versus average loss, payoff asymmetry, net expectancy after fees/funding, tail losses, and PF. A higher win rate or lower DD does **not by itself mathematically guarantee** higher compound wealth if payoff ratios or trade count deteriorate. Flag negative net expectancy or severe degradation; do not set a numeric return/CAGR goal or optimize retrospectively for terminal capital.
+1. **Maximum drawdown:** target **integrated max DD <=20%** for **both** 10bps and 30bps costs, with correct native STOP, funding, current runner Gross/capital competition, and disjoint historical/forward validation. A lower apparent DD from retrospective tuning or from barely trading is not a clean improvement.
+2. **Win rate and directional precision:** aim for **>=70% fee-adjusted win rate**, with LONG/SHORT, route and portfolio breakdown; count false flips, lost originally correct trades, tail-loss severity and independent overlapping-trade episodes. Do not inflate win rate by discarding almost all trades.
+3. **Actual profitability after all costs:** require the **integrated portfolio to remain profitable in both 10bps and 30bps** verified runs (positive net PnL and positive net expectancy over sufficient meaningful trading opportunities). Inspect PF, average win/average loss, funding, fee drag, worst loss, and per-route contribution. A loss-making individual hedge can be studied only if portfolio-level net profitability and risk improvement are demonstrated. When comparing candidates, report the actual profit difference against the unchanged baseline; treat materially reduced profitability as a trade-off requiring explicit review, not an automatic success from win rate or DD alone.
 
-**Required reporting priority:** current implementation and leakage/parity confidence; 10bps/30bps max DD; win rate and number of independent trades/episodes; damaged originally-correct signals and worst loss; trade activity; net expectancy and costs as diagnostic; final equity only as secondary factual accounting.
+**Keep trade count / opportunity as a hard anti-overfiltering check**, alongside those three dimensions. Positive returns from just a handful of trades are not persuasive. Never assume improving win rate and DD *guarantees* higher profits: payoff asymmetry and trade frequency can reverse that result.
+
+**Required BT reporting:** source/pin and causal-leakage status; DD at 10bps and 30bps; win rate and independent episode sample sizes; net portfolio profit and net expectancy after fees/funding at each cost; profit difference versus pinned baseline and average win/loss/PF; retained vs suppressed profitable trades and trade activity; original vs corrected entry/exit parity. **No arbitrary profit-amount, percentage-profit, CAGR or final-wealth threshold is to be used.**
+
+**Status rule:** A rule is never ACCEPTED merely because win rate/DD improve if verified integrated results lose money after costs, or if it depends on hindsight-ranked signals. If profitability remains positive but falls materially while DD/win rate improve, classify as RESEARCH_TRADEOFF_REVIEW rather than auto-accept; show the user the exact comparative figures.
 
 This changes **research acceptance criteria**, not Production policy, current running logic, position sizing, or owner-approved LIVE deployment.
 
