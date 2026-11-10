@@ -146,12 +146,12 @@ assert orig.count(anchor)==1
 orig=orig.replace(anchor,anchor+'\n fet_cooldown_until=0\n idle_cooldown_until={}')
 
 # FET post-exit cooldown.
-old='def close_modeled(pid,exitt,exit_price,reason):\n   nonlocal cash'
+old='def close_modeled(pid,exitt,exit_price,reason):\n  nonlocal cash'
 assert orig.count(old)==1
-orig=orig.replace(old,'def close_modeled(pid,exitt,exit_price,reason):\n   nonlocal cash,fet_cooldown_until')
+orig=orig.replace(old,'def close_modeled(pid,exitt,exit_price,reason):\n  nonlocal cash,fet_cooldown_until')
 anchor='net=total_gm-total_xf-q["fee"]+q["funded"]'
 assert orig.count(anchor)==1
-orig=orig.replace(anchor,anchor+'\n   if q["s"]=="FET":fet_cooldown_until=max(fet_cooldown_until,exitt+24*H)')
+orig=orig.replace(anchor,anchor+'\n  if q["s"]=="FET":fet_cooldown_until=max(fet_cooldown_until,exitt+24*H)')
 
 # Dynamic FET residual gross. HYPE capacity is conservatively checked at its full 1.5x
 # runtime ceiling before actual risk-sized gross is admitted.
