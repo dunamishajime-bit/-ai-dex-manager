@@ -165,3 +165,18 @@ Important **do not repeat** the earlier 3h/8h overlay bug by copying its PnL ari
 - Found separate PENGU risk-accounting SHORT return basis disagreement (entry/exit-1 vs native linear short (entry-exit)/entry). Research correction changes only a BLOCK reason for PENGU_00112; all modeled FILLS/EQUITY/FUNDING CSV hashes are unchanged. This does **not** establish Production parity or safety across future paths.
 - The complete 1,394-signal as-of rank map and 438-conflict + full three-way admission audits are GitHub archived as deterministic `results/*.json.gz.base64` with original SHA256 in the report. Decode using `gzip.decompress(base64.b64decode(contents))` or reproduce using the checked-in scripts. Do not reselect on the already inspected historical target/forward outcomes.
 - The full current Production as-deployed proof, clean native V4 signal population, V52 executable price evidence, episode-disjoint prospective validation and combined DD20% remain **OPEN**. No LIVE/STOP/orders modified.
+
+
+## Latest 2026-11-10 causal gate / concentration checkpoint
+
+Read this before further optimization:
+
+- [CAUSAL_GATE_CONCENTRATION_FRONTIER_20261110.md](./CAUSAL_GATE_CONCENTRATION_FRONTIER_20261110.md)
+- [LATEST_RESEARCH_FRONTIER_20261110.json](./results/LATEST_RESEARCH_FRONTIER_20261110.json)
+
+Current research-only frontier:
+- 3 causal-ish entry gates materially improved both DD and profit versus the PINNED integrated baseline.
+- Best profit-preserving worst-cost DD observed is about **28.90%**, still above the <=20% target.
+- Win rate remains below the >=70% goal.
+- No Production/LIVE change is authorized by these results.
+- Do not force additional in-sample parameter tuning to manufacture <=20%; next acceptance evidence must be independent/untouched and closer to Production parity.
