@@ -78,6 +78,7 @@ orig=orig.replace("# VPS priority research proxy:","\n# Replace the 1,394 hindsi
 orig=orig.replace("Y06_NATIVE_LIFECYCLE_M5_AB","NATIVE_V12_REFERENCE_"+ref_mode)
 orig=orig.replace('v4_native_lifecycle_modeled=1394','v4_native_lifecycle_modeled=(2018+(49 if ref_mode=="PLUS_CORE" else 0))')
 orig=orig.replace('v4_native_lifecycle_unresolved=0','v4_native_lifecycle_unresolved=0')
+orig=orig.replace("ref_mode",repr(ref_mode))  # embed wrapper-local reference mode into generated source
 print("WRAPPER_MODE",mode,"SOURCE_SHA256",hashlib.sha256(source.read_bytes()).hexdigest(),"TARGET",out_name,flush=True)
 exec(compile(orig,str(source)+"::Y06_AB_"+mode,"exec"),{"__name__":"__main__"})
 # Attest output and assumptions, explicitly distinguish this from full production parity.
