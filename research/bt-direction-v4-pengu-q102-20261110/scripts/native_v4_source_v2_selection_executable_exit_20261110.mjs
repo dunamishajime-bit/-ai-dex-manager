@@ -46,7 +46,7 @@ function modeledFunding(symbol,side,entry,exit,entryPrice){
  let total=0,n=0;
  for(const [time,rate] of funding[symbol]){
   if(time<=entry||time>=exit)continue;
-  const b=hbar(symbol,time-H);
+  const b=hbar(symbol,Math.floor(time/H)*H-H); // funding timestamps can carry subsecond venue offsets
   if(!b)throw Error("FUNDING_PREV_MARK_MISSING:"+symbol+":"+time);
   total+=(side==="LONG"?-1:1)*rate*b.close/entryPrice;
   n++;
