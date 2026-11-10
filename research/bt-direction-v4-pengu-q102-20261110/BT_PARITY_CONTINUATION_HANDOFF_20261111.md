@@ -234,3 +234,25 @@ Task A/Bで固定したcanonical baselineに対し:
 ## 再開時の指示
 
 「BT_PARITY_CONTINUATION_HANDOFF_20261111.md の Task A から続ける。772 fills版へ戻らず、exact V4 runtime + Shared Risk + V52 5m semanticsを1本へ統合してcanonical BTを確定する。」
+
+
+## Task A implementation strategy discovered after checkpoint
+
+最短の統合経路は次。
+
+- Baseに portfolio_effective_current_v52_daily_latch_5m_20261111.py を使う。
+  - Shared Risk parityを継承済み。
+  - 5分timing、V52 own 3.5% daily latch、Aster 5m mark、deferred exit処理を含む。
+- そこへ portfolio_effective_current_v4_runtime_parity_20261111.py の exact V4 部分だけを移植する。
+  - current-live-adapter 1394 exact replay
+  - native Core49
+  - Production V4 rank ordering
+  - private V4 gross envelope: request<=1.0, V4<=3.0, recovery<=2.5, crypto new risk<=3.0, total<=4.75
+  - same-side / foreign-symbol ownership
+  - 12h short cooldown
+  - V4 max-DD 21% hold
+  - recovery route slots 16
+- Shared Risk / V52 5m側の処理を移植時に上書きで失わないこと。
+- 統合後、10/30bps二重実行のSHA一致を取ってから研究Gateへ戻る。
+
+この比較まで完了済み。次回は3本の監査スクリプトを最初から読み直さず、この統合から開始する。
