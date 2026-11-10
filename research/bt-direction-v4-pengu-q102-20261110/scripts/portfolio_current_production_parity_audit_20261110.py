@@ -166,13 +166,13 @@ orig=orig.replace(old,new)
 old='elif daily:reason="DAILY_LOSS_7P5_GATE"'
 assert orig.count(old)==1
 new='''elif daily:reason="DAILY_LOSS_7P5_GATE"
-    elif s=="FET" and t<fet_cooldown_until:reason="FET_POST_EXIT_COOLDOWN_24H"
-    elif s=="FET" and g<0.05-1e-8:reason="FET_RESIDUAL_BELOW_MINIMUM"
-    elif s=="HYPE" and used_crypto+1.5>CRYPTO_CAP+1e-8:reason="HYPE_FULL_1P5_CRYPTO_CAP_GATE"
-    elif s=="HYPE" and used_total+1.5>TOTAL_CAP+1e-8:reason="HYPE_FULL_1P5_TOTAL_CAP_GATE"
-    elif s=="IDLE" and t<idle_cooldown_until.get(c["symbol"],0):reason="IDLE_PER_SYMBOL_COOLDOWN_ACTIVE"
-    elif s=="IDLE" and any(v["s"] in FORMAL_PRIORITY for v in opened.values()):reason="IDLE_BASELINE_OPEN_OR_PENDING"
-    elif s=="IDLE" and any(v["s"]=="HYPE" for v in opened.values()):reason="IDLE_NON_BASELINE_SIDECAR_EXPOSURE"'''
+   elif s=="FET" and t<fet_cooldown_until:reason="FET_POST_EXIT_COOLDOWN_24H"
+   elif s=="FET" and g<0.05-1e-8:reason="FET_RESIDUAL_BELOW_MINIMUM"
+   elif s=="HYPE" and used_crypto+1.5>CRYPTO_CAP+1e-8:reason="HYPE_FULL_1P5_CRYPTO_CAP_GATE"
+   elif s=="HYPE" and used_total+1.5>TOTAL_CAP+1e-8:reason="HYPE_FULL_1P5_TOTAL_CAP_GATE"
+   elif s=="IDLE" and t<idle_cooldown_until.get(c["symbol"],0):reason="IDLE_PER_SYMBOL_COOLDOWN_ACTIVE"
+   elif s=="IDLE" and any(v["s"] in FORMAL_PRIORITY for v in opened.values()):reason="IDLE_BASELINE_OPEN_OR_PENDING"
+   elif s=="IDLE" and any(v["s"]=="HYPE" for v in opened.values()):reason="IDLE_NON_BASELINE_SIDECAR_EXPOSURE"'''
 orig=orig.replace(old,new)
 
 # Cooldown is consumed only by a filled IDLE entry.
