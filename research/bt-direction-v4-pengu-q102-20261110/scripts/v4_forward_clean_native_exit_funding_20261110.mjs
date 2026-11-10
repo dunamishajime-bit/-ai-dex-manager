@@ -54,6 +54,7 @@ function sim(e){
   if(ts>=t1)return {status:"RIGHT_CENSORED_PERIOD_END"};
   const b=hbar(symbol,ts),next=hbar(symbol,ts+H);
   if(!b)return {status:"RIGHT_CENSORED_H1_MISSING",at:ts};
+  if(!next)return {status:"RIGHT_CENSORED_NEXT_OPEN_MISSING",at:ts+H};
   const n=evaluateNativeProductionExit(leg,{openTs:b.ts,open:b.open,high:b.high,low:b.low,close:b.close},ts+H,
     next?{ts:ts+H,price:next.open}:undefined);
   leg.nativeStop=n.stop;leg.nativePeak=n.peak;leg.previousExitBar={openTs:b.ts,open:b.open,high:b.high,low:b.low,close:b.close};
