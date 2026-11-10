@@ -81,7 +81,8 @@ V11は現行実装で有効だが、必要なmicrostructure履歴が不足する
 これはProduction parityではなく、V11欠損が3Gate比較を逆転させるかだけを見るストレスである。
 
 価格包絡監査は250日中possible candidate day 87日だが、真の10:00参照価格レンジ全体で条件を満たすrobust candidate dayは0日だった。
-観測LIVE窓17日でもpossible 2日 / robust 0日、実ログはV11 decision 111、candidate non-null 1、position-open 0。
+BT期間と実ログが重なる2026-09-07〜2026-09-30（17営業日）はpossible 2日 / robust 0日。実ログではV11 decision 25、candidate non-null 0、position-open 0だった。
+全取得ログではV11 decision 111、candidate non-null 1、position-open 0だが、唯一のnon-null candidateは2026-11-09のTSLAでBT終了後である。したがってBT重複期間の実証は0候補・0建玉として扱う。
 未再現Gateは dataAge、clock差、spread、30秒spread履歴、spread/median、depth、2秒逆行、post-only fill率である。
 
 | V11 upper case | 10bps Final | 10 DD | 10 WR | 10 PF | fills | 30bps Final | 30 DD | 30 WR | 30 PF | fills |
