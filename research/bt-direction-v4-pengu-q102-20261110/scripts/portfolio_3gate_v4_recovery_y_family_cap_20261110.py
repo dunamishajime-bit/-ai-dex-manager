@@ -132,21 +132,21 @@ orig=orig.replace(_q_anchor,_q_code+_q_anchor)
 _cap_assign='s=c["s"];g=c["gross"];reason=""'
 assert orig.count(_cap_assign)==1,orig.count(_cap_assign)
 _cap_code='''s=c["s"];g=c["gross"];reason=""
-    used_v4y=0.0
-    if eq is not None and eq>0:
-     for _v4y in opened.values():
-      if _v4y["s"]=="V4" and str(_v4y.get("route","")).startswith("REC_Y"):
-       _zv4y=completed_h1(_v4y["symbol"],t)
-       if _zv4y is None:
-        used_v4y=float("inf");break
-       _markv4y=_v4y["entry"] if _zv4y[0]+H<=_v4y.get("active_ts",_v4y["ts"]) else _zv4y[4]
-       used_v4y+=_v4y["notional"]*(_markv4y/_v4y["entry"])/eq
+   used_v4y=0.0
+   if eq is not None and eq>0:
+    for _v4y in opened.values():
+     if _v4y["s"]=="V4" and str(_v4y.get("route","")).startswith("REC_Y"):
+      _zv4y=completed_h1(_v4y["symbol"],t)
+      if _zv4y is None:
+       used_v4y=float("inf");break
+      _markv4y=_v4y["entry"] if _zv4y[0]+H<=_v4y.get("active_ts",_v4y["ts"]) else _zv4y[4]
+      used_v4y+=_v4y["notional"]*(_markv4y/_v4y["entry"])/eq
 '''
 orig=orig.replace(_cap_assign,_cap_code)
 _cap_reason='elif s=="V4" and g>V4_POS_CAP+1e-8:reason="V4_PER_POSITION_CAP"'
 assert orig.count(_cap_reason)==1,orig.count(_cap_reason)
 _cap_insert='''elif s=="V4" and g>V4_POS_CAP+1e-8:reason="V4_PER_POSITION_CAP"
-    elif s=="V4" and str(c.get("route","")).startswith("REC_Y") and used_v4y+g>__CAP__+1e-8:reason="V4_RECOVERY_Y_FAMILY_CAP_RESEARCH"
+   elif s=="V4" and str(c.get("route","")).startswith("REC_Y") and used_v4y+g>__CAP__+1e-8:reason="V4_RECOVERY_Y_FAMILY_CAP_RESEARCH"
 '''
 _cap_insert=_cap_insert.replace('__CAP__',repr(v4ycap))
 orig=orig.replace(_cap_reason,_cap_insert)
