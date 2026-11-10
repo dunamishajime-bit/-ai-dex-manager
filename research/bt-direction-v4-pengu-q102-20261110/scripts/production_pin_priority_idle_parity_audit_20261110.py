@@ -166,10 +166,10 @@ orig=orig.replace(_idle_anchor,_idle_insert)
 _idle_reason='elif s=="RESIDUAL" and any(v["s"] in FORMAL_PRIORITY for v in opened.values()):'
 assert orig.count(_idle_reason)==1,orig.count(_idle_reason)
 _idle_gate='''elif s=="IDLE" and (t in BASELINE_ACCEPTED_SIGNAL_HOURS or any(v["s"] in FORMAL_PRIORITY for v in opened.values())):
-     reason="IDLE_BASELINE_ACCEPTED_OR_OPEN"
-    elif s=="IDLE" and any(v["s"]=="HYPE" for v in opened.values()):
-     reason="IDLE_NON_BASELINE_SIDECAR_EXPOSURE"
-    elif s=="RESIDUAL" and any(v["s"] in FORMAL_PRIORITY for v in opened.values()):'''
+    reason="IDLE_BASELINE_ACCEPTED_OR_OPEN"
+   elif s=="IDLE" and any(v["s"]=="HYPE" for v in opened.values()):
+    reason="IDLE_NON_BASELINE_SIDECAR_EXPOSURE"
+   elif s=="RESIDUAL" and any(v["s"] in FORMAL_PRIORITY for v in opened.values()):'''
 orig=orig.replace(_idle_reason,_idle_gate)
 
 (R/"DIRECTION_RESEARCH_20261109"/"production_pin_parity_transformed_debug.py").write_text(orig,encoding="utf8")
