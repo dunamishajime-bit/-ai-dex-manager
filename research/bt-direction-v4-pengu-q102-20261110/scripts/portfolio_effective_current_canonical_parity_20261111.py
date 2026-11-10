@@ -403,6 +403,7 @@ _global_anchor='P={"V52":0,"PENGU":1,"Q102":2,"V4":3,"FET":4,"HYPE":5,"IDLE":6,"
 assert orig.count(_global_anchor)==1
 _global_code=r'''
 from zoneinfo import ZoneInfo
+_V52_V96_SYMBOLS={"BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","LINKUSDT","AVAXUSDT","DOGEUSDT","INJUSDT","XRPUSDT","ADAUSDT","LTCUSDT","ATOMUSDT","AAVEUSDT","NEARUSDT","PENGUUSDT"}
 _V52_5M={}
 _V52_5M_DIR=R/"V11_ASTER_5M_FULLPERIOD_20261111"
 for _sym in ("AMZNUSDT","METAUSDT","MSFTUSDT","NVDAUSDT","TSLAUSDT"):
@@ -501,11 +502,19 @@ _v52risk=r'''  cur_v52_day=t//(24*H)
    v52_daily_audit.append(dict(utc=iso(t),event="FAIL_CLOSED",loss_pct="",strategy_capital_jpy="",
       realized_strategy_pnl_jpy="",unrealized_strategy_pnl_jpy="",symbol="",reason="MISSING_EQUITY"))
   else:
-   _gscrypto=mtm_gross_state(t,eq_v52,[q for q in opened.values() if q["s"]!="V52"])
-   if _gscrypto is None:
+   _v96_notional=0.0
+   _v96_mark_missing=False
+   for _q in opened.values():
+    if _q["s"]=="V52" or _q["symbol"] not in _V52_V96_SYMBOLS:continue
+    _z=completed_h1(_q["symbol"],t)
+    if _z is None:
+     _v96_mark_missing=True;break
+    _mk_v96=_q["entry"] if _z[0]+H<=_q.get("active_ts",_q["ts"]) else _z[4]
+    _v96_notional+=float(_q["notional"])*(float(_mk_v96)/float(_q["entry"]))
+   if _v96_mark_missing:
     v52_latched=True
     v52_daily_audit.append(dict(utc=iso(t),event="FAIL_CLOSED",loss_pct="",strategy_capital_jpy="",
-       realized_strategy_pnl_jpy="",unrealized_strategy_pnl_jpy="",symbol="",reason="MISSING_CRYPTO_GROSS"))
+       realized_strategy_pnl_jpy="",unrealized_strategy_pnl_jpy="",symbol="",reason="MISSING_V96_SCOPED_MARK"))
    else:
     _start=(t//(24*H))*(24*H)
     _real=sum(x[1] for x in v52_ledger if _start<=x[0]<=t)
@@ -516,9 +525,8 @@ _v52risk=r'''  cur_v52_day=t//(24*H)
      if _mk is None:_mk=_q["entry"]
      _unreal+=_q["notional"]*(1 if _q["side"]=="LONG" else -1)*(_mk/_q["entry"]-1)
     _mincap=10000.0*5.0/62.50520405
-    _crypto_notional=_gscrypto["crypto"]*eq_v52
     _reserve=max(_mincap,.10*eq_v52)
-    _capital=max(_mincap,eq_v52-_crypto_notional-_reserve)
+    _capital=max(_mincap,eq_v52-_v96_notional-_reserve)
     _loss=max(0.0,-(_real+_unreal))
     _lpct=_loss/_capital if _capital>0 else float("inf")
     if (not v52_latched) and _lpct>=.035:
@@ -708,7 +716,7 @@ att={
  "repairs":["Q102 HIGH_VOL 19 included with live V4-builder parity","IDLE 849 pure route candidates; cooldown consumed on actual fill",
             "IDLE blocked while core baseline or HYPE sidecar is open","FET dynamic residual gross 0.05..1.0 and 24h post-exit cooldown",
             "IDLE_RESIDUAL_LONG excluded absent current activation/systemd evidence","HYPE full-1.5x pre-cap gate plus risk-sized actual gross",
-            "V4 exact active-adapter 1394 body plus Production-attached native Core49; Production rank ordering/private gross/same-side/cooldown/DD gates","PENGU current native lifecycle tape","terminal open position carried MTM without artificial exit fee","shared crypto daily risk uses crypto-only settled+unrealized PnL and sticky 7.5% UTC-day latch","DAILY_LOSS_TRIPPED flattens PENGU/Q102 but only entry-blocks V4/FET/HYPE/IDLE/V52","V52 V11/V50 are independent route slots","shared-risk timing evaluated every 5 minutes","V52 own 3.5% strategy daily loss latch evaluated every 5 minutes using full-period Aster stock marks","V52 missed exits while latched close fail-closed at first later regular-session tick"],
+            "V4 exact active-adapter 1394 body plus Production-attached native Core49; Production rank ordering/private gross/same-side/cooldown/DD gates","PENGU current native lifecycle tape","terminal open position carried MTM without artificial exit fee","shared crypto daily risk uses crypto-only settled+unrealized PnL and sticky 7.5% UTC-day latch","DAILY_LOSS_TRIPPED flattens PENGU/Q102 but only entry-blocks V4/FET/HYPE/IDLE/V52","V52 V11/V50 are independent route slots","shared-risk timing evaluated every 5 minutes","V52 own 3.5% strategy daily loss latch evaluated every 5 minutes using full-period Aster stock marks and the inherited 15-symbol V96-scoped excess-margin denominator","V52 missed exits while latched close fail-closed at first later regular-session tick"],
  "unresolved":["V52 remains H1 basis price proxy; no historical executable book/reference/spread parity",
                "effective VPS env verified read-only: Q102 adopted exits ON exact ACK; FET trailing ON; HYPE preemption OFF",
                "V52 V11 conservative baseline is omitted; 34 causal cached candidates remain microstructure-uncertain, while later-period reconstruction/live decisions add zero candidates",
