@@ -53,6 +53,28 @@ assert orig.count(old1)==1,orig.count(old1);orig=orig.replace(old1,new1)
 old2='c["funding"]=funding(c["symbol"],c["t"],m["exitTs"],m["entryPrice"],c["side"])'
 new2='c["funding"]=funding(c["symbol"],c["t"],min(m["exitTs"],END),m["entryPrice"],c["side"])'
 assert orig.count(old2)==1,orig.count(old2);orig=orig.replace(old2,new2)
+# Period-end open positions are marked-to-market rather than force-closed.
+old3=''' assert j==len(a),(j,len(a))
+ assert not opened,("positions_still_open",len(opened))
+ assert len(entries)==len(a)
+ assert math.isclose(cash,10000+sum(x["net_pnl_jpy"] for x in fills),rel_tol=1e-9,abs_tol=1e-6)
+ pp=name+"_"+str(bps)+"BPS"'''
+new3=''' assert j==len(a),(j,len(a))
+ assert len(entries)==len(a)
+ end_equity=mark_current(END)
+ assert end_equity is not None and math.isfinite(end_equity)
+ if end_equity>peak: peak=end_equity
+ if peak>0 and (end_equity/peak-1)*100<mdd:
+  mdd=(end_equity/peak-1)*100;mddt=END
+ if not opened:
+  assert math.isclose(cash,10000+sum(x["net_pnl_jpy"] for x in fills),rel_tol=1e-9,abs_tol=1e-6)
+ pp=name+"_"+str(bps)+"BPS"'''
+assert orig.count(old3)==1,orig.count(old3);orig=orig.replace(old3,new3)
+old4='''final_compounded_jpy=cash,net_return_pct=(cash/10000-1)*100,max_hourly_dd_pct=mdd,'''
+new4='''final_compounded_jpy=end_equity,net_return_pct=(end_equity/10000-1)*100,max_hourly_dd_pct=mdd,
+  open_positions_end=len(opened),wallet_cash_end_jpy=cash,''';
+assert orig.count(old4)==1,orig.count(old4);orig=orig.replace(old4,new4)
+
 # Current replay label / metadata. Remove claims that HIGH_VOL is missing.
 orig=orig.replace('case="STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL"','case="PRODUCTION_LOGIC_PARITY_AUDIT"')
 orig=orig.replace('q102_high_vol_missing=True','q102_high_vol_missing=False')
