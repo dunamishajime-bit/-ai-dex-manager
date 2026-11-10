@@ -74,7 +74,7 @@ for v4c in raw:
 else:
  assert mode=="SYMBOL"
 
-orig=orig.replace("# VPS priority research proxy:","\n# Research-only JUP Gross sensitivity; signal, direction and exits unchanged.\n_jup_gross=jup_gross\n_jup_changed=0\nfor c in raw:\n if c[\"s\"]==\"IDLE\" and c[\"route\"]==\"IDLE_JUP_RELATIVE_SHORT\":\n  assert abs(float(c[\"gross\"])-1.0)<1e-12\n  c[\"gross\"]=_jup_gross\n  c[\"v\"]=dict(c[\"v\"]);c[\"v\"][\"requestedGross\"]=_jup_gross\n  _jup_changed+=1\nassert _jup_changed==58,_jup_changed\nprint(\"JUP_GROSS_RESEARCH\",_jup_gross,\"signals\",_jup_changed,flush=True)\n# VPS priority research proxy:")
+orig=orig.replace("# VPS priority research proxy:","\n# Research-only JUP Gross sensitivity; signal, direction and exits unchanged.\n_jup_gross="+repr(jup_gross)+"\n_jup_changed=0\nfor c in raw:\n if c[\"s\"]==\"IDLE\" and c[\"route\"]==\"IDLE_JUP_RELATIVE_SHORT\":\n  assert abs(float(c[\"gross\"])-1.0)<1e-12\n  c[\"gross\"]=_jup_gross\n  c[\"v\"]=dict(c[\"v\"]);c[\"v\"][\"requestedGross\"]=_jup_gross\n  _jup_changed+=1\nassert _jup_changed==58,_jup_changed\nprint(\"JUP_GROSS_RESEARCH\",_jup_gross,\"signals\",_jup_changed,flush=True)\n# VPS priority research proxy:")
 print("WRAPPER_MODE",mode,"SOURCE_SHA256",hashlib.sha256(source.read_bytes()).hexdigest(),"TARGET",out_name,flush=True)
 exec(compile(orig,str(source)+"::Y06_AB_"+mode,"exec"),{"__name__":"__main__"})
 # Attest output and assumptions, explicitly distinguish this from full production parity.
