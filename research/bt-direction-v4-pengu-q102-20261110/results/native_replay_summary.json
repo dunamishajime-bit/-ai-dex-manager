@@ -1,0 +1,257 @@
+{
+  "status": "PRICE_CAUSAL_RETROSPECTIVE_FROZEN_2026_PIN_NOT_UNTOUCHED_OOS_NOT_VENUE_FILLED",
+  "sourceRuntimePin": "3ad65403013b701db5d9e53e8814e6ab827a28e8",
+  "nativeSourceCode": "lib/v12-v4-native-source.ts + lib/v12-x1-all.ts",
+  "nativeCoreCode": "lib/v12-v4-native-core.ts",
+  "dateStartInclusive": "2025-03-01T00:00:00Z",
+  "periodStart": "2025-10-01T00:00:00Z",
+  "periodEndExclusive": "2026-10-01T00:00:00Z",
+  "symbols": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "SOL",
+    "LINK",
+    "AVAX",
+    "DOGE",
+    "INJ",
+    "XRP",
+    "ADA",
+    "LTC",
+    "ATOM",
+    "AAVE",
+    "NEAR"
+  ],
+  "inputs": {
+    "BTC": {
+      "earlySha256": "b14581251ac605a8cace032c39ef4ec10561974201796d94e62083dfa7e83fd3",
+      "mainSha256": "e4eb9ad9f82ebe335b12ce50d84b4ee0e35f8f940f4c0119746453ed4e13492c",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "ETH": {
+      "earlySha256": "6ec736aa3ce259ce795ab47695bf3a12b454ab07e3f28f1d48858d1e20d6d24f",
+      "mainSha256": "1fd9637951ba2f3f1c1584f1fbceea6a20c152fb1143398b5d81c8091d394e13",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "BNB": {
+      "earlySha256": "3c40a959a8e3c68b66f36d8babe31cc262556cbe4d0c40ea9e1884d18b887f8d",
+      "mainSha256": "9d0c1d0c1928238394d87e40dacb36a2068d34595a53b15906d2c352180e0ecc",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "SOL": {
+      "earlySha256": "b5db9611344d958669eab4814dfe3443f6f817cd3011cddebd6c27787e26a88d",
+      "mainSha256": "1c62a1183bdf09918dec95d367a5f86445af5840357cbefa02842296aacf9993",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "LINK": {
+      "earlySha256": "a329fd68e24826077d55143ee3e0dfc0a02961c413828dd03b2d42c5504a5412",
+      "mainSha256": "a7f0886f1d62746cf40fbf4d918779be5cad4fb8e41dfa6a57e3502dc0b929bb",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "AVAX": {
+      "earlySha256": "179b9f14a4982d26903fde4ebe3828e91c2a31a33b9019ed0958365001be739c",
+      "mainSha256": "ce6b9285da57a8ade701c00cceaf580ab051f18f3907beec0c64aec514afcff1",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "DOGE": {
+      "earlySha256": "ccfbba5e0c7d7c71cddbf22f3cd11f058324ee3a6ba27bcd825a65e54e3aabff",
+      "mainSha256": "b4096cce1c5c458c3ebc43cb317bd04195964d43ba1ceef3fe316107fcccf149",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "INJ": {
+      "earlySha256": "9de4b5b0bbc9ec089f91234a7ff10e51d794740728cb6ed9ff63c8421d98f8d7",
+      "mainSha256": "7e3a8dd793403afef57526de1177de785bcb72dfe86c155e034dffcb28849d42",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "XRP": {
+      "earlySha256": "9f5a5bc8b9df118404db89219cd74a145dd5b874ecd8ed344024a811833cf3c8",
+      "mainSha256": "7e9274840c78e5c95ec39ff5f0101510f80abe7716d0892c03432494329e5f03",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "ADA": {
+      "earlySha256": "16333557a90dd6bac94465d49527396ff816df94dc43a9e2db152d82d67726de",
+      "mainSha256": "121ba3e00a6b1c35b9146a7a36314f40e341e37f7ace31023e7286a5123bcb29",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "LTC": {
+      "earlySha256": "32f07b6911ab9640dc8cbedc4f8ca9c071690e670bdf1170ea2ba674b77dae24",
+      "mainSha256": "e54442a796fb7503998be021704c64f33d8ce942bea214a3ed4353b4dbc99b53",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "ATOM": {
+      "earlySha256": "75b195cf7eba220ca9277deed05609626963b9c3b8c1aeefbe8e860e98c42112",
+      "mainSha256": "49d00cecb195b349a2b0d2dd18f7f4c97bc14ffa178ad7f77b2d38fc39074d6e",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "AAVE": {
+      "earlySha256": "c1b89bcb427ac0389dfa8044837ea253a2f9d9f2a397cdf79a69992b4bcdabd1",
+      "mainSha256": "5988bdd9e9b4a49c4eac54d566ba3a3382fa4237e8eb7db8fdf4df8632217e0d",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    },
+    "NEAR": {
+      "earlySha256": "4ab36e79ad17a15c7a2a452eb30615cbf7a37930cab7cce477787fce1d3a5231",
+      "mainSha256": "6cc921ccf82cfa659d6daba73395ad1d22265f5c4ca53c5df517c26fbe3dbe85",
+      "h1Rows": 13896,
+      "h2Rows": 6948
+    }
+  },
+  "barRange": {
+    "BTC": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "ETH": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "BNB": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "SOL": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "LINK": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "AVAX": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "DOGE": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "INJ": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "XRP": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "ADA": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "LTC": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "ATOM": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "AAVE": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    },
+    "NEAR": {
+      "firstH1": 1740787200000,
+      "lastH1": 1790809200000
+    }
+  },
+  "decisionH2Count": 6827,
+  "sourceSignalCounts": {
+    "pre": 962,
+    "target": 2018
+  },
+  "coreEventCounts": {
+    "pre": 18,
+    "target": 49
+  },
+  "symbolCounts": {
+    "pre": {
+      "ATOMUSDT|SHORT": 26,
+      "XRPUSDT|SHORT": 36,
+      "NEARUSDT|SHORT": 16,
+      "LINKUSDT|SHORT": 41,
+      "SOLUSDT|SHORT": 60,
+      "DOGEUSDT|SHORT": 44,
+      "AAVEUSDT|SHORT": 11,
+      "XRPUSDT|LONG": 28,
+      "SOLUSDT|LONG": 78,
+      "DOGEUSDT|LONG": 49,
+      "NEARUSDT|LONG": 10,
+      "ADAUSDT|LONG": 35,
+      "AVAXUSDT|LONG": 36,
+      "INJUSDT|LONG": 26,
+      "BNBUSDT|LONG": 22,
+      "ADAUSDT|SHORT": 61,
+      "INJUSDT|SHORT": 27,
+      "AAVEUSDT|LONG": 30,
+      "ATOMUSDT|LONG": 9,
+      "LTCUSDT|SHORT": 31,
+      "BTCUSDT|SHORT": 35,
+      "AVAXUSDT|SHORT": 23,
+      "ETHUSDT|SHORT": 52,
+      "BNBUSDT|SHORT": 15,
+      "BTCUSDT|LONG": 54,
+      "LTCUSDT|LONG": 11,
+      "LINKUSDT|LONG": 15,
+      "ETHUSDT|LONG": 81
+    },
+    "target": {
+      "AVAXUSDT|LONG": 62,
+      "SOLUSDT|LONG": 85,
+      "LINKUSDT|LONG": 43,
+      "DOGEUSDT|LONG": 88,
+      "AAVEUSDT|LONG": 62,
+      "BTCUSDT|LONG": 90,
+      "BNBUSDT|LONG": 45,
+      "ETHUSDT|LONG": 75,
+      "LTCUSDT|LONG": 34,
+      "NEARUSDT|LONG": 102,
+      "INJUSDT|LONG": 47,
+      "XRPUSDT|SHORT": 79,
+      "AVAXUSDT|SHORT": 64,
+      "ADAUSDT|SHORT": 108,
+      "ETHUSDT|SHORT": 95,
+      "SOLUSDT|SHORT": 99,
+      "BTCUSDT|SHORT": 98,
+      "ATOMUSDT|SHORT": 54,
+      "LTCUSDT|SHORT": 36,
+      "INJUSDT|SHORT": 49,
+      "DOGEUSDT|SHORT": 96,
+      "NEARUSDT|SHORT": 81,
+      "LINKUSDT|SHORT": 59,
+      "BNBUSDT|SHORT": 110,
+      "AAVEUSDT|SHORT": 85,
+      "XRPUSDT|LONG": 64,
+      "ATOMUSDT|LONG": 23,
+      "ADAUSDT|LONG": 85
+    }
+  },
+  "entryGateCounts": {
+    "ALLOW_STANDARD": 2589,
+    "ALLOW_HC175": 391
+  },
+  "maxSignalsAtDecision": 3,
+  "badEntryTimestamps": 0,
+  "outputs": {
+    "nativeSourceSignalsSha256": "feec4954d9e4e980b1fde8419549e330a89b05d9116fe96842ca29725a63734f",
+    "nativeCoreEventsSha256": "c6bab4264eb01cbd87d61e78d64659def87eb6c67e9a2fd845467952360d65b5"
+  },
+  "caveats": [
+    "Source Runtime built in 2026; cannot call 2025 replay true prospective OOS",
+    "Source signals are selected ranked native top3, not every potential universe candidate",
+    "The candidate snapshot is NOT executable PnL or an actual venue trade",
+    "No V2 41-route hindsight priority or repaired-filter imported",
+    "No H1 fill slippage, STOP execution or production owner-enabled orders simulated"
+  ]
+}
