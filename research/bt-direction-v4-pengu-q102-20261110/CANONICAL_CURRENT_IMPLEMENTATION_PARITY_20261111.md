@@ -72,7 +72,10 @@ Evidence:
 - `evidence/CANONICAL_PARITY_PASS2_SHA256_20261111.txt`
 
 Generated simulator SHA256:
-`88cbc8854779203c35b7e2a81c4c17844e27602a04a50ba13f8b5811f426229a`
+`ebd6324319453da01906bb5c95e9e2da59a0ea6cf630927d68c2f6effe1b31af`
+
+Wrapper source SHA256:
+`72b82db1e25273ba2358008c1ccd40b44dd33695b334d5ba9951802be0289701`
 
 ## Classification
 
