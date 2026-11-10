@@ -334,3 +334,35 @@ Goal status: DD <=20% / win ~70% is **not achieved** by THREE; more research is 
   - 30bps: JPY 579086.35, DD -50.6043%, fills 539, Win 58.2560%, PF 1.3223
 - Causal determinism: 42/42 artifacts exact match.
 - Resume from: analyze residual DD/loss concentration on corrected canonical + CAUSAL_THREE, then develop new causal gates using train/validation/forward only. Do not re-open old 772-fill baseline.
+## 2026-11-11 TAO pre-target causal checkpoint
+
+- corrected canonical + CAUSAL_THREE の残存DDを分解済み。
+- CAUSAL_THREE 10bps max-DD: -41.35%（2026-07-12 peak -> 2026-09-22 trough）。
+- 主なDD寄与: Q102 約 -JPY704.7k / IDLE 約 -JPY161.5k / HYPE 約 -JPY148.7k / PENGU 約 -JPY47.8k。
+- 次の優先route: IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2, PENGU SHORT_V20, HYPE_TREND_LONG_PINNED, Q102 high-vol/BRK/MR concentration。
+
+IDLE TAOはtarget yearを使わず、前期間proxyで再研究した。
+- Binance UM 2025-03..09: TAO H1/M5 + BTC H1、21 archive files。
+- exact pinned IDLE signal + current M5 stop/tp/max-hold semantics。
+- 2025-03-22..2025-10-01 pure TAO candidates: 116。
+- train 70 / validation 31 / prehold Sep-2025 15 / true forward 2026-10-01..11-08 8。
+- 223 rule candidates / 69 robust。
+- Frozen candidate: IDLE_TAO_ATR17 = features.atrRatio <= 0.017。
+- 30bps: train n33 WR45.5 PF1.79; valid n21 WR76.2 PF3.60; prehold n13 WR53.8 PF2.13; forward n5 WR60.0 PF1.61。
+- threshold 0.015..0.018で概ね耐性あり。0.019以上でtrain/validが弱化。
+- Binance-vs-Aster forward 569 hourly pairs: atrRatio correlation 0.9941; ATR17 gate agreement 549/569=96.49%; TAO route agreement 564/569=99.12%。
+- volumeRatioはvenue差が大きいので新TAO gateには使用しない。
+- 旧TAO ret24/rel24 gateはtarget-year 29件を14/15に分けた研究なので causal adoption候補から除外。
+
+GitHubへ追加済み:
+- scripts/idle_tao_preperiod_binance_proxy_replay_20261111.mjs
+- scripts/idle_tao_preperiod_proxy_causal_gate_search_20261111.py
+- scripts/portfolio_effective_current_causal_four_tao_atr_ab_20261111.py
+
+PC接続断により target-year canonical A/B の完了状態は未確認。未確認値は採用しない。
+
+### Resume
+1. PC再接続後、TAO_ATR17単独と CAUSAL_FOUR = CAUSAL_THREE + TAO_ATR17 を最新canonicalで実行/回収。
+2. 10bps/30bpsを2回、成果物SHA一致確認。
+3. 改善確認後もProductionへは入れず、PENGU SHORT_V20 -> HYPE の順に同じ pre-target/validation/forward 方法で研究。
+4. DD <=20% / Win ~70% まで研究継続。
