@@ -1,0 +1,96 @@
+{
+  "status": "CAUSAL_GATE_SOURCE_AUDIT_COMPLETE",
+  "conclusion": {
+    "idle_rel24_only_causally_robust": false,
+    "idle_robust_rule": [
+      {
+        "feature": "volumeRatio",
+        "op": ">=",
+        "threshold": 1.2568362211142174
+      },
+      {
+        "feature": "rel24",
+        "op": ">=",
+        "threshold": -0.04089204262472046
+      }
+    ],
+    "pengu_v8_rule_causally_robust": true,
+    "pengu_v8_rule": [
+      {
+        "feature": "btc24h",
+        "op": "<=",
+        "threshold": 0.011611625094354983
+      }
+    ],
+    "q102_fet_rule_causally_robust_coarse": true,
+    "q102_fet_rule": {
+      "feature": "ret14",
+      "op": "<=",
+      "threshold": 0.048722800378429465
+    }
+  },
+  "metrics": {
+    "idle": {
+      "train30": {
+        "n": 8,
+        "wr": 0.75,
+        "pf": 1.8094982276342486
+      },
+      "valid30": {
+        "n": 6,
+        "wr": 0.6666666666666666,
+        "pf": 1.633075150563976
+      },
+      "forward30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "pf": 3.9985938416906235
+      }
+    },
+    "pengu": {
+      "train30": {
+        "n": 19,
+        "wr": 0.7368421052631579,
+        "pf": 3.049396434861186
+      },
+      "valid30": {
+        "n": 16,
+        "wr": 0.6875,
+        "pf": 1.7908529452517565
+      },
+      "forward30": {
+        "n": 4,
+        "wr": 0.75,
+        "pf": 1.7121468800289674
+      }
+    },
+    "q102": {
+      "train30": {
+        "n": 15,
+        "wr": 0.6666666666666666,
+        "pf": 1.3613321147366266
+      },
+      "valid30": {
+        "n": 16,
+        "wr": 0.5625,
+        "pf": 1.0822442208360221
+      },
+      "forward30": {
+        "n": 14,
+        "wr": 0.5714285714285714,
+        "pf": 1.6001171706065325
+      }
+    }
+  },
+  "source_sha256": {
+    "idle": "EC707585237E28933B7237991E02B586FEEB586F51F49FC7CDC90539E4AD17BE",
+    "pengu": "4EDB564D13F89B5C93B0C377635F561794F24B29DAD22875955CD22738F4D911",
+    "q102": "3653D9BA366C5A0D102FAE93E80E30C7F9BF511D014BC6D23FF5D4C967A3B88D"
+  },
+  "warnings": [
+    "IDLE rel24-only target-period gate is not a standalone robust train/validation/forward rule.",
+    "PENGU forward sample is only n=4.",
+    "Q102/FET source warns forward sample is small and promotion requires larger evidence.",
+    "Research evidence only; not Production adoption authorization."
+  ]
+}
