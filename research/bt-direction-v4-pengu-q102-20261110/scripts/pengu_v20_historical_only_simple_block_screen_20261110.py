@@ -40,7 +40,8 @@ for f,ts in thresholds.items():
    cands.append(z)
 cands.sort(key=lambda z:(-z["trainScore"],z["feature"],z["op"],z["threshold"]))
 for z in cands:
- z["validationPass"]=all(z["split"][n][str(c)]["deltaSum"]>=-1e-12 and
+ z["validationPass"]=all(z["split"][n]["30"]["triggered"]>=1 for n in ("VAL1","VAL2")) and all(
+                         z["split"][n][str(c)]["deltaSum"]>=-1e-12 and
                          z["split"][n][str(c)]["wr"]+1e-12>=z["split"][n][str(c)]["baselineWR"]
                          for n in ("VAL1","VAL2") for c in (10,30))
 stable=[z for z in cands if z["validationPass"]]
@@ -61,7 +62,8 @@ for x in fraw:
 assert len(forward)==6,(len(forward),len(forwardUnresolved))
 for z in stable:
  z["forward"]={str(c):ev(forward,z["feature"],z["op"],z["threshold"],c) for c in (10,30)}
- z["forwardPass"]=all(z["forward"][str(c)]["deltaSum"]>=-1e-12 and
+ z["forwardPass"]=z["forward"]["30"]["triggered"]>=1 and all(
+                      z["forward"][str(c)]["deltaSum"]>=-1e-12 and
                       z["forward"][str(c)]["wr"]+1e-12>=z["forward"][str(c)]["baselineWR"] for c in (10,30))
 report={"status":"PENGU_V20_HISTORICAL_ONLY_SIMPLE_BLOCK_SCREEN","splitSizes":{k:len(v) for k,v in parts.items()},
 "forwardN":len(forward),"forwardRightCensoredN":len(forwardUnresolved),"thresholds":thresholds,
