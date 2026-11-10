@@ -36,3 +36,12 @@ IDLE_JUP alone raises final equity but slightly worsens DD. Its benefit appears 
 These thresholds are research A/B filters on the target period. They are not unbiased OOS certification and must not be treated as Production adoption evidence without causal/pre-period validation.
 
 Evidence: `evidence/CANONICAL_RESEARCH_GATE_AB_COMPARISON_20261111.csv` and `.json`.
+## Determinism
+
+- A/B harness ordering fixed to tuples at commit `517c1cced0f1a25ecfca635375cbdbccf398b6b5`.
+- All 7 research cases were rerun twice from the locked canonical baseline.
+- Pass1 vs Pass2: **147/147 artifacts SHA256 exact match** (21 artifacts x 7 cases).
+- Evidence: `evidence/CANONICAL_RESEARCH_AB_PASS1_SHA256_20261111.txt` and `evidence/CANONICAL_RESEARCH_AB_PASS2_SHA256_20261111.txt`.
+
+No Production mutation was performed.
+

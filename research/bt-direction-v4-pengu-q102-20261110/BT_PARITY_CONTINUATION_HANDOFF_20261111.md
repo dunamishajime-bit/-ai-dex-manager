@@ -300,3 +300,25 @@ Task A/Bをやり直さない。
 5. THREE
 
 古い772-fill baselineの研究改善値は採用判断に使わない。
+
+## Task C completed: canonical research-gate A/B
+
+- Harness: `scripts/portfolio_effective_current_canonical_research_ab_20261111.py`
+- Deterministic harness commit: `517c1cced0f1a25ecfca635375cbdbccf398b6b5`
+- 7 cases x 21 artifacts; Pass1/Pass2 **147/147 SHA256 exact match**.
+- Best tested bundle: THREE.
+  - 10bps: JPY 472,102.93 / DD -42.4237% / 440 fills / Win 59.09% / PF 1.4197
+  - 30bps: JPY 226,988.18 / DD -45.4596% / 434 fills / Win 57.14% / PF 1.3378
+- PENGU_V8 + Q102_FET gives the same best 10bps DD (-42.42%) among pairwise tests; THREE improves profit and 30bps DD.
+- IDLE_JUP alone increases final equity but slightly worsens DD, so its benefit is interaction-dependent.
+- These thresholds were evaluated on the target period and are **research-only**, not unbiased OOS certification.
+
+### New resume point after Task C
+
+Do not repeat canonical parity or the 7-case A/B. Continue with:
+1. causal/pre-period availability audit for IDLE rel24 / PENGU btc24h / Q102 FET ret14;
+2. validate the frozen THREE thresholds without target-period retuning where data permits;
+3. decompose the remaining THREE drawdown window to identify the next DD source using causal features only.
+
+Goal status: DD <=20% / win ~70% is **not achieved** by THREE; more research is required.
+
