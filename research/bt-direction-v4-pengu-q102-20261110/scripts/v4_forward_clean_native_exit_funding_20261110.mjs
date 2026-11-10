@@ -47,7 +47,7 @@ function sim(e){
  const symbol=e.symbol,side=e.side,entry=e.decisionTs,atr=e.atr;
  const first=hbar(symbol,entry);if(!first)return {status:"ENTRY_MISSING"};
  const ep=first.open;
- const leg={entryTs:entry,entryAtr:atr,nativeExitEvidence:"FORWARD_CLEAN_NATIVE",
+ const leg={entryTs:entry,entryAtr:atr,nativeExitEvidence:"WR60_BASELINE_1978_PARITY",
   entryNotional:ep,qty:1,status:"OPEN",candidate:{route:"REC_G3_LATE_BTC_REL",effectiveSide:side}};
  let decision=null;
  for(let ts=entry;ts<entry+46*H;ts+=H){
