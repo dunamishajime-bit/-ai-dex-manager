@@ -11,7 +11,7 @@ def loadbars():
   return {int(z[0]):float(z[4]) for line in f if line.strip() for z in [json.loads(line)]}
 bars=loadbars()
 # forward bars live in holdout
-pf=R/"FORWARD_HOLDOUT_20261001_20261108"/"aster-h1"/"PENGUUSDT-1h-20261001-20261108.jsonl.gz"
+pf=R/"FORWARD_HOLDOUT_20261001_20261108"/"aster-h1"/"PENGUUSDT-1h-20261001-20261108T20.jsonl.gz"
 if pf.exists():
  with gzip.open(pf,"rt",encoding="utf8") as f:
   for line in f:
@@ -53,7 +53,7 @@ for h in [3,6,12,24]:
   grid.append({"hours":h,"loss":loss,"train30":a,"valid30":b,"forward30":c})
 # robust: train improvement, validation and forward no mean degradation, no forward winner converted to loss
 rob=[z for z in grid if z["train30"]["deltaMean"]>0 and z["valid30"]["deltaMean"]>=0 and z["forward30"]["deltaMean"]>=0
-     and z["valid30"]["winnerToLoss"]==0 and z["forward30"]["winnerToLoss"]==0 and z["valid30"]["triggered"]>0]
+     and z["valid30"]["winnerToLoss"]==0 and z["forward30"]["winnerToLoss"]==0 and z["valid30"]["triggered"]>0 and z["forward30"]["missing"]==0]
 rob=sorted(rob,key=lambda z:(z["valid30"]["deltaMean"],z["forward30"]["deltaMean"],-z["loss"]),reverse=True)
 out={"status":"RESEARCH_PENGU_V20_EARLY_ADVERSE_EXIT_GRID","histN":len(hist),"trainN":len(tr),"validN":len(va),"forwardN":len(fwd),
      "grid":grid,"robustN":len(rob),"robust":rob,
