@@ -1,0 +1,379 @@
+{
+  "status": "RESEARCH_FRONTIER_NOT_PRODUCTION_CERTIFIED",
+  "baseline": "BASELINE_PINNED",
+  "bestProfitPreservingWorstDD": "BEST_BALANCED_HARD_CAP",
+  "bestWorstAbsDDPct": 28.89887454498028,
+  "paretoFront": [
+    "4GATE_IDLE_TAO",
+    "3GATE_V4Y_FAMILY_CAP_1P2",
+    "3GATE_DYNAMIC_DD12",
+    "BEST_BALANCED_HARD_CAP",
+    "STATIC_FRAGILE_2P0",
+    "CLIPPED_CAPACITY"
+  ],
+  "cases": {
+    "BASELINE_PINNED": {
+      "10": {
+        "finalJpy": 2111834.8400109867,
+        "ddPct": -50.370436941509396,
+        "winRatePct": 60.44600938967136,
+        "pf": 1.2291155433044159,
+        "fills": 852,
+        "sha256": "a88ed7fe83d1a7a3837dc529f55aee5ec070059d4cffe783cf15f90df4a2ce7b"
+      },
+      "30": {
+        "finalJpy": 667697.913985803,
+        "ddPct": -60.6703507087609,
+        "winRatePct": 57.3943661971831,
+        "pf": 1.1674002661320475,
+        "fills": 852,
+        "sha256": "782c1d45157db46c2f173ffcd03704735385843369a84222a401ad538ae19973"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": false,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 60.6703507087609,
+      "deltaFinalVsBaselinePct": {
+        "10": 0.0,
+        "30": 0.0
+      }
+    },
+    "3GATE": {
+      "10": {
+        "finalJpy": 3561043.860579658,
+        "ddPct": -28.96793387544906,
+        "winRatePct": 61.23936816524909,
+        "pf": 1.5110507173511158,
+        "fills": 823,
+        "sha256": "01d02d98e44fa1ee017ba2688342d22b3782efa90aa8b21381da90e225526b46"
+      },
+      "30": {
+        "finalJpy": 1202219.0106187058,
+        "ddPct": -30.916394739516218,
+        "winRatePct": 58.201701093560146,
+        "pf": 1.3867978266834895,
+        "fills": 823,
+        "sha256": "bf66b9f8a4b3ee7896dfc3279eabd3ef4f1581b08e56bc056a1be7f32af4d7c6"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 30.916394739516218,
+      "deltaFinalVsBaselinePct": {
+        "10": 68.62321773994087,
+        "30": 80.0543307739416
+      }
+    },
+    "4GATE_IDLE_TAO": {
+      "10": {
+        "finalJpy": 4062259.570421365,
+        "ddPct": -29.24962688769056,
+        "winRatePct": 61.70731707317073,
+        "pf": 1.5856800159709878,
+        "fills": 820,
+        "sha256": "1ade45cb9ffecaf35b81ffa6e8bcdda173f8ac853fef63bee504677c6c5db576"
+      },
+      "30": {
+        "finalJpy": 1388887.163304975,
+        "ddPct": -31.14331114565394,
+        "winRatePct": 58.78048780487804,
+        "pf": 1.4490573691023787,
+        "fills": 820,
+        "sha256": "5a1e09326ddd657e9df3f83b1cedb20ce2dcec5992c5f3bfe9ad4d6ad2e2cc87"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 31.14331114565394,
+      "deltaFinalVsBaselinePct": {
+        "10": 92.356878173306,
+        "30": 108.01130784040555
+      }
+    },
+    "3GATE_V4Y_FAMILY_CAP_0P6": {
+      "10": {
+        "finalJpy": 3035898.5469377195,
+        "ddPct": -26.74117459512263,
+        "winRatePct": 60.470879801734824,
+        "pf": 1.6667879146625015,
+        "fills": 807,
+        "sha256": "09131ceacaf831d05bd6eb1ad36cff2682467147ccad9ce2c8999ebce7b967be"
+      },
+      "30": {
+        "finalJpy": 966492.7958723205,
+        "ddPct": -30.916394739516416,
+        "winRatePct": 57.5682382133995,
+        "pf": 1.4526858860203797,
+        "fills": 806,
+        "sha256": "933b0361caa4daf47e1c441e4a0f5edf7a836cae7f7e66d182ca89cca65a9256"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 30.916394739516416,
+      "deltaFinalVsBaselinePct": {
+        "10": 43.756438212844586,
+        "30": 44.75000979153436
+      }
+    },
+    "3GATE_V4Y_FAMILY_CAP_0P9": {
+      "10": {
+        "finalJpy": 2994389.2110742973,
+        "ddPct": -27.33719713158923,
+        "winRatePct": 60.63569682151589,
+        "pf": 1.5721377289224918,
+        "fills": 818,
+        "sha256": "c9c4b86006b41ccecad2d31f081f5d350f5e72b905c696b08337908ef75197a2"
+      },
+      "30": {
+        "finalJpy": 1055318.6491142644,
+        "ddPct": -30.91639473951634,
+        "winRatePct": 57.8239608801956,
+        "pf": 1.4426191681641922,
+        "fills": 818,
+        "sha256": "0c82ef7c44c3d21e846238dd527f54287e7b139733d85aa430d15bb5f5d38e59"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 30.91639473951634,
+      "deltaFinalVsBaselinePct": {
+        "10": 41.79088034454055,
+        "30": 58.053309289910885
+      }
+    },
+    "3GATE_V4Y_FAMILY_CAP_1P2": {
+      "10": {
+        "finalJpy": 3783274.590715465,
+        "ddPct": -27.810641192072815,
+        "winRatePct": 61.510353227771006,
+        "pf": 1.5709212353401745,
+        "fills": 821,
+        "sha256": "51b53edb2f7bfd307bb1cfb954adc46b331e3c7b058e7475977e5047ac8da9ee"
+      },
+      "30": {
+        "finalJpy": 1217020.5733870286,
+        "ddPct": -30.91639473951616,
+        "winRatePct": 58.41463414634146,
+        "pf": 1.4313981255083204,
+        "fills": 820,
+        "sha256": "a211661b61184a9cdb4de32e3c33dd026fd7e514d7248197d8315a8bd9f09b7c"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 30.91639473951616,
+      "deltaFinalVsBaselinePct": {
+        "10": 79.14632901386281,
+        "30": 82.27113607740067
+      }
+    },
+    "3GATE_DYNAMIC_DD12": {
+      "10": {
+        "finalJpy": 3211438.248363936,
+        "ddPct": -28.60827764825986,
+        "winRatePct": 61.05006105006105,
+        "pf": 1.5610730698880568,
+        "fills": 819,
+        "sha256": "e2c06f86a60bc91daf7627ed7996d3fa447c4b19eaee82b829832a0004981599"
+      },
+      "30": {
+        "finalJpy": 904972.2476204578,
+        "ddPct": -28.89887454498036,
+        "winRatePct": 58.05658056580566,
+        "pf": 1.4350074100646115,
+        "fills": 813,
+        "sha256": "6607b038853234bfc638de542cf4c09b6193bf72faefbc8a10974f490d504953"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 28.89887454498036,
+      "deltaFinalVsBaselinePct": {
+        "10": 52.068627125558194,
+        "30": 35.5361801594156
+      }
+    },
+    "BEST_BALANCED_HARD_CAP": {
+      "10": {
+        "finalJpy": 2710806.7434953516,
+        "ddPct": -25.19469476321111,
+        "winRatePct": 60.32338308457711,
+        "pf": 1.664427722914376,
+        "fills": 804,
+        "sha256": "0da2f12972f12b816d0a99d4bc5a5588823425dbfba5a01190ec58e6e72ce51d"
+      },
+      "30": {
+        "finalJpy": 689399.8897690831,
+        "ddPct": -28.89887454498028,
+        "winRatePct": 57.48129675810474,
+        "pf": 1.4266609147175926,
+        "fills": 802,
+        "sha256": "905e6a1debf50cdf421b2bd66c32bc134ce503406baaf3504ef230a09b852895"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 28.89887454498028,
+      "deltaFinalVsBaselinePct": {
+        "10": 28.362630075808816,
+        "30": 3.2502686212887433
+      }
+    },
+    "STATIC_FRAGILE_2P0": {
+      "10": {
+        "finalJpy": 1569081.9544437202,
+        "ddPct": -24.167981190618526,
+        "winRatePct": 60.329531051964516,
+        "pf": 1.6257694335323722,
+        "fills": 789,
+        "sha256": "f571ef5b536bf8e948733f42edd9fbe6fdb82921549555768cf5e5e04a581278"
+      },
+      "30": {
+        "finalJpy": 520646.9548476314,
+        "ddPct": -25.699859488191024,
+        "winRatePct": 57.30622617534943,
+        "pf": 1.4097385748468085,
+        "fills": 787,
+        "sha256": "cc24e51935070f3824e0ed27ae66be6b5e3e6edc87dbdeb5e8a75ce8f1901c5c"
+      },
+      "profitAboveBaselineBoth": false,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 25.699859488191024,
+      "deltaFinalVsBaselinePct": {
+        "10": -25.700536580050116,
+        "30": -22.02357623979312
+      }
+    },
+    "CLIPPED_CAPACITY": {
+      "10": {
+        "finalJpy": 3106050.2955383863,
+        "ddPct": -26.20416225545177,
+        "winRatePct": 60.68376068376068,
+        "pf": 1.6129154778597672,
+        "fills": 819,
+        "sha256": "8ea9ef46b4815d33ba895e254ee91caf1f253defb2195dae1c7286c569620239"
+      },
+      "30": {
+        "finalJpy": 1027708.7833349595,
+        "ddPct": -30.530976858370273,
+        "winRatePct": 57.85627283800243,
+        "pf": 1.4483527267753538,
+        "fills": 821,
+        "sha256": "19785660b68a395ade1b3f921442beef57850f6b8e501ec3bc773f43ea91f8a0"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 30.530976858370273,
+      "deltaFinalVsBaselinePct": {
+        "10": 47.078276988849524,
+        "30": 53.9182258635619
+      }
+    },
+    "DYNAMIC_FRAGILE_1P5": {
+      "10": {
+        "finalJpy": 2178483.3542233463,
+        "ddPct": -32.21351759927333,
+        "winRatePct": 60.200250312891114,
+        "pf": 1.5789624975062266,
+        "fills": 799,
+        "sha256": "ba9b81dda4941b5f26fbab745cbbf8c01fbdce8a3f3ea5ca4de574d08285851d"
+      },
+      "30": {
+        "finalJpy": 613435.0484312902,
+        "ddPct": -36.35491711442357,
+        "winRatePct": 57.556675062972296,
+        "pf": 1.42113550433807,
+        "fills": 794,
+        "sha256": "d571449ca01f6e3841e0203db43ad878340e68425481e44133faa1d13602fa0f"
+      },
+      "profitAboveBaselineBoth": false,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 36.35491711442357,
+      "deltaFinalVsBaselinePct": {
+        "10": 3.155952963254127,
+        "30": -8.12685863141196
+      }
+    },
+    "DYNAMIC_FRAGILE_1P0": {
+      "10": {
+        "finalJpy": 1620347.6443908776,
+        "ddPct": -29.681687512557207,
+        "winRatePct": 59.92414664981036,
+        "pf": 1.606392766421906,
+        "fills": 791,
+        "sha256": "71517af7316fd9617d5cd56a9015ab0901a83d740e277713ed0bdfe20cf377e4"
+      },
+      "30": {
+        "finalJpy": 394358.6449236867,
+        "ddPct": -35.41476381690113,
+        "winRatePct": 57.07006369426752,
+        "pf": 1.3940317386455283,
+        "fills": 785,
+        "sha256": "871dc20f478e83f3889c21d4c9444bea1a1ea22d3bd14780c740b26399f17ab8"
+      },
+      "profitAboveBaselineBoth": false,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 35.41476381690113,
+      "deltaFinalVsBaselinePct": {
+        "10": -23.272994000683887,
+        "30": -40.93756522772786
+      }
+    },
+    "3GATE_PLUS_PENGU_V20_GATE": {
+      "10": {
+        "finalJpy": 3115959.2200926873,
+        "ddPct": -28.967933875449013,
+        "winRatePct": 60.927960927960925,
+        "pf": 1.4734653910762525,
+        "fills": 819,
+        "sha256": "784ae599a70676c15e1fc598589ec3ea54abc7eb51e1983521da0f5397a12988"
+      },
+      "30": {
+        "finalJpy": 1057406.6889047506,
+        "ddPct": -33.42053165731475,
+        "winRatePct": 57.87545787545788,
+        "pf": 1.3603213657168605,
+        "fills": 819,
+        "sha256": "b57e2b31b147f26fb3cc6e562477117b1469493be385b5ae5e7ea7b631eec018"
+      },
+      "profitAboveBaselineBoth": true,
+      "ddImprovedBoth": true,
+      "meetsDD20Both": false,
+      "meetsWR70Both": false,
+      "worstAbsDD": 33.42053165731475,
+      "deltaFinalVsBaselinePct": {
+        "10": 47.547486245490525,
+        "30": 58.366031517545494
+      }
+    }
+  },
+  "conclusions": {
+    "dd20BothReached": false,
+    "wr70BothReached": false,
+    "profitPreservingDD20Reached": false,
+    "note": "No tested candidate reaches maxDD<=20% in both cost cases or win-rate>=70% in both. BEST_BALANCED_HARD_CAP has 10bps -25.19%, 30bps -28.90% and stays above baseline final equity in both cost cases; 3GATE_DYNAMIC_DD12 has the same worst-cost DD 28.90% with higher 30bps/10bps wealth but 10bps DD -28.61%. Static 2.0 fragile cap lowers DD further but sacrifices baseline profit."
+  },
+  "limitations": [
+    "Integrated model still contains V52 price-model proxy and residual coverage gaps; not full Production parity",
+    "V4 historical V2 candidate population contains retrospective filtering; new gates are research counterfactuals",
+    "Final equity is reported as accounting, not used as a fixed profit target",
+    "Candidate selection used multiple research experiments; independent future validation remains mandatory before acceptance"
+  ]
+}
