@@ -152,6 +152,7 @@ assert orig.count(old)==1;orig=orig.replace(old,new)
 assert "dayeq" not in orig and "latched" not in orig.replace("crypto_latched","").replace("v52_latched",""),"STALE_DAILY_VARIABLE"
 # Add attestations and unique name.
 orig=orig.replace("STRICT_V2_PLUS_V4Q102_PENGU_RECOVERY_REVERSAL","PRODUCTION_PIN_PARITY_AUDIT")
+(R/"DIRECTION_RESEARCH_20261109"/"production_pin_parity_transformed_debug.py").write_text(orig,encoding="utf8")
 print("PRODUCTION_PIN_PARITY_WRAPPER","SOURCE_SHA256",hashlib.sha256(source.read_bytes()).hexdigest(),flush=True)
 g={"__name__":"__main__"}
 exec(compile(orig,str(source)+"::PRODUCTION_PIN_PARITY_AUDIT","exec"),g)
