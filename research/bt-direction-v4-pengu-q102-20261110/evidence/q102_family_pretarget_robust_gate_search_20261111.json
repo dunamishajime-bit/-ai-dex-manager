@@ -1,0 +1,158 @@
+{
+  "status": "Q102_PRETARGET_FAMILY_CAUSAL_GATE_SEARCH",
+  "costBps": 30,
+  "periods": {
+    "train": "2025-03-22..2025-06-30",
+    "validation": "2025-07-01..2025-08-31",
+    "prehold": "2025-09-01..2025-09-30",
+    "forward": "2026-10-01..2026-11-08"
+  },
+  "inputs": {
+    "pre": "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250322_20251001\\Q102_SELECTED_BASE\\q102-s34-selected-native-exits.jsonl",
+    "preSha256": "b97a5d4d5cb7928fc2121f8639c31748848e4f668a8b401b4ae4780f40cfb29b",
+    "forward": "C:\\tmp\\disdex-bt-20251001-20261001\\FORWARD_HOLDOUT_20261001_20261108\\Q102_SELECTED_BASE\\q102-s34-selected-native-exits.jsonl",
+    "forwardSha256": "753da296cadeb4cbbf559c104a838025ba183d19d6a748c04f27cdf817c293e4"
+  },
+  "features": [
+    "ret14",
+    "strength",
+    "margin"
+  ],
+  "families": {
+    "MR": {
+      "baseline": {
+        "train": {
+          "n": 12,
+          "wr": 0.5,
+          "mean": 0.003071419806436077,
+          "sum": 0.036857037677232925,
+          "pf": 1.1301266151332345
+        },
+        "validation": {
+          "n": 23,
+          "wr": 0.4782608695652174,
+          "mean": -0.006145606290206801,
+          "sum": -0.14134894467475642,
+          "pf": 0.7184948098546478
+        },
+        "prehold": {
+          "n": 6,
+          "wr": 0.16666666666666666,
+          "mean": -0.02647304873915024,
+          "sum": -0.15883829243490144,
+          "pf": 0.0018506291804420043
+        },
+        "forward": {
+          "n": 6,
+          "wr": 0.6666666666666666,
+          "mean": 0.0162053352583146,
+          "sum": 0.0972320115498876,
+          "pf": 5.412477800001767
+        }
+      },
+      "robustCandidates": []
+    },
+    "REV": {
+      "baseline": {
+        "train": {
+          "n": 16,
+          "wr": 0.25,
+          "mean": -0.013028042826800283,
+          "sum": -0.20844868522880453,
+          "pf": 0.5023939912789633
+        },
+        "validation": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.02651388888888884,
+          "sum": 0.02651388888888884,
+          "pf": 999.0
+        },
+        "prehold": {
+          "n": 4,
+          "wr": 0.5,
+          "mean": -0.006469468030523032,
+          "sum": -0.025877872122092128,
+          "pf": 0.6311145658621858
+        },
+        "forward": {
+          "n": 12,
+          "wr": 0.5833333333333334,
+          "mean": 0.006453187748152959,
+          "sum": 0.0774382529778355,
+          "pf": 2.892794842198254
+        }
+      },
+      "robustCandidates": []
+    },
+    "PB": {
+      "baseline": {
+        "train": {
+          "n": 2,
+          "wr": 0.5,
+          "mean": -0.0010162418175760886,
+          "sum": -0.0020324836351521772,
+          "pf": 0.028517802508082953
+        },
+        "validation": {
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "mean": 0.02486412887003449,
+          "sum": 0.07459238661010348,
+          "pf": 4.824379126465623
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.07519654808030996,
+          "sum": 0.07519654808030996,
+          "pf": 999.0
+        },
+        "forward": {
+          "n": 4,
+          "wr": 0.75,
+          "mean": 0.00940298488181632,
+          "sum": 0.03761193952726528,
+          "pf": 1.7380442700517438
+        }
+      },
+      "robustCandidates": []
+    },
+    "BRK": {
+      "baseline": {
+        "train": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.01949134948096887,
+          "sum": 0.01949134948096887,
+          "pf": 999.0
+        },
+        "validation": {
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "mean": -0.009417977218142562,
+          "sum": -0.028253931654427685,
+          "pf": 0.5337342167073642
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "forward": {
+          "n": 6,
+          "wr": 0.5,
+          "mean": 0.00362990418792216,
+          "sum": 0.021779425127532958,
+          "pf": 1.265966369087187
+        }
+      },
+      "robustCandidates": []
+    }
+  },
+  "selectionRule": "Thresholds from train quantiles only; one- and two-feature AND rules. No target-year outcomes used.",
+  "robustCandidateCount": 0,
+  "decision": "NO_NEW_Q102_FAMILY_GATE"
+}
