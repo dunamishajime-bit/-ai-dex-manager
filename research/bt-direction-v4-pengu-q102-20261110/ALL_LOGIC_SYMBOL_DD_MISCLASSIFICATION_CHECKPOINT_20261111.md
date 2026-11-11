@@ -231,3 +231,27 @@ Result: no additional route passed. The existing STABLE3 Q102 quarantines remain
 - PENGU, V52 and FET were net positive over the same realized-exit window.
 
 These losses are used only to prioritize the next pretarget research. They are not allowed to define thresholds, symbols or routes.
+
+## Global BTC 24h/72h direction-consistency falsification
+
+To avoid strategy-by-strategy target-year tuning, one global, parameter-free structural rule was tested on pre-target data only:
+
+- block LONG when BTC 24h and 72h returns are both negative;
+- block SHORT when BTC 24h and 72h returns are both positive;
+- completed H1 bars only;
+- no target-year thresholds or symbol-specific tuning.
+
+Pretarget result:
+- train aggregate improved slightly;
+- validation aggregate worsened materially: PF 0.972 -> 0.820 and mean -0.040% -> -0.254% per candidate;
+- prehold aggregate improved, but only 2/6 eligible strategy groups showed non-worse mean;
+- the fixed acceptance rule therefore failed.
+
+Decision: **REJECT**. No target-year integrated replay is allowed for this gate because it failed pre-target validation first. This is deliberate overfit protection.
+
+Important examples of why the global gate is unsafe:
+- IDLE: the trades it would block were profitable in validation and prehold.
+- Q102 HIGH_VOL: the blocked validation subset was strongly profitable.
+- V4: prehold improved, but train/validation did not consistently improve.
+
+Current best integrated candidate therefore remains **STABLE3**.
