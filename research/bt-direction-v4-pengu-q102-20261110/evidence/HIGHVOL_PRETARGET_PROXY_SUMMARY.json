@@ -1,0 +1,159 @@
+{
+  "status": "Q102_HIGHVOL_BINANCE_PRETARGET_PROXY_CURRENT_PIN",
+  "period": [
+    "2025-01-01T00:00:00.000Z",
+    "2025-10-01T00:00:00.000Z"
+  ],
+  "signals": 202,
+  "modeled": 202,
+  "unresolved": 0,
+  "parityMismatch": 0,
+  "parityChecked": 202,
+  "bySymbol": {
+    "SUIUSDT": {
+      "n": 46,
+      "wr": 0.6521739130434783,
+      "mean": 0.03643344557903028,
+      "sum": 1.6759384966353927,
+      "pf": 2.901411823185965
+    },
+    "SEIUSDT": {
+      "n": 23,
+      "wr": 0.21739130434782608,
+      "mean": -0.042908604503491106,
+      "sum": -0.9868979035802955,
+      "pf": 0.21174181328587058
+    },
+    "APTUSDT": {
+      "n": 8,
+      "wr": 0.875,
+      "mean": 0.028089673462444356,
+      "sum": 0.22471738769955485,
+      "pf": 15.866592020411709
+    },
+    "ARBUSDT": {
+      "n": 13,
+      "wr": 0.46153846153846156,
+      "mean": -0.0191746572152876,
+      "sum": -0.2492705437987388,
+      "pf": 0.6651839032523233
+    },
+    "OPUSDT": {
+      "n": 24,
+      "wr": 0.4166666666666667,
+      "mean": -0.006451435148546865,
+      "sum": -0.15483444356512477,
+      "pf": 0.8596428015126054
+    },
+    "ENAUSDT": {
+      "n": 36,
+      "wr": 0.5277777777777778,
+      "mean": 0.006344745235725079,
+      "sum": 0.22841082848610283,
+      "pf": 1.1374881131739438
+    },
+    "ONDOUSDT": {
+      "n": 43,
+      "wr": 0.4883720930232558,
+      "mean": 0.0069036654832525714,
+      "sum": 0.2968576157798606,
+      "pf": 1.203466324219451
+    },
+    "FILUSDT": {
+      "n": 9,
+      "wr": 0.1111111111111111,
+      "mean": -0.010542471542097642,
+      "sum": -0.09488224387887878,
+      "pf": 0.651439197486726
+    },
+    "TRXUSDT": {
+      "n": 0,
+      "wr": null,
+      "mean": null,
+      "sum": 0,
+      "pf": null
+    }
+  },
+  "bySymbolRecent90": {
+    "SUIUSDT": {
+      "n": 8,
+      "wr": 0.375,
+      "mean": 0.008558390399440105,
+      "sum": 0.06846712319552084,
+      "pf": 1.256115468405204
+    },
+    "SEIUSDT": {
+      "n": 8,
+      "wr": 0.25,
+      "mean": -0.008688450080780258,
+      "sum": -0.06950760064624206,
+      "pf": 0.5169631086952643
+    },
+    "APTUSDT": {
+      "n": 0,
+      "wr": null,
+      "mean": null,
+      "sum": 0,
+      "pf": null
+    },
+    "ARBUSDT": {
+      "n": 3,
+      "wr": 1,
+      "mean": 0.039301137161418885,
+      "sum": 0.11790341148425665,
+      "pf": 999
+    },
+    "OPUSDT": {
+      "n": 1,
+      "wr": 1,
+      "mean": 0.020289858929997465,
+      "sum": 0.020289858929997465,
+      "pf": 999
+    },
+    "ENAUSDT": {
+      "n": 13,
+      "wr": 0.6153846153846154,
+      "mean": 0.04636371537963001,
+      "sum": 0.6027282999351901,
+      "pf": 3.6720378370227844
+    },
+    "ONDOUSDT": {
+      "n": 11,
+      "wr": 0.45454545454545453,
+      "mean": 0.024713137613992207,
+      "sum": 0.2718445137539143,
+      "pf": 2.6479871268347788
+    },
+    "FILUSDT": {
+      "n": 0,
+      "wr": null,
+      "mean": null,
+      "sum": 0,
+      "pf": null
+    },
+    "TRXUSDT": {
+      "n": 0,
+      "wr": null,
+      "mean": null,
+      "sum": 0,
+      "pf": null
+    }
+  },
+  "inputHashes": {
+    "SUIUSDT": "1fc2490a5127beaa1ff99c09dd94f662ccd6cd4d0d0a44bcfee4d04999568761",
+    "SEIUSDT": "84b8e094e310f51bf7485a8b56a18c8dad122ea472bef53191b2e1e131bd054f",
+    "APTUSDT": "b7207ca179a9798711726bb24700274772528d132dda15d29c4730d0c80878df",
+    "ARBUSDT": "88d01aa2178c1a763df76fe2daedb2cf3cc33809afa242fc91d5c8e9a20e3619",
+    "OPUSDT": "c40eb675dd5f499e54461d6fc8f49b0c3f724424c747f12fb15ef2c223736a8f",
+    "ENAUSDT": "76d4dfb3381d7ac7e0805b509d54c3355539726a4ddb11f216f107dd27012929",
+    "ONDOUSDT": "96f332448aa06de5c46c9d33b79f7e10fc931a30dae3f0a6c3b24adbf3da0c2b",
+    "FILUSDT": "60366c058e851596ecc76d2412dbf968fe0e3f7c416a50fc00df3b6390928547",
+    "TRXUSDT": "d81e934f3c814a8b054b5839a7013f5a8d8ae508b864e41561cf46d1cef1ac59"
+  },
+  "outputSha256": "17d3e513adb3c21c65c390806ac0d3226d7f92bab535476a63e43f120d14591b",
+  "limitations": [
+    "Binance UM is a venue proxy, not Aster.",
+    "HIGH_VOL volume-based features may be venue-sensitive; proxy-to-Aster validation is required before promotion.",
+    "Late-September candidates without 72 hours of pre-2025-10-01 future bars are unresolved and excluded from completed-outcome health."
+  ]
+}

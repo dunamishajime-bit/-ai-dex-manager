@@ -1,0 +1,1555 @@
+{
+  "status": "PRETARGET_ROUTE_HEALTH_POLICY_JITTER_CAUSAL_ONLY",
+  "snapshotTs": "2025-10-01T00:00:00Z",
+  "costBps": 30,
+  "grid": {
+    "lookbackDays": [
+      60,
+      90,
+      120,
+      180
+    ],
+    "minN": [
+      4,
+      5,
+      6,
+      8
+    ],
+    "pfMax": [
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ]
+  },
+  "policyCount": 64,
+  "routes": [
+    {
+      "strategy": "HYPE",
+      "route": "HYPE_TREND_LONG_PINNED",
+      "blockedCount": 28,
+      "eligiblePolicyCount": 64,
+      "blockRateWhenEligible": 0.4375,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "IDLE",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "blockedCount": 20,
+      "eligiblePolicyCount": 64,
+      "blockRateWhenEligible": 0.3125,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "PENGU",
+      "route": "SHORT_V20",
+      "blockedCount": 64,
+      "eligiblePolicyCount": 64,
+      "blockRateWhenEligible": 1.0,
+      "stableBlock": true,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "APT|REV24_T0.05_H24",
+      "blockedCount": 0,
+      "eligiblePolicyCount": 16,
+      "blockRateWhenEligible": 0.0,
+      "stableBlock": false,
+      "stableKeep": true
+    },
+    {
+      "strategy": "Q102",
+      "route": "APT|REV6_T0.03_H24",
+      "blockedCount": 0,
+      "eligiblePolicyCount": 0,
+      "blockRateWhenEligible": null,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|MR24_Z1.5_H24",
+      "blockedCount": 44,
+      "eligiblePolicyCount": 44,
+      "blockRateWhenEligible": 1.0,
+      "stableBlock": true,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|PB168_0.1_P24_0.04_H24",
+      "blockedCount": 0,
+      "eligiblePolicyCount": 12,
+      "blockRateWhenEligible": 0.0,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|REV12_T0.03_H12",
+      "blockedCount": 25,
+      "eligiblePolicyCount": 32,
+      "blockRateWhenEligible": 0.78125,
+      "stableBlock": true,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "AVAX|REV12_T0.08_H24",
+      "blockedCount": 0,
+      "eligiblePolicyCount": 0,
+      "blockRateWhenEligible": null,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR48_Z2.0_H12",
+      "blockedCount": 0,
+      "eligiblePolicyCount": 0,
+      "blockRateWhenEligible": null,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "DOGE|MR72_Z1.5_H12",
+      "blockedCount": 0,
+      "eligiblePolicyCount": 56,
+      "blockRateWhenEligible": 0.0,
+      "stableBlock": false,
+      "stableKeep": true
+    },
+    {
+      "strategy": "Q102",
+      "route": "NEAR|BRK48_H48_V1.2",
+      "blockedCount": 1,
+      "eligiblePolicyCount": 4,
+      "blockRateWhenEligible": 0.25,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "UNI|MR48_Z1.5_H24",
+      "blockedCount": 6,
+      "eligiblePolicyCount": 16,
+      "blockRateWhenEligible": 0.375,
+      "stableBlock": false,
+      "stableKeep": false
+    },
+    {
+      "strategy": "Q102",
+      "route": "UNI|MR72_Z1.5_H24",
+      "blockedCount": 48,
+      "eligiblePolicyCount": 48,
+      "blockRateWhenEligible": 1.0,
+      "stableBlock": true,
+      "stableKeep": false
+    }
+  ],
+  "policies": [
+    {
+      "lookbackDays": 60,
+      "minN": 4,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 4,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 4,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 4,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 5,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 5,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 5,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 5,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 6,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 6,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 6,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 6,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 8,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 8,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 8,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 60,
+      "minN": 8,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 4,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 4,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 4,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 4,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 5,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 5,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 5,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 5,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 6,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 6,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 6,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 6,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 8,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 8,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 8,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 90,
+      "minN": 8,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "HYPE",
+          "route": "HYPE_TREND_LONG_PINNED"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 4,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 4,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 4,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 4,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 5,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 5,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 5,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 5,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 6,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 6,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 6,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 6,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 8,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 8,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 8,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 120,
+      "minN": 8,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 4,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 4,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 4,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR48_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 4,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "NEAR|BRK48_H48_V1.2"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR48_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 5,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 5,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 5,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR48_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 5,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR48_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 6,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 6,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 6,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR48_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 6,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR48_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 8,
+      "pfMax": 0.6,
+      "blocked": [
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 8,
+      "pfMax": 0.7,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 8,
+      "pfMax": 0.8,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    },
+    {
+      "lookbackDays": 180,
+      "minN": 8,
+      "pfMax": 0.9,
+      "blocked": [
+        {
+          "strategy": "IDLE",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+        },
+        {
+          "strategy": "PENGU",
+          "route": "SHORT_V20"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|MR24_Z1.5_H24"
+        },
+        {
+          "strategy": "Q102",
+          "route": "AVAX|REV12_T0.03_H12"
+        },
+        {
+          "strategy": "Q102",
+          "route": "UNI|MR72_Z1.5_H24"
+        }
+      ]
+    }
+  ],
+  "sourceHashes": {
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250101_20251001\\PENGU_V20_BINANCE_PROXY\\pengu-v20-preperiod-proxy-candidates-with-native-exits.jsonl": "7b37ef15994e71512781c593bfa7083bc8c55b2a972e4ed273e821567cfa1803",
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250501_20251001\\HYPE_BINANCE_PROXY\\hype-preperiod-proxy-candidates-with-m5-exits.jsonl": "4c2ca7e3563749a593e28186d0f7191b436d169299d2fe1a74fea0732216bcf8",
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250322_20251001\\IDLE_TAO_BINANCE_PROXY\\idle-tao-preperiod-proxy-candidates-with-m5-exits.jsonl": "44354693f7f5851c1993341be8ebbc51962b8637b6549f678243f1af73993fb7",
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250322_20251001\\Q102_SELECTED_BASE\\q102-s34-selected-native-exits.jsonl": "b97a5d4d5cb7928fc2121f8639c31748848e4f668a8b401b4ae4780f40cfb29b"
+  },
+  "warning": "No target-year outcomes used. Proxy/source limitations remain."
+}

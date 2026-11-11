@@ -1,0 +1,2042 @@
+{
+  "status": "PRETARGET_ONLY_ROUTE_HEALTH_POLICY_WALKFORWARD",
+  "costBps": 30,
+  "snapshots": [
+    "2025-04-01T00:00:00+00:00",
+    "2025-05-01T00:00:00+00:00",
+    "2025-06-01T00:00:00+00:00",
+    "2025-07-01T00:00:00+00:00",
+    "2025-08-01T00:00:00+00:00",
+    "2025-09-01T00:00:00+00:00"
+  ],
+  "futureWindowDays": 30,
+  "policiesTested": 64,
+  "qualified": 52,
+  "best": [
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.678766428237202,
+        "blockedFutureN": 31
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 6,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.6668332316239239,
+        "blockedFutureN": 36
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.6123856130163949,
+        "blockedFutureN": 52
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 9,
+        "trueBadBlocks": 6,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.6004524164031169,
+        "blockedFutureN": 57
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.5965580632544067,
+        "blockedFutureN": 46
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.5965580632544067,
+        "blockedFutureN": 46
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.5846248666411287,
+        "blockedFutureN": 51
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.5846248666411287,
+        "blockedFutureN": 51
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.581171636958911,
+        "blockedFutureN": 29
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.581171636958911,
+        "blockedFutureN": 29
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 6,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.514790821738104,
+        "blockedFutureN": 50
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 4,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.49288602125759157,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 5,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.49288602125759157,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 4,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.4237347399682292,
+        "blockedFutureN": 22
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 5,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.4237347399682292,
+        "blockedFutureN": 22
+      },
+      "qualifies": true
+    }
+  ],
+  "allPolicySummary": [
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 4,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.4237347399682292,
+        "blockedFutureN": 22
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 4,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.49288602125759157,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 4,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 6,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.41067765627479635,
+        "blockedFutureN": 53
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 4,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.2816972202606637,
+        "blockedFutureN": 55
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 5,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.4237347399682292,
+        "blockedFutureN": 22
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 5,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.49288602125759157,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 5,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 6,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.41067765627479635,
+        "blockedFutureN": 53
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 5,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.2816972202606637,
+        "blockedFutureN": 55
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 6,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 11,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.32613994868993823,
+        "blockedFutureN": 20
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 6,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 11,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3952912299793006,
+        "blockedFutureN": 36
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 6,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 11,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.3130828649965054,
+        "blockedFutureN": 51
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 6,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 11,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 6,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.18410242898237272,
+        "blockedFutureN": 53
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 8,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 6,
+        "blockedSnapshots": 1,
+        "trueBadBlocks": 1,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.03218856473867612,
+        "blockedFutureN": 9
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 8,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 6,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.10133984602803851,
+        "blockedFutureN": 25
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 8,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 6,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.01913148104524333,
+        "blockedFutureN": 40
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 60,
+        "minN": 8,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.3042357349138193,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 6,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.01913148104524333,
+        "blockedFutureN": 40
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 6,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.6668332316239239,
+        "blockedFutureN": 36
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.5846248666411287,
+        "blockedFutureN": 51
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.5846248666411287,
+        "blockedFutureN": 51
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 4,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 9,
+        "trueBadBlocks": 6,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.6004524164031169,
+        "blockedFutureN": 57
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.678766428237202,
+        "blockedFutureN": 31
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.5965580632544067,
+        "blockedFutureN": 46
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.5965580632544067,
+        "blockedFutureN": 46
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 5,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 10,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.6123856130163949,
+        "blockedFutureN": 52
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.581171636958911,
+        "blockedFutureN": 29
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 6,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 9,
+        "blockedSnapshots": 6,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.514790821738104,
+        "blockedFutureN": 50
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.581171636958911,
+        "blockedFutureN": 29
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 90,
+        "minN": 8,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.49896327197611584,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 4,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.0779047039628136,
+        "blockedFutureN": 43
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 4,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.1598399416572495,
+        "blockedFutureN": 47
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 4,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.1598399416572495,
+        "blockedFutureN": 47
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 4,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 9,
+        "trueBadBlocks": 5,
+        "falseGoodBlocks": 4,
+        "avoidedNetSum": 0.17566749141923768,
+        "blockedFutureN": 53
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 5,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.13608631448170844,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 5,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.21802155217614433,
+        "blockedFutureN": 42
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 5,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.21802155217614433,
+        "blockedFutureN": 42
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 5,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.23384910193813252,
+        "blockedFutureN": 48
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 6,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.13608631448170844,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 6,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.21802155217614433,
+        "blockedFutureN": 42
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 6,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 3,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": 0.21802155217614433,
+        "blockedFutureN": 42
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 6,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 11,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.23384910193813252,
+        "blockedFutureN": 48
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 8,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.13608631448170844,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 8,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.13608631448170844,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 8,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.13608631448170844,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 120,
+        "minN": 8,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 7,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.13608631448170844,
+        "blockedFutureN": 38
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 4,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 14,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": -0.07123869421232762,
+        "blockedFutureN": 36
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 4,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 14,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": -0.08689824779618269,
+        "blockedFutureN": 38
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 4,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 14,
+        "blockedSnapshots": 5,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": -0.08689824779618269,
+        "blockedFutureN": 38
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 4,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 14,
+        "blockedSnapshots": 8,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 4,
+        "avoidedNetSum": 0.02652409324409647,
+        "blockedFutureN": 46
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 5,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": -0.009330726722855807,
+        "blockedFutureN": 34
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 5,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": -0.024990280306710876,
+        "blockedFutureN": 36
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 5,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": -0.024990280306710876,
+        "blockedFutureN": 36
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 5,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 13,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 13,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.08843206073356827,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 6,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": -0.009330726722855807,
+        "blockedFutureN": 34
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 6,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": -0.024990280306710876,
+        "blockedFutureN": 36
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 6,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 4,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 2,
+        "avoidedNetSum": -0.024990280306710876,
+        "blockedFutureN": 36
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 6,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 12,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.1947218460249304,
+        "blockedFutureN": 40
+      },
+      "validation": {
+        "observations": 12,
+        "blockedSnapshots": 7,
+        "trueBadBlocks": 4,
+        "falseGoodBlocks": 3,
+        "avoidedNetSum": 0.08843206073356827,
+        "blockedFutureN": 44
+      },
+      "qualifies": true
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 8,
+        "pfMax": 0.6
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 8,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 1,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": -0.013057083693432794,
+        "blockedFutureN": 31
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 8,
+        "pfMax": 0.7
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 8,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 1,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": -0.013057083693432794,
+        "blockedFutureN": 31
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 8,
+        "pfMax": 0.8
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 8,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 1,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": -0.013057083693432794,
+        "blockedFutureN": 31
+      },
+      "qualifies": false
+    },
+    {
+      "policy": {
+        "lookbackDays": 180,
+        "minN": 8,
+        "pfMax": 0.9
+      },
+      "train": {
+        "observations": 9,
+        "blockedSnapshots": 2,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 0,
+        "avoidedNetSum": 0.22123573491381923,
+        "blockedFutureN": 39
+      },
+      "validation": {
+        "observations": 8,
+        "blockedSnapshots": 3,
+        "trueBadBlocks": 2,
+        "falseGoodBlocks": 1,
+        "avoidedNetSum": 0.08453770758485817,
+        "blockedFutureN": 33
+      },
+      "qualifies": true
+    }
+  ],
+  "sourceHashes": {
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250101_20251001\\PENGU_V20_BINANCE_PROXY\\pengu-v20-preperiod-proxy-candidates-with-native-exits.jsonl": "7b37ef15994e71512781c593bfa7083bc8c55b2a972e4ed273e821567cfa1803",
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250501_20251001\\HYPE_BINANCE_PROXY\\hype-preperiod-proxy-candidates-with-m5-exits.jsonl": "4c2ca7e3563749a593e28186d0f7191b436d169299d2fe1a74fea0732216bcf8",
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250322_20251001\\IDLE_TAO_BINANCE_PROXY\\idle-tao-preperiod-proxy-candidates-with-m5-exits.jsonl": "44354693f7f5851c1993341be8ebbc51962b8637b6549f678243f1af73993fb7",
+    "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250322_20251001\\Q102_SELECTED_BASE\\q102-s34-selected-native-exits.jsonl": "b97a5d4d5cb7928fc2121f8639c31748848e4f668a8b401b4ae4780f40cfb29b"
+  },
+  "warning": "All policy selection and validation windows end before 2025-10-01. Proxy/source limitations remain."
+}

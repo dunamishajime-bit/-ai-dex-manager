@@ -1,0 +1,65 @@
+{
+  "SUIUSDT": {
+    "rows": 15336,
+    "firstTs": 1704067200000,
+    "lastTs": 1759273200000,
+    "sha256": "1fc2490a5127beaa1ff99c09dd94f662ccd6cd4d0d0a44bcfee4d04999568761",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "SEIUSDT": {
+    "rows": 15336,
+    "firstTs": 1704067200000,
+    "lastTs": 1759273200000,
+    "sha256": "84b8e094e310f51bf7485a8b56a18c8dad122ea472bef53191b2e1e131bd054f",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "APTUSDT": {
+    "rows": 15336,
+    "firstTs": 1704067200000,
+    "lastTs": 1759273200000,
+    "sha256": "b7207ca179a9798711726bb24700274772528d132dda15d29c4730d0c80878df",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "ARBUSDT": {
+    "rows": 15336,
+    "firstTs": 1704067200000,
+    "lastTs": 1759273200000,
+    "sha256": "88d01aa2178c1a763df76fe2daedb2cf3cc33809afa242fc91d5c8e9a20e3619",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "OPUSDT": {
+    "rows": 15336,
+    "firstTs": 1704067200000,
+    "lastTs": 1759273200000,
+    "sha256": "c40eb675dd5f499e54461d6fc8f49b0c3f724424c747f12fb15ef2c223736a8f",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "ENAUSDT": {
+    "rows": 13116,
+    "firstTs": 1712059200000,
+    "lastTs": 1759273200000,
+    "sha256": "76d4dfb3381d7ac7e0805b509d54c3355539726a4ddb11f216f107dd27012929",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "ONDOUSDT": {
+    "rows": 14867,
+    "firstTs": 1705755600000,
+    "lastTs": 1759273200000,
+    "sha256": "96f332448aa06de5c46c9d33b79f7e10fc931a30dae3f0a6c3b24adbf3da0c2b",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "FILUSDT": {
+    "rows": 15336,
+    "firstTs": 1704067200000,
+    "lastTs": 1759273200000,
+    "sha256": "60366c058e851596ecc76d2412dbf968fe0e3f7c416a50fc00df3b6390928547",
+    "missingMonthsAfterFirstSeen": []
+  },
+  "TRXUSDT": {
+    "rows": 15336,
+    "firstTs": 1704067200000,
+    "lastTs": 1759273200000,
+    "sha256": "d81e934f3c814a8b054b5839a7013f5a8d8ae508b864e41561cf46d1cef1ac59",
+    "missingMonthsAfterFirstSeen": []
+  }
+}
