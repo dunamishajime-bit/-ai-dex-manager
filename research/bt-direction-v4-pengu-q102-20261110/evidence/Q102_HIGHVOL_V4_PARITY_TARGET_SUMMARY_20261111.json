@@ -1,0 +1,50 @@
+{
+  "status": "CURRENT_PRODUCTION_Q102_HIGH_VOL_V4_PARITY_REPLAY",
+  "period": [
+    "2025-10-01T00:00:00.000Z",
+    "2026-10-01T00:00:00.000Z"
+  ],
+  "failClosedUntil": "2026-06-20T15:00:00.000Z",
+  "reason": "FILUSDT first H1 2025-11-07T15:00Z + 5400h Production history requirement",
+  "configuredSymbols": [
+    "SUIUSDT",
+    "SEIUSDT",
+    "APTUSDT",
+    "ARBUSDT",
+    "OPUSDT",
+    "ENAUSDT",
+    "ONDOUSDT",
+    "FILUSDT",
+    "TRXUSDT"
+  ],
+  "signals": 19,
+  "bySide": {
+    "LONG": 6,
+    "SHORT": 13
+  },
+  "bySymbol": {
+    "SUIUSDT": 7,
+    "SEIUSDT": 0,
+    "APTUSDT": 0,
+    "ARBUSDT": 2,
+    "OPUSDT": 0,
+    "ENAUSDT": 0,
+    "ONDOUSDT": 10,
+    "FILUSDT": 0,
+    "TRXUSDT": 0
+  },
+  "parityChecked": 19,
+  "parityMismatch": 0,
+  "inputHashes": {
+    "SUIUSDT": "d674f88c0b39070a9068342e3a3b06ae4daf5bdf6959c14a3f15ef559a58621c",
+    "SEIUSDT": "d498d40d05d0472ef8a4b680940dc145c9ff87f46d1f4eb3b30e4ab85fa6a46e",
+    "APTUSDT": "38380069cdfcd467516ce1579a2221f76ecee8515d7a58744701d99a28f09cfc",
+    "ARBUSDT": "dd446b5f461ba133e6e326f9af0da745ebd86e7705f71d9dd74fd5f2f050ea73",
+    "OPUSDT": "7b9dbd39aabed32c590389e9bcc43e019a44d7267a7a7768bf060fc8f5847239",
+    "ENAUSDT": "755639e19659250b6293a85a917248fec79f254e2bad87c835d3eff53dc29fa3",
+    "ONDOUSDT": "1d8c5ca42f471deb803429ca13210da0ea81881b01600f62d63e8e0a970e963c",
+    "FILUSDT": "5a0f23003dd43d2601090c9c0b383f33cc787f7b1330d882efbdb391a1a2903e",
+    "TRXUSDT": "1489b0f8e5d9e0031fb4fa1223cb9279a42684c142896e78f8a2581b893c8e59"
+  },
+  "outputSha256": "6726afd0d1b00bf283c5db96eaae1c1c5acfe4b12d7f1485c62f209f66bee057"
+}

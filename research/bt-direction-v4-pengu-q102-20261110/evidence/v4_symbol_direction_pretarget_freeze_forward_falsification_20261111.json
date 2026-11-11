@@ -1,0 +1,1022 @@
+{
+  "status": "V4_SYMBOL_DIRECTION_PRETARGET_FREEZE_TRUE_FORWARD_FALSIFICATION",
+  "costBps": 30,
+  "pretargetSplit": {
+    "train": "2025-03-22..2025-06-30",
+    "validation": "2025-07-01..2025-08-31",
+    "prehold": "2025-09-01..2025-09-30"
+  },
+  "freezeCriteria": {
+    "trainMinN": 10,
+    "validationMinN": 5,
+    "preholdMinN": 3,
+    "nativeMeanNegativeEveryPretargetSplit": true,
+    "nativePfBelow1EveryPretargetSplit": true,
+    "oppositeMeanStrictlyBetterEveryPretargetSplit": true,
+    "fullPretargetMinN": 20,
+    "fullPretargetPfBelow": 0.5
+  },
+  "audit": {
+    "AAVEUSDT": {
+      "native": {
+        "train": {
+          "n": 26,
+          "wr": 0.38461538461538464,
+          "mean": -0.005597415164826402,
+          "sum": -0.14553279428548646,
+          "pf": 0.7562006684207461
+        },
+        "validation": {
+          "n": 5,
+          "wr": 0.8,
+          "mean": 0.05721495203962956,
+          "sum": 0.2860747601981478,
+          "pf": 42.741017864165855
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.011903654485049816,
+          "sum": -0.011903654485049816,
+          "pf": 0.0
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 26,
+          "wr": 0.5,
+          "mean": -0.005232986120036291,
+          "sum": -0.13605763912094357,
+          "pf": 0.7781457496575165
+        },
+        "validation": {
+          "n": 5,
+          "wr": 0.2,
+          "mean": -0.06325243976514641,
+          "sum": -0.31626219882573203,
+          "pf": 0.06671770551251181
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.005903654485049817,
+          "sum": 0.005903654485049817,
+          "pf": 999.0
+        }
+      },
+      "fullPretargetNative": {
+        "n": 32,
+        "wr": 0.4375,
+        "mean": 0.004019947232112861,
+        "sum": 0.12863831142761156,
+        "pf": 1.208932206921241
+      },
+      "fullPretargetOpposite": {
+        "n": 32,
+        "wr": 0.46875,
+        "mean": -0.013950505733175805,
+        "sum": -0.44641618346162576,
+        "pf": 0.5311472274228097
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "ADAUSDT": {
+      "native": {
+        "train": {
+          "n": 34,
+          "wr": 0.5294117647058824,
+          "mean": -0.0014902842486375805,
+          "sum": -0.05066966445367774,
+          "pf": 0.883474779494005
+        },
+        "validation": {
+          "n": 14,
+          "wr": 0.35714285714285715,
+          "mean": -0.017200245365069207,
+          "sum": -0.24080343511096888,
+          "pf": 0.45996248677361334
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 34,
+          "wr": 0.47058823529411764,
+          "mean": -0.002373758861574617,
+          "sum": -0.08070780129353697,
+          "pf": 0.8250900572276119
+        },
+        "validation": {
+          "n": 14,
+          "wr": 0.5714285714285714,
+          "mean": 0.0019393709095924386,
+          "sum": 0.02715119273429414,
+          "pf": 1.159426991109263
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "fullPretargetNative": {
+        "n": 48,
+        "wr": 0.4791666666666667,
+        "mean": -0.006072356240930138,
+        "sum": -0.2914730995646466,
+        "pf": 0.6690588289002595
+      },
+      "fullPretargetOpposite": {
+        "n": 48,
+        "wr": 0.5,
+        "mean": -0.0011157626783175588,
+        "sum": -0.053556608559242824,
+        "pf": 0.9152222801629115
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "ATOMUSDT": {
+      "native": {
+        "train": {
+          "n": 8,
+          "wr": 0.625,
+          "mean": 0.018200368450078833,
+          "sum": 0.14560294760063067,
+          "pf": 3.5028358196021725
+        },
+        "validation": {
+          "n": 7,
+          "wr": 0.7142857142857143,
+          "mean": 0.0035192935903553815,
+          "sum": 0.02463505513248767,
+          "pf": 2.8374212391634286
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 8,
+          "wr": 0.5,
+          "mean": -0.007817018900918458,
+          "sum": -0.06253615120734766,
+          "pf": 0.5355109431273203
+        },
+        "validation": {
+          "n": 7,
+          "wr": 0.14285714285714285,
+          "mean": -0.00981155864452519,
+          "sum": -0.06868091051167632,
+          "pf": 0.03324141567999125
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "fullPretargetNative": {
+        "n": 15,
+        "wr": 0.6666666666666666,
+        "mean": 0.011349200182207888,
+        "sum": 0.17023800273311832,
+        "pf": 3.3782037891267094
+      },
+      "fullPretargetOpposite": {
+        "n": 15,
+        "wr": 0.3333333333333333,
+        "mean": -0.008747804114601599,
+        "sum": -0.13121706171902398,
+        "pf": 0.3620228612961805
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "AVAXUSDT": {
+      "native": {
+        "train": {
+          "n": 29,
+          "wr": 0.3793103448275862,
+          "mean": 0.009092862960380628,
+          "sum": 0.2636930258510382,
+          "pf": 1.5503094456776951
+        },
+        "validation": {
+          "n": 2,
+          "wr": 0.5,
+          "mean": 0.0029987978361049085,
+          "sum": 0.005997595672209817,
+          "pf": 1.3215494183236025
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.04436656062212785,
+          "sum": 0.04436656062212785,
+          "pf": 999.0
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 29,
+          "wr": 0.4482758620689655,
+          "mean": -0.02740970327681388,
+          "sum": -0.7948813950276026,
+          "pf": 0.4121326354514947
+        },
+        "validation": {
+          "n": 2,
+          "wr": 0.5,
+          "mean": -0.008998797836104907,
+          "sum": -0.017997595672209814,
+          "pf": 0.4127983369614276
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.045417815482502566,
+          "sum": -0.045417815482502566,
+          "pf": 0.0
+        }
+      },
+      "fullPretargetNative": {
+        "n": 32,
+        "wr": 0.40625,
+        "mean": 0.009814286942042996,
+        "sum": 0.31405718214537587,
+        "pf": 1.6308593048937365
+      },
+      "fullPretargetOpposite": {
+        "n": 32,
+        "wr": 0.4375,
+        "mean": -0.026821775193197343,
+        "sum": -0.858296806182315,
+        "pf": 0.39904090651190777
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "BNBUSDT": {
+      "native": {
+        "train": {
+          "n": 7,
+          "wr": 0.14285714285714285,
+          "mean": -0.016281163681418295,
+          "sum": -0.11396814576992807,
+          "pf": 0.059823477078531744
+        },
+        "validation": {
+          "n": 6,
+          "wr": 0.16666666666666666,
+          "mean": -0.01182293128098736,
+          "sum": -0.07093758768592416,
+          "pf": 0.06638830849863545
+        },
+        "prehold": {
+          "n": 4,
+          "wr": 0.0,
+          "mean": -0.020188206189849286,
+          "sum": -0.08075282475939714,
+          "pf": 0.0
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 7,
+          "wr": 0.7142857142857143,
+          "mean": 0.009839496830723783,
+          "sum": 0.06887647781506648,
+          "pf": 4.6768598256635405
+        },
+        "validation": {
+          "n": 6,
+          "wr": 0.8333333333333334,
+          "mean": 0.005822931280987361,
+          "sum": 0.034937587685924164,
+          "pf": 4.163401681481167
+        },
+        "prehold": {
+          "n": 4,
+          "wr": 1.0,
+          "mean": 0.012344156517509145,
+          "sum": 0.04937662607003658,
+          "pf": 999.0
+        }
+      },
+      "fullPretargetNative": {
+        "n": 17,
+        "wr": 0.11764705882352941,
+        "mean": -0.015626974012661728,
+        "sum": -0.26565855821524936,
+        "pf": 0.04423781892085706
+      },
+      "fullPretargetOpposite": {
+        "n": 17,
+        "wr": 0.8235294117647058,
+        "mean": 0.009011217151236895,
+        "sum": 0.15319069157102722,
+        "pf": 6.1446448292988665
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": true,
+        "oppositeStrictlyBetterEverySplit": true,
+        "fullPretargetSevere": false
+      }
+    },
+    "BTCUSDT": {
+      "native": {
+        "train": {
+          "n": 36,
+          "wr": 0.16666666666666666,
+          "mean": -0.02124439982774988,
+          "sum": -0.7647983937989956,
+          "pf": 0.06518697772387456
+        },
+        "validation": {
+          "n": 11,
+          "wr": 0.0,
+          "mean": -0.016922034550034663,
+          "sum": -0.18614238005038128,
+          "pf": 0.0
+        },
+        "prehold": {
+          "n": 4,
+          "wr": 0.0,
+          "mean": -0.015694138025384077,
+          "sum": -0.0627765521015363,
+          "pf": 0.0
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 36,
+          "wr": 0.75,
+          "mean": 0.01674890374054776,
+          "sum": 0.6029605346597194,
+          "pf": 7.020564444682091
+        },
+        "validation": {
+          "n": 11,
+          "wr": 0.45454545454545453,
+          "mean": 0.0027541258032703635,
+          "sum": 0.030295383835973997,
+          "pf": 2.8561901782926316
+        },
+        "prehold": {
+          "n": 4,
+          "wr": 1.0,
+          "mean": 0.010490427847988735,
+          "sum": 0.04196171139195494,
+          "pf": 999.0
+        }
+      },
+      "fullPretargetNative": {
+        "n": 51,
+        "wr": 0.11764705882352941,
+        "mean": -0.019876810312763,
+        "sum": -1.0137173259509131,
+        "pf": 0.049980293764647625
+      },
+      "fullPretargetOpposite": {
+        "n": 51,
+        "wr": 0.7058823529411765,
+        "mean": 0.013239561370346046,
+        "sum": 0.6752176298876483,
+        "pf": 6.797280763056711
+      },
+      "freezeBlockPretargetOnly": true,
+      "criteria": {
+        "enough": true,
+        "persistentNativeLoss": true,
+        "oppositeStrictlyBetterEverySplit": true,
+        "fullPretargetSevere": true
+      }
+    },
+    "DOGEUSDT": {
+      "native": {
+        "train": {
+          "n": 32,
+          "wr": 0.40625,
+          "mean": -0.015323539098235401,
+          "sum": -0.49035325114353284,
+          "pf": 0.594520522517721
+        },
+        "validation": {
+          "n": 32,
+          "wr": 0.5625,
+          "mean": 0.0007315400431501481,
+          "sum": 0.02340928138080474,
+          "pf": 1.055729168751336
+        },
+        "prehold": {
+          "n": 7,
+          "wr": 0.14285714285714285,
+          "mean": -0.08010746418580253,
+          "sum": -0.5607522493006177,
+          "pf": 0.02540944173368782
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 32,
+          "wr": 0.46875,
+          "mean": 0.005761561562344137,
+          "sum": 0.18436996999501237,
+          "pf": 1.1802773187576507
+        },
+        "validation": {
+          "n": 32,
+          "wr": 0.4375,
+          "mean": -0.004953286370508606,
+          "sum": -0.1585051638562754,
+          "pf": 0.6950395168620125
+        },
+        "prehold": {
+          "n": 7,
+          "wr": 0.42857142857142855,
+          "mean": 0.036272258837015695,
+          "sum": 0.2539058118591099,
+          "pf": 2.6256698870602304
+        }
+      },
+      "fullPretargetNative": {
+        "n": 71,
+        "wr": 0.4507042253521127,
+        "mean": -0.014474594634695012,
+        "sum": -1.0276962190633459,
+        "pf": 0.5338704102404027
+      },
+      "fullPretargetOpposite": {
+        "n": 71,
+        "wr": 0.4507042253521127,
+        "mean": 0.003940431239406294,
+        "sum": 0.27977061799784686,
+        "pf": 1.164702352910522
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": true,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "ETHUSDT": {
+      "native": {
+        "train": {
+          "n": 49,
+          "wr": 0.30612244897959184,
+          "mean": -0.018988746410743586,
+          "sum": -0.9304485741264358,
+          "pf": 0.31771312552173636
+        },
+        "validation": {
+          "n": 45,
+          "wr": 0.4666666666666667,
+          "mean": -0.002343652674856967,
+          "sum": -0.10546437036856351,
+          "pf": 0.8779251918465338
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 49,
+          "wr": 0.5918367346938775,
+          "mean": 0.020328616951932246,
+          "sum": 0.9961022306446801,
+          "pf": 2.695403454706915
+        },
+        "validation": {
+          "n": 45,
+          "wr": 0.4222222222222222,
+          "mean": -0.006790590622538774,
+          "sum": -0.3055765780142448,
+          "pf": 0.6929209198397591
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "fullPretargetNative": {
+        "n": 94,
+        "wr": 0.3829787234042553,
+        "mean": -0.011020350473351056,
+        "sum": -1.0359129444949993,
+        "pf": 0.534975576868704
+      },
+      "fullPretargetOpposite": {
+        "n": 94,
+        "wr": 0.5106382978723404,
+        "mean": 0.0073460175811748425,
+        "sum": 0.6905256526304352,
+        "pf": 1.4363130196826808
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "INJUSDT": {
+      "native": {
+        "train": {
+          "n": 26,
+          "wr": 0.5769230769230769,
+          "mean": 0.0210811045613446,
+          "sum": 0.5481087185949596,
+          "pf": 3.323191235754513
+        },
+        "validation": {
+          "n": 6,
+          "wr": 0.5,
+          "mean": 0.02236974205710579,
+          "sum": 0.13421845234263474,
+          "pf": 9.309984336937152
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.04938048918023552,
+          "sum": -0.04938048918023552,
+          "pf": 0.0
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 26,
+          "wr": 0.23076923076923078,
+          "mean": -0.04353303285462213,
+          "sum": -1.1318588542201753,
+          "pf": 0.06827282726335092
+        },
+        "validation": {
+          "n": 6,
+          "wr": 0.0,
+          "mean": -0.030204434911043115,
+          "sum": -0.18122660946625868,
+          "pf": 0.0
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.059883061958130535,
+          "sum": -0.059883061958130535,
+          "pf": 0.0
+        }
+      },
+      "fullPretargetNative": {
+        "n": 33,
+        "wr": 0.5454545454545454,
+        "mean": 0.019180202477495724,
+        "sum": 0.6329466817573589,
+        "pf": 3.0995959274973788
+      },
+      "fullPretargetOpposite": {
+        "n": 33,
+        "wr": 0.18181818181818182,
+        "mean": -0.041605106837714075,
+        "sum": -1.3729685256445645,
+        "pf": 0.05696630220755511
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "LINKUSDT": {
+      "native": {
+        "train": {
+          "n": 27,
+          "wr": 0.48148148148148145,
+          "mean": -0.0036676553396196355,
+          "sum": -0.09902669416973016,
+          "pf": 0.7626504910962508
+        },
+        "validation": {
+          "n": 4,
+          "wr": 0.5,
+          "mean": 0.011279472836653677,
+          "sum": 0.04511789134661471,
+          "pf": 2.108534234493442
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 27,
+          "wr": 0.5555555555555556,
+          "mean": -0.001039800248148424,
+          "sum": -0.028074606700007443,
+          "pf": 0.9208561222909286
+        },
+        "validation": {
+          "n": 4,
+          "wr": 0.25,
+          "mean": -0.01727947283665368,
+          "sum": -0.06911789134661472,
+          "pf": 0.31149959616404904
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "fullPretargetNative": {
+        "n": 31,
+        "wr": 0.4838709677419355,
+        "mean": -0.0017389936394553369,
+        "sum": -0.05390880282311544,
+        "pf": 0.8822744638329202
+      },
+      "fullPretargetOpposite": {
+        "n": 31,
+        "wr": 0.5161290322580645,
+        "mean": -0.003135241872471683,
+        "sum": -0.09719249804662217,
+        "pf": 0.7864453842973923
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "LTCUSDT": {
+      "native": {
+        "train": {
+          "n": 17,
+          "wr": 0.47058823529411764,
+          "mean": -0.019356086267078635,
+          "sum": -0.3290534665403368,
+          "pf": 0.29514830276520854
+        },
+        "validation": {
+          "n": 7,
+          "wr": 0.14285714285714285,
+          "mean": -0.019823730836139114,
+          "sum": -0.1387661158529738,
+          "pf": 0.0719523516278888
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 17,
+          "wr": 0.4117647058823529,
+          "mean": 0.015034407225195534,
+          "sum": 0.25558492282832407,
+          "pf": 2.3705685847374194
+        },
+        "validation": {
+          "n": 7,
+          "wr": 0.8571428571428571,
+          "mean": 0.021758768169355357,
+          "sum": 0.1523113771854875,
+          "pf": 13.512806301255763
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "fullPretargetNative": {
+        "n": 24,
+        "wr": 0.375,
+        "mean": -0.019492482599721275,
+        "sum": -0.4678195823933106,
+        "pf": 0.2410029535967536
+      },
+      "fullPretargetOpposite": {
+        "n": 24,
+        "wr": 0.5416666666666666,
+        "mean": 0.016995679167242147,
+        "sum": 0.40789630001381155,
+        "pf": 3.053306588149023
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": true
+      }
+    },
+    "NEARUSDT": {
+      "native": {
+        "train": {
+          "n": 13,
+          "wr": 0.5384615384615384,
+          "mean": 0.0022853611320723327,
+          "sum": 0.02970969471694033,
+          "pf": 1.1886273146771642
+        },
+        "validation": {
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "mean": -0.055026420240966156,
+          "sum": -0.16507926072289847,
+          "pf": 0.01295653794527069
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 13,
+          "wr": 0.3076923076923077,
+          "mean": -0.019451536105089894,
+          "sum": -0.2528699693661686,
+          "pf": 0.19869462461400605
+        },
+        "validation": {
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "mean": 0.04902642024096615,
+          "sum": 0.14707926072289845,
+          "pf": 19.00912108131282
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "fullPretargetNative": {
+        "n": 16,
+        "wr": 0.5,
+        "mean": -0.008460597875372384,
+        "sum": -0.13536956600595815,
+        "pf": 0.5831587974198112
+      },
+      "fullPretargetOpposite": {
+        "n": 16,
+        "wr": 0.375,
+        "mean": -0.006611919290204387,
+        "sum": -0.1057907086432702,
+        "pf": 0.673222701459196
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "SOLUSDT": {
+      "native": {
+        "train": {
+          "n": 63,
+          "wr": 0.47619047619047616,
+          "mean": -0.0038476104679773895,
+          "sum": -0.24239945948257555,
+          "pf": 0.7956095053633039
+        },
+        "validation": {
+          "n": 21,
+          "wr": 0.5714285714285714,
+          "mean": 0.01002394226967435,
+          "sum": 0.21050278766316136,
+          "pf": 1.606499167938092
+        },
+        "prehold": {
+          "n": 6,
+          "wr": 0.8333333333333334,
+          "mean": 0.017129038093434877,
+          "sum": 0.10277422856060926,
+          "pf": 45.59959252255522
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 63,
+          "wr": 0.47619047619047616,
+          "mean": 0.0011881046554589217,
+          "sum": 0.07485059329391207,
+          "pf": 1.0562440638636121
+        },
+        "validation": {
+          "n": 21,
+          "wr": 0.38095238095238093,
+          "mean": -0.012939304186208483,
+          "sum": -0.27172538791037815,
+          "pf": 0.5970055647498402
+        },
+        "prehold": {
+          "n": 6,
+          "wr": 0.0,
+          "mean": -0.030846859805023146,
+          "sum": -0.18508115883013887,
+          "pf": 0.0
+        }
+      },
+      "fullPretargetNative": {
+        "n": 90,
+        "wr": 0.5222222222222223,
+        "mean": 0.0007875284082355006,
+        "sum": 0.07087755674119506,
+        "pf": 1.046163919201013
+      },
+      "fullPretargetOpposite": {
+        "n": 90,
+        "wr": 0.4222222222222222,
+        "mean": -0.00424395503829561,
+        "sum": -0.38195595344660493,
+        "pf": 0.8256040021449779
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": true,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": false
+      }
+    },
+    "XRPUSDT": {
+      "native": {
+        "train": {
+          "n": 18,
+          "wr": 0.16666666666666666,
+          "mean": -0.024465428025760225,
+          "sum": -0.440377704463684,
+          "pf": 0.20930077092756663
+        },
+        "validation": {
+          "n": 26,
+          "wr": 0.46153846153846156,
+          "mean": -0.008832392361785882,
+          "sum": -0.22964220140643293,
+          "pf": 0.4482595600173256
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "opposite": {
+        "train": {
+          "n": 18,
+          "wr": 0.7222222222222222,
+          "mean": 0.02285020158487029,
+          "sum": 0.4113036285276653,
+          "pf": 6.061742397413074
+        },
+        "validation": {
+          "n": 26,
+          "wr": 0.5769230769230769,
+          "mean": 0.009527423293763448,
+          "sum": 0.24771300563784965,
+          "pf": 2.0044535166655
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "fullPretargetNative": {
+        "n": 44,
+        "wr": 0.3409090909090909,
+        "mean": -0.01522772513341175,
+        "sum": -0.670019905870117,
+        "pf": 0.3115017443331793
+      },
+      "fullPretargetOpposite": {
+        "n": 44,
+        "wr": 0.6363636363636364,
+        "mean": 0.014977650776488976,
+        "sum": 0.6590166341655149,
+        "pf": 3.0099812894853994
+      },
+      "freezeBlockPretargetOnly": false,
+      "criteria": {
+        "enough": false,
+        "persistentNativeLoss": false,
+        "oppositeStrictlyBetterEverySplit": false,
+        "fullPretargetSevere": true
+      }
+    }
+  },
+  "frozenPretargetOnly": [
+    "BTCUSDT"
+  ],
+  "forwardOneShot": {
+    "BTCUSDT": {
+      "native": {
+        "n": 9,
+        "wr": 0.1111111111111111,
+        "mean": -0.0058316934015316645,
+        "sum": -0.052485240613784984,
+        "pf": 0.012385207630630708
+      },
+      "opposite": {
+        "n": 9,
+        "wr": 0.3333333333333333,
+        "mean": -0.001638919011127594,
+        "sum": -0.014750271100148347,
+        "pf": 0.46086271163985165
+      }
+    }
+  },
+  "acceptedAfterForwardFalsification": [
+    "BTCUSDT"
+  ],
+  "rejectedByForwardFalsification": [],
+  "decision": "BLOCK_ONLY_NOT_FLIP. Opposite-side outcomes are diagnostic; a flip is never promoted because forward opposite may still be negative.",
+  "hashes": {
+    "pre": "74a08f1fa472c9abe785aa539c4f7e9bf965b47abaa114a8aa358efb67b9b1e7",
+    "forward": "0b6159b44f4bca2f53be27758e1045b4ffe2c878ad431941b857dffd3b0c42a2"
+  },
+  "warnings": [
+    "Current V4 route catalog is research-frozen and replayed backward; this is not historical as-deployed evidence.",
+    "No 2025-10-01..2026-10-01 target outcome is read when freezing the symbol set.",
+    "Forward 2026-10..11 is falsification only and cannot add a new symbol to the frozen set."
+  ]
+}

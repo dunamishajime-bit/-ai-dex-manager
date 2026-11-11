@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import crypto from 'node:crypto';
-import {
-  computeQuality102HighVolFeatures, matchQuality102HighVolGrid, monthStartUtc
-} from './pinned-source/Q102/lib/disdex-quality102-causal-pipeline.ts';
-import {diagnoseQuality102HighVolSymbol, buildQuality102CausalV1Signal} from './pinned-source/Q102/lib/disdex-quality102-causal-v1-signal.ts';
+import {pathToFileURL} from 'node:url';
 const ROOT='C:/tmp/disdex-bt-20251001-20261001';
+const {computeQuality102HighVolFeatures,matchQuality102HighVolGrid,monthStartUtc}=await import(pathToFileURL(ROOT+'/pinned-source/Q102/lib/disdex-quality102-causal-pipeline.ts').href);
+const {diagnoseQuality102HighVolSymbol}=await import(pathToFileURL(ROOT+'/pinned-source/Q102/lib/disdex-quality102-causal-v1-signal.ts').href);
+const {buildQuality102CausalV4Signal}=await import(pathToFileURL(ROOT+'/pinned-source/Q102/lib/disdex-quality102-causal-v4-signal.ts').href);
 const OUT=ROOT+'/Q102_CURRENT_PRODUCTION_REPLAY_AUDIT_20261110'; fs.mkdirSync(OUT,{recursive:true});
 const H=3600000,BEGIN=Date.parse('2025-10-01T00:00:00Z'),READY=Date.parse('2026-06-20T15:00:00Z'),END=Date.parse('2026-10-01T00:00:00Z');
 const symbols=['SUIUSDT','SEIUSDT','APTUSDT','ARBUSDT','OPUSDT','ENAUSDT','ONDOUSDT','FILUSDT','TRXUSDT'];
@@ -63,16 +63,16 @@ for(const z of rows.slice(0,Math.min(40,rows.length))){
   hist.candlesBySymbol[sym]=data[sym].a.slice(Math.max(0,ci-5399),ci+1);
   hist.entryOpenBySymbol[sym]={timestampMs:z.entryTs,open:data[sym].a[ei].open};
  }
- const full=buildQuality102CausalV1Signal({history:hist,decisionTs:z.entryTs,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false}});
+ const full=buildQuality102CausalV4Signal({history:hist,decisionTs:z.entryTs,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false}});
  parityChecked++;
- if(full.side!==z.side||full.symbol!==z.symbol||full.family!=='HIGH_VOL'||Math.abs(full.requestedGross-z.requestedGross)>1e-12){
+ if(full.side!==z.side||full.symbol!==z.symbol||full.family!=='HIGH_VOL'||Math.abs(full.requestedGross-z.requestedGross)>1e-12||full.exitPolicy!=='HIGH_VOL_TRAIL72'){
   parityMismatch++; console.log('PARITY_MISMATCH',JSON.stringify({z,full}));
  }
 }
 const body=rows.map(x=>JSON.stringify(x)).join('\n')+(rows.length?'\n':'');
 fs.writeFileSync(OUT+'/q102-high-vol-production-signals.jsonl',body);
 fs.writeFileSync(OUT+'/q102-high-vol-monthly-audit.json',JSON.stringify(monthlyAudit,null,2)+'\n');
-const summary={status:'CURRENT_PRODUCTION_Q102_HIGH_VOL_SOURCE_REPLAY',period:[new Date(BEGIN).toISOString(),new Date(END).toISOString()],
+const summary={status:'CURRENT_PRODUCTION_Q102_HIGH_VOL_V4_PARITY_REPLAY',period:[new Date(BEGIN).toISOString(),new Date(END).toISOString()],
  failClosedUntil:new Date(READY).toISOString(),reason:'FILUSDT first H1 2025-11-07T15:00Z + 5400h Production history requirement',
  configuredSymbols:symbols,signals:rows.length,bySide:{LONG:rows.filter(x=>x.side===1).length,SHORT:rows.filter(x=>x.side===-1).length},
  bySymbol:Object.fromEntries(symbols.map(s=>[s,rows.filter(x=>x.symbol===s).length])),parityChecked,parityMismatch,

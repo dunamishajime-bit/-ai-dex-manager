@@ -1,0 +1,414 @@
+{
+  "status": "Q102_S34_ROUTE_PRETARGET_FREEZE_FORWARD_VETO_ONLY",
+  "costBps": 30,
+  "pretargetSplit": {
+    "train": "2025-03-22..2025-06-30",
+    "validation": "2025-07..08",
+    "prehold": "2025-09"
+  },
+  "criteria": {
+    "trainMinN": 5,
+    "validationMinN": 3,
+    "preholdMinN": 2,
+    "fullMinN": 12,
+    "meanNegativeEveryPretargetSplit": true,
+    "pfBelow1EveryPretargetSplit": true,
+    "fullPfBelow": 0.7
+  },
+  "audit": {
+    "APT|REV24_T0.05_H24": {
+      "splits30": {
+        "train": {
+          "n": 8,
+          "wr": 0.375,
+          "mean": 0.0017516527703280312,
+          "sum": 0.01401322216262425,
+          "pf": 1.0861895318971593
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 8,
+        "wr": 0.375,
+        "mean": 0.0017516527703280312,
+        "sum": 0.01401322216262425,
+        "pf": 1.0861895318971593
+      },
+      "freezePretargetOnly": false,
+      "symbol": "APTUSDT",
+      "family": "REV"
+    },
+    "APT|REV6_T0.03_H24": {
+      "splits30": {
+        "train": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.05960377358490576,
+          "sum": -0.05960377358490576,
+          "pf": 0.0
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.02215151515151514,
+          "sum": -0.02215151515151514,
+          "pf": 0.0
+        }
+      },
+      "full30": {
+        "n": 2,
+        "wr": 0.0,
+        "mean": -0.04087764436821045,
+        "sum": -0.0817552887364209,
+        "pf": 0.0
+      },
+      "freezePretargetOnly": false,
+      "symbol": "APTUSDT",
+      "family": "REV"
+    },
+    "AVAX|MR24_Z1.5_H24": {
+      "splits30": {
+        "train": {
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "mean": 0.01382684823637511,
+          "sum": 0.04148054470912533,
+          "pf": 8.152048218815455
+        },
+        "validation": {
+          "n": 5,
+          "wr": 0.4,
+          "mean": -0.012816187367755671,
+          "sum": -0.06408093683877836,
+          "pf": 0.5002853708018847
+        },
+        "prehold": {
+          "n": 2,
+          "wr": 0.0,
+          "mean": -0.04879739563914548,
+          "sum": -0.09759479127829096,
+          "pf": 0.0
+        }
+      },
+      "full30": {
+        "n": 10,
+        "wr": 0.4,
+        "mean": -0.012019518340794398,
+        "sum": -0.12019518340794398,
+        "pf": 0.48108899536119143
+      },
+      "freezePretargetOnly": false,
+      "symbol": "AVAXUSDT",
+      "family": "MR"
+    },
+    "AVAX|PB168_0.1_P24_0.04_H24": {
+      "splits30": {
+        "train": {
+          "n": 2,
+          "wr": 0.5,
+          "mean": -0.0010162418175760886,
+          "sum": -0.0020324836351521772,
+          "pf": 0.028517802508082953
+        },
+        "validation": {
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "mean": 0.02486412887003449,
+          "sum": 0.07459238661010348,
+          "pf": 4.824379126465623
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.07519654808030996,
+          "sum": 0.07519654808030996,
+          "pf": 999.0
+        }
+      },
+      "full30": {
+        "n": 6,
+        "wr": 0.6666666666666666,
+        "mean": 0.024626075175876876,
+        "sum": 0.14775645105526125,
+        "pf": 7.8416563500596785
+      },
+      "freezePretargetOnly": false,
+      "symbol": "AVAXUSDT",
+      "family": "PB"
+    },
+    "AVAX|REV12_T0.03_H12": {
+      "splits30": {
+        "train": {
+          "n": 6,
+          "wr": 0.0,
+          "mean": -0.03278552844359328,
+          "sum": -0.1967131706615597,
+          "pf": 0.0
+        },
+        "validation": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.02651388888888884,
+          "sum": 0.02651388888888884,
+          "pf": 999.0
+        },
+        "prehold": {
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "mean": -0.001242118990192329,
+          "sum": -0.003726356970576987,
+          "pf": 0.9223675631129795
+        }
+      },
+      "full30": {
+        "n": 10,
+        "wr": 0.3,
+        "mean": -0.017392563874324782,
+        "sum": -0.17392563874324782,
+        "pf": 0.28926735625607836
+      },
+      "freezePretargetOnly": false,
+      "symbol": "AVAXUSDT",
+      "family": "REV"
+    },
+    "AVAX|REV12_T0.08_H24": {
+      "splits30": {
+        "train": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.03385503685503666,
+          "sum": 0.03385503685503666,
+          "pf": 999.0
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 1,
+        "wr": 1.0,
+        "mean": 0.03385503685503666,
+        "sum": 0.03385503685503666,
+        "pf": 999.0
+      },
+      "freezePretargetOnly": false,
+      "symbol": "AVAXUSDT",
+      "family": "REV"
+    },
+    "DOGE|MR48_Z2.0_H12": {
+      "splits30": {
+        "train": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "validation": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.02287343441001977,
+          "sum": 0.02287343441001977,
+          "pf": 999.0
+        },
+        "prehold": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.022781308189057544,
+          "sum": -0.022781308189057544,
+          "pf": 0.0
+        }
+      },
+      "full30": {
+        "n": 2,
+        "wr": 0.5,
+        "mean": 4.606311048111281e-05,
+        "sum": 9.212622096222561e-05,
+        "pf": 1.004043939013409
+      },
+      "freezePretargetOnly": false,
+      "symbol": "DOGEUSDT",
+      "family": "MR"
+    },
+    "DOGE|MR72_Z1.5_H12": {
+      "splits30": {
+        "train": {
+          "n": 1,
+          "wr": 0.0,
+          "mean": -0.002511647213947363,
+          "sum": -0.002511647213947363,
+          "pf": 0.0
+        },
+        "validation": {
+          "n": 8,
+          "wr": 0.625,
+          "mean": 0.014612904684876723,
+          "sum": 0.11690323747901378,
+          "pf": 2.267459997962599
+        },
+        "prehold": {
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "mean": -0.012820730989184308,
+          "sum": -0.038462192967552926,
+          "pf": 0.007598579521216743
+        }
+      },
+      "full30": {
+        "n": 12,
+        "wr": 0.5,
+        "mean": 0.006327449774792791,
+        "sum": 0.0759293972975135,
+        "pf": 1.5687484624077979
+      },
+      "freezePretargetOnly": false,
+      "symbol": "DOGEUSDT",
+      "family": "MR"
+    },
+    "NEAR|BRK48_H48_V1.2": {
+      "splits30": {
+        "train": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.01949134948096887,
+          "sum": 0.01949134948096887,
+          "pf": 999.0
+        },
+        "validation": {
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "mean": -0.009417977218142562,
+          "sum": -0.028253931654427685,
+          "pf": 0.5337342167073642
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 4,
+        "wr": 0.5,
+        "mean": -0.0021906455433647037,
+        "sum": -0.008762582173458815,
+        "pf": 0.855393851349761
+      },
+      "freezePretargetOnly": false,
+      "symbol": "NEARUSDT",
+      "family": "BRK"
+    },
+    "UNI|MR48_Z1.5_H24": {
+      "splits30": {
+        "train": {
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "mean": -0.03484823720088829,
+          "sum": -0.10454471160266487,
+          "pf": 0.24290817072473495
+        },
+        "validation": {
+          "n": 3,
+          "wr": 1.0,
+          "mean": 0.02153480918214549,
+          "sum": 0.06460442754643647,
+          "pf": 999.0
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 6,
+        "wr": 0.6666666666666666,
+        "mean": -0.0066567140093714,
+        "sum": -0.039940284056228396,
+        "pf": 0.710760475069952
+      },
+      "freezePretargetOnly": false,
+      "symbol": "UNIUSDT",
+      "family": "MR"
+    },
+    "UNI|MR72_Z1.5_H24": {
+      "splits30": {
+        "train": {
+          "n": 5,
+          "wr": 0.6,
+          "mean": 0.020486570356943967,
+          "sum": 0.10243285178471984,
+          "pf": 1.7485531444450908
+        },
+        "validation": {
+          "n": 6,
+          "wr": 0.0,
+          "mean": -0.04694151787857468,
+          "sum": -0.2816491072714481,
+          "pf": 0.0
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 11,
+        "wr": 0.2727272727272727,
+        "mean": -0.016292386862429842,
+        "sum": -0.17921625548672826,
+        "pf": 0.5717552211079089
+      },
+      "freezePretargetOnly": false,
+      "symbol": "UNIUSDT",
+      "family": "MR"
+    }
+  },
+  "frozenPretargetOnly": [],
+  "forwardOneShot": {},
+  "acceptedAfterForwardVeto": [],
+  "rejectedByForward": [],
+  "hashes": {
+    "pre": "b97a5d4d5cb7928fc2121f8639c31748848e4f668a8b401b4ae4780f40cfb29b",
+    "forward": "753da296cadeb4cbbf559c104a838025ba183d19d6a748c04f27cdf817c293e4"
+  },
+  "warning": "No target-year 2025-10..2026-10 outcome is used. Forward 2026-10..11 may only veto a pretarget-frozen quarantine."
+}

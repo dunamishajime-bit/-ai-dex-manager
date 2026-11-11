@@ -1,0 +1,51 @@
+{
+  "status": "Q102_HIGHVOL_STRUCTURAL_PRETARGET_TRAIN_VALID_PREHOLD_ONE_SHOT_TARGET",
+  "split": {
+    "train": "2025-01-01..2025-05-31",
+    "validation": "2025-06-01..2025-07-31",
+    "prehold": "2025-08-01..2025-09-30"
+  },
+  "costBps": 30,
+  "baseline30": {
+    "train": {
+      "n": 118,
+      "wr": 0.3983050847457627,
+      "mean": -0.013893158949521672,
+      "sum": -1.6393927560435573,
+      "pf": 0.6974217131506781,
+      "worst": -0.15300000000000014
+    },
+    "valid": {
+      "n": 45,
+      "wr": 0.7333333333333333,
+      "mean": 0.037281096743732596,
+      "sum": 1.6776493534679668,
+      "pf": 2.2576391528057385,
+      "worst": -0.13343478260869568
+    },
+    "prehold": {
+      "n": 39,
+      "wr": 0.48717948717948717,
+      "mean": 0.023122630675729824,
+      "sum": 0.9017825963534631,
+      "pf": 2.41643123033062,
+      "worst": -0.07909511889862342
+    }
+  },
+  "candidateRules": 150,
+  "robustRules": 0,
+  "familyRobustCounts": {},
+  "selectedPretargetOnly": null,
+  "targetOneShot": null,
+  "method": [
+    "Thresholds are train quantiles only.",
+    "Only five predeclared structural features and five predeclared feature-pair families are tested.",
+    "Validation and prehold must both remain positive, retain >=30%, not lose win rate, and improve mean >=5%.",
+    "Target 2025-10..2026-10 is read only after the pretarget rule is frozen."
+  ],
+  "hashes": {
+    "pre": "17d3e513adb3c21c65c390806ac0d3226d7f92bab535476a63e43f120d14591b",
+    "target": "81a0ff44bda3ddcca3d35f6853532ea2e138d3f29698872009e3a70a9fbe16b7"
+  },
+  "warning": "Binance UM pretarget is a venue proxy; target is Aster bar replay, not signed fills."
+}

@@ -1,0 +1,44 @@
+{
+  "status": "HYPE_PRETARGET_SIMPLE_STRUCTURAL_ROBUSTNESS_ONLY",
+  "costBps": 30,
+  "split": {
+    "train": "2025-06..07",
+    "validation": "2025-08",
+    "prehold": "2025-09"
+  },
+  "counts": {
+    "train": 19,
+    "validation": 11,
+    "prehold": 9
+  },
+  "baseline30": {
+    "train": {
+      "n": 19,
+      "wr": 0.47368421052631576,
+      "mean": 0.010962004708678738,
+      "sum": 0.20827808946489604,
+      "pf": 2.2315742932545883
+    },
+    "validation": {
+      "n": 11,
+      "wr": 0.0,
+      "mean": -0.018638925008785508,
+      "sum": -0.2050281750966406,
+      "pf": 0.0
+    },
+    "prehold": {
+      "n": 9,
+      "wr": 0.2222222222222222,
+      "mean": -0.0035765071931862357,
+      "sum": -0.03218856473867612,
+      "pf": 0.6992017848712883
+    }
+  },
+  "candidateN": 54,
+  "robustBeforeSiblingCheck": 0,
+  "robustAfterSiblingCheck": 0,
+  "selectedPretargetOnly": null,
+  "method": "Single-feature rules only; thresholds from train quartiles; validation and prehold both must improve mean and not lose WR; >=35% retained; at least two sibling thresholds on same feature/operator required.",
+  "hash": "4c2ca7e3563749a593e28186d0f7191b436d169299d2fe1a74fea0732216bcf8",
+  "warning": "Binance UM pretarget proxy only. No target-year HYPE outcome is used."
+}

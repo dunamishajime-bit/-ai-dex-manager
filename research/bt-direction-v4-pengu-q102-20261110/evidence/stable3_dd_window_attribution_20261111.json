@@ -1,0 +1,572 @@
+{
+  "status": "TARGET_DIAGNOSTIC_ONLY_DO_NOT_SELECT_RULES",
+  "case": "STABLE3",
+  "results": {
+    "10": {
+      "peakUtc": "2026-02-28T10:55:00Z",
+      "peakEquityJpy": 497134.1757917926,
+      "troughUtc": "2026-03-09T02:05:00Z",
+      "troughEquityJpy": 367587.10920917656,
+      "maxDrawdownPct": -26.05877304176173,
+      "durationDays": 8.631944444444445,
+      "exitAttributionByStrategy": {
+        "V4": {
+          "n": 7,
+          "netPnlJpy": 30994.85612522854,
+          "grossPnlJpy": 31985.09237001841,
+          "wins": 6
+        },
+        "Q102": {
+          "n": 1,
+          "netPnlJpy": 3394.172538967902,
+          "grossPnlJpy": 3992.625756266246,
+          "wins": 1
+        },
+        "HYPE": {
+          "n": 3,
+          "netPnlJpy": -22559.87770157909,
+          "grossPnlJpy": -21282.454455784846,
+          "wins": 0
+        }
+      },
+      "worstGroups": [
+        {
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "route": "HYPE_TREND_LONG_PINNED",
+          "n": 3,
+          "netPnlJpy": -22559.87770157909
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 1,
+          "netPnlJpy": -2768.1392966806893
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "netPnlJpy": 497.3145420337884
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 1,
+          "netPnlJpy": 2131.586572680818
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "netPnlJpy": 2494.442125912978
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "route": "FET|REV24_T0.05_H8",
+          "n": 1,
+          "netPnlJpy": 3394.172538967902
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 1,
+          "netPnlJpy": 4846.329184622766
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 2,
+          "netPnlJpy": 23793.322996658877
+        }
+      ],
+      "worstTrades": [
+        {
+          "exitUtc": "2026-03-02T17:50:00Z",
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "side": "LONG",
+          "route": "HYPE_TREND_LONG_PINNED",
+          "netPnlJpy": -7843.360774766945,
+          "reason": "PINNED_HYPE_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-03-04T16:15:00Z",
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "side": "LONG",
+          "route": "HYPE_TREND_LONG_PINNED",
+          "netPnlJpy": -7478.633333913152,
+          "reason": "PINNED_HYPE_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-03-02T02:15:00Z",
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "side": "LONG",
+          "route": "HYPE_TREND_LONG_PINNED",
+          "netPnlJpy": -7237.883592898995,
+          "reason": "PINNED_HYPE_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-02-28T12:00:00Z",
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "netPnlJpy": -2768.1392966806893,
+          "reason": "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT"
+        },
+        {
+          "exitUtc": "2026-03-01T03:00:00Z",
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "netPnlJpy": 497.3145420337884,
+          "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+        },
+        {
+          "exitUtc": "2026-03-01T02:00:00Z",
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "netPnlJpy": 2131.586572680818,
+          "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+        },
+        {
+          "exitUtc": "2026-03-01T03:00:00Z",
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "netPnlJpy": 2494.442125912978,
+          "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+        },
+        {
+          "exitUtc": "2026-03-01T21:00:00Z",
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|REV24_T0.05_H8",
+          "netPnlJpy": 3394.172538967902,
+          "reason": "Q102_PROD_TIME"
+        },
+        {
+          "exitUtc": "2026-02-28T22:00:00Z",
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "netPnlJpy": 4846.329184622766,
+          "reason": "V4_NATIVE_TIME"
+        },
+        {
+          "exitUtc": "2026-02-28T20:00:00Z",
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "netPnlJpy": 11485.26582756237,
+          "reason": "V4_NATIVE_TIME"
+        },
+        {
+          "exitUtc": "2026-02-28T22:00:00Z",
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "netPnlJpy": 12308.057169096506,
+          "reason": "V4_NATIVE_TIME"
+        }
+      ],
+      "hashes": {
+        "equity": "ff1d47352ebe1b437e39b6572f38a86896c0ff3a504024ad0bac9efc2260c189",
+        "fills": "644df05935b0bdaa4786a2e6d532d1d48ad6175d464a6146425a1301ca6b2840"
+      }
+    },
+    "30": {
+      "peakUtc": "2026-07-27T11:00:00Z",
+      "peakEquityJpy": 1646986.314287636,
+      "troughUtc": "2026-09-22T11:00:00Z",
+      "troughEquityJpy": 1184572.4863512039,
+      "maxDrawdownPct": -28.076361286367945,
+      "durationDays": 57.0,
+      "exitAttributionByStrategy": {
+        "V52": {
+          "n": 11,
+          "netPnlJpy": 130280.54949296534,
+          "grossPnlJpy": 226381.86105338603,
+          "wins": 9
+        },
+        "PENGU": {
+          "n": 6,
+          "netPnlJpy": 197024.5458742458,
+          "grossPnlJpy": 228114.30616281804,
+          "wins": 4
+        },
+        "IDLE": {
+          "n": 22,
+          "netPnlJpy": -100818.9706507654,
+          "grossPnlJpy": -22320.767605350302,
+          "wins": 10
+        },
+        "Q102": {
+          "n": 12,
+          "netPnlJpy": -538869.1166082243,
+          "grossPnlJpy": -493306.15357008344,
+          "wins": 2
+        },
+        "FET": {
+          "n": 4,
+          "netPnlJpy": 94331.92135136976,
+          "grossPnlJpy": 111829.98238670497,
+          "wins": 2
+        },
+        "HYPE": {
+          "n": 8,
+          "netPnlJpy": -162390.79435548777,
+          "grossPnlJpy": -117825.37732422273,
+          "wins": 1
+        }
+      },
+      "worstGroups": [
+        {
+          "strategy": "IDLE",
+          "symbol": "TAOUSDT",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+          "n": 8,
+          "netPnlJpy": -167818.3639206788
+        },
+        {
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "route": "HYPE_TREND_LONG_PINNED",
+          "n": 8,
+          "netPnlJpy": -162390.79435548777
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "route": "FET|PB168_0.1_P24_0.02_H12",
+          "n": 1,
+          "netPnlJpy": -146884.88784876166
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ARBUSDT",
+          "route": "HIGH_VOL|ARBUSDT",
+          "n": 1,
+          "netPnlJpy": -91377.56011178272
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "SUIUSDT",
+          "route": "HIGH_VOL|SUIUSDT",
+          "n": 1,
+          "netPnlJpy": -83976.32201402247
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "RENDERUSDT",
+          "route": "RENDER|BRK168_H12_V1.2",
+          "n": 2,
+          "netPnlJpy": -65552.61376843831
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "route": "DOGE|MR72_Z1.5_H12",
+          "n": 1,
+          "netPnlJpy": -50252.19195518234
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "route": "DOGE|MR48_Z2.0_H12",
+          "n": 2,
+          "netPnlJpy": -46618.16358211489
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "route": "FET|REV24_T0.05_H8",
+          "n": 1,
+          "netPnlJpy": -42599.22248792113
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "route": "FET|REV12_T0.05_H12",
+          "n": 1,
+          "netPnlJpy": -35411.09409843861
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "RENDERUSDT",
+          "route": "IDLE_RENDER_RELATIVE_SHORT",
+          "n": 4,
+          "netPnlJpy": -32041.384448973287
+        },
+        {
+          "strategy": "V52",
+          "symbol": "MSFTUSDT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 1,
+          "netPnlJpy": -21041.244890029477
+        },
+        {
+          "strategy": "V52",
+          "symbol": "AMZNUSDT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 1,
+          "netPnlJpy": 97.92649833892028
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "JUPUSDT",
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "n": 3,
+          "netPnlJpy": 6355.13033283742
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ONDOUSDT",
+          "route": "HIGH_VOL|ONDOUSDT",
+          "n": 2,
+          "netPnlJpy": 23802.939258437807
+        },
+        {
+          "strategy": "V52",
+          "symbol": "TSLAUSDT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 4,
+          "netPnlJpy": 55298.85934220922
+        },
+        {
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "route": "RECOVERY_V8",
+          "n": 5,
+          "netPnlJpy": 61701.60963209399
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "TIAUSDT",
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "n": 7,
+          "netPnlJpy": 92685.6473860492
+        },
+        {
+          "strategy": "FET",
+          "symbol": "FETUSDT",
+          "route": "FET_BRK48_RESIDUAL",
+          "n": 4,
+          "netPnlJpy": 94331.92135136976
+        },
+        {
+          "strategy": "V52",
+          "symbol": "METAUSDT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 5,
+          "netPnlJpy": 95925.00854244665
+        }
+      ],
+      "worstTrades": [
+        {
+          "exitUtc": "2026-09-10T07:35:00Z",
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "LONG",
+          "route": "FET|PB168_0.1_P24_0.02_H12",
+          "netPnlJpy": -146884.88784876166,
+          "reason": "Q102_PROD_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-08-19T23:00:00Z",
+          "strategy": "Q102",
+          "symbol": "ARBUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|ARBUSDT",
+          "netPnlJpy": -91377.56011178272,
+          "reason": "Q102_PROD_hard_stop"
+        },
+        {
+          "exitUtc": "2026-07-28T02:00:00Z",
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "LONG",
+          "route": "RECOVERY_V8",
+          "netPnlJpy": -85583.61845738048,
+          "reason": "PENGU_NATIVE_RECOVERY_V8_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-09-18T10:00:00Z",
+          "strategy": "Q102",
+          "symbol": "SUIUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|SUIUSDT",
+          "netPnlJpy": -83976.32201402247,
+          "reason": "Q102_PROD_hard_stop"
+        },
+        {
+          "exitUtc": "2026-08-13T16:00:00Z",
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "LONG",
+          "route": "RECOVERY_V8",
+          "netPnlJpy": -80862.1067202835,
+          "reason": "PENGU_NATIVE_RECOVERY_V8_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-08-21T09:00:00Z",
+          "strategy": "Q102",
+          "symbol": "ONDOUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|ONDOUSDT",
+          "netPnlJpy": -79436.61740980415,
+          "reason": "Q102_PROD_hard_stop"
+        },
+        {
+          "exitUtc": "2026-09-05T13:00:00Z",
+          "strategy": "IDLE",
+          "symbol": "TIAUSDT",
+          "side": "SHORT",
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "netPnlJpy": -72344.540019625,
+          "reason": "IDLE_PROD_MAX_HOLD"
+        },
+        {
+          "exitUtc": "2026-09-21T09:05:00Z",
+          "strategy": "FET",
+          "symbol": "FETUSDT",
+          "side": "LONG",
+          "route": "FET_BRK48_RESIDUAL",
+          "netPnlJpy": -71110.3382850393,
+          "reason": "FET_PROTECTED_STOP"
+        },
+        {
+          "exitUtc": "2026-08-22T05:10:00Z",
+          "strategy": "Q102",
+          "symbol": "RENDERUSDT",
+          "side": "LONG",
+          "route": "RENDER|BRK168_H12_V1.2",
+          "netPnlJpy": -59164.54303216856,
+          "reason": "Q102_PROD_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-09-03T15:00:00Z",
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "DOGE|MR48_Z2.0_H12",
+          "netPnlJpy": -55079.121560750005,
+          "reason": "Q102_PROD_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-09-22T04:05:00Z",
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "DOGE|MR72_Z1.5_H12",
+          "netPnlJpy": -50252.19195518234,
+          "reason": "Q102_PROD_HARD_STOP"
+        },
+        {
+          "exitUtc": "2026-08-15T03:00:00Z",
+          "strategy": "IDLE",
+          "symbol": "TAOUSDT",
+          "side": "SHORT",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+          "netPnlJpy": -49533.315063928945,
+          "reason": "IDLE_PROD_MAX_HOLD"
+        },
+        {
+          "exitUtc": "2026-09-16T21:00:00Z",
+          "strategy": "IDLE",
+          "symbol": "TAOUSDT",
+          "side": "SHORT",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+          "netPnlJpy": -46551.2387063464,
+          "reason": "IDLE_PROD_MAX_HOLD"
+        },
+        {
+          "exitUtc": "2026-08-26T09:00:00Z",
+          "strategy": "IDLE",
+          "symbol": "TAOUSDT",
+          "side": "SHORT",
+          "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+          "netPnlJpy": -43811.58619175339,
+          "reason": "IDLE_PROD_MAX_HOLD"
+        },
+        {
+          "exitUtc": "2026-08-05T21:00:00Z",
+          "strategy": "FET",
+          "symbol": "FETUSDT",
+          "side": "LONG",
+          "route": "FET_BRK48_RESIDUAL",
+          "netPnlJpy": -42724.660584141326,
+          "reason": "MAX_HOLD"
+        },
+        {
+          "exitUtc": "2026-07-30T17:00:00Z",
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|REV24_T0.05_H8",
+          "netPnlJpy": -42599.22248792113,
+          "reason": "Q102_PROD_TIME"
+        },
+        {
+          "exitUtc": "2026-09-03T04:00:00Z",
+          "strategy": "IDLE",
+          "symbol": "JUPUSDT",
+          "side": "SHORT",
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "netPnlJpy": -38013.852814534286,
+          "reason": "IDLE_PROD_MAX_HOLD"
+        },
+        {
+          "exitUtc": "2026-09-05T07:50:00Z",
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|REV12_T0.05_H12",
+          "netPnlJpy": -35411.09409843861,
+          "reason": "SHARED_RISK_FLATTEN"
+        },
+        {
+          "exitUtc": "2026-07-30T04:00:00Z",
+          "strategy": "IDLE",
+          "symbol": "TIAUSDT",
+          "side": "SHORT",
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "netPnlJpy": -34844.233429098844,
+          "reason": "IDLE_PROD_MAX_HOLD"
+        },
+        {
+          "exitUtc": "2026-08-24T00:30:00Z",
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "side": "LONG",
+          "route": "HYPE_TREND_LONG_PINNED",
+          "netPnlJpy": -30989.692176201228,
+          "reason": "PINNED_HYPE_HARD_STOP"
+        }
+      ],
+      "hashes": {
+        "equity": "2d04039521dd806b805a94cda479f7423843fecb4601e1ead8e87483361b0f41",
+        "fills": "7cfbd829bb566e78a4cf8ee5e82938095c5cd38f52bfec87124003c9f02ab2b7"
+      }
+    }
+  },
+  "warning": "This target-year attribution is for prioritizing pretarget research only. No gate/threshold may be selected from these losses."
+}

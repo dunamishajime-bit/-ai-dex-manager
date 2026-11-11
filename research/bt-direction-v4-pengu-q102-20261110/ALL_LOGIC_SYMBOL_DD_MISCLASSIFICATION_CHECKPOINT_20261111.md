@@ -139,3 +139,95 @@ The <=20% DD objective is not yet achieved. HYPE quarantine nearly reaches it, b
 ## Safety
 
 No LIVE order, cancel, position, STOP, Kill Switch, Production runner or Production configuration was changed.
+
+
+## Overfit-guard continuation
+
+The following work was added specifically to prevent target-year loss-mining from becoming a rule.
+
+### HYPE: no promotable gate
+
+A generic 90d/min5/PF<0.60 online shadow-health gate, frozen from cross-route pretarget research, was tested without tuning on HYPE target outcomes. It worsened both pretarget and target HYPE quality, so it is rejected.
+
+A separate simple structural search used only 39 pretarget Binance-proxy HYPE candidates:
+- train: 2025-06..07
+- validation: 2025-08
+- prehold: 2025-09
+- single-feature rules only
+- train quartile thresholds only
+- >=35% retention
+- validation + prehold both required to improve
+- sibling-threshold support required
+
+Result: 0 robust rules. Therefore the attractive full-HYPE-quarantine sensitivity result remains diagnostic only and is not adopted.
+
+### Q102 HIGH_VOL: parity corrected; no new gate
+
+The prior target HIGH_VOL parity diagnostic was comparing against the legacy V1 signal builder and therefore reported 19/19 requested-gross mismatches. The replay now uses buildQuality102CausalV4Signal, which applies the production family/side gross contract and HIGH_VOL exit policy.
+
+Correct result:
+- 19 signals checked
+- 19 exact V4 parity
+- 0 mismatches
+
+A generic online shadow-health gate was then tested with the same pretarget-frozen 90d/min5/PF<0.60 policy. It blocked good pretarget trades and, in the target one-shot, blocked three profitable ONDO LONG trades. Rejected.
+
+A structural HIGH_VOL search used only pretarget data with train/validation/prehold splits, five predeclared features and simple predeclared pair families. 150 rules were tested; 0 survived the robustness constraints. No symbol blacklist or target-fitted HIGH_VOL rule is accepted.
+
+### V4 BTC/BNB/ATOM direction audit
+
+All symbols were screened with pretarget temporal splits before reading the true forward set.
+
+Only BTCUSDT met the strict pretarget quarantine condition:
+- pretarget native n=51, WR 11.76%, mean -1.988%, PF 0.050
+- opposite shadow n=51, WR 70.59%, mean +1.324%, PF 6.797
+- native remained negative in train, validation and prehold
+- true forward native n=9, WR 11.11%, mean -0.583%, PF 0.012
+
+BNB did not have enough robust support and true forward native became positive; ATOM native was positive in pretarget and forward. They are not blocked.
+
+The BTC block was then frozen and evaluated once in the integrated STABLE3 portfolio:
+- 10bps: JPY 3,947,836.61 / DD -26.06% / WR 61.92% / PF 1.667
+- 30bps: JPY 1,295,062.11 / DD -28.08% / WR 59.33% / PF 1.511
+
+DD did not improve and profit fell materially. Decision: reject the BTC block despite its strong isolated statistics. Do not flip BTC direction either.
+
+### IDLE TAO ATR gate retest
+
+The pretarget+forward-robust TAO rule atrRatio <= 0.01706380378807714 was frozen before target evaluation and retested on top of STABLE3:
+- 10bps: JPY 4,435,239.86 / DD -26.06% / WR 61.59% / PF 1.659
+- 30bps: JPY 1,435,064.28 / DD -28.08% / WR 59.44% / PF 1.506
+
+DD did not improve and both profit/PF weakened. Decision: reject.
+
+### Q102 S34 strict route stability
+
+A new route-level screen required every route quarantine to have:
+- train >=5
+- validation >=3
+- prehold >=2
+- full pretarget >=12
+- negative mean and PF<1 in every pretarget split
+- full-period PF<0.70
+- true forward could only veto, never add
+
+Result: no additional route passed. The existing STABLE3 Q102 quarantines remain; no DD-window loser was blacklisted from target outcomes.
+
+### STABLE3 DD attribution is diagnostic only
+
+10bps maximum DD:
+- peak 2026-02-28 10:55 UTC
+- trough 2026-03-09 02:05 UTC
+- DD -26.06%
+- HYPE was the only materially negative realized strategy in the peak-to-trough interval; V4 and Q102 exits were net positive.
+
+30bps maximum DD:
+- peak 2026-07-27 11:00 UTC
+- trough 2026-09-22 11:00 UTC
+- DD -28.08%
+- Q102 realized net in the interval: approximately -JPY 538,869
+- HYPE: approximately -JPY 162,391
+- IDLE: approximately -JPY 100,819
+- PENGU, V52 and FET were net positive over the same realized-exit window.
+
+These losses are used only to prioritize the next pretarget research. They are not allowed to define thresholds, symbols or routes.

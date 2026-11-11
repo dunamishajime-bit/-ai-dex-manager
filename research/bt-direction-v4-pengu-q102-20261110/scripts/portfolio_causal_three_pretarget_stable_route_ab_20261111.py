@@ -31,6 +31,16 @@ CASES={
    ("Q102","AVAX|MR24_Z1.5_H24"),
    ("Q102","UNI|MR72_Z1.5_H24"),
  },
+ "STABLE3_V4BTC":{
+   ("PENGU","SHORT_V20"),
+   ("Q102","AVAX|MR24_Z1.5_H24"),
+   ("Q102","UNI|MR72_Z1.5_H24"),
+ },
+ "STABLE3_TAOATR17":{
+   ("PENGU","SHORT_V20"),
+   ("Q102","AVAX|MR24_Z1.5_H24"),
+   ("Q102","UNI|MR72_Z1.5_H24"),
+ },
 }
 assert case in CASES,case
 BLOCKS=CASES[case]
@@ -41,6 +51,9 @@ Q102_RET14=0.048722800378429465
 RENDER_ATR_MAX=0.02244512414537602
 RENDER_RET24_MAX=-0.05907928388746808
 RENDER_GATE=(case=="STABLE3_RENDER")
+V4_BTC_BLOCK=(case=="STABLE3_V4BTC")
+TAO_ATR_GATE=(case=="STABLE3_TAOATR17")
+TAO_ATR_MAX=0.01706380378807714
 
 src=CANON.read_text(encoding="utf-8")
 cut=src.index('print("CURRENT_PARITY_WRAPPER"')
@@ -64,10 +77,20 @@ _PENGU_V8_BTC_LIMIT=__PENGU_BTC__
 _Q102_FET_RET14_MAX=__Q102_RET14__
 _PRETARGET_BLOCKS=__BLOCKS__
 _RENDER_GATE=__RENDER_GATE__
+_V4_BTC_BLOCK=__V4_BTC_BLOCK__
+_TAO_ATR_GATE=__TAO_ATR_GATE__
+_TAO_ATR_MAX=__TAO_ATR_MAX__
 _RENDER_ATR_MAX=__RENDER_ATR__
 _RENDER_RET24_MAX=__RENDER_RET24__
 _removed=collections.Counter()
 def _keep(c):
+ if _V4_BTC_BLOCK and c["s"]=="V4" and c.get("symbol")=="BTCUSDT":
+  _removed["PRETARGET_V4_BTC_BLOCK"]+=1;return False
+ if _TAO_ATR_GATE and c["s"]=="IDLE" and c.get("route")=="IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2":
+  f=c["v"].get("features") or {}
+  if "atrRatio" not in f:raise RuntimeError("IDLE_TAO_ATR_MISSING")
+  if float(f["atrRatio"])>_TAO_ATR_MAX:
+   _removed["PRETARGET_IDLE_TAO_ATR17"]+=1;return False
  if c["s"]=="IDLE" and c.get("route")=="IDLE_JUP_RELATIVE_SHORT":
   f=c["v"].get("features") or {}
   if "rel24" not in f or "volumeRatio" not in f:raise RuntimeError("IDLE_JUP_FEATURE_MISSING")
@@ -97,7 +120,7 @@ for a,b in [
  ("__IDLE_REL__",repr(IDLE_REL)),("__IDLE_VOL__",repr(IDLE_VOL)),
  ("__PENGU_BTC__",repr(PENGU_BTC)),("__Q102_RET14__",repr(Q102_RET14)),
  ("__BLOCKS__",repr(BLOCKS)),("__CASE__",repr(case)),
- ("__RENDER_GATE__",repr(RENDER_GATE)),("__RENDER_ATR__",repr(RENDER_ATR_MAX)),("__RENDER_RET24__",repr(RENDER_RET24_MAX))
+ ("__RENDER_GATE__",repr(RENDER_GATE)),("__V4_BTC_BLOCK__",repr(V4_BTC_BLOCK)),("__TAO_ATR_GATE__",repr(TAO_ATR_GATE)),("__TAO_ATR_MAX__",repr(TAO_ATR_MAX)),("__RENDER_ATR__",repr(RENDER_ATR_MAX)),("__RENDER_RET24__",repr(RENDER_RET24_MAX))
 ]: gate=gate.replace(a,b)
 orig=orig.replace(anchor,gate+anchor,1)
 assert "STEP=300000" in orig and "V52_STRATEGY_DAILY_LOSS_3P5_GATE" in orig
