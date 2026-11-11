@@ -1,0 +1,259 @@
+{
+  "status": "Q102_FET_ROUTE_PRETARGET_FREEZE_FORWARD_VETO_ONLY",
+  "costBps": 30,
+  "pretargetSplit": {
+    "train": "2025-03-22..2025-06-30",
+    "validation": "2025-07..08",
+    "prehold": "2025-09"
+  },
+  "criteria": {
+    "trainMinN": 6,
+    "validationMinN": 4,
+    "preholdMinN": 2,
+    "fullMinN": 15,
+    "negativeMeanAndPfBelow1EveryPretargetSplit": true,
+    "fullPfBelow": 0.75
+  },
+  "audit": {
+    "FET|BRK24_H48_V1.2": {
+      "splits30": {
+        "train": {
+          "n": 11,
+          "wr": 0.6363636363636364,
+          "mean": 0.04714209024890858,
+          "sum": 0.5185629927379943,
+          "pf": 3.0998710737064266
+        },
+        "validation": {
+          "n": 2,
+          "wr": 0.5,
+          "mean": -0.02466826769132252,
+          "sum": -0.04933653538264504,
+          "pf": 0.4055839110524691
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 13,
+        "wr": 0.6153846153846154,
+        "mean": 0.03609434287348841,
+        "sum": 0.4692264573553493,
+        "pf": 2.4221141741183043
+      },
+      "freezePretargetOnly": false
+    },
+    "FET|PB168_0.1_P24_0.02_H12": {
+      "splits30": {
+        "train": {
+          "n": 32,
+          "wr": 0.40625,
+          "mean": -0.01314023803980712,
+          "sum": -0.42048761727382783,
+          "pf": 0.41329830172394433
+        },
+        "validation": {
+          "n": 6,
+          "wr": 0.6666666666666666,
+          "mean": 0.005319217527046415,
+          "sum": 0.031915305162278494,
+          "pf": 2.1324742573275874
+        },
+        "prehold": {
+          "n": 4,
+          "wr": 1.0,
+          "mean": 0.005805550897820202,
+          "sum": 0.02322220359128081,
+          "pf": 999.0
+        }
+      },
+      "full30": {
+        "n": 42,
+        "wr": 0.5,
+        "mean": -0.008698812107625442,
+        "sum": -0.36535010852026856,
+        "pf": 0.5095177617456189
+      },
+      "freezePretargetOnly": false
+    },
+    "FET|PB72_0.1_P12_0.04_H12": {
+      "splits30": {
+        "train": {
+          "n": 7,
+          "wr": 0.7142857142857143,
+          "mean": 0.012410959975381459,
+          "sum": 0.08687671982767022,
+          "pf": 3.592377317964135
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 7,
+        "wr": 0.7142857142857143,
+        "mean": 0.012410959975381459,
+        "sum": 0.08687671982767022,
+        "pf": 3.592377317964135
+      },
+      "freezePretargetOnly": false
+    },
+    "FET|REV12_T0.05_H12": {
+      "splits30": {
+        "train": {
+          "n": 9,
+          "wr": 0.4444444444444444,
+          "mean": 0.0035381477647615563,
+          "sum": 0.03184332988285401,
+          "pf": 1.3592467678607214
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 9,
+        "wr": 0.4444444444444444,
+        "mean": 0.0035381477647615563,
+        "sum": 0.03184332988285401,
+        "pf": 1.3592467678607214
+      },
+      "freezePretargetOnly": false
+    },
+    "FET|REV12_T0.08_H24": {
+      "splits30": {
+        "train": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.02699850007499627,
+          "sum": 0.02699850007499627,
+          "pf": 999.0
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 1,
+        "wr": 1.0,
+        "mean": 0.02699850007499627,
+        "sum": 0.02699850007499627,
+        "pf": 999.0
+      },
+      "freezePretargetOnly": false
+    },
+    "FET|REV24_T0.05_H8": {
+      "splits30": {
+        "train": {
+          "n": 13,
+          "wr": 0.38461538461538464,
+          "mean": -0.005586340993236095,
+          "sum": -0.07262243291206924,
+          "pf": 0.48771835267154934
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 13,
+        "wr": 0.38461538461538464,
+        "mean": -0.005586340993236095,
+        "sum": -0.07262243291206924,
+        "pf": 0.48771835267154934
+      },
+      "freezePretargetOnly": false
+    },
+    "FET|REV24_T0.08_H8": {
+      "splits30": {
+        "train": {
+          "n": 1,
+          "wr": 1.0,
+          "mean": 0.008768167107973016,
+          "sum": 0.008768167107973016,
+          "pf": 999.0
+        },
+        "validation": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        },
+        "prehold": {
+          "n": 0,
+          "wr": null,
+          "mean": null,
+          "sum": 0,
+          "pf": null
+        }
+      },
+      "full30": {
+        "n": 1,
+        "wr": 1.0,
+        "mean": 0.008768167107973016,
+        "sum": 0.008768167107973016,
+        "pf": 999.0
+      },
+      "freezePretargetOnly": false
+    }
+  },
+  "frozenPretargetOnly": [],
+  "forwardOneShot": {},
+  "acceptedAfterForwardVeto": [],
+  "rejectedByForward": [],
+  "hashes": {
+    "pre": "faa1204b70f104ef9c40dbfe9ad9fff70a0e01b17ad1e65c31e53d3d1f0acd34",
+    "forward": "753da296cadeb4cbbf559c104a838025ba183d19d6a748c04f27cdf817c293e4"
+  },
+  "warning": "Pretarget is Binance UM FET-only local selector proxy; forward is Aster selected-base. No target-year outcome is used for freeze or veto."
+}
