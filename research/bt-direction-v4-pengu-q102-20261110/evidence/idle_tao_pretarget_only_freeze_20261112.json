@@ -1,0 +1,84 @@
+{
+  "status": "IDLE_TAO_PRETARGET_ONLY_FREEZE_FORWARD_VETO",
+  "baseline30": {
+    "train": {
+      "n": 70,
+      "wr": 0.34285714285714286,
+      "mean": -0.01060003361602616,
+      "sum": -0.7420023531218313,
+      "pf": 0.5267449679320811,
+      "worst": -0.10300000000000009
+    },
+    "valid": {
+      "n": 31,
+      "wr": 0.5483870967741935,
+      "mean": -0.003343999914752564,
+      "sum": -0.10366399735732948,
+      "pf": 0.7135512163918414,
+      "worst": -0.10300000000000009
+    },
+    "prehold": {
+      "n": 15,
+      "wr": 0.4666666666666667,
+      "mean": 0.005480557665519679,
+      "sum": 0.08220836498279518,
+      "pf": 1.540889710791795,
+      "worst": -0.0499086803298322
+    },
+    "forward": {
+      "n": 8,
+      "wr": 0.5,
+      "mean": -0.006244067506093101,
+      "sum": -0.04995254004874481,
+      "pf": 0.5380364521837031,
+      "worst": -0.0692497272925604
+    }
+  },
+  "qualifiedPretargetN": 6,
+  "selectedPretargetOnly": {
+    "rule": {
+      "feature": "atrRatio",
+      "op": "<=",
+      "threshold": 0.01706380378807714
+    },
+    "train": {
+      "n": 35,
+      "wr": 0.45714285714285713,
+      "mean": 0.006545496260648162,
+      "sum": 0.22909236912268569,
+      "pf": 1.618905311146721,
+      "worst": -0.06094518568469709
+    },
+    "valid": {
+      "n": 21,
+      "wr": 0.7619047619047619,
+      "mean": 0.008540573324610733,
+      "sum": 0.1793520398168254,
+      "pf": 3.5984957917883458,
+      "worst": -0.029897394902661408
+    },
+    "prehold": {
+      "n": 14,
+      "wr": 0.5,
+      "mean": 0.00849856130522238,
+      "sum": 0.11897985827311333,
+      "pf": 2.0326696052195303,
+      "worst": -0.0499086803298322
+    },
+    "pretargetQualified": true
+  },
+  "forwardVetoMetric": {
+    "n": 6,
+    "wr": 0.6666666666666666,
+    "mean": 0.004968380577764871,
+    "sum": 0.029810283466589226,
+    "pf": 2.050838612957484,
+    "worst": -0.020823849653218148
+  },
+  "forwardPass": true,
+  "method": "Single-feature thresholds generated from TRAIN only. Selection ranks only pretarget train/validation/prehold; true forward is consulted only after freeze as veto, never for ranking.",
+  "hashes": {
+    "pre": "44354693f7f5851c1993341be8ebbc51962b8637b6549f678243f1af73993fb7",
+    "forward": "5703329b9079dd6776c9667ce3ef9c8f6a2324e84f597c17226ce71e2871e942"
+  }
+}

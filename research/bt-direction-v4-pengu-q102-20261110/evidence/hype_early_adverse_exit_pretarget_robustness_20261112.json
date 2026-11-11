@@ -1,0 +1,39 @@
+{
+  "status": "HYPE_EARLY_ADVERSE_EXIT_PRETARGET_CAUSAL_ROBUSTNESS",
+  "costBps": 30,
+  "candidateCount": 80,
+  "trainQualifiedCount": 0,
+  "oosRobustCount": 0,
+  "oosSiblingRobustCount": 0,
+  "baseline": {
+    "train": {
+      "n": 19,
+      "wr": 0.47368421052631576,
+      "mean": 0.010962004708678738,
+      "sum": 0.20827808946489604,
+      "pf": 2.2315742932545883
+    },
+    "validation": {
+      "n": 11,
+      "wr": 0.0,
+      "mean": -0.018638925008785508,
+      "sum": -0.2050281750966406,
+      "pf": 0.0
+    },
+    "prehold": {
+      "n": 9,
+      "wr": 0.2222222222222222,
+      "mean": -0.0035765071931862357,
+      "sum": -0.03218856473867612,
+      "pf": 0.6992017848712883
+    }
+  },
+  "selectedPretargetOnly": null,
+  "topRobust": [],
+  "method": "LONG HYPE only. At 1/2/3/4h, using only completed M5 bars, if current return <= fixed adverse threshold and MFE <= cap, exit at next 5m open. Grid is fixed and small. Train discovers; August validation and September prehold only falsify. No target-year HYPE outcomes used.",
+  "hashes": {
+    "candidates": "4c2ca7e3563749a593e28186d0f7191b436d169299d2fe1a74fea0732216bcf8",
+    "m5": "8fc73d31bf12dffca4cb84006cdb941c892137e4f5bfd46a653b7292c85ebb51"
+  },
+  "warning": "Binance UM pretarget proxy, not Aster. Any candidate still requires one-shot integrated STABLE3 A/B and must reduce total DD, not merely HYPE loss."
+}

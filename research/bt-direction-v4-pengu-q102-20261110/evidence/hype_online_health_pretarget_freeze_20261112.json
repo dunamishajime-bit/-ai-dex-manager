@@ -1,0 +1,18 @@
+{
+  "status": "HYPE_ONLINE_HEALTH_PRETARGET_FREEZE_TARGET_ONE_SHOT",
+  "counts": {
+    "discover": 19,
+    "validation": 11,
+    "prehold": 9,
+    "target": 78
+  },
+  "policyGridN": 36,
+  "robustN": 0,
+  "selectedPretargetOnly": null,
+  "targetOneShot": null,
+  "method": "Online health uses only completed prior HYPE shadow outcomes. Policy grid is deliberately small. June-July discover; August validation; September prehold. Target 2025-10..2026-10 is evaluated once only after pretarget freeze.",
+  "hashes": {
+    "pre": "4c2ca7e3563749a593e28186d0f7191b436d169299d2fe1a74fea0732216bcf8",
+    "target": "1a996f77e52bc645c517f67f95a89561ca2c01896e3055c562de938b527ed6e6"
+  }
+}
