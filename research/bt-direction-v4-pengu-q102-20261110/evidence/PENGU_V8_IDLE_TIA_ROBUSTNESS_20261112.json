@@ -1,0 +1,337 @@
+{
+  "date": "2026-11-12",
+  "scope": "PENGU RECOVERY_V8 + IDLE TIA robustness audit; research only; no production/pin mutation",
+  "baselineRestored": {
+    "stable3Files": 21,
+    "stable3HashVerified": true,
+    "taoHalfFiles": 21,
+    "taoHalfHashVerified": true
+  },
+  "inputs": {
+    "penguPreperiodProxy": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250101_20251001\\PENGU_V20_BINANCE_PROXY\\pengu-v8-preperiod-proxy-candidates-with-native-exits.jsonl",
+      "sha256": "a66baa8c49837e31d7541c155e9199d0fa98f571ef4cd67f7696e6c84a386eb4"
+    },
+    "penguAsterEarlyFeatures": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\PENGU_EARLY_HOLDOUT_20250725_20250919\\pengu-v8-entry-features-current-pin.jsonl",
+      "sha256": "791bd210650588441dd55aa5b72d40684e22a7296cef6d38351e2ab334eaf209"
+    },
+    "idlePretarget": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\PREPERIOD_TRAIN_20250301_20251001\\IDLE_ALL_BINANCE_PROXY\\idle-all-preperiod-proxy-candidates-with-m5-exits.jsonl",
+      "sha256": "ee7b0e86fa61cca32628461da7d7e5b62f9a0dc47d0c8338775009bf7a67092b"
+    },
+    "idleForward": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\FORWARD_HOLDOUT_20261001_20261108\\IDLE_DUALSIDE_LIFECYCLE\\idle-forward-dualside.jsonl",
+      "sha256": "5703329b9079dd6776c9667ce3ef9c8f6a2324e84f597c17226ce71e2871e942"
+    }
+  },
+  "penguRecoveryV8": {
+    "decision": "KEEP_CURRENT; NO NEW BLOCK; DO NOT REMOVE CURRENT BTC24 GATE",
+    "target30": {
+      "n": 27,
+      "wins": 19,
+      "losses": 8,
+      "winRatePct": 70.37037037037037,
+      "profitFactor": 1.852513940788496,
+      "netPnlJpy": 230906.07
+    },
+    "broadPretarget30": {
+      "n": 19,
+      "wins": 13,
+      "losses": 6,
+      "winRatePct": 68.42105263157895,
+      "profitFactor": 2.073
+    },
+    "currentBtc24GatePretarget": {
+      "keptN": 15,
+      "wins": 9,
+      "losses": 6,
+      "winRatePct": 60.0,
+      "profitFactor": 1.506,
+      "removedAllWinners": true
+    },
+    "asterEarly30": {
+      "n": 9,
+      "wins": 6,
+      "losses": 3,
+      "profitFactor": 1.037
+    },
+    "asterEarlyCurrentBtc24Gate": {
+      "keptN": 6,
+      "wins": 3,
+      "losses": 3,
+      "profitFactor": 0.538,
+      "removedWinnersOnly": true
+    },
+    "rsiDelta6Max22TargetRejected": {
+      "keptN": 20,
+      "wins": 13,
+      "losses": 7,
+      "winRatePct": 65.0,
+      "profitFactor": 1.6315,
+      "reason": "removed 6 target winners and only 1 loser"
+    },
+    "btcGateOffIntegrated": {
+      "baseline10": {
+        "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+        "sha256": "a095e087f7afb8d1c2a98271184164253d0538761cd0895de2f7b933d49cfcc0",
+        "final_compounded_jpy": 4380032.763244813,
+        "max_hourly_dd_pct": -23.809717078407854,
+        "modeled_fills": 857,
+        "win_rate_pct": 61.726954492415395,
+        "profit_factor": 1.7265540132970725
+      },
+      "gateOff10": {
+        "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+        "sha256": "ef536ecf3627a289ca4bca86509395a2618fe46922ece24e7f6527375f984587",
+        "final_compounded_jpy": 2042524.6223694587,
+        "max_hourly_dd_pct": -38.290872022320535,
+        "modeled_fills": 843,
+        "win_rate_pct": 61.20996441281139,
+        "profit_factor": 1.4873046647205295
+      },
+      "baseline30": {
+        "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+        "sha256": "dd1e08d6d6c9f2798595bc1145652ccce7ea130cbb31a57aebae254d73aa2b9c",
+        "final_compounded_jpy": 1484977.1303380048,
+        "max_hourly_dd_pct": -24.770165784628382,
+        "modeled_fills": 854,
+        "win_rate_pct": 59.60187353629976,
+        "profit_factor": 1.5668861416115274
+      },
+      "gateOff30": {
+        "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+        "sha256": "c5e380822c8ca22fd42290b036c089a5de6ba8af53f6dc84cae220169fb320a4",
+        "final_compounded_jpy": 708951.2348647468,
+        "max_hourly_dd_pct": -44.36679069633534,
+        "modeled_fills": 841,
+        "win_rate_pct": 59.096313912009514,
+        "profit_factor": 1.3719846056268932
+      },
+      "gateOffRoute30": {
+        "n": 36,
+        "wins": 20,
+        "losses": 16,
+        "win_rate_pct": 55.55555555555556,
+        "profit_factor": 0.8777358536469085,
+        "net_pnl_jpy": -48655.24726170363
+      }
+    }
+  },
+  "idleTIA": {
+    "decision": "RESEARCH_ADOPT_CANDIDATE: require BTC24 >= -0.020 for TIA entry; not deployed",
+    "earlyAdverseExit": {
+      "grid": "3/6/9h x 1/2/3/4% adverse",
+      "trainQualifiedN": 0,
+      "decision": "REJECT"
+    },
+    "halfRisk": {
+      "pretargetSuggested": true,
+      "integratedDecision": "REJECT",
+      "reason": "30bps final 1.5365m -> 1.3292m in TAO-half comparison and DD -24.57% -> -27.60%"
+    },
+    "frozenGate": {
+      "feature": "btc24",
+      "operator": ">=",
+      "threshold": -0.02,
+      "selectionPolicy": "single-feature train-derived candidates; validation+prehold robustness; forward veto; rounded threshold; target not used to tune",
+      "pretarget30": {
+        "base": {
+          "n": 172,
+          "wins": 92,
+          "losses": 80,
+          "winRatePct": 53.49,
+          "profitFactor": 1.055
+        },
+        "gate": {
+          "n": 120,
+          "wins": 71,
+          "losses": 49,
+          "winRatePct": 59.17,
+          "profitFactor": 1.198
+        }
+      },
+      "forward30": {
+        "base": {
+          "n": 7,
+          "wins": 3,
+          "losses": 4,
+          "winRatePct": 42.86,
+          "profitFactor": 0.916
+        },
+        "gate": {
+          "n": 7,
+          "wins": 3,
+          "losses": 4,
+          "winRatePct": 42.86,
+          "profitFactor": 0.916
+        }
+      },
+      "targetIntegrated": {
+        "baseline10": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+          "sha256": "a095e087f7afb8d1c2a98271184164253d0538761cd0895de2f7b933d49cfcc0",
+          "final_compounded_jpy": 4380032.763244813,
+          "max_hourly_dd_pct": -23.809717078407854,
+          "modeled_fills": 857,
+          "win_rate_pct": 61.726954492415395,
+          "profit_factor": 1.7265540132970725
+        },
+        "gate10": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+          "sha256": "f2b0aab253d743e9c03fc191190d842ec64b9c587e9ff8094f852832f63154e5",
+          "final_compounded_jpy": 4615724.080670681,
+          "max_hourly_dd_pct": -23.809717078407854,
+          "modeled_fills": 857,
+          "win_rate_pct": 62.19369894982497,
+          "profit_factor": 1.7619660290805932
+        },
+        "baseline30": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+          "sha256": "dd1e08d6d6c9f2798595bc1145652ccce7ea130cbb31a57aebae254d73aa2b9c",
+          "final_compounded_jpy": 1484977.1303380048,
+          "max_hourly_dd_pct": -24.770165784628382,
+          "modeled_fills": 854,
+          "win_rate_pct": 59.60187353629976,
+          "profit_factor": 1.5668861416115274
+        },
+        "gate30": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+          "sha256": "a56c41cd44d9df61906cba4c2cdd38c518971d429f3508861b51b4254f376130",
+          "final_compounded_jpy": 1565928.7718063684,
+          "max_hourly_dd_pct": -24.571692993410245,
+          "modeled_fills": 854,
+          "win_rate_pct": 60.07025761124122,
+          "profit_factor": 1.5974692773070376
+        },
+        "tiaBaseline30": {
+          "n": 18,
+          "wins": 11,
+          "losses": 7,
+          "win_rate_pct": 61.111111111111114,
+          "profit_factor": 1.5768065047531485,
+          "net_pnl_jpy": 138614.15274062706
+        },
+        "tiaGate30": {
+          "n": 13,
+          "wins": 9,
+          "losses": 4,
+          "win_rate_pct": 69.23076923076923,
+          "profit_factor": 2.6494994538414876,
+          "net_pnl_jpy": 226916.9069373756
+        }
+      },
+      "thresholdSensitivityIntegrated": {
+        "-0.019": {
+          "s10": {
+            "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+            "sha256": "a9b3d3c50f68e33e092ee0ec2ef642057a1ff067df4e6c70355fb3ea1e61b2f7",
+            "final_compounded_jpy": 4615724.080670681,
+            "max_hourly_dd_pct": -23.809717078407854,
+            "modeled_fills": 857,
+            "win_rate_pct": 62.19369894982497,
+            "profit_factor": 1.7619660290805932
+          },
+          "s30": {
+            "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+            "sha256": "32481504ea72d642ddfcb21a4864097785589d806a8141ccdca0403e25f92acf",
+            "final_compounded_jpy": 1565928.7718063684,
+            "max_hourly_dd_pct": -24.571692993410245,
+            "modeled_fills": 854,
+            "win_rate_pct": 60.07025761124122,
+            "profit_factor": 1.5974692773070376
+          }
+        },
+        "-0.020": {
+          "s10": {
+            "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+            "sha256": "f2b0aab253d743e9c03fc191190d842ec64b9c587e9ff8094f852832f63154e5",
+            "final_compounded_jpy": 4615724.080670681,
+            "max_hourly_dd_pct": -23.809717078407854,
+            "modeled_fills": 857,
+            "win_rate_pct": 62.19369894982497,
+            "profit_factor": 1.7619660290805932
+          },
+          "s30": {
+            "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+            "sha256": "a56c41cd44d9df61906cba4c2cdd38c518971d429f3508861b51b4254f376130",
+            "final_compounded_jpy": 1565928.7718063684,
+            "max_hourly_dd_pct": -24.571692993410245,
+            "modeled_fills": 854,
+            "win_rate_pct": 60.07025761124122,
+            "profit_factor": 1.5974692773070376
+          }
+        },
+        "-0.021": {
+          "s10": {
+            "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+            "sha256": "d844bda156bed91c736c01cd2f3917a2f3b9d28ec4d957c1769a044babfd4578",
+            "final_compounded_jpy": 4615724.080670681,
+            "max_hourly_dd_pct": -23.809717078407854,
+            "modeled_fills": 857,
+            "win_rate_pct": 62.19369894982497,
+            "profit_factor": 1.7619660290805932
+          },
+          "s30": {
+            "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_HYPE_HALF_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+            "sha256": "95f2d43332da0bacea829bf9668a8a099ff0b90bc26b38476da486a00e03d64c",
+            "final_compounded_jpy": 1565928.7718063684,
+            "max_hourly_dd_pct": -24.571692993410245,
+            "modeled_fills": 854,
+            "win_rate_pct": 60.07025761124122,
+            "profit_factor": 1.5974692773070376
+          }
+        },
+        "note": "all three produced identical final metrics/fill count despite 45/44/43 raw candidate removals"
+      },
+      "taoHalfInteraction": {
+        "baseline10": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+          "sha256": "6bcbc773d10dcd79964f47f6313ffceeca3637bc9651efb5644479be3a348708",
+          "final_compounded_jpy": 4442161.5817690855,
+          "max_hourly_dd_pct": -23.809717078407832,
+          "modeled_fills": 857,
+          "win_rate_pct": 61.726954492415395,
+          "profit_factor": 1.7833880283890604
+        },
+        "combo10": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+          "sha256": "8b7ec586d9c04ac1fbfa3c845225e7eea78ee3367fdf79b44179b38905dc3bd3",
+          "final_compounded_jpy": 4757774.221089659,
+          "max_hourly_dd_pct": -23.809717078407832,
+          "modeled_fills": 857,
+          "win_rate_pct": 62.19369894982497,
+          "profit_factor": 1.827787763989351
+        },
+        "baseline30": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+          "sha256": "898699233b674a1ca713706e5990c845d5097654c56a1c5df21ee6dcb5486a1d",
+          "final_compounded_jpy": 1536510.0705302875,
+          "max_hourly_dd_pct": -24.5716929934103,
+          "modeled_fills": 854,
+          "win_rate_pct": 59.60187353629976,
+          "profit_factor": 1.616914665192511
+        },
+        "combo30": {
+          "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+          "sha256": "641d479820ce3fd759defd986f0088c5eb372622800f80807d9ba4ea3669dde3",
+          "final_compounded_jpy": 1650119.5604759753,
+          "max_hourly_dd_pct": -24.5716929934103,
+          "modeled_fills": 854,
+          "win_rate_pct": 60.07025761124122,
+          "profit_factor": 1.6564644054703694
+        }
+      }
+    }
+  },
+  "scripts": {
+    "scripts/pengu_v8_preperiod_binance_proxy_replay_20261112.mjs": "cc0039697bed5c72772a7530ee14c23aa2a29d5b08812d85752f0cd2f8f8ed06",
+    "scripts/pengu_v8_aster_early_feature_export_20261112.mjs": "192dea8f31c8863ece59da6cc2707b7e8c19d378192824d9483e2b7fc97a04f9",
+    "scripts/portfolio_stable3_hype_half_pengu_v8_btc_gate_off_inplace_20261112.py": "c327fb1eb5141f1f685a0841264277a3a47cd3f9254e625095dca68b222d7f1a",
+    "scripts/idle_tia_early_adverse_exit_pretarget_forward_20261112.py": "d3a61f09ea76df7050e7a00d62cd4741324b958d907c0b62b2fa463345430522",
+    "scripts/idle_tia_pretarget_half_risk_freeze_20261112.py": "6663ba7dac675dd5c1205acc018d0c6cf418ca137341994adb7ad9fa5930a3a5",
+    "scripts/portfolio_stable3_hype_half_idle_tia_btc24_min19_inplace_20261112.py": "0e4f0e39084d6d9107ddc815f5409bac720f130346a339439231eb188835891c",
+    "scripts/portfolio_stable3_hype_half_idle_tia_btc24_min20_inplace_20261112.py": "38c096f6f526ff63728d95b233e8855c4999cd887a5f36038a5c3bcc3e8ce78c",
+    "scripts/portfolio_stable3_hype_half_idle_tia_btc24_min21_inplace_20261112.py": "d171d496bfd7359fd50f9506f470ae13197fab5e73b8ba07edbec1f7d054d1cf"
+  }
+}
