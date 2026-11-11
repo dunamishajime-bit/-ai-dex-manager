@@ -46,6 +46,11 @@ CASES={
    ("Q102","AVAX|MR24_Z1.5_H24"),
    ("Q102","UNI|MR72_Z1.5_H24"),
  },
+ "S3_HH_TH":{
+   ("PENGU","SHORT_V20"),
+   ("Q102","AVAX|MR24_Z1.5_H24"),
+   ("Q102","UNI|MR72_Z1.5_H24"),
+ },
 }
 assert case in CASES,case
 BLOCKS=CASES[case]
@@ -59,7 +64,8 @@ RENDER_GATE=(case=="STABLE3_RENDER")
 V4_BTC_BLOCK=(case=="STABLE3_V4BTC")
 TAO_ATR_GATE=(case=="STABLE3_TAOATR17")
 TAO_ATR_MAX=0.01706380378807714
-HYPE_HALF=(case=="STABLE3_HYPE_HALF")
+HYPE_HALF=(case in ("STABLE3_HYPE_HALF","S3_HH_TH"))
+TAO_HALF=(case=="S3_HH_TH")
 
 src=CANON.read_text(encoding="utf-8")
 cut=src.index('print("CURRENT_PARITY_WRAPPER"')
@@ -87,6 +93,7 @@ _V4_BTC_BLOCK=__V4_BTC_BLOCK__
 _TAO_ATR_GATE=__TAO_ATR_GATE__
 _TAO_ATR_MAX=__TAO_ATR_MAX__
 _HYPE_HALF=__HYPE_HALF__
+_TAO_HALF=__TAO_HALF__
 _RENDER_ATR_MAX=__RENDER_ATR__
 _RENDER_RET24_MAX=__RENDER_RET24__
 _removed=collections.Counter()
@@ -94,6 +101,9 @@ def _keep(c):
  if _HYPE_HALF and c["s"]=="HYPE":
   c["gross"]=float(c["gross"])*0.5
   _removed["PRETARGET_HYPE_HALF_GROSS"]+=1
+ if _TAO_HALF and c["s"]=="IDLE" and c.get("route")=="IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2":
+  c["gross"]=float(c["gross"])*0.5
+  _removed["PRETARGET_TAO_HALF_GROSS"]+=1
  if _V4_BTC_BLOCK and c["s"]=="V4" and c.get("symbol")=="BTCUSDT":
   _removed["PRETARGET_V4_BTC_BLOCK"]+=1;return False
  if _TAO_ATR_GATE and c["s"]=="IDLE" and c.get("route")=="IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2":
@@ -130,7 +140,7 @@ for a,b in [
  ("__IDLE_REL__",repr(IDLE_REL)),("__IDLE_VOL__",repr(IDLE_VOL)),
  ("__PENGU_BTC__",repr(PENGU_BTC)),("__Q102_RET14__",repr(Q102_RET14)),
  ("__BLOCKS__",repr(tuple(sorted(BLOCKS)))),("__CASE__",repr(case)),
- ("__RENDER_GATE__",repr(RENDER_GATE)),("__V4_BTC_BLOCK__",repr(V4_BTC_BLOCK)),("__TAO_ATR_GATE__",repr(TAO_ATR_GATE)),("__TAO_ATR_MAX__",repr(TAO_ATR_MAX)),("__HYPE_HALF__",repr(HYPE_HALF)),("__RENDER_ATR__",repr(RENDER_ATR_MAX)),("__RENDER_RET24__",repr(RENDER_RET24_MAX))
+ ("__RENDER_GATE__",repr(RENDER_GATE)),("__V4_BTC_BLOCK__",repr(V4_BTC_BLOCK)),("__TAO_ATR_GATE__",repr(TAO_ATR_GATE)),("__TAO_ATR_MAX__",repr(TAO_ATR_MAX)),("__HYPE_HALF__",repr(HYPE_HALF)),("__TAO_HALF__",repr(TAO_HALF)),("__RENDER_ATR__",repr(RENDER_ATR_MAX)),("__RENDER_RET24__",repr(RENDER_RET24_MAX))
 ]: gate=gate.replace(a,b)
 orig=orig.replace(anchor,gate+anchor,1)
 assert "STEP=300000" in orig and "V52_STRATEGY_DAILY_LOSS_3P5_GATE" in orig
