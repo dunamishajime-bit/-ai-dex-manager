@@ -44,13 +44,31 @@ export function pendingV4OwnerProofs(
    !Number.isSafeInteger(heartbeat.heartbeatAt)||heartbeat.heartbeatAt>now||now-heartbeat.heartbeatAt>180000||
    ledger?.schema!==2||ledger.state?.initial?.holdProtected!==false||ledger.state?.executionReview!=null)
   return [];
+ return pendingV4DurableStopProofs(orders,ledger,marker,sha);
+}
+
+/**
+ * Proves ownership from the immutable pinned release marker, the V4 durable ledger,
+ * and the signed venue STOP read-back. This is liveness-independent and grants no
+ * trading permission; it exists only so read-only pending reconciliation cannot
+ * deadlock when the V4 process is fully stopped.
+ */
+export function pendingV4DurableStopProofs(
+ orders:Row[],ledger:Row|undefined,marker:string,sha:string,
+){
+ if(!/^[a-f0-9]{40}$/.test(sha)||ledger?.schema!==2||ledger.releaseSha!==sha||
+   ledger.state?.initial?.holdProtected!==false||ledger.state?.executionReview!=null)
+  return [];
  return v4ProofsFromBoundLedger(orders,ledger,marker,sha).filter(proof=>{
   const intent=ledger.intents?.[proof.stopClientOrderId];
-  const leg=ledger.state.legs?.[intent?.legId];
+  const leg=ledger.state?.legs?.[intent?.legId];
+  const protection=ledger.protections?.[intent?.legId];
   const order=orders.find(row=>row.clientOrderId===proof.stopClientOrderId);
   return intent?.action==='STOP'&&intent.stage==='ACKNOWLEDGED'&&leg?.status==='OPEN'&&
-   leg.qty===proof.quantity&&ledger.protections?.[intent.legId]?.stopClientOrderId===proof.stopClientOrderId&&
-   order?.status==='NEW'&&Number(order.executedQty)===0;
+   Number(leg.qty)===proof.quantity&&protection?.phase==='STOP_CONFIRMED'&&
+   Number(protection?.protectedQty)===proof.quantity&&
+   protection?.stopClientOrderId===proof.stopClientOrderId&&
+   order?.status==='NEW'&&order?.reduceOnly===true&&Number(order.executedQty)===0;
  });
 }
 
@@ -113,12 +131,19 @@ export async function collectPendingOwnerEvidence(positions:Row[],orders:Row[],r
  const states=Object.fromEntries(['PENGU','FET','HYPE','IDLE','RESIDUAL'].map(key=>[key,records[key].value??{}]));
  let v4Proofs=v4ProofsFromIndependentEvidence(orders,records.V4_LEDGER.value,records.V4_HEARTBEAT.value,
    records.V4_MARKER.raw??'',now,manifest.pins.V12);
+ let v4ProofSource:'NONE'|'INDEPENDENT_HEARTBEAT'|'DURABLE_LEDGER'|'RUNNING_BLOCKED_RUNTIME'=
+  v4Proofs.length>0?'INDEPENDENT_HEARTBEAT':'NONE';
  let v4Runtime:V4Runtime|undefined;
  if(v4Proofs.length===0&&orders.some(order=>/^v12-v4-[a-f0-9]{28}$/.test(order.clientOrderId??''))){
-  const runtime=await observeV4Runtime(manifest.pins.V12);
-  v4Proofs=pendingV4OwnerProofs(orders,records.V4_LEDGER.value,records.V4_RUNNER_HEARTBEAT.value,
-   records.V4_MARKER.raw??'',Date.now(),manifest.pins.V12,runtime);
-  if(v4Proofs.length>0)v4Runtime=runtime;
+  v4Proofs=pendingV4DurableStopProofs(orders,records.V4_LEDGER.value,records.V4_MARKER.raw??'',manifest.pins.V12);
+  if(v4Proofs.length>0){
+   v4ProofSource='DURABLE_LEDGER';
+  }else{
+   const runtime=await observeV4Runtime(manifest.pins.V12);
+   v4Proofs=pendingV4OwnerProofs(orders,records.V4_LEDGER.value,records.V4_RUNNER_HEARTBEAT.value,
+    records.V4_MARKER.raw??'',Date.now(),manifest.pins.V12,runtime);
+   if(v4Proofs.length>0){v4Runtime=runtime;v4ProofSource='RUNNING_BLOCKED_RUNTIME';}
+  }
  }
  const q102Proofs=q102ProofsFromIndependentEvidence(orders,records.Q102_STATE.value,records.Q102_HEARTBEAT.value,
    records.Q102_MARKER.raw??'',now,manifest.pins.Q102);
@@ -127,7 +152,11 @@ export async function collectPendingOwnerEvidence(positions:Row[],orders:Row[],r
  const observation=observeResidentProtection(positions,orders,states,runtimeSha,now,v4Proofs,q102Proofs,manifest.pins);
  const required=new Set<string>();
  for(const row of observation.positions){
-  if(row.strategy==='V12_V4')for(const key of ['V4_LEDGER',v4Runtime?'V4_RUNNER_HEARTBEAT':'V4_HEARTBEAT','V4_MARKER'])required.add(key);
+  if(row.strategy==='V12_V4'){
+   required.add('V4_LEDGER');required.add('V4_MARKER');
+   if(v4ProofSource==='INDEPENDENT_HEARTBEAT')required.add('V4_HEARTBEAT');
+   else if(v4ProofSource==='RUNNING_BLOCKED_RUNTIME')required.add('V4_RUNNER_HEARTBEAT');
+  }
   else if(row.strategy==='Q102')for(const key of ['Q102_STATE','Q102_HEARTBEAT','Q102_MARKER'])required.add(key);
   else if(row.strategy==='V52')for(const key of ['V52_STATE','MARGIN'])required.add(key);
   else if(Object.hasOwn(records,row.strategy))required.add(row.strategy);
