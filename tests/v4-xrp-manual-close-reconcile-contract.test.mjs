@@ -24,15 +24,15 @@ test("XRP manual-close reconciliation is exact and non-ordering",()=>{
   assert.match(script,/positionChangesSent:0/);
 });
 
-test("workflow is owner/environment bound and restores read-only maintenance timer",()=>{
+test("workflow is owner/environment bound and requires V4 already quiesced",()=>{
   assert.match(workflow,/github\.actor == 'dunamishajime-bit'/);
   assert.match(workflow,/environment:/);
   assert.match(workflow,/name: disdex-production/);
-  assert.match(workflow,/systemctl stop disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8\.service/);
-  assert.match(workflow,/systemctl start disdex-pending-exposure-reconcile\.service/);
+  assert.match(workflow,/systemctl is-active disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8\.service/);
+  assert.doesNotMatch(workflow,/systemctl stop disdex-v12-v4@/);
+  assert.match(workflow,/PENDING_FLAT_FRESH=TRUE/);
   assert.match(workflow,/runuser -u deploy/);
   assert.match(workflow,/ASTER_ORDERS_SENT=0/);
   assert.match(workflow,/ASTER_CANCELS_SENT=0/);
   assert.match(workflow,/ASTER_POSITION_CHANGES_SENT=0/);
-  assert.match(workflow,/systemctl start disdex-pending-exposure-reconcile\.timer/);
 });

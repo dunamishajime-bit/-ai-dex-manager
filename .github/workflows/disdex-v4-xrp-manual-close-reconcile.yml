@@ -29,7 +29,7 @@ jobs:
           set -euo pipefail
           FILE=scripts/ops/deploy/disdex_v4_xrp_manual_close_reconcile.ts
           test -f "$FILE"
-          for token in             XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000             v12-v4-231ed20b6835c4148b5314d8da7e             3ad65403013b701db5d9e53e8814e6ab827a28e8             21785120 4143469655 21843239 4154566371 4143471979             1.1581 1.0508 1.42709 0.00559025 0.01518936             reconcileV4ExternalFlatClose; do
+          for token in XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000 v12-v4-231ed20b6835c4148b5314d8da7e 3ad65403013b701db5d9e53e8814e6ab827a28e8 21785120 4143469655 21843239 4154566371 4143471979 1.1581 1.0508 1.42709 0.00559025 0.01518936 reconcileV4ExternalFlatClose; do
             grep -Fq "$token" "$FILE"
           done
           ! grep -Eq '\.(placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder|setLeverage|setMarginType)\(' "$FILE"
@@ -51,7 +51,7 @@ jobs:
           printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"
           chmod 0600 "$RUNNER_TEMP/xrp-reconcile-ssh/"*
 
-      - name: Quiesce V4 and refresh flat pending evidence
+      - name: Verify V4 quiesced and flat pending evidence fresh
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -59,27 +59,11 @@ jobs:
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          SSH=(ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key"
-            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes
-            -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"
-            -o ConnectTimeout=12 -p "$PORT" "root@$HOST")
-          "${SSH[@]}" 'set -euo pipefail
-            systemctl stop disdex-pending-exposure-reconcile.timer
-            systemctl stop disdex-pending-exposure-reconcile.service || true
-            systemctl stop disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8.service
-            [[ "$(systemctl is-active disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8.service || true)" == "inactive" ]]
-            systemctl start disdex-pending-exposure-reconcile.service
-            python3 - <<'"'"'PY'"'"'
-import json,time
-p="/var/lib/disdex/shared/pending-exposure.json"
-d=json.load(open(p))
-assert sum(1 for x in d.get("entries",[]) if x.get("status")!="RELEASED")==0
-age=int(time.time()*1000)-int(d["updatedAt"])
-assert 0 <= age <= 300000, age
-print("PENDING_FLAT_FRESH=TRUE")
-PY
-            echo V4_QUIESCED=TRUE
-            echo TRADING_MUTATION=0'
+          SSH=(ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts" -o ConnectTimeout=12 -p "$PORT" "root@$HOST")
+          "${SSH[@]}" "test \"\$(systemctl is-active disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8.service || true)\" = inactive"
+          "${SSH[@]}" "python3 -c 'import json,time; d=json.load(open(\"/var/lib/disdex/shared/pending-exposure.json\")); active=sum(1 for x in d.get(\"entries\",[]) if x.get(\"status\")!=\"RELEASED\"); age=int(time.time()*1000)-int(d[\"updatedAt\"]); assert active==0,active; assert 0<=age<=300000,age; print(\"PENDING_FLAT_FRESH=TRUE\")'"
+          echo V4_QUIESCED=TRUE
+          echo TRADING_MUTATION=0
 
       - name: Upload bounded XRP reconcile helper
         shell: bash
@@ -89,8 +73,8 @@ PY
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          scp -i "$RUNNER_TEMP/xrp-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"             -P "$PORT" scripts/ops/deploy/disdex_v4_xrp_manual_close_reconcile.ts             "root@$HOST:/tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts"
-          ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"             -p "$PORT" "root@$HOST"             "chmod 0644 /tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts"
+          scp -i "$RUNNER_TEMP/xrp-reconcile-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts" -P "$PORT" scripts/ops/deploy/disdex_v4_xrp_manual_close_reconcile.ts "root@$HOST:/tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts"
+          ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts" -p "$PORT" "root@$HOST" "chmod 0644 /tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts"
 
       - name: Reconcile exact XRP manual close into V4 durable state
         shell: bash
@@ -100,14 +84,7 @@ PY
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
-             set -a;
-             . /etc/disdex/disdex-v12-aster-credentials.env;
-             set +a;
-             export HOME=/home/deploy NODE_ENV=production;
-             export DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json;
-             cd /home/deploy/disdex-trading/releases/3ad65403013b701db5d9e53e8814e6ab827a28e8;
-             exec runuser -u deploy --preserve-environment -- /usr/bin/node --import ./node_modules/tsx/dist/loader.mjs /tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts"
+          ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts" -o ConnectTimeout=12 -p "$PORT" "root@$HOST" "set -euo pipefail; set -a; . /etc/disdex/disdex-v12-aster-credentials.env; set +a; export HOME=/home/deploy NODE_ENV=production DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json; cd /home/deploy/disdex-trading/releases/3ad65403013b701db5d9e53e8814e6ab827a28e8; exec runuser -u deploy --preserve-environment -- /usr/bin/node --import ./node_modules/tsx/dist/loader.mjs /tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts"
 
       - name: Exact local-state postflight
         shell: bash
@@ -117,21 +94,8 @@ PY
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"             -p "$PORT" "root@$HOST" 'python3 - <<'"'"'PY'"'"'
-import json
-p="/var/lib/disdex/v12-v4/orders.json"
-d=json.load(open(p))
-leg=d["state"]["legs"]["XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000"]
-prot=d["protections"][leg["id"]]
-stop=d["intents"]["v12-v4-231ed20b6835c4148b5314d8da7e"]
-assert leg["status"]=="CLOSED" and abs(float(leg["qty"]))<1e-12
-assert abs(float(leg["realizedUsd"])-1.42709)<1e-8
-assert abs(float(leg["feesUsd"])-0.01175134)<1e-8
-assert abs(float(leg["fundingUsd"])-0.01518936)<1e-8
-assert prot["phase"]=="CLOSED" and abs(float(prot["protectedQty"]))<1e-12
-assert stop["stage"]=="TERMINAL"
-print("XRP_DURABLE_CLOSE_POSTFLIGHT=PASS")
-PY'
+          CHECK="import json; d=json.load(open('/var/lib/disdex/v12-v4/orders.json')); leg=d['state']['legs']['XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000']; prot=d['protections'][leg['id']]; stop=d['intents']['v12-v4-231ed20b6835c4148b5314d8da7e']; assert leg['status']=='CLOSED' and abs(float(leg['qty']))<1e-12; assert abs(float(leg['realizedUsd'])-1.42709)<1e-8; assert abs(float(leg['feesUsd'])-0.01175134)<1e-8; assert abs(float(leg['fundingUsd'])-0.01518936)<1e-8; assert prot['phase']=='CLOSED' and abs(float(prot['protectedQty']))<1e-12; assert stop['stage']=='TERMINAL'; print('XRP_DURABLE_CLOSE_POSTFLIGHT=PASS')"
+          ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts" -p "$PORT" "root@$HOST" "python3 -c \"$CHECK\""
 
       - name: Final no-order marker
         shell: bash
@@ -141,7 +105,7 @@ PY'
           echo ASTER_CANCELS_SENT=0
           echo ASTER_POSITION_CHANGES_SENT=0
 
-      - name: Restore read-only maintenance timer and cleanup
+      - name: Cleanup
         if: always()
         shell: bash
         env:
@@ -151,6 +115,6 @@ PY'
           set +e
           PORT="${PORT:-22}"
           if [[ -s "$RUNNER_TEMP/xrp-reconcile-ssh/key" && -n "$HOST" ]]; then
-            ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key"               -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes               -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"               -p "$PORT" "root@$HOST"               "systemctl start disdex-pending-exposure-reconcile.timer; rm -f -- /tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts"               >/dev/null 2>&1
+            ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts" -p "$PORT" "root@$HOST" "rm -f -- /tmp/disdex_v4_xrp_manual_close_reconcile.$GITHUB_RUN_ID.ts" >/dev/null 2>&1
           fi
           rm -rf "$RUNNER_TEMP/xrp-reconcile-ssh"
