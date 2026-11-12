@@ -24,6 +24,7 @@ STATE = Path("/var/lib/disdex/hype-zec-long/runner.json")
 V4 = Path("/var/lib/disdex/v12-v4/orders.json")
 SHARED = Path("/var/lib/disdex/shared")
 SNAPSHOT = Path("/var/lib/disdex/runner-health/current.json")
+PENDING_MAINTENANCE_SHA = "22ceb5fe44a6ac10a8880b1c8dcb7d5a20d479e5"
 REVIEW = "HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT"
 REPAIRED = "HYPE_CURRENT_FLAT_REVIEW_REPAIRED_AFTER_SIGNED_SCOPED_FLAT"
 AUDITED = {
@@ -293,7 +294,24 @@ class Restore:
                     reviewEvents=self.review_events,evidenceContract="SIGNED_ASTER_FLAT_3X",
                     resumeAfterStart=True,resumeRunId=resume_run_id,**ZERO)
 
+    def _pending_sdk(self):
+        if getattr(self,"pending_sdk",None) is None:
+            from disdex_pending_maintenance_install import _load_sdk
+            release=self.paths.releases/PENDING_MAINTENANCE_SHA
+            self.pending_sdk=_load_sdk(release)
+            require(self.pending_sdk.source_release()==release,"PENDING_SDK_SOURCE")
+        return self.pending_sdk
+
     def maintain_pending_freshness(self, force=False):
+        """Refresh pending evidence under the already-held exclusive deploy lock.
+
+        The systemd maintenance wrapper intentionally takes a shared deployment
+        lock, so launching it from this helper self-deadlocks. Reuse the exact
+        certified no-order maintenance core instead: committed authority,
+        executor lock, 60-second root grant, deploy-user signed child, normal
+        account-order lock/shared budget, and strict before/after verification.
+        """
+        import secrets
         from disdex_hype_scoped_root_cutover import validate_hype_pending
         from disdex_shared_risk_witness import file_bytes
         path=SHARED/"pending-exposure.json"
@@ -304,19 +322,58 @@ class Restore:
         raw,before=read_updated();now=time.time_ns()//1000000
         if not force and 0<=now-before<=240000:
             return before
-        service="disdex-pending-exposure-reconcile.service"
-        for _ in range(20):
-            subprocess.run(["/usr/bin/systemctl","reset-failed",service],capture_output=True,timeout=15)
-            proc=subprocess.run(["/usr/bin/systemctl","start",service],capture_output=True,text=True,timeout=45)
+
+        sdk=self._pending_sdk();release=self.paths.releases/PENDING_MAINTENANCE_SHA
+        credentials=sdk.load_server_credentials()
+        receipt_raw,_receipt=sdk.current_authority(release.name)
+        sdk.secure(sdk.RUNTIME,directory=True,allowed_write=0o200)
+        require(sdk.RUNTIME.stat().st_gid==self.deploy.pw_gid
+                and (sdk.RUNTIME.stat().st_mode&0o777)==0o750,"PENDING_RUNTIME_GROUP")
+        deadline=time.monotonic()+90
+        last_busy=False
+        while True:
+            runtime_fd=os.open(sdk.RUNTIME/"executor.lock",os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600)
+            grant_path=None
             try:
-                after_raw,after=read_updated();after_now=time.time_ns()//1000000
-                validate_hype_pending(after_raw,after_now)
-            except (ValueError,json.JSONDecodeError):
-                after=before
-            if proc.returncode==0 and after>before:
+                sdk.secure(sdk.RUNTIME/"executor.lock",allowed_write=0o200)
+                try:
+                    fcntl.flock(runtime_fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                except BlockingIOError:
+                    last_busy=True
+                    if time.monotonic()>=deadline:break
+                    time.sleep(0.5);continue
+                before_raw=sdk.PENDING.read_bytes();nonce=secrets.token_hex(16)
+                grant=sdk.build_service_grant(release.name,sdk.digest(before_raw),os.getpid(),
+                    time.time_ns()//1000000,nonce,sdk.digest(receipt_raw))
+                grant_path=sdk.RUNTIME/(nonce+".json")
+                sdk.exclusive_json(grant_path,grant,self.deploy.pw_gid,0o640)
+                try:
+                    result=sdk.run_signed_child(release,self.deploy,grant_path=grant_path,credentials=credentials)
+                except ValueError as error:
+                    if "PENDING_RECONCILE_ACCOUNT_LOCK_BUSY" in str(error):
+                        last_busy=True
+                        if time.monotonic()>=deadline:break
+                        time.sleep(0.5);continue
+                    raise
+                after_raw=sdk.PENDING.read_bytes();sdk.verify_update(before_raw,after_raw,result)
+                report=dict(status="PENDING_MAINTENANCE_RECONCILED",sourceSha=release.name,
+                    scope="PENDING_RECONCILE_ONLY",authorizationMethod="ROOT_COMMITTED_NO_ORDER_MAINTENANCE",
+                    ordersEnabled=False,result=result,completedAt=time.time_ns()//1000000,
+                    caller="HYPE_SHA_RESTORE_EXCLUSIVE_DEPLOY_LOCK")
+                sdk.exclusive_json(sdk.MAINTENANCE/"results"/(nonce+".json"),report)
+                after_raw,after=read_updated();validate_hype_pending(after_raw,time.time_ns()//1000000)
+                require(after>before and result.get("ordersSent")==result.get("cancelsSent")==
+                        result.get("positionChangesSent")==0,"PENDING_REFRESH_RESULT")
+                proofs=getattr(self,"pending_refresh_proofs",[]);proofs.append(dict(
+                    verifiedAt=result.get("verifiedAt"),positionCount=result.get("positionCount"),
+                    openOrderCount=result.get("openOrderCount"),ordersSent=0,cancelsSent=0,
+                    positionChangesSent=0));self.pending_refresh_proofs=proofs
                 return after
-            time.sleep(1)
-        raise ValueError("HYPE_SHA_RESTORE_PENDING_RECONCILIATION_REQUIRED")
+            finally:
+                if grant_path is not None:grant_path.unlink(missing_ok=True)
+                os.close(runtime_fd)
+        raise ValueError("HYPE_SHA_RESTORE_PENDING_RECONCILIATION_REQUIRED" if last_busy
+                         else "HYPE_SHA_RESTORE_PENDING_REFRESH_FAILED")
 
     def preview_fresh(self):
         from disdex_shared_risk_witness import file_bytes
@@ -442,7 +499,7 @@ class Restore:
             _root_file(tx/name,raw,0o400,[])
         before_enable=self.systemd.is_enabled(self.old)
         try:
-            sdk=_load_sdk(self.paths.releases/"7b7719c65d2c6116d02463fc4603200f28e20762")
+            sdk=self._pending_sdk()
             env=sdk.child_environment(CANDIDATE,self.deploy.pw_dir,credentials=sdk.load_server_credentials())
             require(env.get("DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH")==str(SHARED/"aster-rate-budget.json")
                     and not env.get("DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET"),"SHARED_RATE_BUDGET")

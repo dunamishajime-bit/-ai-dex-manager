@@ -35,8 +35,13 @@ test("flat-v2 restore is exact-SHA, 3x signed-flat, two-approval and fail-closed
   assert.match(tokens,/V4_HYPE_PEER_PIN_CONTINUITY:[\s\S]*?scope: "V12_V4",[\s\S]*?ordersEnabled: true/);
   assert.match(helper,/HYPE_SHA_RESTORE_RECONCILE_AFTER_START/);
   assert.match(helper,/resumeAfterStart=True/);
-  assert.match(helper,/disdex-pending-exposure-reconcile\.service/);
   assert.match(helper,/maintain_pending_freshness\(\)/);
+  assert.match(helper,/PENDING_MAINTENANCE_SHA = "22ceb5fe44a6ac10a8880b1c8dcb7d5a20d479e5"/);
+  assert.match(helper,/ROOT_COMMITTED_NO_ORDER_MAINTENANCE/);
+  assert.match(helper,/HYPE_SHA_RESTORE_EXCLUSIVE_DEPLOY_LOCK/);
+  assert.match(helper,/sdk\.verify_update\(before_raw,after_raw,result\)/);
+  assert.match(helper,/PENDING_RECONCILE_ACCOUNT_LOCK_BUSY/);
+  assert.doesNotMatch(helper,/systemctl","start",service/);
   assert.match(helper,/RESUME_UNEXPECTED_LIVE_AUTHORITY/);
   assert.match(helper,/RESUME_STALE_AUTHORITY_CAS/);
   assert.match(helper,/enabled is safe only/);
