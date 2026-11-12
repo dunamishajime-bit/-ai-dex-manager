@@ -11,6 +11,7 @@ import { replayProductionJournal } from './lib/v12-v4-production-lifecycle.ts';
 const [legacy,candidate,plan,runId]=process.argv.slice(1);
 const V4_SHA='3ad65403013b701db5d9e53e8814e6ab827a28e8';
 const REVIEW='HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT';
+const REPAIRED='HYPE_CURRENT_FLAT_REVIEW_REPAIRED_AFTER_SIGNED_SCOPED_FLAT';
 const statePath='/var/lib/disdex/hype-zec-long/runner.json';
 const v4Path='/var/lib/disdex/v12-v4/orders.json';
 const shared='/var/lib/disdex/shared/';
@@ -87,14 +88,20 @@ try{
  const meta=await lstat(statePath);
  if(meta.isSymbolicLink()||!meta.isFile())throw Error('HYPE_FLAT_V2_STATE_FILE_INVALID');
  const state=JSON.parse(raw.toString('utf8'));
- if(state.runtimeCommitSha!==legacy||state.mode!=='LIVE'||state.manualReview!==REVIEW
-    ||(state.positions??[]).length!==0||state.pending)throw Error('HYPE_FLAT_V2_STATE_BASELINE');
+ const failures=Array.isArray(state.failures)?state.failures:[];
+ const lastFailure=failures.at(-1)??{};
+ const lastDecision=state.lastDecision??{};
+ if(state.runtimeCommitSha!==legacy||state.mode!=='LIVE'||state.manualReview!=null
+    ||(state.positions??[]).length!==0||state.pending
+    ||state.updatedAt!==state.lastDecisionTs||state.updatedAt!==lastFailure.occurredAt
+    ||lastDecision.reason!==REPAIRED||lastFailure.message!==REPAIRED
+    ||!failures.some(x=>x?.message===REVIEW))throw Error('HYPE_FLAT_V2_REPAIRED_STATE_BASELINE');
  const backup=statePath+'.before-flat-v2-'+runId;
  await copyFile(statePath,backup,fsConstants.COPYFILE_EXCL);
  if(!(await readFile(backup)).equals(raw))throw Error('HYPE_FLAT_V2_BACKUP_MISMATCH');
  await chown(backup,meta.uid,meta.gid); await chmod(backup,meta.mode&0o777);
  const now=Date.now();
- const reason='HYPE_SHA_FLAT_V2_RECONCILED:ASTER_SIGNED_FLAT_3X';
+ const reason='HYPE_SHA_FLAT_V2_MIGRATED_FROM_REPAIRED_D6:ASTER_SIGNED_FLAT_3X';
  const next={...state,runtimeCommitSha:candidate,updatedAt:now,lastDecisionTs:now,
    lastDecision:{strategy:'HYPE_LONG',signalTs:null,accepted:false,reason},
    failures:[...(Array.isArray(state.failures)?state.failures:[]),{message:reason,occurredAt:now}].slice(-100)};
