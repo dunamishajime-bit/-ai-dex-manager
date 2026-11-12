@@ -22,15 +22,19 @@ test("XRP manual-close reconciliation is exact and non-ordering",()=>{
   assert.match(script,/ordersSent:0/);
   assert.match(script,/cancelsSent:0/);
   assert.match(script,/positionChangesSent:0/);
+  assert.match(script,/RUNNER_NOT_FAIL_CLOSED_BLOCKED/);
+  assert.match(script,/V12_V4_XRP_MANUAL_CLOSE_RECONCILE/);
+  assert.match(script,/account-order\.lock/);
 });
 
-test("workflow is owner/environment bound and requires V4 already quiesced",()=>{
+test("workflow is owner/environment bound and requires V4 fail-closed blocked",()=>{
   assert.match(workflow,/github\.actor == 'dunamishajime-bit'/);
   assert.match(workflow,/environment:/);
   assert.match(workflow,/name: disdex-production/);
   assert.match(workflow,/systemctl is-active disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8\.service/);
-  assert.doesNotMatch(workflow,/systemctl stop disdex-v12-v4@/);
-  assert.match(workflow,/PENDING_FLAT_FRESH=TRUE/);
+  assert.match(workflow,/V4_FAIL_CLOSED_AND_PENDING_FLAT_FRESH=TRUE/);
+  assert.match(workflow,/V4_PEER_ATTESTATION_RETRY_REQUIRED/);
+  assert.doesNotMatch(workflow,/systemctl (?:stop|start|restart) disdex-v12-v4@/);
   assert.match(workflow,/runuser -u deploy/);
   assert.match(workflow,/ASTER_ORDERS_SENT=0/);
   assert.match(workflow,/ASTER_CANCELS_SENT=0/);

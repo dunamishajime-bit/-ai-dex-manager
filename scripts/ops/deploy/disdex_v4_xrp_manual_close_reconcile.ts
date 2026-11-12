@@ -22,6 +22,7 @@ const ROOT = "/var/lib/disdex";
 const STORE = ROOT + "/v12-v4/orders.json";
 const PENDING = ROOT + "/shared/pending-exposure.json";
 const LOCK = ROOT + "/shared/account-order.lock";
+const HEARTBEAT = ROOT + "/v12-v4/heartbeat.json";
 const BACKUP = ROOT + "/v12-v4/orders.json.pre-xrp-manual-reconcile-1794452510700.bak";
 
 const LEG = "XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000";
@@ -58,6 +59,20 @@ function sha256(path:string){ return createHash("sha256").update(readFileSync(pa
 function assertRegular(path:string){
   const st=lstatSync(path);
   if(!st.isFile()||st.isSymbolicLink()) fail("UNSAFE_FILE:"+path);
+}
+function assertBlockedRunner(now=Date.now()){
+  assertRegular(HEARTBEAT);
+  const row=JSON.parse(readFileSync(HEARTBEAT,"utf8"));
+  if(row?.schema!=="disdex-v12-v4-runner-heartbeat/v1"||
+    row?.releaseSha!==SHA||row?.runtimeSha!==SHA||row?.expectedSha!==SHA||
+    row?.processAlive!==true||row?.liveEnabled!==true||
+    row?.safetyState!=="BLOCKED"||row?.status!=="blocked"||
+    row?.orderEnabled!==false||row?.ordersAllowed!==false||row?.orderPermission!=="BLOCKED"||
+    !Number.isSafeInteger(row?.mainPid)||row.mainPid<=0||
+    !Number.isSafeInteger(row?.heartbeatAt)||row.heartbeatAt>now||now-row.heartbeatAt>180000||
+    !String(row?.reason??"").startsWith("V4_PEER_ATTESTATION_RETRY_REQUIRED:"))
+    fail("RUNNER_NOT_FAIL_CLOSED_BLOCKED");
+  return {mainPid:row.mainPid,heartbeatAt:row.heartbeatAt,reason:row.reason};
 }
 function readOnlyFetch(input:RequestInfo|URL,init?:RequestInit){
   const request=input instanceof Request?input:undefined;
@@ -142,9 +157,14 @@ async function main(){
   if(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH!==ROOT+"/shared/aster-rate-budget.json") fail("RATE_BUDGET_BINDING");
   const store=new V4ExecutionStore(STORE,SHA);
   const lock=new FileAccountOrderLock(LOCK,120000,PENDING);
-  const lease=await lock.acquire("V12_V4_XRP_MANUAL_CLOSE_RECONCILE");
+  let lease;
+  for(let attempt=0;attempt<8&&!lease;attempt++){
+    lease=await lock.acquire("V12_V4_XRP_MANUAL_CLOSE_RECONCILE");
+    if(!lease)await new Promise(resolve=>setTimeout(resolve,1500));
+  }
   if(!lease) fail("ACCOUNT_LOCK_BUSY");
   try{
+    const blockedBefore=assertBlockedRunner();
     let doc=store.read();
     if(doc.state.legs[LEG]?.status==="CLOSED"){
       assertClosedState(doc);
@@ -170,6 +190,8 @@ async function main(){
     if(!client.hasTradingCredentials()) fail("ASTER_CREDENTIALS_MISSING");
     const proof=await signedProof(client);
     await lease.renew();
+    const blockedAtCommit=assertBlockedRunner();
+    if(blockedAtCommit.mainPid!==blockedBefore.mainPid) fail("RUNNER_PID_CHANGED_DURING_PROOF");
     if(createHash("sha256").update(readFileSync(STORE)).digest("hex")!==beforeHash) fail("STATE_CHANGED_DURING_PROOF");
 
     const next=reconcileV4ExternalFlatClose(doc,{
@@ -196,6 +218,7 @@ async function main(){
       fundingUsd:doc.state.legs[LEG].fundingUsd,protectionPhase:doc.protections[LEG].phase,
       stopIntentStage:doc.intents[STOP_CLIENT_ID].stage,venueNetQty:0,xrpOpenOrders:0,
       storeSha256Before:beforeHash,backupSha256:backup.backupSha256,storeSha256After:sha256(STORE),
+      runnerMainPid:blockedBefore.mainPid,runnerSafetyState:"BLOCKED",runnerOrderEnabled:false,
       ordersSent:0,cancelsSent:0,positionChangesSent:0,
     }));
   }finally{ await lease.release(); }
