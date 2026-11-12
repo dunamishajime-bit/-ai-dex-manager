@@ -25,6 +25,9 @@ test("flat-v2 restore is exact-SHA, 3x signed-flat, two-approval and fail-closed
   assert.match(workflow,/approval_id:/);
   assert.match(workflow,/v4_approval_id:/);
   assert.match(workflow,/name: disdex-production/);
+  assert.match(workflow,/\/usr\/local\/sbin\/disdex-hype-sha-owner-restore --preflight-readonly/);
+  assert.match(workflow,/\/usr\/local\/sbin\/disdex-hype-sha-owner-restore --run-id/);
+  assert.doesNotMatch(workflow,/\bscp\b|install -d -o root|hype-flat-v2-remote/);
   assert.match(request,/HYPE_TREND_LONG_SHA_RESTORE/);
   assert.match(request,/V4_HYPE_PEER_PIN_CONTINUITY/);
   assert.match(request,/HYPE_SHA_FLAT_RESTORE_V2/);

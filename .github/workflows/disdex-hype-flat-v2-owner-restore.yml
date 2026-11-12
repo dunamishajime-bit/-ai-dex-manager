@@ -53,7 +53,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
-      - name: Configure pinned root SSH and upload exact helper bundle
+      - name: Configure pinned root SSH for forced-command HYPE helper
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
@@ -70,13 +70,6 @@ jobs:
           mkdir -m 0700 "$ssh_dir"
           printf '%s\n' "$KEY" > "$ssh_dir/key"
           printf '%s\n' "$HOST_KEYS" > "$ssh_dir/known_hosts"
-          remote="/run/disdex-hype-flat-v2-$GITHUB_RUN_ID"
-          SSH=(ssh -T -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -o ConnectTimeout=12 -p "$port" "root@$HOST")
-          SCP=(scp -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -P "$port")
-          "${SSH[@]}" "install -d -o root -g root -m 0700 '$remote'"
-          "${SCP[@]}" scripts/ops/deploy/disdex_hype_sha_flat_restore.py scripts/ops/deploy/disdex_hype_sha_flat_restore_contract.py scripts/ops/deploy/disdex_hype_sha_flat_restore_venue.py "root@$HOST:$remote/"
-          "${SSH[@]}" "chmod 0400 '$remote/'*.py"
-          printf '%s' "$remote" > "$RUNNER_TEMP/hype-flat-v2-remote"
 
       - name: Read-only current-flat cutover preflight before redeeming OTP
         shell: bash
@@ -86,9 +79,8 @@ jobs:
         run: |
           set -euo pipefail
           port="${PORT:-22}"
-          remote="$(cat "$RUNNER_TEMP/hype-flat-v2-remote")"
           ssh_dir="$RUNNER_TEMP/hype-flat-v2-ssh"
-          ssh -nT -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -o ConnectTimeout=12 -p "$port" "root@$HOST"             "PYTHONPATH='$remote:/usr/local/libexec/disdex-unified' python3 '$remote/disdex_hype_sha_flat_restore.py' --preflight-readonly"             > "$RUNNER_TEMP/hype-flat-v2-plan.json"
+          ssh -nT -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -o ConnectTimeout=12 -p "$port" "root@$HOST"             "/usr/local/sbin/disdex-hype-sha-owner-restore --preflight-readonly"             > "$RUNNER_TEMP/hype-flat-v2-plan.json"
           python3 - <<'PY'
           import json,os,re
           from pathlib import Path
@@ -147,27 +139,18 @@ jobs:
               hype=redeem(ids[0],OPERATION,RUNNER,CANDIDATE,PLAN,Path(key.name))
               v4=redeem(ids[1],V4_OPERATION,V4_SCOPE,v4_sha,v4_plan,Path(key.name))
           ssh_dir=Path(os.environ["RUNNER_TEMP"])/"hype-flat-v2-ssh"
-          remote=Path(os.environ["RUNNER_TEMP"],"hype-flat-v2-remote").read_text()
           port=os.environ.get("PORT") or "22"
           cmd=["ssh","-T","-i",str(ssh_dir/"key"),"-o","BatchMode=yes","-o","IdentitiesOnly=yes",
                "-o","StrictHostKeyChecking=yes","-o","UserKnownHostsFile="+str(ssh_dir/"known_hosts"),
                "-o","ConnectTimeout=12","-o","ServerAliveInterval=10","-p",port,"root@"+HOST,
-               f"PYTHONPATH='{remote}:/usr/local/libexec/disdex-unified' python3 '{remote}/disdex_hype_sha_flat_restore.py' --run-id {run_id} --read-approval-stdin"]
+               f"/usr/local/sbin/disdex-hype-sha-owner-restore --run-id {run_id} --read-approval-stdin"]
           subprocess.run(cmd,input=json.dumps(dict(hype=hype,v4=v4)),text=True,check=True,timeout=2100)
           PY
 
-      - name: Cleanup ephemeral root bundle and SSH files
+      - name: Cleanup ephemeral SSH files
         if: always()
         shell: bash
-        env:
-          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
-          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
         run: |
           set +e
-          port="${PORT:-22}"
           ssh_dir="$RUNNER_TEMP/hype-flat-v2-ssh"
-          if [[ -s "$ssh_dir/key" && -f "$RUNNER_TEMP/hype-flat-v2-remote" ]]; then
-            remote="$(cat "$RUNNER_TEMP/hype-flat-v2-remote")"
-            ssh -nT -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -p "$port" "root@$HOST" "rm -rf -- '$remote'" >/dev/null 2>&1
-          fi
-          rm -rf "$ssh_dir" "$RUNNER_TEMP/hype-flat-v2-plan.json" "$RUNNER_TEMP/hype-flat-v2-remote"
+          rm -rf "$ssh_dir" "$RUNNER_TEMP/hype-flat-v2-plan.json"
