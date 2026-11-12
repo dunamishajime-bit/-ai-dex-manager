@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { pendingV4OwnerProofs } from "../lib/disdex-pending-owner-evidence";
+import { pendingV4DurableStopProofs, pendingV4OwnerProofs } from "../lib/disdex-pending-owner-evidence";
 
 const sha="a".repeat(40), peer="b".repeat(40), at=1794099959191;
 const serviceUnit=`disdex-v12-v4@${sha}.service`;
@@ -37,4 +37,28 @@ test("stale or mismatched runtime, unknown review, and partial or unrelated STOP
   const s=sample();update(s);
   assert.deepEqual(pendingV4OwnerProofs([s.order],s.ledger,s.heartbeat,sha,at,sha,s.runtime),[]);
  }
+});
+
+test("fully stopped V4 can prove resident STOP ownership from durable pin/ledger/venue evidence",()=>{
+ const s=sample();
+ assert.equal(pendingV4DurableStopProofs([s.order],s.ledger,sha,sha).length,1);
+});
+
+test("durable stopped-runner proof rejects release, ledger review, protection, and venue drift",()=>{
+ for(const update of [
+  (s:any)=>s.ledger.releaseSha="c".repeat(40),
+  (s:any)=>s.ledger.state.initial.holdProtected=true,
+  (s:any)=>s.ledger.state.executionReview="review",
+  (s:any)=>s.ledger.protections[legId].phase="PENDING",
+  (s:any)=>s.ledger.protections[legId].protectedQty=12.3,
+  (s:any)=>s.ledger.intents[clientOrderId].stage="CREATED",
+  (s:any)=>s.order.status="CANCELED",
+  (s:any)=>s.order.executedQty="0.1",
+  (s:any)=>s.order.reduceOnly=false,
+ ]){
+  const s=sample();update(s);
+  assert.deepEqual(pendingV4DurableStopProofs([s.order],s.ledger,sha,sha),[]);
+ }
+ const s=sample();
+ assert.deepEqual(pendingV4DurableStopProofs([s.order],s.ledger,"d".repeat(40),sha),[]);
 });
