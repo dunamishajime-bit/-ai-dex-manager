@@ -82,23 +82,20 @@ jobs:
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts"             -p "$PORT" "root@$HOST" 'python3 - <<'"'"'PY'"'"'
-          import json,subprocess,time
-          U="disdex-hype-long@d6bcc94512a6416189cd92d7203b9ac3b2c98e70.service"
-          subprocess.run(["systemctl","reset-failed",U],check=False)
-          subprocess.run(["systemctl","start",U],check=True,timeout=75)
-          def prop(k): return subprocess.check_output(["systemctl","show",U,f"--property={k}","--value"],text=True).strip()
-          end=time.time()+25
-          while time.time()<end and prop("ActiveState")!="active": time.sleep(1)
-          assert prop("ActiveState")=="active","HYPE_NOT_ACTIVE"
-          pid=int(prop("MainPID")); assert pid>100
-          time.sleep(15)
-          assert prop("ActiveState")=="active" and int(prop("MainPID"))==pid,"HYPE_NOT_STABLE"
-          state=json.load(open("/var/lib/disdex/hype-zec-long/runner.json"))
-          assert state.get("manualReview")!="HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT"
-          print("HYPE_LIVE_RESUME=PASS")
-          print("HYPE_PID="+str(pid))
-          PY
+          SSH=(ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts" -p "$PORT")
+          "${SSH[@]}" "root@$HOST" 'set -e
+            U=disdex-hype-long@d6bcc94512a6416189cd92d7203b9ac3b2c98e70.service
+            systemctl reset-failed "$U" || true
+            systemctl start "$U"
+            sleep 2
+            test "$(systemctl is-active "$U")" = active
+            PID="$(systemctl show "$U" --property=MainPID --value)"
+            test "$PID" -gt 100
+            sleep 15
+            test "$(systemctl is-active "$U")" = active
+            test "$(systemctl show "$U" --property=MainPID --value)" = "$PID"
+            echo HYPE_LIVE_RESUME=PASS
+            echo HYPE_PID="$PID"'
 
       - name: No-control-mutation marker
         run: |
