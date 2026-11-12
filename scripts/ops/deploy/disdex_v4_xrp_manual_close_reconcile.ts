@@ -10,6 +10,10 @@ import {
   readPendingExposureRegistry,
 } from "/home/deploy/disdex-trading/releases/3ad65403013b701db5d9e53e8814e6ab827a28e8/lib/disdex-pending-exposure-registry.ts";
 import {
+  classifyAsterRateBudgetFailure,
+  nextAsterRateBudgetRetryMs,
+} from "/home/deploy/disdex-trading/releases/3ad65403013b701db5d9e53e8814e6ab827a28e8/lib/disdex-aster-rate-budget-policy.ts";
+import {
   V4ExecutionStore,
   type V4ExecutionDocument,
 } from "/home/deploy/disdex-trading/releases/3ad65403013b701db5d9e53e8814e6ab827a28e8/lib/v12-v4-execution-store.ts";
@@ -85,6 +89,28 @@ function readOnlyFetch(input:RequestInfo|URL,init?:RequestInit){
     !readOnlyEndpoints.has(url.pathname.slice(9))) fail("READ_ONLY_BOUNDARY");
   return fetch(input,{...init,redirect:"error"});
 }
+async function rateBudgetRead<T>(
+  label:string,
+  read:()=>Promise<T>,
+  renew:()=>Promise<void>,
+):Promise<T>{
+  let last:unknown;
+  for(let attempt=0;attempt<6;attempt++){
+    await renew();
+    try{return await read();}
+    catch(error){
+      last=error;
+      const deferred=classifyAsterRateBudgetFailure(error);
+      if(!deferred||attempt===5)throw error;
+      const waitMs=nextAsterRateBudgetRetryMs(
+        attempt,250,6000,deferred.waitMs??0,()=>0.5,
+      );
+      if(!Number.isFinite(waitMs)||waitMs<0||waitMs>6000)fail("RATE_BUDGET_RETRY_INVALID:"+label);
+      await new Promise(resolve=>setTimeout(resolve,waitMs));
+    }
+  }
+  throw last;
+}
 function exactTrade(row:any,expected:{
   id:string;orderId:string;side:"BUY"|"SELL";qty:number;price:number;
   commission:number;realizedPnl:number;time:number;
@@ -124,15 +150,17 @@ function assertClosedState(doc:V4ExecutionDocument){
   const fill=(leg as any);
   return fill;
 }
-async function signedProof(client:AsterV3Client){
-  const [positions,openOrders,trades,stop,funding]=await Promise.all([
-    client.getPositions(),
-    client.getOpenOrders(),
-    client.getUserTrades("XRPUSDT",{startTime:ENTRY_TRADE_TS-1,endTime:Date.now(),limit:1000}),
-    client.getOrder("XRPUSDT",STOP_CLIENT_ID),
-    client.getIncomeHistory({symbol:"XRPUSDT",incomeType:"FUNDING_FEE",
-      startTime:ENTRY_TRADE_TS,endTime:Date.now(),limit:1000}),
-  ]);
+async function signedProof(client:AsterV3Client,renew:()=>Promise<void>){
+  const positions=await rateBudgetRead("positions",()=>client.getPositions(),renew);
+  const openOrders=await rateBudgetRead("openOrders",()=>client.getOpenOrders(),renew);
+  const trades=await rateBudgetRead("userTrades",()=>client.getUserTrades(
+    "XRPUSDT",{startTime:ENTRY_TRADE_TS-1,endTime:Date.now(),limit:1000},
+  ),renew);
+  const stop=await rateBudgetRead("stopOrder",()=>client.getOrder("XRPUSDT",STOP_CLIENT_ID),renew);
+  const funding=await rateBudgetRead("funding",()=>client.getIncomeHistory({
+    symbol:"XRPUSDT",incomeType:"FUNDING_FEE",
+    startTime:ENTRY_TRADE_TS,endTime:Date.now(),limit:1000,
+  }),renew);
   if(trades.length===1000||funding.length===1000) fail("HISTORY_MAY_BE_TRUNCATED");
   if(positions.some((x:any)=>Math.abs(Number(x.positionAmt))>1e-10)) fail("VENUE_NOT_FLAT");
   if(openOrders.length!==0) fail("OPEN_ORDER_REMAINS");
@@ -193,8 +221,9 @@ async function main(){
       fetchImpl:readOnlyFetch,userAgent:"DisDex-XRP-Manual-Reconcile/1.0",
     });
     if(!client.hasTradingCredentials()) fail("ASTER_CREDENTIALS_MISSING");
-    const proof=await signedProof(client);
-    await lease.renew();
+    const renewLease=async()=>{await lease!.renew();};
+    const proof=await signedProof(client,renewLease);
+    await renewLease();
     const blockedAtCommit=assertBlockedRunner();
     if(blockedAtCommit.mainPid!==blockedBefore.mainPid) fail("RUNNER_PID_CHANGED_DURING_PROOF");
     if(createHash("sha256").update(readFileSync(STORE)).digest("hex")!==beforeHash) fail("STATE_CHANGED_DURING_PROOF");
@@ -240,8 +269,10 @@ async function main(){
     doc=store.commit(doc.revision,next);
     assertClosedState(doc);
 
-    const post=await signedProof(client);
-    if(post.positions.some((x:any)=>Math.abs(Number(x.positionAmt))>1e-10)||post.openOrders.length) fail("POST_COMMIT_VENUE_CHANGED");
+    const positionsAfter=await rateBudgetRead("postPositions",()=>client.getPositions(),renewLease);
+    const openOrdersAfter=await rateBudgetRead("postOpenOrders",()=>client.getOpenOrders(),renewLease);
+    if(positionsAfter.some((x:any)=>Math.abs(Number(x.positionAmt))>1e-10)||openOrdersAfter.length)
+      fail("POST_COMMIT_VENUE_CHANGED");
     console.log(JSON.stringify({
       status:"V4_XRP_MANUAL_RECONCILE_PASS",
       revision:doc.revision,legId:LEG,durableStatus:doc.state.legs[LEG].status,durableQty:doc.state.legs[LEG].qty,
