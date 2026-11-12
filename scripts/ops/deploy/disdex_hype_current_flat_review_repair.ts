@@ -10,6 +10,10 @@ const STATE="/var/lib/disdex/hype-zec-long/runner.json";
 const V4="/var/lib/disdex/v12-v4/orders.json";
 const PENDING="/var/lib/disdex/shared/pending-exposure.json";
 const LOCK="/var/lib/disdex/shared/account-order.lock";
+const PIN="/etc/disdex/runner-pins.json";
+const KILL="/var/lib/disdex/shared/kill-switch.json";
+const RISK="/var/lib/disdex/shared/crypto-daily-risk.json";
+const MARGIN="/var/lib/disdex/shared/margin-risk/guard-live.json";
 const REVIEW="HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT";
 const XRP_LEG="XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000";
 const HYPE_SYMBOLS=new Set(["HYPEUSDT","ZECUSDT"]);
@@ -28,6 +32,16 @@ async function json(path:string){
   const value=JSON.parse(raw.toString("utf8"));
   if(!value||typeof value!=="object"||Array.isArray(value))fail("JSON_INVALID:"+path);
   return {st,raw,value};
+}
+async function assertProductionGuards(){
+  const pins=(await json(PIN)).value;
+  const row=pins?.runners?.HYPE_TREND_LONG;
+  if(row?.sha!==HYPE_SHA||row?.serviceUnit!=="disdex-hype-long@"+HYPE_SHA+".service")fail("PIN_MISMATCH");
+  const kill=(await json(KILL)).value; if(kill.active!==false)fail("KILL_SWITCH_ACTIVE");
+  const risk=(await json(RISK)).value;
+  if(risk.tripped!==false||risk.sourceComplete!==true||Number(risk.maximumLossPct)!==7.5)fail("SHARED_RISK_NOT_HEALTHY");
+  const margin=(await json(MARGIN)).value;
+  if(margin.stage!=="HEALTHY"||margin.ordersAllowed!==true)fail("MARGIN_NOT_HEALTHY");
 }
 function assertState(value:any){
   if(value.schema!=="disdex-hype-zec-long/v1"||value.runtimeCommitSha!==HYPE_SHA||value.mode!=="LIVE")
@@ -79,6 +93,7 @@ async function signedScopedProof(client:AsterV3Client,renew:()=>Promise<void>){
 async function main(){
   if(process.getuid?.()===0)fail("DEPLOY_USER_REQUIRED");
   if(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH!=="/var/lib/disdex/shared/aster-rate-budget.json")fail("RATE_BUDGET_BINDING");
+  await assertProductionGuards();
   const stateBefore=await json(STATE); assertState(stateBefore.value);
   assertV4((await json(V4)).value);
   const gate=new FileAccountOrderLock(LOCK,120000,PENDING);
@@ -98,11 +113,13 @@ async function main(){
       userAgent:"DisDex-HYPE-Current-Flat-Repair/1.0",
     });
     if(!client.hasTradingCredentials())fail("ASTER_CREDENTIALS_MISSING");
+    await assertProductionGuards();
     const proof1=await signedScopedProof(client,renew);
     await new Promise(r=>setTimeout(r,750));
     const proof2=await signedScopedProof(client,renew);
     if(proof1!==proof2)fail("SCOPED_PROOF_CHANGED");
     assertV4((await json(V4)).value);
+    await assertProductionGuards();
     const current=await readFile(STATE);
     if(digest(current)!==digest(stateBefore.raw))fail("STATE_CAS_PRECONDITION");
     const now=Date.now();

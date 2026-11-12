@@ -47,27 +47,21 @@ jobs:
           printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/hype-repair-ssh/known_hosts"
           chmod 0600 "$RUNNER_TEMP/hype-repair-ssh/"*
 
-      - name: Verify production guards and exact inactive HYPE pin
+      - name: Verify exact inactive HYPE pin and activation gate
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
           PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts"             -p "$PORT" "root@$HOST" 'python3 - <<'"'"'PY'"'"'
-          import json,time,pathlib,subprocess
-          H="d6bcc94512a6416189cd92d7203b9ac3b2c98e70"
-          U=f"disdex-hype-long@{H}.service"
-          pins=json.load(open("/etc/disdex/runner-pins.json"))
-          row=pins["runners"]["HYPE_TREND_LONG"]
-          assert row["sha"]==H and row["serviceUnit"]==U
-          assert pathlib.Path(f"/home/deploy/disdex-trading/releases/{H}/.disdex-release-sha").read_text().strip()==H
-          assert subprocess.check_output(["systemctl","show",U,"--property=ActiveState","--value"],text=True).strip()!="active"
-          kill=json.load(open("/var/lib/disdex/shared/kill-switch.json")); assert kill["active"] is False
-          risk=json.load(open("/var/lib/disdex/shared/crypto-daily-risk.json")); assert risk["tripped"] is False and risk["sourceComplete"] is True
-          margin=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json")); assert margin["stage"]=="HEALTHY" and margin["ordersAllowed"] is True
-          print("HYPE_REPAIR_PREFLIGHT=PASS")
-          PY
+          SSH=(ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts" -p "$PORT")
+          "${SSH[@]}" "root@$HOST" 'set -e
+            H=d6bcc94512a6416189cd92d7203b9ac3b2c98e70
+            U=disdex-hype-long@d6bcc94512a6416189cd92d7203b9ac3b2c98e70.service
+            test "$(systemctl is-active "$U" || true)" != active
+            test "$(cat /home/deploy/disdex-trading/releases/d6bcc94512a6416189cd92d7203b9ac3b2c98e70/.disdex-release-sha)" = "$H"
+            node /home/deploy/disdex-trading/releases/d6bcc94512a6416189cd92d7203b9ac3b2c98e70/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/d6bcc94512a6416189cd92d7203b9ac3b2c98e70 --sha "$H" --runner HYPE_TREND_LONG --activation-path /var/lib/disdex/shared/operator-activation/hype-d6bcc94512a6416189cd92d7203b9ac3b2c98e70.json
+            echo HYPE_REPAIR_PREFLIGHT=PASS'
 
       - name: Upload and repair exact HYPE stale review
         env:
