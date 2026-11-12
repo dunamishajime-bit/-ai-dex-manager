@@ -106,7 +106,11 @@ jobs:
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
-          ssh -T -i "$RUNNER_TEMP/health-pin-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/health-pin-ssh/known_hosts"             -p "$PORT" "root@$HOST"             "python3 -c 'import json; p=json.load(open("/etc/disdex/runner-pins.json"))["runners"]; h=json.load(open("/var/lib/disdex/runner-health/current.json")); rp=h["runnerPins"]; assert all(rp[k]["expectedSha"]==v["sha"] and rp[k]["serviceUnit"]==v["serviceUnit"] and rp[k]["releaseRoot"]==v["releaseRoot"] for k,v in p.items() if k in rp); e=h.get("tradingEffects",{}); assert all(int(e.get(k,0))==0 for k in ("ordersSent","cancelSent","positionChangesSent")); print("HEALTH_PIN_POSTFLIGHT=PASS"); print("ORDERS_SENT=0"); print("CANCELS_SENT=0"); print("POSITION_CHANGES_SENT=0")'"
+          ssh -T -i "$RUNNER_TEMP/health-pin-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/health-pin-ssh/known_hosts" \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex_health_pin_consolidation.$GITHUB_RUN_ID.py --verify"
 
       - name: Cleanup
         if: always()
