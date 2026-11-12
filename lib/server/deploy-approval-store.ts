@@ -280,22 +280,33 @@ export async function createPendingDeploymentApproval(input: {
     return current;
   }
 
-  if (
+  const sameIdentity = Boolean(
     current &&
-    ["PENDING", "OTP_SENT", "APPROVED", "DISPATCHED"].includes(current.status) &&
-    current.requestExpiresAt > now &&
     current.targetSha === input.targetSha &&
     current.planSha256 === input.planSha256 &&
     current.scope === (input.scope ?? DEPLOY_APPROVAL_SCOPE) &&
     (current.operation ?? "V12_V4_LIVE") === (input.operation ?? "V12_V4_LIVE") &&
     (current.ordersEnabled ?? true) === (input.ordersEnabled ?? true)
+  );
+
+  // Owner approval is durable for the exact immutable deployment identity.
+  // requestExpiresAt only limits the pre-approval request/OTP stage.
+  if (current && sameIdentity && ["APPROVED", "DISPATCHED"].includes(current.status)) {
+    return current;
+  }
+
+  if (
+    current &&
+    sameIdentity &&
+    ["PENDING", "OTP_SENT"].includes(current.status) &&
+    current.requestExpiresAt > now
   ) {
     return current;
   }
 
   if (
     current &&
-    ["PENDING", "OTP_SENT", "APPROVED"].includes(current.status) &&
+    ["PENDING", "OTP_SENT"].includes(current.status) &&
     current.requestExpiresAt <= now
   ) {
     await saveDeploymentApproval({ ...current, status: "EXPIRED", lastError: "request expired" });
