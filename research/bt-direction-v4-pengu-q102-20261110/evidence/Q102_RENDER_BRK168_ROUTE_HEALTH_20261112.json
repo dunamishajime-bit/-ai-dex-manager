@@ -1,0 +1,155 @@
+{
+  "date": "2026-11-12",
+  "scope": "Q102 RENDER|BRK168_H12_V1.2 independent pretarget/forward route-health audit and integrated frozen block A/B; research only",
+  "decision": "RESEARCH_ADOPT_CANDIDATE: quarantine RENDER|BRK168_H12_V1.2; not deployed",
+  "selectionIndependence": {
+    "targetOutcomesUsedToCreateRule": false,
+    "rule": "existing 64-policy pretarget route-health stableBlock criterion: eligiblePolicyCount>=16 and blockRateWhenEligible>=0.75",
+    "grid": {
+      "lookbackDays": [
+        60,
+        90,
+        120,
+        180
+      ],
+      "minN": [
+        4,
+        5,
+        6,
+        8
+      ],
+      "pfMax": [
+        0.6,
+        0.7,
+        0.8,
+        0.9
+      ],
+      "costBps": 30
+    },
+    "routeResult": {
+      "eligiblePolicyCount": 28,
+      "blockedCount": 28,
+      "blockRateWhenEligible": 1.0,
+      "stableBlock": true
+    },
+    "lookbackMetrics": {
+      "60": {
+        "n": 1,
+        "wins": 0,
+        "losses": 1,
+        "wr": 0.0,
+        "mean": -0.05300000000000005,
+        "pf": 0.0
+      },
+      "90": {
+        "n": 3,
+        "wins": 1,
+        "losses": 2,
+        "wr": 0.3333333333333333,
+        "mean": -0.02124857643614479,
+        "pf": 0.10323473783392449
+      },
+      "120": {
+        "n": 6,
+        "wins": 1,
+        "losses": 5,
+        "wr": 0.16666666666666666,
+        "mean": -0.019839186239758128,
+        "pf": 0.058068724816494895
+      },
+      "180": {
+        "n": 13,
+        "wins": 4,
+        "losses": 9,
+        "wr": 0.3076923076923077,
+        "mean": -0.011420403946684402,
+        "pf": 0.3729792343938062
+      }
+    }
+  },
+  "independentData": {
+    "pretarget": {
+      "n": 16,
+      "wins": 6,
+      "losses": 10,
+      "wr": 0.375,
+      "mean": -0.0015685402335686278,
+      "pf": 0.8951030409509599
+    },
+    "forward": {
+      "n": 3,
+      "wins": 1,
+      "losses": 2,
+      "wr": 0.3333333333333333,
+      "mean": -0.020029173047278023,
+      "pf": 0.0769265262190985
+    },
+    "note": "Pretarget is Binance UM proxy because Aster early RENDER history is unavailable; forward uses Aster public H1/M5."
+  },
+  "integratedAB": {
+    "baselineCurrentBest10": {
+      "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+      "sha256": "8b7ec586d9c04ac1fbfa3c845225e7eea78ee3367fdf79b44179b38905dc3bd3",
+      "final_compounded_jpy": 4757774.221089659,
+      "max_hourly_dd_pct": -23.809717078407832,
+      "modeled_fills": 857,
+      "win_rate_pct": 62.19369894982497,
+      "profit_factor": 1.827787763989351
+    },
+    "renderBlock10": {
+      "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_10BPS_SUMMARY.json",
+      "sha256": "8585191429cb2e1c164b1afca86997377d21daea5696e5d20e256f3cf682c389",
+      "final_compounded_jpy": 5038682.501158344,
+      "max_hourly_dd_pct": -23.809717078407832,
+      "modeled_fills": 855,
+      "win_rate_pct": 62.3391812865497,
+      "profit_factor": 1.8742061860329167
+    },
+    "baselineCurrentBest30": {
+      "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+      "sha256": "641d479820ce3fd759defd986f0088c5eb372622800f80807d9ba4ea3669dde3",
+      "final_compounded_jpy": 1650119.5604759753,
+      "max_hourly_dd_pct": -24.5716929934103,
+      "modeled_fills": 854,
+      "win_rate_pct": 60.07025761124122,
+      "profit_factor": 1.6564644054703694
+    },
+    "renderBlock30": {
+      "file": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_S3_HH_TH_Q102_ADOPTED_ON_30BPS_SUMMARY.json",
+      "sha256": "477c63aa5b19eb90a768e4a367f604ff8b07e44a42a1bab44ada8ed14a5584ed",
+      "final_compounded_jpy": 1747707.3369418234,
+      "max_hourly_dd_pct": -24.5716929934103,
+      "modeled_fills": 853,
+      "win_rate_pct": 60.14067995310668,
+      "profit_factor": 1.6912458332344815
+    },
+    "deltaFinalJpy10": 280908.28006868437,
+    "deltaFinalJpy30": 97587.77646584809
+  },
+  "sources": {
+    "cases": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\DIRECTION_RESEARCH_20261109\\Q102_RENDER_BRK168_PRETARGET_FORWARD_20261112\\q102-render-brk168-preatarget-forward-cases.jsonl",
+      "sha256": "56b0a8fa0e7f12fbf79cb504015bde32c38605539146dc0b2fb532af2f59f28a"
+    },
+    "summary": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\DIRECTION_RESEARCH_20261109\\Q102_RENDER_BRK168_PRETARGET_FORWARD_20261112\\SUMMARY.json",
+      "sha256": "41a9ba0448cbcb23616923502e3a968dbf6b3302c75cc24be6979687f9b5eb6a"
+    }
+  },
+  "scripts": {
+    "proxyAudit": {
+      "path": "research/bt-direction-v4-pengu-q102-20261110/scripts/q102_render_brk168_pretarget_forward_proxy_audit_20261112.mjs",
+      "sha256": "329fbdc9f8346a018e2c112b2a59c3bcf401d7686db39d8b2ee6e02efed146ca"
+    },
+    "integratedAB": {
+      "path": "research/bt-direction-v4-pengu-q102-20261110/scripts/portfolio_currentbest_plus_q102_render_brk168_block_inplace_20261112.py",
+      "sha256": "05f5fcf699b167cc44fce853a049192832771b3204b200b97d3e492080933f2d"
+    }
+  },
+  "caveats": [
+    "The separately selected 90d/minN5/PF<0.60 conservative single policy has only 3 recent pretarget RENDER cases and therefore does not independently block it.",
+    "The broader pre-existing jitter stability rule does block it 28/28 eligible policies, and true forward remains weak.",
+    "No direction flip is proposed; opposite-direction pretarget shadow was also weak.",
+    "Production/pinned logic was not modified."
+  ]
+}
