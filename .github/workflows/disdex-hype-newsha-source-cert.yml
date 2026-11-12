@@ -1,0 +1,133 @@
+name: DisDex HYPE New-SHA Source Certification (Read Only)
+
+# Deliberately does NOT deploy, activate, sign, reset any review or operate orders.
+# A distinct owner-signed activation executor must be approved before LIVE cutover.
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-hype-newsha-source-cert.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-hype-newsha-source-cert
+  cancel-in-progress: false
+
+jobs:
+  policy:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify certification never executes a production cutover
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          content=Path(".github/workflows/disdex-hype-newsha-source-cert.yml").read_text()
+          required=[
+            "workflow_dispatch:",
+            "github.actor == 'dunamishajime-bit'",
+            "github.ref == 'refs/heads/master'",
+            "a7eee1f91d86d51f2333da117243d044ae1332dc",
+            "d6bcc94512a6416189cd92d7203b9ac3b2c98e70",
+            "tests/hype-owner-sha-recovery.test.ts",
+            "tests/hype-v4-review-journal-replay.test.ts",
+            "npx tsc --noEmit",
+            "ordersSent=0",
+          ]
+          for marker in required:
+            assert marker in content, marker
+          certification_job=content.rsplit("\n  certify:\n",1)[1]
+          for forbidden in [
+            "secrets.DISDEX_VPS_ROOT_PRIVATE_KEY",
+            "secrets.ASTER_API_PRIVATE_KEY",
+            "systemctl start",
+            "systemctl restart",
+            "runner-pins.json",
+            "kill-switch.json",
+          ]:
+            assert forbidden not in certification_job, forbidden
+          print("HYPE_SOURCE_ONLY_CERT_WORKFLOW_POLICY_PASS")
+          PY
+
+  certify:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: disdex-production
+    steps:
+      - name: Checkout reviewed HYPE candidate commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: a7eee1f91d86d51f2333da117243d044ae1332dc
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Prove exact HYPE release lineage and four-file diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          OLD=d6bcc94512a6416189cd92d7203b9ac3b2c98e70
+          NEW=a7eee1f91d86d51f2333da117243d044ae1332dc
+          [[ "$(git rev-parse HEAD)" == "$NEW" ]]
+          git merge-base --is-ancestor "$OLD" "$NEW"
+          git diff --check "$OLD" "$NEW"
+          git diff --name-only "$OLD" "$NEW" | sort > "$RUNNER_TEMP/changed"
+          printf '%s\n' \
+            lib/v12-v4-production-lifecycle.ts \
+            scripts/disdex-hype-owner-sha-recovery.ts \
+            tests/hype-owner-sha-recovery.test.ts \
+            tests/hype-v4-review-journal-replay.test.ts | sort > "$RUNNER_TEMP/expected"
+          diff -u "$RUNNER_TEMP/expected" "$RUNNER_TEMP/changed"
+          sha256sum lib/v12-v4-production-lifecycle.ts | grep -Fx \
+            'd44338ab3086420830261ff0a983a2579fbd8dc926049602509992ec8425226a  lib/v12-v4-production-lifecycle.ts'
+          echo HYPE_EXACT_SHA_SOURCE_PROVEN=TRUE
+
+      - name: Install locked candidate dependencies without lifecycle scripts
+        shell: bash
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: HYPE journal, incident recovery and runner gate regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx --test \
+            tests/hype-owner-sha-recovery.test.ts \
+            tests/hype-v4-review-journal-replay.test.ts \
+            tests/v12-v4-production-lifecycle.test.ts \
+            tests/v12-v4-production-certification.test.ts \
+            tests/hype-zec-long-state.test.ts \
+            tests/hype-zec-stale-state-lifecycle.test.ts \
+            tests/hype-zec-adapter-stale-recovery.test.ts \
+            tests/hype-trend-runner-gate.test.ts
+
+      - name: Type-check exact HYPE candidate
+        shell: bash
+        run: npx tsc --noEmit
+
+      - name: Record certification without touching production
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo HYPE_EXACT_SHA_SOURCE_CERTIFICATION=PASS
+          echo "CANDIDATE_SHA=a7eee1f91d86d51f2333da117243d044ae1332dc"
+          echo HYPE_NEW_SHA_NOT_DEPLOYED=TRUE
+          echo ordersSent=0 cancelsSent=0 positionChangesSent=0
+          echo "NO_PIN_NO_SYSTEMD_NO_STOP_NO_KILL_SWITCH_CHANGES=TRUE"

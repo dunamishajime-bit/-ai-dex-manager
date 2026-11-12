@@ -25,7 +25,9 @@ jobs:
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_MONITOR_REFRESH ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE_PREP ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE ') ||
-        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ')
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY ')
       )
     environment:
       name: disdex-production
@@ -72,6 +74,14 @@ jobs:
               r"DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR SHA=([0-9a-f]{40})",
               body,
           )
+          hype_sha = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE SHA=([0-9a-f]{40})",
+              body,
+          )
+          v4_continuity = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
 
           if deploy:
               target, plan = deploy.groups()
@@ -109,6 +119,28 @@ jobs:
               scope = "IDLE_PRIORITY_SHORT"
               orders_enabled = "false"
               context = f"IDLE_FLAT_STALE_REPAIR_AFTER_THREE_SIGNED_GETS\n{target}\n"
+              plan = hashlib.sha256(context.encode("ascii")).hexdigest()
+          elif v4_continuity:
+              target, plan = v4_continuity.groups()
+              if target != "3ad65403013b701db5d9e53e8814e6ab827a28e8":
+                  raise SystemExit("V4_HYPE_CONTINUITY_ONLY_REVIEWED_V4")
+              operation = "V4_HYPE_PEER_PIN_CONTINUITY"
+              scope = "V12_V4"
+              orders_enabled = "true"
+          elif hype_sha:
+              target = hype_sha.group(1)
+              if target != "a7eee1f91d86d51f2333da117243d044ae1332dc":
+                  raise SystemExit("HYPE_SHA_RESTORE_ONLY_REVIEWED_CANDIDATE")
+              operation = "HYPE_TREND_LONG_SHA_RESTORE"
+              scope = "HYPE_TREND_LONG"
+              orders_enabled = "true"
+              context = chr(10).join([
+                  "HYPE_SHA_RESTORE_V1",
+                  "d6bcc94512a6416189cd92d7203b9ac3b2c98e70",
+                  target,
+                  "XRPUSDT_SHORT_13.3_STOP_v12-v4-231ed20b6835c4148b5314d8da7e",
+                  "",
+              ])
               plan = hashlib.sha256(context.encode("ascii")).hexdigest()
           else:
               raise SystemExit("request comment does not match a protected production request grammar")
