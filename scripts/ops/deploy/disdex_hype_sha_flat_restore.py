@@ -220,11 +220,15 @@ class Restore:
             require(self.systemd.main_pid(self.new)>0 and self.systemd.active_state(self.new)=="active",
                     "RESUME_STALE_LIVE_WRITER_STATE")
             self.only_writer(self.new)
+            # A prior interrupted recovery may also have enabled this exact
+            # candidate unit. The reconcile path stops and disables it under
+            # CAS before revoking the stale activation, so enabled is safe only
+            # in this exact byte-identical revoked-authority state.
         else:
             require(self.systemd.main_pid(self.new)==0
                     and self.systemd.active_state(self.new) in ("inactive","failed"),"WRITER_ACTIVE")
             self.only_writer()
-        require(not self.systemd.is_enabled(self.new),"NEW_WRITER_ENABLED")
+            require(not self.systemd.is_enabled(self.new),"NEW_WRITER_ENABLED")
         for path in (self.legacy.env,self.legacy.operator_env):
             assert_regular_secure(path,root_uid=0,private=True)
         assert_regular_secure(self.legacy.override,root_uid=0,private=False)

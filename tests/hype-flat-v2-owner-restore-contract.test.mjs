@@ -39,6 +39,7 @@ test("flat-v2 restore is exact-SHA, 3x signed-flat, two-approval and fail-closed
   assert.match(helper,/maintain_pending_freshness\(\)/);
   assert.match(helper,/RESUME_UNEXPECTED_LIVE_AUTHORITY/);
   assert.match(helper,/RESUME_STALE_AUTHORITY_CAS/);
+  assert.match(helper,/enabled is safe only/);
   assert.match(helper,/HYPE_SHA_RESTORE_STALE_LIVE_AUTHORITY_CLEARED/);
   assert.doesNotMatch(helper,/account-order\.lock[^\n]*(?:unlink|remove)|(?:unlink|remove)[^\n]*account-order\.lock/);
   assert.doesNotMatch(helper,/XRPUSDT_SHORT_13\.3|v12-v4-231ed20b6835c4148b5314d8da7e/);
