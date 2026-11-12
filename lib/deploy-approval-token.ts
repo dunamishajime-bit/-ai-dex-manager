@@ -21,6 +21,8 @@ export const DEPLOY_APPROVAL_OPERATIONS = [
   "SHARED_CRYPTO_RISK_WRITER",
   "V4_DOGE_MISSED_TIME_EXIT",
   "IDLE_FLAT_STALE_REPAIR",
+  "HYPE_TREND_LONG_SHA_RESTORE",
+  "V4_HYPE_PEER_PIN_CONTINUITY",
   "ALL_RUNNERS_LIVE_RESTORE",
   "ALL_RUNNERS_ORDER_ENABLE_PREP",
   "ALL_RUNNERS_ORDER_ENABLE",
@@ -62,6 +64,16 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "IDLE_PRIORITY_SHORT",
     ordersEnabled: false,
     label: "IDLE flat stale state repair",
+  },
+  HYPE_TREND_LONG_SHA_RESTORE: {
+    scope: "HYPE_TREND_LONG",
+    ordersEnabled: true,
+    label: "HYPE専用SHA復旧（current-flat signed evidence）",
+  },
+  V4_HYPE_PEER_PIN_CONTINUITY: {
+    scope: "V12_V4",
+    ordersEnabled: true,
+    label: "V4 peer pin continuity（HYPEのみ新SHAへ）",
   },
   ALL_RUNNERS_LIVE_RESTORE: {
     scope: "FULL_PROJECT",
