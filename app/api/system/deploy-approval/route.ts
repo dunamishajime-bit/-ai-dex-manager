@@ -285,15 +285,48 @@ export async function POST(request: NextRequest) {
           throw new Error("APPROVAL_IDENTITY_MISMATCH");
         }
 
+        const issueTransportToken = () => issueDeploymentApprovalToken({
+          targetSha: record.targetSha,
+          planSha256: record.planSha256,
+          operator: "dunamishajime-bit",
+          privateKey: loadDeploymentApprovalPrivateKey(),
+          scope: policy.scope,
+          ordersEnabled: policy.ordersEnabled,
+          ttlSeconds: 300,
+        });
+
         if (record.status === "REDEEMED") {
           if (record.redeemedByRunId !== runId) throw new Error("APPROVAL_ALREADY_REDEEMED");
-          if (!record.approvalToken) throw new Error("APPROVAL_REPLAY_TOKEN_MISSING");
+          if (!record.approvedAt) throw new Error("APPROVAL_NOT_REDEEMABLE");
+          const nowSeconds = Math.floor(Date.now() / 1000);
+          if (record.approvalToken && (record.approvalTokenExpiresAt ?? 0) > nowSeconds + 10) {
+            return {
+              result: {
+                ok: true,
+                token: record.approvalToken,
+                approval: sanitizeDeploymentApproval(record),
+                replay: true,
+              },
+            };
+          }
+
+          // A failed/retried GitHub attempt keeps the same run ID. The owner's
+          // immutable approval remains valid; only refresh the expired transport
+          // credential. A different run ID is still rejected above.
+          const refreshed = issueTransportToken();
+          const next = {
+            ...record,
+            approvalToken: refreshed.token,
+            approvalTokenExpiresAt: refreshed.payload.expiresAt,
+            redeemedAt: Date.now(),
+          };
           return {
+            next,
             result: {
               ok: true,
-              token: record.approvalToken,
-              approval: sanitizeDeploymentApproval(record),
-              replay: true,
+              token: refreshed.token,
+              approval: sanitizeDeploymentApproval(next),
+              replay: false,
             },
           };
         }
@@ -305,15 +338,7 @@ export async function POST(request: NextRequest) {
         // The owner's approval is durable for this exact immutable identity.
         // The 300-second token is only a transport credential; refresh it at
         // redemption instead of forcing the owner to repeat OTP approval.
-        const issued = issueDeploymentApprovalToken({
-          targetSha: record.targetSha,
-          planSha256: record.planSha256,
-          operator: "dunamishajime-bit",
-          privateKey: loadDeploymentApprovalPrivateKey(),
-          scope: policy.scope,
-          ordersEnabled: policy.ordersEnabled,
-          ttlSeconds: 300,
-        });
+        const issued = issueTransportToken();
 
         const next = {
           ...record,
