@@ -1,0 +1,43 @@
+name: DisDex Stopped Runner LIVE Recovery CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-stopped-runner-live-recovery.yml"
+      - ".github/workflows/disdex-stopped-runner-live-recovery-ci.yml"
+      - "scripts/ops/deploy/disdex_stopped_runner_live_recovery.py"
+      - "tests/stopped-runner-live-recovery-contract.test.mjs"
+  push:
+    branches-ignore:
+      - master
+    paths:
+      - ".github/workflows/disdex-stopped-runner-live-recovery.yml"
+      - ".github/workflows/disdex-stopped-runner-live-recovery-ci.yml"
+      - "scripts/ops/deploy/disdex_stopped_runner_live_recovery.py"
+      - "tests/stopped-runner-live-recovery-contract.test.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Python syntax
+        run: python3 -m py_compile scripts/ops/deploy/disdex_stopped_runner_live_recovery.py
+      - name: Contract tests
+        run: node --test tests/stopped-runner-live-recovery-contract.test.mjs
+      - name: Diff safety markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=scripts/ops/deploy/disdex_stopped_runner_live_recovery.py
+          grep -Fq 'START_ORDER = ("PENGU_V8", "HYPE_TREND_LONG", "IDLE_PRIORITY_SHORT")' "$FILE"
+          ! grep -Eq '(placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder|setLeverage|setMarginType)' "$FILE"
+          ! grep -Eq 'systemctl", "(stop|restart)' "$FILE"
+          echo STOPPED_RUNNER_RECOVERY_CI=PASS
