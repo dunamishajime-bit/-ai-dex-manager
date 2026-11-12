@@ -51,7 +51,7 @@ jobs:
           printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts"
           chmod 0600 "$RUNNER_TEMP/xrp-reconcile-ssh/"*
 
-      - name: Verify V4 quiesced and flat pending evidence fresh
+      - name: Verify V4 fail-closed and flat pending evidence fresh
         shell: bash
         env:
           HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -60,9 +60,12 @@ jobs:
           set -euo pipefail
           PORT="${PORT:-22}"
           SSH=(ssh -T -i "$RUNNER_TEMP/xrp-reconcile-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/xrp-reconcile-ssh/known_hosts" -o ConnectTimeout=12 -p "$PORT" "root@$HOST")
-          "${SSH[@]}" "test \"\$(systemctl is-active disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8.service || true)\" = inactive"
-          "${SSH[@]}" "python3 -c 'import json,time; d=json.load(open(\"/var/lib/disdex/shared/pending-exposure.json\")); active=sum(1 for x in d.get(\"entries\",[]) if x.get(\"status\")!=\"RELEASED\"); age=int(time.time()*1000)-int(d[\"updatedAt\"]); assert active==0,active; assert 0<=age<=300000,age; print(\"PENDING_FLAT_FRESH=TRUE\")'"
-          echo V4_QUIESCED=TRUE
+          "${SSH[@]}" "test \"\$(systemctl is-active disdex-v12-v4@3ad65403013b701db5d9e53e8814e6ab827a28e8.service)\" = active"
+          "${SSH[@]}" "test \"\$(systemctl is-active disdex-pengu-dual-ls-v2@1657e173d250ad58f53e62f7bb0a3428fb405496.service || true)\" = inactive"
+          "${SSH[@]}" "test \"\$(systemctl is-active disdex-hype-long@d6bcc94512a6416189cd92d7203b9ac3b2c98e70.service || true)\" = inactive"
+          "${SSH[@]}" "test \"\$(systemctl is-active disdex-idle-priority-short@7688ed7c93a1918d8b44837339b7da5584a868f5.service || true)\" = inactive"
+          "${SSH[@]}" "python3 -c 'import json,time; h=json.load(open(\"/var/lib/disdex/v12-v4/heartbeat.json\")); now=int(time.time()*1000); assert h.get(\"releaseSha\")==\"3ad65403013b701db5d9e53e8814e6ab827a28e8\"; assert h.get(\"safetyState\")==\"BLOCKED\" and h.get(\"status\")==\"blocked\"; assert h.get(\"orderEnabled\") is False and h.get(\"ordersAllowed\") is False and h.get(\"orderPermission\")==\"BLOCKED\"; assert str(h.get(\"reason\",\"\")).startswith(\"V4_PEER_ATTESTATION_RETRY_REQUIRED:\"); assert 0<=now-int(h[\"heartbeatAt\"])<=180000; d=json.load(open(\"/var/lib/disdex/shared/pending-exposure.json\")); active=sum(1 for x in d.get(\"entries\",[]) if x.get(\"status\")!=\"RELEASED\"); age=now-int(d[\"updatedAt\"]); assert active==0,active; assert 0<=age<=300000,age; print(\"V4_FAIL_CLOSED_AND_PENDING_FLAT_FRESH=TRUE\")'"
+          echo V4_FAIL_CLOSED=TRUE
           echo TRADING_MUTATION=0
 
       - name: Upload bounded XRP reconcile helper
