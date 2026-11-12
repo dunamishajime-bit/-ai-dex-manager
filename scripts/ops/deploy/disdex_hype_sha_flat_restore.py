@@ -195,10 +195,6 @@ class Restore:
         require(self.current["runners"]==self.pins and self.current["sourceSha"]==self.paths.current.resolve().name,
                 "CURRENT_PLAN")
         self.context=self.secure_context()
-        for u in (self.old,self.new):
-            require(self.systemd.main_pid(u)==0 and self.systemd.active_state(u) in ("inactive","failed"),"WRITER_ACTIVE")
-        self.only_writer()
-        require(not self.systemd.is_enabled(self.new),"NEW_WRITER_ENABLED")
 
         tx,resume_run_id=self._resume_transaction(run_id)
         assert_private_dir(tx,root_uid=0)
@@ -208,7 +204,27 @@ class Restore:
                      "v4-activation.before","state.before","monitor-wiring.json"):
             assert_regular_secure(tx/name,root_uid=0,private=True)
         require(not (tx/"receipt.json").exists(),"RESUME_RECEIPT_EXISTS")
-        require(not self.legacy.approval.exists() and not self.legacy.approval.is_symlink(),"RESUME_AUTHORITY_NOT_REVOKED")
+        self.resume_revoked_raw=file_bytes(tx/"activation.revoked")
+        self.resume_stale_live_activation=False
+        if self.legacy.approval.exists():
+            assert_regular_secure(self.legacy.approval,root_uid=0,private=True)
+            require(file_bytes(self.legacy.approval)==self.resume_revoked_raw,
+                    "RESUME_UNEXPECTED_LIVE_AUTHORITY")
+            self.resume_stale_live_activation=True
+        else:
+            require(not self.legacy.approval.is_symlink(),"RESUME_AUTHORITY_NOT_REVOKED")
+
+        require(self.systemd.main_pid(self.old)==0
+                and self.systemd.active_state(self.old) in ("inactive","failed"),"WRITER_ACTIVE")
+        if self.resume_stale_live_activation:
+            require(self.systemd.main_pid(self.new)>0 and self.systemd.active_state(self.new)=="active",
+                    "RESUME_STALE_LIVE_WRITER_STATE")
+            self.only_writer(self.new)
+        else:
+            require(self.systemd.main_pid(self.new)==0
+                    and self.systemd.active_state(self.new) in ("inactive","failed"),"WRITER_ACTIVE")
+            self.only_writer()
+        require(not self.systemd.is_enabled(self.new),"NEW_WRITER_ENABLED")
         for path in (self.legacy.env,self.legacy.operator_env):
             assert_regular_secure(path,root_uid=0,private=True)
         assert_regular_secure(self.legacy.override,root_uid=0,private=False)
@@ -241,7 +257,7 @@ class Restore:
         require(approval.get("planSha256")==self.v4_plan and approval.get("approvedShaByRunner")==self.pins,
                 "RESUME_V4_CONTINUITY")
 
-        revoked=json.loads(file_bytes(tx/"activation.revoked"))
+        revoked=json.loads(self.resume_revoked_raw)
         require(revoked.get("scope")==RUNNER and revoked.get("operation")==OPERATION
                 and revoked.get("approvedSha")==CANDIDATE and revoked.get("approvedShaByRunner")=={RUNNER:CANDIDATE}
                 and revoked.get("ordersEnabled") is True and revoked.get("planSha256")==PLAN
@@ -520,7 +536,28 @@ class Restore:
         require(run_id==self.resume_run_id,"RESUME_RUN_ID_MISMATCH")
         require(file_bytes(STATE)==self.state,"STATE_CAS")
         require(file_bytes(self.v4_approval_path)==self.v4_approval_before,"V4_APPROVAL_CHANGED")
+        # Refresh no-order pending evidence before any HYPE downtime. If the
+        # service cannot obtain the legitimate shared lock, leave the currently
+        # running stale-authority instance untouched and fail closed.
         self.maintain_pending_freshness(force=True)
+        if self.resume_stale_live_activation:
+            require(self.legacy.approval.exists()
+                    and file_bytes(self.legacy.approval)==self.resume_revoked_raw,
+                    "RESUME_STALE_AUTHORITY_CAS")
+            self.systemd.stop(self.new);self.systemd.disable(self.new)
+            require(self.systemd.main_pid(self.new)==0
+                    and self.systemd.active_state(self.new) in ("inactive","failed"),
+                    "RESUME_STALE_WRITER_STOP_FAILED")
+            if not (self.resume_tx/"stale-live-cleared.json").exists():
+                _root_file(self.resume_tx/"stale-live-cleared.json",json_bytes(dict(
+                    status="HYPE_SHA_RESTORE_STALE_LIVE_AUTHORITY_CLEARED",
+                    activationSha256=digest(self.resume_revoked_raw),githubRunId=run_id,
+                    clearedAt=time.time_ns()//1000000)),0o400,[])
+            require(file_bytes(self.legacy.approval)==self.resume_revoked_raw,
+                    "RESUME_STALE_AUTHORITY_CAS")
+            self.legacy.approval.unlink()
+            system("daemon-reload")
+            self.only_writer()
         auth=verify_approval(self.paths,token,consume=True)
         v4_auth=verify_approval(self.paths,v4_token,consume=True,**v4_verify)
         expected_v4=build_v4_continuity_activation(v4_auth,self.resume_prior_pins,self.pins,
