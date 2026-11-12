@@ -16,7 +16,7 @@ test("XRP manual-close reconciliation is exact and non-ordering",()=>{
   ]) assert.match(script,new RegExp(token.replace(/[.*+?^$\{\}()|[\]\\]/g,"\\$&")));
   assert.match(script,/getPositions\(\)/);
   assert.match(script,/getOpenOrders\(\)/);
-  assert.match(script,/getUserTrades\("XRPUSDT"/);
+  assert.match(script,/getUserTrades\(\s*"XRPUSDT"/);
   assert.match(script,/getOrder\("XRPUSDT",STOP_CLIENT_ID\)/);
   assert.doesNotMatch(script,/\.(?:placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder|setLeverage|setMarginType)\(/);
   assert.match(script,/ordersSent:0/);
@@ -32,6 +32,10 @@ test("XRP manual-close reconciliation is exact and non-ordering",()=>{
   assert.match(script,/process\.argv\.includes\("--preview"\)/);
   assert.match(script,/V4_XRP_MANUAL_RECONCILE_PREVIEW_PASS/);
   assert.match(script,/registryWrites:0/);
+  assert.match(script,/classifyAsterRateBudgetFailure/);
+  assert.match(script,/nextAsterRateBudgetRetryMs/);
+  assert.match(script,/rateBudgetRead/);
+  assert.doesNotMatch(script,/Promise\.all\(\[/);
   assert.doesNotMatch(script,/applyProductionEvent/);
   assert.doesNotMatch(script,/advanceV4Protection/);
 });
