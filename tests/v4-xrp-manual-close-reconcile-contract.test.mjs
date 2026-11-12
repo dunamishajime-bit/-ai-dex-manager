@@ -12,7 +12,7 @@ test("XRP manual-close reconciliation is exact and non-ordering",()=>{
     "3ad65403013b701db5d9e53e8814e6ab827a28e8",
     "21785120","4143469655","21843239","4154566371","4143471979",
     "1.1581","1.0508","1.42709","0.00559025","0.01518936",
-    "BT_REPAIR_FIXED_18H_NEXT_OPEN","reconcileV4ExternalFlatClose",
+    "BT_REPAIR_FIXED_18H_NEXT_OPEN","reconcileV4ExternalFlatClose","TERMINAL","1794452508281",
   ]) assert.match(script,new RegExp(token.replace(/[.*+?^$\{\}()|[\]\\]/g,"\\$&")));
   assert.match(script,/getPositions\(\)/);
   assert.match(script,/getOpenOrders\(\)/);
@@ -25,6 +25,15 @@ test("XRP manual-close reconciliation is exact and non-ordering",()=>{
   assert.match(script,/RUNNER_NOT_FAIL_CLOSED_BLOCKED/);
   assert.match(script,/V12_V4_XRP_MANUAL_CLOSE_RECONCILE/);
   assert.match(script,/account-order\.lock/);
+  assert.match(script,/compatibilityDoc/);
+  assert.match(script,/stage:"ACKNOWLEDGED"/);
+  assert.match(script,/durableTerminalStop/);
+  assert.match(script,/reconcileV4ExternalFlatClose/);
+  assert.match(script,/process\.argv\.includes\("--preview"\)/);
+  assert.match(script,/V4_XRP_MANUAL_RECONCILE_PREVIEW_PASS/);
+  assert.match(script,/registryWrites:0/);
+  assert.doesNotMatch(script,/applyProductionEvent/);
+  assert.doesNotMatch(script,/advanceV4Protection/);
 });
 
 test("workflow is owner/environment bound and requires V4 fail-closed blocked",()=>{

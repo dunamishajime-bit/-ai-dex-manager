@@ -29,6 +29,7 @@ const LEG = "XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000";
 const STOP_CLIENT_ID = "v12-v4-231ed20b6835c4148b5314d8da7e";
 const STOP_ORDER_ID = "4143471979";
 const STOP_PRICE = 1.2507;
+const STOP_TERMINAL_TS = 1794452508281;
 
 const ENTRY_TRADE_ID = "21785120";
 const ENTRY_ORDER_ID = "4143469655";
@@ -50,6 +51,7 @@ const EXPECTED_ROUTE = "REC_X06_TIME_12H";
 const EXPECTED_POLICY = "BT_REPAIR_FIXED_18H_NEXT_OPEN";
 
 const readOnlyEndpoints = new Set(["time","positionRisk","openOrders","order","userTrades","income"]);
+const PREVIEW = process.argv.includes("--preview");
 
 function fail(reason:string):never { throw new Error("V4_XRP_MANUAL_RECONCILE_" + reason); }
 function near(a:unknown,b:number){
@@ -106,8 +108,11 @@ function assertOpenState(doc:V4ExecutionDocument){
   if(!p||p.phase!=="STOP_CONFIRMED"||!near(p.protectedQty,ENTRY_QTY)||
     p.stopClientOrderId!==STOP_CLIENT_ID) fail("PROTECTION_MISMATCH");
   const stop:any=doc.intents[STOP_CLIENT_ID];
-  if(!stop||stop.action!=="STOP"||stop.stage!=="ACKNOWLEDGED"||stop.legId!==LEG||
-    String(stop.venueOrderId)!==STOP_ORDER_ID) fail("STOP_INTENT_MISMATCH");
+  if(!stop||stop.action!=="STOP"||stop.stage!=="TERMINAL"||stop.legId!==LEG||
+    String(stop.venueOrderId)!==STOP_ORDER_ID||stop.updatedAt!==STOP_TERMINAL_TS) fail("STOP_INTENT_MISMATCH");
+  if(Object.values(doc.intents).some((i:any)=>i.stage!=="TERMINAL")) fail("NONTERMINAL_INTENT_REMAINS");
+  if(doc.state.journal.some((e:any)=>
+    (e.type==="EXIT_REQUEST"||e.type==="EXIT_FILL")&&e.id===LEG)) fail("UNEXPECTED_EXIT_EVENT");
 }
 function assertClosedState(doc:V4ExecutionDocument){
   const leg:any=doc.state.legs[LEG];
@@ -194,7 +199,16 @@ async function main(){
     if(blockedAtCommit.mainPid!==blockedBefore.mainPid) fail("RUNNER_PID_CHANGED_DURING_PROOF");
     if(createHash("sha256").update(readFileSync(STORE)).digest("hex")!==beforeHash) fail("STATE_CHANGED_DURING_PROOF");
 
-    const next=reconcileV4ExternalFlatClose(doc,{
+    const durableTerminalStop=doc.intents[STOP_CLIENT_ID];
+    if(!durableTerminalStop) fail("STOP_INTENT_MISSING");
+    const compatibilityDoc:V4ExecutionDocument={
+      ...doc,
+      intents:{
+        ...doc.intents,
+        [STOP_CLIENT_ID]:{...durableTerminalStop,stage:"ACKNOWLEDGED"},
+      },
+    };
+    let next=reconcileV4ExternalFlatClose(compatibilityDoc,{
       positions:proof.positions as any[],
       openOrders:proof.openOrders as any[],
       pendingCount:0,
@@ -203,6 +217,24 @@ async function main(){
       funding:proof.funding as any[],
       observedAt:Date.now(),
     });
+    next={
+      ...next,
+      intents:{...next.intents,[STOP_CLIENT_ID]:durableTerminalStop},
+    };
+    assertClosedState(next);
+    if(PREVIEW){
+      console.log(JSON.stringify({
+        status:"V4_XRP_MANUAL_RECONCILE_PREVIEW_PASS",
+        sourceRevision:doc.revision,legId:LEG,predictedStatus:next.state.legs[LEG].status,
+        predictedQty:next.state.legs[LEG].qty,predictedRealizedUsd:next.state.legs[LEG].realizedUsd,
+        predictedFeesUsd:next.state.legs[LEG].feesUsd,predictedFundingUsd:next.state.legs[LEG].fundingUsd,
+        predictedProtectionPhase:next.protections[LEG].phase,preservedStopIntentStage:next.intents[STOP_CLIENT_ID].stage,
+        venueNetQty:0,xrpOpenOrders:0,storeSha256Before:beforeHash,
+        runnerMainPid:blockedBefore.mainPid,runnerSafetyState:"BLOCKED",runnerOrderEnabled:false,
+        registryWrites:0,ordersSent:0,cancelsSent:0,positionChangesSent:0,
+      }));
+      return;
+    }
     const backup=ensureBackup();
     if(backup.storeSha256Before!==beforeHash) fail("BACKUP_BASELINE_CHANGED");
     doc=store.commit(doc.revision,next);
