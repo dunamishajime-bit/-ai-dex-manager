@@ -285,14 +285,9 @@ export async function POST(request: NextRequest) {
           throw new Error("APPROVAL_IDENTITY_MISMATCH");
         }
 
-        const nowSeconds = Math.floor(Date.now() / 1000);
-        if (!record.approvalToken || !record.approvalTokenExpiresAt ||
-            record.approvalTokenExpiresAt < nowSeconds) {
-          throw new Error("APPROVAL_TOKEN_EXPIRED");
-        }
-
         if (record.status === "REDEEMED") {
           if (record.redeemedByRunId !== runId) throw new Error("APPROVAL_ALREADY_REDEEMED");
+          if (!record.approvalToken) throw new Error("APPROVAL_REPLAY_TOKEN_MISSING");
           return {
             result: {
               ok: true,
@@ -303,13 +298,28 @@ export async function POST(request: NextRequest) {
           };
         }
 
-        if (!["APPROVED", "DISPATCHED"].includes(record.status)) {
+        if (!["APPROVED", "DISPATCHED"].includes(record.status) || !record.approvedAt) {
           throw new Error("APPROVAL_NOT_REDEEMABLE");
         }
+
+        // The owner's approval is durable for this exact immutable identity.
+        // The 300-second token is only a transport credential; refresh it at
+        // redemption instead of forcing the owner to repeat OTP approval.
+        const issued = issueDeploymentApprovalToken({
+          targetSha: record.targetSha,
+          planSha256: record.planSha256,
+          operator: "dunamishajime-bit",
+          privateKey: loadDeploymentApprovalPrivateKey(),
+          scope: policy.scope,
+          ordersEnabled: policy.ordersEnabled,
+          ttlSeconds: 300,
+        });
 
         const next = {
           ...record,
           status: "REDEEMED" as const,
+          approvalToken: issued.token,
+          approvalTokenExpiresAt: issued.payload.expiresAt,
           redeemedAt: Date.now(),
           redeemedByRunId: runId,
         };
@@ -317,7 +327,7 @@ export async function POST(request: NextRequest) {
           next,
           result: {
             ok: true,
-            token: next.approvalToken!,
+            token: issued.token,
             approval: sanitizeDeploymentApproval(next),
             replay: false,
           },
@@ -326,9 +336,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(response);
     } catch (error) {
       const message = error instanceof Error ? error.message : "approval redemption rejected";
-      const status = message === "APPROVAL_NOT_FOUND" ? 404
-        : message === "APPROVAL_TOKEN_EXPIRED" ? 410
-          : 409;
+      const status = message === "APPROVAL_NOT_FOUND" ? 404 : 409;
       return NextResponse.json({ ok: false, error: message }, { status });
     }
   }
