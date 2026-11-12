@@ -38,6 +38,10 @@ test("redeem uses the atomic store mutation and does not do read-then-save", () 
   assert.doesNotMatch(redeem, /APPROVAL_TOKEN_EXPIRED/);
   assert.match(redeem, /issueDeploymentApprovalToken/);
   assert.match(redeem, /The owner.s approval is durable for this exact immutable identity/);
+  assert.match(redeem, /record\.redeemedByRunId !== runId/);
+  assert.match(redeem, /approvalTokenExpiresAt \?\? 0/);
+  assert.match(redeem, /const refreshed = issueTransportToken\(\)/);
+  assert.match(redeem, /A different run ID is still rejected above/);
 });
 
 test("retired DOGE handoff and staging code cannot read or write approval JSON directly",()=>{
