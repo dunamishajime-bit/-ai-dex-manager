@@ -33,5 +33,10 @@ test("flat-v2 restore is exact-SHA, 3x signed-flat, two-approval and fail-closed
   assert.match(request,/HYPE_SHA_FLAT_RESTORE_V2/);
   assert.match(tokens,/HYPE_TREND_LONG_SHA_RESTORE:[\s\S]*?scope: "HYPE_TREND_LONG",[\s\S]*?ordersEnabled: true/);
   assert.match(tokens,/V4_HYPE_PEER_PIN_CONTINUITY:[\s\S]*?scope: "V12_V4",[\s\S]*?ordersEnabled: true/);
+  assert.match(helper,/HYPE_SHA_RESTORE_RECONCILE_AFTER_START/);
+  assert.match(helper,/resumeAfterStart=True/);
+  assert.match(helper,/disdex-pending-exposure-reconcile\.service/);
+  assert.match(helper,/maintain_pending_freshness\(\)/);
+  assert.doesNotMatch(helper,/account-order\.lock[^\n]*(?:unlink|remove)|(?:unlink|remove)[^\n]*account-order\.lock/);
   assert.doesNotMatch(helper,/XRPUSDT_SHORT_13\.3|v12-v4-231ed20b6835c4148b5314d8da7e/);
 });

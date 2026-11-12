@@ -139,7 +139,166 @@ class Restore:
             raise ValueError("HYPE_SHA_RESTORE_PENDING_RECONCILIATION_REQUIRED") from None
         require(self.secure_context()==self.context,"PEER_RUNTIME_CHANGED")
 
-    def preview(self):
+    def preview(self, run_id=None):
+        from disdex_unified_root_gate import parse_live_pins, read_root_json
+        manifest=read_root_json(self.paths.pins,private=False)
+        pins=parse_live_pins(manifest,releases=self.paths.releases)
+        if pins.get(RUNNER)==CANDIDATE:
+            return self.preview_resume(run_id)
+        return self.preview_fresh()
+
+    def _resume_transaction(self, run_id):
+        candidates=[]
+        if run_id is not None:
+            require(re.fullmatch(r"[0-9]{1,20}",run_id) is not None,"RESUME_RUN_ID")
+            candidates=[self.paths.receipts/f"hype-sha-restore-{run_id}"]
+        else:
+            for path in self.paths.receipts.glob("hype-sha-restore-*"):
+                suffix=path.name.removeprefix("hype-sha-restore-")
+                if suffix.isdigit():candidates.append(path)
+        valid=[]
+        for tx in candidates:
+            blocked=tx/"blocked.json"
+            try:
+                row=json.loads(blocked.read_bytes())
+            except (FileNotFoundError,PermissionError,ValueError,json.JSONDecodeError):
+                continue
+            if row=={"status":"HYPE_SHA_RESTORE_RECONCILE_AFTER_START"} and not (tx/"receipt.json").exists():
+                valid.append(tx)
+        require(len(valid)==1,"RESUME_TRANSACTION_IDENTITY")
+        tx=valid[0]
+        suffix=tx.name.removeprefix("hype-sha-restore-")
+        require(suffix.isdigit(),"RESUME_TRANSACTION_IDENTITY")
+        if run_id is not None:require(suffix==run_id,"RESUME_RUN_ID_MISMATCH")
+        return tx,suffix
+
+    def preview_resume(self, run_id):
+        from disdex_shared_risk_witness import file_bytes
+        from disdex_unified_root_gate import (
+            assert_private_dir, assert_regular_secure, parse_live_pins, read_root_json, release_marker,
+        )
+        from disdex_v4_canonical_prestart import validate_activation
+        release_marker(CANDIDATE,self.paths.releases,root_uid=0)
+        for name,expected in AUDITED.items():
+            require(digest(trusted_source(self.release/name,assert_regular_secure))==expected,"SOURCE_DIGEST")
+        for name in ("lib/hype-zec-long-runner.ts","config/hypeZecLongRuntime.ts",
+                     "scripts/disdex-hype-trend-live-runner.ts","scripts/disdex-hype-zec-long-live-runner.ts",
+                     "scripts/ops/root/disdex-live-operator-activation-gate.mjs"):
+            require(trusted_source(self.release/name,assert_regular_secure)==
+                    file_bytes(self.paths.releases/LEGACY/name).replace(b"\r\n",b"\n"),"UNREVIEWED_RUNTIME_DELTA")
+        self.manifest=read_root_json(self.paths.pins,private=False)
+        self.pins=parse_live_pins(self.manifest,releases=self.paths.releases)
+        require(self.pins.get(RUNNER)==CANDIDATE,"RESUME_CANDIDATE_PIN")
+        require(self.pins.get(V4_SCOPE)=="3ad65403013b701db5d9e53e8814e6ab827a28e8","V4_PIN_MISMATCH")
+        self.desired=dict(self.pins)
+        self.current=read_root_json(self.paths.current_plan)
+        require(self.current["runners"]==self.pins and self.current["sourceSha"]==self.paths.current.resolve().name,
+                "CURRENT_PLAN")
+        self.context=self.secure_context()
+        for u in (self.old,self.new):
+            require(self.systemd.main_pid(u)==0 and self.systemd.active_state(u) in ("inactive","failed"),"WRITER_ACTIVE")
+        self.only_writer()
+        require(not self.systemd.is_enabled(self.new),"NEW_WRITER_ENABLED")
+
+        tx,resume_run_id=self._resume_transaction(run_id)
+        assert_private_dir(tx,root_uid=0)
+        self.resume_tx=tx
+        self.resume_run_id=resume_run_id
+        for name in ("blocked.json","activation.revoked","pins.before","plan.before",
+                     "v4-activation.before","state.before","monitor-wiring.json"):
+            assert_regular_secure(tx/name,root_uid=0,private=True)
+        require(not (tx/"receipt.json").exists(),"RESUME_RECEIPT_EXISTS")
+        require(not self.legacy.approval.exists() and not self.legacy.approval.is_symlink(),"RESUME_AUTHORITY_NOT_REVOKED")
+        for path in (self.legacy.env,self.legacy.operator_env):
+            assert_regular_secure(path,root_uid=0,private=True)
+        assert_regular_secure(self.legacy.override,root_uid=0,private=False)
+        drop=self.legacy.dropin.lstat()
+        require(self.legacy.dropin.is_dir() and not self.legacy.dropin.is_symlink() and drop.st_uid==0
+                and drop.st_gid==0 and drop.st_mode&0o777==0o755,"RESUME_DROPIN")
+
+        self.state=file_bytes(STATE);self.state_meta=STATE.lstat()
+        d=json.loads(self.state)
+        require(d.get("runtimeCommitSha")==CANDIDATE and d.get("mode")=="LIVE"
+                and d.get("manualReview") is None and not d.get("positions") and not d.get("pending"),
+                "CANDIDATE_LEDGER_UNHEALTHY")
+        self.deploy=pwd.getpwnam("deploy")
+        require((self.state_meta.st_uid,self.state_meta.st_gid)==(self.deploy.pw_uid,self.deploy.pw_gid)
+                and self.state_meta.st_mode&0o777==0o600,"STATE_OWNER")
+
+        prior_manifest=json.loads(file_bytes(tx/"pins.before"))
+        self.resume_prior_pins=parse_live_pins(prior_manifest,releases=self.paths.releases)
+        require(self.pins==proposed_pins(self.resume_prior_pins),"RESUME_PIN_TRANSITION")
+        prior_plan=json.loads(file_bytes(tx/"plan.before"))
+        require(prior_plan.get("runners")==self.resume_prior_pins,"RESUME_PRIOR_PLAN")
+        self.resume_prior_v4_hash=digest(file_bytes(tx/"v4-activation.before"))
+        self.v4_plan=v4_continuity_plan(self.resume_prior_pins,self.pins,self.resume_prior_v4_hash)
+        self.v4_approval_path=SHARED/"operator-activation/v12-v4-full.json"
+        self.v4_approval_before=file_bytes(self.v4_approval_path)
+        approval=read_root_json(self.v4_approval_path)
+        sha=self.pins[V4_SCOPE]
+        self.v4_readiness=read_root_json(self.paths.releases/sha/"docs/production/v12-v4-implementation-readiness.json",private=False)
+        validate_activation(approval,sha,self.pins,self.v4_readiness,int(time.time()))
+        require(approval.get("planSha256")==self.v4_plan and approval.get("approvedShaByRunner")==self.pins,
+                "RESUME_V4_CONTINUITY")
+
+        revoked=json.loads(file_bytes(tx/"activation.revoked"))
+        require(revoked.get("scope")==RUNNER and revoked.get("operation")==OPERATION
+                and revoked.get("approvedSha")==CANDIDATE and revoked.get("approvedShaByRunner")=={RUNNER:CANDIDATE}
+                and revoked.get("ordersEnabled") is True and revoked.get("planSha256")==PLAN
+                and revoked.get("route")=="GITHUB_ACTIONS" and revoked.get("githubRunId")==resume_run_id
+                and re.fullmatch(r"[0-9a-f]{64}",str(revoked.get("venueProofSha256") or "")),
+                "RESUME_REVOKED_AUTHORITY")
+        self.resume_venue_proof=revoked["venueProofSha256"]
+        self.venue_proof=self.resume_venue_proof
+
+        output=self.node(["--input-type=module","--eval",
+            "import {readFileSync} from 'node:fs';"
+            "import {replayProductionJournal} from './lib/v12-v4-production-lifecycle.ts';"
+            f"const d=JSON.parse(readFileSync({json.dumps(str(V4))},'utf8'));"
+            "if(d.releaseSha!=='3ad65403013b701db5d9e53e8814e6ab827a28e8'||!d.state)throw Error('HYPE_V4_CURRENT_OWNERSHIP_CHANGED');"
+            "const r=replayProductionJournal(d.state.initial,d.state.journal);"
+            "const legs=Object.values(r.legs??{});"
+            "if(r.executionReview!=null||(r.foreign??[]).length||r.initial?.holdProtected!==false||"
+            "legs.some(x=>Math.abs(Number(x.qty??0))>1e-12||!['CLOSED','CANCELLED'].includes(String(x.status))))"
+            "throw Error('HYPE_V4_CURRENT_OWNERSHIP_CHANGED');"
+            "const reviewEvents=(d.state.journal??[]).filter(x=>x?.type==='EXECUTION_REVIEW_RESOLVED').length;"
+            "if(reviewEvents<1)throw Error('HYPE_V4_REVIEW_EVENT_MISSING');"
+            "console.log(JSON.stringify({journalCount:d.state.journal.length,reviewEvents}));"],
+            {"PATH":"/usr/bin:/bin"},deploy=False)
+        self.journal_count=output["journalCount"];self.review_events=output["reviewEvents"]
+        self.wiring=monitoring(self.release);self.wiring.assert_applied()
+        self.health()
+        return dict(status="HYPE_SHA_RESTORE_PREFLIGHT_PASS",candidateSha=CANDIDATE,
+                    planSha256=PLAN,v4Sha=sha,v4PlanSha256=self.v4_plan,journalCount=self.journal_count,
+                    reviewEvents=self.review_events,evidenceContract="SIGNED_ASTER_FLAT_3X",
+                    resumeAfterStart=True,resumeRunId=resume_run_id,**ZERO)
+
+    def maintain_pending_freshness(self, force=False):
+        from disdex_hype_scoped_root_cutover import validate_hype_pending
+        from disdex_shared_risk_witness import file_bytes
+        path=SHARED/"pending-exposure.json"
+        def read_updated():
+            raw=file_bytes(path);row=json.loads(raw);updated=row.get("updatedAt")
+            require(type(updated) is int and updated>0,"PENDING_UPDATED_AT")
+            return raw,updated
+        raw,before=read_updated();now=time.time_ns()//1000000
+        if not force and 0<=now-before<=240000:
+            return before
+        service="disdex-pending-exposure-reconcile.service"
+        for _ in range(20):
+            subprocess.run(["/usr/bin/systemctl","reset-failed",service],capture_output=True,timeout=15)
+            proc=subprocess.run(["/usr/bin/systemctl","start",service],capture_output=True,text=True,timeout=45)
+            try:
+                after_raw,after=read_updated();after_now=time.time_ns()//1000000
+                validate_hype_pending(after_raw,after_now)
+            except (ValueError,json.JSONDecodeError):
+                after=before
+            if proc.returncode==0 and after>before:
+                return after
+            time.sleep(1)
+        raise ValueError("HYPE_SHA_RESTORE_PENDING_RECONCILIATION_REQUIRED")
+
+    def preview_fresh(self):
         from disdex_shared_risk_witness import file_bytes
         from disdex_unified_root_gate import (
             assert_regular_secure, parse_live_pins, read_root_json, release_marker,
@@ -229,9 +388,11 @@ class Restore:
         from disdex_shared_risk_witness import file_bytes
         from disdex_unified_root_gate import assert_private_dir, assert_regular_secure
         verify_approval(self.paths,token)
-        self.preview()
+        preflight=self.preview(run_id)
         v4_verify=dict(sha=self.pins[V4_SCOPE],scope=V4_SCOPE,plan=self.v4_plan)
         verify_approval(self.paths,v4_token,**v4_verify)
+        if preflight.get("resumeAfterStart") is True:
+            return self.reconcile_after_start(run_id,token,v4_token,v4_verify)
         tx=self.paths.receipts/f"hype-sha-restore-{run_id}"
         assert_private_dir(self.paths.receipts,root_uid=0)
         for p in (self.legacy.env,self.legacy.operator_env,self.legacy.dropin,self.legacy.approval,tx):
@@ -351,6 +512,62 @@ class Restore:
             _root_file(tx/"blocked.json",json_bytes(dict(status="HYPE_SHA_RESTORE_ROLLED_BACK")),0o400,[])
             raise
 
+    def reconcile_after_start(self, run_id, token, v4_token, v4_verify):
+        from disdex_hype_scoped_root_cutover import _root_file
+        from disdex_shared_risk_witness import file_bytes
+        from disdex_unified_root_gate import read_root_json
+        from disdex_v4_canonical_prestart import validate_activation
+        require(run_id==self.resume_run_id,"RESUME_RUN_ID_MISMATCH")
+        require(file_bytes(STATE)==self.state,"STATE_CAS")
+        require(file_bytes(self.v4_approval_path)==self.v4_approval_before,"V4_APPROVAL_CHANGED")
+        self.maintain_pending_freshness(force=True)
+        auth=verify_approval(self.paths,token,consume=True)
+        v4_auth=verify_approval(self.paths,v4_token,consume=True,**v4_verify)
+        expected_v4=build_v4_continuity_activation(v4_auth,self.resume_prior_pins,self.pins,
+                                                   self.resume_prior_v4_hash,int(time.time()))
+        require(expected_v4.get("planSha256")==self.v4_plan
+                and expected_v4.get("approvedShaByRunner")==self.pins,"RESUME_V4_TOKEN")
+        validate_activation(read_root_json(self.v4_approval_path),self.pins[V4_SCOPE],self.pins,
+                            self.v4_readiness,int(time.time()))
+        require(int(time.time())<min(auth["expiresAt"],v4_auth["expiresAt"]),"APPROVAL_EXPIRED_BEFORE_START")
+        activation=dict(schema="disdex-live-operator-activation/v1",repository=REPOSITORY,
+            deploymentTarget=HOST,target=OPERATOR_TARGET,scope=RUNNER,operation=OPERATION,
+            approvedSha=CANDIDATE,approvedRunners=[RUNNER],approvedShaByRunner={RUNNER:CANDIDATE},
+            ordersEnabled=True,activationClass="FULL_LIVE",route="GITHUB_ACTIONS",
+            authorizationMethod="OWNER_SIGNED_TOKEN",approvedAt=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime(auth["issuedAt"])),
+            operatorAcknowledgement="I_ACK_REAL_MONEY_LIVE_ACTIVATION",planSha256=PLAN,
+            nonceDigest=digest(auth["nonce"].encode()),githubRunId=run_id,venueProofSha256=self.resume_venue_proof)
+        require(not self.legacy.approval.exists() and not self.legacy.approval.is_symlink(),"RESUME_AUTHORITY_NOT_REVOKED")
+        _root_file(self.legacy.approval,json_bytes(activation),0o600,[])
+        system("daemon-reload")
+        check=subprocess.run(["/usr/bin/systemd-analyze","verify",self.new],capture_output=True,timeout=45)
+        require(check.returncode==0,"UNIT_VERIFY")
+        self.parent._assert_expected_pins(self.pins)
+        self.wiring.assert_applied();self.check_ledger();self.only_writer()
+        self.health()
+        require(int(time.time())<min(auth["expiresAt"],v4_auth["expiresAt"]),"APPROVAL_EXPIRED_BEFORE_START")
+        started_at=time.time_ns()//1000000
+        self.started=True
+        try:
+            self.systemd.start(self.new)
+            result=self.audit(started_at)
+            self.systemd.enable(self.new)
+            receipt={**result,"status":"HYPE_SHA_RESTORE_LIVE_VERIFIED","sourceSha":CANDIDATE,
+                     "previousSha":LEGACY,"ordersEnabled":True,"githubRunId":run_id,"planSha256":PLAN,
+                     "v4PlanSha256":self.v4_plan,"v4PidPreserved":self.context["peers"][V4_SCOPE]["pid"],
+                     "signedPreflightReads":3,"reviewEvents":self.review_events,"accountFlatVerified":True,
+                     "venueProofSha256":self.resume_venue_proof,"reconciledAfterStart":True,**ZERO}
+            _root_file(self.resume_tx/"receipt.json",json_bytes(receipt),0o400,[])
+            return receipt
+        except Exception:
+            if self.legacy.approval.exists():
+                require(file_bytes(self.legacy.approval)==json_bytes(activation),"ROLLBACK_AUTHORITY_CAS")
+                tag=digest(auth["nonce"].encode())[:16]
+                _root_file(self.resume_tx/f"activation.reconcile-revoked.{tag}",json_bytes(activation),0o400,[])
+                self.legacy.approval.unlink()
+            self.systemd.stop(self.new);self.systemd.disable(self.new)
+            raise
+
     def check_ledger(self):
         from disdex_shared_risk_witness import file_bytes
         row=json.loads(file_bytes(STATE))
@@ -373,6 +590,7 @@ class Restore:
             self.only_writer(self.new)
             self.parent._assert_expected_pins(self.desired)
             self.wiring.assert_applied()
+            self.maintain_pending_freshness()
             self.health()
             self.check_ledger()
             if tick.exists():
