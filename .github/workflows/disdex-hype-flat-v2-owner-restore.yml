@@ -1,0 +1,173 @@
+name: DisDex HYPE current-flat exact-SHA owner restore
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-hype-flat-v2-owner-restore.yml"
+      - ".github/workflows/disdex-v4-hp-approval-request.yml"
+      - "scripts/ops/deploy/disdex_hype_sha_flat_restore*.py"
+      - "tests/hype-flat-v2-owner-restore-contract.test.mjs"
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: Fresh HYPE-specific HP email-OTP approval ID
+        type: string
+        required: true
+      v4_approval_id:
+        description: Fresh V4 peer-pin continuity HP email-OTP approval ID
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: |
+          python3 -m py_compile scripts/ops/deploy/disdex_hype_sha_flat_restore.py scripts/ops/deploy/disdex_hype_sha_flat_restore_contract.py scripts/ops/deploy/disdex_hype_sha_flat_restore_venue.py
+          node --test tests/hype-flat-v2-owner-restore-contract.test.mjs
+
+  restore:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 38
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Configure pinned root SSH and upload exact helper bundle
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_PRODUCTION_SSH_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$HOST_KEYS" ]]
+          port="${PORT:-22}"
+          [[ "$port" =~ ^[0-9]{1,5}$ && "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          umask 077
+          ssh_dir="$RUNNER_TEMP/hype-flat-v2-ssh"
+          mkdir -m 0700 "$ssh_dir"
+          printf '%s\n' "$KEY" > "$ssh_dir/key"
+          printf '%s\n' "$HOST_KEYS" > "$ssh_dir/known_hosts"
+          remote="/run/disdex-hype-flat-v2-$GITHUB_RUN_ID"
+          SSH=(ssh -T -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -o ConnectTimeout=12 -p "$port" "root@$HOST")
+          SCP=(scp -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -P "$port")
+          "${SSH[@]}" "install -d -o root -g root -m 0700 '$remote'"
+          "${SCP[@]}" scripts/ops/deploy/disdex_hype_sha_flat_restore.py scripts/ops/deploy/disdex_hype_sha_flat_restore_contract.py scripts/ops/deploy/disdex_hype_sha_flat_restore_venue.py "root@$HOST:$remote/"
+          "${SSH[@]}" "chmod 0400 '$remote/'*.py"
+          printf '%s' "$remote" > "$RUNNER_TEMP/hype-flat-v2-remote"
+
+      - name: Read-only current-flat cutover preflight before redeeming OTP
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          port="${PORT:-22}"
+          remote="$(cat "$RUNNER_TEMP/hype-flat-v2-remote")"
+          ssh_dir="$RUNNER_TEMP/hype-flat-v2-ssh"
+          ssh -nT -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -o ConnectTimeout=12 -p "$port" "root@$HOST"             "PYTHONPATH='$remote:/usr/local/libexec/disdex-unified' python3 '$remote/disdex_hype_sha_flat_restore.py' --preflight-readonly"             > "$RUNNER_TEMP/hype-flat-v2-plan.json"
+          python3 - <<'PY'
+          import json,os,re
+          from pathlib import Path
+          p=json.loads(Path(os.environ["RUNNER_TEMP"],"hype-flat-v2-plan.json").read_text())
+          assert p["status"]=="HYPE_SHA_RESTORE_PREFLIGHT_PASS"
+          assert p["candidateSha"]=="a7eee1f91d86d51f2333da117243d044ae1332dc"
+          assert p["evidenceContract"]=="SIGNED_ASTER_FLAT_3X"
+          assert p["reviewEvents"]>=1 and p["journalCount"]>=10000
+          assert p["ordersSent"]==p["cancelsSent"]==p["positionChangesSent"]==0
+          assert re.fullmatch(r"[0-9a-f]{64}",p["v4PlanSha256"])
+          print("HYPE_FLAT_V2_PREFLIGHT=PASS")
+          PY
+
+      - name: Redeem two independent owner approvals and execute exact cutover
+        shell: bash
+        env:
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          V4_APPROVAL_ID: ${{ inputs.v4_approval_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          OWNER_PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+          PYTHONPATH: scripts/ops/deploy
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 - <<'PY'
+          import json,os,re,subprocess,tempfile,urllib.request
+          from pathlib import Path
+          from disdex_hype_sha_flat_restore_contract import (
+              CANDIDATE,HOST,OPERATION,OPERATOR_TARGET,OWNER,PLAN,REPOSITORY,RUNNER,V4_OPERATION,V4_SCOPE,
+          )
+          from disdex_owner_approval import verify
+          ids=[os.environ["APPROVAL_ID"],os.environ["V4_APPROVAL_ID"]]
+          assert all(re.fullmatch(r"[0-9a-fA-F-]{36}",x) for x in ids) and ids[0]!=ids[1]
+          run_id=os.environ["GITHUB_RUN_ID"]; assert re.fullmatch(r"[0-9]{1,20}",run_id)
+          assert os.environ["HOST"]==HOST and os.environ["BRIDGE"] and os.environ["OWNER_PUBLIC_KEY"]
+          plan=json.loads(Path(os.environ["RUNNER_TEMP"],"hype-flat-v2-plan.json").read_text())
+          assert plan["candidateSha"]==CANDIDATE and plan["planSha256"]==PLAN
+          v4_sha,v4_plan=plan["v4Sha"],plan["v4PlanSha256"]
+          def redeem(approval_id,operation,scope,sha,plan_hash,public_key):
+              body=json.dumps(dict(action="redeem",approval_id=approval_id,operation=operation,
+                  scope=scope,target_sha=sha,plan_sha256=plan_hash,run_id=run_id)).encode()
+              request=urllib.request.Request("https://"+HOST+"/api/system/deploy-approval",data=body,method="POST",
+                  headers={"Authorization":"Bearer "+os.environ["BRIDGE"],"Content-Type":"application/json"})
+              with urllib.request.urlopen(request,timeout=15) as res:data=json.load(res)
+              a=data.get("approval") or {}
+              assert data.get("ok") is True and a.get("operation")==operation and a.get("scope")==scope
+              assert a.get("targetSha")==sha and a.get("planSha256")==plan_hash and a.get("ordersEnabled") is True
+              token=data["token"]
+              verify(token,public_key,REPOSITORY,sha,scope,OWNER,plan_hash,route="GITHUB_ACTIONS",
+                     deployment_target=HOST,operator_target=OPERATOR_TARGET,orders_enabled=True)
+              return token
+          with tempfile.NamedTemporaryFile(mode="w",dir=os.environ["RUNNER_TEMP"]) as key:
+              key.write(os.environ["OWNER_PUBLIC_KEY"]);key.flush()
+              hype=redeem(ids[0],OPERATION,RUNNER,CANDIDATE,PLAN,Path(key.name))
+              v4=redeem(ids[1],V4_OPERATION,V4_SCOPE,v4_sha,v4_plan,Path(key.name))
+          ssh_dir=Path(os.environ["RUNNER_TEMP"])/"hype-flat-v2-ssh"
+          remote=Path(os.environ["RUNNER_TEMP"],"hype-flat-v2-remote").read_text()
+          port=os.environ.get("PORT") or "22"
+          cmd=["ssh","-T","-i",str(ssh_dir/"key"),"-o","BatchMode=yes","-o","IdentitiesOnly=yes",
+               "-o","StrictHostKeyChecking=yes","-o","UserKnownHostsFile="+str(ssh_dir/"known_hosts"),
+               "-o","ConnectTimeout=12","-o","ServerAliveInterval=10","-p",port,"root@"+HOST,
+               f"PYTHONPATH='{remote}:/usr/local/libexec/disdex-unified' python3 '{remote}/disdex_hype_sha_flat_restore.py' --run-id {run_id} --read-approval-stdin"]
+          subprocess.run(cmd,input=json.dumps(dict(hype=hype,v4=v4)),text=True,check=True,timeout=2100)
+          PY
+
+      - name: Cleanup ephemeral root bundle and SSH files
+        if: always()
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_PRODUCTION_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_PRODUCTION_SSH_PORT }}
+        run: |
+          set +e
+          port="${PORT:-22}"
+          ssh_dir="$RUNNER_TEMP/hype-flat-v2-ssh"
+          if [[ -s "$ssh_dir/key" && -f "$RUNNER_TEMP/hype-flat-v2-remote" ]]; then
+            remote="$(cat "$RUNNER_TEMP/hype-flat-v2-remote")"
+            ssh -nT -i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" -p "$port" "root@$HOST" "rm -rf -- '$remote'" >/dev/null 2>&1
+          fi
+          rm -rf "$ssh_dir" "$RUNNER_TEMP/hype-flat-v2-plan.json" "$RUNNER_TEMP/hype-flat-v2-remote"
