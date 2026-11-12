@@ -1,0 +1,67 @@
+{
+  "status": "FINAL_RESEARCH_BT_CHECKPOINT_NO_PRODUCTION_CHANGE",
+  "date": "2026-11-12",
+  "period": {
+    "begin": "2025-10-01T00:00:00Z",
+    "endExclusive": "2026-10-01T00:00:00Z"
+  },
+  "case": "S3_HH_TH_RB",
+  "canonicalSimulatorSha256": "eba62b627ae78929de28a3274e9afadaf5204af05527996c47ce7ef6b14018c6",
+  "generatedSimulatorSha256": "cc72e9f9c2e545e0d9dc5e721049fddd2fa7bca48a0c395c27db80d6a2db8841",
+  "wrapperSha256": "dcba1dd0df2f09b2c532e27497c5e7e2e00dd085fafc59677046457cd615d527",
+  "outputManifestSha256": "df5627f7f99be11368bae36f30eeb7e149378e7b857112159dfa8f70f1d86c1b",
+  "determinism": {
+    "runs": 2,
+    "artifactCount": 21,
+    "exactSha256Match": true
+  },
+  "metrics": {
+    "10bps": {
+      "initialJpy": 10000,
+      "finalJpy": 4704435.475345347,
+      "maxHourlyDdPct": -23.809717078407832,
+      "fills": 855,
+      "winRatePct": 61.87134502923976,
+      "profitFactor": 1.8269832918257876
+    },
+    "30bps": {
+      "initialJpy": 10000,
+      "finalJpy": 1627379.002025883,
+      "maxHourlyDdPct": -24.5716929934103,
+      "fills": 853,
+      "winRatePct": 59.67174677608441,
+      "profitFactor": 1.649402061650759
+    }
+  },
+  "accepted": [
+    "HYPE requested gross x0.5",
+    "IDLE TAO requested gross x0.5",
+    "BLOCK Q102 RENDER|BRK168_H12_V1.2"
+  ],
+  "rejectedOrKeepNative": [
+    "PENGU RECOVERY_V8: RSI<=22 rejected; BTC24 gate deletion rejected; keep current",
+    "IDLE TIA: early adverse exits, half-risk, ret12/BTC24/volume changes rejected",
+    "IDLE TAO ATR gate rejected; retain half-risk",
+    "IDLE RENDER frozen gate rejected on latest integrated baseline",
+    "Q102 HIGH_VOL ARB/SUI: no robust pretarget structural rule; keep native",
+    "Q102 FET: no defensible pretarget route stop; keep native",
+    "Q102 DOGE MR48/MR72: insufficient or positive pretarget evidence; keep native",
+    "V4 X02/X12/G3/X10/X07/Y08/Y15: corrections rejected or unresolved on unseen data; keep native",
+    "Portfolio F0/HB/V4Q4/V52H rejected"
+  ],
+  "terminalOpen": {
+    "count": 1,
+    "strategy": "Q102",
+    "symbol": "SUIUSDT",
+    "side": "LONG",
+    "route": "HIGH_VOL|SUIUSDT",
+    "entryUtc": "2026-09-29T04:00:00Z",
+    "modeledFutureExitUtc": "2026-10-02T03:00:00Z",
+    "treatment": "MTM at end-exclusive boundary; post-period exit not imported"
+  },
+  "ddObjective": {
+    "targetPct": -20,
+    "achieved": false
+  },
+  "productionMutation": false
+}
