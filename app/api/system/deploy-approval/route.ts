@@ -327,7 +327,6 @@ export async function POST(request: NextRequest) {
               token: refreshed.token,
               approval: sanitizeDeploymentApproval(next),
               replay: false,
-              refreshed: true,
             },
           };
         }
