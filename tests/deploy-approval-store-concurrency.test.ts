@@ -88,6 +88,27 @@ test("file-backed approvals serialize concurrent writers and reject corrupt data
     assert.equal(claims.filter((x) => x.status === "rejected").length, 19);
     assert.equal((await store.getDeploymentApproval("single-redeem"))?.status, "REDEEMED");
 
+    const durableApproved = await store.saveDeploymentApproval({
+      ...record("durable-approved"),
+      requestExpiresAt: Date.now() - 60_000,
+      status: "APPROVED",
+      approvedAt: Date.now() - 120_000,
+      approvalToken: "expired-transport-token",
+      approvalTokenExpiresAt: Math.floor(Date.now() / 1000) - 60,
+    });
+    const reused = await store.createPendingDeploymentApproval({
+      targetSha: durableApproved.targetSha,
+      planSha256: durableApproved.planSha256,
+      scope: "V12_V4",
+      operation: "V12_V4_LIVE",
+      ordersEnabled: true,
+      requestActor: "synthetic-test",
+      requestCommentId: "same-task-retry",
+    });
+    assert.equal(reused.id, durableApproved.id);
+    assert.equal(reused.status, "APPROVED");
+    assert.equal((await store.getDeploymentApproval(durableApproved.id))?.status, "APPROVED");
+
     await fs.writeFile(storePath, "{corrupt");
     await assert.rejects(store.saveDeploymentApproval(record("must-not-overwrite")));
     assert.equal(await fs.readFile(storePath, "utf8"), "{corrupt");
