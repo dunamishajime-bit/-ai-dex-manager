@@ -108,11 +108,18 @@ def verify_health(pins):
     if any(int(eff.get(k,0))!=0 for k in ("ordersSent","cancelSent","positionChangesSent")): die("TRADING_EFFECT")
     return row
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--apply",action="store_true"); a=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--apply",action="store_true"); ap.add_argument("--verify",action="store_true"); a=ap.parse_args()
     pins,plan=validate(); eb=render(pins); db=dropin()
     out={"status":"HEALTH_PIN_CONSOLIDATION_PREFLIGHT_PASS","monitorSha":MONITOR_SHA,
          "envPath":str(ENV),"dropinPath":str(DROPIN),"envSha256":digest(eb),"dropinSha256":digest(db),
          "ordersSent":0,"cancelsSent":0,"positionChangesSent":0}
+    if a.verify:
+        row=verify_health(pins)
+        print(json.dumps({"status":"HEALTH_PIN_CONSOLIDATION_VERIFY_PASS",
+            "generatedAt":row.get("generatedAt"),"overallSafetyState":row.get("overallSafetyState"),
+            "enabledRunnerBlocks":row.get("enabledRunnerBlocks"),"ordersSent":0,"cancelsSent":0,
+            "positionChangesSent":0},sort_keys=True))
+        return
     if not a.apply:
         print(json.dumps(out,sort_keys=True)); return
     stamp=str(int(time.time()))
