@@ -8,6 +8,8 @@ IDLE_SHA="7688ed7c93a1918d8b44837339b7da5584a868f5"
 V4_SHA="3ad65403013b701db5d9e53e8814e6ab827a28e8"
 IDLE_UNIT=f"disdex-idle-priority-short@{IDLE_SHA}.service"
 STATE=Path("/var/lib/disdex/idle-priority/residual-long-state.json")
+CORE_STATE=Path("/var/lib/disdex/idle-priority/state.json")
+TIMEOUT_REVIEW="IDLE_RUNNER_FAIL_CLOSED:Aster request timeout after 10000ms"
 KILL=Path("/var/lib/disdex/shared/kill-switch.json")
 RISK=Path("/var/lib/disdex/shared/crypto-daily-risk.json")
 MARGIN=Path("/var/lib/disdex/shared/margin-risk/guard-live.json")
@@ -106,11 +108,48 @@ def repair(run_id):
     req(readj(STATE).get("updatedAt")==now,"IDLE_REPAIR_READBACK")
     return old,now,str(backup)
 
+def repair_core_timeout(run_id):
+    raw=CORE_STATE.read_bytes(); st=CORE_STATE.stat(); d=json.loads(raw)
+    req(d.get("schema")=="disdex-idle-priority-state/v2","IDLE_CORE_SCHEMA")
+    req(d.get("runtimeSha")==IDLE_SHA,"IDLE_CORE_SHA")
+    req(d.get("positions")==[] and d.get("pending") is None,"IDLE_CORE_NOT_FLAT")
+    review=d.get("manualReview")
+    if review is None:
+        return False,None
+    req(review==TIMEOUT_REVIEW,"IDLE_CORE_REVIEW_NOT_EXACT_TIMEOUT")
+    failures=d.get("failures"); req(isinstance(failures,list),"IDLE_CORE_FAILURES_INVALID")
+    now=int(time.time()*1000)
+    backup=CORE_STATE.with_name(CORE_STATE.name+f".before-signed-flat-timeout-recovery-{run_id}")
+    fd=os.open(backup,os.O_CREAT|os.O_EXCL|os.O_WRONLY,st.st_mode & 0o777)
+    try:
+        os.write(fd,raw); os.fsync(fd)
+    finally: os.close(fd)
+    os.chown(backup,st.st_uid,st.st_gid)
+    d["manualReview"]=None
+    d["updatedAt"]=now
+    d["failures"]=[*failures,{"message":"IDLE_BENIGN_SIGNED_FLAT_TIMEOUT_RECOVERY","occurredAt":now}][-100:]
+    out=(json.dumps(d,indent=2)+"\n").encode()
+    tmp=CORE_STATE.with_name(CORE_STATE.name+f".{run_id}.timeout-recovery.tmp")
+    fd=os.open(tmp,os.O_CREAT|os.O_EXCL|os.O_WRONLY,st.st_mode & 0o777)
+    try:
+        os.write(fd,out); os.fsync(fd)
+    finally: os.close(fd)
+    os.chown(tmp,st.st_uid,st.st_gid)
+    req(CORE_STATE.read_bytes()==raw,"IDLE_CORE_STATE_CAS")
+    os.replace(tmp,CORE_STATE)
+    after=readj(CORE_STATE)
+    req(after.get("manualReview") is None and after.get("updatedAt")==now,"IDLE_CORE_RECOVERY_READBACK")
+    return True,str(backup)
+
 def main(run_id):
     req(os.geteuid()==0,"ROOT_REQUIRED"); req(run_id.isdecimal(),"RUN_ID")
     health(); gate(); before=signed_flat()
+    coreRecovered,coreBackup=repair_core_timeout(run_id)
     old,new,backup=repair(run_id)
     health(); gate()
+    p=subprocess.run(["systemctl","reset-failed",IDLE_UNIT],capture_output=True,text=True,timeout=15)
+    req(p.returncode==0,"IDLE_RESET_FAILED")
+    time.sleep(3)
     if not active(IDLE_UNIT):
         p=subprocess.run(["systemctl","start",IDLE_UNIT],capture_output=True,text=True,timeout=75)
         req(p.returncode==0,"IDLE_START_FAILED:"+(p.stderr or p.stdout)[-180:])
@@ -121,7 +160,8 @@ def main(run_id):
     time.sleep(5); req(active(IDLE_UNIT) and int(prop(IDLE_UNIT,"MainPID") or "0")==pid,"IDLE_NOT_STABLE")
     after=signed_flat()
     print(json.dumps({"status":"IDLE_CURRENT_FLAT_STALE_REPAIR_LIVE_PASS","pid":pid,"oldUpdatedAt":old,
-      "newUpdatedAt":new,"backup":backup,"signedBefore":before,"signedAfter":after,
+      "newUpdatedAt":new,"backup":backup,"coreTimeoutRecovered":coreRecovered,"coreBackup":coreBackup,
+      "signedBefore":before,"signedAfter":after,
       "ordersSentByHelper":0,"cancelsSentByHelper":0,"stopChangesByHelper":0},sort_keys=True))
 
 if __name__=="__main__":
