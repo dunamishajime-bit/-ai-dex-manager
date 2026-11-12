@@ -1,0 +1,127 @@
+name: DisDex HYPE current flat review repair and LIVE resume
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Static no-order checks
+        run: |
+          set -euo pipefail
+          FILE=scripts/ops/deploy/disdex_hype_current_flat_review_repair.ts
+          grep -Fq 'HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT' "$FILE"
+          grep -Fq 'd6bcc94512a6416189cd92d7203b9ac3b2c98e70' "$FILE"
+          grep -Fq 'XRPUSDT:REC_X06_TIME_12H:SHORT:1794067200000' "$FILE"
+          ! grep -Eq '\.(placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder|setLeverage|setMarginType)\(' "$FILE"
+          node --test tests/hype-current-flat-review-repair-contract.test.mjs
+
+      - name: Configure pinned SSH
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          mkdir -m 0700 "$RUNNER_TEMP/hype-repair-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/hype-repair-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/hype-repair-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/hype-repair-ssh/"*
+
+      - name: Verify production guards and exact inactive HYPE pin
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts"             -p "$PORT" "root@$HOST" 'python3 - <<'"'"'PY'"'"'
+          import json,time,pathlib,subprocess
+          H="d6bcc94512a6416189cd92d7203b9ac3b2c98e70"
+          U=f"disdex-hype-long@{H}.service"
+          pins=json.load(open("/etc/disdex/runner-pins.json"))
+          row=pins["runners"]["HYPE_TREND_LONG"]
+          assert row["sha"]==H and row["serviceUnit"]==U
+          assert pathlib.Path(f"/home/deploy/disdex-trading/releases/{H}/.disdex-release-sha").read_text().strip()==H
+          assert subprocess.check_output(["systemctl","show",U,"--property=ActiveState","--value"],text=True).strip()!="active"
+          kill=json.load(open("/var/lib/disdex/shared/kill-switch.json")); assert kill["active"] is False
+          risk=json.load(open("/var/lib/disdex/shared/crypto-daily-risk.json")); assert risk["tripped"] is False and risk["sourceComplete"] is True
+          margin=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json")); assert margin["stage"]=="HEALTHY" and margin["ordersAllowed"] is True
+          print("HYPE_REPAIR_PREFLIGHT=PASS")
+          PY
+
+      - name: Upload and repair exact HYPE stale review
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          SCP=(scp -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts" -P "$PORT")
+          SSH=(ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts" -p "$PORT")
+          "${SCP[@]}" scripts/ops/deploy/disdex_hype_current_flat_review_repair.ts "root@$HOST:/tmp/disdex_hype_current_flat_review_repair.$GITHUB_RUN_ID.ts"
+          "${SSH[@]}" "root@$HOST" "set -ae; . /etc/disdex/disdex-v12-aster-credentials.env; . /etc/disdex/disdex-v12-pengu-v2-v52.env; set +a; export HOME=/home/deploy NODE_ENV=production DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json; cd /home/deploy/disdex-trading/releases/d6bcc94512a6416189cd92d7203b9ac3b2c98e70; exec runuser -u deploy --preserve-environment -- /usr/bin/node --import ./node_modules/tsx/dist/loader.mjs /tmp/disdex_hype_current_flat_review_repair.$GITHUB_RUN_ID.ts"
+
+      - name: Start exact HYPE unit and verify stable daemon
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts"             -p "$PORT" "root@$HOST" 'python3 - <<'"'"'PY'"'"'
+          import json,subprocess,time
+          U="disdex-hype-long@d6bcc94512a6416189cd92d7203b9ac3b2c98e70.service"
+          subprocess.run(["systemctl","reset-failed",U],check=False)
+          subprocess.run(["systemctl","start",U],check=True,timeout=75)
+          def prop(k): return subprocess.check_output(["systemctl","show",U,f"--property={k}","--value"],text=True).strip()
+          end=time.time()+25
+          while time.time()<end and prop("ActiveState")!="active": time.sleep(1)
+          assert prop("ActiveState")=="active","HYPE_NOT_ACTIVE"
+          pid=int(prop("MainPID")); assert pid>100
+          time.sleep(15)
+          assert prop("ActiveState")=="active" and int(prop("MainPID"))==pid,"HYPE_NOT_STABLE"
+          state=json.load(open("/var/lib/disdex/hype-zec-long/runner.json"))
+          assert state.get("manualReview")!="HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT"
+          print("HYPE_LIVE_RESUME=PASS")
+          print("HYPE_PID="+str(pid))
+          PY
+
+      - name: No-control-mutation marker
+        run: |
+          echo HELPER_ORDERS_SENT=0
+          echo HELPER_CANCELS_SENT=0
+          echo HELPER_POSITION_CHANGES_SENT=0
+          echo TEST_ORDERS_SENT=0
+
+      - name: Cleanup
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/hype-repair-ssh/key" ]]; then
+            ssh -T -i "$RUNNER_TEMP/hype-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes               -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/hype-repair-ssh/known_hosts"               -p "$PORT" "root@$HOST" "rm -f /tmp/disdex_hype_current_flat_review_repair.$GITHUB_RUN_ID.ts" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/hype-repair-ssh"
