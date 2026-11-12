@@ -25,6 +25,7 @@ V4 = Path("/var/lib/disdex/v12-v4/orders.json")
 SHARED = Path("/var/lib/disdex/shared")
 SNAPSHOT = Path("/var/lib/disdex/runner-health/current.json")
 REVIEW = "HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT"
+REPAIRED = "HYPE_CURRENT_FLAT_REVIEW_REPAIRED_AFTER_SIGNED_SCOPED_FLAT"
 AUDITED = {
     "lib/v12-v4-production-lifecycle.ts": "d44338ab3086420830261ff0a983a2579fbd8dc926049602509992ec8425226a",
     "scripts/disdex-hype-owner-sha-recovery.ts": "b8f7956070a29cba5707f31c15b45384cd68d3c8e31f3137d19204d7bfb7460e",
@@ -166,8 +167,15 @@ class Restore:
         self.state=file_bytes(STATE)
         self.state_meta=STATE.lstat()
         d=json.loads(self.state)
+        failures=d.get("failures") if isinstance(d.get("failures"),list) else []
+        last_failure=failures[-1] if failures and isinstance(failures[-1],dict) else {}
+        last_decision=d.get("lastDecision") if isinstance(d.get("lastDecision"),dict) else {}
         require(d.get("runtimeCommitSha")==LEGACY and d.get("mode")=="LIVE" and
-                d.get("manualReview")==REVIEW and not d.get("positions") and not d.get("pending"),"REVIEW_BASELINE")
+                d.get("manualReview") is None and not d.get("positions") and not d.get("pending") and
+                d.get("updatedAt")==d.get("lastDecisionTs")==last_failure.get("occurredAt") and
+                last_decision.get("reason")==REPAIRED and last_failure.get("message")==REPAIRED and
+                any(isinstance(x,dict) and x.get("message")==REVIEW for x in failures),
+                "REPAIRED_BASELINE")
         self.deploy=pwd.getpwnam("deploy")
         require((self.state_meta.st_uid,self.state_meta.st_gid)==(self.deploy.pw_uid,self.deploy.pw_gid)
                 and self.state_meta.st_mode&0o777==0o600,"STATE_OWNER")
