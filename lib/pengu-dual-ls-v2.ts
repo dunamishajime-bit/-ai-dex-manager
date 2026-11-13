@@ -1,3 +1,5 @@
+import type { DisDexStable4Mode } from "../config/disdexStable4Opportunity";
+import { stable4PenguShortV20Pass } from "./pengu-stable4-opportunity";
 import { PENGU_DUAL_LS_V2 } from "@/config/penguDualLsV2Runtime";
 import { PENGU_V8_V64_BASE } from "@/config/penguRecoveryV8";
 import type { DisDexV35Candle } from "@/lib/disdex-v35-signal-engine";
@@ -16,6 +18,7 @@ export const PENGU_M05_SHADOW_THRESHOLD = -0.005;
 export interface PenguDualLsV2SignalOptions {
     recoveryV8Enabled?: boolean;
     v64DynamicLongEnabled?: boolean;
+    stable4Mode?: DisDexStable4Mode;
 }
 
 export function selectPenguRecoveryV8Entry(row: RecoveryV8FeatureRow | undefined, enabled: boolean) {
@@ -655,6 +658,9 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
     if (position) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "PENGU V2保有中の新規Long/Shortはblocked signalとして記録し、追加発注・反転を行いません。", features: latest.features, decision, updatedPosition: positionEvaluation?.updatedPosition, diagnostics };
     if (cooldownBlocked) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "PENGU V2決済後6時間のcooldown中です。", features: latest.features, decision, diagnostics };
     if (!decision.active) return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: decision.reason, features: latest.features, decision, diagnostics };
+    if (baseDecision.active && baseDecision.side < 0 && baseDecision.shortEligible && !stable4PenguShortV20Pass(options.stable4Mode || "OFF", latest.features)) {
+        return { strategyId: PENGU_DUAL_LS_V2.id, referenceTs: latest.features.referenceTs, side: 0, targetGross: 0, reason: "STABLE4_PENGU_SHORT_V20_RANK3_WAIT", features: latest.features, decision, diagnostics };
+    }
     return {
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest.features.referenceTs,

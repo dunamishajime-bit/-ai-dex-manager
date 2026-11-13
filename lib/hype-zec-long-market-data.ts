@@ -39,10 +39,10 @@ export class HypeZecAsterMarketDataProvider {
   private completedSnapshot?: { boundary: number; value: HypeZecLongMarketData };
   private readonly inFlight = new Map<number, Promise<HypeZecLongMarketData>>();
 
-  constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneHourLimit?: number; oneMinuteLimit?: number; now?: () => number; signalMode?: "LEGACY" | "TREND"; symbols?: ReadonlyArray<"HYPEUSDT" | "ZECUSDT"> } = {}) {}
+  constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneHourLimit?: number; oneMinuteLimit?: number; now?: () => number; signalMode?: "LEGACY" | "TREND" | "STABLE4"; symbols?: ReadonlyArray<"HYPEUSDT" | "ZECUSDT"> } = {}) {}
 
   private completedCandleBoundary(now: number) {
-    const intervalMs = this.options.signalMode === "TREND" ? HOUR : MINUTE;
+    const intervalMs = this.options.signalMode === "TREND" || this.options.signalMode === "STABLE4" ? HOUR : MINUTE;
     return Math.floor(now / intervalMs) * intervalMs;
   }
 
@@ -54,7 +54,7 @@ export class HypeZecAsterMarketDataProvider {
     const symbols = this.options.symbols || ["HYPEUSDT", "ZECUSDT"];
     const needHype = symbols.includes("HYPEUSDT");
     const needZec = symbols.includes("ZECUSDT");
-    const trend = signalMode === "TREND";
+    const trend = signalMode === "TREND" || signalMode === "STABLE4";
     const empty = async (): Promise<AsterKline[]> => [];
     const [btc15, btc1h, hype15, hype1h, hype1, zec15, zec1] = await Promise.all([
       trend ? empty() : this.client.getKlines("BTCUSDT", "15m", fifteenLimit),
