@@ -1,7 +1,7 @@
 "use client";
 import type {Replay} from "@/lib/bt-verification/replay";
 
-type Mark = {time:string;label:string;kind:"ENTRY"|"EXIT";result:"POSITIVE"|"NEGATIVE"|"UNKNOWN"};
+type Mark = {frameIndex:number;time:string;label:string;kind:"ENTRY"|"EXIT";result:"POSITIVE"|"NEGATIVE"|"UNKNOWN"};
 const LOGICS=["V4","V12","PENGU","V52","Q102","HYPE","FET","IDLE","STABLE3","STABLE4"];
 function markers(replay:Replay,cursor:number):Mark[]{
  const result:Mark[]=[];
@@ -9,18 +9,18 @@ function markers(replay:Replay,cursor:number):Mark[]{
   const frame=replay.frames[i];
   for(const e of frame.events){
    if(e.startsWith("BLOCK ") || e.includes(" RISK ") || e.startsWith("RISK "))continue;
-   const time=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/.test(e)?e.slice(0,20):frame.timestamp;
+   const time=(e.length>=20 && e.charAt(4)==="-" && e.charAt(10)==="T")?e.slice(0,20):frame.timestamp;
    const enter=e.includes("ENTRY")||e.includes("発火")||e.includes("エントリー");
    const exit=e.includes("EXIT")||e.includes("利確")||e.includes("損切")||e.includes("決済");
    if(!enter&&!exit)continue;
    const logic=LOGICS.find(x=>new RegExp("(^|[^A-Z0-9])"+x+"([^A-Z0-9]|$)").test(e))??"BT";
-   result.push({time,label:logic+(enter?" 発火":" 決済")+" / "+e,kind:enter?"ENTRY":"EXIT",
+   result.push({frameIndex:i,time,label:logic+(enter?" 発火":" 決済")+" / "+e,kind:enter?"ENTRY":"EXIT",
     result:e.includes("利確")||/\+\d+(?:\.\d+)?\s*JPY/.test(e)?"POSITIVE":e.includes("損切")||/-\d+(?:\.\d+)?\s*JPY/.test(e)?"NEGATIVE":"UNKNOWN"});
   }
  }
  return result;
 }
-export function BtcCandlestickChart({replay,cursor}:{replay:Replay;cursor:number}){
+export function BtcCandlestickChart({replay,cursor,onEventSelect}:{replay:Replay;cursor:number;onEventSelect?:(frameIndex:number,label:string)=>void}){
  const now=replay.frames[cursor].timestamp;
  const available=(replay.btcCandles??[]).filter(c=>c.closedAt<=now);
  const candles=available.slice(-64);
@@ -57,7 +57,7 @@ export function BtcCandlestickChart({replay,cursor}:{replay:Replay;cursor:number
    const color=isEntry?"#38bdf8":mark.result==="POSITIVE"?"#4ade80":mark.result==="NEGATIVE"?"#fb7185":"#fbbf24";
    const y=isEntry?Math.max(12,scale(c.high)-13):Math.min(199,scale(c.low)+15);
    return <g key={i}>
-     <circle cx={x} cy={y} r="5" stroke="#0b1724" strokeWidth="1" fill={color}>
+     <circle cx={x} cy={y} r="7" stroke="#0b1724" strokeWidth="1" fill={color} role="button" tabIndex={0} aria-label={mark.label} className="cursor-pointer" onClick={()=>onEventSelect?.(mark.frameIndex,mark.label)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onEventSelect?.(mark.frameIndex,mark.label)}}}>
        <title>{mark.time} {mark.label}</title>
      </circle>
      {(i===eventMarkers.length-1||i===eventMarkers.length-2)&&<text x={Math.min(530,x+7)} y={Math.max(10,y-4)} fontSize="10" fill={color}>{mark.label.slice(0,17)}</text>}

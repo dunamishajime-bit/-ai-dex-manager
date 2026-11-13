@@ -51,3 +51,13 @@ Research-replay diagnostic (not canonical/verified):
 6. Keep all read-only BT APIs and data separate from LIVE keys, orders, STOP and Kill Switch.
 
 **No production deployment, merge, LIVE trading change or claim of verified BT parity is authorized by this Draft PR alone.**
+
+
+## Replay visual refinements — 2026-11-14
+
+- The first demo-only equity polyline had an absolute 10,000-JPY center and fixed scaling. It was unsuitable for the actual multi-million-JPY backtest range; replaced with EquityTimelineChart using a cursor-bounded dynamic Y scale, historical running maximum drawdown, start/current/min/max, and extrema-preserving bucket downsampling. No future equity values are read.
+- GrossAllocationPanel replaces generic cyan/violet segments with stable per-position color segments, explicit Total/Crypto/Stock x-values and % of each cap, color-coded legend, position gross / total gross and position gross / total cap as separate denominators, and an exact unallocated Gross segment whenever per-position Gross is unknown.
+- BTC event markers can be clicked or keyboard-activated to jump to their associated replay frame. The per-event Gross comparison is explicitly labeled previous sampled snapshot vs current sampled snapshot, not exact pre-order/post-order state.
+- Mobile BottomNav includes a BT検証 link and horizontal overflow scrolling instead of shrinking every item to unreadable widths.
+- Post-change TypeScript typecheck PASS and Next.js 16 production build PASS (route /bt-verification generated).
+- No production deployment was made.
