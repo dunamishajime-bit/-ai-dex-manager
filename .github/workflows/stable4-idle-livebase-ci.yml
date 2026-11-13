@@ -1,0 +1,30 @@
+name: STABLE4 IDLE live-base CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feat/stable4-idle-livebase-20261114'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: STABLE4 IDLE contract
+        run: npx tsx scripts/stable4-idle-livebase-selftest.ts
+      - name: Existing IDLE regression
+        run: npm run strategy:idle-priority-short:selftest
+      - name: IDLE live selftest
+        run: npm run strategy:idle-priority-short:live:selftest
+      - name: Repository typecheck
+        run: npm run typecheck
