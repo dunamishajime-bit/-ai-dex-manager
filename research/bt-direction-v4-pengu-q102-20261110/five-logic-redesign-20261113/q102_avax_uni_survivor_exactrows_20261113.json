@@ -1,0 +1,3155 @@
+{
+  "status": "RESEARCH_ONLY_Q102_SURVIVOR_EXACT_ROWS",
+  "selectionUsesTarget": false,
+  "source": "TARGETTimes frozen by pretarget-selected generator",
+  "candidates": {
+    "AVAX_H12_R2": {
+      "symbol": "AVAXUSDT",
+      "horizon": 12,
+      "rank": 2,
+      "side": "LONG",
+      "rule": [
+        [
+          "r24",
+          "<=",
+          -0.054495466113996596,
+          0.1
+        ],
+        [
+          "rel72",
+          "<=",
+          -0.04991897456532612,
+          0.2
+        ]
+      ],
+      "score": 0.009676347614996509,
+      "pre": {
+        "TRAIN": {
+          "n": 14,
+          "wr": 0.6428571428571429,
+          "mean": 0.011755908327581017,
+          "sum": 0.16458271658613424,
+          "pf": 2.1648101123186314,
+          "worst": -0.08756790123456781
+        },
+        "VALID": {
+          "n": 6,
+          "wr": 0.6666666666666666,
+          "mean": 0.017136006423959703,
+          "sum": 0.10281603854375822,
+          "pf": 9.624917675997354,
+          "worst": -0.008396430053964284
+        },
+        "PREHOLD": {
+          "n": 6,
+          "wr": 0.5,
+          "mean": 0.00889634761499651,
+          "sum": 0.05337808568997905,
+          "pf": 1.7275185688138819,
+          "worst": -0.04548704663212433
+        }
+      },
+      "target30": {
+        "n": 27,
+        "wr": 0.5925925925925926,
+        "mean": 0.0022582695232811673,
+        "sum": 0.06097327712859152,
+        "pf": 1.194527730436615,
+        "worst": -0.06337567084078699
+      },
+      "target10": {
+        "n": 27,
+        "wr": 0.5925925925925926,
+        "mean": 0.004258269523281167,
+        "sum": 0.11497327712859151,
+        "pf": 1.3944971602809726,
+        "worst": -0.06137567084078699
+      },
+      "forward30": {
+        "n": 2,
+        "wr": 1.0,
+        "mean": 0.03057964843747396,
+        "sum": 0.06115929687494792,
+        "pf": 999.0,
+        "worst": 0.01491369754552652
+      },
+      "forward10": {
+        "n": 2,
+        "wr": 1.0,
+        "mean": 0.03257964843747396,
+        "sum": 0.06515929687494793,
+        "pf": 999.0,
+        "worst": 0.016913697545526518
+      },
+      "rows": [
+        {
+          "entryTs": 1759885200000,
+          "exitTs": 1759928400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 28.29,
+          "exitPrice": 28.5,
+          "rawReturn": 0.007423117709437932
+        },
+        {
+          "entryTs": 1760144400000,
+          "exitTs": 1760187600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 21.21,
+          "exitPrice": 22.36,
+          "rawReturn": 0.05421970768505413
+        },
+        {
+          "entryTs": 1760187600000,
+          "exitTs": 1760230800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 22.36,
+          "exitPrice": 21.01,
+          "rawReturn": -0.06037567084078699
+        },
+        {
+          "entryTs": 1760684400000,
+          "exitTs": 1760727600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 19.87,
+          "exitPrice": 19.97,
+          "rawReturn": 0.0050327126321085824
+        },
+        {
+          "entryTs": 1761159600000,
+          "exitTs": 1761202800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 19.35,
+          "exitPrice": 19.51,
+          "rawReturn": 0.008268733850129273
+        },
+        {
+          "entryTs": 1761850800000,
+          "exitTs": 1761894000000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 17.89,
+          "exitPrice": 18.42,
+          "rawReturn": 0.029625489100056024
+        },
+        {
+          "entryTs": 1761894000000,
+          "exitTs": 1761937200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 18.42,
+          "exitPrice": 17.92,
+          "rawReturn": -0.02714440825190012
+        },
+        {
+          "entryTs": 1762239600000,
+          "exitTs": 1762282800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 16.29,
+          "exitPrice": 15.85,
+          "rawReturn": -0.027010435850214787
+        },
+        {
+          "entryTs": 1762282800000,
+          "exitTs": 1762326000000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 15.85,
+          "exitPrice": 16.52,
+          "rawReturn": 0.04227129337539437
+        },
+        {
+          "entryTs": 1763082000000,
+          "exitTs": 1763125200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 15.89,
+          "exitPrice": 15.42,
+          "rawReturn": -0.029578351164254335
+        },
+        {
+          "entryTs": 1764550800000,
+          "exitTs": 1764594000000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 13.12,
+          "exitPrice": 12.9,
+          "rawReturn": -0.01676829268292679
+        },
+        {
+          "entryTs": 1764594000000,
+          "exitTs": 1764637200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 12.9,
+          "exitPrice": 12.75,
+          "rawReturn": -0.011627906976744207
+        },
+        {
+          "entryTs": 1768784400000,
+          "exitTs": 1768827600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 12.52,
+          "exitPrice": 12.7,
+          "rawReturn": 0.01437699680511173
+        },
+        {
+          "entryTs": 1768827600000,
+          "exitTs": 1768870800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 12.7,
+          "exitPrice": 12.66,
+          "rawReturn": -0.0031496062992125706
+        },
+        {
+          "entryTs": 1769886000000,
+          "exitTs": 1769929200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.82,
+          "exitPrice": 10.17,
+          "rawReturn": 0.035641547861507084
+        },
+        {
+          "entryTs": 1772283600000,
+          "exitTs": 1772326800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 8.53,
+          "exitPrice": 9.14,
+          "rawReturn": 0.07151230949589693
+        },
+        {
+          "entryTs": 1775545200000,
+          "exitTs": 1775588400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 8.58,
+          "exitPrice": 8.64,
+          "rawReturn": 0.006993006993007089
+        },
+        {
+          "entryTs": 1775588400000,
+          "exitTs": 1775631600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 8.64,
+          "exitPrice": 9.41,
+          "rawReturn": 0.08912037037037024
+        },
+        {
+          "entryTs": 1780642800000,
+          "exitTs": 1780686000000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 7.1,
+          "exitPrice": 6.786,
+          "rawReturn": -0.044225352112676086
+        },
+        {
+          "entryTs": 1780686000000,
+          "exitTs": 1780729200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.786,
+          "exitPrice": 6.539,
+          "rawReturn": -0.036398467432950166
+        },
+        {
+          "entryTs": 1780729200000,
+          "exitTs": 1780772400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.539,
+          "exitPrice": 6.628,
+          "rawReturn": 0.013610643829331748
+        },
+        {
+          "entryTs": 1781852400000,
+          "exitTs": 1781895600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.033,
+          "exitPrice": 5.913,
+          "rawReturn": -0.019890601690701115
+        },
+        {
+          "entryTs": 1781895600000,
+          "exitTs": 1781938800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 5.913,
+          "exitPrice": 5.936,
+          "rawReturn": 0.0038897344833417336
+        },
+        {
+          "entryTs": 1783494000000,
+          "exitTs": 1783537200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.404,
+          "exitPrice": 6.468,
+          "rawReturn": 0.009993753903810187
+        },
+        {
+          "entryTs": 1783839600000,
+          "exitTs": 1783882800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.367,
+          "exitPrice": 6.449,
+          "rawReturn": 0.012878906863514894
+        },
+        {
+          "entryTs": 1790190000000,
+          "exitTs": 1790233200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 10.296,
+          "exitPrice": 10.252,
+          "rawReturn": -0.004273504273504147
+        },
+        {
+          "entryTs": 1790233200000,
+          "exitTs": 1790276400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 10.252,
+          "exitPrice": 10.432,
+          "rawReturn": 0.0175575497463909
+        }
+      ],
+      "missing": []
+    },
+    "AVAX_H12_R6": {
+      "symbol": "AVAXUSDT",
+      "horizon": 12,
+      "rank": 6,
+      "side": "SHORT",
+      "rule": [
+        [
+          "r12",
+          ">=",
+          -0.03874381814749157,
+          0.1
+        ],
+        [
+          "rel24",
+          "<=",
+          -0.042054569308923775,
+          0.1
+        ]
+      ],
+      "score": 0.008505564391244334,
+      "pre": {
+        "TRAIN": {
+          "n": 13,
+          "wr": 0.5384615384615384,
+          "mean": 0.010863254892958595,
+          "sum": 0.14122231360846174,
+          "pf": 1.7491216282083404,
+          "worst": -0.09028557013118055
+        },
+        "VALID": {
+          "n": 6,
+          "wr": 0.8333333333333334,
+          "mean": 0.016867923461575805,
+          "sum": 0.10120754076945483,
+          "pf": 9.491133581590832,
+          "worst": -0.011919202518363089
+        },
+        "PREHOLD": {
+          "n": 8,
+          "wr": 0.625,
+          "mean": 0.007695564391244333,
+          "sum": 0.061564515129954665,
+          "pf": 2.0952790933620733,
+          "worst": -0.02983134582623503
+        }
+      },
+      "target30": {
+        "n": 26,
+        "wr": 0.5,
+        "mean": 0.002414944431961797,
+        "sum": 0.06278855523100672,
+        "pf": 1.1799681915008977,
+        "worst": -0.08143137254901955
+      },
+      "target10": {
+        "n": 26,
+        "wr": 0.5,
+        "mean": 0.004414944431961798,
+        "sum": 0.11478855523100673,
+        "pf": 1.355506940348176,
+        "worst": -0.07943137254901955
+      },
+      "forward30": {
+        "n": 2,
+        "wr": 0.5,
+        "mean": 0.0029684556185259926,
+        "sum": 0.005936911237051985,
+        "pf": 1.7013910628666964,
+        "worst": -0.008464480874316945
+      },
+      "forward10": {
+        "n": 2,
+        "wr": 0.5,
+        "mean": 0.004968455618525991,
+        "sum": 0.009936911237051982,
+        "pf": 2.5371553308372876,
+        "worst": -0.006464480874316946
+      },
+      "rows": [
+        {
+          "entryTs": 1759626000000,
+          "exitTs": 1759669200000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 29.92,
+          "exitPrice": 30.16,
+          "rawReturn": -0.008021390374331583
+        },
+        {
+          "entryTs": 1759906800000,
+          "exitTs": 1759950000000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 28.18,
+          "exitPrice": 29.39,
+          "rawReturn": -0.042938254080908456
+        },
+        {
+          "entryTs": 1760187600000,
+          "exitTs": 1760230800000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 22.36,
+          "exitPrice": 21.01,
+          "rawReturn": 0.06037567084078699
+        },
+        {
+          "entryTs": 1760274000000,
+          "exitTs": 1760317200000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 21.27,
+          "exitPrice": 22.0,
+          "rawReturn": -0.03432063939821339
+        },
+        {
+          "entryTs": 1761872400000,
+          "exitTs": 1761915600000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 18.26,
+          "exitPrice": 18.49,
+          "rawReturn": -0.01259583789704255
+        },
+        {
+          "entryTs": 1762196400000,
+          "exitTs": 1762239600000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 16.89,
+          "exitPrice": 16.29,
+          "rawReturn": 0.035523978685612856
+        },
+        {
+          "entryTs": 1764486000000,
+          "exitTs": 1764529200000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 14.08,
+          "exitPrice": 13.93,
+          "rawReturn": 0.01065340909090906
+        },
+        {
+          "entryTs": 1764529200000,
+          "exitTs": 1764572400000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 13.93,
+          "exitPrice": 12.95,
+          "rawReturn": 0.07035175879396993
+        },
+        {
+          "entryTs": 1764982800000,
+          "exitTs": 1765026000000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 13.25,
+          "exitPrice": 13.17,
+          "rawReturn": 0.006037735849056647
+        },
+        {
+          "entryTs": 1765414800000,
+          "exitTs": 1765458000000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 13.78,
+          "exitPrice": 13.31,
+          "rawReturn": 0.0341074020319303
+        },
+        {
+          "entryTs": 1765458000000,
+          "exitTs": 1765501200000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 13.31,
+          "exitPrice": 13.39,
+          "rawReturn": -0.006010518407212562
+        },
+        {
+          "entryTs": 1768460400000,
+          "exitTs": 1768503600000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 14.27,
+          "exitPrice": 13.71,
+          "rawReturn": 0.03924316748423262
+        },
+        {
+          "entryTs": 1768503600000,
+          "exitTs": 1768546800000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 13.71,
+          "exitPrice": 13.82,
+          "rawReturn": -0.008023340627279385
+        },
+        {
+          "entryTs": 1768849200000,
+          "exitTs": 1768892400000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 12.77,
+          "exitPrice": 12.59,
+          "rawReturn": 0.014095536413469056
+        },
+        {
+          "entryTs": 1775566800000,
+          "exitTs": 1775610000000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 8.67,
+          "exitPrice": 9.35,
+          "rawReturn": -0.07843137254901955
+        },
+        {
+          "entryTs": 1780621200000,
+          "exitTs": 1780664400000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 7.626,
+          "exitPrice": 7.135,
+          "rawReturn": 0.06438499868869663
+        },
+        {
+          "entryTs": 1780707600000,
+          "exitTs": 1780750800000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.899,
+          "exitPrice": 6.761,
+          "rawReturn": 0.02000289897086538
+        },
+        {
+          "entryTs": 1780772400000,
+          "exitTs": 1780815600000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.628,
+          "exitPrice": 6.773,
+          "rawReturn": -0.021876885938442836
+        },
+        {
+          "entryTs": 1781874000000,
+          "exitTs": 1781917200000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.112,
+          "exitPrice": 5.895,
+          "rawReturn": 0.035503926701570765
+        },
+        {
+          "entryTs": 1781917200000,
+          "exitTs": 1781960400000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.895,
+          "exitPrice": 6.159,
+          "rawReturn": -0.0447837150127226
+        },
+        {
+          "entryTs": 1783882800000,
+          "exitTs": 1783926000000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.449,
+          "exitPrice": 6.485,
+          "rawReturn": -0.005582260815630402
+        },
+        {
+          "entryTs": 1786863600000,
+          "exitTs": 1786906800000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.333,
+          "exitPrice": 6.336,
+          "rawReturn": -0.000473709142586376
+        },
+        {
+          "entryTs": 1790017200000,
+          "exitTs": 1790060400000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 10.893,
+          "exitPrice": 10.693,
+          "rawReturn": 0.01836041494537788
+        },
+        {
+          "entryTs": 1790060400000,
+          "exitTs": 1790103600000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 10.693,
+          "exitPrice": 11.006,
+          "rawReturn": -0.029271486018890958
+        },
+        {
+          "entryTs": 1790233200000,
+          "exitTs": 1790276400000,
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "entryPrice": 10.252,
+          "exitPrice": 10.432,
+          "rawReturn": -0.0175575497463909
+        }
+      ],
+      "missing": [
+        [
+          1790773200000,
+          1790816400000
+        ]
+      ]
+    },
+    "AVAX_H24_R7": {
+      "symbol": "AVAXUSDT",
+      "horizon": 24,
+      "rank": 7,
+      "side": "LONG",
+      "rule": [
+        [
+          "rel72",
+          "<=",
+          -0.06495536868932814,
+          0.1
+        ],
+        [
+          "pos24",
+          "<=",
+          0.28333333333333327,
+          0.35
+        ]
+      ],
+      "score": 0.011379636393678713,
+      "pre": {
+        "TRAIN": {
+          "n": 13,
+          "wr": 0.5384615384615384,
+          "mean": 0.010599636393678714,
+          "sum": 0.13779527311782327,
+          "pf": 1.8028100564001777,
+          "worst": -0.10648644161593812
+        },
+        "VALID": {
+          "n": 7,
+          "wr": 0.8571428571428571,
+          "mean": 0.011945972852870407,
+          "sum": 0.08362180997009284,
+          "pf": 109.20228437051804,
+          "worst": -0.0007728285077951398
+        },
+        "PREHOLD": {
+          "n": 6,
+          "wr": 0.6666666666666666,
+          "mean": 0.018012914963408937,
+          "sum": 0.10807748978045363,
+          "pf": 3.099523568840599,
+          "worst": -0.029469268730372363
+        }
+      },
+      "target30": {
+        "n": 12,
+        "wr": 0.75,
+        "mean": 0.007472870984107215,
+        "sum": 0.08967445180928658,
+        "pf": 1.540877016991058,
+        "worst": -0.09129863603732957
+      },
+      "target10": {
+        "n": 12,
+        "wr": 0.75,
+        "mean": 0.009472870984107215,
+        "sum": 0.11367445180928659,
+        "pf": 1.7113788595136976,
+        "worst": -0.08929863603732957
+      },
+      "forward30": {
+        "n": 2,
+        "wr": 1.0,
+        "mean": 0.030202791568328058,
+        "sum": 0.060405583136656116,
+        "pf": 999.0,
+        "worst": 0.013443361753958553
+      },
+      "forward10": {
+        "n": 2,
+        "wr": 1.0,
+        "mean": 0.03220279156832806,
+        "sum": 0.06440558313665612,
+        "pf": 999.0,
+        "worst": 0.015443361753958551
+      },
+      "rows": [
+        {
+          "entryTs": 1760230800000,
+          "exitTs": 1760317200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 21.01,
+          "exitPrice": 22.0,
+          "rawReturn": 0.04712041884816753
+        },
+        {
+          "entryTs": 1764529200000,
+          "exitTs": 1764615600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 13.93,
+          "exitPrice": 12.7,
+          "rawReturn": -0.08829863603732957
+        },
+        {
+          "entryTs": 1764615600000,
+          "exitTs": 1764702000000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 12.7,
+          "exitPrice": 13.66,
+          "rawReturn": 0.07559055118110236
+        },
+        {
+          "entryTs": 1766041200000,
+          "exitTs": 1766127600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 11.75,
+          "exitPrice": 11.8,
+          "rawReturn": 0.004255319148936287
+        },
+        {
+          "entryTs": 1768590000000,
+          "exitTs": 1768676400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 13.37,
+          "exitPrice": 13.85,
+          "rawReturn": 0.03590127150336575
+        },
+        {
+          "entryTs": 1775696400000,
+          "exitTs": 1775782800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 8.927,
+          "exitPrice": 9.325,
+          "rawReturn": 0.0445838467570292
+        },
+        {
+          "entryTs": 1780664400000,
+          "exitTs": 1780750800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 7.135,
+          "exitPrice": 6.761,
+          "rawReturn": -0.05241765942536791
+        },
+        {
+          "entryTs": 1780837200000,
+          "exitTs": 1780923600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.628,
+          "exitPrice": 6.803,
+          "rawReturn": 0.026403138201569032
+        },
+        {
+          "entryTs": 1781852400000,
+          "exitTs": 1781938800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.033,
+          "exitPrice": 5.936,
+          "rawReturn": -0.016078236366650178
+        },
+        {
+          "entryTs": 1783839600000,
+          "exitTs": 1783926000000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.367,
+          "exitPrice": 6.485,
+          "rawReturn": 0.018533061096277725
+        },
+        {
+          "entryTs": 1786086000000,
+          "exitTs": 1786172400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.401,
+          "exitPrice": 6.509,
+          "rawReturn": 0.01687236369317313
+        },
+        {
+          "entryTs": 1790190000000,
+          "exitTs": 1790276400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 10.296,
+          "exitPrice": 10.432,
+          "rawReturn": 0.013209013209013243
+        }
+      ],
+      "missing": []
+    },
+    "AVAX_H48_R3": {
+      "symbol": "AVAXUSDT",
+      "horizon": 48,
+      "rank": 3,
+      "side": "LONG",
+      "rule": [
+        [
+          "rel24",
+          "<=",
+          -0.015331649876483312,
+          0.35
+        ],
+        [
+          "atr24",
+          "<=",
+          0.006676605034364488,
+          0.2
+        ]
+      ],
+      "score": 0.02184518175219604,
+      "pre": {
+        "TRAIN": {
+          "n": 13,
+          "wr": 0.6153846153846154,
+          "mean": 0.029749740978905533,
+          "sum": 0.3867466327257719,
+          "pf": 2.978426194322317,
+          "worst": -0.07252869808679419
+        },
+        "VALID": {
+          "n": 9,
+          "wr": 0.6666666666666666,
+          "mean": 0.02088518175219604,
+          "sum": 0.18796663576976436,
+          "pf": 2.646038481552198,
+          "worst": -0.0508260869565218
+        },
+        "PREHOLD": {
+          "n": 10,
+          "wr": 0.8,
+          "mean": 0.04500020482006717,
+          "sum": 0.4500020482006717,
+          "pf": 7.406870448474766,
+          "worst": -0.04109913969684553
+        }
+      },
+      "target30": {
+        "n": 33,
+        "wr": 0.48484848484848486,
+        "mean": 0.000392025846069961,
+        "sum": 0.012936852920308713,
+        "pf": 1.022469930177973,
+        "worst": -0.12592817679558022
+      },
+      "target10": {
+        "n": 33,
+        "wr": 0.5151515151515151,
+        "mean": 0.0023920258460699614,
+        "sum": 0.07893685292030872,
+        "pf": 1.1455117237890808,
+        "worst": -0.12392817679558021
+      },
+      "forward30": {
+        "n": 2,
+        "wr": 1.0,
+        "mean": 0.03423967620938351,
+        "sum": 0.06847935241876701,
+        "pf": 999.0,
+        "worst": 0.01738844332785783
+      },
+      "forward10": {
+        "n": 2,
+        "wr": 1.0,
+        "mean": 0.03623967620938351,
+        "sum": 0.07247935241876702,
+        "pf": 999.0,
+        "worst": 0.01938844332785783
+      },
+      "rows": [
+        {
+          "entryTs": 1763902800000,
+          "exitTs": 1764075600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 13.31,
+          "exitPrice": 13.9,
+          "rawReturn": 0.04432757325319314
+        },
+        {
+          "entryTs": 1764442800000,
+          "exitTs": 1764615600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 14.48,
+          "exitPrice": 12.7,
+          "rawReturn": -0.12292817679558021
+        },
+        {
+          "entryTs": 1764896400000,
+          "exitTs": 1765069200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 14.42,
+          "exitPrice": 13.46,
+          "rawReturn": -0.06657420249653256
+        },
+        {
+          "entryTs": 1766343600000,
+          "exitTs": 1766516400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 12.07,
+          "exitPrice": 12.14,
+          "rawReturn": 0.0057995028997515075
+        },
+        {
+          "entryTs": 1767531600000,
+          "exitTs": 1767704400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 14.1,
+          "exitPrice": 14.61,
+          "rawReturn": 0.03617021276595733
+        },
+        {
+          "entryTs": 1771462800000,
+          "exitTs": 1771635600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 8.85,
+          "exitPrice": 9.15,
+          "rawReturn": 0.033898305084745894
+        },
+        {
+          "entryTs": 1771743600000,
+          "exitTs": 1771916400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.0,
+          "exitPrice": 8.24,
+          "rawReturn": -0.08444444444444443
+        },
+        {
+          "entryTs": 1773514800000,
+          "exitTs": 1773687600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.56,
+          "exitPrice": 10.2,
+          "rawReturn": 0.06694560669456062
+        },
+        {
+          "entryTs": 1774162800000,
+          "exitTs": 1774335600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.22,
+          "exitPrice": 9.55,
+          "rawReturn": 0.03579175704989157
+        },
+        {
+          "entryTs": 1774530000000,
+          "exitTs": 1774702800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.24,
+          "exitPrice": 8.84,
+          "rawReturn": -0.04329004329004338
+        },
+        {
+          "entryTs": 1775415600000,
+          "exitTs": 1775588400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 8.85,
+          "exitPrice": 8.64,
+          "rawReturn": -0.023728813559321882
+        },
+        {
+          "entryTs": 1775912400000,
+          "exitTs": 1776085200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.277,
+          "exitPrice": 9.156,
+          "rawReturn": -0.013043009593618482
+        },
+        {
+          "entryTs": 1776582000000,
+          "exitTs": 1776754800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.278,
+          "exitPrice": 9.317,
+          "rawReturn": 0.004203492131924946
+        },
+        {
+          "entryTs": 1776884400000,
+          "exitTs": 1777057200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.5,
+          "exitPrice": 9.433,
+          "rawReturn": -0.007052631578947421
+        },
+        {
+          "entryTs": 1777294800000,
+          "exitTs": 1777467600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.241,
+          "exitPrice": 9.2,
+          "rawReturn": -0.0044367492695596145
+        },
+        {
+          "entryTs": 1777618800000,
+          "exitTs": 1777791600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.082,
+          "exitPrice": 9.07,
+          "rawReturn": -0.0013212948689715898
+        },
+        {
+          "entryTs": 1778612400000,
+          "exitTs": 1778785200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.85,
+          "exitPrice": 10.094,
+          "rawReturn": 0.024771573604060793
+        },
+        {
+          "entryTs": 1778979600000,
+          "exitTs": 1779152400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.261,
+          "exitPrice": 9.244,
+          "rawReturn": -0.001835654896879313
+        },
+        {
+          "entryTs": 1779238800000,
+          "exitTs": 1779411600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.118,
+          "exitPrice": 9.409,
+          "rawReturn": 0.03191489361702127
+        },
+        {
+          "entryTs": 1779649200000,
+          "exitTs": 1779822000000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 9.226,
+          "exitPrice": 9.128,
+          "rawReturn": -0.01062215477996975
+        },
+        {
+          "entryTs": 1781463600000,
+          "exitTs": 1781636400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.402,
+          "exitPrice": 6.856,
+          "rawReturn": 0.07091533895657598
+        },
+        {
+          "entryTs": 1783018800000,
+          "exitTs": 1783191600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.721,
+          "exitPrice": 7.055,
+          "rawReturn": 0.04969498586519849
+        },
+        {
+          "entryTs": 1783688400000,
+          "exitTs": 1783861200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.736,
+          "exitPrice": 6.445,
+          "rawReturn": -0.04320071258907354
+        },
+        {
+          "entryTs": 1784228400000,
+          "exitTs": 1784401200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.581,
+          "exitPrice": 6.57,
+          "rawReturn": -0.001671478498708412
+        },
+        {
+          "entryTs": 1784466000000,
+          "exitTs": 1784638800000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.426,
+          "exitPrice": 6.647,
+          "rawReturn": 0.03439153439153442
+        },
+        {
+          "entryTs": 1784638800000,
+          "exitTs": 1784811600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.647,
+          "exitPrice": 6.5,
+          "rawReturn": -0.022115239957875787
+        },
+        {
+          "entryTs": 1785135600000,
+          "exitTs": 1785308400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.708,
+          "exitPrice": 6.426,
+          "rawReturn": -0.04203935599284436
+        },
+        {
+          "entryTs": 1785610800000,
+          "exitTs": 1785783600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.1,
+          "exitPrice": 6.577,
+          "rawReturn": 0.07819672131147537
+        },
+        {
+          "entryTs": 1785783600000,
+          "exitTs": 1785956400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.577,
+          "exitPrice": 6.68,
+          "rawReturn": 0.015660635548122137
+        },
+        {
+          "entryTs": 1785956400000,
+          "exitTs": 1786129200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.68,
+          "exitPrice": 6.425,
+          "rawReturn": -0.038173652694610816
+        },
+        {
+          "entryTs": 1786474800000,
+          "exitTs": 1786647600000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.225,
+          "exitPrice": 6.421,
+          "rawReturn": 0.0314859437751005
+        },
+        {
+          "entryTs": 1786863600000,
+          "exitTs": 1787036400000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.333,
+          "exitPrice": 6.344,
+          "rawReturn": 0.001736933522817008
+        },
+        {
+          "entryTs": 1787036400000,
+          "exitTs": 1787209200000,
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "entryPrice": 6.344,
+          "exitPrice": 6.804,
+          "rawReturn": 0.07250945775535933
+        }
+      ],
+      "missing": []
+    },
+    "UNI_H24_R15": {
+      "symbol": "UNIUSDT",
+      "horizon": 24,
+      "rank": 15,
+      "side": "SHORT",
+      "rule": [
+        [
+          "b24",
+          "<=",
+          0.0002657951031377337,
+          0.5
+        ],
+        [
+          "rel72",
+          ">=",
+          0.003054849968417634,
+          0.65
+        ]
+      ],
+      "score": 0.0057212962457998,
+      "pre": {
+        "TRAIN": {
+          "n": 22,
+          "wr": 0.5,
+          "mean": 0.0039512962457998,
+          "sum": 0.08692851740759559,
+          "pf": 1.2054294993588066,
+          "worst": -0.1424321766561515
+        },
+        "VALID": {
+          "n": 21,
+          "wr": 0.6190476190476191,
+          "mean": 0.007599532584647671,
+          "sum": 0.1595901842776011,
+          "pf": 1.487150548094759,
+          "worst": -0.08920689655172398
+        },
+        "PREHOLD": {
+          "n": 16,
+          "wr": 0.625,
+          "mean": 0.01706516280321959,
+          "sum": 0.27304260485151344,
+          "pf": 3.288943566886956,
+          "worst": -0.04242780509611077
+        }
+      },
+      "target30": {
+        "n": 109,
+        "wr": 0.5779816513761468,
+        "mean": 0.006600426746927501,
+        "sum": 0.7194465154150976,
+        "pf": 1.3772284235448953,
+        "worst": -0.14147319568100014
+      },
+      "target10": {
+        "n": 109,
+        "wr": 0.5871559633027523,
+        "mean": 0.0086004267469275,
+        "sum": 0.9374465154150976,
+        "pf": 1.5162660359897777,
+        "worst": -0.13947319568100014
+      },
+      "forward30": {
+        "n": 11,
+        "wr": 0.36363636363636365,
+        "mean": 0.00010964051871869894,
+        "sum": 0.0012060457059056883,
+        "pf": 1.0126427803228377,
+        "worst": -0.029497695852534474
+      },
+      "forward10": {
+        "n": 11,
+        "wr": 0.36363636363636365,
+        "mean": 0.002109640518718698,
+        "sum": 0.02320604570590568,
+        "pf": 1.2851074832830671,
+        "worst": -0.027497695852534476
+      },
+      "rows": [
+        {
+          "entryTs": 1760079600000,
+          "exitTs": 1760166000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 8.197,
+          "exitPrice": 5.839,
+          "rawReturn": 0.287666219348542
+        },
+        {
+          "entryTs": 1760403600000,
+          "exitTs": 1760490000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 7.002,
+          "exitPrice": 6.797,
+          "rawReturn": 0.029277349328763247
+        },
+        {
+          "entryTs": 1760490000000,
+          "exitTs": 1760576400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.797,
+          "exitPrice": 6.578,
+          "rawReturn": 0.032220097101662404
+        },
+        {
+          "entryTs": 1760576400000,
+          "exitTs": 1760662800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.578,
+          "exitPrice": 6.378,
+          "rawReturn": 0.030404378230465268
+        },
+        {
+          "entryTs": 1761051600000,
+          "exitTs": 1761138000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.314,
+          "exitPrice": 6.148,
+          "rawReturn": 0.02629078238834337
+        },
+        {
+          "entryTs": 1761613200000,
+          "exitTs": 1761699600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.543,
+          "exitPrice": 6.337,
+          "rawReturn": 0.03148402873299716
+        },
+        {
+          "entryTs": 1761699600000,
+          "exitTs": 1761786000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.337,
+          "exitPrice": 6.339,
+          "rawReturn": -0.0003156067539846763
+        },
+        {
+          "entryTs": 1762434000000,
+          "exitTs": 1762520400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.249,
+          "exitPrice": 5.279,
+          "rawReturn": -0.0057153743570204085
+        },
+        {
+          "entryTs": 1762520400000,
+          "exitTs": 1762606800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.279,
+          "exitPrice": 6.01,
+          "rawReturn": -0.13847319568100014
+        },
+        {
+          "entryTs": 1762628400000,
+          "exitTs": 1762714800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.989,
+          "exitPrice": 6.724,
+          "rawReturn": -0.12272499582568042
+        },
+        {
+          "entryTs": 1762822800000,
+          "exitTs": 1762909200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 9.493,
+          "exitPrice": 8.321,
+          "rawReturn": 0.12345939113030657
+        },
+        {
+          "entryTs": 1762909200000,
+          "exitTs": 1762995600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 8.321,
+          "exitPrice": 7.629,
+          "rawReturn": 0.0831630813604134
+        },
+        {
+          "entryTs": 1762995600000,
+          "exitTs": 1763082000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 7.629,
+          "exitPrice": 7.563,
+          "rawReturn": 0.008651199370821816
+        },
+        {
+          "entryTs": 1763276400000,
+          "exitTs": 1763362800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 7.658,
+          "exitPrice": 7.468,
+          "rawReturn": 0.024810655523635483
+        },
+        {
+          "entryTs": 1763384400000,
+          "exitTs": 1763470800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 7.958,
+          "exitPrice": 7.279,
+          "rawReturn": 0.08532294546368435
+        },
+        {
+          "entryTs": 1763470800000,
+          "exitTs": 1763557200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 7.279,
+          "exitPrice": 7.29,
+          "rawReturn": -0.001511196592938635
+        },
+        {
+          "entryTs": 1763578800000,
+          "exitTs": 1763665200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.87,
+          "exitPrice": 6.569,
+          "rawReturn": 0.04381368267831154
+        },
+        {
+          "entryTs": 1764831600000,
+          "exitTs": 1764918000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.108,
+          "exitPrice": 5.963,
+          "rawReturn": 0.02373935821872941
+        },
+        {
+          "entryTs": 1764918000000,
+          "exitTs": 1765004400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.963,
+          "exitPrice": 5.501,
+          "rawReturn": 0.07747777964112024
+        },
+        {
+          "entryTs": 1765220400000,
+          "exitTs": 1765306800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.598,
+          "exitPrice": 5.863,
+          "rawReturn": -0.04733833511968566
+        },
+        {
+          "entryTs": 1765695600000,
+          "exitTs": 1765782000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.482,
+          "exitPrice": 5.399,
+          "rawReturn": 0.015140459686245888
+        },
+        {
+          "entryTs": 1765782000000,
+          "exitTs": 1765868400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.399,
+          "exitPrice": 5.001,
+          "rawReturn": 0.07371735506575283
+        },
+        {
+          "entryTs": 1766300400000,
+          "exitTs": 1766386800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.355,
+          "exitPrice": 6.24,
+          "rawReturn": 0.018095987411487102
+        },
+        {
+          "entryTs": 1766473200000,
+          "exitTs": 1766559600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.006,
+          "exitPrice": 5.63,
+          "rawReturn": 0.0626040626040627
+        },
+        {
+          "entryTs": 1766775600000,
+          "exitTs": 1766862000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.827,
+          "exitPrice": 5.92,
+          "rawReturn": -0.01596018534408783
+        },
+        {
+          "entryTs": 1767013200000,
+          "exitTs": 1767099600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.086,
+          "exitPrice": 5.963,
+          "rawReturn": 0.02021031876437729
+        },
+        {
+          "entryTs": 1767769200000,
+          "exitTs": 1767855600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.023,
+          "exitPrice": 5.541,
+          "rawReturn": 0.08002656483479986
+        },
+        {
+          "entryTs": 1768762800000,
+          "exitTs": 1768849200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.361,
+          "exitPrice": 5.023,
+          "rawReturn": 0.0630479388173848
+        },
+        {
+          "entryTs": 1769173200000,
+          "exitTs": 1769259600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.872,
+          "exitPrice": 4.9035,
+          "rawReturn": -0.006465517241379448
+        },
+        {
+          "entryTs": 1769648400000,
+          "exitTs": 1769734800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.785,
+          "exitPrice": 4.382,
+          "rawReturn": 0.08422152560083607
+        },
+        {
+          "entryTs": 1770145200000,
+          "exitTs": 1770231600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.709,
+          "exitPrice": 3.773,
+          "rawReturn": -0.017255324885413925
+        },
+        {
+          "entryTs": 1770253200000,
+          "exitTs": 1770339600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.786,
+          "exitPrice": 3.171,
+          "rawReturn": 0.16244057052297944
+        },
+        {
+          "entryTs": 1770836400000,
+          "exitTs": 1770922800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.521,
+          "exitPrice": 3.238,
+          "rawReturn": 0.08037489349616589
+        },
+        {
+          "entryTs": 1770966000000,
+          "exitTs": 1771052400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.31,
+          "exitPrice": 3.402,
+          "rawReturn": -0.02779456193353469
+        },
+        {
+          "entryTs": 1771160400000,
+          "exitTs": 1771246800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.527,
+          "exitPrice": 3.574,
+          "rawReturn": -0.013325772611284314
+        },
+        {
+          "entryTs": 1771268400000,
+          "exitTs": 1771354800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.511,
+          "exitPrice": 3.565,
+          "rawReturn": -0.0153802335516946
+        },
+        {
+          "entryTs": 1771398000000,
+          "exitTs": 1771484400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.565,
+          "exitPrice": 3.435,
+          "rawReturn": 0.036465638148667545
+        },
+        {
+          "entryTs": 1771765200000,
+          "exitTs": 1771851600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.511,
+          "exitPrice": 3.462,
+          "rawReturn": 0.013956137852463635
+        },
+        {
+          "entryTs": 1771851600000,
+          "exitTs": 1771938000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.462,
+          "exitPrice": 3.312,
+          "rawReturn": 0.0433275563258233
+        },
+        {
+          "entryTs": 1772132400000,
+          "exitTs": 1772218800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.777,
+          "exitPrice": 3.747,
+          "rawReturn": 0.00794281175536149
+        },
+        {
+          "entryTs": 1772218800000,
+          "exitTs": 1772305200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.747,
+          "exitPrice": 3.747,
+          "rawReturn": 0.0
+        },
+        {
+          "entryTs": 1772586000000,
+          "exitTs": 1772672400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.908,
+          "exitPrice": 3.977,
+          "rawReturn": -0.017656090071647812
+        },
+        {
+          "entryTs": 1772823600000,
+          "exitTs": 1772910000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.853,
+          "exitPrice": 3.779,
+          "rawReturn": 0.019205813651700043
+        },
+        {
+          "entryTs": 1772910000000,
+          "exitTs": 1772996400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.779,
+          "exitPrice": 3.667,
+          "rawReturn": 0.029637470230219676
+        },
+        {
+          "entryTs": 1773234000000,
+          "exitTs": 1773320400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.889,
+          "exitPrice": 3.919,
+          "rawReturn": -0.007714065312419693
+        },
+        {
+          "entryTs": 1773450000000,
+          "exitTs": 1773536400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.977,
+          "exitPrice": 3.918,
+          "rawReturn": 0.014835302992205146
+        },
+        {
+          "entryTs": 1774227600000,
+          "exitTs": 1774314000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.478,
+          "exitPrice": 3.563,
+          "rawReturn": -0.02443933294997125
+        },
+        {
+          "entryTs": 1774508400000,
+          "exitTs": 1774594800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.604,
+          "exitPrice": 3.505,
+          "rawReturn": 0.027469478357380783
+        },
+        {
+          "entryTs": 1774594800000,
+          "exitTs": 1774681200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.505,
+          "exitPrice": 3.393,
+          "rawReturn": 0.031954350927246855
+        },
+        {
+          "entryTs": 1774962000000,
+          "exitTs": 1775048400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.492,
+          "exitPrice": 3.603,
+          "rawReturn": -0.03178694158075612
+        },
+        {
+          "entryTs": 1776409200000,
+          "exitTs": 1776495600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.38,
+          "exitPrice": 3.467,
+          "rawReturn": -0.025739644970414366
+        },
+        {
+          "entryTs": 1776517200000,
+          "exitTs": 1776603600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.373,
+          "exitPrice": 3.331,
+          "rawReturn": 0.012451823302698006
+        },
+        {
+          "entryTs": 1777381200000,
+          "exitTs": 1777467600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.229,
+          "exitPrice": 3.258,
+          "rawReturn": -0.008981108702384555
+        },
+        {
+          "entryTs": 1777510800000,
+          "exitTs": 1777597200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.223,
+          "exitPrice": 3.204,
+          "rawReturn": 0.0058951287620229165
+        },
+        {
+          "entryTs": 1778094000000,
+          "exitTs": 1778180400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.449,
+          "exitPrice": 3.435,
+          "rawReturn": 0.004059147579008382
+        },
+        {
+          "entryTs": 1778180400000,
+          "exitTs": 1778266800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.435,
+          "exitPrice": 3.689,
+          "rawReturn": -0.07394468704512369
+        },
+        {
+          "entryTs": 1778266800000,
+          "exitTs": 1778353200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.689,
+          "exitPrice": 3.703,
+          "rawReturn": -0.003795066413662118
+        },
+        {
+          "entryTs": 1778590800000,
+          "exitTs": 1778677200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.785,
+          "exitPrice": 3.689,
+          "rawReturn": 0.025363276089828246
+        },
+        {
+          "entryTs": 1779152400000,
+          "exitTs": 1779238800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.563,
+          "exitPrice": 3.442,
+          "rawReturn": 0.033960145944428866
+        },
+        {
+          "entryTs": 1779238800000,
+          "exitTs": 1779325200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.442,
+          "exitPrice": 3.661,
+          "rawReturn": -0.06362579895409648
+        },
+        {
+          "entryTs": 1779368400000,
+          "exitTs": 1779454800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.577,
+          "exitPrice": 3.666,
+          "rawReturn": -0.024881185350852597
+        },
+        {
+          "entryTs": 1779476400000,
+          "exitTs": 1779562800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.521,
+          "exitPrice": 3.436,
+          "rawReturn": 0.02414086907128654
+        },
+        {
+          "entryTs": 1780318800000,
+          "exitTs": 1780405200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.941,
+          "exitPrice": 2.916,
+          "rawReturn": 0.008500510030601816
+        },
+        {
+          "entryTs": 1780405200000,
+          "exitTs": 1780491600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.916,
+          "exitPrice": 2.903,
+          "rawReturn": 0.004458161865569243
+        },
+        {
+          "entryTs": 1780491600000,
+          "exitTs": 1780578000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.903,
+          "exitPrice": 2.671,
+          "rawReturn": 0.07991732690320363
+        },
+        {
+          "entryTs": 1780578000000,
+          "exitTs": 1780664400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.671,
+          "exitPrice": 2.518,
+          "rawReturn": 0.05728191688506179
+        },
+        {
+          "entryTs": 1781031600000,
+          "exitTs": 1781118000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.487,
+          "exitPrice": 2.401,
+          "rawReturn": 0.034579815038198736
+        },
+        {
+          "entryTs": 1781614800000,
+          "exitTs": 1781701200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.083,
+          "exitPrice": 3.345,
+          "rawReturn": -0.08498216023353877
+        },
+        {
+          "entryTs": 1781701200000,
+          "exitTs": 1781787600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.345,
+          "exitPrice": 3.125,
+          "rawReturn": 0.06576980568011959
+        },
+        {
+          "entryTs": 1781787600000,
+          "exitTs": 1781874000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.125,
+          "exitPrice": 3.065,
+          "rawReturn": 0.019199999999999995
+        },
+        {
+          "entryTs": 1781874000000,
+          "exitTs": 1781960400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.065,
+          "exitPrice": 3.017,
+          "rawReturn": 0.01566068515497554
+        },
+        {
+          "entryTs": 1782349200000,
+          "exitTs": 1782435600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.911,
+          "exitPrice": 2.874,
+          "rawReturn": 0.0127104087942288
+        },
+        {
+          "entryTs": 1782435600000,
+          "exitTs": 1782522000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.874,
+          "exitPrice": 2.944,
+          "rawReturn": -0.02435629784272786
+        },
+        {
+          "entryTs": 1782651600000,
+          "exitTs": 1782738000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.92,
+          "exitPrice": 2.957,
+          "rawReturn": -0.012671232876712235
+        },
+        {
+          "entryTs": 1782738000000,
+          "exitTs": 1782824400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 2.957,
+          "exitPrice": 2.778,
+          "rawReturn": 0.060534325329726024
+        },
+        {
+          "entryTs": 1783472400000,
+          "exitTs": 1783558800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.265,
+          "exitPrice": 3.3,
+          "rawReturn": -0.010719754977029039
+        },
+        {
+          "entryTs": 1783558800000,
+          "exitTs": 1783645200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.3,
+          "exitPrice": 3.432,
+          "rawReturn": -0.040000000000000036
+        },
+        {
+          "entryTs": 1783774800000,
+          "exitTs": 1783861200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.631,
+          "exitPrice": 3.617,
+          "rawReturn": 0.00385568713852924
+        },
+        {
+          "entryTs": 1783861200000,
+          "exitTs": 1783947600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.617,
+          "exitPrice": 3.479,
+          "rawReturn": 0.03815316560685644
+        },
+        {
+          "entryTs": 1783969200000,
+          "exitTs": 1784055600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.51,
+          "exitPrice": 3.688,
+          "rawReturn": -0.05071225071225083
+        },
+        {
+          "entryTs": 1784185200000,
+          "exitTs": 1784271600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.708,
+          "exitPrice": 3.519,
+          "rawReturn": 0.050970873786407744
+        },
+        {
+          "entryTs": 1784703600000,
+          "exitTs": 1784790000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.681,
+          "exitPrice": 3.852,
+          "rawReturn": -0.046454767726161306
+        },
+        {
+          "entryTs": 1784790000000,
+          "exitTs": 1784876400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.852,
+          "exitPrice": 3.86,
+          "rawReturn": -0.0020768431983384517
+        },
+        {
+          "entryTs": 1784876400000,
+          "exitTs": 1784962800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.86,
+          "exitPrice": 3.681,
+          "rawReturn": 0.04637305699481864
+        },
+        {
+          "entryTs": 1784962800000,
+          "exitTs": 1785049200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.681,
+          "exitPrice": 3.675,
+          "rawReturn": 0.0016299918500407573
+        },
+        {
+          "entryTs": 1785222000000,
+          "exitTs": 1785308400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.727,
+          "exitPrice": 3.823,
+          "rawReturn": -0.02575798229138715
+        },
+        {
+          "entryTs": 1785373200000,
+          "exitTs": 1785459600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.0,
+          "exitPrice": 4.443,
+          "rawReturn": -0.1107499999999999
+        },
+        {
+          "entryTs": 1785502800000,
+          "exitTs": 1785589200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.342,
+          "exitPrice": 4.06,
+          "rawReturn": 0.06494702901888527
+        },
+        {
+          "entryTs": 1785589200000,
+          "exitTs": 1785675600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.06,
+          "exitPrice": 4.184,
+          "rawReturn": -0.030541871921182295
+        },
+        {
+          "entryTs": 1786042800000,
+          "exitTs": 1786129200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.01,
+          "exitPrice": 4.02,
+          "rawReturn": -0.0024937655860348684
+        },
+        {
+          "entryTs": 1786410000000,
+          "exitTs": 1786496400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 3.943,
+          "exitPrice": 3.764,
+          "rawReturn": 0.04539690590920631
+        },
+        {
+          "entryTs": 1787446800000,
+          "exitTs": 1787533200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.328,
+          "exitPrice": 4.483,
+          "rawReturn": -0.03581330868761534
+        },
+        {
+          "entryTs": 1787662800000,
+          "exitTs": 1787749200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.382,
+          "exitPrice": 4.284,
+          "rawReturn": 0.022364217252396124
+        },
+        {
+          "entryTs": 1787943600000,
+          "exitTs": 1788030000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 4.382,
+          "exitPrice": 4.665,
+          "rawReturn": -0.06458238247375636
+        },
+        {
+          "entryTs": 1788138000000,
+          "exitTs": 1788224400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.147,
+          "exitPrice": 5.244,
+          "rawReturn": -0.018845929667767436
+        },
+        {
+          "entryTs": 1788289200000,
+          "exitTs": 1788375600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.651,
+          "exitPrice": 5.798,
+          "rawReturn": -0.02601309502742888
+        },
+        {
+          "entryTs": 1788397200000,
+          "exitTs": 1788483600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 5.789,
+          "exitPrice": 6.333,
+          "rawReturn": -0.093971324926585
+        },
+        {
+          "entryTs": 1788548400000,
+          "exitTs": 1788634800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.209,
+          "exitPrice": 7.041,
+          "rawReturn": -0.133999033660815
+        },
+        {
+          "entryTs": 1788721200000,
+          "exitTs": 1788807600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 7.155,
+          "exitPrice": 6.872,
+          "rawReturn": 0.03955276030747734
+        },
+        {
+          "entryTs": 1788807600000,
+          "exitTs": 1788894000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.872,
+          "exitPrice": 6.838,
+          "rawReturn": 0.004947613504074466
+        },
+        {
+          "entryTs": 1789261200000,
+          "exitTs": 1789347600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.4,
+          "exitPrice": 6.2,
+          "rawReturn": 0.03125
+        },
+        {
+          "entryTs": 1789347600000,
+          "exitTs": 1789434000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.2,
+          "exitPrice": 6.683,
+          "rawReturn": -0.07790322580645159
+        },
+        {
+          "entryTs": 1789455600000,
+          "exitTs": 1789542000000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.6,
+          "exitPrice": 6.317,
+          "rawReturn": 0.04287878787878785
+        },
+        {
+          "entryTs": 1789542000000,
+          "exitTs": 1789628400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 6.317,
+          "exitPrice": 6.778,
+          "rawReturn": -0.07297767927813825
+        },
+        {
+          "entryTs": 1789866000000,
+          "exitTs": 1789952400000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 8.703,
+          "exitPrice": 8.878,
+          "rawReturn": -0.020108008732621085
+        },
+        {
+          "entryTs": 1790168400000,
+          "exitTs": 1790254800000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 9.688,
+          "exitPrice": 9.04,
+          "rawReturn": 0.06688687035507856
+        },
+        {
+          "entryTs": 1790254800000,
+          "exitTs": 1790341200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 9.04,
+          "exitPrice": 9.856,
+          "rawReturn": -0.09026548672566381
+        },
+        {
+          "entryTs": 1790362800000,
+          "exitTs": 1790449200000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 9.616,
+          "exitPrice": 9.568,
+          "rawReturn": 0.004991680532445919
+        },
+        {
+          "entryTs": 1790557200000,
+          "exitTs": 1790643600000,
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "entryPrice": 9.664,
+          "exitPrice": 8.735,
+          "rawReturn": 0.09612996688741726
+        }
+      ],
+      "missing": []
+    },
+    "UNI_H48_R18": {
+      "symbol": "UNIUSDT",
+      "horizon": 48,
+      "rank": 18,
+      "side": "LONG",
+      "rule": [
+        [
+          "r12",
+          "<=",
+          -0.011760858240916985,
+          0.35
+        ],
+        [
+          "er24",
+          "<=",
+          0.1320306418227812,
+          0.35
+        ]
+      ],
+      "score": 0.009045714367601534,
+      "pre": {
+        "TRAIN": {
+          "n": 17,
+          "wr": 0.4117647058823529,
+          "mean": 0.00955145478248849,
+          "sum": 0.16237473130230431,
+          "pf": 1.4028530996627302,
+          "worst": -0.14103733516013017
+        },
+        "VALID": {
+          "n": 15,
+          "wr": 0.5333333333333333,
+          "mean": 0.028136449805053587,
+          "sum": 0.4220467470758038,
+          "pf": 2.0918049018107787,
+          "worst": -0.12415710481723552
+        },
+        "PREHOLD": {
+          "n": 13,
+          "wr": 0.6153846153846154,
+          "mean": 0.0076957143676015345,
+          "sum": 0.10004428677881995,
+          "pf": 1.3691793342710994,
+          "worst": -0.09701114206128136
+        }
+      },
+      "target30": {
+        "n": 89,
+        "wr": 0.48314606741573035,
+        "mean": 0.001246947467793199,
+        "sum": 0.11097832463359471,
+        "pf": 1.0433841580042174,
+        "worst": -0.24493548387096764
+      },
+      "target10": {
+        "n": 89,
+        "wr": 0.5056179775280899,
+        "mean": 0.003246947467793199,
+        "sum": 0.28897832463359474,
+        "pf": 1.117105400431611,
+        "worst": -0.24293548387096764
+      },
+      "forward30": {
+        "n": 12,
+        "wr": 0.6666666666666666,
+        "mean": 0.005413176096082061,
+        "sum": 0.06495811315298473,
+        "pf": 1.320498121288831,
+        "worst": -0.11331630714205876
+      },
+      "forward10": {
+        "n": 12,
+        "wr": 0.6666666666666666,
+        "mean": 0.007413176096082062,
+        "sum": 0.08895811315298474,
+        "pf": 1.4569485778446682,
+        "worst": -0.11131630714205876
+      },
+      "rows": [
+        {
+          "entryTs": 1759712400000,
+          "exitTs": 1759885200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 8.034,
+          "exitPrice": 7.846,
+          "rawReturn": -0.023400547672392413
+        },
+        {
+          "entryTs": 1760014800000,
+          "exitTs": 1760187600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 7.874,
+          "exitPrice": 5.969,
+          "rawReturn": -0.24193548387096764
+        },
+        {
+          "entryTs": 1760230800000,
+          "exitTs": 1760403600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.832,
+          "exitPrice": 7.002,
+          "rawReturn": 0.2006172839506173
+        },
+        {
+          "entryTs": 1760425200000,
+          "exitTs": 1760598000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.531,
+          "exitPrice": 6.654,
+          "rawReturn": 0.01883325677537906
+        },
+        {
+          "entryTs": 1760986800000,
+          "exitTs": 1761159600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.393,
+          "exitPrice": 6.087,
+          "rawReturn": -0.04786485218207415
+        },
+        {
+          "entryTs": 1761332400000,
+          "exitTs": 1761505200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.249,
+          "exitPrice": 6.55,
+          "rawReturn": 0.04816770683309324
+        },
+        {
+          "entryTs": 1761591600000,
+          "exitTs": 1761764400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.631,
+          "exitPrice": 6.361,
+          "rawReturn": -0.040717840446388265
+        },
+        {
+          "entryTs": 1761937200000,
+          "exitTs": 1762110000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.704,
+          "exitPrice": 5.749,
+          "rawReturn": 0.007889200561009835
+        },
+        {
+          "entryTs": 1762131600000,
+          "exitTs": 1762304400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.784,
+          "exitPrice": 5.014,
+          "rawReturn": -0.13312586445366525
+        },
+        {
+          "entryTs": 1762412400000,
+          "exitTs": 1762585200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.293,
+          "exitPrice": 5.94,
+          "rawReturn": 0.12223691668241088
+        },
+        {
+          "entryTs": 1762650000000,
+          "exitTs": 1762822800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.96,
+          "exitPrice": 9.493,
+          "rawReturn": 0.592785234899329
+        },
+        {
+          "entryTs": 1762930800000,
+          "exitTs": 1763103600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 8.482,
+          "exitPrice": 7.593,
+          "rawReturn": -0.10481018627682148
+        },
+        {
+          "entryTs": 1763103600000,
+          "exitTs": 1763276400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 7.593,
+          "exitPrice": 7.658,
+          "rawReturn": 0.008560516264980889
+        },
+        {
+          "entryTs": 1763341200000,
+          "exitTs": 1763514000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 7.321,
+          "exitPrice": 7.428,
+          "rawReturn": 0.014615489687201277
+        },
+        {
+          "entryTs": 1763535600000,
+          "exitTs": 1763708400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 7.221,
+          "exitPrice": 6.495,
+          "rawReturn": -0.10054009140008313
+        },
+        {
+          "entryTs": 1763816400000,
+          "exitTs": 1763989200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.041,
+          "exitPrice": 6.112,
+          "rawReturn": 0.011753021023009458
+        },
+        {
+          "entryTs": 1764054000000,
+          "exitTs": 1764226800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.24,
+          "exitPrice": 6.215,
+          "rawReturn": -0.004006410256410353
+        },
+        {
+          "entryTs": 1764226800000,
+          "exitTs": 1764399600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.215,
+          "exitPrice": 6.114,
+          "rawReturn": -0.016251005631536586
+        },
+        {
+          "entryTs": 1764788400000,
+          "exitTs": 1764961200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.04,
+          "exitPrice": 5.458,
+          "rawReturn": -0.09635761589403968
+        },
+        {
+          "entryTs": 1765155600000,
+          "exitTs": 1765328400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.489,
+          "exitPrice": 5.642,
+          "rawReturn": 0.02787392967753699
+        },
+        {
+          "entryTs": 1765371600000,
+          "exitTs": 1765544400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.563,
+          "exitPrice": 5.62,
+          "rawReturn": 0.01024626999820244
+        },
+        {
+          "entryTs": 1765566000000,
+          "exitTs": 1765738800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.333,
+          "exitPrice": 5.333,
+          "rawReturn": 0.0
+        },
+        {
+          "entryTs": 1765954800000,
+          "exitTs": 1766127600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.078,
+          "exitPrice": 5.102,
+          "rawReturn": 0.004726270185112291
+        },
+        {
+          "entryTs": 1766343600000,
+          "exitTs": 1766516400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.13,
+          "exitPrice": 5.767,
+          "rawReturn": -0.059216965742251104
+        },
+        {
+          "entryTs": 1766581200000,
+          "exitTs": 1766754000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.731,
+          "exitPrice": 5.9,
+          "rawReturn": 0.029488745419647522
+        },
+        {
+          "entryTs": 1767423600000,
+          "exitTs": 1767596400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.819,
+          "exitPrice": 5.881,
+          "rawReturn": 0.010654751675545748
+        },
+        {
+          "entryTs": 1767726000000,
+          "exitTs": 1767898800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.91,
+          "exitPrice": 5.487,
+          "rawReturn": -0.07157360406091373
+        },
+        {
+          "entryTs": 1767963600000,
+          "exitTs": 1768136400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.452,
+          "exitPrice": 5.528,
+          "rawReturn": 0.013939838591342513
+        },
+        {
+          "entryTs": 1768179600000,
+          "exitTs": 1768352400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.465,
+          "exitPrice": 5.737,
+          "rawReturn": 0.04977127172918583
+        },
+        {
+          "entryTs": 1768719600000,
+          "exitTs": 1768892400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.298,
+          "exitPrice": 4.963,
+          "rawReturn": -0.06323140807852023
+        },
+        {
+          "entryTs": 1768914000000,
+          "exitTs": 1769086800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.907,
+          "exitPrice": 4.917,
+          "rawReturn": 0.0020379050336254423
+        },
+        {
+          "entryTs": 1769108400000,
+          "exitTs": 1769281200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.8335,
+          "exitPrice": 4.8565,
+          "rawReturn": 0.004758456604944561
+        },
+        {
+          "entryTs": 1769842800000,
+          "exitTs": 1770015600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.25,
+          "exitPrice": 3.852,
+          "rawReturn": -0.09364705882352942
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770382800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.84,
+          "exitPrice": 3.354,
+          "rawReturn": -0.1265624999999999
+        },
+        {
+          "entryTs": 1770534000000,
+          "exitTs": 1770706800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.482,
+          "exitPrice": 3.366,
+          "rawReturn": -0.033314187248707716
+        },
+        {
+          "entryTs": 1770728400000,
+          "exitTs": 1770901200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.34,
+          "exitPrice": 3.392,
+          "rawReturn": 0.015568862275449069
+        },
+        {
+          "entryTs": 1771160400000,
+          "exitTs": 1771333200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.527,
+          "exitPrice": 3.56,
+          "rawReturn": 0.009356393535582708
+        },
+        {
+          "entryTs": 1771333200000,
+          "exitTs": 1771506000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.56,
+          "exitPrice": 3.352,
+          "rawReturn": -0.05842696629213484
+        },
+        {
+          "entryTs": 1771527600000,
+          "exitTs": 1771700400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.351,
+          "exitPrice": 3.638,
+          "rawReturn": 0.0856460757982691
+        },
+        {
+          "entryTs": 1771743600000,
+          "exitTs": 1771916400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.566,
+          "exitPrice": 3.32,
+          "rawReturn": -0.06898485698261358
+        },
+        {
+          "entryTs": 1772218800000,
+          "exitTs": 1772391600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.747,
+          "exitPrice": 3.753,
+          "rawReturn": 0.0016012810248198228
+        },
+        {
+          "entryTs": 1772542800000,
+          "exitTs": 1772715600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.828,
+          "exitPrice": 4.052,
+          "rawReturn": 0.05851619644723094
+        },
+        {
+          "entryTs": 1772758800000,
+          "exitTs": 1772931600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.972,
+          "exitPrice": 3.754,
+          "rawReturn": -0.054884189325276944
+        },
+        {
+          "entryTs": 1773190800000,
+          "exitTs": 1773363600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.863,
+          "exitPrice": 3.981,
+          "rawReturn": 0.030546207610665288
+        },
+        {
+          "entryTs": 1773450000000,
+          "exitTs": 1773622800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.977,
+          "exitPrice": 4.071,
+          "rawReturn": 0.023635906462157408
+        },
+        {
+          "entryTs": 1773730800000,
+          "exitTs": 1773903600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.025,
+          "exitPrice": 3.642,
+          "rawReturn": -0.09515527950310565
+        },
+        {
+          "entryTs": 1774508400000,
+          "exitTs": 1774681200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.604,
+          "exitPrice": 3.393,
+          "rawReturn": -0.058546059933407446
+        },
+        {
+          "entryTs": 1775242800000,
+          "exitTs": 1775415600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.16,
+          "exitPrice": 3.096,
+          "rawReturn": -0.020253164556962022
+        },
+        {
+          "entryTs": 1775890800000,
+          "exitTs": 1776063600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.135,
+          "exitPrice": 3.054,
+          "rawReturn": -0.02583732057416266
+        },
+        {
+          "entryTs": 1776193200000,
+          "exitTs": 1776366000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.113,
+          "exitPrice": 3.436,
+          "rawReturn": 0.10375843238034044
+        },
+        {
+          "entryTs": 1776906000000,
+          "exitTs": 1777078800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.312,
+          "exitPrice": 3.264,
+          "rawReturn": -0.01449275362318847
+        },
+        {
+          "entryTs": 1777143600000,
+          "exitTs": 1777316400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.236,
+          "exitPrice": 3.217,
+          "rawReturn": -0.005871446229913535
+        },
+        {
+          "entryTs": 1777510800000,
+          "exitTs": 1777683600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.223,
+          "exitPrice": 3.214,
+          "rawReturn": -0.0027924294135898142
+        },
+        {
+          "entryTs": 1777921200000,
+          "exitTs": 1778094000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.318,
+          "exitPrice": 3.449,
+          "rawReturn": 0.0394816154309825
+        },
+        {
+          "entryTs": 1778180400000,
+          "exitTs": 1778353200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.435,
+          "exitPrice": 3.703,
+          "rawReturn": 0.07802037845705967
+        },
+        {
+          "entryTs": 1778482800000,
+          "exitTs": 1778655600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.89,
+          "exitPrice": 3.791,
+          "rawReturn": -0.025449871465295648
+        },
+        {
+          "entryTs": 1778850000000,
+          "exitTs": 1779022800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.656,
+          "exitPrice": 3.583,
+          "rawReturn": -0.019967177242888434
+        },
+        {
+          "entryTs": 1779066000000,
+          "exitTs": 1779238800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.454,
+          "exitPrice": 3.442,
+          "rawReturn": -0.00347423277359582
+        },
+        {
+          "entryTs": 1779368400000,
+          "exitTs": 1779541200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.577,
+          "exitPrice": 3.315,
+          "rawReturn": -0.07324573665082468
+        },
+        {
+          "entryTs": 1779735600000,
+          "exitTs": 1779908400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.344,
+          "exitPrice": 3.267,
+          "rawReturn": -0.023026315789473673
+        },
+        {
+          "entryTs": 1780059600000,
+          "exitTs": 1780232400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 2.982,
+          "exitPrice": 3.045,
+          "rawReturn": 0.021126760563380254
+        },
+        {
+          "entryTs": 1780405200000,
+          "exitTs": 1780578000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 2.916,
+          "exitPrice": 2.671,
+          "rawReturn": -0.08401920438957478
+        },
+        {
+          "entryTs": 1780988400000,
+          "exitTs": 1781161200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 2.524,
+          "exitPrice": 2.5,
+          "rawReturn": -0.009508716323296418
+        },
+        {
+          "entryTs": 1781247600000,
+          "exitTs": 1781420400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 2.517,
+          "exitPrice": 2.53,
+          "rawReturn": 0.005164878823996855
+        },
+        {
+          "entryTs": 1781722800000,
+          "exitTs": 1781895600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.284,
+          "exitPrice": 3.016,
+          "rawReturn": -0.08160779537149809
+        },
+        {
+          "entryTs": 1782176400000,
+          "exitTs": 1782349200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.001,
+          "exitPrice": 2.911,
+          "rawReturn": -0.02999000333222257
+        },
+        {
+          "entryTs": 1782414000000,
+          "exitTs": 1782586800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 2.826,
+          "exitPrice": 2.97,
+          "rawReturn": 0.05095541401273884
+        },
+        {
+          "entryTs": 1782910800000,
+          "exitTs": 1783083600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 2.744,
+          "exitPrice": 3.283,
+          "rawReturn": 0.1964285714285714
+        },
+        {
+          "entryTs": 1783148400000,
+          "exitTs": 1783321200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.181,
+          "exitPrice": 3.108,
+          "rawReturn": -0.022948758252121948
+        },
+        {
+          "entryTs": 1783342800000,
+          "exitTs": 1783515600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.102,
+          "exitPrice": 3.292,
+          "rawReturn": 0.06125080593165699
+        },
+        {
+          "entryTs": 1783623600000,
+          "exitTs": 1783796400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.372,
+          "exitPrice": 3.732,
+          "rawReturn": 0.10676156583629903
+        },
+        {
+          "entryTs": 1783861200000,
+          "exitTs": 1784034000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.617,
+          "exitPrice": 3.693,
+          "rawReturn": 0.021011888305225268
+        },
+        {
+          "entryTs": 1784228400000,
+          "exitTs": 1784401200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.631,
+          "exitPrice": 3.521,
+          "rawReturn": -0.030294684659873283
+        },
+        {
+          "entryTs": 1784833200000,
+          "exitTs": 1785006000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.778,
+          "exitPrice": 3.683,
+          "rawReturn": -0.025145579671784102
+        },
+        {
+          "entryTs": 1785373200000,
+          "exitTs": 1785546000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.0,
+          "exitPrice": 4.313,
+          "rawReturn": 0.07824999999999993
+        },
+        {
+          "entryTs": 1785718800000,
+          "exitTs": 1785891600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.136,
+          "exitPrice": 3.846,
+          "rawReturn": -0.07011605415860733
+        },
+        {
+          "entryTs": 1785999600000,
+          "exitTs": 1786172400000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.036,
+          "exitPrice": 3.996,
+          "rawReturn": -0.009910802775024652
+        },
+        {
+          "entryTs": 1786626000000,
+          "exitTs": 1786798800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 3.506,
+          "exitPrice": 3.257,
+          "rawReturn": -0.07102110667427264
+        },
+        {
+          "entryTs": 1787468400000,
+          "exitTs": 1787641200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.117,
+          "exitPrice": 4.382,
+          "rawReturn": 0.06436725771192608
+        },
+        {
+          "entryTs": 1787706000000,
+          "exitTs": 1787878800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 4.316,
+          "exitPrice": 4.745,
+          "rawReturn": 0.09939759036144591
+        },
+        {
+          "entryTs": 1788354000000,
+          "exitTs": 1788526800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 5.827,
+          "exitPrice": 6.081,
+          "rawReturn": 0.04359018362793887
+        },
+        {
+          "entryTs": 1788526800000,
+          "exitTs": 1788699600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.081,
+          "exitPrice": 7.042,
+          "rawReturn": 0.1580332182206874
+        },
+        {
+          "entryTs": 1788894000000,
+          "exitTs": 1789066800000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.838,
+          "exitPrice": 6.077,
+          "rawReturn": -0.11128985083357712
+        },
+        {
+          "entryTs": 1789153200000,
+          "exitTs": 1789326000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.003,
+          "exitPrice": 6.349,
+          "rawReturn": 0.057637847742795234
+        },
+        {
+          "entryTs": 1789498800000,
+          "exitTs": 1789671600000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 6.403,
+          "exitPrice": 7.534,
+          "rawReturn": 0.176635951897548
+        },
+        {
+          "entryTs": 1789844400000,
+          "exitTs": 1790017200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 8.696,
+          "exitPrice": 8.738,
+          "rawReturn": 0.00482980680772771
+        },
+        {
+          "entryTs": 1790168400000,
+          "exitTs": 1790341200000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 9.688,
+          "exitPrice": 9.856,
+          "rawReturn": 0.01734104046242768
+        },
+        {
+          "entryTs": 1790449200000,
+          "exitTs": 1790622000000,
+          "symbol": "UNIUSDT",
+          "side": "LONG",
+          "entryPrice": 9.568,
+          "exitPrice": 8.89,
+          "rawReturn": -0.07086120401337781
+        }
+      ],
+      "missing": [
+        [
+          1790730000000,
+          1790902800000
+        ]
+      ]
+    }
+  }
+}

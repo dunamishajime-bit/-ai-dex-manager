@@ -1,0 +1,370 @@
+{
+  "status": "RESEARCH_ONLY_INTEGRATED_FALSIFICATION_COMPLETE_NOT_PRODUCTION",
+  "period": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z_EXCLUSIVE"
+  ],
+  "initial_jpy": 10000,
+  "baseline_reproduced_exactly": true,
+  "source_commit": "b7133c209ad9e2f59b9b37d032bb1b3379258267",
+  "cases": {
+    "STABLE3": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\VPS_EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_20261111_REPRO_20261113\\RUN_MANIFEST.json",
+      "note": "locked exact baseline",
+      "results": {
+        "10": {
+          "final_compounded_jpy": 4512970.171211586,
+          "max_hourly_dd_pct": -26.05877304176173,
+          "modeled_fills": 856,
+          "win_rate_pct": 61.6822429906542,
+          "profit_factor": 1.668352713023249,
+          "source_intents": 2466,
+          "admitted_by_runner": {
+            "Q102": 84,
+            "V52": 86,
+            "V4": 502,
+            "PENGU": 38,
+            "IDLE": 91,
+            "HYPE": 48,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 13,
+          "shared_risk_flatten_count": 8,
+          "delta_final_vs_stable3_jpy": 0.0,
+          "delta_dd_vs_stable3_pctpt": 0.0,
+          "delta_wr_vs_stable3_pctpt": 0.0
+        },
+        "30": {
+          "final_compounded_jpy": 1454529.574075996,
+          "max_hourly_dd_pct": -28.076361286367945,
+          "modeled_fills": 855,
+          "win_rate_pct": 59.53216374269006,
+          "profit_factor": 1.512646047959108,
+          "source_intents": 2466,
+          "admitted_by_runner": {
+            "Q102": 84,
+            "V52": 86,
+            "V4": 501,
+            "PENGU": 38,
+            "IDLE": 91,
+            "HYPE": 48,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 13,
+          "shared_risk_flatten_count": 8,
+          "delta_final_vs_stable3_jpy": 0.0,
+          "delta_dd_vs_stable3_pctpt": 0.0,
+          "delta_wr_vs_stable3_pctpt": 0.0
+        }
+      }
+    },
+    "PENGU_R3": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\FIVEBT_P3_20261113\\RUN_MANIFEST.json",
+      "note": "SHORT_V20 fixed SHORT R3 gate",
+      "results": {
+        "10": {
+          "final_compounded_jpy": 5435516.072278837,
+          "max_hourly_dd_pct": -26.05877304176174,
+          "modeled_fills": 853,
+          "win_rate_pct": 61.1957796014068,
+          "profit_factor": 1.63918531514828,
+          "source_intents": 2484,
+          "admitted_by_runner": {
+            "Q102": 84,
+            "V52": 84,
+            "V4": 500,
+            "PENGU": 46,
+            "IDLE": 84,
+            "HYPE": 48,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 14,
+          "shared_risk_flatten_count": 10,
+          "delta_final_vs_stable3_jpy": 922545.9010672504,
+          "delta_dd_vs_stable3_pctpt": -1.0658141036401503e-14,
+          "delta_wr_vs_stable3_pctpt": -0.4864633892474046
+        },
+        "30": {
+          "final_compounded_jpy": 1765364.8156207537,
+          "max_hourly_dd_pct": -28.07636128636807,
+          "modeled_fills": 850,
+          "win_rate_pct": 59.05882352941176,
+          "profit_factor": 1.4929673622641932,
+          "source_intents": 2484,
+          "admitted_by_runner": {
+            "Q102": 84,
+            "V52": 84,
+            "V4": 498,
+            "PENGU": 45,
+            "IDLE": 84,
+            "HYPE": 48,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 14,
+          "shared_risk_flatten_count": 9,
+          "delta_final_vs_stable3_jpy": 310835.24154475774,
+          "delta_dd_vs_stable3_pctpt": -1.2434497875801753e-13,
+          "delta_wr_vs_stable3_pctpt": -0.47334021327829845
+        }
+      }
+    },
+    "Q102_AVAX_H24_ONLY": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\FIVEBT_P3_A24R7_ONLY_20261113\\RUN_MANIFEST.json",
+      "note": "PENGU R3 + AVAX H24 LONG",
+      "results": {
+        "10": {
+          "final_compounded_jpy": 751208.9239490703,
+          "max_hourly_dd_pct": -42.33092986984015,
+          "modeled_fills": 534,
+          "win_rate_pct": 61.23595505617978,
+          "profit_factor": 1.6492827026962344,
+          "source_intents": 2496,
+          "admitted_by_runner": {
+            "Q102": 96,
+            "V52": 51,
+            "V4": 222,
+            "PENGU": 44,
+            "HYPE": 39,
+            "IDLE": 74,
+            "FET": 9
+          },
+          "shared_risk_trip_count": 11,
+          "shared_risk_flatten_count": 8,
+          "delta_final_vs_stable3_jpy": -3761761.247262516,
+          "delta_dd_vs_stable3_pctpt": -16.27215682807842,
+          "delta_wr_vs_stable3_pctpt": -0.4462879344744195
+        },
+        "30": {
+          "final_compounded_jpy": 251945.62015802917,
+          "max_hourly_dd_pct": -45.61982175411625,
+          "modeled_fills": 520,
+          "win_rate_pct": 58.84615384615385,
+          "profit_factor": 1.4666297688186214,
+          "source_intents": 2496,
+          "admitted_by_runner": {
+            "Q102": 87,
+            "V52": 51,
+            "V4": 221,
+            "PENGU": 43,
+            "HYPE": 36,
+            "IDLE": 74,
+            "FET": 9
+          },
+          "shared_risk_trip_count": 10,
+          "shared_risk_flatten_count": 6,
+          "delta_final_vs_stable3_jpy": -1202583.9539179667,
+          "delta_dd_vs_stable3_pctpt": -17.543460467748307,
+          "delta_wr_vs_stable3_pctpt": -0.6860098965362127
+        }
+      }
+    },
+    "Q102_AVAX_H24_UNI_H24": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\FIVEBT_P3_A24R7_U24R15_20261113\\RUN_MANIFEST.json",
+      "note": "PENGU R3 + AVAX H24 LONG + UNI H24 SHORT",
+      "results": {
+        "10": {
+          "final_compounded_jpy": 1019819.4056410763,
+          "max_hourly_dd_pct": -44.096179789310796,
+          "modeled_fills": 583,
+          "win_rate_pct": 61.4065180102916,
+          "profit_factor": 1.4919583121130378,
+          "source_intents": 2605,
+          "admitted_by_runner": {
+            "Q102": 164,
+            "V52": 51,
+            "V4": 222,
+            "PENGU": 46,
+            "HYPE": 38,
+            "IDLE": 54,
+            "FET": 9
+          },
+          "shared_risk_trip_count": 14,
+          "shared_risk_flatten_count": 12,
+          "delta_final_vs_stable3_jpy": -3493150.76557051,
+          "delta_dd_vs_stable3_pctpt": -18.037406747549067,
+          "delta_wr_vs_stable3_pctpt": -0.27572498036260384
+        },
+        "30": {
+          "final_compounded_jpy": 383695.24286727945,
+          "max_hourly_dd_pct": -50.89889272754892,
+          "modeled_fills": 575,
+          "win_rate_pct": 59.82608695652174,
+          "profit_factor": 1.3776766143727874,
+          "source_intents": 2605,
+          "admitted_by_runner": {
+            "Q102": 160,
+            "V52": 50,
+            "V4": 222,
+            "PENGU": 44,
+            "HYPE": 37,
+            "IDLE": 54,
+            "FET": 9
+          },
+          "shared_risk_trip_count": 14,
+          "shared_risk_flatten_count": 11,
+          "delta_final_vs_stable3_jpy": -1070834.3312087166,
+          "delta_dd_vs_stable3_pctpt": -22.822531441180974,
+          "delta_wr_vs_stable3_pctpt": 0.2939232138316825
+        }
+      }
+    },
+    "IDLE_VNEXT_1X": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\FIVEBT_P3_IDLEV3_20261113\\RUN_MANIFEST.json",
+      "note": "PENGU R3 + IDLE vNext 1.0x",
+      "results": {
+        "10": {
+          "final_compounded_jpy": 3450538.210815596,
+          "max_hourly_dd_pct": -30.480057347789803,
+          "modeled_fills": 789,
+          "win_rate_pct": 60.836501901140686,
+          "profit_factor": 1.5101251856591453,
+          "source_intents": 2140,
+          "admitted_by_runner": {
+            "IDLE": 97,
+            "V52": 75,
+            "Q102": 80,
+            "V4": 443,
+            "PENGU": 41,
+            "HYPE": 46,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 16,
+          "shared_risk_flatten_count": 9,
+          "delta_final_vs_stable3_jpy": -1062431.9603959904,
+          "delta_dd_vs_stable3_pctpt": -4.421284306028074,
+          "delta_wr_vs_stable3_pctpt": -0.8457410895135169
+        },
+        "30": {
+          "final_compounded_jpy": 236038.21209190626,
+          "max_hourly_dd_pct": -35.557709461337495,
+          "modeled_fills": 425,
+          "win_rate_pct": 55.529411764705884,
+          "profit_factor": 1.3609314010075941,
+          "source_intents": 2140,
+          "admitted_by_runner": {
+            "IDLE": 145,
+            "V52": 74,
+            "Q102": 87,
+            "V4": 25,
+            "PENGU": 42,
+            "HYPE": 45,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 20,
+          "shared_risk_flatten_count": 8,
+          "delta_final_vs_stable3_jpy": -1218491.3619840897,
+          "delta_dd_vs_stable3_pctpt": -7.4813481749695505,
+          "delta_wr_vs_stable3_pctpt": -4.002751977984175
+        }
+      }
+    },
+    "HYPE_H36_1X": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\S3_H36_1X_REPRO_20261113\\RUN_MANIFEST.json",
+      "note": "STABLE3 + HYPE H36 1.0x",
+      "results": {
+        "10": {
+          "final_compounded_jpy": 3542060.0456157154,
+          "max_hourly_dd_pct": -23.603768863106588,
+          "modeled_fills": 840,
+          "win_rate_pct": 61.54761904761905,
+          "profit_factor": 1.6906076936286114,
+          "source_intents": 2508,
+          "admitted_by_runner": {
+            "Q102": 79,
+            "V52": 82,
+            "HYPE": 109,
+            "V4": 480,
+            "PENGU": 37,
+            "IDLE": 46,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 29,
+          "shared_risk_flatten_count": 18,
+          "delta_final_vs_stable3_jpy": -970910.1255958709,
+          "delta_dd_vs_stable3_pctpt": 2.455004178655141,
+          "delta_wr_vs_stable3_pctpt": -0.13462394303515168
+        },
+        "30": {
+          "final_compounded_jpy": 624035.6336433023,
+          "max_hourly_dd_pct": -25.08575795084651,
+          "modeled_fills": 684,
+          "win_rate_pct": 58.187134502923975,
+          "profit_factor": 1.5177110168583483,
+          "source_intents": 2508,
+          "admitted_by_runner": {
+            "Q102": 88,
+            "V52": 83,
+            "HYPE": 110,
+            "V4": 285,
+            "PENGU": 40,
+            "IDLE": 71,
+            "FET": 8
+          },
+          "shared_risk_trip_count": 32,
+          "shared_risk_flatten_count": 19,
+          "delta_final_vs_stable3_jpy": -830493.9404326937,
+          "delta_dd_vs_stable3_pctpt": 2.9906033355214348,
+          "delta_wr_vs_stable3_pctpt": -1.3450292397660846
+        }
+      }
+    },
+    "ALL5_CURRENT_STRESS": {
+      "path": "C:\\tmp\\disdex-bt-20251001-20261001\\FIVEBT_P3_A24R7_U24R15_IDLEV3_HYPEH36_20261113\\RUN_MANIFEST.json",
+      "note": "current all-five stress",
+      "results": {
+        "10": {
+          "final_compounded_jpy": 771982.8684890323,
+          "max_hourly_dd_pct": -68.82013075499631,
+          "modeled_fills": 780,
+          "win_rate_pct": 59.61538461538461,
+          "profit_factor": 1.4127295393096984,
+          "source_intents": 2303,
+          "admitted_by_runner": {
+            "IDLE": 25,
+            "V52": 39,
+            "Q102": 113,
+            "HYPE": 92,
+            "V4": 479,
+            "PENGU": 27,
+            "FET": 6
+          },
+          "shared_risk_trip_count": 30,
+          "shared_risk_flatten_count": 22,
+          "delta_final_vs_stable3_jpy": -3740987.302722554,
+          "delta_dd_vs_stable3_pctpt": -42.76135771323459,
+          "delta_wr_vs_stable3_pctpt": -2.0668583752695895
+        },
+        "30": {
+          "final_compounded_jpy": 132324.1716068021,
+          "max_hourly_dd_pct": -65.96676079417509,
+          "modeled_fills": 373,
+          "win_rate_pct": 56.30026809651475,
+          "profit_factor": 1.2980240231887927,
+          "source_intents": 2303,
+          "admitted_by_runner": {
+            "IDLE": 49,
+            "V52": 41,
+            "Q102": 128,
+            "HYPE": 95,
+            "V4": 20,
+            "PENGU": 35,
+            "FET": 6
+          },
+          "shared_risk_trip_count": 28,
+          "shared_risk_flatten_count": 20,
+          "delta_final_vs_stable3_jpy": -1322205.4024691938,
+          "delta_dd_vs_stable3_pctpt": -37.890399507807146,
+          "delta_wr_vs_stable3_pctpt": -3.2318956461753103
+        }
+      }
+    }
+  },
+  "conclusions": {
+    "PENGU_SHORT_V20": "R3 survives exact integration and improves final compounded JPY at 10/30bps without worsening baseline DD. Research candidate only.",
+    "Q102_AVAX_UNI": "Current from-scratch entry candidates fail exact portfolio integration. Shared Risk/capacity cascades require protection/exit redesign and lower event density.",
+    "HYPE": "H36 1.0x is locally viable but loses portfolio opportunity through occupancy. Keep 1.0x objective; redesign yield/preemption and occupancy.",
+    "IDLE": "vNext 1.0x is standalone/forward positive but fails exact portfolio integration through capacity interaction. Keep 1.0x objective; redesign sidecar yield/preemption.",
+    "ALL5": "Current first-pass all-five combination is rejected and retained as falsification evidence."
+  },
+  "production_mutation": false
+}
