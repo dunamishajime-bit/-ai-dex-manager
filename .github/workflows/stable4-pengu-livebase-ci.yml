@@ -1,0 +1,30 @@
+name: STABLE4 PENGU live-base CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feat/stable4-pengu-livebase-20261114'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: STABLE4 PENGU contract
+        run: npx tsx scripts/stable4-pengu-livebase-selftest.ts
+      - name: Existing PENGU regression
+        run: npm run strategy:pengu-dual-ls-v2:selftest
+      - name: PENGU typecheck
+        run: npm run strategy:pengu-dual-ls-v2:typecheck
+      - name: Repository typecheck
+        run: npm run typecheck
