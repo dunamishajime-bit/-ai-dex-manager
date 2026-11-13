@@ -39,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/research-lab/discussions", label: "議論内容", icon: MessageSquareText },
     ],
   },
+  { href: "/bt-verification", label: "BT検証", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/history", label: "トレード履歴", icon: FileText },
   { href: "/settings", label: "設定", icon: Settings },
