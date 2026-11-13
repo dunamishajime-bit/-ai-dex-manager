@@ -1,0 +1,68 @@
+{
+  "status": "RESEARCH_ONLY_V3_SUPERSEDES_V2",
+  "productionMutation": false,
+  "comparison": {
+    "10": {
+      "v2FinalJpy": 10600406.84939976,
+      "v3FinalJpy": 12931262.767297685,
+      "finalDeltaJpy": 2330855.917897925,
+      "finalImprovementPct": 21.988362814866,
+      "v2MaxDdPct": -25.560278078047606,
+      "v3MaxDdPct": -25.56027807804765,
+      "ddDeltaPctPoint": -4.263256414560601e-14,
+      "v2PF": 2.0531554752734946,
+      "v3PF": 2.25436151512263,
+      "v2WR": 63.72795969773299,
+      "v3WR": 63.77358490566037,
+      "v2Admitted": {
+        "Q102": 117,
+        "PENGU": 46,
+        "V52": 84,
+        "V4": 496,
+        "IDLE": 37,
+        "HYPE": 7,
+        "FET": 8
+      },
+      "v3Admitted": {
+        "Q102": 118,
+        "PENGU": 47,
+        "V52": 84,
+        "V4": 496,
+        "IDLE": 35,
+        "HYPE": 8,
+        "FET": 8
+      }
+    },
+    "30": {
+      "v2FinalJpy": 3807596.919928814,
+      "v3FinalJpy": 4701167.248266114,
+      "finalDeltaJpy": 893570.3283373001,
+      "finalImprovementPct": 23.468091479441732,
+      "v2MaxDdPct": -26.241956240350007,
+      "v3MaxDdPct": -26.241956240350017,
+      "ddDeltaPctPoint": -1.0658141036401503e-14,
+      "v2PF": 1.8551825635811288,
+      "v3PF": 2.0431341181692426,
+      "v2WR": 61.5676359039191,
+      "v3WR": 61.694058154235144,
+      "v2Admitted": {
+        "Q102": 117,
+        "PENGU": 46,
+        "V52": 84,
+        "V4": 494,
+        "IDLE": 36,
+        "HYPE": 7,
+        "FET": 8
+      },
+      "v3Admitted": {
+        "Q102": 118,
+        "PENGU": 46,
+        "V52": 84,
+        "V4": 494,
+        "IDLE": 34,
+        "HYPE": 8,
+        "FET": 8
+      }
+    }
+  }
+}

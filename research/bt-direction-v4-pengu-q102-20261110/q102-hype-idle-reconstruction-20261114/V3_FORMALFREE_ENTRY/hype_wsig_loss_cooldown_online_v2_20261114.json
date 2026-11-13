@@ -1,0 +1,29 @@
+{
+  "status": "RESEARCH_ONLY_HYPE_WSIG_CAUSAL_LOSS_COOLDOWN",
+  "selectionUsesTarget": false,
+  "entryRule": [
+    [
+      "h12",
+      "<=",
+      0.004297852251518686
+    ],
+    [
+      "h24",
+      ">=",
+      0.02047426596091347
+    ],
+    [
+      "rel24",
+      "<=",
+      0.026202553353817715
+    ]
+  ],
+  "baseCounts": {
+    "PRE": 12,
+    "TARGET": 27,
+    "FORWARD": 2
+  },
+  "qualifyingPretarget": 0,
+  "selectedPretargetTop1": null,
+  "topPretargetDiagnostics": []
+}
