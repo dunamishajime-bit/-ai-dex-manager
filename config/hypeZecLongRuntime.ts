@@ -82,8 +82,12 @@ export function resolveHypeZecLongRuntime(env: NodeJS.ProcessEnv = process.env):
     maximumSlippageBps: Math.max(0, number(env.DISDEX_HYPE_ZEC_MAX_SLIPPAGE_BPS, 20)),
     feeBpsPerSide: Math.max(0, number(env.DISDEX_HYPE_ZEC_FEE_BPS_PER_SIDE, 4)),
     fundingBps: Math.max(0, number(env.DISDEX_HYPE_ZEC_FUNDING_BPS, 2)),
-    cryptoGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-    totalGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+    cryptoGrossCap: stable4Mode === "LIVE"
+      ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+      : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+    totalGrossCap: stable4Mode === "LIVE"
+      ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+      : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
     signalMode: resolvedSignalMode,
     stable4Mode,
     symbols: symbols(env.DISDEX_HYPE_ZEC_SYMBOLS || (resolvedSignalMode === "STABLE4" ? "HYPEUSDT" : undefined)),

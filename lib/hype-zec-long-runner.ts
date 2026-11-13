@@ -407,6 +407,10 @@ export class HypeZecLongRunner {
       pendingExposure,
       availableBalanceUsd: account.availableBalance,
       intents: [candidate],
+      entryGrossCaps: {
+        cryptoGrossCap: this.dependencies.runtime.cryptoGrossCap,
+        totalGrossCap: this.dependencies.runtime.totalGrossCap,
+      },
     });
     const accepted = plan.status === "planned" ? plan.accepted.find((intent) => intent.strategy === signal.strategy) : undefined;
     state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: Boolean(accepted), reason: accepted ? signal.reason : (plan.reason || plan.rejected.find((row) => row.intent.strategy === signal.strategy)?.reason || "CAPACITY_BLOCKED") };

@@ -6,6 +6,10 @@ import { evaluateStable4HypeSignal, stable4HypeFormalPriorityOpen, type Stable4H
 import { stable4IdleBlocks, stable4IdleTaoRiskOffUntil } from "../lib/disdex-stable4-idle";
 import { stable4PenguShortV20Pass } from "../lib/pengu-stable4-opportunity";
 
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap,3.0);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.stockGrossCap,1.5);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,3.5);
+
 const H=3_600_000;
 const entryTs=Date.UTC(2026,0,1,6,0,0);
 const start=entryTs-25*H;
@@ -71,5 +75,18 @@ const hr=resolveHypeZecLongRuntime({DISDEX_HYPE_ZEC_SIGNAL_MODE:"STABLE4"} as No
 assert.deepEqual(hr.symbols,["HYPEUSDT"]);
 assert.equal(hr.maximumGross,1);
 assert.equal(hr.signalMode,"STABLE4");
+
+assert.equal(hr.cryptoGrossCap,3.0);
+assert.equal(hr.totalGrossCap,4.25);
+
+const liveSha="c".repeat(40);
+const hrLive=resolveHypeZecLongRuntime({
+  DISDEX_HYPE_ZEC_SIGNAL_MODE:"STABLE4",
+  DISDEX_STABLE4_MODE:"LIVE",
+  DISDEX_STABLE4_GLOBAL_LIVE_ACK:liveSha,
+  DISDEX_HYPE_ZEC_RUNTIME_SHA:liveSha,
+} as NodeJS.ProcessEnv);
+assert.equal(hrLive.cryptoGrossCap,3.0);
+assert.equal(hrLive.totalGrossCap,3.5);
 
 console.log("STABLE4_GLOBAL_SELFTEST_PASS");

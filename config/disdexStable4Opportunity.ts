@@ -2,6 +2,11 @@ export type DisDexStable4Mode = "OFF" | "SHADOW" | "LIVE";
 
 export const DISDEX_STABLE4_OPPORTUNITY = Object.freeze({
   name: "STABLE4_OPPORTUNITY",
+  portfolio: Object.freeze({
+    cryptoGrossCap: 3.0,
+    stockGrossCap: 1.5,
+    totalGrossCap: 3.5,
+  }),
   pengu: Object.freeze({
     shortV20Btc24hMax: -0.010836782776818987,
     shortV20Pengu72hMax: -0.05237466490617382,

@@ -13,7 +13,7 @@ import type {
     DirectTradeResult,
 } from "@/lib/direct-trade-executor";
 import type { LiveRunnerLock, LiveRunnerLockHandle } from "@/lib/live-runner-state";
-import type { DisDexStable4Mode } from "@/config/disdexStable4Opportunity";
+import { DISDEX_STABLE4_OPPORTUNITY, type DisDexStable4Mode } from "@/config/disdexStable4Opportunity";
 import {
     buildPenguDualLsV2Signal,
     cooldownHoursForPenguExit,
@@ -414,8 +414,12 @@ export class PenguDualLsV2PortfolioRunner {
             candidate,
             pendingCryptoGross: input.pendingCryptoGross,
             pendingTotalGross: input.pendingTotalGross,
-            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+            cryptoEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+            totalEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
             causeIdempotencyKey: candidate.idempotencyKey,
             expectedRuntimeSha: process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
             enabled: true,
@@ -1183,6 +1187,12 @@ export class PenguDualLsV2PortfolioRunner {
                             signalTs: signal.referenceTs,
                         }],
                         maxDataAgeMs: 5 * 60_000,
+                        ...(this.dependencies.config.stable4Mode === "LIVE" ? {
+                            entryGrossCaps: {
+                                cryptoGrossCap: DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap,
+                                totalGrossCap: DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,
+                            },
+                        } : {}),
                     });
                     if (strictPlan.status !== "planned") {
                         const planReason = strictPlan.reason || strictPlan.rejected[0]?.reason;
@@ -1195,8 +1205,12 @@ export class PenguDualLsV2PortfolioRunner {
                             candidateGross: targetGross,
                             candidateSymbol: SYMBOL,
                             candidateStrategy: "PENGU_DUAL_LS_V2",
-                            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-                            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+                            cryptoEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+                            totalEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
                         });
                         if (isSharedCapacityBlock(planReason) && sidecarCausesCapacity && await retryAfterHypeZecPreemption(targetGross)) continue;
                         await this.dependencies.stateStore.save(state);
@@ -1276,8 +1290,12 @@ export class PenguDualLsV2PortfolioRunner {
                             candidateGross: targetGross,
                             candidateSymbol: SYMBOL,
                             candidateStrategy: "PENGU_DUAL_LS_V2",
-                            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-                            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+                            cryptoEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+                            totalEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
                         });
                         if (isSharedCapacityBlock(planReason) && sidecarCausesCapacity && await retryAfterHypeZecPreemption(targetGross)) continue;
                         await this.dependencies.stateStore.save(state);

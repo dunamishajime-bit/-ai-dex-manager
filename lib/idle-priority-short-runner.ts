@@ -25,6 +25,7 @@ import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-p
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
 import { stable4IdleBlocks, stable4IdleTaoRiskOffUntil } from "./disdex-stable4-idle";
+import { DISDEX_STABLE4_OPPORTUNITY } from "../config/disdexStable4Opportunity";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -533,8 +534,14 @@ export class IdlePriorityShortRunner {
             }
             if (!venueFiveXCrossConfirmed) return { status: "held", message: "IDLE_VENUE_5X_CROSS_READBACK_FAILED", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
-        const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
-        const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
+        const effectiveCryptoCap = this.dependencies.runtime.stable4Mode === "LIVE"
+            ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+            : INTEGRATED_CRYPTO_CAP;
+        const effectiveTotalCap = this.dependencies.runtime.stable4Mode === "LIVE"
+            ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+            : INTEGRATED_TOTAL_CAP;
+        const fullCryptoGrossAvailable = effectiveCryptoCap - exposure.cryptoGross - pendingAggregate.cryptoGross;
+        const fullTotalGrossAvailable = effectiveTotalCap - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
         const kill = await readSharedKillSwitch(process.env);
         const risk = await readSharedCryptoDailyRisk(this.dependencies.runtime.riskPath, this.now());
         let marginHealthy = false;
@@ -861,8 +868,14 @@ export class IdlePriorityShortRunner {
             if (signals.length > 1) {
                 const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
                 const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
-                const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
-                const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
+                const effectiveCryptoCap = this.dependencies.runtime.stable4Mode === "LIVE"
+                    ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                    : INTEGRATED_CRYPTO_CAP;
+                const effectiveTotalCap = this.dependencies.runtime.stable4Mode === "LIVE"
+                    ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                    : INTEGRATED_TOTAL_CAP;
+                const fullCryptoGrossAvailable = effectiveCryptoCap - exposure.cryptoGross - pendingAggregate.cryptoGross;
+                const fullTotalGrossAvailable = effectiveTotalCap - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
                 const requestedGross = signals.reduce((sum, signal) => sum + IDLE_PRIORITY_SHORT_POLICY.routes[signal.symbol].gross, 0);
                 if (fullCryptoGrossAvailable + EPSILON < requestedGross || fullTotalGrossAvailable + EPSILON < requestedGross) {
                     state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "IDLE_MULTI_SIGNAL_CAPACITY_AMBIGUOUS" };
