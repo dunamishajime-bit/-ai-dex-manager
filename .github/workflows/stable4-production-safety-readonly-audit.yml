@@ -1,0 +1,88 @@
+name: STABLE4 Production Safety Readonly Audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure read-only VPS transport
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          mkdir -p "$RUNNER_TEMP/ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/ssh/"*
+
+      - name: Read common safety snapshots only
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -T -i "$RUNNER_TEMP/ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" \
+            -p "${PORT:-22}" "root@$HOST" 'python3 -' <<'PY'
+          import collections, datetime, json, pathlib, time
+          now=int(time.time()*1000)
+          paths={
+            'kill':pathlib.Path('/var/lib/disdex/shared/kill-switch.json'),
+            'risk':pathlib.Path('/var/lib/disdex/shared/crypto-daily-risk.json'),
+            'margin':pathlib.Path('/var/lib/disdex/shared/margin-risk/guard-live.json'),
+            'pending':pathlib.Path('/var/lib/disdex/shared/pending-exposure.json'),
+          }
+          rows={}
+          for k,p in paths.items():
+            st=p.lstat()
+            assert p.is_file() and not p.is_symlink() and not (st.st_mode & 0o002), 'SAFETY_FILE_UNTRUSTED:'+k
+            rows[k]=json.loads(p.read_text())
+          kill,risk,margin,pending=rows['kill'],rows['risk'],rows['margin'],rows['pending']
+          def age(v):
+            return None if not isinstance(v,(int,float)) else now-int(v)
+          limits={k:risk.get(k) for k in ['maximumLossPct','dailyLossLimit','maxDailyLossPct','dailyLossLimitPct'] if risk.get(k) is not None}
+          entries=pending.get('entries') if isinstance(pending.get('entries'),list) else []
+          status_counts=collections.Counter(str(x.get('status')) for x in entries if isinstance(x,dict))
+          active=[x for x in entries if isinstance(x,dict) and x.get('status')!='RELEASED']
+          print('SAFETY_KILL='+json.dumps({'active':kill.get('active'),'reason':kill.get('reason'),'updatedAt':kill.get('updatedAt')},sort_keys=True))
+          print('SAFETY_RISK='+json.dumps({'schema':risk.get('schema'),'utcDay':risk.get('utcDay'),'sourceComplete':risk.get('sourceComplete'),'tripped':risk.get('tripped'),'updatedAt':risk.get('updatedAt'),'ageMs':age(risk.get('updatedAt')),'limits':limits},sort_keys=True))
+          print('SAFETY_MARGIN='+json.dumps({'schema':margin.get('schema'),'stage':margin.get('stage'),'ordersAllowed':margin.get('ordersAllowed'),'checkedAt':margin.get('checkedAt'),'ageMs':age(margin.get('checkedAt')),'reason':margin.get('reason'),'runtimeSha':margin.get('runtimeSha') or margin.get('runtimeCommitSha')},sort_keys=True))
+          print('SAFETY_PENDING='+json.dumps({'schema':pending.get('schema'),'updatedAt':pending.get('updatedAt'),'ageMs':age(pending.get('updatedAt')),'entryCount':len(entries),'statusCounts':status_counts,'activeCount':len(active),'active':[{'strategyId':x.get('strategyId'),'symbol':x.get('symbol'),'status':x.get('status'),'gross':x.get('gross'),'expiresAt':x.get('expiresAt')} for x in active[:20]]},sort_keys=True))
+          err=''
+          try:
+            if kill.get('active') is not False: raise Exception('KILL_SWITCH_ACTIVE_OR_INVALID')
+            if risk.get('sourceComplete') is not True or risk.get('tripped') is not False: raise Exception('SHARED_RISK_NOT_HEALTHY')
+            day=datetime.datetime.fromtimestamp(now/1000,datetime.timezone.utc).date().isoformat()
+            if risk.get('utcDay')!=day: raise Exception('SHARED_RISK_WRONG_UTC_DAY')
+            for label,stamp in [('SHARED_RISK',risk.get('updatedAt')),('MARGIN',margin.get('checkedAt'))]:
+              if not isinstance(stamp,(int,float)) or stamp<=0 or stamp>now+1000 or now-stamp>15*60*1000: raise Exception(label+'_STALE')
+            if not limits: raise Exception('SHARED_RISK_LIMIT_MISSING')
+            for value in limits.values():
+              n=float(value)
+              if not (abs(n-7.5)<1e-9 or abs(n-.075)<1e-9): raise Exception('SHARED_RISK_LIMIT_MISMATCH')
+            if margin.get('stage')!='HEALTHY' or margin.get('ordersAllowed') is not True: raise Exception('MARGIN_GUARD_NOT_HEALTHY')
+            if pending.get('schema')!='disdex-pending-exposure/v1' or not isinstance(pending.get('entries'),list) or any(not isinstance(x,dict) or x.get('status')!='RELEASED' for x in entries): raise Exception('PENDING_EXPOSURE_NOT_CLEARED')
+          except Exception as e:
+            err=str(e)
+          print('SAFETY_HEALTH_REASON='+json.dumps(err))
+          print('SAFETY_OVERALL='+('HEALTHY' if not err else 'BLOCKED'))
+          print('TRADING_MUTATION=0')
+          PY
+
+      - name: Cleanup local SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/ssh"
