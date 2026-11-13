@@ -64,6 +64,8 @@ export type IdleState={
   pending:IdlePending|null;
   lastDecision?:IdleDecision;
   lastAcceptedBySymbol:Partial<Record<IdlePrioritySymbol,number>>;
+  stable4TaoRiskOffUntil?:number;
+  stable4ShadowTaoRiskOffUntil?:number;
   failures:Array<{message:string;occurredAt:number}>;
 };
 
@@ -117,6 +119,7 @@ export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{
  if(x.manualReview!=null&&typeof x.manualReview!=="string")throw new Error("IDLE_STATE_MANUAL_REVIEW_INVALID");
  const cooldown=x.lastAcceptedBySymbol||{};
  for(const [symbol,ts] of Object.entries(cooldown)){if(!validSymbol(symbol)||!validTs(ts))throw new Error("IDLE_STATE_COOLDOWN_INVALID");}
+ for(const v of [x.stable4TaoRiskOffUntil,x.stable4ShadowTaoRiskOffUntil]){if(v!==undefined&&(!Number.isFinite(Number(v))||Number(v)<0))throw new Error("IDLE_STATE_STABLE4_RISK_WINDOW_INVALID");}
  if(!Array.isArray(x.failures))throw new Error("IDLE_STATE_FAILURES_INVALID");
  const failures=x.failures.map((row)=>{if(!row||typeof row.message!=="string"||!row.message||!validTs(row.occurredAt))throw new Error("IDLE_STATE_FAILURES_INVALID");return {message:row.message,occurredAt:Number(row.occurredAt)};}).slice(-100);
  return {
@@ -128,6 +131,8 @@ export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{
   pending:x.pending??null,
   lastDecision:x.lastDecision,
   lastAcceptedBySymbol:{...cooldown},
+  stable4TaoRiskOffUntil:x.stable4TaoRiskOffUntil===undefined?undefined:Number(x.stable4TaoRiskOffUntil),
+  stable4ShadowTaoRiskOffUntil:x.stable4ShadowTaoRiskOffUntil===undefined?undefined:Number(x.stable4ShadowTaoRiskOffUntil),
   failures,
  };
 }

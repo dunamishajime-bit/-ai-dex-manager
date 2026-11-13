@@ -24,6 +24,8 @@ import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-da
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { stable4IdleBlocks, stable4IdleTaoRiskOffUntil } from "./disdex-stable4-idle";
+import { DISDEX_STABLE4_OPPORTUNITY } from "../config/disdexStable4Opportunity";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -532,8 +534,14 @@ export class IdlePriorityShortRunner {
             }
             if (!venueFiveXCrossConfirmed) return { status: "held", message: "IDLE_VENUE_5X_CROSS_READBACK_FAILED", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
-        const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
-        const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
+        const effectiveCryptoCap = this.dependencies.runtime.stable4Mode === "LIVE"
+            ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+            : INTEGRATED_CRYPTO_CAP;
+        const effectiveTotalCap = this.dependencies.runtime.stable4Mode === "LIVE"
+            ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+            : INTEGRATED_TOTAL_CAP;
+        const fullCryptoGrossAvailable = effectiveCryptoCap - exposure.cryptoGross - pendingAggregate.cryptoGross;
+        const fullTotalGrossAvailable = effectiveTotalCap - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
         const kill = await readSharedKillSwitch(process.env);
         const risk = await readSharedCryptoDailyRisk(this.dependencies.runtime.riskPath, this.now());
         let marginHealthy = false;
@@ -748,8 +756,31 @@ export class IdlePriorityShortRunner {
                     return { symbol, features, generic: evaluateIdleGenericCandidate(features) };
                 })
                 .filter((row) => row.generic.accepted);
-            const routeCandidates = rawGeneric
+            let routeCandidates = rawGeneric
                 .filter((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic).accepted);
+            if (this.dependencies.runtime.stable4Mode !== "OFF") {
+                const taoRawCandidate = routeCandidates.some((row) => row.symbol === "TAOUSDT");
+                if (this.dependencies.runtime.stable4Mode === "LIVE") {
+                    const nextUntil = stable4IdleTaoRiskOffUntil("LIVE", market.decisionTs, taoRawCandidate, state.stable4TaoRiskOffUntil || 0);
+                    if (nextUntil !== (state.stable4TaoRiskOffUntil || 0)) {
+                        state.stable4TaoRiskOffUntil = nextUntil;
+                        await this.dependencies.stateStore.save(state);
+                    }
+                    const before = routeCandidates.length;
+                    routeCandidates = routeCandidates.filter((row) => !stable4IdleBlocks("LIVE", row.symbol, market.decisionTs, state.stable4TaoRiskOffUntil || 0));
+                    if (before > 0 && routeCandidates.length === 0) {
+                        state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "STABLE4_IDLE_WAIT" };
+                        await this.dependencies.stateStore.save(state);
+                        return { status: "no-change", message: "STABLE4_IDLE_WAIT", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                    }
+                } else {
+                    const nextUntil = stable4IdleTaoRiskOffUntil("SHADOW", market.decisionTs, taoRawCandidate, state.stable4ShadowTaoRiskOffUntil || 0);
+                    if (nextUntil !== (state.stable4ShadowTaoRiskOffUntil || 0)) {
+                        state.stable4ShadowTaoRiskOffUntil = nextUntil;
+                        await this.dependencies.stateStore.save(state);
+                    }
+                }
+            }
             const lifecycleCandidates = routeCandidates.filter((row) => this.candidateLifecycleAllows(state, row));
             if (!lifecycleCandidates.length) {
                 await this.dependencies.stateStore.save({
@@ -837,8 +868,14 @@ export class IdlePriorityShortRunner {
             if (signals.length > 1) {
                 const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
                 const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
-                const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
-                const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
+                const effectiveCryptoCap = this.dependencies.runtime.stable4Mode === "LIVE"
+                    ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                    : INTEGRATED_CRYPTO_CAP;
+                const effectiveTotalCap = this.dependencies.runtime.stable4Mode === "LIVE"
+                    ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                    : INTEGRATED_TOTAL_CAP;
+                const fullCryptoGrossAvailable = effectiveCryptoCap - exposure.cryptoGross - pendingAggregate.cryptoGross;
+                const fullTotalGrossAvailable = effectiveTotalCap - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
                 const requestedGross = signals.reduce((sum, signal) => sum + IDLE_PRIORITY_SHORT_POLICY.routes[signal.symbol].gross, 0);
                 if (fullCryptoGrossAvailable + EPSILON < requestedGross || fullTotalGrossAvailable + EPSILON < requestedGross) {
                     state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "IDLE_MULTI_SIGNAL_CAPACITY_AMBIGUOUS" };
