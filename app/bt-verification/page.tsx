@@ -109,6 +109,7 @@ export default function BtVerificationPage() {
 
   const snapshot = run?.snapshots[Math.min(step, run.snapshots.length - 1)];
   const gross = useMemo(() => run && snapshot ? computeBtGross(snapshot, run.limits) : null, [run, snapshot]);
+  const priorGross = useMemo(() => run && step > 0 ? computeBtGross(run.snapshots[step - 1], run.limits) : null, [run, step]);
   const visible = run ? run.snapshots.slice(0, step + 1) : [];
   const events = visible.flatMap((s) => s.events || []);
   const closed = events.filter((e) => e.type === "EXIT");
@@ -172,7 +173,7 @@ export default function BtVerificationPage() {
         <div><h1 className="flex items-center gap-2 text-2xl font-extrabold"><FlaskConical className="text-teal-300" /> BT検証ページ</h1>
           <p className="mt-2 text-xs text-slate-400">条件設定 → 取引再生・ポートフォリオ・Gross → 結果保存・エクスポート</p></div>
         <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200">
-          {run?.mode === "REAL_BT" ? "正規BTデータ再生（読取専用）" : "表示デモ：取引・損益は仮想例"}
+          {run?.mode === "REAL_BT" ? "BT台帳リプレイ（原本SHAの照合は未実施）" : "表示デモ：取引・損益は仮想例"}
         </span>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -286,6 +287,9 @@ export default function BtVerificationPage() {
               <b>{selectedEvent.logic} / {selectedEvent.symbol}</b><p className="mt-1">理由：{selectedEvent.reason || "台帳未収録"}</p>
               <p>数量：{selectedEvent.quantity == null ? "—" : fixed(selectedEvent.quantity, 6)} / 価格：{selectedEvent.price == null ? "—" : fixed(selectedEvent.price, 5)}</p>
               <p>この時点の総Gross：{fixed(gross.totalX)} / {fixed(run.limits.totalX)}x</p>
+              <p>総Gross・イベント直前 → 直後：{priorGross ? fixed(priorGross.totalX) + "x" : "—"} → {fixed(gross.totalX)}x</p>
+              <p>Gross増減：{priorGross ? fixed(gross.totalX - priorGross.totalX) + "x" : "—"}（複数イベントが同時刻なら合算）</p>
+              <p>全体上限に対する変化：{priorGross ? fixed(100 * (gross.totalX - priorGross.totalX) / run.limits.totalX, 1) + "%" : "—"}</p>
             </div>}
           </section>
         </div>
