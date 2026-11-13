@@ -1,0 +1,923 @@
+{
+  "status": "RESEARCH_ONLY_THREE_LAYER_DUAL_WINDOW_RECOVERY",
+  "productionMutation": false,
+  "selectionUsesCurrentOutcome": false,
+  "policy": {
+    "layer2Base": {
+      "pwin": 0.6,
+      "ev": 0.002,
+      "confidence": 0.45,
+      "analogs": 6
+    },
+    "route": {
+      "completedNMin": 6,
+      "pwinMin": 0.6,
+      "meanMinExclusive": 0
+    },
+    "routeHealth": {
+      "recent5MeanMinExclusive": 0.002,
+      "recent6MeanMinExclusive": 0.002
+    },
+    "layer3": "opportunityScore > active max when scored active exists"
+  },
+  "ids": [
+    "Q102P_00089",
+    "IDLEP_00064",
+    "IDLEP_00065",
+    "IDLEP_00066",
+    "IDLEP_00067",
+    "IDLEP_00068",
+    "IDLEP_00069",
+    "IDLEP_00070",
+    "IDLEP_00705",
+    "PENGU_00013",
+    "PENGU_00014",
+    "PENGU_00057",
+    "PENGU_00058",
+    "PENGU_00077",
+    "PENGU_00078",
+    "PENGU_00084"
+  ],
+  "candidates": [
+    {
+      "id": "Q102P_00089",
+      "strategy": "Q102",
+      "entryTs": 1772485200000,
+      "exitTs": 1772571600000,
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "route": "UNI|MR72_Z1.5_H24",
+      "gross": 0.75,
+      "layer1Kept": false,
+      "expectedHoldHours": 24.0,
+      "predEV30": 0.03877505525535952,
+      "predWinProb": 0.6391894961775325,
+      "confidence": 0.7277129988421238,
+      "analogs": 106,
+      "opportunityScore": 0.03762281565352898,
+      "layer2Promote": true,
+      "realizedNet30": 0.00941610812095127,
+      "components": {
+        "strategy": {
+          "mean": 0.016237179095134686,
+          "pwin": 0.6166601265807407,
+          "sd": 0.058857634020297256,
+          "neff": 92.77954206165559,
+          "n": 106,
+          "sw": 61.88473880308068
+        },
+        "route": {
+          "mean": 0.04100705623075086,
+          "pwin": 0.612336379815359,
+          "sd": 0.15600768888295086,
+          "neff": 5.6773695499766275,
+          "n": 6
+        },
+        "symbol": {
+          "mean": 0.03904076238338728,
+          "pwin": 0.6774426128036098,
+          "sd": 0.14108241948242028,
+          "neff": 11.444071553385383,
+          "n": 12
+        },
+        "knn": {
+          "mean": 0.046491029422710876,
+          "pwin": 0.6393566769890383,
+          "sd": 0.1615528624121486,
+          "neff": 6.923474243967066,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.06995449877870205,
+      "recent6Mean": 0.117792950484659,
+      "recent5WR": 0.6,
+      "recent6WR": 0.6666666666666666,
+      "activeMaxOpportunity": 0.01131675298360795
+    },
+    {
+      "id": "IDLEP_00064",
+      "strategy": "IDLE",
+      "entryTs": 1768446000000,
+      "exitTs": 1768489200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 12.0,
+      "predEV30": 0.0036503505244395752,
+      "predWinProb": 0.6671027708480464,
+      "confidence": 0.7540738481584962,
+      "analogs": 62,
+      "opportunityScore": 0.022021070936732282,
+      "layer2Promote": true,
+      "realizedNet30": -0.018590443313875122,
+      "components": {
+        "strategy": {
+          "mean": -0.0036155125291022342,
+          "pwin": 0.49723600665267115,
+          "sd": 0.03214819553916048,
+          "neff": 57.858508660770255,
+          "n": 62,
+          "sw": 43.449089642963685
+        },
+        "route": {
+          "mean": 0.00569195552878788,
+          "pwin": 0.7041789028003321,
+          "sd": 0.019641056859329275,
+          "neff": 8.999896849136514,
+          "n": 9
+        },
+        "symbol": {
+          "mean": 0.00569195552878788,
+          "pwin": 0.7041789028003321,
+          "sd": 0.019641056859329275,
+          "neff": 8.999896849136514,
+          "n": 9
+        },
+        "knn": {
+          "mean": 0.002985170796929859,
+          "pwin": 0.6681504660722105,
+          "sd": 0.03350697657908294,
+          "neff": 8.664970187345125,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.0028706143873872027,
+      "recent6Mean": 0.006997974842878012,
+      "recent5WR": 0.8,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": 0.019541504346643316
+    },
+    {
+      "id": "IDLEP_00065",
+      "strategy": "IDLE",
+      "entryTs": 1768456800000,
+      "exitTs": 1768500000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 12.0,
+      "predEV30": 0.0039380384406198865,
+      "predWinProb": 0.668072663274448,
+      "confidence": 0.7563205132984139,
+      "analogs": 62,
+      "opportunityScore": 0.023827354038388142,
+      "layer2Promote": true,
+      "realizedNet30": -0.009714898570127346,
+      "components": {
+        "strategy": {
+          "mean": -0.003615512529102234,
+          "pwin": 0.4972360066526711,
+          "sd": 0.03214819553916047,
+          "neff": 57.85850866077026,
+          "n": 62,
+          "sw": 43.40728114027459
+        },
+        "route": {
+          "mean": 0.005691955528787878,
+          "pwin": 0.7041789028003321,
+          "sd": 0.019641056859329275,
+          "neff": 8.999896849136514,
+          "n": 9
+        },
+        "symbol": {
+          "mean": 0.005691955528787878,
+          "pwin": 0.7041789028003321,
+          "sd": 0.019641056859329275,
+          "neff": 8.999896849136514,
+          "n": 9
+        },
+        "knn": {
+          "mean": 0.0038225389793661384,
+          "pwin": 0.6709212409178497,
+          "sd": 0.0311224644411831,
+          "neff": 8.80485842071696,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.0028706143873872027,
+      "recent6Mean": 0.006997974842878012,
+      "recent5WR": 0.8,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": 0.019541504346643316
+    },
+    {
+      "id": "IDLEP_00066",
+      "strategy": "IDLE",
+      "entryTs": 1768460400000,
+      "exitTs": 1768503600000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 12.0,
+      "predEV30": 0.0035793704538742755,
+      "predWinProb": 0.6642472178699576,
+      "confidence": 0.7537618472749101,
+      "analogs": 62,
+      "opportunityScore": 0.02158394308314806,
+      "layer2Promote": true,
+      "realizedNet30": 0.0012214227024567306,
+      "components": {
+        "strategy": {
+          "mean": -0.0036155125291022347,
+          "pwin": 0.49723600665267115,
+          "sd": 0.03214819553916048,
+          "neff": 57.85850866077024,
+          "n": 62,
+          "sw": 43.39335391459338
+        },
+        "route": {
+          "mean": 0.0056919555287878775,
+          "pwin": 0.704178902800332,
+          "sd": 0.01964105685932927,
+          "neff": 8.999896849136514,
+          "n": 9
+        },
+        "symbol": {
+          "mean": 0.0056919555287878775,
+          "pwin": 0.704178902800332,
+          "sd": 0.01964105685932927,
+          "neff": 8.999896849136514,
+          "n": 9
+        },
+        "knn": {
+          "mean": 0.002811344431761105,
+          "pwin": 0.6600346080438414,
+          "sd": 0.03351364699046297,
+          "neff": 9.029541304943217,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.0028706143873872027,
+      "recent6Mean": 0.006997974842878012,
+      "recent5WR": 0.8,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": 0.019541504346643316
+    },
+    {
+      "id": "IDLEP_00067",
+      "strategy": "IDLE",
+      "entryTs": 1768474800000,
+      "exitTs": 1768515900000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 12.0,
+      "predEV30": 0.00750606513643625,
+      "predWinProb": 0.6928672439807294,
+      "confidence": 0.7586901799180477,
+      "analogs": 63,
+      "opportunityScore": 0.04555822327071522,
+      "layer2Promote": true,
+      "realizedNet30": 0.01231319417636522,
+      "components": {
+        "strategy": {
+          "mean": -0.002132429874572602,
+          "pwin": 0.5085612152484122,
+          "sd": 0.03325163128311639,
+          "neff": 58.75069940214659,
+          "n": 63,
+          "sw": 44.336406900615366
+        },
+        "route": {
+          "mean": 0.009525287683329005,
+          "pwin": 0.725723188580406,
+          "sd": 0.023635573472646478,
+          "neff": 9.999722215405798,
+          "n": 10
+        },
+        "symbol": {
+          "mean": 0.009525287683329005,
+          "pwin": 0.725723188580406,
+          "sd": 0.023635573472646478,
+          "neff": 9.999722215405798,
+          "n": 10
+        },
+        "knn": {
+          "mean": 0.00736765125824787,
+          "pwin": 0.6989296195478882,
+          "sd": 0.022674330895313927,
+          "neff": 9.912386134602743,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.010837712695217754,
+      "recent6Mean": 0.01276276209582706,
+      "recent5WR": 0.8,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": 0.019541504346643316
+    },
+    {
+      "id": "IDLEP_00068",
+      "strategy": "IDLE",
+      "entryTs": 1768485600000,
+      "exitTs": 1768516200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 12.0,
+      "predEV30": 0.0038637513533101935,
+      "predWinProb": 0.6458295050803294,
+      "confidence": 0.6367511363814382,
+      "analogs": 63,
+      "opportunityScore": 0.019681984519324684,
+      "layer2Promote": true,
+      "realizedNet30": 0.041711667101386324,
+      "components": {
+        "strategy": {
+          "mean": -0.0021324298745726018,
+          "pwin": 0.5085612152484122,
+          "sd": 0.03325163128311638,
+          "neff": 58.7506994021466,
+          "n": 63,
+          "sw": 44.29374458473347
+        },
+        "route": {
+          "mean": 0.009525287683329007,
+          "pwin": 0.7257231885804059,
+          "sd": 0.023635573472646478,
+          "neff": 9.999722215405797,
+          "n": 10
+        },
+        "symbol": {
+          "mean": 0.009525287683329007,
+          "pwin": 0.7257231885804059,
+          "sd": 0.023635573472646478,
+          "neff": 9.999722215405797,
+          "n": 10
+        },
+        "knn": {
+          "mean": -0.0035887563179216914,
+          "pwin": 0.5582497997264908,
+          "sd": 0.04001655662652813,
+          "neff": 8.981157106841602,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.010837712695217754,
+      "recent6Mean": 0.01276276209582706,
+      "recent5WR": 0.8,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": 0.019541504346643316
+    },
+    {
+      "id": "IDLEP_00069",
+      "strategy": "IDLE",
+      "entryTs": 1768492800000,
+      "exitTs": 1768536000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 12.0,
+      "predEV30": 0.005757084460100438,
+      "predWinProb": 0.6510939703175411,
+      "confidence": 0.7533514150665174,
+      "analogs": 64,
+      "opportunityScore": 0.034696861797392974,
+      "layer2Promote": true,
+      "realizedNet30": 0.01287695522287266,
+      "components": {
+        "strategy": {
+          "mean": -0.002495905652074657,
+          "pwin": 0.49732962379288603,
+          "sd": 0.032971232566022884,
+          "neff": 59.646999400871664,
+          "n": 64,
+          "sw": 45.26500499961588
+        },
+        "route": {
+          "mean": 0.00786531000695018,
+          "pwin": 0.6821461429178803,
+          "sd": 0.024988980319804125,
+          "neff": 10.999514907532799,
+          "n": 11
+        },
+        "symbol": {
+          "mean": 0.00786531000695018,
+          "pwin": 0.6821461429178803,
+          "sd": 0.024988980319804125,
+          "neff": 10.999514907532799,
+          "n": 11
+        },
+        "knn": {
+          "mean": 0.0048005915440834995,
+          "pwin": 0.646223812953745,
+          "sd": 0.026176629823038103,
+          "neff": 10.481224682504616,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.005550021355224919,
+      "recent6Mean": 0.005933020027035608,
+      "recent5WR": 0.6,
+      "recent6WR": 0.6666666666666666,
+      "activeMaxOpportunity": 0.019541504346643316
+    },
+    {
+      "id": "IDLEP_00070",
+      "strategy": "IDLE",
+      "entryTs": 1768500000000,
+      "exitTs": 1768543200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 12.0,
+      "predEV30": 0.004333907900052106,
+      "predWinProb": 0.6336056151217488,
+      "confidence": 0.7453166421331715,
+      "analogs": 64,
+      "opportunityScore": 0.025841069467050084,
+      "layer2Promote": true,
+      "realizedNet30": -0.006047380122116786,
+      "components": {
+        "strategy": {
+          "mean": -0.0024959056520746565,
+          "pwin": 0.49732962379288603,
+          "sd": 0.032971232566022884,
+          "neff": 59.64699940087166,
+          "n": 64,
+          "sw": 45.23596310668646
+        },
+        "route": {
+          "mean": 0.007865310006950179,
+          "pwin": 0.6821461429178801,
+          "sd": 0.02498898031980412,
+          "neff": 10.999514907532797,
+          "n": 11
+        },
+        "symbol": {
+          "mean": 0.007865310006950179,
+          "pwin": 0.6821461429178801,
+          "sd": 0.02498898031980412,
+          "neff": 10.999514907532797,
+          "n": 11
+        },
+        "knn": {
+          "mean": 0.0008612147012438137,
+          "pwin": 0.5975646450822949,
+          "sd": 0.03457475546168062,
+          "neff": 10.878048350358243,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.005550021355224919,
+      "recent6Mean": 0.005933020027035608,
+      "recent5WR": 0.6,
+      "recent6WR": 0.6666666666666666,
+      "activeMaxOpportunity": 0.019541504346643316
+    },
+    {
+      "id": "IDLEP_00705",
+      "strategy": "IDLE",
+      "entryTs": 1788138000000,
+      "exitTs": 1788224400000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "gross": 0.25,
+      "layer1Kept": false,
+      "expectedHoldHours": 24.0,
+      "predEV30": 0.003245999864881005,
+      "predWinProb": 0.6094268135861495,
+      "confidence": 0.7464609885972111,
+      "analogs": 702,
+      "opportunityScore": 0.009692049072501955,
+      "layer2Promote": true,
+      "realizedNet30": -0.03192935444579787,
+      "components": {
+        "strategy": {
+          "mean": -0.004229305194888544,
+          "pwin": 0.4913949457685531,
+          "sd": 0.03697959998161391,
+          "neff": 541.9704177114324,
+          "n": 702,
+          "sw": 284.03991696665656
+        },
+        "route": {
+          "mean": 0.003919747260115621,
+          "pwin": 0.6275856363540576,
+          "sd": 0.032383745535438345,
+          "neff": 77.19318404202774,
+          "n": 118
+        },
+        "symbol": {
+          "mean": 0.003919747260115621,
+          "pwin": 0.6275856363540576,
+          "sd": 0.032383745535438345,
+          "neff": 77.19318404202774,
+          "n": 118
+        },
+        "knn": {
+          "mean": 0.004434669184644842,
+          "pwin": 0.6125705393922588,
+          "sd": 0.01897455859985071,
+          "neff": 8.663857890377487,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.005686735507916277,
+      "recent6Mean": 0.00977166887283016,
+      "recent5WR": 0.6,
+      "recent6WR": 0.6666666666666666,
+      "activeMaxOpportunity": 0.0039809861692966944
+    },
+    {
+      "id": "PENGU_00013",
+      "strategy": "PENGU",
+      "entryTs": 1762650000000,
+      "exitTs": 1762736400000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "gross": 1.0,
+      "layer1Kept": false,
+      "expectedHoldHours": 72.0,
+      "predEV30": 0.08263445463967803,
+      "predWinProb": 0.7664225265038607,
+      "confidence": 0.4842710263829597,
+      "analogs": 8,
+      "opportunityScore": 0.013339157387651,
+      "layer2Promote": true,
+      "realizedNet30": -0.08269431958762893,
+      "components": {
+        "strategy": {
+          "mean": 0.08091916259126736,
+          "pwin": 0.7579555172791792,
+          "sd": 0.08182737625041508,
+          "neff": 7.98300114542184,
+          "n": 8,
+          "sw": 7.423153865761557
+        },
+        "route": {
+          "mean": 0.08091916259126736,
+          "pwin": 0.7579555172791792,
+          "sd": 0.08182737625041508,
+          "neff": 7.98300114542184,
+          "n": 8
+        },
+        "symbol": {
+          "mean": 0.08091916259126736,
+          "pwin": 0.7579555172791792,
+          "sd": 0.08182737625041508,
+          "neff": 7.98300114542184,
+          "n": 8
+        },
+        "knn": {
+          "mean": 0.08598537118856066,
+          "pwin": 0.7829632907176376,
+          "sd": 0.07525416334217583,
+          "neff": 7.151196345245487,
+          "n": 8
+        }
+      },
+      "recent5Mean": 0.12684444326809627,
+      "recent6Mean": 0.09200667996836881,
+      "recent5WR": 1.0,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": 0.011322192090325851
+    },
+    {
+      "id": "PENGU_00014",
+      "strategy": "PENGU",
+      "entryTs": 1762682400000,
+      "exitTs": 1762718400000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "gross": 1.0,
+      "layer1Kept": false,
+      "expectedHoldHours": 72.0,
+      "predEV30": 0.08254203337139673,
+      "predWinProb": 0.7661037659204849,
+      "confidence": 0.48412194675061354,
+      "analogs": 8,
+      "opportunityScore": 0.013320136628171565,
+      "layer2Promote": true,
+      "realizedNet30": -0.0828955190177123,
+      "components": {
+        "strategy": {
+          "mean": 0.08091916259126737,
+          "pwin": 0.7579555172791793,
+          "sd": 0.08182737625041508,
+          "neff": 7.983001145421838,
+          "n": 8,
+          "sw": 7.401745885923562
+        },
+        "route": {
+          "mean": 0.08091916259126737,
+          "pwin": 0.7579555172791794,
+          "sd": 0.08182737625041508,
+          "neff": 7.983001145421838,
+          "n": 8
+        },
+        "symbol": {
+          "mean": 0.08091916259126737,
+          "pwin": 0.7579555172791794,
+          "sd": 0.08182737625041508,
+          "neff": 7.983001145421838,
+          "n": 8
+        },
+        "knn": {
+          "mean": 0.08565805890510977,
+          "pwin": 0.7817489738644758,
+          "sd": 0.07603463466993324,
+          "neff": 7.275907570022969,
+          "n": 8
+        }
+      },
+      "recent5Mean": 0.12684444326809627,
+      "recent6Mean": 0.09200667996836881,
+      "recent5WR": 1.0,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": null
+    },
+    {
+      "id": "PENGU_00057",
+      "strategy": "PENGU",
+      "entryTs": 1775152800000,
+      "exitTs": 1775412000000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "gross": 1.0,
+      "layer1Kept": false,
+      "expectedHoldHours": 72.0,
+      "predEV30": 0.034671113946391066,
+      "predWinProb": 0.6548243947029231,
+      "confidence": 0.6949570525909005,
+      "analogs": 23,
+      "opportunityScore": 0.0080316450527424,
+      "layer2Promote": true,
+      "realizedNet30": 0.014511994196356515,
+      "components": {
+        "strategy": {
+          "mean": 0.0353487080630456,
+          "pwin": 0.6589477680765375,
+          "sd": 0.09264323901800807,
+          "neff": 20.06217108038722,
+          "n": 23,
+          "sw": 9.765687536737795
+        },
+        "route": {
+          "mean": 0.0353487080630456,
+          "pwin": 0.6589477680765375,
+          "sd": 0.09264323901800807,
+          "neff": 20.06217108038722,
+          "n": 23
+        },
+        "symbol": {
+          "mean": 0.0353487080630456,
+          "pwin": 0.6589477680765375,
+          "sd": 0.09264323901800807,
+          "neff": 20.06217108038722,
+          "n": 23
+        },
+        "knn": {
+          "mean": 0.03307384176559654,
+          "pwin": 0.6451044909746843,
+          "sd": 0.08832335910953651,
+          "neff": 8.908610956128383,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.0026249279616692655,
+      "recent6Mean": 0.006246809431386352,
+      "recent5WR": 0.4,
+      "recent6WR": 0.5,
+      "activeMaxOpportunity": -0.028028539708527433
+    },
+    {
+      "id": "PENGU_00058",
+      "strategy": "PENGU",
+      "entryTs": 1775433600000,
+      "exitTs": 1775649600000,
+      "symbol": "PENGUUSDT",
+      "side": "LONG",
+      "route": "RECOVERY_V8",
+      "gross": 1.0,
+      "layer1Kept": false,
+      "expectedHoldHours": 120.0,
+      "predEV30": 0.02670599274587538,
+      "predWinProb": 0.6570909259818873,
+      "confidence": 0.7661096238803584,
+      "analogs": 33,
+      "opportunityScore": 0.004091943611578833,
+      "layer2Promote": true,
+      "realizedNet30": 0.05227535033852938,
+      "components": {
+        "strategy": {
+          "mean": 0.027938801904951186,
+          "pwin": 0.6626543094416187,
+          "sd": 0.0653752192545191,
+          "neff": 28.88851078651817,
+          "n": 33,
+          "sw": 16.97397460046597
+        },
+        "route": {
+          "mean": 0.019970757834073403,
+          "pwin": 0.628188301133866,
+          "sd": 0.05375071731880948,
+          "neff": 17.279653779586955,
+          "n": 20
+        },
+        "symbol": {
+          "mean": 0.02793880190495119,
+          "pwin": 0.6626543094416188,
+          "sd": 0.0653752192545191,
+          "neff": 28.88851078651817,
+          "n": 33
+        },
+        "knn": {
+          "mean": 0.033153842731525565,
+          "pwin": 0.6845330357804607,
+          "sd": 0.0680558377698075,
+          "neff": 10.814075492624896,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.042400048836358784,
+      "recent6Mean": 0.02853323129645736,
+      "recent5WR": 0.8,
+      "recent6WR": 0.6666666666666666,
+      "activeMaxOpportunity": null
+    },
+    {
+      "id": "PENGU_00077",
+      "strategy": "PENGU",
+      "entryTs": 1781150400000,
+      "exitTs": 1781409600000,
+      "symbol": "PENGUUSDT",
+      "side": "LONG",
+      "route": "RECOVERY_V8",
+      "gross": 1.0,
+      "layer1Kept": false,
+      "expectedHoldHours": 120.0,
+      "predEV30": 0.03771375850261035,
+      "predWinProb": 0.7901194404125593,
+      "confidence": 0.7937512891016572,
+      "analogs": 47,
+      "opportunityScore": 0.00598706888566311,
+      "layer2Promote": true,
+      "realizedNet30": -0.008447046723479415,
+      "components": {
+        "strategy": {
+          "mean": 0.03827837091783926,
+          "pwin": 0.7910682285378741,
+          "sd": 0.05744379596297768,
+          "neff": 37.75428957630141,
+          "n": 47,
+          "sw": 20.11840190889043
+        },
+        "route": {
+          "mean": 0.035875812124350724,
+          "pwin": 0.8077734172170795,
+          "sd": 0.04448325116390922,
+          "neff": 24.54829248372392,
+          "n": 30
+        },
+        "symbol": {
+          "mean": 0.03827837091783926,
+          "pwin": 0.7910682285378741,
+          "sd": 0.05744379596297768,
+          "neff": 37.75428957630141,
+          "n": 47
+        },
+        "knn": {
+          "mean": 0.03930608301602582,
+          "pwin": 0.7694448477257831,
+          "sd": 0.058178716146835376,
+          "neff": 10.659789922876461,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.05410657776322327,
+      "recent6Mean": 0.05287332840812826,
+      "recent5WR": 1.0,
+      "recent6WR": 1.0,
+      "activeMaxOpportunity": null
+    },
+    {
+      "id": "PENGU_00078",
+      "strategy": "PENGU",
+      "entryTs": 1781474400000,
+      "exitTs": 1781553600000,
+      "symbol": "PENGUUSDT",
+      "side": "LONG",
+      "route": "RECOVERY_V8",
+      "gross": 1.0,
+      "layer1Kept": false,
+      "expectedHoldHours": 120.0,
+      "predEV30": 0.03747880348759654,
+      "predWinProb": 0.7669301812303756,
+      "confidence": 0.80146331376333,
+      "analogs": 48,
+      "opportunityScore": 0.006007577207810754,
+      "layer2Promote": true,
+      "realizedNet30": 0.04154451877427713,
+      "components": {
+        "strategy": {
+          "mean": 0.03601661329836983,
+          "pwin": 0.7527763376627554,
+          "sd": 0.056926517751032926,
+          "neff": 37.98243016128491,
+          "n": 48,
+          "sw": 20.539910483270276
+        },
+        "route": {
+          "mean": 0.03302773858898535,
+          "pwin": 0.7557764314574016,
+          "sd": 0.0443153332033556,
+          "neff": 24.939127289574163,
+          "n": 31
+        },
+        "symbol": {
+          "mean": 0.03601661329836983,
+          "pwin": 0.7527763376627554,
+          "sd": 0.056926517751032926,
+          "neff": 37.98243016128491,
+          "n": 48
+        },
+        "knn": {
+          "mean": 0.044524278782387995,
+          "pwin": 0.7945765349243549,
+          "sd": 0.045282144806665335,
+          "neff": 9.448970821825165,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.04024819681665256,
+      "recent6Mean": 0.043680973682106154,
+      "recent5WR": 0.8,
+      "recent6WR": 0.8333333333333334,
+      "activeMaxOpportunity": null
+    },
+    {
+      "id": "PENGU_00084",
+      "strategy": "PENGU",
+      "entryTs": 1783648800000,
+      "exitTs": 1783908000000,
+      "symbol": "PENGUUSDT",
+      "side": "LONG",
+      "route": "RECOVERY_V8",
+      "gross": 1.0,
+      "layer1Kept": false,
+      "expectedHoldHours": 120.0,
+      "predEV30": 0.029196347674702906,
+      "predWinProb": 0.7100970630048642,
+      "confidence": 0.7919362754466822,
+      "analogs": 52,
+      "opportunityScore": 0.0046243293668301235,
+      "layer2Promote": true,
+      "realizedNet30": -0.06350209596602631,
+      "components": {
+        "strategy": {
+          "mean": 0.03240664026888728,
+          "pwin": 0.7486519602780908,
+          "sd": 0.05752068698333289,
+          "neff": 38.90475493719655,
+          "n": 52,
+          "sw": 20.56090873115026
+        },
+        "route": {
+          "mean": 0.02916136018501151,
+          "pwin": 0.7499279585467826,
+          "sd": 0.04820378094465889,
+          "neff": 26.747575786270257,
+          "n": 35
+        },
+        "symbol": {
+          "mean": 0.03240664026888728,
+          "pwin": 0.7486519602780908,
+          "sd": 0.05752068698333289,
+          "neff": 38.90475493719655,
+          "n": 52
+        },
+        "knn": {
+          "mean": 0.02577970852669857,
+          "pwin": 0.6111040330723713,
+          "sd": 0.06040579583759777,
+          "neff": 8.333564721926713,
+          "n": 12
+        }
+      },
+      "recent5Mean": 0.011708956493507358,
+      "recent6Mean": 0.015111252911917583,
+      "recent5WR": 0.6,
+      "recent6WR": 0.6666666666666666,
+      "activeMaxOpportunity": 0.0016930278730634836
+    }
+  ]
+}

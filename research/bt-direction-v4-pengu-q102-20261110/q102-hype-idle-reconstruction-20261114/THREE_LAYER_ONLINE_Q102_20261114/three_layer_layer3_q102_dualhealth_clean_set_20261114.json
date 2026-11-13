@@ -1,0 +1,87 @@
+{
+  "status": "RESEARCH_ONLY_THREE_LAYER_Q102_DUALHEALTH_CLEAN",
+  "productionMutation": false,
+  "selectionUsesCandidateOwnFutureOutcome": false,
+  "policy": {
+    "layer1": "existing Q102 candidate generation; suppressed routes remain shadow-only unless all later gates pass",
+    "layer2": {
+      "predWinProbMin": 0.6,
+      "predEV30MinExclusive": 0.002,
+      "confidenceMin": 0.45,
+      "analogsMin": 6,
+      "sameRouteCompletedMin": 6,
+      "sameRoutePwinMin": 0.6,
+      "sameRouteMeanNet30MinExclusive": 0.0
+    },
+    "onlineRouteHealth": {
+      "recentCompletedWindows": [
+        5,
+        6
+      ],
+      "bothMeanNet30MinExclusive": 0.002
+    },
+    "layer3": "candidate opportunityScore must exceed max scored baseline active opportunityScore when any exists",
+    "gross": "preserve native candidate gross; cap at 1.0x only if higher",
+    "safety": "existing Shared Risk, gross, Q102 one-slot, symbol ownership and fail-closed gates remain authoritative"
+  },
+  "ids": [
+    "Q102P_00089"
+  ],
+  "candidates": [
+    {
+      "id": "Q102P_00089",
+      "strategy": "Q102",
+      "entryTs": 1772485200000,
+      "exitTs": 1772571600000,
+      "symbol": "UNIUSDT",
+      "side": "SHORT",
+      "route": "UNI|MR72_Z1.5_H24",
+      "gross": 0.75,
+      "layer1Kept": false,
+      "expectedHoldHours": 24.0,
+      "predEV30": 0.03877505525535952,
+      "predWinProb": 0.6391894961775325,
+      "confidence": 0.7277129988421238,
+      "analogs": 106,
+      "opportunityScore": 0.03762281565352898,
+      "layer2Promote": true,
+      "realizedNet30": 0.00941610812095127,
+      "components": {
+        "strategy": {
+          "mean": 0.016237179095134686,
+          "pwin": 0.6166601265807407,
+          "sd": 0.058857634020297256,
+          "neff": 92.77954206165559,
+          "n": 106,
+          "sw": 61.88473880308068
+        },
+        "route": {
+          "mean": 0.04100705623075086,
+          "pwin": 0.612336379815359,
+          "sd": 0.15600768888295086,
+          "neff": 5.6773695499766275,
+          "n": 6
+        },
+        "symbol": {
+          "mean": 0.03904076238338728,
+          "pwin": 0.6774426128036098,
+          "sd": 0.14108241948242028,
+          "neff": 11.444071553385383,
+          "n": 12
+        },
+        "knn": {
+          "mean": 0.046491029422710876,
+          "pwin": 0.6393566769890383,
+          "sd": 0.1615528624121486,
+          "neff": 6.923474243967066,
+          "n": 12
+        }
+      },
+      "recent5MeanNet30": 0.06995449877870205,
+      "recent6MeanNet30": 0.117792950484659,
+      "recent5WinRate": 0.6,
+      "recent6WinRate": 0.6666666666666666,
+      "activeMaxOpportunity": 0.01131675298360795
+    }
+  ]
+}

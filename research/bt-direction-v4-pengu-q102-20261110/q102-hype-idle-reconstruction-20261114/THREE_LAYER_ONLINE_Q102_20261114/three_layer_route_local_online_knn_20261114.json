@@ -1,0 +1,2903 @@
+{
+  "status": "RESEARCH_ONLY_ROUTE_LOCAL_ONLINE_KNN",
+  "productionMutation": false,
+  "selectionUsesCurrentOutcome": false,
+  "policy": {
+    "sameRouteSide": true,
+    "minPool": 10,
+    "k": 12,
+    "halfLifeDays": 90,
+    "predEVMin": 0.002,
+    "pwinMin": 0.6,
+    "neffMin": 5,
+    "confidenceMin": 0.2
+  },
+  "counts": {
+    "scored": 744,
+    "promoted": 141
+  },
+  "metrics": {
+    "promoted": {
+      "n": 141,
+      "wr": 0.41843971631205673,
+      "mean": -0.013883858713914659,
+      "sum": -1.957624078661967,
+      "pf": 0.40057871919374644,
+      "worst": -0.11907686094069515
+    }
+  },
+  "byStrategy": {
+    "Q102": {
+      "metrics": {
+        "n": 1,
+        "wr": 0.0,
+        "mean": -0.02684154965856478,
+        "sum": -0.02684154965856478,
+        "pf": 0.0,
+        "worst": -0.02684154965856478
+      },
+      "routes": {
+        "AVAX|MR24_Z1.5_H24": 1
+      },
+      "ids": [
+        "Q102P_00197"
+      ]
+    },
+    "IDLE": {
+      "metrics": {
+        "n": 128,
+        "wr": 0.4296875,
+        "mean": -0.012397476892473705,
+        "sum": -1.5868770422366343,
+        "pf": 0.419405216484977,
+        "worst": -0.11907686094069515
+      },
+      "routes": {
+        "IDLE_RENDER_RELATIVE_SHORT": 38,
+        "IDLE_DOT_MOMENTUM_SHORT_BTCREL": 8,
+        "IDLE_JUP_RELATIVE_SHORT": 71,
+        "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2": 10,
+        "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100": 1
+      },
+      "ids": [
+        "IDLEP_00067",
+        "IDLEP_00068",
+        "IDLEP_00069",
+        "IDLEP_00070",
+        "IDLEP_00072",
+        "IDLEP_00080",
+        "IDLEP_00090",
+        "IDLEP_00091",
+        "IDLEP_00096",
+        "IDLEP_00099",
+        "IDLEP_00100",
+        "IDLEP_00114",
+        "IDLEP_00120",
+        "IDLEP_00121",
+        "IDLEP_00158",
+        "IDLEP_00164",
+        "IDLEP_00173",
+        "IDLEP_00175",
+        "IDLEP_00178",
+        "IDLEP_00194",
+        "IDLEP_00206",
+        "IDLEP_00207",
+        "IDLEP_00208",
+        "IDLEP_00209",
+        "IDLEP_00211",
+        "IDLEP_00222",
+        "IDLEP_00223",
+        "IDLEP_00224",
+        "IDLEP_00225",
+        "IDLEP_00226",
+        "IDLEP_00230",
+        "IDLEP_00237",
+        "IDLEP_00254",
+        "IDLEP_00258",
+        "IDLEP_00266",
+        "IDLEP_00271",
+        "IDLEP_00277",
+        "IDLEP_00280",
+        "IDLEP_00282",
+        "IDLEP_00283",
+        "IDLEP_00285",
+        "IDLEP_00300",
+        "IDLEP_00301",
+        "IDLEP_00314",
+        "IDLEP_00316",
+        "IDLEP_00342",
+        "IDLEP_00352",
+        "IDLEP_00356",
+        "IDLEP_00357",
+        "IDLEP_00358",
+        "IDLEP_00360",
+        "IDLEP_00367",
+        "IDLEP_00370",
+        "IDLEP_00380",
+        "IDLEP_00385",
+        "IDLEP_00386",
+        "IDLEP_00391",
+        "IDLEP_00393",
+        "IDLEP_00403",
+        "IDLEP_00404",
+        "IDLEP_00406",
+        "IDLEP_00407",
+        "IDLEP_00409",
+        "IDLEP_00410",
+        "IDLEP_00422",
+        "IDLEP_00433",
+        "IDLEP_00442",
+        "IDLEP_00446",
+        "IDLEP_00459",
+        "IDLEP_00477",
+        "IDLEP_00478",
+        "IDLEP_00479",
+        "IDLEP_00480",
+        "IDLEP_00481",
+        "IDLEP_00482",
+        "IDLEP_00503",
+        "IDLEP_00504",
+        "IDLEP_00506",
+        "IDLEP_00507",
+        "IDLEP_00508",
+        "IDLEP_00509",
+        "IDLEP_00510",
+        "IDLEP_00511",
+        "IDLEP_00524",
+        "IDLEP_00525",
+        "IDLEP_00526",
+        "IDLEP_00530",
+        "IDLEP_00531",
+        "IDLEP_00537",
+        "IDLEP_00539",
+        "IDLEP_00546",
+        "IDLEP_00581",
+        "IDLEP_00619",
+        "IDLEP_00628",
+        "IDLEP_00630",
+        "IDLEP_00642",
+        "IDLEP_00643",
+        "IDLEP_00651",
+        "IDLEP_00653",
+        "IDLEP_00661",
+        "IDLEP_00666",
+        "IDLEP_00669",
+        "IDLEP_00670",
+        "IDLEP_00671",
+        "IDLEP_00680",
+        "IDLEP_00683",
+        "IDLEP_00696",
+        "IDLEP_00697",
+        "IDLEP_00708",
+        "IDLEP_00710",
+        "IDLEP_00716",
+        "IDLEP_00738",
+        "IDLEP_00753",
+        "IDLEP_00760",
+        "IDLEP_00800",
+        "IDLEP_00812",
+        "IDLEP_00816",
+        "IDLEP_00820",
+        "IDLEP_00824",
+        "IDLEP_00828",
+        "IDLEP_00832",
+        "IDLEP_00833",
+        "IDLEP_00836",
+        "IDLEP_00837",
+        "IDLEP_00840",
+        "IDLEP_00844",
+        "IDLEP_00845",
+        "IDLEP_00847"
+      ]
+    },
+    "PENGU": {
+      "metrics": {
+        "n": 12,
+        "wr": 0.3333333333333333,
+        "mean": -0.02865879056389734,
+        "sum": -0.3439054867667681,
+        "pf": 0.32010736740290313,
+        "worst": -0.08288861609152902
+      },
+      "routes": {
+        "SHORT_V20": 9,
+        "RECOVERY_V8": 3
+      },
+      "ids": [
+        "PENGU_00021",
+        "PENGU_00032",
+        "PENGU_00034",
+        "PENGU_00035",
+        "PENGU_00057",
+        "PENGU_00070",
+        "PENGU_00077",
+        "PENGU_00078",
+        "PENGU_00083",
+        "PENGU_00086",
+        "PENGU_00088",
+        "PENGU_00101"
+      ]
+    }
+  },
+  "promoted": [
+    {
+      "id": "PENGU_00021",
+      "strategy": "PENGU",
+      "entryTs": 1765029600000,
+      "exitTs": 1765069200000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.05228636723551051,
+        "pwin": 0.6738558958599059,
+        "neff": 10.588296525931755,
+        "n": 12,
+        "avgDistance": 0.950056915560486,
+        "confidence": 0.4249950849946903
+      },
+      "promote": true,
+      "realizedNet30": -0.08284551185547617
+    },
+    {
+      "id": "PENGU_00032",
+      "strategy": "PENGU",
+      "entryTs": 1766059200000,
+      "exitTs": 1766318400000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.053727252453326886,
+        "pwin": 0.6728222376302869,
+        "neff": 10.878770987404318,
+        "n": 12,
+        "avgDistance": 1.303722083651513,
+        "confidence": 0.3632630258275085
+      },
+      "promote": true,
+      "realizedNet30": 0.0025530015110337588
+    },
+    {
+      "id": "PENGU_00034",
+      "strategy": "PENGU",
+      "entryTs": 1766080800000,
+      "exitTs": 1766160000000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.047774173382521615,
+        "pwin": 0.6456550890645671,
+        "neff": 11.141026002795156,
+        "n": 12,
+        "avgDistance": 1.0747752924783154,
+        "confidence": 0.4067111772557196
+      },
+      "promote": true,
+      "realizedNet30": -0.08287713954095417
+    },
+    {
+      "id": "PENGU_00035",
+      "strategy": "PENGU",
+      "entryTs": 1766102400000,
+      "exitTs": 1766156400000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.05953974408559111,
+        "pwin": 0.7349394225931569,
+        "neff": 9.677288876919926,
+        "n": 12,
+        "avgDistance": 1.1580708130928146,
+        "confidence": 0.37102004442921127
+      },
+      "promote": true,
+      "realizedNet30": -0.08288861609152902
+    },
+    {
+      "id": "IDLEP_00067",
+      "strategy": "IDLE",
+      "entryTs": 1768474800000,
+      "exitTs": 1768515900000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01741090117334981,
+        "pwin": 0.9069806073139662,
+        "neff": 9.668722728288618,
+        "n": 10,
+        "avgDistance": 1.7026482854745049,
+        "confidence": 0.2961549874329113
+      },
+      "promote": true,
+      "realizedNet30": 0.01231319417636522
+    },
+    {
+      "id": "IDLEP_00068",
+      "strategy": "IDLE",
+      "entryTs": 1768485600000,
+      "exitTs": 1768516200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.016130990678572175,
+        "pwin": 0.907398263681359,
+        "neff": 8.324710477490571,
+        "n": 10,
+        "avgDistance": 2.2261381797206488,
+        "confidence": 0.23256572939759818
+      },
+      "promote": true,
+      "realizedNet30": 0.041711667101386324
+    },
+    {
+      "id": "IDLEP_00069",
+      "strategy": "IDLE",
+      "entryTs": 1768492800000,
+      "exitTs": 1768536000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.014230193019342781,
+        "pwin": 0.8472722931642429,
+        "neff": 10.414416594391225,
+        "n": 11,
+        "avgDistance": 2.49829972442467,
+        "confidence": 0.23546570186832208
+      },
+      "promote": true,
+      "realizedNet30": 0.01287695522287266
+    },
+    {
+      "id": "IDLEP_00070",
+      "strategy": "IDLE",
+      "entryTs": 1768500000000,
+      "exitTs": 1768543200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.014443946416176174,
+        "pwin": 0.8467018332583603,
+        "neff": 10.514580306250656,
+        "n": 11,
+        "avgDistance": 2.62440589277352,
+        "confidence": 0.22807815898461894
+      },
+      "promote": true,
+      "realizedNet30": -0.006047380122116786
+    },
+    {
+      "id": "IDLEP_00072",
+      "strategy": "IDLE",
+      "entryTs": 1768518000000,
+      "exitTs": 1768561200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.014837987403387745,
+        "pwin": 0.8536152847541939,
+        "neff": 11.700128460288553,
+        "n": 12,
+        "avgDistance": 2.911636893376571,
+        "confidence": 0.21927622574783295
+      },
+      "promote": true,
+      "realizedNet30": -0.023376920326530635
+    },
+    {
+      "id": "IDLEP_00080",
+      "strategy": "IDLE",
+      "entryTs": 1768791600000,
+      "exitTs": 1768834800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.008989864831273373,
+        "pwin": 0.7336503810698124,
+        "neff": 11.77621981006946,
+        "n": 12,
+        "avgDistance": 1.7838064114260808,
+        "confidence": 0.30875776567465524
+      },
+      "promote": true,
+      "realizedNet30": -0.013108547796019856
+    },
+    {
+      "id": "IDLEP_00090",
+      "strategy": "IDLE",
+      "entryTs": 1768856400000,
+      "exitTs": 1768899600000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0055689712515531896,
+        "pwin": 0.6401306674257999,
+        "neff": 11.01516523207709,
+        "n": 12,
+        "avgDistance": 1.4228010486134206,
+        "confidence": 0.34692235517299197
+      },
+      "promote": true,
+      "realizedNet30": 0.0436724634811956
+    },
+    {
+      "id": "IDLEP_00091",
+      "strategy": "IDLE",
+      "entryTs": 1768860000000,
+      "exitTs": 1768903200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0044185342592537695,
+        "pwin": 0.6641053143124144,
+        "neff": 11.474854391276486,
+        "n": 12,
+        "avgDistance": 1.6274563012991843,
+        "confidence": 0.3243767619961801
+      },
+      "promote": true,
+      "realizedNet30": 0.03380519358563791
+    },
+    {
+      "id": "IDLEP_00096",
+      "strategy": "IDLE",
+      "entryTs": 1768939200000,
+      "exitTs": 1768982400000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011091971938298225,
+        "pwin": 0.6579847774580403,
+        "neff": 11.604340919414259,
+        "n": 12,
+        "avgDistance": 1.0677796203214422,
+        "confidence": 0.41369952601051835
+      },
+      "promote": true,
+      "realizedNet30": -0.02191297220250529
+    },
+    {
+      "id": "IDLEP_00099",
+      "strategy": "IDLE",
+      "entryTs": 1768953600000,
+      "exitTs": 1768996800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.012278042153289113,
+        "pwin": 0.7214925815936467,
+        "neff": 11.450948260529925,
+        "n": 12,
+        "avgDistance": 1.2188704166884865,
+        "confidence": 0.383842175229942
+      },
+      "promote": true,
+      "realizedNet30": -0.021084806740506275
+    },
+    {
+      "id": "IDLEP_00100",
+      "strategy": "IDLE",
+      "entryTs": 1768968000000,
+      "exitTs": 1769008800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011471127320856728,
+        "pwin": 0.6493819594310847,
+        "neff": 11.188307837083284,
+        "n": 12,
+        "avgDistance": 1.0068883376437683,
+        "confidence": 0.4210797796600159
+      },
+      "promote": true,
+      "realizedNet30": -0.10316686590885561
+    },
+    {
+      "id": "IDLEP_00114",
+      "strategy": "IDLE",
+      "entryTs": 1769526000000,
+      "exitTs": 1769569200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.008955422858276597,
+        "pwin": 0.7423558210730039,
+        "neff": 11.87241016806167,
+        "n": 12,
+        "avgDistance": 0.8675956798422608,
+        "confidence": 0.46142535440616755
+      },
+      "promote": true,
+      "realizedNet30": -0.049152955418746494
+    },
+    {
+      "id": "IDLEP_00120",
+      "strategy": "IDLE",
+      "entryTs": 1769551200000,
+      "exitTs": 1769594400000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0048965467418684875,
+        "pwin": 0.6058774820776635,
+        "neff": 11.838125494427777,
+        "n": 12,
+        "avgDistance": 0.9548772975382609,
+        "confidence": 0.4404183303904826
+      },
+      "promote": true,
+      "realizedNet30": -0.017480710502942753
+    },
+    {
+      "id": "IDLEP_00121",
+      "strategy": "IDLE",
+      "entryTs": 1769554800000,
+      "exitTs": 1769598000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.010605918332920754,
+        "pwin": 0.672589366051345,
+        "neff": 11.683408596424862,
+        "n": 12,
+        "avgDistance": 1.0583018193987965,
+        "confidence": 0.41652392996548165
+      },
+      "promote": true,
+      "realizedNet30": -0.030331400679507667
+    },
+    {
+      "id": "IDLEP_00158",
+      "strategy": "IDLE",
+      "entryTs": 1770318000000,
+      "exitTs": 1770324300000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.006727095893118229,
+        "pwin": 0.7412167030619243,
+        "neff": 9.69956441509473,
+        "n": 12,
+        "avgDistance": 2.405732622500467,
+        "confidence": 0.23531680590274967
+      },
+      "promote": true,
+      "realizedNet30": 0.01392307692307693
+    },
+    {
+      "id": "IDLEP_00164",
+      "strategy": "IDLE",
+      "entryTs": 1770332400000,
+      "exitTs": 1770337200000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.0036345751335089926,
+        "pwin": 0.7562752880438368,
+        "neff": 9.010813383100846,
+        "n": 12,
+        "avgDistance": 2.6970123147366203,
+        "confidence": 0.2102431757090614
+      },
+      "promote": true,
+      "realizedNet30": 0.07702334264150948
+    },
+    {
+      "id": "IDLEP_00173",
+      "strategy": "IDLE",
+      "entryTs": 1770364800000,
+      "exitTs": 1770408000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0033045533160534326,
+        "pwin": 0.6759711545226554,
+        "neff": 11.592287384848493,
+        "n": 12,
+        "avgDistance": 1.1901949040441702,
+        "confidence": 0.39044413097975844
+      },
+      "promote": true,
+      "realizedNet30": -0.08591080605229594
+    },
+    {
+      "id": "IDLEP_00175",
+      "strategy": "IDLE",
+      "entryTs": 1770368400000,
+      "exitTs": 1770411600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.004381327394168696,
+        "pwin": 0.6930084604357575,
+        "neff": 11.061290315728316,
+        "n": 12,
+        "avgDistance": 1.4741392660811325,
+        "confidence": 0.3402173565166981
+      },
+      "promote": true,
+      "realizedNet30": -0.07784750721867001
+    },
+    {
+      "id": "IDLEP_00178",
+      "strategy": "IDLE",
+      "entryTs": 1770375600000,
+      "exitTs": 1770418800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0047423714886568324,
+        "pwin": 0.6991786365702846,
+        "neff": 11.465942369312572,
+        "n": 12,
+        "avgDistance": 1.1674605997387832,
+        "confidence": 0.39311727233427796
+      },
+      "promote": true,
+      "realizedNet30": -0.06654851153266331
+    },
+    {
+      "id": "IDLEP_00194",
+      "strategy": "IDLE",
+      "entryTs": 1770649200000,
+      "exitTs": 1770692400000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.006187383010073474,
+        "pwin": 0.604599949259019,
+        "neff": 11.498278323907478,
+        "n": 12,
+        "avgDistance": 1.6217001577173642,
+        "confidence": 0.3253084893384559
+      },
+      "promote": true,
+      "realizedNet30": -0.028603967803030414
+    },
+    {
+      "id": "IDLEP_00206",
+      "strategy": "IDLE",
+      "entryTs": 1770732000000,
+      "exitTs": 1770775200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.014029211905722299,
+        "pwin": 0.663389313243082,
+        "neff": 11.758878437277076,
+        "n": 12,
+        "avgDistance": 0.5049315893884178,
+        "confidence": 0.5708666443157026
+      },
+      "promote": true,
+      "realizedNet30": 0.012208742302405335
+    },
+    {
+      "id": "IDLEP_00207",
+      "strategy": "IDLE",
+      "entryTs": 1770739200000,
+      "exitTs": 1770782400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.015552270401299346,
+        "pwin": 0.6259538454431448,
+        "neff": 11.749641984137257,
+        "n": 12,
+        "avgDistance": 0.5357687975453264,
+        "confidence": 0.559262697272889
+      },
+      "promote": true,
+      "realizedNet30": 0.01818502081632649
+    },
+    {
+      "id": "IDLEP_00208",
+      "strategy": "IDLE",
+      "entryTs": 1770742800000,
+      "exitTs": 1770786000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.015735732933239675,
+        "pwin": 0.6260448746149795,
+        "neff": 11.69236074547357,
+        "n": 12,
+        "avgDistance": 0.5357540740729415,
+        "confidence": 0.5583867123541847
+      },
+      "promote": true,
+      "realizedNet30": 0.029134717518745825
+    },
+    {
+      "id": "IDLEP_00209",
+      "strategy": "IDLE",
+      "entryTs": 1770746400000,
+      "exitTs": 1770789600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.018198735918796317,
+        "pwin": 0.763809578645802,
+        "neff": 11.825579551632668,
+        "n": 12,
+        "avgDistance": 0.5576435721788983,
+        "confidence": 0.552547953416729
+      },
+      "promote": true,
+      "realizedNet30": 0.03199506961643829
+    },
+    {
+      "id": "IDLEP_00211",
+      "strategy": "IDLE",
+      "entryTs": 1770764400000,
+      "exitTs": 1770807600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.014370247727005655,
+        "pwin": 0.6883177455759127,
+        "neff": 11.546745572391226,
+        "n": 12,
+        "avgDistance": 0.4860519566620749,
+        "confidence": 0.5747074280753532
+      },
+      "promote": true,
+      "realizedNet30": 0.026388332974683407
+    },
+    {
+      "id": "IDLEP_00222",
+      "strategy": "IDLE",
+      "entryTs": 1771448400000,
+      "exitTs": 1771491600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.012707697418133854,
+        "pwin": 0.7780782432740243,
+        "neff": 11.793639467072685,
+        "n": 12,
+        "avgDistance": 0.4826255280018114,
+        "confidence": 0.5800042470736622
+      },
+      "promote": true,
+      "realizedNet30": -0.0033773823313686968
+    },
+    {
+      "id": "IDLEP_00223",
+      "strategy": "IDLE",
+      "entryTs": 1771452000000,
+      "exitTs": 1771495200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01691702001756706,
+        "pwin": 0.7547267511634466,
+        "neff": 11.74177830600803,
+        "n": 12,
+        "avgDistance": 0.891934933372232,
+        "confidence": 0.4538809098879223
+      },
+      "promote": true,
+      "realizedNet30": -0.007977023400915422
+    },
+    {
+      "id": "IDLEP_00224",
+      "strategy": "IDLE",
+      "entryTs": 1771470000000,
+      "exitTs": 1771513200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0148174595581977,
+        "pwin": 0.7225992761834573,
+        "neff": 8.542750285682377,
+        "n": 12,
+        "avgDistance": 2.305091691637134,
+        "confidence": 0.2297064133302863
+      },
+      "promote": true,
+      "realizedNet30": 0.012865549210356018
+    },
+    {
+      "id": "IDLEP_00225",
+      "strategy": "IDLE",
+      "entryTs": 1771480800000,
+      "exitTs": 1771524000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01937878056730402,
+        "pwin": 0.8628527557231888,
+        "neff": 11.693895488600234,
+        "n": 12,
+        "avgDistance": 0.4704954371476184,
+        "confidence": 0.5831919506892054
+      },
+      "promote": true,
+      "realizedNet30": 0.01625999186562296
+    },
+    {
+      "id": "IDLEP_00226",
+      "strategy": "IDLE",
+      "entryTs": 1771484400000,
+      "exitTs": 1771527600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.012879917642140418,
+        "pwin": 0.7031771184490404,
+        "neff": 10.389582150536564,
+        "n": 12,
+        "avgDistance": 1.8370311316072592,
+        "confidence": 0.29009145601228553
+      },
+      "promote": true,
+      "realizedNet30": 0.017557715009772087
+    },
+    {
+      "id": "IDLEP_00230",
+      "strategy": "IDLE",
+      "entryTs": 1771524000000,
+      "exitTs": 1771567200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.02178879001756471,
+        "pwin": 0.9060315480540567,
+        "neff": 11.83628745711107,
+        "n": 12,
+        "avgDistance": 0.4111691613096995,
+        "confidence": 0.6100765381577767
+      },
+      "promote": true,
+      "realizedNet30": -0.019921925395874913
+    },
+    {
+      "id": "IDLEP_00237",
+      "strategy": "IDLE",
+      "entryTs": 1771833600000,
+      "exitTs": 1771876800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.014108824670144416,
+        "pwin": 0.6606710535691138,
+        "neff": 11.696625676932397,
+        "n": 12,
+        "avgDistance": 0.529645939686059,
+        "confidence": 0.5606826197783404
+      },
+      "promote": true,
+      "realizedNet30": 0.0057205367513735944
+    },
+    {
+      "id": "IDLEP_00254",
+      "strategy": "IDLE",
+      "entryTs": 1772287200000,
+      "exitTs": 1772316600000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.023712102159930578,
+        "pwin": 0.8738879341717436,
+        "neff": 10.799623323102846,
+        "n": 12,
+        "avgDistance": 0.4765360361153081,
+        "confidence": 0.5653033272861887
+      },
+      "promote": true,
+      "realizedNet30": -0.10403537259894455
+    },
+    {
+      "id": "IDLEP_00258",
+      "strategy": "IDLE",
+      "entryTs": 1772294400000,
+      "exitTs": 1772316300000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.016491343649476593,
+        "pwin": 0.820264588474808,
+        "neff": 10.420095531064204,
+        "n": 12,
+        "avgDistance": 0.521105538838871,
+        "confidence": 0.5416431260444889
+      },
+      "promote": true,
+      "realizedNet30": -0.10300000000000009
+    },
+    {
+      "id": "IDLEP_00266",
+      "strategy": "IDLE",
+      "entryTs": 1772535600000,
+      "exitTs": 1772578800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01078929124470952,
+        "pwin": 0.6156343816607375,
+        "neff": 11.695349782628783,
+        "n": 12,
+        "avgDistance": 0.6470612524730363,
+        "confidence": 0.5206944288345142
+      },
+      "promote": true,
+      "realizedNet30": -0.024297393780303055
+    },
+    {
+      "id": "IDLEP_00271",
+      "strategy": "IDLE",
+      "entryTs": 1772823600000,
+      "exitTs": 1772866800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.010583027442817965,
+        "pwin": 0.6750777952410223,
+        "neff": 11.502315502795373,
+        "n": 12,
+        "avgDistance": 0.6488724285084835,
+        "confidence": 0.5172991396752329
+      },
+      "promote": true,
+      "realizedNet30": -0.009909162568181834
+    },
+    {
+      "id": "IDLEP_00277",
+      "strategy": "IDLE",
+      "entryTs": 1773093600000,
+      "exitTs": 1773136800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.010547884904064221,
+        "pwin": 0.674336869124063,
+        "neff": 10.96399091669467,
+        "n": 12,
+        "avgDistance": 1.3269562748263009,
+        "confidence": 0.36062467414026195
+      },
+      "promote": true,
+      "realizedNet30": -0.09162916634282192
+    },
+    {
+      "id": "IDLEP_00280",
+      "strategy": "IDLE",
+      "entryTs": 1773104400000,
+      "exitTs": 1773135600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.022073775794069987,
+        "pwin": 0.7817636309419745,
+        "neff": 11.721735745010742,
+        "n": 12,
+        "avgDistance": 0.9929340146947685,
+        "confidence": 0.43064165453631714
+      },
+      "promote": true,
+      "realizedNet30": -0.10312149493433405
+    },
+    {
+      "id": "IDLEP_00282",
+      "strategy": "IDLE",
+      "entryTs": 1773212400000,
+      "exitTs": 1773255600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.018146382176881623,
+        "pwin": 0.7608000361430327,
+        "neff": 11.930919751972906,
+        "n": 12,
+        "avgDistance": 0.48156225225633403,
+        "confidence": 0.5825590826369476
+      },
+      "promote": true,
+      "realizedNet30": -0.011443588179068258
+    },
+    {
+      "id": "IDLEP_00283",
+      "strategy": "IDLE",
+      "entryTs": 1773237600000,
+      "exitTs": 1773280800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01366039206228005,
+        "pwin": 0.8370437895703021,
+        "neff": 11.852827699337444,
+        "n": 12,
+        "avgDistance": 0.7398040492231065,
+        "confidence": 0.49505808922133
+      },
+      "promote": true,
+      "realizedNet30": 0.008843210475045073
+    },
+    {
+      "id": "IDLEP_00285",
+      "strategy": "IDLE",
+      "entryTs": 1773633600000,
+      "exitTs": 1773676800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01291583017805182,
+        "pwin": 0.6033088572643271,
+        "neff": 11.655818582033039,
+        "n": 12,
+        "avgDistance": 0.8139100679659187,
+        "confidence": 0.4722805346399469
+      },
+      "promote": true,
+      "realizedNet30": 0.010944413092070233
+    },
+    {
+      "id": "IDLEP_00300",
+      "strategy": "IDLE",
+      "entryTs": 1774252800000,
+      "exitTs": 1774296000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.014738534717572395,
+        "pwin": 0.6608016809286944,
+        "neff": 11.64108182815772,
+        "n": 12,
+        "avgDistance": 0.4314519270903187,
+        "confidence": 0.5982191523006387
+      },
+      "promote": true,
+      "realizedNet30": -0.050270529682440813
+    },
+    {
+      "id": "IDLEP_00301",
+      "strategy": "IDLE",
+      "entryTs": 1774494000000,
+      "exitTs": 1774537200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.015702586631926085,
+        "pwin": 0.6515238997986466,
+        "neff": 11.327008339792968,
+        "n": 12,
+        "avgDistance": 0.5827161121633694,
+        "confidence": 0.5361673631639425
+      },
+      "promote": true,
+      "realizedNet30": 0.013160005160026186
+    },
+    {
+      "id": "PENGU_00057",
+      "strategy": "PENGU",
+      "entryTs": 1775152800000,
+      "exitTs": 1775412000000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.03103099462935773,
+        "pwin": 0.6326731234629351,
+        "neff": 8.908610956128383,
+        "n": 12,
+        "avgDistance": 0.751947818794435,
+        "confidence": 0.4414773134267702
+      },
+      "promote": true,
+      "realizedNet30": 0.014511994196356515
+    },
+    {
+      "id": "IDLEP_00314",
+      "strategy": "IDLE",
+      "entryTs": 1775692800000,
+      "exitTs": 1775736000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.013719448258396227,
+        "pwin": 0.7580328127555108,
+        "neff": 11.793763639168883,
+        "n": 12,
+        "avgDistance": 0.4273438860885061,
+        "confidence": 0.6024700916354446
+      },
+      "promote": true,
+      "realizedNet30": -0.007881453889585988
+    },
+    {
+      "id": "IDLEP_00316",
+      "strategy": "IDLE",
+      "entryTs": 1775728800000,
+      "exitTs": 1775772000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.013815579303462767,
+        "pwin": 0.7039290997446876,
+        "neff": 11.380202350105595,
+        "n": 12,
+        "avgDistance": 0.4492444836911634,
+        "confidence": 0.5864690584495263
+      },
+      "promote": true,
+      "realizedNet30": -0.023449338235294045
+    },
+    {
+      "id": "IDLEP_00342",
+      "strategy": "IDLE",
+      "entryTs": 1776524400000,
+      "exitTs": 1776549000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.005730589749890694,
+        "pwin": 0.6120759771641303,
+        "neff": 10.762930631613417,
+        "n": 12,
+        "avgDistance": 0.7068486771798984,
+        "confidence": 0.48843034969439825
+      },
+      "promote": true,
+      "realizedNet30": 0.016988897981451184
+    },
+    {
+      "id": "IDLEP_00352",
+      "strategy": "IDLE",
+      "entryTs": 1776657600000,
+      "exitTs": 1776700800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.009316339360961835,
+        "pwin": 0.6337224095325688,
+        "neff": 11.633960502908998,
+        "n": 12,
+        "avgDistance": 0.49350337929346083,
+        "confidence": 0.5732503450181078
+      },
+      "promote": true,
+      "realizedNet30": 0.007201420959147483
+    },
+    {
+      "id": "IDLEP_00356",
+      "strategy": "IDLE",
+      "entryTs": 1777485600000,
+      "exitTs": 1777528800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.017807259140468615,
+        "pwin": 0.7613491371525902,
+        "neff": 11.97536234464133,
+        "n": 12,
+        "avgDistance": 0.77301253437022,
+        "confidence": 0.4873670284107136
+      },
+      "promote": true,
+      "realizedNet30": -0.01509278658875907
+    },
+    {
+      "id": "IDLEP_00357",
+      "strategy": "IDLE",
+      "entryTs": 1777507200000,
+      "exitTs": 1777550400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.010012543210794731,
+        "pwin": 0.6091408220021916,
+        "neff": 11.497667634713144,
+        "n": 12,
+        "avgDistance": 0.5283342673213195,
+        "confidence": 0.5580234372009996
+      },
+      "promote": true,
+      "realizedNet30": 0.01867330987858714
+    },
+    {
+      "id": "IDLEP_00358",
+      "strategy": "IDLE",
+      "entryTs": 1777521600000,
+      "exitTs": 1777564800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01139254291217181,
+        "pwin": 0.6111107742325034,
+        "neff": 11.576985023431032,
+        "n": 12,
+        "avgDistance": 0.5854763957266526,
+        "confidence": 0.5391306039554803
+      },
+      "promote": true,
+      "realizedNet30": 0.01472794117647061
+    },
+    {
+      "id": "IDLEP_00360",
+      "strategy": "IDLE",
+      "entryTs": 1778425200000,
+      "exitTs": 1778444100000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.016588661081195923,
+        "pwin": 0.7556348770969334,
+        "neff": 11.429130639863486,
+        "n": 12,
+        "avgDistance": 0.5777499120321558,
+        "confidence": 0.5394744667151585
+      },
+      "promote": true,
+      "realizedNet30": -0.11907686094069515
+    },
+    {
+      "id": "IDLEP_00367",
+      "strategy": "IDLE",
+      "entryTs": 1778598000000,
+      "exitTs": 1778641200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.010481149212786752,
+        "pwin": 0.6691409938359341,
+        "neff": 10.792230156647449,
+        "n": 12,
+        "avgDistance": 0.4938504128378296,
+        "confidence": 0.5586147770907522
+      },
+      "promote": true,
+      "realizedNet30": -0.05700843340611358
+    },
+    {
+      "id": "IDLEP_00370",
+      "strategy": "IDLE",
+      "entryTs": 1778612400000,
+      "exitTs": 1778655600000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.012408237873364989,
+        "pwin": 0.8463180024137177,
+        "neff": 10.987952242809456,
+        "n": 12,
+        "avgDistance": 0.5073577062010669,
+        "confidence": 0.5571331183566327
+      },
+      "promote": true,
+      "realizedNet30": -0.028257261904762035
+    },
+    {
+      "id": "PENGU_00070",
+      "strategy": "PENGU",
+      "entryTs": 1778673600000,
+      "exitTs": 1778922000000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.03483787405333279,
+        "pwin": 0.6023799776818777,
+        "neff": 8.548449311703482,
+        "n": 12,
+        "avgDistance": 0.5849652463407344,
+        "confidence": 0.47914575513164936
+      },
+      "promote": true,
+      "realizedNet30": 0.10330822771213755
+    },
+    {
+      "id": "IDLEP_00380",
+      "strategy": "IDLE",
+      "entryTs": 1778853600000,
+      "exitTs": 1778940000000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.006077734880519039,
+        "pwin": 0.6778469069807496,
+        "neff": 10.059522363687208,
+        "n": 12,
+        "avgDistance": 0.6630198774722805,
+        "confidence": 0.4888629806521761
+      },
+      "promote": true,
+      "realizedNet30": 0.0166814728682172
+    },
+    {
+      "id": "IDLEP_00385",
+      "strategy": "IDLE",
+      "entryTs": 1778864400000,
+      "exitTs": 1778907600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.009246119002957147,
+        "pwin": 0.6544860708400981,
+        "neff": 11.22939700893226,
+        "n": 12,
+        "avgDistance": 0.5425401257531487,
+        "confidence": 0.5485222191013579
+      },
+      "promote": true,
+      "realizedNet30": 0.0023504917061611353
+    },
+    {
+      "id": "IDLEP_00386",
+      "strategy": "IDLE",
+      "entryTs": 1778868000000,
+      "exitTs": 1778911200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011236192782704126,
+        "pwin": 0.6560823076097777,
+        "neff": 11.669907542217116,
+        "n": 12,
+        "avgDistance": 0.7421424873271363,
+        "confidence": 0.49192909276870617
+      },
+      "promote": true,
+      "realizedNet30": 0.0032923177083332865
+    },
+    {
+      "id": "IDLEP_00391",
+      "strategy": "IDLE",
+      "entryTs": 1778950800000,
+      "exitTs": 1778994000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.017640635578399268,
+        "pwin": 0.7053022891618361,
+        "neff": 10.944885225201682,
+        "n": 12,
+        "avgDistance": 0.7220013818362524,
+        "confidence": 0.4870175332791782
+      },
+      "promote": true,
+      "realizedNet30": 0.005601892430278877
+    },
+    {
+      "id": "IDLEP_00393",
+      "strategy": "IDLE",
+      "entryTs": 1778961600000,
+      "exitTs": 1779004800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01661978744140914,
+        "pwin": 0.7541816851323687,
+        "neff": 10.393592458436277,
+        "n": 12,
+        "avgDistance": 0.4662924299039413,
+        "confidence": 0.5613592080928642
+      },
+      "promote": true,
+      "realizedNet30": -0.006358084919839767
+    },
+    {
+      "id": "IDLEP_00403",
+      "strategy": "IDLE",
+      "entryTs": 1779526800000,
+      "exitTs": 1779569100000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.012347817444582578,
+        "pwin": 0.6565602895794996,
+        "neff": 11.113166187450178,
+        "n": 12,
+        "avgDistance": 1.885264846429514,
+        "confidence": 0.292211473101707
+      },
+      "promote": true,
+      "realizedNet30": -0.10769219573234978
+    },
+    {
+      "id": "IDLEP_00404",
+      "strategy": "IDLE",
+      "entryTs": 1779526800000,
+      "exitTs": 1779568800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0036708812437140272,
+        "pwin": 0.7606229693880163,
+        "neff": 11.36682923675717,
+        "n": 12,
+        "avgDistance": 1.2004333751001395,
+        "confidence": 0.38610676254304416
+      },
+      "promote": true,
+      "realizedNet30": -0.10284283098591558
+    },
+    {
+      "id": "IDLEP_00406",
+      "strategy": "IDLE",
+      "entryTs": 1779537600000,
+      "exitTs": 1779575700000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.009104323500217492,
+        "pwin": 0.6762280214910298,
+        "neff": 10.93828881615571,
+        "n": 12,
+        "avgDistance": 1.5120995860041537,
+        "confidence": 0.3337715504309084
+      },
+      "promote": true,
+      "realizedNet30": -0.10380591181061405
+    },
+    {
+      "id": "IDLEP_00407",
+      "strategy": "IDLE",
+      "entryTs": 1779544800000,
+      "exitTs": 1779588000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.013062305107929894,
+        "pwin": 0.6810580864921834,
+        "neff": 11.021956604807263,
+        "n": 12,
+        "avgDistance": 1.295028817145081,
+        "confidence": 0.36631533679803385
+      },
+      "promote": true,
+      "realizedNet30": -0.08073004125838074
+    },
+    {
+      "id": "IDLEP_00409",
+      "strategy": "IDLE",
+      "entryTs": 1779552000000,
+      "exitTs": 1779595200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011568606524529481,
+        "pwin": 0.6198345014782854,
+        "neff": 10.582835916984612,
+        "n": 12,
+        "avgDistance": 0.634708146090512,
+        "confidence": 0.5068847879841427
+      },
+      "promote": true,
+      "realizedNet30": -0.06344568482688412
+    },
+    {
+      "id": "IDLEP_00410",
+      "strategy": "IDLE",
+      "entryTs": 1779552000000,
+      "exitTs": 1779595200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.00988141597024783,
+        "pwin": 0.6257123325543716,
+        "neff": 11.055114666160765,
+        "n": 12,
+        "avgDistance": 0.4638995792836596,
+        "confidence": 0.5748906284512757
+      },
+      "promote": true,
+      "realizedNet30": -0.05184524760383399
+    },
+    {
+      "id": "IDLEP_00422",
+      "strategy": "IDLE",
+      "entryTs": 1779919200000,
+      "exitTs": 1779962400000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.0057368919575982716,
+        "pwin": 0.6779112681554015,
+        "neff": 11.132252931513438,
+        "n": 12,
+        "avgDistance": 1.0022691867175018,
+        "confidence": 0.42132486390318774
+      },
+      "promote": true,
+      "realizedNet30": 0.015787143885669416
+    },
+    {
+      "id": "IDLEP_00433",
+      "strategy": "IDLE",
+      "entryTs": 1779955200000,
+      "exitTs": 1779982200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.005512190006667183,
+        "pwin": 0.7660415701290915,
+        "neff": 10.069509181989892,
+        "n": 12,
+        "avgDistance": 0.75550948263492,
+        "confidence": 0.4632842361201277
+      },
+      "promote": true,
+      "realizedNet30": 0.014918175037294881
+    },
+    {
+      "id": "IDLEP_00442",
+      "strategy": "IDLE",
+      "entryTs": 1779998400000,
+      "exitTs": 1780041600000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.008407434504301566,
+        "pwin": 0.7919842920321628,
+        "neff": 10.67160641325322,
+        "n": 12,
+        "avgDistance": 0.8628942590400609,
+        "confidence": 0.44614758484284167
+      },
+      "promote": true,
+      "realizedNet30": -0.04326337752525257
+    },
+    {
+      "id": "IDLEP_00446",
+      "strategy": "IDLE",
+      "entryTs": 1780092000000,
+      "exitTs": 1780135200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.004732064417692944,
+        "pwin": 0.620218274826611,
+        "neff": 10.295588825335136,
+        "n": 12,
+        "avgDistance": 0.7425013097292527,
+        "confidence": 0.4707048583704286
+      },
+      "promote": true,
+      "realizedNet30": -0.015609899286078564
+    },
+    {
+      "id": "IDLEP_00459",
+      "strategy": "IDLE",
+      "entryTs": 1780459200000,
+      "exitTs": 1780502400000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.009557781225956227,
+        "pwin": 0.6287662322505236,
+        "neff": 10.605088434395695,
+        "n": 12,
+        "avgDistance": 2.3037767163947716,
+        "confidence": 0.25099854922636056
+      },
+      "promote": true,
+      "realizedNet30": -0.03454336462941226
+    },
+    {
+      "id": "IDLEP_00477",
+      "strategy": "IDLE",
+      "entryTs": 1780588800000,
+      "exitTs": 1780597800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011815024580730171,
+        "pwin": 0.8903996918801022,
+        "neff": 9.835210062798312,
+        "n": 12,
+        "avgDistance": 1.2031506619625107,
+        "confidence": 0.3657784513282888
+      },
+      "promote": true,
+      "realizedNet30": 0.014766484138972729
+    },
+    {
+      "id": "IDLEP_00478",
+      "strategy": "IDLE",
+      "entryTs": 1780592400000,
+      "exitTs": 1780635600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.009710976155068688,
+        "pwin": 0.6698870336026755,
+        "neff": 10.777758729865615,
+        "n": 12,
+        "avgDistance": 1.4632303932182518,
+        "confidence": 0.33861519170826204
+      },
+      "promote": true,
+      "realizedNet30": 0.04743158464034614
+    },
+    {
+      "id": "IDLEP_00479",
+      "strategy": "IDLE",
+      "entryTs": 1780592400000,
+      "exitTs": 1780597800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.012311864400945267,
+        "pwin": 0.9217287685174393,
+        "neff": 10.415063480044662,
+        "n": 12,
+        "avgDistance": 1.081589268997089,
+        "confidence": 0.3957306158651276
+      },
+      "promote": true,
+      "realizedNet30": 0.01474140861027182
+    },
+    {
+      "id": "IDLEP_00480",
+      "strategy": "IDLE",
+      "entryTs": 1780596000000,
+      "exitTs": 1780609800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.012935520722469663,
+        "pwin": 0.9223040147634703,
+        "neff": 10.450072894182867,
+        "n": 12,
+        "avgDistance": 1.0526871873546588,
+        "confidence": 0.4018020980793948
+      },
+      "promote": true,
+      "realizedNet30": 0.031927180605438685
+    },
+    {
+      "id": "IDLEP_00481",
+      "strategy": "IDLE",
+      "entryTs": 1780599600000,
+      "exitTs": 1780609800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.015353862821582177,
+        "pwin": 0.9253062516029292,
+        "neff": 10.677179346607033,
+        "n": 12,
+        "avgDistance": 1.0026353462995383,
+        "confidence": 0.41509431926091606
+      },
+      "promote": true,
+      "realizedNet30": 0.03782023839877621
+    },
+    {
+      "id": "IDLEP_00482",
+      "strategy": "IDLE",
+      "entryTs": 1780603200000,
+      "exitTs": 1780646400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.013150396704385704,
+        "pwin": 0.6602326698947407,
+        "neff": 10.525566009927728,
+        "n": 12,
+        "avgDistance": 1.3534677093195608,
+        "confidence": 0.3513814653339181
+      },
+      "promote": true,
+      "realizedNet30": 0.11653188965884852
+    },
+    {
+      "id": "IDLEP_00503",
+      "strategy": "IDLE",
+      "entryTs": 1780693200000,
+      "exitTs": 1780736400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.024748173936875593,
+        "pwin": 0.7373539349612477,
+        "neff": 9.728663081064816,
+        "n": 12,
+        "avgDistance": 1.1609605236536835,
+        "confidence": 0.3713102675249346
+      },
+      "promote": true,
+      "realizedNet30": 0.02073490683229816
+    },
+    {
+      "id": "IDLEP_00504",
+      "strategy": "IDLE",
+      "entryTs": 1780696800000,
+      "exitTs": 1780740000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.042266862312800815,
+        "pwin": 0.8503568661391491,
+        "neff": 11.07427163836327,
+        "n": 12,
+        "avgDistance": 1.211879981157254,
+        "confidence": 0.3807110470500795
+      },
+      "promote": true,
+      "realizedNet30": 0.03407738728866631
+    },
+    {
+      "id": "IDLEP_00506",
+      "strategy": "IDLE",
+      "entryTs": 1780707600000,
+      "exitTs": 1780750800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.008277884059423282,
+        "pwin": 0.607863443733396,
+        "neff": 10.347118171255007,
+        "n": 12,
+        "avgDistance": 1.1476507640051385,
+        "confidence": 0.3826233594745996
+      },
+      "promote": true,
+      "realizedNet30": 0.020415990566037844
+    },
+    {
+      "id": "IDLEP_00507",
+      "strategy": "IDLE",
+      "entryTs": 1780718400000,
+      "exitTs": 1780761600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.029371886764649555,
+        "pwin": 0.8145674141495608,
+        "neff": 10.896074655468109,
+        "n": 12,
+        "avgDistance": 1.0407606267616945,
+        "confidence": 0.4103013656926189
+      },
+      "promote": true,
+      "realizedNet30": -0.00479354760362695
+    },
+    {
+      "id": "IDLEP_00508",
+      "strategy": "IDLE",
+      "entryTs": 1780722000000,
+      "exitTs": 1780765200000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.008175827174787912,
+        "pwin": 0.7358406827720163,
+        "neff": 10.932548006969848,
+        "n": 12,
+        "avgDistance": 1.109904929734468,
+        "confidence": 0.397322520657889
+      },
+      "promote": true,
+      "realizedNet30": -0.03488735586162729
+    },
+    {
+      "id": "IDLEP_00509",
+      "strategy": "IDLE",
+      "entryTs": 1780725600000,
+      "exitTs": 1780768800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.022773469609008803,
+        "pwin": 0.7101816043224811,
+        "neff": 10.170960572421686,
+        "n": 12,
+        "avgDistance": 1.00956911928733,
+        "confidence": 0.40627125196954955
+      },
+      "promote": true,
+      "realizedNet30": 0.010819625407166064
+    },
+    {
+      "id": "IDLEP_00510",
+      "strategy": "IDLE",
+      "entryTs": 1780725600000,
+      "exitTs": 1780768800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.02015556165249385,
+        "pwin": 0.8497623832120476,
+        "neff": 11.629616877770454,
+        "n": 12,
+        "avgDistance": 1.0947838599237585,
+        "confidence": 0.40865655339808965
+      },
+      "promote": true,
+      "realizedNet30": 0.019935158656808373
+    },
+    {
+      "id": "IDLEP_00511",
+      "strategy": "IDLE",
+      "entryTs": 1780743600000,
+      "exitTs": 1780786800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.03177718023176035,
+        "pwin": 0.8340633063079728,
+        "neff": 10.78080888814802,
+        "n": 12,
+        "avgDistance": 0.8697445708405162,
+        "confidence": 0.4461419847197685
+      },
+      "promote": true,
+      "realizedNet30": -0.0048173966535433035
+    },
+    {
+      "id": "IDLEP_00524",
+      "strategy": "IDLE",
+      "entryTs": 1781143200000,
+      "exitTs": 1781186400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.021562902167458948,
+        "pwin": 0.8070162789365334,
+        "neff": 9.968978796663212,
+        "n": 12,
+        "avgDistance": 0.6564814557753184,
+        "confidence": 0.4890760115789031
+      },
+      "promote": true,
+      "realizedNet30": -0.034055880265428114
+    },
+    {
+      "id": "PENGU_00077",
+      "strategy": "PENGU",
+      "entryTs": 1781150400000,
+      "exitTs": 1781409600000,
+      "symbol": "PENGUUSDT",
+      "side": "LONG",
+      "route": "RECOVERY_V8",
+      "pred": {
+        "ev": 0.02743665420516048,
+        "pwin": 0.7275124616193198,
+        "neff": 11.202287860181912,
+        "n": 12,
+        "avgDistance": 0.6697450092420302,
+        "confidence": 0.506317242843741
+      },
+      "promote": true,
+      "realizedNet30": -0.008447046723479415
+    },
+    {
+      "id": "IDLEP_00525",
+      "strategy": "IDLE",
+      "entryTs": 1781182800000,
+      "exitTs": 1781226000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.008061032029056555,
+        "pwin": 0.604410287427773,
+        "neff": 10.584711987311112,
+        "n": 12,
+        "avgDistance": 0.6101806794948629,
+        "confidence": 0.5146393100974536
+      },
+      "promote": true,
+      "realizedNet30": -0.05491483772493567
+    },
+    {
+      "id": "PENGU_00078",
+      "strategy": "PENGU",
+      "entryTs": 1781474400000,
+      "exitTs": 1781553600000,
+      "symbol": "PENGUUSDT",
+      "side": "LONG",
+      "route": "RECOVERY_V8",
+      "pred": {
+        "ev": 0.03877731361619625,
+        "pwin": 0.8077937846154891,
+        "neff": 8.990128620475467,
+        "n": 12,
+        "avgDistance": 0.8468639784565095,
+        "confidence": 0.4204437610705093
+      },
+      "promote": true,
+      "realizedNet30": 0.04154451877427713
+    },
+    {
+      "id": "IDLEP_00526",
+      "strategy": "IDLE",
+      "entryTs": 1781611200000,
+      "exitTs": 1781633100000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.005493297771664776,
+        "pwin": 0.6366986066897306,
+        "neff": 9.747457567999293,
+        "n": 12,
+        "avgDistance": 0.5265711613353194,
+        "confidence": 0.5260186281273622
+      },
+      "promote": true,
+      "realizedNet30": 0.022438201878855816
+    },
+    {
+      "id": "IDLEP_00530",
+      "strategy": "IDLE",
+      "entryTs": 1781629200000,
+      "exitTs": 1781672400000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.010908908928105528,
+        "pwin": 0.6996073145298025,
+        "neff": 10.477447038211418,
+        "n": 12,
+        "avgDistance": 0.5293242504807202,
+        "confidence": 0.5398277317312828
+      },
+      "promote": true,
+      "realizedNet30": -0.029386250314136098
+    },
+    {
+      "id": "IDLEP_00531",
+      "strategy": "IDLE",
+      "entryTs": 1781632800000,
+      "exitTs": 1781676000000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.004422234237093656,
+        "pwin": 0.6264327085390923,
+        "neff": 10.68522170693177,
+        "n": 12,
+        "avgDistance": 0.4954732715139201,
+        "confidence": 0.5560169933422267
+      },
+      "promote": true,
+      "realizedNet30": -0.020527389423298775
+    },
+    {
+      "id": "IDLEP_00537",
+      "strategy": "IDLE",
+      "entryTs": 1781762400000,
+      "exitTs": 1781805600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.022318517554303308,
+        "pwin": 0.6492424038783143,
+        "neff": 9.693338822338585,
+        "n": 12,
+        "avgDistance": 0.6413495790032128,
+        "confidence": 0.4881470625082797
+      },
+      "promote": true,
+      "realizedNet30": 0.005967421850053921
+    },
+    {
+      "id": "IDLEP_00539",
+      "strategy": "IDLE",
+      "entryTs": 1781766000000,
+      "exitTs": 1781809200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.019923007290170033,
+        "pwin": 0.6587357293001496,
+        "neff": 9.731655058923835,
+        "n": 12,
+        "avgDistance": 0.6347088941667467,
+        "confidence": 0.49090413028159424
+      },
+      "promote": true,
+      "realizedNet30": -0.006463479730021562
+    },
+    {
+      "id": "IDLEP_00546",
+      "strategy": "IDLE",
+      "entryTs": 1782108000000,
+      "exitTs": 1782151200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.00686103081356839,
+        "pwin": 0.6062896661652617,
+        "neff": 10.247114333828941,
+        "n": 12,
+        "avgDistance": 0.6163390150733076,
+        "confidence": 0.5065430908864692
+      },
+      "promote": true,
+      "realizedNet30": 0.012581760557919645
+    },
+    {
+      "id": "IDLEP_00581",
+      "strategy": "IDLE",
+      "entryTs": 1782615600000,
+      "exitTs": 1782658800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.004728560977653085,
+        "pwin": 0.7039903503883472,
+        "neff": 9.779957604055918,
+        "n": 12,
+        "avgDistance": 0.4009797384850747,
+        "confidence": 0.5739333834343107
+      },
+      "promote": true,
+      "realizedNet30": 0.02152154543368529
+    },
+    {
+      "id": "PENGU_00083",
+      "strategy": "PENGU",
+      "entryTs": 1783357200000,
+      "exitTs": 1783476000000,
+      "symbol": "PENGUUSDT",
+      "side": "LONG",
+      "route": "RECOVERY_V8",
+      "pred": {
+        "ev": 0.039074809213709594,
+        "pwin": 0.8320274817390259,
+        "neff": 9.43684179136237,
+        "n": 12,
+        "avgDistance": 0.5864738193794363,
+        "confidence": 0.49955944102012073
+      },
+      "promote": true,
+      "realizedNet30": -0.06339321946169778
+    },
+    {
+      "id": "IDLEP_00619",
+      "strategy": "IDLE",
+      "entryTs": 1783609200000,
+      "exitTs": 1783652400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.015395600533151439,
+        "pwin": 0.8136521865824095,
+        "neff": 11.028617964074227,
+        "n": 12,
+        "avgDistance": 1.729542959731073,
+        "confidence": 0.3080665967697996
+      },
+      "promote": true,
+      "realizedNet30": -0.026011188343765097
+    },
+    {
+      "id": "IDLEP_00628",
+      "strategy": "IDLE",
+      "entryTs": 1783695600000,
+      "exitTs": 1783738800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.017306856378621335,
+        "pwin": 0.830750084985397,
+        "neff": 10.712466963606836,
+        "n": 12,
+        "avgDistance": 0.7251496857891987,
+        "confidence": 0.48243461029191187
+      },
+      "promote": true,
+      "realizedNet30": -0.014765138589743428
+    },
+    {
+      "id": "IDLEP_00630",
+      "strategy": "IDLE",
+      "entryTs": 1783710000000,
+      "exitTs": 1783753200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.013311029924334594,
+        "pwin": 0.6642083649753701,
+        "neff": 11.47567651556135,
+        "n": 12,
+        "avgDistance": 0.6490584689388265,
+        "confidence": 0.516844018498279
+      },
+      "promote": true,
+      "realizedNet30": -0.020778277372587813
+    },
+    {
+      "id": "IDLEP_00642",
+      "strategy": "IDLE",
+      "entryTs": 1784019600000,
+      "exitTs": 1784062800000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.0021439062141715027,
+        "pwin": 0.6758637988846142,
+        "neff": 11.385298137524275,
+        "n": 12,
+        "avgDistance": 0.7114682852961954,
+        "confidence": 0.49668723000124526
+      },
+      "promote": true,
+      "realizedNet30": -0.032217368339161695
+    },
+    {
+      "id": "IDLEP_00643",
+      "strategy": "IDLE",
+      "entryTs": 1784041200000,
+      "exitTs": 1784084400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.008199278339583565,
+        "pwin": 0.7132893014033828,
+        "neff": 10.99709597424982,
+        "n": 12,
+        "avgDistance": 0.5871133384197103,
+        "confidence": 0.5292897692761694
+      },
+      "promote": true,
+      "realizedNet30": -0.02167380687861261
+    },
+    {
+      "id": "IDLEP_00651",
+      "strategy": "IDLE",
+      "entryTs": 1784260800000,
+      "exitTs": 1784304000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.019884084349639886,
+        "pwin": 0.7851051655058788,
+        "neff": 10.906811150475606,
+        "n": 12,
+        "avgDistance": 0.4493623060056377,
+        "confidence": 0.5779215440658623
+      },
+      "promote": true,
+      "realizedNet30": -0.002961453137154555
+    },
+    {
+      "id": "IDLEP_00653",
+      "strategy": "IDLE",
+      "entryTs": 1784271600000,
+      "exitTs": 1784314800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.01615539840417042,
+        "pwin": 0.7720725895978493,
+        "neff": 10.600011555285988,
+        "n": 12,
+        "avgDistance": 0.4147088144989488,
+        "confidence": 0.5860560193287291
+      },
+      "promote": true,
+      "realizedNet30": -0.03354568250648677
+    },
+    {
+      "id": "PENGU_00086",
+      "strategy": "PENGU",
+      "entryTs": 1784318400000,
+      "exitTs": 1784548800000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.06330018156074096,
+        "pwin": 0.8192755370735654,
+        "neff": 10.285300860490153,
+        "n": 12,
+        "avgDistance": 0.9875714203023441,
+        "confidence": 0.41251110271165914
+      },
+      "promote": true,
+      "realizedNet30": -0.08242314164146142
+    },
+    {
+      "id": "IDLEP_00661",
+      "strategy": "IDLE",
+      "entryTs": 1785168000000,
+      "exitTs": 1785211200000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.0050863019411011455,
+        "pwin": 0.7667771775977147,
+        "neff": 10.005000093609835,
+        "n": 12,
+        "avgDistance": 0.5612839876953075,
+        "confidence": 0.5196247045846109
+      },
+      "promote": true,
+      "realizedNet30": 0.028513930013463144
+    },
+    {
+      "id": "IDLEP_00666",
+      "strategy": "IDLE",
+      "entryTs": 1785218400000,
+      "exitTs": 1785304800000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.010825371823915063,
+        "pwin": 0.6730202485384507,
+        "neff": 8.394244728849626,
+        "n": 12,
+        "avgDistance": 0.7072286994230734,
+        "confidence": 0.44116314592133754
+      },
+      "promote": true,
+      "realizedNet30": 0.01026588845655
+    },
+    {
+      "id": "PENGU_00088",
+      "strategy": "PENGU",
+      "entryTs": 1785232800000,
+      "exitTs": 1785492000000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.02042219467448417,
+        "pwin": 0.6738800002849177,
+        "neff": 7.159787478524451,
+        "n": 12,
+        "avgDistance": 0.9325920894071177,
+        "confidence": 0.3605418766161552
+      },
+      "promote": true,
+      "realizedNet30": -0.020202590231340835
+    },
+    {
+      "id": "IDLEP_00669",
+      "strategy": "IDLE",
+      "entryTs": 1786010400000,
+      "exitTs": 1786053600000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.006864369256521253,
+        "pwin": 0.7831108353023639,
+        "neff": 10.316765395959168,
+        "n": 12,
+        "avgDistance": 1.3699168361141192,
+        "confidence": 0.3463570024372
+      },
+      "promote": true,
+      "realizedNet30": -0.0002316606715336792
+    },
+    {
+      "id": "IDLEP_00670",
+      "strategy": "IDLE",
+      "entryTs": 1786024800000,
+      "exitTs": 1786068000000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.003598873530848216,
+        "pwin": 0.7510516538529894,
+        "neff": 9.489086320752147,
+        "n": 12,
+        "avgDistance": 0.5133737361937946,
+        "confidence": 0.5248780077894148
+      },
+      "promote": true,
+      "realizedNet30": -0.005785789860698004
+    },
+    {
+      "id": "IDLEP_00671",
+      "strategy": "IDLE",
+      "entryTs": 1786467600000,
+      "exitTs": 1786510800000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0026284796944447924,
+        "pwin": 0.6355248073836923,
+        "neff": 8.017691962607541,
+        "n": 12,
+        "avgDistance": 1.855287578861325,
+        "confidence": 0.2581802901338445
+      },
+      "promote": true,
+      "realizedNet30": -0.03043471208434701
+    },
+    {
+      "id": "IDLEP_00680",
+      "strategy": "IDLE",
+      "entryTs": 1787414400000,
+      "exitTs": 1787457600000,
+      "symbol": "RENDERUSDT",
+      "side": "SHORT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.009670765338091051,
+        "pwin": 0.7859027268007808,
+        "neff": 10.128140676936182,
+        "n": 12,
+        "avgDistance": 0.9833333758264998,
+        "confidence": 0.41098254710612525
+      },
+      "promote": true,
+      "realizedNet30": 0.015837465373961208
+    },
+    {
+      "id": "IDLEP_00683",
+      "strategy": "IDLE",
+      "entryTs": 1787457600000,
+      "exitTs": 1787500800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.020738988723778256,
+        "pwin": 0.9126244243524179,
+        "neff": 10.269165204097815,
+        "n": 12,
+        "avgDistance": 1.1240982659124208,
+        "confidence": 0.3857685344780348
+      },
+      "promote": true,
+      "realizedNet30": -0.0855145169624747
+    },
+    {
+      "id": "IDLEP_00696",
+      "strategy": "IDLE",
+      "entryTs": 1787947200000,
+      "exitTs": 1787990400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.015380233278658366,
+        "pwin": 0.6370482335200703,
+        "neff": 10.83739945381945,
+        "n": 12,
+        "avgDistance": 0.7704831323853543,
+        "confidence": 0.4720340114917859
+      },
+      "promote": true,
+      "realizedNet30": -0.0033386253011494253
+    },
+    {
+      "id": "IDLEP_00697",
+      "strategy": "IDLE",
+      "entryTs": 1787954400000,
+      "exitTs": 1787997600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.017880588275275392,
+        "pwin": 0.6016060884147276,
+        "neff": 11.870064678676307,
+        "n": 12,
+        "avgDistance": 0.8730753078707826,
+        "confidence": 0.4600466103171599
+      },
+      "promote": true,
+      "realizedNet30": 0.002149464979423917
+    },
+    {
+      "id": "IDLEP_00708",
+      "strategy": "IDLE",
+      "entryTs": 1788145200000,
+      "exitTs": 1788188400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.026185783688419697,
+        "pwin": 0.8114842670193155,
+        "neff": 10.802118114742463,
+        "n": 12,
+        "avgDistance": 0.7837976195481381,
+        "confidence": 0.4679675799543771
+      },
+      "promote": true,
+      "realizedNet30": -0.03540264855398141
+    },
+    {
+      "id": "IDLEP_00710",
+      "strategy": "IDLE",
+      "entryTs": 1788156000000,
+      "exitTs": 1788199200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011123118920560062,
+        "pwin": 0.6902622736126084,
+        "neff": 10.299506948076074,
+        "n": 12,
+        "avgDistance": 0.49510299683603315,
+        "confidence": 0.5486720354320681
+      },
+      "promote": true,
+      "realizedNet30": -0.045180822062408726
+    },
+    {
+      "id": "IDLEP_00716",
+      "strategy": "IDLE",
+      "entryTs": 1788361200000,
+      "exitTs": 1788404400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.007938241163518954,
+        "pwin": 0.7640084830254161,
+        "neff": 10.352047757642856,
+        "n": 12,
+        "avgDistance": 0.4027217030384154,
+        "confidence": 0.5859235978711099
+      },
+      "promote": true,
+      "realizedNet30": -0.03631722247981009
+    },
+    {
+      "id": "PENGU_00101",
+      "strategy": "PENGU",
+      "entryTs": 1788368400000,
+      "exitTs": 1788451200000,
+      "symbol": "PENGUUSDT",
+      "side": "SHORT",
+      "route": "SHORT_V20",
+      "pred": {
+        "ev": 0.0630776805762465,
+        "pwin": 0.8273024995279774,
+        "neff": 6.778428181377925,
+        "n": 12,
+        "avgDistance": 0.4664884593930267,
+        "confidence": 0.46156661050326275
+      },
+      "promote": true,
+      "realizedNet30": -0.08274596341463422
+    },
+    {
+      "id": "Q102P_00197",
+      "strategy": "Q102",
+      "entryTs": 1788411600000,
+      "exitTs": 1788498000000,
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "route": "AVAX|MR24_Z1.5_H24",
+      "pred": {
+        "ev": 0.007191709195460596,
+        "pwin": 0.6670661742409608,
+        "neff": 7.989152760814208,
+        "n": 11,
+        "avgDistance": 1.4593544735966015,
+        "confidence": 0.2992353841437882
+      },
+      "promote": true,
+      "realizedNet30": -0.02684154965856478
+    },
+    {
+      "id": "IDLEP_00738",
+      "strategy": "IDLE",
+      "entryTs": 1788872400000,
+      "exitTs": 1788915600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.007614536375105851,
+        "pwin": 0.628409923197445,
+        "neff": 9.12282566352296,
+        "n": 12,
+        "avgDistance": 0.6136495182494719,
+        "confidence": 0.48423841794276967
+      },
+      "promote": true,
+      "realizedNet30": -0.01473090349896481
+    },
+    {
+      "id": "IDLEP_00753",
+      "strategy": "IDLE",
+      "entryTs": 1789009200000,
+      "exitTs": 1789052400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.02159559460785728,
+        "pwin": 0.8105478204861146,
+        "neff": 8.589029537874781,
+        "n": 12,
+        "avgDistance": 1.4725079504898455,
+        "confidence": 0.3078052583187638
+      },
+      "promote": true,
+      "realizedNet30": 0.024213837310344787
+    },
+    {
+      "id": "IDLEP_00760",
+      "strategy": "IDLE",
+      "entryTs": 1789045200000,
+      "exitTs": 1789131600000,
+      "symbol": "TIAUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+      "pred": {
+        "ev": 0.021497378971333393,
+        "pwin": 0.6798611326950894,
+        "neff": 9.864828179974802,
+        "n": 12,
+        "avgDistance": 0.738301198417817,
+        "confidence": 0.4641433804320026
+      },
+      "promote": true,
+      "realizedNet30": 0.005452321842811184
+    },
+    {
+      "id": "IDLEP_00800",
+      "strategy": "IDLE",
+      "entryTs": 1789585200000,
+      "exitTs": 1789628400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.0066095099718111415,
+        "pwin": 0.6928128253637921,
+        "neff": 8.493068843914688,
+        "n": 12,
+        "avgDistance": 1.4455773836985768,
+        "confidence": 0.3096195646722601
+      },
+      "promote": true,
+      "realizedNet30": -0.04237524705882369
+    },
+    {
+      "id": "IDLEP_00812",
+      "strategy": "IDLE",
+      "entryTs": 1790089200000,
+      "exitTs": 1790132400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.010637714325151022,
+        "pwin": 0.6772508760870333,
+        "neff": 11.091354816746684,
+        "n": 12,
+        "avgDistance": 0.6213999605269174,
+        "confidence": 0.5196349657996532
+      },
+      "promote": true,
+      "realizedNet30": -0.03861011004126554
+    },
+    {
+      "id": "IDLEP_00816",
+      "strategy": "IDLE",
+      "entryTs": 1790179200000,
+      "exitTs": 1790222400000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.005714609094865925,
+        "pwin": 0.7104475947363901,
+        "neff": 10.39922334381809,
+        "n": 12,
+        "avgDistance": 1.1782924598423279,
+        "confidence": 0.37794864378176124
+      },
+      "promote": true,
+      "realizedNet30": 0.013428055663948363
+    },
+    {
+      "id": "IDLEP_00820",
+      "strategy": "IDLE",
+      "entryTs": 1790215200000,
+      "exitTs": 1790258400000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.016662157020975257,
+        "pwin": 0.8104240352148399,
+        "neff": 9.374645669333814,
+        "n": 12,
+        "avgDistance": 1.255947881420232,
+        "confidence": 0.3503521692008512
+      },
+      "promote": true,
+      "realizedNet30": -0.017671886553290442
+    },
+    {
+      "id": "IDLEP_00824",
+      "strategy": "IDLE",
+      "entryTs": 1790560800000,
+      "exitTs": 1790604000000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.0035999644025742935,
+        "pwin": 0.757577392953366,
+        "neff": 8.397924493696006,
+        "n": 12,
+        "avgDistance": 0.7370765389041263,
+        "confidence": 0.43366984826085464
+      },
+      "promote": true,
+      "realizedNet30": 0.014863329069395425
+    },
+    {
+      "id": "IDLEP_00828",
+      "strategy": "IDLE",
+      "entryTs": 1790589600000,
+      "exitTs": 1790632800000,
+      "symbol": "TAOUSDT",
+      "side": "SHORT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "pred": {
+        "ev": 0.009389330027197865,
+        "pwin": 0.617450203877712,
+        "neff": 10.06824720548249,
+        "n": 12,
+        "avgDistance": 1.493150168752729,
+        "confidence": 0.32619799930115256
+      },
+      "promote": true,
+      "realizedNet30": -0.012219144129066897
+    },
+    {
+      "id": "IDLEP_00832",
+      "strategy": "IDLE",
+      "entryTs": 1790600400000,
+      "exitTs": 1790610000000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.00828504757809218,
+        "pwin": 0.7187624776739551,
+        "neff": 7.989931308932908,
+        "n": 12,
+        "avgDistance": 1.3385111866731592,
+        "confidence": 0.3147131167720412
+      },
+      "promote": true,
+      "realizedNet30": 0.014745591939546724
+    },
+    {
+      "id": "IDLEP_00833",
+      "strategy": "IDLE",
+      "entryTs": 1790604000000,
+      "exitTs": 1790610000000,
+      "symbol": "DOTUSDT",
+      "side": "SHORT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "pred": {
+        "ev": 0.007249266266340279,
+        "pwin": 0.642136292655057,
+        "neff": 9.136135301148066,
+        "n": 12,
+        "avgDistance": 1.259449009123378,
+        "confidence": 0.3460469713822677
+      },
+      "promote": true,
+      "realizedNet30": 0.013932773109243572
+    },
+    {
+      "id": "IDLEP_00836",
+      "strategy": "IDLE",
+      "entryTs": 1790622000000,
+      "exitTs": 1790665200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.013076704267718895,
+        "pwin": 0.7596936478451161,
+        "neff": 11.366238650190557,
+        "n": 12,
+        "avgDistance": 1.0116012444024787,
+        "confidence": 0.42234384397387686
+      },
+      "promote": true,
+      "realizedNet30": 0.01638929645219483
+    },
+    {
+      "id": "IDLEP_00837",
+      "strategy": "IDLE",
+      "entryTs": 1790625600000,
+      "exitTs": 1790668800000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011134369562220458,
+        "pwin": 0.66257165620176,
+        "neff": 10.744690563770066,
+        "n": 12,
+        "avgDistance": 0.8010276753436293,
+        "confidence": 0.4626082728326793
+      },
+      "promote": true,
+      "realizedNet30": -0.0004151035322776495
+    },
+    {
+      "id": "IDLEP_00840",
+      "strategy": "IDLE",
+      "entryTs": 1790636400000,
+      "exitTs": 1790679600000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.02651848606090296,
+        "pwin": 0.8559672153561444,
+        "neff": 11.828851791722787,
+        "n": 12,
+        "avgDistance": 1.065619630355171,
+        "confidence": 0.4167024363797309
+      },
+      "promote": true,
+      "realizedNet30": -0.020160143226403332
+    },
+    {
+      "id": "IDLEP_00844",
+      "strategy": "IDLE",
+      "entryTs": 1790647200000,
+      "exitTs": 1790690400000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.017995282432420247,
+        "pwin": 0.6592259995493643,
+        "neff": 10.914210267381165,
+        "n": 12,
+        "avgDistance": 0.9157326893700648,
+        "confidence": 0.43733545427670456
+      },
+      "promote": true,
+      "realizedNet30": -0.014013733282208524
+    },
+    {
+      "id": "IDLEP_00845",
+      "strategy": "IDLE",
+      "entryTs": 1790650800000,
+      "exitTs": 1790694000000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.02816558677539141,
+        "pwin": 0.7719868372678504,
+        "neff": 10.925119566059095,
+        "n": 12,
+        "avgDistance": 1.0049003990978969,
+        "confidence": 0.4180319584624184
+      },
+      "promote": true,
+      "realizedNet30": -0.025344552672467553
+    },
+    {
+      "id": "IDLEP_00847",
+      "strategy": "IDLE",
+      "entryTs": 1790658000000,
+      "exitTs": 1790701200000,
+      "symbol": "JUPUSDT",
+      "side": "SHORT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "pred": {
+        "ev": 0.011654671500780102,
+        "pwin": 0.7046283613177498,
+        "neff": 10.875505465491438,
+        "n": 12,
+        "avgDistance": 0.8999511474961145,
+        "confidence": 0.4404156604579299
+      },
+      "promote": true,
+      "realizedNet30": -0.0291870027504666
+    }
+  ]
+}

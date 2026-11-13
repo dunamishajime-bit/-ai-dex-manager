@@ -1,0 +1,699 @@
+{
+  "status": "RESEARCH_ONLY_THREE_LAYER_ONLINE_PORTFOLIO",
+  "productionMutation": false,
+  "period": {
+    "start": "2025-10-01T00:00:00Z",
+    "endExclusive": "2026-10-01T00:00:00Z"
+  },
+  "initialCapitalJpy": 10000,
+  "architecture": {
+    "layer1": "existing logic emits candidate; all original candidates remain observable in shadow",
+    "layer2": "causal completed-outcome online estimator + same-route confirmation + dual recent route health",
+    "layer3": "opportunity comparison while existing Shared Risk/Gross/slot/symbol/fail-closed gates remain authoritative"
+  },
+  "selectedScope": "Q102 only. Generic cross-runner score, IDLE recovery, PENGU recovery and broad route-local KNN rollout are rejected.",
+  "selectedCandidate": {
+    "id": "Q102P_00089",
+    "strategy": "Q102",
+    "entryTs": 1772485200000,
+    "exitTs": 1772571600000,
+    "symbol": "UNIUSDT",
+    "side": "SHORT",
+    "route": "UNI|MR72_Z1.5_H24",
+    "gross": 0.75,
+    "layer1Kept": false,
+    "expectedHoldHours": 24.0,
+    "predEV30": 0.03877505525535952,
+    "predWinProb": 0.6391894961775325,
+    "confidence": 0.7277129988421238,
+    "analogs": 106,
+    "opportunityScore": 0.03762281565352898,
+    "layer2Promote": true,
+    "realizedNet30": 0.00941610812095127,
+    "components": {
+      "strategy": {
+        "mean": 0.016237179095134686,
+        "pwin": 0.6166601265807407,
+        "sd": 0.058857634020297256,
+        "neff": 92.77954206165559,
+        "n": 106,
+        "sw": 61.88473880308068
+      },
+      "route": {
+        "mean": 0.04100705623075086,
+        "pwin": 0.612336379815359,
+        "sd": 0.15600768888295086,
+        "neff": 5.6773695499766275,
+        "n": 6
+      },
+      "symbol": {
+        "mean": 0.03904076238338728,
+        "pwin": 0.6774426128036098,
+        "sd": 0.14108241948242028,
+        "neff": 11.444071553385383,
+        "n": 12
+      },
+      "knn": {
+        "mean": 0.046491029422710876,
+        "pwin": 0.6393566769890383,
+        "sd": 0.1615528624121486,
+        "neff": 6.923474243967066,
+        "n": 12
+      }
+    },
+    "recent5MeanNet30": 0.06995449877870205,
+    "recent6MeanNet30": 0.117792950484659,
+    "recent5WinRate": 0.6,
+    "recent6WinRate": 0.6666666666666666,
+    "activeMaxOpportunity": 0.01131675298360795
+  },
+  "exact": {
+    "V3": {
+      "10": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 10,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 12931262.767297685,
+        "net_return_pct": 129212.62767297684,
+        "max_hourly_dd_pct": -25.56027807804765,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 795,
+        "win_rate_pct": 63.77358490566037,
+        "profit_factor": 2.25436151512263,
+        "admitted_by_runner": {
+          "Q102": 118,
+          "PENGU": 47,
+          "V52": 84,
+          "V4": 496,
+          "IDLE": 35,
+          "HYPE": 8,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 63,
+          "HYPE_FORMAL_BASELINE_OPEN_GATE": 19,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 59,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 118,
+          "RUNNER_SLOT_BUSY": 44,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 109,
+          "DAILY_LOSS_7P5_GATE": 40,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_GROSS_CAP_3": 12,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 683,
+          "FET_POST_EXIT_COOLDOWN_24H": 2,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 2
+        },
+        "source_intents": 2070,
+        "residual_priority_exits": 1,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.592734551353476,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 9,
+        "shared_risk_flatten_count": 6,
+        "v52_daily_trip_count": 30,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      },
+      "30": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 30,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 4701167.248266114,
+        "net_return_pct": 46911.67248266114,
+        "max_hourly_dd_pct": -26.241956240350017,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 791,
+        "win_rate_pct": 61.694058154235144,
+        "profit_factor": 2.0431341181692426,
+        "admitted_by_runner": {
+          "Q102": 118,
+          "PENGU": 46,
+          "V52": 84,
+          "V4": 494,
+          "IDLE": 34,
+          "HYPE": 8,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 62,
+          "HYPE_FORMAL_BASELINE_OPEN_GATE": 19,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 58,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "V4_GROSS_CAP_3": 13,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 119,
+          "RUNNER_SLOT_BUSY": 44,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 108,
+          "DAILY_LOSS_7P5_GATE": 45,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 683,
+          "FET_POST_EXIT_COOLDOWN_24H": 2,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 2
+        },
+        "source_intents": 2070,
+        "residual_priority_exits": 1,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.666110611244542,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 9,
+        "shared_risk_flatten_count": 5,
+        "v52_daily_trip_count": 36,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      }
+    },
+    "THREE_LAYER_Q102": {
+      "10": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 10,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 13541227.416992147,
+        "net_return_pct": 135312.27416992147,
+        "max_hourly_dd_pct": -21.571152025921148,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 795,
+        "win_rate_pct": 63.899371069182386,
+        "profit_factor": 2.259771849399654,
+        "admitted_by_runner": {
+          "Q102": 118,
+          "PENGU": 47,
+          "V52": 84,
+          "V4": 496,
+          "IDLE": 35,
+          "HYPE": 8,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 63,
+          "HYPE_FORMAL_BASELINE_OPEN_GATE": 19,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 59,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 118,
+          "RUNNER_SLOT_BUSY": 45,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 109,
+          "DAILY_LOSS_7P5_GATE": 40,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_GROSS_CAP_3": 12,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 683,
+          "FET_POST_EXIT_COOLDOWN_24H": 2,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 2
+        },
+        "source_intents": 2071,
+        "residual_priority_exits": 1,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.592734551353476,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 9,
+        "shared_risk_flatten_count": 6,
+        "v52_daily_trip_count": 30,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      },
+      "30": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 30,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 4923411.540923881,
+        "net_return_pct": 49134.11540923882,
+        "max_hourly_dd_pct": -22.281590510182536,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 791,
+        "win_rate_pct": 61.820480404551205,
+        "profit_factor": 2.049764986471018,
+        "admitted_by_runner": {
+          "Q102": 118,
+          "PENGU": 46,
+          "V52": 84,
+          "V4": 494,
+          "IDLE": 34,
+          "HYPE": 8,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 62,
+          "HYPE_FORMAL_BASELINE_OPEN_GATE": 19,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 58,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "V4_GROSS_CAP_3": 13,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 119,
+          "RUNNER_SLOT_BUSY": 45,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 108,
+          "DAILY_LOSS_7P5_GATE": 45,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 683,
+          "FET_POST_EXIT_COOLDOWN_24H": 2,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 2
+        },
+        "source_intents": 2071,
+        "residual_priority_exits": 1,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.666110611244542,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 9,
+        "shared_risk_flatten_count": 5,
+        "v52_daily_trip_count": 36,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      }
+    }
+  },
+  "deltaVsV3": {
+    "10": {
+      "finalDeltaJpy": 609964.6496944614,
+      "finalImprovementPct": 4.716976684110241,
+      "ddImprovementPctPoint": 3.989126052126501,
+      "pfDelta": 0.005410334277023754
+    },
+    "30": {
+      "finalDeltaJpy": 222244.29265776742,
+      "finalImprovementPct": 4.727427911434878,
+      "ddImprovementPctPoint": 3.9603657301674815,
+      "pfDelta": 0.006630868301775283
+    }
+  },
+  "layer2FilteredSummary": {
+    "FET": {
+      "all": {
+        "n": 11,
+        "wr": 0.5454545454545454,
+        "mean": 0.01770498012803078,
+        "sum": 0.19475478140833857,
+        "pf": 1.966629765300026,
+        "worst": -0.05381196628547581
+      },
+      "filtered": {
+        "n": 0
+      },
+      "promotedFiltered": {
+        "n": 0
+      },
+      "promotedIds": []
+    },
+    "HYPE": {
+      "all": {
+        "n": 105,
+        "wr": 0.3523809523809524,
+        "mean": 0.0033295699094720525,
+        "sum": 0.3496048404945655,
+        "pf": 1.246436019628999,
+        "worst": -0.08667054567398011
+      },
+      "filtered": {
+        "n": 78,
+        "wr": 0.2692307692307692,
+        "mean": -0.001093091114262565,
+        "sum": -0.08526110691248007,
+        "pf": 0.9113024093468421,
+        "worst": -0.04389648780929034
+      },
+      "promotedFiltered": {
+        "n": 1,
+        "wr": 0.0,
+        "mean": -0.02854294007878899,
+        "sum": -0.02854294007878899,
+        "pf": 0.0,
+        "worst": -0.02854294007878899
+      },
+      "promotedIds": [
+        "HYPE_00011"
+      ]
+    },
+    "IDLE": {
+      "all": {
+        "n": 849,
+        "wr": 0.4758539458186101,
+        "mean": -0.006236219118190361,
+        "sum": -5.294550031343616,
+        "pf": 0.643583250148993,
+        "worst": -0.13809943899291896
+      },
+      "filtered": {
+        "n": 652,
+        "wr": 0.4570552147239264,
+        "mean": -0.008248275638525874,
+        "sum": -5.3778757163188695,
+        "pf": 0.5537910919359598,
+        "worst": -0.13809943899291896
+      },
+      "promotedFiltered": {
+        "n": 12,
+        "wr": 0.4166666666666667,
+        "mean": -0.0016939230354475847,
+        "sum": -0.020327076425371016,
+        "pf": 0.7952343255842403,
+        "worst": -0.03192935444579787
+      },
+      "promotedIds": [
+        "IDLEP_00064",
+        "IDLEP_00065",
+        "IDLEP_00066",
+        "IDLEP_00067",
+        "IDLEP_00068",
+        "IDLEP_00069",
+        "IDLEP_00070",
+        "IDLEP_00072",
+        "IDLEP_00507",
+        "IDLEP_00509",
+        "IDLEP_00511",
+        "IDLEP_00705"
+      ]
+    },
+    "PENGU": {
+      "all": {
+        "n": 116,
+        "wr": 0.6293103448275862,
+        "mean": 0.02173806725263173,
+        "sum": 2.521615801305281,
+        "pf": 1.9215389228740336,
+        "worst": -0.08344669417780565
+      },
+      "filtered": {
+        "n": 38,
+        "wr": 0.4473684210526316,
+        "mean": -0.005602602600680381,
+        "sum": -0.21289889882585447,
+        "pf": 0.8481467966145424,
+        "worst": -0.0828955190177123
+      },
+      "promotedFiltered": {
+        "n": 22,
+        "wr": 0.5,
+        "mean": -0.004037724799492108,
+        "sum": -0.08882994558882638,
+        "pf": 0.8828353245478769,
+        "worst": -0.0828955190177123
+      },
+      "promotedIds": [
+        "PENGU_00013",
+        "PENGU_00014",
+        "PENGU_00018",
+        "PENGU_00021",
+        "PENGU_00032",
+        "PENGU_00033",
+        "PENGU_00034",
+        "PENGU_00035",
+        "PENGU_00046",
+        "PENGU_00054",
+        "PENGU_00055",
+        "PENGU_00057",
+        "PENGU_00058",
+        "PENGU_00070",
+        "PENGU_00077",
+        "PENGU_00078",
+        "PENGU_00083",
+        "PENGU_00084",
+        "PENGU_00085",
+        "PENGU_00086",
+        "PENGU_00100",
+        "PENGU_00106"
+      ]
+    },
+    "Q102": {
+      "all": {
+        "n": 278,
+        "wr": 0.5323741007194245,
+        "mean": 0.006341274929923715,
+        "sum": 1.762874430518793,
+        "pf": 1.3948893796828312,
+        "worst": -0.09980314077397645
+      },
+      "filtered": {
+        "n": 54,
+        "wr": 0.37037037037037035,
+        "mean": 0.001986404343061615,
+        "sum": 0.1072658345253272,
+        "pf": 1.0801480800163672,
+        "worst": -0.08673329729729734
+      },
+      "promotedFiltered": {
+        "n": 18,
+        "wr": 0.4444444444444444,
+        "mean": 0.016194733031929125,
+        "sum": 0.29150519457472424,
+        "pf": 1.9000711513311965,
+        "worst": -0.06842056074766356
+      },
+      "promotedIds": [
+        "Q102P_00010",
+        "Q102P_00051",
+        "Q102P_00052",
+        "Q102P_00053",
+        "Q102P_00055",
+        "Q102P_00084",
+        "Q102P_00089",
+        "Q102P_00090",
+        "Q102P_00097",
+        "Q102P_00102",
+        "Q102P_00103",
+        "Q102P_00104",
+        "Q102P_00117",
+        "Q102P_00125",
+        "Q102P_00133",
+        "Q102P_00140",
+        "Q102P_00144",
+        "Q102P_00158"
+      ]
+    },
+    "V4": {
+      "all": {
+        "n": 1443,
+        "wr": 0.577962577962578,
+        "mean": 0.009005383970766629,
+        "sum": 12.994769069816245,
+        "pf": 1.775297977107594,
+        "worst": -0.2842343411815483
+      },
+      "filtered": {
+        "n": 0
+      },
+      "promotedFiltered": {
+        "n": 0
+      },
+      "promotedIds": []
+    },
+    "V52": {
+      "all": {
+        "n": 90,
+        "wr": 0.8222222222222222,
+        "mean": 0.0068707552258962966,
+        "sum": 0.6183679703306667,
+        "pf": 10.351088572804532,
+        "worst": -0.012192785851864781
+      },
+      "filtered": {
+        "n": 0
+      },
+      "promotedFiltered": {
+        "n": 0
+      },
+      "promotedIds": []
+    }
+  },
+  "antiOverfit": {
+    "thresholdSensitivity": "pWin 0.58-0.60, EV 0.1%-0.3%, confidence 0.40-0.50 select the same Q102P_00089; pWin 0.62 selects none.",
+    "cleanReplay": "single selected candidate clean wrapper exactly reproduces the route-health exact result.",
+    "caveat": "The route-confirmation and dual-window health structure was developed after target-period diagnostics. This is a research candidate, not an untouched holdout result. Require fresh forward/live-shadow evidence before Production adoption."
+  },
+  "mechanism": {
+    "added": "Q102P_00089 UNIUSDT SHORT UNI|MR72_Z1.5_H24, native gross 0.75x",
+    "displaced": "Q102Q01365_00031 AVAXUSDT candidate that later hit STOP5",
+    "explanation": "Earlier qualifying UNI occupies the existing Q102 one-slot. No cap is bypassed and no position is force-preempted; the later losing AVAX candidate is naturally blocked."
+  },
+  "productionChanged": false
+}
