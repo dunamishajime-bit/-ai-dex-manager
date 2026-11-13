@@ -7,9 +7,12 @@ on:
       - 'research/current-performance-restoration-*'
     paths:
       - 'config/disdexQuality102CausalV1Runtime.ts'
+      - 'config/disdexStable4Opportunity.ts'
+      - 'config/stable4/q102-*.json'
       - 'config/disdexQuality102CausalV4Model.ts'
       - 'lib/disdex-aster-portfolio-classifier.ts'
       - 'lib/disdex-quality102-causal-v1-*.ts'
+      - 'lib/disdex-quality102-stable4-online.ts'
       - 'lib/disdex-quality102-causal-v4-*.ts'
       - 'lib/disdex-shared-crypto-*.ts'
       - 'lib/disdex-strict-portfolio-planner.ts'
@@ -18,6 +21,7 @@ on:
       - 'lib/v12-*.ts'
       - 'scripts/disdex-quality102-causal-v1-*.ts'
       - 'scripts/disdex-quality102-causal-v4-*.ts'
+      - 'scripts/stable4-q102-selftest.ts'
       - 'scripts/disdex-shared-crypto-*.ts'
       - 'scripts/disdex_v12_crypto_daily_risk.py'
       - 'scripts/disdex_quality102_v52_mtm_selftest.py'
@@ -80,6 +84,7 @@ jobs:
         run: |
           npm run strategy:shared-crypto-risk:selftest
           npm run strategy:quality102-causal-v1:runner:selftest
+          npm run strategy:stable4-q102:selftest
           npm run strategy:executor:selftest
           npm run strategy:quality102-causal-v1:portfolio:test
           npm run strategy:strict-bt33404708902:gross:selftest

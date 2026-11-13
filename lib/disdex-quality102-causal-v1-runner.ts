@@ -1106,6 +1106,10 @@ export class Quality102CausalV1Runner {
                 }],
                 maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
                 quality102CausalV1Ready: true,
+                entryGrossCaps: {
+                    cryptoGrossCap: this.dependencies.config.cryptoGrossCap,
+                    totalGrossCap: this.dependencies.config.totalGrossCap,
+                },
             });
             if (live.positions.some(nonZero) && planner.reductions.length > 0) {
                 throw new Error("Q102_PENDING_CANNOT_DISPLACE_EXISTING_RUNNER_EXPOSURE");
@@ -1434,6 +1438,10 @@ export class Quality102CausalV1Runner {
             }],
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS,
             quality102CausalV1Ready: true,
+                entryGrossCaps: {
+                    cryptoGrossCap: this.dependencies.config.cryptoGrossCap,
+                    totalGrossCap: this.dependencies.config.totalGrossCap,
+                },
         });
         // Q102 uses uncommitted gross only. Never displace another runner
         // merely because the signal is now evaluated while the account is occupied.

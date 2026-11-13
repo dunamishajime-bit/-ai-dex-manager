@@ -1,12 +1,24 @@
 import assert from "node:assert/strict";
 import {
     markToMarketReducePosition,
-    planStrictPortfolio,
+    planStrictPortfolio as planStrictPortfolioBase,
     type StrictPortfolioPosition,
 } from "../lib/disdex-strict-portfolio-planner";
 import { STRICT_BT33404708902 } from "../config/disdexStrictBt33404708902Runtime";
 
 const NOW = 1_800_000_000_000;
+
+const STRICT_ENTRY_GROSS_CAPS = Object.freeze({
+    cryptoGrossCap: STRICT_BT33404708902.cryptoGrossCap,
+    totalGrossCap: STRICT_BT33404708902.totalGrossCap,
+});
+
+function planStrictPortfolio(input: Parameters<typeof planStrictPortfolioBase>[0]) {
+    return planStrictPortfolioBase({
+        ...input,
+        entryGrossCaps: input.entryGrossCaps ?? STRICT_ENTRY_GROSS_CAPS,
+    });
+}
 
 function position(input: Partial<StrictPortfolioPosition> & Pick<StrictPortfolioPosition, "id" | "strategy" | "symbol" | "quantity" | "entryPrice" | "markPrice">): StrictPortfolioPosition {
     const markSource = input.markSource ?? (input.strategy === "QUALITY102" ? "BINANCE_VISION_USDM_1M_OPEN" : undefined);

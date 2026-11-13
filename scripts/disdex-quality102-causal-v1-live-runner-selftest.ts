@@ -44,7 +44,7 @@ assert.ok(config.symbols.includes("AAVEUSDT"));
 assert.ok(config.symbols.length > config.highVolSymbols.length);
 assert.equal(config.maximumGross, 3.0);
 assert.equal(config.cryptoGrossCap, 3);
-assert.equal(config.totalGrossCap, 4.25);
+assert.equal(config.totalGrossCap, 3.5);
 assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(config, baseEnv));
 const adoptedEnv: NodeJS.ProcessEnv = {
     ...baseEnv,
