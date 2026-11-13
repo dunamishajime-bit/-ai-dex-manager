@@ -22,3 +22,32 @@ Owner-approved: B main = actual Gross x usage; A auxiliary = percentage of expli
 The new route app/bt-verification/page.tsx contains an isolated illustrative UI MVP: time controls, BTC path, equity curve, live position table, Total/Crypto/Stock Gross stacked meters, per-position cap share, logic/symbol filtering, JSON import/export and CSV timelines.
 
 NOT YET BUILT: canonical BT adapter, authenticated durable storage, ZIP/PDF, reference-source consistency checks, formal QA, menu navigation, deployment. The sample numbers must never be interpreted as real BT results.
+
+
+## Implementation extension (same Draft PR #481)
+
+- lib/bt-verification/replay.ts: strict, bounded replay JSON validation; source-snapshot Gross authoritative over reconstructed position allocation; unresolved exposure must be displayed as grey/unallocated rather than invented per-position metrics.
+- lib/bt-verification/storage.ts: per-browser IndexedDB save / list / reload / delete. Local-only, not cross-device durable server storage.
+- lib/bt-verification/zip-store.ts: no third-party ZIP store; ZIP includes replay.json, portfolio_timeline.csv, positions_timeline.csv, event_ledger_display.json, manifest.json, README.txt and SHA256 checksums.
+- components/bt-verification/BtcCandlestickChart.tsx: last 64 completed BTC 1h OHLC candles, marker overlay for reported event times. No lookahead; no conversion of BTC representative chart into trade symbol.
+- scripts/bt_hp_research_replay_adapter.py: READ-ONLY RESEARCH DATA ADAPTER. It reads existing model-equity/fills/decisions/Shared Risk rows and optional historical BTC candle gzip, emits a 1y research playback with event timestamps and source hashes. All position quantities/marks/current per-position Gross remain null where research fills cannot supply exact evidence.
+- tests/test_bt_hp_research_replay_adapter.py: reject inconsistent Gross / duplicate trade ID, check BTC completed-candle as-of behavior.
+- scripts/bt-hp-replay-selftest.ts: strict import / gross / ZIP tests.
+
+Research-replay diagnostic (not canonical/verified):
+- Input: November 13 FIVEBT_P3_20261113 (10bps) research run, venue fills not proven.
+- Test conversion: 4,073 frames, 853 model fills, 8,928 BTC hourly candles, 4.93 MB output; every snapshot BTC close checked against last completed candle.
+- Observed max Total Gross 4.6785429617x, **not evidence of authorized Production Gross cap**.
+- Conversion CLI requires explicit Total/Crypto/Stock cap arguments, preserving note USER_SUPPLIED_NOT_VERIFIED. These cap arguments MUST be verified against the BT run's true risk manifest before using percentage comparisons.
+- Partial / missing per-position mark, quantity or Gross is represented as null and must never be back-filled with guessed prices.
+
+## Still required before ready-for-review or HP deployment
+
+1. Retrieve and pin the truly latest *verified* strategy and engine versions, SHA and parity evidence; register only confirmed logic/config source.
+2. Bind replay to the canonical immutable BT engine and event/fill model, incl. fee, funding, tick/lot constraints, time alignment, STOP, trailing, partial fills, risk, pending exposure and gross transfer.
+3. Add event-level exact position mark/notional and Gross allocation snapshots and compare reconstructed total with canonical equity ledger to tolerance. Avoid dividing by a different equity base at any timestamp.
+4. Owner-authenticated backend storage with object retention, quota and replay search; multi-device saved results, ZIP and optional PDF report.
+5. Full e2e UI test (selection, pause/rewind, marker details, cost parity, huge replay, export/reimport), Production auth security review and safe deploy.
+6. Keep all read-only BT APIs and data separate from LIVE keys, orders, STOP and Kill Switch.
+
+**No production deployment, merge, LIVE trading change or claim of verified BT parity is authorized by this Draft PR alone.**
