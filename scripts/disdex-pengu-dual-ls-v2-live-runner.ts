@@ -8,6 +8,7 @@ import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { PENGU_DUAL_LS_V2, resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "../config/integratedProductionRiskPolicy";
+import { assertStable4GlobalLiveAck } from "../config/disdexStable4Opportunity";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
 import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-runner";
 import { FilePenguDualLsV2RunnerStateStore } from "../lib/pengu-dual-ls-v2-runner-state";
@@ -26,6 +27,11 @@ function numberEnv(name: string, fallback: number) {
 async function main() {
     const runtime = resolvePenguDualLsV2Runtime();
     const expectedQ102RuntimeSha = process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA;
+    if (runtime.stable4Mode === "LIVE") {
+        const runtimeSha=String(process.env.DISDEX_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.GIT_COMMIT || "").trim().toLowerCase();
+        if(!/^[0-9a-f]{40}$/.test(runtimeSha)) throw new Error("PENGU_STABLE4_RUNTIME_SHA_REQUIRED");
+        assertStable4GlobalLiveAck(runtime.stable4Mode,runtimeSha);
+    }
     if (runtime.mode === "LIVE" && runtime.enabled) {
         const strict = assertV12StrictLiveConfiguration();
         if (Math.abs(runtime.maximumGross - INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross) > 1e-9) {
@@ -112,6 +118,7 @@ async function main() {
             portfolioDailyLossStatePath: runtime.portfolioDailyLossStatePath,
             recoveryV8Enabled,
             v64DynamicLongEnabled: recoveryV8Enabled,
+            stable4Mode: runtime.stable4Mode,
         },
         residentStopGateway: runtime.mode === "LIVE" ? new AsterResidentStopGateway(client) : undefined,
         recoveryV8Protection,
@@ -133,6 +140,7 @@ async function main() {
         recoveryV8Enabled,
         v64DynamicLongEnabled: recoveryV8Enabled,
         promotionStatus: PENGU_RECOVERY_V8_PROMOTION.status,
+        stable4Mode: runtime.stable4Mode,
     }));
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));

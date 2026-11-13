@@ -13,6 +13,7 @@ import type {
     DirectTradeResult,
 } from "@/lib/direct-trade-executor";
 import type { LiveRunnerLock, LiveRunnerLockHandle } from "@/lib/live-runner-state";
+import { DISDEX_STABLE4_OPPORTUNITY, type DisDexStable4Mode } from "@/config/disdexStable4Opportunity";
 import {
     buildPenguDualLsV2Signal,
     cooldownHoursForPenguExit,
@@ -85,6 +86,7 @@ export interface PenguDualLsV2PortfolioRunnerConfig {
     residentStopRequired?: boolean;
     recoveryV8Enabled?: boolean;
     v64DynamicLongEnabled?: boolean;
+    stable4Mode?: DisDexStable4Mode;
 }
 
 export interface PenguDualLsV2RunnerLogger {
@@ -413,8 +415,12 @@ export class PenguDualLsV2PortfolioRunner {
             candidate,
             pendingCryptoGross: input.pendingCryptoGross,
             pendingTotalGross: input.pendingTotalGross,
-            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+            cryptoEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+            totalEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
             causeIdempotencyKey: candidate.idempotencyKey,
             expectedRuntimeSha: process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
             enabled: true,
@@ -868,7 +874,7 @@ export class PenguDualLsV2PortfolioRunner {
             if (state.pending) return await this.reconcilePending(state);
             const history = preloadedHistory ?? await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
-                const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
+                const signal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true, stable4Mode: this.dependencies.config.stable4Mode });
                 state.lastSignalReferenceTs = signal.referenceTs;
                 state.latestSignal = signal;
                 await this.dependencies.stateStore.save(state);
@@ -983,7 +989,7 @@ export class PenguDualLsV2PortfolioRunner {
                 await this.dependencies.stateStore.save(state);
             }
 
-            const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true });
+            const baseSignal = buildPenguDualLsV2Signal(history, state.position, this.now(), state.cooldownUntilTs, { recoveryV8Enabled: this.dependencies.config.recoveryV8Enabled === true, v64DynamicLongEnabled: this.dependencies.config.v64DynamicLongEnabled === true, stable4Mode: this.dependencies.config.stable4Mode });
             const timedSignal: PenguDualLsV2Signal = timedStopAction && state.position && !baseSignal.exit
                 ? {
                     ...baseSignal,
@@ -1182,6 +1188,12 @@ export class PenguDualLsV2PortfolioRunner {
                             signalTs: signal.referenceTs,
                         }],
                         maxDataAgeMs: 5 * 60_000,
+                        ...(this.dependencies.config.stable4Mode === "LIVE" ? {
+                            entryGrossCaps: {
+                                cryptoGrossCap: DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap,
+                                totalGrossCap: DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,
+                            },
+                        } : {}),
                     });
                     if (strictPlan.status !== "planned") {
                         const planReason = strictPlan.reason || strictPlan.rejected[0]?.reason;
@@ -1194,8 +1206,12 @@ export class PenguDualLsV2PortfolioRunner {
                             candidateGross: targetGross,
                             candidateSymbol: SYMBOL,
                             candidateStrategy: "PENGU_DUAL_LS_V2",
-                            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-                            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+                            cryptoEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+                            totalEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
                         });
                         if (isSharedCapacityBlock(planReason) && sidecarCausesCapacity && await retryAfterHypeZecPreemption(targetGross)) continue;
                         await this.dependencies.stateStore.save(state);
@@ -1277,8 +1293,12 @@ export class PenguDualLsV2PortfolioRunner {
                             candidateGross: targetGross,
                             candidateSymbol: SYMBOL,
                             candidateStrategy: "PENGU_DUAL_LS_V2",
-                            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-                            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+                            cryptoEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+                            totalEntryCap: this.dependencies.config.stable4Mode === "LIVE"
+                                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
+                                : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
                         });
                         if (isSharedCapacityBlock(planReason) && sidecarCausesCapacity && await retryAfterHypeZecPreemption(targetGross)) continue;
                         await this.dependencies.stateStore.save(state);
