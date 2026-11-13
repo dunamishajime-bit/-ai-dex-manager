@@ -129,6 +129,81 @@ jobs:
             print('V4_'+name.upper()+'='+json.dumps(out,sort_keys=True,default=str))
           print('TRADING_MUTATION=0')
           PY
+
+      - name: Signed Aster read-only orphan proof for V4 pending
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -T -i "$RUNNER_TEMP/ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" \
+            -p "${PORT:-22}" "root@$HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          SHA=3ad65403013b701db5d9e53e8814e6ab827a28e8
+          RELEASE=/home/deploy/disdex-trading/releases/$SHA
+          set -a
+          . /etc/disdex/disdex-v13d-v11eq-v96.env
+          . /etc/disdex/disdex-v12-pengu-v2-v52.env
+          . /etc/disdex/disdex-v12-v4.env
+          . /etc/disdex/disdex-v12-aster-credentials.env
+          . /etc/disdex/current-runtime/$SHA.env
+          set +a
+          export DISDEX_RELEASE_SHA=$SHA
+          export DISDEX_RUNTIME_COMMIT_SHA=$SHA
+          runuser -u deploy --preserve-environment -- /usr/bin/node \
+            --import "$RELEASE/node_modules/tsx/dist/loader.mjs" --input-type=module - <<NODE
+          import { AsterV3Client } from "file://$RELEASE/lib/aster-v3-client.ts";
+          import { assertV4SharedRateBudget, createV4EvidenceFetch } from "file://$RELEASE/lib/v12-v4-monitor-only.ts";
+          assertV4SharedRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
+          const client = new AsterV3Client({
+            baseUrl: process.env.ASTER_FUTURES_BASE_URL,
+            userAddress: process.env.ASTER_USER_ADDRESS,
+            privateKey: process.env.ASTER_API_PRIVATE_KEY,
+            requestTimeoutMs: 10000,
+            readOnlyRateLimitMaxRetries: 0,
+            fetchImpl: createV4EvidenceFetch(fetch),
+            userAgent: "DisDex-STABLE4-Orphan-Proof/1",
+          });
+          if (!client.hasTradingCredentials()) throw new Error("ASTER_READONLY_CREDENTIALS_REQUIRED");
+          const positions = await client.getPositions();
+          const openOrders = await client.getOpenOrders();
+          const balances = await client.getBalances();
+          const nonzero = positions.filter((p) => Number.isFinite(Number(p.positionAmt ?? p.quantity)) && Math.abs(Number(p.positionAmt ?? p.quantity)) > 1e-12);
+          const safePositions = nonzero.map((p) => ({
+            symbol:String(p.symbol||""),
+            quantity:Number(p.positionAmt ?? p.quantity),
+            entryPrice:Number(p.entryPrice||0),
+            markPrice:Number(p.markPrice||0),
+            positionSide:String(p.positionSide||""),
+            updatedAt:Number(p.updateTime ?? p.updatedAt ?? 0),
+          }));
+          const safeOrders = openOrders.map((o) => ({
+            symbol:String(o.symbol||""),
+            side:String(o.side||""),
+            type:String(o.type||""),
+            quantity:Number(o.origQty ?? o.quantity ?? 0),
+            executedQuantity:Number(o.executedQty ?? o.executedQuantity ?? 0),
+            reduceOnly:Boolean(o.reduceOnly),
+            status:String(o.status||""),
+            clientOrderId:String(o.clientOrderId||""),
+          }));
+          const aavePositions=safePositions.filter((p)=>p.symbol.toUpperCase()==="AAVEUSDT");
+          const aaveOrders=safeOrders.filter((o)=>o.symbol.toUpperCase()==="AAVEUSDT");
+          console.log("ASTER_ORPHAN_PROOF="+JSON.stringify({
+            nonzeroPositionCount:safePositions.length,
+            openOrderCount:safeOrders.length,
+            balanceRows:Array.isArray(balances)?balances.length:null,
+            aavePositions,
+            aaveOrders,
+            allPositions:safePositions,
+            allOpenOrders:safeOrders,
+            ordersSent:0,cancelsSent:0,positionChangesSent:0,
+          }));
+          NODE
+          echo TRADING_MUTATION=0
+          REMOTE
       - name: Cleanup local SSH material
         if: always()
         shell: bash
