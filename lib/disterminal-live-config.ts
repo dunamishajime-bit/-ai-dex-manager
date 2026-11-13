@@ -1,0 +1,152 @@
+import v52V50Runtime from "@/config/v52V50Runtime.json";
+
+/**
+ * Build-time compatibility metadata only.
+ * Production strategy truth MUST come from /api/system/live-runtime, which reads
+ * /home/deploy/disdex-trading/current and the release-pinned runtime heartbeats.
+ * Do not use these values to assert the currently running Production contract.
+ */
+export const DIST_TERMINAL_LIVE_CONFIG = {
+  productName: "DISTerminal",
+  strategyLabel: "V12 X1.00 ALL Top2 / Dynamic Residual 2.00x + PENGU Dual LS V2 / Short V20 + Q102 Causal V4 + V52",
+  executionVenue: "AsterDEX",
+  executor: "AsterDirectTradeExecutor",
+  /** Release currently used by the V12/PENGU/Quality102 VPS runners. */
+  approvedReleaseSha: "4230604a4cff33e5fb93725e36544e180eb0da45",
+  productionReleaseShas: {
+    v12: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    pengu: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    v52: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    quality102: "4230604a4cff33e5fb93725e36544e180eb0da45",
+  },
+  v12DailyLossPct: 7.5,
+  sharedCryptoDailyLossPct: 7.5,
+  v52DailyLossPct: 3.5,
+  /** Gross values are policy caps; V12's requested size remains risk/ATR-driven. */
+  maximumGross: 3.5,
+  v12BaseGross: 1.5,
+  v12Gross: 2.0,
+  v12PerPositionGross: 1,
+  v12MaximumPositions: 2,
+  v12SizingMode: "ATR/繝ｪ繧ｹ繧ｯ騾｣蜍輔。ase蜷郁ｨ・.50x / Dynamic Residual霎ｼ縺ｿ譛螟ｧ2.00x / Top2",
+  sharedCryptoGross: 3,
+  quality102Runtime: {
+    expectedReleaseSha: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    strategyGrossCap: 2.5,
+    familyGross: {
+      HIGH_VOL: 1.661,
+      MR: 1.0,
+      BRK: 2.465,
+      REV: 2.5,
+      PB: 2.5,
+    },
+    cryptoGrossCap: 3,
+    totalGrossCap: 3.5,
+    selectorMode: "CAUSAL_V4",
+    historicalSelectorParity: false,
+    brkLiveEnabled: true,
+    symbols: [
+      "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT",
+      "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT",
+    ],
+  },
+  /**
+   * Strict BT #33404708902 policy is displayed separately from the currently
+   * deployed multi-lineage LIVE caps. The historical frozen selector remains
+   * fail-closed until a reproducible, no-lookahead selector is proven; the
+   * derived HIGH_VOL sleeve is described separately above.
+   */
+  strictBt33404708902: {
+    sourceRun: "33404708902",
+    sourceSha: "aec066fefd761b12f07e6927b5f2a524f88ca08b",
+    quality102PositionCap: 1.5,
+    cryptoGrossCap: 3,
+    totalGrossCap: 3.5,
+    quality102LiveSelectorParity: false,
+    quality102LiveBlockedFailClosed: true,
+    liveActivated: true,
+  },
+  v52StockGross: 1.98,
+  v52V11Gross: 1.64,
+  v52V50Gross: 1.64,
+  v52V11Tiers: [
+    { label: "default", basisBps: 0, netEdgeBps: 0, requestedGross: 0.75 },
+    { label: "qualified", basisBps: 80, netEdgeBps: 10, requestedGross: 1 },
+    { label: "strong", basisBps: 110, netEdgeBps: 20, requestedGross: 1.25 },
+    { label: "very-strong", basisBps: 140, netEdgeBps: 30, requestedGross: 1.5 },
+  ],
+  v52V50Tiers: [
+    { label: "normal", basisBps: v52V50Runtime.minimumEntryBasisBps, netEdgeBps: v52V50Runtime.minimumNetEdgeBps, requestedGross: v52V50Runtime.slotGross },
+    { label: "strong", basisBps: 100, netEdgeBps: 15, requestedGross: v52V50Runtime.slotGross },
+  ],
+  v52MaxConcurrentPositions: 2,
+  v52ProductionReleaseSha: "4230604a4cff33e5fb93725e36544e180eb0da45",
+  v52Top2Policy: {
+    rank1RequestedGross: 1,
+    rank2RequestedGross: 0.25,
+    maxConcurrentPositions: 2,
+    maxDailyEntries: 3,
+    minEntryBasisBps: v52V50Runtime.minimumEntryBasisBps,
+    minNetEdgeBps: v52V50Runtime.minimumNetEdgeBps,
+    convergenceBps: v52V50Runtime.convergenceBps,
+    basisStopMultiple: v52V50Runtime.basisStopMultiple,
+    maximumRoundTripCostBps: v52V50Runtime.maximumRoundTripCostBps,
+    maximumSpreadBps: v52V50Runtime.maximumSpreadBps,
+    policyId: v52V50Runtime.policyId,
+    entryWindowSeconds: 20,
+    windowsNy: [...v52V50Runtime.windowsNy],
+    stockGrossCap: 1.98,
+    globalGrossCap: 3.5,
+    retryableReasons: [
+      "STALE_DATA",
+      "SOURCE_CLOCK_MISMATCH",
+      "ROUND_TRIP_COST_OVER_60",
+      "DEPTH_BELOW_2X",
+      "SPREAD_OVER_20",
+    ],
+    finalRejectReasons: [
+      "BASIS_BELOW_60",
+      "NET_EDGE_BELOW_7_5",
+      "SIGN_CHANGED",
+      "ADVERSE_BASIS_MOVE",
+      "SAME_SYMBOL_ACTIVE",
+    ],
+  },
+  penguGross: 0.85,
+  penguLongGross: 1.0625,
+  penguShortGross: 0.85,
+  penguLongMultiplier: 1.25,
+  penguShortMultiplier: 1,
+  penguShortVersion: "SHORT_V20",
+  penguHardStopCooldownHours: 24,
+  penguRecoveryV8: {
+    sourceResearchSha: "15c0b7586710c9db1c46b376bb5041203fc7d826",
+    implementationSha: "5a98a7e04d6ac4b867d26d46f3e718ffd7f7bfd2",
+    entryRule: "R_BTC3",
+    priority: "SHORT_FIRST",
+    rsiDelta6Min: 7.392354615445917,
+    ema168DistanceMinPct: -5.864583483302943,
+    btcReturn6hMinPct: 0.20571786048402818,
+    ordinaryPrecedence: "??Short / Base Long??????????????????Recovery???Long?????????????????",
+    recoveryGross: 0.5,
+    partialGross: 0.25,
+    partialAfterHours: 24,
+    partialTriggerPct: -4,
+    hardStopPct: -6,
+    trailActivationPct: 6,
+    trailRetracePct: 3,
+    maxHoldHours: 72,
+    sameBarOrder: "-4% partial-defense???????gross?-6% hard stop",
+    liveTriggerNote: "LIVE?entry?0.96?STOP_MARKET trigger??????fill???slippage????exact fill??????",
+  },
+  vpsObservedReleases: {
+    v12: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    pengu: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    v52: "4230604a4cff33e5fb93725e36544e180eb0da45",
+    quality102: "4230604a4cff33e5fb93725e36544e180eb0da45",
+  },
+  v12Symbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT"],
+  penguSymbol: "PENGUUSDT",
+  cryptoSymbols: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT", "APTUSDT", "ARBUSDT", "ENAUSDT", "FILUSDT", "JUPUSDT", "ONDOUSDT", "OPUSDT", "RENDERUSDT", "SEIUSDT", "SUIUSDT", "TAOUSDT", "TIAUSDT", "TRXUSDT"],
+  stockSymbols: ["AMZNUSDT", "METAUSDT", "MSFTUSDT", "NVDAUSDT", "TSLAUSDT"],
+} as const;

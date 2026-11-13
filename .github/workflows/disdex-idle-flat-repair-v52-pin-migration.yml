@@ -1,0 +1,94 @@
+name: DisDex IDLE Flat Repair V52 Exact Pin Migration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Verify scoped protected helper migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_idle_repair_v52_pin_migration.py
+          grep -Fq 'ad84823335cd6355dc529f8e2a092e803fc23dd1fea13ff0a60ea5e465ac0ab5' scripts/ops/deploy/disdex_idle_repair_v52_pin_migration.py
+          echo 'EXACT_ROOT_HELPER_MIGRATION_CODE_VERIFIED=TRUE'
+      - name: Configure reviewed HP maintenance SSH
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$HOST_KEYS" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/idle-v52-pin-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/idle-v52-pin-ssh/key"
+          printf '%s\n' "$HOST_KEYS" > "$RUNNER_TEMP/idle-v52-pin-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/idle-v52-pin-ssh/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/idle-v52-pin-ssh/key" >/dev/null
+      - name: Upload scoped verified helper
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          scp -i "$RUNNER_TEMP/idle-v52-pin-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-v52-pin-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_idle_repair_v52_pin_migration.py \
+            "root@$HOST:/tmp/disdex-idle-v52-pin-$GITHUB_RUN_ID.py"
+      - name: Migrate exact V52 source SHA and verify with three read-only signed GETs
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          ssh -T -i "$RUNNER_TEMP/idle-v52-pin-ssh/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-v52-pin-ssh/known_hosts" \
+            -o ConnectTimeout=10 -o ServerAliveInterval=10 -o ServerAliveCountMax=4 \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-idle-v52-pin-$GITHUB_RUN_ID.py --run-id $GITHUB_RUN_ID"
+      - name: Cleanup ephemeral helper and SSH material
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set +e
+          if [[ -z "$PORT" ]]; then PORT=22; fi
+          if [[ -s "$RUNNER_TEMP/idle-v52-pin-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/idle-v52-pin-ssh/key" \
+              -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/idle-v52-pin-ssh/known_hosts" \
+              -o ConnectTimeout=5 -p "$PORT" "root@$HOST" \
+              "rm -f -- /tmp/disdex-idle-v52-pin-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/idle-v52-pin-ssh"

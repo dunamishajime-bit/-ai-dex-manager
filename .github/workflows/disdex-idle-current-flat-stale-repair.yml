@@ -1,0 +1,64 @@
+name: DisDex IDLE current flat stale repair and LIVE resume
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    if: github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Static checks
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_idle_current_flat_stale_repair.py
+          node --test tests/idle-current-flat-stale-repair-contract.test.mjs
+      - name: Configure pinned SSH
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          mkdir -m 0700 "$RUNNER_TEMP/idle-repair-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/idle-repair-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/idle-repair-ssh/known_hosts"
+      - name: Upload and execute exact repair
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          SCP=(scp -i "$RUNNER_TEMP/idle-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/idle-repair-ssh/known_hosts" -P "$PORT")
+          SSH=(ssh -T -i "$RUNNER_TEMP/idle-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/idle-repair-ssh/known_hosts" -p "$PORT")
+          "${SCP[@]}" scripts/ops/deploy/disdex_idle_current_flat_stale_repair.py "root@$HOST:/tmp/disdex_idle_current_flat_stale_repair.$GITHUB_RUN_ID.py"
+          "${SSH[@]}" "root@$HOST" "chmod 0700 /tmp/disdex_idle_current_flat_stale_repair.$GITHUB_RUN_ID.py && exec python3 /tmp/disdex_idle_current_flat_stale_repair.$GITHUB_RUN_ID.py $GITHUB_RUN_ID"
+      - name: Cleanup
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/idle-repair-ssh/key" ]]; then
+            ssh -T -i "$RUNNER_TEMP/idle-repair-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/idle-repair-ssh/known_hosts" -p "$PORT" "root@$HOST" "rm -f /tmp/disdex_idle_current_flat_stale_repair.$GITHUB_RUN_ID.py" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/idle-repair-ssh"

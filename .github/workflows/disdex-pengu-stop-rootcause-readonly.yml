@@ -1,0 +1,72 @@
+name: DisDex PENGU Stop Root-Cause Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-stop-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-stop-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-stop-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-stop-ssh/"*
+
+      - name: Inspect PENGU unit dependency and stop evidence
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-stop-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-stop-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             unit='disdex-pengu-dual-ls-v2@7688ed7c93a1918d8b44837339b7da5584a868f5.service';
+             echo PENGU_UNIT_PROPS_BEGIN;
+             systemctl show \"\$unit\" --no-pager                -p Id -p LoadState -p UnitFileState -p ActiveState -p SubState -p MainPID                -p Result -p Restart -p RestartUSec -p ExecMainCode -p ExecMainStatus                -p FragmentPath -p DropInPaths -p StopWhenUnneeded -p RefuseManualStop                -p PartOf -p BindsTo -p Requires -p Wants -p Conflicts -p Before -p After                -p OnFailure -p Triggers -p TriggeredBy;
+             echo PENGU_UNIT_PROPS_END;
+             echo PENGU_UNIT_CAT_BEGIN;
+             systemctl cat \"\$unit\" --no-pager || true;
+             echo PENGU_UNIT_CAT_END;
+             echo PENGU_REVERSE_DEPS_BEGIN;
+             systemctl list-dependencies --reverse --all \"\$unit\" --no-pager || true;
+             echo PENGU_REVERSE_DEPS_END;
+             echo PENGU_SYSTEM_JOURNAL_WINDOW_BEGIN;
+             journalctl --since '2026-11-01 14:55:00' --until '2026-11-01 15:05:00'                --no-pager -o short-iso |                grep -Eai 'pengu|disdex|systemd|stop(ping|ped)?|sigterm|terminate|v4|runner' | tail -n 240 || true;
+             echo PENGU_SYSTEM_JOURNAL_WINDOW_END;
+             echo PENGU_TIMERS_BEGIN;
+             systemctl list-timers --all --no-pager | grep -Eai 'pengu|disdex' || true;
+             echo PENGU_TIMERS_END;
+             echo PENGU_FAILED_BEGIN;
+             systemctl --failed --no-pager | grep -Eai 'pengu|disdex' || true;
+             echo PENGU_FAILED_END;
+             echo TRADING_MUTATION=0;
+             echo ORDERS_SENT=0;
+             echo CANCELS_SENT=0;
+             echo POSITION_CHANGES_SENT=0"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-stop-ssh"

@@ -1,0 +1,57 @@
+name: DisDex IDLE V52 Pin Migration Safety CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_idle_repair_v52_pin_migration.py"
+      - ".github/workflows/disdex-idle-flat-repair-v52-pin-migration.yml"
+      - ".github/workflows/disdex-idle-v52-pin-migration-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Exact one-field source modification safety policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_idle_repair_v52_pin_migration.py
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          s=Path("scripts/ops/deploy/disdex_idle_repair_v52_pin_migration.py").read_text()
+          w=Path(".github/workflows/disdex-idle-flat-repair-v52-pin-migration.yml").read_text()
+          ast.parse(s)
+          old="97830672e2f139b39f7194166d7dc8c36e8c8933"
+          new="4d33d8244c0b50a7e461ffd8aaf493c32bfdfd81"
+          assert f'V52_SHA = "{old}"' != f'V52_SHA = "{new}"'
+          for required in [
+              "EXPECTED_SOURCE_SHA256",
+              "old.count(OLD_FRAGMENT)==1",
+              "updated=old.replace(OLD_FRAGMENT,NEW_FRAGMENT,1)",
+              "validate_venue_owner()",
+              "READ_ONLY_PROOF_PASS_NO_CHANGE",
+              "PROTECTED_SCRIPT_READBACK_MISMATCH",
+              "atomic_replace(old,st)",
+              "HOLD_PROTECTED",
+              "IDLE_EXPECTED_FAILED_STATE_CHANGED",
+          ]:
+              assert required in s,required
+          for required in [
+              "environment:", "name: disdex-production",
+              "github.actor == 'dunamishajime-bit'",
+              "github.ref == 'refs/heads/master'",
+              "disdex_idle_repair_v52_pin_migration.py",
+          ]:
+              assert required in w,required
+          assert "--execute-after-three-signed-gets" not in w
+          assert "systemctl restart" not in w
+          print("PROTECTED_HELPER_EXACT_SHA_MIGRATION_POLICY_PASS")
+          PY

@@ -1,0 +1,63 @@
+name: DisDex PENGU Operator Activation Gate Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-gate-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-gate-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-gate-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-gate-ssh/"*
+
+      - name: Evaluate exact existing PENGU operator activation gate
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-gate-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-gate-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "set -euo pipefail;
+             sha=7688ed7c93a1918d8b44837339b7da5584a868f5;
+             root=/home/deploy/disdex-trading/releases/\$sha;
+             gate=/home/deploy/disdex-trading/releases/53a0be396719f0284af4e11b35c66a4ac7d58f79/scripts/ops/root/disdex-live-operator-activation-gate.mjs;
+             test -f \"\$gate\";
+             test -d \"\$root\";
+             set +e;
+             /usr/bin/node \"\$gate\"                --release-root \"\$root\"                --sha \"\$sha\"                --runner PENGU_V8                --activation-path /var/lib/disdex/shared/operator-activation/current.json;
+             rc=\$?;
+             set -e;
+             echo PENGU_OPERATOR_GATE_EXIT=\$rc;
+             echo TRADING_MUTATION=0;
+             echo ORDERS_SENT=0;
+             echo CANCELS_SENT=0;
+             echo POSITION_CHANGES_SENT=0"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-gate-ssh"

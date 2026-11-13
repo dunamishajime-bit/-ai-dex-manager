@@ -1,0 +1,32 @@
+name: DisDex IDLE current flat stale repair CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-idle-current-flat-stale-repair.yml"
+      - ".github/workflows/disdex-idle-current-flat-stale-repair-ci.yml"
+      - "scripts/ops/deploy/disdex_idle_current_flat_stale_repair.py"
+      - "tests/idle-current-flat-stale-repair-contract.test.mjs"
+  push:
+    branches-ignore:
+      - master
+    paths:
+      - ".github/workflows/disdex-idle-current-flat-stale-repair.yml"
+      - ".github/workflows/disdex-idle-current-flat-stale-repair-ci.yml"
+      - "scripts/ops/deploy/disdex_idle_current_flat_stale_repair.py"
+      - "tests/idle-current-flat-stale-repair-contract.test.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - run: python3 -m py_compile scripts/ops/deploy/disdex_idle_current_flat_stale_repair.py
+      - run: node --test tests/idle-current-flat-stale-repair-contract.test.mjs

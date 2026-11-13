@@ -1,0 +1,113 @@
+name: DisDex PENGU SIGTERM Source Read-Only Scan
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-sigterm-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-sigterm-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-sigterm-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-sigterm-ssh/"*
+
+      - name: Scan bounded local management surfaces for PENGU signal sources
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-sigterm-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-sigterm-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import pathlib,re,subprocess
+
+          log=pathlib.Path('/home/deploy/goldcat-logs/copy-autopilot-cron.log')
+          print('GOLDCAT_CRON_LOG_EXISTS='+str(log.is_file() and not log.is_symlink()).lower())
+          if log.is_file() and not log.is_symlink():
+              lines=log.read_text(errors='replace').splitlines()
+              print('GOLDCAT_CRON_LOG_TAIL_BEGIN')
+              for line in lines[-160:]:
+                  if re.search(r'2026-11-01|15:00|error|not found|kill|stop|restart|node|process|disdex|pengu',line,re.I):
+                      print(line)
+              print('GOLDCAT_CRON_LOG_TAIL_END')
+
+          roots=[
+            pathlib.Path('/usr/local/sbin'),
+            pathlib.Path('/opt/disdex-readonly-ops'),
+            pathlib.Path('/etc/systemd/system'),
+            pathlib.Path('/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5/scripts'),
+            pathlib.Path('/home/deploy/disdex-trading/releases/53a0be396719f0284af4e11b35c66a4ac7d58f79/scripts'),
+          ]
+          print('PENGU_SIGNAL_SOURCE_SCAN_BEGIN')
+          seen=set()
+          for root in roots:
+              if not root.exists(): continue
+              for p in root.rglob('*'):
+                  try:
+                      if not p.is_file() or p.is_symlink() or p.stat().st_size>2_000_000: continue
+                      key=str(p)
+                      if key in seen: continue
+                      seen.add(key)
+                      body=p.read_text(errors='replace')
+                  except Exception:
+                      continue
+                  if not re.search(r'pengu|disdex-pengu-dual-ls-v2',body,re.I):
+                      continue
+                  hits=[]
+                  for n,line in enumerate(body.splitlines(),1):
+                      if re.search(r'kill|pkill|killall|SIGTERM|SIGINT|process\.kill|systemctl\s+(stop|restart|kill|disable)|disable\s+--now|service\s+.*(stop|restart)',line,re.I):
+                          hits.append(f'{n}:{line}')
+                  if hits:
+                      print('PENGU_SIGNAL_SOURCE_FILE='+key)
+                      print('\n'.join(hits[:120]))
+          print('PENGU_SIGNAL_SOURCE_SCAN_END')
+
+          print('PENGU_PROCESS_FINAL_JOURNAL_BEGIN')
+          p=subprocess.run(['journalctl','_SYSTEMD_UNIT=disdex-pengu-dual-ls-v2@7688ed7c93a1918d8b44837339b7da5584a868f5.service',
+              '--since','2026-11-01 14:58:00','--until','2026-11-01 15:00:25','--no-pager','-o','short-iso'],
+              capture_output=True,text=True,timeout=20)
+          print(p.stdout.strip())
+          print('PENGU_PROCESS_FINAL_JOURNAL_END')
+
+          for candidate in ['/var/log/auth.log','/var/log/syslog']:
+              p=pathlib.Path(candidate)
+              if p.is_file() and not p.is_symlink():
+                  print('LOG_SIGNAL_WINDOW_BEGIN='+candidate)
+                  for line in p.read_text(errors='replace').splitlines()[-5000:]:
+                      if re.search(r'Nov\s+1\s+15:00|3065213|pengu|SIGTERM|kill',line,re.I):
+                          print(line)
+                  print('LOG_SIGNAL_WINDOW_END='+candidate)
+
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-sigterm-ssh"

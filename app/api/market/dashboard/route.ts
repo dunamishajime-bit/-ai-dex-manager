@@ -2,6 +2,7 @@
 import { kvGet } from "@/lib/kv";
 import { Universe, PricePoint, TokenRef } from "@/lib/types/market";
 import { fetchPricesBatch, fetchUsdJpy, priceKey, toJpy } from "@/lib/providers/market-providers";
+import { marketDashboardInternalRefreshUrl } from "@/lib/server/market-dashboard-internal-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,7 +29,7 @@ export async function GET() {
         // Self-seed if empty
         if (!universe) {
             console.log("[Dashboard] Universe empty, seeding...");
-            const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/agents/refresh-universe`, { method: "POST" });
+            const refreshRes = await fetch(marketDashboardInternalRefreshUrl(), { method: "POST", cache: "no-store" });
             if (refreshRes.ok) {
                 universe = await kvGet<Universe>("universe:v1");
             }

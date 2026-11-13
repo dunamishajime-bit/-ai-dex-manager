@@ -1,0 +1,22 @@
+name: DisDex V4 DOGE Missed TIME Exit Operator Handoff Readiness
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  retired-manual-flat:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Retire stale protected-position handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT=TRUE
+          echo REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE=TRUE
+          echo TRADING_MUTATION=0
+          exit 1

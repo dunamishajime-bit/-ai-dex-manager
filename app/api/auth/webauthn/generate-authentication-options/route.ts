@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Store challenge in cookie
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         cookieStore.set("authentication-challenge", options.challenge, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",

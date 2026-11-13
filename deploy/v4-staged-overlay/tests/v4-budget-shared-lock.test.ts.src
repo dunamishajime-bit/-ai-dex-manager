@@ -1,0 +1,73 @@
+import assert from "node:assert/strict";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createConnection } from "node:net";
+import { spawn } from "node:child_process";
+import test from "node:test";
+import { reserveAsterGlobalRateSlot, deferAsterGlobalRateBudget } from "../lib/disdex-aster-global-rate-budget";
+import { createV4BudgetBrokerServer } from "../lib/disdex-v4-rate-budget-server";
+
+test("broker and direct runners serialize 80 real shared-budget writes and retain cooldown", {timeout:60000}, async () => {
+  const dir=await mkdtemp(join(tmpdir(), "disdex-budget-test-"));
+  const path=join(dir,"budget.json");
+  const slots:number[]=[];
+  const reserve=async () => {
+    const result=await reserveAsterGlobalRateSlot({path,minIntervalMs:1,maxQueueMs:30000,priority:"RISK_READ"});
+    slots.push(result.permitAt);
+    return result;
+  };
+  const server=createV4BudgetBrokerServer({reserve:async()=>reserve(),defer:async(status,cooldownMs)=>deferAsterGlobalRateBudget({path,status,cooldownMs})});
+  try {
+    await new Promise<void>((resolve,reject)=>{
+      server.once("error",reject);
+      if (process.platform === "win32") server.listen(0,"127.0.0.1",resolve);
+      else server.listen(join(dir,"budget.sock"),resolve);
+    });
+    const address=server.address(); assert.ok(address);
+    const request=()=>new Promise<any>((resolve,reject)=>{
+      const socket=createConnection(typeof address === "string" ? {path:address} : {host:"127.0.0.1",port:address.port}); let raw="";
+      socket.setEncoding("utf8"); socket.once("error",reject);
+      socket.on("data",chunk=>{raw+=chunk;});
+      socket.once("end",()=>{try{resolve(JSON.parse(raw));}catch(error){reject(error);}});
+      socket.once("connect",()=>socket.write(JSON.stringify({schema:"disdex-v4-budget-proxy/v1",operation:"reserve",weight:1,priority:"RISK_READ"})+"\n"));
+    });
+    const results=await Promise.all([...Array.from({length:40},()=>request()),...Array.from({length:40},()=>reserve())]);
+    assert.equal(results.filter(result=>result.ok===true).length,40);
+    assert.equal(slots.length,80); assert.equal(new Set(slots).size,80);
+    const persisted=JSON.parse(await readFile(path,"utf8"));
+    assert.ok(persisted.nextAllowedAt>Math.max(...slots));
+    const deferred=await deferAsterGlobalRateBudget({path,status:429,cooldownMs:60000});
+    await assert.rejects(()=>reserve(),/SATURATED/);
+    const after=JSON.parse(await readFile(path,"utf8"));
+    assert.equal(after.nextAllowedAt,deferred.cooldownUntil);
+    await writeFile(path,"{bad json");
+    await assert.rejects(()=>reserve());
+  } finally {
+    await new Promise<void>(resolve=>server.close(()=>resolve()));
+    await rm(dir,{recursive:true,force:true});
+  }
+});
+
+test("a crashed lock owner is recovered before the next reservation", {timeout:20000}, async () => {
+  const dir=await mkdtemp(join(tmpdir(), "disdex-budget-crash-"));
+  const path=join(dir,"budget.json");
+  const childCode = `const fs=require('node:fs');const p=process.argv[1]+'.lock';fs.mkdirSync(p);fs.writeFileSync(p+'/owner.json',JSON.stringify({schema:'disdex-aster-rate-budget-lock/v1',pid:process.pid,createdAt:Date.now(),token:'crash-test'}));process.stdout.write('READY\\n');setInterval(()=>{},1000);`;
+  const child=spawn(process.execPath,["-e",childCode,path],{stdio:["ignore","pipe","pipe"]});
+  try {
+    await new Promise<void>((resolve,reject)=>{
+      let output=""; child.stdout.setEncoding("utf8");
+      child.stdout.on("data",chunk=>{output+=chunk;if(output.includes("READY\n"))resolve();});
+      child.once("error",reject); child.once("exit",()=>reject(new Error("LOCK_OWNER_EXITED_BEFORE_READY")));
+    });
+    const stopped=new Promise<void>(resolve=>child.once("exit",()=>resolve()));
+    child.kill("SIGKILL"); await stopped;
+    const result=await reserveAsterGlobalRateSlot({path,minIntervalMs:1,maxQueueMs:30000,priority:"RISK_READ"});
+    assert.ok(Number.isFinite(result.permitAt));
+    const persisted=JSON.parse(await readFile(path,"utf8"));
+    assert.equal(persisted.nextAllowedAt,result.nextAllowedAt);
+  } finally {
+    if(child.exitCode===null && child.signalCode===null) child.kill("SIGKILL");
+    await rm(dir,{recursive:true,force:true});
+  }
+});

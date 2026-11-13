@@ -38,7 +38,21 @@ export type OperationalWalletRecord = {
   depositDetectedAt?: string;
   lastBalanceWei?: string;
   lastBalanceFormatted?: string;
+  /** AsterDex account-level wallet balance, kept separate from portfolio valuation. */
+  lastAsterAccountBalanceUsd?: number;
+  /** AsterDex balance available for new orders. */
+  lastAsterAvailableBalanceUsd?: number;
+  /** Timestamp of the last successful Aster account snapshot. */
+  lastAsterAccountVerifiedAt?: string;
+  /** Source used for the account valuation displayed in the UI. */
+  lastAsterAccountSource?: "AsterDEX";
+  /** Account-level unrealized PnL included in the Aster margin snapshot. */
+  lastAsterUnrealizedPnlUsd?: number;
+  lastAsterBalanceUpdatedAt?: string;
   lastPortfolioUsd?: number;
+  lastPortfolioHighWaterUsd?: number;
+  lastPortfolioDrawdownPct?: number;
+  lastPortfolioDrawdownCheckedAt?: string;
   trackedHoldings?: OperationalWalletHolding[];
   deletedAt?: string;
   whitelist: OperationalWhitelistEntry[];

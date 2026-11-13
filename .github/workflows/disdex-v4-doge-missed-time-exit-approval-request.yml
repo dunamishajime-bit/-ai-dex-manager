@@ -1,0 +1,28 @@
+name: DisDex V4 DOGE Missed TIME Exit Approval Request (Retired)
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  retired:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_DOGE_MISSED_TIME_EXIT ')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Fail closed because protected-position incident is already manually settled
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "DOGE_PROTECTED_POSITION_PLAN_RETIRED_MANUAL_FLAT=TRUE"
+          echo "REQUIRES_NEW_FLAT_STATE_PLAN_AND_SCOPE=TRUE"
+          echo "TRADING_MUTATION=0"
+          exit 1

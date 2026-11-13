@@ -1,0 +1,44 @@
+name: DisDex IDLE HOLD Recovery Policy CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-idle-v52-owner-hold-formal-recovery.yml"
+      - ".github/workflows/disdex-idle-kill-hold-recovery-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Require exact static owner-scoped recovery commands
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path(".github/workflows/disdex-idle-v52-owner-hold-formal-recovery.yml").read_text()
+          requirements=(
+              "workflow_dispatch:",
+              "environment:",
+              "name: disdex-production",
+              "github.actor == 'dunamishajime-bit'",
+              "github.ref == 'refs/heads/master'",
+              "inputs.mode == 'execute'",
+              "/usr/bin/python3 /usr/local/sbin/disdex-idle-residual-kill-recovery",
+              "/usr/local/sbin/disdex-idle-residual-kill-recovery --execute-after-three-signed-gets",
+              "DISDEX_PRODUCTION_SSH_PRIVATE_KEY",
+              "SHARED_HOLD_NOT_RELEASED",
+          )
+          for item in requirements:
+              assert item in s, item
+          assert s.count("disdex-idle-residual-kill-recovery --execute-after-three-signed-gets")==1
+          assert "systemctl stop" not in s
+          assert "systemctl restart" not in s
+          print("EXACT_SCOPED_OWNER_HOLD_WORKFLOW_POLICY_PASS")
+          PY

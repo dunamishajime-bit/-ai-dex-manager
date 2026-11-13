@@ -86,7 +86,7 @@ export function CorrelationHeatmap() {
         computeMatrix();
         setLoading(false);
         setLastUpdated(new Date());
-    }, []); // eslint-disable-line
+    }, []);
 
     function computeMatrix() {
         const n = ASSETS.length;

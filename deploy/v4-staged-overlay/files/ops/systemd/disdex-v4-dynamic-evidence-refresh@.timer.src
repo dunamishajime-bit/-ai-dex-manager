@@ -1,0 +1,12 @@
+[Unit]
+Description=Schedule SHA-pinned DisDex V4 read-only evidence refresh (%i)
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+RandomizedDelaySec=30s
+AccuracySec=15s
+Unit=disdex-v4-dynamic-evidence-refresh@%i.service
+
+[Install]
+WantedBy=timers.target

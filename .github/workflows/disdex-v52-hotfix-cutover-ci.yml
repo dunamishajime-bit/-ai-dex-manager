@@ -1,0 +1,65 @@
+name: DisDex V52 Hotfix Cutover Unit and Policy CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/deploy/disdex_v52_owner_approved_4d33_cutover.py"
+      - "tests/ops/test_v52_owner_approved_hotfix_cutover.py"
+      - ".github/workflows/disdex-v52-exact-owner-approved-hotfix-cutover.yml"
+      - ".github/workflows/disdex-v52-hotfix-cutover-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-unit-policy:
+    if: github.repository == 'dunamishajime-bit/-ai-dex-manager'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Python compile and fail-closed unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/ops/deploy/disdex_v52_owner_approved_4d33_cutover.py
+          python3 -m unittest discover -s tests/ops -p test_v52_owner_approved_hotfix_cutover.py -v
+      - name: Verify owner review and exact restricted workflow permissions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast
+          p=Path('scripts/ops/deploy/disdex_v52_owner_approved_4d33_cutover.py')
+          w=Path('.github/workflows/disdex-v52-exact-owner-approved-hotfix-cutover.yml')
+          text=p.read_text()
+          workflow=w.read_text()
+          ast.parse(text)
+          for item in [
+              'environment:',
+              'name: disdex-production',
+              "github.actor == 'dunamishajime-bit'",
+              "github.ref == 'refs/heads/master'",
+              'mode == ',
+              'V52_EXACT_SHA_HELPER_VALIDATED=TRUE',
+          ]:
+              assert item in workflow,item
+          for forbidden in [
+              'DISDEX_PRODUCTION_APPROVER_PUBLIC_KEY_PEM',
+              'disdex-v12-v4@',
+              'kill-switch clear',
+              'cancel-order',
+              'test-order',
+          ]:
+              assert forbidden not in workflow,forbidden
+          for required in [
+              'HOLD_PROTECTED','PENDING_EXPOSURE_ACTIVE','RESIDENT_DOGE_STOP_MISMATCH',
+              'OLD_V52_STILL_ACTIVE','NEW_V52_NOT_STABLE','V52_HOTFIX_ROLLBACK=SUCCESS',
+          ]:
+              assert required in text,required
+          print('V52_CUTOVER_STATIC_POLICY=PASS')
+          PY

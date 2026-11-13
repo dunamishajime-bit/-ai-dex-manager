@@ -1,0 +1,95 @@
+name: DisDex PENGU Watchdog Post-Stop Read-Only
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  diagnostic:
+    if: github.ref == 'refs/heads/master' && github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/pengu-watchdog-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/pengu-watchdog-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/pengu-watchdog-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/pengu-watchdog-ssh/"*
+
+      - name: Read watchdog decisions after PENGU clean stop
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/pengu-watchdog-ssh/key"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$RUNNER_TEMP/pengu-watchdog-ssh/known_hosts"             -o ConnectTimeout=12 -p "$PORT" "root@$HOST"             "python3 - <<'PY'
+          import json,pathlib,subprocess,re
+
+          def run(*args):
+              p=subprocess.run(list(args),capture_output=True,text=True,timeout=20)
+              return p.returncode,p.stdout.strip(),p.stderr.strip()
+
+          rc,out,err=run('journalctl','-u','disdex-runner-watchdog.service',
+              '--since','2026-11-01 15:00:20','--until','2026-11-01 15:04:30',
+              '--no-pager','-o','short-iso')
+          print('WATCHDOG_POST_STOP_JOURNAL_BEGIN')
+          print(out)
+          print('WATCHDOG_POST_STOP_JOURNAL_END')
+
+          for pth in [
+              '/var/lib/disdex/runner-health/heartbeats/pengu-v8.json',
+              '/var/lib/disdex/shared/operator-activation/current.json',
+              '/etc/disdex/current-runtime/7688ed7c93a1918d8b44837339b7da5584a868f5.watchdog.env',
+          ]:
+              p=pathlib.Path(pth)
+              print('FILE='+pth)
+              if not p.is_file() or p.is_symlink():
+                  print('FILE_STATE=MISSING_OR_UNSAFE')
+                  continue
+              if p.suffix=='.json':
+                  try:
+                      d=json.loads(p.read_text())
+                  except Exception:
+                      print('FILE_STATE=INVALID_JSON');continue
+                  if 'operator-activation' in pth:
+                      # Print only non-secret activation metadata.
+                      keep={k:d.get(k) for k in ('schema','releaseSha','sha','status','ordersEnabled','updatedAt','createdAt','runner','runners')}
+                      print('SAFE_JSON='+json.dumps(keep,separators=(',',':')))
+                  else:
+                      keep={k:d.get(k) for k in ('runnerId','expectedSha','runtimeSha','serviceUnit','active','processPresent','safetyState','reason','orderPermission','heartbeatAt','updatedAt','mainPid','restartAttempts')}
+                      print('SAFE_JSON='+json.dumps(keep,separators=(',',':')))
+              else:
+                  for line in p.read_text(errors='replace').splitlines():
+                      if re.search(r'PENGU|OPERATOR_ACTIVATION|EXPECTED_SHA|SERVICE_UNIT|RESTART|APPROVED',line):
+                          if re.search(r'SECRET|TOKEN|KEY|PASSWORD',line,re.I): continue
+                          print(line)
+
+          print('TRADING_MUTATION=0')
+          print('ORDERS_SENT=0')
+          print('CANCELS_SENT=0')
+          print('POSITION_CHANGES_SENT=0')
+          PY"
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/pengu-watchdog-ssh"

@@ -101,8 +101,12 @@ jobs:
           grep -Fq 'NODE_OPTIONS=--max-old-space-size=1536 bash "$activate"' "$control"
           NODE_OPTIONS=--max-old-space-size=1536 node - <<'NODE'
           const mib = require('node:v8').getHeapStatistics().heap_size_limit / 1024 / 1024;
-          if (mib < 1500 || mib > 1700) process.exit(1);
-          console.log(`DISDEX_V12_BUILD_HEAP_SELFTEST_PASS heapLimitMiB=${mib.toFixed(0)}`);
+          console.log('DISDEX_V12_BUILD_HEAP_SELFTEST heapLimitMiB=' + mib.toFixed(0) + ' node=' + process.version);
+          if (process.env.NODE_OPTIONS !== '--max-old-space-size=1536') process.exit(1);
+          // V8 adds non-old-space regions to heap_size_limit; that overhead changes by Node/V8 release.
+          // Prove the 1536 MiB old-space envelope took effect without pinning an obsolete total-heap constant.
+          if (mib < 1500 || mib > 2200) process.exit(1);
+          console.log('DISDEX_V12_BUILD_HEAP_SELFTEST_PASS');
           NODE
 
       - name: Prove least-privilege tool extraction topology

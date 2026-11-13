@@ -1,0 +1,27 @@
+import { NextRequest, NextResponse } from "next/server";
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
+import { loadFetRuntimeObservability } from "@/lib/server/fet-runtime-observability";
+import { requestHasSignedOwnerSession } from "@/lib/server/session-auth";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+/** Read only. Expected FET SHA is derived from the actual approved trading release, never the UI build SHA. */
+export async function GET(request: NextRequest) {
+  if (!requestHasSignedOwnerSession(request)) {
+    return NextResponse.json({ok:false,readOnly:true,tradingMutation:0,error:"ログインが必要です。"},
+      {status:401,headers:{"Cache-Control":"private, no-store, max-age=0"}});
+  }
+  try {
+    const current = await loadCurrentProductionRuntime();
+    const expectedRuntimeSha = current.productionReleaseShas.fet;
+    const fet = await loadFetRuntimeObservability({expectedReleaseSha:expectedRuntimeSha});
+    return NextResponse.json({ok:true,readOnly:true,tradingMutation:0,
+      expectedRuntimeSha,...fet},
+      {headers:{"Cache-Control":"private, no-store, max-age=0"}});
+  } catch(error) {
+    return NextResponse.json({ok:false,readOnly:true,tradingMutation:0,
+      error:error instanceof Error?error.message:"FET実Runnerを取得できません。"},
+      {status:503,headers:{"Cache-Control":"private, no-store, max-age=0"}});
+  }
+}

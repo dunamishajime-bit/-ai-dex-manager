@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """FET audit SHA-independent V52 pin negative-case contract tests."""
 import importlib.util
-import json
 from pathlib import Path
-import tempfile
 import unittest
 
 SOURCE = Path(__file__).resolve().parents[1] / "scripts/ops/root/disdex-fet-preemption-readiness-guard.py"
@@ -16,18 +14,22 @@ SHA = "7688ed7c93a1918d8b44837339b7da5584a868f5"
 
 class PinnedV52AuditTests(unittest.TestCase):
     def test_absent_pin_fails_closed(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            ok, reason = guard.v52_live_pinned(Path(tmp) / "missing", Path(tmp) / "hb")
-            self.assertFalse(ok)
-            self.assertNotEqual(reason, "V52_PINNED_IDENTITY_PASS")
+        reason = guard.validate_v52_contract(
+            None, {}, 1_793_573_600_000, 1, "/tmp", SHA, True
+        )
+        self.assertEqual(reason, "FET_PREEMPTION_V52_PIN_MISSING")
 
     def test_invalid_pin_fails_closed(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            pin = Path(tmp) / "v52-current.env"
-            pin.write_text("DISDEX_V52_RUNTIME_SHA=bad\nDISDEX_V52_RUNTIME_ROOT=/tmp/invalid\n")
-            ok, reason = guard.v52_live_pinned(pin, Path(tmp) / "hb")
-            self.assertFalse(ok)
-            self.assertNotEqual(reason, "V52_PINNED_IDENTITY_PASS")
+        invalid = {
+            "sha": "bad",
+            "releaseRoot": "/tmp/invalid",
+            "serviceUnit": "invalid.service",
+            "evidenceMode": "legacy",
+        }
+        reason = guard.validate_v52_contract(
+            invalid, {}, 1_793_573_600_000, 1, "/tmp/invalid", SHA, True
+        )
+        self.assertEqual(reason, "FET_PREEMPTION_V52_PIN_INVALID")
 
     def test_fet_approval_and_config_remain_required(self):
         valid = {"DISDEX_RUNTIME_COMMIT_SHA": SHA, "FET_BRK48_CORE_PREEMPTION_READY": "true"}

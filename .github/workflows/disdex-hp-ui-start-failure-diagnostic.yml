@@ -1,0 +1,101 @@
+name: DisDex HP UI Start Failure Diagnostic Read Only
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_HP_UI_START_DIAG_20261031'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" > "$HOME/.ssh/id_vps_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+
+      - name: Read failed HP start evidence
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root"             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=10             -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          svc='ai-dex-manager-ui.service'
+          failed='/home/deploy/disdex-trading/ui-releases/ui-hp-approval-9844d3ce05f9'
+
+          echo 'SERVICE_BEGIN'
+          echo "ACTIVE=$(systemctl is-active "$svc" 2>/dev/null || true)"
+          echo "WORKDIR=$(systemctl show "$svc" --property WorkingDirectory --value 2>/dev/null || true)"
+          echo "EXECSTART=$(systemctl show "$svc" --property ExecStart --value 2>/dev/null || true)"
+          echo "USER=$(systemctl show "$svc" --property User --value 2>/dev/null || true)"
+          echo "GROUP=$(systemctl show "$svc" --property Group --value 2>/dev/null || true)"
+          echo "ENVFILES=$(systemctl show "$svc" --property EnvironmentFiles --value 2>/dev/null || true)"
+          echo "RESULT=$(systemctl show "$svc" --property Result --value 2>/dev/null || true)"
+          echo "EXEC_MAIN_STATUS=$(systemctl show "$svc" --property ExecMainStatus --value 2>/dev/null || true)"
+          echo "NRESTARTS=$(systemctl show "$svc" --property NRestarts --value 2>/dev/null || true)"
+          echo 'SERVICE_END'
+
+          echo 'FAILED_RELEASE_BEGIN'
+          if [[ -d "$failed" ]]; then
+            echo "FAILED_RELEASE_EXISTS=TRUE"
+            echo "FAILED_RELEASE_STAT=$(stat -c '%U:%G:%a' "$failed")"
+            echo "FAILED_RELEASE_SHA=$(tr -d '[:space:]' < "$failed/.disdex-release-sha" 2>/dev/null || true)"
+            echo "BUILD_ID=$(tr -d '[:space:]' < "$failed/.next/BUILD_ID" 2>/dev/null || true)"
+            echo "PACKAGE_START=$(node -e 'const p=require(process.argv[1]); console.log(p.scripts?.start||"")' "$failed/package.json" 2>/dev/null || true)"
+            echo "PACKAGE_NEXT=$(node -e 'const p=require(process.argv[1]); console.log(p.dependencies?.next||"")' "$failed/package.json" 2>/dev/null || true)"
+            echo "NEXT_LINK=$(readlink "$failed/node_modules/.bin/next" 2>/dev/null || true)"
+            echo "NEXT_REAL=$(readlink -f "$failed/node_modules/.bin/next" 2>/dev/null || true)"
+            echo "NEXT_STAT=$(stat -c '%U:%G:%a' "$failed/node_modules/.bin/next" 2>/dev/null || true)"
+            echo "NEXT_TARGET_STAT=$(stat -Lc '%U:%G:%a' "$failed/node_modules/.bin/next" 2>/dev/null || true)"
+            if runuser -u deploy -- test -x "$failed/node_modules/.bin/next"; then
+              echo 'DEPLOY_CAN_EXEC_NEXT=TRUE'
+            else
+              echo 'DEPLOY_CAN_EXEC_NEXT=FALSE'
+            fi
+            echo "NEXT_VERSION=$(runuser -u deploy -- "$failed/node_modules/.bin/next" --version 2>&1 | head -n 2 || true)"
+            echo "NODE_VERSION=$(runuser -u deploy -- node --version 2>&1 || true)"
+            echo "NEXT_SERVER_FILE=$(test -f "$failed/node_modules/next/dist/bin/next" && echo PRESENT || echo MISSING)"
+            echo "NEXT_BUILD_DIR=$(stat -c '%U:%G:%a' "$failed/.next" 2>/dev/null || true)"
+          else
+            echo "FAILED_RELEASE_EXISTS=FALSE"
+          fi
+          echo 'FAILED_RELEASE_END'
+
+          echo 'JOURNAL_BEGIN'
+          journalctl -u "$svc"             --since '2026-10-31 06:05:40 UTC'             --until '2026-10-31 06:07:10 UTC'             --no-pager -o short-iso 2>/dev/null             | tail -n 220             | sed -E               -e 's/([A-Za-z0-9_]*(TOKEN|KEY|PASSWORD|SECRET)[A-Za-z0-9_]*)=[^ ]+/\1=***REDACTED***/Ig'               -e 's/(Authorization: Bearer )[A-Za-z0-9._-]+/\1***REDACTED***/Ig'
+          echo 'JOURNAL_END'
+
+          echo "TRADING_CURRENT=$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+          echo "UI_HTTP=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+          echo 'TRADING_MUTATION=0'
+          echo 'HP_UI_START_DIAG_COMPLETE'
+          REMOTE
+
+      - name: Destroy SSH material
+        if: always()
+        shell: bash
+        run: rm -rf "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"

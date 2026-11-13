@@ -1,0 +1,213 @@
+name: DisDex HP Production Approval Request
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-hp-production-approval-request
+  cancel-in-progress: false
+
+jobs:
+  publish-request:
+    if: >-
+      github.event.repository.full_name == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.event.issue.number == 317 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      (
+        startsWith(github.event.comment.body, 'DISDEX_DEPLOY_REQUEST V12_V4 ') ||
+        startsWith(github.event.comment.body, 'DISDEX_DEPLOY_REQUEST PENGU_V8 ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST SHARED_CRYPTO_RISK_WRITER ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_MONITOR_REFRESH ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE_PREP ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY ')
+      )
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Validate exact request command and bind operation
+        id: request
+        shell: bash
+        env:
+          BODY: ${{ github.event.comment.body }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import hashlib, os, re
+
+          body = os.environ["BODY"].strip()
+          deploy = re.fullmatch(
+              r"DISDEX_DEPLOY_REQUEST V12_V4 SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          pengu = re.fullmatch(
+              r"DISDEX_DEPLOY_REQUEST PENGU_V8 SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          shared = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST SHARED_CRYPTO_RISK_WRITER SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          monitor = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST ALL_RUNNERS_MONITOR_REFRESH SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          order_enable_prep = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE_PREP SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          order_enable = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+          idle = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR SHA=([0-9a-f]{40})",
+              body,
+          )
+          hype_sha = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE SHA=([0-9a-f]{40})",
+              body,
+          )
+          v4_continuity = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64})",
+              body,
+          )
+
+          if deploy:
+              target, plan = deploy.groups()
+              operation = "V12_V4_LIVE"
+              scope = "V12_V4"
+              orders_enabled = "true"
+          elif pengu:
+              target, plan = pengu.groups()
+              operation = "PENGU_V8_LIVE"
+              scope = "PENGU_V8"
+              orders_enabled = "true"
+          elif shared:
+              target, plan = shared.groups()
+              operation = "SHARED_CRYPTO_RISK_WRITER"
+              scope = "SHARED_CRYPTO_RISK_ONLY"
+              orders_enabled = "false"
+          elif monitor:
+              target, plan = monitor.groups()
+              operation = "ALL_RUNNERS_MONITOR_REFRESH"
+              scope = "FULL_PROJECT"
+              orders_enabled = "false"
+          elif order_enable_prep:
+              target, plan = order_enable_prep.groups()
+              operation = "ALL_RUNNERS_ORDER_ENABLE_PREP"
+              scope = "FULL_PROJECT"
+              orders_enabled = "false"
+          elif order_enable:
+              target, plan = order_enable.groups()
+              operation = "ALL_RUNNERS_ORDER_ENABLE"
+              scope = "FULL_PROJECT"
+              orders_enabled = "true"
+          elif idle:
+              target = idle.group(1)
+              operation = "IDLE_FLAT_STALE_REPAIR"
+              scope = "IDLE_PRIORITY_SHORT"
+              orders_enabled = "false"
+              context = f"IDLE_FLAT_STALE_REPAIR_AFTER_THREE_SIGNED_GETS\n{target}\n"
+              plan = hashlib.sha256(context.encode("ascii")).hexdigest()
+          elif hype_sha:
+              target = hype_sha.group(1)
+              if target != "a7eee1f91d86d51f2333da117243d044ae1332dc":
+                  raise SystemExit("HYPE_SHA_RESTORE_ONLY_REVIEWED_CANDIDATE")
+              operation = "HYPE_TREND_LONG_SHA_RESTORE"
+              scope = "HYPE_TREND_LONG"
+              orders_enabled = "true"
+              context = "\n".join([
+                  "HYPE_SHA_FLAT_RESTORE_V2",
+                  "d6bcc94512a6416189cd92d7203b9ac3b2c98e70",
+                  target,
+                  "V4_3ad65403013b701db5d9e53e8814e6ab827a28e8",
+                  "SIGNED_ASTER_FLAT_3X",
+                  "",
+              ])
+              plan = hashlib.sha256(context.encode("ascii")).hexdigest()
+          elif v4_continuity:
+              target, plan = v4_continuity.groups()
+              if target != "3ad65403013b701db5d9e53e8814e6ab827a28e8":
+                  raise SystemExit("V4_HYPE_CONTINUITY_ONLY_REVIEWED_V4")
+              operation = "V4_HYPE_PEER_PIN_CONTINUITY"
+              scope = "V12_V4"
+              orders_enabled = "true"
+          else:
+              raise SystemExit("request comment does not match a protected production request grammar")
+
+          print("operation=" + operation)
+          print("scope=" + scope)
+          print("orders_enabled=" + orders_enabled)
+          print("target_sha=" + target)
+          print("plan_sha256=" + plan)
+          print("comment_id=" + os.environ["COMMENT_ID"])
+          PY
+
+      - name: Publish pending request through authenticated HP approval API
+        shell: bash
+        env:
+          BRIDGE_SECRET: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          OPERATION: ${{ steps.request.outputs.operation }}
+          SCOPE: ${{ steps.request.outputs.scope }}
+          ORDERS_ENABLED: ${{ steps.request.outputs.orders_enabled }}
+          TARGET_SHA: ${{ steps.request.outputs.target_sha }}
+          PLAN_SHA256: ${{ steps.request.outputs.plan_sha256 }}
+          COMMENT_ID: ${{ steps.request.outputs.comment_id }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          [[ -n "$BRIDGE_SECRET" ]]
+          python3 - <<'PY'
+          import json, os, urllib.request
+
+          body = json.dumps({
+              "action": "publish",
+              "operation": os.environ["OPERATION"],
+              "scope": os.environ["SCOPE"],
+              "orders_enabled": os.environ["ORDERS_ENABLED"].lower() == "true",
+              "target_sha": os.environ["TARGET_SHA"],
+              "plan_sha256": os.environ["PLAN_SHA256"],
+              "actor": os.environ["ACTOR"],
+              "comment_id": os.environ["COMMENT_ID"],
+          }).encode("utf-8")
+          request = urllib.request.Request(
+              "https://professional-dismanager.net/api/system/deploy-approval",
+              data=body,
+              method="POST",
+              headers={
+                  "Authorization": "Bearer " + os.environ["BRIDGE_SECRET"],
+                  "Content-Type": "application/json",
+              },
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              result = json.load(response)
+          approval = result.get("approval") or {}
+          expected_orders = os.environ["ORDERS_ENABLED"].lower() == "true"
+          if not result.get("ok"):
+              raise SystemExit("APPROVAL_API_NOT_OK")
+          if approval.get("operation") != os.environ["OPERATION"]:
+              raise SystemExit("APPROVAL_OPERATION_MISMATCH")
+          if approval.get("scope") != os.environ["SCOPE"]:
+              raise SystemExit("APPROVAL_SCOPE_MISMATCH")
+          if approval.get("targetSha") != os.environ["TARGET_SHA"]:
+              raise SystemExit("APPROVAL_TARGET_SHA_MISMATCH")
+          if approval.get("planSha256") != os.environ["PLAN_SHA256"]:
+              raise SystemExit("APPROVAL_PLAN_HASH_MISMATCH")
+          if approval.get("ordersEnabled") is not expected_orders:
+              raise SystemExit("APPROVAL_ORDER_PERMISSION_MISMATCH")
+          print("APPROVAL_REQUEST_ID=" + str(approval.get("id")))
+          print("APPROVAL_REQUEST_STATUS=" + str(approval.get("status")))
+          print("APPROVAL_REQUEST_PUBLISHED_VIA_API=TRUE")
+          print("TRADING_MUTATION=0")
+          PY

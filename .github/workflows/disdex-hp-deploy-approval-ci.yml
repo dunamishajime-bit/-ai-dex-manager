@@ -1,0 +1,111 @@
+name: DisDex HP Deployment Approval CI
+
+on:
+  pull_request:
+    paths:
+      - "lib/deploy-approval-token.ts"
+      - "lib/server/deploy-approval-store.ts"
+      - "lib/server/owner-session.ts"
+      - "lib/server/password-hash.ts"
+      - "lib/server/otp-challenge-store.ts"
+      - "lib/server/request-security.ts"
+      - "app/api/auth/**"
+      - "app/api/admin/**"
+      - "app/api/admin/deploy-approval/**"
+      - "app/api/production-approval/**"
+      - "app/production-approval/**"
+      - "components/layout/Sidebar.tsx"
+      - "app/page.tsx"
+      - "app/realtime/**"
+      - "app/decision-status/**"
+      - "app/performance/**"
+      - "scripts/ops/disdex-hp-ui-regression-guard.mjs"
+      - "app/settings/page.tsx"
+      - "app/api/system/deploy-approval/**"
+      - "app/admin/page.tsx"
+      - "scripts/disdex-hp-deploy-approval-selftest.ts"
+      - "tests/deploy-approval-store-concurrency.test.ts"
+      - "tests/fixtures/approval-store-writer.ts"
+      - "tests/deploy-approval-direct-writer.test.mjs"
+      - "tests/password-hash-hardening.test.ts"
+      - "tests/owner-session-hardening.test.ts"
+      - "tests/otp-challenge-store.test.ts"
+      - "tests/auth-boundary-source.test.mjs"
+      - "tests/production-workflow-protected-environment.test.mjs"
+      - ".github/workflows/disdex-v4-hp-approval-request.yml"
+      - ".github/workflows/disdex-v4-doge-missed-time-exit-approval-request.yml"
+      - "package.json"
+      - "next.config.mjs"
+      - ".github/workflows/disdex-v4-hp-approval-request.yml"
+      - ".github/workflows/disdex-hp-approval-ui-production-deploy.yml"
+      - ".github/workflows/disdex-hp-standard-approval-ui-deploy.yml"
+      - ".github/workflows/disdex-hp-deploy-approval-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  approval-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Reject legacy homepage regression
+        run: node scripts/ops/disdex-hp-ui-regression-guard.mjs
+
+      - name: TypeScript validation
+        run: npx tsc --noEmit
+
+      - name: Python verifier syntax
+        run: python3 -m py_compile scripts/ops/deploy/disdex_owner_approval.py scripts/ops/deploy/disdex_deployment_contract.py
+
+      - name: HP approval token interoperability
+        run: npm run deploy:hp-approval:selftest
+
+      - name: Approval store concurrency and corruption
+        run: node --import tsx --test tests/deploy-approval-store-concurrency.test.ts
+
+      - name: Owner auth and password contracts
+        run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
+
+      - name: Authentication boundary source contracts
+        run: node --test tests/auth-boundary-source.test.mjs tests/deploy-approval-atomic-redeem-source.test.mjs
+
+      - name: Legacy direct-writer and atomic redeem contract
+        run: node --test tests/deploy-approval-direct-writer.test.mjs
+
+      - name: Protected Production workflow contracts
+        run: node --test tests/production-workflow-protected-environment.test.mjs
+
+      - name: Owner auth, password and OTP contracts
+        run: node --import tsx --test tests/password-hash-hardening.test.ts tests/owner-session-hardening.test.ts tests/otp-challenge-store.test.ts
+
+      - name: Authentication boundary source contracts
+        run: node --test tests/auth-boundary-source.test.mjs
+
+      - name: Signed owner-session probe and portfolio display security
+        run: |
+          node --test tests/hp-independent-owner-probe.test.mjs tests/hp-live-portfolio-session-expiry.test.mjs
+          bash -n scripts/ops/disdex-hp-independent-owner-probe-nginx-cutover.sh
+      - name: Fail-closed user login second-factor source and runtime contracts
+        run: |
+          node --test tests/hp-server-side-user-login-2fa.test.mjs
+          node --import tsx --test tests/user-login-otp-store.test.ts
+      - name: Resume interrupted second-factor UI without bypassing owner login
+        run: node --test tests/hp-resume-pending-factor.test.mjs
+      - name: Ordered switchable login factors and server-bound passkey
+        run: node --test tests/hp-login-factor-order-switch.test.mjs
+      - name: Production HP build
+        run: |
+          npm run build
+          test -f .next/standalone/server.js
+          test -f .next/standalone/.next/BUILD_ID
+          node --check .next/standalone/server.js

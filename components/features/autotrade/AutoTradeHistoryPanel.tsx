@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Activity, BellRing, ExternalLink } from "lucide-react";
 
 import { useCurrency } from "@/context/CurrencyContext";
@@ -93,7 +93,7 @@ function isRotationPath(path: string[]) {
 function stepBadgeClass(step?: HistoryEntry["walletResults"][number]["step"]) {
   if (step === "sell") return "border-loss/35 bg-loss/10 text-loss";
   if (step === "buy") return "border-profit/35 bg-profit/10 text-profit";
-  if (step === "wait") return "border-gold-400/35 bg-gold-400/10 text-gold-100";
+  if (step === "wait") return "border-gold-400/35 bg-gold-400/10 text-white";
   return "border-white/12 bg-white/[0.03] text-white/70";
 }
 
@@ -128,13 +128,13 @@ export function AutoTradeHistoryPanel({ compact = false }: { compact?: boolean }
   }, []);
 
   return (
-    <section className="panel-gold rounded-[28px] p-4">
+    <section className="rounded-[28px] border border-amber-300/45 bg-amber-300/[0.055] p-4 text-white shadow-[0_0_26px_rgba(245,158,11,0.08)]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-bold text-white">
-          <BellRing className="h-4 w-4 text-gold-100" />
+          <BellRing className="h-4 w-4 text-white" />
           自動売買実行履歴
         </div>
-        <div className="text-[10px] uppercase tracking-[0.24em] text-gold-100/70">{currency} view</div>
+        <div className="text-[10px] uppercase tracking-[0.24em] text-white/70">{currency} view</div>
       </div>
 
       <div className="mt-3 space-y-2">
@@ -149,13 +149,13 @@ export function AutoTradeHistoryPanel({ compact = false }: { compact?: boolean }
             const nonTradeSteps = entry.walletResults.filter((item) => item.status !== "traded");
 
             return (
-              <div key={entry.id} className="rounded-[18px] border border-white/10 bg-white/[0.04] px-4 py-4">
+              <div key={entry.id} className="rounded-[18px] border border-amber-300/35 bg-black/20 px-4 py-4 text-white shadow-[0_0_20px_rgba(245,158,11,0.06)]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm font-bold text-white">
-                    <Activity className="h-4 w-4 text-gold-100" />
+                    <Activity className="h-4 w-4 text-white" />
                     {entry.desiredSymbol} / {toLabel(entry.desiredSide)}
                     {entry.trigger === "manual" ? (
-                      <span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-2 py-0.5 text-[10px] font-bold text-gold-100">
+                      <span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-2 py-0.5 text-[10px] font-bold text-white">
                         {entry.triggerLabel || "手動トレード判定"}
                       </span>
                     ) : null}
@@ -207,7 +207,7 @@ export function AutoTradeHistoryPanel({ compact = false }: { compact?: boolean }
                           ) : null}
                         </div>
                         {isRotationPath(item.path) ? (
-                          <div className="mt-1 text-gold-100">
+                          <div className="mt-1 text-white/82">
                             保有通貨を全額売却し、そのまま次の通貨へ乗り換えています。
                           </div>
                         ) : null}
@@ -219,7 +219,7 @@ export function AutoTradeHistoryPanel({ compact = false }: { compact?: boolean }
                                 href={`https://bscscan.com/tx/${txHash}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-gold-100 hover:text-gold-50"
+                                className="inline-flex items-center gap-1 text-white hover:text-gold-50"
                               >
                                 tx を確認
                                 <ExternalLink className="h-3 w-3" />

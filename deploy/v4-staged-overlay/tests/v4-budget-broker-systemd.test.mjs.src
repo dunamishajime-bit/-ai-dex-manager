@@ -1,0 +1,36 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { readFileSync } from "node:fs";
+
+test("budget broker is a release-pinned local-only service without credentials", () => {
+  const unit=readFileSync("ops/systemd/disdex-v4-rate-budget-broker@.service","utf8");
+  assert.match(unit,/^User=deploy$/m);
+  assert.match(unit,/^WorkingDirectory=\/home\/deploy\/disdex-trading\/releases\/%i$/m);
+  assert.match(unit,/disdex-v4-rate-budget-broker\.ts --sha %i/);
+  assert.match(unit,/^RestrictAddressFamilies=AF_UNIX$/m);
+  assert.match(unit,/^RuntimeDirectory=disdex-v4-budget-%i$/m);
+  assert.match(unit,/^ReadWritePaths=\/var\/lib\/disdex\/shared \/run\/disdex-v4-budget-%i$/m);
+  assert.match(unit,/^UnsetEnvironment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET/m);
+  assert.doesNotMatch(unit,/EnvironmentFile|ASTER_API_PRIVATE_KEY=/);
+});
+
+test("monitor and refresh require the matching broker before starting", () => {
+  const monitor=readFileSync("deploy/systemd/disdex-v12-v4-monitor@.service","utf8");
+  const refresh=readFileSync("ops/systemd/disdex-v4-dynamic-evidence-refresh@.service","utf8");
+  for(const unit of [monitor,refresh]) {
+    assert.match(unit,/^Requires=disdex-v4-rate-budget-broker@%i\.service$/m);
+    assert.match(unit,/^After=.*disdex-v4-rate-budget-broker@%i\.service/m);
+  }
+  assert.match(refresh,/^SupplementaryGroups=deploy$/m);
+});
+
+test("an explicit timer schedules only the SHA-pinned refresh service", () => {
+  const timer=readFileSync("ops/systemd/disdex-v4-dynamic-evidence-refresh@.timer","utf8");
+  const refresh=readFileSync("ops/systemd/disdex-v4-dynamic-evidence-refresh@.service","utf8");
+  assert.match(timer,/^OnBootSec=2min$/m);
+  assert.match(timer,/^OnUnitActiveSec=15min$/m);
+  assert.match(timer,/^RandomizedDelaySec=30s$/m);
+  assert.match(timer,/^Unit=disdex-v4-dynamic-evidence-refresh@%i\.service$/m);
+  assert.match(refresh,/^ConditionPathExists=\/var\/lib\/disdex\/unified-deploy\/refresh-leases\/v4\/%i\.json$/m);
+  assert.match(refresh,/--apply --lease \/var\/lib\/disdex\/unified-deploy\/refresh-leases\/v4\/%i\.json/);
+});

@@ -1,0 +1,40 @@
+name: DisDex HYPE current flat review repair CI
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/disdex-hype-current-flat-review-repair.yml'
+      - '.github/workflows/disdex-hype-current-flat-review-repair-ci.yml'
+      - 'scripts/ops/deploy/disdex_hype_current_flat_review_repair.ts'
+      - 'tests/hype-current-flat-review-repair-contract.test.mjs'
+  push:
+    branches:
+      - 'fix/hype-current-flat-review-repair-20261112'
+    paths:
+      - '.github/workflows/disdex-hype-current-flat-review-repair.yml'
+      - '.github/workflows/disdex-hype-current-flat-review-repair-ci.yml'
+      - 'scripts/ops/deploy/disdex_hype_current_flat_review_repair.ts'
+      - 'tests/hype-current-flat-review-repair-contract.test.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Contract and no-order audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/hype-current-flat-review-repair-contract.test.mjs
+          FILE=scripts/ops/deploy/disdex_hype_current_flat_review_repair.ts
+          grep -Fq 'HYPE_ZEC_RUNNER_FAIL_CLOSED:UNKNOWN_JOURNAL_EVENT' "$FILE"
+          grep -Fq 'd6bcc94512a6416189cd92d7203b9ac3b2c98e70' "$FILE"
+          ! grep -Eq '\.(placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder|setLeverage|setMarginType)\(' "$FILE"
+          echo HYPE_REPAIR_CI=PASS
+          echo ORDER_MUTATION_API=0

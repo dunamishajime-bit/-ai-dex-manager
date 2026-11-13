@@ -4,24 +4,24 @@ import { execFileSync } from "child_process";
 
 import type { Candle1h } from "./types";
 
-const REMOTE_START_2023 = Date.UTC(2023, 0, 1, 0, 0, 0);
-const REMOTE_CACHE_VERSION = "v4";
-const PUBLIC_ARCHIVE_ROOT = "https://data.binance.vision/data/spot/monthly/klines";
-const BINANCE_SPOT_API_BASES = [
-    "https://api.binance.com",
-    "https://api-gcp.binance.com",
-    "https://api1.binance.com",
-    "https://api2.binance.com",
-    "https://api3.binance.com",
-    "https://api4.binance.com",
-] as const;
+const REMOTE_START_2022 = Date.UTC(2022, 0, 1, 0, 0, 0);
+const REMOTE_CACHE_VERSION = "v1";
+const BINANCE_RETRY_DELAYS_MS = [1500, 4000, 8000];
+const INTERVAL_MS: Record<string, number> = {
+    "15m": 15 * 60 * 1000,
+    "1h": 60 * 60 * 1000,
+};
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function psQuote(value: string) {
     return `'${value.replace(/'/g, "''")}'`;
 }
 
-function asUrl(baseUrl: string, symbol: string, startMs: number, endMs: number) {
-    return `${baseUrl}/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=1h&startTime=${startMs}&endTime=${endMs}&limit=1000`;
+function asUrl(symbol: string, startMs: number, endMs: number, interval: string) {
+    return `https://api.binance.com/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${encodeURIComponent(interval)}&startTime=${startMs}&endTime=${endMs}&limit=1000`;
 }
 
 async function exists(filePath: string) {
@@ -52,25 +52,16 @@ async function ensureExpanded(zipPath: string, targetDir: string) {
     const marker = path.join(targetDir, ".expanded.ok");
     if (await exists(marker)) return;
 
-    if (process.platform === "win32") {
-        const command = `Expand-Archive -LiteralPath ${psQuote(zipPath)} -DestinationPath ${psQuote(targetDir)} -Force`;
-        execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], { stdio: "ignore" });
-    } else {
-        execFileSync("unzip", ["-o", zipPath, "-d", targetDir], { stdio: "ignore" });
-    }
+    const command = `Expand-Archive -LiteralPath ${psQuote(zipPath)} -DestinationPath ${psQuote(targetDir)} -Force`;
+    execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], { stdio: "ignore" });
     await fs.writeFile(marker, new Date().toISOString(), "utf8");
-}
-
-function normalizeTimestamp(value: number) {
-    if (!Number.isFinite(value)) return value;
-    return value > 10_000_000_000_000 ? Math.floor(value / 1000) : value;
 }
 
 function parseCsvLine(line: string): Candle1h | null {
     const parts = line.split(",");
     if (parts.length < 6) return null;
     const candle = {
-        ts: normalizeTimestamp(Number(parts[0])),
+        ts: Number(parts[0]),
         open: Number(parts[1]),
         high: Number(parts[2]),
         low: Number(parts[3]),
@@ -87,8 +78,7 @@ async function readCsv(filePath: string): Promise<Candle1h[]> {
     const raw = await fs.readFile(filePath, "utf8");
     const rows = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
     const candles: Candle1h[] = [];
-    const startIndex = rows[0]?.toLowerCase().includes("open") ? 1 : 0;
-    for (const row of rows.slice(startIndex)) {
+    for (const row of rows.slice(1)) {
         const candle = parseCsvLine(row);
         if (candle) candles.push(candle);
     }
@@ -104,7 +94,10 @@ export async function loadLocalBinanceCandles(zipPath: string, cacheRoot: string
     const innerZips = (await listFilesRecursive(targetDir)).filter((filePath) => filePath.toLowerCase().endsWith(".zip"));
     for (const innerZip of innerZips) {
         const innerDir = innerZip.replace(/\.zip$/i, "");
-        await ensureExpanded(innerZip, innerDir);
+        if (!(await exists(innerDir))) {
+            const command = `Expand-Archive -LiteralPath ${psQuote(innerZip)} -DestinationPath ${psQuote(innerDir)} -Force`;
+            execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command], { stdio: "ignore" });
+        }
     }
 
     const csvFiles = (await listFilesRecursive(targetDir)).filter((filePath) => filePath.toLowerCase().endsWith(".csv"));
@@ -112,41 +105,33 @@ export async function loadLocalBinanceCandles(zipPath: string, cacheRoot: string
     return candles.flat().sort((left, right) => left.ts - right.ts);
 }
 
-async function fetchKlineRows(symbol: string, startMs: number, endMs: number) {
-    const failures: string[] = [];
-    for (const baseUrl of BINANCE_SPOT_API_BASES) {
-        const url = asUrl(baseUrl, symbol, startMs, endMs);
-        try {
-            const response = await fetch(url, { cache: "no-store" });
-            if (!response.ok) {
-                failures.push(`${new URL(baseUrl).hostname}:${response.status}`);
-                continue;
-            }
-            const json = await response.json();
-            if (!Array.isArray(json)) {
-                failures.push(`${new URL(baseUrl).hostname}:invalid-json`);
-                continue;
-            }
-            return json;
-        } catch (error) {
-            failures.push(`${new URL(baseUrl).hostname}:${error instanceof Error ? error.message : String(error)}`);
-        }
-    }
-    throw new Error(`Binance klines request failed for ${symbol}: ${failures.join(", ")}`);
-}
-
-export async function fetchBinanceKlines(symbol: string, startMs: number, endMs: number): Promise<Candle1h[]> {
+export async function fetchBinanceKlines(symbol: string, startMs: number, endMs: number, interval = "1h"): Promise<Candle1h[]> {
     const all: Candle1h[] = [];
     let cursor = startMs;
 
     while (cursor < endMs) {
-        const rows = await fetchKlineRows(symbol, cursor, endMs);
+        const url = asUrl(symbol, cursor, endMs, interval);
+        let response: Response | null = null;
+        let lastStatus = 0;
+        for (let attempt = 0; attempt <= BINANCE_RETRY_DELAYS_MS.length; attempt += 1) {
+            response = await fetch(url, { cache: "no-store" });
+            lastStatus = response.status;
+            if (response.ok) break;
+            if (response.status !== 429 || attempt === BINANCE_RETRY_DELAYS_MS.length) break;
+            await sleep(BINANCE_RETRY_DELAYS_MS[attempt]);
+        }
+        if (!response?.ok) {
+            throw new Error(`Binance klines request failed for ${symbol}: ${lastStatus}`);
+        }
+
+        const json = await response.json();
+        const rows = Array.isArray(json) ? json : [];
         if (!rows.length) break;
 
         for (const row of rows) {
             if (!Array.isArray(row) || row.length < 6) continue;
             const candle = {
-                ts: normalizeTimestamp(Number(row[0])),
+                ts: Number(row[0]),
                 open: Number(row[1]),
                 high: Number(row[2]),
                 low: Number(row[3]),
@@ -159,8 +144,7 @@ export async function fetchBinanceKlines(symbol: string, startMs: number, endMs:
         }
 
         const last = rows.at(-1);
-        const closeTime = normalizeTimestamp(Number(Array.isArray(last) ? last[6] : 0));
-        const nextTs = closeTime + 1;
+        const nextTs = Number(Array.isArray(last) ? last[6] : 0) + 1;
         if (!Number.isFinite(nextTs) || nextTs <= cursor) break;
         cursor = nextTs;
     }
@@ -168,63 +152,26 @@ export async function fetchBinanceKlines(symbol: string, startMs: number, endMs:
     return all.sort((left, right) => left.ts - right.ts);
 }
 
-function monthKeys(startMs: number, endMs: number) {
-    const start = new Date(startMs);
-    let cursor = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1);
-    const keys: string[] = [];
-    while (cursor < endMs) {
-        const date = new Date(cursor);
-        const nextMonth = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1);
-        if (nextMonth > endMs) break;
-        keys.push(`${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`);
-        cursor = nextMonth;
-    }
-    return keys;
+function normalizeRemoteEndMs(endMs: number, interval: string) {
+    const intervalMs = INTERVAL_MS[interval] || 60 * 60 * 1000;
+    const now = Date.now();
+    const isLiveLikeEnd = Math.abs(now - endMs) <= intervalMs * 2;
+    if (!isLiveLikeEnd) return endMs;
+    return Math.floor(endMs / intervalMs) * intervalMs;
 }
 
-async function downloadPublicArchive(url: string, zipPath: string) {
-    if (await exists(zipPath)) return true;
-    const response = await fetch(url, { cache: "no-store" });
-    if (response.status === 404) return false;
-    if (!response.ok) throw new Error(`Binance public archive request failed: ${response.status} ${url}`);
-    const bytes = Buffer.from(await response.arrayBuffer());
-    if (bytes.length < 100) throw new Error(`Binance public archive was unexpectedly small: ${url}`);
-    await fs.mkdir(path.dirname(zipPath), { recursive: true });
-    await fs.writeFile(zipPath, bytes);
-    return true;
+function normalizeRemoteStartMs(startMs: number, endMs: number, interval: string) {
+    const intervalMs = INTERVAL_MS[interval] || 60 * 60 * 1000;
+    const now = Date.now();
+    const isLiveLikeEnd = Math.abs(now - endMs) <= intervalMs * 2;
+    if (!isLiveLikeEnd) return startMs;
+    return Math.floor(startMs / intervalMs) * intervalMs;
 }
 
-async function loadPublicArchiveCandles(input: {
-    symbol: string;
-    cacheRoot: string;
-    startMs: number;
-    endMs: number;
-}) {
-    const { symbol, cacheRoot, startMs, endMs } = input;
-    const monthlyRoot = path.join(cacheRoot, "public-data", symbol, "1h");
-    const all: Candle1h[] = [];
-
-    for (const monthKey of monthKeys(startMs, endMs)) {
-        const archiveName = `${symbol}-1h-${monthKey}.zip`;
-        const zipPath = path.join(monthlyRoot, archiveName);
-        const extractedDir = path.join(monthlyRoot, archiveName.replace(/\.zip$/i, ""));
-        const url = `${PUBLIC_ARCHIVE_ROOT}/${encodeURIComponent(symbol)}/1h/${archiveName}`;
-        const available = await downloadPublicArchive(url, zipPath);
-        if (!available) continue;
-        await ensureExpanded(zipPath, extractedDir);
-        const csvFiles = (await listFilesRecursive(extractedDir)).filter((filePath) => filePath.toLowerCase().endsWith(".csv"));
-        for (const csvFile of csvFiles) {
-            all.push(...await readCsv(csvFile));
-        }
-    }
-
-    return all
-        .filter((candle) => candle.ts >= startMs && candle.ts < endMs)
-        .sort((left, right) => left.ts - right.ts);
-}
-
-function remoteCacheFile(cacheRoot: string, symbol: string, startMs: number, endMs: number) {
-    const fileName = `${symbol}-${startMs}-${endMs}-${REMOTE_CACHE_VERSION}.json`;
+function remoteCacheFile(cacheRoot: string, symbol: string, startMs: number, endMs: number, interval: string) {
+    const normalizedStartMs = normalizeRemoteStartMs(startMs, endMs, interval);
+    const normalizedEndMs = normalizeRemoteEndMs(endMs, interval);
+    const fileName = `${symbol}-${interval}-${normalizedStartMs}-${normalizedEndMs}-${REMOTE_CACHE_VERSION}.json`;
     return path.join(cacheRoot, "remote", fileName);
 }
 
@@ -234,51 +181,34 @@ export async function loadHistoricalCandles(input: {
     cacheRoot: string;
     startMs: number;
     endMs: number;
+    interval?: "1h" | "15m";
 }) {
-    const { symbol, localZipPath, cacheRoot, startMs, endMs } = input;
+    const { symbol, localZipPath, cacheRoot, startMs, endMs, interval = "1h" } = input;
     const out: Candle1h[] = [];
 
-    if (localZipPath && startMs < REMOTE_START_2023) {
+    if (interval === "1h" && localZipPath && startMs < REMOTE_START_2022) {
         const localCandles = await loadLocalBinanceCandles(localZipPath, cacheRoot);
-        out.push(...localCandles.filter((candle) => candle.ts >= startMs && candle.ts < Math.min(endMs, REMOTE_START_2023)));
+        for (const candle of localCandles) {
+            if (candle.ts >= startMs && candle.ts < Math.min(endMs, REMOTE_START_2022)) {
+                out.push(candle);
+            }
+        }
     }
 
-    if (endMs > REMOTE_START_2023) {
-        const remoteStart = Math.max(startMs, REMOTE_START_2023);
-        const cacheFile = remoteCacheFile(cacheRoot, symbol, remoteStart, endMs);
+    if (endMs > REMOTE_START_2022) {
+        const remoteStart = Math.max(startMs, REMOTE_START_2022);
+        const cacheFile = remoteCacheFile(cacheRoot, symbol, remoteStart, endMs, interval);
         let remoteCandles: Candle1h[] = [];
         if (await exists(cacheFile)) {
             remoteCandles = JSON.parse(await fs.readFile(cacheFile, "utf8")) as Candle1h[];
         } else {
-            const archiveOnly = process.env.BINANCE_PUBLIC_ARCHIVE_ONLY === "true";
-            let apiError: unknown = null;
-            if (!archiveOnly) {
-                try {
-                    remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs);
-                } catch (error) {
-                    apiError = error;
-                }
-            }
-            if (!remoteCandles.length) {
-                remoteCandles = await loadPublicArchiveCandles({
-                    symbol,
-                    cacheRoot,
-                    startMs: remoteStart,
-                    endMs,
-                });
-            }
-            if (!remoteCandles.length) {
-                const message = archiveOnly
-                    ? "Binance public archive returned no candles"
-                    : apiError instanceof Error
-                        ? apiError.message
-                        : String(apiError ?? "no API data");
-                throw new Error(`${message}; no historical candles for ${symbol}`);
-            }
+            remoteCandles = await fetchBinanceKlines(symbol, remoteStart, endMs, interval);
             await fs.mkdir(path.dirname(cacheFile), { recursive: true });
             await fs.writeFile(cacheFile, JSON.stringify(remoteCandles), "utf8");
         }
-        out.push(...remoteCandles);
+        for (const candle of remoteCandles) {
+            out.push(candle);
+        }
     }
 
     const dedup = new Map<number, Candle1h>();

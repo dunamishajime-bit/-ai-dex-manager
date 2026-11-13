@@ -4,16 +4,14 @@ import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 
 import { runLiveHybridAutotrade } from "@/lib/server/live-hybrid-autotrade";
+import { verifyRequestSession } from "@/lib/server/owner-session";
+import { requireSameOriginMutation } from "@/lib/server/request-security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const LOCK_PATH = path.join(process.cwd(), "data", "auto-trade-run.lock");
 const LOCK_TTL_MS = 15 * 60 * 1000;
-
-function isAuthorized(req: NextRequest) {
-  return req.cookies.get("disdex_auth")?.value === "1";
-}
 
 function acquireRunLock() {
   try {
@@ -65,8 +63,11 @@ function releaseRunLock(fd: number | null) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ ok: false, error: "ログイン状態を確認できないため、手動判定を実行できません。" }, { status: 401 });
+  try {
+    requireSameOriginMutation(req);
+    verifyRequestSession(req, ["USER", "ADMIN"]);
+  } catch {
+    return NextResponse.json({ ok: false, error: "Authentication required." }, { status: 403 });
   }
 
   const lockFd = acquireRunLock();
