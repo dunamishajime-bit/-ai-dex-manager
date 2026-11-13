@@ -43,6 +43,7 @@ function HistoryChart({ data, index, field, click }: { data: BtSnapshot[]; index
   const from = Math.max(0, index - 79);
   const rows = data.slice(from, index + 1);
   const values = rows.map((r) => field === "equity" ? r.equity : r.btcPrice || NaN).filter(Number.isFinite);
+  if (values.length === 0) return <div className="flex h-48 items-center justify-center rounded-lg border border-[#2c4a62] text-xs text-slate-400">BTC価格の時系列が台帳にありません。実データを正規BTから出力してください。</div>;
   const low = Math.min(...values), high = Math.max(...values);
   const spread = Math.max(high - low, high * 0.006, 1);
   const x = (i: number) => 22 + 727 * i / Math.max(1, rows.length - 1);
