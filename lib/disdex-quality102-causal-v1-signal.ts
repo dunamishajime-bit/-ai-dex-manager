@@ -55,7 +55,7 @@ export interface Quality102CausalV1Signal {
     dataCutoffTs: number;
     hardStop?: number;
     maxHoldHours?: number;
-    exitPolicy?: "HIGH_VOL_TRAIL72" | "FIXED_HOLD_STOP";
+    exitPolicy?: "HIGH_VOL_TRAIL72" | "FIXED_HOLD_STOP" | "STABLE4_STOP5_TP3_H24";
     brkEnabled: boolean;
 }
 

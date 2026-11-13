@@ -1,4 +1,4 @@
-import { AsterResidentStopGateway } from "../lib/venue-resident-stop";
+﻿import { AsterResidentStopGateway } from "../lib/venue-resident-stop";
 import { findManagedOrdinaryResidentStops } from "../lib/disdex-managed-protective-orders";
 import "dotenv/config";
 
@@ -10,6 +10,7 @@ import {
     resolveQuality102CausalV1Runtime,
     type Quality102CausalV1Mode,
 } from "../config/disdexQuality102CausalV1Runtime";
+import { resolveDisDexStable4Mode, type DisDexStable4Mode } from "../config/disdexStable4Opportunity";
 import {
     QUALITY102_CAUSAL_V4_CAPABILITIES,
     QUALITY102_CAUSAL_V4_S34_MODEL,
@@ -31,6 +32,7 @@ import {
 import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality102-causal-v1-market-data";
 import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-runner";
 import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
+import { Stable4Q102OnlineEngine } from "../lib/disdex-quality102-stable4-online";
 import { buildQuality102CausalV4DecisionSnapshot } from "../lib/disdex-quality102-causal-v4-observability";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
@@ -161,6 +163,10 @@ export interface Quality102CausalV1LiveResolvedConfig {
     historyHours: number;
     historyPageLimit: number;
     stateRoot: string;
+    stable4Mode: DisDexStable4Mode;
+    stable4RecoverySeedPath: string;
+    stable4AvaxSeedPath: string;
+    stable4StatePath: string;
 }
 
 function boolEnv(env: NodeJS.ProcessEnv, name: string, fallback = false): boolean {
@@ -276,6 +282,10 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         historyHours,
         historyPageLimit,
         stateRoot,
+        stable4Mode: resolveDisDexStable4Mode(env),
+        stable4RecoverySeedPath: resolve(env.DISDEX_STABLE4_Q102_RECOVERY_SEED_PATH || resolve(process.cwd(), "config/stable4/q102-online-recovery-seed-20261114.json")),
+        stable4AvaxSeedPath: resolve(env.DISDEX_STABLE4_Q102_AVAX_SEED_PATH || resolve(process.cwd(), "config/stable4/q102-avax-knn-seed-20261114.json")),
+        stable4StatePath: resolve(env.DISDEX_STABLE4_Q102_STATE_PATH || resolve(stateRoot, "stable4-online-state.json")),
     };
     if (Math.abs(config.maximumGross - QUALITY102_CAUSAL_V1.maximumGross) > 1e-12
         || Math.abs(config.cryptoGrossCap - QUALITY102_CAUSAL_V1.cryptoGrossCap) > 1e-12
@@ -303,6 +313,16 @@ export function assertQuality102CausalV1ReadOnlyPreflightConfiguration(
     }
     const ack = String(env.QUALITY102_CAUSAL_V1_LIVE_ACK || "").trim().toLowerCase();
     if (ack !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_CAUSAL_V1_LIVE_ACK_MUST_MATCH_RUNTIME_SHA");
+    if (config.stable4Mode === "LIVE") {
+        const stable4Ack = String(env.DISDEX_STABLE4_Q102_LIVE_ACK || "").trim().toLowerCase();
+        if (stable4Ack !== config.runtimeCommitSha.toLowerCase()) throw new Error("DISDEX_STABLE4_Q102_LIVE_ACK_MUST_MATCH_RUNTIME_SHA");
+        new Stable4Q102OnlineEngine({
+            mode: "LIVE",
+            recoverySeedPath: config.stable4RecoverySeedPath,
+            avaxSeedPath: config.stable4AvaxSeedPath,
+            statePath: config.stable4StatePath,
+        });
+    }
     if (config.adoptedExitPoliciesEnabled) {
         const adoptedAck = String(env.QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK || "").trim().toLowerCase();
         if (adoptedAck !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK_MUST_MATCH_RUNTIME_SHA");
@@ -525,6 +545,13 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             readRequestSpacingMs: numberEnv(env, "V12_X1_ALL_REQUEST_SPACING_MS", 100),
         })
         : undefined;
+    const stable4Engine = config.stable4Mode === "OFF" ? undefined : new Stable4Q102OnlineEngine({
+        mode: config.stable4Mode,
+        recoverySeedPath: config.stable4RecoverySeedPath,
+        avaxSeedPath: config.stable4AvaxSeedPath,
+        statePath: config.stable4StatePath,
+        logger: (message, payload) => console.log(JSON.stringify({ level: "info", strategyId: QUALITY102_CAUSAL_V1.strategyId, message, ...(payload || {}) })),
+    });
     const runner = new Quality102CausalV1Runner({
         marketData: new Quality102CausalV1AsterMarketDataProvider(client, {
             symbols: config.symbols,
@@ -539,7 +566,10 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         residentStopGateway: config.mode === "LIVE" ? new AsterResidentStopGateway(client) : undefined,
         stateStore: new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.expectedRuntimeCommitSha),
         lock: new FileAccountOrderLock(config.accountLockPath, numberEnv(env, "DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000)),
-        signalBuilder: (input) => buildQuality102CausalV4Signal(input, { highVolSymbols: config.highVolSymbols }),
+        signalBuilder: (input) => {
+            const nativeSignal = buildQuality102CausalV4Signal(input, { highVolSymbols: config.highVolSymbols });
+            return stable4Engine ? stable4Engine.select(nativeSignal, input.history, input.decisionTs).signal : nativeSignal;
+        },
         decisionObserver: async ({ history, decisionTs }) => {
             const snapshot = buildQuality102CausalV4DecisionSnapshot({
                 history,
@@ -604,6 +634,7 @@ async function main(): Promise<void> {
         mode: built.config.mode,
         enabled: built.config.enabled,
         selectorMode: built.config.selectorMode,
+        stable4Mode: built.config.stable4Mode,
         highVolSymbols: built.config.highVolSymbols,
         symbols: built.config.symbols,
         runtimeCommitSha: built.config.runtimeCommitSha,
@@ -682,3 +713,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         process.exitCode = 1;
     });
 }
+

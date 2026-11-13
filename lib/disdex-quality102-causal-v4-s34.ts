@@ -191,6 +191,36 @@ function modelRowsFor(symbol: string): readonly Quality102CausalV4ModelRow[] {
     return QUALITY102_CAUSAL_V4_S34_MODEL.filter((row) => row.symbol === normalized);
 }
 
+export function generateQuality102CausalV4S34ShadowCandidates(input: {
+    symbol: string;
+    rows: readonly Quality102Candle[];
+    entryOpen: Quality102CausalV4EntryOpen;
+}): Quality102CausalV4S34Candidate[] {
+    if (!input.rows.length) throw new Error("QUALITY102_CAUSAL_V4_S34_HISTORY_REQUIRED");
+    const expectedEntryTs = input.rows.at(-1)!.timestampMs + HOUR_MS;
+    if (input.entryOpen.timestampMs !== expectedEntryTs) throw new Error("QUALITY102_CAUSAL_V4_ENTRY_OPEN_TIMESTAMP_MISMATCH");
+    if (new Date(input.entryOpen.timestampMs).getUTCHours() % 4 !== 1) return [];
+    const out: Quality102CausalV4S34Candidate[] = [];
+    for (const model of modelRowsFor(input.symbol)) {
+        const raw = detectQuality102CausalV4S34RawSignal(input.rows, input.entryOpen, model.variant);
+        if (!raw) continue;
+        out.push({
+            ...raw,
+            id: "S34SHADOW:" + model.key + ":" + input.entryOpen.timestampMs + ":" + raw.side,
+            key: model.key,
+            symbol: model.symbol,
+            variant: model.variant,
+            family: model.family,
+            layer: model.layer,
+            entryTs: input.entryOpen.timestampMs,
+            dataCutoffTs: input.rows.at(-1)!.timestampMs,
+            maxHoldHours: raw.holdHours,
+            exitPolicy: "FIXED_HOLD_STOP",
+        });
+    }
+    return out;
+}
+
 export function generateQuality102CausalV4S34Candidates(input: {
     symbol: string;
     rows: readonly Quality102Candle[];

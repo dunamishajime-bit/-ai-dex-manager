@@ -92,7 +92,7 @@ export interface Quality102CausalV1TickResult {
     message: string;
     signal?: Quality102CausalV1Signal;
     idempotencyKey?: string;
-    exitReason?: "hard_stop" | "profit_floor_0p5" | "profit_floor_1p0" | "trail_5pct_after_12pct" | "72h_time" | "time" | "shared_risk_flatten" | Q102AdoptedExitReason;
+    exitReason?: "hard_stop" | "profit_floor_0p5" | "profit_floor_1p0" | "trail_5pct_after_12pct" | "72h_time" | "time" | "take_profit_3p0" | "shared_risk_flatten" | Q102AdoptedExitReason;
     ordersSent?: number;
 }
 
@@ -447,7 +447,7 @@ export function quality102ExitReasonForState(
     statePosition: NonNullable<Quality102CausalV1State["position"]>,
     markPrice: number,
     now: number,
-): "hard_stop" | "profit_floor_0p5" | "profit_floor_1p0" | "trail_5pct_after_12pct" | "72h_time" | "time" | undefined {
+): "hard_stop" | "profit_floor_0p5" | "profit_floor_1p0" | "trail_5pct_after_12pct" | "72h_time" | "time" | "take_profit_3p0" | undefined {
     const hardStop = statePosition.hardStop;
     if (!(hardStop && Number.isFinite(markPrice) && markPrice > 0 && Number.isFinite(now) && now >= statePosition.entryTs)) return undefined;
     const long = statePosition.side > 0;
@@ -456,6 +456,13 @@ export function quality102ExitReasonForState(
     }
     const stopPrice = long ? statePosition.entryPrice * (1 - hardStop) : statePosition.entryPrice * (1 + hardStop);
     if ((long && markPrice <= stopPrice) || (!long && markPrice >= stopPrice)) return "hard_stop";
+
+    if (statePosition.exitPolicy === "STABLE4_STOP5_TP3_H24") {
+        const takeProfitPrice = long ? statePosition.entryPrice * 1.03 : statePosition.entryPrice * 0.97;
+        if ((long && markPrice >= takeProfitPrice) || (!long && markPrice <= takeProfitPrice)) return "take_profit_3p0";
+        const maxHoldHours = statePosition.maxHoldHours || 24;
+        return now - statePosition.entryTs >= maxHoldHours * HOUR_MS ? "time" : undefined;
+    }
 
     if (statePosition.exitPolicy === "FIXED_HOLD_STOP") {
         const maxHoldHours = statePosition.maxHoldHours;
