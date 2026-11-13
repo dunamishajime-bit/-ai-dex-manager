@@ -1,0 +1,900 @@
+{
+  "status": "RESEARCH_ONLY_FINAL_V2_NO_PRODUCTION_CHANGE",
+  "period": [
+    "2025-10-01T00:00:00Z",
+    "2026-10-01T00:00:00Z_EXCLUSIVE"
+  ],
+  "initialJpy": 10000,
+  "stable3SourceCommit": "b7133c209ad9e2f59b9b37d032bb1b3379258267",
+  "selectionDiscipline": {
+    "targetUsedForParameterSelection": false,
+    "forwardUsedForParameterSelection": false,
+    "notes": [
+      "PENGU R3 frozen from prior phase.",
+      "Q102 AVAX predThreshold 0.013 is the strictest tested hardening that passes all pretarget E1/E2/E3; 0.014 fails E1.",
+      "HYPE consensus rules discovered on TRAIN, survived/ranked on VALID, required PREHOLD pass; target/forward evaluated only after freeze.",
+      "HYPE online health uses only completed shadow HYPE candidate outcomes known before each entry.",
+      "HYPE stale-health TTL is 60 days; 45/60/90-day sensitivity produces the same target/forward candidate set.",
+      "IDLE JUP/TIA online variant was rejected by exact portfolio replay."
+    ]
+  },
+  "selectedDesign": {
+    "PENGU": {
+      "status": "FROZEN",
+      "SHORT_V20": {
+        "side": "SHORT",
+        "btc24Max": -0.010836782776818987,
+        "pengu72Max": -0.05237466490617382
+      },
+      "V2": "UNCHANGED",
+      "RecoveryV8": "UNCHANGED"
+    },
+    "Q102": {
+      "AVAX_NEW": {
+        "model": "causal online KNN",
+        "windowDays": 9999,
+        "k": 40,
+        "weighted": false,
+        "predThreshold": 0.013,
+        "agreeMin": 0.65,
+        "gross": 0.75,
+        "exit": "M5 STOP5 + TP3 + 24h time"
+      },
+      "AVAX_OLD_MR24": "QUARANTINED",
+      "UNI_OLD_MR72": "QUARANTINED",
+      "UNI_NEW": "WAIT_NO_ROBUST_CANDIDATE",
+      "otherRoutes": "UNCHANGED"
+    },
+    "HYPE": {
+      "status": "ACTIVE_RESEARCH_CANDIDATE",
+      "gross": 1.0,
+      "side": "LONG",
+      "entry": "TOP10 consensus: TRAIN discovery -> VALID survivors -> vote >=50% -> PREHOLD pass",
+      "onlineHealth": {
+        "lookbackShadowCandidates": 2,
+        "minMean30bps": -0.01,
+        "minWinRate": 0.34,
+        "maxLossStreak": 1,
+        "warmupAllow": true
+      },
+      "healthTTLdays": 60,
+      "ttlSensitivityDays": [
+        45,
+        60,
+        90
+      ],
+      "ttlSensitivityInvariant": true,
+      "exit": "48h time unless FORMAL_PRIORITY preemption",
+      "formalPriorityPreemption": true
+    },
+    "IDLE": {
+      "activeGross": 1.0,
+      "RENDER": "WAIT_PRETARGET_NO_ROBUST",
+      "TAO": "RISK_OFF_SENSOR_ONLY_NATIVE_12H",
+      "DOT": "LEGACY_KEEP_STRICT_CONFIRMED",
+      "JUP": "LEGACY_KEEP",
+      "TIA": "LEGACY_KEEP"
+    }
+  },
+  "exactCases": {
+    "STABLE3": {
+      "10": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 10,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 4512970.171211586,
+        "net_return_pct": 45029.701712115864,
+        "max_hourly_dd_pct": -26.05877304176173,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 856,
+        "win_rate_pct": 61.6822429906542,
+        "profit_factor": 1.668352713023249,
+        "admitted_by_runner": {
+          "Q102": 84,
+          "V52": 86,
+          "V4": 502,
+          "PENGU": 38,
+          "IDLE": 91,
+          "HYPE": 48,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "CRYPTO_GROSS_CAP": 42,
+          "SYMBOL_BUSY": 57,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 3,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 2,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 64,
+          "HYPE_FULL_1P5_CRYPTO_CAP_GATE": 22,
+          "V4_GROSS_CAP_3": 14,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 300,
+          "RUNNER_SLOT_BUSY": 133,
+          "DAILY_LOSS_7P5_GATE": 82,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 93,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 114,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 2,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 656,
+          "HYPE_FULL_1P5_TOTAL_CAP_GATE": 1,
+          "FET_POST_EXIT_COOLDOWN_24H": 1,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 1
+        },
+        "source_intents": 2466,
+        "residual_priority_exits": 0,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 4.236600751738031,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 13,
+        "shared_risk_flatten_count": 8,
+        "v52_daily_trip_count": 26,
+        "v52_deferred_exit_count": 6,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      },
+      "30": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 30,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 1454529.574075996,
+        "net_return_pct": 14445.29574075996,
+        "max_hourly_dd_pct": -28.076361286367945,
+        "dd_time_utc": "2026-09-22T11:00:00Z",
+        "modeled_fills": 855,
+        "win_rate_pct": 59.53216374269006,
+        "profit_factor": 1.512646047959108,
+        "admitted_by_runner": {
+          "Q102": 84,
+          "V52": 86,
+          "V4": 501,
+          "PENGU": 38,
+          "IDLE": 91,
+          "HYPE": 48,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "CRYPTO_GROSS_CAP": 42,
+          "SYMBOL_BUSY": 57,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 3,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 2,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 64,
+          "HYPE_FULL_1P5_CRYPTO_CAP_GATE": 22,
+          "V4_GROSS_CAP_3": 14,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 300,
+          "RUNNER_SLOT_BUSY": 133,
+          "DAILY_LOSS_7P5_GATE": 84,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 93,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 113,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 2,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 656,
+          "HYPE_FULL_1P5_TOTAL_CAP_GATE": 1,
+          "FET_POST_EXIT_COOLDOWN_24H": 1,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 1
+        },
+        "source_intents": 2466,
+        "residual_priority_exits": 0,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 4.246686536605103,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 13,
+        "shared_risk_flatten_count": 8,
+        "v52_daily_trip_count": 31,
+        "v52_deferred_exit_count": 6,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      }
+    },
+    "PENGU_R3": {
+      "10": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 10,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 5435516.072278837,
+        "net_return_pct": 54255.160722788365,
+        "max_hourly_dd_pct": -26.05877304176174,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 853,
+        "win_rate_pct": 61.1957796014068,
+        "profit_factor": 1.63918531514828,
+        "admitted_by_runner": {
+          "Q102": 84,
+          "V52": 84,
+          "V4": 500,
+          "PENGU": 46,
+          "IDLE": 84,
+          "HYPE": 48,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "CRYPTO_GROSS_CAP": 51,
+          "SYMBOL_BUSY": 60,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 2,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 64,
+          "HYPE_FULL_1P5_CRYPTO_CAP_GATE": 20,
+          "V4_GROSS_CAP_3": 14,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 330,
+          "RUNNER_SLOT_BUSY": 120,
+          "DAILY_LOSS_7P5_GATE": 88,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 82,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 110,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "HYPE_FULL_1P5_TOTAL_CAP_GATE": 2,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 2,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 656,
+          "FET_POST_EXIT_COOLDOWN_24H": 1,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 1
+        },
+        "source_intents": 2484,
+        "residual_priority_exits": 0,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000026,
+        "pengu_final_realized_index": 6.462206196439978,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 14,
+        "shared_risk_flatten_count": 10,
+        "v52_daily_trip_count": 30,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      },
+      "30": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 30,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 1765364.8156207537,
+        "net_return_pct": 17553.64815620754,
+        "max_hourly_dd_pct": -28.07636128636807,
+        "dd_time_utc": "2026-09-22T11:00:00Z",
+        "modeled_fills": 850,
+        "win_rate_pct": 59.05882352941176,
+        "profit_factor": 1.4929673622641932,
+        "admitted_by_runner": {
+          "Q102": 84,
+          "V52": 84,
+          "V4": 498,
+          "PENGU": 45,
+          "IDLE": 84,
+          "HYPE": 48,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "CRYPTO_GROSS_CAP": 52,
+          "SYMBOL_BUSY": 60,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 2,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 64,
+          "HYPE_FULL_1P5_CRYPTO_CAP_GATE": 20,
+          "V4_GROSS_CAP_3": 14,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 330,
+          "RUNNER_SLOT_BUSY": 120,
+          "DAILY_LOSS_7P5_GATE": 93,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 82,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 109,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "HYPE_FULL_1P5_TOTAL_CAP_GATE": 2,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 2,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 654,
+          "FET_POST_EXIT_COOLDOWN_24H": 1,
+          "IDLE_NON_BASELINE_SIDECAR_EXPOSURE": 1
+        },
+        "source_intents": 2484,
+        "residual_priority_exits": 0,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 6.561394973933974,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 14,
+        "shared_risk_flatten_count": 9,
+        "v52_daily_trip_count": 36,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      }
+    },
+    "HYPE_WAIT_CAUSAL_FRONTIER": {
+      "10": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 10,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 9819826.922174217,
+        "net_return_pct": 98098.26922174217,
+        "max_hourly_dd_pct": -25.560278078047617,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 787,
+        "win_rate_pct": 63.786531130876746,
+        "profit_factor": 2.064239140360928,
+        "admitted_by_runner": {
+          "Q102": 117,
+          "PENGU": 46,
+          "V52": 84,
+          "V4": 496,
+          "IDLE": 37,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 64,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 59,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 116,
+          "RUNNER_SLOT_BUSY": 43,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 109,
+          "DAILY_LOSS_7P5_GATE": 44,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_GROSS_CAP_3": 12,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 683,
+          "FET_POST_EXIT_COOLDOWN_24H": 2
+        },
+        "source_intents": 2043,
+        "residual_priority_exits": 0,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.666110611244542,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 10,
+        "shared_risk_flatten_count": 6,
+        "v52_daily_trip_count": 30,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      },
+      "30": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 30,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 3163593.0054065865,
+        "net_return_pct": 31535.930054065862,
+        "max_hourly_dd_pct": -26.241956240350028,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 785,
+        "win_rate_pct": 61.401273885350314,
+        "profit_factor": 1.7419701500724516,
+        "admitted_by_runner": {
+          "Q102": 117,
+          "PENGU": 47,
+          "V52": 84,
+          "V4": 494,
+          "IDLE": 36,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 62,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 58,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "V4_GROSS_CAP_3": 13,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 117,
+          "RUNNER_SLOT_BUSY": 42,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 108,
+          "DAILY_LOSS_7P5_GATE": 51,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 681,
+          "FET_POST_EXIT_COOLDOWN_24H": 2
+        },
+        "source_intents": 2043,
+        "residual_priority_exits": 0,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.241376936120439,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 11,
+        "shared_risk_flatten_count": 8,
+        "v52_daily_trip_count": 36,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      }
+    },
+    "FINAL_TTL60_HYPE_ACTIVE": {
+      "10": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 10,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 10600406.84939976,
+        "net_return_pct": 105904.0684939976,
+        "max_hourly_dd_pct": -25.560278078047606,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 794,
+        "win_rate_pct": 63.72795969773299,
+        "profit_factor": 2.0531554752734946,
+        "admitted_by_runner": {
+          "Q102": 117,
+          "PENGU": 46,
+          "V52": 84,
+          "V4": 496,
+          "IDLE": 37,
+          "HYPE": 7,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 64,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 59,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 116,
+          "RUNNER_SLOT_BUSY": 43,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 109,
+          "DAILY_LOSS_7P5_GATE": 44,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "V4_GROSS_CAP_3": 12,
+          "HYPE_REDESIGN_1P0_CRYPTO_CAP_GATE": 2,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 683,
+          "FET_POST_EXIT_COOLDOWN_24H": 2
+        },
+        "source_intents": 2052,
+        "residual_priority_exits": 5,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.666110611244542,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 10,
+        "shared_risk_flatten_count": 6,
+        "v52_daily_trip_count": 30,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      },
+      "30": {
+        "case": "EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON",
+        "cost_bps_roundtrip": 30,
+        "initial_jpy": 10000.0,
+        "final_compounded_jpy": 3807596.919928814,
+        "net_return_pct": 37975.969199288134,
+        "max_hourly_dd_pct": -26.241956240350007,
+        "dd_time_utc": "2026-03-09T02:05:00Z",
+        "modeled_fills": 791,
+        "win_rate_pct": 61.5676359039191,
+        "profit_factor": 1.8551825635811288,
+        "admitted_by_runner": {
+          "Q102": 117,
+          "PENGU": 46,
+          "V52": 84,
+          "V4": 494,
+          "IDLE": 36,
+          "HYPE": 7,
+          "FET": 8
+        },
+        "blocked_by_reason": {
+          "SYMBOL_BUSY": 63,
+          "V52_STRATEGY_DAILY_LOSS_3P5_GATE": 5,
+          "V4_FOREIGN_SYMBOL_OWNERSHIP": 7,
+          "CRYPTO_GROSS_CAP": 58,
+          "V4_OPPOSITE_SYMBOL_ACTIVE": 62,
+          "V4_GROSS_CAP_3": 13,
+          "IDLE_BASELINE_OPEN_OR_PENDING": 117,
+          "RUNNER_SLOT_BUSY": 43,
+          "V4_RECOVERY_FAMILY_GROSS_CAP_2P5": 108,
+          "DAILY_LOSS_7P5_GATE": 48,
+          "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE": 23,
+          "V4_TOTAL_GROSS_CAP_4P75": 1,
+          "HYPE_REDESIGN_1P0_CRYPTO_CAP_GATE": 2,
+          "V4_SHORT_SYMBOL_COOLDOWN_12H": 15,
+          "PENGU_ROUTE_QUARANTINE_60H": 6,
+          "TOTAL_GROSS_CAP": 4,
+          "V4_MAX_DRAWDOWN_21PCT_HOLD": 683,
+          "FET_POST_EXIT_COOLDOWN_24H": 2
+        },
+        "source_intents": 2052,
+        "residual_priority_exits": 5,
+        "pengu_partial_events": 3,
+        "pengu_final_realized_dd_pct": -6.120000000000014,
+        "pengu_final_realized_index": 7.666110611244542,
+        "terminal_open_count": 1,
+        "terminal_open_positions": [
+          {
+            "strategy": "Q102",
+            "symbol": "SUIUSDT",
+            "side": "LONG",
+            "route": "HIGH_VOL|SUIUSDT",
+            "entry_utc": "2026-09-29T04:00:00Z",
+            "entry_price": 1.1156,
+            "gross_x": 1.0,
+            "modeled_future_exit_utc": "2026-10-02T03:00:00Z"
+          }
+        ],
+        "shared_risk_trip_count": 10,
+        "shared_risk_flatten_count": 6,
+        "v52_daily_trip_count": 36,
+        "v52_deferred_exit_count": 7,
+        "status": "CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY",
+        "v4_sizing": "NATIVE_GROSS",
+        "v4_per_position_cap": 1.0,
+        "v4_aggregate_cap": 2.0,
+        "crypto_cap": 3.0,
+        "stock_cap": 4.0,
+        "total_cap": 4.25,
+        "direction_overrides": {
+          "V4": [
+            "G4",
+            "X03",
+            "X05",
+            "X07",
+            "X11",
+            "Y07"
+          ],
+          "Q102": [
+            "FET_PB168",
+            "UNI_MR72"
+          ],
+          "IDLE": [],
+          "PENGU": []
+        },
+        "v4_direction_override_candidates": 0,
+        "q102_direction_override_candidates": 0,
+        "pengu_timed_stops": true,
+        "q102_selected_native_modeled": 224,
+        "q102_selected_native_unresolved_failclosed": 0,
+        "q102_high_vol_missing": false,
+        "v4_native_lifecycle_modeled": 1394,
+        "v4_native_lifecycle_unresolved": 0
+      }
+    }
+  },
+  "hypeExactContribution": {
+    "10": {
+      "n": 7,
+      "wins": 4,
+      "winRate": 0.5714285714285714,
+      "directNetJpy": 44598.28376673094,
+      "sumNormalizedEquityReturn": 0.08822263612610753,
+      "meanNormalizedEquityReturn": 0.012603233732301076,
+      "worstNormalizedEquityReturn": -0.03790597644859602,
+      "bestNormalizedEquityReturn": 0.10074416602973987
+    },
+    "30": {
+      "n": 7,
+      "wins": 4,
+      "winRate": 0.5714285714285714,
+      "directNetJpy": -1136.6957374100434,
+      "sumNormalizedEquityReturn": 0.07422263612610755,
+      "meanNormalizedEquityReturn": 0.01060323373230108,
+      "worstNormalizedEquityReturn": -0.03990597644859601,
+      "bestNormalizedEquityReturn": 0.09874416602973987
+    }
+  },
+  "conclusion": {
+    "final10": {
+      "finalJpy": 10600406.84939976,
+      "ddPct": -25.560278078047606,
+      "winRatePct": 63.72795969773299,
+      "pf": 2.0531554752734946,
+      "fills": 794
+    },
+    "final30": {
+      "finalJpy": 3807596.919928814,
+      "ddPct": -26.241956240350007,
+      "winRatePct": 61.5676359039191,
+      "pf": 1.8551825635811288,
+      "fills": 791
+    },
+    "vsHypeWait": {
+      "delta10Jpy": 780579.9272255432,
+      "delta30Jpy": 644003.9145222274,
+      "dd10DeltaPctPt": 1.0658141036401503e-14,
+      "dd30DeltaPctPt": 2.1316282072803006e-14
+    },
+    "remainingDD": "Feb-Mar DD remains dominated by V52/V4 overlap plus one Q102 AVAX STOP5; selected HYPE does not worsen max DD.",
+    "productionPromotion": "NOT_REQUESTED_NOT_PERFORMED"
+  },
+  "rejected": {
+    "HYPE_H48R20": "holdout-selected exploratory only",
+    "HYPE_SIMPLE_ONLINE_KNN": "no pretarget robust candidates",
+    "HYPE_GENERIC_ONLINE_HEALTH": "worsened target/forward",
+    "HYPE_STOP4_5_6": "worsened Shared Risk/DD",
+    "IDLE_ONLINE_JUP_TIA": "exact capacity/opportunity-cost failure",
+    "Q102_UNI_NEW": "no robust candidate"
+  },
+  "productionMutation": false
+}

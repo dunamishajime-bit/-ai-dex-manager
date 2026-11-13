@@ -1,0 +1,5806 @@
+{
+  "status": "RESEARCH_ONLY_FINAL_SELECTED_HYPE_TTL60_ROBUSTNESS",
+  "selectionUsesTargetYearForAdoptedRules": false,
+  "costs": {
+    "10": {
+      "months": {
+        "2025-10": {
+          "equity_return_pct": 261.861158860868,
+          "fills": 124,
+          "wr_pct": 65.3225806451613,
+          "pf": 4.243634045616104,
+          "net_pnl_jpy": 26002.448457756254
+        },
+        "2025-11": {
+          "equity_return_pct": 93.89334101145934,
+          "fills": 151,
+          "wr_pct": 58.27814569536424,
+          "pf": 1.9530802790671904,
+          "net_pnl_jpy": 33190.18201317949
+        },
+        "2025-12": {
+          "equity_return_pct": 83.34946332938247,
+          "fills": 85,
+          "wr_pct": 60.0,
+          "pf": 2.457691495082272,
+          "net_pnl_jpy": 59919.82727196608
+        },
+        "2026-01": {
+          "equity_return_pct": 116.77184051896683,
+          "fills": 103,
+          "wr_pct": 66.99029126213593,
+          "pf": 3.2618939759688677,
+          "net_pnl_jpy": 117490.48402531687
+        },
+        "2026-02": {
+          "equity_return_pct": 165.94521716873928,
+          "fills": 135,
+          "wr_pct": 64.44444444444444,
+          "pf": 3.0617743109351094,
+          "net_pnl_jpy": 512115.8628445926
+        },
+        "2026-03": {
+          "equity_return_pct": 23.646691402087217,
+          "fills": 20,
+          "wr_pct": 75.0,
+          "pf": 1.9240433155983165,
+          "net_pnl_jpy": 131576.81153320603
+        },
+        "2026-04": {
+          "equity_return_pct": 58.206616924780306,
+          "fills": 31,
+          "wr_pct": 61.29032258064516,
+          "pf": 3.721389734434433,
+          "net_pnl_jpy": 523940.85647528863
+        },
+        "2026-05": {
+          "equity_return_pct": 89.86616200844068,
+          "fills": 29,
+          "wr_pct": 75.86206896551724,
+          "pf": 6.5664979384910485,
+          "net_pnl_jpy": 1270920.0396683211
+        },
+        "2026-06": {
+          "equity_return_pct": 107.63146025145987,
+          "fills": 33,
+          "wr_pct": 72.72727272727273,
+          "pf": 5.895694105091408,
+          "net_pnl_jpy": 2748568.827448273
+        },
+        "2026-07": {
+          "equity_return_pct": 38.418760904345525,
+          "fills": 31,
+          "wr_pct": 58.064516129032256,
+          "pf": 2.4337870968338304,
+          "net_pnl_jpy": 2179223.056497117
+        },
+        "2026-08": {
+          "equity_return_pct": 14.388846849368564,
+          "fills": 22,
+          "wr_pct": 59.09090909090909,
+          "pf": 1.446699317921045,
+          "net_pnl_jpy": 1227261.2789282938
+        },
+        "2026-09": {
+          "equity_return_pct": 19.993697534534682,
+          "fills": 30,
+          "wr_pct": 63.333333333333336,
+          "pf": 1.3422348566497622,
+          "net_pnl_jpy": 1322361.9599691345
+        },
+        "2026-10": {
+          "equity_return_pct": 0.0,
+          "fills": 0,
+          "wr_pct": null,
+          "pf": null,
+          "net_pnl_jpy": 0
+        }
+      },
+      "routeContribution": [
+        {
+          "strategy": "FET",
+          "symbol": "FETUSDT",
+          "side": "LONG",
+          "route": "FET_BRK48_RESIDUAL",
+          "n": 8,
+          "wr": 0.5,
+          "net": 792825.4545349826,
+          "pf": 2.120842940099241
+        },
+        {
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "side": "LONG",
+          "route": "HYPE_CONSENSUS_ONHEALTH_TTL60_H48",
+          "n": 7,
+          "wr": 0.5714285714285714,
+          "net": 44598.28376673095,
+          "pf": 1.210900046839724
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "DOTUSDT",
+          "side": "SHORT",
+          "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+          "n": 10,
+          "wr": 0.4,
+          "net": -101600.91560414304,
+          "pf": 0.42856710560070954
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "TIAUSDT",
+          "side": "SHORT",
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "n": 15,
+          "wr": 0.5333333333333333,
+          "net": 103506.77246845416,
+          "pf": 1.1061763406908829
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "JUPUSDT",
+          "side": "SHORT",
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "n": 12,
+          "wr": 0.5833333333333334,
+          "net": 451221.0157514007,
+          "pf": 1.8617041771816993
+        },
+        {
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "SHORT",
+          "route": "SHORT_V20",
+          "n": 7,
+          "wr": 0.7142857142857143,
+          "net": 180190.5048328261,
+          "pf": 6.364621439692795
+        },
+        {
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "LONG",
+          "route": "RECOVERY_V8",
+          "n": 27,
+          "wr": 0.7407407407407407,
+          "net": 949758.191929782,
+          "pf": 1.6316773269604123
+        },
+        {
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "LONG",
+          "route": "LONG_V64",
+          "n": 12,
+          "wr": 0.8333333333333334,
+          "net": 2379144.229825123,
+          "pf": 19.87687493571451
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "LONG",
+          "route": "FET|PB168_0.1_P24_0.02_H12",
+          "n": 2,
+          "wr": 0.5,
+          "net": -778706.7600098902,
+          "pf": 0.09471547474160208
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ONDOUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|ONDOUSDT",
+          "n": 2,
+          "wr": 0.0,
+          "net": -548066.3416661343,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ARBUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|ARBUSDT",
+          "n": 1,
+          "wr": 0.0,
+          "net": -487929.2287545993,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "SUIUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|SUIUSDT",
+          "n": 1,
+          "wr": 0.0,
+          "net": -484960.76289041433,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "DOGE|MR48_Z2.0_H12",
+          "n": 5,
+          "wr": 0.4,
+          "net": -296302.067168202,
+          "pf": 0.26144096560218216
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ARBUSDT",
+          "side": "LONG",
+          "route": "HIGH_VOL|ARBUSDT",
+          "n": 1,
+          "wr": 0.0,
+          "net": -211689.59998945784,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|REV12_T0.05_H12",
+          "n": 1,
+          "wr": 0.0,
+          "net": -206068.9692621295,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "RENDERUSDT",
+          "side": "LONG",
+          "route": "RENDER|BRK168_H12_V1.2",
+          "n": 4,
+          "wr": 0.25,
+          "net": -182759.75334066944,
+          "pf": 0.5311304420492007
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|REV24_T0.05_H8",
+          "n": 6,
+          "wr": 0.5,
+          "net": -172493.1969878415,
+          "pf": 0.4152478229839971
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "route": "UNI|MR48_Z1.5_H24",
+          "n": 7,
+          "wr": 0.7142857142857143,
+          "net": -13191.118744463125,
+          "pf": 0.5440183346547605
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "APTUSDT",
+          "side": "SHORT",
+          "route": "APT|REV24_T0.05_H24",
+          "n": 5,
+          "wr": 0.4,
+          "net": -12092.464245413314,
+          "pf": 0.29914274723674705
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "NEAR|BRK48_H48_V1.2",
+          "n": 1,
+          "wr": 1.0,
+          "net": 13178.188878164598,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "n": 10,
+          "wr": 0.8,
+          "net": 34039.61005140966,
+          "pf": 1.1096372630415805
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "DOGE|MR72_Z1.5_H12",
+          "n": 12,
+          "wr": 0.6666666666666666,
+          "net": 44833.187595381605,
+          "pf": 1.981357924373032
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "APTUSDT",
+          "side": "SHORT",
+          "route": "APT|REV6_T0.03_H24",
+          "n": 10,
+          "wr": 0.5,
+          "net": 75646.38043052018,
+          "pf": 1.4645163335573155
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "AVAX|REV12_T0.03_H12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 116293.8526343843,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "AVAX|REV12_T0.03_H12",
+          "n": 10,
+          "wr": 0.8,
+          "net": 159744.34660486266,
+          "pf": 7.3949877299897
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "route": "NEAR|BRK48_H48_V1.2",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 169343.7708629776,
+          "pf": 2248.550872942701
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "n": 27,
+          "wr": 0.5925925925925926,
+          "net": 516833.8879633461,
+          "pf": 2.0756910396773303
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "APTUSDT",
+          "side": "LONG",
+          "route": "APT|REV24_T0.05_H24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 519689.25085266767,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|PB168_0.1_P24_0.02_H12",
+          "n": 4,
+          "wr": 1.0,
+          "net": 1460919.8147412061,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ONDOUSDT",
+          "side": "LONG",
+          "route": "HIGH_VOL|ONDOUSDT",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1709175.9499603342,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 8,
+          "wr": 0.5,
+          "net": -27231.190261854717,
+          "pf": 0.11391532785540813
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 5,
+          "wr": 0.6,
+          "net": -18325.54431457972,
+          "pf": 0.017136521888297125
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 4,
+          "wr": 0.0,
+          "net": -17891.588020763153,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 4,
+          "wr": 0.5,
+          "net": -9275.721920862645,
+          "pf": 0.11326790709659712
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -9146.230467329493,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -6180.845140683486,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_X10_TIME_48H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -5292.0272014118,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 4,
+          "wr": 0.25,
+          "net": -4950.798418674386,
+          "pf": 0.02942696143992639
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.5,
+          "net": -4625.653062293149,
+          "pf": 0.04741092781668841
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 0.0,
+          "net": -3700.3374188432244,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -3662.1393401445384,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 4,
+          "wr": 0.5,
+          "net": -3641.883352621645,
+          "pf": 0.1694407880438563
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -3129.7907785693615,
+          "pf": 0.027366740890731732
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 3,
+          "wr": 0.0,
+          "net": -2528.0631571508447,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 0.0,
+          "net": -2524.1826640644604,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -2262.016611681961,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -2220.924265341778,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 0.0,
+          "net": -2125.738054673911,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1894.4139429221648,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 2,
+          "wr": 0.0,
+          "net": -1845.5942206089585,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 5,
+          "wr": 0.4,
+          "net": -1803.5342859367106,
+          "pf": 0.37113399307033906
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1712.3960236949742,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -1618.1707638573248,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 4,
+          "wr": 0.25,
+          "net": -1600.6086232455214,
+          "pf": 0.1121081186592474
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1596.2020386932966,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 2,
+          "wr": 0.0,
+          "net": -1529.8853052070942,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1521.418823583641,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -1412.1775240671582,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1328.52623153736,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -1232.9919802442064,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1206.6421560307856,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1196.0008173470167,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1071.6956812274457,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -1022.5725062793617,
+          "pf": 0.33738909363207586
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 2,
+          "wr": 0.0,
+          "net": -997.4849963675288,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 1,
+          "wr": 0.0,
+          "net": -988.8762343351467,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -985.8825556742413,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -869.2299443371824,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -811.0144939379292,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 0.0,
+          "net": -656.5762750397172,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -617.0906756517869,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 1,
+          "wr": 0.0,
+          "net": -567.9046579224579,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 5,
+          "wr": 0.6,
+          "net": -538.5151987463767,
+          "pf": 0.4564221314997227
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -522.7355729603098,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 2,
+          "wr": 0.5,
+          "net": -444.3719632640432,
+          "pf": 0.6786935868624034
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -429.3768438130162,
+          "pf": 0.34940427613096636
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -410.78996672513193,
+          "pf": 0.06577991917005277
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 2,
+          "wr": 0.0,
+          "net": -325.32018133010115,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -272.2808747410124,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": -221.8371102586277,
+          "pf": 0.10716096962571112
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -195.49846177507476,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -188.77934950815697,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -175.53016381070654,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 0.0,
+          "net": -170.77847979162237,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 4,
+          "wr": 0.5,
+          "net": -154.89181973253943,
+          "pf": 0.871779605234038
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 4,
+          "wr": 0.25,
+          "net": -115.63383058583247,
+          "pf": 0.6652575542021101
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -93.04987050586774,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "LONG",
+          "route": "REC_Y15_REV_D0_T3",
+          "n": 1,
+          "wr": 0.0,
+          "net": -89.94043693739788,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -89.09522858393204,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_Y15_REV_D0_T3",
+          "n": 1,
+          "wr": 0.0,
+          "net": -84.12775298058462,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -77.21955061104919,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -75.80448452662753,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -73.30697040590223,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": -66.53382917512242,
+          "pf": 0.5820612338766568
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -64.36139846879271,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -63.57286374496962,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -62.598480548792836,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 0.5,
+          "net": -58.868142271537835,
+          "pf": 0.7790709618677447
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -55.79015761560889,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -44.58634856035165,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 1,
+          "wr": 0.0,
+          "net": -27.503955478196524,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -21.158044698993344,
+          "pf": 0.7573118752680243
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -12.460294833278631,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1.6284498715985745,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 0.5,
+          "net": 12.341993884680193,
+          "pf": 1.0521143767894572
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 4,
+          "wr": 0.25,
+          "net": 12.350586668428605,
+          "pf": 1.0060755301565878
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 20.66352605216446,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 20.860705456148565,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 26.281084090839613,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 3,
+          "wr": 1.0,
+          "net": 29.193982988456277,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 30.047481891045933,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 1.0,
+          "net": 32.888169165698336,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 37.056586195343506,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 39.785947403458565,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "route": "REC_Y15_REV_D0_T3",
+          "n": 1,
+          "wr": 1.0,
+          "net": 40.35298932485375,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_X14_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 42.615991421754906,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 2,
+          "wr": 0.5,
+          "net": 58.19787312652039,
+          "pf": 13.696921637727456
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_X10_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 63.74610879421127,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 76.21627081210458,
+          "pf": 3.6243746969458286
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 86.43303039386515,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_Y16_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 90.4102442786412,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 91.50918559919398,
+          "pf": 1.5816037982876885
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 109.40049542254727,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 118.97119427460092,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_Y16_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 119.95731080664449,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 1,
+          "wr": 1.0,
+          "net": 120.87592994129248,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 121.24949374450806,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 139.43849012447197,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 1,
+          "wr": 1.0,
+          "net": 146.17345746747515,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 4,
+          "wr": 0.5,
+          "net": 152.41009593591434,
+          "pf": 1.1057676876937201
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 158.23973692880207,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 166.3237529773945,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 167.09196330090572,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 2,
+          "wr": 0.5,
+          "net": 182.04176214461654,
+          "pf": 2.8265122977886237
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 192.11297731441553,
+          "pf": 2.2429140136188317
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 193.94726803538077,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 208.32218909222217,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 210.76745929633023,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 234.55564708885169,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 240.14043149588895,
+          "pf": 1.877986917750338
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 255.40645926346957,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 272.5820993085576,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 277.1159800887028,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 2,
+          "wr": 1.0,
+          "net": 287.5092436782278,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 287.7592223961343,
+          "pf": 6.704208938438911
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 2,
+          "wr": 1.0,
+          "net": 317.37468313401047,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 327.57781135163566,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 4,
+          "wr": 0.5,
+          "net": 327.9829578516276,
+          "pf": 1.4289615535504403
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 339.6595286594737,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 2,
+          "wr": 1.0,
+          "net": 362.01050604733507,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 1,
+          "wr": 1.0,
+          "net": 368.9553107215425,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 382.9821316974296,
+          "pf": 1.74185731357866
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 4,
+          "wr": 0.75,
+          "net": 402.0773353123524,
+          "pf": 5.41544897818778
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 414.1454621088614,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 4,
+          "wr": 0.75,
+          "net": 425.3616379909263,
+          "pf": 1.0729692414919318
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 429.89153324753613,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 451.82239802777707,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "route": "REC_X10_TIME_48H",
+          "n": 3,
+          "wr": 1.0,
+          "net": 488.23907796334134,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 498.53343974114443,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 5,
+          "wr": 0.8,
+          "net": 504.39902297963863,
+          "pf": 1.4304152882770624
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 516.5958023544654,
+          "pf": 1.2516678323018406
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 557.1955442335985,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 557.2144721317134,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 4,
+          "wr": 1.0,
+          "net": 568.9600568784074,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 1.0,
+          "net": 582.3493442701423,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 2,
+          "wr": 0.5,
+          "net": 596.8244136462318,
+          "pf": 8.182188863543619
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 621.8267586414631,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 622.7559795404616,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "LONG",
+          "route": "REC_X14_TIME_48H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 628.9040203698296,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 640.3114776743087,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 701.10365047832,
+          "pf": 2.35866601912008
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 777.92921436654,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 2,
+          "wr": 1.0,
+          "net": 808.6908534412712,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 10,
+          "wr": 0.6,
+          "net": 821.5963752613387,
+          "pf": 1.7379297477155786
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 823.4306308654552,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 856.8019964215216,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 1.0,
+          "net": 864.2423533730973,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 897.5378245591723,
+          "pf": 8.78490996584962
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 930.229940659759,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 2,
+          "wr": 0.5,
+          "net": 935.8355092000006,
+          "pf": 2.2764098206205934
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 2,
+          "wr": 0.5,
+          "net": 1006.2416200193177,
+          "pf": 1.8272843555264062
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 1012.2687241974243,
+          "pf": 4.222898907794413
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 5,
+          "wr": 0.6,
+          "net": 1012.7656420804534,
+          "pf": 8.698925547545363
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1031.5875470346505,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1080.120956054739,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1086.0099473124,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1087.6412455974878,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 3,
+          "wr": 1.0,
+          "net": 1109.4377722977542,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 1249.4029470245193,
+          "pf": 2.1159571446594656
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1263.5755393896202,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1355.7841826127592,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1389.1286845206325,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1429.3831002569852,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1475.6251837952736,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1546.3606843187667,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1553.276664299517,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1588.8228623295784,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 8,
+          "wr": 0.5,
+          "net": 1671.6941407655763,
+          "pf": 1.294864630401396
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 1714.7164381500756,
+          "pf": 4.276767441900151
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_Y16_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1772.0318455446866,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1816.909607459261,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 1831.2603121128702,
+          "pf": 2.73252810039142
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1915.0816086006014,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1992.2296536365418,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 2159.8053683353637,
+          "pf": 2.3599150688761945
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 5,
+          "wr": 0.4,
+          "net": 2168.242546273278,
+          "pf": 2.814356799180704
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 2206.5772114923225,
+          "pf": 19.90700615428351
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2261.395705357679,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 2334.330719303753,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2413.189338040342,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2437.894295240105,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 2462.7973599594607,
+          "pf": 10.780454790987855
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 9,
+          "wr": 0.7777777777777778,
+          "net": 2662.0320286913407,
+          "pf": 4.313649799517391
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 8,
+          "wr": 0.625,
+          "net": 2685.865497126117,
+          "pf": 2.999087521816861
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2777.3809883410718,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 6,
+          "wr": 0.8333333333333334,
+          "net": 2877.562951352298,
+          "pf": 4.749306164930253
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 2907.5036713311456,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2959.2528667006263,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3165.8115153059775,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 3220.6404524205755,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 2,
+          "wr": 1.0,
+          "net": 3321.022970296749,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3617.983327817794,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 2,
+          "wr": 1.0,
+          "net": 3650.796562035256,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3715.3085079682096,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3745.1389656984334,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 2,
+          "wr": 0.5,
+          "net": 3756.385029273535,
+          "pf": 26.445214006801
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3956.3916315811125,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 4244.702452774061,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 4863.370333436326,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 2,
+          "wr": 1.0,
+          "net": 5467.747497676706,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 5587.58866531301,
+          "pf": 49.322660187237915
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 6237.439353351633,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 2,
+          "wr": 1.0,
+          "net": 6621.606523095654,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 6662.184093764186,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 6712.761907935181,
+          "pf": 94.42883017506263
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 7340.910748704224,
+          "pf": 1.4996593951061872
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 4,
+          "wr": 0.75,
+          "net": 8111.586855194307,
+          "pf": 39.63047673815329
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 8416.696255530132,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 8575.071298965728,
+          "pf": 14.209593458643667
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 1.0,
+          "net": 8834.226902687124,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 9998.387028633053,
+          "pf": 37.98398871590048
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 3,
+          "wr": 1.0,
+          "net": 11125.918635047165,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 5,
+          "wr": 0.6,
+          "net": 12299.892236205533,
+          "pf": 6.133568400476878
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 2,
+          "wr": 1.0,
+          "net": 13954.8572596271,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 14099.325162813419,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 15832.16454588121,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 15883.15830629948,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 3,
+          "wr": 1.0,
+          "net": 16151.581434300155,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 9,
+          "wr": 0.7777777777777778,
+          "net": 16393.5375933242,
+          "pf": 777.3491342564873
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 17311.619817489973,
+          "pf": 140.6137562124201
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 19260.105978440515,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 6,
+          "wr": 0.8333333333333334,
+          "net": 19928.49364097213,
+          "pf": 41.78921790296396
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 10,
+          "wr": 0.5,
+          "net": 20066.29916516821,
+          "pf": 14.103255732537667
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 8,
+          "wr": 1.0,
+          "net": 26474.598486742438,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 2,
+          "wr": 0.5,
+          "net": 38506.281445181216,
+          "pf": 33714.488039711214
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 57946.27139443289,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 15,
+          "wr": 0.7333333333333333,
+          "net": 62304.416251477945,
+          "pf": 12.598780282599202
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 92569.1324719997,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V52",
+          "symbol": "NVDAUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 2,
+          "wr": 0.5,
+          "net": 16564.026168261975,
+          "pf": 1.8819943919874809
+        },
+        {
+          "strategy": "V52",
+          "symbol": "AMZNUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 5,
+          "wr": 0.6,
+          "net": 18001.125309852472,
+          "pf": 56.6584460377607
+        },
+        {
+          "strategy": "V52",
+          "symbol": "NVDAUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 6,
+          "wr": 1.0,
+          "net": 28107.738896888462,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V52",
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 11,
+          "wr": 0.6363636363636364,
+          "net": 209186.05960320204,
+          "pf": 14.762892015743894
+        },
+        {
+          "strategy": "V52",
+          "symbol": "MSFTUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 9,
+          "wr": 0.8888888888888888,
+          "net": 287485.2199647009,
+          "pf": 2105.3143108368586
+        },
+        {
+          "strategy": "V52",
+          "symbol": "TSLAUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 7,
+          "wr": 1.0,
+          "net": 351207.88308312895,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V52",
+          "symbol": "MSFTUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 8,
+          "wr": 0.75,
+          "net": 367460.04629294644,
+          "pf": 5.00897650751437
+        },
+        {
+          "strategy": "V52",
+          "symbol": "METAUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 7,
+          "wr": 1.0,
+          "net": 398325.1023685612,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V52",
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 13,
+          "wr": 0.9230769230769231,
+          "net": 681361.4650214395,
+          "pf": 31.06393020508167
+        },
+        {
+          "strategy": "V52",
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 16,
+          "wr": 0.875,
+          "net": 1039056.4141539822,
+          "pf": 25.438358100124358
+        }
+      ],
+      "maxDD": {
+        "pct": -25.560278078047606,
+        "peakUtc": "2026-02-28 10:55:00+00:00",
+        "troughUtc": "2026-03-09 02:05:00+00:00",
+        "overlapWorst": [
+          {
+            "strategy": "Q102",
+            "symbol": "AVAXUSDT",
+            "side": "SHORT",
+            "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+            "entry": "2026-03-03T19:00:00Z",
+            "exit": "2026-03-04T16:00:00Z",
+            "gross": 0.75,
+            "net": -27782.72165266798,
+            "reason": "STOP5"
+          },
+          {
+            "strategy": "V52",
+            "symbol": "NVDAUSDT",
+            "side": "LONG",
+            "route": "V50_POST_OPEN_BASIS",
+            "entry": "2026-02-26T17:30:00Z",
+            "exit": "2026-03-12T13:30:00Z",
+            "gross": 2.0,
+            "net": -18780.194430643372,
+            "reason": "MISSED_CHECKPOINT_FAIL_CLOSED"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "INJUSDT",
+            "side": "SHORT",
+            "route": "REC_G3_LATE_BTC_REL",
+            "entry": "2026-02-28T10:00:00Z",
+            "exit": "2026-02-28T12:00:00Z",
+            "gross": 0.25,
+            "net": -4710.4430847199,
+            "reason": "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "ADAUSDT",
+            "side": "SHORT",
+            "route": "REC_Y01_REV_D0_T72",
+            "entry": "2026-02-27T08:00:00Z",
+            "exit": "2026-03-01T03:00:00Z",
+            "gross": 0.6000000000000001,
+            "net": 846.262270205372,
+            "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "SOLUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-26T10:00:00Z",
+            "exit": "2026-03-01T02:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 3627.2442079797424,
+            "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "LTCUSDT",
+            "side": "SHORT",
+            "route": "REC_Y01_REV_D0_T72",
+            "entry": "2026-02-27T08:00:00Z",
+            "exit": "2026-03-01T03:00:00Z",
+            "gross": 0.6000000000000001,
+            "net": 4244.702452774061,
+            "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+          },
+          {
+            "strategy": "Q102",
+            "symbol": "FETUSDT",
+            "side": "SHORT",
+            "route": "FET|REV24_T0.05_H8",
+            "entry": "2026-03-01T13:00:00Z",
+            "exit": "2026-03-01T21:00:00Z",
+            "gross": 1.25,
+            "net": 5775.74133776397,
+            "reason": "Q102_PROD_TIME"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "NEARUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-25T22:00:00Z",
+            "exit": "2026-02-28T22:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 8246.824074697503,
+            "reason": "V4_NATIVE_TIME"
+          },
+          {
+            "strategy": "Q102",
+            "symbol": "AVAXUSDT",
+            "side": "LONG",
+            "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+            "entry": "2026-03-08T13:00:00Z",
+            "exit": "2026-03-09T05:50:00Z",
+            "gross": 0.75,
+            "net": 14479.556223327829,
+            "reason": "TP3"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "ADAUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-25T20:00:00Z",
+            "exit": "2026-02-28T20:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 19544.06378988361,
+            "reason": "V4_NATIVE_TIME"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "ADAUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-25T22:00:00Z",
+            "exit": "2026-02-28T22:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 20944.178223988958,
+            "reason": "V4_NATIVE_TIME"
+          }
+        ]
+      }
+    },
+    "30": {
+      "months": {
+        "2025-10": {
+          "equity_return_pct": 207.9090963113459,
+          "fills": 122,
+          "wr_pct": 64.75409836065573,
+          "pf": 3.5705138396070595,
+          "net_pnl_jpy": 20689.52698654882
+        },
+        "2025-11": {
+          "equity_return_pct": 70.28683207803206,
+          "fills": 151,
+          "wr_pct": 56.29139072847682,
+          "pf": 1.702946195467082,
+          "net_pnl_jpy": 21114.786370599715
+        },
+        "2025-12": {
+          "equity_return_pct": 69.899074561768,
+          "fills": 85,
+          "wr_pct": 56.470588235294116,
+          "pf": 2.1912224069588677,
+          "net_pnl_jpy": 37700.327096648965
+        },
+        "2026-01": {
+          "equity_return_pct": 100.1681881421117,
+          "fills": 102,
+          "wr_pct": 64.70588235294117,
+          "pf": 2.8378443221822556,
+          "net_pnl_jpy": 68470.16526508477
+        },
+        "2026-02": {
+          "equity_return_pct": 138.98586964239828,
+          "fills": 135,
+          "wr_pct": 61.48148148148148,
+          "pf": 2.753881897139492,
+          "net_pnl_jpy": 279687.5086441601
+        },
+        "2026-03": {
+          "equity_return_pct": 19.758478091573007,
+          "fills": 20,
+          "wr_pct": 70.0,
+          "pf": 1.680178141789929,
+          "net_pnl_jpy": 58296.54681648554
+        },
+        "2026-04": {
+          "equity_return_pct": 47.129803041676446,
+          "fills": 31,
+          "wr_pct": 61.29032258064516,
+          "pf": 3.0213941928288124,
+          "net_pnl_jpy": 236010.655259375
+        },
+        "2026-05": {
+          "equity_return_pct": 76.31948157676179,
+          "fills": 29,
+          "wr_pct": 72.41379310344827,
+          "pf": 5.348981692311432,
+          "net_pnl_jpy": 558635.3402461011
+        },
+        "2026-06": {
+          "equity_return_pct": 88.5529234348041,
+          "fills": 33,
+          "wr_pct": 72.72727272727273,
+          "pf": 4.675290747399746,
+          "net_pnl_jpy": 1083418.3637677403
+        },
+        "2026-07": {
+          "equity_return_pct": 27.609268014212283,
+          "fills": 31,
+          "wr_pct": 51.61290322580645,
+          "pf": 1.9509801182003335,
+          "net_pnl_jpy": 692210.1344388127
+        },
+        "2026-08": {
+          "equity_return_pct": 8.525747770847158,
+          "fills": 22,
+          "wr_pct": 59.09090909090909,
+          "pf": 1.2727263482024518,
+          "net_pnl_jpy": 308682.44863974093
+        },
+        "2026-09": {
+          "equity_return_pct": 12.898137775344987,
+          "fills": 30,
+          "wr_pct": 63.333333333333336,
+          "pf": 1.1848361808423833,
+          "net_pnl_jpy": 278916.48225747416
+        },
+        "2026-10": {
+          "equity_return_pct": 0.0,
+          "fills": 0,
+          "wr_pct": null,
+          "pf": null,
+          "net_pnl_jpy": 0
+        }
+      },
+      "routeContribution": [
+        {
+          "strategy": "FET",
+          "symbol": "FETUSDT",
+          "side": "LONG",
+          "route": "FET_BRK48_RESIDUAL",
+          "n": 8,
+          "wr": 0.5,
+          "net": 300873.4349556824,
+          "pf": 2.0231639154951493
+        },
+        {
+          "strategy": "HYPE",
+          "symbol": "HYPEUSDT",
+          "side": "LONG",
+          "route": "HYPE_CONSENSUS_ONHEALTH_TTL60_H48",
+          "n": 7,
+          "wr": 0.5714285714285714,
+          "net": -1136.6957374100457,
+          "pf": 0.9875564770312246
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "DOTUSDT",
+          "side": "SHORT",
+          "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+          "n": 9,
+          "wr": 0.4444444444444444,
+          "net": -43992.05135868044,
+          "pf": 0.3787923696217451
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "TIAUSDT",
+          "side": "SHORT",
+          "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+          "n": 15,
+          "wr": 0.5333333333333333,
+          "net": -12150.904329814603,
+          "pf": 0.971560530936383
+        },
+        {
+          "strategy": "IDLE",
+          "symbol": "JUPUSDT",
+          "side": "SHORT",
+          "route": "IDLE_JUP_RELATIVE_SHORT",
+          "n": 12,
+          "wr": 0.5833333333333334,
+          "net": 154547.332053264,
+          "pf": 1.661329322718232
+        },
+        {
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "SHORT",
+          "route": "SHORT_V20",
+          "n": 7,
+          "wr": 0.7142857142857143,
+          "net": 81944.88627821922,
+          "pf": 5.253155594768502
+        },
+        {
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "LONG",
+          "route": "RECOVERY_V8",
+          "n": 27,
+          "wr": 0.7407407407407407,
+          "net": 417109.4514799821,
+          "pf": 1.6847167248989279
+        },
+        {
+          "strategy": "PENGU",
+          "symbol": "PENGUUSDT",
+          "side": "LONG",
+          "route": "LONG_V64",
+          "n": 12,
+          "wr": 0.8333333333333334,
+          "net": 933419.9979106013,
+          "pf": 14.948647255655226
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "LONG",
+          "route": "FET|PB168_0.1_P24_0.02_H12",
+          "n": 2,
+          "wr": 0.5,
+          "net": -301464.5258594768,
+          "pf": 0.10313674916643742
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ONDOUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|ONDOUSDT",
+          "n": 2,
+          "wr": 0.0,
+          "net": -226098.6564999582,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ARBUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|ARBUSDT",
+          "n": 1,
+          "wr": 0.0,
+          "net": -194873.05442649996,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "SUIUSDT",
+          "side": "SHORT",
+          "route": "HIGH_VOL|SUIUSDT",
+          "n": 1,
+          "wr": 0.0,
+          "net": -183879.13551080064,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "DOGE|MR48_Z2.0_H12",
+          "n": 5,
+          "wr": 0.4,
+          "net": -127263.06791180102,
+          "pf": 0.24617986583539864
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ARBUSDT",
+          "side": "LONG",
+          "route": "HIGH_VOL|ARBUSDT",
+          "n": 1,
+          "wr": 0.0,
+          "net": -94950.52680247983,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "RENDERUSDT",
+          "side": "LONG",
+          "route": "RENDER|BRK168_H12_V1.2",
+          "n": 4,
+          "wr": 0.25,
+          "net": -90752.98036091264,
+          "pf": 0.44088130185450464
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|REV24_T0.05_H8",
+          "n": 6,
+          "wr": 0.5,
+          "net": -90013.1162869419,
+          "pf": 0.3551331093694705
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|REV12_T0.05_H12",
+          "n": 1,
+          "wr": 0.0,
+          "net": -85906.63198222058,
+          "pf": 0.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "UNIUSDT",
+          "side": "SHORT",
+          "route": "UNI|MR48_Z1.5_H24",
+          "n": 7,
+          "wr": 0.5714285714285714,
+          "net": -14148.49756848214,
+          "pf": 0.28278496405784165
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "APTUSDT",
+          "side": "SHORT",
+          "route": "APT|REV24_T0.05_H24",
+          "n": 5,
+          "wr": 0.4,
+          "net": -9610.987810089486,
+          "pf": 0.2626967759140072
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "n": 10,
+          "wr": 0.8,
+          "net": 4582.364950353192,
+          "pf": 1.0354931491055335
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "NEAR|BRK48_H48_V1.2",
+          "n": 1,
+          "wr": 1.0,
+          "net": 6734.458074057423,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "DOGE|MR72_Z1.5_H12",
+          "n": 12,
+          "wr": 0.5833333333333334,
+          "net": 12468.278120151079,
+          "pf": 1.43917515521479
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "APTUSDT",
+          "side": "SHORT",
+          "route": "APT|REV6_T0.03_H24",
+          "n": 10,
+          "wr": 0.5,
+          "net": 30241.85744646426,
+          "pf": 1.3368641153749032
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "AVAX|REV12_T0.03_H12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 31639.98371111065,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "AVAX|REV12_T0.03_H12",
+          "n": 10,
+          "wr": 0.7,
+          "net": 66617.46205180523,
+          "pf": 4.918625304663989
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "route": "NEAR|BRK48_H48_V1.2",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 78322.9693731356,
+          "pf": 858.8104858598641
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+          "n": 27,
+          "wr": 0.5925925925925926,
+          "net": 134073.46000278994,
+          "pf": 1.5643429788645165
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "APTUSDT",
+          "side": "LONG",
+          "route": "APT|REV24_T0.05_H24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 178215.11080693992,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "FETUSDT",
+          "side": "SHORT",
+          "route": "FET|PB168_0.1_P24_0.02_H12",
+          "n": 4,
+          "wr": 1.0,
+          "net": 619828.6279456792,
+          "pf": 999.0
+        },
+        {
+          "strategy": "Q102",
+          "symbol": "ONDOUSDT",
+          "side": "LONG",
+          "route": "HIGH_VOL|ONDOUSDT",
+          "n": 2,
+          "wr": 1.0,
+          "net": 681633.5793099788,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 8,
+          "wr": 0.5,
+          "net": -17002.56789125167,
+          "pf": 0.12243194451703635
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 4,
+          "wr": 0.0,
+          "net": -11435.690034497957,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 5,
+          "wr": 0.4,
+          "net": -10854.912660889748,
+          "pf": 0.019693517752737203
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -5517.269954899405,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 4,
+          "wr": 0.5,
+          "net": -5195.957870383474,
+          "pf": 0.17462696338473024
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -4161.003695310281,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_X10_TIME_48H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -3457.834515046862,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 4,
+          "wr": 0.25,
+          "net": -3196.591026598658,
+          "pf": 0.0388773221845407
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -3132.9366904638646,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 4,
+          "wr": 0.5,
+          "net": -2730.5419000301918,
+          "pf": 0.07983843312294893
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 0.0,
+          "net": -2616.5336707591478,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -2393.9599536704186,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -2196.7587475483165,
+          "pf": 0.03018792891657283
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 4,
+          "wr": 0.25,
+          "net": -1822.9924349971066,
+          "pf": 0.057298633298331084
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1752.5329732776222,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 5,
+          "wr": 0.4,
+          "net": -1725.4873831461798,
+          "pf": 0.21890287871032157
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1675.0505904067977,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 4,
+          "wr": 0.25,
+          "net": -1555.7727352787642,
+          "pf": 0.015958207462032283
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1536.8670677120026,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1519.6576793022411,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 2,
+          "wr": 0.0,
+          "net": -1452.84175108418,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1408.8242941557926,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -1348.9025081568416,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1215.3718777593394,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1191.6934985714545,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 2,
+          "wr": 0.0,
+          "net": -1156.9552057215533,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -1061.9769407941724,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -1058.1366023022406,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -1010.5760201844993,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -925.2148712392233,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -922.7709887072467,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -913.3119724821258,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 0.0,
+          "net": -871.3778709239599,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 1,
+          "wr": 0.0,
+          "net": -859.3020465416125,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -857.6052811897544,
+          "pf": 0.293697205244642
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -815.226801853841,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 2,
+          "wr": 0.0,
+          "net": -772.5029686969716,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.0,
+          "net": -655.060648517205,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -622.7468607151918,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 0.0,
+          "net": -596.8921930542572,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 2,
+          "wr": 0.5,
+          "net": -589.66954943964,
+          "pf": 0.12136429029248098
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 4,
+          "wr": 0.25,
+          "net": -566.6736355889134,
+          "pf": 0.6494935719764859
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 2,
+          "wr": 0.5,
+          "net": -511.4176850873682,
+          "pf": 0.5042539094841467
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -461.4018897079391,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 1,
+          "wr": 0.0,
+          "net": -455.5491159503137,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -445.39375880601654,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 5,
+          "wr": 0.6,
+          "net": -392.2911001869647,
+          "pf": 0.45661751725273264
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -390.8528647426625,
+          "pf": 0.03760629171278231
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -354.55014132365477,
+          "pf": 0.2249093528192915
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 2,
+          "wr": 0.0,
+          "net": -352.2599455118072,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 4,
+          "wr": 0.25,
+          "net": -325.56515518237404,
+          "pf": 0.10993262586201025
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -300.8935786717625,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": -227.23367042781575,
+          "pf": 0.04469498498947582
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -196.76707169350823,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -187.45833002065268,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -176.73096471519963,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 0.0,
+          "net": -165.76286006472543,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 4,
+          "wr": 0.5,
+          "net": -159.71828680696444,
+          "pf": 0.9565884896934904
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 4,
+          "wr": 0.5,
+          "net": -111.24754863297835,
+          "pf": 0.8836038836370579
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 0.5,
+          "net": -94.51553916854334,
+          "pf": 0.5983420857986378
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -89.89925665338376,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 2,
+          "wr": 0.0,
+          "net": -88.67543409311332,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -88.5945629594256,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 0.0,
+          "net": -85.79650291798748,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -85.37038723234318,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_Y15_REV_D0_T3",
+          "n": 1,
+          "wr": 0.0,
+          "net": -83.3608503243316,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -78.26377575799101,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -75.46675783059251,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "LONG",
+          "route": "REC_Y15_REV_D0_T3",
+          "n": 1,
+          "wr": 0.0,
+          "net": -74.87483112003409,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -74.71927371890592,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 1,
+          "wr": 0.0,
+          "net": -69.94594201730321,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -68.30469843428975,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -66.72029815364186,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": -63.666721003991,
+          "pf": 0.5262104930354298
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -58.66862348668128,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 2,
+          "wr": 0.0,
+          "net": -53.38318111579756,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 1,
+          "wr": 0.0,
+          "net": -46.90276966784552,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 1,
+          "wr": 0.0,
+          "net": -43.43488460200453,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 0.5,
+          "net": -42.01295409030536,
+          "pf": 0.8026506439831319
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 0.0,
+          "net": -36.98137948457341,
+          "pf": 0.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": -32.62070142555815,
+          "pf": 0.5798863431008915
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 4,
+          "wr": 0.5,
+          "net": -30.572061094883907,
+          "pf": 0.9563250102894059
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": -7.601253443294496,
+          "pf": 0.9700086235141161
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 0.5,
+          "net": -2.7755673392615563,
+          "pf": 0.7630880926135388
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3.728865132845132,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 4.237745482504343,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 4,
+          "wr": 0.5,
+          "net": 6.196196160595264,
+          "pf": 1.0054461455060761
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 12.521991325378368,
+          "pf": 6.775453573380738
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 14.85946427397356,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 16.133510642713013,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 18.744037529544848,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_X14_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 20.112235570155534,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 20.86329251002354,
+          "pf": 1.1365977727949053
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 24.826407677861358,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 25.006307599343813,
+          "pf": 1.0572661936777017
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "route": "REC_Y15_REV_D0_T3",
+          "n": 1,
+          "wr": 1.0,
+          "net": 27.50792721027807,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 38.4953366331402,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_X10_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 41.26209654191697,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_Y16_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 45.02309466233054,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_Y16_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 50.849281104537354,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 1,
+          "wr": 1.0,
+          "net": 60.587259224830504,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 61.95899155950317,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 1,
+          "wr": 1.0,
+          "net": 65.02164577822188,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 100.3044136531504,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 101.36908465677797,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 106.12729892390419,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 115.95925295999479,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 117.66560019233768,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 8,
+          "wr": 0.5,
+          "net": 122.41055883496301,
+          "pf": 1.0307181304546627
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 125.23005719907889,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 2,
+          "wr": 0.5,
+          "net": 128.60811590033134,
+          "pf": 2.2804873154685
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 136.4238355261052,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 137.93361146911874,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 144.8066560085398,
+          "pf": 2.0521381523623052
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 159.921106486629,
+          "pf": 3.8702093069707413
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 177.1344683344875,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 185.50996114491682,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 1,
+          "wr": 1.0,
+          "net": 208.00496452067398,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 209.55473069743277,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_Y08_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 217.54177442191713,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 2,
+          "wr": 1.0,
+          "net": 222.83653554341683,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 2,
+          "wr": 1.0,
+          "net": 224.7337094162746,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 231.96767558344214,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 241.45497756384944,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 245.12272567015088,
+          "pf": 1.1876390563573056
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 2,
+          "wr": 1.0,
+          "net": 245.61098402677135,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 276.53892107305546,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 2,
+          "wr": 0.5,
+          "net": 279.0111788244143,
+          "pf": 4.246770716577806
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 282.6091595063665,
+          "pf": 1.679174548884555
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 308.23725680440634,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 318.1349962006887,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 2,
+          "wr": 1.0,
+          "net": 328.7630360487769,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 348.0944463681141,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 366.35919418826626,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 2,
+          "wr": 1.0,
+          "net": 380.2890816970305,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X07_TIME_6H",
+          "n": 4,
+          "wr": 0.75,
+          "net": 384.2956900935078,
+          "pf": 6.2386035736747445
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "route": "REC_X10_TIME_48H",
+          "n": 3,
+          "wr": 1.0,
+          "net": 384.8721605003845,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 4,
+          "wr": 1.0,
+          "net": 390.02635311233246,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 408.0395116976415,
+          "pf": 1.5076733342288204
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "LONG",
+          "route": "REC_X14_TIME_48H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 412.61508558772584,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 10,
+          "wr": 0.5,
+          "net": 414.06560840829013,
+          "pf": 1.4419161553674906
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 414.96038528950356,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 5,
+          "wr": 0.8,
+          "net": 426.6070225524486,
+          "pf": 1.5031902863925153
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 441.50613763167456,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 477.11158372544736,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ATOMUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 478.41064139907803,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 486.41968819736724,
+          "pf": 1.5062222727214765
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 489.1909387421266,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 5,
+          "wr": 0.6,
+          "net": 515.6890231287039,
+          "pf": 4.916919622671943
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 541.1743035023983,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 1.0,
+          "net": 558.971973425833,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 563.6142157905222,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 2,
+          "wr": 0.5,
+          "net": 609.8752023541031,
+          "pf": 1.6356180176868067
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 649.654169781476,
+          "pf": 6.444563344895986
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 2,
+          "wr": 0.5,
+          "net": 669.4732065887704,
+          "pf": 2.0309892914209318
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 1.0,
+          "net": 673.4108119575523,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 681.8722054267469,
+          "pf": 3.4881013749772487
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "LONG",
+          "route": "REC_X09_TIME_48H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 684.9754368408118,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 726.6767803445499,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 761.7605331851586,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 2,
+          "wr": 1.0,
+          "net": 763.5714222540128,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 843.7700565673763,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 848.1429004164055,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 2,
+          "wr": 1.0,
+          "net": 880.175662703267,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 1.0,
+          "net": 975.155544461921,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 1036.6444500953253,
+          "pf": 2.226886458298384
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1037.0162973596653,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1043.80213383315,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "CONT_SHORT_MID_AGE24_48",
+          "n": 2,
+          "wr": 0.5,
+          "net": 1080.5289493397388,
+          "pf": 128.1828142745428
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "route": "REC_Y16_REV_D0_T6",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1153.900817744021,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1175.6155552107746,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 2,
+          "wr": 0.5,
+          "net": 1181.9637885460834,
+          "pf": 446.9237812537818
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 5,
+          "wr": 0.4,
+          "net": 1188.409868836884,
+          "pf": 2.2344633560593574
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 1203.6760999830108,
+          "pf": 2.071237165874389
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 8,
+          "wr": 0.625,
+          "net": 1247.7397268502234,
+          "pf": 2.1463579508712147
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 1260.7056860746463,
+          "pf": 6.224066537297405
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_G3_LATE_BTC_REL",
+          "n": 6,
+          "wr": 0.6666666666666666,
+          "net": 1324.8606948126733,
+          "pf": 3.005884091470377
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1456.582934204753,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_G4_MATURE_REL_RANGE",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1468.212654284598,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1474.4681761732782,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 1481.204306547948,
+          "pf": 13.753049826426842
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X02_TIME_36H",
+          "n": 9,
+          "wr": 0.7777777777777778,
+          "net": 1525.7481337192953,
+          "pf": 3.2049182618958736
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1581.2545986876912,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X12_TIME_12H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1593.5744217619836,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 2,
+          "wr": 1.0,
+          "net": 1661.628373062103,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1767.2898447782918,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_Y07_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1791.7176464787312,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1802.386156476945,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X13_TP1.5_SL1_H24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1894.2493357687,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1910.5438472085566,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 1928.6978039931319,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "route": "REC_Y02_REV_D0_T12",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2132.9972449592615,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G1_MID_REL_LOWVOL",
+          "n": 2,
+          "wr": 0.5,
+          "net": 2246.8913085253275,
+          "pf": 15.179882736390713
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2265.4590170278393,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 2,
+          "wr": 1.0,
+          "net": 2281.0970373285018,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X04_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 2318.9688842574196,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 2,
+          "wr": 1.0,
+          "net": 2452.4430990867204,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 2,
+          "wr": 1.0,
+          "net": 3115.6459750081717,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3236.766500208798,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 2,
+          "wr": 0.5,
+          "net": 3455.6755288026193,
+          "pf": 30.42583509801212
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 3681.7955467772704,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 2,
+          "wr": 0.5,
+          "net": 4076.178508287921,
+          "pf": 86.16654199260756
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X11_TIME_48H",
+          "n": 3,
+          "wr": 0.3333333333333333,
+          "net": 4209.483222560413,
+          "pf": 1.4447756523384179
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 4299.130706180919,
+          "pf": 50.11976602576961
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_Y03_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 4665.158753096253,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "n": 4,
+          "wr": 0.75,
+          "net": 4935.972105138376,
+          "pf": 26.510755564886793
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_X05_TIME_36H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 5194.154949415353,
+          "pf": 10.930907889107647
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 1,
+          "wr": 1.0,
+          "net": 5531.973466745946,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 1,
+          "wr": 1.0,
+          "net": 5576.195701627823,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 5952.347159214883,
+          "pf": 25.236424611745832
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 3,
+          "wr": 1.0,
+          "net": 6085.415985688954,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X06_TIME_12H",
+          "n": 5,
+          "wr": 0.6,
+          "net": 7369.105468249674,
+          "pf": 5.109415586202105
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "LONG",
+          "route": "REC_Y11_REV_D0_T36",
+          "n": 2,
+          "wr": 1.0,
+          "net": 8188.387372883977,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "route": "FAILED_BREAK_REV_SHORT_6H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 8847.741918241285,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "route": "REC_X01_TIME_24H",
+          "n": 1,
+          "wr": 1.0,
+          "net": 8885.046271947258,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 9317.22742303483,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 8,
+          "wr": 0.75,
+          "net": 9358.368169192941,
+          "pf": 195.19346814690724
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 3,
+          "wr": 1.0,
+          "net": 10262.144120574312,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "route": "REC_X08_TIME_48H",
+          "n": 3,
+          "wr": 0.6666666666666666,
+          "net": 10601.992593877092,
+          "pf": 83.81202496873615
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_Y01_REV_D0_T72",
+          "n": 1,
+          "wr": 1.0,
+          "net": 11406.289453532978,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "route": "REC_X03_TIME_12H",
+          "n": 6,
+          "wr": 0.8333333333333334,
+          "net": 11923.54473666152,
+          "pf": 30.563519301395083
+        },
+        {
+          "strategy": "V4",
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "route": "REC_G5_SLOW_TREND",
+          "n": 10,
+          "wr": 0.5,
+          "net": 12100.491766979902,
+          "pf": 9.846819789864195
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 8,
+          "wr": 1.0,
+          "net": 16463.210058214925,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 2,
+          "wr": 0.5,
+          "net": 23589.102698691222,
+          "pf": 928.4423141912363
+        },
+        {
+          "strategy": "V4",
+          "symbol": "AVAXUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 33312.40267975214,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V4",
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "route": "REC_Y06_REV_D0_T72",
+          "n": 15,
+          "wr": 0.8,
+          "net": 38381.211784819534,
+          "pf": 13.628755485116795
+        },
+        {
+          "strategy": "V4",
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "route": "REC_Y12_REV_D0_T24",
+          "n": 1,
+          "wr": 1.0,
+          "net": 53463.87187669881,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V52",
+          "symbol": "NVDAUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 2,
+          "wr": 0.5,
+          "net": 4901.356068935353,
+          "pf": 1.3877406842245648
+        },
+        {
+          "strategy": "V52",
+          "symbol": "AMZNUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 5,
+          "wr": 0.6,
+          "net": 6844.000293641426,
+          "pf": 16.057850320650186
+        },
+        {
+          "strategy": "V52",
+          "symbol": "NVDAUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 6,
+          "wr": 1.0,
+          "net": 14241.342045126745,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V52",
+          "symbol": "AMZNUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 11,
+          "wr": 0.6363636363636364,
+          "net": 38549.64957430835,
+          "pf": 2.7883141229727855
+        },
+        {
+          "strategy": "V52",
+          "symbol": "MSFTUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 9,
+          "wr": 0.8888888888888888,
+          "net": 98842.84517666936,
+          "pf": 314.306155513192
+        },
+        {
+          "strategy": "V52",
+          "symbol": "MSFTUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 8,
+          "wr": 0.75,
+          "net": 107290.46168930098,
+          "pf": 2.916168166597289
+        },
+        {
+          "strategy": "V52",
+          "symbol": "METAUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 7,
+          "wr": 0.8571428571428571,
+          "net": 144078.6362261137,
+          "pf": 14.647517811274026
+        },
+        {
+          "strategy": "V52",
+          "symbol": "TSLAUSDT",
+          "side": "LONG",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 7,
+          "wr": 1.0,
+          "net": 149100.53086371676,
+          "pf": 999.0
+        },
+        {
+          "strategy": "V52",
+          "symbol": "TSLAUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 13,
+          "wr": 0.9230769230769231,
+          "net": 205690.01550529368,
+          "pf": 15.120077105100169
+        },
+        {
+          "strategy": "V52",
+          "symbol": "METAUSDT",
+          "side": "SHORT",
+          "route": "V50_POST_OPEN_BASIS",
+          "n": 16,
+          "wr": 0.875,
+          "net": 318029.20165198366,
+          "pf": 8.577277721610214
+        }
+      ],
+      "maxDD": {
+        "pct": -26.241956240350007,
+        "peakUtc": "2026-02-28 10:00:00+00:00",
+        "troughUtc": "2026-03-09 02:05:00+00:00",
+        "overlapWorst": [
+          {
+            "strategy": "Q102",
+            "symbol": "AVAXUSDT",
+            "side": "SHORT",
+            "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+            "entry": "2026-03-03T19:00:00Z",
+            "exit": "2026-03-04T16:00:00Z",
+            "gross": 0.75,
+            "net": -16526.07852054338,
+            "reason": "STOP5"
+          },
+          {
+            "strategy": "V52",
+            "symbol": "NVDAUSDT",
+            "side": "LONG",
+            "route": "V50_POST_OPEN_BASIS",
+            "entry": "2026-02-26T17:30:00Z",
+            "exit": "2026-03-12T13:30:00Z",
+            "gross": 2.0,
+            "net": -12640.809356226006,
+            "reason": "MISSED_CHECKPOINT_FAIL_CLOSED"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "INJUSDT",
+            "side": "SHORT",
+            "route": "REC_G3_LATE_BTC_REL",
+            "entry": "2026-02-28T10:00:00Z",
+            "exit": "2026-02-28T12:00:00Z",
+            "gross": 0.25,
+            "net": -2955.598970931877,
+            "reason": "V4_NATIVE_TRAILING_CROSSED_BEFORE_REPLACEMENT"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "ADAUSDT",
+            "side": "SHORT",
+            "route": "REC_Y01_REV_D0_T72",
+            "entry": "2026-02-27T08:00:00Z",
+            "exit": "2026-03-01T03:00:00Z",
+            "gross": 0.6000000000000001,
+            "net": -47.861265855337095,
+            "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "SOLUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-26T10:00:00Z",
+            "exit": "2026-03-01T02:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 1836.9237850599004,
+            "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "LTCUSDT",
+            "side": "SHORT",
+            "route": "REC_Y01_REV_D0_T72",
+            "entry": "2026-02-27T08:00:00Z",
+            "exit": "2026-03-01T03:00:00Z",
+            "gross": 0.6000000000000001,
+            "net": 1910.5438472085566,
+            "reason": "V4_NATIVE_V4_SHORT_PROFIT_GUARD_FILLED"
+          },
+          {
+            "strategy": "Q102",
+            "symbol": "FETUSDT",
+            "side": "SHORT",
+            "route": "FET|REV24_T0.05_H8",
+            "entry": "2026-03-01T13:00:00Z",
+            "exit": "2026-03-01T21:00:00Z",
+            "gross": 1.25,
+            "net": 2314.578561925337,
+            "reason": "Q102_PROD_TIME"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "NEARUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-25T22:00:00Z",
+            "exit": "2026-02-28T22:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 4534.003931089093,
+            "reason": "V4_NATIVE_TIME"
+          },
+          {
+            "strategy": "Q102",
+            "symbol": "AVAXUSDT",
+            "side": "LONG",
+            "route": "Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",
+            "entry": "2026-03-08T13:00:00Z",
+            "exit": "2026-03-09T05:50:00Z",
+            "gross": 0.75,
+            "net": 7699.343388788687,
+            "reason": "TP3"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "ADAUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-25T20:00:00Z",
+            "exit": "2026-02-28T20:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 11097.57233253567,
+            "reason": "V4_NATIVE_TIME"
+          },
+          {
+            "strategy": "V4",
+            "symbol": "ADAUSDT",
+            "side": "SHORT",
+            "route": "REC_Y06_REV_D0_T72",
+            "entry": "2026-02-25T22:00:00Z",
+            "exit": "2026-02-28T22:00:00Z",
+            "gross": 0.30000000000000004,
+            "net": 11890.55489118652,
+            "reason": "V4_NATIVE_TIME"
+          }
+        ]
+      }
+    }
+  }
+}

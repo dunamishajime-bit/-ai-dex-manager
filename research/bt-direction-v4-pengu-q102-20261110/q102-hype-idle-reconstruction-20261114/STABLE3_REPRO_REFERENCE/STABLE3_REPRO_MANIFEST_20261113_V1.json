@@ -1,0 +1,74 @@
+﻿{
+    "status":  "REUSABLE_STABLE3_REPRO_LEDGER_V1",
+    "created_jst":  "2026-11-13",
+    "period":  [
+                   "2025-10-01T00:00:00Z",
+                   "2026-10-01T00:00:00Z_EXCLUSIVE"
+               ],
+    "initial_jpy":  10000,
+    "source_commit":  "b7133c209ad9e2f59b9b37d032bb1b3379258267",
+    "source_script_repo_path":  "research/bt-direction-v4-pengu-q102-20261110/scripts/portfolio_causal_three_pretarget_stable_route_ab_20261111.py",
+    "canonical_script_repo_path":  "research/bt-direction-v4-pengu-q102-20261110/scripts/portfolio_effective_current_canonical_parity_20261111.py",
+    "local_repro_dir":  "C:\\tmp\\disdex-bt-20251001-20261001\\DIRECTION_RESEARCH_20261109\\STABLE3_REPRO_RECOVERED_20261113",
+    "output_dir":  "C:\\tmp\\disdex-bt-20251001-20261001\\VPS_EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON_20261111_REPRO_20261113",
+    "environment":  {
+                        "DISDEX_PRETARGET_STABLE_CASE":  "STABLE3",
+                        "DISDEX_Q102_ADOPTED_MODE":  "ON"
+                    },
+    "stable3_blocks":  [
+                           {
+                               "route":  "SHORT_V20",
+                               "strategy":  "PENGU"
+                           },
+                           {
+                               "route":  "AVAX|MR24_Z1.5_H24",
+                               "strategy":  "Q102"
+                           },
+                           {
+                               "route":  "UNI|MR72_Z1.5_H24",
+                               "strategy":  "Q102"
+                           }
+                       ],
+    "actual":  [
+                   {
+                       "cost_bps_roundtrip":  10,
+                       "final_compounded_jpy":  4512970.171211586,
+                       "max_hourly_dd_pct":  -26.05877304176173,
+                       "modeled_fills":  856,
+                       "win_rate_pct":  61.6822429906542,
+                       "profit_factor":  1.668352713023249,
+                       "source_intents":  2466,
+                       "admitted_by_runner":  {
+                                                  "Q102":  84,
+                                                  "V52":  86,
+                                                  "V4":  502,
+                                                  "PENGU":  38,
+                                                  "IDLE":  91,
+                                                  "HYPE":  48,
+                                                  "FET":  8
+                                              }
+                   },
+                   {
+                       "cost_bps_roundtrip":  30,
+                       "final_compounded_jpy":  1454529.574075996,
+                       "max_hourly_dd_pct":  -28.076361286367945,
+                       "modeled_fills":  855,
+                       "win_rate_pct":  59.53216374269006,
+                       "profit_factor":  1.512646047959108,
+                       "source_intents":  2466,
+                       "admitted_by_runner":  {
+                                                  "Q102":  84,
+                                                  "V52":  86,
+                                                  "V4":  501,
+                                                  "PENGU":  38,
+                                                  "IDLE":  91,
+                                                  "HYPE":  48,
+                                                  "FET":  8
+                                              }
+                   }
+               ],
+    "input_hashes":  [
+
+                     ],
+    "production_mutation":  false
+}
