@@ -2,6 +2,9 @@ name: STABLE4 Production Safety Readonly Audit
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - 'audit/stable4-safety-readonly-20261114'
 
 permissions:
   contents: read
