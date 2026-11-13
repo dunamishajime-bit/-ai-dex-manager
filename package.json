@@ -129,7 +129,8 @@
     "strategy:idle-priority-short:parity:63-61-overlay": "tsx scripts/idle-priority-short-63-61-overlay-parity.ts",
     "strategy:idle-priority-short:parity:certify": "tsx scripts/idle-priority-short-generate-parity-cert.ts",
     "strategy:v12-v4-shadow:selftest": "tsx scripts/v12-multilogic-v4-shadow-runner.ts --self-test && tsx --test tests/v12-multilogic-v4-shadow.test.ts tests/v12-v4-shadow-observability.test.ts",
-    "strategy:v12-v4-shadow:once": "tsx scripts/v12-multilogic-v4-shadow-runner.ts --once"
+    "strategy:v12-v4-shadow:once": "tsx scripts/v12-multilogic-v4-shadow-runner.ts --once",
+    "strategy:stable4-global:selftest": "tsx scripts/stable4-global-selftest.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

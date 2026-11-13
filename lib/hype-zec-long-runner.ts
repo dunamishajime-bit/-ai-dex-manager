@@ -15,6 +15,7 @@ import type { DirectAccountSnapshot, DirectMarketQuote, DirectOpenOrder, DirectP
 import type { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
 import { buildHypeZecProtection, calculateHypeZecQuantity, evaluateHypeLongSignal, type HypeZecSignalResult } from "./hype-zec-long-sleeves";
 import { buildHypeTrendSignal, type HypeTrendCandle } from "./hype-trend-long-signal";
+import { evaluateStable4HypeSignal, stable4HypeFormalPriorityOpen } from "./hype-stable4-opportunity-signal";
 import { evaluateHypeTrendEntryGate } from "./hype-trend-long-runner";
 import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
 import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
@@ -351,10 +352,18 @@ export class HypeZecLongRunner {
     if (quote.updatedAt > this.now() || this.now() - quote.updatedAt > 5 * 60_000) return { status: "held", message: `HYPE_ZEC_QUOTE_STALE:${symbol}`, strategy: signal.strategy };
     const filters = await this.filters(symbol);
     const equity = Math.max(0, account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0));
-    const sizing = calculateHypeZecQuantity({ strategy: signal.strategy, equityUsd: equity, entryPrice: signal.entryPrice, stopPrice: signal.stopPrice, feeBpsPerSide: this.dependencies.runtime.feeBpsPerSide, slippageBps: this.dependencies.runtime.maximumSlippageBps, fundingBps: this.dependencies.runtime.fundingBps, stepSize: filters.stepSize, maximumGross: this.dependencies.runtime.maximumGross });
+    const sizing = calculateHypeZecQuantity({ strategy: signal.strategy, equityUsd: equity, entryPrice: signal.entryPrice, stopPrice: signal.stopPrice, feeBpsPerSide: this.dependencies.runtime.feeBpsPerSide, slippageBps: this.dependencies.runtime.maximumSlippageBps, fundingBps: this.dependencies.runtime.fundingBps, stepSize: filters.stepSize, maximumGross: this.dependencies.runtime.maximumGross, fixedGross: this.dependencies.runtime.signalMode === "STABLE4" });
     if (!(sizing.quantity > 0)) return { status: "held", message: `HYPE_ZEC_CAPACITY_BLOCKED_BY_MINIMUM:${symbol}`, strategy: signal.strategy };
 
     const active = await this.strictPositions(positions, this.now());
+    if (this.dependencies.runtime.signalMode === "STABLE4") {
+      if (stable4HypeFormalPriorityOpen(active.map((row) => row.strategy))) {
+        state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: "HYPE_STABLE4_FORMAL_PRIORITY_OPEN" };
+        state.lastDecisionTs = this.now();
+        await this.dependencies.stateStore.save(state);
+        return { status: "held", message: "HYPE_STABLE4_FORMAL_PRIORITY_OPEN", strategy: signal.strategy };
+      }
+    }
     const pendingExposure = aggregatePendingExposure(await readPendingExposureRegistry());
     const existingTotalGross = positions.reduce((sum, position) => sum + Math.abs(Number(position.notionalUsd || 0)), 0) / Math.max(equity, EPSILON);
     const existingCryptoGross = positions
@@ -425,14 +434,18 @@ export class HypeZecLongRunner {
     if (!actual || positionSide(actual) !== "LONG") return this.manualReview(state, `HYPE_ZEC_ENTRY_POSITION_MISMATCH:${symbol}`);
     const actualQty = actualQuantity(actual);
     const actualEntry = actual.entryPrice || signal.entryPrice;
-    const trendStop = this.dependencies.runtime.signalMode === "TREND" && signal.stopDistance
-      ? actualEntry - signal.stopDistance
-      : signal.stopPrice;
-    const trendTakeProfit = this.dependencies.runtime.signalMode === "TREND" && signal.trailingDistance
-      ? actualEntry + signal.trailingDistance
-      : signal.takeProfitPrice;
+    const trendStop = this.dependencies.runtime.signalMode === "STABLE4"
+      ? actualEntry * 0.94
+      : this.dependencies.runtime.signalMode === "TREND" && signal.stopDistance
+        ? actualEntry - signal.stopDistance
+        : signal.stopPrice;
+    const trendTakeProfit = this.dependencies.runtime.signalMode === "STABLE4"
+      ? actualEntry * 2.0
+      : this.dependencies.runtime.signalMode === "TREND" && signal.trailingDistance
+        ? actualEntry + signal.trailingDistance
+        : signal.takeProfitPrice;
     const acceptedEntryGross = Math.max(EPSILON, Math.abs(Number(actual.notionalUsd || actualQty * actualEntry)) / Math.max(equity, EPSILON));
-    const walletRiskStop = signal.strategy === "HYPE_LONG"
+    const walletRiskStop = signal.strategy === "HYPE_LONG" && this.dependencies.runtime.signalMode !== "STABLE4"
       ? calculateWalletRiskStop({
         side: "LONG",
         entryPrice: actualEntry,
@@ -614,9 +627,11 @@ export class HypeZecLongRunner {
         const age = this.now() - quote.updatedAt;
         if (age < 0 || age > 5 * 60_000) return { status: "held", message: `HYPE_ZEC_EXIT_QUOTE_STALE:${owned.symbol}`, strategy: owned.strategy };
         const heldMinutes = (this.now() - owned.entryTs) / 60_000;
-        const maxHoldMinutes = this.dependencies.runtime.signalMode === "TREND" && owned.strategy === "HYPE_LONG"
-          ? HYPE_TREND_LONG_POLICY.maximumHoldHours * 60
-          : HYPE_ZEC_LONG_POLICY[owned.strategy].signal.holdMinutes;
+        const maxHoldMinutes = this.dependencies.runtime.signalMode === "STABLE4" && owned.strategy === "HYPE_LONG"
+          ? 48 * 60
+          : this.dependencies.runtime.signalMode === "TREND" && owned.strategy === "HYPE_LONG"
+            ? HYPE_TREND_LONG_POLICY.maximumHoldHours * 60
+            : HYPE_ZEC_LONG_POLICY[owned.strategy].signal.holdMinutes;
         const exit = quote.bidPrice <= owned.stopPrice ? "HARD_STOP" : quote.bidPrice >= owned.takeProfitPrice ? "TAKE_PROFIT" : heldMinutes >= maxHoldMinutes ? "MAX_HOLD" : undefined;
         if (exit) return this.exitPosition(state, owned, actual, quote, exit, lock);
       }
@@ -624,9 +639,11 @@ export class HypeZecLongRunner {
       const priorLastDecisionTs = state.lastDecisionTs;
       const signals: HypeZecSignalResult[] = [];
       if (this.dependencies.runtime.symbols.includes("HYPEUSDT")) {
-        signals.push(this.dependencies.runtime.signalMode === "TREND"
-          ? trendSignalAsLegacy(buildHypeTrendSignal({ now: this.now(), btc: market.btc1h.map(trendCandle), hype: market.hype1h.map(trendCandle) }))
-          : evaluateHypeLongSignal({ now: this.now(), btc15m: market.btc15m, symbol15m: market.hype15m, symbol1m: market.hype1m }));
+        signals.push(this.dependencies.runtime.signalMode === "STABLE4"
+          ? evaluateStable4HypeSignal({ now: this.now(), btc1h: market.btc1h, hype1h: market.hype1h })
+          : this.dependencies.runtime.signalMode === "TREND"
+            ? trendSignalAsLegacy(buildHypeTrendSignal({ now: this.now(), btc: market.btc1h.map(trendCandle), hype: market.hype1h.map(trendCandle) }))
+            : evaluateHypeLongSignal({ now: this.now(), btc15m: market.btc15m, symbol15m: market.hype15m, symbol1m: market.hype1m }));
       }
       for (const signal of signals) {
         if (existingStrategies.has(signal.strategy)) continue;

@@ -1,5 +1,6 @@
 import { resolveSharedCryptoDailyLossPct } from "./sharedCryptoRiskPolicy";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "./integratedProductionRiskPolicy";
+import { resolveDisDexStable4Mode, type DisDexStable4Mode } from "./disdexStable4Opportunity";
 
 export type PenguDualLsV2Mode = "SHADOW" | "PAPER" | "LIVE";
 
@@ -104,6 +105,7 @@ export interface ResolvedPenguDualLsV2Runtime {
     killSwitchPath?: string;
     portfolioDailyLossStatePath?: string;
     closeUnmanagedPositions: false;
+    stable4Mode: DisDexStable4Mode;
 }
 
 /**
@@ -135,5 +137,6 @@ export function resolvePenguDualLsV2Runtime(env: Partial<NodeJS.ProcessEnv> = pr
         killSwitchPath: env.PENGU_DUAL_LS_V2_KILL_SWITCH_FILE,
         portfolioDailyLossStatePath: env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || env.PENGU_DUAL_LS_V2_PORTFOLIO_DAILY_LOSS_STATE_FILE || ".runtime-state/shared/crypto-daily-risk.json",
         closeUnmanagedPositions: false,
+        stable4Mode: resolveDisDexStable4Mode(env),
     };
 }

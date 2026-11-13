@@ -24,6 +24,7 @@ import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-da
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { stable4IdleBlocks, stable4IdleTaoRiskOffUntil } from "./disdex-stable4-idle";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -748,8 +749,31 @@ export class IdlePriorityShortRunner {
                     return { symbol, features, generic: evaluateIdleGenericCandidate(features) };
                 })
                 .filter((row) => row.generic.accepted);
-            const routeCandidates = rawGeneric
+            let routeCandidates = rawGeneric
                 .filter((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic).accepted);
+            if (this.dependencies.runtime.stable4Mode !== "OFF") {
+                const taoRawCandidate = routeCandidates.some((row) => row.symbol === "TAOUSDT");
+                if (this.dependencies.runtime.stable4Mode === "LIVE") {
+                    const nextUntil = stable4IdleTaoRiskOffUntil("LIVE", market.decisionTs, taoRawCandidate, state.stable4TaoRiskOffUntil || 0);
+                    if (nextUntil !== (state.stable4TaoRiskOffUntil || 0)) {
+                        state.stable4TaoRiskOffUntil = nextUntil;
+                        await this.dependencies.stateStore.save(state);
+                    }
+                    const before = routeCandidates.length;
+                    routeCandidates = routeCandidates.filter((row) => !stable4IdleBlocks("LIVE", row.symbol, market.decisionTs, state.stable4TaoRiskOffUntil || 0));
+                    if (before > 0 && routeCandidates.length === 0) {
+                        state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "STABLE4_IDLE_WAIT" };
+                        await this.dependencies.stateStore.save(state);
+                        return { status: "no-change", message: "STABLE4_IDLE_WAIT", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                    }
+                } else {
+                    const nextUntil = stable4IdleTaoRiskOffUntil("SHADOW", market.decisionTs, taoRawCandidate, state.stable4ShadowTaoRiskOffUntil || 0);
+                    if (nextUntil !== (state.stable4ShadowTaoRiskOffUntil || 0)) {
+                        state.stable4ShadowTaoRiskOffUntil = nextUntil;
+                        await this.dependencies.stateStore.save(state);
+                    }
+                }
+            }
             const lifecycleCandidates = routeCandidates.filter((row) => this.candidateLifecycleAllows(state, row));
             if (!lifecycleCandidates.length) {
                 await this.dependencies.stateStore.save({
