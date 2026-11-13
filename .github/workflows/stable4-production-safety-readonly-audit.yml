@@ -85,6 +85,50 @@ jobs:
           print('TRADING_MUTATION=0')
           PY
 
+
+      - name: Inspect V4 execution wiring and stale pending identity
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -T -i "$RUNNER_TEMP/ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" \
+            -p "${PORT:-22}" "root@$HOST" 'python3 -' <<'PY'
+          import hashlib,json,pathlib,subprocess,time
+          sha='3ad65403013b701db5d9e53e8814e6ab827a28e8'
+          unit=f'disdex-v12-v4@{sha}.service'
+          def sh(*args):
+            return subprocess.run(args,text=True,capture_output=True,check=False).stdout.strip()
+          print('V4_UNIT_SHOW='+json.dumps({k:sh('systemctl','show',unit,'-p',k,'--value') for k in ['User','Group','ExecStart','ExecStartPre','EnvironmentFiles','ActiveState','SubState','Result']},sort_keys=True))
+          rel=pathlib.Path('/home/deploy/disdex-trading/releases')/sha
+          checks={}
+          for x in [rel,rel/'node_modules',rel/'node_modules/.bin/tsx',rel/'scripts/ops/root/disdex-pending-exposure-readonly-reconcile.ts']:
+            try:
+              st=x.stat(); checks[str(x)]={'exists':True,'mode':oct(st.st_mode&0o777),'uid':st.st_uid,'gid':st.st_gid,'isFile':x.is_file(),'isDir':x.is_dir()}
+            except Exception as e: checks[str(x)]={'exists':False,'error':type(e).__name__}
+          print('V4_RELEASE_PATHS='+json.dumps(checks,sort_keys=True))
+          reg=json.loads(pathlib.Path('/var/lib/disdex/shared/pending-exposure.json').read_text())
+          active=[x for x in reg.get('entries',[]) if isinstance(x,dict) and x.get('status')!='RELEASED']
+          safe=[]
+          for x in active:
+            safe.append({k:x.get(k) for k in ['reservationId','strategyId','sleeve','symbol','side','gross','notionalUsd','status','createdAt','updatedAt','runtimeSha','idempotencyKey']})
+          print('PENDING_ACTIVE_FULL='+json.dumps(safe,sort_keys=True))
+          for name,path in [('heartbeat','/var/lib/disdex/v12-v4/heartbeat.json'),('state','/var/lib/disdex/v12-v4/state.json'),('runner','/var/lib/disdex/v12-v4/runner.json'),('decision','/var/lib/disdex/v12-v4/realtime-decision.json')]:
+            p=pathlib.Path(path)
+            if not p.exists():
+              print('V4_'+name.upper()+'={"exists":false}'); continue
+            try: o=json.loads(p.read_text())
+            except Exception as e: print('V4_'+name.upper()+'='+json.dumps({'exists':True,'parseError':type(e).__name__})); continue
+            out={'exists':True}
+            for k in ['schema','strategyId','runtimeCommitSha','releaseSha','updatedAt','heartbeatAt','status','reason','liveEnabled','orderEnabled','ordersAllowed','orderPermission','lastReconciledAt']:
+              if k in o: out[k]=o[k]
+            for k in ['position','pending','activePositions','positions','reservations']:
+              if k in o: out[k]=o[k]
+            print('V4_'+name.upper()+'='+json.dumps(out,sort_keys=True,default=str))
+          print('TRADING_MUTATION=0')
+          PY
       - name: Cleanup local SSH material
         if: always()
         shell: bash
