@@ -5,8 +5,10 @@ export type Quality102CausalV1Mode = "SHADOW" | "PAPER" | "LIVE";
 export const QUALITY102_CAUSAL_V1 = Object.freeze({
   strategyId: "QUALITY102_CAUSAL_V1",
   maximumGross: INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross,
-  cryptoGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-  totalGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+  // Formal DD1296 production contract and STABLE4 production-cap replay.
+  // Do not inherit profit-tier expansion here: Q102 is limited to free gross.
+  cryptoGrossCap: Math.min(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3.0),
+  totalGrossCap: Math.min(INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap, 3.5),
   maximumPositions: INTEGRATED_PRODUCTION_RISK_POLICY.q102MaximumPositions,
   historicalSelectorParity: false,
   brkEnabled: false,
@@ -42,8 +44,8 @@ export function resolveQuality102CausalV1Runtime(
     liveExecutionEnabled: bool("QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED"),
     operatorArmed: bool("QUALITY102_CAUSAL_V1_OPERATOR_ARMED"),
     maximumGross: Math.min(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, Math.max(0, Number.isFinite(requestedGross) ? requestedGross : INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross)),
-    cryptoGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-    totalGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+    cryptoGrossCap: QUALITY102_CAUSAL_V1.cryptoGrossCap,
+    totalGrossCap: QUALITY102_CAUSAL_V1.totalGrossCap,
     maximumPositions: 1,
     historicalSelectorParity: false,
     brkEnabled: false,

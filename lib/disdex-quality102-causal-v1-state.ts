@@ -10,7 +10,7 @@ const STATE_VERSION = 1 as const;
 
 export type Quality102CausalFamily = "HIGH_VOL" | "PB" | "MR" | "BRK" | "REV";
 export type Quality102CausalLayer = "S1" | "S2" | "S3" | "S4";
-export type Quality102CausalExitPolicy = "HIGH_VOL_TRAIL72" | "FIXED_HOLD_STOP";
+export type Quality102CausalExitPolicy = "HIGH_VOL_TRAIL72" | "FIXED_HOLD_STOP" | "STABLE4_STOP5_TP3_H24";
 
 export interface Quality102CausalV1PendingOrder {
   idempotencyKey: string;
@@ -149,7 +149,7 @@ function normalizePosition(value: unknown): Quality102CausalV1State["position"] 
   }
   if (raw.family !== undefined && !["HIGH_VOL", "PB", "MR", "BRK", "REV"].includes(String(raw.family))) malformed("position.family");
   if (raw.layer !== undefined && !["S1", "S2", "S3", "S4"].includes(String(raw.layer))) malformed("position.layer");
-  if (raw.exitPolicy !== undefined && raw.exitPolicy !== "HIGH_VOL_TRAIL72" && raw.exitPolicy !== "FIXED_HOLD_STOP") malformed("position.exitPolicy");
+  if (raw.exitPolicy !== undefined && raw.exitPolicy !== "HIGH_VOL_TRAIL72" && raw.exitPolicy !== "FIXED_HOLD_STOP" && raw.exitPolicy !== "STABLE4_STOP5_TP3_H24") malformed("position.exitPolicy");
   if (raw.maxHoldHours !== undefined && !(typeof raw.maxHoldHours === "number" && Number.isFinite(raw.maxHoldHours) && raw.maxHoldHours > 0 && raw.maxHoldHours <= 72)) malformed("position.maxHoldHours");
   const variant = optionalString(raw.variant, "position.variant");
   return {
@@ -201,7 +201,7 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
   if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("pending.hardStop");
   if (raw.family !== undefined && !["HIGH_VOL", "PB", "MR", "BRK", "REV"].includes(String(raw.family))) malformed("pending.family");
   if (raw.layer !== undefined && !["S1", "S2", "S3", "S4"].includes(String(raw.layer))) malformed("pending.layer");
-  if (raw.exitPolicy !== undefined && raw.exitPolicy !== "HIGH_VOL_TRAIL72" && raw.exitPolicy !== "FIXED_HOLD_STOP") malformed("pending.exitPolicy");
+  if (raw.exitPolicy !== undefined && raw.exitPolicy !== "HIGH_VOL_TRAIL72" && raw.exitPolicy !== "FIXED_HOLD_STOP" && raw.exitPolicy !== "STABLE4_STOP5_TP3_H24") malformed("pending.exitPolicy");
   if (raw.maxHoldHours !== undefined && !(typeof raw.maxHoldHours === "number" && Number.isFinite(raw.maxHoldHours) && raw.maxHoldHours > 0 && raw.maxHoldHours <= 72)) malformed("pending.maxHoldHours");
   const variant = optionalString(raw.variant, "pending.variant");
   const reason = optionalString(raw.reason, "pending.reason");
