@@ -11,7 +11,7 @@ export const DISDEX_STABLE4_OPPORTUNITY = Object.freeze({
   }),
   idle: Object.freeze({ taoRiskOffHours: 12, jupRel24Max: -0.08530033147389149, jupVolumeRatioMin: 2.5113219910413944, renderWait: true }),
   q102: Object.freeze({
-    fetRet14Max: 0.048699999999999966, avaxGross: 0.75, avaxPredThreshold: 0.013, avaxAgreementMin: 0.65, avaxK: 40,
+    fetRet14Max: 0.048722800378429465, avaxGross: 0.75, avaxPredThreshold: 0.013, avaxAgreementMin: 0.65, avaxK: 40,
     avaxHardStop: 0.05, avaxTakeProfit: 0.03, avaxHoldHours: 24,
     recoveryPredWinMin: 0.60, recoveryPredEv30Min: 0.002, recoveryConfidenceMin: 0.45, recoveryAnalogsMin: 6,
     recoveryRouteCompletedMin: 6, recoveryRouteWinMin: 0.60, recoveryRecentWindows: [5, 6] as const,

@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "
 import { dirname } from "node:path";
 import { DISDEX_STABLE4_OPPORTUNITY, type DisDexStable4Mode } from "../config/disdexStable4Opportunity";
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
+import { causalReturn } from "./dd1296-entry-policy";
 import type { Quality102Candle } from "./disdex-quality102-causal-pipeline";
 import type { Quality102CausalV1History, Quality102CausalV1Signal } from "./disdex-quality102-causal-v1-signal";
 import {
@@ -254,6 +255,13 @@ export class Stable4Q102OnlineEngine{
    const proposal=this.propose(history);
    this.logger("STABLE4 Q102 online decision",{mode:this.mode,nativeReason:nativeSignal.reason,nativeSymbol:nativeSignal.symbol,nativeVariant:nativeSignal.variant,proposalKind:proposal?.kind,proposalDiagnostics:proposal?.diagnostics});
    if(this.mode==="SHADOW")return{signal:nativeSignal,proposal};
+   if(nativeSignal.side!==0&&nativeSignal.symbol==="FETUSDT"){
+    let ret14:number|undefined;
+    const entry=history.entryOpenBySymbol?.FETUSDT;
+    try{if(entry?.timestampMs===nativeSignal.referenceTs)ret14=causalReturn(history.candlesBySymbol.FETUSDT,entry,336);}catch{}
+    if(!finite(ret14)||ret14>DISDEX_STABLE4_OPPORTUNITY.q102.fetRet14Max)
+     return{signal:{strategyId:"QUALITY102_CAUSAL_V1",referenceTs:nativeSignal.referenceTs,side:0,requestedGross:0,reason:"STABLE4_Q102_FET_RET14_WAIT",dataCutoffTs:nativeSignal.dataCutoffTs,brkEnabled:true},proposal};
+   }
    const nativeKey=nativeSignal.symbol&&nativeSignal.variant?(nativeSignal.symbol.replace(/USDT$/,"")+"|"+nativeSignal.variant):undefined;
    const weakNative=Boolean(nativeKey&&STABLE4_Q102_WEAK_ROUTES.has(nativeKey));
    if(nativeSignal.side!==0&&!weakNative)return{signal:nativeSignal,proposal};
