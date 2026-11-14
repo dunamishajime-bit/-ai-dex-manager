@@ -89,3 +89,16 @@ Enable the formal authenticated BT page to list, select, replay and download fou
 - Execute scripts/bt-hp-research-http-auth-selftest.ts with tsx. The test generates its own temporary HMAC test key; validates anon 401, authenticated GET 200, private/no-store, traversal 400 and missing-config 503.
 - Validate Python adapter, replay schemas, Next.js build and browser preview.
 - Formal production placement and deployment are not yet performed.
+
+
+## Source completeness check: per-position Gross is NOT in the current research replay
+
+The 2026-11-14 read-only, SHA256-validated, model-replay data shows:
+- STABLE4_HYPE6_Q102_DUALHEALTH_VALIDATION 10bps: 8,984/8,984 frames contain source Total/Crypto/Stock Gross. 0/18,412 position-frame records have a current position Gross.
+- STABLE4_HYPE6_Q102_DUALHEALTH_VALIDATION 30bps: 8,981/8,981 source Gross frames; 0/18,382 position-frame records have current position Gross.
+- STABLE4_OPPORTUNITY_PROD_CAPS 10bps: 8,978/8,978 source Gross frames; 0/28,375 position-frame records have current position Gross.
+- STABLE4_OPPORTUNITY_PROD_CAPS 30bps: 8,975/8,975 source Gross frames; 0/28,188 position-frame records have current position Gross.
+- These are model study records, not signed venue fills and not current production-pin strategy parity.
+- The new report widget computes actual source coverage for Total Gross, BTC price, position quantity, mark price, entry Gross and current Gross, without filling absent fields. It shows a clear warning whenever position-current-Gross is incomplete.
+
+To satisfy the owner's requirement for per-position current Gross%, the future canonical replay source must record each position's symbol, logic, side, actual model quantity, market mark price, JPY/USD value with explicit FX conversion, current notional, current Gross x, entry Gross x, total/category Gross snapshots, entry/exit timestamps, partial fills, funding and fees. Account equity and source Gross sums must reconcile at every replay step; do not make up quantities or allocate residual Gross by arbitrary ratio.

@@ -123,6 +123,25 @@ export function grossForFrame(frame: ReplayFrame): GrossState {
     hasAuthoritative: Boolean(frame.gross)
   };
 }
+/** Inspect source-field completeness without pretending missing position exposure can be inferred. */
+export function replayCoverage(replay:Replay){
+ const out={frames:replay.frames.length,framesWithSourceGross:0,framesWithBtc:0,
+   positionSnapshots:0,quantityKnown:0,markKnown:0,currentGrossKnown:0,
+   entryGrossKnown:0,events:0};
+ for(const frame of replay.frames){
+   if(frame.gross)out.framesWithSourceGross++;
+   if(frame.btc!==null)out.framesWithBtc++;
+   out.events+=frame.events.length;
+   for(const position of frame.positions){
+     out.positionSnapshots++;
+     if(position.quantity!==null)out.quantityKnown++;
+     if(position.mark!==null)out.markKnown++;
+     if(position.gross!==null)out.currentGrossKnown++;
+     if(position.grossAtEntry!==null&&position.grossAtEntry!==undefined)out.entryGrossKnown++;
+   }
+ }
+ return out;
+}
 const isObj=(v:unknown):v is Record<string,unknown> => v!==null && typeof v==="object" && !Array.isArray(v);
 const number=(v:unknown):v is number=>typeof v==="number" && Number.isFinite(v);
 const nullableNumber=(v:unknown)=>v===null || number(v);

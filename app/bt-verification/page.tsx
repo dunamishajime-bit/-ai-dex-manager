@@ -1,7 +1,7 @@
  "use client";
 import {useEffect,useMemo,useState} from "react";
 import type {Replay,Position} from "@/lib/bt-verification/replay";
-import {isStock,validateReplay,grossForFrame,serializeCsv} from "@/lib/bt-verification/replay";
+import {isStock,validateReplay,grossForFrame,serializeCsv,replayCoverage} from "@/lib/bt-verification/replay";
 import {saveRun,listRuns,readRun,deleteRun,type SavedRun} from "@/lib/bt-verification/storage";
 import {makeZip,type ZipEntry} from "@/lib/bt-verification/zip-store";
 import {BtcCandlestickChart} from "@/components/bt-verification/BtcCandlestickChart";
@@ -49,7 +49,9 @@ useEffect(()=>{
 },[running,speed,replay.mode,replay.frames.length]);
 useEffect(()=>{listRuns().then(setSavedRuns).catch(()=>setSavedNotice("保存ライブラリを利用できません"))},[]);
 useEffect(()=>{if(cursor===replay.frames.length-1)setRunning(false)},[cursor,replay.frames.length]);
-const catalogs=useMemo(()=>{
+const coverage=useMemo(()=>replayCoverage(replay),[replay]);
+ const coveredPercent=(x:number,y:number)=>y?((x/y)*100).toFixed(1)+"%":"—";
+ const catalogs=useMemo(()=>{
   // Only expose symbols/strategies present in the actual selected replay.
   // A synthetic BTC demo must never advertise real exchange symbols as simulated.
   const allLogics=new Set<string>();
@@ -520,6 +522,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
       {error&&<p className="mt-3 rounded-lg border border-rose-500/50 p-3 text-xs text-rose-200">{error}</p>}
       {savedNotice&&<p className="mt-3 text-xs text-cyan-200">{savedNotice}</p>}
     </section>
+    <div className="space-y-4">
     <section className={card+" p-5"}><h2 className="mb-3 text-[16px] font-bold text-white">データの出所と整合性</h2>
       <div className="space-y-3 text-xs">{[["モード",sourceLabel],["モデル実装参照SHA",replay.engineSha],["時点数",replay.frames.length.toLocaleString()+" スナップショット"],["BTC確定足",String(replay.btcCandles?.length??0)+" 本"],["Total Gross上限",replay.limits.total.toFixed(2)+"x"],["Crypto / Stock",replay.limits.crypto.toFixed(2)+"x / "+replay.limits.stock.toFixed(2)+"x"]].map(([k,v])=><div key={k} className="flex items-start justify-between gap-4 border-b border-[#2c4055] pb-2"><span className="text-[#8fa7bd]">{k}</span><span className="max-w-[60%] break-all text-right font-mono text-[#d8eaf8]">{v}</span></div>)}</div>
       {verifiedResearch&&<div className="mt-4 rounded-xl border border-[#327b89]/40 bg-[#123346] p-3">
@@ -531,6 +534,25 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
       <p className="mt-4 rounded-lg border border-amber-700/40 bg-amber-950/10 p-3 text-[11px] leading-6 text-amber-100">現在の画面は再生・可視化専用です。最新の正規BTエンジン、現在の各Runner SHA、数量・価格・個別Grossの完全照合が済むまで新規BT実行を有効化しません。</p>
       <button type="button" onClick={()=>setTab("library")} className="mt-4 w-full rounded-lg bg-[#20506b] px-3 py-3 text-[13px] font-semibold text-cyan-100">保存ライブラリを開く</button>
     </section>
+    <section className={card+" p-5"}>
+      <h2 className="mb-2 text-[15px] font-bold text-white">BT台帳のデータ充足率</h2>
+      <p className="mb-4 text-[11px] leading-5 text-[#92adbf]">総Grossは時点スナップショット、建玉別Grossは建玉自身の記録で別々に確認します。未取得項目を推定値で埋めません。</p>
+      <div className="grid grid-cols-2 gap-3">{([
+        ["総Grossの記録",coverage.framesWithSourceGross,coverage.frames],
+        ["BTC価格の記録",coverage.framesWithBtc,coverage.frames],
+        ["建玉数量の記録",coverage.quantityKnown,coverage.positionSnapshots],
+        ["建玉現在値の記録",coverage.markKnown,coverage.positionSnapshots],
+        ["建玉ごとの現在Gross",coverage.currentGrossKnown,coverage.positionSnapshots],
+        ["建玉エントリーGross",coverage.entryGrossKnown,coverage.positionSnapshots]
+      ] as const).map(([name,known,total])=><div key={name} className="rounded-lg border border-[#305069] bg-[#0d2639] p-3">
+        <p className="text-[11px] text-[#91aebf]">{name}</p>
+        <p className="mt-2 text-lg font-bold tabular-nums text-[#d1f0ef]">{coveredPercent(known,total)}</p>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#1b3d50]"><div className="h-full rounded-full bg-cyan-400" style={{width:total?Math.min(100,100*known/total)+"%":"0%"}}/></div>
+        <p className="mt-1.5 text-[10px] text-[#8ba6b9]">{known.toLocaleString()} / {total.toLocaleString()}記録</p>
+      </div>)}</div>
+      {coverage.positionSnapshots>0&&coverage.currentGrossKnown<coverage.positionSnapshots&&<p className="mt-3 rounded-lg border border-amber-700/35 bg-[#34291e]/50 p-3 text-[11px] leading-5 text-amber-200">現在の台帳では建玉別Grossに欠損があります。Total Grossから比例配分して補完することはできません。正規の建玉数量・現在価格・時点別Grossを追加したBTエンジン証跡が必要です。</p>}
+    </section>
+    </div>
   </div>}
   {tab==="library"&&<div className="space-y-4">
     <section className={card+" p-5"}><h2 className="mb-3 flex items-center gap-2 text-[17px] font-bold text-white"><Save className="h-5 w-5 text-cyan-300"/>BT保存ライブラリ</h2><p className="mb-4 text-xs text-[#97aec1]">再生データと参照条件を保存し、後から再生・JSONダウンロードできます。</p>

@@ -3,6 +3,7 @@ import {mkdtempSync,writeFileSync,readFileSync,copyFileSync,unlinkSync,rmSync} f
 import {join} from "node:path";
 import {tmpdir} from "node:os";
 import {listResearchReplays,readResearchReplay} from "../lib/server/bt-research-library";
+import {replayCoverage} from "../lib/bt-verification/replay";
 async function main(){
 const root=process.env.DISDEX_BT_RESEARCH_LIBRARY_DIR;
 assert.ok(root,"Test requires an explicit read-only research library path");
@@ -20,7 +21,16 @@ for(const item of items){
  assert.equal(result.replay.researchSummary?.costBps,item.bps);
  assert.equal(result.replay.mode,"EXTERNAL");
  assert.equal(result.replay.source?.kind,"RESEARCH_MODEL_RECONSTRUCTED");
- console.log(JSON.stringify({id:item.id,bps:item.bps,frames:item.frames,modelFills:item.modeledFills,sourceStatus:item.sourceStatus,status:"HASHED_READONLY_PASS"}));
+ const coverage=replayCoverage(result.replay);
+ assert.equal(coverage.frames,item.frames);
+ assert.ok(coverage.framesWithSourceGross>0);
+ assert.ok(coverage.positionSnapshots>=item.modeledFills,"Position timeline should contain indexed model fills");
+ assert.ok(coverage.currentGrossKnown<=coverage.positionSnapshots);
+ assert.ok(coverage.markKnown<=coverage.positionSnapshots);
+ assert.ok(coverage.quantityKnown<=coverage.positionSnapshots);
+ console.log(JSON.stringify({id:item.id,bps:item.bps,frames:item.frames,modelFills:item.modeledFills,sourceStatus:item.sourceStatus,
+   sourceGrossSnapshots:coverage.framesWithSourceGross,positionGrossKnown:coverage.currentGrossKnown,
+   positionSnapshots:coverage.positionSnapshots,status:"HASHED_READONLY_PASS"}));
 }
 await assert.rejects(readResearchReplay("../fake_REPLAY.json"),/BT_RESEARCH_INVALID_ID/);
 await assert.rejects(readResearchReplay("other\\fake_REPLAY.json"),/BT_RESEARCH_INVALID_ID/);
