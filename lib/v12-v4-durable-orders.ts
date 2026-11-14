@@ -7,7 +7,8 @@
  */
 import {AsterApiError} from "./aster-v3-client";
 import {MarketSlippageGuardError} from "./market-slippage-guard-error";
-import {rejectV4UnsentSlippageEntry} from "./v12-v4-local-entry-rejection";
+import {MarketPreSubmitEntryError} from "./market-pre-submit-entry-error";
+import {rejectV4UnsentSlippageEntry,rejectV4UnsentPreSubmitEntry} from "./v12-v4-local-entry-rejection";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4ExecutionStore,v4OrderIdentity,advanceV4Intent,type V4OrderAction,type V4OrderIntent} from "./v12-v4-execution-store";
 export type V4DurableOrderCommand={
@@ -70,6 +71,10 @@ export class V4DurableOrderDispatcher{
    return result;
   }catch(error){
    const current=this.store.read();
+   if(command.action==="ENTRY"&&error instanceof MarketPreSubmitEntryError&&error.reduceOnly===false&&error.symbol===command.symbol&&error.clientOrderId===cid){
+    this.store.commit(current.revision,rejectV4UnsentPreSubmitEntry(current,cid,ts));
+    return{status:"LOCAL_PRE_SUBMIT_REJECTED" as const,reason:error.message};
+   }
    if(command.action==="ENTRY"&&error instanceof MarketSlippageGuardError&&
     error.reduceOnly===false&&error.symbol===command.symbol&&error.clientOrderId===cid){
     this.store.commit(current.revision,rejectV4UnsentSlippageEntry(current,cid,ts));

@@ -9,9 +9,33 @@ import {V4ExecutionStore,advanceV4Intent,v4OrderIdentity} from "../lib/v12-v4-ex
 import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure,classifyV4AccountLeaseRenewalFailure,classifyV4MarketDataReadFailure} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
 import {MarketSlippageGuardError} from "../lib/market-slippage-guard-error";
+import {MarketPreSubmitEntryError} from "../lib/market-pre-submit-entry-error";
 import {readPendingExposureRegistry} from "../lib/disdex-pending-exposure-registry";
 import {V4SharedReservations} from "../lib/v12-v4-shared-reservations";
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
+test("bound pre-submit margin rejection releases only the unsent entry and keeps the runner alive",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  let attempts=0;h.engine.deps.adapter.executeEntry=async x=>{attempts++;throw new MarketPreSubmitEntryError(x.symbol,x.clientOrderId!,"MARGIN_PREPARATION",Error("ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:NON_ZERO_POSITION"));};
+  const first=await h.engine.tick();assert.equal(first.status,"blocked");assert.match(first.reason,/PRE_SUBMIT/);
+  const doc=h.store.read(),intent=Object.values(doc.intents)[0];assert.equal(intent.stage,"TERMINAL");assert.equal(doc.state.legs[intent.legId].status,"CANCELLED");assert.equal(doc.protections[intent.legId].phase,"CLOSED");
+  assert.equal((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries.find(r=>r.reservationId===intent.clientOrderId)?.status,"RELEASED");
+  h.time+=1000;assert.equal((await h.engine.tick()).status,"observing");assert.equal(attempts,1);assert.equal(h.stopSends,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+test("unbound margin-shaped exceptions retain unknown execution and cannot release shared capacity",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{h.engine.deps.adapter.executeEntry=async()=>{throw Error("ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:NON_ZERO_POSITION");};await assert.rejects(h.engine.tick(),/VENUE_MARGIN/);assert.equal(Object.values(h.store.read().intents)[0].stage,"UNKNOWN");}
+ finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+for(const field of ["symbol","clientOrderId"] as const)test(`pre-submit rejection with a different ${field} cannot retire the entry`,async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.adapter.executeEntry=async x=>{throw new MarketPreSubmitEntryError(field==="symbol"?"OTHERUSDT":x.symbol,field==="clientOrderId"?"other-client":x.clientOrderId!,"QUOTE",Error("READ_FAILED"));};
+  await assert.rejects(h.engine.tick(),/PRE_SUBMIT/);const intent=Object.values(h.store.read().intents)[0];assert.equal(intent.stage,"UNKNOWN");
+  assert.notEqual((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries.find(r=>r.reservationId===intent.clientOrderId)?.status,"RELEASED");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
 
 test("entry overrun review holds new orders without stopping protected position reconciliation",async()=>{
  const h=await protectionRecoveryHarness("PARTIAL_GROWTH");

@@ -12,7 +12,7 @@ import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
 import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4OrderCycle} from "./v12-v4-order-cycle";
-import {isV4LocalSlippageRejection} from "./v12-v4-local-entry-rejection";
+import {isV4LocalSlippageRejection,isV4LocalEntryRejection} from "./v12-v4-local-entry-rejection";
 import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
 import {planV4RetiredStops,attestV4CompletedExitMissingStop} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
@@ -270,7 +270,7 @@ export class V4RunnerEngine{
   const d=this.deps;
   // Resume a crash between the atomic local rejection and shared release.
   const rejectionDocument=d.store.read();
-  const rejected=Object.keys(rejectionDocument.intents).filter(cid=>isV4LocalSlippageRejection(rejectionDocument,cid));
+  const rejected=Object.keys(rejectionDocument.intents).filter(cid=>isV4LocalEntryRejection(rejectionDocument,cid));
   if(rejected.length){
    const registry=await readPendingExposureRegistry(d.pendingRegistryPath);
    for(const cid of rejected)if(registry.entries.some(row=>row.reservationId===cid&&row.status!=="RELEASED"))
@@ -603,10 +603,11 @@ export class V4RunnerEngine{
    this.commitEvent(plan);
    this.commitProtection(plan.leg.id,"ENTRY_PREPARED",0);
    const cid=dispatcher.prepare(command,this.now());
-   await dispatcher.submit(cid,this.now());
-   if(isV4LocalSlippageRejection(d.store.read(),cid)){
+   const submission=await dispatcher.submit(cid,this.now());
+   if(isV4LocalEntryRejection(d.store.read(),cid)){
     await cycle.reservations.synchronize(cid);
-    return {status:"observing",reason:"V4_ENTRY_SLIPPAGE_REJECTED",eventTs:this.now(),
+    const slippage=isV4LocalSlippageRejection(d.store.read(),cid);
+    return {status:slippage?"observing":"blocked",reason:slippage?"V4_ENTRY_SLIPPAGE_REJECTED":"V4_ENTRY_PRE_SUBMIT_REJECTED"+(submission&&"reason" in submission?":"+submission.reason:""),eventTs:this.now(),
      candidateCount:decision.candidateCount,orderEnabled:false};
    }
    this.commitProtection(plan.leg.id,"ENTRY_SENT",0);
