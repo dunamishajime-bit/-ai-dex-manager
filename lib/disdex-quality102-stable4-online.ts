@@ -46,12 +46,25 @@ function candleOpen(history:Quality102CausalV1History,symbol:string,ts:number):n
  return row?.open&&row.open>0?row.open:undefined;
 }
 function sideName(side:-1|1):"LONG"|"SHORT"{return side>0?"LONG":"SHORT";}
+function chronology(entryTs:number,exitTs:number){
+ if(!Number.isSafeInteger(entryTs)||entryTs<=0||!Number.isSafeInteger(exitTs)||exitTs<=entryTs)
+  throw Error("STABLE4_Q102_LABEL_CHRONOLOGY_INVALID");
+}
+function recoveryIdentity(row:Pick<RecoverySeedRow,"entryTs"|"symbol"|"route"|"side">){
+ return JSON.stringify([row.entryTs,row.symbol,row.route,row.side]);
+}
+function featureRecord(value:unknown):Record<string,number>{
+ if(!value||typeof value!=="object"||Array.isArray(value)||Object.values(value).some(v=>!finite(v)))
+  throw Error("STABLE4_Q102_RECOVERY_FEATURES_INVALID");
+ return {...value} as Record<string,number>;
+}
 
 function validateRecoverySeed(value:unknown):RecoverySeedRow[]{
  const root=value as any;if(!root||root.schemaVersion!==1||!Array.isArray(root.rows))throw new Error("STABLE4_Q102_RECOVERY_SEED_INVALID");
  return root.rows.map((z:any)=>{
   if(!z||!finite(z.entryTs)||!finite(z.exitTs)||typeof z.symbol!=="string"||typeof z.route!=="string"||!["LONG","SHORT"].includes(z.side)||!finite(z.net30)||!z.features||typeof z.features!=="object")throw new Error("STABLE4_Q102_RECOVERY_SEED_ROW_INVALID");
-  const features:Record<string,number>={};for(const [k,v] of Object.entries(z.features)){if(finite(v))features[k]=v;}
+  chronology(z.entryTs,z.exitTs);
+  const features=featureRecord(z.features);
   return {id:String(z.id||""),entryTs:z.entryTs,exitTs:z.exitTs,symbol:z.symbol,side:z.side,route:z.route,net30:z.net30,features};
  });
 }
@@ -59,6 +72,7 @@ function validateAvaxSeed(value:unknown):AvaxSeedRow[]{
  const root=value as any;if(!root||root.schemaVersion!==1||!Array.isArray(root.rows))throw new Error("STABLE4_Q102_AVAX_SEED_INVALID");
  return root.rows.map((z:any)=>{
   if(!z||!finite(z.entryTs)||!finite(z.exitTs)||!finite(z.raw)||!Array.isArray(z.f)||z.f.length!==FEATURE_NAMES.length||!z.f.every(finite))throw new Error("STABLE4_Q102_AVAX_SEED_ROW_INVALID");
+  chronology(z.entryTs,z.exitTs);
   return {entryTs:z.entryTs,exitTs:z.exitTs,raw:z.raw,f:z.f.map(Number)};
  });
 }
@@ -67,6 +81,18 @@ function loadState(path:string):Stable4OnlineState{
  if(!existsSync(path))return defaultState();
  const v=JSON.parse(readFileSync(path,"utf8")) as any;
  if(!v||v.schemaVersion!==1||!Array.isArray(v.recoveryRows)||!Array.isArray(v.recoveryPending)||!Array.isArray(v.avaxRows)||!Array.isArray(v.avaxPending))throw new Error("STABLE4_Q102_ONLINE_STATE_INVALID");
+ if(!finite(v.updatedAt)||v.updatedAt<0||(v.avaxLastSelectedEntryTs!==undefined&&(!Number.isSafeInteger(v.avaxLastSelectedEntryTs)||v.avaxLastSelectedEntryTs<=0)))throw Error("STABLE4_Q102_ONLINE_STATE_CLOCK_INVALID");
+ v.recoveryRows=validateRecoverySeed({schemaVersion:1,rows:v.recoveryRows});
+ v.avaxRows=validateAvaxSeed({schemaVersion:1,rows:v.avaxRows});
+ for(const row of v.recoveryPending){
+  if(!row||!finite(row.entryPrice)||row.entryPrice<=0||!finite(row.hardStop)||row.hardStop<=0||row.hardStop>=1||
+   typeof row.symbol!=="string"||typeof row.route!=="string"||!["LONG","SHORT"].includes(row.side))throw Error("STABLE4_Q102_RECOVERY_PENDING_INVALID");
+  chronology(row.entryTs,row.exitTs);featureRecord(row.features);
+ }
+ for(const row of v.avaxPending){
+  if(!row||!finite(row.entryPrice)||row.entryPrice<=0||!Array.isArray(row.f)||row.f.length!==FEATURE_NAMES.length||!row.f.every(finite))throw Error("STABLE4_Q102_AVAX_PENDING_INVALID");
+  chronology(row.entryTs,row.exitTs);
+ }
  return v as Stable4OnlineState;
 }
 function saveState(path:string,state:Stable4OnlineState){
@@ -154,7 +180,7 @@ export class Stable4Q102OnlineEngine{
   this.state=loadState(options.statePath);
  }
  isHealthy(){return this.healthy;}
- private allRecoveryRows(t:number){const m=new Map<number,RecoverySeedRow>();for(const r of [...this.recoverySeed,...this.state.recoveryRows])if(r.exitTs<t)m.set(r.entryTs,r);return[...m.values()].sort((a,b)=>a.entryTs-b.entryTs);}
+ private allRecoveryRows(t:number){const m=new Map<string,RecoverySeedRow>();for(const r of [...this.recoverySeed,...this.state.recoveryRows])if(r.exitTs<t)m.set(recoveryIdentity(r),r);return[...m.values()].sort((a,b)=>a.entryTs-b.entryTs||recoveryIdentity(a).localeCompare(recoveryIdentity(b)));}
  private allAvaxRows(t:number){const m=new Map<number,AvaxSeedRow>();for(const r of [...this.avaxSeed,...this.state.avaxRows])if(r.exitTs<=t)m.set(r.entryTs,r);return[...m.values()].sort((a,b)=>a.entryTs-b.entryTs);}
  private persist(){this.state.updatedAt=Date.now();saveState(this.options.statePath,this.state);}
  observe(history:Quality102CausalV1History,decisionTs:number){
