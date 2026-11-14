@@ -45,6 +45,20 @@ assert.equal(state.total,1.5);
 assert.equal(state.unallocated,1.5);
 assert.equal(state.hasAuthoritative,true);
 assert.equal(state.inconsistent,false);
+const sourceCategory=structuredClone(replay);
+sourceCategory.frames[0].positions[0].gross=1.5;
+sourceCategory.frames[0].positions[0].category="stock";
+sourceCategory.frames[0].gross={totalX:1.5,cryptoX:0,stockX:1.5,source:"bt_equity_snapshot"};
+sourceCategory.frames[0].sourceOpenCount=1;
+sourceCategory.frames[0].sourcePositionAlignment="SOURCE_MODEL_LEDGER_MATCHED";
+assert.equal(validateReplay(sourceCategory),true,"Explicit source classification beats ticker heuristic");
+assert.equal(grossForFrame(sourceCategory.frames[0]).stock,1.5);
+const forgedCategory=structuredClone(sourceCategory);
+forgedCategory.frames[0].positions[0].category="crypto";
+assert.equal(validateReplay(forgedCategory),false,"Forged source category must fail equity Gross reconciliation");
+const missingCategory=structuredClone(sourceCategory);
+delete missingCategory.frames[0].positions[0].category;
+assert.equal(validateReplay(missingCategory),false,"Source-matched category cannot be silently guessed");
 const malformed=structuredClone(replay);
 malformed.frames[0].gross!.cryptoX=10;
 assert.equal(validateReplay(malformed),false);
@@ -77,4 +91,4 @@ if(process.argv[2]){
     candles:replayLoaded.btcCandles?.length,stats:replayLoaded.strategyStats?.length,
     reportCostBps:replayLoaded.researchSummary?.costBps}));
 }
-console.log(JSON.stringify({status:"PASS",tests:7,zipPath:path,zipBytes:archive.length}));
+console.log(JSON.stringify({status:"PASS",tests:10,zipPath:path,zipBytes:archive.length}));

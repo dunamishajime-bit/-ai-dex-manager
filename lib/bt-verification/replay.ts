@@ -11,6 +11,8 @@ export type Position = {
   entry: number;
   mark: number | null;
   gross: number | null;
+  /** Native source category; do not infer from instrument spelling when present. */
+  category?: "crypto" | "stock";
   grossAtEntry?: number | null;
   lastPartialGrossX?: number | null;
   lastPartialAt?: string;
@@ -126,17 +128,19 @@ export const STOCKS = new Set(["AMZN", "AAPL", "MSFT", "NVDA", "META", "TSLA", "
 export function isStock(symbol: string): boolean {
   return STOCKS.has(symbol.toUpperCase().replace(/USDT$/, ""));
 }
+export function isStockPosition(p:Position):boolean { return p.category!==undefined ? p.category==="stock" : isStock(p.symbol); }
 export function grossForFrame(frame: ReplayFrame): GrossState {
   const known = frame.positions.reduce((a, p) => a + (p.gross ?? 0), 0);
-  const cryptoKnown = frame.positions.filter(p => !isStock(p.symbol)).reduce((a,p)=>a+(p.gross ?? 0),0);
+  const cryptoKnown = frame.positions.filter(p => !isStockPosition(p)).reduce((a,p)=>a+(p.gross ?? 0),0);
   const stockKnown = known-cryptoKnown;
+  const completeNative = frame.sourcePositionAlignment==="SOURCE_MODEL_LEDGER_MATCHED" && frame.positions.every(p=>p.gross!==null && p.category!==undefined);
   const total = frame.gross ? frame.gross.totalX : known;
   const crypto = frame.gross ? frame.gross.cryptoX : cryptoKnown;
   const stock = frame.gross ? frame.gross.stockX : stockKnown;
   return {
     total, crypto, stock, breakdownKnown: known,
     unallocated: Math.max(0,total-known),
-    inconsistent: Boolean(frame.gross && (Math.abs(total - crypto - stock) > 0.02 || known > total+0.02)),
+    inconsistent: Boolean(frame.gross && (Math.abs(total - crypto - stock) > 0.02 || known > total+0.02 || (completeNative && (Math.abs(known-total)>1e-5 || Math.abs(cryptoKnown-crypto)>1e-5 || Math.abs(stockKnown-stock)>1e-5)))),
     hasAuthoritative: Boolean(frame.gross)
   };
 }
@@ -179,6 +183,7 @@ function validPosition(p:unknown):p is Position {
     number(p.entry) && p.entry>=0 &&
     nullableNumber(p.mark) && (p.mark===null || p.mark>=0) &&
     nullableNumber(p.gross) && (p.gross===null || p.gross>=0) &&
+    (p.category===undefined || p.category==="crypto" || p.category==="stock") &&
     date(p.openedAt) &&
     (p.grossAtEntry===undefined || (nullableNumber(p.grossAtEntry) && (p.grossAtEntry===null || p.grossAtEntry>=0))) &&
     (p.lastPartialGrossX===undefined || (nullableNumber(p.lastPartialGrossX) && (p.lastPartialGrossX===null || p.lastPartialGrossX>=0))) &&
@@ -300,6 +305,11 @@ export function validateReplay(value:unknown):value is Replay {
     for(const p of frame.positions){
       if(!validPosition(p)||ids.has(p.id))return false;
       ids.add(p.id);
+    }
+    if(frame.sourcePositionAlignment==="SOURCE_MODEL_LEDGER_MATCHED"){
+      const holdings=frame.positions as Position[];
+      if(!frame.gross || holdings.some(p=>p.category===undefined || p.gross===null) ||
+         grossForFrame(frame as ReplayFrame).inconsistent)return false;
     }
   }
   return value.source===undefined || (isObj(value.source) && typeof value.source.kind==="string" && value.source.kind.length<120);

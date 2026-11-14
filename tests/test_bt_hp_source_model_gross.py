@@ -61,6 +61,7 @@ class ModelGrossAuditTests(unittest.TestCase):
         mid=data["frames"][2]["positions"][0]
         self.assertEqual(mid["gross"],1)
         self.assertEqual(mid["mark"],100)
+        self.assertEqual(mid["category"],"crypto")
         self.assertIsNone(mid["quantity"])
         self.assertEqual(data["source"]["positionExposureEvidence"],"SOURCE_MODEL_GROSS_ONLY_NO_QUANTITY_FX")
         self.assertEqual(len(data["source"]["positionGrossSnapshotsSha256"]),64)

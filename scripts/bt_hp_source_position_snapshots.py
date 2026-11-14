@@ -114,7 +114,7 @@ def check_source_snapshot(*,timestamp:str,active:dict[str,dict],
         out.append({**{k:v for k,v in ref.items() if k in ("id","logic","symbol","side","entry","openedAt",
                 "lastPartialGrossX","lastPartialAt","lastPartialFractionClosed")},
                 "quantity":item["quantity"],"mark":item["mark"],"notional":item["notional"],
-                "gross":item["gross"],"grossAtEntry":item["grossAtEntry"]})
+                "gross":item["gross"],"grossAtEntry":item["grossAtEntry"],"category":item["_category"]})
     for kind,current in (("total",gross_total),("crypto",gross_crypto),("stock",gross_stock)):
         if abs(current-source_gross[kind])>GROSS_TOLERANCE:
             raise ValueError("Source position "+kind+" Gross fails source equity reconciliation at "+timestamp)

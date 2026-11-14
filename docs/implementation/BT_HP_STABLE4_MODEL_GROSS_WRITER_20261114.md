@@ -37,3 +37,28 @@ Private replay directory: C:\tmp\bt481-hp-replay-library-model-gross-v4-20261114
 The HP replay can now display measured model per-holding Gross and mark as it advances, with quantity explicitly unknown.
 Historical source research remains unverified against exact current LIVE pins, signed venue fills and real quantity/FX.
 Never commit private research CSV or replay JSON to GitHub or public preview. Formal HP deployment remains separate owner-authorized work.
+
+## Verified source category hardening
+
+The portfolio replay now preserves source category=crypto|stock for each
+model position instead of deducing classification from the ticker. The
+browser rejects category-forged or unlabeled SOURCE_MODEL_LEDGER_MATCHED
+frames when their per-position Gross does not equal source category/total
+Gross. Legacy DEMO remains explicitly labeled and is not reclassified as
+source evidence.
+
+2026-11-14 private-library regeneration (not uploaded to Production):
+- 10bps: 8,978 frames, 27,394 positions with source category/Gross,
+  SHA256 bdccc0d9bcbfaddb8ff6e7a0babafbadb78c7320c41a7e80aa1f6d682c25d160.
+- 30bps: 8,975 frames, 27,211 positions with source category/Gross,
+  SHA256 35a9925c84994dfd0aa832ae9174749a8d6ac539f623b03fe92f309133e03142.
+- No missing category and no category/Total Gross inconsistency; venue
+  quantity remains explicitly unknown.
+
+Production readiness (read-only SSH audit, 2026-11-14): Xserver VPS root
+is accessible using an owner-managed key. Root filesystem 48 GB total,
+46 GB used, about 1.4 GB free (98% utilization). The HP private model
+replay files were **not** uploaded; do not merge or deploy until storage,
+owner authentication, server private-path isolation and LIVE-pin parity
+are verified. No LIVE services, orders, STOP or runtime configuration
+were changed.

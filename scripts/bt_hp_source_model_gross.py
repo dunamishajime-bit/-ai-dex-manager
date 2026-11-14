@@ -177,7 +177,7 @@ class GrossReconciler:
                 "id":item["id"],"logic":item["logic"],"symbol":item["symbol"],
                 "side":item["side"],"entry":item["entry"],"openedAt":ref["openedAt"],
                 "quantity":None,"mark":item["mark"],"notional":item["notional"],
-                "gross":item["gross"],"grossAtEntry":item["grossAtEntry"]
+                "gross":item["gross"],"grossAtEntry":item["grossAtEntry"],"category":item["_category"]
             })
         for key in ("total","crypto","stock"):
             if abs(gross[key]-float(source_gross[key]))>GROSS_TOLERANCE:

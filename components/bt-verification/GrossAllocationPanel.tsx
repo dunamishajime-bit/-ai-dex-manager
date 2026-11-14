@@ -1,6 +1,6 @@
 "use client";
 import type { ReplayFrame, Position } from "@/lib/bt-verification/replay";
-import { grossForFrame, isStock } from "@/lib/bt-verification/replay";
+import { grossForFrame, isStockPosition } from "@/lib/bt-verification/replay";
 
 const COLORS=["#22d3ee","#a78bfa","#fbbf24","#34d399","#f472b6","#60a5fa","#c084fc","#fb923c","#2dd4bf","#e879f9","#a3e635","#f87171"];
 function colorFor(p:Position):string {
@@ -49,8 +49,8 @@ export function GrossAllocationPanel({
    <h2 className="mb-3 text-xl font-bold">Gross使用状況（実数値主表示・割合補助）</h2>
    <div className="space-y-5">
      {renderMeter("Total",g.total,limits.total,frame.positions)}
-     {renderMeter("Crypto",g.crypto,limits.crypto,frame.positions.filter(p=>!isStock(p.symbol)))}
-     {renderMeter("Stock",g.stock,limits.stock,frame.positions.filter(p=>isStock(p.symbol)))}
+     {renderMeter("Crypto",g.crypto,limits.crypto,frame.positions.filter(p=>!isStockPosition(p)))}
+     {renderMeter("Stock",g.stock,limits.stock,frame.positions.filter(p=>isStockPosition(p)))}
    </div>
    {researchManifestCap&&<p className="mt-3 text-xs text-slate-400">上限値はこの研究BTの集計マニフェストと一致しています（現在のLIVE設定への適合は別途確認）。</p>}
    {unverifiedCap&&<p className="mt-3 rounded-lg border border-amber-700/60 bg-amber-950/20 p-2 text-sm text-amber-200">Gross上限は元BTの設定との一致が未検証です。割合は仮の上限に対する参考値です。</p>}

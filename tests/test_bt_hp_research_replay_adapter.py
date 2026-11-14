@@ -158,6 +158,7 @@ class ReplayAdapterTests(unittest.TestCase):
         self.assertEqual(position["mark"],100000)
         self.assertEqual(position["gross"],1)
         self.assertEqual(position["notional"],10070)
+        self.assertEqual(position["category"],"crypto")
         self.assertEqual(out["frames"][0]["positions"],[])
         self.assertEqual(out["frames"][-1]["positions"],[])
         self.assertEqual(out["source"]["positionExposureEvidence"],"SOURCE_ENGINE_TIMEPOINT_RECONCILED")
