@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: "/decision-status", label: "判定状況", icon: BarChart3 },
   { href: "/decision-status/fet", label: "FET 判定", icon: BarChart3 },
   { href: "/decision-status/hype", label: "HYPE 判定", icon: BarChart3 },
+  { href: "/bt-verification", label: "BT検証", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/performance", label: "損益カレンダー", icon: CalendarDays },
   {
