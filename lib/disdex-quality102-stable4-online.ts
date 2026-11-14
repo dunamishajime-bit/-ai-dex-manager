@@ -247,7 +247,7 @@ export class Stable4Q102OnlineEngine{
   const means=FEATURE_NAMES.map((_,j)=>mean(hist.map(r=>r.f[j]))),std=FEATURE_NAMES.map((_,j)=>{const s=pstdev(hist.map(r=>r.f[j]));return s<1e-8?1:s;});
   const near=hist.map(r=>({r,d:Math.sqrt(mean(r.f.map((v,j)=>((v-means[j])/std[j]-(av.f[j]-means[j])/std[j])**2)))})).sort((a,b)=>a.d-b.d).slice(0,DISDEX_STABLE4_OPPORTUNITY.q102.avaxK);
   const pred=mean(near.map(x=>x.r.raw));if(Math.abs(pred)<DISDEX_STABLE4_OPPORTUNITY.q102.avaxPredThreshold)return undefined;
-  const side:1|-1=pred>0?1:-1;const agree=near.filter(x=>(x.r.raw>0?1:-1)===side).length/near.length;if(agree<DISDEX_STABLE4_OPPORTUNITY.q102.avaxAgreementMin)return undefined;
+  const side:1|-1=pred>0?1:-1;const agree=near.filter(x=>x.r.raw*side>0).length/near.length;if(agree<DISDEX_STABLE4_OPPORTUNITY.q102.avaxAgreementMin)return undefined;
   return {kind:"AVAX_KNN",diagnostics:{pred,agree,n:hist.length},signal:{strategyId:"QUALITY102_CAUSAL_V1",referenceTs:av.entryTs,side,symbol:"AVAXUSDT",family:"MR",variant:"STABLE4_ONLINE_KNN_Q01365",layer:"S3",requestedGross:DISDEX_STABLE4_OPPORTUNITY.q102.avaxGross,reason:"STABLE4_Q102_AVAX_ONLINE_KNN",dataCutoffTs:av.entryTs-HOUR,hardStop:DISDEX_STABLE4_OPPORTUNITY.q102.avaxHardStop,maxHoldHours:24,exitPolicy:"STABLE4_STOP5_TP3_H24",brkEnabled:false}};
  }
  private recoveryProposal(history:Quality102CausalV1History,blocked?:Quality102CausalV4S34Candidate,activeBaselineMaxScore?:number):Stable4Q102OnlineProposal|undefined{

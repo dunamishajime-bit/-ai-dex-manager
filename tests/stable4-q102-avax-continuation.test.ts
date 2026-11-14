@@ -25,3 +25,9 @@ test("qualified QAON7 shadow selection consumes its own durable 24h slot indepen
   const restarted=new online.Stable4Q102OnlineEngine(options);assert.equal(restarted.propose(history(A+6*H)),undefined);assert.equal(restarted.propose(history(A+24*H))?.kind,"AVAX_KNN");
  }finally{rmSync(root,{recursive:true,force:true});}
 });
+test("zero-return training neighbors never count as SHORT agreement",()=>{
+ const root=mkdtempSync(join(tmpdir(),"stable4-avax-zero-")),seed=join(root,"seed.json"),empty=join(root,"empty.json");
+ writeFileSync(empty,JSON.stringify({schemaVersion:1,rows:[]}));writeFileSync(seed,JSON.stringify({schemaVersion:1,rows:Array.from({length:40},(_,i)=>({entryTs:A-(50+i*30)*H,exitTs:A-(26+i*30)*H,raw:i<25?-.03:0,f:[0,0,0,0,0,0,0,0,0,.5,.02,1]}))}));
+ try{const engine=new online.Stable4Q102OnlineEngine({mode:"LIVE",recoverySeedPath:empty,avaxSeedPath:seed,statePath:join(root,"state.json")});assert.equal(engine.propose(history()),undefined);}
+ finally{rmSync(root,{recursive:true,force:true});}
+});
