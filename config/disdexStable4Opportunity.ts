@@ -8,6 +8,7 @@ export const DISDEX_STABLE4_OPPORTUNITY = Object.freeze({
     totalGrossCap: 3.5,
   }),
   pengu: Object.freeze({
+    recoveryV8Btc24hMax: 0.011611625094354983,
     shortV20Btc24hMax: -0.010836782776818987,
     shortV20Pengu72hMax: -0.05237466490617382,
   }),
