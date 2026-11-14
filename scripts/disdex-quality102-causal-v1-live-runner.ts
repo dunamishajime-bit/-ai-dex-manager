@@ -33,6 +33,7 @@ import { Quality102CausalV1AsterMarketDataProvider } from "../lib/disdex-quality
 import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-runner";
 import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
 import { Stable4Q102OnlineEngine } from "../lib/disdex-quality102-stable4-online";
+import {Stable4Q102ShadowEvidenceProvider} from "../lib/stable4-q102-shadow-evidence";
 import { buildQuality102CausalV4DecisionSnapshot } from "../lib/disdex-quality102-causal-v4-observability";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
@@ -321,6 +322,8 @@ export function assertQuality102CausalV1ReadOnlyPreflightConfiguration(
             recoverySeedPath: config.stable4RecoverySeedPath,
             avaxSeedPath: config.stable4AvaxSeedPath,
             statePath: config.stable4StatePath,
+            highVolSymbols: config.highVolSymbols,
+            requireHourlyCoverage: true,
         });
     }
     if (config.adoptedExitPoliciesEnabled) {
@@ -550,8 +553,11 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         recoverySeedPath: config.stable4RecoverySeedPath,
         avaxSeedPath: config.stable4AvaxSeedPath,
         statePath: config.stable4StatePath,
+        highVolSymbols: config.highVolSymbols,
+        requireHourlyCoverage: config.stable4Mode === "LIVE",
         logger: (message, payload) => console.log(JSON.stringify({ level: "info", strategyId: QUALITY102_CAUSAL_V1.strategyId, message, ...(payload || {}) })),
     });
+    const stable4Evidence = stable4Engine ? new Stable4Q102ShadowEvidenceProvider(client) : undefined;
     const runner = new Quality102CausalV1Runner({
         marketData: new Quality102CausalV1AsterMarketDataProvider(client, {
             symbols: config.symbols,
@@ -566,6 +572,9 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         residentStopGateway: config.mode === "LIVE" ? new AsterResidentStopGateway(client) : undefined,
         stateStore: new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.expectedRuntimeCommitSha),
         lock: new FileAccountOrderLock(config.accountLockPath, numberEnv(env, "DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000)),
+        onlineObserver: stable4Engine && stable4Evidence
+            ? async ({history,decisionTs}) => stable4Engine.observeAndRefresh(history,decisionTs,stable4Evidence)
+            : undefined,
         signalBuilder: (input) => {
             const nativeSignal = buildQuality102CausalV4Signal(input, { highVolSymbols: config.highVolSymbols });
             return stable4Engine ? stable4Engine.select(nativeSignal, input.history, input.decisionTs).signal : nativeSignal;

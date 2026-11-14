@@ -43,3 +43,14 @@ test("partial evidence failure cannot leak uncommitted model rows into the next 
   const state=JSON.parse(readFileSync(f.statePath,"utf8"));assert.equal(state.recoveryRows.length,2);assert.equal(engine.isHealthy(),true);
  }finally{rmSync(f.root,{recursive:true,force:true});}
 });
+test("SHADOW observation degradation preserves native trading while LIVE fails closed",async()=>{
+ const f=fixture();
+ try{
+  const provider={load:async()=>{throw Error("UNEXPECTED_DATA_CALL");}},history={candlesBySymbol:{}};
+  const broken=()=>{throw Error("HISTORY_GAP");};
+  const shadow=new Stable4Q102OnlineEngine({...f.options,mode:"SHADOW",nativeSignalBuilder:broken});
+  await assert.doesNotReject((shadow as any).observeAndRefresh(history,T,provider));assert.equal(shadow.isHealthy(),false);
+  const live=new Stable4Q102OnlineEngine({...f.options,mode:"LIVE",nativeSignalBuilder:broken});
+  await assert.rejects((live as any).observeAndRefresh(history,T,provider),/HISTORY_GAP/);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});

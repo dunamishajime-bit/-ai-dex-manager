@@ -257,6 +257,15 @@ export class Stable4Q102OnlineEngine{
    this.healthy=true;
   }catch(error){this.healthy=false;throw error;}
  }
+ async observeAndRefresh(history:Quality102CausalV1History,decisionTs:number,provider:{load(input:Stable4ShadowEvidenceRequest):Promise<Stable4ShadowEvidence>}){
+  if(this.mode==="OFF")return;
+  try{this.observe(history,decisionTs);await this.refreshOutcomes(history,decisionTs,provider);}
+  catch(error){
+   this.healthy=false;
+   if(this.mode==="LIVE")throw error;
+   this.logger("STABLE4 Q102 SHADOW learning degraded; native trading preserved",{message:error instanceof Error?error.message:String(error)});
+  }
+ }
  private avaxProposal(history:Quality102CausalV1History):Stable4Q102OnlineProposal|undefined{
   const av=deriveStable4AvaxFeatures(history);if(!av)return undefined;
   if(this.state.avaxLastSelectedEntryTs&&av.entryTs!==this.state.avaxLastSelectedEntryTs&&av.entryTs<this.state.avaxLastSelectedEntryTs+24*HOUR)return undefined;
