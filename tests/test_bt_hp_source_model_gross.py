@@ -90,6 +90,16 @@ class ModelGrossAuditTests(unittest.TestCase):
         eq[2]={**eq[2],"stock_gross_x":"0.1","crypto_gross_x":"0.9"}
         with self.assertRaisesRegex(ValueError,"Gross/equity reconciliation"):
             self.convert(eq=eq)
+    def test_same_timestamp_post_snapshot_preemption_keeps_source_holding(self):
+        # In the engine an admitted V4 can preempt a HYPE model position
+        # AFTER the equity/Gross sample at that exact timestamp. The
+        # source-sampled holding still exists even though fill.exit_utc=t.
+        fill=[{**self.fillrow,"exit_utc":self.times[2]}]
+        out=self.convert(fill=fill)
+        self.assertEqual(out["frames"][2]["positions"][0]["id"],"id1")
+        self.assertEqual(out["frames"][-1]["positions"],[])
+        self.assertEqual(out["frames"][2]["positions"][0]["gross"],1)
+
     def test_flat_marker_with_populated_position_rejected(self):
         rows=self.grossrows()
         rows.insert(2,dict.fromkeys(self.grosscols,"")|{"utc":self.times[2]})
