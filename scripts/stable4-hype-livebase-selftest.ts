@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { DISDEX_STABLE4_OPPORTUNITY, assertStable4GlobalLiveAck } from "../config/disdexStable4Opportunity";
 import { resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
@@ -44,4 +45,7 @@ const live=resolveHypeZecLongRuntime({
 assert.equal(live.maximumGross,1);
 assert.equal(live.cryptoGrossCap,3);
 assert.equal(live.totalGrossCap,3.5);
+const entrypoint=readFileSync(new URL("./disdex-hype-stable4-live-runner.ts",import.meta.url),"utf8");
+assert.match(entrypoint,/DISDEX_HYPE_ZEC_SIGNAL_MODE\s*=\s*"STABLE4"/);
+assert.match(entrypoint,/DISDEX_HYPE_ZEC_SYMBOLS\s*=\s*"HYPEUSDT"/);
 console.log("STABLE4_HYPE_LIVEBASE_SELFTEST_PASS");
