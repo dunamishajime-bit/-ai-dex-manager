@@ -487,7 +487,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
         <p className="mb-3 rounded-lg border border-amber-500/40 bg-amber-950/20 p-3 text-[11px] leading-5 text-amber-200">
           同時刻に複数の注文・決済が重なり、元台帳の{frame.sourceOpenCount}件と一致する並びが複数あります。建玉IDまでの一致は未確認です。
         </p>}
-      {frame.sourcePositionAlignment==="MATCHED"&&
+      {(frame.sourcePositionAlignment==="MATCHED"||frame.sourcePositionAlignment==="SOURCE_MODEL_LEDGER_MATCHED")&&
         <p className="mb-3 text-[10px] text-emerald-300/90">元台帳の保有件数 {frame.sourceOpenCount}件と再生建玉件数が一致しています（建玉別Grossは別途証拠が必要です）。</p>}
 
       <div className="overflow-x-auto"><table className="w-full min-w-[790px] text-left text-[12px]"><thead className="bg-[#182f45] text-[#9db8cc]"><tr>{["銘柄","ロジック","方向","数量","取得価格","現在価格","含み損益※","現在Gross","Total上限比"].map(n=><th key={n} className="px-3 py-3 font-medium">{n}</th>)}</tr></thead>

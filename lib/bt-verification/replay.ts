@@ -53,7 +53,7 @@ export type ReplayFrame = {
   /** Number of open positions reported by the same source equity snapshot. */
   sourceOpenCount?: number;
   /** Phase reconciliation of source equity inventory versus modeled fill events. */
-  sourcePositionAlignment?: "MATCHED" | "AMBIGUOUS" | "UNMATCHED";
+  sourcePositionAlignment?: "MATCHED" | "AMBIGUOUS" | "UNMATCHED" | "SOURCE_MODEL_LEDGER_MATCHED";
   /** Synthetic-only, causal current-hour OHLC built from ticks observed so far. */
   formingBtcCandle?: BtcCandle;
   /** Synthetic-only threshold checks recorded at this exact tick. */
@@ -111,7 +111,7 @@ export type Replay = {
   terminalModelPositions?: TerminalModelPosition[];
   strategyStats?: StrategyStat[];
   limits: { total: number; crypto: number; stock: number };
-  source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; positionSnapshotsSha256?: string | null; positionExposureEvidence?: "SOURCE_ENGINE_TIMEPOINT_RECONCILED" | "MISSING_SOURCE_POSITION_MARKS"; grossCapEvidence?: string; note?: string };
+  source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; positionSnapshotsSha256?: string | null; positionGrossSnapshotsSha256?: string | null; modelEntriesSha256?: string | null; positionExposureEvidence?: "SOURCE_ENGINE_TIMEPOINT_RECONCILED" | "SOURCE_MODEL_GROSS_ONLY_NO_QUANTITY_FX" | "MISSING_SOURCE_POSITION_MARKS"; grossCapEvidence?: string; note?: string };
 };
 export type GrossState = {
   total: number;
@@ -150,7 +150,7 @@ export function replayCoverage(replay:Replay){
  for(const frame of replay.frames){
    if(frame.gross)out.framesWithSourceGross++;
    if(frame.sourceOpenCount!==undefined)out.framesWithSourceOpenCount++;
-   if(frame.sourcePositionAlignment==="MATCHED")out.sourcePositionMatched++;
+   if(frame.sourcePositionAlignment==="MATCHED"||frame.sourcePositionAlignment==="SOURCE_MODEL_LEDGER_MATCHED")out.sourcePositionMatched++;
    if(frame.sourcePositionAlignment==="AMBIGUOUS")out.sourcePositionAmbiguous++;
    if(frame.sourcePositionAlignment==="UNMATCHED")out.sourcePositionUnmatched++;
    if(frame.btc!==null)out.framesWithBtc++;
@@ -273,8 +273,8 @@ export function validateReplay(value:unknown):value is Replay {
     if(frame.sourcePositionAlignment!==undefined){
       if(value.mode!=="EXTERNAL"||frame.sourceOpenCount===undefined||
          typeof frame.sourcePositionAlignment!=="string"||
-         !["MATCHED","AMBIGUOUS","UNMATCHED"].includes(frame.sourcePositionAlignment))return false;
-      if(frame.sourcePositionAlignment==="MATCHED"&&frame.positions.length!==frame.sourceOpenCount)return false;
+         !["MATCHED","AMBIGUOUS","UNMATCHED","SOURCE_MODEL_LEDGER_MATCHED"].includes(frame.sourcePositionAlignment))return false;
+      if((frame.sourcePositionAlignment==="MATCHED"||frame.sourcePositionAlignment==="SOURCE_MODEL_LEDGER_MATCHED")&&frame.positions.length!==frame.sourceOpenCount)return false;
     }
     if(frame.formingBtcCandle!==undefined){
       const c=frame.formingBtcCandle;

@@ -27,6 +27,14 @@ def build_case(base:Path,bps:int,btc:Path|None,interval_minutes:int,outdir:Path)
             source_file(base,bps,"POSITION_SNAPSHOTS.csv")
             if list(base.glob("*_"+str(bps)+"BPS_POSITION_SNAPSHOTS.csv")) else None
         ),
+        model_gross_snapshots=(
+            source_file(base,bps,"POSITION_GROSS_SNAPSHOTS.csv")
+            if list(base.glob("*_"+str(bps)+"BPS_POSITION_GROSS_SNAPSHOTS.csv")) else None
+        ),
+        model_entries=(
+            source_file(base,bps,"MODEL_ENTRIES.csv")
+            if list(base.glob("*_"+str(bps)+"BPS_MODEL_ENTRIES.csv")) else None
+        ),
     )
     if not source.summary.is_file():raise ValueError("Missing RUN_MANIFEST.json")
     caps,evidence,meta=resolve_gross_caps(source,cost_bps=bps)

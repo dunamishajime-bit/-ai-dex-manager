@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from bt_hp_source_position_snapshots import load_position_snapshots,check_source_snapshot
+from bt_hp_source_model_gross import load_model_entries,load_model_gross,GrossReconciler
 
 @dataclass(frozen=True)
 class Source:
@@ -24,6 +25,8 @@ class Source:
     partial_events: Path | None = None
     funding: Path | None = None
     position_snapshots: Path | None = None
+    model_gross_snapshots: Path | None = None
+    model_entries: Path | None = None
 
 def digest(path: Path) -> str:
     h=hashlib.sha256()
@@ -92,6 +95,18 @@ def prepare(source: Source):
             pnl=number(row.get("net_pnl_jpy","0") or "0","model net PnL")
             timeline.append((exit_time,0,key,None,"EXIT "+row["strategy"]+" "+row["symbol"]+" "+direction+
                             " reason="+row.get("exit_model_reason","")+" "+format(pnl,"+.2f")+" JPY [model]"))
+    if source.model_entries is not None:
+        known={f["id"] for f in fills}
+        for key,row in load_model_entries(source.model_entries).items():
+            if key in known:continue
+            when=row["openedAt"]
+            terminal=dict(id=key,logic=row["logic"],symbol=row["symbol"],
+                side=row["side"],quantity=None,entry=row["entry"],mark=None,
+                gross=None,grossAtEntry=row["grossAtEntry"],notional=None,
+                openedAt=when)
+            timeline.append((when,1,key,terminal,
+                "ENTRY "+row["logic"]+" "+row["symbol"]+" "+row["side"]+
+                " route="+row["route"]+" [source model, period-end open possible]"))
     if len({r["id"] for r in fills})!=len(fills):
         raise ValueError("Duplicate trade_id")
     if source.partial_events:
@@ -260,8 +275,15 @@ def model_strategy_performance(path:Path) -> list[dict]:
 def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, max_frames:int=50000, cap_evidence:str="USER_SUPPLIED_NOT_VERIFIED", source_meta:dict|None=None) -> dict:
     fills,events=prepare(source)
     candles=load_btc_candles(source.btc_candles)
+    if source.position_snapshots is not None and source.model_gross_snapshots is not None:
+        raise ValueError("Specify only one source position evidence tier")
     source_positions=(load_position_snapshots(source.position_snapshots)
                       if source.position_snapshots is not None else None)
+    if (source.model_gross_snapshots is None)!=(source.model_entries is None):
+        raise ValueError("Model Gross snapshots require exact model entry audit")
+    model_gross=(GrossReconciler(load_model_entries(source.model_entries),
+                                load_model_gross(source.model_gross_snapshots),source.fills)
+                 if source.model_gross_snapshots is not None else None)
     used_source_position_times:set[str]=set()
 
     candle_cursor=0
@@ -358,7 +380,11 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
                 phase_unmatched+=1
                 phase_status="UNMATCHED"
         if set(sampled)!=set(active):phase_corrected+=1
-        if source_positions is not None:
+        if model_gross is not None:
+            latest_positions=model_gross.check(
+                t,row,{"total":total,"crypto":crypto,"stock":stock})
+            phase_status="SOURCE_MODEL_LEDGER_MATCHED"
+        elif source_positions is not None:
             # Validate every equity source observation, even timepoints
             # intentionally omitted from the reduced playback view.
             latest_positions=check_source_snapshot(
@@ -387,6 +413,8 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
     if not frames:raise ValueError("No equity snapshots")
     if source_positions is not None and used_source_position_times!=set(source_positions):
         raise ValueError("Unexpected source position snapshot time not in equity source")
+    if model_gross is not None:
+        model_gross.finish()
     terminal=source_meta.get("terminalModelPositions") if source_meta else None
     if terminal is not None and last_equity_open_count is not None:
         if len(terminal)!=last_equity_open_count:
@@ -398,6 +426,10 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
         "note":("RESEARCH MODEL ONLY, not full production parity. Model-engine source "
                 "position snapshots supplied and reconciled against source equity Gross. "
                 if source_positions is not None else
+                "RESEARCH MODEL ONLY. Per-position Gross/mark are recorded directly "
+                "from the source model at every equity observation and reconciled; "
+                "actual venue quantity/FX is NOT available. "
+                if model_gross is not None else
                 "RESEARCH MODEL ONLY, not full production parity. Current quantity/mark/"
                 "per-position Gross are not supplied by the research fills. "
                 "Gross and equity are original source snapshots."),
@@ -410,8 +442,13 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
         "partialEventsSha256":digest(source.partial_events) if source.partial_events else None,
         "fundingEventsSha256":digest(source.funding) if source.funding else None,
         "positionSnapshotsSha256":digest(source.position_snapshots) if source.position_snapshots else None,
+        "positionGrossSnapshotsSha256":digest(source.model_gross_snapshots) if source.model_gross_snapshots else None,
+        "modelEntriesSha256":digest(source.model_entries) if source.model_entries else None,
         "positionExposureEvidence":("SOURCE_ENGINE_TIMEPOINT_RECONCILED"
-                                    if source_positions is not None else "MISSING_SOURCE_POSITION_MARKS"),
+                                    if source_positions is not None else
+                                    "SOURCE_MODEL_GROSS_ONLY_NO_QUANTITY_FX"
+                                    if model_gross is not None else
+                                    "MISSING_SOURCE_POSITION_MARKS"),
         "costAndFunding":"from research source; not recalculated",
         "grossCapEvidence":cap_evidence,
         "sourceRiskManifest":source_meta or {},
@@ -450,14 +487,18 @@ def main(argv=None)->int:
     ap.add_argument("--position-snapshots",type=Path,
         help="Optional strict source-engine position observations at EVERY equity timestamp;"
              " empty timestamps must contain a marker; never estimate missing Gross")
+    ap.add_argument("--model-gross-snapshots",type=Path,
+        help="Source engine model Gross snapshots; quantities/FX remain unknown")
+    ap.add_argument("--model-entries",type=Path,
+        help="All source model admissions, including period-end open positions")
     ap.add_argument("--total-cap",type=float)
     ap.add_argument("--crypto-cap",type=float)
     ap.add_argument("--stock-cap",type=float)
     ap.add_argument("--cost-bps",type=int,choices=(10,30),help="Source research case; inferred from filenames when unique")
     ap.add_argument("--inspect-only",action="store_true")
     args=ap.parse_args(argv)
-    src=Source(args.equity,args.fills,args.summary,args.decisions,args.risk_events,args.btc_candles,args.partial_events,args.funding,args.position_snapshots)
-    for f in (src.equity,src.fills,src.summary,src.decisions,src.risk_events,src.btc_candles,src.partial_events,src.funding,src.position_snapshots):
+    src=Source(args.equity,args.fills,args.summary,args.decisions,args.risk_events,args.btc_candles,args.partial_events,args.funding,args.position_snapshots,args.model_gross_snapshots,args.model_entries)
+    for f in (src.equity,src.fills,src.summary,src.decisions,src.risk_events,src.btc_candles,src.partial_events,src.funding,src.position_snapshots,src.model_gross_snapshots,src.model_entries):
         if f is not None and not f.is_file():ap.error("Missing source "+str(f))
     if args.inspect_only:
         fills,events=prepare(src)
