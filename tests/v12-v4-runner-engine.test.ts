@@ -44,6 +44,20 @@ test("ordinary entry minimum/cap rejection remains a live blocked cycle without 
  }finally{rmSync(h.dir,{recursive:true,force:true});}
 });
 
+test("expired entry admission window holds new orders and keeps later reconciliation cycles running",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.time=h.candidate.eligibleEntryTs+14*60_000;
+  h.engine.deps.referencePrice=async()=>{h.time+=2*60_000;return 100;};
+  const first=await h.engine.tick();
+  assert.equal(first.status,"blocked");assert.match(first.reason,/ENTRY_LIVE_OBSERVATION_EXPIRED/);
+  h.time+=1000;
+  assert.equal((await h.engine.tick()).status,"observing");
+  assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+  assert.equal(Object.keys(h.store.read().intents).length,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
 test("pre-send slippage rejection retires only the unsent entry and keeps subsequent ticks running",async()=>{
  const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
  try{

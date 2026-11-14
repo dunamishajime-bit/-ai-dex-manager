@@ -139,8 +139,9 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   if(state.executionReview)throw Error("UNRESOLVED_EXECUTION_REVIEW:"+state.executionReview);
   if (!Number.isFinite(input.ts) || input.ts !== c.eligibleEntryTs || input.ts % HOUR !== 0) throw Error("ENTRY_TIME_MISMATCH");
   const observedAtMs=input.observedAtMs??input.ts;
-  if(!Number.isFinite(observedAtMs)||observedAtMs<input.ts||observedAtMs-input.ts>15*60_000||
+  if(!Number.isFinite(observedAtMs)||observedAtMs<input.ts||
     observedAtMs<(state.journal.at(-1)?.ts??0))throw Error("ENTRY_LIVE_OBSERVATION_STALE_OR_REVERSED");
+  if(observedAtMs-input.ts>15*60_000)throw Error("ENTRY_LIVE_OBSERVATION_EXPIRED");
   if (state.foreign.some(x=>x.symbol === c.symbol)) throw Error("FOREIGN_SYMBOL_OWNERSHIP");
   if (state.legs[key(c)] || state.journal.some(x=>x.eventId===input.eventId)) throw Error("DUPLICATE_ENTRY");
   if ((state.cooldown[c.symbol+":"+c.route]??0)>input.ts ||

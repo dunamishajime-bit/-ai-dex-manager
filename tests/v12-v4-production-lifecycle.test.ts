@@ -20,6 +20,15 @@ const normalizer:any={normalizeMarketQuantity:async(_s:string,q:number,px:number
 async function reserve(state=createProductionState(initial),c=candidate(),eventId="r1"){
  return planProductionEntry(state,{candidate:c,ts,eventId,referencePrice:30,minimumOrderNotionalUsd:5,quantityNormalizer:normalizer,entryAtr:2});
 }
+test("entry expiry is distinct from invalid or reversed observation clocks",async()=>{
+ const input={candidate:candidate(),ts,eventId:"clock",referencePrice:30,minimumOrderNotionalUsd:5,quantityNormalizer:normalizer,entryAtr:2};
+ await planProductionEntry(createProductionState(initial),{...input,observedAtMs:ts+15*60_000});
+ await assert.rejects(planProductionEntry(createProductionState(initial),{...input,observedAtMs:ts+15*60_000+1}),/^Error: ENTRY_LIVE_OBSERVATION_EXPIRED$/);
+ for(const observedAtMs of [NaN,Infinity,ts-1])await assert.rejects(planProductionEntry(createProductionState(initial),{...input,observedAtMs}),/^Error: ENTRY_LIVE_OBSERVATION_STALE_OR_REVERSED$/);
+ const state=createProductionState(initial);
+ state.journal.push({type:"ACCOUNT_MARK",eventId:"later",ts:ts+20*60_000} as any);
+ await assert.rejects(planProductionEntry(state,{...input,observedAtMs:ts+16*60_000}),/^Error: ENTRY_LIVE_OBSERVATION_STALE_OR_REVERSED$/);
+});
 test("41 executable exit catalog rows preserve two-pass overrides and one native state exit",()=>{
  assert.equal(PRODUCTION_EXIT_CATALOG.length,41);
  assert.deepEqual(productionExitSpec("FAILED_BREAK_REV_SHORT_6H"),{kind:"TIME",hours:9});

@@ -575,7 +575,7 @@ export class V4RunnerEngine{
    try{ordinaryPlan=await planProductionEntry(state,{candidate,...baseInput});}
    catch(error){
     const reason=error instanceof Error?error.message:String(error);
-    if(!["COOLDOWN","OPPOSITE_SYMBOL_ACTIVE","PREEMPT_CLOSE_FILL_REQUIRED","RECOVERY_ROUTE_SLOT_OCCUPIED",
+    if(!["ENTRY_LIVE_OBSERVATION_EXPIRED","COOLDOWN","OPPOSITE_SYMBOL_ACTIVE","PREEMPT_CLOSE_FILL_REQUIRED","RECOVERY_ROUTE_SLOT_OCCUPIED",
      "MIN_LIFT_BLOCKED","RECOVERY_FAMILY_GROSS_CAP","V12_GROSS_CAP","CRYPTO_GROSS_CAP","TOTAL_GROSS_CAP"].includes(reason))throw error;
     // This boundary precedes durable intent preparation and every order send.
     // A normal admission hold must not stop reconciliation of existing legs.
