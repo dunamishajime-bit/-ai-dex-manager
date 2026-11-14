@@ -13,6 +13,37 @@ import {readPendingExposureRegistry} from "../lib/disdex-pending-exposure-regist
 import {V4SharedReservations} from "../lib/v12-v4-shared-reservations";
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
 
+test("entry overrun review holds new orders without stopping protected position reconciliation",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const execute=h.engine.deps.adapter.executeEntry;
+  h.engine.deps.adapter.executeEntry=async x=>{
+   await execute(x);const order=h.orders.get(x.clientOrderId!)!;
+   Object.assign(order,{status:"FILLED",executedQty:String(x.quantity),avgPrice:"101",cumQuote:String(x.quantity*101)});
+   Object.assign(h.fills[0],{qty:String(x.quantity),price:"101"});
+   h.positionQty=x.quantity*(x.side==="LONG"?1:-1);
+   return {status:"FILLED",executionUnknown:false} as any;
+  };
+  assert.equal((await h.engine.tick()).status,"submitted");
+  assert.match(h.store.read().state.executionReview!,/^ENTRY_FILL_OVER_RESERVED_NOTIONAL:/);
+  h.time+=7200000;
+  h.engine.deps.fetchExitFeed=async()=>({closed:Array.from({length:2},(_,i)=>({openTs:h.candidate.eligibleEntryTs+i*3600000,open:101,high:101.1,low:100.9,close:101})),nextOpens:[{ts:h.candidate.eligibleEntryTs+7200000,price:101}]});
+  const decision=await h.engine.deps.fetchDecision(),candidate={...h.candidate,eligibleEntryTs:h.candidate.eligibleEntryTs+7200000};
+  const key=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
+  h.engine.deps.fetchDecision=async()=>({...decision,capturedAtMs:h.time,decisionTs:candidate.eligibleEntryTs,candidates:[candidate],entryAtrByCandidate:{[key]:1}});
+  const held=await h.engine.tick();assert.equal(held.status,"blocked");assert.match(held.reason,/EXECUTION_REVIEW/);
+  assert.equal(h.entrySends,1);assert.equal(h.store.read().protections[Object.keys(h.store.read().state.legs)[0]].phase,"STOP_CONFIRMED");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+test("ordinary entry minimum/cap rejection remains a live blocked cycle without order intent",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.minimumVenueOrderNotional=async()=>100000;
+  const result=await h.engine.tick();assert.equal(result.status,"blocked");assert.match(result.reason,/MIN_LIFT_BLOCKED/);
+  assert.equal(h.entrySends,0);assert.equal(Object.keys(h.store.read().intents).length,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
 test("pre-send slippage rejection retires only the unsent entry and keeps subsequent ticks running",async()=>{
  const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
  try{

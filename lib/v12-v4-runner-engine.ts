@@ -538,6 +538,9 @@ export class V4RunnerEngine{
   }
   // This is a source-level *independent* proof, not the shadow boolean.
   await d.assertSourceParity(decision);
+  const executionReview=d.store.read().state.executionReview;
+  if(executionReview)return {status:"blocked",reason:"V4_EXECUTION_REVIEW_REQUIRED:"+executionReview,
+   eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
   // A Production canary is deliberately one-entry-only. Historical durable
   // ENTRY intents remain the consumption marker even after the canary closes.
   if(d.canaryEntry&&Object.values(d.store.read().intents).some(i=>i.action==="ENTRY"))
@@ -568,7 +571,16 @@ export class V4RunnerEngine{
     quantityNormalizer:d.quantityNormalizer};
    // The natural candidate must be admissible under ordinary strategy/risk rules.
    // Canary mode changes only size, never route eligibility or ownership rules.
-   const ordinaryPlan=await planProductionEntry(state,{candidate,...baseInput});
+   let ordinaryPlan:Awaited<ReturnType<typeof planProductionEntry>>;
+   try{ordinaryPlan=await planProductionEntry(state,{candidate,...baseInput});}
+   catch(error){
+    const reason=error instanceof Error?error.message:String(error);
+    if(!["COOLDOWN","OPPOSITE_SYMBOL_ACTIVE","PREEMPT_CLOSE_FILL_REQUIRED","RECOVERY_ROUTE_SLOT_OCCUPIED",
+     "MIN_LIFT_BLOCKED","RECOVERY_FAMILY_GROSS_CAP","V12_GROSS_CAP","CRYPTO_GROSS_CAP","TOTAL_GROSS_CAP"].includes(reason))throw error;
+    // This boundary precedes durable intent preparation and every order send.
+    // A normal admission hold must not stop reconciliation of existing legs.
+    return {status:"blocked",reason:"V4_ENTRY_ADMISSION_HOLD:"+reason,eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+   }
    let plan=ordinaryPlan;
    if(d.canaryEntry){
     if(min>d.canaryEntry.maxNotionalUsd+1e-8)
