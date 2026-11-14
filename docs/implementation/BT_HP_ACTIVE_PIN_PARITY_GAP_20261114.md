@@ -39,3 +39,20 @@ Read-only VPS filesystem check: `/dev/vda1` 48 GB capacity, 46 GB used, about 1.
 5. Run browser E2E, owner-approved GitHub Actions production workflow and separate post-deploy read-only checks. Never bypass the owner approval gate.
 
 Production services/positions/orders/STOP/Kill Switch were not modified for this audit. The model Gross replay is a research visualization only.
+
+## 2026-11-14 approximately 20:00 JST: LIVE runner status changed
+
+A later independent systemd snapshot, SHA256
+1046688173e66c2fc454480f530c59580fd59e588528509dc136de7029b5a8a5,
+no longer reports V4 as active. In particular, release
+795fefbbbb1c1176c80c7fd8391347578dadd0d5 is failed with exit
+code 2 at 19:15:11 JST. The exact V4 model comparison status has
+therefore changed from PIN_MISMATCH to NO_RUNNING_SERVICE in the
+read-only checker. HYPE remains pin mismatched. This does not mean the
+research model is current.
+
+See docs/implementation/BT_HP_V4_STALE_RUNNER_STOP_PROTECTION_20261114.md
+for incident analysis and read-only STOP/position reconciliation. The
+exchange position and stop are intact as sampled; this is not authorization
+to restart, place/cancel orders or deploy. Private account and ledger
+evidence remains on the owner's PC.
