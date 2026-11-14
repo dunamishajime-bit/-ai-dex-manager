@@ -204,7 +204,7 @@ export class Stable4Q102OnlineEngine{
    this.state.avaxPending=remainingAvax;
 
    const av=deriveStable4AvaxFeatures(history);
-   if(av&&!this.state.avaxPending.some(x=>x.entryTs===av.entryTs)&&!this.state.avaxRows.some(x=>x.entryTs===av.entryTs)){
+   if(av&&!this.avaxSeed.some(x=>x.entryTs===av.entryTs)&&!this.state.avaxPending.some(x=>x.entryTs===av.entryTs)&&!this.state.avaxRows.some(x=>x.entryTs===av.entryTs)){
     this.state.avaxPending.push({entryTs:av.entryTs,exitTs:av.entryTs+24*HOUR,entryPrice:av.entryPrice,f:av.f});changed=true;
    }
    const selected=this.avaxProposal(history);
