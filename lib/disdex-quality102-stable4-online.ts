@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { DISDEX_STABLE4_OPPORTUNITY, type DisDexStable4Mode } from "../config/disdexStable4Opportunity";
+import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
 import type { Quality102Candle } from "./disdex-quality102-causal-pipeline";
 import type { Quality102CausalV1History, Quality102CausalV1Signal } from "./disdex-quality102-causal-v1-signal";
 import {
@@ -226,7 +227,7 @@ export class Stable4Q102OnlineEngine{
   const side:1|-1=pred>0?1:-1;const agree=near.filter(x=>(x.r.raw>0?1:-1)===side).length/near.length;if(agree<DISDEX_STABLE4_OPPORTUNITY.q102.avaxAgreementMin)return undefined;
   return {kind:"AVAX_KNN",diagnostics:{pred,agree,n:hist.length},signal:{strategyId:"QUALITY102_CAUSAL_V1",referenceTs:av.entryTs,side,symbol:"AVAXUSDT",family:"MR",variant:"STABLE4_ONLINE_KNN_Q01365",layer:"S3",requestedGross:DISDEX_STABLE4_OPPORTUNITY.q102.avaxGross,reason:"STABLE4_Q102_AVAX_ONLINE_KNN",dataCutoffTs:av.entryTs-HOUR,hardStop:DISDEX_STABLE4_OPPORTUNITY.q102.avaxHardStop,maxHoldHours:24,exitPolicy:"STABLE4_STOP5_TP3_H24",brkEnabled:false}};
  }
- private recoveryProposal(history:Quality102CausalV1History,blocked?:Quality102CausalV4S34Candidate):Stable4Q102OnlineProposal|undefined{
+ private recoveryProposal(history:Quality102CausalV1History,blocked?:Quality102CausalV4S34Candidate,activeBaselineMaxScore?:number):Stable4Q102OnlineProposal|undefined{
   const c=blocked?.key===Q102_RECOVERY_ROUTE?blocked:currentUniCandidate(history);if(!c||c.key!==Q102_RECOVERY_ROUTE||c.side!==-1)return undefined;
   const t=c.entryTs,rows=this.allRecoveryRows(t);const sameSide=rows.filter(r=>r.side==="SHORT");const base=weightedStats(sameSide,t);if(!base)return undefined;
   const route=shrink(weightedStats(sameSide.filter(r=>r.route===c.key),t),base);const symbol=shrink(weightedStats(sameSide.filter(r=>r.symbol===c.symbol),t),base);const knn=shrink(knnStats(c,rows,t),base);
@@ -236,12 +237,15 @@ export class Stable4Q102OnlineEngine{
   const ev=weighted.reduce((s,x)=>s+x.st.mean*x.w,0)/sw,pwin=weighted.reduce((s,x)=>s+x.st.pwin*x.w,0)/sw,sd=weighted.reduce((s,x)=>s+x.st.sd*x.w,0)/sw;
   const positives=weighted.filter(x=>x.st.mean>0).length,agree=Math.max(positives,weighted.length-positives)/weighted.length,mxne=Math.max(...weighted.map(x=>x.st.neff));
   const conf=(1-Math.exp(-mxne/8))*(.5+.5*agree)*(.65+.35/(1+sd/.04));const analogs=Math.max(...weighted.map(x=>x.st.n));
-  const opportunityScore=ev*conf/Math.min(DISDEX_STABLE4_OPPORTUNITY.q102.recoveryGrossCap,.75);
+  const nativeGross=quality102GrossForFamily(c.family,c.side);
+  const opportunityScore=ev*conf/Math.max(.25,nativeGross)/Math.max(.25,c.maxHoldHours/24);
+  if(activeBaselineMaxScore!==undefined&&(!finite(activeBaselineMaxScore)||opportunityScore<=activeBaselineMaxScore))return undefined;
   if(pwin<DISDEX_STABLE4_OPPORTUNITY.q102.recoveryPredWinMin||ev<=DISDEX_STABLE4_OPPORTUNITY.q102.recoveryPredEv30Min||conf<DISDEX_STABLE4_OPPORTUNITY.q102.recoveryConfidenceMin||analogs<DISDEX_STABLE4_OPPORTUNITY.q102.recoveryAnalogsMin)return undefined;
-  const exactRoute=rows.filter(r=>r.route===c.key&&r.side==="SHORT").sort((a,b)=>a.entryTs-b.entryTs);if(exactRoute.length<DISDEX_STABLE4_OPPORTUNITY.q102.recoveryRouteCompletedMin)return undefined;
-  const routeMean=mean(exactRoute.map(r=>r.net30)),routeP=exactRoute.filter(r=>r.net30>0).length/exactRoute.length;if(routeMean<=0||routeP<DISDEX_STABLE4_OPPORTUNITY.q102.recoveryRouteWinMin)return undefined;
+  const exactRoute=rows.filter(r=>r.route===c.key).sort((a,b)=>a.entryTs-b.entryTs);
+  if(!route||route.n<DISDEX_STABLE4_OPPORTUNITY.q102.recoveryRouteCompletedMin)return undefined;
+  const routeMean=route.mean,routeP=route.pwin;if(routeMean<=0||routeP<DISDEX_STABLE4_OPPORTUNITY.q102.recoveryRouteWinMin)return undefined;
   const r5=exactRoute.slice(-5),r6=exactRoute.slice(-6);if(r5.length<5||r6.length<6||mean(r5.map(r=>r.net30))<=DISDEX_STABLE4_OPPORTUNITY.q102.recoveryRecentMeanMin||mean(r6.map(r=>r.net30))<=DISDEX_STABLE4_OPPORTUNITY.q102.recoveryRecentMeanMin)return undefined;
-  return {kind:"UNI_RECOVERY",diagnostics:{ev,pwin,confidence:conf,analogs,opportunityScore,routeN:exactRoute.length,routeMean,routeP,recent5:mean(r5.map(r=>r.net30)),recent6:mean(r6.map(r=>r.net30))},signal:{strategyId:"QUALITY102_CAUSAL_V1",referenceTs:c.entryTs,side:c.side,symbol:c.symbol,family:c.family,variant:c.variant,layer:c.layer,requestedGross:Math.min(DISDEX_STABLE4_OPPORTUNITY.q102.recoveryGrossCap,.75),reason:"STABLE4_Q102_UNI_ONLINE_RECOVERY",dataCutoffTs:c.dataCutoffTs,hardStop:c.hardStop,maxHoldHours:c.maxHoldHours,exitPolicy:c.exitPolicy,brkEnabled:false}};
+  return {kind:"UNI_RECOVERY",diagnostics:{ev,pwin,confidence:conf,analogs,opportunityScore,routeN:route.n,routeMean,routeP,recent5:mean(r5.map(r=>r.net30)),recent6:mean(r6.map(r=>r.net30))},signal:{strategyId:"QUALITY102_CAUSAL_V1",referenceTs:c.entryTs,side:c.side,symbol:c.symbol,family:c.family,variant:c.variant,layer:c.layer,requestedGross:Math.min(DISDEX_STABLE4_OPPORTUNITY.q102.recoveryGrossCap,nativeGross),reason:"STABLE4_Q102_UNI_ONLINE_RECOVERY",dataCutoffTs:c.dataCutoffTs,hardStop:c.hardStop,maxHoldHours:c.maxHoldHours,exitPolicy:c.exitPolicy,brkEnabled:false}};
  }
  select(nativeSignal:Quality102CausalV1Signal,history:Quality102CausalV1History,decisionTs:number):{signal:Quality102CausalV1Signal;proposal?:Stable4Q102OnlineProposal}{
   if(this.mode==="OFF")return{signal:nativeSignal};
@@ -264,9 +268,9 @@ export class Stable4Q102OnlineEngine{
    throw error;
   }
  }
- propose(history:Quality102CausalV1History,blocked?:Quality102CausalV4S34Candidate):Stable4Q102OnlineProposal|undefined{
+ propose(history:Quality102CausalV1History,blocked?:Quality102CausalV4S34Candidate,activeBaselineMaxScore?:number):Stable4Q102OnlineProposal|undefined{
   if(this.mode==="OFF"||!this.healthy)return undefined;
-  const recovery=this.recoveryProposal(history,blocked);if(recovery)return recovery;
+  const recovery=this.recoveryProposal(history,blocked,activeBaselineMaxScore);if(recovery)return recovery;
   return this.avaxProposal(history);
  }
 }

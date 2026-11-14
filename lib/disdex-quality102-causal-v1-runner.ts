@@ -169,6 +169,8 @@ export interface Quality102CausalV1RunnerDependencies {
         sleeveOccupancy: { activePosition: boolean; unresolvedPendingEntry: boolean; basePositionActive?: boolean };
     }) => Quality102CausalV1Signal;
     decisionObserver?: (input: { history: Quality102CausalV1History; decisionTs: number }) => Promise<void>;
+    /** Strategy learning is independent of account admission; failure blocks only new entries. */
+    onlineObserver?: (input: { history: Quality102CausalV1History; decisionTs: number }) => Promise<void>;
 }
 
 function defaultLogger(): Quality102CausalV1Logger {
@@ -1579,6 +1581,19 @@ export class Quality102CausalV1Runner {
             }
         }
         let preloadedHistory: Quality102CausalV1History | undefined;
+        let onlineObserverError: string | undefined;
+        const onlineEligible = beforeLockState.strategyId === STRATEGY_ID
+            && beforeLockState.mode === this.dependencies.config.mode
+            && (this.dependencies.config.mode !== "LIVE" || beforeLockState.runtimeCommitSha.toLowerCase() === this.dependencies.config.runtimeCommitSha.toLowerCase());
+        if (onlineEligible && this.dependencies.onlineObserver) {
+            try {
+                preloadedHistory = await this.dependencies.marketData.load();
+                await this.dependencies.onlineObserver({ history: preloadedHistory, decisionTs: this.now() });
+            } catch (error) {
+                onlineObserverError = `QUALITY102_ONLINE_OBSERVER_FAILED:${error instanceof Error ? error.message : String(error)}`;
+                this.log.warn("Q102 online observation failed; protection and reconciliation remain enabled.", { message: onlineObserverError });
+            }
+        }
         const preloadEligible = beforeLockState.strategyId === STRATEGY_ID
             && beforeLockState.mode === this.dependencies.config.mode
             && (this.dependencies.config.mode !== "LIVE" || beforeLockState.runtimeCommitSha.toLowerCase() === this.dependencies.config.runtimeCommitSha.toLowerCase())
@@ -1586,7 +1601,7 @@ export class Quality102CausalV1Runner {
             && !beforeLockState.position;
         if (preloadEligible) {
             try {
-                preloadedHistory = await this.dependencies.marketData.load();
+                preloadedHistory = preloadedHistory ?? await this.dependencies.marketData.load();
                 if (this.dependencies.decisionObserver) {
                     try {
                         await this.dependencies.decisionObserver({ history: preloadedHistory, decisionTs: this.now() });
@@ -1690,6 +1705,11 @@ export class Quality102CausalV1Runner {
                 refreshQ102StateAfterRiskBlock(state, this.now());
                 await this.dependencies.stateStore.save(state);
                 return { status: "blocked-local", message: sharedRisk.reason, ordersSent: 0 };
+            }
+            if (onlineObserverError && this.dependencies.config.mode === "LIVE") {
+                refreshQ102StateAfterRiskBlock(state, this.now());
+                await this.dependencies.stateStore.save(state);
+                return { status: "blocked-local", message: onlineObserverError, ordersSent: 0 };
             }
             // Other runners' positions are assessed by the strict portfolio
             // admission planner below; they do not invalidate the Q102 signal.

@@ -34,3 +34,24 @@ test("restart validates persisted model samples rather than trusting array-shape
  try{assert.throws(()=>new Stable4Q102OnlineEngine(f.options),/RECOVERY.*INVALID/);}
  finally{rmSync(f.root,{recursive:true,force:true});}
 });
+
+const candidate:any={id:"UNI",key:"UNI|MR72_Z1.5_H24",symbol:"UNIUSDT",side:-1,family:"MR",variant:"MR72_Z1.5_H24",layer:"S3",entryTs:200*24*H,dataCutoffTs:200*24*H-H,ret14:.01,strength:2,margin:.1,hardStop:.07,maxHoldHours:24,exitPolicy:"FIXED_HOLD_STOP"};
+function positiveRows(){return Array.from({length:12},(_,i)=>({...row("UNIUSDT",candidate.key),id:String(i),entryTs:(180+i)*24*H,exitTs:(181+i)*24*H,net30:.03}));}
+test("recovered opportunity preserves native MR gross and compares its score with active entry scores",()=>{
+ const f=fixture(positiveRows());
+ try{
+  const e=new Stable4Q102OnlineEngine(f.options);
+  const p=e.propose({candlesBySymbol:{}},candidate)!;
+  assert.ok(p);assert.equal(p.signal.requestedGross,.75,"native MR gross remains .75");
+  assert.ok(Math.abs(Number(p.diagnostics.opportunityScore)-Number(p.diagnostics.ev)*Number(p.diagnostics.confidence)/.75)<1e-12);
+  assert.equal(e.propose({candlesBySymbol:{}},candidate,Number(p.diagnostics.opportunityScore)),undefined,"strictly higher than existing entry scores is required");
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+test("route health uses shrunk time-weighted component instead of lifetime unweighted wins",()=>{
+ const good=positiveRows();
+ // Ancient losses overwhelm raw route win rate, but no longer dominate a 90-day half life.
+ const ancient=Array.from({length:30},(_,i)=>({...good[0],id:"old"+i,entryTs:(i+1)*H,exitTs:(i+2)*H,net30:-.001,features:{ret14:100,strength:100,margin:100}}));
+ const f=fixture([...ancient,...good]);
+ try{assert.ok(new Stable4Q102OnlineEngine(f.options).propose({candlesBySymbol:{}},{...candidate,entryTs:1000*24*H}));}
+ finally{rmSync(f.root,{recursive:true,force:true});}
+});
