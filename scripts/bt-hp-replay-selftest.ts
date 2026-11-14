@@ -17,6 +17,24 @@ const replay:Replay={
   }]
 };
 assert.equal(validateReplay(replay),true);
+const asof=structuredClone(replay);
+asof.frames[0].sourceOpenCount=1;
+asof.frames[0].sourcePositionAlignment="MATCHED";
+assert.equal(validateReplay(asof),true,"Source open-count aligned with original modeled inventory");
+const badSourceCount=structuredClone(asof);
+badSourceCount.frames[0].sourceOpenCount=0;
+assert.equal(validateReplay(badSourceCount),false,"Forged model source count must not be called matched");
+const terminal=structuredClone(replay);
+terminal.terminalModelPositions=[{
+ logic:"Q102",symbol:"SUIUSDT",side:"LONG",openedAt:"2025-10-01T01:00:00Z",
+ entryPrice:1.1156,entryGrossX:1,route:"MODEL_TEST",modeledFutureExitAt:"2025-10-04T03:00:00Z",
+ evidence:"SOURCE_RESEARCH_MANIFEST_TERMINAL_OPEN_NOT_VENUE"
+}];
+assert.equal(validateReplay(terminal),true,"Sourced terminal open-only model is supported");
+const forgedTerminal=structuredClone(terminal);
+forgedTerminal.terminalModelPositions![0].modeledFutureExitAt="2025-09-30T00:00:00Z";
+assert.equal(validateReplay(forgedTerminal),false,"Terminal model exit before entry is invalid");
+
 const forged=structuredClone(replay);
 forged.strategyCatalog=[{logic:"V4",trades:1,sourceRuntimeShas:["fake"],modelClasses:["fake"],
   routes:1,symbols:1,status:"CANONICAL_PIN_VERIFIED"}] as unknown as typeof forged.strategyCatalog;
