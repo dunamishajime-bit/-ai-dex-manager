@@ -767,7 +767,7 @@ export class IdlePriorityShortRunner {
                         await this.dependencies.stateStore.save(state);
                     }
                     const before = routeCandidates.length;
-                    routeCandidates = routeCandidates.filter((row) => !stable4IdleBlocks("LIVE", row.symbol, market.decisionTs, state.stable4TaoRiskOffUntil || 0));
+                    routeCandidates = routeCandidates.filter((row) => !stable4IdleBlocks("LIVE", row.symbol, market.decisionTs, state.stable4TaoRiskOffUntil || 0, row.features));
                     if (before > 0 && routeCandidates.length === 0) {
                         state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "STABLE4_IDLE_WAIT" };
                         await this.dependencies.stateStore.save(state);

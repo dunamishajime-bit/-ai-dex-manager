@@ -12,6 +12,8 @@ export const DISDEX_STABLE4_OPPORTUNITY = Object.freeze({
     shortV20Pengu72hMax: -0.05237466490617382,
   }),
   idle: Object.freeze({
+    jupRel24Min: -0.04089204262472046,
+    jupVolumeRatioMin: 1.2568362211142174,
     taoRiskOffHours: 12,
     renderWait: true,
   }),
