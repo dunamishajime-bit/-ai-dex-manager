@@ -152,57 +152,91 @@ jobs:
           set +a
           export DISDEX_RELEASE_SHA=$SHA
           export DISDEX_RUNTIME_COMMIT_SHA=$SHA
-          ESBUILD_SRC="$RELEASE/node_modules/@esbuild/linux-x64/bin/esbuild"
-          ESBUILD_TMP="/usr/local/bin/disdex-stable4-esbuild-$$"
-          test -f "$ESBUILD_SRC"
-          install -o root -g root -m 0755 "$ESBUILD_SRC" "$ESBUILD_TMP"
-          trap 'rm -f "$ESBUILD_TMP"' EXIT
-          export ESBUILD_BINARY_PATH="$ESBUILD_TMP"
-          echo "ASTER_PROOF_ESBUILD_SRC=$(stat -c '%a:%U:%G' "$ESBUILD_SRC")"
-          echo "ASTER_PROOF_ESBUILD_TMP=$(stat -c '%a:%U:%G' "$ESBUILD_TMP")"
-          runuser -u deploy --preserve-environment -- /usr/bin/node \
-            --import "$RELEASE/node_modules/tsx/dist/loader.mjs" --input-type=module - <<NODE
-          import { AsterV3Client, AsterApiError } from "file://$RELEASE/lib/aster-v3-client.ts";
-          import { assertV4SharedRateBudget, createV4EvidenceFetch } from "file://$RELEASE/lib/v12-v4-monitor-only.ts";
-          assertV4SharedRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
-          const client = new AsterV3Client({
-            baseUrl: process.env.ASTER_FUTURES_BASE_URL,
-            userAddress: process.env.ASTER_USER_ADDRESS,
-            privateKey: process.env.ASTER_API_PRIVATE_KEY,
-            requestTimeoutMs: 10000,
-            readOnlyRateLimitMaxRetries: 0,
-            fetchImpl: createV4EvidenceFetch(fetch),
-            userAgent: "DisDex-STABLE4-Orphan-Proof/2",
-          });
-          if (!client.hasTradingCredentials()) throw new Error("ASTER_READONLY_CREDENTIALS_REQUIRED");
+          runuser -u deploy --preserve-environment -- /usr/bin/node --input-type=module - <<NODE
+          import { privateKeyToAccount } from "file://$RELEASE/node_modules/viem/_esm/accounts/index.js";
+
+          const baseUrl=String(process.env.ASTER_FUTURES_BASE_URL||"https://fapi3.asterdex.com").replace(/\/+$/,"");
+          const user=String(process.env.ASTER_USER_ADDRESS||"").trim();
+          const rawKey=String(process.env.ASTER_API_PRIVATE_KEY||"").trim();
+          const privateKey=rawKey.startsWith("0x")?rawKey:"0x"+rawKey;
+          if(!user||!/^0x[0-9a-fA-F]{64}$/.test(privateKey)) throw new Error("ASTER_READONLY_CREDENTIALS_REQUIRED");
+          const account=privateKeyToAccount(privateKey);
+          let lastNonce=0n;
+          function nonce(){
+            const now=BigInt(Date.now())*1000n;
+            lastNonce=now>lastNonce?now:lastNonce+1n;
+            return lastNonce.toString();
+          }
+          function encode(params){
+            const q=new URLSearchParams();
+            for(const [k,v] of Object.entries(params)){
+              if(v===undefined||v===null||v==="") continue;
+              q.append(k,typeof v==="string"?v:String(v));
+            }
+            return q.toString();
+          }
+          async function signedGet(path,params={}){
+            const signedParams={...params,recvWindow:5000,nonce:nonce(),user,signer:account.address};
+            const message=encode(signedParams);
+            const signature=await account.signTypedData({
+              domain:{name:"AsterSignTransaction",version:"1",chainId:1666,verifyingContract:"0x0000000000000000000000000000000000000000"},
+              types:{Message:[{name:"msg",type:"string"}]},
+              primaryType:"Message",
+              message:{msg:message},
+            });
+            const response=await fetch(baseUrl+path+"?"+encode({...signedParams,signature}),{
+              method:"GET",
+              headers:{"content-type":"application/x-www-form-urlencoded","user-agent":"DisDex-STABLE4-Orphan-Proof/3"},
+              cache:"no-store",
+            });
+            const text=await response.text();
+            let body;try{body=text?JSON.parse(text):null;}catch{body=text;}
+            if(!response.ok){
+              const e=new Error("ASTER_HTTP_"+response.status);
+              e.status=response.status;
+              e.code=Number(body?.code);
+              e.body=body;
+              throw e;
+            }
+            return body;
+          }
+          async function publicGet(path){
+            const response=await fetch(baseUrl+path,{method:"GET",cache:"no-store"});
+            const body=await response.json();
+            if(!response.ok) throw new Error("ASTER_PUBLIC_HTTP_"+response.status);
+            return body;
+          }
+
           const symbol="AAVEUSDT";
           const clientOrderId="v12-v4-5bc2f54f3ec346d12c4b75668204";
           const createdAt=1794535335697;
           const rounds=[];
           for(let i=0;i<3;i++){
-            const server=await client.getServerTime();
-            const positions=await client.getPositions();
-            const openOrders=await client.getOpenOrders();
+            const clock=await publicGet("/fapi/v3/time");
+            const positions=await signedGet("/fapi/v3/positionRisk",{symbol});
+            const openOrders=await signedGet("/fapi/v3/openOrders",{symbol});
             let lookup;
             try{
-              await client.getOrder(symbol,clientOrderId);
+              await signedGet("/fapi/v3/order",{symbol,origClientOrderId:clientOrderId});
               throw new Error("ASTER_PENDING_ORDER_EXISTS");
             }catch(error){
-              if(!(error instanceof AsterApiError)||error.status!==400||error.code!==-2013) throw error;
+              if(error?.status!==400||error?.code!==-2013) throw error;
               lookup={status:error.status,code:error.code};
             }
-            const trades=await client.getUserTrades(symbol,{startTime:createdAt-120000,endTime:Date.now(),limit:1000});
-            const aavePositions=positions.filter((p)=>String(p.symbol||"").toUpperCase()===symbol && Math.abs(Number(p.positionAmt ?? p.quantity))>1e-12);
-            const aaveOrders=openOrders.filter((o)=>String(o.symbol||"").toUpperCase()===symbol);
-            if(aavePositions.length||aaveOrders.length||trades.length) throw new Error("ASTER_AAVE_PENDING_NOT_ORPHANED");
-            rounds.push({observedAt:Date.now(),serverTime:server.serverTime,aavePositions,aaveOrders,tradeCount:trades.length,lookup});
+            const tradeEndMs=Date.now();
+            const trades=await signedGet("/fapi/v3/userTrades",{symbol,startTime:createdAt-120000,endTime:tradeEndMs,limit:1000});
+            const aavePositions=(Array.isArray(positions)?positions:[]).filter((row)=>Math.abs(Number(row.positionAmt??row.quantity??0))>1e-12);
+            const aaveOrders=Array.isArray(openOrders)?openOrders:[];
+            if(aavePositions.length||aaveOrders.length||!Array.isArray(trades)||trades.length){
+              throw new Error("ASTER_AAVE_PENDING_NOT_ORPHANED");
+            }
+            rounds.push({observedAt:Date.now(),serverTime:Number(clock.serverTime),aavePositionCount:0,aaveOpenOrderCount:0,tradeCount:0,lookup});
             if(i<2) await new Promise((resolve)=>setTimeout(resolve,1000));
           }
-          const balances=await client.getBalances();
+          const provenAbsent=rounds.length===3&&rounds.every((r)=>r.lookup.code===-2013&&r.aavePositionCount===0&&r.aaveOpenOrderCount===0&&r.tradeCount===0);
+          if(!provenAbsent) throw new Error("ASTER_AAVE_THREE_ROUND_PROOF_FAILED");
           console.log("ASTER_ORPHAN_PROOF="+JSON.stringify({
-            symbol,clientOrderId,createdAt,rounds,
-            balanceRows:Array.isArray(balances)?balances.length:null,
-            provenAbsent:rounds.length===3&&rounds.every((r)=>r.lookup.code===-2013&&!r.aavePositions.length&&!r.aaveOrders.length&&r.tradeCount===0),
+            symbol,clientOrderId,createdAt,rounds,provenAbsent,
             ordersSent:0,cancelsSent:0,positionChangesSent:0,
           }));
           NODE
