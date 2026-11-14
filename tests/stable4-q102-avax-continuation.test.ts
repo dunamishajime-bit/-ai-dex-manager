@@ -31,3 +31,18 @@ test("zero-return training neighbors never count as SHORT agreement",()=>{
  try{const engine=new online.Stable4Q102OnlineEngine({mode:"LIVE",recoverySeedPath:empty,avaxSeedPath:seed,statePath:join(root,"state.json")});assert.equal(engine.propose(history()),undefined);}
  finally{rmSync(root,{recursive:true,force:true});}
 });
+test("FET ret14 rejection still admits an independently qualified QAON7 proposal",()=>{
+ const root=mkdtempSync(join(tmpdir(),"stable4-fet-avax-")),seed=join(root,"seed.json"),empty=join(root,"empty.json");
+ writeFileSync(empty,JSON.stringify({schemaVersion:1,rows:[]}));
+ writeFileSync(seed,JSON.stringify({schemaVersion:1,rows:Array.from({length:40},(_,i)=>({entryTs:A-(50+i*30)*H,exitTs:A-(26+i*30)*H,raw:.02,f:[0,0,0,0,0,0,0,0,0,.5,.02,1]}))}));
+ try{
+  const engine=new online.Stable4Q102OnlineEngine({mode:"LIVE",recoverySeedPath:empty,avaxSeedPath:seed,statePath:join(root,"state.json")});
+  const base=history(),fet=Array.from({length:336},(_,i)=>({timestampMs:A-(336-i)*H,open:90,high:101,low:89,close:100,quoteVolume:100}));
+  const h={...base,candlesBySymbol:{...base.candlesBySymbol,FETUSDT:fet},entryOpenBySymbol:{...base.entryOpenBySymbol,FETUSDT:{timestampMs:A,open:100}}};
+  const native:any={strategyId:"QUALITY102_CAUSAL_V1",referenceTs:A,side:-1,symbol:"FETUSDT",family:"REV",variant:"REV24_T0.05_H8",requestedGross:1.25,reason:"NATIVE_FET",dataCutoffTs:A-H,brkEnabled:true};
+  const selected=engine.select(native,h,A);
+  assert.equal(selected.proposal?.kind,"AVAX_KNN");assert.equal(selected.signal.symbol,"AVAXUSDT");assert.equal(selected.signal.reason,"STABLE4_Q102_AVAX_ONLINE_KNN");
+  const accepted=engine.select(native,{...h,entryOpenBySymbol:{...h.entryOpenBySymbol,FETUSDT:{timestampMs:A,open:90}}},A);
+  assert.equal(accepted.signal.reason,"NATIVE_FET","admissible native priority stays unchanged");
+ }finally{rmSync(root,{recursive:true,force:true});}
+});

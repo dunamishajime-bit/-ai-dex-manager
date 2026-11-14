@@ -24,3 +24,10 @@ test("missing completed bars, duplicate responses and pagination limits fail clo
  const dup=fixture();dup.client.getKlines=async()=>[k(T),k(T)];await assert.rejects(dup.provider.load(request),/DUPLICATE|NONADVANCING/);
  const truncated=fixture({maxPages:1});await assert.rejects(truncated.provider.load(request),/PAGINATION_LIMIT/);
 });
+test("zero-trade evidence rejects missing, null, blank, boolean or invalid volume/count metadata",async()=>{
+ for(const index of [5,7,8])for(const value of [undefined,null,""," ",false,-1,NaN]){
+  const f=fixture();(f.klines[0] as any[])[index]=value;
+  await assert.rejects(f.provider.load(request),/M5_.*INVALID/);
+ }
+ const fraction=fixture();fraction.klines[0][8]=.5;await assert.rejects(fraction.provider.load(request),/M5_.*INVALID/);
+});

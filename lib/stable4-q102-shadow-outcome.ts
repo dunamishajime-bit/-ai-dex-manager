@@ -7,7 +7,7 @@ export interface Stable4ShadowOutcomeInput {
  entryTs:number;entryPrice:number;side:"LONG"|"SHORT";family:string;hardStop:number;maxHoldHours:number;
  exitPolicy:"FIXED_HOLD_STOP"|"HIGH_VOL_TRAIL72"|"STABLE4_STOP5_TP3_H24";now:number;
  dataThrough?:number;
- fiveMinute:readonly Quality102Candle[];hourly:readonly Quality102Candle[];
+ fiveMinute:readonly (Quality102Candle&{tradeCount?:number})[];hourly:readonly Quality102Candle[];
  boundaryOpen?:{timestampMs:number;open:number};
  funding:{from:number;through:number;capturedAt:number;rows:readonly{fundingTime:number;fundingRate:number}[]};
 }

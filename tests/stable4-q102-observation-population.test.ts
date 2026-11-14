@@ -54,3 +54,28 @@ test("SHADOW observation degradation preserves native trading while LIVE fails c
   await assert.rejects((live as any).observeAndRefresh(history,T,provider),/HISTORY_GAP/);
  }finally{rmSync(f.root,{recursive:true,force:true});}
 });
+test("zero-trade entry mismatch stays durably unresolved while independently valid labels complete",async()=>{
+ const q=(symbol:string)=>({entryTs:T,exitTs:T+24*H,symbol,side:"LONG",route:symbol+"|MR",entryPrice:100,hardStop:.05,family:"MR",exitPolicy:"FIXED_HOLD_STOP",maxHoldHours:24,features:{}});
+ const f=fixture({schemaVersion:1,updatedAt:T,recoveryRows:[],avaxRows:[],avaxPending:[],recoveryPending:[q("UNIUSDT"),q("FETUSDT")]});
+ try{
+  const engine=new Stable4Q102OnlineEngine({...f.options,now:()=>T+2*M});let calls=0;
+  const provider={load:async(x:any)=>{calls++;return{fiveMinute:[{timestampMs:T,open:x.symbol==="FETUSDT"?99:100,high:x.symbol==="FETUSDT"?99:100,low:x.symbol==="FETUSDT"?99:94,close:x.symbol==="FETUSDT"?99:94,quoteVolume:x.symbol==="FETUSDT"?0:1,baseVolume:x.symbol==="FETUSDT"?0:1,tradeCount:x.symbol==="FETUSDT"?0:1}],hourly:[],funding:{from:T,through:T+2*M,capturedAt:T+2*M,rows:[]}};}};
+  await engine.refreshOutcomes({candlesBySymbol:{}},T+2*M,provider);
+  const state=JSON.parse(readFileSync(f.statePath,"utf8"));assert.equal(state.recoveryRows.length,1);assert.equal(state.recoveryRows[0].symbol,"UNIUSDT");
+  assert.equal(state.recoveryPending.length,0);assert.equal(state.recoveryUnresolved.length,1);
+  assert.equal(state.recoveryUnresolved[0].candidate.entryPrice,100);assert.equal(state.recoveryUnresolved[0].entryM5.open,99);
+  assert.equal(state.recoveryUnresolved[0].reason,"M5_ZERO_TRADE_ENTRY_OPEN_MISMATCH");
+  const restarted=new Stable4Q102OnlineEngine(f.options);await restarted.refreshOutcomes({candlesBySymbol:{}},T+3*M,provider);assert.equal(calls,2);
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+test("unexplained or traded entry mismatches still fail the entire label round",async()=>{
+ const q={entryTs:T,exitTs:T+24*H,symbol:"FETUSDT",side:"LONG",route:"FET|MR",entryPrice:100,hardStop:.05,family:"MR",exitPolicy:"FIXED_HOLD_STOP",maxHoldHours:24,features:{}};
+ for(const overrides of [{baseVolume:1,tradeCount:1},{high:100},{tradeCount:undefined}]){
+  const f=fixture({schemaVersion:1,updatedAt:T,recoveryRows:[],avaxRows:[],avaxPending:[],recoveryPending:[q]});
+  try{
+   const engine=new Stable4Q102OnlineEngine(f.options),provider={load:async()=>({fiveMinute:[{timestampMs:T,open:99,high:99,low:99,close:99,quoteVolume:0,baseVolume:0,tradeCount:0,...overrides}],hourly:[],funding:{from:T,through:T+2*M,capturedAt:T+2*M,rows:[]}})};
+   await assert.rejects(engine.refreshOutcomes({candlesBySymbol:{}},T+2*M,provider),/M5_ENTRY_OPEN_MISMATCH/);
+   assert.equal(JSON.parse(readFileSync(f.statePath,"utf8")).recoveryRows.length,0);
+  }finally{rmSync(f.root,{recursive:true,force:true});}
+ }
+});

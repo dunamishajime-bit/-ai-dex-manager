@@ -23,7 +23,8 @@ type RecoverySeedRow={id:string;entryTs:number;exitTs:number;symbol:string;side:
 type AvaxSeedRow={entryTs:number;exitTs:number;raw:number;f:number[]};
 type PendingRecovery={entryTs:number;exitTs:number;symbol:string;side:"LONG"|"SHORT";route:string;entryPrice:number;hardStop:number;features:Record<string,number>;family:string;maxHoldHours:number;exitPolicy:NonNullable<Quality102CausalV1Signal["exitPolicy"]>};
 type PendingAvax={entryTs:number;exitTs:number;entryPrice:number;f:number[]};
-type Stable4OnlineState={schemaVersion:1;updatedAt:number;recoveryRows:RecoverySeedRow[];recoveryPending:PendingRecovery[];avaxRows:AvaxSeedRow[];avaxPending:PendingAvax[];avaxLastSelectedEntryTs?:number;observedThrough?:number};
+type UnresolvedRecovery={candidate:PendingRecovery;reason:"M5_ZERO_TRADE_ENTRY_OPEN_MISMATCH";observedAt:number;entryM5:Quality102Candle&{tradeCount:number}};
+type Stable4OnlineState={schemaVersion:1;updatedAt:number;recoveryRows:RecoverySeedRow[];recoveryPending:PendingRecovery[];recoveryUnresolved:UnresolvedRecovery[];avaxRows:AvaxSeedRow[];avaxPending:PendingAvax[];avaxLastSelectedEntryTs?:number;observedThrough?:number};
 
 export type Stable4Q102OnlineProposal={
  signal:Quality102CausalV1Signal;
@@ -84,7 +85,10 @@ function validateAvaxSeed(value:unknown):AvaxSeedRow[]{
   return {entryTs:z.entryTs,exitTs:z.exitTs,raw:z.raw,f:z.f.map(Number)};
  });
 }
-function defaultState():Stable4OnlineState{return {schemaVersion:1,updatedAt:0,recoveryRows:[],recoveryPending:[],avaxRows:[],avaxPending:[]};}
+function defaultState():Stable4OnlineState{return {schemaVersion:1,updatedAt:0,recoveryRows:[],recoveryPending:[],recoveryUnresolved:[],avaxRows:[],avaxPending:[]};}
+function zeroTradeEntryMismatch(q:PendingRecovery,b:Quality102Candle&{tradeCount?:number}|undefined){
+ return Boolean(q&&b&&b.timestampMs===q.entryTs&&finite(b.open)&&b.open>0&&b.open===b.high&&b.open===b.low&&b.open===b.close&&b.baseVolume===0&&b.quoteVolume===0&&b.tradeCount===0&&Math.abs(b.open-q.entryPrice)>Math.max(1e-10,q.entryPrice*1e-9));
+}
 function loadState(path:string):Stable4OnlineState{
  if(!existsSync(path))return defaultState();
  const v=JSON.parse(readFileSync(path,"utf8")) as any;
@@ -92,7 +96,10 @@ function loadState(path:string):Stable4OnlineState{
  if(!finite(v.updatedAt)||v.updatedAt<0||(v.avaxLastSelectedEntryTs!==undefined&&(!Number.isSafeInteger(v.avaxLastSelectedEntryTs)||v.avaxLastSelectedEntryTs<=0)))throw Error("STABLE4_Q102_ONLINE_STATE_CLOCK_INVALID");
  v.recoveryRows=validateRecoverySeed({schemaVersion:1,rows:v.recoveryRows});
  v.avaxRows=validateAvaxSeed({schemaVersion:1,rows:v.avaxRows});
- for(const row of v.recoveryPending){
+ v.recoveryUnresolved??=[];
+ if(!Array.isArray(v.recoveryUnresolved))throw Error("STABLE4_Q102_UNRESOLVED_INVALID");
+ for(const row of v.recoveryUnresolved)if(!row||row.reason!=="M5_ZERO_TRADE_ENTRY_OPEN_MISMATCH"||!Number.isSafeInteger(row.observedAt)||row.observedAt>v.updatedAt||row.observedAt<row.candidate?.entryTs+300000||!zeroTradeEntryMismatch(row.candidate,row.entryM5))throw Error("STABLE4_Q102_UNRESOLVED_INVALID");
+ for(const row of [...v.recoveryPending,...v.recoveryUnresolved.map((r:UnresolvedRecovery)=>r.candidate)]){
   if(!row||!finite(row.entryPrice)||row.entryPrice<=0||!finite(row.hardStop)||row.hardStop<=0||row.hardStop>=1||
    typeof row.symbol!=="string"||typeof row.route!=="string"||!["LONG","SHORT"].includes(row.side))throw Error("STABLE4_Q102_RECOVERY_PENDING_INVALID");
   chronology(row.entryTs,row.exitTs);featureRecord(row.features);
@@ -176,10 +183,15 @@ export class Stable4Q102OnlineEngine{
    const coverage=this.seedCoverageThrough,observed=this.state.observedThrough;
    if(recoveryDocument.kind!=="STABLE4_Q102_RECOVERY_SEED"||!Number.isSafeInteger(coverage)||!coverage||coverage%HOUR!==0||this.recoverySeed.some(r=>r.entryTs>=coverage))throw Error("STABLE4_Q102_SEED_COVERAGE_INVALID");
    if(observed!==undefined&&(!Number.isSafeInteger(observed)||observed%HOUR!==0||observed<coverage-HOUR||observed>Math.floor(this.clock()/HOUR)*HOUR))throw Error("STABLE4_Q102_STATE_COVERAGE_INVALID");
-   if(observed===undefined&&(this.state.recoveryRows.length||this.state.recoveryPending.length||this.state.avaxPending.length||this.state.avaxRows.length))throw Error("STABLE4_Q102_STATE_CONTINUITY_METADATA_MISSING");
+   if(observed===undefined&&(this.state.recoveryRows.length||this.state.recoveryPending.length||this.state.recoveryUnresolved.length||this.state.avaxPending.length||this.state.avaxRows.length))throw Error("STABLE4_Q102_STATE_CONTINUITY_METADATA_MISSING");
   }
  }
  isHealthy(){return this.healthy;}
+ learningStatus(){return{healthy:this.healthy,seedCoverageThrough:this.seedCoverageThrough,observedThrough:this.state.observedThrough??(this.seedCoverageThrough?this.seedCoverageThrough-HOUR:undefined),completedContinuationRows:this.state.recoveryRows.length,pendingContinuationRows:this.state.recoveryPending.length,unresolvedContinuationRows:this.state.recoveryUnresolved.length,avaxLastSelectedEntryTs:this.state.avaxLastSelectedEntryTs};}
+ pendingEvidenceRequests(through:number){
+  const groups=new Map<string,PendingRecovery[]>();for(const q of this.state.recoveryPending)groups.set(q.symbol,[...(groups.get(q.symbol)??[]),q]);
+  return[...groups].map(([symbol,pending])=>({symbol,from:Math.min(...pending.map(q=>q.entryTs)),through:Math.min(through,Math.max(...pending.map(q=>q.exitTs))),includeM5:pending.some(q=>q.exitPolicy!=="HIGH_VOL_TRAIL72"),pendingCount:pending.length}));
+ }
  private allRecoveryRows(t:number){const m=new Map<string,RecoverySeedRow>();for(const r of [...this.recoverySeed,...this.state.recoveryRows])if(r.exitTs<t)m.set(recoveryIdentity(r),r);return[...m.values()].sort((a,b)=>a.entryTs-b.entryTs||recoveryIdentity(a).localeCompare(recoveryIdentity(b)));}
  private allAvaxRows(t:number){const m=new Map<number,AvaxSeedRow>();for(const r of [...this.avaxSeed,...this.state.avaxRows])if(r.exitTs<=t)m.set(r.entryTs,r);return[...m.values()].sort((a,b)=>a.entryTs-b.entryTs);}
  private persist(){this.state.updatedAt=this.clock();saveState(this.options.statePath,this.state);}
@@ -211,7 +223,7 @@ export class Stable4Q102OnlineEngine{
     if(!entry||entry.timestampMs!==native.referenceTs||!(entry.open>0)||native.referenceTs>decisionTs||!(native.hardStop&&native.maxHoldHours&&native.exitPolicy)||!native.family||native.family!=="HIGH_VOL"&&!candidate)throw Error("STABLE4_Q102_NATIVE_OBSERVATION_EVIDENCE_MISSING");
     const q:PendingRecovery={entryTs:native.referenceTs,exitTs:native.referenceTs+native.maxHoldHours*HOUR,symbol:native.symbol,side:sideName(native.side),route:native.family==="HIGH_VOL"?"HIGH_VOL|"+native.symbol:candidate!.key,entryPrice:entry.open,hardStop:native.hardStop,features:candidate?featureMap(candidate):{},family:native.family,maxHoldHours:native.maxHoldHours,exitPolicy:native.exitPolicy};
     const identity=recoveryIdentity(q);
-    if(![...this.recoverySeed,...this.state.recoveryRows,...this.state.recoveryPending].some(row=>recoveryIdentity(row)===identity)){
+    if(![...this.recoverySeed,...this.state.recoveryRows,...this.state.recoveryPending,...this.state.recoveryUnresolved.map(r=>r.candidate)].some(row=>recoveryIdentity(row)===identity)){
      this.state.recoveryPending.push(q);changed=true;
     }
    }
@@ -227,7 +239,7 @@ export class Stable4Q102OnlineEngine{
    if(av&&selected&&this.state.avaxLastSelectedEntryTs!==av.entryTs){
     this.state.avaxLastSelectedEntryTs=av.entryTs;
     const q:PendingRecovery={entryTs:av.entryTs,exitTs:av.entryTs+24*HOUR,symbol:"AVAXUSDT",side:sideName(selected.signal.side as 1|-1),route:"Q102_AVAX_ONLINE_KNN_STOP5_TP3_Q01365",entryPrice:av.entryPrice,hardStop:.05,family:"MR",maxHoldHours:24,exitPolicy:"STABLE4_STOP5_TP3_H24",features:{}};
-    if(![...this.recoverySeed,...this.state.recoveryRows,...this.state.recoveryPending].some(row=>recoveryIdentity(row)===recoveryIdentity(q)))this.state.recoveryPending.push(q);
+    if(![...this.recoverySeed,...this.state.recoveryRows,...this.state.recoveryPending,...this.state.recoveryUnresolved.map(r=>r.candidate)].some(row=>recoveryIdentity(row)===recoveryIdentity(q)))this.state.recoveryPending.push(q);
     changed=true;
    }
    if(this.options.requireHourlyCoverage&&this.state.observedThrough!==hour){this.state.observedThrough=hour;changed=true;}
@@ -239,19 +251,27 @@ export class Stable4Q102OnlineEngine{
   try{
    const groups=new Map<string,PendingRecovery[]>();
    for(const q of this.state.recoveryPending)groups.set(q.symbol,[...(groups.get(q.symbol)??[]),q]);
-   const snapshot=this.state,remaining:PendingRecovery[]=[],completed:RecoverySeedRow[]=[];
+   const snapshot=this.state,remaining:PendingRecovery[]=[],completed:RecoverySeedRow[]=[],unresolved:UnresolvedRecovery[]=[];
    for(const [symbol,pending]of groups){
     const evidence=await provider.load({symbol,from:Math.min(...pending.map(q=>q.entryTs)),through:Math.min(decisionTs,Math.max(...pending.map(q=>q.exitTs))),includeM5:pending.some(q=>q.exitPolicy!=="HIGH_VOL_TRAIL72"),history});
     const observedAt=Math.max(decisionTs,this.clock());
     for(const q of pending){
-     const out=modelStable4Q102Outcome({...q,...evidence,now:observedAt,dataThrough:evidence.funding.through});
+     let out;
+     try{out=modelStable4Q102Outcome({...q,...evidence,now:observedAt,dataThrough:evidence.funding.through});}
+     catch(error){
+      const entry=evidence.fiveMinute.find(b=>b.timestampMs===q.entryTs);
+      if(!(error instanceof Error)||error.message!=="STABLE4_M5_ENTRY_OPEN_MISMATCH"||!zeroTradeEntryMismatch(q,entry))throw error;
+      // The accepted native replay leaves these prices unresolved. Preserve
+      // both source prices; never create a return or a training observation.
+      unresolved.push({candidate:structuredClone(q),reason:"M5_ZERO_TRADE_ENTRY_OPEN_MISMATCH",observedAt,entryM5:{...entry!,tradeCount:0}});continue;
+     }
      if(!out){remaining.push(q);continue;}
      completed.push({id:"LIVE:"+recoveryIdentity(q),entryTs:q.entryTs,exitTs:out.exitTs,symbol:q.symbol,side:q.side,route:q.route,features:q.features,net30:out.net30});
     }
    }
    if(this.state!==snapshot)throw Error("STABLE4_Q102_OBSERVATION_CHANGED_DURING_EVIDENCE");
-   if(completed.length){
-    const next={...snapshot,recoveryRows:[...snapshot.recoveryRows,...completed],recoveryPending:remaining,updatedAt:this.clock()};
+   if(completed.length||unresolved.length){
+    const next={...snapshot,recoveryRows:[...snapshot.recoveryRows,...completed],recoveryPending:remaining,recoveryUnresolved:[...snapshot.recoveryUnresolved,...unresolved],updatedAt:this.clock()};
     saveState(this.options.statePath,next);this.state=next;
    }
    this.healthy=true;
@@ -309,7 +329,7 @@ export class Stable4Q102OnlineEngine{
     const entry=history.entryOpenBySymbol?.FETUSDT;
     try{if(entry?.timestampMs===nativeSignal.referenceTs)ret14=causalReturn(history.candlesBySymbol.FETUSDT,entry,336);}catch{}
     if(!finite(ret14)||ret14>DISDEX_STABLE4_OPPORTUNITY.q102.fetRet14Max)
-     return{signal:{strategyId:"QUALITY102_CAUSAL_V1",referenceTs:nativeSignal.referenceTs,side:0,requestedGross:0,reason:"STABLE4_Q102_FET_RET14_WAIT",dataCutoffTs:nativeSignal.dataCutoffTs,brkEnabled:true},proposal};
+     return{signal:proposal?.kind==="AVAX_KNN"?proposal.signal:{strategyId:"QUALITY102_CAUSAL_V1",referenceTs:nativeSignal.referenceTs,side:0,requestedGross:0,reason:"STABLE4_Q102_FET_RET14_WAIT",dataCutoffTs:nativeSignal.dataCutoffTs,brkEnabled:true},proposal};
    }
    const nativeKey=nativeSignal.symbol&&nativeSignal.variant?(nativeSignal.symbol.replace(/USDT$/,"")+"|"+nativeSignal.variant):undefined;
    const weakNative=Boolean(nativeKey&&STABLE4_Q102_WEAK_ROUTES.has(nativeKey));

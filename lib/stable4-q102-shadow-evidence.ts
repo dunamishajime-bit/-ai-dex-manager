@@ -5,6 +5,10 @@ import type {Stable4ShadowOutcomeInput} from "./stable4-q102-shadow-outcome";
 const M=300000,DAY=86400000;
 export type Stable4ShadowEvidence=Pick<Stable4ShadowOutcomeInput,"fiveMinute"|"hourly"|"boundaryOpen"|"funding">;
 export interface Stable4ShadowEvidenceRequest{symbol:string;from:number;through:number;includeM5:boolean;history:Quality102CausalV1History;}
+export function publicM5Nonnegative(value:unknown,integer=false):number{
+ if(!(typeof value==="number"||typeof value==="string"&&/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(value)))throw Error("STABLE4_M5_METADATA_INVALID");
+ const n=Number(value);if(!Number.isFinite(n)||n<0||integer&&!Number.isSafeInteger(n))throw Error("STABLE4_M5_METADATA_INVALID");return n;
+}
 /** Public GET-only evidence, using the client's unchanged shared rate budget. */
 export class Stable4Q102ShadowEvidenceProvider {
  private readonly now:()=>number;
@@ -29,7 +33,7 @@ export class Stable4Q102ShadowEvidenceProvider {
      if(!(open>0&&Number.isFinite(open)))throw Error("STABLE4_M5_OPEN_INVALID");
      previous=timestampMs;seen.add(timestampMs);
      if(timestampMs+M>x.through){boundaryOpen={timestampMs,open};continue;}
-     const candle={timestampMs,open,high:Number(row[2]),low:Number(row[3]),close:Number(row[4]),quoteVolume:Number(row[7])};
+     const candle={timestampMs,open,high:Number(row[2]),low:Number(row[3]),close:Number(row[4]),baseVolume:publicM5Nonnegative(row[5]),quoteVolume:publicM5Nonnegative(row[7]),tradeCount:publicM5Nonnegative(row[8],true)};
      if(![candle.high,candle.low,candle.close,candle.quoteVolume].every(Number.isFinite)||candle.low<=0||candle.quoteVolume<0||candle.high<Math.max(open,candle.close)||candle.low>Math.min(open,candle.close))throw Error("STABLE4_M5_RESPONSE_INVALID");
      fiveMinute.push(candle);
     }
