@@ -28,7 +28,7 @@ private原データ：Owner PC `C:\tmp\disdex-bt-20251001-20261001\hype-aster-hi
 
 private再計算JSON：`C:\tmp\bt481-native-hype-trend-h1-replay-20261115.json`。
 
-結果JSONのSHA256：`bc6e50172b642cf325a621ff11e8662f18ca2a3ddee0cea46f49555073346adf`。
+結果JSONのSHA256：`d36a7aabcc3865dc988f870ff45694a59ade71f498536ed3cf97dc92c3e382ef`。
 
 ## 一致範囲と未検証範囲
 
@@ -37,3 +37,17 @@ private再計算JSON：`C:\tmp\bt481-native-hype-trend-h1-replay-20261115.json`�
 また、STABLE4研究モデルHYPE `HYPE_REDESIGN_CAUSAL_H48R4_WSIG` の5採用取引は別の研究ロジックであり、78件の本番TRENDシグナルに置換するだけでは他Runnerとの資金競合が変化する。単なる5→78件置換、勝ち負けの選別、過去PnLの合算は禁じる。入口・出口・Gross・全Runner競合を含めて10bps/30bpsの統合BT全体を再実行すること。
 
 同時にV4はCodexが切替作業中であり、本検証でV4または本番HP/Runner/注文/STOPは操作していない。PR #481はDraftのままとする。
+
+## STABLE4研究HYPE 5件との入口時刻照合（追加）
+
+独立に作成したnative HYPE TREND 78候補を、過去STABLE4研究版
+H48R4採用5件とentry UTCで照合（--research-gate-audit）。
+同時刻の候補：0/5件。前後1時間以内の候補：0/5件。
+個別最短乖離：205h / 81h / 69h / 41h / 9h。
+研究HYPEは別ロジックであり、H48R4研究モデルの損益を
+現行HYPE TREND 78候補の損益として扱うことはできない。
+
+追加照合は、旧研究Gate台帳のシグナル/UTC/routeを検証してから
+native候補のentryTsMsと比較するだけで、売買やポートフォリオの
+再計算は行わない。private監査の研究台帳はPCのみ保存し、
+公開される研究書類には口座/鍵/実約定を含めない。

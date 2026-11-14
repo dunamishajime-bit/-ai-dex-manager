@@ -1,5 +1,5 @@
 import {strict as assert} from "node:assert";
-import {parseCandles,compareSignalSets} from "./bt-hp-native-hype-trend-h1-signal-replay";
+import {parseCandles,compareSignalSets,compareHistoricalAdmissions} from "./bt-hp-native-hype-trend-h1-signal-replay";
 
 const HOUR=3600000;
 const START=Date.parse("2025-09-24T00:00:00Z");
@@ -44,5 +44,19 @@ check("missing/extra candidates remain explicit",()=>{
 });
 check("duplicate accepted signal fails closed",()=>{
  assert.throws(()=>compareSignalSets([1,1],[1]),/DUPLICATE_CANDIDATE_TIMESTAMPS/);
+});
+check("research H48 and native TREND no-time-overlap stays explicit",()=>{
+ const s=compareHistoricalAdmissions([START,START+10*HOUR],[START+5*HOUR]);
+ assert.equal(s.sameHourCount,0);
+ assert.equal(s.withinOneHourCount,0);
+ assert.equal(s.nearest[0].nearestNativeCandidateHours,5);
+});
+check("one-hour proximity is not exact same-hour admission",()=>{
+ const s=compareHistoricalAdmissions([START],[START+HOUR]);
+ assert.equal(s.sameHourCount,0);
+ assert.equal(s.withinOneHourCount,1);
+});
+check("duplicate research admission timestamps fail closed",()=>{
+ assert.throws(()=>compareHistoricalAdmissions([START],[START,START]),/DUPLICATE_RESEARCH_HYPE_ENTRY_TIME/);
 });
 console.log(JSON.stringify({status:"PASS",tests}));

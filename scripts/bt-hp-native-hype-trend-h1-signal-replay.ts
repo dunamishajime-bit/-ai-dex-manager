@@ -50,6 +50,20 @@ export function compareSignalSets(accepted:number[],expected:number[]):{
  const extra=[...a].filter(x=>!b.has(x)).sort((x,y)=>x-y);
  return {matched:a.size-extra.length,missing,extra,pass:missing.length===0&&extra.length===0};
 }
+export function compareHistoricalAdmissions(nativeEntryTimes:number[],researchEntryTimes:number[]){
+ if(new Set(researchEntryTimes).size!==researchEntryTimes.length)throw Error("DUPLICATE_RESEARCH_HYPE_ENTRY_TIME");
+ if(new Set(nativeEntryTimes).size!==nativeEntryTimes.length)throw Error("DUPLICATE_NATIVE_HYPE_ENTRY_TIME");
+ const nearest=researchEntryTimes.map(time=>{
+  const diff=Math.min(...nativeEntryTimes.map(x=>Math.abs(x-time)));
+  return {researchEntryUtc:new Date(time).toISOString(),
+    nativeCandidateSameHour:nativeEntryTimes.includes(time),
+    nearestNativeCandidateHours:Number.isFinite(diff)?diff/HOUR:null};
+ });
+ return {researchEntryCount:researchEntryTimes.length,nativeCandidateCount:nativeEntryTimes.length,
+   sameHourCount:nearest.filter(x=>x.nativeCandidateSameHour).length,
+   withinOneHourCount:nearest.filter(x=>x.nearestNativeCandidateHours!==null&&
+     x.nearestNativeCandidateHours<=1).length,nearest};
+}
 async function main(){
  const source=resolve(option("live-source-root"));
  const prior=resolve(option("old-source-root"));
@@ -92,6 +106,22 @@ async function main(){
   accepted.push({signalTsMs:signal.signalTsMs,entryTsMs:now,reason:signal.reason});
  }
  const comparison=compareSignalSets(accepted.map(x=>x.signalTsMs),old.map(x=>x.signal_ts_ms));
+ let researchOverlap:ReturnType<typeof compareHistoricalAdmissions>|null=null;
+ let researchAuditSha256:string|null=null;
+ if(process.argv.includes("--research-gate-audit")){
+  const proofPath=resolve(option("research-gate-audit"));
+  const data=readFileSync(proofPath);
+  const gate=JSON.parse(data.toString("utf8")) as {schema?:string;signals?:Array<{sourceTime:string;route:string}>};
+  if(gate.schema!=="disdex-bt-hype-asof-gate-evidence/v1"||!Array.isArray(gate.signals))
+   throw Error("INVALID_RESEARCH_GATE_AUDIT_INPUT");
+  if(gate.signals.some(x=>x.route!=="HYPE_REDESIGN_CAUSAL_H48R4_WSIG"||
+     !x.sourceTime.endsWith("Z")||!Number.isFinite(Date.parse(x.sourceTime))))
+   throw Error("INCOMPATIBLE_RESEARCH_HYPE_SIGNAL_SOURCE");
+  researchOverlap=compareHistoricalAdmissions(accepted.map(x=>x.entryTsMs),
+    gate.signals.map(x=>Date.parse(x.sourceTime)));
+  researchAuditSha256=sha(data);
+ }
+
  const output={
   schema:"disdex-bt-native-hype-trend-h1-signal-replay/v1",
   status:comparison.pass?"CURRENT_HYPE_TREND_SIGNAL_MATCHES_PRIOR_PINNED_CANDIDATES":"CURRENT_HYPE_TREND_SIGNAL_CANDIDATE_MISMATCH",
@@ -102,6 +132,7 @@ async function main(){
   comparison,signalReasons:reasons,
   normalizedSourceSha256:normalizedShas,
   inputSha256:{btcH1:sha(readFileSync(btcPath)),hypeH1:sha(readFileSync(hypePath)),priorCandidates:sha(readFileSync(expectedPath))},
+  researchOverlap,researchGateAuditSha256:researchAuditSha256,
   nativeSignals:accepted,
   liveFillParityCertified:false,stopParityCertified:false,
   sharedRiskParityCertified:false,portfolioEconomicParityCertified:false,
