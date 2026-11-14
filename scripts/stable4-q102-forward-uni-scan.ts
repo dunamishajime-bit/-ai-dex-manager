@@ -4,7 +4,7 @@ import { generateQuality102CausalV4S34ShadowCandidates } from "../lib/disdex-qua
 
 type Row={timestampMs:number;open:number;high:number;low:number;close:number;quoteVolume:number;baseVolume?:number};
 function load(path:string):Row[]{
- const raw=gunzipSync(readFileSync(path)).toString("utf8").trim().split(String.fromCharCode(10)).map((s)=>s.trim()).filter(Boolean).map(JSON.parse);
+ const raw=gunzipSync(readFileSync(path)).toString("utf8").trim().split(String.fromCharCode(10)).map((s)=>s.trim()).filter(Boolean).map(s=>JSON.parse(s));
  return raw.map((z:any)=>({timestampMs:Number(z[0]),open:Number(z[1]),high:Number(z[2]),low:Number(z[3]),close:Number(z[4]),quoteVolume:Number(z[5]),baseVolume:Number(z[5])}));
 }
 const root="C:/tmp/disdex-bt-20251001-20261001";
