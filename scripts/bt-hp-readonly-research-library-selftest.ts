@@ -21,6 +21,17 @@ for(const item of items){
  assert.equal(result.replay.researchSummary?.costBps,item.bps);
  assert.equal(result.replay.mode,"EXTERNAL");
  assert.equal(result.replay.source?.kind,"RESEARCH_MODEL_RECONSTRUCTED");
+ if(result.replay.terminalModelPositions!==undefined){
+   assert.equal(result.replay.terminalModelPositions.length,1);
+   const terminal=result.replay.terminalModelPositions[0];
+   assert.equal(terminal.logic,"Q102");
+   assert.equal(terminal.symbol,"SUIUSDT");
+   assert.equal(terminal.side,"LONG");
+   assert.equal(terminal.entryGrossX,1);
+   assert.equal(terminal.evidence,"SOURCE_RESEARCH_MANIFEST_TERMINAL_OPEN_NOT_VENUE");
+   assert.equal(result.replay.frames.at(-1)?.sourceOpenCount,1);
+   assert.equal(result.replay.frames.at(-1)?.sourcePositionAlignment,"UNMATCHED");
+ }
  const coverage=replayCoverage(result.replay);
  assert.equal(coverage.frames,item.frames);
  assert.ok(coverage.framesWithSourceGross>0);

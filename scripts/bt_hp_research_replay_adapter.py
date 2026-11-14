@@ -11,6 +11,7 @@ import argparse, csv, gzip, hashlib, json, math, sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from bt_hp_source_position_snapshots import load_position_snapshots,check_source_snapshot
 
 @dataclass(frozen=True)
 class Source:
@@ -22,6 +23,7 @@ class Source:
     btc_candles: Path | None = None
     partial_events: Path | None = None
     funding: Path | None = None
+    position_snapshots: Path | None = None
 
 def digest(path: Path) -> str:
     h=hashlib.sha256()
@@ -175,10 +177,38 @@ def resolve_gross_caps(source:Source, *, total:float|None=None, crypto:float|Non
         if len(matching)!=1:
             raise ValueError("No unique source manifest case for cost-bps="+str(cost_bps))
         record=matching[0]
+        terminal_count=record.get("terminal_open_count")
+        terminal_rows=record.get("terminal_open_positions")
+        if terminal_count is not None or terminal_rows is not None:
+            if not isinstance(terminal_count,int) or isinstance(terminal_count,bool) or not 0<=terminal_count<=300:
+                raise ValueError("Invalid source terminal open count")
+            if not isinstance(terminal_rows,list) or len(terminal_rows)!=terminal_count:
+                raise ValueError("Source terminal open positions/count mismatch")
+            validated_terminal=[]
+            for pos in terminal_rows:
+                if not isinstance(pos,dict):raise ValueError("Invalid terminal model position source")
+                if not all(isinstance(pos.get(k),str) and pos[k] for k in
+                           ("strategy","symbol","side","entry_utc","route")):
+                    raise ValueError("Incomplete terminal model position identity")
+                if pos["side"] not in ("LONG","SHORT"):raise ValueError("Invalid terminal model direction")
+                when=iso(pos["entry_utc"])
+                future=iso(pos["modeled_future_exit_utc"]) if pos.get("modeled_future_exit_utc") else None
+                if future and future<=when:raise ValueError("Terminal model future exit before entry")
+                entry_price=number(str(pos["entry_price"]),"terminal entry price")
+                entry_gross=number(str(pos["gross_x"]),"terminal entry Gross")
+                if entry_price<=0 or entry_gross<=0:raise ValueError("Invalid terminal model price or Gross")
+                validated_terminal.append({
+                    "logic":pos["strategy"],"symbol":pos["symbol"],"side":pos["side"],
+                    "openedAt":when,"entryPrice":entry_price,"entryGrossX":entry_gross,
+                    "route":pos["route"],"modeledFutureExitAt":future,
+                    "evidence":"SOURCE_RESEARCH_MANIFEST_TERMINAL_OPEN_NOT_VENUE"
+                })
+        else:validated_terminal=None
         evidence={"costBps":cost_bps,
                   "researchCase":record.get("case"),
                   "manifestStatus":raw.get("status"),
                   "summaryExpectedFillCount":record.get("modeled_fills"),
+                  "terminalModelPositions":validated_terminal,
                   "researchSummary":({
                     "costBps":cost_bps,
                     "initialJpy":number(str(record["initial_jpy"]),"initial_jpy"),
@@ -230,6 +260,10 @@ def model_strategy_performance(path:Path) -> list[dict]:
 def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, max_frames:int=50000, cap_evidence:str="USER_SUPPLIED_NOT_VERIFIED", source_meta:dict|None=None) -> dict:
     fills,events=prepare(source)
     candles=load_btc_candles(source.btc_candles)
+    source_positions=(load_position_snapshots(source.position_snapshots)
+                      if source.position_snapshots is not None else None)
+    used_source_position_times:set[str]=set()
+
     candle_cursor=0
     latest_btc=None
     active:dict[str,dict]={}
@@ -237,12 +271,18 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
     event_buffer:list[str]=[]
     first_equity=None
     max_equity_gross=0.0
+    phase_corrected=0
+    phase_ambiguous=0
+    phase_unmatched=0
     t_last=None
+    last_equity_open_count=None
     for row in read_rows(source.equity):
         t=iso(row["utc"])
         seconds=int(datetime.fromisoformat(t.replace("Z","+00:00")).timestamp())
         if t_last is not None and t<=t_last:raise ValueError("Equity timestamps unsorted/duplicated")
         t_last=t
+        last_equity_open_count=(int(row["open_count"])
+                                if row.get("open_count") not in (None,"") else None)
         total=number(row["total_gross_x"],"total_gross_x")
         crypto=number(row["crypto_gross_x"],"crypto_gross_x")
         stock=number(row["stock_gross_x"],"stock_gross_x")
@@ -254,8 +294,13 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
         while candle_cursor<len(candles) and candles[candle_cursor]["closedAt"]<=t:
             latest_btc=candles[candle_cursor]["close"]
             candle_cursor+=1
+        same_timestamp_states=[]
+        same_time_events=[]
         while cursor<len(events) and events[cursor][0]<=t:
             when,kind,key,position,description=events[cursor]
+            if when==t:
+                if not same_timestamp_states:same_timestamp_states.append(dict(active))
+                same_time_events.append((kind,key,position))
             if kind==0: active.pop(key,None)
             elif kind==1 and position is not None: active[key]=position
             elif kind==3:
@@ -264,6 +309,65 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
                 active[key]={**active[key],**position}
             event_buffer.append(when+" "+description)
             cursor+=1
+            if when==t:same_timestamp_states.append(dict(active))
+        # A source equity row may be sampled *before* a same-timestamp ENTRY,
+        # but *after* an EXIT. The original research exporter observes this:
+        # 2025-10-01 01:00:00 has 0 open / 0 Gross, while the 01:00
+        # modeled entry appears at the subsequent 01:05 equity snapshot.
+        # Reconcile the actual sampled phase, not merely event_time <= utc.
+        candidates=same_timestamp_states or [dict(active)]
+        phase_status=None
+        if same_time_events:
+            # Original research engine executes maturing EXITs first, samples
+            # equity/Gross, then may admit new ENTRYs at this same timestamp.
+            # Visual annotation ledger sorts ENTRY before EXIT for legibility,
+            # but source-equity snapshots can be from the exit-first phase.
+            exit_first=dict(candidates[0])
+            for kind,key,payload in same_time_events:
+                if kind==0:exit_first.pop(key,None)
+            candidates.append(dict(exit_first))
+            for kind,key,payload in same_time_events:
+                if kind==3 and key in exit_first and isinstance(payload,dict):
+                    exit_first[key]={**exit_first[key],**payload}
+            candidates.append(dict(exit_first))
+            for kind,key,payload in same_time_events:
+                if kind==1 and isinstance(payload,dict):
+                    exit_first[key]=payload
+            candidates.append(dict(exit_first))
+        sampled=dict(active)
+        if source_positions is not None:
+            source_ids={p["id"] for p in source_positions.get(t,[])}
+            possible=[state for state in candidates if set(state)==source_ids]
+            if not possible:
+                raise ValueError("Source portfolio/event phase mismatch at "+t)
+            phase_status="MATCHED"
+            # Source quantity/mark/Gross are authoritative; among the states
+            # with matching IDs, the latest partial-close bookkeeping wins.
+            sampled=possible[-1]
+        elif row.get("open_count") not in (None,""):
+            count=int(row["open_count"])
+            count_matches=[state for state in candidates if len(state)==count]
+            distinct={frozenset(state) for state in count_matches}
+            if len(distinct)==1 and count_matches:
+                sampled=count_matches[-1]
+                phase_status="MATCHED"
+            elif len(distinct)>1:
+                phase_ambiguous+=1
+                phase_status="AMBIGUOUS"
+            else:
+                phase_unmatched+=1
+                phase_status="UNMATCHED"
+        if set(sampled)!=set(active):phase_corrected+=1
+        if source_positions is not None:
+            # Validate every equity source observation, even timepoints
+            # intentionally omitted from the reduced playback view.
+            latest_positions=check_source_snapshot(
+                timestamp=t,active=sampled,summary=row,
+                source_gross={"total":total,"crypto":crypto,"stock":stock},
+                positions=source_positions)
+            used_source_position_times.add(t)
+        else:
+            latest_positions=list(sampled.values())
         if previous_epoch>=0 and (seconds-previous_epoch)<interval_minutes*60 and not event_buffer:
             continue
         previous_epoch=seconds
@@ -271,16 +375,32 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
             "timestamp":t,"btc":latest_btc,
             "equity":number(row["compounded_mtm_equity_jpy"],"equity"),
             "realized":number(row["wallet_cash_jpy"],"wallet_cash")-first_equity,
-            "positions":list(active.values()),
+            "positions":latest_positions,
             "events":event_buffer,
+            **({"sourceOpenCount":int(row["open_count"]),
+                 "sourcePositionAlignment":phase_status}
+                if phase_status is not None and row.get("open_count") not in (None,"") else {}),
             "gross":{"totalX":total,"cryptoX":crypto,"stockX":stock,"source":"bt_equity_snapshot"},
         })
         event_buffer=[]
         if len(frames)>max_frames:raise ValueError("Too many frames, raise --interval-minutes")
     if not frames:raise ValueError("No equity snapshots")
+    if source_positions is not None and used_source_position_times!=set(source_positions):
+        raise ValueError("Unexpected source position snapshot time not in equity source")
+    terminal=source_meta.get("terminalModelPositions") if source_meta else None
+    if terminal is not None and last_equity_open_count is not None:
+        if len(terminal)!=last_equity_open_count:
+            raise ValueError("Source terminal model count disagrees with terminal equity snapshot")
+        if any(p["openedAt"]>t_last for p in terminal):
+            raise ValueError("Terminal source model entry is after source period")
     manifest={
         "kind":"RESEARCH_MODEL_RECONSTRUCTED",
-        "note":"RESEARCH MODEL ONLY, not full production parity. Current quantity/mark/per-position Gross are not supplied by the research fills. Gross and equity are original source snapshots.",
+        "note":("RESEARCH MODEL ONLY, not full production parity. Model-engine source "
+                "position snapshots supplied and reconciled against source equity Gross. "
+                if source_positions is not None else
+                "RESEARCH MODEL ONLY, not full production parity. Current quantity/mark/"
+                "per-position Gross are not supplied by the research fills. "
+                "Gross and equity are original source snapshots."),
         "equitySha256":digest(source.equity),
         "fillsSha256":digest(source.fills),
         "summarySha256":digest(source.summary) if source.summary else None,
@@ -289,13 +409,19 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
         "btcCandlesSha256":digest(source.btc_candles) if source.btc_candles else None,
         "partialEventsSha256":digest(source.partial_events) if source.partial_events else None,
         "fundingEventsSha256":digest(source.funding) if source.funding else None,
+        "positionSnapshotsSha256":digest(source.position_snapshots) if source.position_snapshots else None,
+        "positionExposureEvidence":("SOURCE_ENGINE_TIMEPOINT_RECONCILED"
+                                    if source_positions is not None else "MISSING_SOURCE_POSITION_MARKS"),
         "costAndFunding":"from research source; not recalculated",
         "grossCapEvidence":cap_evidence,
         "sourceRiskManifest":source_meta or {},
         "drawdownModel":"BT equity snapshot; no re-estimation",
         "intervalMinutes":interval_minutes,
         "inputFillCount":len(fills),
-        "maxRecordedGrossX":max_equity_gross
+        "maxRecordedGrossX":max_equity_gross,
+        "modelEventSnapshotPhaseCorrections":phase_corrected,
+        "modelEventSnapshotPhaseAmbiguous":phase_ambiguous,
+        "modelEventSnapshotPhaseUnmatched":phase_unmatched
     }
     return {
         "schema":"disdex-bt-portfolio-v1","mode":"EXTERNAL",
@@ -307,7 +433,9 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
         "btcCandles":candles,
         "strategyCatalog":research_strategy_catalog(source.fills),
         "researchSummary":(source_meta or {}).get("researchSummary"),
-        "strategyStats":model_strategy_performance(source.fills)
+        "strategyStats":model_strategy_performance(source.fills),
+        **({"terminalModelPositions":source_meta["terminalModelPositions"]}
+           if source_meta and source_meta.get("terminalModelPositions") is not None else {})
     }
 
 def main(argv=None)->int:
@@ -319,14 +447,17 @@ def main(argv=None)->int:
     ap.add_argument("--btc-candles",type=Path,help="Aster historical BTC 1h JSONL.GZ; only completed candles are exposed")
     ap.add_argument("--partial-events",type=Path,help="Source PENGU partial close event ledger")
     ap.add_argument("--funding",type=Path,help="Source model funding cashflow ledger")
+    ap.add_argument("--position-snapshots",type=Path,
+        help="Optional strict source-engine position observations at EVERY equity timestamp;"
+             " empty timestamps must contain a marker; never estimate missing Gross")
     ap.add_argument("--total-cap",type=float)
     ap.add_argument("--crypto-cap",type=float)
     ap.add_argument("--stock-cap",type=float)
     ap.add_argument("--cost-bps",type=int,choices=(10,30),help="Source research case; inferred from filenames when unique")
     ap.add_argument("--inspect-only",action="store_true")
     args=ap.parse_args(argv)
-    src=Source(args.equity,args.fills,args.summary,args.decisions,args.risk_events,args.btc_candles,args.partial_events,args.funding)
-    for f in (src.equity,src.fills,src.summary,src.decisions,src.risk_events,src.btc_candles,src.partial_events,src.funding):
+    src=Source(args.equity,args.fills,args.summary,args.decisions,args.risk_events,args.btc_candles,args.partial_events,args.funding,args.position_snapshots)
+    for f in (src.equity,src.fills,src.summary,src.decisions,src.risk_events,src.btc_candles,src.partial_events,src.funding,src.position_snapshots):
         if f is not None and not f.is_file():ap.error("Missing source "+str(f))
     if args.inspect_only:
         fills,events=prepare(src)

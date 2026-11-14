@@ -102,3 +102,46 @@ The 2026-11-14 read-only, SHA256-validated, model-replay data shows:
 - The new report widget computes actual source coverage for Total Gross, BTC price, position quantity, mark price, entry Gross and current Gross, without filling absent fields. It shows a clear warning whenever position-current-Gross is incomplete.
 
 To satisfy the owner's requirement for per-position current Gross%, the future canonical replay source must record each position's symbol, logic, side, actual model quantity, market mark price, JPY/USD value with explicit FX conversion, current notional, current Gross x, entry Gross x, total/category Gross snapshots, entry/exit timestamps, partial fills, funding and fees. Account equity and source Gross sums must reconcile at every replay step; do not make up quantities or allocate residual Gross by arbitrary ratio.
+
+
+## 2026-11-14 — source-as-of portfolio reconciliation and terminal open source model
+
+The research-only replay converter now reads original source snapshots in their
+actual timing phase. Same-timestamp matured exits can be counted before new
+entries; the earlier purely event-time <= frame-time view could show phantom
+positions not present in the recorded Gross snapshot.
+
+The strict optional per-position source file contract and producer integration
+requirements are documented in:
+docs/implementation/BT_POSITION_SNAPSHOT_SOURCE_CONTRACT_20261114.md
+
+A new private and non-overwriting source-hash-verified research library was built:
+C:\\tmp\\bt481-hp-replay-library-terminal-v3-20261114
+
+| Case | Old mismatched emitted frames | New mismatched | Ambiguous |
+| --- | ---: | ---: | ---: |
+| STABLE4 Opportunity 10bps | 888 | 45 | 2 |
+| STABLE4 Opportunity 30bps | 885 | 45 | 2 |
+| STABLE4 HYPE6 Q102 10bps | 708 | 45 | 1 |
+| STABLE4 HYPE6 Q102 30bps | 704 | 45 | 1 |
+
+The final 45 reconstructed-snapshot discrepancies have a specific known origin:
+the source manifested Q102 SUIUSDT LONG open from 2026-09-29 04:00 UTC,
+with no matching completed fill in FILLS.csv, and the final 2026-10-01
+equity snapshot reports 1 position. The source RUN_MANIFEST contains a
+terminal_open_positions record. The RESULTS tab now shows its exact
+model strategy, symbol, side, entry time, entry price 1.1156, entry Gross
+1.0x and future **model planned** exit 2026-10-02 03:00 UTC separately.
+Do not claim actual execution, actual exit, timepoint quantity or current Gross.
+
+The original model equity, realized cash, Gross source snapshots, funding
+events, model fill events, BTC candle history, model summaries and all
+original input hashes are unchanged across the four derived research cases.
+Only the display as-of position alignment and source audit/terminal metadata
+were added. The original archive was not overwritten. The v3 replay source
+uses an Owner-authenticated read-only API, not public GitHub Pages.
+
+The new strict optional POSITION_SNAPSHOTS.csv contract still requires an
+actual model-engine writer at every equity observation; it is not present
+in the current historical 4-case source. Terminal model records are NOT
+substitutes for complete per-timepoint quantity, mark, FX and current Gross.

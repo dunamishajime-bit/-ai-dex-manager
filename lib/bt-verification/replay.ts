@@ -50,6 +50,10 @@ export type ReplayFrame = {
   positions: Position[];
   events: string[];
   gross?: GrossSnapshot;
+  /** Number of open positions reported by the same source equity snapshot. */
+  sourceOpenCount?: number;
+  /** Phase reconciliation of source equity inventory versus modeled fill events. */
+  sourcePositionAlignment?: "MATCHED" | "AMBIGUOUS" | "UNMATCHED";
   /** Synthetic-only, causal current-hour OHLC built from ticks observed so far. */
   formingBtcCandle?: BtcCandle;
   /** Synthetic-only threshold checks recorded at this exact tick. */
@@ -83,6 +87,17 @@ export type StrategyStat = {
   maxLossJpy: number | null;
   winRatePct: number | null;
 };
+export type TerminalModelPosition = {
+  logic:string;
+  symbol:string;
+  side:"LONG"|"SHORT";
+  openedAt:string;
+  entryPrice:number;
+  entryGrossX:number;
+  route:string;
+  modeledFutureExitAt:string|null;
+  evidence:"SOURCE_RESEARCH_MANIFEST_TERMINAL_OPEN_NOT_VENUE";
+};
 export type Replay = {
   schema: "disdex-bt-portfolio-v1";
   mode: "DEMO" | "EXTERNAL";
@@ -92,9 +107,11 @@ export type Replay = {
   btcCandles?: BtcCandle[];
   strategyCatalog?: StrategyCatalogEntry[];
   researchSummary?: ResearchSummary | null;
+  /** Sourced model positions still open at period end and absent from completed FILLS. */
+  terminalModelPositions?: TerminalModelPosition[];
   strategyStats?: StrategyStat[];
   limits: { total: number; crypto: number; stock: number };
-  source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; grossCapEvidence?: string; note?: string };
+  source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; positionSnapshotsSha256?: string | null; positionExposureEvidence?: "SOURCE_ENGINE_TIMEPOINT_RECONCILED" | "MISSING_SOURCE_POSITION_MARKS"; grossCapEvidence?: string; note?: string };
 };
 export type GrossState = {
   total: number;
@@ -126,10 +143,16 @@ export function grossForFrame(frame: ReplayFrame): GrossState {
 /** Inspect source-field completeness without pretending missing position exposure can be inferred. */
 export function replayCoverage(replay:Replay){
  const out={frames:replay.frames.length,framesWithSourceGross:0,framesWithBtc:0,
+   framesWithSourceOpenCount:0,sourcePositionMatched:0,
+   sourcePositionAmbiguous:0,sourcePositionUnmatched:0,
    positionSnapshots:0,quantityKnown:0,markKnown:0,currentGrossKnown:0,
    entryGrossKnown:0,events:0};
  for(const frame of replay.frames){
    if(frame.gross)out.framesWithSourceGross++;
+   if(frame.sourceOpenCount!==undefined)out.framesWithSourceOpenCount++;
+   if(frame.sourcePositionAlignment==="MATCHED")out.sourcePositionMatched++;
+   if(frame.sourcePositionAlignment==="AMBIGUOUS")out.sourcePositionAmbiguous++;
+   if(frame.sourcePositionAlignment==="UNMATCHED")out.sourcePositionUnmatched++;
    if(frame.btc!==null)out.framesWithBtc++;
    out.events+=frame.events.length;
    for(const position of frame.positions){
@@ -182,6 +205,21 @@ export function validateReplay(value:unknown):value is Replay {
        !number(x.winRatePct)||x.winRatePct<0||x.winRatePct>100||
        !number(x.profitFactor)||x.profitFactor<0)return false;
   }
+  if(value.terminalModelPositions!==undefined){
+    if(value.mode!=="EXTERNAL"||!Array.isArray(value.terminalModelPositions)||
+       value.terminalModelPositions.length>300)return false;
+    for(const p of value.terminalModelPositions){
+      if(!isObj(p)||typeof p.logic!=="string"||!p.logic||p.logic.length>80||
+         typeof p.symbol!=="string"||!p.symbol||p.symbol.length>80||
+         (p.side!=="LONG"&&p.side!=="SHORT")||
+         !date(p.openedAt)||!number(p.entryPrice)||p.entryPrice<=0||
+         !number(p.entryGrossX)||p.entryGrossX<=0||
+         typeof p.route!=="string"||p.route.length>300||
+         !(p.modeledFutureExitAt===null||
+          (date(p.modeledFutureExitAt)&&p.modeledFutureExitAt>p.openedAt))||
+         p.evidence!=="SOURCE_RESEARCH_MANIFEST_TERMINAL_OPEN_NOT_VENUE")return false;
+    }
+  }
   if(value.strategyStats!==undefined){
     if(!Array.isArray(value.strategyStats)||value.strategyStats.length>2000)return false;
     for(const x of value.strategyStats){
@@ -227,6 +265,17 @@ export function validateReplay(value:unknown):value is Replay {
     if(!number(frame.equity)||!number(frame.realized)||!Array.isArray(frame.positions)||frame.positions.length>300)return false;
     if(!Array.isArray(frame.events)||frame.events.length>500||frame.events.some((e:unknown)=>typeof e!=="string"||e.length>600))return false;
     if(frame.gross!==undefined && !validGross(frame.gross))return false;
+    if(frame.sourceOpenCount!==undefined){
+      if(value.mode!=="EXTERNAL"||typeof frame.sourceOpenCount!=="number"||
+         !Number.isInteger(frame.sourceOpenCount)||frame.sourceOpenCount<0||
+         frame.sourceOpenCount>300)return false;
+    }
+    if(frame.sourcePositionAlignment!==undefined){
+      if(value.mode!=="EXTERNAL"||frame.sourceOpenCount===undefined||
+         typeof frame.sourcePositionAlignment!=="string"||
+         !["MATCHED","AMBIGUOUS","UNMATCHED"].includes(frame.sourcePositionAlignment))return false;
+      if(frame.sourcePositionAlignment==="MATCHED"&&frame.positions.length!==frame.sourceOpenCount)return false;
+    }
     if(frame.formingBtcCandle!==undefined){
       const c=frame.formingBtcCandle;
       if(value.mode!=="DEMO"||!isObj(c)||!date(c.time)||!date(c.closedAt)||

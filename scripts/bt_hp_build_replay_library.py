@@ -23,6 +23,10 @@ def build_case(base:Path,bps:int,btc:Path|None,interval_minutes:int,outdir:Path)
         btc_candles=btc,
         partial_events=source_file(base,bps,"PENGU_PARTIAL_EVENTS.csv"),
         funding=source_file(base,bps,"FUNDING.csv"),
+        position_snapshots=(
+            source_file(base,bps,"POSITION_SNAPSHOTS.csv")
+            if list(base.glob("*_"+str(bps)+"BPS_POSITION_SNAPSHOTS.csv")) else None
+        ),
     )
     if not source.summary.is_file():raise ValueError("Missing RUN_MANIFEST.json")
     caps,evidence,meta=resolve_gross_caps(source,cost_bps=bps)
@@ -45,7 +49,8 @@ def build_case(base:Path,bps:int,btc:Path|None,interval_minutes:int,outdir:Path)
         "fundingEventCount":sum(" FUNDING " in e for f in result["frames"] for e in f["events"]),
         "modelSummary":result.get("researchSummary"),
         "sourceStatus":meta["manifestStatus"],
-        "sourceMode":"RESEARCH_MODEL_NOT_VENUE_EXECUTION"
+        "sourceMode":"RESEARCH_MODEL_NOT_VENUE_EXECUTION",
+        "positionExposureEvidence":result.get("source",{}).get("positionExposureEvidence","MISSING_SOURCE_POSITION_MARKS"),
     }
 def main(argv=None)->int:
     ap=argparse.ArgumentParser(description=__doc__)

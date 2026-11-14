@@ -477,6 +477,19 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
     <section className={card+" min-w-0 p-4"}>
       <div className="mb-3 flex items-center justify-between gap-2"><h2 className="text-[16px] font-bold text-white">保有建玉ポートフォリオ</h2><span className="rounded-full bg-[#17404a] px-3 py-1 text-[11px] text-cyan-200">{frame.positions.length} 建玉 / Gross {total.toFixed(2)}x</span></div>
       <p className="mb-3 text-[11px] text-[#8ea6bb]">ロジック・通貨の表示フィルターは建玉一覧だけに適用され、Total Grossと口座資産は変わりません。欠損した現在値は推測しません。</p>
+      {frame.sourcePositionAlignment==="UNMATCHED"&&
+        <p className="mb-3 rounded-lg border border-rose-500/40 bg-rose-950/25 p-3 text-[11px] leading-5 text-rose-200">
+          <strong>建玉件数の不一致：</strong> 元の資産台帳は{frame.sourceOpenCount}件ですが、取引イベントから復元した建玉は{frame.positions.length}件です。
+          建玉一覧は完全一致していません。総Gross・口座残高は元台帳の値を表示しています。
+          {(replay.terminalModelPositions?.length??0)>0&&" 元研究マニフェストには期末の未決済モデル建玉が記録されています（検証結果タブを参照）。"}
+        </p>}
+      {frame.sourcePositionAlignment==="AMBIGUOUS"&&
+        <p className="mb-3 rounded-lg border border-amber-500/40 bg-amber-950/20 p-3 text-[11px] leading-5 text-amber-200">
+          同時刻に複数の注文・決済が重なり、元台帳の{frame.sourceOpenCount}件と一致する並びが複数あります。建玉IDまでの一致は未確認です。
+        </p>}
+      {frame.sourcePositionAlignment==="MATCHED"&&
+        <p className="mb-3 text-[10px] text-emerald-300/90">元台帳の保有件数 {frame.sourceOpenCount}件と再生建玉件数が一致しています（建玉別Grossは別途証拠が必要です）。</p>}
+
       <div className="overflow-x-auto"><table className="w-full min-w-[790px] text-left text-[12px]"><thead className="bg-[#182f45] text-[#9db8cc]"><tr>{["銘柄","ロジック","方向","数量","取得価格","現在価格","含み損益※","現在Gross","Total上限比"].map(n=><th key={n} className="px-3 py-3 font-medium">{n}</th>)}</tr></thead>
       <tbody>{positions.map(p=><tr key={p.id} onClick={()=>setSelected(p.id)} className={"cursor-pointer border-t border-[#2d4456] hover:bg-[#1b354b] "+(selected===p.id?"bg-[#1b4054]":"")}>
         <td className="px-3 py-3 font-semibold text-white">{p.symbol}</td><td className="px-3 py-3 font-semibold text-cyan-300">{p.logic}</td>
@@ -504,6 +517,23 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
         ] as const).map(([name,val])=><div key={name} className={metric}><p className="mb-3 text-xs text-[#8ea7be]">{name}</p><p className="text-lg font-bold text-cyan-100">{val}</p></div>)}
       </div>
     </section>
+    {(replay.terminalModelPositions?.length??0)>0&&<section className={card+" p-4"}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-[15px] font-bold text-white">期末の未決済モデル建玉（元研究マニフェスト）</h2>
+        <span className="rounded-full border border-amber-500/40 bg-amber-950/30 px-2.5 py-1 text-[10px] text-amber-200">{replay.terminalModelPositions?.length}件 / 実約定未確認</span>
+      </div>
+      <p className="mb-3 text-xs leading-5 text-[#98b0c4]">研究期間の終了時点で保有中だったモデル建玉です。決済済みのFILLS.csvには含まれません。エントリー時Grossを現在Grossとして扱わず、数量・現在価格・期末評価損益は推測しません。</p>
+      <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left text-[11px]">
+        <thead className="bg-[#162f43] text-[#9fb7ca]"><tr>{["ロジック","通貨","方向","建玉開始","取得価格","エントリーGross","予定モデル決済","現在Gross"].map(x=><th key={x} className="px-3 py-2.5">{x}</th>)}</tr></thead>
+        <tbody>{(replay.terminalModelPositions??[]).map((p,i)=><tr key={p.symbol+"-"+p.openedAt+"-"+i} className="border-t border-[#2b4559] text-[#d5e6f4]">
+          <td className="px-3 py-3 font-semibold text-cyan-200">{p.logic}</td><td className="px-3 py-3">{p.symbol}</td>
+          <td className="px-3 py-3">{p.side}</td><td className="px-3 py-3 font-mono">{titleCase(p.openedAt)}</td>
+          <td className="px-3 py-3 font-mono">{fmt(p.entryPrice)}</td><td className="px-3 py-3 font-mono">{p.entryGrossX.toFixed(3)}x</td>
+          <td className="px-3 py-3 font-mono">{p.modeledFutureExitAt?titleCase(p.modeledFutureExitAt)+" (予定)":"未登録"}</td>
+          <td className="px-3 py-3 text-amber-200">不明</td>
+        </tr>)}</tbody>
+      </table></div>
+    </section>}
     <div className="grid gap-4 xl:grid-cols-2"><section className={card+" p-4"}><h2 className="mb-3 text-[16px] font-bold text-white">資産推移とDrawdown</h2><EquityTimelineChart frames={replay.frames} cursor={replay.frames.length-1}/></section><GrossAllocationPanel frame={replay.frames[replay.frames.length-1]} limits={replay.limits} selected={selected} onSelect={setSelected} researchManifestCap={replay.source?.grossCapEvidence==="SOURCE_SUMMARY_MATCHED_RESEARCH_ONLY"} unverifiedCap={replay.source?.grossCapEvidence==="USER_SUPPLIED_NOT_VERIFIED"}/></div>
     <section className={card+" p-4"}><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-[16px] font-bold text-white">ロジック×通貨別の検証</h2><button className="rounded-lg border border-[#3b627c] px-3 py-2 text-xs text-cyan-200" onClick={exportStrategyStats}>CSV出力</button></div>
       {(replay.strategyStats?.length??0)>0?<div className="max-h-[450px] overflow-auto"><table className="w-full min-w-[720px] text-left text-xs"><thead className="sticky top-0 bg-[#1a3249] text-[#a7bcd0]"><tr>{["ロジック","通貨","モデル取引","決済数","勝率","純損益（JPY）","単独最大損失"].map(t=><th key={t} className="p-3">{t}</th>)}</tr></thead><tbody>{[...(replay.strategyStats??[])].sort((a,b)=>(a.winRatePct??100)-(b.winRatePct??100)).map(r=><tr key={r.logic+"-"+r.symbol} className="border-t border-[#2a4357]"><td className="p-3 font-semibold text-cyan-300">{r.logic}</td><td className="p-3">{r.symbol}</td><td className="p-3">{r.tradeCount}</td><td className="p-3">{r.closedCount}</td><td className="p-3">{r.winRatePct===null?"—":r.winRatePct.toFixed(1)+"%"}</td><td className={"p-3 "+(r.netPnlJpy<0?"text-rose-300":"text-emerald-300")}>{fmt(r.netPnlJpy)}</td><td className="p-3 text-rose-300">{r.maxLossJpy===null?"—":fmt(r.maxLossJpy)}</td></tr>)}</tbody></table></div>:<p className="rounded-lg bg-[#11263a] p-6 text-sm text-[#91abc0]">研究BTのロジック×通貨別集計は未読込です。デモ画面には実測成績を生成しません。</p>}
@@ -539,6 +569,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
       <p className="mb-4 text-[11px] leading-5 text-[#92adbf]">総Grossは時点スナップショット、建玉別Grossは建玉自身の記録で別々に確認します。未取得項目を推定値で埋めません。</p>
       <div className="grid grid-cols-2 gap-3">{([
         ["総Grossの記録",coverage.framesWithSourceGross,coverage.frames],
+        ["建玉件数の時点一致",coverage.sourcePositionMatched,coverage.framesWithSourceOpenCount],
         ["BTC価格の記録",coverage.framesWithBtc,coverage.frames],
         ["建玉数量の記録",coverage.quantityKnown,coverage.positionSnapshots],
         ["建玉現在値の記録",coverage.markKnown,coverage.positionSnapshots],
@@ -550,6 +581,12 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#1b3d50]"><div className="h-full rounded-full bg-cyan-400" style={{width:total?Math.min(100,100*known/total)+"%":"0%"}}/></div>
         <p className="mt-1.5 text-[10px] text-[#8ba6b9]">{known.toLocaleString()} / {total.toLocaleString()}記録</p>
       </div>)}</div>
+      {coverage.framesWithSourceOpenCount>0&&(coverage.sourcePositionUnmatched>0||coverage.sourcePositionAmbiguous>0)&&
+        <p className="mt-3 rounded-lg border border-rose-600/35 bg-rose-950/20 p-3 text-[11px] leading-5 text-rose-200">
+          元台帳の保有件数との再生照合：不一致 {coverage.sourcePositionUnmatched.toLocaleString()}時点、
+          ID順序が曖昧 {coverage.sourcePositionAmbiguous.toLocaleString()}時点。
+          表示用取引イベントだけでは全時点の建玉を確定できません。正式BTエンジンのポジション台帳が必要です。
+        </p>}
       {coverage.positionSnapshots>0&&coverage.currentGrossKnown<coverage.positionSnapshots&&<p className="mt-3 rounded-lg border border-amber-700/35 bg-[#34291e]/50 p-3 text-[11px] leading-5 text-amber-200">現在の台帳では建玉別Grossに欠損があります。Total Grossから比例配分して補完することはできません。正規の建玉数量・現在価格・時点別Grossを追加したBTエンジン証跡が必要です。</p>}
     </section>
     </div>
