@@ -32,3 +32,15 @@ test("malformed/future evidence and external edits are preserved rather than ove
  let n=0;const changing={document:async()=>{if(++n===2)await writeFile(path,"external-edit");return lease().document();}};
  await assert.rejects(store.append(record,changing),/CAS/);assert.equal(await readFile(path,"utf8"),"external-edit");
 }));
+test("concurrent publishers sharing one lease preserve both records across store instances",async()=>fixture(async path=>{
+ await writeFile(path,JSON.stringify({schemaVersion:1,records:[]}));
+ const a=new Stable4EntryOpportunityStore(path,()=>now),b=new Stable4EntryOpportunityStore(path,()=>now);
+ await Promise.all([a.append(record,lease()),b.append({...record,positionId:"native-order-2"},lease())]);
+ assert.deepEqual((await a.read()).records.map(x=>x.positionId).sort(),["native-order-1","native-order-2"]);
+}));
+test("caller mutation during an awaited lease read cannot change captured entry evidence",async()=>fixture(async path=>{
+ await writeFile(path,JSON.stringify({schemaVersion:1,records:[]}));
+ const mutable={...record},store=new Stable4EntryOpportunityStore(path,()=>now);
+ await store.append(mutable,{document:async()=>{mutable.capturedAt=now+1;mutable.score=99;return lease().document();}});
+ assert.equal((await store.read()).records[0].capturedAt,now);assert.equal((await store.read()).records[0].score,.04);
+}));

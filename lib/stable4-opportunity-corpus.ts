@@ -29,6 +29,7 @@ export function mergeStable4OpportunityLabels(seed:readonly Stable4OpportunityLa
 }
 /** The deployed source pins reviewed bytes; an arbitrary manifest hash is insufficient. */
 export function loadStable4OpportunityCorpus(raw:Uint8Array,expectedSha256:string){
+ if(expectedSha256!==STABLE4_CORPUS_SEED_SHA256)throw Error("STABLE4_CORPUS_HASH_NOT_REVIEWED");
  if(!hash(expectedSha256)||createHash("sha256").update(raw).digest("hex")!==expectedSha256)throw Error("STABLE4_CORPUS_HASH_MISMATCH");
  let value:Record<string,any>;try{value=JSON.parse(Buffer.from(raw).toString("utf8"));}catch{throw Error("STABLE4_CORPUS_JSON_INVALID");}
  if(!object(value)||value.schema!=="disdex-stable4-opportunity-corpus/v1"||value.kind!=="RESEARCH_SHADOW_LABELS_NOT_LIVE_FILLS"||value.modelVersion!==STABLE4_OPPORTUNITY_MODEL_VERSION||

@@ -1,10 +1,12 @@
 import {randomUUID} from "node:crypto";
 import {lstat,open,readFile,rename,unlink} from "node:fs/promises";
-import {dirname} from "node:path";
+import {dirname,resolve} from "node:path";
 import {ACCOUNT_LOCK_SCHEMA,type AccountLockDocument} from "./disdex-account-order-lock";
 import {appendStable4EntryOpportunityRecord,validateStable4EntryOpportunityBook,type Stable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 
 type OwnedLease={document():Promise<AccountLockDocument>};
+// A shared lease can have multiple concurrent callers; serialize their full transactions.
+const appendQueues=new Map<string,Promise<void>>();
 /** Evidence publication only. Missing/invalid stores never become implicit empty books. */
 export class Stable4EntryOpportunityStore{
  constructor(readonly path:string,private readonly now:()=>number=Date.now){}
@@ -18,7 +20,17 @@ export class Stable4EntryOpportunityStore{
   return{book,bytes,stat:after};
  }
  async read():Promise<Stable4EntryOpportunityBook>{return(await this.snapshot()).book;}
- async append(record:Stable4EntryOpportunityRecord,lease:OwnedLease):Promise<Stable4EntryOpportunityBook>{
+ append(record:Stable4EntryOpportunityRecord,lease:OwnedLease):Promise<Stable4EntryOpportunityBook>{
+  let captured:Stable4EntryOpportunityRecord;
+  try{captured=appendStable4EntryOpportunityRecord({schemaVersion:1,records:[]},record).records[0];}catch(error){return Promise.reject(error);}
+  const absolute=resolve(this.path),key=process.platform==="win32"?absolute.toLowerCase():absolute;
+  const prior=appendQueues.get(key)??Promise.resolve();
+  const transaction=prior.then(()=>this.appendLocked(captured,lease));
+  const settled=transaction.then(()=>undefined,()=>undefined);appendQueues.set(key,settled);
+  void settled.then(()=>{if(appendQueues.get(key)===settled)appendQueues.delete(key);});
+  return transaction;
+ }
+ private async appendLocked(record:Stable4EntryOpportunityRecord,lease:OwnedLease):Promise<Stable4EntryOpportunityBook>{
   let first:AccountLockDocument|undefined;
   const check=async()=>{
    const d=await lease.document(),now=this.now();
