@@ -172,6 +172,14 @@ export interface Quality102CausalV1RunnerDependencies {
     decisionObserver?: (input: { history: Quality102CausalV1History; decisionTs: number }) => Promise<void>;
     /** Strategy learning is independent of account admission; failure blocks only new entries. */
     onlineObserver?: (input: { history: Quality102CausalV1History; decisionTs: number }) => Promise<void>;
+    /** Required for LIVE recovered UNI entries; ordinary native entries and exits are independent. */
+    recoveredEntryAdmission?: (input: {
+        signal: Quality102CausalV1Signal;
+        history: Quality102CausalV1History;
+        decisionTs: number;
+        positions: DirectPosition[];
+        lock: Quality102CausalV1LockHandle;
+    }) => Promise<{ allowed: boolean; reason: string }>;
 }
 
 function defaultLogger(): Quality102CausalV1Logger {
@@ -1720,7 +1728,22 @@ export class Quality102CausalV1Runner {
             }
             // Other runners' positions are assessed by the strict portfolio
             // admission planner below; they do not invalidate the Q102 signal.
-            const baseSignal = this.buildSignal(history, this.now(), false, false);
+            const decisionTs = this.now();
+            const baseSignal = this.buildSignal(history, decisionTs, false, false);
+            if (this.dependencies.config.mode === "LIVE"
+                && baseSignal.reason === "STABLE4_Q102_UNI_ONLINE_RECOVERY"
+                && baseSignal.symbol === "UNIUSDT" && baseSignal.side === -1) {
+                const admission = this.dependencies.recoveredEntryAdmission;
+                if (!admission) return { status: "blocked-local", message: "STABLE4_Q102_RECOVERED_ENTRY_ADMISSION_MISSING", signal: baseSignal, ordersSent: 0 };
+                try {
+                    const result = await admission({ signal: baseSignal, history, decisionTs, positions: live.positions, lock });
+                    if (result?.allowed !== true || typeof result.reason !== "string" || !result.reason.trim()) {
+                        return { status: "blocked-local", message: `STABLE4_Q102_RECOVERED_ENTRY_ADMISSION_BLOCKED:${typeof result?.reason === "string" ? result.reason : "INVALID_RESULT"}`, signal: baseSignal, ordersSent: 0 };
+                    }
+                } catch (error) {
+                    return { status: "blocked-local", message: `STABLE4_Q102_RECOVERED_ENTRY_ADMISSION_FAILED:${error instanceof Error ? error.message : String(error)}`, signal: baseSignal, ordersSent: 0 };
+                }
+            }
             let signal = baseSignal;
             if (baseSignal.side !== 0 && baseSignal.symbol) {
                 const governor = this.dependencies.config.portfolioDdGovernorPath

@@ -3,7 +3,7 @@ export interface Stable4OpportunityCandidate {
  strategy:string;symbol:string;side:"LONG"|"SHORT";route:string;entryTs:number;
  gross:number;expectedHoldHours:number;features:Record<string,number>;
 }
-export interface Stable4OpportunityLabel extends Stable4OpportunityCandidate {id:string;exitTs:number;net30:number;}
+export type Stable4OpportunityLabel=Omit<Stable4OpportunityCandidate,"gross"|"expectedHoldHours">&{id:string;exitTs:number;net30:number};
 type Stats={mean:number;pwin:number;sd:number;neff:number;n:number};
 const DAY=86400000;
 const ALLOWED=new Set(["rank","strength","margin","score","sg","state_age_h","onset_momentum90","atr","atrRatio","volumeRatio","pengu72h","btc24h","btc24","rel24","rel12","rel6","rel72","h6","h12","h24","h72","b6","b12","b24","b72","er24","pos24","rv24","brv24","ret6","ret12","ret14","ret24","ret48","ret72","return24h","return48h","return72h","entry_basis_bps","capture_basis_bps"]);
@@ -31,13 +31,16 @@ const ENTRY_SCHEMAS:Readonly<Record<string,readonly string[]>>=Object.freeze({
  V52:["capture_basis_bps","entry_basis_bps"],
  HYPE:["features.h6","features.h12","features.h24","features.h72","features.b24","features.rel24","features.er24","features.pos24","features.rv24"],
 });
+export function isStable4StrategyEntryFeature(strategy:string,key:string):boolean{
+ return ENTRY_SCHEMAS[strategy]?.includes(key)===true;
+}
 export function extractStable4StrategyEntryFeatures(strategy:string,snapshot:unknown):Record<string,number>{
  const schema=ENTRY_SCHEMAS[strategy];if(!schema)throw Error("STABLE4_OPPORTUNITY_STRATEGY_SCHEMA_UNKNOWN");
  const extracted=extractStable4EntryFeatures(snapshot);
  return Object.fromEntries(schema.filter(k=>finite(extracted[k])).map(k=>[k,extracted[k]]));
 }
-function validate(x:Stable4OpportunityCandidate){
- if(!x||![x.strategy,x.symbol,x.route].every(s=>typeof s==="string"&&s.length>0)||!["LONG","SHORT"].includes(x.side)||!Number.isSafeInteger(x.entryTs)||x.entryTs<=0||!finite(x.gross)||x.gross<=0||!finite(x.expectedHoldHours)||x.expectedHoldHours<=0)throw Error("STABLE4_OPPORTUNITY_CANDIDATE_INVALID");
+function validateIdentity(x:Omit<Stable4OpportunityCandidate,"gross"|"expectedHoldHours">){
+ if(!x||![x.strategy,x.symbol,x.route].every(s=>typeof s==="string"&&s.length>0)||!["LONG","SHORT"].includes(x.side)||!Number.isSafeInteger(x.entryTs)||x.entryTs<=0)throw Error("STABLE4_OPPORTUNITY_CANDIDATE_INVALID");
  if(!x.features||typeof x.features!=="object"||Array.isArray(x.features)||Object.values(x.features).some(v=>!finite(v)))throw Error("STABLE4_OPPORTUNITY_FEATURE_INVALID");
 }
 function stats(values:{w:number;y:number}[]):Stats|undefined{
@@ -63,8 +66,9 @@ function neighbors(c:Stable4OpportunityCandidate,pool:Stable4OpportunityLabel[])
  return near.length>=5?stats(near.slice(0,12)):undefined;
 }
 export function scoreStable4Opportunity(candidate:Stable4OpportunityCandidate,labels:readonly Stable4OpportunityLabel[]){
- validate(candidate);
- for(const r of labels){validate(r);if(!Number.isSafeInteger(r.exitTs)||r.exitTs<=r.entryTs||!finite(r.net30))throw Error("STABLE4_OPPORTUNITY_LABEL_CHRONOLOGY_OR_RETURN_INVALID");}
+ validateIdentity(candidate);
+ if(!finite(candidate.gross)||candidate.gross<=0||!finite(candidate.expectedHoldHours)||candidate.expectedHoldHours<=0)throw Error("STABLE4_OPPORTUNITY_CANDIDATE_INVALID");
+ for(const r of labels){validateIdentity(r);if(!Number.isSafeInteger(r.exitTs)||r.exitTs<=r.entryTs||!finite(r.net30))throw Error("STABLE4_OPPORTUNITY_LABEL_CHRONOLOGY_OR_RETURN_INVALID");}
  const pool=labels.filter(r=>r.strategy===candidate.strategy&&r.side===candidate.side&&r.exitTs<candidate.entryTs).sort((a,b)=>a.entryTs-b.entryTs||(a.id<b.id?-1:a.id>b.id?1:0));
  const base=weighted(pool,candidate.entryTs),route=shrink(weighted(pool.filter(r=>r.route===candidate.route),candidate.entryTs),base),symbol=shrink(weighted(pool.filter(r=>r.symbol===candidate.symbol),candidate.entryTs),base),knn=shrink(neighbors(candidate,pool),base);
  const components:Record<string,Stats>={},used:{s:Stats;w:number}[]=[];
