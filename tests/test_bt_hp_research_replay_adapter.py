@@ -57,6 +57,14 @@ class ReplayAdapterTests(unittest.TestCase):
         self.assertEqual(out["frames"][2]["btc"],125)
         self.assertEqual(len(out["btcCandles"]),2)
         self.assertTrue(out["source"]["btcCandlesSha256"])
+    def test_catalog_never_claims_current_latest_pin(self):
+        fills=self.fills()
+        out=convert(Source(self.equity(),fills,None),dict(total=3.5,crypto=3,stock=1.5))
+        catalog=out["strategyCatalog"]
+        self.assertEqual([entry["logic"] for entry in catalog],["V4"])
+        self.assertEqual(catalog[0]["status"],"RESEARCH_SOURCE_UNVERIFIED")
+        self.assertEqual(catalog[0]["trades"],1)
+
     def test_bad_gross_is_rejected(self):
         with self.assertRaisesRegex(ValueError,"Gross"):
             convert(Source(self.equity(bad_gross=True),self.fills(),None),dict(total=3.5,crypto=3,stock=1.5))

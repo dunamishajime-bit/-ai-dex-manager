@@ -101,6 +101,31 @@ def prepare(source: Source):
     timeline.sort(key=lambda x:(x[0],x[1]))
     return fills,timeline
 
+def research_strategy_catalog(fills_path:Path) -> list[dict]:
+    catalog:dict[str,dict]={}
+    for row in read_rows(fills_path):
+        logic=row.get("strategy","").strip()
+        if not logic:raise ValueError("Fill without strategy name")
+        if logic not in catalog:
+            catalog[logic]={"logic":logic,"trades":0,"sourceRuntimeShas":set(),
+                            "modelClasses":set(),"routesSet":set(),"symbolsSet":set(),
+                            "status":"RESEARCH_SOURCE_UNVERIFIED"}
+        item=catalog[logic]
+        item["trades"]+=1
+        if row.get("source_runtime_sha"):item["sourceRuntimeShas"].add(row["source_runtime_sha"])
+        if row.get("model_class"):item["modelClasses"].add(row["model_class"])
+        if row.get("route"):item["routesSet"].add(row["route"])
+        if row.get("symbol"):item["symbolsSet"].add(row["symbol"])
+    result=[]
+    for logic in sorted(catalog):
+        item=catalog[logic]
+        result.append({"logic":logic,"trades":item["trades"],
+                       "sourceRuntimeShas":sorted(item["sourceRuntimeShas"]),
+                       "modelClasses":sorted(item["modelClasses"]),
+                       "routes":len(item["routesSet"]),"symbols":len(item["symbolsSet"]),
+                       "status":"RESEARCH_SOURCE_UNVERIFIED"})
+    return result
+
 def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, max_frames:int=50000) -> dict:
     fills,events=prepare(source)
     candles=load_btc_candles(source.btc_candles)
@@ -171,7 +196,8 @@ def convert(source:Source, limits:dict[str,float], *, interval_minutes:int=60, m
         "limits":limits,
         "source":manifest,
         "frames":frames,
-        "btcCandles":candles
+        "btcCandles":candles,
+        "strategyCatalog":research_strategy_catalog(source.fills)
     }
 
 def main(argv=None)->int:

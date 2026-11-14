@@ -38,6 +38,15 @@ export type ReplayFrame = {
   events: string[];
   gross?: GrossSnapshot;
 };
+export type StrategyCatalogEntry = {
+  logic: string;
+  trades: number;
+  sourceRuntimeShas: string[];
+  modelClasses: string[];
+  routes: number;
+  symbols: number;
+  status: "RESEARCH_SOURCE_UNVERIFIED" | "CANONICAL_PIN_VERIFIED";
+};
 export type Replay = {
   schema: "disdex-bt-portfolio-v1";
   mode: "DEMO" | "EXTERNAL";
@@ -45,6 +54,7 @@ export type Replay = {
   seed: number;
   frames: ReplayFrame[];
   btcCandles?: BtcCandle[];
+  strategyCatalog?: StrategyCatalogEntry[];
   limits: { total: number; crypto: number; stock: number };
   source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; grossCapEvidence?: string; note?: string };
 };
@@ -105,6 +115,20 @@ export function validateReplay(value:unknown):value is Replay {
   if(!isObj(limits))return false;
   if(!(["total","crypto","stock"] as const).every(k=>number(limits[k]) && (limits[k] as number)>0 && (limits[k] as number)<100))return false;
   if(!Array.isArray(value.frames) || value.frames.length<1 || value.frames.length>50000)return false;
+  if(value.strategyCatalog!==undefined){
+    if(!Array.isArray(value.strategyCatalog)||value.strategyCatalog.length>1000)return false;
+    const seen=new Set<string>();
+    for(const entry of value.strategyCatalog){
+      if(!isObj(entry)||typeof entry.logic!=="string"||!entry.logic||entry.logic.length>80||seen.has(entry.logic))return false;
+      seen.add(entry.logic);
+      if(!number(entry.trades)||entry.trades<0||!number(entry.routes)||entry.routes<0||!number(entry.symbols)||entry.symbols<0)return false;
+      if(entry.status!=="RESEARCH_SOURCE_UNVERIFIED"&&entry.status!=="CANONICAL_PIN_VERIFIED")return false;
+      for(const key of ["sourceRuntimeShas","modelClasses"]){
+        const values=entry[key];
+        if(!Array.isArray(values)||values.length>100||values.some(v=>typeof v!=="string"||v.length>250))return false;
+      }
+    }
+  }
   if(value.btcCandles!==undefined){
     if(!Array.isArray(value.btcCandles)||value.btcCandles.length>20000)return false;
     let previousClose="";

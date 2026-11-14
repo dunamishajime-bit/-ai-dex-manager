@@ -61,3 +61,12 @@ Research-replay diagnostic (not canonical/verified):
 - Mobile BottomNav includes a BT検証 link and horizontal overflow scrolling instead of shrinking every item to unreadable widths.
 - Post-change TypeScript typecheck PASS and Next.js 16 production build PASS (route /bt-verification generated).
 - No production deployment was made.
+
+
+## Source-derived strategy registry
+
+- The read-only adapter emits strategyCatalog from the input research model fills. The catalog includes logic name, model-fill count, recorded source runtime commit SHA(s), model class, route count and symbol count.
+- Each entry is deliberately flagged RESEARCH_SOURCE_UNVERIFIED; the source SHA is neither the latest LIVE pin nor evidence that present-day fully validated settings match the research replay.
+- The BT page displays these pinned references separately and derives the add/remove dropdown options from the loaded replay's logic/position catalog rather than an older hard-coded universe.
+- Five Python adapter tests PASS; TypeScript typecheck (both project configurations) PASS. Representative 10bps research export contains 7 recorded logic families. Replay JSON SHA256 on the local PC is 117806620b399f165331af144cb02274395328ca2ffd467e3acce01dd796aa56.
+- Outstanding: Verify all current production and latest research SHA sets, logic economic parameters and canonical backtest parity before marking any source pin as canonical or enabling new backtest execution from the HP page.
