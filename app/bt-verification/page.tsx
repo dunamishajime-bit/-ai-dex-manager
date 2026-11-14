@@ -506,6 +506,14 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
     <section className={card+" p-5"}>
       <div className="mb-4 flex items-center justify-between gap-2"><h2 className="flex items-center gap-2 text-[17px] font-bold text-white"><BarChart3 className="h-5 w-5 text-cyan-300"/>BT検証結果</h2><span className="text-xs text-amber-200">{sourceLabel}</span></div>
       <p className="mb-4 text-[12px] text-[#93aabd]">{replay.researchSummary?"研究BTマニフェストの集計結果です。最新LIVE・署名済み実約定の証明ではありません。":"デモには検証済み成績がありません。現在の画面は合成データの可視化です。"}</p>
+      {verifiedResearch?.sourceCase==="STABLE4_OPPORTUNITY_PROD_CAPS_20261114_GROSS_CAPTURE_V1"&&
+        <div role="status" className="mb-4 border-l-2 border-amber-500/70 pl-3 text-[12px] leading-6 text-[#c9b99e]">
+          <strong className="text-amber-200">HYPE実装差分（確認済み）：</strong>
+          この研究BTのHYPEは48時間の研究用H48R4ルート・モデル取引5件です。
+          現行HYPE TREND入口関数を過去の確定H1足で再実行した候補は78件で、
+          H48R4研究5件との同時刻発火は0件でした。
+          研究結果を現行HYPEの勝率・実約定・損益として扱うことはできません。
+        </div>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {([
           ["開始資金","¥ "+fmt(replay.researchSummary?.initialJpy??initialEquity)],
