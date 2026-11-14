@@ -33,6 +33,14 @@ export function evaluateStable4HypeSignal(input:{now:number;btc1h:readonly Stabl
   const rows=hype.filter(x=>btcByTs.has(x.ts));
   if(rows.length<25)return reject("STABLE4_HYPE_INSUFFICIENT_H1");
   const last=rows.at(-1)!;
+  // Intersecting histories must not turn 12/24 hourly observations into a
+  // longer horizon. Validate both complete windows before using row offsets.
+  for(const series of [btc,hype]){
+    const window=series.filter(x=>x.ts>=last.ts-24*HOUR&&x.ts<=last.ts);
+    if(new Set(window.map(x=>x.ts)).size!==window.length)return reject("STABLE4_HYPE_DUPLICATE_H1");
+    if(window.length!==25||window.some((x,i)=>x.ts!==last.ts-(24-i)*HOUR))return reject("STABLE4_HYPE_NONCONTIGUOUS_H1");
+    if(window.some(x=>![x.ts,x.open,x.high,x.low,x.close].every(Number.isFinite)||x.open<=0||x.close<=0||x.low<=0||x.high<Math.max(x.open,x.close)||x.low>Math.min(x.open,x.close)))return reject("STABLE4_HYPE_INVALID_H1");
+  }
   const index=rows.length-1;
   const entryTs=last.ts+HOUR;
   if(entryTs%SIX_HOURS!==0)return reject("STABLE4_HYPE_NOT_6H_ENTRY_BOUNDARY");
