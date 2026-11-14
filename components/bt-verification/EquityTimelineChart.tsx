@@ -22,7 +22,9 @@ export function EquityTimelineChart({ frames, cursor }: { frames: ReplayFrame[];
   const top = 20;
   const bottom = 183;
   const y = (v: number) => bottom - ((v - lower) / (upper - lower)) * (bottom - top);
-  const x = (i: number) => left + i * (right - left) / Math.max(1, visible.length - 1);
+  // Keep the horizontal time axis FIXED to the chosen replay duration.
+  // Previously the entire curve was stretched and shifted on every tick.
+  const x = (i: number) => left + i * (right - left) / Math.max(1, frames.length - 1);
   const plot: { index: number; value: number }[] = [];
   const stride = Math.max(1, Math.ceil(visible.length / 260));
   for (let from = 0; from < visible.length; from += stride) {
@@ -37,6 +39,11 @@ export function EquityTimelineChart({ frames, cursor }: { frames: ReplayFrame[];
   if (plot.length === 0 || plot[0].index !== 0) plot.unshift({index:0,value:equities[0]});
   if (plot[plot.length - 1].index !== visible.length - 1) plot.push({index:visible.length - 1,value:current});
   const path = plot.map(p => x(p.index).toFixed(2) + "," + y(p.value).toFixed(2)).join(" ");
+  const areaPath="M "+left+" "+bottom+" L "+
+    plot.map(p => x(p.index).toFixed(2) + " " + y(p.value).toFixed(2)).join(" L ")+
+    " L "+x(visible.length-1).toFixed(2)+" "+bottom+" Z";
+  const progress=(visible.length-1)/Math.max(1,frames.length-1);
+
   let peak = -Infinity, maxDrawdown = 0;
   for (const equity of equities) {
     peak = Math.max(peak, equity);
@@ -50,7 +57,13 @@ export function EquityTimelineChart({ frames, cursor }: { frames: ReplayFrame[];
         {money(current)}（{delta < 0 ? "" : "+"}{money(delta)}）
       </strong>
     </div>
-    <svg viewBox={"0 0 " + width + " 225"} role="img" aria-label="時点同期の評価資産曲線。これまでの最小値、最大値と現在値を表示" className="w-full rounded-lg bg-[#071524]">
+    <svg viewBox={"0 0 " + width + " 225"} role="img" aria-label="時点同期の評価資産曲線。これまでの最小値、最大値と現在値を表示" className="w-full rounded-xl border border-[#284459] bg-[#071827]">
+      <defs><linearGradient id="bt-equity-area-fill" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stopColor="#21d9c6" stopOpacity=".25"/>
+        <stop offset=".85" stopColor="#21d9c6" stopOpacity=".015"/>
+      </linearGradient></defs>
+      <rect x="76" y="19" width={right-left} height={bottom-top+2} fill="#0c2433" fillOpacity=".36"/>
+
       {[0,1,2,3,4].map(i => {
         const value = upper - (upper-lower)*i/4, yy = top+(bottom-top)*i/4;
         return <g key={i}>
@@ -59,8 +72,18 @@ export function EquityTimelineChart({ frames, cursor }: { frames: ReplayFrame[];
         </g>;
       })}
       {lower <= start && start <= upper && <line x1={left} x2={right} y1={y(start)} y2={y(start)} stroke="#8fa1bb" strokeDasharray="4 4"/>}
-      <polyline points={path} fill="none" stroke={delta >= 0 ? "#2dd4bf" : "#fb7185"} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
-      <circle cx={x(visible.length-1)} cy={y(current)} r="4.5" fill={delta >= 0 ? "#2dd4bf" : "#fb7185"} />
+      <path d={areaPath} fill="url(#bt-equity-area-fill)" />
+      <polyline points={path} fill="none" stroke={delta >= 0 ? "#2dd4bf" : "#fb7185"} strokeWidth="2.1" strokeLinejoin="round" strokeLinecap="round"/>
+      <line x1={x(visible.length-1)} x2={x(visible.length-1)} y1={top} y2={bottom} stroke="#2ac8c1" strokeDasharray="3 4" strokeWidth=".75" opacity=".5"
+        style={{transition:"x1 120ms ease-out,x2 120ms ease-out"}}/>
+      <circle cx={x(visible.length-1)} cy={y(current)} r="7" fill={delta>=0?"#2dd4bf":"#fb7185"} fillOpacity=".22"
+        style={{transition:"cx 120ms ease-out,cy 120ms ease-out"}}/>
+      <circle cx={x(visible.length-1)} cy={y(current)} r="3.7" stroke="#bafaf1" strokeWidth="1" fill={delta >= 0 ? "#2dd4bf" : "#fb7185"}
+        style={{transition:"cx 120ms ease-out,cy 120ms ease-out"}}/>
+      <rect x={left} y="192" width={right-left} height="2" rx="1" fill="#264456"/>
+      <rect x={left} y="192" width={Math.max(0,(right-left)*progress)} height="2" rx="1" fill="#27d3c6"
+        style={{transition:"width 120ms ease-out"}}/>
+
       <text x={left} y="213" fontSize="11" fill="#94a3b8">{visible[0].timestamp.slice(0,16)} UTC</text>
       <text x={right} y="213" textAnchor="end" fontSize="11" fill="#94a3b8">{visible[visible.length-1].timestamp.slice(0,16)} UTC</text>
     </svg>

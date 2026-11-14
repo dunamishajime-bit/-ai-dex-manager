@@ -28,13 +28,25 @@ type ServerRun={id:string;name:string;createdAt:string;frames:number;mode:string
 const [serverRuns,setServerRuns]=useState<ServerRun[]>([]);
 const [serverNotice,setServerNotice]=useState("");
 const [runName,setRunName]=useState("BT-"+new Date().toISOString().slice(0,10)),[savedRuns,setSavedRuns]=useState<SavedRun[]>([]),[savedNotice,setSavedNotice]=useState("");
-const [logicFilter,setLogicFilter]=useState<string[]>(["V4","V12","PENGU","V52","Q102","HYPE","FET","IDLE"]),[symbolFilter,setSymbolFilter]=useState<string[]>(["BTC","ETH","SOL","DOGE","AVAX","PENGU","FET","HYPE","NEAR","AMZN"]);
-useEffect(()=>{if(!running)return;const t=setInterval(()=>setCursor(i=>Math.min(i+Math.max(1,Math.floor(speed*replay.frames.length/1200)),replay.frames.length-1)),Math.max(60,800/speed));return()=>clearInterval(t)},[running,speed,replay.frames.length]);
+const [logicFilter,setLogicFilter]=useState<string[]>(["DEMO_V4","DEMO_PENGU","DEMO_Q102"]),[symbolFilter,setSymbolFilter]=useState<string[]>(["BTC"]);
+useEffect(()=>{
+ if(!running)return;
+ // DEMO: show intermediate 5-minute price ticks instead of skipping whole candles.
+ // Accelerated modes only change presentation cadence, never strategy evaluation.
+ const demo=replay.mode==="DEMO";
+ const delay=demo?(speed===1?90:speed===5?58:40):Math.max(60,800/speed);
+ const step=demo?(speed===20?3:speed===5?2:1):
+   Math.max(1,Math.floor(speed*replay.frames.length/1200));
+ const t=setInterval(()=>setCursor(i=>Math.min(i+step,replay.frames.length-1)),delay);
+ return()=>clearInterval(t);
+},[running,speed,replay.mode,replay.frames.length]);
 useEffect(()=>{listRuns().then(setSavedRuns).catch(()=>setSavedNotice("保存ライブラリを利用できません"))},[]);
 useEffect(()=>{if(cursor===replay.frames.length-1)setRunning(false)},[cursor,replay.frames.length]);
 const catalogs=useMemo(()=>{
-  const allLogics=new Set<string>(replay.mode==="DEMO"?["V4","V12","PENGU","V52","Q102","HYPE","FET","IDLE"]:[]);
-  const allSymbols=new Set<string>(replay.mode==="DEMO"?["BTC","ETH","SOL","DOGE","AVAX","PENGU","FET","HYPE","NEAR","AMZN"]:[]);
+  // Only expose symbols/strategies present in the actual selected replay.
+  // A synthetic BTC demo must never advertise real exchange symbols as simulated.
+  const allLogics=new Set<string>();
+  const allSymbols=new Set<string>();
   for(const item of replay.strategyCatalog??[]) allLogics.add(item.logic);
   for(const f of replay.frames)for(const p of f.positions){allLogics.add(p.logic);allSymbols.add(p.symbol)}
   return {logics:[...allLogics].sort(),symbols:[...allSymbols].sort()};
@@ -58,6 +70,12 @@ let peak=-Infinity,maxDrawdown=0;
 for(let i=0;i<=cursor;i++){const value=replay.frames[i].equity;peak=Math.max(peak,value);if(peak>0)maxDrawdown=Math.min(maxDrawdown,100*(value/peak-1))}
 const isResearch=replay.mode==="EXTERNAL";
 const sourceLabel=isResearch?"研究データ・未認証":"模擬再生・デモ";
+const signalState=frame.demoSignals??[];
+const activeCandlestick=frame.formingBtcCandle;
+const currentCrossings=signalState.filter(x=>x.crossed);
+const firedCount=replay.mode==="DEMO"?replay.frames.slice(0,cursor+1).reduce(
+  (sum,f)=>sum+(f.demoSignals?.filter(x=>x.fired).length??0),0):null;
+
 const titleCase=(s:string)=>s.replace("T"," ").replace("Z"," UTC");
 function prepareDemo(){
   const demo=createPreviewReplay(previewSeed,scenario);
@@ -307,7 +325,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
       <div className="ml-auto flex items-center gap-2 rounded-lg border border-[#35516c] bg-[#0a192b] px-3 py-2 text-[12px] text-[#c7dae9]"><Clock3 className="h-4 w-4 text-cyan-300"/> {titleCase(frame.timestamp)}</div>
       <label className="w-full"><span className="sr-only">BT再生時刻</span><input type="range" min={0} max={replay.frames.length-1} value={cursor} aria-label="BT再生時刻" onChange={e=>{setRunning(false);setCursor(Number(e.target.value))}} className="w-full cursor-pointer accent-cyan-400"/></label>
     </section>
-    <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 2xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-6">
       {([
         ["現在残高","¥ "+fmt(frame.equity),(changePct>=0?"+":"")+changePct.toFixed(2)+"%",changePct>=0?"text-emerald-300":"text-rose-300"],
         ["開始からの増減","¥ "+fmt(equityChange),(changePct>=0?"+":"")+changePct.toFixed(2)+"%","text-cyan-200"],
@@ -319,13 +337,47 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
     </div>
     <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1.75fr)_minmax(310px,.85fr)]">
       <section className={card+" min-w-0 p-4"}>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="flex items-center gap-2 text-[16px] font-bold text-white"><Activity className="h-5 w-5 text-cyan-300"/>BTC / USDT（代表チャート）</h2><span className="text-[11px] text-[#a7becd]">1時間確定足・モデル発火マーカー</span></div>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="flex items-center gap-2 text-[16px] font-bold text-white"><Activity className="h-5 w-5 text-cyan-300"/>BTC / USDT（代表チャート）</h2><span className="text-[11px] text-[#a7becd]">{replay.mode==="DEMO"?"5分刻みで1時間足が形成・模擬判定":"1時間確定足・研究モデルの発火マーカー"}</span></div>
         {(replay.btcCandles?.length??0)>0?<BtcCandlestickChart replay={replay} cursor={cursor} onEventSelect={(at,label)=>{setRunning(false);setCursor(at);setSelectedEvent(label)}}/>:<div className="rounded-lg border border-dashed border-[#38546b] p-10 text-center text-[#8ea6ba]">確定済BTCローソク足を読み込むと表示されます。</div>}
       </section>
+      <div className="min-w-0 space-y-4">
+        {replay.mode==="DEMO"&&<section className={card+" overflow-hidden"}>
+          <div className="flex items-center justify-between border-b border-[#2c4e61] px-4 py-3">
+            <div><h2 className="text-[15px] font-bold text-white">価格連動・模擬発火Gate</h2>
+              <p className="mt-1 text-[10px] text-[#8ea9c1]">確定済み1時間足 + 現在の5分価格だけで判定</p></div>
+            <div className="rounded-lg border border-[#206879] bg-[#0e3d47] px-2.5 py-1.5 text-right">
+              <span className="block text-[10px] text-[#9fbecb]">累計発火</span>
+              <span className="font-mono text-[16px] font-bold text-cyan-100">{firedCount}</span>
+            </div>
+          </div>
+          <div className="space-y-2 p-3">{signalState.map(signal=><div key={signal.logic}
+            className={"rounded-xl border px-3 py-2.5 transition-colors duration-150 "+(signal.fired?
+              "border-emerald-400/55 bg-emerald-800/20":signal.crossed?"border-amber-500/40 bg-amber-900/10":"border-[#29455a] bg-[#0a2133]/80")}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[12px] font-bold text-[#d4eaf7]">{signal.logic.replace("DEMO_","")}</span>
+                <span className={"rounded px-1.5 py-0.5 text-[10px] "+(signal.side==="LONG"?"bg-emerald-900/40 text-emerald-300":"bg-rose-900/40 text-rose-300")}>{signal.side}</span>
+              </div>
+              <span className={"rounded-md px-2 py-1 text-[10px] font-bold "+(signal.fired?
+                "bg-emerald-500/25 text-emerald-200":signal.crossed?"bg-amber-600/20 text-amber-200":"bg-[#21374b] text-[#8ea8bd]")}>
+                {signal.fired?"● 発火":signal.crossed?"△ ゲート通過・見送り":"― 未発火"}
+              </span>
+            </div>
+            <div className="mt-2 flex flex-wrap justify-between gap-1 font-mono text-[11px]">
+              <span className="text-[#8faabe]">基準 {signal.direction==="ABOVE"?">":"<"} {signal.threshold===null?"確定足待ち":fmt(signal.threshold)}</span>
+              <span className="text-[#bde7e7]">現在 {fmt(signal.price)}</span>
+            </div>
+            <div className="mt-1.5 text-[10px] text-[#8ca6b9]">{signal.note}</div>
+          </div>)}</div>
+          <p className="border-t border-[#29465a] px-3 py-2 text-[10px] leading-5 text-amber-200/90">
+            V4・PENGU・Q102を模したデモ専用Gateです。現行本番ロジックの判定条件ではありません。
+          </p>
+        </section>}
       <section className={card+" min-w-0 overflow-hidden"}>
         <div className="flex items-center justify-between border-b border-[#30485e] px-4 py-3"><h2 className="text-[15px] font-bold text-white">取引イベント（時点同期）</h2><select aria-label="イベント種別" value={eventFilter} onChange={e=>setEventFilter(e.target.value as typeof eventFilter)} className="rounded-md border border-[#426078] bg-[#172d44] px-2 py-1 text-[11px]"><option value="TRADES">売買</option><option value="RISK">リスク</option><option value="FUNDING">Funding</option><option value="ALL">全て</option></select></div>
         <div className="max-h-[415px] min-h-[285px] overflow-y-auto">{recentEvents.length?recentEvents.map((e,i)=><button type="button" key={e.index+"-"+i} onClick={()=>{setRunning(false);setCursor(e.index);setSelectedEvent(e.event)}} className="flex w-full items-start gap-3 border-b border-[#263b50] px-4 py-3 text-left hover:bg-[#1b3349]"><span className={"mt-1 h-2.5 w-2.5 shrink-0 rounded-full "+(e.event.includes("EXIT")?"bg-emerald-400":e.event.includes("PARTIAL")?"bg-violet-400":"bg-cyan-400")}/><span className="min-w-0"><span className="block text-[11px] text-[#87a3bc]">{e.timestamp.slice(5,16).replace("T"," ")}</span><span className="mt-1 block break-all text-[12px] leading-5 text-[#d6e4f1]">{e.event}</span></span></button>):<p className="p-6 text-sm text-[#87a0b9]">この時点までにイベントはありません。</p>}</div>
       </section>
+      </div>
     </div>
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,.94fr)]">
       <section className={card+" min-w-0 p-4"}><h2 className="mb-3 flex items-center gap-2 text-[16px] font-bold text-white"><BarChart3 className="h-5 w-5 text-cyan-300"/>エクイティカーブ（資産推移）</h2><EquityTimelineChart frames={replay.frames} cursor={cursor}/></section>

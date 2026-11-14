@@ -32,6 +32,16 @@ export type BtcCandle = {
   low: number;
   close: number;
 };
+export type DemoSignal = {
+  logic: string;
+  side: "LONG" | "SHORT";
+  direction: "ABOVE" | "BELOW";
+  price: number;
+  threshold: number | null;
+  crossed: boolean;
+  fired: boolean;
+  note: string;
+};
 export type ReplayFrame = {
   timestamp: string;
   btc: number | null;
@@ -40,6 +50,10 @@ export type ReplayFrame = {
   positions: Position[];
   events: string[];
   gross?: GrossSnapshot;
+  /** Synthetic-only, causal current-hour OHLC built from ticks observed so far. */
+  formingBtcCandle?: BtcCandle;
+  /** Synthetic-only threshold checks recorded at this exact tick. */
+  demoSignals?: DemoSignal[];
 };
 export type StrategyCatalogEntry = {
   logic: string;
@@ -194,6 +208,26 @@ export function validateReplay(value:unknown):value is Replay {
     if(!number(frame.equity)||!number(frame.realized)||!Array.isArray(frame.positions)||frame.positions.length>300)return false;
     if(!Array.isArray(frame.events)||frame.events.length>500||frame.events.some((e:unknown)=>typeof e!=="string"||e.length>600))return false;
     if(frame.gross!==undefined && !validGross(frame.gross))return false;
+    if(frame.formingBtcCandle!==undefined){
+      const c=frame.formingBtcCandle;
+      if(value.mode!=="DEMO"||!isObj(c)||!date(c.time)||!date(c.closedAt)||
+        c.time>=frame.timestamp||c.closedAt<=frame.timestamp||!number(c.open)||!number(c.high)||
+        !number(c.low)||!number(c.close)||c.open<=0||c.low<=0||
+        c.low>Math.min(c.open,c.close)||c.high<Math.max(c.open,c.close)||
+        frame.btc!==c.close)return false;
+    }
+    if(frame.demoSignals!==undefined){
+      if(value.mode!=="DEMO"||!Array.isArray(frame.demoSignals)||frame.demoSignals.length>16)return false;
+      for(const item of frame.demoSignals){
+        if(!isObj(item)||typeof item.logic!=="string"||item.logic.length>80||
+          (item.side!=="LONG"&&item.side!=="SHORT")||
+          (item.direction!=="ABOVE"&&item.direction!=="BELOW")||
+          !number(item.price)||(item.threshold!==null&&!number(item.threshold))||
+          typeof item.crossed!=="boolean"||typeof item.fired!=="boolean"||
+          (item.fired&&!item.crossed)||typeof item.note!=="string"||item.note.length>160||
+          item.price!==frame.btc)return false;
+      }
+    }
     const ids=new Set<string>();
     for(const p of frame.positions){
       if(!validPosition(p)||ids.has(p.id))return false;

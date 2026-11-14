@@ -20,7 +20,7 @@ export function BTWorkspaceShell({
   children:ReactNode;
   sourceStatus:string;
 }){
-  return <div className="flex min-h-dvh w-full bg-[#081321] text-[#dae8f5] selection:bg-cyan-400/30">
+  return <div className="flex min-h-dvh w-full bg-[radial-gradient(ellipse_at_75%_-6%,#123044_0%,#081321_44%,#07111e_100%)] text-[#dae8f5] selection:bg-cyan-400/30">
     <aside className="sticky top-0 hidden h-dvh w-[218px] shrink-0 flex-col border-r border-[#213346] bg-[linear-gradient(180deg,#101d30_0%,#0c192b_53%,#081525_100%)] md:flex">
       <div className="flex h-[70px] items-center gap-3 border-b border-[#223348] px-5">
         <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10"><Activity className="h-5 w-5 text-cyan-300"/></span>
