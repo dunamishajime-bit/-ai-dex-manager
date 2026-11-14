@@ -152,6 +152,14 @@ jobs:
           set +a
           export DISDEX_RELEASE_SHA=$SHA
           export DISDEX_RUNTIME_COMMIT_SHA=$SHA
+          ESBUILD_SRC="$RELEASE/node_modules/@esbuild/linux-x64/bin/esbuild"
+          ESBUILD_TMP="/var/tmp/disdex-stable4-esbuild-$$"
+          test -f "$ESBUILD_SRC"
+          install -o deploy -g deploy -m 0755 "$ESBUILD_SRC" "$ESBUILD_TMP"
+          trap 'rm -f "$ESBUILD_TMP"' EXIT
+          export ESBUILD_BINARY_PATH="$ESBUILD_TMP"
+          echo "ASTER_PROOF_ESBUILD_SRC=$(stat -c '%a:%U:%G' "$ESBUILD_SRC")"
+          echo "ASTER_PROOF_ESBUILD_TMP=$(stat -c '%a:%U:%G' "$ESBUILD_TMP")"
           runuser -u deploy --preserve-environment -- /usr/bin/node \
             --import "$RELEASE/node_modules/tsx/dist/loader.mjs" --input-type=module - <<NODE
           import { AsterV3Client } from "file://$RELEASE/lib/aster-v3-client.ts";
