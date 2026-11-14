@@ -6,6 +6,7 @@ const H=3600000,M=300000;
 export interface Stable4ShadowOutcomeInput {
  entryTs:number;entryPrice:number;side:"LONG"|"SHORT";family:string;hardStop:number;maxHoldHours:number;
  exitPolicy:"FIXED_HOLD_STOP"|"HIGH_VOL_TRAIL72"|"STABLE4_STOP5_TP3_H24";now:number;
+ dataThrough?:number;
  fiveMinute:readonly Quality102Candle[];hourly:readonly Quality102Candle[];
  boundaryOpen?:{timestampMs:number;open:number};
  funding:{from:number;through:number;capturedAt:number;rows:readonly{fundingTime:number;fundingRate:number}[]};
@@ -24,7 +25,9 @@ function series(rows:readonly Quality102Candle[],interval:number,now:number,labe
 /** Research shadow labels only. This never values or settles actual venue fills. */
 export function modelStable4Q102Outcome(x:Stable4ShadowOutcomeInput):Stable4ShadowOutcome|undefined{
  if(!Number.isSafeInteger(x.entryTs)||x.entryTs<=0||x.entryTs%H!==0||!Number.isSafeInteger(x.now)||x.now<x.entryTs||!Number.isFinite(x.entryPrice)||x.entryPrice<=0||!Number.isFinite(x.hardStop)||x.hardStop<=0||x.hardStop>=1||!Number.isFinite(x.maxHoldHours)||x.maxHoldHours<=0||!["LONG","SHORT"].includes(x.side))throw Error("STABLE4_SHADOW_CONTRACT_INVALID");
- const m5=series(x.fiveMinute,M,x.now,"M5"),h1=series(x.hourly,H,x.now,"H1");
+ const cutoff=x.dataThrough??x.now;
+ if(!Number.isSafeInteger(cutoff)||cutoff>x.now||cutoff<x.entryTs)throw Error("STABLE4_SHADOW_DATA_CUTOFF_INVALID");
+ const m5=series(x.fiveMinute,M,cutoff,"M5"),h1=series(x.hourly,H,cutoff,"H1");
  const long=x.side==="LONG",deadline=x.entryTs+x.maxHoldHours*H;
  const finish=(exitTs:number,exitPrice:number,exitReason:string):Stable4ShadowOutcome=>{
   const f=x.funding;
@@ -45,8 +48,8 @@ export function modelStable4Q102Outcome(x:Stable4ShadowOutcomeInput):Stable4Shad
  };
  if(x.exitPolicy==="HIGH_VOL_TRAIL72"){
   const bars:Quality102Candle[]=[];
-  for(let t=x.entryTs;t<Math.min(deadline,x.now);t+=H){
-   if(t+H>x.now)break;
+  for(let t=x.entryTs;t<Math.min(deadline,cutoff);t+=H){
+   if(t+H>cutoff)break;
    const bar=h1.get(t);if(!bar)throw Error("STABLE4_H1_GAP");bars.push(bar);
    const adopted=evaluateQ102HighVolLongH1Loss({family:"HIGH_VOL",side:x.side,entryTs:x.entryTs,entryPrice:x.entryPrice,now:t+H,candles:bars});
    try{
@@ -62,14 +65,14 @@ export function modelStable4Q102Outcome(x:Stable4ShadowOutcomeInput):Stable4Shad
  let best=x.entryPrice;
  const stop=x.entryPrice*(long?1-x.hardStop:1+x.hardStop),tp=x.entryPrice*(long?1.03:.97);
  for(let t=x.entryTs;t<=deadline;t+=M){
-  if(t>x.now)return;
+  if(t>cutoff)return;
   if(t===deadline){
    const open=m5.get(t)?.open??(x.boundaryOpen?.timestampMs===t?x.boundaryOpen.open:undefined);
-   if(open===undefined){if(t===x.now)return;throw Error("STABLE4_M5_GAP");}
+   if(open===undefined){if(t===cutoff)return;throw Error("STABLE4_M5_GAP");}
    if(!(open>0&&Number.isFinite(open)))throw Error("STABLE4_M5_OPEN_INVALID");
    return finish(t,open,"TIME");
   }
-  if(t+M>x.now)return;
+  if(t+M>cutoff)return;
   const b=m5.get(t);if(!b)throw Error("STABLE4_M5_GAP");
   if(t===x.entryTs&&Math.abs(b.open-x.entryPrice)>Math.max(1e-10,x.entryPrice*1e-9))throw Error("STABLE4_M5_ENTRY_OPEN_MISMATCH");
   if(long?b.low<=stop:b.high>=stop)return finish(t+M,long?Math.min(b.open,stop):Math.max(b.open,stop),"HARD_STOP");
