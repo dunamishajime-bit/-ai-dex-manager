@@ -9,6 +9,7 @@ import {EquityTimelineChart} from "@/components/bt-verification/EquityTimelineCh
 import {GrossAllocationPanel} from "@/components/bt-verification/GrossAllocationPanel";
 import {BTWorkspaceShell,type BTWorkspaceTab} from "@/components/bt-verification/BTWorkspaceShell";
 import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo";
+import type {ResearchLibraryEntry} from "@/lib/server/bt-research-library";
 import {Activity,Archive,BarChart3,CalendarDays,Clock3,Download,FileText,Pause,Play,RotateCcw,Save,Settings2,ShieldAlert,Upload} from "lucide-react";
 const DEMO=createPreviewReplay(123456,"trend");
 const SHOW_SERVER_ARCHIVE=true;
@@ -27,6 +28,12 @@ const [eventFilter,setEventFilter]=useState<"TRADES"|"RISK"|"FUNDING"|"ALL">("TR
 type ServerRun={id:string;name:string;createdAt:string;frames:number;mode:string;bytes:number;sha256:string;sourceKind:string};
 const [serverRuns,setServerRuns]=useState<ServerRun[]>([]);
 const [serverNotice,setServerNotice]=useState("");
+ const [researchItems,setResearchItems]=useState<ResearchLibraryEntry[]>([]);
+ const [researchNotice,setResearchNotice]=useState("");
+ const [researchBusy,setResearchBusy]=useState(false);
+ const [researchSelected,setResearchSelected]=useState("");
+ const [verifiedResearch,setVerifiedResearch]=useState<ResearchLibraryEntry|null>(null);
+
 const [runName,setRunName]=useState("BT-"+new Date().toISOString().slice(0,10)),[savedRuns,setSavedRuns]=useState<SavedRun[]>([]),[savedNotice,setSavedNotice]=useState("");
 const [logicFilter,setLogicFilter]=useState<string[]>(["DEMO_V4","DEMO_PENGU","DEMO_Q102"]),[symbolFilter,setSymbolFilter]=useState<string[]>(["BTC"]);
 useEffect(()=>{
@@ -69,7 +76,7 @@ const changePct=initialEquity?equityChange/initialEquity*100:0;
 let peak=-Infinity,maxDrawdown=0;
 for(let i=0;i<=cursor;i++){const value=replay.frames[i].equity;peak=Math.max(peak,value);if(peak>0)maxDrawdown=Math.min(maxDrawdown,100*(value/peak-1))}
 const isResearch=replay.mode==="EXTERNAL";
-const sourceLabel=isResearch?"研究データ・未認証":"模擬再生・デモ";
+const sourceLabel=isResearch?(verifiedResearch?"研究モデル・SHA照合済み":"研究データ・出所未認証"):"模擬再生・デモ";
 const signalState=frame.demoSignals??[];
 const activeCandlestick=frame.formingBtcCandle;
 const currentCrossings=signalState.filter(x=>x.crossed);
@@ -79,7 +86,7 @@ const firedCount=replay.mode==="DEMO"?replay.frames.slice(0,cursor+1).reduce(
 const titleCase=(s:string)=>s.replace("T"," ").replace("Z"," UTC");
 function prepareDemo(){
   const demo=createPreviewReplay(previewSeed,scenario);
-  setReplay(demo);setCursor(0);setRunning(false);setError("");
+  setReplay(demo);setVerifiedResearch(null);setCursor(0);setRunning(false);setError("");
   setLogicFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.logic)))]);
   setSymbolFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.symbol)))]);
   return demo;
@@ -103,7 +110,7 @@ function selector(label:string,all:string[],chosen:string[],setter:(x:string[])=
  </div>
 }
 
-async function upload(e:React.ChangeEvent<HTMLInputElement>){const file=e.target.files?.[0];if(!file)return;try{if(file.size>60_000_000)throw Error("ファイルが60MBを超えています");const v=JSON.parse(await file.text()) as Replay;if(!validateReplay(v))throw Error("BTリプレイ形式が不正です");setReplay({...v,mode:"EXTERNAL"});setPreviewMode("historical");setTab("playback");setLogicFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setCursor(0);setRunning(false);setError("")}catch(err){setError(String(err))}e.target.value=""}
+async function upload(e:React.ChangeEvent<HTMLInputElement>){const file=e.target.files?.[0];if(!file)return;try{if(file.size>60_000_000)throw Error("ファイルが60MBを超えています");const v=JSON.parse(await file.text()) as Replay;if(!validateReplay(v))throw Error("BTリプレイ形式が不正です");setReplay({...v,mode:"EXTERNAL"});setVerifiedResearch(null);setPreviewMode("historical");setTab("playback");setLogicFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setCursor(0);setRunning(false);setError("")}catch(err){setError(String(err))}e.target.value=""}
 function exportTimeline(){
   const rows:(string|number|null)[][]=[["timestamp","equity","realized","gross_total","gross_crypto","gross_stock","positions_count","unallocated_gross_x","gross_snapshot_source"]];
   for(const f of replay.frames){const g=grossForFrame(f);rows.push([f.timestamp,f.equity,f.realized,g.total,g.crypto,g.stock,f.positions.length,g.unallocated,f.gross?.source??"demo_or_unverified"])}
@@ -142,6 +149,13 @@ async function exportPackage(){
       {name:"event_ledger_display.json",content:JSON.stringify(events,null,2)},
       {name:"README.txt",content:"DisDex BT visualization export. NOT independent trading/execution proof. Check source provenance, SHA, fees, funding, risk budgets, order fills and logic pins against canonical engine. Displayed events are not signed exchange fills.\n"}
     ];
+    if(verifiedResearch)entries.push({name:"research_source_provenance.json",content:JSON.stringify({
+      status:"ORIGINAL_RESEARCH_REPLAY_FILE_SHA256_MATCHED",
+      file:verifiedResearch.id,sha256:verifiedResearch.sha256,
+      sourceCase:verifiedResearch.sourceCase,costBps:verifiedResearch.bps,
+      grossCaps:verifiedResearch.grossCaps,sourceStatus:verifiedResearch.sourceStatus,
+      qualification:"Proof of integrity of indexed research model file only; does NOT certify current pinned LIVE logic or any venue fill."
+    },null,2)});
     const checks:string[]=[];
     for(const item of entries){
       const hash=await globalThis.crypto.subtle.digest("SHA-256",new TextEncoder().encode(item.content));
@@ -149,6 +163,8 @@ async function exportPackage(){
     }
     entries.push({name:"manifest.json",content:JSON.stringify({
       schema:replay.schema,sourceMode:replay.mode,source:replay.source??null,
+      verifiedResearchSource:verifiedResearch??null,
+      researchModelOnly:replay.mode==="EXTERNAL",
       engineSha:replay.engineSha,seed:replay.seed,limits:replay.limits,
       frameCount:replay.frames.length,exportedAt:new Date().toISOString(),
       qualification:"Visualization export; not canonical BT execution proof without source and hash verification."
@@ -162,6 +178,61 @@ async function exportPackage(){
     setTimeout(()=>URL.revokeObjectURL(url),1000);
     setSavedNotice("検証用ZIPをダウンロードしました");
   }catch(e){setSavedNotice("ZIP出力失敗: "+String(e))}
+}
+async function refreshResearchLibrary(){
+ if(!SHOW_SERVER_ARCHIVE){setResearchNotice("公開デモは研究BT台帳へ接続しません。正式HP上でOwner認証後に利用します。");return}
+ setResearchBusy(true);
+ try{
+   const res=await fetch("/api/bt-verification/research",{cache:"no-store",credentials:"same-origin"});
+   if(!res.ok)throw Error(res.status===503?"研究BTライブラリ未配置です。サーバー側の専用パス設定が必要です。":"研究BT一覧取得失敗 HTTP "+res.status);
+   const raw:unknown=await res.json();
+   if(!raw||typeof raw!=="object"||!Array.isArray((raw as {items?:unknown}).items))throw Error("研究BTの一覧形式が不正です");
+   const items=(raw as {items:ResearchLibraryEntry[]}).items;
+   setResearchItems(items);
+   if(items.length&&!items.some(x=>x.id===researchSelected))setResearchSelected(items[0].id);
+   setResearchNotice(items.length+"件の研究モデルを確認。SHA256検証は再生データ取得時に実行します。");
+ }catch(e){setResearchItems([]);setResearchNotice(String(e))}
+ finally{setResearchBusy(false)}
+}
+async function getResearchReplay(id:string):Promise<{entry:ResearchLibraryEntry;replay:Replay}>{
+ if(!SHOW_SERVER_ARCHIVE)throw Error("公開デモは研究BTの読込に対応しません");
+ if(!researchItems.some(item=>item.id===id))throw Error("研究BTの選択が無効です");
+ const res=await fetch("/api/bt-verification/research/"+encodeURIComponent(id),
+   {cache:"no-store",credentials:"same-origin"});
+ if(!res.ok)throw Error(res.status===503?"研究BTの署名済み台帳照合に失敗しました":"研究BTの読込失敗 HTTP "+res.status);
+ const raw:unknown=await res.json();
+ if(!raw||typeof raw!=="object")throw Error("研究データの応答形式が不正です");
+ const {entry,replay:data}=raw as {entry:ResearchLibraryEntry;replay:unknown};
+ if(!entry||entry.id!==id||!researchItems.some(x=>x.id===id&&x.sha256===entry.sha256)||
+    !validateReplay(data)||data.mode!=="EXTERNAL"||data.frames.length!==entry.frames||
+    data.researchSummary?.costBps!==entry.bps||
+    data.researchSummary?.modelFills!==entry.modeledFills||
+    data.source?.kind==="SYNTHETIC_UI_ONLY"){
+     throw Error("研究BTのハッシュ照合・出所・整合性に問題があります");
+ }
+ return {entry,replay:data};
+}
+async function loadResearchRun(id:string){
+ setResearchBusy(true);setResearchNotice("研究モデルの元ファイルSHA256を照合して読み込んでいます…");
+ try{
+   const {entry,replay:data}=await getResearchReplay(id);
+   setReplay(data);setPreviewMode("historical");setVerifiedResearch(entry);
+   setCursor(0);setRunning(false);setSelectedEvent("");setSelected(null);
+   setLogicFilter([...new Set(data.frames.flatMap(f=>f.positions.map(p=>p.logic)))]);
+   setSymbolFilter([...new Set(data.frames.flatMap(f=>f.positions.map(p=>p.symbol)))]);
+   setTab("playback");setError("");
+   setResearchNotice("研究データを読み込みました（元データSHA256照合PASS）。LIVEと一致したBTではありません。");
+ }catch(e){setResearchNotice(String(e))}
+ finally{setResearchBusy(false)}
+}
+async function downloadResearchRun(id:string){
+ setResearchBusy(true);
+ try{
+   const {replay:data,entry}=await getResearchReplay(id);
+   saveFile("RESEARCH_"+entry.id,JSON.stringify(data),"application/json");
+   setResearchNotice("照合済み研究BTをJSONとして保存しました");
+ }catch(e){setResearchNotice(String(e))}
+ finally{setResearchBusy(false)}
 }
 async function refreshServerRuns(){
   try{
@@ -197,7 +268,7 @@ async function serverGet(id:string):Promise<Replay>{
 async function loadServerRun(id:string){
   try{
     const item=await serverGet(id);
-    setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});setPreviewMode(item.mode==="DEMO"?"synthetic":"historical");setTab("playback");
+    setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});setVerifiedResearch(null);setPreviewMode(item.mode==="DEMO"?"synthetic":"historical");setTab("playback");
     setCursor(0);setRunning(false);
     setLogicFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.logic)))));
     setSymbolFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));
@@ -221,7 +292,7 @@ async function saveLibrary(){
   try{await saveRun(runName,replay);setSavedRuns(await listRuns());setSavedNotice("ブラウザー内に保存しました")}catch(e){setSavedNotice("保存失敗: "+String(e))}
 }
 async function loadLibrary(id:string){
-  try{const item=await readRun(id);if(!item||!validateReplay(item))throw Error("データが不正");setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});setPreviewMode(item.mode==="DEMO"?"synthetic":"historical");setTab("playback");setCursor(0);setRunning(false);setLogicFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setSavedNotice("保存済みデータを再読込しました")}catch(e){setSavedNotice("再読込失敗: "+String(e))}
+  try{const item=await readRun(id);if(!item||!validateReplay(item))throw Error("データが不正");setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});setVerifiedResearch(null);setPreviewMode(item.mode==="DEMO"?"synthetic":"historical");setTab("playback");setCursor(0);setRunning(false);setLogicFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setSavedNotice("保存済みデータを再読込しました")}catch(e){setSavedNotice("再読込失敗: "+String(e))}
 }
 async function downloadLibrary(id:string){
   try{
@@ -290,6 +361,24 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
           <div className="text-xs font-medium text-[#95abc1]">初期資金（データ記録値）
             <div className={inputCls+" mt-2 text-right opacity-80"}>¥ {fmt(initialEquity)}</div></div>
         </div>
+        {previewMode==="historical"&&<section className="space-y-3 rounded-xl border border-[#39617b] bg-[#0a2235] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div><h3 className="text-[13px] font-bold text-cyan-100">研究BTライブラリ（10bps / 30bps）</h3>
+              <p className="mt-1 text-[11px] leading-5 text-[#94b1c7]">実際に保存された研究BTの資産・確定足・取引イベントを再生します。LIVEの実注文履歴ではありません。</p></div>
+            {SHOW_SERVER_ARCHIVE&&<button type="button" onClick={refreshResearchLibrary} disabled={researchBusy}
+              className="rounded-lg border border-[#337e92] bg-[#19536a] px-3 py-2 text-[11px] font-bold text-cyan-100 disabled:opacity-50">研究BT一覧を取得</button>}
+          </div>
+          {SHOW_SERVER_ARCHIVE&&researchItems.length>0&&<div className="flex flex-col gap-2 sm:flex-row">
+            <select aria-label="研究BTモデル選択" value={researchSelected} onChange={e=>setResearchSelected(e.target.value)} className={inputCls+" sm:flex-1"}>
+              {researchItems.map(item=><option key={item.id} value={item.id}>{item.sourceCase} / {item.bps}bps / {item.modeledFills}モデル取引</option>)}
+            </select>
+            <button type="button" onClick={()=>loadResearchRun(researchSelected)} disabled={researchBusy||!researchSelected}
+              className="rounded-lg border border-cyan-500 bg-[#15666b] px-4 py-3 text-xs font-bold text-white disabled:opacity-50">SHA照合して再生</button>
+          </div>}
+          {!SHOW_SERVER_ARCHIVE&&<p className="rounded-lg bg-[#17384a] p-3 text-xs text-amber-200">この公開デモには研究BT台帳・口座情報を配置しません。正式HPのOwner認証後に利用する機能です。</p>}
+          {researchNotice&&<p className="text-[11px] leading-5 text-cyan-200">{researchNotice}</p>}
+          {verifiedResearch&&<p className="break-all text-[10px] text-[#8eabc1]">現在の検証: {verifiedResearch.sourceCase} / {verifiedResearch.bps}bps / SHA256 {verifiedResearch.sha256}</p>}
+        </section>}
         <div className="rounded-xl border border-amber-700/30 bg-amber-950/10 p-3 text-[11px] leading-5 text-amber-100/90">
           <ShieldAlert className="mr-1 inline h-4 w-4"/> この画面のロジック・銘柄選択は再生の<strong>表示フィルター</strong>です。選択を変えても過去BTの取引結果・Grossは再計算されません。模擬データは実際の相場や運用成績ではありません。
         </div>
@@ -433,6 +522,12 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
     </section>
     <section className={card+" p-5"}><h2 className="mb-3 text-[16px] font-bold text-white">データの出所と整合性</h2>
       <div className="space-y-3 text-xs">{[["モード",sourceLabel],["モデル実装参照SHA",replay.engineSha],["時点数",replay.frames.length.toLocaleString()+" スナップショット"],["BTC確定足",String(replay.btcCandles?.length??0)+" 本"],["Total Gross上限",replay.limits.total.toFixed(2)+"x"],["Crypto / Stock",replay.limits.crypto.toFixed(2)+"x / "+replay.limits.stock.toFixed(2)+"x"]].map(([k,v])=><div key={k} className="flex items-start justify-between gap-4 border-b border-[#2c4055] pb-2"><span className="text-[#8fa7bd]">{k}</span><span className="max-w-[60%] break-all text-right font-mono text-[#d8eaf8]">{v}</span></div>)}</div>
+      {verifiedResearch&&<div className="mt-4 rounded-xl border border-[#327b89]/40 bg-[#123346] p-3">
+        <p className="text-xs font-semibold text-cyan-100">読み取り専用研究BT / 元ファイルSHA256照合済み</p>
+        <p className="mt-2 text-[11px] text-[#b7ccdb]">{verifiedResearch.sourceCase}・{verifiedResearch.bps}bps・{verifiedResearch.modeledFills}モデル取引</p>
+        <p className="mt-1 break-all font-mono text-[10px] text-[#95b2c4]">{verifiedResearch.sha256}</p>
+        <p className="mt-2 text-[11px] text-amber-200">ハッシュ照合＝元データの完全性。現行LIVEとの実装一致は未証明です。</p>
+      </div>}
       <p className="mt-4 rounded-lg border border-amber-700/40 bg-amber-950/10 p-3 text-[11px] leading-6 text-amber-100">現在の画面は再生・可視化専用です。最新の正規BTエンジン、現在の各Runner SHA、数量・価格・個別Grossの完全照合が済むまで新規BT実行を有効化しません。</p>
       <button type="button" onClick={()=>setTab("library")} className="mt-4 w-full rounded-lg bg-[#20506b] px-3 py-3 text-[13px] font-semibold text-cyan-100">保存ライブラリを開く</button>
     </section>
@@ -444,6 +539,26 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
       <p className="mb-2 text-xs text-[#8ca5bb]">ブラウザー内保存（別端末とは自動共有されません）</p>
       <div className="space-y-2">{savedRuns.length?savedRuns.map(item=><div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2d4b60] bg-[#122a3d] px-4 py-3"><span className="text-[12px] text-[#d8e6f1]"><strong>{item.name}</strong><span className="ml-2 text-[#86a0b7]">{item.frames}時点 / {item.createdAt}</span></span><div className="flex flex-wrap gap-2"><button className="rounded-lg bg-[#22516b] px-3 py-2 text-[11px]" onClick={()=>loadLibrary(item.id)}>再読込</button><button className="rounded-lg bg-[#244257] px-3 py-2 text-[11px]" onClick={()=>downloadLibrary(item.id)}>JSON DL</button><button className="rounded-lg bg-[#5a2738] px-3 py-2 text-[11px]" onClick={()=>removeLibrary(item.id)}>削除</button></div></div>):<p className="rounded-xl border border-dashed border-[#36536c] p-6 text-center text-sm text-[#8ca7bb]">ブラウザー内の保存データはまだありません。</p>}</div>
     </section>
+    {SHOW_SERVER_ARCHIVE&&<section className={card+" p-5"}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div><h2 className="text-[16px] font-bold text-white">保存済み研究BT（読み取り専用）</h2>
+          <p className="mt-1 text-xs text-[#92acc2]">サーバーに配置した研究モデルのみ表示。元データのSHA256を照合して再生・DLします。</p></div>
+        <button onClick={refreshResearchLibrary} disabled={researchBusy}
+          className="rounded-lg border border-[#396984] bg-[#18384d] px-4 py-2 text-xs text-cyan-200 disabled:opacity-50">研究BT一覧を更新</button>
+      </div>
+      {researchNotice&&<p className="mb-3 text-xs text-cyan-200">{researchNotice}</p>}
+      <div className="space-y-2">{researchItems.map(item=><div key={item.id}
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#304e64] bg-[#10263a] px-3 py-3">
+          <div className="min-w-0"><p className="text-xs font-bold text-cyan-100">{item.sourceCase} <span className="ml-2 rounded bg-[#1c5467] px-2 py-1 text-[10px]">{item.bps}bps</span></p>
+            <p className="mt-1 text-[11px] text-[#94acbf]">{item.frames.toLocaleString()}時点・モデル取引 {item.modeledFills.toLocaleString()}件・BTC確定足 {item.btcCandles.toLocaleString()}本</p>
+            <p className="mt-1 break-all font-mono text-[10px] text-[#7b9eb5]">SHA256 {item.sha256}</p></div>
+          <div className="flex gap-2"><button onClick={()=>loadResearchRun(item.id)} disabled={researchBusy}
+            className="rounded-lg bg-[#1c6d70] px-3 py-2 text-xs font-semibold disabled:opacity-50">再生</button>
+            <button onClick={()=>downloadResearchRun(item.id)} disabled={researchBusy}
+              className="rounded-lg bg-[#1d425c] px-3 py-2 text-xs disabled:opacity-50">JSON DL</button></div>
+        </div>)}</div>
+      <p className="mt-3 text-[11px] text-amber-200">ファイルの照合が成功しても、現行Runner SHA・実約定・正式BTとの一致を証明するものではありません。</p>
+    </section>}
     {SHOW_SERVER_ARCHIVE&&<section className={card+" p-5"}><h2 className="mb-2 text-[16px] font-bold text-white">Owner認証付きサーバー保存</h2><p className="mb-4 text-xs text-[#93aec1]">専用保存先とOriginが設定され、Owner認証が成立している場合のみ利用可能です。未設定の場合は安全側に拒否されます。</p>
       <div className="mb-3 flex flex-wrap gap-2"><button onClick={saveServerRun} className="rounded-lg border border-[#336f86] bg-[#164257] px-4 py-2.5 text-xs text-cyan-100">サーバーへ保存</button><button onClick={refreshServerRuns} className="rounded-lg bg-[#243d52] px-4 py-2.5 text-xs text-slate-200">保存一覧を更新</button></div>
       {serverNotice&&<p className="mb-3 text-xs text-cyan-200">{serverNotice}</p>}

@@ -68,3 +68,24 @@ Formal HP Production deployment and canonical live-pinned BT engine are still no
 - The market path continues uninterrupted into the replay. No simulated orders or account equity changes occur during the warmup. Causal entry thresholds can use these already-completed historical candles immediately at the first replay tick.
 - The exported btcCandles collection contains both prior completed context bars and replay completed bars, with strictly increasing timestamps; the 1728 replay frames only cover the requested synthetic BT playback period.
 - Tests assert warmup candle timestamps are all prior to replay start, and use strict as-of closed-candle thresholds at every subsequent entry. 68 warmup bars are display/context data, not 68 hours of hidden performance.
+
+
+## 2026-11-14 — Owner-authenticated research replay library
+
+### Purpose
+Enable the formal authenticated BT page to list, select, replay and download four existing research BT cases from an owner-controlled private server filesystem. Never copy research JSON, venue credentials or account data into Next.js public/, GitHub Pages or the Git repository.
+
+### Separate deployment configuration
+- Set DISDEX_BT_RESEARCH_LIBRARY_DIR on the formal HP server only to an absolute private directory containing INDEX.json and its indexed _REPLAY.json files. This is intentionally separate from DISDEX_BT_ARCHIVE_DIR used for user-created saved runs.
+- The read-only source on the workstation is C:\\tmp\\bt481-hp-replay-library-20261114 (four cases, 10bps/30bps). It is NOT automatically accessible from Linux VPS. Production requires secure owner-approved installation, private directory configuration and approved deployment.
+- Absent config returns HTTP 503. The public GitHub Pages demo contains no research files and does not expose the research API UI.
+- Both new endpoints are GET only: /api/bt-verification/research lists metadata, and /api/bt-verification/research/:id delivers the exact allowlisted, SHA256-checked model JSON. Existing HMAC Owner session is mandatory (USER or ADMIN), replies are private/no-store and nosniff. No write/delete/execute method.
+- Indexed sourceMode must equal RESEARCH_MODEL_NOT_VENUE_EXECUTION. The sourceStatus explicitly identifies research-only and missing full production parity.
+- Server refuses unsafe roots, symlinks, path traversal, duplicate index entries, oversized files, bad source SHA256, malformed replay schema, and mismatched Gross caps, frame counts, model fill counts, or cost summaries.
+- The config page's real-data mode allows selecting verified source IDs. Following successful load, the user sees the research model label and the source SHA256 in the report, and later in the GPT/Codex ZIP provenance manifest. Integrity of research inputs does NOT certify latest LIVE strategy implementation, or real venue fills.
+
+### Tests
+- Configure DISDEX_BT_RESEARCH_LIBRARY_DIR to the protected workstation test library, then execute scripts/bt-hp-readonly-research-library-selftest.ts with tsx.
+- Execute scripts/bt-hp-research-http-auth-selftest.ts with tsx. The test generates its own temporary HMAC test key; validates anon 401, authenticated GET 200, private/no-store, traversal 400 and missing-config 503.
+- Validate Python adapter, replay schemas, Next.js build and browser preview.
+- Formal production placement and deployment are not yet performed.
