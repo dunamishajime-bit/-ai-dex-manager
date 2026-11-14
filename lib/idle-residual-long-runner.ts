@@ -1,4 +1,5 @@
 import {reuseFlatIdleMarketSnapshot} from "./idle-lock-safe-market";
+import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
@@ -335,9 +336,12 @@ export class IdleResidualLongRunner{
     state.pending=pending;state.lastDecision={decisionTs:signal.features.decisionTs,symbol:signal.symbol,route:signal.route,accepted:true,reason:"IDLE_RESIDUAL_ENTRY_PLANNED"};await this.d.stateStore.save(state);
     state.pending.phase="submitted";await this.d.stateStore.save(state);
     try{
-      const result=await this.d.executor.executeMarket({requestId:clientOrderId,clientOrderId,symbol:signal.symbol,side:"BUY",positionSide:"BOTH",quantity:normalized.quantity,expectedPrice:quote.askPrice,maxSlippageBps:this.d.runtime.maximumSlippageBps,reason:`IDLE_RESIDUAL_LONG_ENTRY:${signal.route}`,requireVenueMargin5xCross:true});
+      const result=await this.d.executor.executeMarket({requestId:clientOrderId,clientOrderId,symbol:signal.symbol,side:"BUY",positionSide:"BOTH",quantity:normalized.quantity,expectedPrice:quote.askPrice,maxSlippageBps:this.d.runtime.maximumSlippageBps,reason:`IDLE_RESIDUAL_LONG_ENTRY:${signal.route}`,requireVenueMargin5xCross:true,stable4Admission:{lease:lock,ownReservationId:reservation.reservationId}});
       return await this.finalizeEntry(state,pending,result,lock);
-    }catch(error){return await this.manual(state,`IDLE_RESIDUAL_ENTRY_ERROR:${error instanceof Error?error.message:String(error)}`);}
+    }catch(error){
+      if(error instanceof Stable4EntryGrossAdmissionError){state.pending=null;state.lastDecision={decisionTs:signal.features.decisionTs,symbol:signal.symbol,route:signal.route,accepted:false,reason:error.message};await this.d.stateStore.save(state);await lock.releaseReservation(reservation.reservationId);return{status:"held",message:error.message,ordersSent:0,cancelsSent:0,positionChangesSent:0};}
+      return await this.manual(state,`IDLE_RESIDUAL_ENTRY_ERROR:${error instanceof Error?error.message:String(error)}`);
+    }
   }
 
   async tick():Promise<IdleResidualLongTickResult>{

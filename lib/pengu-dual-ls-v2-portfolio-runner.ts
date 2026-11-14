@@ -1,4 +1,5 @@
 import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
+import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import type { AsterOrderSide } from "@/lib/aster-v3-client";
@@ -745,7 +746,7 @@ export class PenguDualLsV2PortfolioRunner {
         return this.applyResult(state, pending, result);
     }
 
-    private async executePending(state: PenguDualLsV2RunnerState): Promise<PenguDualLsV2TickResult> {
+    private async executePending(state: PenguDualLsV2RunnerState,lock:PenguDualLsV2LockHandle,ownReservationId?:string): Promise<PenguDualLsV2TickResult> {
         const pending = state.pending;
         if (!pending) return { status: "held", message: "No PENGU Dual LS pending order." };
         let submitted = false;
@@ -797,10 +798,15 @@ export class PenguDualLsV2PortfolioRunner {
                 expectedPrice,
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
                 reason: `${pending.reason} entryVersion=${pending.entryVersion || state.position?.entryVersion || "UNKNOWN"}`,
+                ...(!pending.reduceOnly&&lock.document?{stable4Admission:{lease:{document:lock.document},ownReservationId}}:{}),
             };
             const result = await this.dependencies.executor.executeMarket(command);
             return this.applyResult(state, pending, result);
         } catch (error) {
+            if(!pending.reduceOnly&&error instanceof Stable4EntryGrossAdmissionError){
+                state.pending=undefined;this.recordFailure(state,error);await this.dependencies.stateStore.save(state);
+                return{status:"held",message:error.message,idempotencyKey:pending.idempotencyKey};
+            }
             const rateBudget = classifyAsterRateBudgetFailure(error);
             if (rateBudget && !submitted) {
                 pending.lastError = rateBudget.reason;
@@ -1398,7 +1404,7 @@ export class PenguDualLsV2PortfolioRunner {
                 remainingPortfolioGross: Math.max(0, this.dependencies.config.portfolioGrossCap - normalizedPositionGross(workingPositions, workingEquity, SYMBOL)),
                 referenceTs: signal.referenceTs,
             });
-            const result = await this.executePending(state);
+            const result = await this.executePending(state,lock,exposureReservation?.reservationId);
             // A durable pending row remains active through UNKNOWN/manual-review
             // outcomes. Release it only after the runner has cleared its pending
             // state, which means the venue result was terminally reconciled.

@@ -5,6 +5,7 @@ import { lstat, readFile } from "node:fs/promises";
 import type { AsterV3Client } from "./aster-v3-client";
 import { AsterDirectTradeExecutor, type DirectAccountSnapshot, type DirectOpenOrder, type DirectPosition, type DirectTradeResult } from "./direct-trade-executor";
 import { FileAccountOrderLock, type AccountLockHandle } from "./disdex-account-order-lock";
+import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
@@ -613,14 +614,14 @@ export class IdlePriorityShortRunner {
         try {
             state.pending.phase = "submitted";
             await this.dependencies.stateStore.save(state);
-            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity * admission.gross });
+            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity * admission.gross,stable4Admission:{lease:lock,ownReservationId:reservation.reservationId} });
             return await this.finalizeEntry(state, pending, result, lock);
         } catch (error) {
             // This specific error is thrown by the executor BEFORE any order request.
             // Do not strand a reservation or put a flat account in manual review.
-            if (error instanceof Error && error.message.startsWith("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:")) {
+            if (error instanceof Stable4EntryGrossAdmissionError||error instanceof Error && error.message.startsWith("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:")) {
                 state.pending = null;
-                const reason = `IDLE_ENTRY_PREORDER_GROSS_LIMIT:${symbol}`;
+                const reason = error instanceof Stable4EntryGrossAdmissionError?error.message:`IDLE_ENTRY_PREORDER_GROSS_LIMIT:${symbol}`;
                 state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
                 await this.dependencies.stateStore.save(state);
                 await lock.releaseReservation(reservation.reservationId);

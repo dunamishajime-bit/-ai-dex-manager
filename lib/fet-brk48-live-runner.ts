@@ -1,4 +1,5 @@
 import { recordFetExit } from "./fet-brk48-state";
+import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import { createHash } from "node:crypto";
 
 import { FET_BRK48_RESIDUAL } from "@/config/fetBrk48Runtime";
@@ -951,6 +952,7 @@ export class FetBrk48LiveRunner {
           maxSlippageBps: this.deps.maxSlippageBps ?? 20,
           reason: "FET_BRK48_LONG_ENTRY",
           requireVenueMargin5xCross: true,
+          stable4Admission:{lease:lock,ownReservationId:reservation.reservationId},
         });
         if (result.status === "UNKNOWN" || result.executionUnknown) {
           state.manualReview = "FET_ENTRY_EXECUTION_UNKNOWN";
@@ -988,6 +990,9 @@ export class FetBrk48LiveRunner {
           signal,
           gross: targetGross,
         };
+      } catch(error){
+        if(error instanceof Stable4EntryGrossAdmissionError){state.pending=undefined;await writeFetBrk48State(this.deps.statePath,state);releaseExposureReservation=true;return{status:"blocked",message:error.message,ordersSent:0,signal,gross:targetGross};}
+        throw error;
       } finally {
         if (releaseExposureReservation) await lock.releaseReservation(reservation.reservationId).catch(() => undefined);
       }

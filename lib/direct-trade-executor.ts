@@ -1,5 +1,10 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { lstat,readFile } from "node:fs/promises";
+import { resolveDisDexStable4Mode } from "@/config/disdexStable4Opportunity";
+import { type AccountLockDocument, ACCOUNT_LOCK_SCHEMA } from "./disdex-account-order-lock";
+import { pendingExposurePath, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
+import { assertStable4EntryGrossAdmission, Stable4EntryGrossAdmissionError } from "./stable4-entry-gross-guard";
 
 import {
     AsterApiError,
@@ -38,6 +43,8 @@ export interface DirectTradeCommand {
     requireVenueMargin5xCross?: boolean;
     /** Optional pre-order gross cap. Never rounds a lot upwards. */
     maxEntryNotionalUsd?: number;
+    /** Explicit capability for the caller's currently owned shared admission lease. */
+    stable4Admission?: { lease: { document(): Promise<AccountLockDocument> }; ownReservationId?: string };
 }
 
 export interface DirectTradeResult {
@@ -705,6 +712,99 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         };
     }
 
+    private async assertStable4SignedEntryAdmission(command: DirectTradeCommand, symbol: string, notionalUsd: number): Promise<void> {
+        try {
+            const admission = command.stable4Admission;
+            if (!admission?.lease || typeof admission.lease.document !== "function") {
+                throw new Stable4EntryGrossAdmissionError("INVALID_INPUT", "owned admission lease required");
+            }
+            let initialLease: AccountLockDocument | undefined;
+            const validateLease = async () => {
+                const document = await admission.lease.document();
+                const now = Date.now();
+                if (!document || document.schema !== ACCOUNT_LOCK_SCHEMA
+                    || typeof document.accountScope !== "string" || !document.accountScope.trim()
+                    || typeof document.ownerId !== "string" || !document.ownerId.trim()
+                    || typeof document.leaseId !== "string" || !document.leaseId.trim()
+                    || typeof document.acquiredAt !== "number" || !Number.isFinite(document.acquiredAt) || document.acquiredAt <= 0 || document.acquiredAt > now
+                    || typeof document.expiresAt !== "number" || !Number.isFinite(document.expiresAt) || document.expiresAt <= now
+                    || (initialLease && (document.ownerId !== initialLease.ownerId || document.leaseId !== initialLease.leaseId || document.accountScope !== initialLease.accountScope))) {
+                    throw new Stable4EntryGrossAdmissionError("INVALID_INPUT", "admission lease invalid or ownership changed");
+                }
+                initialLease ??= { ...document };
+                return document;
+            };
+            const venueNumber = (value: unknown, field: string): number => {
+                if (typeof value === "string" && !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value.trim())) {
+                    throw new Stable4EntryGrossAdmissionError("INVALID_INPUT", field);
+                }
+                return requiredVenueNumber(value, field);
+            };
+            await validateLease();
+            // Use full signed responses rather than managed/symbol-scoped projections.
+            const rawPositions = await this.client.getPositions();
+            const positionsObservedAt = Date.now();
+            if (!Array.isArray(rawPositions)) throw new Stable4EntryGrossAdmissionError("INVALID_POSITION", "signed position rows missing");
+            let unrealizedPnl = 0;
+            const positions = rawPositions.flatMap(row => {
+                if (!row || typeof row !== "object" || Array.isArray(row)) throw new Stable4EntryGrossAdmissionError("INVALID_POSITION", "signed position row malformed");
+                const quantity = venueNumber(row.positionAmt, "POSITION_AMOUNT");
+                const rawPnl = row.unRealizedProfit === undefined ? row.unrealizedProfit : row.unRealizedProfit;
+                // Only a strictly parsed exact zero proves a foreign venue row is irrelevant.
+                if (quantity === 0) {
+                    if (rawPnl !== undefined) venueNumber(rawPnl, "POSITION_UNREALIZED_PNL");
+                    return [];
+                }
+                const symbol = requiredVenueSymbol(row.symbol, this.quoteAsset);
+                const markPrice = venueNumber(row.markPrice, "POSITION_MARK_PRICE");
+                if (!(markPrice > 0)) throw new Stable4EntryGrossAdmissionError("INVALID_POSITION", "nonpositive signed mark");
+                unrealizedPnl += venueNumber(rawPnl, "POSITION_UNREALIZED_PNL");
+                return [{ symbol, quantity, markPrice, observedAt: positionsObservedAt }];
+            });
+            const balances = await this.client.getBalances();
+            const balancesObservedAt = Date.now();
+            if (!Array.isArray(balances)) throw new Stable4EntryGrossAdmissionError("INVALID_ACCOUNT", "signed balances missing");
+            const quoteRows = balances.filter(row => {
+                if (!row || typeof row !== "object" || typeof row.asset !== "string" || !row.asset.trim()) throw new Stable4EntryGrossAdmissionError("INVALID_ACCOUNT", "signed balance row malformed");
+                return row.asset.trim().toUpperCase() === "USDT";
+            });
+            if (this.quoteAsset !== "USDT" || quoteRows.length !== 1) throw new Stable4EntryGrossAdmissionError("INVALID_ACCOUNT", "unique USDT balance required");
+            const walletBalance = quoteRows[0].balance === undefined ? quoteRows[0].crossWalletBalance : quoteRows[0].balance;
+            const equityUsd = venueNumber(walletBalance, "USDT_WALLET_BALANCE") + unrealizedPnl;
+            const lease = await validateLease();
+            const registryPath = pendingExposurePath();
+            try {
+                const stats = await lstat(registryPath);
+                if (!stats.isFile() || stats.isSymbolicLink()) throw new Error("registry must be a regular file");
+            } catch { throw new Stable4EntryGrossAdmissionError("INVALID_REGISTRY", "complete pending registry required"); }
+            let pending:Awaited<ReturnType<typeof readPendingExposureRegistry>>;
+            try{pending=JSON.parse(await readFile(registryPath,"utf8"));if(!pending||!Array.isArray(pending.entries))throw Error("invalid root");}
+            catch{throw new Stable4EntryGrossAdmissionError("INVALID_REGISTRY","invalid pending registry document");}
+            if (pending.accountScope !== lease.accountScope) throw new Stable4EntryGrossAdmissionError("INVALID_REGISTRY", "account scope mismatch");
+            const finalLease=await validateLease();
+            if(admission.ownReservationId!==undefined){
+                const normalize=(value:unknown)=>typeof value==="string"?value.trim().toUpperCase().replace(/[:/_-]/g,"").replace(/USDT$/,""):"";
+                const owned=Array.isArray(finalLease.reservations)?finalLease.reservations.filter(r=>r.reservationId===admission.ownReservationId):[];
+                const registered=pending.entries.filter(r=>r.reservationId===admission.ownReservationId);
+                const own=owned[0],row=registered[0],side=command.side==="BUY"?"LONG":"SHORT";
+                if(owned.length!==1||registered.length!==1||own.status!=="RESERVED"||row.status==="RELEASED"||own.strategyId!==row.strategyId||normalize(own.symbol)!==normalize(symbol)||normalize(row.symbol)!==normalize(symbol)||own.side!==side||row.side!==side||!Number.isFinite(own.notionalUsd)||own.notionalUsd!==row.notionalUsd)
+                    throw new Stable4EntryGrossAdmissionError("OWN_RESERVATION_CONFLICT","reservation does not belong to current account lease");
+            }
+            const now = Date.now();
+            // The response time of the earlier read must survive later slow reads, even when all positions are flat.
+            if (positionsObservedAt > now || now - positionsObservedAt > 120_000) throw new Stable4EntryGrossAdmissionError("STALE_POSITION");
+            if (command.side !== "BUY" && command.side !== "SELL") throw new Stable4EntryGrossAdmissionError("INVALID_CANDIDATE", "order side invalid");
+            assertStable4EntryGrossAdmission({
+                now, account: { equityUsd, observedAt: balancesObservedAt }, positions, pending,
+                candidate: { symbol, notionalUsd, side: command.side === "BUY" ? "LONG" : "SHORT", ownReservationId: admission.ownReservationId },
+            });
+        } catch (error) {
+            if (error instanceof Stable4EntryGrossAdmissionError) throw error;
+            // Admission failures are definitely before the venue write; never classify them as execution-unknown.
+            throw new Stable4EntryGrossAdmissionError("INVALID_INPUT", "signed admission metadata/read failed");
+        }
+    }
+
     async executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult> {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
@@ -731,6 +831,9 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 normalized.notional > command.maxEntryNotionalUsd * (1 + 1e-9)) {
                 throw new Error("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:" + symbol);
             }
+        }
+        if (command.reduceOnly !== true && resolveDisDexStable4Mode(process.env) === "LIVE") {
+            await this.assertStable4SignedEntryAdmission(command, symbol, normalized.notional);
         }
         try {
             const raw = await this.client.placeMarketOrder({

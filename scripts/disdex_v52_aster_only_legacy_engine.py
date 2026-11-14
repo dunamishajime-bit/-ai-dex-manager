@@ -10,13 +10,15 @@ import shutil
 import signal
 import tempfile
 import time
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import disdex_v11eq_aster_only_live_engine as legacy
 from disdex_v52_daily_loss import update_v52_strategy_daily_latch
 from disdex_account_order_lock import AccountOrderLock
-from disdex_pending_exposure_registry import release_pending, upsert_pending
+from disdex_pending_exposure_registry import read_registry, release_pending, upsert_pending
+from disdex_stable4_entry_gross_guard import Stable4EntryGrossRejected, evaluate_stable4_entry_gross
 from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
 from disdex_strict_portfolio_planner import (
     STRICT_CAPS,
@@ -781,6 +783,84 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             return None, {"ROUTER": ["V11_GROSS_CAPACITY_INSUFFICIENT"]}
         return base.StockEngine.v11_candidates(self, rows)
 
+    def _stable4_final_entry_gross(self, symbol: str, side: str, quantity: float, price: float, client: str) -> dict:
+        """Fresh signed admission within the caller's existing shared lease."""
+        def owned():
+            check = getattr(getattr(self, "lock", None), "_owned", None)
+            if not callable(check):
+                raise Stable4EntryGrossRejected("ACCOUNT_LOCK_UNPROVEN")
+            try:
+                document = check()
+            except Exception as error:
+                raise Stable4EntryGrossRejected("ACCOUNT_LOCK_UNPROVEN") from error
+            if not isinstance(document, dict) or document.get("accountScope") != "ASTER_FUTURES":
+                raise Stable4EntryGrossRejected("ACCOUNT_SCOPE_INVALID")
+            return document
+
+        def signed_number(value, field):
+            # Venue responses contain decimal strings. Reject missing/coerced
+            # values and underflow before an exact-zero filter can hide them.
+            if type(value) not in (int, float, str) or isinstance(value, str) and not value.strip():
+                raise Stable4EntryGrossRejected("SIGNED_NUMERIC_INVALID", field)
+            try:
+                decimal = Decimal(str(value))
+                number = float(decimal)
+            except (InvalidOperation, ValueError, OverflowError) as error:
+                raise Stable4EntryGrossRejected("SIGNED_NUMERIC_INVALID", field) from error
+            if not decimal.is_finite() or not math.isfinite(number) or number == 0 and decimal != 0:
+                raise Stable4EntryGrossRejected("SIGNED_NUMERIC_INVALID", field)
+            return number
+
+        lease = owned()
+        balance_observed = base.now_ms()
+        balances = self.aster.balances()  # signed /fapi/v3/balance; never cached
+        position_observed = base.now_ms()
+        rows = self.aster.positions()  # signed /fapi/v3/positionRisk, all symbols
+        if not isinstance(balances, list) or not isinstance(rows, list):
+            raise Stable4EntryGrossRejected("SIGNED_SNAPSHOT_INVALID")
+        usdt = [row for row in balances if isinstance(row, dict) and row.get("asset") == "USDT"]
+        if len(usdt) != 1:
+            raise Stable4EntryGrossRejected("SIGNED_BALANCE_INVALID")
+        equity = signed_number(usdt[0].get("balance"), "USDT.balance")
+        positions = []
+        for row in rows:
+            if not isinstance(row, dict):
+                raise Stable4EntryGrossRejected("SIGNED_POSITION_INVALID")
+            amount = signed_number(row.get("positionAmt"), "positionAmt")
+            if amount == 0:
+                continue
+            pnl = row.get("unRealizedProfit") if "unRealizedProfit" in row else row.get("unrealizedProfit")
+            equity += signed_number(pnl, "unrealizedProfit")
+            positions.append({"symbol": row.get("symbol"), "quantity": amount, "markPrice": signed_number(row.get("markPrice"), "markPrice"), "observedAt": position_observed})
+        try:
+            registry = read_registry()
+        except (OSError, RuntimeError, ValueError, KeyError, TypeError) as error:
+            raise Stable4EntryGrossRejected("REGISTRY_INVALID") from error
+        if registry.get("accountScope") != lease["accountScope"]:
+            raise Stable4EntryGrossRejected("ACCOUNT_SCOPE_INVALID")
+        pending = self.state.get("pendingOrder")
+        def normalized_symbol(value):
+            return str(value or "").upper().replace("USDT", "").replace("-", "").replace("_", "").replace("/", "").replace(":", "")
+        matches = [row for row in registry.get("entries", []) if row.get("reservationId") == client]
+        if (not isinstance(pending, dict) or pending.get("action") != "OPEN" or pending.get("clientId") != client
+                or normalized_symbol(pending.get("symbol")) != normalized_symbol(symbol) or pending.get("side") != side
+                or pending.get("quantity") != quantity or pending.get("price") != price or len(matches) != 1
+                or matches[0].get("strategyId") != str(pending.get("slot") or STRATEGY_ID)
+                or normalized_symbol(matches[0].get("symbol")) != normalized_symbol(symbol)
+                or matches[0].get("notionalUsd") != quantity * price):
+            raise Stable4EntryGrossRejected("OWN_RESERVATION_CONFLICT")
+        decision = evaluate_stable4_entry_gross({
+            "now": base.now_ms(),
+            "account": {"equityUsd": equity, "observedAt": min(balance_observed, position_observed)},
+            "positions": positions,
+            "pendingRegistry": registry,
+            "candidate": {"symbol": symbol, "side": "LONG" if side == "BUY" else "SHORT" if side == "SELL" else side, "notionalUsd": quantity * price, "ownReservationId": client},
+        })
+        current = owned()
+        if (current.get("ownerId"), current.get("leaseId")) != (lease.get("ownerId"), lease.get("leaseId")):
+            raise Stable4EntryGrossRejected("ACCOUNT_LOCK_CHANGED")
+        return decision
+
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
         if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
             return False
@@ -804,6 +884,23 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         quantity, price = self.aster.normalize(aster_symbol, quantity, base.finite(candidate["entryPrice"]), side)
         client = self.client_id(slot, symbol, "OPEN")
         self._set_pending({"slot": slot, "action": "OPEN", "symbol": symbol, "side": side, "quantity": quantity, "clientId": client, "candidate": candidate, "targetGross": target_gross, "price": price})
+        if self.live and os.getenv("DISDEX_STABLE4_MODE") == "LIVE":
+            try:
+                admission = self._stable4_final_entry_gross(aster_symbol, side, quantity, price, client)
+            except Stable4EntryGrossRejected as error:
+                own = self.state.get("pendingOrder")
+                if isinstance(own, dict) and own.get("action") == "OPEN" and own.get("clientId") == client:
+                    self._clear_pending()
+                self.log("v52-stable4-final-entry-held", slot=slot, reason=error.code, details=error.details)
+                return False
+            except Exception:
+                # All operations above precede submission. Preserve API/auth
+                # failures while releasing only this known unsent reservation.
+                own = self.state.get("pendingOrder")
+                if isinstance(own, dict) and own.get("action") == "OPEN" and own.get("clientId") == client:
+                    self._clear_pending()
+                raise
+            self.log("v52-stable4-final-entry-admitted", slot=slot, admission=admission)
         initial = self.aster.place_limit(symbol=aster_symbol, side=side, quantity=quantity, price=price, client_id=client, post_only=True)
         fill = initial if not self.live else self.aster.poll_fill(aster_symbol, client, quantity, side, base.V11_ENTRY_TTL_MS)
         notify_v52_fill(self, fill, "ENTRY_FILL", f"{slot}_ENTRY", slot)

@@ -1,4 +1,5 @@
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
+import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
 import { residentStopPlan, verifyResidentStopPartial, retireResidentStop, ensureResidentStop, type ResidentStopGateway } from "./venue-resident-stop";
 import { createHash, randomUUID } from "node:crypto";
@@ -1271,11 +1272,17 @@ export class Quality102CausalV1Runner {
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
                 reason: `${pending.reason || STRATEGY_ID} family=${pending.family || state.position?.family || "UNKNOWN"} variant=${pending.variant || state.position?.variant || "UNKNOWN"} layer=${pending.layer || state.position?.layer || "UNKNOWN"}`,
                 requireVenueMargin5xCross: !pending.reduceOnly,
+                ...(!pending.reduceOnly&&lock.document?{stable4Admission:{lease:{document:lock.document},ownReservationId:reservation?.reservationId}}:{}),
             };
             let result: DirectTradeResult;
             try {
                 result = await this.dependencies.executor.executeMarket(command);
             } catch (error) {
+                if(!pending.reduceOnly&&error instanceof Stable4EntryGrossAdmissionError){
+                    state.pending=undefined;this.recordFailure(state,error,pending.idempotencyKey);
+                    await this.dependencies.stateStore.save(state);
+                    return{status:"blocked-local",message:error.message,idempotencyKey:pending.idempotencyKey,ordersSent:0};
+                }
                 return this.manualReview(state, error instanceof Error ? error.message : String(error), pending.idempotencyKey);
             }
             if (result.symbol.toUpperCase() !== pending.symbol.toUpperCase()

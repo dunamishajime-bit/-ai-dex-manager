@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { assertHypeZecLiveGate, type HypeZecLongRuntime } from "../config/hypeZecLongRuntime";
+import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import { HYPE_ZEC_LONG_POLICY, type HypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
 import { calculateWalletRiskStop, moreProtectiveStop } from "./disdex-exit-overlay-contract";
@@ -414,8 +415,9 @@ export class HypeZecLongRunner {
     try {
       state.pending.phase = "submitted";
       await this.dependencies.stateStore.save(state);
-      result = await this.dependencies.executor.executeMarket({ requestId: idempotencyKey, clientOrderId: idempotencyKey, symbol, side: "BUY", positionSide: "BOTH", quantity: quantity.quantity, expectedPrice: signal.entryPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `HYPE_ZEC_${signal.strategy}_ENTRY`, requireVenueMargin5xCross: true });
+      result = await this.dependencies.executor.executeMarket({ requestId: idempotencyKey, clientOrderId: idempotencyKey, symbol, side: "BUY", positionSide: "BOTH", quantity: quantity.quantity, expectedPrice: signal.entryPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `HYPE_ZEC_${signal.strategy}_ENTRY`, requireVenueMargin5xCross: true,stable4Admission:{lease:lock} });
     } catch (error) {
+      if(error instanceof Stable4EntryGrossAdmissionError){state.pending=undefined;state.lastDecision={strategy:signal.strategy,signalTs:signal.signalTs,accepted:false,reason:error.message};await this.dependencies.stateStore.save(state);return{status:"held",message:error.message,strategy:signal.strategy};}
       return this.manualReview(state, `HYPE_ZEC_ENTRY_ERROR:${error instanceof Error ? error.message : String(error)}`);
     }
     if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `HYPE_ZEC_ENTRY_UNKNOWN:${idempotencyKey}`);
