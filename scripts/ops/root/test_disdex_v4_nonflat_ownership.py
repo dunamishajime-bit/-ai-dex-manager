@@ -52,6 +52,14 @@ class SoleV4OwnershipTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             attest_sole_v4_inventory(doc, SHA, positions, orders)
 
+    def test_terminal_zero_quantity_history_allows_only_the_reducers_roundoff_residual(self):
+        doc,positions,orders=fixture()
+        historical={"id":"historical","qty":0,"status":"CLOSED","reservationUsd":0,"exitRemainingQty":3.552713678800501e-15}
+        doc["state"]["legs"]["historical"]=historical
+        self.assertTrue(attest_sole_v4_inventory(doc,SHA,positions,orders)["verified"])
+        historical["exitRemainingQty"]=1e-11
+        self.assert_rejected(doc,positions,orders)
+
     def test_one_and_two_same_symbol_legs_have_exact_independent_stop_owners(self):
         for count in [1, 2]:
             doc, positions, orders = fixture(count)

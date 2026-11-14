@@ -181,13 +181,18 @@ def _attest(document, expected_sha, positions, orders):
         qty = _number(leg.get("qty"), "LEG_QTY", durable=True, nonnegative=True)
         reservation = _number(leg.get("reservationUsd"), "LEG_RESERVATION", durable=True, nonnegative=True)
         remaining = _number(leg.get("exitRemainingQty"), "LEG_EXIT_REMAINING", durable=True, nonnegative=True)
-        if reservation != 0 or remaining != 0:
+        if reservation != 0:
             _fail("LEG_RESERVATION_OR_EXIT_PENDING")
         status = leg.get("status")
         if status in ("CLOSED", "CANCELLED"):
-            if qty != 0:
+            # The unchanged TS EXIT_FILL reducer closes qty <= 1e-12 while
+            # subtraction may leave exitRemainingQty at machine roundoff.
+            # No venue residual or active intent is ignored by this allowance.
+            if qty != 0 or remaining > Decimal("1e-12"):
                 _fail("INACTIVE_LEG_NONZERO")
             continue
+        if remaining != 0:
+            _fail("LEG_RESERVATION_OR_EXIT_PENDING")
         if status != "OPEN" or qty <= 0:
             _fail("ACTIVE_LEG_NOT_OPEN")
         candidate = _object(leg.get("candidate"), "CANDIDATE")
