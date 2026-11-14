@@ -7,20 +7,20 @@ import {makeZip,type ZipEntry} from "@/lib/bt-verification/zip-store";
 import {BtcCandlestickChart} from "@/components/bt-verification/BtcCandlestickChart";
 import {EquityTimelineChart} from "@/components/bt-verification/EquityTimelineChart";
 import {GrossAllocationPanel} from "@/components/bt-verification/GrossAllocationPanel";
-const LIMITS={total:3.5,crypto:3,stock:1.5};
-const DEMO:Replay={schema:"disdex-bt-portfolio-v1",mode:"DEMO",engineSha:"DEMO_ONLY_NOT_CANONICAL",seed:123456,limits:LIMITS,frames:[
-{timestamp:"2025-10-01T00:00:00Z",btc:108200,equity:10000,realized:0,positions:[],events:[]},
-{timestamp:"2025-10-02T00:00:00Z",btc:109300,equity:10028,realized:0,positions:[{id:"v4-1",logic:"V4",symbol:"BTC",side:"LONG",quantity:0.03,entry:108200,mark:109300,gross:0.4,openedAt:"2025-10-02T00:00:00Z"}],events:["V4 BTC LONG 発火"]},
-{timestamp:"2025-10-03T00:00:00Z",btc:107400,equity:9950,realized:0,positions:[{id:"v4-1",logic:"V4",symbol:"BTC",side:"LONG",quantity:0.03,entry:108200,mark:107400,gross:0.4,openedAt:"2025-10-02T00:00:00Z"},{id:"pengu-1",logic:"PENGU",symbol:"PENGU",side:"SHORT",quantity:120,entry:0.034,mark:0.035,gross:0.35,openedAt:"2025-10-03T00:00:00Z"}],events:["PENGU SHORT 発火"]},
-{timestamp:"2025-10-04T00:00:00Z",btc:110300,equity:10060,realized:0,positions:[{id:"v4-1",logic:"V4",symbol:"BTC",side:"LONG",quantity:0.03,entry:108200,mark:110300,gross:0.4,openedAt:"2025-10-02T00:00:00Z"},{id:"pengu-1",logic:"PENGU",symbol:"PENGU",side:"SHORT",quantity:120,entry:0.034,mark:0.033,gross:0.35,openedAt:"2025-10-03T00:00:00Z"},{id:"q102-1",logic:"Q102",symbol:"AVAX",side:"LONG",quantity:9,entry:32,mark:33,gross:0.25,openedAt:"2025-10-04T00:00:00Z"}],events:["Q102 AVAX LONG 発火"]},
-{timestamp:"2025-10-05T00:00:00Z",btc:112000,equity:10110,realized:65,positions:[{id:"pengu-1",logic:"PENGU",symbol:"PENGU",side:"SHORT",quantity:120,entry:0.034,mark:0.032,gross:0.35,openedAt:"2025-10-03T00:00:00Z"},{id:"q102-1",logic:"Q102",symbol:"AVAX",side:"LONG",quantity:9,entry:32,mark:33.5,gross:0.25,openedAt:"2025-10-04T00:00:00Z"}],events:["V4 BTC 利確 / Gross解放"]},
-{timestamp:"2025-10-06T00:00:00Z",btc:109600,equity:10030,realized:48,positions:[{id:"q102-1",logic:"Q102",symbol:"AVAX",side:"LONG",quantity:9,entry:32,mark:31.8,gross:0.25,openedAt:"2025-10-04T00:00:00Z"}],events:["PENGU SHORT 決済 / Gross解放"]},
-{timestamp:"2025-10-07T00:00:00Z",btc:113000,equity:10140,realized:130,positions:[],events:["Q102 AVAX 利確 / 全建玉解放"]}
-]};
+import {BTWorkspaceShell,type BTWorkspaceTab} from "@/components/bt-verification/BTWorkspaceShell";
+import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo";
+import {Activity,Archive,BarChart3,CalendarDays,Clock3,Download,FileText,Pause,Play,RotateCcw,Save,Settings2,ShieldAlert,Upload} from "lucide-react";
+const DEMO=createPreviewReplay(123456,"trend");
+const SHOW_SERVER_ARCHIVE=true;
 const fmt=(n:number)=>n.toLocaleString("ja-JP",{maximumFractionDigits:2});
 const fmtOpt=(v:number|null|undefined)=>v===null||v===undefined?"—":fmt(v);
 function saveFile(name:string,body:string,type:string){const u=URL.createObjectURL(new Blob([body],{type}));const a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 export default function BTVerification(){
+const [tab,setTab]=useState<BTWorkspaceTab>("config");
+const [previewMode,setPreviewMode]=useState<"synthetic"|"historical">("synthetic");
+const [scenario,setScenario]=useState<DemoScenario>("trend");
+const [previewSeed,setPreviewSeed]=useState(123456);
+
 const [replay,setReplay]=useState<Replay>(DEMO),[cursor,setCursor]=useState(0),[running,setRunning]=useState(false),[speed,setSpeed]=useState(1),[selected,setSelected]=useState<string|null>(null),[error,setError]=useState("");
 const [selectedEvent,setSelectedEvent]=useState("");
 const [eventFilter,setEventFilter]=useState<"TRADES"|"RISK"|"FUNDING"|"ALL">("TRADES");
@@ -47,8 +47,45 @@ const recentEvents=replay.frames.slice(0,cursor+1).flatMap((f,i)=>f.events.map(e
    (eventFilter==="RISK"&&(row.event.includes(" BLOCK ")||row.event.includes(" RISK ")))||
    (eventFilter==="TRADES"&&([" ENTRY "," EXIT "," PARTIAL "," 発火"," エントリー"," 利確"," 決済"," 損切"].some(k=>row.event.includes(k)))))
  .slice(-35).reverse();
-const card="rounded-xl border border-cyan-800 bg-[#10243b] p-4";
-async function upload(e:React.ChangeEvent<HTMLInputElement>){const file=e.target.files?.[0];if(!file)return;try{if(file.size>60_000_000)throw Error("ファイルが60MBを超えています");const v=JSON.parse(await file.text()) as Replay;if(!validateReplay(v))throw Error("BTリプレイ形式が不正です");setReplay({...v,mode:"EXTERNAL"});setLogicFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setCursor(0);setRunning(false);setError("")}catch(err){setError(String(err))}e.target.value=""}
+const card="rounded-[16px] border border-[#2b445b] bg-[linear-gradient(145deg,#15283e_0%,#0f1f32_100%)] shadow-[0_6px_28px_rgba(1,8,20,.16)]";
+const metric="rounded-[14px] border border-[#2c4559] bg-[linear-gradient(180deg,#152a3d,#101f31)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,.025)]";
+const inputCls="w-full min-w-0 rounded-[9px] border border-[#344e64] bg-[#0b1a2b] px-3 py-2.5 text-[13px] font-medium text-slate-100 outline-none focus:border-cyan-400";
+const chosenCount=logicFilter.length+"ロジック / "+symbolFilter.length+"通貨";
+const initialEquity=replay.frames[0]?.equity??1;
+const equityChange=frame.equity-initialEquity;
+const changePct=initialEquity?equityChange/initialEquity*100:0;
+let peak=-Infinity,maxDrawdown=0;
+for(let i=0;i<=cursor;i++){const value=replay.frames[i].equity;peak=Math.max(peak,value);if(peak>0)maxDrawdown=Math.min(maxDrawdown,100*(value/peak-1))}
+const isResearch=replay.mode==="EXTERNAL";
+const sourceLabel=isResearch?"研究データ・未認証":"模擬再生・デモ";
+const titleCase=(s:string)=>s.replace("T"," ").replace("Z"," UTC");
+function prepareDemo(){
+  const demo=createPreviewReplay(previewSeed,scenario);
+  setReplay(demo);setCursor(0);setRunning(false);setError("");
+  setLogicFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.logic)))]);
+  setSymbolFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.symbol)))]);
+  return demo;
+}
+function startPlayback(){
+  if(previewMode==="historical"&&!isResearch){setError("実データはレポート画面からJSONを読み込んでください。新規BT計算は未接続です。");setTab("report");return}
+  if(previewMode==="synthetic")prepareDemo();
+  setCursor(0);setSelectedEvent("");setRunning(true);setTab("playback");
+}
+function switchTab(next:BTWorkspaceTab){setTab(next);setRunning(false)}
+function selector(label:string,all:string[],chosen:string[],setter:(x:string[])=>void){
+ return <div className="min-w-0">
+   <div className="mb-2 flex items-center justify-between"><label className="text-[13px] font-semibold text-slate-200">{label}</label><span className="text-[11px] text-[#7894ad]">{chosen.length} 選択</span></div>
+   <div className="flex min-h-[56px] flex-wrap items-center gap-1.5 rounded-xl border border-[#334d63] bg-[#0c1a2d] p-2">
+    {chosen.map(value=><button key={value} type="button" className="rounded-md border border-[#376280] bg-[#213952] px-2.5 py-1.5 text-[11px] font-semibold text-[#daebfb] hover:border-cyan-400" onClick={()=>setter(chosen.filter(x=>x!==value))}>{value} <span className="pl-1 text-cyan-400">×</span></button>)}
+    <select aria-label={label+"を追加"} className="max-w-full min-w-[84px] flex-1 bg-transparent px-1 text-[11px] text-cyan-200 outline-none" value="" onChange={e=>{if(e.target.value)setter([...chosen,e.target.value])}}>
+      <option value="">＋ 追加</option>
+      {all.filter(x=>!chosen.includes(x)).map(value=><option key={value} value={value}>{value}</option>)}
+    </select>
+   </div>
+ </div>
+}
+
+async function upload(e:React.ChangeEvent<HTMLInputElement>){const file=e.target.files?.[0];if(!file)return;try{if(file.size>60_000_000)throw Error("ファイルが60MBを超えています");const v=JSON.parse(await file.text()) as Replay;if(!validateReplay(v))throw Error("BTリプレイ形式が不正です");setReplay({...v,mode:"EXTERNAL"});setPreviewMode("historical");setTab("playback");setLogicFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(v.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setCursor(0);setRunning(false);setError("")}catch(err){setError(String(err))}e.target.value=""}
 function exportTimeline(){
   const rows:(string|number|null)[][]=[["timestamp","equity","realized","gross_total","gross_crypto","gross_stock","positions_count","unallocated_gross_x","gross_snapshot_source"]];
   for(const f of replay.frames){const g=grossForFrame(f);rows.push([f.timestamp,f.equity,f.realized,g.total,g.crypto,g.stock,f.positions.length,g.unallocated,f.gross?.source??"demo_or_unverified"])}
@@ -142,7 +179,7 @@ async function serverGet(id:string):Promise<Replay>{
 async function loadServerRun(id:string){
   try{
     const item=await serverGet(id);
-    setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});
+    setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});setPreviewMode(item.mode==="DEMO"?"synthetic":"historical");setTab("playback");
     setCursor(0);setRunning(false);
     setLogicFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.logic)))));
     setSymbolFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));
@@ -166,7 +203,7 @@ async function saveLibrary(){
   try{await saveRun(runName,replay);setSavedRuns(await listRuns());setSavedNotice("ブラウザー内に保存しました")}catch(e){setSavedNotice("保存失敗: "+String(e))}
 }
 async function loadLibrary(id:string){
-  try{const item=await readRun(id);if(!item||!validateReplay(item))throw Error("データが不正");setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});setCursor(0);setRunning(false);setLogicFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setSavedNotice("保存済みデータを再読込しました")}catch(e){setSavedNotice("再読込失敗: "+String(e))}
+  try{const item=await readRun(id);if(!item||!validateReplay(item))throw Error("データが不正");setReplay({...item,mode:item.mode==="DEMO"?"DEMO":"EXTERNAL"});setPreviewMode(item.mode==="DEMO"?"synthetic":"historical");setTab("playback");setCursor(0);setRunning(false);setLogicFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.logic)))));setSymbolFilter(Array.from(new Set(item.frames.flatMap(f=>f.positions.map(p=>p.symbol)))));setSavedNotice("保存済みデータを再読込しました")}catch(e){setSavedNotice("再読込失敗: "+String(e))}
 }
 async function downloadLibrary(id:string){
   try{
@@ -179,58 +216,188 @@ async function downloadLibrary(id:string){
 async function removeLibrary(id:string){
   try{await deleteRun(id);setSavedRuns(await listRuns());setSavedNotice("保存データを削除しました")}catch(e){setSavedNotice("削除失敗: "+String(e))}
 }
-return <div className="min-h-screen space-y-4 rounded-2xl bg-[#071321] p-5 text-slate-100"><header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">BT検証 / 時点同期ポートフォリオ</h1><p className="text-slate-400">BTC代表チャート・建玉・Gross・資産推移・保存/再読込</p></div><strong className="rounded-lg bg-amber-900 px-3 py-2 text-amber-200">{replay.mode==="DEMO"?"サンプル再生・正規BT未接続":"外部データ表示・検証未実施"}</strong></header>
-<div className={card}><div className="flex flex-wrap items-center gap-3"><button className="rounded-lg bg-teal-700 px-4 py-2" onClick={()=>setRunning(x=>!x)}>{running?"一時停止":"▶ BT再生"}</button><button className="rounded-lg bg-slate-700 px-4 py-2" onClick={()=>{setRunning(false);setCursor(0)}}>リセット</button><select value={speed} onChange={e=>setSpeed(Number(e.target.value))} className="rounded-lg bg-slate-800 p-2"><option value={1}>1x</option><option value={5}>5x</option><option value={20}>20x</option></select><span>{frame.timestamp.replace("T"," ").replace("Z"," UTC")}</span></div><input className="mt-4 w-full accent-cyan-400" aria-label="BT再生位置" type="range" min={0} max={replay.frames.length-1} value={cursor} onChange={e=>{setRunning(false);setCursor(Number(e.target.value))}}/></div>
-<div className="grid gap-3 md:grid-cols-4">{[["評価資産",fmt(frame.equity)],["確定損益",fmt(frame.realized)],["保有建玉数",String(frame.positions.length)],["Gross合計",total.toFixed(2)+"x"]].map(x=><div key={x[0]} className={card}><p className="text-sm text-slate-400">{x[0]}</p><b className="text-2xl">{x[1]}</b></div>)}</div>
-<div className="grid gap-4 xl:grid-cols-2"><GrossAllocationPanel frame={frame} limits={replay.limits} unverifiedCap={replay.source?.grossCapEvidence==="USER_SUPPLIED_NOT_VERIFIED"} researchManifestCap={replay.source?.grossCapEvidence==="SOURCE_SUMMARY_MATCHED_RESEARCH_ONLY"} onSelect={setSelected} selected={selected}/>
-<section className={card}><h2 className="mb-4 text-xl font-bold">BTC代表チャート / 資産推移</h2>{(replay.btcCandles?.length??0)>0?<BtcCandlestickChart replay={replay} cursor={cursor} onEventSelect={(at,label)=>{setRunning(false);setCursor(at);setSelectedEvent(label)}}/>:replay.frames.every(f=>f.btc!==null)?<svg viewBox="0 0 600 210" className="w-full rounded-lg bg-[#081524]" role="img" aria-label="BTC価格と発火時刻">{replay.frames.map((f,i)=>i>0?<line key={i} x1={20+(i-1)*550/(replay.frames.length-1)} y1={180-((replay.frames[i-1].btc??0)-100000)/100} x2={20+i*550/(replay.frames.length-1)} y2={180-((f.btc??0)-100000)/100} stroke={(f.btc??0)>=(replay.frames[i-1].btc??0)?"#2dd4bf":"#fb7185"} strokeWidth="4" opacity={i<=cursor?1:0.25}/>:null)}{replay.frames.slice(0,cursor+1).map((f,i)=>f.events.length>0?<circle key={i} cx={20+i*550/(replay.frames.length-1)} cy={180-((f.btc??0)-100000)/100} r="6" fill="#fbbf24"/>:null)}<text x="15" y="200" fontSize="12" fill="#cbd5e1">黄点：取引イベント</text></svg>:<p className="p-4 text-amber-300">BTC時系列未収録。実データを推測して描画しません。</p>}<h3 className="my-2 font-bold">エクイティカーブ</h3><EquityTimelineChart frames={replay.frames} cursor={cursor}/><p className="mt-2 text-sm">最新イベント：{frame.events.join(" / ")||"なし"}</p>{frame.events.length>0&&<p className="mt-2 rounded-lg border border-cyan-700 p-2 text-sm">前回スナップショット→現時点のTotal Gross：{cursor>0?grossForFrame(replay.frames[cursor-1]).total.toFixed(2):"0.00"}x → {total.toFixed(2)}x ／ 建玉数：{cursor>0?replay.frames[cursor-1].positions.length:0} → {frame.positions.length}（厳密な注文前後ではありません）</p>}</section></div>
-<section className={card}><h2 className="mb-3 text-xl font-bold">現在のポートフォリオ（時点同期）</h2><p className="text-xs text-slate-400">元台帳に現在価格・実約定数量がない建玉は未算定。発注時名目額（JPY）とデモ時価（USD/USDT）は別単位です。</p><div className="overflow-x-auto"><table className="w-full whitespace-nowrap text-left text-sm"><thead><tr>{["ロジック","銘柄","売買","数量","取得価格","現在価格","名目額（入力元）","Gross","Total割合","含み損益"].map(n=><th key={n} className="border-b border-slate-600 p-2">{n}</th>)}</tr></thead><tbody>{positions.map(p=><tr key={p.id} onClick={()=>setSelected(p.id)} className={selected===p.id?"cursor-pointer bg-slate-700":"cursor-pointer hover:bg-slate-800"}>{[p.logic,p.symbol,p.side,p.quantity,fmt(p.entry),fmtOpt(p.mark),p.notional!==undefined&&p.notional!==null?fmt(p.notional)+" JPY（発注時）":p.quantity!==null&&p.mark!==null?fmt(p.quantity*p.mark)+" "+(p.symbol.endsWith("USDT")?"USDT":"USD"):"—",p.gross!==null?p.gross.toFixed(2)+"x":"未算定",p.gross!==null?(100*p.gross/replay.limits.total).toFixed(1)+"%":"—",p.quantity!==null&&p.mark!==null?fmt((p.mark-p.entry)*p.quantity*(p.side==="LONG"?1:-1)):"—"].map((v,i)=><td key={i} className="border-b border-slate-800 p-2">{v}</td>)}</tr>)}</tbody></table></div>{positions.length===0&&<p className="p-3 text-slate-400">保有建玉なし</p>}{positions.find(p=>p.id===selected)&&<p className="mt-3 text-cyan-300">選択建玉：{positions.find(p=>p.id===selected)?.logic} / {positions.find(p=>p.id===selected)?.symbol}</p>}</section>
-<section className={card}><h2 className="mb-2 text-lg font-bold">取引イベント履歴（クリックで該当時点へ移動）</h2><label className="mb-2 flex items-center gap-2 text-sm">表示対象 <select aria-label="イベント種類" value={eventFilter} onChange={e=>setEventFilter(e.target.value as "TRADES"|"RISK"|"FUNDING"|"ALL")} className="rounded bg-slate-800 px-2 py-1"><option value="TRADES">売買・部分決済</option><option value="RISK">リスク・ブロック</option><option value="FUNDING">Funding</option><option value="ALL">すべて</option></select></label><p className="mb-2 text-sm text-slate-400">ENTRY / EXIT / BLOCK / RISKイベントを時刻順に表示。モデル取引であり、本番約定記録ではありません。</p><div className="max-h-56 space-y-1 overflow-y-auto">{recentEvents.map((row,i)=><button key={row.index+"-"+i} onClick={()=>{setRunning(false);setCursor(row.index);setSelectedEvent(row.event)}} className="flex w-full flex-wrap justify-between gap-2 rounded-lg border border-slate-700 p-2 text-left text-sm hover:bg-slate-800"><span className="text-cyan-300">{row.timestamp}</span><span className={row.event.includes("BLOCK")?"text-amber-300":"text-slate-200"}>{row.event}</span></button>)}</div>{selectedEvent&&<p className="mt-3 rounded-lg border border-cyan-500/40 p-3 text-sm">選択イベント：{selectedEvent}</p>}</section>
-{(replay.strategyCatalog?.length??0)>0&&<section className={card}>
-  <h2 className="mb-2 text-lg font-bold">ロジック登録情報（読み込んだBTの参照元）</h2>
-  <p className="mb-3 text-sm text-amber-200">研究BTの記録に含まれるSHAです。現在LIVEの最新ロジックと一致する証明ではありません。</p>
-  <div className="grid gap-2 lg:grid-cols-2">{(replay.strategyCatalog??[]).map(item=><div key={item.logic} className="rounded-lg border border-slate-700 bg-slate-900/70 p-3">
-    <div className="flex flex-wrap justify-between gap-2">
-      <strong>{item.logic}</strong><span className="text-sm text-slate-300">{item.trades}モデル取引 / {item.symbols}通貨</span>
+return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={sourceLabel}>
+  {tab==="config"&&<div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.22fr)_minmax(0,.96fr)]">
+    <section className={card+" overflow-hidden"}>
+      <div className="flex items-center gap-3 border-b border-[#2b445a] px-5 py-4">
+        <Settings2 className="h-5 w-5 text-cyan-300"/>
+        <div className="min-w-0"><h2 className="text-[17px] font-bold text-white">検証条件</h2>
+          <p className="mt-1 text-[11px] text-[#8da5be]">ロジック・銘柄・再生モードを選択して視覚的に検証します。</p></div>
+      </div>
+      <div className="space-y-5 p-5">
+        <div className="grid gap-3 lg:grid-cols-[164px_minmax(0,1fr)]">
+          <div><p className="text-[13px] font-bold text-slate-100">ロジック選択 <span className="ml-1 rounded bg-rose-700/50 px-1.5 py-0.5 text-[10px] text-rose-100">必須</span></p><p className="mt-1 text-[11px] leading-5 text-[#829bb4]">一覧から追加・削除できます。</p></div>
+          {selector("検証対象ロジック",catalogs.logics,logicFilter,setLogicFilter)}
+        </div>
+        <div className="grid gap-3 border-t border-[#223a50] pt-4 lg:grid-cols-[164px_minmax(0,1fr)]">
+          <div><p className="text-[13px] font-bold text-slate-100">通貨選択 <span className="ml-1 rounded bg-rose-700/50 px-1.5 py-0.5 text-[10px] text-rose-100">必須</span></p><p className="mt-1 text-[11px] leading-5 text-[#829bb4]">時点同期の表示対象です。</p></div>
+          {selector("対象通貨・株式",catalogs.symbols,symbolFilter,setSymbolFilter)}
+        </div>
+        <div className="grid gap-3 border-t border-[#223a50] pt-4 lg:grid-cols-[164px_minmax(0,1fr)]">
+          <div><p className="text-[13px] font-bold text-slate-100">検証モード</p><p className="mt-1 text-[11px] leading-5 text-[#829bb4]">研究データの再生、または合成相場のプレビュー。</p></div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button type="button" onClick={()=>setPreviewMode("historical")}
+              className={"flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-[13px] font-semibold "+(previewMode==="historical"?"border-cyan-400 bg-[#11434a] text-cyan-100":"border-[#37516a] bg-[#102139] text-[#92abc3]")}>
+              <Archive className="h-4 w-4"/> 実データを読込・再生
+            </button>
+            <button type="button" onClick={()=>setPreviewMode("synthetic")}
+              className={"flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-[13px] font-semibold "+(previewMode==="synthetic"?"border-cyan-400 bg-[#11434a] text-cyan-100":"border-[#37516a] bg-[#102139] text-[#92abc3]")}>
+              <Activity className="h-4 w-4"/> 模擬チャート再生
+            </button>
+            <p className="text-[11px] leading-5 text-[#8ca8bb] sm:col-span-2">実データは研究BTのJSON読込後に再生できます。新規BT計算は未接続です。</p>
+          </div>
+        </div>
+        <div className="grid gap-3 border-t border-[#223a50] pt-4 lg:grid-cols-[164px_minmax(0,1fr)]">
+          <div><p className="text-[13px] font-bold text-slate-100">期間</p><p className="mt-1 text-[11px] leading-5 text-[#829bb4]">読み込んだデータの記録期間。</p></div>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <div className="relative"><CalendarDays className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#698daa]"/><input aria-label="データ開始日" type="date" value={replay.frames[0].timestamp.slice(0,10)} readOnly className={inputCls+" pl-9 opacity-80"}/></div>
+            <span className="text-slate-400">〜</span>
+            <div className="relative"><CalendarDays className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-[#698daa]"/><input aria-label="データ終了日" type="date" value={replay.frames[replay.frames.length-1].timestamp.slice(0,10)} readOnly className={inputCls+" pl-9 opacity-80"}/></div>
+          </div>
+        </div>
+        <div className="grid gap-3 border-t border-[#223a50] pt-4 lg:grid-cols-[164px_minmax(0,1fr)]">
+          <div><p className="text-[13px] font-bold text-slate-100">シナリオ（模擬時）</p><p className="mt-1 text-[11px] leading-5 text-[#829bb4]">チャートの動きを切り替えられます。</p></div>
+          <div className="flex flex-wrap gap-2">{([
+            ["trend","↗ 上昇相場"],["range","↔ レンジ"],["down","↘ 下落相場"],["volatile","⌁ 高変動"]
+          ] as const).map(([id,label])=><button type="button" key={id} disabled={previewMode!=="synthetic"}
+            onClick={()=>setScenario(id)}
+            className={"rounded-lg border px-3 py-2 text-[12px] font-semibold disabled:opacity-40 "+(scenario===id?"border-cyan-400 bg-[#144e52] text-cyan-100":"border-[#3a536a] bg-[#112238] text-[#95adc6] hover:border-cyan-600")}>{label}{scenario===id?" ✓":""}</button>)}</div>
+        </div>
+        <div className="grid gap-3 border-t border-[#223a50] pt-4 sm:grid-cols-3">
+          <label className="text-xs font-medium text-[#95abc1]">シード値
+            <input aria-label="模擬シード値" type="number" min={0} max={2147483647} value={previewSeed} disabled={previewMode!=="synthetic"}
+              onChange={e=>setPreviewSeed(Math.max(0,Math.min(2147483647,Number(e.target.value)||0)))} className={inputCls+" mt-2 disabled:opacity-60"}/></label>
+          <label className="text-xs font-medium text-[#95abc1]">再生速度
+            <select value={speed} onChange={e=>setSpeed(Number(e.target.value))} className={inputCls+" mt-2"}><option value={1}>1x</option><option value={5}>5x</option><option value={20}>20x</option></select></label>
+          <div className="text-xs font-medium text-[#95abc1]">初期資金（データ記録値）
+            <div className={inputCls+" mt-2 text-right opacity-80"}>¥ {fmt(initialEquity)}</div></div>
+        </div>
+        <div className="rounded-xl border border-amber-700/30 bg-amber-950/10 p-3 text-[11px] leading-5 text-amber-100/90">
+          <ShieldAlert className="mr-1 inline h-4 w-4"/> この画面のロジック・銘柄選択は再生の<strong>表示フィルター</strong>です。選択を変えても過去BTの取引結果・Grossは再計算されません。模擬データは実際の相場や運用成績ではありません。
+        </div>
+        <div className="grid gap-2 border-t border-[#2b445b] pt-4 sm:grid-cols-3">
+          <button type="button" onClick={()=>{prepareDemo();setTab("playback")}} disabled={previewMode!=="synthetic"} className="flex items-center justify-center gap-2 rounded-xl border border-[#3685bc] bg-[#12364d] px-3 py-3 text-xs font-bold text-cyan-100 hover:border-cyan-400 disabled:opacity-50"><Activity className="h-4 w-4"/>模擬チャート生成</button>
+          <button type="button" onClick={startPlayback} disabled={previewMode==="historical"&&!isResearch} className="flex items-center justify-center gap-2 rounded-xl border border-[#3cf3dd]/70 bg-[linear-gradient(110deg,#078e95,#12b8a5)] px-3 py-3 text-sm font-bold text-white shadow-[0_8px_28px_rgba(0,184,169,.2)] hover:brightness-110 disabled:opacity-50"><Play className="h-4 w-4 fill-current"/> BT再生を開始</button>
+          <button type="button" onClick={()=>setTab("library")} className="flex items-center justify-center gap-2 rounded-xl border border-[#46627d] bg-[#1a3047] px-3 py-3 text-xs font-bold text-slate-100 hover:border-cyan-500"><Save className="h-4 w-4"/>設定・再生を保存</button>
+        </div>
+        {error&&<div className="rounded-lg border border-rose-500/50 p-3 text-xs text-rose-200">{error}</div>}
+      </div>
+    </section>
+    <div className="space-y-4">
+      <section className={card+" p-4"}>
+        <div className="mb-3 flex items-center justify-between gap-2"><h2 className="flex items-center gap-2 text-[15px] font-bold text-white"><Activity className="h-5 w-5 text-cyan-300"/>BTC代表チャートプレビュー</h2><span className="rounded-full border border-[#3c6582] bg-[#18364e] px-2 py-1 text-[10px] text-[#b1d7e8]">{replay.mode==="DEMO"?"模擬データ":"研究データ"}</span></div>
+        {(replay.btcCandles?.length??0)>0?<BtcCandlestickChart replay={replay} cursor={replay.frames.length-1} onEventSelect={(at,label)=>{setCursor(at);setSelectedEvent(label);setTab("playback")}}/>:
+        <div className="rounded-xl border border-dashed border-[#365269] p-8 text-center text-sm text-[#8ea8bf]">BTCローソク足はこのデータに含まれていません。</div>}
+        <p className="mt-2 rounded-lg bg-[#172f47] p-2 text-[11px] text-[#96b8d0]">シード値で模擬相場を再現。BTCの代表チャートと各通貨の取引イベントを同じ時間軸に表示します。</p>
+      </section>
+      <section className={card+" overflow-hidden"}>
+        <div className="border-b border-[#2b4356] px-4 py-3"><h2 className="flex items-center gap-2 text-[15px] font-bold text-white"><Archive className="h-4 w-4 text-cyan-300"/>ロジック登録情報</h2><p className="mt-1 text-[11px] text-[#8ca2b9]">この再生データに記録されたロジック。最新LIVEの認証済みバージョンとは限りません。</p></div>
+        <div className="overflow-x-auto"><table className="w-full min-w-[400px] text-left text-[12px]">
+          <thead className="bg-[#162b40] text-[#a2b8cf]"><tr>{["ロジック","状態","モデル取引","参照元"].map(x=><th key={x} className="px-3 py-2.5 font-medium">{x}</th>)}</tr></thead>
+          <tbody>{(replay.strategyCatalog?.length?replay.strategyCatalog.map(x=>({logic:x.logic,amount:x.trades,ref:x.sourceRuntimeShas[0]??"記録なし"})):catalogs.logics.map(x=>({logic:x,amount:0,ref:"模擬用"}))).map(x=><tr key={x.logic} className="border-t border-[#283f54]"><td className="px-3 py-3 font-bold text-cyan-300">{x.logic}</td><td className="px-3 py-3"><span className="rounded-full bg-amber-900/30 px-2 py-1 text-[10px] text-amber-200">未認証</span></td><td className="px-3 py-3 text-slate-200">{x.amount||"—"}</td><td className="max-w-28 truncate px-3 py-3 font-mono text-[10px] text-[#9aaec2]" title={x.ref}>{x.ref.slice(0,12)}</td></tr>)}</tbody>
+        </table></div>
+      </section>
     </div>
-    <p className="mt-2 text-xs text-slate-400">記録モデル：{item.modelClasses.join(" / ")||"不明"}</p>
-    <p className="mt-1 break-all font-mono text-xs text-cyan-200">参照SHA：{item.sourceRuntimeShas.join(", ")||"不明"}</p>
-    <p className="mt-1 text-xs text-amber-300">研究台帳参照・最新版未照合</p>
-  </div>)}</div>
-</section>}
-<p className="text-xs text-slate-400">以下のプルダウンは読み込んだBTの表示フィルターです。新しいロジック組合せによるBT計算は正規BTエンジン接続後に利用できます。</p>
-<section className={card}><h2 className="mb-2 text-lg font-bold">表示フィルター（プルダウン追加・削除）</h2><div className="grid gap-3 md:grid-cols-2">{([["ロジック",catalogs.logics,logicFilter,setLogicFilter],["通貨",catalogs.symbols,symbolFilter,setSymbolFilter]] as const).map(([label,all,chosen,setter])=><div key={label}><p>{label}</p><select className="w-full rounded bg-slate-800 p-2" value="" onChange={e=>{if(e.target.value)(setter as (x:string[])=>void)(Array.from(new Set([...chosen,e.target.value])))}}><option value="">＋追加</option>{all.filter(x=>!chosen.includes(x)).map(x=><option key={x}>{x}</option>)}</select><div className="flex flex-wrap gap-2 py-2">{chosen.map(x=><button className="rounded border border-cyan-600 px-2 py-1" key={x} onClick={()=>(setter as (x:string[])=>void)(chosen.filter(y=>x!==y))}>{x} ×</button>)}</div></div>)}</div></section>
-{(replay.researchSummary||replay.strategyStats?.length)?<section className={card}>
- <h2 className="mb-3 text-xl font-bold">BT検証レポート（モデル取引・研究集計）</h2>
- <p className="mb-3 text-sm text-amber-200">この表は読み込んだ研究BTの保存集計です。実約定・現行LIVEとの完全一致を示しません。最大DDは研究集計上の時間足基準値です。</p>
- {replay.researchSummary&&<div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
- {[
-  ["コスト",replay.researchSummary.costBps+"bps"],
-  ["勝率",replay.researchSummary.winRatePct.toFixed(2)+"%"],
-  ["最大DD",replay.researchSummary.maxDdPct.toFixed(2)+"%"],
-  ["PF",replay.researchSummary.profitFactor.toFixed(3)],
-  ["モデル取引",String(replay.researchSummary.modelFills)],
-  ["研究集計最終資産","¥"+fmt(replay.researchSummary.finalEquityJpy)]
- ].map(([label,value])=><div key={label} className="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
-  <p className="text-xs text-slate-400">{label}</p><strong className="mt-1 block text-lg">{value}</strong>
- </div>)}</div>}
- {(replay.strategyStats?.length??0)>0&&<div className="mt-4">
-  <h3 className="mb-1 font-bold">ロジック×通貨別 損益・勝率</h3>
-  <p className="mb-2 text-xs text-slate-400">研究モデルの取引結果を通貨ごとに分類。損益の単位はJPY。複利口座の最終資産との単純合計一致を保証するものではありません。</p>
-  <div className="max-h-80 overflow-auto"><table className="w-full whitespace-nowrap text-left text-xs">
-    <thead className="sticky top-0 bg-slate-900"><tr>{["ロジック","銘柄","モデル約定数","決済数","勝率","モデル純損益 JPY","単独最大損失 JPY"].map(x=><th className="p-2" key={x}>{x}</th>)}</tr></thead>
-    <tbody>{[...(replay.strategyStats??[])].sort((a,b)=>(a.winRatePct??100)-(b.winRatePct??100)).map(r=><tr className="border-t border-slate-800" key={r.logic+"-"+r.symbol}>
-      {[r.logic,r.symbol,r.tradeCount,r.closedCount,r.winRatePct===null?"—":r.winRatePct.toFixed(1)+"%",fmt(r.netPnlJpy),r.maxLossJpy===null?"—":fmt(r.maxLossJpy)].map((v,i)=><td className="p-2" key={i}>{v}</td>)}
-    </tr>)}</tbody>
-  </table></div></div>}
-</section>:null}
-<section className={card}><h2 className="mb-2 text-lg font-bold">保存・ダウンロード・Codex/GPT分析</h2><p className="mb-3 text-sm text-slate-400">外部データには正規BTエンジンの署名・SHA照合が必要です。このページのサンプル値はBT実績ではありません。</p><div className="mb-3 flex flex-wrap items-center gap-2"><input aria-label="保存名" value={runName} onChange={e=>setRunName(e.target.value)} className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2"/><button onClick={saveLibrary} className="rounded-lg bg-teal-800 px-4 py-2">保存ライブラリに登録</button><span className="text-sm text-cyan-200">{savedNotice}</span></div><div className="flex flex-wrap gap-2"><button className="rounded-lg bg-teal-700 px-4 py-2" onClick={()=>saveFile("bt_replay.json",JSON.stringify(replay,null,2),"application/json")}>JSONダウンロード</button><button className="rounded-lg bg-slate-700 px-4 py-2" onClick={exportTimeline}>資産/Gross時系列 CSV</button><button className="rounded-lg bg-slate-700 px-4 py-2" onClick={exportPositions}>建玉時系列 CSV</button><button className="rounded-lg bg-slate-700 px-4 py-2" onClick={exportStrategyStats}>ロジック別CSV</button><button className="rounded-lg bg-violet-800 px-4 py-2" onClick={exportPackage}>GPT / Codex用 ZIPエクスポート</button><label className="cursor-pointer rounded-lg border border-cyan-600 px-4 py-2">JSON再読込 <input className="hidden" type="file" accept=".json" onChange={upload}/></label></div>{error&&<p className="mt-2 text-rose-300">{error}</p>}<h3 className="mt-5 mb-2 font-bold">認証済みサーバー保存（端末間共有）</h3>
-<p className="mb-2 text-xs text-slate-400">サーバー保存は正式なOwnerセッション・専用保存先の設定がある場合だけ有効です。未設定でもブラウザー保存は利用できます。</p>
-<div className="flex flex-wrap gap-2">
- <button className="rounded bg-teal-800 px-3 py-2 text-sm" onClick={saveServerRun}>サーバーへ保存</button>
- <button className="rounded bg-slate-700 px-3 py-2 text-sm" onClick={refreshServerRuns}>サーバー保存一覧を更新</button>
-</div>
-{serverNotice&&<p className="my-2 text-sm text-cyan-200">{serverNotice}</p>}
-<div className="max-h-52 space-y-1 overflow-y-auto">{serverRuns.map(item=><div key={item.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 py-2 text-xs"><span>{item.name} / {item.frames}時点 / {(item.bytes/1024/1024).toFixed(1)}MB / {item.createdAt}</span><div className="flex flex-wrap gap-2"><button className="rounded bg-cyan-800 px-2 py-1" onClick={()=>loadServerRun(item.id)}>再生</button><button className="rounded bg-slate-700 px-2 py-1" onClick={()=>downloadServerRun(item.id)}>JSON DL</button><button className="rounded bg-rose-950 px-2 py-1" onClick={()=>deleteServerRun(item.id)}>削除</button></div></div>)}</div>
-<h3 className="mt-4 mb-2 font-bold">保存済みのBT再生</h3><p className="text-xs text-slate-400">このブラウザー内のみ保存。PC変更やブラウザーデータ削除に備えてJSONをダウンロードしてください。</p><div className="space-y-2">{savedRuns.map(item=><div key={item.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 py-2"><span>{item.name} / {item.frames}時点 / {item.createdAt}</span><div className="flex gap-2"><button className="rounded bg-cyan-800 px-3 py-1" onClick={()=>loadLibrary(item.id)}>再読込</button><button className="rounded bg-slate-700 px-3 py-1" onClick={()=>downloadLibrary(item.id)}>JSONをDL</button><button className="rounded bg-rose-950 px-3 py-1" onClick={()=>removeLibrary(item.id)}>削除</button></div></div>)}</div></section><p className="text-xs text-slate-400">Read-only / DEMO。LIVE注文・Runner・STOP・Kill Switchとは非接続。画面のGrossはスナップショット値であり、正式なBT計算は行いません。</p></div>
+  </div>}
+  {tab==="playback"&&<div className="space-y-4">
+    <section className={card+" flex flex-wrap items-center gap-3 px-4 py-3"}>
+      <button type="button" onClick={()=>setRunning(x=>!x)} className="flex items-center justify-center gap-2 rounded-lg border border-cyan-400 bg-[#14515b] px-5 py-2.5 text-[13px] font-bold text-white hover:bg-[#16606c]">{running?<><Pause className="h-4 w-4"/>一時停止</>:<><Play className="h-4 w-4"/>再生</>}</button>
+      <button type="button" onClick={()=>{setRunning(false);setCursor(0)}} className="flex items-center gap-2 rounded-lg border border-[#3d5870] bg-[#1b2f45] px-4 py-2.5 text-[12px] text-slate-100"><RotateCcw className="h-4 w-4"/>リセット</button>
+      <div className="flex items-center gap-2 border-l border-[#355066] pl-3"><span className="text-xs text-[#8ea7be]">速度</span>{[1,5,20].map(n=><button key={n} onClick={()=>setSpeed(n)} className={"rounded-md border px-3 py-2 text-[12px] "+(speed===n?"border-cyan-400 bg-[#124f57] text-cyan-100":"border-[#3c536b] text-slate-300")}>{n}x</button>)}</div>
+      <div className="ml-auto flex items-center gap-2 rounded-lg border border-[#35516c] bg-[#0a192b] px-3 py-2 text-[12px] text-[#c7dae9]"><Clock3 className="h-4 w-4 text-cyan-300"/> {titleCase(frame.timestamp)}</div>
+      <label className="w-full"><span className="sr-only">BT再生時刻</span><input type="range" min={0} max={replay.frames.length-1} value={cursor} aria-label="BT再生時刻" onChange={e=>{setRunning(false);setCursor(Number(e.target.value))}} className="w-full cursor-pointer accent-cyan-400"/></label>
+    </section>
+    <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 2xl:grid-cols-6">
+      {([
+        ["現在残高","¥ "+fmt(frame.equity),(changePct>=0?"+":"")+changePct.toFixed(2)+"%",changePct>=0?"text-emerald-300":"text-rose-300"],
+        ["開始からの増減","¥ "+fmt(equityChange),(changePct>=0?"+":"")+changePct.toFixed(2)+"%","text-cyan-200"],
+        ["確定損益","¥ "+fmt(frame.realized),"モデル台帳","text-emerald-300"],
+        ["最大DD",maxDrawdown.toFixed(2)+"%","再生済み区間","text-rose-300"],
+        ["使用中Gross",total.toFixed(2)+"x",((total/replay.limits.total)*100).toFixed(1)+"% / Total上限","text-cyan-100"],
+        ["保有建玉",String(frame.positions.length),replay.researchSummary?"研究取引 "+replay.researchSummary.modelFills+"件":"デモ専用","text-[#d8e8f6]"]
+      ] as const).map(([label,val,sub,color])=><div key={label} className={metric}><div className="mb-2 text-[11px] font-semibold text-[#8da6bd]">{label}</div><div className={"text-[19px] font-bold tracking-tight sm:text-[22px] "+color}>{val}</div><div className="mt-1 text-[11px] text-[#819cb3]">{sub}</div></div>)}
+    </div>
+    <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1.75fr)_minmax(310px,.85fr)]">
+      <section className={card+" min-w-0 p-4"}>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="flex items-center gap-2 text-[16px] font-bold text-white"><Activity className="h-5 w-5 text-cyan-300"/>BTC / USDT（代表チャート）</h2><span className="text-[11px] text-[#a7becd]">1時間確定足・モデル発火マーカー</span></div>
+        {(replay.btcCandles?.length??0)>0?<BtcCandlestickChart replay={replay} cursor={cursor} onEventSelect={(at,label)=>{setRunning(false);setCursor(at);setSelectedEvent(label)}}/>:<div className="rounded-lg border border-dashed border-[#38546b] p-10 text-center text-[#8ea6ba]">確定済BTCローソク足を読み込むと表示されます。</div>}
+      </section>
+      <section className={card+" min-w-0 overflow-hidden"}>
+        <div className="flex items-center justify-between border-b border-[#30485e] px-4 py-3"><h2 className="text-[15px] font-bold text-white">取引イベント（時点同期）</h2><select aria-label="イベント種別" value={eventFilter} onChange={e=>setEventFilter(e.target.value as typeof eventFilter)} className="rounded-md border border-[#426078] bg-[#172d44] px-2 py-1 text-[11px]"><option value="TRADES">売買</option><option value="RISK">リスク</option><option value="FUNDING">Funding</option><option value="ALL">全て</option></select></div>
+        <div className="max-h-[415px] min-h-[285px] overflow-y-auto">{recentEvents.length?recentEvents.map((e,i)=><button type="button" key={e.index+"-"+i} onClick={()=>{setRunning(false);setCursor(e.index);setSelectedEvent(e.event)}} className="flex w-full items-start gap-3 border-b border-[#263b50] px-4 py-3 text-left hover:bg-[#1b3349]"><span className={"mt-1 h-2.5 w-2.5 shrink-0 rounded-full "+(e.event.includes("EXIT")?"bg-emerald-400":e.event.includes("PARTIAL")?"bg-violet-400":"bg-cyan-400")}/><span className="min-w-0"><span className="block text-[11px] text-[#87a3bc]">{e.timestamp.slice(5,16).replace("T"," ")}</span><span className="mt-1 block break-all text-[12px] leading-5 text-[#d6e4f1]">{e.event}</span></span></button>):<p className="p-6 text-sm text-[#87a0b9]">この時点までにイベントはありません。</p>}</div>
+      </section>
+    </div>
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,.94fr)]">
+      <section className={card+" min-w-0 p-4"}><h2 className="mb-3 flex items-center gap-2 text-[16px] font-bold text-white"><BarChart3 className="h-5 w-5 text-cyan-300"/>エクイティカーブ（資産推移）</h2><EquityTimelineChart frames={replay.frames} cursor={cursor}/></section>
+      <GrossAllocationPanel frame={frame} limits={replay.limits} selected={selected} onSelect={setSelected} researchManifestCap={replay.source?.grossCapEvidence==="SOURCE_SUMMARY_MATCHED_RESEARCH_ONLY"} unverifiedCap={replay.source?.grossCapEvidence==="USER_SUPPLIED_NOT_VERIFIED"}/>
+    </div>
+    <section className={card+" min-w-0 p-4"}>
+      <div className="mb-3 flex items-center justify-between gap-2"><h2 className="text-[16px] font-bold text-white">保有建玉ポートフォリオ</h2><span className="rounded-full bg-[#17404a] px-3 py-1 text-[11px] text-cyan-200">{frame.positions.length} 建玉 / Gross {total.toFixed(2)}x</span></div>
+      <p className="mb-3 text-[11px] text-[#8ea6bb]">ロジック・通貨の表示フィルターは建玉一覧だけに適用され、Total Grossと口座資産は変わりません。欠損した現在値は推測しません。</p>
+      <div className="overflow-x-auto"><table className="w-full min-w-[790px] text-left text-[12px]"><thead className="bg-[#182f45] text-[#9db8cc]"><tr>{["銘柄","ロジック","方向","数量","取得価格","現在価格","含み損益※","現在Gross","Total上限比"].map(n=><th key={n} className="px-3 py-3 font-medium">{n}</th>)}</tr></thead>
+      <tbody>{positions.map(p=><tr key={p.id} onClick={()=>setSelected(p.id)} className={"cursor-pointer border-t border-[#2d4456] hover:bg-[#1b354b] "+(selected===p.id?"bg-[#1b4054]":"")}>
+        <td className="px-3 py-3 font-semibold text-white">{p.symbol}</td><td className="px-3 py-3 font-semibold text-cyan-300">{p.logic}</td>
+        <td className="px-3 py-3"><span className={"rounded-md px-2 py-1 text-[10px] font-bold "+(p.side==="LONG"?"bg-emerald-800/40 text-emerald-300":"bg-rose-900/35 text-rose-300")}>{p.side}</span></td>
+        <td className="px-3 py-3">{fmtOpt(p.quantity)}</td><td className="px-3 py-3">{fmt(p.entry)}</td><td className="px-3 py-3">{fmtOpt(p.mark)}</td>
+        <td className="px-3 py-3">{p.quantity!==null&&p.mark!==null?fmt((p.mark-p.entry)*p.quantity*(p.side==="LONG"?1:-1))+" USD/USDT":"—"}</td>
+        <td className="px-3 py-3">{p.gross!==null?p.gross.toFixed(2)+"x":"未算定"}</td><td className="px-3 py-3">{p.gross!==null?(100*p.gross/replay.limits.total).toFixed(1)+"%":"—"}</td>
+      </tr>)}{positions.length===0&&<tr><td colSpan={9} className="px-3 py-8 text-center text-[#91a7bf]">この時点の保有建玉はありません</td></tr>}</tbody></table></div>
+      <p className="mt-2 text-[10px] text-[#8199b2]">※参考含み損益は数量と価格がある場合のみ簡易計算。USD/USDT換算値をJPY口座残高と直接合算しません。</p>
+    </section>
+    {selectedEvent&&<section className={card+" border-cyan-600/50 p-4"}><h2 className="mb-2 text-[14px] font-bold text-cyan-100">選択したイベントの詳細</h2><p className="mb-2 break-all font-mono text-[12px] text-[#d1e3ef]">{selectedEvent}</p><div className="flex flex-wrap gap-4 text-xs text-[#91aac2]"><span>発生時刻：{titleCase(frame.timestamp)}</span><span>総Gross：{total.toFixed(3)}x</span><span>保有建玉：{frame.positions.length}</span></div><p className="mt-2 text-[11px] text-amber-200">表示は記録スナップショット単位です。厳密な注文前後の残高を示すものではありません。</p></section>}
+  </div>}
+  {tab==="results"&&<div className="space-y-4">
+    <section className={card+" p-5"}>
+      <div className="mb-4 flex items-center justify-between gap-2"><h2 className="flex items-center gap-2 text-[17px] font-bold text-white"><BarChart3 className="h-5 w-5 text-cyan-300"/>BT検証結果</h2><span className="text-xs text-amber-200">{sourceLabel}</span></div>
+      <p className="mb-4 text-[12px] text-[#93aabd]">{replay.researchSummary?"研究BTマニフェストの集計結果です。最新LIVE・署名済み実約定の証明ではありません。":"デモには検証済み成績がありません。現在の画面は合成データの可視化です。"}</p>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        {([
+          ["開始資金","¥ "+fmt(replay.researchSummary?.initialJpy??initialEquity)],
+          ["最終残高","¥ "+fmt(replay.researchSummary?.finalEquityJpy??replay.frames[replay.frames.length-1].equity)],
+          ["勝率",replay.researchSummary?replay.researchSummary.winRatePct.toFixed(2)+"%":"—"],
+          ["最大DD",replay.researchSummary?replay.researchSummary.maxDdPct.toFixed(2)+"%":"—"],
+          ["Profit Factor",replay.researchSummary?replay.researchSummary.profitFactor.toFixed(3):"—"],
+          ["モデル取引",replay.researchSummary?replay.researchSummary.modelFills.toLocaleString():"—"]
+        ] as const).map(([name,val])=><div key={name} className={metric}><p className="mb-3 text-xs text-[#8ea7be]">{name}</p><p className="text-lg font-bold text-cyan-100">{val}</p></div>)}
+      </div>
+    </section>
+    <div className="grid gap-4 xl:grid-cols-2"><section className={card+" p-4"}><h2 className="mb-3 text-[16px] font-bold text-white">資産推移とDrawdown</h2><EquityTimelineChart frames={replay.frames} cursor={replay.frames.length-1}/></section><GrossAllocationPanel frame={replay.frames[replay.frames.length-1]} limits={replay.limits} selected={selected} onSelect={setSelected} researchManifestCap={replay.source?.grossCapEvidence==="SOURCE_SUMMARY_MATCHED_RESEARCH_ONLY"} unverifiedCap={replay.source?.grossCapEvidence==="USER_SUPPLIED_NOT_VERIFIED"}/></div>
+    <section className={card+" p-4"}><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-[16px] font-bold text-white">ロジック×通貨別の検証</h2><button className="rounded-lg border border-[#3b627c] px-3 py-2 text-xs text-cyan-200" onClick={exportStrategyStats}>CSV出力</button></div>
+      {(replay.strategyStats?.length??0)>0?<div className="max-h-[450px] overflow-auto"><table className="w-full min-w-[720px] text-left text-xs"><thead className="sticky top-0 bg-[#1a3249] text-[#a7bcd0]"><tr>{["ロジック","通貨","モデル取引","決済数","勝率","純損益（JPY）","単独最大損失"].map(t=><th key={t} className="p-3">{t}</th>)}</tr></thead><tbody>{[...(replay.strategyStats??[])].sort((a,b)=>(a.winRatePct??100)-(b.winRatePct??100)).map(r=><tr key={r.logic+"-"+r.symbol} className="border-t border-[#2a4357]"><td className="p-3 font-semibold text-cyan-300">{r.logic}</td><td className="p-3">{r.symbol}</td><td className="p-3">{r.tradeCount}</td><td className="p-3">{r.closedCount}</td><td className="p-3">{r.winRatePct===null?"—":r.winRatePct.toFixed(1)+"%"}</td><td className={"p-3 "+(r.netPnlJpy<0?"text-rose-300":"text-emerald-300")}>{fmt(r.netPnlJpy)}</td><td className="p-3 text-rose-300">{r.maxLossJpy===null?"—":fmt(r.maxLossJpy)}</td></tr>)}</tbody></table></div>:<p className="rounded-lg bg-[#11263a] p-6 text-sm text-[#91abc0]">研究BTのロジック×通貨別集計は未読込です。デモ画面には実測成績を生成しません。</p>}
+    </section>
+  </div>}
+  {tab==="report"&&<div className="grid gap-4 xl:grid-cols-[1.1fr_.9fr]">
+    <section className={card+" p-5"}><h2 className="mb-2 flex items-center gap-2 text-[17px] font-bold text-white"><FileText className="h-5 w-5 text-cyan-300"/>レポート・エクスポート</h2><p className="mb-5 text-xs leading-6 text-[#94aec3]">取引イベント・資産時系列・Gross・ロジック別のデータをCodex/GPTでも点検できる形式で出力します。研究データの証拠能力は元SHAの検証が必要です。</p>
+      <div className="grid gap-2 sm:grid-cols-2">{([
+        ["JSONデータをDL",()=>saveFile("bt_replay.json",JSON.stringify(replay,null,2),"application/json")],
+        ["資産・Gross CSV",exportTimeline],
+        ["建玉時系列 CSV",exportPositions],
+        ["ロジック別 CSV",exportStrategyStats],
+        ["GPT / Codex用 ZIP",exportPackage]
+      ] as const).map(([name,action])=><button key={name} type="button" onClick={action} className="flex items-center justify-center gap-2 rounded-xl border border-[#3b6179] bg-[#19344a] px-4 py-3 text-[13px] font-semibold text-cyan-100 hover:border-cyan-400"><Download className="h-4 w-4"/>{name}</button>)}</div>
+      <label className="mt-5 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-cyan-600 bg-[#102b40] px-4 py-4 text-[13px] text-cyan-100"><Upload className="h-4 w-4"/>研究BTのJSONを読み込んで検証<input className="sr-only" type="file" accept=".json" onChange={upload}/></label>
+      {error&&<p className="mt-3 rounded-lg border border-rose-500/50 p-3 text-xs text-rose-200">{error}</p>}
+      {savedNotice&&<p className="mt-3 text-xs text-cyan-200">{savedNotice}</p>}
+    </section>
+    <section className={card+" p-5"}><h2 className="mb-3 text-[16px] font-bold text-white">データの出所と整合性</h2>
+      <div className="space-y-3 text-xs">{[["モード",sourceLabel],["モデル実装参照SHA",replay.engineSha],["時点数",replay.frames.length.toLocaleString()+" スナップショット"],["BTC確定足",String(replay.btcCandles?.length??0)+" 本"],["Total Gross上限",replay.limits.total.toFixed(2)+"x"],["Crypto / Stock",replay.limits.crypto.toFixed(2)+"x / "+replay.limits.stock.toFixed(2)+"x"]].map(([k,v])=><div key={k} className="flex items-start justify-between gap-4 border-b border-[#2c4055] pb-2"><span className="text-[#8fa7bd]">{k}</span><span className="max-w-[60%] break-all text-right font-mono text-[#d8eaf8]">{v}</span></div>)}</div>
+      <p className="mt-4 rounded-lg border border-amber-700/40 bg-amber-950/10 p-3 text-[11px] leading-6 text-amber-100">現在の画面は再生・可視化専用です。最新の正規BTエンジン、現在の各Runner SHA、数量・価格・個別Grossの完全照合が済むまで新規BT実行を有効化しません。</p>
+      <button type="button" onClick={()=>setTab("library")} className="mt-4 w-full rounded-lg bg-[#20506b] px-3 py-3 text-[13px] font-semibold text-cyan-100">保存ライブラリを開く</button>
+    </section>
+  </div>}
+  {tab==="library"&&<div className="space-y-4">
+    <section className={card+" p-5"}><h2 className="mb-3 flex items-center gap-2 text-[17px] font-bold text-white"><Save className="h-5 w-5 text-cyan-300"/>BT保存ライブラリ</h2><p className="mb-4 text-xs text-[#97aec1]">再生データと参照条件を保存し、後から再生・JSONダウンロードできます。</p>
+      <div className="mb-4 flex flex-wrap items-center gap-3"><input aria-label="BT保存名" value={runName} onChange={e=>setRunName(e.target.value)} className={inputCls+" max-w-[340px]"} placeholder="BT保存名"/><button type="button" onClick={saveLibrary} className="flex items-center gap-2 rounded-xl border border-cyan-400 bg-[#14616b] px-5 py-3 text-[13px] font-semibold text-white"><Save className="h-4 w-4"/>ブラウザーに保存</button></div>
+      {savedNotice&&<p className="mb-3 text-[12px] text-cyan-200">{savedNotice}</p>}
+      <p className="mb-2 text-xs text-[#8ca5bb]">ブラウザー内保存（別端末とは自動共有されません）</p>
+      <div className="space-y-2">{savedRuns.length?savedRuns.map(item=><div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#2d4b60] bg-[#122a3d] px-4 py-3"><span className="text-[12px] text-[#d8e6f1]"><strong>{item.name}</strong><span className="ml-2 text-[#86a0b7]">{item.frames}時点 / {item.createdAt}</span></span><div className="flex flex-wrap gap-2"><button className="rounded-lg bg-[#22516b] px-3 py-2 text-[11px]" onClick={()=>loadLibrary(item.id)}>再読込</button><button className="rounded-lg bg-[#244257] px-3 py-2 text-[11px]" onClick={()=>downloadLibrary(item.id)}>JSON DL</button><button className="rounded-lg bg-[#5a2738] px-3 py-2 text-[11px]" onClick={()=>removeLibrary(item.id)}>削除</button></div></div>):<p className="rounded-xl border border-dashed border-[#36536c] p-6 text-center text-sm text-[#8ca7bb]">ブラウザー内の保存データはまだありません。</p>}</div>
+    </section>
+    {SHOW_SERVER_ARCHIVE&&<section className={card+" p-5"}><h2 className="mb-2 text-[16px] font-bold text-white">Owner認証付きサーバー保存</h2><p className="mb-4 text-xs text-[#93aec1]">専用保存先とOriginが設定され、Owner認証が成立している場合のみ利用可能です。未設定の場合は安全側に拒否されます。</p>
+      <div className="mb-3 flex flex-wrap gap-2"><button onClick={saveServerRun} className="rounded-lg border border-[#336f86] bg-[#164257] px-4 py-2.5 text-xs text-cyan-100">サーバーへ保存</button><button onClick={refreshServerRuns} className="rounded-lg bg-[#243d52] px-4 py-2.5 text-xs text-slate-200">保存一覧を更新</button></div>
+      {serverNotice&&<p className="mb-3 text-xs text-cyan-200">{serverNotice}</p>}
+      <div className="space-y-2">{serverRuns.map(item=><div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#304b60] p-3"><span className="text-xs">{item.name}・{item.frames}時点・{(item.bytes/1024/1024).toFixed(1)}MB</span><div className="flex flex-wrap gap-2"><button className="rounded bg-[#255876] px-3 py-1.5 text-xs" onClick={()=>loadServerRun(item.id)}>再生</button><button className="rounded bg-[#275068] px-3 py-1.5 text-xs" onClick={()=>downloadServerRun(item.id)}>JSON DL</button><button className="rounded bg-rose-900/60 px-3 py-1.5 text-xs" onClick={()=>deleteServerRun(item.id)}>削除</button></div></div>)}</div>
+    </section>}
+    <p className="text-[12px] text-[#8ca4b8]">Read-only / 研究リプレイ・DEMO。LIVE Runner・注文・STOP・Kill Switchには非接続です。</p>
+  </div>}
+</BTWorkspaceShell>;
 }
