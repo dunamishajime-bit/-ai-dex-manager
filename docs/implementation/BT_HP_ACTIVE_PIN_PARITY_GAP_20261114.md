@@ -53,6 +53,6 @@ research model is current.
 
 See docs/implementation/BT_HP_V4_STALE_RUNNER_STOP_PROTECTION_20261114.md
 for incident analysis and read-only STOP/position reconciliation. The
-exchange position and stop are intact as sampled; this is not authorization
+exchange position and protective stop matched as sampled; this is not authorization
 to restart, place/cancel orders or deploy. Private account and ledger
 evidence remains on the owner's PC.

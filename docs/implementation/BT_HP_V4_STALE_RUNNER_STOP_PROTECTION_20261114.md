@@ -11,25 +11,23 @@ Read-only incident investigation for DisDex research/LIVE parity. The operator's
   - `scripts/v12-v4-production-runner.ts` = `2dbd403ce093f08881a2351d4801428dc240d6aaf4501e80a6c54cbe424424e1`
 - VPS `systemd` on 2026-11-14 around 20:00 JST: `disdex-v12-v4@795fefbb...` = `failed`, `ExecMainStatus=2`, latest transition at 19:15:11 JST.
 - `journalctl`: 19:11:07 JST `submitted/DURABLE_ENTRY_WITH_RESIDENT_STOP`, followed by 19:15:11 JST fatal `V4_RUNNER_FAILED_CLOSED/ENTRY_LIVE_OBSERVATION_STALE_OR_REVERSED`.
-- The ledger is revision 13605, release SHA matches the above, with a single OPEN V4 leg at failure time: `DOGEUSDT SHORT 301`, `REC_X05_TIME_36H`. Protect intent and protection-phase state recorded `STOP_CONFIRMED`.
+- The ledger release SHA matches the above, and one V4 leg was still open when the Runner failed. The protection record showed STOP_CONFIRMED. Exact instrument and quantities are retained in owner-only evidence.
 
 ## Independent Aster signed GET (read-only)
 
-Two complementary signed **GET** checks returned a single venue position and its single resident stop. The inputs and full order ledger were retained privately on the owner's PC only.
+Read-only account, open-order and individual stop GET checks established that
+the *single* V4 OPEN leg, the venue position and the protective reduce-only
+STOP_MARKET order agreed on side, quantity, order identity, trigger price and
+NEW status. There were no other positions or orders at observation. The
+model has **no claim of continuous protection** after the sample.
 
-| Field | Ledger | Signed venue GET |
-| --- | --- | --- |
-| Instrument/side | DOGEUSDT SHORT | DOGEUSDT SHORT |
-| Open quantity | 301 | -301 signed positionAmount |
-| Entry | 0.06294 USDT | 0.06294 USDT |
-| STOP client order | `v12-v4-95d1f28b06eaedcb5939752030be` | same |
-| STOP direction/type | BUY STOP_MARKET | BUY STOP_MARKET |
-| STOP quantity | 301 | 301 |
-| STOP trigger price | 0.06798 | 0.067980 |
-| STOP status | STOP_CONFIRMED | NEW |
-| reduceOnly | protective | true |
-
-Read-only diagnostic reported `ordersSent=0`, `cancelsSent=0`, `positionChangesSent=0`, and no other exchange positions/orders at the observation. The offline validator in `scripts/bt_hp_v4_readonly_protection_audit.py` reconciles venue position + STOP order + stopPrice against ledger and supplied systemd snapshot, returning **`PROTECTED_BUT_RUNNER_NOT_RUNNING`** with exit code 2. This is a snapshot, not a continuous guarantee. Source documents, private full GET JSON and snapshot must never be placed in public HP or GitHub.
+The precise symbol, fill, position quantity, STOP ID, STOP price, private
+account GET JSON and full order ledger are retained on the owner's PC only.
+Do not publish them to GitHub or any public HP. The standalone,
+read-only verifier in scripts/bt_hp_v4_readonly_protection_audit.py
+reconciled all fields and returned PROTECTED_BUT_RUNNER_NOT_RUNNING,
+exit status 2. Diagnostic reported ordersSent=0, cancelsSent=0,
+positionChangesSent=0.
 
 ## Precise entry-timestamp failure surface
 

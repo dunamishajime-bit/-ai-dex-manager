@@ -5,39 +5,39 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"scripts"))
 from bt_hp_v4_readonly_protection_audit import audit
 
 SHA="7"*40
-ID="DOGEUSDT:REC_X05_TIME_36H:SHORT:1794650400000"
-STOP="v12-v4-95d1f28b06eaedcb5939752030be"
+ID="TESTUSDT:REC_X05_TIME_36H:SHORT:1704067200000"
+STOP="synthetic-stop-client-order-1"
 
 def evidence(active=False):
     ledger={
       "releaseSha":SHA,
-      "state":{"legs":{ID:{"status":"OPEN","qty":301,"entryNotional":18.94494,"candidate":{"symbol":"DOGEUSDT","effectiveSide":"SHORT"}}}},
-      "intents":{STOP:{"legId":ID,"action":"STOP","clientOrderId":STOP,"command":{"price":0.06798}}},
-      "protections":{ID:{"legId":ID,"phase":"STOP_CONFIRMED","protectedQty":301,"stopClientOrderId":STOP}},
+      "state":{"legs":{ID:{"status":"OPEN","qty":7,"entryNotional":700.0,"candidate":{"symbol":"TESTUSDT","effectiveSide":"SHORT"}}}},
+      "intents":{STOP:{"legId":ID,"action":"STOP","clientOrderId":STOP,"command":{"price":108.0}}},
+      "protections":{ID:{"legId":ID,"phase":"STOP_CONFIRMED","protectedQty":7,"stopClientOrderId":STOP}},
     }
     venue={
-      "status":"ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS","venueTime":1794652000000,
+      "status":"ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS","venueTime":1704067205000,
       "ordersSent":0,"cancelsSent":0,"positionChangesSent":0,
-      "positions":[{"symbol":"DOGEUSDT","positionAmt":-301,"entryPrice":0.06294}],
-      "openOrders":[{"symbol":"DOGEUSDT","clientOrderId":STOP,"status":"NEW","side":"BUY","type":"STOP_MARKET",
-                     "reduceOnly":True,"origQty":"301","executedQty":"0"}]
+      "positions":[{"symbol":"TESTUSDT","positionAmt":-7,"entryPrice":100.0}],
+      "openOrders":[{"symbol":"TESTUSDT","clientOrderId":STOP,"status":"NEW","side":"BUY","type":"STOP_MARKET",
+                     "reduceOnly":True,"origQty":"7","executedQty":"0"}]
     }
     status="loaded active running" if active else "loaded failed failed"
     services=f"disdex-v12-v4@{SHA}.service {status} test\n"
     return ledger,venue,services
 
 def stop_detail():
-    return {"status":"READ_ONLY_ORDER","id":STOP,"symbol":"DOGEUSDT",
+    return {"status":"READ_ONLY_ORDER","id":STOP,"symbol":"TESTUSDT",
             "orderStatus":"NEW","type":"STOP_MARKET","side":"BUY","reduceOnly":True,
-            "quantity":"301","executed":"0","stopPrice":"0.067980","ordersSent":0,"cancelsSent":0}
+            "quantity":"7","executed":"0","stopPrice":"108.000","ordersSent":0,"cancelsSent":0}
 
 class ProtectionAuditTests(unittest.TestCase):
     def test_protected_but_runner_failed(self):
         result=audit(*evidence(),stop_detail=stop_detail())
         self.assertEqual(result["status"],"PROTECTED_BUT_RUNNER_NOT_RUNNING")
         self.assertTrue(result["stopPriceVerified"])
-        self.assertAlmostEqual(result["positions"][0]["stopPrice"],0.06798)
-        self.assertEqual(result["positions"][0]["qty"],301)
+        self.assertAlmostEqual(result["positions"][0]["stopPrice"],108.0)
+        self.assertEqual(result["positions"][0]["qty"],7)
         self.assertFalse(result["tradeAuthorityProvided"])
     def test_running_is_not_trading_certification(self):
         result=audit(*evidence(True),stop_detail=stop_detail())
@@ -48,12 +48,12 @@ class ProtectionAuditTests(unittest.TestCase):
         self.assertEqual(result["status"],"RUNNER_NOT_RUNNING_STOP_PRICE_UNVERIFIED")
         self.assertFalse(result["stopPriceVerified"])
     def test_wrong_stop_price_rejected(self):
-        d=stop_detail();d["stopPrice"]="0.068"
+        d=stop_detail();d["stopPrice"]="109.0"
         with self.assertRaisesRegex(ValueError,"STOP_PRICE_LEDGER_VENUE_MISMATCH"):audit(*evidence(),stop_detail=d)
     def test_stop_price_not_protective_rejected(self):
         a,b,c=evidence()
-        a["intents"][STOP]["command"]["price"]=0.05
-        d=stop_detail();d["stopPrice"]="0.05"
+        a["intents"][STOP]["command"]["price"]=90.0
+        d=stop_detail();d["stopPrice"]="90.0"
         with self.assertRaisesRegex(ValueError,"STOP_PRICE_NOT_PROTECTIVE"):audit(a,b,c,d)
     def test_signed_stop_detail_identity_required(self):
         d=stop_detail();d["id"]="forged"
@@ -62,7 +62,7 @@ class ProtectionAuditTests(unittest.TestCase):
         a,b,c=evidence();b["openOrders"]=[]
         with self.assertRaisesRegex(ValueError,"VENUE_STOP_MISSING"):audit(a,b,c)
     def test_wrong_quantity_rejected(self):
-        a,b,c=evidence();b["positions"][0]["positionAmt"]=-300
+        a,b,c=evidence();b["positions"][0]["positionAmt"]=-6
         with self.assertRaisesRegex(ValueError,"VENUE_POSITION_LEDGER_MISMATCH"):audit(a,b,c)
     def test_reduce_only_required(self):
         a,b,c=evidence();b["openOrders"][0]["reduceOnly"]=False
@@ -86,7 +86,7 @@ class ProtectionAuditTests(unittest.TestCase):
         a,b,c=evidence();del b["cancelsSent"]
         with self.assertRaisesRegex(ValueError,"SIGNED_GET_MUST_BE_READ_ONLY"):audit(a,b,c)
     def test_stop_quantity_matched(self):
-        a,b,c=evidence();b["openOrders"][0]["origQty"]="201"
+        a,b,c=evidence();b["openOrders"][0]["origQty"]="5"
         with self.assertRaisesRegex(ValueError,"VENUE_STOP_QUANTITY_INVALID"):audit(a,b,c)
 
 if __name__=="__main__":unittest.main()
