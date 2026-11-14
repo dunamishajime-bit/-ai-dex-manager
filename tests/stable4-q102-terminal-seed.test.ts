@@ -4,6 +4,11 @@ import {mkdtempSync,rmSync,readFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {Stable4Q102OnlineEngine} from "../lib/disdex-quality102-stable4-online";
+test("production recovery seed declares its last complete candidate interval",()=>{
+ const seed=JSON.parse(readFileSync("config/stable4/q102-online-recovery-seed-20261114.json","utf8"));
+ assert.equal(seed.candidateCoverageThrough,Date.UTC(2026,9,1));
+ assert.ok(seed.rows.every((x:any)=>x.entryTs<seed.candidateCoverageThrough));
+});
 test("terminal seed exposes the corrected H1 close only after 72h and includes all nine public funding settlements",()=>{
  const root=mkdtempSync(join(tmpdir(),"stable4-terminal-"));
  try{

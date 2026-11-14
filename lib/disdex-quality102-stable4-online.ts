@@ -23,7 +23,7 @@ type RecoverySeedRow={id:string;entryTs:number;exitTs:number;symbol:string;side:
 type AvaxSeedRow={entryTs:number;exitTs:number;raw:number;f:number[]};
 type PendingRecovery={entryTs:number;exitTs:number;symbol:string;side:"LONG"|"SHORT";route:string;entryPrice:number;hardStop:number;features:Record<string,number>;family:string;maxHoldHours:number;exitPolicy:NonNullable<Quality102CausalV1Signal["exitPolicy"]>};
 type PendingAvax={entryTs:number;exitTs:number;entryPrice:number;f:number[]};
-type Stable4OnlineState={schemaVersion:1;updatedAt:number;recoveryRows:RecoverySeedRow[];recoveryPending:PendingRecovery[];avaxRows:AvaxSeedRow[];avaxPending:PendingAvax[];avaxLastSelectedEntryTs?:number};
+type Stable4OnlineState={schemaVersion:1;updatedAt:number;recoveryRows:RecoverySeedRow[];recoveryPending:PendingRecovery[];avaxRows:AvaxSeedRow[];avaxPending:PendingAvax[];avaxLastSelectedEntryTs?:number;observedThrough?:number};
 
 export type Stable4Q102OnlineProposal={
  signal:Quality102CausalV1Signal;
@@ -39,6 +39,8 @@ export interface Stable4Q102OnlineOptions{
  logger?:(message:string,payload?:Record<string,unknown>)=>void;
  highVolSymbols?:readonly string[];
  nativeSignalBuilder?:(history:Quality102CausalV1History,decisionTs:number)=>Quality102CausalV1Signal;
+ requireHourlyCoverage?:boolean;
+ now?:()=>number;
 }
 
 function finite(v:unknown):v is number{return typeof v==="number"&&Number.isFinite(v);}
@@ -162,16 +164,25 @@ export class Stable4Q102OnlineEngine{
  private readonly avaxSeed:AvaxSeedRow[];
  private state:Stable4OnlineState;
  private healthy=true;
+ private readonly seedCoverageThrough?:number;
+ private readonly clock:()=>number;
  constructor(private readonly options:Stable4Q102OnlineOptions){
-  this.mode=options.mode;this.logger=options.logger||(()=>undefined);
-  this.recoverySeed=validateRecoverySeed(JSON.parse(readFileSync(options.recoverySeedPath,"utf8")));
+  this.mode=options.mode;this.logger=options.logger||(()=>undefined);this.clock=options.now??Date.now;
+  const recoveryDocument=JSON.parse(readFileSync(options.recoverySeedPath,"utf8"));
+  this.recoverySeed=validateRecoverySeed(recoveryDocument);this.seedCoverageThrough=recoveryDocument.candidateCoverageThrough;
   this.avaxSeed=validateAvaxSeed(JSON.parse(readFileSync(options.avaxSeedPath,"utf8")));
   this.state=loadState(options.statePath);
+  if(options.requireHourlyCoverage){
+   const coverage=this.seedCoverageThrough,observed=this.state.observedThrough;
+   if(recoveryDocument.kind!=="STABLE4_Q102_RECOVERY_SEED"||!Number.isSafeInteger(coverage)||!coverage||coverage%HOUR!==0||this.recoverySeed.some(r=>r.entryTs>=coverage))throw Error("STABLE4_Q102_SEED_COVERAGE_INVALID");
+   if(observed!==undefined&&(!Number.isSafeInteger(observed)||observed%HOUR!==0||observed<coverage-HOUR||observed>Math.floor(this.clock()/HOUR)*HOUR))throw Error("STABLE4_Q102_STATE_COVERAGE_INVALID");
+   if(observed===undefined&&(this.state.recoveryRows.length||this.state.recoveryPending.length||this.state.avaxPending.length||this.state.avaxRows.length))throw Error("STABLE4_Q102_STATE_CONTINUITY_METADATA_MISSING");
+  }
  }
  isHealthy(){return this.healthy;}
  private allRecoveryRows(t:number){const m=new Map<string,RecoverySeedRow>();for(const r of [...this.recoverySeed,...this.state.recoveryRows])if(r.exitTs<t)m.set(recoveryIdentity(r),r);return[...m.values()].sort((a,b)=>a.entryTs-b.entryTs||recoveryIdentity(a).localeCompare(recoveryIdentity(b)));}
  private allAvaxRows(t:number){const m=new Map<number,AvaxSeedRow>();for(const r of [...this.avaxSeed,...this.state.avaxRows])if(r.exitTs<=t)m.set(r.entryTs,r);return[...m.values()].sort((a,b)=>a.entryTs-b.entryTs);}
- private persist(){this.state.updatedAt=Date.now();saveState(this.options.statePath,this.state);}
+ private persist(){this.state.updatedAt=this.clock();saveState(this.options.statePath,this.state);}
  private nativeSignal(history:Quality102CausalV1History,t:number){
   return this.options.nativeSignalBuilder?.(history,t)??buildQuality102CausalV4Signal({history,decisionTs:t,sleeveOccupancy:{activePosition:false,unresolvedPendingEntry:false}},{highVolSymbols:this.options.highVolSymbols});
  }
@@ -186,6 +197,11 @@ export class Stable4Q102OnlineEngine{
   const before=structuredClone(this.state);
   try{
    let changed=false;
+   const hour=Math.floor(decisionTs/HOUR)*HOUR;
+   if(this.options.requireHourlyCoverage){
+    const previous=this.state.observedThrough??this.seedCoverageThrough!-HOUR;
+    if(hour<previous||hour>previous+HOUR)throw Error("STABLE4_Q102_OBSERVATION_GAP_REQUIRES_BACKFILL");
+   }
    // Register the native selector's one chosen signal with sleeve occupancy
    // cleared. Raw detectors and rejected lower-ranked routes are not labels.
    const native=this.nativeSignal(history,decisionTs);
@@ -214,6 +230,7 @@ export class Stable4Q102OnlineEngine{
     if(![...this.recoverySeed,...this.state.recoveryRows,...this.state.recoveryPending].some(row=>recoveryIdentity(row)===recoveryIdentity(q)))this.state.recoveryPending.push(q);
     changed=true;
    }
+   if(this.options.requireHourlyCoverage&&this.state.observedThrough!==hour){this.state.observedThrough=hour;changed=true;}
    if(changed)this.persist();
   }catch(error){this.state=before;this.healthy=false;this.logger("STABLE4 Q102 online observer fail-closed",{message:error instanceof Error?error.message:String(error)});throw error;}
  }
@@ -225,7 +242,7 @@ export class Stable4Q102OnlineEngine{
    const snapshot=this.state,remaining:PendingRecovery[]=[],completed:RecoverySeedRow[]=[];
    for(const [symbol,pending]of groups){
     const evidence=await provider.load({symbol,from:Math.min(...pending.map(q=>q.entryTs)),through:Math.min(decisionTs,Math.max(...pending.map(q=>q.exitTs))),includeM5:pending.some(q=>q.exitPolicy!=="HIGH_VOL_TRAIL72"),history});
-    const observedAt=Math.max(decisionTs,Date.now());
+    const observedAt=Math.max(decisionTs,this.clock());
     for(const q of pending){
      const out=modelStable4Q102Outcome({...q,...evidence,now:observedAt,dataThrough:evidence.funding.through});
      if(!out){remaining.push(q);continue;}
@@ -234,7 +251,7 @@ export class Stable4Q102OnlineEngine{
    }
    if(this.state!==snapshot)throw Error("STABLE4_Q102_OBSERVATION_CHANGED_DURING_EVIDENCE");
    if(completed.length){
-    const next={...snapshot,recoveryRows:[...snapshot.recoveryRows,...completed],recoveryPending:remaining,updatedAt:Date.now()};
+    const next={...snapshot,recoveryRows:[...snapshot.recoveryRows,...completed],recoveryPending:remaining,updatedAt:this.clock()};
     saveState(this.options.statePath,next);this.state=next;
    }
    this.healthy=true;
@@ -274,6 +291,7 @@ export class Stable4Q102OnlineEngine{
   if(this.mode==="OFF")return{signal:nativeSignal};
   try{
    if(this.mode==="LIVE"&&!this.healthy)throw Error("STABLE4_Q102_ONLINE_UNHEALTHY");
+   if(this.mode==="LIVE"&&this.options.requireHourlyCoverage&&this.state.observedThrough!==Math.floor(decisionTs/HOUR)*HOUR)throw Error("STABLE4_Q102_OBSERVATION_NOT_CURRENT");
    const proposal=this.propose(history,this.nativeS34(history,nativeSignal));
    this.logger("STABLE4 Q102 online decision",{mode:this.mode,nativeReason:nativeSignal.reason,nativeSymbol:nativeSignal.symbol,nativeVariant:nativeSignal.variant,proposalKind:proposal?.kind,proposalDiagnostics:proposal?.diagnostics});
    if(this.mode==="SHADOW")return{signal:nativeSignal,proposal};

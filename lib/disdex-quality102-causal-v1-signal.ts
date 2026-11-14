@@ -1,4 +1,5 @@
 import { QUALITY102_CAUSAL_V1 } from "../config/disdexQuality102CausalV1Runtime";
+import {CausalHistoryMemo} from "./causal-history-memo";
 import {
     QUALITY102_DAY_MS,
     QUALITY102_HIGH_VOL_GRID,
@@ -73,6 +74,7 @@ interface MonthlySelection {
     rule: Quality102HighVolRule;
     metrics: TrainingMetrics;
 }
+const monthlySelectionMemo=new CausalHistoryMemo<MonthlySelection>(16);
 
 interface Candidate {
     id: string;
@@ -201,7 +203,8 @@ function monthlySelection(symbol: string, rows: readonly Quality102Candle[], dat
     const firstSignalIndex = (trainingStartTs - firstTs) / QUALITY102_HOUR_MS;
     const trainingEndIndex = (trainingEndTs - firstTs) / QUALITY102_HOUR_MS;
     if (!Number.isInteger(firstSignalIndex) || !Number.isInteger(trainingEndIndex)) return undefined;
-
+    const completedWindow=rows.slice(firstSignalIndex-FEATURE_WARMUP_HOURS,trainingEndIndex+1);
+    return monthlySelectionMemo.get(`${symbol}:${monthStartTs}`,completedWindow,()=>{
     const features = new Map<number, Quality102HighVolFeatures>();
     for (let index = firstSignalIndex; index < trainingEndIndex - MAXIMUM_HOLD_HOURS; index += 1) {
         features.set(index, computeQuality102HighVolFeatures(rows, index));
@@ -224,6 +227,7 @@ function monthlySelection(symbol: string, rows: readonly Quality102Candle[], dat
             maxDrawdown: selected.maxDrawdown,
         },
     };
+    });
 }
 
 function scannerHealthPass(metrics: TrainingMetrics): boolean {
