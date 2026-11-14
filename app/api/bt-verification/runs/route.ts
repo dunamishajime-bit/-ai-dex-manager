@@ -13,10 +13,12 @@ function authenticate(request:NextRequest) {
 function validOrigin(request:NextRequest) {
   const origin=request.headers.get("origin");
   if(!origin)return false;
-  const expected=process.env.DISDEX_BT_ORIGIN?.trim()||request.nextUrl.origin;
+  const expected=process.env.DISDEX_BT_ORIGIN?.trim();
+  if(!expected)return false; // fail closed: never trust request Host as a security config
   try{
     const sent=new URL(origin),allowed=new URL(expected);
-    return sent.origin===allowed.origin && (sent.protocol==="https:"||sent.hostname==="localhost");
+    return sent.origin===allowed.origin && (sent.protocol==="https:"||sent.hostname==="localhost") &&
+      (allowed.protocol==="https:"||allowed.hostname==="localhost");
   }catch{return false}
 }
 async function readBounded(request:NextRequest):Promise<unknown> {

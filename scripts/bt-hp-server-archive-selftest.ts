@@ -40,6 +40,13 @@ async function main(){
     body:JSON.stringify({name:"bad",replay:data})}));
   assert.equal(csrf.status,403,"Cross-origin write forbidden");
 
+  delete process.env.DISDEX_BT_ORIGIN;
+  const noConfiguredOrigin=await POST(new NextRequest(baseUrl,{method:"POST",
+    headers:{Cookie:cookie,origin:"http://localhost:3000","Content-Type":"application/json"},
+    body:JSON.stringify({name:"bad",replay:data})}));
+  assert.equal(noConfiguredOrigin.status,403,"Write denied when operator origin not configured");
+  process.env.DISDEX_BT_ORIGIN="http://localhost:3000";
+
   const good=await POST(new NextRequest(baseUrl,{method:"POST",
     headers:{Cookie:cookie,origin:"http://localhost:3000","Content-Type":"application/json"},
     body:JSON.stringify({name:"stored replay",replay:data})}));
@@ -73,7 +80,7 @@ async function main(){
   const otherRes=await READ(otherReq,{params:Promise.resolve({id:own.id})});
   assert.equal(otherRes.status,404,"Signed other owner must not see replay");
   await deleteOwnerRun(subject,own.id);
-  console.log(JSON.stringify({status:"PASS",tests:14,storageRoot:"ephemeral test only"}));
+  console.log(JSON.stringify({status:"PASS",tests:15,storageRoot:"ephemeral test only"}));
  }finally{
   await fs.rm(base,{recursive:true,force:true});
   delete process.env.DISDEX_BT_ARCHIVE_DIR;

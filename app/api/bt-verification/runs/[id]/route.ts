@@ -12,10 +12,13 @@ function subjectFor(request:NextRequest){
 function validOrigin(request:NextRequest){
   const origin=request.headers.get("origin");
   if(!origin)return false;
+  const configured=process.env.DISDEX_BT_ORIGIN?.trim();
+  if(!configured)return false; // require separate operator-controlled HTTPS origin
   try {
-    const expected=new URL(process.env.DISDEX_BT_ORIGIN?.trim()||request.nextUrl.origin);
+    const expected=new URL(configured);
     const sent=new URL(origin);
-    return sent.origin===expected.origin&&(sent.protocol==="https:"||sent.hostname==="localhost");
+    return sent.origin===expected.origin&&(sent.protocol==="https:"||sent.hostname==="localhost")&&
+      (expected.protocol==="https:"||expected.hostname==="localhost");
   }catch{return false}
 }
 export async function GET(request:NextRequest,ctx:{params:Promise<{id:string}>}){

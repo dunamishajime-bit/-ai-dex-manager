@@ -52,3 +52,4 @@ HP button BT再生 currently replays DEMO or already generated RESEARCH_MODE JSO
 - Do not put any user PC private data, API credentials, trading-account details or raw research dumps into Git history.
 
 Owner handoff: install immutable canonical engine on an isolated host only after proving G1-G6, then add authenticated POST /api/bt-verification/jobs and replay GET with immutable provenance. No automatic merge, LIVE switch or token access is part of this document.
+\nNote: owner-archive POST/DELETE also require operator-configured DISDEX_BT_ORIGIN; without it, writes fail closed even with a signed session. Model-uploaded self-claims of certified strategy pin are rejected until server-signed certification is implemented.\n
