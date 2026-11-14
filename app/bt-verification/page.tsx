@@ -195,7 +195,7 @@ return <div className="min-h-screen space-y-4 rounded-2xl bg-[#071321] p-5 text-
     </div>
     <p className="mt-2 text-xs text-slate-400">記録モデル：{item.modelClasses.join(" / ")||"不明"}</p>
     <p className="mt-1 break-all font-mono text-xs text-cyan-200">参照SHA：{item.sourceRuntimeShas.join(", ")||"不明"}</p>
-    <p className="mt-1 text-xs text-amber-300">{item.status==="CANONICAL_PIN_VERIFIED"?"正規PIN検証済み":"研究台帳参照・最新版未照合"}</p>
+    <p className="mt-1 text-xs text-amber-300">研究台帳参照・最新版未照合</p>
   </div>)}</div>
 </section>}
 <p className="text-xs text-slate-400">以下のプルダウンは読み込んだBTの表示フィルターです。新しいロジック組合せによるBT計算は正規BTエンジン接続後に利用できます。</p>

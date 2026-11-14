@@ -17,6 +17,11 @@ const replay:Replay={
   }]
 };
 assert.equal(validateReplay(replay),true);
+const forged=structuredClone(replay);
+forged.strategyCatalog=[{logic:"V4",trades:1,sourceRuntimeShas:["fake"],modelClasses:["fake"],
+  routes:1,symbols:1,status:"CANONICAL_PIN_VERIFIED"}] as unknown as typeof forged.strategyCatalog;
+assert.equal(validateReplay(forged),false,"Forged source proof must never enter the HP as certified");
+
 const state=grossForFrame(replay.frames[0]);
 assert.equal(state.total,1.5);
 assert.equal(state.unallocated,1.5);

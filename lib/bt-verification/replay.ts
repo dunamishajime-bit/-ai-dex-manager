@@ -48,7 +48,7 @@ export type StrategyCatalogEntry = {
   modelClasses: string[];
   routes: number;
   symbols: number;
-  status: "RESEARCH_SOURCE_UNVERIFIED" | "CANONICAL_PIN_VERIFIED";
+  status: "RESEARCH_SOURCE_UNVERIFIED";
 };
 export type ResearchSummary = {
   costBps: number;
@@ -168,7 +168,7 @@ export function validateReplay(value:unknown):value is Replay {
       if(!isObj(entry)||typeof entry.logic!=="string"||!entry.logic||entry.logic.length>80||seen.has(entry.logic))return false;
       seen.add(entry.logic);
       if(!number(entry.trades)||entry.trades<0||!number(entry.routes)||entry.routes<0||!number(entry.symbols)||entry.symbols<0)return false;
-      if(entry.status!=="RESEARCH_SOURCE_UNVERIFIED"&&entry.status!=="CANONICAL_PIN_VERIFIED")return false;
+      if(entry.status!=="RESEARCH_SOURCE_UNVERIFIED")return false;
       for(const key of ["sourceRuntimeShas","modelClasses"]){
         const values=entry[key];
         if(!Array.isArray(values)||values.length>100||values.some(v=>typeof v!=="string"||v.length>250))return false;
