@@ -79,6 +79,7 @@ export interface Aster24hTicker {
 }
 
 export type AsterKline = [number, string, string, string, string, string, number, string, number, string, string, string];
+export interface AsterFundingRateHistoryRow {symbol:string;fundingTime:number;fundingRate:string;}
 
 export interface AsterKlineRange {
     startTime?: number;
@@ -407,6 +408,10 @@ export class AsterV3Client {
             params: { symbol, interval, limit, startTime: range.startTime, endTime: range.endTime },
             ratePriority: "MARKET_DATA",
         });
+    }
+    getFundingRateHistory(symbol:string,limit=1000,range:AsterKlineRange={}) {
+        return this.request<AsterFundingRateHistoryRow[]>({method:"GET",path:"/fapi/v3/fundingRate",
+            params:{symbol,limit,startTime:range.startTime,endTime:range.endTime},ratePriority:"MARKET_DATA"});
     }
     getBalances() { return this.request<AsterBalanceRow[]>({ method: "GET", path: "/fapi/v3/balance", signed: true, ratePriority:"RISK_READ" }); }
     getPositionMode() { return this.request<{ dualSidePosition: boolean }>({ method: "GET", path: "/fapi/v3/positionSide/dual", signed: true, ratePriority:"RISK_READ" }); }
