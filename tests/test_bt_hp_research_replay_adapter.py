@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"scripts"))
-from bt_hp_research_replay_adapter import Source, convert
+from bt_hp_research_replay_adapter import Source, convert, resolve_gross_caps
 
 class ReplayAdapterTests(unittest.TestCase):
     def setUp(self):
@@ -30,6 +30,7 @@ class ReplayAdapterTests(unittest.TestCase):
         return self.write("fills.csv",[dict(
             trade_id="trade_1",strategy="V4",symbol="BTCUSDT",side="LONG",
             entry_utc="2025-10-01T01:00:00Z",exit_utc="2025-10-01T02:00:00Z",
+            net_pnl_jpy="150",
             model_entry_price="100000",notional_jpy="10000",gross_x="1"
         )])
     def test_canonical_gross_is_used_and_position_mark_unknown(self):
@@ -65,6 +66,69 @@ class ReplayAdapterTests(unittest.TestCase):
         self.assertEqual(catalog[0]["status"],"RESEARCH_SOURCE_UNVERIFIED")
         self.assertEqual(catalog[0]["trades"],1)
 
+    def test_source_manifest_caps_override_invalid_manual_guess(self):
+        summary=self.root/"RUN_MANIFEST.json"
+        summary.write_text(json.dumps({
+            "status":"RESEARCH_ONLY",
+            "results":[
+                {"case":"CASE_A","cost_bps_roundtrip":10,"total_cap":4.25,"crypto_cap":3.0,
+                 "stock_cap":4.0,"modeled_fills":1},
+                {"case":"CASE_A","cost_bps_roundtrip":30,"total_cap":3.5,"crypto_cap":3.0,
+                 "stock_cap":1.5,"modeled_fills":1}
+            ]
+        }),encoding="utf-8")
+        source=Source(self.equity(),self.fills(),summary)
+        limits,kind,meta=resolve_gross_caps(source,cost_bps=10)
+        self.assertEqual(limits,{"total":4.25,"crypto":3.0,"stock":4.0})
+        self.assertEqual(kind,"SOURCE_SUMMARY_MATCHED_RESEARCH_ONLY")
+        self.assertEqual(meta["researchCase"],"CASE_A")
+        with self.assertRaisesRegex(ValueError,"Gross cap mismatch"):
+            resolve_gross_caps(source,total=4.75,cost_bps=10)
+        self.assertEqual(resolve_gross_caps(source,cost_bps=30)[0]["total"],3.5)
+    def test_missing_case_is_rejected(self):
+        summary=self.root/"RUN_MANIFEST.json"
+        summary.write_text(json.dumps({"results":[{"cost_bps_roundtrip":10,
+            "total_cap":3.5,"crypto_cap":3,"stock_cap":1.5}]}),encoding="utf-8")
+        source=Source(self.equity(),self.fills(),summary)
+        with self.assertRaisesRegex(ValueError,"No unique source manifest case"):
+            resolve_gross_caps(source,cost_bps=30)
+    def test_partial_close_preserves_entry_and_records_last_model_gross(self):
+        path=self.write("partials.csv",[{
+            "utc":"2025-10-01T01:30:00Z",
+            "trade_id":"trade_1","strategy":"V4","symbol":"BTCUSDT",
+            "closed_fraction_of_current":"0.5",
+            "remaining_gross_x":"0.5"
+        }])
+        out=convert(Source(self.equity(),self.fills(),None,partial_events=path),
+                    dict(total=3.5,crypto=3,stock=1.5),interval_minutes=60)
+        item=out["frames"][2]["positions"]
+        self.assertEqual(len(item),0)
+        active=out["frames"][1]["positions"]
+        # Entry snapshot precedes the partial event: entry exposure remains unchanged.
+        self.assertEqual(active[0]["grossAtEntry"],1)
+        self.assertIn("PARTIAL",out["frames"][2]["events"][0])
+        self.assertTrue(out["source"]["partialEventsSha256"])
+    def test_partial_and_final_close_same_tick_preserves_both_events(self):
+        path=self.write("partials.csv",[{
+            "utc":"2025-10-01T02:00:00Z","trade_id":"trade_1",
+            "strategy":"V4","symbol":"BTCUSDT",
+            "closed_fraction_of_current":"0.5","remaining_gross_x":"0.5"
+        }])
+        out=convert(Source(self.equity(),self.fills(),None,partial_events=path),
+                    dict(total=3.5,crypto=3,stock=1.5),interval_minutes=60)
+        end_events=out["frames"][-1]["events"]
+        self.assertEqual(len(out["frames"][-1]["positions"]),0)
+        self.assertTrue(any("PARTIAL" in e for e in end_events))
+        self.assertTrue(any("EXIT" in e for e in end_events))
+    def test_partial_close_without_position_is_rejected(self):
+        path=self.write("partials.csv",[{
+            "utc":"2025-10-01T00:30:00Z","trade_id":"trade_1",
+            "strategy":"V4","symbol":"BTCUSDT",
+            "closed_fraction_of_current":"0.5","remaining_gross_x":"0.5"
+        }])
+        with self.assertRaisesRegex(ValueError,"outside active position"):
+            convert(Source(self.equity(),self.fills(),None,partial_events=path),
+                    dict(total=3.5,crypto=3,stock=1.5))
     def test_bad_gross_is_rejected(self):
         with self.assertRaisesRegex(ValueError,"Gross"):
             convert(Source(self.equity(bad_gross=True),self.fills(),None),dict(total=3.5,crypto=3,stock=1.5))

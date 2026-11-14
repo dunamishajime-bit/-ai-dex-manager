@@ -12,6 +12,9 @@ export type Position = {
   mark: number | null;
   gross: number | null;
   grossAtEntry?: number | null;
+  lastPartialGrossX?: number | null;
+  lastPartialAt?: string;
+  lastPartialFractionClosed?: number | null;
   notional?: number | null;
   openedAt: string;
 };
@@ -47,6 +50,25 @@ export type StrategyCatalogEntry = {
   symbols: number;
   status: "RESEARCH_SOURCE_UNVERIFIED" | "CANONICAL_PIN_VERIFIED";
 };
+export type ResearchSummary = {
+  costBps: number;
+  initialJpy: number;
+  finalEquityJpy: number;
+  maxDdPct: number;
+  modelFills: number;
+  winRatePct: number;
+  profitFactor: number;
+};
+export type StrategyStat = {
+  logic: string;
+  symbol: string;
+  tradeCount: number;
+  closedCount: number;
+  wins: number;
+  netPnlJpy: number;
+  maxLossJpy: number | null;
+  winRatePct: number | null;
+};
 export type Replay = {
   schema: "disdex-bt-portfolio-v1";
   mode: "DEMO" | "EXTERNAL";
@@ -55,6 +77,8 @@ export type Replay = {
   frames: ReplayFrame[];
   btcCandles?: BtcCandle[];
   strategyCatalog?: StrategyCatalogEntry[];
+  researchSummary?: ResearchSummary | null;
+  strategyStats?: StrategyStat[];
   limits: { total: number; crypto: number; stock: number };
   source?: { kind: string; equitySha256?: string; fillsSha256?: string; summarySha256?: string; btcCandlesSha256?: string; grossCapEvidence?: string; note?: string };
 };
@@ -100,7 +124,10 @@ function validPosition(p:unknown):p is Position {
     nullableNumber(p.mark) && (p.mark===null || p.mark>=0) &&
     nullableNumber(p.gross) && (p.gross===null || p.gross>=0) &&
     date(p.openedAt) &&
-    (p.grossAtEntry===undefined || (nullableNumber(p.grossAtEntry) && (p.grossAtEntry===null || p.grossAtEntry>=0)));
+    (p.grossAtEntry===undefined || (nullableNumber(p.grossAtEntry) && (p.grossAtEntry===null || p.grossAtEntry>=0))) &&
+    (p.lastPartialGrossX===undefined || (nullableNumber(p.lastPartialGrossX) && (p.lastPartialGrossX===null || p.lastPartialGrossX>=0))) &&
+    (p.lastPartialAt===undefined || (date(p.lastPartialAt) && p.lastPartialAt>=p.openedAt)) &&
+    (p.lastPartialFractionClosed===undefined || (nullableNumber(p.lastPartialFractionClosed) && (p.lastPartialFractionClosed===null || p.lastPartialFractionClosed>0&&p.lastPartialFractionClosed<=1)));
 }
 function validGross(g:unknown):g is GrossSnapshot {
   return isObj(g) && number(g.totalX) && g.totalX>=0 && number(g.cryptoX) && g.cryptoX>=0 &&
@@ -115,6 +142,25 @@ export function validateReplay(value:unknown):value is Replay {
   if(!isObj(limits))return false;
   if(!(["total","crypto","stock"] as const).every(k=>number(limits[k]) && (limits[k] as number)>0 && (limits[k] as number)<100))return false;
   if(!Array.isArray(value.frames) || value.frames.length<1 || value.frames.length>50000)return false;
+  if(value.researchSummary!==undefined && value.researchSummary!==null){
+    const x=value.researchSummary;
+    if(!isObj(x)||!number(x.costBps)||x.costBps<0||!number(x.initialJpy)||x.initialJpy<=0||
+       !number(x.finalEquityJpy)||!number(x.maxDdPct)||!number(x.modelFills)||
+       !number(x.winRatePct)||x.winRatePct<0||x.winRatePct>100||
+       !number(x.profitFactor)||x.profitFactor<0)return false;
+  }
+  if(value.strategyStats!==undefined){
+    if(!Array.isArray(value.strategyStats)||value.strategyStats.length>2000)return false;
+    for(const x of value.strategyStats){
+      if(!isObj(x)||typeof x.logic!=="string"||x.logic.length>100||
+         typeof x.symbol!=="string"||x.symbol.length>100||
+         !number(x.tradeCount)||x.tradeCount<0||
+         !number(x.closedCount)||x.closedCount<0||x.closedCount>x.tradeCount||
+         !number(x.wins)||x.wins<0||x.wins>x.closedCount||
+         !number(x.netPnlJpy)||!(x.maxLossJpy===null||number(x.maxLossJpy))||
+         !(x.winRatePct===null||(number(x.winRatePct)&&x.winRatePct>=0&&x.winRatePct<=100)))return false;
+    }
+  }
   if(value.strategyCatalog!==undefined){
     if(!Array.isArray(value.strategyCatalog)||value.strategyCatalog.length>1000)return false;
     const seen=new Set<string>();

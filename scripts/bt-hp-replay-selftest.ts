@@ -44,6 +44,14 @@ if(process.argv[2]){
   assert.ok(replayLoaded.frames.length>1);
   assert.ok((replayLoaded.btcCandles?.length??0)>1);
   assert.ok(replayLoaded.frames.some(f=>grossForFrame(f).hasAuthoritative));
-  console.log(JSON.stringify({status:"SOURCE_REPLAY_PASS",frames:replayLoaded.frames.length,candles:replayLoaded.btcCandles?.length}));
+  if(replayLoaded.researchSummary && replayLoaded.strategyStats){
+    const totalTrades=replayLoaded.strategyStats.reduce((n,row)=>n+row.tradeCount,0);
+    assert.equal(totalTrades,replayLoaded.researchSummary.modelFills,"Research fill count matches logic×symbol breakdown");
+    assert.ok(replayLoaded.researchSummary.profitFactor>=0);
+    assert.ok(replayLoaded.researchSummary.maxDdPct<=0);
+  }
+  console.log(JSON.stringify({status:"SOURCE_REPLAY_PASS",frames:replayLoaded.frames.length,
+    candles:replayLoaded.btcCandles?.length,stats:replayLoaded.strategyStats?.length,
+    reportCostBps:replayLoaded.researchSummary?.costBps}));
 }
 console.log(JSON.stringify({status:"PASS",tests:7,zipPath:path,zipBytes:archive.length}));

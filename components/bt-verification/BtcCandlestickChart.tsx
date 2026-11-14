@@ -1,7 +1,7 @@
 "use client";
 import type {Replay} from "@/lib/bt-verification/replay";
 
-type Mark = {frameIndex:number;time:string;label:string;kind:"ENTRY"|"EXIT";result:"POSITIVE"|"NEGATIVE"|"UNKNOWN"};
+type Mark = {frameIndex:number;time:string;label:string;kind:"ENTRY"|"EXIT"|"PARTIAL";result:"POSITIVE"|"NEGATIVE"|"UNKNOWN"};
 const LOGICS=["V4","V12","PENGU","V52","Q102","HYPE","FET","IDLE","STABLE3","STABLE4"];
 function markers(replay:Replay,cursor:number):Mark[]{
  const result:Mark[]=[];
@@ -11,10 +11,11 @@ function markers(replay:Replay,cursor:number):Mark[]{
    if(e.startsWith("BLOCK ") || e.includes(" RISK ") || e.startsWith("RISK "))continue;
    const time=(e.length>=20 && e.charAt(4)==="-" && e.charAt(10)==="T")?e.slice(0,20):frame.timestamp;
    const enter=e.includes("ENTRY")||e.includes("発火")||e.includes("エントリー");
+   const partial=e.includes("PARTIAL")||e.includes("部分決済");
    const exit=e.includes("EXIT")||e.includes("利確")||e.includes("損切")||e.includes("決済");
-   if(!enter&&!exit)continue;
+   if(!enter&&!exit&&!partial)continue;
    const logic=LOGICS.find(x=>new RegExp("(^|[^A-Z0-9])"+x+"([^A-Z0-9]|$)").test(e))??"BT";
-   result.push({frameIndex:i,time,label:logic+(enter?" 発火":" 決済")+" / "+e,kind:enter?"ENTRY":"EXIT",
+   result.push({frameIndex:i,time,label:logic+(enter?" 発火":partial?" 部分決済":" 決済")+" / "+e,kind:enter?"ENTRY":partial?"PARTIAL":"EXIT",
     result:e.includes("利確")||/\+\d+(?:\.\d+)?\s*JPY/.test(e)?"POSITIVE":e.includes("損切")||/-\d+(?:\.\d+)?\s*JPY/.test(e)?"NEGATIVE":"UNKNOWN"});
   }
  }
@@ -54,7 +55,7 @@ export function BtcCandlestickChart({replay,cursor,onEventSelect}:{replay:Replay
    if(j<0)return null;
    const c=candles[j],x=left+(j+0.5)*dx;
    const isEntry=mark.kind==="ENTRY";
-   const color=isEntry?"#38bdf8":mark.result==="POSITIVE"?"#4ade80":mark.result==="NEGATIVE"?"#fb7185":"#fbbf24";
+   const color=isEntry?"#38bdf8":mark.kind==="PARTIAL"?"#a78bfa":mark.result==="POSITIVE"?"#4ade80":mark.result==="NEGATIVE"?"#fb7185":"#fbbf24";
    const y=isEntry?Math.max(12,scale(c.high)-13):Math.min(199,scale(c.low)+15);
    return <g key={i}>
      <circle cx={x} cy={y} r="7" stroke="#0b1724" strokeWidth="1" fill={color} role="button" tabIndex={0} aria-label={mark.label} className="cursor-pointer" onClick={()=>onEventSelect?.(mark.frameIndex,mark.label)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onEventSelect?.(mark.frameIndex,mark.label)}}}>
@@ -64,6 +65,6 @@ export function BtcCandlestickChart({replay,cursor,onEventSelect}:{replay:Replay
    </g>
   })}
   </svg>
-  <p className="text-xs text-slate-400">水色：発火 ／ 緑：利益決済 ／ 赤：損失決済 ／ 黄色：損益不明。マーカーは各通貨のイベントをBTCの時間軸に表示しています。</p>
+  <p className="text-xs text-slate-400">水色：発火 ／ 紫：部分決済 ／ 緑：利益決済 ／ 赤：損失決済 ／ 黄色：損益不明。マーカーは各通貨のイベントをBTCの時間軸に表示しています。</p>
  </div>;
 }
