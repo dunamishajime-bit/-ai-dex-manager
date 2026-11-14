@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { AsterV3Client, isAsterDepositRequirementError } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor } from "../lib/direct-trade-executor";
+import {MarketSlippageGuardError} from "../lib/market-slippage-guard-error";
 
 const TEST_PRIVATE_KEY = `0x${"1".repeat(64)}` as `0x${string}`;
 const TEST_USER = "0x2222222222222222222222222222222222222222";
@@ -216,7 +217,8 @@ async function slippageGuardTest() {
             maxSlippageBps: 20,
             reason: "selftest-slippage",
         }),
-        /Slippage guard blocked/,
+        (error:unknown)=>error instanceof MarketSlippageGuardError&&error.symbol==="SUIUSDT"&&
+            error.clientOrderId==="w80-test-slippage"&&error.reduceOnly===false,
     );
     assert.equal(postCount, 0);
 }

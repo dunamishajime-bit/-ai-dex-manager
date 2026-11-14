@@ -8,7 +8,80 @@ import {assertSharedKillSwitchAllowsNewEntry} from "../lib/disdex-shared-kill-sw
 import {V4ExecutionStore,advanceV4Intent,v4OrderIdentity} from "../lib/v12-v4-execution-store";
 import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure,classifyV4AccountLeaseRenewalFailure,classifyV4MarketDataReadFailure} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
+import {MarketSlippageGuardError} from "../lib/market-slippage-guard-error";
+import {readPendingExposureRegistry} from "../lib/disdex-pending-exposure-registry";
+import {V4SharedReservations} from "../lib/v12-v4-shared-reservations";
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
+
+test("pre-send slippage rejection retires only the unsent entry and keeps subsequent ticks running",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  let attempts=0;
+  const acceptedEntry=h.engine.deps.adapter.executeEntry;
+  h.engine.deps.adapter.executeEntry=async x=>{attempts++;throw new MarketSlippageGuardError(x.symbol,x.clientOrderId!,false,22.39,20);};
+  const result=await h.engine.tick();
+  assert.equal(result.status,"observing");
+  assert.equal(result.reason,"V4_ENTRY_SLIPPAGE_REJECTED");
+  assert.equal(result.orderEnabled,false);
+  const doc=h.store.read(),intent=Object.values(doc.intents)[0],leg=doc.state.legs[intent.legId];
+  assert.equal(intent.stage,"TERMINAL");assert.equal(leg.status,"CANCELLED");
+  assert.equal(leg.qty,0);assert.equal(leg.reservationUsd,0);
+  assert.equal(doc.protections[leg.id].phase,"CLOSED");
+  const row=(await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries.find(r=>r.reservationId===intent.clientOrderId);
+  assert.equal(row?.status,"RELEASED");
+  h.time+=1000;assert.equal((await h.engine.tick()).status,"observing");
+  assert.equal(attempts,1);assert.equal(h.stopSends,0);
+  h.engine.deps.adapter.executeEntry=acceptedEntry;
+  h.time+=7_200_000;
+  const candidate={...h.candidate,eligibleEntryTs:h.candidate.eligibleEntryTs+7_200_000};
+  const priorDecision=await h.engine.deps.fetchDecision();
+  const key=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
+  h.engine.deps.fetchDecision=async()=>({...priorDecision,capturedAtMs:h.time,decisionTs:candidate.eligibleEntryTs,
+   candidates:[candidate],entryAtrByCandidate:{[key]:1}});
+  assert.equal((await h.engine.tick()).status,"submitted");
+  const next=Object.values(h.store.read().state.legs).find(x=>x.status==="PENDING_ENTRY"||x.status==="OPEN")!;
+  assert.ok(next.qty>0);assert.equal(h.store.read().protections[next.id].phase,"STOP_CONFIRMED");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("generic slippage-shaped errors remain unknown and require signed reconciliation",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.adapter.executeEntry=async()=>{throw Error("Slippage guard blocked AAVEUSDT: 22.39bps > 20.00bps.");};
+  await assert.rejects(h.engine.tick(),/Slippage guard blocked/);
+  assert.equal(Object.values(h.store.read().intents)[0].stage,"UNKNOWN");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("restart finishes shared release after a committed local slippage rejection",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ const synchronize=V4SharedReservations.prototype.synchronize;
+ try{
+  h.engine.deps.adapter.executeEntry=async x=>{throw new MarketSlippageGuardError(x.symbol,x.clientOrderId!,false,22.39,20);};
+  V4SharedReservations.prototype.synchronize=async()=>{throw Error("simulated crash before shared release");};
+  await assert.rejects(h.engine.tick(),/simulated crash/);
+  const cid=Object.keys(h.store.read().intents)[0];
+  assert.equal(h.store.read().intents[cid].stage,"TERMINAL");
+  assert.notEqual((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries[0].status,"RELEASED");
+  V4SharedReservations.prototype.synchronize=synchronize;
+  const restarted=new V4RunnerEngine({...h.engine.deps,store:new V4ExecutionStore(join(h.dir,"state.json"),sha)});
+  h.time+=1000;assert.equal((await restarted.tick()).status,"observing");
+  assert.equal((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries[0].status,"RELEASED");
+  assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+ }finally{V4SharedReservations.prototype.synchronize=synchronize;rmSync(h.dir,{recursive:true,force:true});}
+});
+
+for(const mismatch of ["symbol","clientOrderId","reduceOnly"]){
+ test(`slippage error with mismatched ${mismatch} cannot retire an unknown submission`,async()=>{
+  const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+  try{
+   h.engine.deps.adapter.executeEntry=async x=>{throw new MarketSlippageGuardError(
+    mismatch==="symbol"?"OTHERUSDT":x.symbol,mismatch==="clientOrderId"?"other":x.clientOrderId!,mismatch==="reduceOnly",22.39,20);};
+   await assert.rejects(h.engine.tick(),/Slippage guard blocked/);
+   assert.equal(Object.values(h.store.read().intents)[0].stage,"UNKNOWN");
+  }finally{rmSync(h.dir,{recursive:true,force:true});}
+ });
+}
 
 test("unresolved V4 entry lifecycle blocks fresh candidate admission",()=>{
  const doc:any={

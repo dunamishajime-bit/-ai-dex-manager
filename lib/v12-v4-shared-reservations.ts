@@ -12,6 +12,7 @@ import type {V4DurableOrderCommand,V4DispatchGuards} from "./v12-v4-durable-orde
 import {productionGross} from "./v12-v4-production-lifecycle";
 import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
+import {isV4LocalSlippageRejection} from "./v12-v4-local-entry-rejection";
 export const V4_SHARED_OWNER="V12_V4";
 /** The journal append time cannot make an older signed response fresh. */
 export function hasFreshV4SharedAccountLedger(doc:V4ExecutionDocument,now:number):boolean{
@@ -112,7 +113,7 @@ export class V4SharedReservations{
   if(intent.stage==="TERMINAL"){
    const terminal=doc.state.journal.find(x=>x.type==="ENTRY_TERMINAL"&&x.id===leg.id&&
     x.eventId==="venue-terminal:"+leg.candidate.symbol+":"+intent.venueOrderId);
-   if(!intent.venueOrderId||!terminal||leg.status==="PENDING_ENTRY"||leg.reservationUsd!==0)throw Error("VERIFIED_TERMINAL_FILL_JOURNAL_REQUIRED");
+   if(!isV4LocalSlippageRejection(doc,cid)&&(!intent.venueOrderId||!terminal||leg.status==="PENDING_ENTRY"||leg.reservationUsd!==0))throw Error("VERIFIED_TERMINAL_FILL_JOURNAL_REQUIRED");
    if(row.status!=="RELEASED"){await releasePendingExposure(cid,this.path);await this.flush();}
    return;
   }

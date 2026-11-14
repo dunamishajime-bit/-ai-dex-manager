@@ -12,6 +12,7 @@ import {V4_SIGNED_ACCOUNT_MAX_AGE_MS} from "./v12-v4-account-freshness";
 import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4OrderCycle} from "./v12-v4-order-cycle";
+import {isV4LocalSlippageRejection} from "./v12-v4-local-entry-rejection";
 import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
 import {planV4RetiredStops} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
@@ -267,6 +268,14 @@ export class V4RunnerEngine{
  }
  private async reconcileEntriesAndProtection(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle){
   const d=this.deps;
+  // Resume a crash between the atomic local rejection and shared release.
+  const rejectionDocument=d.store.read();
+  const rejected=Object.keys(rejectionDocument.intents).filter(cid=>isV4LocalSlippageRejection(rejectionDocument,cid));
+  if(rejected.length){
+   const registry=await readPendingExposureRegistry(d.pendingRegistryPath);
+   for(const cid of rejected)if(registry.entries.some(row=>row.reservationId===cid&&row.status!=="RELEASED"))
+    await cycle.reservations.synchronize(cid);
+  }
   for(const snapshot of Object.values(d.store.read().intents).filter(isReconciliableV4EntryIntent)){
    let intent=d.store.read().intents[snapshot.clientOrderId];
    if(intent.stage==="PREPARED"){this.abandonPreparedEntry(intent.clientOrderId);continue;}
@@ -578,6 +587,11 @@ export class V4RunnerEngine{
    this.commitProtection(plan.leg.id,"ENTRY_PREPARED",0);
    const cid=dispatcher.prepare(command,this.now());
    await dispatcher.submit(cid,this.now());
+   if(isV4LocalSlippageRejection(d.store.read(),cid)){
+    await cycle.reservations.synchronize(cid);
+    return {status:"observing",reason:"V4_ENTRY_SLIPPAGE_REJECTED",eventTs:this.now(),
+     candidateCount:decision.candidateCount,orderEnabled:false};
+   }
    this.commitProtection(plan.leg.id,"ENTRY_SENT",0);
    await cycle.reconcileEntry(cid,this.now());
    const proof=await dispatcher.reconcile(cid,this.now());

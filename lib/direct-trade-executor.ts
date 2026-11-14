@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import {MarketSlippageGuardError} from "./market-slippage-guard-error";
 
 import {
     AsterApiError,
@@ -720,9 +721,8 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 : Math.max(0, ((command.expectedPrice - executablePrice) / command.expectedPrice) * 10_000)
             : 0;
         if (adverseSlippageBps > command.maxSlippageBps) {
-            throw new Error(
-                `Slippage guard blocked ${symbol}: ${adverseSlippageBps.toFixed(2)}bps > ${command.maxSlippageBps.toFixed(2)}bps.`,
-            );
+            throw new MarketSlippageGuardError(symbol,clientOrderId,command.reduceOnly===true,
+                adverseSlippageBps,command.maxSlippageBps);
         }
         const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice, { allowBelowMinNotional: command.reduceOnly === true });
         if (command.maxEntryNotionalUsd !== undefined && command.reduceOnly !== true) {

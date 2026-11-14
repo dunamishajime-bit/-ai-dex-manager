@@ -6,6 +6,8 @@
  * or resident protection; venue trades/open orders must be reconciled separately.
  */
 import {AsterApiError} from "./aster-v3-client";
+import {MarketSlippageGuardError} from "./market-slippage-guard-error";
+import {rejectV4UnsentSlippageEntry} from "./v12-v4-local-entry-rejection";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4ExecutionStore,v4OrderIdentity,advanceV4Intent,type V4OrderAction,type V4OrderIntent} from "./v12-v4-execution-store";
 export type V4DurableOrderCommand={
@@ -68,6 +70,11 @@ export class V4DurableOrderDispatcher{
    return result;
   }catch(error){
    const current=this.store.read();
+   if(command.action==="ENTRY"&&error instanceof MarketSlippageGuardError&&
+    error.reduceOnly===false&&error.symbol===command.symbol&&error.clientOrderId===cid){
+    this.store.commit(current.revision,rejectV4UnsentSlippageEntry(current,cid,ts));
+    return {status:"LOCAL_SLIPPAGE_REJECTED" as const};
+   }
    if(current.intents[cid].stage==="SUBMITTING")this.store.commit(current.revision,advanceV4Intent(current,cid,"UNKNOWN",ts));
    throw error;
   }
