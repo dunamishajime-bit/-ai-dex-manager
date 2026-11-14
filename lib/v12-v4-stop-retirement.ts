@@ -16,6 +16,23 @@ function attestStopTrigger(intent:V4OrderIntent,order:Stop,legId:string){
    throw Error("V4_RETIRE_SURVIVING_STOP_TRIGGER_MISMATCH:"+legId);
 }
 
+/** A full reduce-only EXIT can cause Aster to expire its unused STOP itself. */
+export function attestV4CompletedExitMissingStop(args:{
+ state:State;intents:Record<string,V4OrderIntent>;legId:string;stopClientOrderId:string;
+ proof:AsterOrderResponse|undefined;
+}):void{
+ const {state,intents,legId,stopClientOrderId,proof}=args;
+ const leg=state.legs[legId],intent=intents[stopClientOrderId];
+ if(!leg||leg.status!=="CLOSED"||leg.qty!==0||!intent||intent.legId!==legId||intent.action!=="STOP"||
+    !proof||proof.clientOrderId!==stopClientOrderId||String(proof.orderId)!==intent.venueOrderId||
+    proof.symbol!==leg.candidate.symbol||proof.type!=="STOP_MARKET"||proof.reduceOnly!==true||
+    proof.side!==(leg.candidate.effectiveSide==="LONG"?"SELL":"BUY")||
+    !["EXPIRED","CANCELED","REJECTED"].includes(String(proof.status).toUpperCase())||
+    Number(proof.executedQty)!==0||Number(proof.origQty)!==Number((intent.command as {quantity?:unknown}|undefined)?.quantity)||
+    !(Number(proof.origQty)>0))throw Error("V4_COMPLETED_EXIT_MISSING_STOP_NOT_ATTESTED:"+legId);
+ attestStopTrigger(intent,proof,legId);
+}
+
 export function planV4RetiredStops(args:{
  state:State;intents:Record<string,V4OrderIntent>;
  openOrders:readonly Stop[];positions:readonly Position[];

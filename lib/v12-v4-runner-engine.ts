@@ -14,7 +14,7 @@ import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4OrderCycle} from "./v12-v4-order-cycle";
 import {isV4LocalSlippageRejection} from "./v12-v4-local-entry-rejection";
 import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
-import {planV4RetiredStops} from "./v12-v4-stop-retirement";
+import {planV4RetiredStops,attestV4CompletedExitMissingStop} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
 import {createV4FourRuleState,desiredV4FourRuleStop} from "./v12-v4-four-rule-policy";
 import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput,type ExitDecision} from "./v12-v4-production-lifecycle";
@@ -104,7 +104,7 @@ export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number)
 export interface V4RunnerDependencies{
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
  adapter:V12AsterLiveAdapter;
- client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory">;
+ client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory"|"getOrder">;
  pendingRegistryPath:string;
  fetchDecision:()=>Promise<V4LiveDecisionSnapshot>;
  fetchExitFeed:(symbol:string,fromTs?:number,untilTs?:number)=>Promise<V4ExitFeed>;
@@ -497,8 +497,13 @@ export class V4RunnerEngine{
    assertNet(beforePositions);
    const activeStops=Object.values(after.intents).filter(i=>i.legId===leg.id&&i.action==="STOP"&&
     beforeOrders.some(o=>o.clientOrderId===i.clientOrderId));
-   if(activeStops.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
-   const stopCid=activeStops[0].clientOrderId;
+   if(activeStops.length>1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
+   const stopCid=activeStops[0]?.clientOrderId??after.protections[leg.id]?.stopClientOrderId;
+   if(!stopCid)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
+   if(activeStops.length===0){
+    const proof=await d.client.getOrder(leg.candidate.symbol,stopCid);
+    attestV4CompletedExitMissingStop({state:after.state,intents:after.intents,legId:leg.id,stopClientOrderId:stopCid,proof});
+   }
    const pendingRetire=planV4RetiredStops({state:after.state,intents:after.intents,
     openOrders:beforeOrders,positions:beforePositions});
    if(beforeOrders.some(o=>o.clientOrderId===stopCid)){

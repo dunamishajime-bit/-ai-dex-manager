@@ -370,7 +370,7 @@ test("candidate source errors and stale data remain fail-closed observations",as
   }
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
-test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservation retirement",async()=>{
+for(const venueExpiresStop of [false,true])test(`signed full route exit preserves protection when venue expires STOP=${venueExpiresStop}`,async()=>{
  const fixture=(await import("./fixtures/v12-v4-native-route-20261009.json")).default;
  const {adaptProductionCandidates}=await import("../lib/v12-v4-production-features");
  const {readPendingExposureRegistry}=await import("../lib/disdex-pending-exposure-registry");
@@ -402,6 +402,7 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
    },
    executeExit:async(x:any)=>{
     exits++;const qty=x.quantity,id=53;positionQty=0;
+    if(venueExpiresStop)for(const order of orders.values())if(order.type==="STOP_MARKET")order.status="EXPIRED";
     const side=x.positionSide==="LONG"?"SELL":"BUY";
     orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,
      orderId:id,status:"FILLED",side,reduceOnly:true,origQty:String(qty),
@@ -417,6 +418,7 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
     return signedQty?[{symbol:candidate.symbol,positionAmt:String(signedQty),markPrice:"100",unRealizedProfit:"0"}]:[];
    },
    getOpenOrders:async()=>[...orders.values()].filter(o=>o.status==="NEW"),
+   getOrder:async(_s:string,cid:string)=>orders.get(cid),
    getUserTrades:async()=>fills,getIncomeHistory:async()=>[]};
   const atrKey=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
   const runner=new V4RunnerEngine({store,accountLock:lock,adapter,client,
@@ -449,6 +451,13 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
   exitFeed={closed:Array.from({length:spec.hours},(_,i)=>({openTs:candidate.eligibleEntryTs+i*3600000,
    open:100,high:100.1,low:99.9,close:100})),nextOpens:[{ts:end,price:100}]};
   time=end+5000;
+  if(venueExpiresStop){
+   const result=await runner.tick();
+   assert.equal(result.status,"exited");assert.equal(exits,1);assert.equal(cancelCount,0);
+   assert.equal(store.read().protections[leg.id].phase,"CLOSED");
+   time+=1000;assert.equal((await runner.tick()).status,"observing");assert.equal(exits,1);
+   return;
+  }
   venueExitDrift=true;
   await assert.rejects(runner.tick(),/V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT/);
   assert.equal(exits,1);
