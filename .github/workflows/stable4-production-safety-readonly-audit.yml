@@ -153,16 +153,16 @@ jobs:
           export DISDEX_RELEASE_SHA=$SHA
           export DISDEX_RUNTIME_COMMIT_SHA=$SHA
           ESBUILD_SRC="$RELEASE/node_modules/@esbuild/linux-x64/bin/esbuild"
-          ESBUILD_TMP="/var/tmp/disdex-stable4-esbuild-$$"
+          ESBUILD_TMP="/usr/local/bin/disdex-stable4-esbuild-$$"
           test -f "$ESBUILD_SRC"
-          install -o deploy -g deploy -m 0755 "$ESBUILD_SRC" "$ESBUILD_TMP"
+          install -o root -g root -m 0755 "$ESBUILD_SRC" "$ESBUILD_TMP"
           trap 'rm -f "$ESBUILD_TMP"' EXIT
           export ESBUILD_BINARY_PATH="$ESBUILD_TMP"
           echo "ASTER_PROOF_ESBUILD_SRC=$(stat -c '%a:%U:%G' "$ESBUILD_SRC")"
           echo "ASTER_PROOF_ESBUILD_TMP=$(stat -c '%a:%U:%G' "$ESBUILD_TMP")"
           runuser -u deploy --preserve-environment -- /usr/bin/node \
             --import "$RELEASE/node_modules/tsx/dist/loader.mjs" --input-type=module - <<NODE
-          import { AsterV3Client } from "file://$RELEASE/lib/aster-v3-client.ts";
+          import { AsterV3Client, AsterApiError } from "file://$RELEASE/lib/aster-v3-client.ts";
           import { assertV4SharedRateBudget, createV4EvidenceFetch } from "file://$RELEASE/lib/v12-v4-monitor-only.ts";
           assertV4SharedRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
           const client = new AsterV3Client({
@@ -172,41 +172,37 @@ jobs:
             requestTimeoutMs: 10000,
             readOnlyRateLimitMaxRetries: 0,
             fetchImpl: createV4EvidenceFetch(fetch),
-            userAgent: "DisDex-STABLE4-Orphan-Proof/1",
+            userAgent: "DisDex-STABLE4-Orphan-Proof/2",
           });
           if (!client.hasTradingCredentials()) throw new Error("ASTER_READONLY_CREDENTIALS_REQUIRED");
-          const positions = await client.getPositions();
-          const openOrders = await client.getOpenOrders();
-          const balances = await client.getBalances();
-          const nonzero = positions.filter((p) => Number.isFinite(Number(p.positionAmt ?? p.quantity)) && Math.abs(Number(p.positionAmt ?? p.quantity)) > 1e-12);
-          const safePositions = nonzero.map((p) => ({
-            symbol:String(p.symbol||""),
-            quantity:Number(p.positionAmt ?? p.quantity),
-            entryPrice:Number(p.entryPrice||0),
-            markPrice:Number(p.markPrice||0),
-            positionSide:String(p.positionSide||""),
-            updatedAt:Number(p.updateTime ?? p.updatedAt ?? 0),
-          }));
-          const safeOrders = openOrders.map((o) => ({
-            symbol:String(o.symbol||""),
-            side:String(o.side||""),
-            type:String(o.type||""),
-            quantity:Number(o.origQty ?? o.quantity ?? 0),
-            executedQuantity:Number(o.executedQty ?? o.executedQuantity ?? 0),
-            reduceOnly:Boolean(o.reduceOnly),
-            status:String(o.status||""),
-            clientOrderId:String(o.clientOrderId||""),
-          }));
-          const aavePositions=safePositions.filter((p)=>p.symbol.toUpperCase()==="AAVEUSDT");
-          const aaveOrders=safeOrders.filter((o)=>o.symbol.toUpperCase()==="AAVEUSDT");
+          const symbol="AAVEUSDT";
+          const clientOrderId="v12-v4-5bc2f54f3ec346d12c4b75668204";
+          const createdAt=1794535335697;
+          const rounds=[];
+          for(let i=0;i<3;i++){
+            const server=await client.getServerTime();
+            const positions=await client.getPositions();
+            const openOrders=await client.getOpenOrders();
+            let lookup;
+            try{
+              await client.getOrder(symbol,clientOrderId);
+              throw new Error("ASTER_PENDING_ORDER_EXISTS");
+            }catch(error){
+              if(!(error instanceof AsterApiError)||error.status!==400||error.code!==-2013) throw error;
+              lookup={status:error.status,code:error.code};
+            }
+            const trades=await client.getUserTrades(symbol,{startTime:createdAt-120000,endTime:Date.now(),limit:1000});
+            const aavePositions=positions.filter((p)=>String(p.symbol||"").toUpperCase()===symbol && Math.abs(Number(p.positionAmt ?? p.quantity))>1e-12);
+            const aaveOrders=openOrders.filter((o)=>String(o.symbol||"").toUpperCase()===symbol);
+            if(aavePositions.length||aaveOrders.length||trades.length) throw new Error("ASTER_AAVE_PENDING_NOT_ORPHANED");
+            rounds.push({observedAt:Date.now(),serverTime:server.serverTime,aavePositions,aaveOrders,tradeCount:trades.length,lookup});
+            if(i<2) await new Promise((resolve)=>setTimeout(resolve,1000));
+          }
+          const balances=await client.getBalances();
           console.log("ASTER_ORPHAN_PROOF="+JSON.stringify({
-            nonzeroPositionCount:safePositions.length,
-            openOrderCount:safeOrders.length,
+            symbol,clientOrderId,createdAt,rounds,
             balanceRows:Array.isArray(balances)?balances.length:null,
-            aavePositions,
-            aaveOrders,
-            allPositions:safePositions,
-            allOpenOrders:safeOrders,
+            provenAbsent:rounds.length===3&&rounds.every((r)=>r.lookup.code===-2013&&!r.aavePositions.length&&!r.aaveOrders.length&&r.tradeCount===0),
             ordersSent:0,cancelsSent:0,positionChangesSent:0,
           }));
           NODE
