@@ -25,12 +25,16 @@ try{
     ($_.CommandLine -match 'next build|tsc|bt-hp|git commit|git push')
   }).Count -gt 0
 }catch{ $active=$null }
+git -C $repo merge-base --is-ancestor $cp.lastCommittedHead $head
+$baseIsAncestor=($LASTEXITCODE -eq 0)
+if($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 1){throw "BT_GIT_MERGE_BASE_FAILED"}
 $state=[ordered]@{
  schema="disdex-bt-pr481-resume-v1"
  repository="dunamishajime-bit/-ai-dex-manager"
  branch=$branch
  headSha=$head
- headMatchesCheckpoint=($head -eq $cp.lastCommittedHead)
+  checkpointBaseSha=$cp.lastCommittedHead
+  checkpointBaseIsAncestorOfHead=$baseIsAncestor
  checkoutClean=($dirty.Count -eq 0)
  trackedOrUntrackedChanges=@($dirty)
  otherBTTaskProcessesDetected=$active
