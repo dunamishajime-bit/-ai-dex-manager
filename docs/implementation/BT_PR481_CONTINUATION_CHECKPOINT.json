@@ -56,9 +56,9 @@
       "scope": "Q102 original native 180-day selector over closed-trade research fixtures only"
     },
     {
-      "id": "BT-481-H",
-      "status": "pending",
-      "scope": "Unified independent source-candidate observation ledger across HYPE/FET/IDLE/PENGU/V4/Q102/V52 with verified as-of provenance, never fills",
+      "id": "BT-481-H1",
+      "status": "committed",
+      "scope": "Offline seven-family causal observation schema/validator; 11 negative regression cases; no real signals or fills",
       "requirements": [
         "each data source locked to cutoff",
         "source pin",
@@ -66,6 +66,11 @@
         "feature-only vs candidate vs true entry distinguished",
         "no simulated order unless independent lifecycle validated"
       ]
+    },
+    {
+      "id": "BT-481-H2",
+      "status": "pending",
+      "scope": "Connect actual SHA-pinned native candidate outputs for all seven families to the offline causal observation ledger; prove source availability timestamps and stage mapping; no invented fills"
     },
     {
       "id": "BT-481-I",
