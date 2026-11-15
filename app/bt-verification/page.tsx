@@ -17,6 +17,7 @@ import {createMultiassetH48Replay} from "@/lib/bt-verification/multiasset-h48-re
 import {auditSyntheticFeed,type SyntheticFeedAudit} from "@/lib/bt-verification/synthetic-feed-audit";
 import {auditQ102NativeS34,type Q102NativeS34Audit} from "@/lib/bt-verification/q102-s34-synthetic-audit";
 import {auditQ102NativeHighVol22D,type Q102HighVol22DAudit} from "@/lib/bt-verification/q102-highvol-synthetic-audit";
+import {auditV4NativeFailedBreak22D,type V4NativeCore22DAudit} from "@/lib/bt-verification/v4-native-core-synthetic-audit";
 import {observedV4MismatchInResearchSource,V4_PIN_OBSERVED_2026_11_15} from "@/lib/bt-verification/source-pin-observation";
 import {buildNativeHypeSensitivityComparison} from "@/lib/bt-verification/native-hype-sensitivity-comparison";
 import {buildStable4BaselineComparison} from "@/lib/bt-verification/stable4-baseline-comparison";
@@ -33,7 +34,7 @@ const [previewMode,setPreviewMode]=useState<"synthetic"|"historical">("synthetic
 const [scenario,setScenario]=useState<DemoScenario>("trend");
 const [previewSeed,setPreviewSeed]=useState(123456);
 const [syntheticStrategy,setSyntheticStrategy]=useState<"proxy"|"h48"|"h48multi">("proxy");
-const [syntheticFeedVersion,setSyntheticFeedVersion]=useState<"v1"|"v2"|"v3">("v1");
+const [syntheticFeedVersion,setSyntheticFeedVersion]=useState<"v1"|"v2"|"v3"|"v4">("v1");
 const [syntheticFeeBps,setSyntheticFeeBps]=useState<10|30>(10);
 const [feedAudit,setFeedAudit]=useState<SyntheticFeedAudit|null>(null);
 const [feedAuditNotice,setFeedAuditNotice]=useState("");
@@ -43,6 +44,9 @@ const [q102NativeNotice,setQ102NativeNotice]=useState("");
 const [q102HighVolAudit,setQ102HighVolAudit]=useState<Q102HighVol22DAudit|null>(null);
 const [q102HighVolBusy,setQ102HighVolBusy]=useState(false);
 const [q102HighVolNotice,setQ102HighVolNotice]=useState("");
+const [v4NativeAudit,setV4NativeAudit]=useState<V4NativeCore22DAudit|null>(null);
+const [v4NativeBusy,setV4NativeBusy]=useState(false);
+const [v4NativeNotice,setV4NativeNotice]=useState("");
 const [serverJobBusy,setServerJobBusy]=useState(false);
 const [serverJobNotice,setServerJobNotice]=useState("");
 
@@ -117,8 +121,21 @@ function runInputAudit(){
  try{
    const result=auditSyntheticFeed(previewSeed,scenario,168,syntheticFeedVersion);
    setFeedAudit(result);
-   setFeedAuditNotice("人工市場"+(syntheticFeedVersion==="v3"?"26":syntheticFeedVersion==="v2"?"24":"23")+"銘柄・7日間のOHLCV入力検査PASS。全Runnerの約定判定は未接続です。");
+   setFeedAuditNotice("人工市場"+(syntheticFeedVersion==="v4"?"33":syntheticFeedVersion==="v3"?"26":syntheticFeedVersion==="v2"?"24":"23")+"銘柄・7日間のOHLCV入力検査PASS。全Runnerの約定判定は未接続です。");
  }catch(e){setFeedAudit(null);setFeedAuditNotice("人工市場入力エラー："+String(e))}
+}
+function runV4NativeCoreAudit(){
+ if(v4NativeBusy||syntheticFeedVersion!=="v4")return;
+ setV4NativeBusy(true);setV4NativeNotice("");
+ window.setTimeout(()=>{
+  try{
+    setV4NativeAudit(auditV4NativeFailedBreak22D(previewSeed,scenario));
+    setV4NativeNotice("V4の元FAILED_BREAK H2状態遷移を検査しました。結果は注文ではありません。");
+  }catch(e){
+    setV4NativeAudit(null);
+    setV4NativeNotice("V4元コード判定を拒否: "+String(e));
+  }finally{setV4NativeBusy(false)}
+ },0);
 }
 function runQ102HighVolSourceAudit(){
  if(q102HighVolBusy)return;
@@ -472,12 +489,12 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                 <button type="button" aria-pressed={syntheticStrategy==="h48"} onClick={()=>setSyntheticStrategy("h48")}
                   className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>HYPE H48単体研究デモ</button>
                 <button type="button" aria-pressed={syntheticStrategy==="h48multi"} onClick={()=>setSyntheticStrategy("h48multi")}
-                  className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48multi"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>23／24／26銘柄OHLCV → H48候補研究</button>
+                  className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48multi"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>23／24／26／33銘柄OHLCV → H48候補研究</button>
               </div>
               <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div><p className="font-bold text-cyan-200">全銘柄・人工市場OHLCV入力監査</p>
-                    <p>BTC・HYPE等{syntheticFeedVersion==="v3"?18:syntheticFeedVersion==="v2"?16:15}暗号資産＋8株式の5分足・1時間足・出来高・モデルFunding・仮想為替を生成（過去価格のコピーではありません）。</p></div>
+                    <p>BTC・HYPE等{syntheticFeedVersion==="v4"?25:syntheticFeedVersion==="v3"?18:syntheticFeedVersion==="v2"?16:15}暗号資産＋8株式の5分足・1時間足・出来高・モデルFunding・仮想為替を生成（過去価格のコピーではありません）。</p></div>
                   <button type="button" onClick={runInputAudit}
                     className="rounded-md border border-cyan-500/50 bg-[#155069] px-3 py-2 font-bold text-white">7日間の入力を点検</button>
                 </div>
@@ -497,6 +514,35 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                     <ul className="mt-2 list-disc space-y-1 pl-4">{feedAudit.blockers.map((reason,i)=><li key={i}>{reason}</li>)}</ul>
                   </details>
                 </div>}
+              </div>
+              <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div><p className="font-bold text-cyan-200">V4元FAILED_BREAK判定（14銘柄・22日間）</p>
+                    <p>33銘柄版v4を選ぶと、元ソースの14銘柄を確定H2で判定します。FAILED_BREAKはV4の一部分です。V4全体・本番版との一致・約定は未認証です。</p></div>
+                  <button type="button" onClick={runV4NativeCoreAudit}
+                     disabled={v4NativeBusy||syntheticFeedVersion!=="v4"}
+                     className="rounded-md border border-cyan-500/50 bg-[#155069] px-3 py-2 font-bold text-white disabled:opacity-50">
+                     {v4NativeBusy?"V4元判定を計算中":"V4元H2判定を検証"}
+                  </button>
+                </div>
+                {syntheticFeedVersion!=="v4"&&<p className="mt-2 text-amber-200">元V4の14銘柄すべてを揃えるには、人工市場v4（33銘柄）を選択してください。</p>}
+                {v4NativeNotice&&<p className="mt-2 text-amber-200">{v4NativeNotice}</p>}
+                {v4NativeAudit&&v4NativeAudit.seed===previewSeed&&
+                 v4NativeAudit.scenario===scenario&&syntheticFeedVersion==="v4"&&
+                 <div className="mt-3 border-t border-[#355471] pt-3">
+                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                     <div><p className="text-[#819cb2]">元V4対象銘柄</p><p className="font-bold text-white">{v4NativeAudit.configuredSymbols}</p></div>
+                     <div><p className="text-[#819cb2]">H2判定時点</p><p className="font-bold text-white">{v4NativeAudit.evaluatedH2Times}</p></div>
+                     <div><p className="text-[#819cb2]">FAILED_BREAKイベント</p><p className="font-bold text-cyan-200">{v4NativeAudit.nativeSourceEvents}</p></div>
+                     <div><p className="text-[#819cb2]">約定</p><p className="font-bold text-amber-200">0（未接続）</p></div>
+                   </div>
+                   <p className="mt-2">元コードSHA：{v4NativeAudit.sourceSha256.slice(0,12)}…</p>
+                   <details className="mt-2"><summary className="cursor-pointer text-cyan-200">元ソースの検出イベント</summary>
+                     {v4NativeAudit.eventSample.length===0?<p>この人工期間はイベントが発生していません。</p>:
+                     <div>{v4NativeAudit.eventSample.map((e,i)=><p key={i}>{e.at} / {e.symbol} / {e.side} / score={e.score.toFixed(4)}</p>)}</div>}
+                   </details>
+                   <p className="mt-2 text-amber-200">この判定だけでは本番V4の1,394候補を再現できません。ほかの入口ルート、優先順位、STOP、手数料、Shared Risk、OnlineおよびPortfolio Opportunityは未接続です。</p>
+                 </div>}
               </div>
               <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -562,7 +608,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
               </div>
               {(syntheticStrategy==="h48"||syntheticStrategy==="h48multi")&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
                 <p>確定H1のH12/H24/BTC相対24hと6時間UTC入場枠で判定。次の足の始値で入り、最大48時間後に決済。元候補研究にある6%STOPは観測済み5分模擬価格で評価します（本番STOPの再現ではありません）。</p>
-                {syntheticStrategy==="h48multi"&&<p className="text-cyan-100">{syntheticFeedVersion==="v3"?"26銘柄版（TIA・APT・LDOの人工OHLCVも生成）":syntheticFeedVersion==="v2"?"24銘柄版（TIAの人工OHLCVも生成）":"既存23銘柄版（TIA・APT・LDOは未登録でブロック）"}の独立模擬OHLCVからBTC・HYPEの確定足を作り、同じH48候補研究関数へ接続します。FETとIDLE（JUP・TAO・DOT・RENDER・v2はTIA）は元の入口関数をShadowで評価します。PENGUは元V2・Short V20・Recovery V8の入口関数と研究版の相場フィルターを、それぞれShadowで検証します。これらの結果は約定・損益・Grossに加算しません。モデルFunding・変動USDJPYはH48の収支だけに反映します。</p>}
+                {syntheticStrategy==="h48multi"&&<p className="text-cyan-100">{syntheticFeedVersion==="v4"?"33銘柄版（V4元14銘柄を網羅）":syntheticFeedVersion==="v3"?"26銘柄版（TIA・APT・LDOの人工OHLCVも生成）":syntheticFeedVersion==="v2"?"24銘柄版（TIAの人工OHLCVも生成）":"既存23銘柄版（TIA・APT・LDOは未登録でブロック）"}の独立模擬OHLCVからBTC・HYPEの確定足を作り、同じH48候補研究関数へ接続します。FETとIDLE（JUP・TAO・DOT・RENDER・v2はTIA）は元の入口関数をShadowで評価します。PENGUは元V2・Short V20・Recovery V8の入口関数と研究版の相場フィルターを、それぞれShadowで検証します。これらの結果は約定・損益・Grossに加算しません。モデルFunding・変動USDJPYはH48の収支だけに反映します。</p>}
                 <label className="flex items-center gap-2">往復モデル費用
                   <select aria-label="H48模擬往復費用" value={syntheticFeeBps} onChange={e=>setSyntheticFeeBps(Number(e.target.value) as 10|30)}
                     className="rounded-md border border-[#46637b] bg-[#102b41] px-2 py-1 text-white">
@@ -576,11 +622,12 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                 {syntheticStrategy==="h48multi"&&<div className="space-y-2">
                   <label className="flex items-center gap-2 text-cyan-100">人工市場入力バージョン
                     <select aria-label="人工市場バージョン" value={syntheticFeedVersion}
-                      onChange={e=>setSyntheticFeedVersion(e.target.value as "v1"|"v2"|"v3")}
+                      onChange={e=>setSyntheticFeedVersion(e.target.value as "v1"|"v2"|"v3"|"v4")}
                       className="rounded-md border border-[#46637b] bg-[#102b41] px-2 py-1 text-white">
                       <option value="v1">v1（23銘柄・既存シード固定）</option>
                       <option value="v2">v2（24銘柄・TIA含む）</option>
                       <option value="v3">v3（26銘柄・APT/LDOも含む）</option>
+                      <option value="v4">v4（33銘柄・V4元対象14銘柄を含む）</option>
                     </select>
                   </label>
                   <button type="button" onClick={()=>{setPreviewSeed(1);setScenario("trend")}}

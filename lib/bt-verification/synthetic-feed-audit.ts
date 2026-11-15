@@ -37,7 +37,7 @@ export function auditSyntheticFeed(
     throw Error("SYNTHETIC_FEED_AUDIT_INCOMPLETE");
   return {schema:"disdex-bt-input-audit-v1",seed,scenario,feedVersion,generatedAtWindowEnd:end,
     firstObservedAt:first,lastObservedAt:last,hours,ticks,
-    cryptoSymbols:feedVersion==="v3"?18:feedVersion==="v2"?16:15,stockSymbols:8,
+    cryptoSymbols:feedVersion==="v4"?25:feedVersion==="v3"?18:feedVersion==="v2"?16:15,stockSymbols:8,
     totalSymbols:feed.description.symbols.length,
     btcClosedH1:btcH1,hypeClosedH1:hypeH1,fundingEvents:funding,
     stockSessionObservations:stockSession,partialSessionBars:partial,
