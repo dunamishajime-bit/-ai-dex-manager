@@ -16,6 +16,7 @@ import {createH48ResearchReplay} from "@/lib/bt-verification/h48-research-sandbo
 import {createMultiassetH48Replay} from "@/lib/bt-verification/multiasset-h48-replay";
 import {auditSyntheticFeed,type SyntheticFeedAudit} from "@/lib/bt-verification/synthetic-feed-audit";
 import {auditQ102NativeS34,type Q102NativeS34Audit} from "@/lib/bt-verification/q102-s34-synthetic-audit";
+import {auditQ102NativeHighVol22D,type Q102HighVol22DAudit} from "@/lib/bt-verification/q102-highvol-synthetic-audit";
 import {observedV4MismatchInResearchSource,V4_PIN_OBSERVED_2026_11_15} from "@/lib/bt-verification/source-pin-observation";
 import {buildNativeHypeSensitivityComparison} from "@/lib/bt-verification/native-hype-sensitivity-comparison";
 import {buildStable4BaselineComparison} from "@/lib/bt-verification/stable4-baseline-comparison";
@@ -39,6 +40,9 @@ const [feedAuditNotice,setFeedAuditNotice]=useState("");
 const [q102NativeAudit,setQ102NativeAudit]=useState<Q102NativeS34Audit|null>(null);
 const [q102NativeBusy,setQ102NativeBusy]=useState(false);
 const [q102NativeNotice,setQ102NativeNotice]=useState("");
+const [q102HighVolAudit,setQ102HighVolAudit]=useState<Q102HighVol22DAudit|null>(null);
+const [q102HighVolBusy,setQ102HighVolBusy]=useState(false);
+const [q102HighVolNotice,setQ102HighVolNotice]=useState("");
 const [serverJobBusy,setServerJobBusy]=useState(false);
 const [serverJobNotice,setServerJobNotice]=useState("");
 
@@ -115,6 +119,20 @@ function runInputAudit(){
    setFeedAudit(result);
    setFeedAuditNotice("人工市場"+(syntheticFeedVersion==="v3"?"26":syntheticFeedVersion==="v2"?"24":"23")+"銘柄・7日間のOHLCV入力検査PASS。全Runnerの約定判定は未接続です。");
  }catch(e){setFeedAudit(null);setFeedAuditNotice("人工市場入力エラー："+String(e))}
+}
+function runQ102HighVolSourceAudit(){
+ if(q102HighVolBusy)return;
+ setQ102HighVolBusy(true);setQ102HighVolNotice("");
+ window.setTimeout(()=>{
+   try{
+     const data=auditQ102NativeHighVol22D(previewSeed,scenario,syntheticFeedVersion);
+     setQ102HighVolAudit(data);
+     setQ102HighVolNotice("元のHIGH_VOL特徴量を検査しました。閾値一致は入口候補ではありません。");
+   }catch(e){
+     setQ102HighVolAudit(null);
+     setQ102HighVolNotice("HIGH_VOL検査を拒否: "+String(e));
+   }finally{setQ102HighVolBusy(false)}
+ },0);
 }
 function runQ102NativeS34Audit(){
  if(q102NativeBusy)return;
@@ -479,6 +497,37 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                     <ul className="mt-2 list-disc space-y-1 pl-4">{feedAudit.blockers.map((reason,i)=><li key={i}>{reason}</li>)}</ul>
                   </details>
                 </div>}
+              </div>
+              <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div><p className="font-bold text-cyan-200">Q102元S1/S2 HIGH_VOL特徴量（22日間）</p>
+                    <p>元のHIGH_VOL計算関数に337本の確定1時間足を入力します。直前180日間の学習とS1/S2の採用ルールが未接続のため、閾値一致は売買シグナルと扱いません。</p></div>
+                  <button type="button" onClick={runQ102HighVolSourceAudit} disabled={q102HighVolBusy}
+                    className="rounded-md border border-cyan-500/50 bg-[#155069] px-3 py-2 font-bold text-white disabled:opacity-50">
+                    {q102HighVolBusy?"Q102 S1/S2の特徴量を計算中":"Q102 S1/S2元特徴量を検証"}
+                  </button>
+                </div>
+                {q102HighVolNotice&&<p className="mt-2 text-amber-200">{q102HighVolNotice}</p>}
+                {q102HighVolAudit&&q102HighVolAudit.seed===previewSeed&&
+                 q102HighVolAudit.scenario===scenario&&q102HighVolAudit.feedVersion===syntheticFeedVersion&&
+                 <div className="mt-3 border-t border-[#355471] pt-3">
+                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                     <div><p className="text-[#819cb2]">元特徴量の評価時点</p><p className="font-bold text-white">{q102HighVolAudit.sourceEvaluatedH1}</p></div>
+                     <div><p className="text-[#819cb2]">生の閾値一致（重複含む）</p><p className="font-bold text-white">{q102HighVolAudit.rawThresholdGridMatches}</p></div>
+                     <div><p className="text-[#819cb2]">180日学習済み採用ルール</p><p className="font-bold text-amber-200">未取得</p></div>
+                     <div><p className="text-[#819cb2]">正式入口候補／約定</p><p className="font-bold text-amber-200">0／0</p></div>
+                   </div>
+                   <p className="mt-2">元コードSHA：{q102HighVolAudit.pipelineSha256.slice(0,12)}…</p>
+                   <p>元特徴量の対象：{q102HighVolAudit.evaluatedModelSymbols.join(" / ")}</p>
+                   <p>人工市場にない対象：{q102HighVolAudit.missingModelSymbols.join(" / ")||"なし"}</p>
+                   <details className="mt-2"><summary className="cursor-pointer text-cyan-200">銘柄別の閾値一致（正式入口ではありません）</summary>
+                     <table className="mt-2 w-full text-left"><thead><tr><th>銘柄</th><th>評価H1</th><th>重複を含む閾値一致</th></tr></thead>
+                       <tbody>{q102HighVolAudit.perSymbol.map(v=><tr key={v.symbol} className="border-t border-[#355471]">
+                         <td>{v.symbol}</td><td>{v.frames}</td><td>{v.rawGrid}</td></tr>)}</tbody>
+                     </table>
+                   </details>
+                   <p className="mt-2 text-amber-200">この結果は投資の勝率や利益ではありません。180日学習、S1/S2の採用ルール、Online、Portfolio Opportunity、約定は未接続です。</p>
+                 </div>}
               </div>
               <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
