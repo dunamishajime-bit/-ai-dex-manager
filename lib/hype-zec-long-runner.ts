@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import { assertHypeZecLiveGate, type HypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
+import {MarketSlippageGuardError} from "./market-slippage-guard-error";
 import {createHypeH48TimeOnlyContract,validateHypeH48TimeOnlyContract,validateHypeH48PolicyEvidence,evaluateHypeH48TimeOnlyExit,type HypeH48TimeOnlyContract,type HypeH48PolicyEvidence} from "./hype-stable4-time-only-contract";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
 import { readFile, lstat } from "node:fs/promises";
@@ -51,6 +52,8 @@ export function refreshHypeZecNoEntryDecision(
 export interface HypeZecLongRunnerDependencies {
   /** Supplied only by an exact-source root certificate validator. No environment boolean substitutes for this proof. */
   h48TimeOnlyPolicy?:{authorize(input:{phase:"ENTRY"|"POSITION";runtimeSha:string;contract:HypeH48TimeOnlyContract;quantity:number;lease:AccountLockHandle}):Promise<HypeH48PolicyEvidence>};
+  /** Root-certified narrowly scoped V4 priority close; grants no entry authority. */
+  h48V4PriorityPolicy?:{authorize():Promise<void>};
   entryOpportunityBuilder?:(input:{signal:HypeZecSignalResult;market:HypeZecLongMarketData|undefined;pending:HypeZecLongPending;decisionTs:number;lock:AccountLockHandle;gross:number})=>Promise<import("./stable4-entry-opportunity-book").Stable4EntryOpportunityRecord|undefined>;
   marketData: { load(): Promise<HypeZecLongMarketData> };
   executor: DirectTradeExecutor;
@@ -380,6 +383,37 @@ export class HypeZecLongRunner {
     return undefined;
   }
 
+  /** The V4 engine must first establish its ordinary entry eligibility. This
+   * method only handles the H48 owner's independently checked durable exit;
+   * it neither grants V4 entry nor acquires/releases the caller's lease. */
+  async preemptH48ForV4(input:{lease:AccountLockHandle;expectedRuntimeSha:string;expectedPositionId:string;expectedQuantity:number;revalidate:()=>Promise<void>}):Promise<HypeZecLongTickResult>{
+    let state:HypeZecLongRunnerState,owned:HypeZecLongPositionState,actual:DirectPosition,quote:DirectMarketQuote;
+    try{
+      if(this.dependencies.runtime.mode!=="LIVE"||this.dependencies.runtime.signalMode!=="STABLE4"||this.dependencies.runtime.runtimeSha!==input.expectedRuntimeSha||!/^[a-f0-9]{40}$/.test(input.expectedRuntimeSha)||!input.expectedPositionId||!Number.isFinite(input.expectedQuantity)||input.expectedQuantity<=0||!this.dependencies.h48V4PriorityPolicy)throw Error("H48_PREEMPT_SCOPE_INVALID");
+      await this.dependencies.h48V4PriorityPolicy.authorize();
+      const first=await input.lease.document();if(first.accountScope!=="ASTER_FUTURES"||first.expiresAt<=this.now())throw Error("H48_PREEMPT_LEASE_INVALID");
+      state=await this.dependencies.stateStore.load();
+      if(state.mode!=="LIVE"||state.runtimeCommitSha!==input.expectedRuntimeSha||state.pending||state.manualReview||(state.positions||[]).length!==1)throw Error("H48_PREEMPT_STATE_UNAVAILABLE");
+      owned=state.positions![0];
+      if(owned.positionId!==input.expectedPositionId||owned.quantity!==input.expectedQuantity||owned.symbol!=="HYPEUSDT"||owned.strategy!=="HYPE_LONG"||!owned.nativeExitContract)throw Error("H48_PREEMPT_OWNER_CHANGED");
+      const [positions,orders]=await Promise.all([hypePortfolioPositions(this.dependencies.executor),hypePortfolioOpenOrders(this.dependencies.executor)]);
+      const issue=await this.reconcileOwnership(state,positions,orders,input.lease);if(issue)throw Error(issue);
+      const matched=positions.filter(p=>p.symbol==="HYPEUSDT"&&p.quantity!==0);
+      if(matched.length!==1||matched[0].quantity!==owned.quantity||positionSide(matched[0])!=="LONG"||orders.some(o=>o.symbol==="HYPEUSDT"))throw Error("H48_PREEMPT_SIGNED_OWNER_CHANGED");
+      actual=matched[0];quote=await this.dependencies.executor.getMarketQuote(owned.symbol);
+      const age=this.now()-quote.updatedAt;
+      if(quote.symbol!==owned.symbol||!Number.isFinite(quote.bidPrice)||quote.bidPrice<=0||!Number.isFinite(age)||age<0||age>5*60000)throw Error("H48_PREEMPT_QUOTE_INVALID");
+      const current=await input.lease.document();if(current.leaseId!==first.leaseId||current.ownerId!==first.ownerId||current.acquiredAt!==first.acquiredAt||current.accountScope!==first.accountScope||current.expiresAt<=this.now())throw Error("H48_PREEMPT_LEASE_CHANGED");
+      await input.revalidate();
+      await this.assertH48TimeOnlyPolicy(owned.nativeExitContract!,owned.quantity,input.lease,"POSITION");
+      await input.revalidate();
+      await this.dependencies.h48V4PriorityPolicy.authorize();
+      const last=await input.lease.document();if(last.leaseId!==first.leaseId||last.ownerId!==first.ownerId||last.acquiredAt!==first.acquiredAt||last.accountScope!==first.accountScope||last.expiresAt<=this.now())throw Error("H48_PREEMPT_LEASE_CHANGED");
+      if(this.now()-quote.updatedAt>5*60000)throw Error("H48_PREEMPT_QUOTE_STALE");
+    }catch{return{status:"held",message:"H48_PREEMPT_READONLY_PROOF_UNAVAILABLE"};}
+    return this.exitPosition(state!,owned!,actual!,quote!,"HYPE_V4_FORMAL_PRIORITY",input.lease);
+  }
+
   private async exitPosition(state: HypeZecLongRunnerState, owned: HypeZecLongPositionState, actual: DirectPosition, quote: DirectMarketQuote, reason: string, lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
     if (this.dependencies.runtime.mode !== "LIVE") {
       state.lastDecision = { strategy: owned.strategy, signalTs: owned.signalTs, accepted: false, reason: `SHADOW_EXIT_${reason}` };
@@ -395,8 +429,17 @@ export class HypeZecLongRunner {
     try {
       state.pending.phase = "submitted";
       await this.dependencies.stateStore.save(state);
+      const currentLease=await lock.document();
+      if(currentLease.accountScope!=="ASTER_FUTURES"||currentLease.expiresAt<=this.now())throw Error("HYPE_EXIT_ACCOUNT_LEASE_EXPIRED");
       result = await this.dependencies.executor.executeMarket({ requestId: idempotencyKey, clientOrderId: idempotencyKey, symbol: owned.symbol, side: "SELL", positionSide: "BOTH", quantity: actualQuantity(actual), reduceOnly: true, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason, requireVenueMargin5xCross: true });
     } catch (error) {
+      if(owned.nativeExitContract&&error instanceof MarketSlippageGuardError&&error.symbol===owned.symbol&&error.clientOrderId===idempotencyKey&&error.reduceOnly===true){
+        try{
+          const lease=await lock.document();if(lease.accountScope!=="ASTER_FUTURES"||lease.expiresAt<=this.now())throw Error("H48_LEASE_EXPIRED");
+          state.pending=undefined;state.lastDecision={strategy:owned.strategy,signalTs:owned.signalTs,accepted:false,reason:"HYPE_H48_EXIT_SLIPPAGE_RETRY"};state.lastDecisionTs=this.now();await this.dependencies.stateStore.save(state);
+          return{status:"held",message:"HYPE_H48_EXIT_SLIPPAGE_RETRY",strategy:owned.strategy};
+        }catch{/* If state or lease is uncertain, preserve the pending intent. */}
+      }
       return this.manualReview(state, `HYPE_ZEC_EXIT_ERROR:${error instanceof Error ? error.message : String(error)}`);
     }
     if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `HYPE_ZEC_EXIT_UNKNOWN:${idempotencyKey}`);

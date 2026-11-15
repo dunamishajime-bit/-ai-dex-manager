@@ -1,6 +1,12 @@
 ﻿import "dotenv/config";
 import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
 import {resolveDisDexStable4Mode} from "../config/disdexStable4Opportunity";
+import {resolveHypeZecLongRuntime} from "../config/hypeZecLongRuntime";
+import {HypeZecLongRunner} from "../lib/hype-zec-long-runner";
+import {FileHypeZecLongRunnerStateStore} from "../lib/hype-zec-long-runner-state";
+import {createH48TimeOnlyPolicyAuthority} from "../lib/hype-stable4-time-only-authority";
+import {createH48V4PriorityAuthority} from "../lib/hype-stable4-v4-priority-authority";
+import {readPendingExposureRegistry} from "../lib/disdex-pending-exposure-registry";
 import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
 import {expectedStable4OpportunityHoldHours} from "../lib/stable4-opportunity-expected-hold";
 import {v4ExecutionPhase,v4MonitorIdentity,v4ReadOnlyRuntimeSha} from "../lib/v12-v4-execution-phase";
@@ -19,7 +25,7 @@ import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-cert
 import {readV4CanaryPermit,assertV4CanarySourceSnapshot,assertV4CanaryOrderAuthority} from "../lib/v12-v4-canary-permit";
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
-import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource,type V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
+import {v4PeerOwners,liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource,type V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 import {classifyAsterRateBudgetFailure,nextAsterRateBudgetRetryMs} from "../lib/disdex-aster-rate-budget-policy";
@@ -356,7 +362,33 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
  };
  let entryOpportunityRuntime:ReturnType<typeof createStable4EntryOpportunityRuntime>|undefined;
  const stable4Mode=resolveDisDexStable4Mode();
+ const preemptH48ForV4=stable4Mode!=="LIVE"?undefined:async({lease,expectedQuantity,revalidate}:{lease:import("../lib/disdex-account-order-lock").AccountLockHandle;expectedQuantity:number;revalidate:()=>Promise<void>})=>{
+  try{
+   const verifyRegistry=async()=>{
+    const meta=await lstat(pendingRegistryPath);if(!meta.isFile()||meta.isSymbolicLink())throw Error("H48_V4_PENDING_REGISTRY_MISSING");
+    const registry=await readPendingExposureRegistry(pendingRegistryPath),age=Date.now()-registry.updatedAt;
+    if(registry.accountScope!=="ASTER_FUTURES"||!Number.isFinite(age)||age<0||age>120000||registry.entries.some(row=>row.status!=="RELEASED"))throw Error("H48_V4_PENDING_REGISTRY_NOT_CLEAR");
+   };
+   await verifyRegistry();
+   const manifestPath="/etc/disdex/runner-pins.json",before=await lstat(manifestPath);
+   if(!before.isFile()||before.isSymbolicLink()||before.uid!==0||before.gid!==0||(before.mode&0o022)!==0)throw Error("H48_V4_PIN_METADATA");
+   const bytes=await readFile(manifestPath),manifest=JSON.parse(bytes.toString("utf8")),pin=manifest.runners?.HYPE_TREND_LONG;
+   if(manifest.schema!=="disdex-runner-pin-manifest/v1"||pin?.sha!==releaseSha||pin.releaseRoot!=="/home/deploy/disdex-trading/releases/"+releaseSha||pin.serviceUnit!=="disdex-hype-long@"+releaseSha+".service")throw Error("H48_V4_PIN_SOURCE");
+   const paths=JSON.parse(env("V12_V4_PEER_STATE_PATHS_JSON"));
+   if(paths.HYPE_LONG!=="/var/lib/disdex/hype-zec-long/runner.json")throw Error("H48_V4_OWNER_PATH");
+   const peers=await loadPeers(releaseSha,peerLineageMode),owners=v4PeerOwners(peers,releaseSha,Date.now(),peerLineageMode);
+   const peer=peers.find(p=>p.kind==="HYPE_LONG"),owner=owners.find(o=>o.owner==="HYPE_LONG");
+   const positions=peer?.raw?.positions;
+   if(!peer||peer.programSha!==releaseSha||!peer.service?.active||!owner||owner.qty!==expectedQuantity||owner.symbol!=="HYPEUSDT"||owner.side!=="LONG"||!Array.isArray(positions)||positions.length!==1||typeof positions[0]?.positionId!=="string"||!positions[0].nativeExitContract)throw Error("H48_V4_OWNER_SOURCE");
+   const after=await lstat(manifestPath);if(before.ino!==after.ino||before.dev!==after.dev||before.size!==after.size||before.mtimeMs!==after.mtimeMs||!(await readFile(manifestPath)).equals(bytes))throw Error("H48_V4_PIN_CHANGED");
+   const runtime=resolveHypeZecLongRuntime({...process.env,DISDEX_HYPE_ZEC_MODE:"LIVE",DISDEX_HYPE_ZEC_SIGNAL_MODE:"STABLE4",DISDEX_HYPE_ZEC_RUNTIME_SHA:releaseSha,DISDEX_HYPE_ZEC_STATE_PATH:paths.HYPE_LONG});
+   const executor=adapter.executor;
+   const runner=new HypeZecLongRunner({runtime,executor,adapter,lock,stateStore:new FileHypeZecLongRunnerStateStore(paths.HYPE_LONG,releaseSha,"LIVE"),h48TimeOnlyPolicy:createH48TimeOnlyPolicyAuthority(releaseSha,executor),h48V4PriorityPolicy:createH48V4PriorityAuthority(releaseSha),marketData:{load:async()=>{throw Error("H48_PREEMPT_MARKET_DATA_FORBIDDEN");}}});
+   return await runner.preemptH48ForV4({lease,expectedRuntimeSha:releaseSha,expectedPositionId:positions[0].positionId,expectedQuantity,revalidate:async()=>{await verifyRegistry();await revalidate();}});
+  }catch{return{status:"held",message:"H48_V4_PINNED_OWNER_PROOF_UNAVAILABLE"};}
+ };
  const engine=new V4RunnerEngine({
+  ...(preemptH48ForV4?{preemptH48ForV4}:{}),
   ...(stable4Mode==="OFF"?{}:{
    entryOpportunityBuilder:async({candidate,reservation,decisionTs,lock,entrySnapshot})=>{
     entryOpportunityRuntime??=createStable4EntryOpportunityRuntime();

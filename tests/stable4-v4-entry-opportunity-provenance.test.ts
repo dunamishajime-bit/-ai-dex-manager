@@ -28,9 +28,9 @@ test("journaled provenance survives partial fills, reduction, closure and restar
  event({type:"EXIT_REQUEST",eventId:"closerequest",ts:T+400,id:r.leg.id,qty:.5});
  event({type:"EXIT_FILL",eventId:"closefill",ts:T+401,id:r.leg.id,qty:.5,price:101,feeUsd:0,cooldownUntil:T+402});assert.equal(s.legs[r.leg.id].status,"CLOSED");
 });
-function harness(builder?:any){
- const dir=mkdtempSync(join(tmpdir(),"v4-entry-provenance-")),store=new V4ExecutionStore(join(dir,"state.json"),SHA);let doc=store.initialize(initial);
- doc=store.commit(doc.revision,{...doc,state:applyProductionEvent(doc.state,{type:"ACCOUNT_MARK",eventId:"account",ts:T+100,equityUsd:1000,prices:{}})});
+function harness(builder?:any,foreign:any[]=[]){
+ const dir=mkdtempSync(join(tmpdir(),"v4-entry-provenance-")),store=new V4ExecutionStore(join(dir,"state.json"),SHA);let doc=store.initialize({...initial,foreign});
+ doc=store.commit(doc.revision,{...doc,state:applyProductionEvent(doc.state,{type:"ACCOUNT_MARK",eventId:"account",ts:T+100,equityUsd:1000,prices:Object.fromEntries(foreign.map(x=>[x.symbol,100]))})});
  const warnings:string[]=[],events:string[]=[],lock={document:async()=>({ownerId:"V4"})},c=candidate();let now=T+100;
  const engine:any=new V4RunnerEngine({store,now:()=>now,assertEntrySafety:async()=>{},assertSourceParity:async()=>{},referencePrice:async()=>100,minimumVenueOrderNotional:async()=>5,requiredResidentStop:async()=>95,quantityNormalizer:normalizer,assertAuthority:async()=>{},...(builder?{entryOpportunityBuilder:async(x:any)=>{events.push("capture");return builder(x,store);}}:{}),entryOpportunityDiagnostic:(message:string)=>warnings.push(message)} as any);
  const decision:any={candidateCount:1,candidates:[c],entryAtrByCandidate:{[[c.symbol,c.route,c.effectiveSide,c.eligibleEntryTs].join("|")]:1},nativeCoreEvents:[]};
@@ -43,6 +43,27 @@ test("builder captures under the actual lease before journal commit and entry tr
  try{await assert.rejects(f.run(),/TEST_TRANSPORT_BOUNDARY/);assert.equal(input.lock,f.lock);assert.equal(input.decisionTs,T+100);assert.equal(Object.isFrozen(input.reservation),true);assert.equal(Object.isFrozen(input.reservation.leg),true);assert.deepEqual(input.entrySnapshot,{rank:f.c.rank});assert.deepEqual(f.events,["capture","prepare","HTTP"]);
   const doc=new V4ExecutionStore(f.store.path,SHA).read(),leg:any=Object.values(doc.state.legs)[0];assert.deepEqual(leg.entryOpportunity,(doc.state.journal.find(e=>e.type==="RESERVE") as any).leg.entryOpportunity);assert.equal(leg.entryOpportunity.positionId,leg.id);
   const edited=structuredClone(doc);(Object.values(edited.state.legs)[0] as any).entryOpportunity.score=999;assert.throws(()=>f.store.commit(doc.revision,edited),/SNAPSHOT_JOURNAL_MISMATCH/);
+ }finally{rmSync(f.dir,{recursive:true,force:true});}
+});
+test("eligible V4 preempts H48 even without gross pressure, then waits for a fresh account tick",async()=>{
+ const f=harness(undefined,[{owner:"HYPE_LONG",symbol:"HYPEUSDT",side:"LONG",qty:2,gross:.1,crypto:true,pendingGross:0}]);
+ try{let calls=0;f.engine.deps.preemptH48ForV4=async(x:any)=>{calls++;assert.equal(x.lease,f.lock);assert.equal(x.expectedQuantity,2);return{status:"completed",message:"done"};};
+ f.lock.document=async()=>({ownerId:"V4",accountScope:"ASTER_FUTURES",expiresAt:T+10000} as any);
+ const out=await f.run();assert.equal(out.reason,"V4_H48_PREEMPTED_RECHECK_REQUIRED");assert.equal(calls,1);assert.equal(Object.keys(f.store.read().state.legs).length,0);assert.deepEqual(f.events,[]);
+ }finally{rmSync(f.dir,{recursive:true,force:true});}
+});
+test("ineligible V4, stale authority or unresolved HYPE work never trigger H48 close",async()=>{
+ for(const kind of ["gross","pending","authority","lease"]){const f=harness(undefined,[{owner:"HYPE_LONG",symbol:"HYPEUSDT",side:"LONG",qty:2,gross:.1,crypto:true,pendingGross:kind==="pending"?.1:0}]);
+ try{let calls=0;f.engine.deps.preemptH48ForV4=async()=>{calls++;return{status:"completed",message:"done"};};
+ f.lock.document=async()=>({ownerId:"V4",accountScope:"ASTER_FUTURES",expiresAt:kind==="lease"?1:T+10000} as any);
+ if(kind==="gross")f.c.requestedGross=2;if(kind==="authority")f.engine.deps.assertAuthority=async()=>{throw Error("NO_AUTHORITY");};
+ if(kind==="authority"||kind==="lease")await assert.rejects(f.run());else assert.equal((await f.run()).status,"blocked");assert.equal(calls,0,kind);assert.equal(Object.keys(f.store.read().state.legs).length,0,kind);
+ }finally{rmSync(f.dir,{recursive:true,force:true});}}
+});
+test("H48 is preserved if insufficient time remains for the subsequent V4 cycle",async()=>{
+ const f=harness(undefined,[{owner:"HYPE_LONG",symbol:"HYPEUSDT",side:"LONG",qty:2,gross:.1,crypto:true,pendingGross:0}]);
+ try{let calls=0;f.engine.deps.preemptH48ForV4=async()=>{calls++;return{status:"completed",message:"done"};};f.setTime(T+10*60000);
+ const out=await f.run();assert.equal(out.reason,"V4_H48_PREEMPTION_TIME_BUDGET_INSUFFICIENT");assert.equal(calls,0);
  }finally{rmSync(f.dir,{recursive:true,force:true});}
 });
 test("absent, failed or mismatched baseline capture logs missing provenance without inventing a score or blocking native entry",async()=>{

@@ -25,6 +25,7 @@ import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 import {classifyAsterRateBudgetFailure} from "./disdex-aster-rate-budget-policy";
 import {SharedKillSwitchActiveError} from "./disdex-shared-kill-switch";
+import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 export type V4PreparedDecision =
  | {kind:"READY";preparedAtMs:number;decision:V4LiveDecisionSnapshot}
  | {kind:"FAILED";preparedAtMs:number;reason:string};
@@ -119,6 +120,8 @@ export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number)
  return {fromTs:entryTs,untilTs:Math.min(now,entryTs+durationHours*3600000)};
 }
 export interface V4RunnerDependencies{
+ /** Enabled only by the exact-source STABLE4 runtime; this does not grant entry. */
+ preemptH48ForV4?:(input:{lease:AccountLockHandle;expectedQuantity:number;revalidate:()=>Promise<void>})=>Promise<{status:string;message:string}>;
  entryOpportunityBuilder?:(input:{candidate:EntryEvent["leg"]["candidate"];reservation:EntryEvent;decisionTs:number;lock:AccountLockHandle;entrySnapshot:Readonly<Record<string,number>>})=>Promise<Stable4EntryOpportunityRecord|undefined>;
  entryOpportunityDiagnostic?:(message:string,payload?:Record<string,unknown>)=>void;
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
@@ -588,6 +591,34 @@ export class V4RunnerEngine{
     minimumOrderNotionalUsd:min,entryAtr:atr14,
     nativeExitEvidence:nativeEvidenceForProductionRoute(candidate.route),
     quantityNormalizer:d.quantityNormalizer};
+   // Research priority closes the full H48 owner whenever V4 is otherwise
+   // eligible, even if current gross would permit both positions. This is a
+   // hypothetical calculation only; never reserve from the altered snapshot.
+   const hype=state.foreign.filter(x=>x.owner==="HYPE_LONG");
+   if(hype.length&&d.preemptH48ForV4&&!d.canaryEntry){
+    // Reserve six minutes for the next real account/risk cycle inside the
+    // native 15-minute candidate window. It is not a guarantee of a fill.
+    if(this.now()-candidate.eligibleEntryTs>9*60000)return {status:"blocked",reason:"V4_H48_PREEMPTION_TIME_BUDGET_INSUFFICIENT",eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+    if(!lease||hype.length!==1||hype[0].symbol!=="HYPEUSDT"||hype[0].side!=="LONG"||!hype[0].crypto||!(hype[0].qty>0)||hype[0].pendingGross!==0||state.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12||!hasFreshV4SharedAccountLedger(d.store.read(),this.now()))
+     return {status:"blocked",reason:"V4_H48_PREEMPTION_PROOF_UNAVAILABLE",eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+    const hypothetical={...state,foreign:state.foreign.filter(x=>x!==hype[0])};
+    let hypotheticalPlan:Awaited<ReturnType<typeof planProductionEntry>>;
+    try{hypotheticalPlan=await planProductionEntry(hypothetical,{candidate,...baseInput});}
+    catch(error){return {status:"blocked",reason:"V4_H48_PREEMPTION_CANDIDATE_INELIGIBLE:"+safeDecisionFailureReason(error),eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};}
+    const preflight:V4DurableOrderCommand={legId:hypotheticalPlan.leg.id,action:"ENTRY",sequence:0,symbol:candidate.symbol,positionSide:candidate.effectiveSide,quantity:hypotheticalPlan.leg.requestedQty,price,signalTs:candidate.eligibleEntryTs};
+    await d.assertAuthority(preflight);await d.assertEntrySafety();
+    const accountLease=await lease.document();if(accountLease.accountScope!=="ASTER_FUTURES"||accountLease.expiresAt<=this.now())throw Error("V4_H48_PREEMPTION_LEASE_INVALID");
+    if(!hasFreshV4SharedAccountLedger(d.store.read(),this.now()))return {status:"blocked",reason:"V4_ENTRY_ACCOUNT_LEDGER_REFRESH_REQUIRED",eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+    const revision=d.store.read().revision;
+    const reduction=await d.preemptH48ForV4({lease,expectedQuantity:hype[0].qty,revalidate:async()=>{
+     if(d.store.read().revision!==revision||!hasFreshV4SharedAccountLedger(d.store.read(),this.now())||this.now()-candidate.eligibleEntryTs>9*60000)throw Error("V4_H48_PREEMPTION_REVALIDATION_STALE");
+     await d.assertAuthority(preflight);await d.assertEntrySafety();
+    }});
+    if(reduction.status!=="completed")return {status:"blocked",reason:"V4_H48_PREEMPTION_NOT_COMPLETED:"+reduction.message,eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+    // The next tick must rebuild signed account/risk and re-run every V4 gate.
+    // Never submit an entry against the hypothetical pre-close snapshot.
+    return {status:"observing",reason:"V4_H48_PREEMPTED_RECHECK_REQUIRED",eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+   }
    // The natural candidate must be admissible under ordinary strategy/risk rules.
    // Canary mode changes only size, never route eligibility or ownership rules.
    let ordinaryPlan:Awaited<ReturnType<typeof planProductionEntry>>;
