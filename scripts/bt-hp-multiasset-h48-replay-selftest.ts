@@ -15,7 +15,7 @@ for(const scenario of ["trend","range","down","volatile"] as const){
  assert.equal(r.frames.at(-1)?.timestamp,"2025-10-11T00:00:00Z");
  const b=createMultiassetH48Replay(11,scenario,10);
  assert.deepEqual(r,b,"Same scenario/seed must be repeatable");
- let movements=0,closedMarks=0,fetEntrySourceEvaluations=0,idleNativeEvaluations=0,idleTiaBlock=0,penguRegimeEvaluations=0;
+ let movements=0,closedMarks=0,fetEntrySourceEvaluations=0,idleNativeEvaluations=0,idleTiaBlock=0,penguRegimeEvaluations=0,penguNativeSourceEvaluations=0;
  for(let i=0;i<r.frames.length;i++){
   const f=r.frames[i],h=f.h48Research!;
   assert.ok(h.ready&&h.hypePrice>0);
@@ -42,6 +42,13 @@ for(const scenario of ["trend","range","down","volatile"] as const){
    assert.ok(p.gross!==null&&p.gross>0);
   }
   for(const e of f.events){
+   if(e.includes("PINNED_NATIVE_PENGU_ENTRY_SHADOW")){
+     penguNativeSourceEvaluations++;
+     assert.ok(e.startsWith("RISK PENGU_V2_NATIVE"));
+     assert.ok(e.endsWith("NO_FILL NO_RISK_ADMISSION"));
+     assert.ok(e.includes("sourceRevision=9118eeaa6"));
+     assert.equal(f.timestamp.slice(14,16),"00");
+   }
    if(e.includes("RESEARCH_PRETARGET_ONLY")){
      penguRegimeEvaluations++;
      assert.ok(e.startsWith("RISK PENGU_"));
@@ -91,6 +98,8 @@ for(const scenario of ["trend","range","down","volatile"] as const){
    "TIA missing synthetic input must consistently block native source and never fabricate a fill");
  assert.equal(penguRegimeEvaluations,240*2,
    "PENGU ShortV20 and RecoveryV8 regime probes must run each hourly close with no fills");
+ assert.equal(penguNativeSourceEvaluations,240,
+   "Native pinned PENGU pure source must run on each completed H1 (never as fill)");
 }
 const p=createMultiassetH48Replay(11,"trend",30);
 assert.equal(validateReplay(p),true);

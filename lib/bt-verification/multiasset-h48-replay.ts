@@ -3,6 +3,7 @@ import {SyntheticMarket5m,type SyntheticScenario,type MarketCandle5m,type Synthe
 import {probeSyntheticFet} from "./pinned-native-fet/probe";
 import {probeSyntheticIdleAt} from "./pinned-native-idle/probe";
 import {probeSyntheticPenguAt} from "./stable4-pengu-research-gates";
+import {probeNativePenguSyntheticAt} from "./pinned-native-pengu/probe";
 import {evaluateH48ClosedHourly,H48_RESEARCH_LOGIC,
   H48_RESEARCH_THRESHOLDS,type H48Observation,type H48Decision} from "./h48-research-sandbox";
 
@@ -141,6 +142,19 @@ export function createMultiassetH48Replay(
          " NO_NATIVE_ENTRY_CANDIDATE NO_FILL");
      }
    }
+   // Source-pinned V2/ShortV20/RecoveryV8 actual pure signal entry.
+   // The native source has no modeled live position here, so its candidate
+   // is a separate SHADOW RISK event and NEVER a fill or portfolio slot.
+   if(inMain&&step.completedH1.some(x=>x.symbol==="BTCUSDT")){
+     const native=probeNativePenguSyntheticAt(feed,step);
+     events.push("RISK PENGU_V2_NATIVE [PINNED_NATIVE_PENGU_ENTRY_SHADOW] "+
+       (native.status==="NATIVE_ENTRY_CANDIDATE"?"PASS":"BLOCK")+
+       " asOf="+native.asOf+" sourceRevision="+native.sourceRevision+
+       " status="+native.status+" side="+native.nativeSide+
+       " entryVersion="+(native.nativeEntryVersion??"NONE")+
+       " targetGrossRequested="+round(native.nativeTargetGross,4)+
+       " NO_FILL NO_RISK_ADMISSION");
+   }
    const b=step.completedH1.find(x=>x.symbol==="BTCUSDT"),
      h=step.completedH1.find(x=>x.symbol==="HYPEUSDT");
    if(Boolean(b)!==Boolean(h))throw Error("MULTIASSET_H48_ASOF_H1_ALIGNMENT");
@@ -194,6 +208,6 @@ export function createMultiassetH48Replay(
      routes:1,symbols:1,status:"RESEARCH_SOURCE_UNVERIFIED"}],
    source:{kind:"SYNTHETIC_MULTI_ASSET_H48_CANDIDATE",
      grossCapEvidence:"SYNTHETIC_SINGLE_SLEEVE_NO_PORTFOLIO_PARITY",
-     note:(feedVersion==="v3"?"26 assets including TIA/APT/LDO (v3) ":feedVersion==="v2"?"24 assets including TIA (v2) ":"23 assets without TIA (v1) ")+"generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. Pinned FET and IDLE pure native entry probes are shadow-only and never open positions; IDLE TIA receives synthetic H1 only in v2/v3 and is explicitly blocked in v1, TAO 12h research sensor state is not a portfolio risk model. PENGU ShortV20 and RecoveryV8 research regime-only filters likewise have no native candidate or fills. No native production STOP, no formal V4 priority preemption or complete other runners, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
+     note:(feedVersion==="v3"?"26 assets including TIA/APT/LDO (v3) ":feedVersion==="v2"?"24 assets including TIA (v2) ":"23 assets without TIA (v1) ")+"generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. Pinned FET and IDLE pure native entry probes are shadow-only and never open positions; IDLE TIA receives synthetic H1 only in v2/v3 and is explicitly blocked in v1, TAO 12h research sensor state is not a portfolio risk model. PENGU source-pinned pure V2/ShortV20/RecoveryV8 entry also runs as an independent Shadow candidate without positions or fills; its historical STABLE4 pretarget regime checks are separate. No native production STOP, no formal V4 priority preemption or complete other runners, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
  };
 }

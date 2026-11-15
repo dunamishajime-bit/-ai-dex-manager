@@ -513,7 +513,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
               </div>
               {(syntheticStrategy==="h48"||syntheticStrategy==="h48multi")&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
                 <p>確定H1のH12/H24/BTC相対24hと6時間UTC入場枠で判定。次の足の始値で入り、最大48時間後に決済。元候補研究にある6%STOPは観測済み5分模擬価格で評価します（本番STOPの再現ではありません）。</p>
-                {syntheticStrategy==="h48multi"&&<p className="text-cyan-100">{syntheticFeedVersion==="v3"?"26銘柄版（TIA・APT・LDOの人工OHLCVも生成）":syntheticFeedVersion==="v2"?"24銘柄版（TIAの人工OHLCVも生成）":"既存23銘柄版（TIA・APT・LDOは未登録でブロック）"}の独立模擬OHLCVからBTC・HYPEの確定足を作り、同じH48候補研究関数へ接続します。FETとIDLE（JUP・TAO・DOT・RENDER・v2はTIA）は元の入口関数をShadowで評価します。PENGUは研究版の相場フィルターだけを検証します。これらの結果は約定・損益・Grossに加算しません。モデルFunding・変動USDJPYはH48の収支だけに反映します。</p>}
+                {syntheticStrategy==="h48multi"&&<p className="text-cyan-100">{syntheticFeedVersion==="v3"?"26銘柄版（TIA・APT・LDOの人工OHLCVも生成）":syntheticFeedVersion==="v2"?"24銘柄版（TIAの人工OHLCVも生成）":"既存23銘柄版（TIA・APT・LDOは未登録でブロック）"}の独立模擬OHLCVからBTC・HYPEの確定足を作り、同じH48候補研究関数へ接続します。FETとIDLE（JUP・TAO・DOT・RENDER・v2はTIA）は元の入口関数をShadowで評価します。PENGUは元V2・Short V20・Recovery V8の入口関数と研究版の相場フィルターを、それぞれShadowで検証します。これらの結果は約定・損益・Grossに加算しません。モデルFunding・変動USDJPYはH48の収支だけに反映します。</p>}
                 <label className="flex items-center gap-2">往復モデル費用
                   <select aria-label="H48模擬往復費用" value={syntheticFeeBps} onChange={e=>setSyntheticFeeBps(Number(e.target.value) as 10|30)}
                     className="rounded-md border border-[#46637b] bg-[#102b41] px-2 py-1 text-white">
