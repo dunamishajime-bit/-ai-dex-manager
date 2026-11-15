@@ -52,3 +52,13 @@
 - Episode相関・保有中MTMと約定済み損益・実venue FillとモデルFill・資金予約Grossと時価Grossを区別する。
 - 独立市場と経済パリティを満たす改善が出るまでは、**利益・勝率・DD改善済み／本番へ採用可能**とは書かない。
 - この台帳を次回再開地点とし、タスクごとに文書・ユニットテスト・コミットを積み上げて続行する。
+
+## 追記：2026-11-15 Codex V4切替後の新たな研究ブロッカー
+
+- ユーザー申告のV4切替完了を踏まえ、VPS登録manifestをread-onlyで確認：`V12_V4=e788abc82e80f9fc7ab0e1ba83fdb8be267eb513`。V4対応Broker稼働は観測したが、新V4本体のactive/runningとvenue状態は未認証。旧unit failedが残るため、旧unitの失敗を新V4に直接帰属しない。詳細：`V4_CODEX_POST_ACTIVATION_READONLY_HANDOFF_20261115.md`。
+- `01c8f7a13` 現行9pin manifestと10/30bps研究BT7系統を比較。**V4とHYPEにsource mismatch**、Q102/PENGU/V52/IDLE/FETはpin SHA一致のみ。新V4 sourceの本番経済完全再計算まで`BLOCKED_REPLAY_REQUIRED`。本番LIVE/STOP証明は別。
+- `fe0269635` 研究BT結果画面に切替後V4ピン差分を明示。既存HYPE H48との差分警告は維持。
+- `0742bc89b` HYPE native TRENDとHYPEなし対照の10/30bps、合計4つのsource-hashed private ReplayをOwner PC内へ生成。Aster BTC確定H1 8,928本、研究元Gross・Funding/Partialイベント、未決済モデル建玉を保持。研究ケース3種を`source-pin-observation.ts`で明示警告、SHA256検証4/4 PASS。Private: `C:\tmp\bt481-hp-replay-library-native-hype-nohype-20261115`。**HP正式配信・publicへのコピーはしていない**。
+- `ec7a315ef` V4 Codexに返すread-only確認とimmutable release source取得・検証の要件を文書化。
+- 追加後のオフライン検証：Python204件PASS、追加native/noHYPE private library 4件SHA256 PASS、V4 pin複数ケースUI assertion PASS、TypeScript typecheck／Next.js webpack build PASS。GitHub CIは最新SHAについて別途確認。
+- **未完了の最優先**：新V4 release `e788...` のexact runtime sourceと正式LIVE本体・STOPの読取専用証拠。GitHub commit APIにはこのSHAのcommit objectなし。旧STABLE4のV4をこの新V4へそのまま同一視してBT完成/正式LIVE経済一致としない。要求DD≤20%は元研究シナリオの現状で未達成であり、改善済みを主張しない。
