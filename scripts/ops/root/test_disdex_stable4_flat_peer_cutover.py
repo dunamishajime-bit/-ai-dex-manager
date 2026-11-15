@@ -14,7 +14,13 @@ import disdex_stable4_flat_peer_cutover as cutover
 REF=Path(__file__).resolve().parents[3]/'.tmp/stable4-root-reference-20261115'
 OLD='a'*40;NEW='b'*40
 class FlatPeerTests(unittest.TestCase):
+ def require_captured_installed_source(self):
+  required=('disdex_hype_scoped_root_cutover.py','disdex_unified_root_gate.py',
+            'disdex_deployment_contract.py','disdex_deployment_plan.py')
+  if any(not (REF/name).is_file() for name in required):
+   self.skipTest('VPS installed Root source is private and required for full-source tests; verify separately on Owner PC')
  def generated(self,role):
+  self.require_captured_installed_source()
   out=cutover.build_stable4_flat_peer_sources((REF/'disdex_hype_scoped_root_cutover.py').read_bytes(),(REF/'disdex_unified_root_gate.py').read_bytes(),old_by_role={r:OLD for r in cutover.ROLES})
   contract=types.ModuleType('disdex_deployment_contract');exec((REF/'disdex_deployment_contract.py').read_text(),contract.__dict__)
   plan=types.ModuleType('disdex_deployment_plan')
@@ -81,6 +87,7 @@ class FlatPeerTests(unittest.TestCase):
      self.assertEqual(after[key],NEW);self.assertEqual({k:v for k,v in after.items() if k not in (key,'updatedAt')},{k:v for k,v in before.items() if k not in (key,'updatedAt')})
      self.assertLess(events.index('stop'),events.index('write'));self.assertLess(events.index('write'),events.index('start'))
  def test_real_native_public_parser_imports_accept_flat_sources_without_writing(self):
+  self.require_captured_installed_source()
   root=REF.parents[1]
   for role,state in self.states().items():
    if role=='PENGU_V8':state={k:v for k,v in state.items() if k!='riskOverlay'}
@@ -96,6 +103,7 @@ class FlatPeerTests(unittest.TestCase):
  def function(self,name):
   f=getattr(cutover,name,None);self.assertTrue(callable(f),name);return f
  def test_only_four_explicit_peer_roles_can_generate_authenticated_transactions(self):
+  self.require_captured_installed_source()
   build=self.function('build_stable4_flat_peer_sources');h=(REF/'disdex_hype_scoped_root_cutover.py').read_bytes();g=(REF/'disdex_unified_root_gate.py').read_bytes()
   roles=['QUALITY102_CAUSAL_V1','PENGU_V8','FET_BRK48_RESIDUAL','IDLE_PRIORITY_SHORT'];out=build(h,g,old_by_role={r:OLD for r in roles})
   for name,raw in out.items():ast.parse(raw,filename=name)
