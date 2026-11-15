@@ -344,7 +344,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
           {" / "}H24 {frame.h48Research.h24===null?"—":(frame.h48Research.h24*100).toFixed(3)+"%"}
           {" / "}BTC相対24h {frame.h48Research.rel24===null?"—":(frame.h48Research.rel24*100).toFixed(3)+"%"}</p>
         <p className="mt-1 text-[#99b1c8]">{frame.h48Research.reason}</p>
-        <p className="mt-2 text-amber-200">H48研究入口＋48時間出口のみ。7系統の統合判定ではありません。</p>
+        <p className="mt-2 text-amber-200">H48研究入口＋48時間上限＋候補研究の簡易STOPのみ。7系統の統合判定ではありません。</p>
       </div>
     </div>
   </section>}
@@ -385,14 +385,18 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                   className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>HYPE H48研究版の入口判定</button>
               </div>
               {syntheticStrategy==="h48"&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
-                <p>確定H1のH12/H24/BTC相対24hを使い、H48研究版の3条件で判定。成立後、次の足の始値で模擬エントリーし48時間後の始値で決済します。</p>
+                <p>確定H1のH12/H24/BTC相対24hと6時間UTC入場枠で判定。次の足の始値で入り、最大48時間後に決済。元候補研究にある6%STOPは観測済み5分模擬価格で評価します（本番STOPの再現ではありません）。</p>
                 <label className="flex items-center gap-2">往復モデル費用
                   <select aria-label="H48模擬往復費用" value={syntheticFeeBps} onChange={e=>setSyntheticFeeBps(Number(e.target.value) as 10|30)}
                     className="rounded-md border border-[#46637b] bg-[#102b41] px-2 py-1 text-white">
                     <option value={10}>10bps</option><option value={30}>30bps</option>
                   </select>
                 </label>
-                <p className="text-amber-200">H48入口と時間出口だけの検証です。V4の枠譲渡・Q102等6系統・Online Layer2/3・Funding・本番STOPは未接続。統合STABLE4の利益やDDではありません。</p>
+                <button type="button" onClick={()=>{setPreviewSeed(11);setScenario("trend")}}
+                  className="rounded-lg border border-cyan-500/40 bg-[#15495a] px-3 py-2 text-[11px] text-cyan-100">
+                  H48発火例（人工市場シード11）を設定
+                </button>
+                <p className="text-amber-200">H48研究入口と候補研究の簡易STOPのみ。V4枠譲渡・Q102等6系統・Online Layer2/3・Funding・本番STOPは未接続。統合STABLE4の利益やDDではありません。</p>
               </div>}
             </div>}
           </div>

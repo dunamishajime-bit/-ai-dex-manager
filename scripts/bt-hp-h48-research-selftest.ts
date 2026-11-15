@@ -58,14 +58,19 @@ for(const scenario of ["trend","range","down","volatile"] as const){
      const prev=i-1;
      assert.ok(prev>=0 && a.frames[prev].events.some(e=>e.includes(" HYPEUSDT PASS ")),"Entry only after previous closed-hour H48 PASS");
      assert.equal(i%12,0,"Entry occurs at following hour open, not current signal close");
+     assert.equal(new Date(f.timestamp).getUTCHours()%6,0,"Frozen H48 entries are six-hour UTC grid");
    }
    for(const e of f.events.filter(e=>e.startsWith("EXIT "))){
-     assert.equal(i%12,0,"H48 time exit is at next-open hour");
-     assert.ok(e.includes("TIME48_NEXTOPEN"));
+     if(e.includes("TIME48_NEXTOPEN")) assert.equal(i%12,0,"H48 time exit is at next-open hour");
+     else assert.ok(e.includes("H48_STUDY_STOP_6PCT_5MIN_OBSERVED"),"Only sourced time/STOP paths allowed");
    }
  }
 }
-assert.ok(totalEntries>0,"Synthetic HYPE scenarios exercise at least one H48 entry");
+const sourceGridExample=createH48ResearchReplay(11,"trend",10);
+const sourceGridEntries=sourceGridExample.frames.filter(f=>f.events.some(e=>e.startsWith("ENTRY "+H48_RESEARCH_LOGIC)));
+assert.ok(sourceGridEntries.length>0,"Frozen H48 6h research grid must have an executable artificial-market example");
+assert.equal(new Date(sourceGridEntries[0].timestamp).getUTCHours()%6,0,"Example respects observed six-hour research entry grid");
+totalEntries+=sourceGridEntries.length;
 const badH48=structuredClone(createH48ResearchReplay());
 badH48.frames[1].h48Research!.hypePrice=Number.NaN;
 assert.equal(validateReplay(badH48),false,"Do not allow synthetic price tampering");

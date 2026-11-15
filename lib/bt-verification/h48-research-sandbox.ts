@@ -7,7 +7,7 @@ import {createPreviewReplay,DEMO_WARMUP_HOURS,DEMO_TICKS_PER_HOUR,DEMO_BASE_JPY,
  */
 export const H48_RESEARCH_THRESHOLDS=Object.freeze({
   h12Max:.0042978523,h24Min:.020474266,rel24Max:.0262025534,
-  holdingHours:48,requestedGrossX:1.0
+  holdingHours:48,requestedGrossX:1.0,entryGridHours:6,researchCandidateHardStopPct:.06
 });
 export const H48_RESEARCH_LOGIC="HYPE_H48_RESEARCH";
 export type H48Observation={btcClose:number;hypeClose:number};
@@ -105,17 +105,31 @@ export function createH48ResearchReplay(seed=123456,scenario:DemoScenario="trend
       const index=hour*DEMO_TICKS_PER_HOUR+step,mark=priceByTick[index];
       const original=base.frames[index];
       const events=step===0?tickEvents.slice():[];
+      // Candidate-source research used a 6% hardStop (6 of 27 target candidate
+      // rows STOP). This is first *observed* synthetic 5-min quote, not an
+      // intrabar/venue stop, and not evidence of historical integrated adoption.
+      if(position&&mark<=position.entry*(1-H48_RESEARCH_THRESHOLDS.researchCandidateHardStopPct)){
+        const net=position.qty*(mark-position.entry)*DEMO_SYNTHETIC_USDJPY-
+          position.qty*mark*DEMO_SYNTHETIC_USDJPY*feeRate;
+        realized+=net;
+        events.push("EXIT "+H48_RESEARCH_LOGIC+" HYPEUSDT LONG reason=H48_STUDY_STOP_6PCT_5MIN_OBSERVED netJPY="+round(net));
+        position=null;
+      }
       if(step===DEMO_TICKS_PER_HOUR-1){
         const i=DEMO_WARMUP_HOURS+hour;
         observations.push({btcClose:btcBars[i].close,hypeClose:mark});
         const d=evaluateH48ClosedHourly(observations);
-        latestH48=d;
-        events.push("RISK "+H48_RESEARCH_LOGIC+" HYPEUSDT "+(d.candidate?"PASS":"BLOCK")+
+        // All 27 H48 candidate entry timestamps in the frozen owner source
+        // were on a six-hour UTC grid. Check the NEXT bar open, not future prices.
+        const gridOK=(hour+1)%H48_RESEARCH_THRESHOLDS.entryGridHours===0;
+        const candidate=d.candidate&&gridOK;
+        latestH48={...d,candidate,reason:!gridOK?"次の6時間UTCエントリー枠ではない":d.reason};
+        events.push("RISK "+H48_RESEARCH_LOGIC+" HYPEUSDT "+(candidate?"PASS":"BLOCK")+
           " H12="+(d.h12===null?"NA":round(d.h12*100,3)+"%")+
           " H24="+(d.h24===null?"NA":round(d.h24*100,3)+"%")+
           " REL24="+(d.rel24===null?"NA":round(d.rel24*100,3)+"%")+
-          " reason="+d.reason);
-        if(d.candidate)pending=true;
+          " reason="+latestH48.reason);
+        if(candidate)pending=true;
       }
       const unrealized=position?position.qty*(mark-position.entry)*DEMO_SYNTHETIC_USDJPY:0;
       const equity=DEMO_BASE_JPY+realized+unrealized;
@@ -140,6 +154,6 @@ export function createH48ResearchReplay(seed=123456,scenario:DemoScenario="trend
     limits:{total:3.5,crypto:3,stock:1.5},frames,btcCandles:btcBars,
     strategyCatalog:[{logic:H48_RESEARCH_LOGIC,trades:admitted,sourceRuntimeShas:["FROZEN_H48R4_RESEARCH"],modelClasses:["H48R4_SIGNAL_AND_TIME48_ONLY"],routes:1,symbols:1,status:"RESEARCH_SOURCE_UNVERIFIED"}],
     source:{kind:"SYNTHETIC_H48_RESEARCH_RULE_ONLY",grossCapEvidence:"SYNTHETIC_SINGLE_SLEEVE_NOT_RISK_PARITY",
-      note:"HYPE H48R4 closed-H1 entry thresholds and next-open 48h time exit only, using artificial HYPE and BTC data. Other runners, V4 preemption, Online Layer2/3, portfolio opportunity, native STOP/TP, funding and actual venue fills are NOT modeled. Results never prove STABLE4 production parity."}
+      note:"HYPE H48R4 closed-H1 entry thresholds, 6h UTC entry grid, next-open 48h maximum and candidate-source 6% stop at synthetic 5min observed quote. Synthetic STOP does NOT prove intrabar STOP or venue execution. Other runners, V4 preemption, Online Layer2/3, funding, native STOP order handling and actual venue fills are NOT modeled."}
   };
 }

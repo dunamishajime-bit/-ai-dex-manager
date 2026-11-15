@@ -40,3 +40,11 @@ CI/Build PASSは本番一致を意味しない。LIVE Codex作業には干渉し
 - Owner PC Chrome headlessでHTML印刷経由のPDFを実際に生成。検証専用private path C:\\tmp\\bt481-h48-pdf-smoke-20261115.pdf、107,702 bytes、PDF signature %PDF、1ページを確認。これは合成H48の独立レポートであり正式LIVE根拠ではない。ブラウザーのポップアップ操作やOwner認証済み実サーバー保存のE2Eは未実施。
 - スモーク試験用fixture生成スクリプト scripts/bt-hp-print-chromium-fixture.ts を保持。Private HTML/PDFはGitHubへ保存しない。
 - 元STABLE4 manifestの根拠はOwner PCの結果台帳／研究wrapper。Source SHA・全戦略の独立計算エンジンは未認証のため、新規全戦略BT実行は有効化しない。Codex LIVE作業とは競合させない。
+
+## 2026-11-15：H48ソースの追加独立監査と修正
+- Owner PCの研究元データ hype_wsig_fixed_entry_m5_exit_grid_v3_20261114.json から、選定candidate設定 holdHours48/hardStop6%/takeProfitなしを確認。
+- 当該candidateの対象年27件はすべて entry UTC hour mod 6=0。うちTIME21件/STOP6件。
+- 実際に3層STABLE4統合研究で採用されたHYPEモデル決済8件は、TIME7件/FORMAL_PRIORITY1件/STOP0件（10bpsと30bpsで同件数）。候補側のSTOP6件と統合8件のSTOP0件を混同しない。
+- H48の模擬エントリーを6時間UTC枠に限定し、候補研究の6%STOPを人工5分刻みの観測済み価格で簡易判定する。これは元M5の高値安値/取引所STOPや全Runner枠譲渡の再現ではない。
+- デフォルトseed123456で4相場計0エントリーになることは入口判定の制約であり合格件数を偽造しない。再現テスト用の合成人工市場seed11/trendで6時間枠に従う1 entryを確認。画面に「H48発火例」シード設定ボタンを設置。
+- したがって単体検証のためのH48信号モデルと、LIVE切替対象の3層STABLE4_OPPORTUNITY全経済ロジックを別のsourceModeとして区別する。
