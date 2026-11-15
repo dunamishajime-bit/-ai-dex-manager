@@ -1,5 +1,6 @@
 import type {Replay,ReplayFrame,BtcCandle,Position} from "./replay";
 import {SyntheticMarket5m,type SyntheticScenario,type MarketCandle5m} from "./synthetic-market";
+import {probeSyntheticFet} from "./pinned-native-fet/probe";
 import {evaluateH48ClosedHourly,H48_RESEARCH_LOGIC,
   H48_RESEARCH_THRESHOLDS,type H48Observation,type H48Decision} from "./h48-research-sandbox";
 
@@ -95,6 +96,21 @@ export function createMultiassetH48Replay(
        }
      }
    }
+   // Frozen native FET ENTRY signal only. No modeled FET fills or portfolio slots.
+   const fetBar=step.completedH1.find(x=>x.symbol==="FETUSDT");
+   if(inMain&&fetBar&&new Date(now).getUTCHours()%4===1){
+     const fet=probeSyntheticFet(feed,step.observedAt);
+     const note="RISK FET_BRK48_RESIDUAL [PINNED_NATIVE_ENTRY_SIGNAL_ONLY] "+
+       (fet.status==="NATIVE_SIGNAL_PASSED"?"PASS":"BLOCK")+
+       " asOf="+fet.asOf+" sourceRevision="+fet.sourceRevision+
+       " reason="+fet.status;
+     if(fet.candidate){
+       events.push(note+" signalReferenceTs="+iso(fet.candidate.referenceTs)+
+         " signalAnchorPrice="+round(fet.candidate.entryPrice,7)+
+         " volumeRatio="+round(fet.candidate.volumeRatio,4)+
+         " return72h="+round(fet.candidate.return72h*100,4)+"%");
+     }else events.push(note);
+   }
    const b=step.completedH1.find(x=>x.symbol==="BTCUSDT"),
      h=step.completedH1.find(x=>x.symbol==="HYPEUSDT");
    if(Boolean(b)!==Boolean(h))throw Error("MULTIASSET_H48_ASOF_H1_ALIGNMENT");
@@ -148,6 +164,6 @@ export function createMultiassetH48Replay(
      routes:1,symbols:1,status:"RESEARCH_SOURCE_UNVERIFIED"}],
    source:{kind:"SYNTHETIC_MULTI_ASSET_H48_CANDIDATE",
      grossCapEvidence:"SYNTHETIC_SINGLE_SLEEVE_NO_PORTFOLIO_PARITY",
-     note:"23 assets generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. No native production STOP, no formal V4 priority preemption or other 6 families, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
+     note:"23 assets generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. Pinned FET pure native entry is shadow-only and never opens a position. No native production STOP, no formal V4 priority preemption or complete other runners, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
  };
 }

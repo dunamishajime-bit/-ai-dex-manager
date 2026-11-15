@@ -15,7 +15,7 @@ for(const scenario of ["trend","range","down","volatile"] as const){
  assert.equal(r.frames.at(-1)?.timestamp,"2025-10-11T00:00:00Z");
  const b=createMultiassetH48Replay(11,scenario,10);
  assert.deepEqual(r,b,"Same scenario/seed must be repeatable");
- let movements=0,closedMarks=0;
+ let movements=0,closedMarks=0,fetEntrySourceEvaluations=0;
  for(let i=0;i<r.frames.length;i++){
   const f=r.frames[i],h=f.h48Research!;
   assert.ok(h.ready&&h.hypePrice>0);
@@ -42,6 +42,13 @@ for(const scenario of ["trend","range","down","volatile"] as const){
    assert.ok(p.gross!==null&&p.gross>0);
   }
   for(const e of f.events){
+   if(e.includes("PINNED_NATIVE_ENTRY_SIGNAL_ONLY")){
+     fetEntrySourceEvaluations++;
+     assert.equal(new Date(f.timestamp).getUTCHours()%4,1);
+     assert.equal(f.timestamp.slice(14,16),"00");
+     assert.ok(e.includes("sourceRevision=9118eeaa6"));
+     assert.ok(e.startsWith("RISK FET_BRK48_RESIDUAL"));
+   }
    if(e.startsWith("ENTRY ")){
     const at=e.match(/modelEntryAt=([0-9TZ:-]+)/)?.[1];
     assert.ok(at,"Model entry time must be explicit");
@@ -59,6 +66,8 @@ for(const scenario of ["trend","range","down","volatile"] as const){
   }
  }
  assert.ok(movements>2400&&closedMarks===240);
+ assert.ok(fetEntrySourceEvaluations>=50,
+   "At least 50 actual frozen FET source decisions are recorded");
 }
 const p=createMultiassetH48Replay(11,"trend",30);
 assert.equal(validateReplay(p),true);
