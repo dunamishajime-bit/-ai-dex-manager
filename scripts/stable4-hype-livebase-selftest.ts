@@ -44,7 +44,7 @@ const live=resolveHypeZecLongRuntime({
 } as NodeJS.ProcessEnv);
 assert.equal(live.maximumGross,1);
 assert.equal(live.cryptoGrossCap,3);
-assert.equal(live.totalGrossCap,3.5);
+assert.equal(live.totalGrossCap,DISDEX_STABLE4_OPPORTUNITY.productionRisk.totalGrossCap);
 const entrypoint=readFileSync(new URL("./disdex-hype-stable4-live-runner.ts",import.meta.url),"utf8");
 assert.match(entrypoint,/DISDEX_HYPE_ZEC_SIGNAL_MODE\s*=\s*"STABLE4"/);
 assert.match(entrypoint,/DISDEX_HYPE_ZEC_SYMBOLS\s*=\s*"HYPEUSDT"/);
