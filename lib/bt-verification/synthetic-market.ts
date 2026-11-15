@@ -146,7 +146,7 @@ export class SyntheticMarket5m {
    const start=options?.start??iso(startPeriod),end=options?.endExclusive??iso(endPeriod);
    const from=Date.parse(start),to=Date.parse(end);
    if(!Number.isFinite(from)||!Number.isFinite(to)||from>=to||
-     from%H1!==0||to%H1!==0||(to-from)/M5>(options?.version==="v5"?60_000:53_000)||
+     from%H1!==0||to%H1!==0||(to-from)/M5>(options?.version==="v5"?70_000:53_000)||
      from<Date.parse("2025-01-01T00:00:00Z")||to>Date.parse("2027-01-01T00:00:00Z"))
      throw Error("SYNTHETIC_WINDOW_INVALID");
    if(options?.version!==undefined&&options.version!=="v1"&&options.version!=="v2"&&options.version!=="v3"&&options.version!=="v4"&&options.version!=="v5")
