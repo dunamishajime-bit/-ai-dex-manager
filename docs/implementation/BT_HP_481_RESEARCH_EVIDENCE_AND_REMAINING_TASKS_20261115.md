@@ -62,3 +62,18 @@
 - `ec7a315ef` V4 Codexに返すread-only確認とimmutable release source取得・検証の要件を文書化。
 - 追加後のオフライン検証：Python204件PASS、追加native/noHYPE private library 4件SHA256 PASS、V4 pin複数ケースUI assertion PASS、TypeScript typecheck／Next.js webpack build PASS。GitHub CIは最新SHAについて別途確認。
 - **未完了の最優先**：新V4 release `e788...` のexact runtime sourceと正式LIVE本体・STOPの読取専用証拠。GitHub commit APIにはこのSHAのcommit objectなし。旧STABLE4のV4をこの新V4へそのまま同一視してBT完成/正式LIVE経済一致としない。要求DD≤20%は元研究シナリオの現状で未達成であり、改善済みを主張しない。
+
+## 追記：2026-11-15 Shared Risk・V52資本・最大DD・IDLE Layer2・同時刻Gross Gateの実証
+
+順番にテスト→証拠作成→単独コミット→GitHub Pushを終えてから次タスクへ移動。
+
+1. `cfcd3ad81`：Shared Risk 7.5% と日次Gate・Gross時価・V52専用日次リスクを10/30bps全105,121×2の5分時点で照合。10bps 1,025・30bps1,026モデルAdmissionでGate True時新規Entry0。Gross MTMの上限超過は存在し、入場超過と分離。V52の損失率が極端になり分母スケール未解決と判定。根拠 `BT_HP_SHARED_RISK_V52_GROSS_ASOF_AUDIT_20261115.md`。
+2. `0ac782968`：上記V52分母の元研究ソース式を再現。V52資本は `max(約800円, equity - 他のV96対象銘柄のGross Notional - 10%reserve)`。10bps81、30bps83の最低資本分母すべてが元5分時価Positionから再現可能。ただし本番運用設計の妥当性・V52ライブ約定は未認証。根拠 `BT_HP_V52_MINIMUM_CAPITAL_DENOMINATOR_PROVENANCE_20261115.md`。
+3. `44751c5f1`：元研究全5分MTMで最大DDピーク 2026-08-05 07:00 UTC → 2026-09-22 11:00 UTC。10bps −40.2388%/−383.66万円、30bps −27.37075%/−112.68万円。Cash＋元建玉未実現PnLとEquity完全一致。決済ベースはQ102が最大損失だが原因の識別は別検証必要。DDの悪い期間から閾値fitを禁ずる。根拠 `BT_HP_INTEGRATED_MTM_MAX_DD_FALSE_DIRECTION_WINDOW_20261115.md`。
+4. `5889157e7`：Owner非公開のHYPE TRENDあり／なし比較モデル(10/30bps)をBT研究ライブラリのUIへ追加。4-case INDEXが揃いSHA/出所/Grossが妥当な場合だけ比較表示。両経路でDD20%未達。過去研究のHYPE非採用が本番停止の根拠になると主張しない。型検査＋Next build＋全Python PASS。根拠 `BT_HP_NATIVE_HYPE_SIDE_BY_SIDE_MODEL_COMPARISON_20261115.md`。
+5. `6f05aa82e`：IDLE新1x/1-slot（RENDER固定SHORT、DOT固定LONG、JUP/TIA Online）の研究元Frozen pretarget→Target270・Forward33の別市場照合。Target30bps勝率53.70%、単独決済DD−33.26%、Forward30bps勝率66.67%・DD−14.38%。母数33で高勝率保証不可。別ALL5P Online確認は218件中反対Gateが0で成績改善なし。根拠 `BT_HP_IDLE_1X_VNEXT_LAYER2_FORWARD_20261115.md`。
+6. `6d175ad9f`：Gross3.0/1.5/3.5xの研究新規Admission Gateを同じtickの**複数Entryの合算**で確認。10bps計1,025件（176回複数同時）、30bps1,026件（174回複数同時）。新規入場によるモデルGross上限超過0。既存Stock MTM 1.5x超過は同時点10bps15・30bps16件だが、その際に新Stock Grossを増やしたわけではない。モデル登録時点での約定実態は未認証。根拠 `BT_HP_GROSS_ENTRY_ASOF_TICK_MULTIPLE_ADMISSIONS_20261115.md`。
+
+BT Python回帰テスト **252件PASS**（今回まで）。研究Owner private JSON元資料は非公開維持、GitHubへは監査ソース・ユニットテスト・文書だけ。既存のsourceピン不一致（新V4/HYPE）と残存のDD20%超過、Signed venue STOP/Fillの不一致、独立相場による全Runner統合OOSの欠落は依然として最重要ブロッカー。本番LIVE Runner・注文・STOP・Kill Switch・資金Grossの操作は0件。
+
+次の優先研究はIDLE/ HYPE Layer3同時点EVの証拠確認、Q102 HIGH_VOL独立Forward集計、Risk/fee/gross同時競合・V4最新版元Sourceの研究統合リプレイ。結果を見てから対象年の損失Gateを逆算最適化しない。
