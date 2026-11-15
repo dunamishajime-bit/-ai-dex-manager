@@ -1,4 +1,4 @@
-﻿import type {Replay,ReplayFrame,Position} from "./replay";
+import type {Replay,ReplayFrame,Position} from "./replay";
 import {createPreviewReplay,DEMO_WARMUP_HOURS,DEMO_TICKS_PER_HOUR,DEMO_BASE_JPY,DEMO_SYNTHETIC_USDJPY,type DemoScenario} from "./demo";
 
 /** Frozen historical H48R4 research *entry* thresholds.
@@ -72,6 +72,7 @@ export function createH48ResearchReplay(seed=123456,scenario:DemoScenario="trend
   const observations:H48Observation[]=warmupHypeCloses.map((hypeClose,i)=>({btcClose:btcBars[i].close,hypeClose}));
   let realized=0,sequence=0,position:null|{id:string;entry:number;qty:number;at:string;hour:number}=null;
   let pending=false,admitted=0;
+  let latestH48=evaluateH48ClosedHourly(observations);
   const feeRate=costBps/20000;
   const frames:ReplayFrame[]=[];
   for(let hour=0;hour<base.frames.length/DEMO_TICKS_PER_HOUR;hour++){
@@ -108,6 +109,7 @@ export function createH48ResearchReplay(seed=123456,scenario:DemoScenario="trend
         const i=DEMO_WARMUP_HOURS+hour;
         observations.push({btcClose:btcBars[i].close,hypeClose:mark});
         const d=evaluateH48ClosedHourly(observations);
+        latestH48=d;
         events.push("RISK "+H48_RESEARCH_LOGIC+" HYPEUSDT "+(d.candidate?"PASS":"BLOCK")+
           " H12="+(d.h12===null?"NA":round(d.h12*100,3)+"%")+
           " H24="+(d.h24===null?"NA":round(d.h24*100,3)+"%")+
@@ -125,7 +127,10 @@ export function createH48ResearchReplay(seed=123456,scenario:DemoScenario="trend
       }]:[];
       frames.push({
         timestamp:original.timestamp,btc:original.btc,equity:round(equity),realized:round(realized),
-        positions,events,...(original.formingBtcCandle?{formingBtcCandle:original.formingBtcCandle}:{})
+        positions,events,h48Research:{hypePrice:round(mark,8),
+          h12:latestH48.h12,h24:latestH48.h24,btc24:latestH48.btc24,
+          rel24:latestH48.rel24,ready:latestH48.ready,candidate:latestH48.candidate,reason:latestH48.reason},
+        ...(original.formingBtcCandle?{formingBtcCandle:original.formingBtcCandle}:{})
       });
     }
   }

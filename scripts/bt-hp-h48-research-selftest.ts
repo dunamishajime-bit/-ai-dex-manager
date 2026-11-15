@@ -45,6 +45,10 @@ for(const scenario of ["trend","range","down","volatile"] as const){
  assert.ok(entries.length>=exits.length);
  for(let i=0;i<a.frames.length;i++){
    const f=a.frames[i];
+   assert.ok(f.h48Research?.hypePrice!==undefined && f.h48Research.hypePrice>0,"HYPE quote must update with every modeled tick");
+   if(f.events.some(e=>e.startsWith("RISK "+H48_RESEARCH_LOGIC))){
+     assert.equal(f.h48Research?.ready,true,"H48 closing decision is complete");
+   }
    assert.equal(grossForFrame(f).inconsistent,false);
    assert.ok(f.equity>0);
    const pnl=f.positions.reduce((sum,p)=>sum+(p.quantity??0)*((p.mark??p.entry)-p.entry)*145,0);
@@ -62,6 +66,12 @@ for(const scenario of ["trend","range","down","volatile"] as const){
  }
 }
 assert.ok(totalEntries>0,"Synthetic HYPE scenarios exercise at least one H48 entry");
+const badH48=structuredClone(createH48ResearchReplay());
+badH48.frames[1].h48Research!.hypePrice=Number.NaN;
+assert.equal(validateReplay(badH48),false,"Do not allow synthetic price tampering");
+const badExternal=structuredClone(createH48ResearchReplay());
+badExternal.mode="EXTERNAL";
+assert.equal(validateReplay(badExternal),false,"Do not allow study observation in external research data");
 const ten=createH48ResearchReplay(555,"range",10),thirty=createH48ResearchReplay(555,"range",30);
 assert.deepEqual(ten.frames.filter(f=>f.events.some(e=>e.includes(" HYPEUSDT PASS "))).map(f=>f.timestamp),
  thirty.frames.filter(f=>f.events.some(e=>e.includes(" HYPEUSDT PASS "))).map(f=>f.timestamp),

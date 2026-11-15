@@ -44,6 +44,16 @@ export type DemoSignal = {
   fired: boolean;
   note: string;
 };
+export type H48SyntheticObservation = {
+  hypePrice:number;
+  h12:number|null;
+  h24:number|null;
+  btc24:number|null;
+  rel24:number|null;
+  ready:boolean;
+  candidate:boolean;
+  reason:string;
+};
 export type ReplayFrame = {
   timestamp: string;
   btc: number | null;
@@ -58,6 +68,8 @@ export type ReplayFrame = {
   sourcePositionAlignment?: "MATCHED" | "AMBIGUOUS" | "UNMATCHED" | "SOURCE_MODEL_LEDGER_MATCHED";
   /** Synthetic-only, causal current-hour OHLC built from ticks observed so far. */
   formingBtcCandle?: BtcCandle;
+  /** Synthetic-only HYPE live quote and latest closed-H1 H48 study decision. */
+  h48Research?:H48SyntheticObservation;
   /** Synthetic-only threshold checks recorded at this exact tick. */
   demoSignals?: DemoSignal[];
 };
@@ -288,6 +300,15 @@ export function validateReplay(value:unknown):value is Replay {
         !number(c.low)||!number(c.close)||c.open<=0||c.low<=0||
         c.low>Math.min(c.open,c.close)||c.high<Math.max(c.open,c.close)||
         frame.btc!==c.close)return false;
+    }
+    if(frame.h48Research!==undefined){
+      const h=frame.h48Research;
+      if(value.mode!=="DEMO"||!isObj(value.source)||
+         value.source.kind!=="SYNTHETIC_H48_RESEARCH_RULE_ONLY"||!isObj(h)||
+         !number(h.hypePrice)||h.hypePrice<=0||
+         !nullableNumber(h.h12)||!nullableNumber(h.h24)||!nullableNumber(h.btc24)||!nullableNumber(h.rel24)||
+         typeof h.ready!=="boolean"||typeof h.candidate!=="boolean"||
+         (h.candidate&&!h.ready)||typeof h.reason!=="string"||h.reason.length>160)return false;
     }
     if(frame.demoSignals!==undefined){
       if(value.mode!=="DEMO"||!Array.isArray(frame.demoSignals)||frame.demoSignals.length>16)return false;

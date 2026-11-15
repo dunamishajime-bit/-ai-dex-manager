@@ -332,6 +332,22 @@ async function removeLibrary(id:string){
   try{await deleteRun(id);setSavedRuns(await listRuns());setSavedNotice("保存データを削除しました")}catch(e){setSavedNotice("削除失敗: "+String(e))}
 }
 return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={sourceLabel}>
+  {frame.h48Research&&<section aria-label="H48研究模擬判定" className="mb-4 rounded-2xl border border-[#36647b] bg-[#11273c] p-4">
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div><p className="text-[11px] font-semibold text-cyan-300">人工市場・研究版H48（実取引ではありません）</p>
+        <p className="mt-1 text-[12px] text-[#a7bbcc]">HYPEUSDT 模擬現在価格</p>
+        <p className="mt-1 text-xl font-bold tabular-nums text-white">{frame.h48Research.hypePrice.toFixed(4)} USDT</p>
+      </div>
+      <div className="text-[11px] text-[#bdcfdd]">
+        <p>最後に確定したH1足の判定: <strong className={frame.h48Research.candidate?"text-emerald-300":"text-amber-200"}>{frame.h48Research.candidate?"入口条件PASS":"条件未成立"}</strong></p>
+        <p className="mt-1">H12 {frame.h48Research.h12===null?"—":(frame.h48Research.h12*100).toFixed(3)+"%"}
+          {" / "}H24 {frame.h48Research.h24===null?"—":(frame.h48Research.h24*100).toFixed(3)+"%"}
+          {" / "}BTC相対24h {frame.h48Research.rel24===null?"—":(frame.h48Research.rel24*100).toFixed(3)+"%"}</p>
+        <p className="mt-1 text-[#99b1c8]">{frame.h48Research.reason}</p>
+        <p className="mt-2 text-amber-200">H48研究入口＋48時間出口のみ。7系統の統合判定ではありません。</p>
+      </div>
+    </div>
+  </section>}
   {tab==="config"&&<div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.22fr)_minmax(0,.96fr)]">
     <section className={card+" overflow-hidden"}>
       <div className="flex items-center gap-3 border-b border-[#2b445a] px-5 py-4">
