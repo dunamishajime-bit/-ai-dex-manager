@@ -1,5 +1,7 @@
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
 import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
+import type {Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
+import {validateQuality102EntryOpportunity} from "./disdex-quality102-causal-v1-state";
 import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
 import { residentStopPlan, verifyResidentStopPartial, retireResidentStop, ensureResidentStop, type ResidentStopGateway } from "./venue-resident-stop";
 import { createHash, randomUUID } from "node:crypto";
@@ -180,6 +182,13 @@ export interface Quality102CausalV1RunnerDependencies {
         positions: DirectPosition[];
         lock: Quality102CausalV1LockHandle;
     }) => Promise<{ allowed: boolean; reason: string }>;
+    entryOpportunityBuilder?: (input: {
+        signal: Quality102CausalV1Signal;
+        history: Quality102CausalV1History;
+        pending: Quality102CausalV1PendingOrder;
+        decisionTs: number;
+        lock: Quality102CausalV1LockHandle;
+    }) => Promise<Stable4EntryOpportunityRecord | undefined>;
 }
 
 function defaultLogger(): Quality102CausalV1Logger {
@@ -880,6 +889,7 @@ export class Quality102CausalV1Runner {
             initialAdverseBestGainPct: 0,
             h1LossConsecutive: 0,
             acceptedEntryGross: pending.targetGross,
+            ...(pending.entryOpportunity ? {entryOpportunity: pending.entryOpportunity} : {}),
             family: pending.family,
             variant: pending.variant,
             layer: pending.layer,
@@ -1383,6 +1393,7 @@ export class Quality102CausalV1Runner {
         allowDynamicTrim = true,
         allowHypeZecPreemption = true,
         lock?: Quality102CausalV1LockHandle,
+        history?: Quality102CausalV1History,
     ): Promise<Quality102CausalV1TickResult> {
         if (signal.side === 0 || !signal.symbol || signal.requestedGross <= 0) {
             state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
@@ -1390,6 +1401,10 @@ export class Quality102CausalV1Runner {
             return { status: "no-change", message: signal.reason, signal, ordersSent: 0 };
         }
         const symbol = signal.symbol.toUpperCase();
+        const recoveredUni = this.dependencies.config.mode === "LIVE" && signal.side === -1 && symbol === "UNIUSDT"
+            && signal.reason.split(":")[0] === "STABLE4_Q102_UNI_ONLINE_RECOVERY";
+        if (recoveredUni && !this.dependencies.entryOpportunityBuilder)
+            return {status:"blocked-local",message:"STABLE4_Q102_ENTRY_OPPORTUNITY_BUILDER_MISSING",signal,ordersSent:0};
         if (!this.symbolSet.has(symbol)) return { status: "blocked-local", message: "Q102 signal symbol is outside configured causal universe.", signal, ordersSent: 0 };
         if (positions.some((position) => nonZero(position) && position.symbol.toUpperCase() === symbol)) {
             return this.manualReview(state, "Q102 exchange position exists without matching Q102 state; entry blocked.", undefined);
@@ -1435,7 +1450,7 @@ export class Quality102CausalV1Runner {
                     this.dependencies.executor.getPositions(),
                 ]);
                 const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-                return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim, allowHypeZecPreemption, lock);
+                return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim, allowHypeZecPreemption, lock, history);
             }
         }
         const grossContext = await this.integratedGrossContext(quote.updatedAt, account);
@@ -1475,7 +1490,7 @@ export class Quality102CausalV1Runner {
                 this.dependencies.executor.getPositions(),
             ]);
             const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim, allowHypeZecPreemption, lock);
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim, allowHypeZecPreemption, lock, history);
         }
         let accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
         const capacityShortfall = planner.status !== "planned"
@@ -1493,7 +1508,7 @@ export class Quality102CausalV1Runner {
                 this.dependencies.executor.getPositions(),
             ]);
             const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, allowHypeZecPreemption, lock);
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, allowHypeZecPreemption, lock, history);
         }
         const plannerReason = planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason;
         const explicitSharedCapacityBlock = !accepted && isSharedCapacityBlock(plannerReason);
@@ -1526,7 +1541,7 @@ export class Quality102CausalV1Runner {
                     this.dependencies.executor.getPositions(),
                 ]);
                 const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-                return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, false, lock);
+                return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, false, lock, history);
             }
         }
         if (planner.status !== "planned" || !accepted) {
@@ -1568,6 +1583,21 @@ export class Quality102CausalV1Runner {
             reason: `${signal.reason}:${signal.family || "UNKNOWN"}`,
         };
         if (!pending.hardStop) return this.manualReview(state, "Q102 signal has no recovered hard-stop metadata; entry blocked.", idempotencyKey);
+        if (this.dependencies.config.mode === "LIVE") {
+            try {
+                if (!this.dependencies.entryOpportunityBuilder || !history || !lock) throw Error("BUILDER_OR_ENTRY_CONTEXT_MISSING");
+                const built=await this.dependencies.entryOpportunityBuilder({signal,history,pending:Object.freeze(structuredClone(pending)),decisionTs:this.now(),lock});
+                if (!built) throw Error("RECORD_MISSING");
+                const entry=validateQuality102EntryOpportunity(built,{symbol:pending.symbol,side:pending.side==="BUY"?"LONG":"SHORT",positionId:pending.idempotencyKey,logicalEntryTs:pending.referenceTs});
+                if(entry.capturedAt>this.now())throw Error("CAPTURE_IN_FUTURE");
+                if(entry.sourceSha!==this.dependencies.config.runtimeCommitSha.toLowerCase())throw Error("ENTRY_SOURCE_MISMATCH");
+                if(recoveredUni&&entry.score===null)throw Error("RECOVERED_SCORE_UNKNOWN");
+                pending.entryOpportunity=entry;
+            } catch (error) {
+                this.log.warn("STABLE4_Q102_ENTRY_OPPORTUNITY_MISSING",{symbol:pending.symbol,idempotencyKey:pending.idempotencyKey,message:error instanceof Error?error.message:String(error)});
+                if(recoveredUni)return{status:"blocked-local",message:"STABLE4_Q102_ENTRY_OPPORTUNITY_REQUIRED",signal,ordersSent:0};
+            }
+        }
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         return { status: "planned", message: "QUALITY102_CAUSAL_V1_ENTRY_PLANNED", signal, idempotencyKey, ordersSent: 0 };
@@ -1778,7 +1808,7 @@ export class Quality102CausalV1Runner {
                 return { status: "blocked-local", message: "Q102 entry waits for unmanaged open orders to clear; managed protective orders remain untouched.", signal, ordersSent: 0 };
             }
             const quote = await this.dependencies.executor.getMarketQuote(signal.symbol);
-            const planned = await this.planEntry(state, signal, live.account, live.positions, quote, true, true, lock);
+            const planned = await this.planEntry(state, signal, live.account, live.positions, quote, true, true, lock, history);
             return planned.status === "planned" ? this.executePending(state, lock) : planned;
         } catch (error) {
             const rateBudget = classifyAsterRateBudgetFailure(error);

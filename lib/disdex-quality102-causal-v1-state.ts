@@ -3,6 +3,7 @@ import { validateResidentStopProtection, type ResidentStopProtection } from "./v
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import {validateStable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 import { QUALITY102_CAUSAL_V1, type Quality102CausalV1Mode } from "@/config/disdexQuality102CausalV1Runtime";
 
 const STRATEGY_ID = "QUALITY102_CAUSAL_V1" as const;
@@ -13,6 +14,7 @@ export type Quality102CausalLayer = "S1" | "S2" | "S3" | "S4";
 export type Quality102CausalExitPolicy = "HIGH_VOL_TRAIL72" | "FIXED_HOLD_STOP" | "STABLE4_STOP5_TP3_H24";
 
 export interface Quality102CausalV1PendingOrder {
+  entryOpportunity?: Stable4EntryOpportunityRecord;
   idempotencyKey: string;
   clientOrderId: string;
   phase: "planned" | "submitted" | "manual_review";
@@ -44,6 +46,7 @@ export interface Quality102CausalV1State {
   lastProcessedReferenceTs?: number;
   lastCompletedIdempotencyKey?: string;
   position?: {
+    entryOpportunity?: Stable4EntryOpportunityRecord;
     stopLedger?: import("./resident-stop-ledger").StopLedger;
     residentStop?: ResidentStopProtection;
     acceptedEntryGross?: number;
@@ -130,10 +133,22 @@ function optionalTimestamp(value: unknown, field: string): number | undefined {
   return finiteNumber(value, field);
 }
 
+/** The nested record retains logical entry provenance independently of venue observation clocks. */
+export function validateQuality102EntryOpportunity(value: unknown, binding: {symbol: string; side: "LONG"|"SHORT"; positionId?: string; logicalEntryTs?: number; observedEntryTs?: number}): Stable4EntryOpportunityRecord {
+  let entry: Stable4EntryOpportunityRecord;
+  try { entry=validateStable4EntryOpportunityBook({schemaVersion:1,records:[value]}).records[0]; }
+  catch { malformed("entryOpportunity.record"); }
+  if(entry.strategy!=="Q102"||entry.symbol!==binding.symbol||entry.side!==binding.side
+    ||(binding.positionId!==undefined&&entry.positionId!==binding.positionId)
+    ||(binding.logicalEntryTs!==undefined&&entry.entryTs!==binding.logicalEntryTs)
+    ||(binding.observedEntryTs!==undefined&&entry.entryTs>binding.observedEntryTs))malformed("entryOpportunity.binding");
+  return entry;
+}
+
 function normalizePosition(value: unknown): Quality102CausalV1State["position"] {
   if (value === undefined) return undefined;
   const raw = record(value, "position");
-  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "profitFloorArmed", "profitFloorStopPrice", "profitFloorBestGainPct", "profitFloorLastConfirmed5mTs", "profitFloorStage", "initialAdverseBestGainPct", "h1LossConsecutive", "h1LastConfirmedCloseTs", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger"], "position");
+  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "profitFloorArmed", "profitFloorStopPrice", "profitFloorBestGainPct", "profitFloorLastConfirmed5mTs", "profitFloorStage", "initialAdverseBestGainPct", "h1LossConsecutive", "h1LastConfirmedCloseTs", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger", "entryOpportunity"], "position");
   if(raw.acceptedEntryGross!==undefined&&(!(typeof raw.acceptedEntryGross==="number"&&Number.isFinite(raw.acceptedEntryGross)&&raw.acceptedEntryGross>0&&raw.acceptedEntryGross<=3)))malformed("position.acceptedEntryGross");
   if (raw.side !== -1 && raw.side !== 1) malformed("position.side");
   if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("position.hardStop");
@@ -154,6 +169,7 @@ function normalizePosition(value: unknown): Quality102CausalV1State["position"] 
   const variant = optionalString(raw.variant, "position.variant");
   return {
     symbol: requiredString(raw.symbol, "position.symbol"), side: raw.side,
+    ...(raw.entryOpportunity===undefined?{}:{entryOpportunity:validateQuality102EntryOpportunity(raw.entryOpportunity,{symbol:requiredString(raw.symbol,"position.symbol"),side:raw.side>0?"LONG":"SHORT",observedEntryTs:finiteNumber(raw.entryTs,"position.entryTs")})}),
     ...(raw.acceptedEntryGross === undefined ? {} : { acceptedEntryGross: raw.acceptedEntryGross as number }),
     ...(raw.stopLedger === undefined ? {} : { stopLedger: validateStopLedger(raw.stopLedger) }),
     ...(raw.residentStop === undefined ? {} : { residentStop: validateResidentStopProtection(raw.residentStop) }),
@@ -189,6 +205,7 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
     "maxHoldHours",
     "reason",
     "lastError",
+    "entryOpportunity",
   ], "pending");
   if (raw.phase !== "planned" && raw.phase !== "submitted" && raw.phase !== "manual_review") {
     malformed("pending.phase");
@@ -205,12 +222,14 @@ function normalizePending(value: unknown): Quality102CausalV1PendingOrder | unde
   if (raw.maxHoldHours !== undefined && !(typeof raw.maxHoldHours === "number" && Number.isFinite(raw.maxHoldHours) && raw.maxHoldHours > 0 && raw.maxHoldHours <= 72)) malformed("pending.maxHoldHours");
   const variant = optionalString(raw.variant, "pending.variant");
   const reason = optionalString(raw.reason, "pending.reason");
+  if(raw.entryOpportunity!==undefined&&raw.reduceOnly)malformed("pending.entryOpportunity.reduceOnly");
   return {
     idempotencyKey: requiredString(raw.idempotencyKey, "pending.idempotencyKey"),
     clientOrderId: requiredString(raw.clientOrderId, "pending.clientOrderId"),
     phase: raw.phase,
     symbol: requiredString(raw.symbol, "pending.symbol"),
     side: raw.side,
+    ...(raw.entryOpportunity===undefined?{}:{entryOpportunity:validateQuality102EntryOpportunity(raw.entryOpportunity,{symbol:requiredString(raw.symbol,"pending.symbol"),side:raw.side==="BUY"?"LONG":"SHORT",positionId:requiredString(raw.idempotencyKey,"pending.idempotencyKey"),logicalEntryTs:finiteNumber(raw.referenceTs,"pending.referenceTs")})}),
     quantity: positiveNumber(raw.quantity, "pending.quantity"),
     reduceOnly: raw.reduceOnly,
     referenceTs: finiteNumber(raw.referenceTs, "pending.referenceTs"),
