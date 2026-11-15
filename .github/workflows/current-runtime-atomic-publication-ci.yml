@@ -13,6 +13,15 @@ on:
       - 'scripts/disdex-quality102-causal-v1-live-runner.ts'
       - 'tests/peer-decision-cycle-observation.test.ts'
       - 'tests/q102-fatal-mutation-telemetry.test.ts'
+      - 'lib/hype-zec-long-runner.ts'
+      - 'scripts/disdex-hype-zec-long-live-runner.ts'
+      - 'tests/hype-runner-mutation-telemetry.test.ts'
+      - 'tests/hype-live-zec-scope.test.ts'
+      - 'tests/hype-zec-runner-gate.test.ts'
+      - 'scripts/disdex-pengu-dual-ls-v2-live-runner.ts'
+      - 'scripts/disdex-fet-brk48-live-runner.ts'
+      - 'scripts/disdex-idle-priority-short-live-runner.ts'
+      - 'tests/fet-deferred-mutation-telemetry.test.ts'
       - 'tests/current-runtime-atomic-publications.test.ts'
       - '.github/workflows/current-runtime-atomic-publication-ci.yml'
   workflow_dispatch:
@@ -30,3 +39,5 @@ jobs:
       - run: npx tsx --test tests/peer-decision-cycle-observation.test.ts
       - run: npx tsx --test tests/q102-fatal-mutation-telemetry.test.ts
       - run: npx tsx --test tests/current-runtime-atomic-publications.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/idle-priority-short-state.test.ts tests/idle-residual-long-state-migrate.test.ts tests/hype-zec-long-state.test.ts tests/hype-zec-stale-state-lifecycle.test.ts tests/quality102-preflight-rate-budget.test.ts tests/quality102-preflight-protective-order.test.ts tests/pending-exposure-registry.test.ts
+      - run: npx tsx --test tests/hype-runner-mutation-telemetry.test.ts tests/hype-live-zec-scope.test.ts tests/hype-zec-runner-gate.test.ts
+      - run: npx tsx --test tests/fet-deferred-mutation-telemetry.test.ts

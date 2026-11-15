@@ -17,6 +17,7 @@ import { AsterRecoveryV8ProtectiveOrderGateway } from "../lib/pengu-recovery-v8-
 import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
 import { nextPenguDaemonWaitMs } from "../lib/pengu-live-scheduling";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
+import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -146,7 +147,9 @@ async function main() {
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
     do {
-        const result = await runner.tick();
+        const result = await observePeerDecisionCycle({ runnerId: "PENGU_V8",
+            runtimeSha: String(process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RELEASE_SHA || "").trim(),
+            mode: runtime.mode, operation: () => runner.tick() });
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), mode: runtime.mode, strategyId: runtime.strategyId, ...result }));
         if (!daemon || stopping) break;
         const waitMs = nextPenguDaemonWaitMs(result.status, Date.now(), boundaryDelayMs, lockRetryMs, result.message);

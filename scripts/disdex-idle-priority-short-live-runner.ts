@@ -14,6 +14,7 @@ import { resolveIdlePriorityShortRuntime } from "../config/idlePriorityShortRunt
 import { resolveIdleResidualLongRuntime } from "../config/idleResidualLongRuntime";
 import { IdleResidualLongRunner } from "../lib/idle-residual-long-runner";
 import { FileIdleResidualLongStateStore } from "../lib/idle-residual-long-state";
+import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 
 function numberEnv(name: string, fallback: number) {
     const value = Number(process.env[name]);
@@ -115,29 +116,33 @@ async function main() {
     });
     do {
         marketCache = undefined;
-        const residualState = residualRuntime.enabled ? await residualStateStore.load() : undefined;
-        let result;
-        let residualResult;
-        if (residualRuntime.enabled && residualState && (residualState.position || residualState.pending)) {
-            residualResult = await runTick(() => residualRunner.tick());
-            console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-residual-long-tick", strategyId: "IDLE_RESIDUAL_LONG", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...residualResult }));
-            if (residualResult.status === "manual-review") {
-                result = residualResult;
-            } else if (residualResult.status === "held" && residualResult.message.startsWith("IDLE_RESIDUAL_POSITION_HELD:")) {
-                result = residualResult;
-            } else {
-                result = await runTick(() => runner.tick());
-                console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-priority-short-tick", strategyId: "IDLE_PRIORITY_SHORT", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...result }));
-            }
-        } else {
-            result = await runTick(() => runner.tick());
-            console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-priority-short-tick", strategyId: "IDLE_PRIORITY_SHORT", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...result }));
-            if (residualRuntime.enabled && result.status === "no-change") {
-                residualResult = await runTick(() => residualRunner.tick());
-                console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-residual-long-tick", strategyId: "IDLE_RESIDUAL_LONG", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...residualResult }));
-                if (residualResult.status === "manual-review" || residualResult.status === "completed" || residualResult.status === "locked") result = residualResult;
-            }
-        }
+        const result = await observePeerDecisionCycle({ runnerId: "IDLE_PRIORITY_SHORT",
+            runtimeSha: runtime.runtimeSha, mode: runtime.mode, operation: async () => {
+                const residualState = residualRuntime.enabled ? await residualStateStore.load() : undefined;
+                let result;
+                let residualResult;
+                if (residualRuntime.enabled && residualState && (residualState.position || residualState.pending)) {
+                    residualResult = await runTick(() => residualRunner.tick());
+                    console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-residual-long-tick", strategyId: "IDLE_RESIDUAL_LONG", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...residualResult }));
+                    if (residualResult.status === "manual-review") {
+                        result = residualResult;
+                    } else if (residualResult.status === "held" && residualResult.message.startsWith("IDLE_RESIDUAL_POSITION_HELD:")) {
+                        result = residualResult;
+                    } else {
+                        result = await runTick(() => runner.tick());
+                        console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-priority-short-tick", strategyId: "IDLE_PRIORITY_SHORT", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...result }));
+                    }
+                } else {
+                    result = await runTick(() => runner.tick());
+                    console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-priority-short-tick", strategyId: "IDLE_PRIORITY_SHORT", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...result }));
+                    if (residualRuntime.enabled && result.status === "no-change") {
+                        residualResult = await runTick(() => residualRunner.tick());
+                        console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-residual-long-tick", strategyId: "IDLE_RESIDUAL_LONG", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...residualResult }));
+                        if (residualResult.status === "manual-review" || residualResult.status === "completed" || residualResult.status === "locked") result = residualResult;
+                    }
+                }
+        return result;
+        } });
         if (!daemon || stopping || result.status === "manual-review") break;
         const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.pollMs));
         const lockRetryMs = numberEnv("DISDEX_IDLE_PRIORITY_LOCK_RETRY_MS", 8_000);

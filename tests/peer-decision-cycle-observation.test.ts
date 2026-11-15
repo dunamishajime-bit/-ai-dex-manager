@@ -59,3 +59,15 @@ test('Q102 actual ef1 entrypoint wraps its real decision operation',async()=>{
  assert.ok(source.includes('runnerId: "QUALITY102_CAUSAL_V1"'));
  assert.ok(source.includes('runtimeSha: built.config.runtimeCommitSha'));
 });
+test('the four legacy Production entrypoints wrap their real decision operation',async()=>{
+ for(const [file,id] of Object.entries({
+  'disdex-pengu-dual-ls-v2-live-runner.ts':'PENGU_V8',
+  'disdex-fet-brk48-live-runner.ts':'FET_BRK48_RESIDUAL',
+  'disdex-hype-zec-long-live-runner.ts':'HYPE_TREND_LONG',
+  'disdex-idle-priority-short-live-runner.ts':'IDLE_PRIORITY_SHORT',
+ })){
+  const source=await readFile('scripts/'+file,'utf8');
+  assert.ok(/await observePeerDecisionCycle\(/.test(source),file);
+  assert.ok(source.includes(`runnerId: "${id}"`),file);
+ }
+});

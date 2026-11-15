@@ -46,6 +46,7 @@ export type HypeZecQuantityInput = {
   fundingBps: number;
   stepSize: number;
   maximumGross?: number;
+  fixedGross?: boolean;
 };
 
 export type HypeZecQuantityResult = {
@@ -212,7 +213,7 @@ export function calculateHypeZecQuantity(input: HypeZecQuantityInput): HypeZecQu
   const lossPerUnit = (entry - stop) + bufferPerUnit;
   const riskQuantity = riskBudgetUsd / lossPerUnit;
   const grossQuantity = equity * (input.maximumGross ?? policy.maximumGross) / entry;
-  const quantity = roundStable(floorToStep(Math.min(riskQuantity, grossQuantity), step), step);
+  const quantity = roundStable(floorToStep(input.fixedGross ? grossQuantity : Math.min(riskQuantity, grossQuantity), step), step);
   const worstCaseLossUsd = quantity * lossPerUnit;
   const gross = quantity * entry / equity;
   return {
@@ -225,7 +226,7 @@ export function calculateHypeZecQuantity(input: HypeZecQuantityInput): HypeZecQu
     gross,
     leverage: policy.leverage,
     marginType: policy.marginType,
-    reason: quantity > 0 ? "RISK_AND_GROSS_CAPPED" : "CAPACITY_BLOCKED_BY_MINIMUM_QUANTITY",
+    reason: quantity > 0 ? (input.fixedGross ? "FIXED_GROSS_CAPPED" : "RISK_AND_GROSS_CAPPED") : "CAPACITY_BLOCKED_BY_MINIMUM_QUANTITY",
   };
 }
 
