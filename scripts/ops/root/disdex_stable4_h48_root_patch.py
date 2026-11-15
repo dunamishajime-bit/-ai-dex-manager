@@ -33,10 +33,25 @@ def build_h48_manifest_binding(release,sha):
  hashes={key:hashlib.sha256(_immutable_binding_bytes(path)).hexdigest() for key,path in files.items()}
  return {'schema':'disdex-pending-h48-authority-binding/v1','sourceSha':sha,**hashes}
 
+def build_h48_v4_priority_authority(*,certificate_raw,approved_sha,approved_plan_sha256,authorization,now_ms):
+ """Build only after the transaction verifies and consumes its scoped nonce."""
+ _require(isinstance(certificate_raw,bytes) and type(now_ms)is int,'PRIORITY_INPUT')
+ certificate=validate_h48_certificate(json.loads(certificate_raw),approved_sha=approved_sha,approved_plan_sha256=approved_plan_sha256,now_ms=now_ms)
+ a=authorization
+ _require(isinstance(a,dict) and a.get('sourceSha')==approved_sha and a.get('scope')=='HYPE_TREND_LONG' and a.get('planSha256')==approved_plan_sha256 and a.get('ordersEnabled')is True and a.get('deploymentTarget')=='professional-dismanager.net' and a.get('route') in ('CODEX_SSH','GITHUB_ACTIONS') and isinstance(a.get('nonce'),str) and re.fullmatch('[a-f0-9]{32}',a['nonce']) and type(a.get('issuedAt'))is int and type(a.get('expiresAt'))is int and a['issuedAt']<=now_ms//1000<a['expiresAt'] and 1<=a['expiresAt']-a['issuedAt']<=300,'PRIORITY_AUTHORIZATION')
+ return {'schema':'disdex-stable4-v4-h48-priority-authority/v1','approvedSha':approved_sha,'researchSha':certificate['researchSha'],'planSha256':approved_plan_sha256,'deploymentTarget':'professional-dismanager.net','scope':'V4_PRIORITY_H48_FULL_EXIT','h48CertificateSha256':hashlib.sha256(certificate_raw).hexdigest(),'issuedAt':now_ms,'expiresAt':certificate['expiresAt'],'operatorAcknowledgement':'V4_PRIORITY_H48_FULL_EXIT','authorizesOtherPolicies':False}
+
+def assert_deploy_readable_policy(path,deploy,expected_hash,*,run=subprocess.run):
+ _require(isinstance(path,Path) and isinstance(expected_hash,str) and re.fullmatch('[a-f0-9]{64}',expected_hash) and deploy.pw_uid>0 and deploy.pw_gid>0,'DEPLOY_READ_BINDING')
+ code='import hashlib,pathlib,sys;print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())'
+ child=run(['/usr/bin/python3','-c',code,str(path)],user=deploy.pw_uid,group=deploy.pw_gid,extra_groups=[],cwd='/',env={'PATH':'/usr/bin:/bin'},capture_output=True,text=True,timeout=10,check=False)
+ _require(child.returncode==0 and child.stdout.strip()==expected_hash,'DEPLOY_POLICY_READ_DENIED')
+
 def read_h48_policy_certificate(sha,plan_sha256,now_ms):
  _require(isinstance(sha,str) and re.fullmatch('[a-f0-9]{40}',sha),'SOURCE_INVALID')
  path=Path('/etc/disdex/stable4/h48-time-only')/(sha+'.json')
  before=path.lstat();validate_h48_certificate_metadata(before)
+ _require(before.st_mode&0o004 and path.parent.stat().st_mode&0o001,'CERTIFICATE_NOT_DEPLOY_READABLE')
  _require(path.resolve()==path,'CERTIFICATE_PATH_INDIRECTION')
  raw=path.read_bytes();after=path.lstat();validate_h48_certificate_metadata(after)
  _require((before.st_dev,before.st_ino,before.st_mtime_ns,before.st_size)==(after.st_dev,after.st_ino,after.st_mtime_ns,after.st_size) and path.read_bytes()==raw,'CERTIFICATE_CHANGED')
@@ -99,7 +114,8 @@ def build_h48_root_sources(hype_source,gate_source,*,old_hype_sha):
  def replace_once(text,old,new):
   _require(text.count(old)==1,'SOURCE_ANCHOR_NOT_UNIQUE');return text.replace(old,new,1)
  h=replace_once(h,'OLD = "7688ed7c93a1918d8b44837339b7da5584a868f5"','OLD = "'+old_hype_sha+'"')
- h=replace_once(h,'RUNNER = "HYPE_TREND_LONG"','from disdex_stable4_h48_root_patch import read_h48_policy_certificate, collect_h48_signed_inventory, build_h48_manifest_binding\n\nRUNNER = "HYPE_TREND_LONG"')
+ h=replace_once(h,'RUNNER = "HYPE_TREND_LONG"','from disdex_stable4_h48_root_patch import read_h48_policy_certificate, collect_h48_signed_inventory, build_h48_manifest_binding, build_h48_v4_priority_authority, assert_deploy_readable_policy, _immutable_binding_bytes\n\nRUNNER = "HYPE_TREND_LONG"')
+ h=replace_once(h,'    validate_hype_plan(desired, current, pins, target_sha)\n    return "fresh" if pins[RUNNER] == OLD else "resume"','    require(pins.get(RUNNER) == OLD, "H48_RESUME_REQUIRES_SEPARATE_REVIEW")\n    validate_hype_plan(desired, current, pins, target_sha)\n    return "fresh"')
  h=replace_once(h,'f"{self.release}/scripts/disdex-hype-trend-live-runner.ts --daemon"','f"{self.release}/scripts/disdex-hype-zec-long-live-runner.ts --daemon"')
  h=replace_once(h,'"DISDEX_HYPE_ZEC_SIGNAL_MODE": "TREND",','"DISDEX_HYPE_ZEC_SIGNAL_MODE": "STABLE4",\n        "DISDEX_STABLE4_MODE": "LIVE",\n        "DISDEX_STABLE4_GLOBAL_LIVE_ACK": new_sha,\n        "DISDEX_HYPE_ZEC_MAX_GROSS": "1",')
  start=h.index('    def signed_flat(self):');end=h.index('    def health(',start)
@@ -156,6 +172,22 @@ def build_h48_root_sources(hype_source,gate_source,*,old_hype_sha):
             evidenceMode="tick-v1")''','''        self.next_manifest["runners"][RUNNER].update(
             sha=self.args.sha, serviceUnit=self.new_unit, releaseRoot=str(self.release),
             evidenceMode="tick-v1", h48TimeOnly=build_h48_manifest_binding(self.release,self.args.sha))''')
+ h=replace_once(h,'''        self.activation = build_activation(self.desired, authority,
+                                           self.inventory_digest, self.authorization_at)''','''        self.activation = build_activation(self.desired, authority,
+                                           self.inventory_digest, self.authorization_at)
+        self.priority_path = Path("/etc/disdex/stable4/v4-h48-priority")/(self.args.sha+".json")
+        priority_parent = self.priority_path.parent.lstat()
+        require(stat.S_ISDIR(priority_parent.st_mode) and priority_parent.st_uid==0 and priority_parent.st_gid==0 and not priority_parent.st_mode&0o022 and priority_parent.st_mode&0o001 and not self.priority_path.parent.is_symlink(), "PRIORITY_DIRECTORY_UNTRUSTED")
+        require(not self.priority_path.exists() and not self.priority_path.is_symlink(), "PRIORITY_RECEIPT_EXISTS")
+        priority_certificate = _immutable_binding_bytes(Path("/etc/disdex/stable4/h48-time-only")/(self.args.sha+".json"))
+        self.priority_authority = build_h48_v4_priority_authority(certificate_raw=priority_certificate, approved_sha=self.args.sha, approved_plan_sha256=self.args.plan_sha256, authorization=authority, now_ms=time.time_ns()//1000000)
+        require(self.priority_authority["h48CertificateSha256"]==self.next_manifest["runners"][RUNNER]["h48TimeOnly"]["certificateSha256"], "PRIORITY_CERTIFICATE_CHANGED")
+        assert_deploy_readable_policy(Path("/etc/disdex/stable4/h48-time-only")/(self.args.sha+".json"), self.deploy, self.priority_authority["h48CertificateSha256"])''')
+ h=replace_once(h,'''        self.approval_bytes = canonical(self.activation)+b"\\n"
+        if self.plan_mode == "fresh":''','''        self.approval_bytes = canonical(self.activation)+b"\\n"
+        _root_file(self.priority_path, canonical(self.priority_authority)+b"\\n", 0o444, self.created)
+        assert_deploy_readable_policy(self.priority_path, self.deploy, hashlib.sha256(canonical(self.priority_authority)+b"\\n").hexdigest())
+        if self.plan_mode == "fresh":''')
  # Keep existing HOLD, pending, signed-read, transaction, rollback and three-tick
  # requirements. This branch only selects a separately certified lifecycle.
  h=replace_once(h,'        validate_hype_candidate_safety(self.release)','''        validate_hype_candidate_safety(self.release)

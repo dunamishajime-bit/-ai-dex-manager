@@ -7,7 +7,7 @@ import types
 import unittest
 from unittest.mock import patch as mock_patch
 import disdex_stable4_h48_root_patch as patch
-from test_disdex_stable4_h48_policy import SHA,NOW
+from test_disdex_stable4_h48_policy import SHA,NOW,PLAN,certificate
 from test_disdex_v4_nonflat_ownership import fixture,SHA as V4_SHA
 ROOT=Path(__file__).resolve().parents[3]
 REF=ROOT/'.tmp/stable4-root-reference-20261115'
@@ -26,6 +26,9 @@ class H48RootPatchTests(unittest.TestCase):
   self.assertIn('"DISDEX_STABLE4_GLOBAL_LIVE_ACK": new_sha',text)
   self.assertIn('scripts/disdex-hype-zec-long-live-runner.ts --daemon',text)
   self.assertIn('h48TimeOnly=build_h48_manifest_binding(self.release,self.args.sha)',text)
+  self.assertIn('build_h48_v4_priority_authority(certificate_raw=priority_certificate',text)
+  self.assertIn('_root_file(self.priority_path, canonical(self.priority_authority)+b"\\n", 0o444, self.created)',text)
+  self.assertLess(text.index('nonce_dir=self.paths.nonce_dir'),text.index('build_h48_v4_priority_authority(certificate_raw=priority_certificate'))
   self.assertNotIn('positionCount", "openOrderCount", "ordersSent"',text[text.index('    def signed_flat(self):'):text.index('    def health(',text.index('    def signed_flat(self):'))])
   generic=out['disdex_unified_root_gate.py'].decode();self.assertIn('from disdex_hype_scoped_root_cutover import HypeScopedRootExecutor',generic);self.assertIn('from disdex_stable4_h48_scoped_root_cutover import HypeScopedRootExecutor',generic)
   with self.assertRaises(ValueError):f(h+b'\n',g,old_hype_sha='b'*40)
@@ -39,6 +42,24 @@ class H48RootPatchTests(unittest.TestCase):
   for key,path in {'authoritySha256':release/'lib/hype-stable4-time-only-authority.ts','contractSha256':release/'lib/hype-stable4-time-only-contract.ts','certificateSha256':Path('/etc/disdex/stable4/h48-time-only')/(SHA+'.json')}.items():
    self.assertEqual(result[key],hashlib.sha256(str(path).encode()).hexdigest())
   with self.assertRaises(ValueError):patch.build_h48_manifest_binding(Path('/tmp')/SHA,SHA)
+ def test_priority_authority_binds_exact_certificate_and_consumed_scope(self):
+  raw=json.dumps(certificate(),sort_keys=True).encode()
+  auth={'sourceSha':SHA,'scope':'HYPE_TREND_LONG','planSha256':PLAN,'ordersEnabled':True,'deploymentTarget':'professional-dismanager.net','route':'CODEX_SSH','nonce':'e'*32,'issuedAt':NOW//1000-2,'expiresAt':NOW//1000+100}
+  result=patch.build_h48_v4_priority_authority(certificate_raw=raw,approved_sha=SHA,approved_plan_sha256=PLAN,authorization=auth,now_ms=NOW)
+  self.assertEqual(result['schema'],'disdex-stable4-v4-h48-priority-authority/v1')
+  self.assertEqual(result['h48CertificateSha256'],hashlib.sha256(raw).hexdigest())
+  self.assertEqual(result['expiresAt'],certificate()['expiresAt'])
+  self.assertEqual(result['scope'],'V4_PRIORITY_H48_FULL_EXIT')
+  self.assertIs(result['authorizesOtherPolicies'],False)
+  for change in [{'scope':'V12_V4'},{'ordersEnabled':False},{'planSha256':'f'*64},{'sourceSha':'a'*40},{'expiresAt':NOW//1000},{'nonce':''}]:
+   with self.subTest(change=change),self.assertRaises(ValueError):patch.build_h48_v4_priority_authority(certificate_raw=raw,approved_sha=SHA,approved_plan_sha256=PLAN,authorization={**auth,**change},now_ms=NOW)
+ def test_policy_is_really_read_as_deploy_uid_and_gid(self):
+  seen=[];deploy=types.SimpleNamespace(pw_uid=1001,pw_gid=1002)
+  def run(argv,**kwargs):
+   seen.append((argv,kwargs));return types.SimpleNamespace(returncode=0,stdout='e'*64+'\n')
+  patch.assert_deploy_readable_policy(Path('/etc/disdex/stable4/v4-h48-priority')/(SHA+'.json'),deploy,'e'*64,run=run)
+  self.assertEqual((seen[0][1]['user'],seen[0][1]['group'],seen[0][1]['extra_groups']),(1001,1002,[]))
+  with self.assertRaisesRegex(ValueError,'READ_DENIED'):patch.assert_deploy_readable_policy(Path('/tmp/cert'),deploy,'e'*64,run=lambda *a,**kw:types.SimpleNamespace(returncode=1,stdout=''))
  @unittest.skipUnless((REF/'disdex_hype_scoped_root_cutover.py').is_file(),'actual captured VPS root source required')
  def test_active_old_hype_stops_only_after_health_and_signed_flat_then_rechecks(self):
   h=(REF/'disdex_hype_scoped_root_cutover.py').read_bytes();g=(REF/'disdex_unified_root_gate.py').read_bytes()
