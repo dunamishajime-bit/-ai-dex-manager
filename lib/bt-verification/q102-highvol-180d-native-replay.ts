@@ -116,14 +116,14 @@ export function replayQ102HvNativeClosed180d(input:{
         });
       }catch(e){
         if(e instanceof Error&&e.message==="QUALITY102_HV_EXIT_BARS_INSUFFICIENT_FOR_72H"){
-          rightCensored++;continue;
+          rightCensored++;unavailableUntil=Infinity;continue;
         }
         throw e;
       }
       // Exit timestamps in the native function denote the OPEN of the
       // exit candle; its complete OHLC is only known at that candle's CLOSE.
       const exitAvailableAt=exit.exitTs+H;
-      if(exitAvailableAt>end){rightCensored++;continue;}
+      if(exitAvailableAt>end){rightCensored++;unavailableUntil=Infinity;continue;}
       const net=quality102NetFromGross(
         exit.grossReturn,exit.holdHours,
         QUALITY102_RESEARCH_COSTS.normal.perSide,

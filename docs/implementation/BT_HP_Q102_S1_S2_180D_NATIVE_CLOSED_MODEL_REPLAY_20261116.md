@@ -33,7 +33,7 @@ npx --yes tsx scripts/bt-hp-q102-180d-native-monthly-ledger-selftest.ts
 ```
 
 - 非公開保存：`C:\Users\dis\disdex-bt481-private-evidence-20261116\Q102_S1S2_180D_CLOSED_NATIVE_REPLAY_20261116.json`
-- 再生成後の証拠SHA256：`9FCE65B082312DC33D9714EBFC19385392EAAD4E0FA9624DBB54A2E81E6F2932`。コード改変でscript SHAが変わるとJSON SHAも変わるので、必ずその場で再計算する。
+- 再生成後の証拠SHA256：`2E276765462D6ED0E6BCDF0DA458E50F22DB34937A8398609194F80F3DF293E8`。コード改変でscript SHAが変わるとJSON SHAも変わるので、必ずその場で再計算する。
 - 原個別Event JSONはGitHubへPushしない。コード、テスト、結果の集計、出所説明のみコミット。
 
 ## 未完のBT-481-J境界と次Task
@@ -41,3 +41,6 @@ npx --yes tsx scripts/bt-hp-q102-180d-native-monthly-ledger-selftest.ts
 実際のQ102 S1/S2のstage1Ids/stage2Ids、全ネイティブルールの前180日Native H1価格・Entry・Exit・venue費用と実約定照合、毎月繰返しのOut-of-Sample、多市場独立検証、Q102 one-slotと他RunnerのPortfolio Opportunity/Shared Risk/Grossへの接続は**まだ未認証**。
 
 次は上流の30件S1/S2 IDとNativeソース/Exit経済の対応を読み取り専用で特定し、証拠不足なら `STAGE_MEMBERSHIP_UNVERIFIED` を維持。人工月次研究27件の勝率・DDを、本番で達成した数値と表示しない。V4本番切替はCodex担当のままとする。
+
+### 期末右打切りの追加回帰（2026-11-16）
+月末の人工価格経路を別Fixtureに変え、Native Grid発火後の72時間先がまだ観測できない例を生成して、未決済を右打切りにした。未決済ポジションが同一研究ルール内の後続候補で二重使用されないように修正し、決済済み行への将来損益混入がないことを確認した。再実行とTypeScript限定型検査PASS。基準27件の月次選択結果は不変。

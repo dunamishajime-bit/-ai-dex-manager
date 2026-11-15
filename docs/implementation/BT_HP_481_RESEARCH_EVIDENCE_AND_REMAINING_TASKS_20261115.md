@@ -92,3 +92,5 @@ BT Python回帰テスト合計 **282件PASS**。3タスク各々テスト→Git 
 - 元Pinned native HIGH_VOLのgrid/72h出口/normal費用/180日月次Selectorを変更せず、独立人工H1で入口→出口が完成したモデル取引のみを再生。前336Hウォームアップ＋正確な前180日学習窓を証明。固定2ルールでgrid一致87、ルール内overlap遮断60、**Native出口済モデル27件**。将来・欠損・偽グリッド・未決済を拒否し、各Native Exitの価格/理由/純Returnの全件再計算とdeterministic再実行がPASS。
 - Native selectorが人工研究ルール1件を選択したが、上流S1/S2のstage membership証明がないため `SELECTED_RESEARCH_ONLY`、`nativeS1S2Orders=0`。対象は人工H1のモデル出口で、**LIVEや現行Targetの実約定27件ではない**。対象年の勝率・DD改善も一切主張しない。
 - 元モデルNormal費用 perSide0.0006/fundingDay0.0002 とユーザー指定10/30bps統合BTは別。Model eventsの個票JsonとSHA256はOwner PC非公開 `C:\Users\dis\disdex-bt481-private-evidence-20261116`。再実行・証拠は `BT_HP_Q102_S1_S2_180D_NATIVE_CLOSED_MODEL_REPLAY_20261116.md`。固定本番Q102 pin、上流S1/S2 ID、完全市場のOOS、Portfolio/Shared Risk/Gross/venue経済パリティは今後のタスク。V4 Codex切替・Productionは触れない。
+
+- **BT-481-J追補（同日）**：人工月末でNative未決済の右打切りを合成検査。未決済候補をルール内slotとして保持し後続モデル発注重複を防止。基準27件の研究結果は不変。最新Owner private証拠 SHA256 `2E276765462D6ED0E6BCDF0DA458E50F22DB34937A8398609194F80F3DF293E8`。実S1/S2所属ID・本番取引認証は引続き未達。

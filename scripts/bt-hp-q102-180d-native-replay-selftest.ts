@@ -98,6 +98,19 @@ assert.throws(()=>replayQ102HvNativeClosed180d({...input,frozenRules:[]}),
  /FROZEN_RULESET_REQUIRED/);
 assert.throws(()=>replayQ102HvNativeClosed180d({...input,frozenRules:[{...rules[0],longDrop:.081}]}),
  /RULE_OUTSIDE_GRID/);
+// A final-day signal with an unobserved 72h exit must remain OPEN.
+// In particular, a second signal may not reuse that same scenario slot.
+const boundary=candles.map(c=>({...c}));
+for(let i=count-26;i<count;i++){
+  const open=boundary[i-1].close;
+  const close=i===count-2?open*1.018:i===count-1?open:open*.992;
+  boundary[i]={...boundary[i],open,close,
+    high:Math.max(open,close)*1.012,low:Math.min(open,close)*.988};
+}
+const nearEnd=replayQ102HvNativeClosed180d({...input,bars:boundary});
+assert.ok(nearEnd.rightCensored>0,
+ "A native matching signal whose exit is unobserved must be right-censored");
+assert.ok(nearEnd.ledger.rows.every(x=>x.closedAtMs!==null&&x.closedAtMs<=end));
 // A future outcome is excluded even when its price path could be
 // simulated from a larger dataset, and no month-start entry is invented.
 assert.ok(result.ledger.rows.every(row=>row.closedAtMs!<=end));
