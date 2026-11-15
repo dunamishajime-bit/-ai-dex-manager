@@ -13,6 +13,7 @@ import {Stable4BaselineComparisonPanel} from "@/components/bt-verification/Stabl
 import {BTWorkspaceShell,type BTWorkspaceTab} from "@/components/bt-verification/BTWorkspaceShell";
 import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo";
 import {createH48ResearchReplay} from "@/lib/bt-verification/h48-research-sandbox";
+import {auditSyntheticFeed,type SyntheticFeedAudit} from "@/lib/bt-verification/synthetic-feed-audit";
 import {observedV4MismatchInResearchSource,V4_PIN_OBSERVED_2026_11_15} from "@/lib/bt-verification/source-pin-observation";
 import {buildNativeHypeSensitivityComparison} from "@/lib/bt-verification/native-hype-sensitivity-comparison";
 import {buildStable4BaselineComparison} from "@/lib/bt-verification/stable4-baseline-comparison";
@@ -30,6 +31,8 @@ const [scenario,setScenario]=useState<DemoScenario>("trend");
 const [previewSeed,setPreviewSeed]=useState(123456);
 const [syntheticStrategy,setSyntheticStrategy]=useState<"proxy"|"h48">("proxy");
 const [syntheticFeeBps,setSyntheticFeeBps]=useState<10|30>(10);
+const [feedAudit,setFeedAudit]=useState<SyntheticFeedAudit|null>(null);
+const [feedAuditNotice,setFeedAuditNotice]=useState("");
 
 const [replay,setReplay]=useState<Replay>(DEMO),[cursor,setCursor]=useState(0),[running,setRunning]=useState(false),[speed,setSpeed]=useState(1),[selected,setSelected]=useState<string|null>(null),[error,setError]=useState("");
 const [selectedEvent,setSelectedEvent]=useState("");
@@ -98,6 +101,13 @@ const firedCount=replay.mode==="DEMO"?replay.frames.slice(0,cursor+1).reduce(
   (sum,f)=>sum+(f.demoSignals?.filter(x=>x.fired).length??0),0):null;
 
 const titleCase=(s:string)=>s.replace("T"," ").replace("Z"," UTC");
+function runInputAudit(){
+ try{
+   const result=auditSyntheticFeed(previewSeed,scenario,168);
+   setFeedAudit(result);
+   setFeedAuditNotice("人工市場7日間のOHLCV入力検査に成功。元ロジックの判定は未接続です。");
+ }catch(e){setFeedAudit(null);setFeedAuditNotice("人工市場入力エラー："+String(e))}
+}
 function prepareDemo(){
   const demo=syntheticStrategy==="h48"?createH48ResearchReplay(previewSeed,scenario,syntheticFeeBps):createPreviewReplay(previewSeed,scenario);
   setReplay(demo);setVerifiedResearch(null);setCursor(0);setRunning(false);setError("");
@@ -383,6 +393,29 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                   className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="proxy"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>チャート動作確認（簡易デモ）</button>
                 <button type="button" aria-pressed={syntheticStrategy==="h48"} onClick={()=>setSyntheticStrategy("h48")}
                   className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>HYPE H48研究版の入口判定</button>
+              </div>
+              <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div><p className="font-bold text-cyan-200">全銘柄・人工市場OHLCV入力監査</p>
+                    <p>BTC・HYPE等15暗号資産＋8株式の5分足・1時間足・出来高・モデルFunding・仮想為替を生成（過去価格のコピーではありません）。</p></div>
+                  <button type="button" onClick={runInputAudit}
+                    className="rounded-md border border-cyan-500/50 bg-[#155069] px-3 py-2 font-bold text-white">7日間の入力を点検</button>
+                </div>
+                {feedAuditNotice&&<p className="mt-2 text-amber-200">{feedAuditNotice}</p>}
+                {feedAudit&&feedAudit.seed===previewSeed&&feedAudit.scenario===scenario&&<div className="mt-3 border-t border-[#355471] pt-3">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <div><p className="text-[#819cb2]">5分観測点</p><p className="font-bold text-white">{feedAudit.ticks.toLocaleString()}</p></div>
+                    <div><p className="text-[#819cb2]">対象銘柄</p><p className="font-bold text-white">{feedAudit.totalSymbols}（暗号{feedAudit.cryptoSymbols}/株式{feedAudit.stockSymbols}）</p></div>
+                    <div><p className="text-[#819cb2]">BTC確定H1</p><p className="font-bold text-white">{feedAudit.btcClosedH1.toLocaleString()}本</p></div>
+                    <div><p className="text-[#819cb2]">Funding時点</p><p className="font-bold text-white">{feedAudit.fundingEvents.toLocaleString()}</p></div>
+                  </div>
+                  <p className="mt-2">BTC模擬値幅 {feedAudit.btcMin.toFixed(2)}〜{feedAudit.btcMax.toFixed(2)} USDT /
+                    HYPE {feedAudit.hypeMin.toFixed(4)}〜{feedAudit.hypeMax.toFixed(4)} USDT</p>
+                  <p className="mt-2 font-bold text-amber-200">本番ルールによる全7系統の発火判定: 未接続（Fail Closed）</p>
+                  <details className="mt-2"><summary className="cursor-pointer text-cyan-200">未接続の理由を確認</summary>
+                    <ul className="mt-2 list-disc space-y-1 pl-4">{feedAudit.blockers.map((reason,i)=><li key={i}>{reason}</li>)}</ul>
+                  </details>
+                </div>}
               </div>
               {syntheticStrategy==="h48"&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
                 <p>確定H1のH12/H24/BTC相対24hと6時間UTC入場枠で判定。次の足の始値で入り、最大48時間後に決済。元候補研究にある6%STOPは観測済み5分模擬価格で評価します（本番STOPの再現ではありません）。</p>
