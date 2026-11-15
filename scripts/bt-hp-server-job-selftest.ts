@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import {parseAllowedSyntheticJob,computeAllowedSyntheticJob} from "../lib/bt-verification/server-job";
+import {validateReplay} from "../lib/bt-verification/replay";
+const job=parseAllowedSyntheticJob({mode:"H48_23SYM_CANDIDATE_RESEARCH_ONLY",seed:1,scenario:"trend",costBps:10});
+assert.equal(job.seed,1);
+const out=computeAllowedSyntheticJob(job);
+assert.equal(validateReplay(out),true);
+assert.equal(out.frames.length,2880);
+assert.equal(out.source?.kind,"SYNTHETIC_MULTI_ASSET_H48_CANDIDATE");
+assert.ok(out.frames.some(f=>f.events.some(e=>e.startsWith("ENTRY HYPE_H48_RESEARCH"))));
+assert.ok(out.frames.some(f=>f.events.some(e=>e.startsWith("EXIT HYPE_H48_RESEARCH"))));
+assert.throws(()=>parseAllowedSyntheticJob({mode:"STABLE4_FULL",seed:1,scenario:"trend",costBps:10}),/NOT_CONNECTED/);
+assert.throws(()=>parseAllowedSyntheticJob({...job,enginePath:"/tmp/local"}),/FIELDS_INVALID/);
+assert.throws(()=>parseAllowedSyntheticJob({...job,seed:-1}),/SEED_INVALID/);
+assert.throws(()=>parseAllowedSyntheticJob({...job,costBps:2}),/COST_INVALID/);
+assert.throws(()=>parseAllowedSyntheticJob({...job,scenario:"untrusted"}),/SCENARIO_INVALID/);
+assert.throws(()=>parseAllowedSyntheticJob(null),/INVALID_PAYLOAD/);
+console.log("PASS opt-in bounded research-only server job; native/full request fail-closed");

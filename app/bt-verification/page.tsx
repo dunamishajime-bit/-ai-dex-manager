@@ -34,6 +34,8 @@ const [syntheticStrategy,setSyntheticStrategy]=useState<"proxy"|"h48"|"h48multi"
 const [syntheticFeeBps,setSyntheticFeeBps]=useState<10|30>(10);
 const [feedAudit,setFeedAudit]=useState<SyntheticFeedAudit|null>(null);
 const [feedAuditNotice,setFeedAuditNotice]=useState("");
+const [serverJobBusy,setServerJobBusy]=useState(false);
+const [serverJobNotice,setServerJobNotice]=useState("");
 
 const [replay,setReplay]=useState<Replay>(DEMO),[cursor,setCursor]=useState(0),[running,setRunning]=useState(false),[speed,setSpeed]=useState(1),[selected,setSelected]=useState<string|null>(null),[error,setError]=useState("");
 const [selectedEvent,setSelectedEvent]=useState("");
@@ -108,6 +110,38 @@ function runInputAudit(){
    setFeedAudit(result);
    setFeedAuditNotice("人工市場7日間のOHLCV入力検査に成功。元ロジックの判定は未接続です。");
  }catch(e){setFeedAudit(null);setFeedAuditNotice("人工市場入力エラー："+String(e))}
+}
+async function runServerH48ResearchJob(){
+ if(serverJobBusy)return;
+ setServerJobBusy(true);setServerJobNotice("");
+ try{
+   const response=await fetch("/api/bt-verification/simulate",{
+     method:"POST",credentials:"same-origin",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({mode:"H48_23SYM_CANDIDATE_RESEARCH_ONLY",seed:previewSeed,
+       scenario,costBps:syntheticFeeBps})
+   });
+   const raw:unknown=await response.json();
+   if(!raw||typeof raw!=="object")throw Error("サーバー応答形式が不正");
+   const result=raw as {sourceMode?:unknown;parity?:unknown;replay?:unknown;error?:unknown};
+   if(!response.ok){
+     if(result.error==="BT_SYNTHETIC_JOB_DISABLED_FAIL_CLOSED")
+       throw Error("隔離サーバー計算が未設定です。ブラウザー内の模擬再生を使用できます");
+     throw Error("ジョブは実行されませんでした: "+String(result.error??response.status));
+   }
+   if(result.sourceMode!=="SYNTHETIC_H48_RESEARCH_ONLY"||
+     result.parity!=="NOT_PRODUCTION_OR_SEVEN_RUNNER_PARITY"||
+     !validateReplay(result.replay)||result.replay.mode!=="DEMO"||
+     result.replay.source?.kind!=="SYNTHETIC_MULTI_ASSET_H48_CANDIDATE")
+     throw Error("研究成果の出所を確認できません");
+   const data=result.replay;
+   setReplay(data);setVerifiedResearch(null);setSelectedEvent("");setRunning(false);
+   setPreviewMode("synthetic");setCursor(0);setError("");
+   setLogicFilter([...new Set(data.frames.flatMap(f=>f.positions.map(p=>p.logic)))]);
+   setSymbolFilter([...new Set(data.frames.flatMap(f=>f.positions.map(p=>p.symbol)))]);
+   setTab("playback");
+ }catch(e){setServerJobNotice("隔離ジョブ: "+String(e))}
+ finally{setServerJobBusy(false)}
 }
 function prepareDemo(){
   const demo=syntheticStrategy==="h48multi"?createMultiassetH48Replay(previewSeed,scenario,syntheticFeeBps):syntheticStrategy==="h48"?createH48ResearchReplay(previewSeed,scenario,syntheticFeeBps):createPreviewReplay(previewSeed,scenario);
@@ -433,10 +467,18 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                   className="rounded-lg border border-cyan-500/40 bg-[#15495a] px-3 py-2 text-[11px] text-cyan-100">
                   H48発火例（単体研究シード11）を設定
                 </button>}
-                {syntheticStrategy==="h48multi"&&<button type="button" onClick={()=>{setPreviewSeed(1);setScenario("trend")}}
-                  className="rounded-lg border border-cyan-500/40 bg-[#15495a] px-3 py-2 text-[11px] text-cyan-100">
-                  23銘柄入力でH48が発火する例（シード1）を設定
-                </button>}
+                {syntheticStrategy==="h48multi"&&<div className="space-y-2">
+                  <button type="button" onClick={()=>{setPreviewSeed(1);setScenario("trend")}}
+                    className="rounded-lg border border-cyan-500/40 bg-[#15495a] px-3 py-2 text-[11px] text-cyan-100">
+                    23銘柄入力でH48が発火する例（シード1）を設定
+                  </button>
+                  <button type="button" disabled={serverJobBusy} onClick={runServerH48ResearchJob}
+                    className="ml-2 rounded-lg border border-cyan-500/50 bg-[#175e70] px-3 py-2 text-[11px] font-semibold text-white disabled:opacity-50">
+                    {serverJobBusy?"隔離研究ジョブを検証中":"Owner限定の隔離研究ジョブを実行"}
+                  </button>
+                  <p className="text-amber-200">サーバー側はOwner認証・許可Origin・明示的な研究ジョブ有効設定が必須。未設定なら拒否します。LIVE注文・全7系統の統合BTではありません。</p>
+                  {serverJobNotice&&<p className="text-rose-200">{serverJobNotice}</p>}
+                </div>}
                 <p className="text-amber-200">H48研究入口と候補研究の簡易STOPのみ。V4枠譲渡・Q102等6系統・Online Layer2/3・Funding・本番STOPは未接続。統合STABLE4の利益やDDではありません。</p>
               </div>}
             </div>}
