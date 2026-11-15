@@ -31,5 +31,12 @@
 4. 数量・FX・contract multiplierと正規出口の証跡を元コードから出力。研究欠損は推測補完しない
 5. HP新規BTジョブ送信、隔離Worker、認証保存、再生一体化は未接続
 6. 本番の非公開ディレクトリ・Owner origin・容量・Approval/Deployは未完了
-7. ブラウザE2E、PDFレポート、正式HP公開は未完了
+7. BT画面全体のブラウザーE2E、正式HP公開は未完了。PDFレポート生成はChromium smoke PASS
 CI/Build PASSは本番一致を意味しない。LIVE Codex作業には干渉しない。
+
+## 2026-11-15: H48画面・PDFの追加チェック
+- Commit 83d0776ba: モデル口座残高、最大DD、Gross、建玉、ロジック別成績、source SHAをHTMLエスケープしてPDF保存できる印刷画面を追加。ページ全体のTypeScript型検査とNext.js production build PASS。
+- Commit e1733789d: 毎5分tickの人工HYPE現在価格と最後の確定H1でのH12/H24/BTC相対24h結果、PASS/BLOCK理由を画面に追加。外部研究JSONへの研究用H48判定値混入と不正模擬価格はstrict replay validatorで拒否。4市場/5モデルENTRY/全Tick一致テスト、TypeScript型検査、Next.js build PASS。
+- Owner PC Chrome headlessでHTML印刷経由のPDFを実際に生成。検証専用private path C:\\tmp\\bt481-h48-pdf-smoke-20261115.pdf、107,702 bytes、PDF signature %PDF、1ページを確認。これは合成H48の独立レポートであり正式LIVE根拠ではない。ブラウザーのポップアップ操作やOwner認証済み実サーバー保存のE2Eは未実施。
+- スモーク試験用fixture生成スクリプト scripts/bt-hp-print-chromium-fixture.ts を保持。Private HTML/PDFはGitHubへ保存しない。
+- 元STABLE4 manifestの根拠はOwner PCの結果台帳／研究wrapper。Source SHA・全戦略の独立計算エンジンは未認証のため、新規全戦略BT実行は有効化しない。Codex LIVE作業とは競合させない。
