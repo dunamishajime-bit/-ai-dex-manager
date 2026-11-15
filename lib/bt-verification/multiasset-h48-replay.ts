@@ -1,5 +1,5 @@
 import type {Replay,ReplayFrame,BtcCandle,Position} from "./replay";
-import {SyntheticMarket5m,type SyntheticScenario,type MarketCandle5m} from "./synthetic-market";
+import {SyntheticMarket5m,type SyntheticScenario,type MarketCandle5m,type SyntheticFeedVersion} from "./synthetic-market";
 import {probeSyntheticFet} from "./pinned-native-fet/probe";
 import {probeSyntheticIdleAt} from "./pinned-native-idle/probe";
 import {probeSyntheticPenguAt} from "./stable4-pengu-research-gates";
@@ -28,11 +28,13 @@ function decided(obs:readonly H48Observation[],at:string):H48Decision{
    reason:on6h?base.reason:"次の6時間UTC入場枠ではない"};
 }
 export function createMultiassetH48Replay(
- seed=123456,scenario:SyntheticScenario="trend",costBps:10|30=10
+ seed=123456,scenario:SyntheticScenario="trend",costBps:10|30=10,
+ feedVersion:SyntheticFeedVersion="v1"
 ):Replay{
  if(costBps!==10&&costBps!==30)throw Error("MULTIASSET_H48_FEE_INVALID");
  const feed=new SyntheticMarket5m(seed,scenario,{
-   start:iso(START-WARMUP_HOURS*HOUR),endExclusive:iso(START+PLAY_HOURS*HOUR)
+   start:iso(START-WARMUP_HOURS*HOUR),endExclusive:iso(START+PLAY_HOURS*HOUR),
+   version:feedVersion
  });
  const btcCandles:BtcCandle[]=[],observations:H48Observation[]=[];
  const frames:ReplayFrame[]=[];
@@ -184,7 +186,7 @@ export function createMultiassetH48Replay(
  if(frames.length!==PLAY_HOURS*12||btcCandles.length!==WARMUP_HOURS+PLAY_HOURS)
    throw Error("MULTIASSET_H48_FRAMES_MISSING");
  return {schema:"disdex-bt-portfolio-v1",mode:"DEMO",seed,
-   engineSha:"H48_CANDIDATE_RESEARCH_23SYM_SYNTHETIC_NOT_NATIVE_PRODUCTION",
+   engineSha:"H48_CANDIDATE_RESEARCH_"+(feedVersion==="v2"?"24SYM_V2":"23SYM_V1")+"_SYNTHETIC_NOT_NATIVE_PRODUCTION",
    frames,btcCandles,limits:{total:3.5,crypto:3,stock:1.5},
    strategyCatalog:[{logic:H48_RESEARCH_LOGIC,trades:entries,
      sourceRuntimeShas:["UNVERIFIED_RESEARCH_RULE_SOURCE"],
@@ -192,6 +194,6 @@ export function createMultiassetH48Replay(
      routes:1,symbols:1,status:"RESEARCH_SOURCE_UNVERIFIED"}],
    source:{kind:"SYNTHETIC_MULTI_ASSET_H48_CANDIDATE",
      grossCapEvidence:"SYNTHETIC_SINGLE_SLEEVE_NO_PORTFOLIO_PARITY",
-     note:"23 assets generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. Pinned FET and IDLE pure native entry probes are shadow-only and never open positions; IDLE TIA lacks synthetic input and is marked blocked, TAO 12h research sensor state is not a portfolio risk model. PENGU ShortV20 and RecoveryV8 research regime-only filters likewise have no native candidate or fills. No native production STOP, no formal V4 priority preemption or complete other runners, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
+     note:(feedVersion==="v2"?"24 assets including TIA (v2) ":"23 assets without TIA (v1) ")+"generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. Pinned FET and IDLE pure native entry probes are shadow-only and never open positions; IDLE TIA receives synthetic H1 only in v2 and is explicitly blocked in v1, TAO 12h research sensor state is not a portfolio risk model. PENGU ShortV20 and RecoveryV8 research regime-only filters likewise have no native candidate or fills. No native production STOP, no formal V4 priority preemption or complete other runners, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
  };
 }

@@ -1,8 +1,8 @@
-import {SyntheticMarket5m,SYNTHETIC_FEED_SYMBOLS,type SyntheticScenario,SYNTHETIC_DATA_REQUIREMENTS} from "./synthetic-market";
+import {SyntheticMarket5m,type SyntheticFeedVersion,type SyntheticScenario,SYNTHETIC_DATA_REQUIREMENTS} from "./synthetic-market";
 
 export type SyntheticFeedAudit={
  schema:"disdex-bt-input-audit-v1";
- seed:number;scenario:SyntheticScenario;generatedAtWindowEnd:string;
+ seed:number;scenario:SyntheticScenario;feedVersion:SyntheticFeedVersion;generatedAtWindowEnd:string;
  firstObservedAt:string;lastObservedAt:string;hours:number;ticks:number;
  cryptoSymbols:number;stockSymbols:number;totalSymbols:number;
  btcClosedH1:number;hypeClosedH1:number;fundingEvents:number;
@@ -11,11 +11,13 @@ export type SyntheticFeedAudit={
  nativeRunnerDecisionReady:false;
  blockers:readonly string[];
 };
-export function auditSyntheticFeed(seed:number,scenario:SyntheticScenario,hours=168):SyntheticFeedAudit{
+export function auditSyntheticFeed(
+ seed:number,scenario:SyntheticScenario,hours=168,feedVersion:SyntheticFeedVersion="v1"
+):SyntheticFeedAudit{
   if(!Number.isSafeInteger(hours)||hours<1||hours>24*7)throw Error("SYNTHETIC_UI_AUDIT_WINDOW_INVALID");
   const start="2025-10-01T00:00:00Z";
   const end=new Date(Date.parse(start)+hours*3_600_000).toISOString().replace(".000Z","Z");
-  const feed=new SyntheticMarket5m(seed,scenario,{start,endExclusive:end});
+  const feed=new SyntheticMarket5m(seed,scenario,{start,endExclusive:end,version:feedVersion});
   let ticks=0,first="",last="",btcH1=0,hypeH1=0,funding=0,stockSession=0,partial=0;
   let btcMin=Infinity,btcMax=-Infinity,hypeMin=Infinity,hypeMax=-Infinity,usdJpy=0;
   feed.runToEnd(step=>{
@@ -33,9 +35,10 @@ export function auditSyntheticFeed(seed:number,scenario:SyntheticScenario,hours=
   });
   if(ticks!==hours*12||btcH1!==hours||hypeH1!==hours||!Number.isFinite(usdJpy))
     throw Error("SYNTHETIC_FEED_AUDIT_INCOMPLETE");
-  return {schema:"disdex-bt-input-audit-v1",seed,scenario,generatedAtWindowEnd:end,
+  return {schema:"disdex-bt-input-audit-v1",seed,scenario,feedVersion,generatedAtWindowEnd:end,
     firstObservedAt:first,lastObservedAt:last,hours,ticks,
-    cryptoSymbols:15,stockSymbols:8,totalSymbols:SYNTHETIC_FEED_SYMBOLS.length,
+    cryptoSymbols:feedVersion==="v2"?16:15,stockSymbols:8,
+    totalSymbols:feed.description.symbols.length,
     btcClosedH1:btcH1,hypeClosedH1:hypeH1,fundingEvents:funding,
     stockSessionObservations:stockSession,partialSessionBars:partial,
     btcMin,btcMax,hypeMin,hypeMax,lastUsdJpy:usdJpy,nativeRunnerDecisionReady:false,

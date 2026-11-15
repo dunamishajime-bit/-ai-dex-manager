@@ -15,7 +15,7 @@ import {
  type IdleFeatures,type IdleH1Candle,type IdleSignal
 } from "./idle-priority-short-signal";
 import type {IdlePrioritySymbol} from "./idlePriorityShortPolicy";
-import {SYNTHETIC_FEED_SYMBOLS,type MarketCandle5m,type SyntheticMarket5m} from "../synthetic-market";
+import {SYNTHETIC_FEED_SYMBOLS_V2,type MarketCandle5m,type SyntheticMarket5m} from "../synthetic-market";
 
 const HOUR=3600_000;
 export const IDLE_RESEARCH_CANDIDATE_FILTERS=Object.freeze({
@@ -81,8 +81,12 @@ export function inspectNativeIdleAt(
  const decision=Date.parse(asOf);
  if(!Number.isFinite(decision)||decision%HOUR!==0)
    return result(symbol,asOf,"NOT_H1","確定済み時間足ではない");
- if(!SYNTHETIC_FEED_SYMBOLS.includes(symbol as typeof SYNTHETIC_FEED_SYMBOLS[number]))
+ if(!SYNTHETIC_FEED_SYMBOLS_V2.includes(symbol))
    return result(symbol,asOf,"MISSING_SYMBOL","人工市場に当該IDLE銘柄が未登録");
+ // Versioned feed v1 deliberately does not emit TIA; distinguish a missing
+ // whole input stream from an existing v2 symbol still warming up.
+ if(symbolHistory.length===0)
+   return result(symbol,asOf,"MISSING_SYMBOL","この人工市場バージョンに該当する銘柄の確定H1がない");
  if(symbolHistory.length<73||btcHistory.length<73)
    return result(symbol,asOf,"HISTORY_INSUFFICIENT","過去73本の正規H1を待機");
  let native:IdleSignal,features:IdleFeatures;
@@ -111,8 +115,8 @@ export function inspectNativeIdleAt(
 export function probeSyntheticIdleAt(feed:SyntheticMarket5m,asOf:string):IdleNativeShadowProbe[]{
  const btc=feed.historyH1("BTCUSDT",96);
  return IDLE_EVALUATED_SYMBOLS.map(symbol=>{
-   const available=SYNTHETIC_FEED_SYMBOLS.includes(symbol as typeof SYNTHETIC_FEED_SYMBOLS[number]);
-   const hist=available?feed.historyH1(symbol as typeof SYNTHETIC_FEED_SYMBOLS[number],96):[];
+   const available=feed.description.symbols.includes(symbol);
+   const hist=available?feed.historyH1(symbol,96):[];
    return inspectNativeIdleAt(symbol,asOf,hist,btc);
  });
 }
