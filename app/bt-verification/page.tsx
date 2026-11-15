@@ -4,6 +4,7 @@ import type {Replay,Position} from "@/lib/bt-verification/replay";
 import {isStock,validateReplay,grossForFrame,serializeCsv,replayCoverage} from "@/lib/bt-verification/replay";
 import {saveRun,listRuns,readRun,deleteRun,type SavedRun} from "@/lib/bt-verification/storage";
 import {makeZip,type ZipEntry} from "@/lib/bt-verification/zip-store";
+import {buildPrintableBtReport} from "@/lib/bt-verification/print-report";
 import {BtcCandlestickChart} from "@/components/bt-verification/BtcCandlestickChart";
 import {EquityTimelineChart} from "@/components/bt-verification/EquityTimelineChart";
 import {GrossAllocationPanel} from "@/components/bt-verification/GrossAllocationPanel";
@@ -138,6 +139,18 @@ function strategyReportCsv(){
   const rows:(string|number|null)[][]=[["logic","symbol","model_trades","closed","wins","win_rate_pct","model_net_pnl_jpy","max_single_loss_jpy"]];
   for(const r of replay.strategyStats??[]) rows.push([r.logic,r.symbol,r.tradeCount,r.closedCount,r.wins,r.winRatePct,r.netPnlJpy,r.maxLossJpy]);
   return serializeCsv(rows);
+}
+function printBtReport(){
+ try{
+  const html=buildPrintableBtReport(replay,runName,sourceLabel,verifiedResearch);
+  const popup=window.open("","_blank","width=1000,height=900");
+  if(!popup){setSavedNotice("PDF出力のポップアップがブロックされています。ブラウザーで許可してください。");return}
+  popup.onload=()=>{popup.focus();popup.print()};
+  popup.document.open();
+  popup.document.write(html);
+  popup.document.close();
+  setSavedNotice("別ウィンドウの印刷画面で「PDFに保存」を選択してください。");
+ }catch(e){setSavedNotice("レポート生成失敗: "+String(e))}
 }
 function exportStrategyStats(){
   if(!(replay.strategyStats?.length)){setSavedNotice("ロジック別集計がないためCSVは出力できません");return}
@@ -593,7 +606,8 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
         ["資産・Gross CSV",exportTimeline],
         ["建玉時系列 CSV",exportPositions],
         ["ロジック別 CSV",exportStrategyStats],
-        ["GPT / Codex用 ZIP",exportPackage]
+        ["GPT / Codex用 ZIP",exportPackage],
+        ["PDFレポート（印刷保存）",printBtReport]
       ] as const).map(([name,action])=><button key={name} type="button" onClick={action} className="flex items-center justify-center gap-2 rounded-xl border border-[#3b6179] bg-[#19344a] px-4 py-3 text-[13px] font-semibold text-cyan-100 hover:border-cyan-400"><Download className="h-4 w-4"/>{name}</button>)}</div>
       <label className="mt-5 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-cyan-600 bg-[#102b40] px-4 py-4 text-[13px] text-cyan-100"><Upload className="h-4 w-4"/>研究BTのJSONを読み込んで検証<input className="sr-only" type="file" accept=".json" onChange={upload}/></label>
       {error&&<p className="mt-3 rounded-lg border border-rose-500/50 p-3 text-xs text-rose-200">{error}</p>}
