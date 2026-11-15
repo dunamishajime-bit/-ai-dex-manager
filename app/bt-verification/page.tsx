@@ -10,6 +10,7 @@ import {EquityTimelineChart} from "@/components/bt-verification/EquityTimelineCh
 import {GrossAllocationPanel} from "@/components/bt-verification/GrossAllocationPanel";
 import {NativeHypeSensitivityPanel} from "@/components/bt-verification/NativeHypeSensitivityPanel";
 import {Stable4BaselineComparisonPanel} from "@/components/bt-verification/Stable4BaselineComparisonPanel";
+import {SevenFamilyObservationEvidencePanel} from "@/components/bt-verification/SevenFamilyObservationEvidencePanel";
 import {BTWorkspaceShell,type BTWorkspaceTab} from "@/components/bt-verification/BTWorkspaceShell";
 import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo";
 import {createH48ResearchReplay} from "@/lib/bt-verification/h48-research-sandbox";
@@ -515,6 +516,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                   </details>
                 </div>}
               </div>
+              <SevenFamilyObservationEvidencePanel />
               <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div><p className="font-bold text-cyan-200">V4元FAILED_BREAK判定（14銘柄・22日間）</p>

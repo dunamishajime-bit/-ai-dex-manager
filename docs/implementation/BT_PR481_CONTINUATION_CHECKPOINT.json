@@ -69,8 +69,17 @@
     },
     {
       "id": "BT-481-H2",
-      "status": "pending",
-      "scope": "Connect actual SHA-pinned native candidate outputs for all seven families to the offline causal observation ledger; prove source availability timestamps and stage mapping; no invented fills"
+      "status": "committed",
+      "scope": "Connect actual SHA-pinned native candidate outputs for all seven families to the offline causal observation ledger; prove source availability timestamps and stage mapping; no invented fills",
+      "head": "ba23fe3100c94cebf6c14bd2a7ded8f81692667d",
+      "proofLedgerSha256": "b1a2714e028a11c2779ab0d430120be15a50bb1b6d8fb9bf83071d4727cd197b"
+    },
+    {
+      "id": "BT-481-H3",
+      "status": "committed",
+      "scope": "Show the source-only seven-family H2 archive manifest and explicit feature/candidate/zero-fills stage distinction on the dedicated BT page, with regression and UI tests; no production or LIVE changes",
+      "evidence": "docs/implementation/BT_PR481_H3_SAVED_SOURCE_EVIDENCE_UI_20261116.md",
+      "tests": "BT verification React static markup, full Next.js build, TypeScript typecheck PASS"
     },
     {
       "id": "BT-481-I",
