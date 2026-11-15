@@ -456,7 +456,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
               </div>
               {(syntheticStrategy==="h48"||syntheticStrategy==="h48multi")&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
                 <p>確定H1のH12/H24/BTC相対24hと6時間UTC入場枠で判定。次の足の始値で入り、最大48時間後に決済。元候補研究にある6%STOPは観測済み5分模擬価格で評価します（本番STOPの再現ではありません）。</p>
-                {syntheticStrategy==="h48multi"&&<p className="text-cyan-100">23銘柄の独立した模擬OHLCVからBTC・HYPEの確定足を作り、同じH48候補研究関数へ接続します。FETは元の入口関数をShadowで評価しますが、FET建玉・損益・出口は発生させません。他系統は未接続です。モデルFunding・変動USDJPYはH48の収支だけに反映します。</p>}
+                {syntheticStrategy==="h48multi"&&<p className="text-cyan-100">23銘柄の独立した模擬OHLCVからBTC・HYPEの確定足を作り、同じH48候補研究関数へ接続します。FETとIDLE（JUP・TAO・DOT・RENDER）は元の入口関数をShadowで評価します。TIAは価格入力不足でブロックします。Shadow結果は約定・損益・Grossに加算しません。モデルFunding・変動USDJPYはH48の収支だけに反映します。</p>}
                 <label className="flex items-center gap-2">往復モデル費用
                   <select aria-label="H48模擬往復費用" value={syntheticFeeBps} onChange={e=>setSyntheticFeeBps(Number(e.target.value) as 10|30)}
                     className="rounded-md border border-[#46637b] bg-[#102b41] px-2 py-1 text-white">

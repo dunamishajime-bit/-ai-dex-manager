@@ -1,6 +1,7 @@
 import type {Replay,ReplayFrame,BtcCandle,Position} from "./replay";
 import {SyntheticMarket5m,type SyntheticScenario,type MarketCandle5m} from "./synthetic-market";
 import {probeSyntheticFet} from "./pinned-native-fet/probe";
+import {probeSyntheticIdleAt} from "./pinned-native-idle/probe";
 import {evaluateH48ClosedHourly,H48_RESEARCH_LOGIC,
   H48_RESEARCH_THRESHOLDS,type H48Observation,type H48Decision} from "./h48-research-sandbox";
 
@@ -111,6 +112,19 @@ export function createMultiassetH48Replay(
          " return72h="+round(fet.candidate.return72h*100,4)+"%");
      }else events.push(note);
    }
+   // Frozen IDLE native entry and pretarget filters are run as shadow
+   // telemetry ONLY; the IDLE runner, 12h lifecycle, shared slots and EXIT
+   // are not implemented, so never admit these candidates as trades.
+   if(inMain&&step.completedH1.some(x=>x.symbol==="BTCUSDT")){
+     const idleProbes=probeSyntheticIdleAt(feed,step.observedAt);
+     for(const probe of idleProbes){
+       events.push("RISK IDLE_NATIVE_"+probe.symbol+" [PINNED_NATIVE_IDLE_SHADOW] "+
+         (probe.researchPreliminaryEligible?"PASS":"BLOCK")+
+         " asOf="+probe.asOf+" sourceRevision=9118eeaa6"+
+         " nativeCandidate="+probe.nativeEntryCandidate+
+         " status="+probe.status+" NO_FILL");
+     }
+   }
    const b=step.completedH1.find(x=>x.symbol==="BTCUSDT"),
      h=step.completedH1.find(x=>x.symbol==="HYPEUSDT");
    if(Boolean(b)!==Boolean(h))throw Error("MULTIASSET_H48_ASOF_H1_ALIGNMENT");
@@ -164,6 +178,6 @@ export function createMultiassetH48Replay(
      routes:1,symbols:1,status:"RESEARCH_SOURCE_UNVERIFIED"}],
    source:{kind:"SYNTHETIC_MULTI_ASSET_H48_CANDIDATE",
      grossCapEvidence:"SYNTHETIC_SINGLE_SLEEVE_NO_PORTFOLIO_PARITY",
-     note:"23 assets generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. Pinned FET pure native entry is shadow-only and never opens a position. No native production STOP, no formal V4 priority preemption or complete other runners, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
+     note:"23 assets generated independently of LIVE, but ONLY frozen H48 research candidate on BTC and HYPE is admitted. 6h UTC grid, 48h maximum, synthetic observed M5 stop 6%, model FX/funding/costs. Pinned FET and IDLE pure native entry probes are shadow-only and never open positions; IDLE TIA lacks synthetic input and is marked blocked, TAO 12h research sensor state is not a portfolio risk model. No native production STOP, no formal V4 priority preemption or complete other runners, no Online Layer2/3 or Shared Risk. This is NOT a STABLE4 integrated backtest or execution evidence."}
  };
 }

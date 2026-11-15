@@ -15,7 +15,7 @@ for(const scenario of ["trend","range","down","volatile"] as const){
  assert.equal(r.frames.at(-1)?.timestamp,"2025-10-11T00:00:00Z");
  const b=createMultiassetH48Replay(11,scenario,10);
  assert.deepEqual(r,b,"Same scenario/seed must be repeatable");
- let movements=0,closedMarks=0,fetEntrySourceEvaluations=0;
+ let movements=0,closedMarks=0,fetEntrySourceEvaluations=0,idleNativeEvaluations=0,idleTiaBlock=0;
  for(let i=0;i<r.frames.length;i++){
   const f=r.frames[i],h=f.h48Research!;
   assert.ok(h.ready&&h.hypePrice>0);
@@ -42,6 +42,17 @@ for(const scenario of ["trend","range","down","volatile"] as const){
    assert.ok(p.gross!==null&&p.gross>0);
   }
   for(const e of f.events){
+   if(e.includes("PINNED_NATIVE_IDLE_SHADOW")){
+     idleNativeEvaluations++;
+     assert.ok(e.startsWith("RISK IDLE_NATIVE_"));
+     assert.ok(e.includes("sourceRevision=9118eeaa6"));
+     assert.ok(e.endsWith("NO_FILL"));
+     assert.equal(f.timestamp.slice(14,16),"00");
+     if(e.includes("IDLE_NATIVE_TIAUSDT")){
+       assert.ok(e.includes("MISSING_SYMBOL"));
+       idleTiaBlock++;
+     }
+   }
    if(e.includes("PINNED_NATIVE_ENTRY_SIGNAL_ONLY")){
      fetEntrySourceEvaluations++;
      assert.equal(new Date(f.timestamp).getUTCHours()%4,1);
@@ -55,7 +66,7 @@ for(const scenario of ["trend","range","down","volatile"] as const){
     assert.equal(Date.parse(f.timestamp)-Date.parse(at!),300000,"No first-tick lookahead");
     assert.equal(new Date(at!).getUTCHours()%6,0,"Research UTC 6H grid");
    }
-   if(e.startsWith("RISK ")&&e.includes(" PASS ")){
+   if(e.startsWith("RISK "+H48_RESEARCH_LOGIC+" ")&&e.includes(" PASS ")){
     assert.equal(new Date(f.timestamp).getUTCHours()%6,0);
     assert.equal(f.timestamp.slice(14,16),"00");
    }
@@ -68,6 +79,10 @@ for(const scenario of ["trend","range","down","volatile"] as const){
  assert.ok(movements>2400&&closedMarks===240);
  assert.ok(fetEntrySourceEvaluations>=50,
    "At least 50 actual frozen FET source decisions are recorded");
+ assert.equal(idleNativeEvaluations,240*5,
+   "All five IDLE routes have independent as-of native shadow diagnostics each hour");
+ assert.equal(idleTiaBlock,240,
+   "TIA missing synthetic input must consistently block native source and never fabricate a fill");
 }
 const p=createMultiassetH48Replay(11,"trend",30);
 assert.equal(validateReplay(p),true);

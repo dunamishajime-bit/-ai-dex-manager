@@ -40,7 +40,7 @@ export function auditSyntheticFeed(seed:number,scenario:SyntheticScenario,hours=
     stockSessionObservations:stockSession,partialSessionBars:partial,
     btcMin,btcMax,hypeMin,hypeMax,lastUsdJpy:usdJpy,nativeRunnerDecisionReady:false,
     blockers:[
-      "V4/Q102/PENGU/FET/IDLE/V52: 現行・研究ルートの元シグナルコードが人工OHLCVに未接続",
+      "V4/Q102/PENGU/V52: 元シグナルが未接続。FET/IDLEは入口関数のShadow点検のみで、Runner約定・出口・枠管理は未接続",
       "HYPE: 既存のH48単体研究モードは別実装。現行LIVEとの全出口・優先順位一致は未認証",
       "Q102 Online: 学習済み状態と各時点で利用可能だった過去学習行の注入が未完了",
       "Portfolio Layer3・Shared Risk・Gross: 複数Runnerの建玉・機会競合をまだ一括計算していない",
