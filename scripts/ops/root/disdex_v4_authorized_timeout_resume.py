@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -22,7 +23,7 @@ def validate_resume_binding(*,sha,approved_plan_hash,approved_plan,journal,pins,
     if not isinstance(old,str) or not re.fullmatch('[a-f0-9]{40}',old) or old==sha:raise ValueError('RESUME_OLD_SHA_INVALID')
     if not (journal.get('phase')=='RECOVERY_REQUIRED_PROTECTED' and journal.get('scope')=='V12_V4'
             and journal.get('newSha')==sha and journal.get('oldSha')==old
-            and journal.get('reason')=='V4_REAL_DECISION_CYCLE_TIMEOUT'
+            and journal.get('reason') in ('V4_REAL_DECISION_CYCLE_TIMEOUT','DYNAMIC_EVIDENCE_REFRESH_FAILED','GENUINE_PENDING_MAINTENANCE_FAILED')
             and journal.get('candidateOwnershipRetained') is True
             and journal.get('oldSourceRestartAuthorized') is False
             and journal.get('requiresFreshVenueAndDurableCompatibility') is True):raise ValueError('RESUME_NOT_INITIAL_TIMEOUT_PROTECTED')
@@ -30,6 +31,42 @@ def validate_resume_binding(*,sha,approved_plan_hash,approved_plan,journal,pins,
     root=('/home/deploy/disdex-trading/releases/'+sha).encode()
     if root not in unit_bytes or b'disdex_v4_canonical_prestart.py' not in unit_bytes or b' --daemon' not in unit_bytes or b'--monitor-only' in unit_bytes:raise ValueError('RESUME_UNIT_NOT_EXACT_FULL_SOURCE')
     return old
+
+
+@contextmanager
+def shared_readonly_audit(lock,flock_module=None):
+    """Block deployment writers while admitting committed no-order maintenance.
+
+    Restore exclusive ownership before every lifecycle mutation or cleanup.
+    """
+    if flock_module is None:import fcntl as flock_module
+    flock_module.flock(lock,flock_module.LOCK_SH)
+    try:yield
+    finally:flock_module.flock(lock,flock_module.LOCK_EX)
+
+
+def refresh_committed_pending_maintenance():
+    # This actual systemd service validates its own PID, committed root receipt,
+    # signed account and deploy-owned account lease before its CAS registry write.
+    unit='disdex-pending-exposure-reconcile.service';deadline=time.monotonic()+600
+    while True:
+        result=subprocess.run(['/usr/bin/systemctl','start','--wait',unit],capture_output=True,text=True,timeout=90)
+        if result.returncode==0:break
+        invocation=subprocess.check_output(['/usr/bin/systemctl','show',unit,'-p','InvocationID','--value'],text=True).strip()
+        rows=subprocess.check_output(['/usr/bin/journalctl','-u',unit,'-n','30','--no-pager','-o','json'],text=True).splitlines()
+        reason=None
+        for raw in rows:
+            try:
+                event=json.loads(raw)
+                if not invocation or event.get('_SYSTEMD_INVOCATION_ID')!=invocation:continue
+                payload=json.loads(event.get('MESSAGE','{}'))
+                if payload.get('status')=='PENDING_MAINTENANCE_FAIL_CLOSED':reason=payload.get('reason')
+            except (ValueError,TypeError,AttributeError):continue
+        if reason!='PENDING_MAINTENANCE_CHILD_REJECTED:PENDING_RECONCILE_ACCOUNT_LOCK_BUSY' or time.monotonic()>=deadline:raise ValueError('GENUINE_PENDING_MAINTENANCE_FAILED')
+        time.sleep(2)
+    row=json.loads(Path('/var/lib/disdex/shared/pending-exposure.json').read_text());now=int(time.time()*1000)
+    updated=row.get('updatedAt')
+    if type(updated)is not int or not 0<updated<=now+1000 or now-updated>90000:raise ValueError('GENUINE_PENDING_MAINTENANCE_NOT_FRESH')
 
 
 def protect_resume_failure(systemd,unit,prior_journal,reason,write_journal):
@@ -96,6 +133,10 @@ def main():
         unitpath=Path('/etc/systemd/system')/unit
         if systemd.main_pid(unit)!=0 or systemd.main_pid(oldunit)!=0 or not systemd.is_masked(unit) or not systemd.is_masked(oldunit):raise ValueError('RESUME_DUPLICATE_OR_UNPROTECTED_WRITER')
         if not unitpath.is_symlink() or str(unitpath.readlink())!='/dev/null':raise ValueError('RESUME_UNIT_MASK_CHANGED')
+        # While V4 is masked the regular maintenance service correctly refuses
+        # its running-peer proof. The caller first performs the separately
+        # signed stopped-owner reconciliation. Revalidate fresh full venue
+        # evidence here; do not invent freshness or pretend V4 is running.
         before=_validate_venue_evidence(collect_v4_venue_evidence(sha=sha,expected_pins=pins,phase='before'),now=int(time.time()),label='authorized-resume-before',require_v4_runtime=False)
         if digest((root/'transaction.json').read_bytes())!=original_journal_hash or any(digest(p.read_bytes())!=h for p,h in protected.items()) or backup.read_bytes()!=raw:raise ValueError('RESUME_AUTHORITY_CAS_CHANGED')
         _atomic_json(transaction/'before.json',before,root_uid=0)
@@ -112,16 +153,18 @@ def main():
         print(json.dumps({'status':'AUTHORIZED_V4_RESUME_PROCESS_STARTED','sha':sha,'mainPid':pid}),flush=True)
         _atomic_json(root/'transaction.json',{**prior_journal,'phase':'ACTIVE_AWAITING_AUDIT','sameApprovedTransactionResume':True},root_uid=0)
         rows=[];previous=None;captured=before['capturedAt']
-        for cycle in range(3):
-            if systemd.main_pid(oldunit)!=0:raise RuntimeError('RESUME_OLD_WRITER_STARTED')
-            decision=await_v4_decision_cycle(systemd,sha=sha,release=release,pid=pid,started_after_ms=started,previous_tick=previous)
-            if previous is not None and decision['tickCompletedAt']<=previous:raise RuntimeError('RESUME_TICK_NOT_ADVANCED')
-            previous=decision['tickCompletedAt']
-            after=_validate_venue_evidence(collect_v4_venue_evidence(sha=sha,expected_pins=pins,phase='after'),now=int(time.time()),label='authorized-resume-after-'+str(cycle+1),baseline=before)
-            if after['capturedAt']<=captured:raise RuntimeError('RESUME_SIGNED_WITNESS_NOT_ADVANCED')
-            captured=after['capturedAt'];after['decisionCycle']=decision;rows.append(after)
-            _atomic_json(transaction/('cycle-'+str(cycle+1)+'.json'),after,root_uid=0)
-            print(json.dumps({'status':'AUTHORIZED_V4_REAL_CYCLE_VERIFIED','cycle':cycle+1,'tickCompletedAt':previous,'sha':sha}),flush=True)
+        with shared_readonly_audit(lock):
+            for cycle in range(3):
+                if systemd.main_pid(oldunit)!=0:raise RuntimeError('RESUME_OLD_WRITER_STARTED')
+                decision=await_v4_decision_cycle(systemd,sha=sha,release=release,pid=pid,started_after_ms=started,previous_tick=previous)
+                if previous is not None and decision['tickCompletedAt']<=previous:raise RuntimeError('RESUME_TICK_NOT_ADVANCED')
+                previous=decision['tickCompletedAt']
+                refresh_committed_pending_maintenance()
+                after=_validate_venue_evidence(collect_v4_venue_evidence(sha=sha,expected_pins=pins,phase='after'),now=int(time.time()),label='authorized-resume-after-'+str(cycle+1),baseline=before)
+                if after['capturedAt']<=captured:raise RuntimeError('RESUME_SIGNED_WITNESS_NOT_ADVANCED')
+                captured=after['capturedAt'];after['decisionCycle']=decision;rows.append(after)
+                _atomic_json(transaction/('cycle-'+str(cycle+1)+'.json'),after,root_uid=0)
+                print(json.dumps({'status':'AUTHORIZED_V4_REAL_CYCLE_VERIFIED','cycle':cycle+1,'tickCompletedAt':previous,'sha':sha}),flush=True)
         if any(digest(p.read_bytes())!=h for p,h in protected.items()):raise RuntimeError('RESUME_FINAL_AUTHORITY_CHANGED')
         receipt=dict(schema='disdex-unified-deploy-receipt/v1',status='V4_LIVE_CUTOVER_VERIFIED',targetSha=sha,scope='V12_V4',ordersEnabled=True,route='CODEX_SSH',sameApprovedTransactionResume=True,planSha256=args.approved_plan_sha256,newUnit=unit,oldUnit=oldunit,approvedRunners=['V12_V4'],approvedShaByRunner=pins,authorizationMethod='ROOT_SSH_SESSION',nonceDigest=digest(authority['nonce'].encode()),auditCycles=rows,ordersSent=0,cancelsSent=0,positionChangesSent=0)
         systemd.enable(unit)
