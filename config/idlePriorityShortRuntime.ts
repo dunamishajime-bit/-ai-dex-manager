@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import { IDLE_PRIORITY_SHORT_POLICY } from "./idlePriorityShortPolicy";
+import { assertStable4GlobalLiveAck, resolveDisDexStable4Mode } from "./disdexStable4Opportunity";
 
 export type IdlePriorityMode="SHADOW"|"LIVE";
 export type IdlePriorityShortRuntime = ReturnType<typeof resolveIdlePriorityShortRuntime>;
@@ -8,13 +9,15 @@ export function resolveIdlePriorityShortRuntime(){
  const mode=(String(process.env.DISDEX_IDLE_PRIORITY_MODE||"SHADOW").toUpperCase()==="LIVE"?"LIVE":"SHADOW") as IdlePriorityMode;
  const enabled=bool(process.env.DISDEX_IDLE_PRIORITY_ENABLED,false);
  const runtimeSha=String(process.env.DISDEX_RUNTIME_SHA||process.env.GIT_COMMIT||"").trim().toLowerCase();
+ const stable4Mode=resolveDisDexStable4Mode(process.env);
  if(!/^[0-9a-f]{40}$/.test(runtimeSha)) throw new Error("IDLE_RUNTIME_SHA_INVALID");
+ if(stable4Mode==="LIVE") assertStable4GlobalLiveAck(stable4Mode,runtimeSha);
  if(mode==="LIVE" && (!enabled || !bool(process.env.DISDEX_IDLE_PRIORITY_OPERATOR_ARMED,false))) throw new Error("IDLE_LIVE_NOT_OPERATOR_ARMED");
  const v12DecisionPath=resolve(mode==="LIVE"
   ? (process.env.V12_V4_IDLE_BASELINE_SNAPSHOT_PATH||"/var/lib/disdex/v12-v4/idle-baseline-snapshot.json")
   : (process.env.V12_DECISION_SNAPSHOT_PATH||"/var/lib/disdex/v12-x1-all/decision-snapshot.json"));
  return {
-  mode,enabled,runtimeSha,
+  mode,enabled,runtimeSha,stable4Mode,
   releaseRoot:resolve(process.env.DISDEX_RELEASE_ROOT||process.cwd()),
   parityCertificatePath:resolve(process.env.DISDEX_IDLE_PRIORITY_PARITY_CERT_PATH||"/var/lib/disdex/shared/idle-priority-parity-cert.json"),
   statePath:resolve(process.env.DISDEX_IDLE_PRIORITY_STATE_PATH||"/var/lib/disdex/idle-priority/state.json"),
