@@ -1,0 +1,60 @@
+{
+  "actualFills": 0,
+  "actualOrders": 0,
+  "archiveRelativePath": "reports/bt-verification/BT_PR481_H2_7_FAMILY_CAUSAL_OBSERVATIONS_20261116_V1.json.gz",
+  "archiveSha256": "9d52567195ff340022cba73d15063da42b6361fc0ee5e3b760386c9227f5c457",
+  "artificialMarket": {
+    "calendarHolidaysImplemented": false,
+    "endExclusive": "2025-10-23T00:00:00Z",
+    "realExchangeData": false,
+    "scenario": "rotation",
+    "seed": 20261115,
+    "start": "2025-10-01T00:00:00Z",
+    "v52IndependentModeledQuotes": true,
+    "version": "v4"
+  },
+  "cutoffUtc": "2025-10-23T00:00:00+00:00",
+  "limitations": [
+    "V4 only native FAILED_BREAK core; other V4 routes not connected",
+    "Q102 S1/S2 features have no proven 180d monthly selection; S3/S4 candidates require full admission",
+    "HYPE H48 is a research-only entry gate, not certified current production strategy",
+    "V52 source V50 timing is invented dual-quote synthetic data, not observed venues",
+    "No native exits/STOP/positions/Shared Risk/Gross, no seven-runner performance calculation"
+  ],
+  "liveParityVerified": false,
+  "nativeProbeCounters": {
+    "fetCandidates": 0,
+    "h1": 528,
+    "h2": 204,
+    "hypeCandidates": 5,
+    "idleCandidates": 4,
+    "penguCandidates": 11,
+    "q102HVThresholds": 84,
+    "q102S34Gated": 0,
+    "q102S34Raw": 215,
+    "v4Events": 3
+  },
+  "observedPnL": null,
+  "observedPortfolioGross": null,
+  "schema": "disdex-bt-pr481-h2-source-evidence-manifest-v1",
+  "sourceEntryAdmitted": false,
+  "sourceLedgerSha256": "b1a2714e028a11c2779ab0d430120be15a50bb1b6d8fb9bf83071d4727cd197b",
+  "sourceObservationCounts": {
+    "FET": 114,
+    "HYPE": 504,
+    "IDLE": 2280,
+    "PENGU": 349,
+    "Q102": 2327,
+    "V4": 2655,
+    "V52": 31
+  },
+  "stageCounts": {
+    "ENTRY_VERIFIED": 0,
+    "FEATURE_ONLY": 8206,
+    "RESEARCH_RULE_SELECTED": 0,
+    "SOURCE_CANDIDATE": 54
+  },
+  "taskId": "BT-481-H2",
+  "v52NativeCandidateWindows": 31,
+  "v52UnderlyingSyntheticWindows": 39
+}

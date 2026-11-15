@@ -1,4 +1,5 @@
-import importlib.util,hashlib,copy,pathlib
+import importlib.util,hashlib,copy,pathlib,sys
+sys.dont_write_bytecode=True
 p=pathlib.Path(__file__).with_name("bt-hp-unified-candidate-observation-ledger.py")
 spec=importlib.util.spec_from_file_location("ledger",p);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 pin=hashlib.sha256(b"engineered-fixture-not-live").hexdigest()
