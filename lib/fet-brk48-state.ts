@@ -111,12 +111,12 @@ export function emptyFetBrk48State(runtimeCommitSha: string, now = Date.now()): 
   return { schema: FET_BRK48_STATE_SCHEMA, strategyId: "FET_BRK48_RESIDUAL", runtimeCommitSha, updatedAt: now, failures: [] };
 }
 
-export async function readFetBrk48State(path: string, runtimeCommitSha?: string): Promise<FetBrk48State> {
+export async function readFetBrk48State(path: string, runtimeCommitSha?: string, required = false): Promise<FetBrk48State> {
   let raw: any;
   try {
     raw = JSON.parse(await readFile(resolve(path), "utf8"));
   } catch (error: any) {
-    if (error?.code === "ENOENT") return emptyFetBrk48State(runtimeCommitSha || "UNKNOWN");
+    if (error?.code === "ENOENT" && !required) return emptyFetBrk48State(runtimeCommitSha || "UNKNOWN");
     throw error;
   }
   if (raw?.schema !== FET_BRK48_STATE_SCHEMA) throw new Error("FET_STATE_SCHEMA_INVALID");

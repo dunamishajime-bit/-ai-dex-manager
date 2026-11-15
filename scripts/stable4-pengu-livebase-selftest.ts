@@ -1,0 +1,24 @@
+import assert from "node:assert/strict";
+import { DISDEX_STABLE4_OPPORTUNITY, assertStable4GlobalLiveAck, resolveDisDexStable4Mode } from "../config/disdexStable4Opportunity";
+import { stable4PenguShortV20Pass } from "../lib/pengu-stable4-opportunity";
+
+assert.equal(resolveDisDexStable4Mode({}),"OFF");
+assert.equal(resolveDisDexStable4Mode({DISDEX_STABLE4_MODE:"SHADOW"}),"SHADOW");
+assert.equal(resolveDisDexStable4Mode({DISDEX_STABLE4_MODE:"LIVE"}),"LIVE");
+const p=DISDEX_STABLE4_OPPORTUNITY.pengu;
+assert.equal(p.shortV20Btc24hMax,-0.010836782776818987);
+assert.equal(p.shortV20Pengu72hMax,-0.05237466490617382);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap,3);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,3.5);
+const good={btcReturn24h:p.shortV20Btc24hMax-.0001,penguReturn72h:p.shortV20Pengu72hMax-.0001};
+const badBtc={...good,btcReturn24h:p.shortV20Btc24hMax+.0001};
+const badPengu={...good,penguReturn72h:p.shortV20Pengu72hMax+.0001};
+assert.equal(stable4PenguShortV20Pass("OFF",badBtc),true);
+assert.equal(stable4PenguShortV20Pass("SHADOW",badPengu),true);
+assert.equal(stable4PenguShortV20Pass("LIVE",good),true);
+assert.equal(stable4PenguShortV20Pass("LIVE",badBtc),false);
+assert.equal(stable4PenguShortV20Pass("LIVE",badPengu),false);
+const sha="a".repeat(40);
+assert.doesNotThrow(()=>assertStable4GlobalLiveAck("LIVE",sha,{DISDEX_STABLE4_GLOBAL_LIVE_ACK:sha}));
+assert.throws(()=>assertStable4GlobalLiveAck("LIVE",sha,{DISDEX_STABLE4_GLOBAL_LIVE_ACK:"b".repeat(40)}));
+console.log("STABLE4_PENGU_LIVEBASE_SELFTEST_PASS");

@@ -15,6 +15,7 @@ export interface FetCoreReductionInput {
     statePath?: string;
     maxSlippageBps: number;
     expectedRuntimeSha?: string;
+    expectedQ102RuntimeSha?: string;
     now?: () => number;
 }
 
@@ -29,14 +30,15 @@ export async function reduceFetBrk48ForCoreConflict(input: FetCoreReductionInput
     const path = input.statePath || process.env.FET_BRK48_STATE_PATH || "/var/lib/disdex/fet-brk48-residual/state.json";
     let state;
     try {
-        state = await readFetBrk48State(path, input.expectedRuntimeSha);
+        state = await readFetBrk48State(path, input.expectedRuntimeSha, Boolean(input.expectedQ102RuntimeSha));
     } catch (error) {
         return { status: "blocked" as const, message: error instanceof Error ? error.message : String(error) };
     }
     if (state.manualReview) return { status: "blocked" as const, message: `FET_RESIDUAL_MANUAL_REVIEW:${state.manualReview}` };
 
     const q102 = await readQuality102CausalV1Ownership({
-        expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || input.expectedRuntimeSha,
+        expectedRuntimeSha: input.expectedQ102RuntimeSha || process.env.DISDEX_Q102_RUNTIME_SHA || input.expectedRuntimeSha,
+        required: Boolean(input.expectedQ102RuntimeSha),
     });
     const allFet = (await input.executor.getPositions()).filter(
         (position) => position.symbol.toUpperCase() === "FETUSDT" && Math.abs(position.quantity) > EPS,
