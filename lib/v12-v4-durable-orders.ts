@@ -8,6 +8,9 @@
 import {AsterApiError} from "./aster-v3-client";
 import {MarketSlippageGuardError} from "./market-slippage-guard-error";
 import {MarketPreSubmitEntryError} from "./market-pre-submit-entry-error";
+import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
+import {resolveDisDexStable4Mode} from "../config/disdexStable4Opportunity";
+import type {AccountLockHandle} from "./disdex-account-order-lock";
 import {rejectV4UnsentSlippageEntry,rejectV4UnsentPreSubmitEntry} from "./v12-v4-local-entry-rejection";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4ExecutionStore,v4OrderIdentity,advanceV4Intent,type V4OrderAction,type V4OrderIntent} from "./v12-v4-execution-store";
@@ -145,9 +148,16 @@ export class V4DurableOrderDispatcher{
 }
 
 /** Readback bypasses legacy protection-fill notification classification. */
-export function createV4AsterOrderGateway(adapter:V12AsterLiveAdapter):Gateway{
+export function createV4AsterOrderGateway(adapter:V12AsterLiveAdapter,context?:{lease:Pick<AccountLockHandle,"document">;readDocument:()=>import("./v12-v4-execution-store").V4ExecutionDocument}):Gateway{
  return {
-  executeEntry:input=>adapter.executeEntry(input),
+  executeEntry:async input=>{
+   const admission=context&&resolveDisDexStable4Mode(process.env)==="LIVE"?{lease:context.lease,ownReservationId:input.clientOrderId,v4Reservation:{readDocument:context.readDocument}}:undefined;
+   try{return await adapter.executeEntry({...input,...(admission?{stable4Admission:admission}:{})});}
+   catch(error){
+    if(admission&&error instanceof Stable4EntryGrossAdmissionError&&input.clientOrderId)throw new MarketPreSubmitEntryError(input.symbol,input.clientOrderId,"ENTRY_NOTIONAL",new Error("STABLE4_ENTRY_GROSS_"+error.code));
+    throw error;
+   }
+  },
   executeExit:input=>adapter.executeExit(input),
   placeStopMarket:input=>adapter.placeStopMarket(input),
   placeTakeProfit:input=>adapter.placeTakeProfit(input),

@@ -376,6 +376,7 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
     }
    }
    return {
+    availableThrough:now,
     closed:rows.filter(x=>Number(x[0])+3600000<=now&&Number(x[6])<now)
      .map(x=>({openTs:Number(x[0]),open:Number(x[1]),high:Number(x[2]),low:Number(x[3]),close:Number(x[4])})),
     closedM5:m5rows.filter(x=>Number(x[0])+300000<=now&&Number(x[6])<now)

@@ -373,7 +373,7 @@ export class V4RunnerEngine{
  private async underLease(lease:AccountLockHandle,prepared?:V4PreparedDecision):Promise<V4TickResult>{
   const at=this.now(), d=this.deps;
   const reserv=new V4SharedReservations(d.store,lease,d.pendingRegistryPath,this.now);
-  const dispatcher=new V4DurableOrderDispatcher(d.store,createV4AsterOrderGateway(d.adapter),
+  const dispatcher=new V4DurableOrderDispatcher(d.store,createV4AsterOrderGateway(d.adapter,{lease,readDocument:()=>d.store.read()}),
    bindV4SharedDispatchGuards(reserv,d.assertAuthority));
   const cycle=new V4OrderCycle(d.store,dispatcher,reserv,d.client);
   // Protection recovery runs before ordinary account/market reads. A newly

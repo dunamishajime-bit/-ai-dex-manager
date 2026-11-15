@@ -5,6 +5,8 @@ import { resolveDisDexStable4Mode } from "@/config/disdexStable4Opportunity";
 import { type AccountLockDocument, ACCOUNT_LOCK_SCHEMA } from "./disdex-account-order-lock";
 import { pendingExposurePath, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { assertStable4EntryGrossAdmission, Stable4EntryGrossAdmissionError } from "./stable4-entry-gross-guard";
+import {assertStable4V4ReservationOwnership} from "./stable4-v4-reservation-proof";
+import type {V4ExecutionDocument} from "./v12-v4-execution-store";
 import {MarketSlippageGuardError} from "./market-slippage-guard-error";
 import {MarketPreSubmitEntryError} from "./market-pre-submit-entry-error";
 
@@ -46,7 +48,7 @@ export interface DirectTradeCommand {
     /** Optional pre-order gross cap. Never rounds a lot upwards. */
     maxEntryNotionalUsd?: number;
     /** Explicit capability for the caller's currently owned shared admission lease. */
-    stable4Admission?: { lease: { document(): Promise<AccountLockDocument> }; ownReservationId?: string };
+    stable4Admission?: { lease: { document(): Promise<AccountLockDocument> }; ownReservationId?: string; v4Reservation?:{readDocument():V4ExecutionDocument} };
 }
 
 export interface DirectTradeResult {
@@ -796,9 +798,16 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 const owned=Array.isArray(finalLease.reservations)?finalLease.reservations.filter(r=>r.reservationId===admission.ownReservationId):[];
                 const registered=pending.entries.filter(r=>r.reservationId===admission.ownReservationId);
                 const own=owned[0],row=registered[0],side=command.side==="BUY"?"LONG":"SHORT";
-                if(owned.length!==1||registered.length!==1||own.status!=="RESERVED"||row.status==="RELEASED"||own.strategyId!==row.strategyId||normalize(own.symbol)!==normalize(symbol)||normalize(row.symbol)!==normalize(symbol)||own.side!==side||row.side!==side||!Number.isFinite(own.notionalUsd)||own.notionalUsd!==row.notionalUsd)
+                if(admission.v4Reservation){
+                    if(owned.length!==0||registered.length!==1||admission.ownReservationId!==sanitizeClientOrderId(command.clientOrderId)||typeof admission.v4Reservation.readDocument!=="function")throw new Stable4EntryGrossAdmissionError("OWN_RESERVATION_CONFLICT","V4 reservation capability invalid");
+                    const sourceSha=String(process.env.DISDEX_RELEASE_SHA||process.env.DISDEX_RUNTIME_COMMIT_SHA||"").trim().toLowerCase();
+                    assertStable4V4ReservationOwnership({sourceSha,lease:finalLease,document:admission.v4Reservation.readDocument(),row,command:{...command,symbol}});
+                    await validateLease();
+                }else if(owned.length!==1||registered.length!==1||own.status!=="RESERVED"||row.status==="RELEASED"||own.strategyId!==row.strategyId||normalize(own.symbol)!==normalize(symbol)||normalize(row.symbol)!==normalize(symbol)||own.side!==side||row.side!==side||!Number.isFinite(own.notionalUsd)||own.notionalUsd!==row.notionalUsd){
                     throw new Stable4EntryGrossAdmissionError("OWN_RESERVATION_CONFLICT","reservation does not belong to current account lease");
+                }
             }
+            else if(admission.v4Reservation)throw new Stable4EntryGrossAdmissionError("OWN_RESERVATION_CONFLICT","V4 client identity required");
             const now = Date.now();
             // The response time of the earlier read must survive later slow reads, even when all positions are flat.
             if (positionsObservedAt > now || now - positionsObservedAt > 120_000) throw new Stable4EntryGrossAdmissionError("STALE_POSITION");

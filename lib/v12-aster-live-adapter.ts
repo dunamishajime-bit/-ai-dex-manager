@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { AsterApiError, AsterV3Client, isAsterIpBanError, type AsterOrderResponse, type AsterOrderSide } from "@/lib/aster-v3-client";
-import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition, type DirectTradeResult } from "@/lib/direct-trade-executor";
+import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition, type DirectTradeResult,type DirectTradeCommand } from "@/lib/direct-trade-executor";
 import { assertSharedKillSwitchAllowsNewEntry } from "@/lib/disdex-shared-kill-switch";
 import { buildTradeFillNotificationEvent, enqueueTradeFillNotification, isConfirmedTradeFill } from "@/lib/trade-fill-notification";
 import type { ResidentStopAdapter } from "@/lib/v12-resident-stop-lifecycle";
@@ -77,10 +77,10 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
         return { price, text: price.toFixed(precision) };
     }
 
-    async executeEntry(input: { signalTs: number; symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string }): Promise<DirectTradeResult> {
+    async executeEntry(input: { signalTs: number; symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string;stable4Admission?:DirectTradeCommand["stable4Admission"] }): Promise<DirectTradeResult> {
         await assertSharedKillSwitchAllowsNewEntry();
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "ENTRY", signalTs: input.signalTs, symbol: input.symbol, side: input.side });
-        return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY", requireVenueMargin5xCross: true });
+        return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY", requireVenueMargin5xCross: true,...(input.stable4Admission?{stable4Admission:input.stable4Admission}:{}) });
     }
     async executeExit(input: { signalTs: number; symbol: string; positionSide: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string; failsafe?: boolean }): Promise<DirectTradeResult> {
         const action = input.failsafe ? "FAILSAFE_CLOSE" : "EXIT";

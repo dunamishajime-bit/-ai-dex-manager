@@ -8,11 +8,12 @@ import type { AsterV3Client } from "../lib/aster-v3-client";
 import { Stable4EntryGrossAdmissionError } from "../lib/stable4-entry-gross-guard";
 import { emptyPendingExposureRegistry } from "../lib/disdex-pending-exposure-registry";
 import { ACCOUNT_LOCK_SCHEMA, type AccountLockDocument } from "../lib/disdex-account-order-lock";
+import {v4OrderIdentity} from "../lib/v12-v4-execution-store";
 
 async function fixture(run: (f: ReturnType<typeof setup>, path: string) => Promise<void>) {
   const root = await mkdtemp(join(tmpdir(), "stable4-admission-"));
   const path = join(root, "pending.json");
-  const changes = { DISDEX_STABLE4_MODE: "LIVE", DISDEX_PENDING_EXPOSURE_REGISTRY_PATH: path, DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED: "false" };
+  const changes = { DISDEX_STABLE4_MODE: "LIVE", DISDEX_PENDING_EXPOSURE_REGISTRY_PATH: path, DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED: "false",DISDEX_RELEASE_SHA:"a".repeat(40) };
   const old = Object.fromEntries(Object.keys(changes).map(key => [key, process.env[key]]));
   Object.assign(process.env, changes);
   try { await writeFile(path, JSON.stringify(emptyPendingExposureRegistry())); await run(setup(), path); }
@@ -102,4 +103,16 @@ test("LIVE excludes only strictly exact-zero foreign rows without requiring a ma
 test("LIVE wraps signed read failures without initiating reconciliation", async () => fixture(async f => {
   f.client.getBalances = async () => { throw Object.assign(new Error("read unavailable"), { executionUnknown: true }); };
   await blocked(f, "INVALID_INPUT");
+}));
+
+test("LIVE V4 durable own reservation replaces its pending dollars exactly once",async()=>fixture(async(f,path)=>{
+ const sha="a".repeat(40),entryTs=Date.now()-1000,id=`BTCUSDT:REC_X04_TIME_24H:LONG:${entryTs}`,cid=v4OrderIdentity(sha,id,"ENTRY",0),now=Date.now();
+ const row={reservationId:cid,idempotencyKey:cid,strategyId:"V12_V4",sleeve:"CRYPTO" as const,symbol:"BTCUSDT",side:"LONG" as const,gross:2,notionalUsd:200,status:"PENDING" as const,createdAt:now,updatedAt:now,runtimeSha:sha};
+ const document:any={schema:2,releaseSha:sha,state:{legs:{[id]:{id,status:"PENDING_ENTRY",qty:0,entryTs,requestedQty:2,reservationUsd:200,candidate:{symbol:"BTCUSDT",effectiveSide:"LONG"}}}},intents:{[cid]:{clientOrderId:cid,legId:id,action:"ENTRY",sequence:0,stage:"SUBMITTING",command:{legId:id,action:"ENTRY",sequence:0,symbol:"BTCUSDT",positionSide:"LONG",quantity:2,signalTs:entryTs}}}};
+ const prior=f.lease.document;f.lease.document=async()=>({...await prior(),ownerId:"V12_V4_RUNNER"});
+ f.command.clientOrderId=cid;f.command.stable4Admission={lease:f.lease,ownReservationId:cid,v4Reservation:{readDocument:()=>document}} as any;
+ await writeFile(path,JSON.stringify({...emptyPendingExposureRegistry(now),entries:[row]}));
+ await f.executor.executeMarket(f.command);assert.equal(f.calls.orders,1);
+ f.calls.orders=0;document.intents[cid].venueOrderId="already-sent";await blocked(f,"OWN_RESERVATION_CONFLICT");
+ delete document.intents[cid].venueOrderId;f.lease.document=prior;await blocked(f,"OWN_RESERVATION_CONFLICT");
 }));

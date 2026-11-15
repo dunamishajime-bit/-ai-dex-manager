@@ -1,13 +1,17 @@
 /** Causal, journalled H1 exit evaluation for all 41 frozen exit contracts. */
 import {applyProductionEvent,productionExitSpec,HOUR,type H1Bar,type State} from "./v12-v4-production-lifecycle";
 import type {V4FourRuleM5Bar} from "./v12-v4-four-rule-policy";
-export type V4ExitFeed={closed:H1Bar[];closedM5?:V4FourRuleM5Bar[];nextOpen?:{ts:number;price:number};nextOpens?:{ts:number;price:number}[]};
+export type V4ExitFeed={closed:H1Bar[];closedM5?:V4FourRuleM5Bar[];nextOpen?:{ts:number;price:number};nextOpens?:{ts:number;price:number}[];availableThrough?:number};
 export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:number):State{
  let next=state;
  const original=state.legs[id];
  if(!original)throw Error("V4_EXIT_FEED_UNKNOWN_LEG");
  if(original.status!=="OPEN"||original.plannedExit)return next;
  if(!Number.isFinite(at)||at<original.entryTs)throw Error("V4_EXIT_FEED_CLOCK_INVALID");
+ // The provider captures its closed-bar fence before awaiting venue reads.
+ // Crossing a later close during those reads cannot make a new bar required.
+ const through=feed.availableThrough===undefined?at:feed.availableThrough;
+ if(typeof through!=="number"||!Number.isSafeInteger(through)||through<original.entryTs||through>at)throw Error("V4_EXIT_FEED_AVAILABILITY_CLOCK_INVALID");
  const spec=productionExitSpec(original.candidate.route);
  // The four-rule policy is deliberately opt-in at the feed boundary. Legacy
  // callers that only provide the H1 stream retain their old contract; the
@@ -19,9 +23,9 @@ export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:
    if(m5Seen.has(bar.openTs))throw Error("V4_EXIT_FEED_DUPLICATE_M5");
    m5Seen.add(bar.openTs);m5Indexed.set(bar.openTs,bar);
   }
-  const m5End=Math.min(at,original.entryTs+spec.hours*HOUR);
+  const m5End=Math.min(through,original.entryTs+spec.hours*HOUR);
   let m5Ts=original.fourRuleState?.lastM5OpenTs===undefined?original.entryTs:original.fourRuleState.lastM5OpenTs+300_000;
-  while(m5Ts+300_000<=at&&m5Ts<m5End){
+  while(m5Ts+300_000<=through&&m5Ts<m5End){
    const bar=m5Indexed.get(m5Ts);
    if(!bar)throw Error("V4_EXIT_FEED_M5_GAP:"+m5Ts);
    next=applyProductionEvent(next,{type:"M5_POLICY_BAR",id,eventId:"live-policy-m5:"+id+":"+m5Ts,
@@ -34,13 +38,13 @@ export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:
  const seen=new Set<number>(),indexed=new Map<number,H1Bar>();
  for(const bar of feed.closed){
   if(seen.has(bar.openTs))throw Error("V4_EXIT_FEED_DUPLICATE_H1");seen.add(bar.openTs);
-  if(bar.openTs%HOUR!==0||bar.openTs+HOUR>at||!(bar.close>0))
+  if(bar.openTs%HOUR!==0||bar.openTs+HOUR>through||!(bar.close>0))
    throw Error("V4_EXIT_FEED_UNCLOSED_H1");
   indexed.set(bar.openTs,bar);
  }
  const end=original.entryTs+spec.hours*HOUR;
  let barTs=original.lastExitBarTs===undefined?original.entryTs:original.lastExitBarTs+HOUR;
- while(barTs+HOUR<=at&&barTs<end){
+ while(barTs+HOUR<=through&&barTs<end){
   const bar=indexed.get(barTs);
   if(!bar)throw Error("V4_EXIT_FEED_GAP:"+barTs);
   const boundary=barTs+HOUR;
