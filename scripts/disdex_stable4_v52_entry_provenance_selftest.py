@@ -32,9 +32,13 @@ class ProvenanceTests(unittest.TestCase):
         with patch.dict(os.environ,{'DISDEX_STABLE4_MODE':'LIVE'}),patch.object(mod.subprocess,'run') as run:
             self.assertIsNone(e._prepare_stable4_entry_opportunity(mod.V11_SLOT,{},1,'client'));run.assert_not_called()
     def test_changed_real_lease_is_rejected_after_evidence_subprocess(self):
-        e=self.engine();documents=iter([{'ownerId':'owner','leaseId':'lease','accountScope':'ASTER_FUTURES'},{'ownerId':'another','leaseId':'lease','accountScope':'ASTER_FUTURES'}]);e.lock._owned=lambda:next(documents)
-        with patch.dict(os.environ,{'DISDEX_STABLE4_MODE':'LIVE','DISDEX_RELEASE_SHA':'a'*40}),patch.object(mod.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='{}')):
+        e=self.engine();now=1800000000000
+        documents=iter([{'ownerId':'owner','leaseId':'lease','accountScope':'ASTER_FUTURES'},{'ownerId':'another','leaseId':'lease','accountScope':'ASTER_FUTURES'}])
+        e.lock._owned=lambda:next(documents)
+        # Fix the logical entry/exit clock, not the host's current NY session:
+        # this test must reach and reject the post-publication account lease drift.
+        with patch.dict(os.environ,{'DISDEX_STABLE4_MODE':'LIVE','DISDEX_RELEASE_SHA':'a'*40}),patch.object(mod.base,'now_ms',return_value=now),patch.object(mod.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout='{}')):
             with self.assertRaisesRegex(RuntimeError,'ACCOUNT_LEASE_CHANGED'):
-                e._prepare_stable4_entry_opportunity(mod.V50_SLOT,{'symbol':'NVDA','side':'BUY','basisBps':-86,'signalBasisBps':-99},1,'client')
+                e._prepare_stable4_entry_opportunity(mod.V50_SLOT,{'symbol':'NVDA','side':'BUY','basisBps':-86,'signalBasisBps':-99},1,'client',planned_exit_at=now+3_600_000)
 
 if __name__=='__main__':unittest.main()
