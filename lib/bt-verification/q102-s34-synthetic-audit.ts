@@ -61,7 +61,8 @@ export function auditQ102NativeS34(
    }
  });
  if(decisions===0||warmup===0||evaluated===0||
-    !missing.has("APTUSDT")||!missing.has("LDOUSDT")||
+    (feedVersion!=="v3"&&(!missing.has("APTUSDT")||!missing.has("LDOUSDT")))||
+    (feedVersion==="v3"&&missing.size!==0)||
     !processed.has("AVAXUSDT")||!processed.has("UNIUSDT"))
    throw Error("Q102_NATIVE_14D_AUDIT_INCOMPLETE_FAIL_CLOSED");
  return {

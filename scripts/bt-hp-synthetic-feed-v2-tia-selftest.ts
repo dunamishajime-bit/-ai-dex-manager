@@ -64,7 +64,7 @@ for(let i=0;i<72*12;i++)oldV1.step();
 const v1Probe=probeSyntheticIdleAt(oldV1,oldV1.now).find(p=>p.symbol==="TIAUSDT");
 assert.equal(v1Probe?.status,"MISSING_SYMBOL",
  "Explicit v1 TIA blockage must stay unchanged");
-assert.throws(()=>new SyntheticMarket5m(4,"trend",{...window,version:"v3" as never}),/SYNTHETIC_VERSION_INVALID/);
+assert.throws(()=>new SyntheticMarket5m(4,"trend",{...window,version:"v4" as never}),/SYNTHETIC_VERSION_INVALID/);
 console.log("PASS opt-in v2 24-symbol feed with native TIA Shadow, unchanged v1 seeds",JSON.stringify({
  ticks,tiaBars,tiaInsufficient,tiaNativeRejected,tiaAccepted,tiaInvalid,execution:false
 }));

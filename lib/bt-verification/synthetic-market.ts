@@ -13,8 +13,10 @@ export const SYNTHETIC_FEED_SYMBOLS = [
 ] as const;
 /** Opt-in feed extension; v1 remains seed-reproducible and unchanged. */
 export const SYNTHETIC_FEED_SYMBOLS_V2=[...SYNTHETIC_FEED_SYMBOLS,"TIAUSDT"] as const;
-export type SyntheticSymbol = typeof SYNTHETIC_FEED_SYMBOLS_V2[number];
-export type SyntheticFeedVersion="v1"|"v2";
+/** Further versioned extension: complete Q102 S3/S4 configured model universe. */
+export const SYNTHETIC_FEED_SYMBOLS_V3=[...SYNTHETIC_FEED_SYMBOLS_V2,"APTUSDT","LDOUSDT"] as const;
+export type SyntheticSymbol = typeof SYNTHETIC_FEED_SYMBOLS_V3[number];
+export type SyntheticFeedVersion="v1"|"v2"|"v3";
 export type SyntheticKind = "crypto"|"stock";
 export type SyntheticScenario = "trend"|"range"|"down"|"volatile"|"rotation";
 export type MarketCandle5m = {
@@ -36,7 +38,7 @@ export type SyntheticStep={
   funding:readonly SyntheticFunding[];
 };
 export type SyntheticFeedDescription = {
-  schema:"disdex-bt-synthetic-feed-v1"|"disdex-bt-synthetic-feed-v2";seed:number;scenario:SyntheticScenario;
+  schema:"disdex-bt-synthetic-feed-v1"|"disdex-bt-synthetic-feed-v2"|"disdex-bt-synthetic-feed-v3";seed:number;scenario:SyntheticScenario;
   start:string;endExclusive:string;intervalMinutes:5;
   symbols:readonly SyntheticSymbol[];fundingIntervalHours:8;warmupHoursRequired:96;
   equityCalendar:"NY_WEEKDAY_RTH_ONLY_NO_HOLIDAYS";
@@ -71,6 +73,8 @@ const profiles:Record<SyntheticSymbol,{kind:SyntheticKind;start:number;beta:numb
  GOOGL:{kind:"stock",start:250,beta:.78,sigma:.0012,volume:2e7},
  GOOG:{kind:"stock",start:250,beta:.78,sigma:.0012,volume:2e7},
  TIAUSDT:{kind:"crypto",start:5,beta:1.18,sigma:.004,volume:2e6},
+ APTUSDT:{kind:"crypto",start:8,beta:1.13,sigma:.0033,volume:2.4e6},
+ LDOUSDT:{kind:"crypto",start:1.3,beta:1.09,sigma:.0035,volume:1.8e6},
 };
 const check=(v:number)=>Number.isFinite(v)&&v>0;
 const iso=(n:number)=>new Date(n).toISOString().replace(".000Z","Z");
@@ -123,10 +127,11 @@ export class SyntheticMarket5m {
      from%H1!==0||to%H1!==0||(to-from)/M5>53000||
      from<Date.parse("2025-01-01T00:00:00Z")||to>Date.parse("2027-01-01T00:00:00Z"))
      throw Error("SYNTHETIC_WINDOW_INVALID");
-   if(options?.version!==undefined&&options.version!=="v1"&&options.version!=="v2")
+   if(options?.version!==undefined&&options.version!=="v1"&&options.version!=="v2"&&options.version!=="v3")
      throw Error("SYNTHETIC_VERSION_INVALID");
    const version=options?.version??"v1";
-   this.symbols=version==="v2"?SYNTHETIC_FEED_SYMBOLS_V2:SYNTHETIC_FEED_SYMBOLS;
+   this.symbols=version==="v3"?SYNTHETIC_FEED_SYMBOLS_V3:
+     version==="v2"?SYNTHETIC_FEED_SYMBOLS_V2:SYNTHETIC_FEED_SYMBOLS;
    this.startMs=from;this.endMs=to;this.lastObservedAt=from;
    this.totalTicks=(to-from)/M5;this.next=rng(seed);
    for(const symbol of this.symbols){
@@ -134,7 +139,8 @@ export class SyntheticMarket5m {
       this.completed.set(symbol,[]);
    }
    this.description=Object.freeze({
-      schema:version==="v2"?"disdex-bt-synthetic-feed-v2":"disdex-bt-synthetic-feed-v1",
+      schema:version==="v3"?"disdex-bt-synthetic-feed-v3":
+         version==="v2"?"disdex-bt-synthetic-feed-v2":"disdex-bt-synthetic-feed-v1",
        seed,scenario,start:iso(from),
       endExclusive:iso(to),intervalMinutes:5,symbols:this.symbols,
       fundingIntervalHours:8,warmupHoursRequired:96,
