@@ -1,0 +1,230 @@
+{
+  "schema": "disdex-v4-recovery-gross-research-20261026/v1",
+  "status": "RESEARCH_COMPLETE_NOT_ASTER_LIVE_CERTIFIED_NOT_CURRENT_FULL_8_RUNTIME_PARITY",
+  "sourceModel": "frozen V12 V4 V2_M150_D05_CORE_NATIVE, 2026-10-08/09 H1 integrated model",
+  "economicPeriod": "2025-08-10 to 2026-08-10 UTC",
+  "costsBps": [
+    10,
+    30
+  ],
+  "strategyCount": 8,
+  "sleeves": [
+    "V12",
+    "PENGU",
+    "Q102",
+    "IDLE",
+    "RESIDUAL",
+    "V52",
+    "HYPE_LONG",
+    "FET"
+  ],
+  "onlyEditedRows": "V12 REC_* candidate requested_gross exactly 0.18x, 217 candidates across 41-route V4 source",
+  "grossTargets": [
+    0.18,
+    0.2,
+    0.225,
+    0.25,
+    0.275,
+    0.3
+  ],
+  "changedBehavior": "No other V4 or peer strategy entry/exit/policy/cap/priority change; shared family/V12/crypto/total caps and native owner admission retained",
+  "repeated025Deterministic": "PASS same final equity, DD, PF, win rate, closedTrades and accounting across two runs for both costs",
+  "originalHistoricalBaselineReproduction": "PASS 10bps final 291326102.6203428 JPY exact same as V4 production-cert 20261009 archived metrics",
+  "noLiveChange": true,
+  "limitations": [
+    "Not actual 2026-10-26 live venue/fill parity; uses older frozen integrated 8-sleeve source, not RENDER dual additions / later overlay changes",
+    "Frozen full-year scored V4 ranking may incorporate in-sample model selection and cannot be treated as out-of-sample forward verification",
+    "Actual low-wallet venue lot sizes and minimum orders may prevent reaching requested target gross",
+    "All 0.18x routes only, not a blanket 0.25x for all 41 V4 routes",
+    "10bps DD near 21 percent research threshold; this is NOT a live stop switch; small extra slippage can change conclusion",
+    "0.30x 30bps DD 21.6243 percent and cost sensitivity is nonlinear"
+  ],
+  "cases": [
+    {
+      "requestedGross": 0.18,
+      "sourceAffectedCandidates": 217,
+      "scenarios": {
+        "10bps": {
+          "finalEquityJpy": 291326102.6203428,
+          "maximumMtmDdPct": -20.42001379546361,
+          "PF": 4.0489917790238845,
+          "winRate": 0.7160392798690671,
+          "closedTrades": 1222,
+          "v12Trades": 828,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 182,
+          "meanAcceptedGross": 0.1733860909404969,
+          "tradeLedgerSha256": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65"
+        },
+        "30bps": {
+          "finalEquityJpy": 174749524.31834882,
+          "maximumMtmDdPct": -18.38876526854678,
+          "PF": 3.2776408293736883,
+          "winRate": 0.6830870279146142,
+          "closedTrades": 1218,
+          "v12Trades": 824,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 181,
+          "meanAcceptedGross": 0.1721936103024504,
+          "tradeLedgerSha256": "b47a0845f01d2f43c4b9575f9e940ab12d410e25a7f8cb9f5852bb734f016337"
+        }
+      }
+    },
+    {
+      "requestedGross": 0.2,
+      "sourceAffectedCandidates": 217,
+      "scenarios": {
+        "10bps": {
+          "finalEquityJpy": 293792211.81324935,
+          "maximumMtmDdPct": -20.472105513274176,
+          "PF": 4.0408429516059465,
+          "winRate": 0.7162714636140638,
+          "closedTrades": 1223,
+          "v12Trades": 829,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 182,
+          "meanAcceptedGross": 0.19140168898064255,
+          "tradeLedgerSha256": "f89af87c52e988ec202222973df7f13889e1133de384946c6a1e582b5362773c"
+        },
+        "30bps": {
+          "finalEquityJpy": 185261450.0544588,
+          "maximumMtmDdPct": -18.390327088801772,
+          "PF": 3.478983519468989,
+          "winRate": 0.6844700082169268,
+          "closedTrades": 1217,
+          "v12Trades": 824,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 181,
+          "meanAcceptedGross": 0.19262095559530867,
+          "tradeLedgerSha256": "bf34c8fcdb5858e0779ac6f1f2802b7b7354479ee132a0e6ea7926b1c725f687"
+        }
+      }
+    },
+    {
+      "requestedGross": 0.225,
+      "sourceAffectedCandidates": 217,
+      "scenarios": {
+        "10bps": {
+          "finalEquityJpy": 296672974.5419021,
+          "maximumMtmDdPct": -20.462711617876263,
+          "PF": 4.060670018685492,
+          "winRate": 0.7158067158067158,
+          "closedTrades": 1221,
+          "v12Trades": 828,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 182,
+          "meanAcceptedGross": 0.21204660536841913,
+          "tradeLedgerSha256": "7d58b5d2a2dfc595f5d0aad87eeae057bb0c375e0e6c35b66b59590f6377608c"
+        },
+        "30bps": {
+          "finalEquityJpy": 175225477.71672586,
+          "maximumMtmDdPct": -18.39482003236499,
+          "PF": 3.256955723455709,
+          "winRate": 0.6817807089859852,
+          "closedTrades": 1213,
+          "v12Trades": 819,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 178,
+          "meanAcceptedGross": 0.21578139751356198,
+          "tradeLedgerSha256": "0e33e89292b997b8d83deec9bb103b111b90bec6bb53ac5abe59ba1f38388efd"
+        }
+      }
+    },
+    {
+      "requestedGross": 0.25,
+      "sourceAffectedCandidates": 217,
+      "scenarios": {
+        "10bps": {
+          "finalEquityJpy": 298359667.4222071,
+          "maximumMtmDdPct": -20.482328168050568,
+          "PF": 4.048278651946374,
+          "winRate": 0.7155737704918033,
+          "closedTrades": 1220,
+          "v12Trades": 827,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 182,
+          "meanAcceptedGross": 0.2331511193048282,
+          "tradeLedgerSha256": "be4c95af6cf13de8590a84173ce253e85a9cf93d4d678cee5c22f800d3d1c3d9"
+        },
+        "30bps": {
+          "finalEquityJpy": 185858224.75952727,
+          "maximumMtmDdPct": -18.39538376877181,
+          "PF": 3.4466638877652795,
+          "winRate": 0.6836483155299918,
+          "closedTrades": 1217,
+          "v12Trades": 824,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 181,
+          "meanAcceptedGross": 0.23658906092465612,
+          "tradeLedgerSha256": "2a1d96d655bc93e8f4a2c4c3ad96fa7aa15d7aaa5c865cebee5528005cf5254c"
+        }
+      }
+    },
+    {
+      "requestedGross": 0.275,
+      "sourceAffectedCandidates": 217,
+      "scenarios": {
+        "10bps": {
+          "finalEquityJpy": 301513741.3652415,
+          "maximumMtmDdPct": -20.453579531482347,
+          "PF": 4.056956893344144,
+          "winRate": 0.7151067323481116,
+          "closedTrades": 1218,
+          "v12Trades": 825,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 182,
+          "meanAcceptedGross": 0.25222940212558054,
+          "tradeLedgerSha256": "26603f5d8d3296406e94c6f8f5ad681470960e78a2794e7ccfa68faa4fafe590"
+        },
+        "30bps": {
+          "finalEquityJpy": 191974345.721728,
+          "maximumMtmDdPct": -18.351532740002053,
+          "PF": 3.457189073809367,
+          "winRate": 0.6831275720164609,
+          "closedTrades": 1215,
+          "v12Trades": 821,
+          "accounting": "PASS",
+          "requestedAtSelectedTargetCandidates": 217,
+          "targetGrossAcceptedCount": 179,
+          "meanAcceptedGross": 0.25983023690575263,
+          "tradeLedgerSha256": "0d20014b76f21d145a4f692250af003ae4d0d01215e4223d47be6c0a28becf80"
+        }
+      }
+    },
+    {
+      "requestedGross": 0.3,
+      "sourceAffectedCandidates": 217,
+      "scenarios": {
+        "10bps": {
+          "finalEquityJpy": 303331440.3953004,
+          "maximumMtmDdPct": -20.463738328082204,
+          "PF": 4.043891887439209,
+          "winRate": 0.715927750410509,
+          "closedTrades": 1218,
+          "v12Trades": 825,
+          "accounting": "PASS",
+          "tradeLedgerSha256": "6058377dcaca257be3343d202961baef799235736402e982a0f28e6f4d48d656"
+        },
+        "30bps": {
+          "finalEquityJpy": 190119293.99621958,
+          "maximumMtmDdPct": -21.624298485279468,
+          "PF": 3.414113060586979,
+          "winRate": 0.6831275720164609,
+          "closedTrades": 1215,
+          "v12Trades": 821,
+          "accounting": "PASS",
+          "tradeLedgerSha256": "f84b694ec1dc035a20c385692c985b76f6a5af1c938b918b10f3effb0ba84b89"
+        }
+      }
+    }
+  ]
+}

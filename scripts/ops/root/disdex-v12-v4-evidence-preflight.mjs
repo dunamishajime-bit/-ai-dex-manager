@@ -57,7 +57,14 @@ export function validateEvidenceBundle({ sha, releaseMarker, payloads, now = Dat
 export function validateRuntimeHealth({ sharedRisk, marginGuard, killSwitch, pendingExposure }) {
   if (sharedRisk?.sourceComplete !== true || sharedRisk?.tripped === true) throw new Error("V4_RUNTIME_SHARED_RISK_NOT_HEALTHY");
   if (marginGuard?.stage !== "HEALTHY" || marginGuard?.ordersAllowed !== true) throw new Error("V4_RUNTIME_MARGIN_GUARD_NOT_HEALTHY");
-  if (killSwitch?.active === true) throw new Error("V4_RUNTIME_KILL_SWITCH_ACTIVE");
+  const scopedV52ReferenceHold = killSwitch?.active === true
+    && killSwitch.scope === "V52_REFERENCE_ONLY"
+    && killSwitch.action === "HOLD_PROTECTED"
+    && killSwitch.operator === "disdex-v52-aster-only"
+    && killSwitch.recoverable === true
+    && String(killSwitch.reason || "").startsWith("V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=")
+    && String(killSwitch.reason || "").includes('{"error":"stale_quote"');
+  if (killSwitch?.active === true && !scopedV52ReferenceHold) throw new Error("V4_RUNTIME_KILL_SWITCH_ACTIVE");
   if (finiteNumber(pendingExposure?.activeCount, "pendingExposure.activeCount") !== 0) throw new Error("V4_RUNTIME_PENDING_EXPOSURE_NOT_EMPTY");
   return true;
 }

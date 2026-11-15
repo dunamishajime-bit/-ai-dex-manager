@@ -1,0 +1,35 @@
+# Root-owned, no-order V4 dynamic evidence refresh.
+# The lease is installed only by the owner-signed refresh activation helper.
+[Unit]
+Description=DisDex V4 dynamic evidence refresh (%i)
+OnFailure=disdex-runner-health-alert.service
+After=network-online.target local-fs.target disdex-v4-rate-budget-broker@%i.service
+Requires=disdex-v4-rate-budget-broker@%i.service
+Wants=network-online.target
+ConditionPathExists=/var/lib/disdex/unified-deploy/refresh-leases/v4/%i.json
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+SupplementaryGroups=deploy
+RuntimeDirectory=disdex-v4-evidence-refresh
+RuntimeDirectoryMode=0750
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v12-aster-credentials.env
+Environment=DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=/var/lib/disdex/shared/aster-rate-budget.json
+Environment=DISDEX_RELEASE_SHA=%i
+Environment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET=/run/disdex-v4-budget-%i/budget.sock
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/node_modules/tsx/dist/cli.mjs
+ExecStartPre=/usr/bin/test ! -L /home/deploy/disdex-trading/releases/%i/node_modules/tsx
+ExecStart=/usr/bin/flock -n /run/disdex-v4-evidence-refresh/refresh.lock /usr/bin/node /home/deploy/disdex-trading/releases/%i/node_modules/tsx/dist/cli.mjs /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-v4-dynamic-evidence-refresh.ts --sha %i --apply --lease /var/lib/disdex/unified-deploy/refresh-leases/v4/%i.json
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ReadWritePaths=/run/disdex-v4-evidence-refresh /etc/disdex/v12-v4-evidence /var/lib/disdex/unified-deploy/v4-evidence
+UMask=0077
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+TimeoutStartSec=5min

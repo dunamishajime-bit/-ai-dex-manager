@@ -38,6 +38,7 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   q102MaximumPositions: 1,
   // Normal operating caps proven by the 2026-09-22 DD<20% integrated replay.
   cryptoGrossCap: 3.0,
+  cryptoGrossExistingExposureCap: 3.5,
   stockGrossCap: Number(v52V50Runtime.stockAggregateGross),
   stockSlotGrossCap: Number(v52V50Runtime.slotGross),
   totalGrossCap: 4.25,
@@ -78,6 +79,7 @@ export function resolveIntegratedProductionRiskPolicy(env: Record<string, string
     HYPE_ZEC_MAX_REDUCTION_FRACTION: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumReductionFraction,
     QUALITY102_CAUSAL_V1_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross,
     CRYPTO_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+    CRYPTO_GROSS_EXISTING_EXPOSURE_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossExistingExposureCap,
     CRYPTO_GROSS_HARD_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap,
     STOCK_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap,
     TOTAL_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,

@@ -89,6 +89,60 @@ export interface StrictPortfolioPlan {
 
 const EPSILON = 1e-9;
 
+export interface CryptoGrossEntryControl {
+    currentCryptoGross: number;
+    normalEntryCap: number;
+    existingExposureMax: number;
+    entryCapForNewRisk: number;
+    existingExposureManaged: true;
+    protectedExitAllowed: true;
+    newRiskAllowed: boolean;
+    existingExposureBand: "WITHIN_NORMAL" | "EXISTING_EXCESS_ALLOWED" | "ABOVE_EXISTING_ALLOWANCE";
+    reason: "CRYPTO_GROSS_NORMAL_ENTRY_CAPACITY" | "CRYPTO_GROSS_EXISTING_EXCESS_NO_NEW_RISK";
+}
+
+/**
+ * Keep mark-to-market exposure management separate from new-risk admission.
+ * A current crypto Gross above the normal target is never a reason to stop
+ * exits or protection. It only removes incremental crypto-entry capacity.
+ */
+export function resolveCryptoGrossEntryControl(input: {
+    currentCryptoGross: number;
+    requestedEntryCap: number;
+    approvedEntryExpansion?: boolean;
+}): CryptoGrossEntryControl {
+    const current = nonNegative(input.currentCryptoGross, "current crypto gross");
+    const requested = positive(input.requestedEntryCap, "requested crypto entry cap");
+    const normalEntryCap = INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap;
+    const existingExposureMax = INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossExistingExposureCap;
+    const approvedExpansion = input.approvedEntryExpansion === true;
+    const requestedForNewRisk = approvedExpansion
+        ? requested
+        : Math.min(requested, normalEntryCap);
+    const entryCapForNewRisk = current >= normalEntryCap - EPSILON
+        ? current
+        : Math.max(current, requestedForNewRisk);
+    const existingExposureBand = current <= normalEntryCap + EPSILON
+        ? "WITHIN_NORMAL"
+        : current <= existingExposureMax + EPSILON
+            ? "EXISTING_EXCESS_ALLOWED"
+            : "ABOVE_EXISTING_ALLOWANCE";
+    return {
+        currentCryptoGross: current,
+        normalEntryCap,
+        existingExposureMax,
+        entryCapForNewRisk,
+        existingExposureManaged: true,
+        protectedExitAllowed: true,
+        newRiskAllowed: entryCapForNewRisk > current + EPSILON,
+        existingExposureBand,
+        reason: entryCapForNewRisk > current + EPSILON
+            ? "CRYPTO_GROSS_NORMAL_ENTRY_CAPACITY"
+            : "CRYPTO_GROSS_EXISTING_EXCESS_NO_NEW_RISK",
+    };
+}
+
+
 function positive(value: unknown, name: string) {
     const number = Number(value);
     if (!Number.isFinite(number) || number <= 0) throw new Error(`${name} must be positive.`);
@@ -507,6 +561,7 @@ export function planStrictPortfolio(input: {
         return rejectPlan("QUALITY102_CAUSAL_V1_GROSS_OVER_CAP", input.active, equity);
     }
     const initialTotals = planTotals(input.active, [], equity, pendingExposure);
+    const activeTotals = planTotals(input.active, [], equity);
     const governor = resolveIntegratedGrossGovernor({
         now: input.now,
         equityUsd: equity,
@@ -520,11 +575,16 @@ export function planStrictPortfolio(input: {
     const requestedTotalEntryCap = Number(input.entryGrossCaps?.totalGrossCap ?? governor.totalEntryCap);
     if (!Number.isFinite(requestedCryptoEntryCap) || requestedCryptoEntryCap <= 0 || requestedCryptoEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap + EPSILON) return rejectPlan("CRYPTO_ENTRY_GROSS_CAP_INVALID", input.active, equity);
     if (!Number.isFinite(requestedTotalEntryCap) || requestedTotalEntryCap <= 0 || requestedTotalEntryCap > INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossHardCap + EPSILON) return rejectPlan("TOTAL_ENTRY_GROSS_CAP_INVALID", input.active, equity);
-    const cryptoEntryCeiling = Math.max(initialTotals.cryptoGross, requestedCryptoEntryCap);
-    const totalEntryCeiling = Math.max(initialTotals.totalGross, requestedTotalEntryCap);
-    if (initialTotals.cryptoGross > requestedCryptoEntryCap + EPSILON) return rejectPlan("PENDING_CRYPTO_GROSS_OVER_ENTRY_CAP", input.active, equity, pendingExposure);
-    if (initialTotals.stockGross > INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap + EPSILON) return rejectPlan("PENDING_STOCK_GROSS_OVER_ENTRY_CAP", input.active, equity, pendingExposure);
-    if (initialTotals.totalGross > requestedTotalEntryCap + EPSILON) return rejectPlan("PENDING_TOTAL_GROSS_OVER_ENTRY_CAP", input.active, equity, pendingExposure);
+    const cryptoControl = resolveCryptoGrossEntryControl({
+        currentCryptoGross: activeTotals.cryptoGross,
+        requestedEntryCap: requestedCryptoEntryCap,
+        approvedEntryExpansion: governor.tier !== "BASE",
+    });
+    const cryptoEntryCeiling = cryptoControl.entryCapForNewRisk;
+    const totalEntryCeiling = Math.max(activeTotals.totalGross, requestedTotalEntryCap);
+    if (pendingExposure.cryptoGross > Math.max(0, cryptoEntryCeiling - activeTotals.cryptoGross) + EPSILON) return rejectPlan("PENDING_CRYPTO_GROSS_OVER_ENTRY_CAP", input.active, equity, pendingExposure);
+    if (pendingExposure.stockGross > Math.max(0, INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap - activeTotals.stockGross) + EPSILON) return rejectPlan("PENDING_STOCK_GROSS_OVER_ENTRY_CAP", input.active, equity, pendingExposure);
+    if (pendingExposure.cryptoGross + pendingExposure.stockGross > Math.max(0, requestedTotalEntryCap - activeTotals.totalGross) + EPSILON) return rejectPlan("PENDING_TOTAL_GROSS_OVER_ENTRY_CAP", input.active, equity, pendingExposure);
     if (grossForNotional(sumNotional(input.active, (row) => row.strategy === "V12"), equity) + pendingGrossForStrategy(pendingExposure, "V12") > INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap + EPSILON) return rejectPlan("V12_GROSS_OVER_CAP", input.active, equity, pendingExposure);
     if (grossForNotional(sumNotional(input.active, (row) => row.strategy === "PENGU_DUAL_LS_V2"), equity) + pendingGrossForStrategy(pendingExposure, "PENGU_DUAL_LS_V2") > INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross + EPSILON) return rejectPlan("PENGU_GROSS_OVER_CAP", input.active, equity, pendingExposure);
     if (initialTotals.cryptoGross > INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap + EPSILON) return rejectPlan("CRYPTO_GROSS_HARD_CAP", input.active, equity);

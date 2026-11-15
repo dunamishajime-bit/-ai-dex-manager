@@ -10,7 +10,7 @@ export async function assertV4EntrySafety(input:{
  dailyRiskMaxAgeMs?:number;marginMaxAgeMs?:number;
 }={}){
  const now=input.now??Date.now();
- await assertSharedKillSwitchAllowsNewEntry(input.env??process.env);
+ await assertSharedKillSwitchAllowsNewEntry(input.env??process.env,{consumer:"V4_CRYPTO"});
  const daily=await readSharedCryptoDailyRisk(
   input.dailyRiskPath??V4_SHARED_DAILY_RISK_PATH,now,input.dailyRiskMaxAgeMs??120000);
  if(!daily.ok)throw Error("V4_SHARED_DAILY_RISK_BLOCK:"+String(daily.reason??"UNKNOWN"));

@@ -1,0 +1,28 @@
+name: DisDex Seven Runner Read-Only Audit CI
+on:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-seven-runner-readonly-audit.py'
+      - 'ops/systemd/disdex-seven-runner-readonly-audit.service'
+      - 'ops/systemd/disdex-seven-runner-readonly-audit.timer'
+      - '.github/workflows/disdex-seven-runner-readonly-audit-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python read-only audit self-test
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/ops/root/disdex-seven-runner-readonly-audit.py
+          python3 scripts/ops/root/disdex-seven-runner-readonly-audit.py --self-test
+          grep -Fq 'OnCalendar=*:0/2' ops/systemd/disdex-seven-runner-readonly-audit.timer
+          grep -Fq 'ProtectSystem=strict' ops/systemd/disdex-seven-runner-readonly-audit.service
+          grep -Fq 'ReadWritePaths=/var/lib/disdex/ops-audit' ops/systemd/disdex-seven-runner-readonly-audit.service
+          test "$(grep -Fc 'User=root' ops/systemd/disdex-seven-runner-readonly-audit.service)" = 1

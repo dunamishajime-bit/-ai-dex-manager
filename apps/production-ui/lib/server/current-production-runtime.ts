@@ -224,8 +224,8 @@ async function loadRuntimeLineage(releaseSha: string, v12V4: V12V4LiveSource): P
       const raw = heartbeat.raw;
       const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
         : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
-      const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim()
-        : unit === "fet" ? releaseSha : undefined;
+      const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim() : undefined;
+      const validRuntimeSha = Boolean(runtimeSha && SHA_RE.test(runtimeSha));
       units[unit] = {
         runtimeSha,
         expectedSha,
@@ -240,11 +240,12 @@ async function loadRuntimeLineage(releaseSha: string, v12V4: V12V4LiveSource): P
             : undefined,
         healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
         // Runner releases are intentionally independent in the current VPS
-        // topology (V4 and HYPE/Idle can be on a dedicated immutable SHA).
-        // A unit is coherent when its own runtime SHA matches its declared
-        // expected SHA. Only legacy heartbeats without an expected SHA fall
-        // back to the common current release marker.
-        matchesCurrent: Boolean(runtimeSha) && (expectedSha ? runtimeSha === expectedSha : runtimeSha === releaseSha),
+        // topology. A unit is coherent when its own runtime SHA matches its
+        // declared expected SHA. FET's legacy state has no expectedSha, so
+        // its own validated runtimeCommitSha is the authoritative lineage.
+        matchesCurrent: validRuntimeSha && (expectedSha
+          ? runtimeSha === expectedSha
+          : unit === "fet" || runtimeSha === releaseSha),
       };
     } catch (error) {
       units[unit] = {

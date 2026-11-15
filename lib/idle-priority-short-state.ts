@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
+import { RENDER_ENTRY_POLICY, RENDER_INDEPENDENT_ROUTE, RENDER_M5_MS, type LegacyRenderAdverseState } from "./render-highwr-and-legacy-stop";
 
 export const IDLE_STATE_SCHEMA="disdex-idle-priority-state/v2" as const;
 export type IdlePendingPhase="planned"|"submitted"|"manual_review";
@@ -16,7 +17,7 @@ export type IdleOwnedPosition={
   exitTs:number;
   entryPrice:number;
   quantity:number;
-  holdHours:12|24;
+  holdHours:number;
   gross:number;
   stopPrice:number;
   takeProfitPrice:number;
@@ -27,6 +28,8 @@ export type IdleOwnedPosition={
   bestConfirmed5mGainPct?: number;
   trailingStopPrice?: number;
   lastConfirmed5mTs?: number;
+  /** Existing RENDER only. Durable first-adverse M5 watch; never on the independent route. */
+  legacyRenderAdverse?: LegacyRenderAdverseState;
 };
 
 export type IdlePending={
@@ -40,7 +43,7 @@ export type IdlePending={
   expectedPrice:number;
   signalTs:number;
   decisionTs:number;
-  holdHours:12|24;
+  holdHours:number;
   createdAt:number;
   updatedAt:number;
   reason:string;
@@ -78,6 +81,9 @@ function validSymbol(v:unknown):v is IdlePrioritySymbol{return SYMBOLS.has(Strin
 function routeFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].route;}
 function holdFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].holdHours;}
 function grossFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;}
+function independentFor(symbol:IdlePrioritySymbol,route:string){return symbol==="RENDERUSDT"&&route===RENDER_INDEPENDENT_ROUTE;}
+function routeValid(symbol:IdlePrioritySymbol,route:string){return route===routeFor(symbol)||independentFor(symbol,route);}
+function holdValid(symbol:IdlePrioritySymbol,route:string,hours:number){return hours===(independentFor(symbol,route)?RENDER_ENTRY_POLICY.independentRealMaxMinutes/60:holdFor(symbol));}
 
 export function emptyIdleState(runtimeSha:string,now=Date.now()):IdleState{
  if(!validSha(runtimeSha))throw new Error("IDLE_STATE_RUNTIME_SHA_INVALID");
@@ -85,26 +91,37 @@ export function emptyIdleState(runtimeSha:string,now=Date.now()):IdleState{
 }
 
 function validatePosition(p:IdleOwnedPosition){
- if(!p||!validSymbol(p.symbol)||p.side!=="SHORT"||p.route!==routeFor(p.symbol))throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(!p||!validSymbol(p.symbol)||p.side!=="SHORT"||!routeValid(p.symbol,p.route))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.entryTs)||!validTs(p.exitTs)||p.exitTs<=p.entryTs)throw new Error("IDLE_STATE_POSITION_INVALID");
- if(!finitePositive(p.entryPrice)||!finitePositive(p.quantity)||Math.abs(p.gross-grossFor(p.symbol))>1e-9||p.holdHours!==holdFor(p.symbol))throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(!finitePositive(p.entryPrice)||!finitePositive(p.quantity)||(independentFor(p.symbol,p.route) ? (p.gross < 0.25-1e-9 || p.gross > RENDER_ENTRY_POLICY.independentRequestedGross+1e-9) : Math.abs(p.gross-grossFor(p.symbol))>1e-9)||!holdValid(p.symbol,p.route,p.holdHours))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(p.exitTs!==p.entryTs+p.holdHours*3_600_000)throw new Error("IDLE_STATE_POSITION_INVALID");
  const trailingStop = p.trailArmed === true && p.trailingStopPrice !== undefined;
  if(!finitePositive(p.stopPrice)||!finitePositive(p.takeProfitPrice)||(!trailingStop && p.stopPrice<=p.entryPrice)||(trailingStop && p.stopPrice>p.entryPrice)||p.takeProfitPrice>=p.entryPrice)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!p.stopClientOrderId||!p.takeProfitClientOrderId||p.protectionVerified!==true)throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(independentFor(p.symbol,p.route)&& (Math.abs(p.stopPrice/p.entryPrice-(1+RENDER_ENTRY_POLICY.independentRealStopLossPct/100))>0.001||Math.abs(p.takeProfitPrice/p.entryPrice-(1-RENDER_ENTRY_POLICY.independentRealTakeProfitPct/100))>0.001))throw new Error("IDLE_RENDER_INDEPENDENT_BRACKET_INVALID");
  if(p.trailArmed!==undefined&&typeof p.trailArmed!=="boolean")throw new Error("IDLE_STATE_POSITION_INVALID");
  for(const value of [p.bestConfirmed5mGainPct,p.trailingStopPrice,p.lastConfirmed5mTs])if(value!==undefined&&!Number.isFinite(value))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(p.trailingStopPrice!==undefined&&!trailingStop)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(trailingStop && Math.abs(p.stopPrice-p.trailingStopPrice!)>Math.max(1e-10,Math.abs(p.stopPrice)*1e-9))throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(p.legacyRenderAdverse!==undefined){
+  const v=p.legacyRenderAdverse;
+  if(p.symbol!=="RENDERUSDT"||p.route!==routeFor(p.symbol)||v.originalRoute!==p.route||
+     !Number.isSafeInteger(v.entryTs)||v.entryTs%RENDER_M5_MS!==0||v.entryTs<p.entryTs-RENDER_M5_MS||
+     Math.abs(v.entryPrice-p.entryPrice)>Math.max(1e-10,p.entryPrice*1e-8)||
+     (v.lastClosedM5Ts!==null&&(!Number.isSafeInteger(v.lastClosedM5Ts)||v.lastClosedM5Ts<v.entryTs||v.lastClosedM5Ts%RENDER_M5_MS!==0))||
+     (v.watchStartedAt!==null&&(!Number.isSafeInteger(v.watchStartedAt)||v.watchStartedAt<v.entryTs||v.watchStartedAt%RENDER_M5_MS!==0))||
+     !Number.isFinite(v.maxFavorableExcursionPct)||v.maxFavorableExcursionPct<0||typeof v.completed!=="boolean")
+       throw new Error("IDLE_RENDER_ADVERSE_STATE_INVALID");
+ }
 }
 
 function validatePending(p:IdlePending){
  if(!p||!["ENTRY","EXIT"].includes(p.action)||!["planned","submitted","manual_review"].includes(p.phase))throw new Error("IDLE_STATE_PENDING_INVALID");
- if(!validSymbol(p.symbol)||p.route!==routeFor(p.symbol)||p.holdHours!==holdFor(p.symbol))throw new Error("IDLE_STATE_PENDING_INVALID");
+ if(!validSymbol(p.symbol)||!routeValid(p.symbol,p.route)||!holdValid(p.symbol,p.route,p.holdHours))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!p.clientOrderId||!p.idempotencyKey||!finitePositive(p.quantity)||!finitePositive(p.expectedPrice))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.decisionTs)||!validTs(p.createdAt)||!validTs(p.updatedAt)||!p.reason)throw new Error("IDLE_STATE_PENDING_INVALID");
  if(p.reservationId!=null&&typeof p.reservationId!=="string")throw new Error("IDLE_STATE_PENDING_INVALID");
- if(p.gross!==undefined&&(!Number.isFinite(p.gross)||p.gross<=0||Math.abs(p.gross-grossFor(p.symbol))>1e-9))throw new Error("IDLE_STATE_PENDING_INVALID");
+ if(p.gross!==undefined&&(!Number.isFinite(p.gross)||p.gross<=0||(independentFor(p.symbol,p.route) ? (p.gross < 0.25-1e-9 || p.gross > RENDER_ENTRY_POLICY.independentRequestedGross+1e-9) : Math.abs(p.gross-grossFor(p.symbol))>1e-9)))throw new Error("IDLE_STATE_PENDING_INVALID");
 }
 
 export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{

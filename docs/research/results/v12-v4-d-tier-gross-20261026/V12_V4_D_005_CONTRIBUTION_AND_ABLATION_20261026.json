@@ -1,0 +1,409 @@
+{
+  "schema": "v12-v4-d-005-contribution-ablation-20261026/v1",
+  "source": "Frozen integrated V2_M150_D05_CORE_NATIVE H1 research engine, 2025-08-10 to 2026-08-10, base C=0.25x, D=0.05x",
+  "status": "RESEARCH_ONLY_DETERMINISTIC_MODEL_NOT_LIVE_VENUE_PARITY",
+  "interpretation": "Direct FX converted route PnL vs causal-ish integrated leave-out counterfactual are different measures. Route ablations do not add to full-tier ablation due nonlinear ownership/capital gating and compounding.",
+  "basis": {
+    "10bps": {
+      "finalEquityJpy": 298359667.4222071,
+      "maximumDdPct": -20.482328168050568,
+      "allTrades": 1220,
+      "dDirectNetPnlJpyAtExitFx": 1149890.3153850958,
+      "dTrades": 114,
+      "allDRemovedFinalEquityJpy": 291319290.2064688,
+      "portfolioDeltaAttributableToDIncludingPathEffectsJpy": 7040377.2157382965,
+      "portfolioDeltaRatioPct": 2.3596946854668186,
+      "dShareAllClosedTradesPct": 9.344262295081966
+    },
+    "30bps": {
+      "finalEquityJpy": 185858224.75952727,
+      "maximumDdPct": -18.39538376877181,
+      "allTrades": 1217,
+      "dDirectNetPnlJpyAtExitFx": 384806.55792204716,
+      "dTrades": 116,
+      "allDRemovedFinalEquityJpy": 171504727.6576174,
+      "portfolioDeltaAttributableToDIncludingPathEffectsJpy": 14353497.101909876,
+      "portfolioDeltaRatioPct": 7.7228205103546825,
+      "dShareAllClosedTradesPct": 9.531635168447
+    }
+  },
+  "routeDirectPnl": {
+    "10bps": {
+      "CONT_SHORT_MID_AGE24_48": {
+        "trades": 14,
+        "wins": 10,
+        "acceptedGrossMean": 0.04978850542141451,
+        "directModeledRealizedNetPnlJpyAtExitFx": 38675.05616728874
+      },
+      "REC_G3_LATE_BTC_REL": {
+        "trades": 38,
+        "wins": 28,
+        "acceptedGrossMean": 0.05095251536645143,
+        "directModeledRealizedNetPnlJpyAtExitFx": 868720.7568966403
+      },
+      "REC_X07_TIME_6H": {
+        "trades": 14,
+        "wins": 6,
+        "acceptedGrossMean": 0.04968257215598561,
+        "directModeledRealizedNetPnlJpyAtExitFx": 48838.72701060592
+      },
+      "REC_X13_TP1.5_SL1_H24": {
+        "trades": 22,
+        "wins": 13,
+        "acceptedGrossMean": 0.051792294677031614,
+        "directModeledRealizedNetPnlJpyAtExitFx": 220601.17850322262
+      },
+      "REC_X14_TIME_48H": {
+        "trades": 7,
+        "wins": 4,
+        "acceptedGrossMean": 0.049991927511332336,
+        "directModeledRealizedNetPnlJpyAtExitFx": -61826.91131188063
+      },
+      "REC_Y15_REV_D0_T3": {
+        "trades": 10,
+        "wins": 10,
+        "acceptedGrossMean": 0.049283734018132436,
+        "directModeledRealizedNetPnlJpyAtExitFx": 16952.537656230492
+      },
+      "REC_Y18_REV_D2_T18": {
+        "trades": 9,
+        "wins": 7,
+        "acceptedGrossMean": 0.05935139891795709,
+        "directModeledRealizedNetPnlJpyAtExitFx": 17928.97046298833
+      }
+    },
+    "30bps": {
+      "CONT_SHORT_MID_AGE24_48": {
+        "trades": 15,
+        "wins": 11,
+        "acceptedGrossMean": 0.05140739067409641,
+        "directModeledRealizedNetPnlJpyAtExitFx": 46516.21602677464
+      },
+      "REC_G3_LATE_BTC_REL": {
+        "trades": 38,
+        "wins": 24,
+        "acceptedGrossMean": 0.052340897366443054,
+        "directModeledRealizedNetPnlJpyAtExitFx": 373495.871387397
+      },
+      "REC_X07_TIME_6H": {
+        "trades": 14,
+        "wins": 6,
+        "acceptedGrossMean": 0.04984948778518642,
+        "directModeledRealizedNetPnlJpyAtExitFx": 23250.74444243652
+      },
+      "REC_X13_TP1.5_SL1_H24": {
+        "trades": 22,
+        "wins": 13,
+        "acceptedGrossMean": 0.05175560493304227,
+        "directModeledRealizedNetPnlJpyAtExitFx": 57548.80776608526
+      },
+      "REC_X14_TIME_48H": {
+        "trades": 7,
+        "wins": 4,
+        "acceptedGrossMean": 0.049834884941988955,
+        "directModeledRealizedNetPnlJpyAtExitFx": -115227.20539001809
+      },
+      "REC_Y15_REV_D0_T3": {
+        "trades": 10,
+        "wins": 8,
+        "acceptedGrossMean": 0.05030846941099271,
+        "directModeledRealizedNetPnlJpyAtExitFx": -10.49914193467983
+      },
+      "REC_Y18_REV_D2_T18": {
+        "trades": 10,
+        "wins": 8,
+        "acceptedGrossMean": 0.05986593962644454,
+        "directModeledRealizedNetPnlJpyAtExitFx": -767.3771686935098
+      }
+    }
+  },
+  "leaveOutCounterfactual": {
+    "ABLATE_ALL_D": {
+      "name": "ABLATE_ALL_D",
+      "excluded": [
+        "CONT_SHORT_MID_AGE24_48",
+        "REC_G3_LATE_BTC_REL",
+        "REC_X07_TIME_6H",
+        "REC_X13_TP1.5_SL1_H24",
+        "REC_X14_TIME_48H",
+        "REC_Y15_REV_D0_T3",
+        "REC_Y18_REV_D2_T18"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_REC_X13_TP1.5_SL1_H24": 22,
+        "removed_CONT_SHORT_MID_AGE24_48": 18,
+        "removed_REC_G3_LATE_BTC_REL": 40,
+        "removed_REC_X14_TIME_48H": 11,
+        "removed_REC_X07_TIME_6H": 16,
+        "removed_REC_Y18_REV_D2_T18": 10,
+        "removed_REC_Y15_REV_D0_T3": 10
+      },
+      "seconds": 14.03,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 291319290.2064688,
+        "maxDdPct": -20.579410671535538,
+        "trades": 1108,
+        "WR": 0.7166064981949458,
+        "PF": 4.094312249021772,
+        "ledger_sha256": "9a8e80e11e97226b1906f0481a086a6ace88d4047258b9946c5e48d291c955b5",
+        "v12_trades": 715,
+        "D_trades": 0,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 171504727.6576174,
+        "maxDdPct": -18.402394191782367,
+        "trades": 1104,
+        "WR": 0.6856884057971014,
+        "PF": 3.2717217857683623,
+        "ledger_sha256": "af6f4239927aea490cb471ae5631f3c8d2aa3d2b871a8fbb93d08c7217e17e88",
+        "v12_trades": 710,
+        "D_trades": 0,
+        "accounting": "PASS"
+      }
+    },
+    "ABLATE_CONT_SHORT_MID_AGE24_48": {
+      "name": "ABLATE_CONT_SHORT_MID_AGE24_48",
+      "excluded": [
+        "CONT_SHORT_MID_AGE24_48"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_CONT_SHORT_MID_AGE24_48": 18
+      },
+      "seconds": 15.76,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 297950934.52337545,
+        "maxDdPct": -20.49628695604886,
+        "trades": 1207,
+        "WR": 0.7149958574979287,
+        "PF": 4.051344945339557,
+        "ledger_sha256": "27fd6d7310042e00a9f6a31ba4d0aa0eb77e8052d9a9574832473f5179e2652a",
+        "v12_trades": 814,
+        "D_trades": 100,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 185659355.82428545,
+        "maxDdPct": -18.396431048721485,
+        "trades": 1203,
+        "WR": 0.6824605153782212,
+        "PF": 3.448899327482287,
+        "ledger_sha256": "878a042a77263a9b123dd237ea67054529612e4e056fe15b20a7ff2810dee0f8",
+        "v12_trades": 810,
+        "D_trades": 101,
+        "accounting": "PASS"
+      }
+    },
+    "ABLATE_REC_G3_LATE_BTC_REL": {
+      "name": "ABLATE_REC_G3_LATE_BTC_REL",
+      "excluded": [
+        "REC_G3_LATE_BTC_REL"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_REC_G3_LATE_BTC_REL": 40
+      },
+      "seconds": 14.65,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 296544441.68041474,
+        "maxDdPct": -20.513092219059182,
+        "trades": 1182,
+        "WR": 0.7148900169204738,
+        "PF": 4.054310328415668,
+        "ledger_sha256": "2fd684b4485fa25308146247ec274a14ae07946cf263f90dfc7863be2892e15d",
+        "v12_trades": 789,
+        "D_trades": 76,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 184809375.90642065,
+        "maxDdPct": -18.39612539212766,
+        "trades": 1179,
+        "WR": 0.6853265479219678,
+        "PF": 3.4536112548736324,
+        "ledger_sha256": "b982785647d1b66fa351a66724044ba543b46888cd889839254b514dd44ae157",
+        "v12_trades": 786,
+        "D_trades": 78,
+        "accounting": "PASS"
+      }
+    },
+    "ABLATE_REC_X07_TIME_6H": {
+      "name": "ABLATE_REC_X07_TIME_6H",
+      "excluded": [
+        "REC_X07_TIME_6H"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_REC_X07_TIME_6H": 16
+      },
+      "seconds": 15.96,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 298947910.9123893,
+        "maxDdPct": -20.498775654332867,
+        "trades": 1206,
+        "WR": 0.7189054726368159,
+        "PF": 4.060450000680377,
+        "ledger_sha256": "b410686413d00aa2539e4bf998402e49f0102dff42ff4a8fb4c28e21d7772a42",
+        "v12_trades": 813,
+        "D_trades": 100,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 185025340.14085874,
+        "maxDdPct": -18.39716449058545,
+        "trades": 1201,
+        "WR": 0.6860949208992506,
+        "PF": 3.449354210809548,
+        "ledger_sha256": "846d63630db150b4fd4200c19c939b548675305671304dc4e81836230d4b669d",
+        "v12_trades": 808,
+        "D_trades": 102,
+        "accounting": "PASS"
+      }
+    },
+    "ABLATE_REC_X13_TP1.5_SL1_H24": {
+      "name": "ABLATE_REC_X13_TP1.5_SL1_H24",
+      "excluded": [
+        "REC_X13_TP1.5_SL1_H24"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_REC_X13_TP1.5_SL1_H24": 22
+      },
+      "seconds": 15.98,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 297471458.65989554,
+        "maxDdPct": -20.500358206607693,
+        "trades": 1198,
+        "WR": 0.7178631051752922,
+        "PF": 4.05598365076936,
+        "ledger_sha256": "88000838a281a9603c5d71ba04e4b0df585ee9f61186a1a2ae34a9bb1ceed785",
+        "v12_trades": 805,
+        "D_trades": 92,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 185314632.59740373,
+        "maxDdPct": -18.395750870469584,
+        "trades": 1195,
+        "WR": 0.6853556485355649,
+        "PF": 3.4529119516365694,
+        "ledger_sha256": "042f05380add2260cc2e6f911eb36fe763e6c75e67223449667600f32e82a006",
+        "v12_trades": 802,
+        "D_trades": 94,
+        "accounting": "PASS"
+      }
+    },
+    "ABLATE_REC_X14_TIME_48H": {
+      "name": "ABLATE_REC_X14_TIME_48H",
+      "excluded": [
+        "REC_X14_TIME_48H"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_REC_X14_TIME_48H": 11
+      },
+      "seconds": 20.2,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 297865044.2258114,
+        "maxDdPct": -20.50484699645746,
+        "trades": 1213,
+        "WR": 0.7164056059356966,
+        "PF": 4.058207039664403,
+        "ledger_sha256": "ee5f1917c6c219800661a8c399bd30fd135a61cfe28737244da3937c024dccce",
+        "v12_trades": 820,
+        "D_trades": 107,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 184865087.61474365,
+        "maxDdPct": -18.396291859990033,
+        "trades": 1209,
+        "WR": 0.6840363937138131,
+        "PF": 3.4431359697013524,
+        "ledger_sha256": "22361096349edc0fd33b9e9fda4114ba1411f26ec597c9940c075a6f945807c5",
+        "v12_trades": 816,
+        "D_trades": 109,
+        "accounting": "PASS"
+      }
+    },
+    "ABLATE_REC_Y15_REV_D0_T3": {
+      "name": "ABLATE_REC_Y15_REV_D0_T3",
+      "excluded": [
+        "REC_Y15_REV_D0_T3"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_REC_Y15_REV_D0_T3": 10
+      },
+      "seconds": 18.94,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 296189202.023375,
+        "maxDdPct": -20.562801908555215,
+        "trades": 1210,
+        "WR": 0.7099173553719008,
+        "PF": 4.050317018221894,
+        "ledger_sha256": "142fa9d811bf3f66374e8b9e710acbc3ed9162c7ad2d1765e3fa74d23f7ae6a0",
+        "v12_trades": 817,
+        "D_trades": 104,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 174649519.86840793,
+        "maxDdPct": -18.399044747466785,
+        "trades": 1203,
+        "WR": 0.6783042394014963,
+        "PF": 3.2475796427742196,
+        "ledger_sha256": "3e6c83ff17d4cce90542a392462287e4380f9c5a50fc0977f13b6d47b3fef346",
+        "v12_trades": 809,
+        "D_trades": 104,
+        "accounting": "PASS"
+      }
+    },
+    "ABLATE_REC_Y18_REV_D2_T18": {
+      "name": "ABLATE_REC_Y18_REV_D2_T18",
+      "excluded": [
+        "REC_Y18_REV_D2_T18"
+      ],
+      "counts": {
+        "c_gross025": 217,
+        "removed_REC_Y18_REV_D2_T18": 10
+      },
+      "seconds": 20.39,
+      "status": "RESEARCH_ONLY_NOT_LIVE",
+      "10bps": {
+        "finalEquityJpy": 298163041.37914026,
+        "maxDdPct": -20.49226866132363,
+        "trades": 1209,
+        "WR": 0.7146401985111662,
+        "PF": 4.050349755717543,
+        "ledger_sha256": "849a9b86889178b7d52feb4b9e693ddd1c8322ab1b16f712cbc2ed8cabb9fe9b",
+        "v12_trades": 816,
+        "D_trades": 105,
+        "accounting": "PASS"
+      },
+      "30bps": {
+        "finalEquityJpy": 185033562.4237769,
+        "maxDdPct": -18.39713201871166,
+        "trades": 1205,
+        "WR": 0.6821576763485477,
+        "PF": 3.4483846751945584,
+        "ledger_sha256": "d89c3cdeda3c74ed469eb413f152b283f0195d4b7d0aa63cf1d7f7f37f554849",
+        "v12_trades": 812,
+        "D_trades": 106,
+        "accounting": "PASS"
+      }
+    }
+  },
+  "recommendation": "Gross for 0.05x routes cannot be judged only by direct summed trading PNL; removal of all routes reduces terminal wallet value, while individual Y15/X14 economic effects are path dependent. D upgrades require more recent held-out parity.",
+  "productionChanged": false,
+  "userPositionChanged": false
+}

@@ -1,0 +1,26 @@
+[Unit]
+Description=DisDex V4 shared API budget broker (%i)
+After=local-fs.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+Environment=DISDEX_RELEASE_SHA=%i
+UnsetEnvironment=DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET ASTER_API_PRIVATE_KEY ASTER_USER_ADDRESS
+RuntimeDirectory=disdex-v4-budget-%i
+RuntimeDirectoryMode=0750
+ExecStart=/usr/bin/node /home/deploy/disdex-trading/releases/%i/node_modules/tsx/dist/cli.mjs scripts/ops/root/disdex-v4-rate-budget-broker.ts --sha %i
+Restart=on-failure
+RestartSec=10s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/disdex/shared /run/disdex-v4-budget-%i
+RestrictAddressFamilies=AF_UNIX
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

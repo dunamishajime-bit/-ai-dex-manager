@@ -107,6 +107,7 @@ test("final integrated production constants stay pinned", () => {
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 1);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 3);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossExistingExposureCap, 3.5);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap, 5);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 4);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 2);

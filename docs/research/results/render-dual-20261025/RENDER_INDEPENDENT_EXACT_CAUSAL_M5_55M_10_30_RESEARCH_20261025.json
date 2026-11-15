@@ -1,0 +1,262 @@
+{
+  "schema": "render-independent-exact-causal-m5-research/v1",
+  "status": "RESEARCH_ONLY_PUBLIC_BINANCE_M5_NOT_ASTER_NATIVE8_OR_LIVE",
+  "periodStart": "2025-08-10T00:00:00+00:00",
+  "periodEnd": "2026-08-10T00:00:00+00:00",
+  "sourceRangeFirst": 1722470400000,
+  "sourceRangeLast": 1788220500000,
+  "sourceRawMonthlyFiles": {
+    "RENDERUSDT": [
+      {
+        "name": "RENDERUSDT-5m-2024-08.zip",
+        "sha256": "560fd59cbfb57a05c33798f9418c07595d8d4ea8b08f616271bafa79e9768f4f"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-09.zip",
+        "sha256": "f348516b533353751a1552b876d2a34357458dae7a1a6bfadfa4fe72cc892fc8"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-10.zip",
+        "sha256": "825d7ee092cbee13461f2cb5db63bd7412f523145cf810e879fb3aad32fa9106"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-11.zip",
+        "sha256": "bd2e7c9ab27287ed480037bf4029ca616601c1eda3ae5279df44378ba22c53d8"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-12.zip",
+        "sha256": "95ec99ae56cbb97928ba00af9e72e22f83be3c8a03ff35df058dac0d50c36b5b"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-01.zip",
+        "sha256": "613caee201751c24d87a0e964b62ff4fe82e9ddc6d2c163a31b542c4084930ee"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-02.zip",
+        "sha256": "a5f730f0dd181153e060ea187adb043f61bf5e94b94ca68a81f0a4afdb7fd104"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-03.zip",
+        "sha256": "6959c90e9e8fa070ae8a490ae9e7eb31cbfd7073be53d87fddc138b330d06de5"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-04.zip",
+        "sha256": "afa12c8c3abe19324e8ebf5446fd16cf7ab0f738e7252667ee866668fda05760"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-05.zip",
+        "sha256": "e823a99b194906b76b59eb2a968edee67bd54fa566b3885e96c9ad43ce5e486a"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-06.zip",
+        "sha256": "c3a22f3c861d5f3c47665ff3d7d2b8f4465f4dde4a20a2cbb930af065e6b5978"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-07.zip",
+        "sha256": "a7f2803891f0c4dca43ba23466b8db375e822fb85ecdf4a100fba67d28d29004"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-08.zip",
+        "sha256": "960a0505df0e4986442ee946f7cf5680c085c65f0fb77142c6ff99a7dff3262f"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-09.zip",
+        "sha256": "e74973f90a05f46f2589ebbeae0481f10a034245088dfe82a484a88a3f9b301f"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-10.zip",
+        "sha256": "fa5393c7e5262d5902d029d5e33c16f26cb2e41d812d4ffa7ec24be14aae57af"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-11.zip",
+        "sha256": "a3ff4cf7a4c7b93bfe55583b352ce44b1694cd8af921aec6585c39d826049f63"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-12.zip",
+        "sha256": "17b9690bec9f7443e6f3676c6a908df05b4a4a17e3324a1b41e4c2af09e1be47"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-01.zip",
+        "sha256": "5c49d0d0250f69be36f0467d3544d9a327f84c78178606cf87b3d10318a6ebc6"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-02.zip",
+        "sha256": "8ddc453b8198028b2dc83d1a924434c4debc513fbe01b0383673e7ef04103a12"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-03.zip",
+        "sha256": "4be8e87abecf80cfb2f65418b8f46788994d46a1cfb5e9846cb2abf705f6b0c8"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-04.zip",
+        "sha256": "d68d85751780422a37b48b833beb1dbb10101ce88cb2bcdb2d5021ac1ffab142"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-05.zip",
+        "sha256": "1905f2b0e4f250c8ed1fe3a7fdfa11493efa71cf0e8310ba3b38582bb8278f57"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-06.zip",
+        "sha256": "ec765da120b89c202ecd6d8b7fe81e95b12010c54ec2d61d4fa12a00fa4eeb71"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-07.zip",
+        "sha256": "b64425c6021bf7def4e8db61ca1aa62b22f837347a3b80ba977eb6457b6c0070"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-08.zip",
+        "sha256": "f61627bfc5a770bb33d14de7ceec304b69cdb55a2b12c8a7542df7dcf0ba1945"
+      }
+    ],
+    "BTCUSDT": [
+      {
+        "name": "BTCUSDT-5m-2024-08.zip",
+        "sha256": "5804758756c980445eb6bbba96f10bd98bb7da471b6041bc31337cb0c7236a16"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-09.zip",
+        "sha256": "15ffdcf3d23f9fb6743c54d9d783cdc20373aaf8f60fd949a85653e7bee29170"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-10.zip",
+        "sha256": "024d574aec22d830443dfe557c12137d24423c18b228e2c10045851cd056434d"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-11.zip",
+        "sha256": "bf2ff598c07f5f78a4265c376b3a8f3277e39b42d66bf79610b8b3199a34fa45"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-12.zip",
+        "sha256": "261ced4d4a389f680ae730c53ba82b42f97f656b630352713e2d7fd738f57b8c"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-01.zip",
+        "sha256": "0c99422d64fa3cc58564cf77969fc5a96d6f44783c79ecfcf94b103753bf7570"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-02.zip",
+        "sha256": "fdd6fb92b75bae5c02dd583b5be44ca6673d1807ce4b0c08160d3c5cf7677a46"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-03.zip",
+        "sha256": "46f83773b9cec38a09be429727a5a300ccca6d11c8e8ca5fa9545fad6eda131f"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-04.zip",
+        "sha256": "9eda69fd858e9ced7e72cfbb75bffe34458763c37c8ee73910e572b4baba21ed"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-05.zip",
+        "sha256": "073da284f178e72777abbfbcf79faa99fcf77bd69c4a678938abbf6cd7d14f5b"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-06.zip",
+        "sha256": "da39c04e24a90c87406b9030e1aaf376655ad59d4bc0496f38e4162a9babf514"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-07.zip",
+        "sha256": "2cea4750d51d9c064d674ec8d0d8d1f39448960284272fdc74698562c873bf0f"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-08.zip",
+        "sha256": "7f78f6f88ae1946f8bd8312a37d1d74b24e24d6b13bc37d2909ad7c8c0c7e9ae"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-09.zip",
+        "sha256": "dbfb8bc2f9343107c7a702acd6919d77060a8f7ea4b25359c71e5fc018a85209"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-10.zip",
+        "sha256": "fab262ca4318f8f65164ae33a020458439adc6f7bc2e59bbfce1886118d05a48"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-11.zip",
+        "sha256": "2759d4be0fe68cc2be3d4d91940fcd95abc69f0c31f25d0b6cb5e0629c625d2d"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-12.zip",
+        "sha256": "0e923a3d2ac4f6711d8c841220f4e5d2e479c1bdb40b41515eb250e16808304f"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-01.zip",
+        "sha256": "c092f3b26036f203bb5b11c28958574aa8501315ed26dd0f8c017051b9fb3abf"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-02.zip",
+        "sha256": "8be83befce2cd9bf0959c872d91108debd03e1b51a451bac3a56b8ddca196bb4"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-03.zip",
+        "sha256": "0302ccef9b3e5e38c35bc8667a1e890138c9136e89145688220eea99b748200e"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-04.zip",
+        "sha256": "e2934467bdb6a000124948f4c8fef176e2066520a6b2e5a0522450fed51396f7"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-05.zip",
+        "sha256": "b1a73378796bb62084c32ca5865903beeaf87d521d950d5e7776343f682dea93"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-06.zip",
+        "sha256": "782c555963c852ca768335de21d5743147e5d50bff449600f8fceb9ebe5273de"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-07.zip",
+        "sha256": "ec750f7aa69c8f842fa1464a90ad4aa92452cfa767df9e8d70dc484e466c8fc3"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-08.zip",
+        "sha256": "14fd408e5d2902665c66b701e861b173568b66399e3fa462b94c766d209567d1"
+      }
+    ]
+  },
+  "sourceContinuity": "PASS_5M_NO_GAPS_NO_CONFLICTS",
+  "rawQualifiedH1": 26,
+  "firstRawSignal": 1723608000000,
+  "lastRawSignal": 1787752800000,
+  "qualifiedAsOfIndependentSignalsBeforeWallet": 1,
+  "signals": [
+    {
+      "t": 1779930000000,
+      "net30Pct": 0.508368996671438,
+      "exitTs": 1779933300000,
+      "result": "TIME",
+      "qualityLifetime": {
+        "n": 24,
+        "wr": 0.8333333333333334,
+        "pf": 2.5193441414885775,
+        "mean": 0.5824152542372885
+      },
+      "quality365": {
+        "n": 11,
+        "wr": 0.9090909090909091,
+        "pf": 4.859985261606482,
+        "mean": 0.8070878274268104
+      }
+    }
+  ],
+  "10bps": {
+    "modelTradeCount": 1,
+    "winRate": 1.0,
+    "pf": 0,
+    "meanNetPct": 0.7083689966714379,
+    "standaloneCompoundPct": 0.7083689966714379,
+    "standaloneClosedDdPct": 0.0
+  },
+  "30bps": {
+    "modelTradeCount": 1,
+    "winRate": 1.0,
+    "pf": 0,
+    "meanNetPct": 0.508368996671438,
+    "standaloneCompoundPct": 0.5083689966714378,
+    "standaloneClosedDdPct": 0.0
+  },
+  "limitations": [
+    "Independent outcomes are modeled on Binance futures public M5, not signed Aster venue fills, funding, or L2 slippage.",
+    "Each shadow receives TP1.5% STOP2% 6h until settled. Entry-quality uses only settledAt<t, including shadow signals never traded.",
+    "55m real route uses TP1.5% STOP2%, 12h cooldown since prior accepted ENTRY.",
+    "These results do NOT replay shared native eight-strategy wallet capital, owner score, competing signals, or margin.",
+    "24 historical shadows are in-sample; untouched out-of-sample and real venue lifecycle still required."
+  ]
+}

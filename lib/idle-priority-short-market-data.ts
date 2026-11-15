@@ -3,6 +3,7 @@ import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/i
 import { IDLE_RESIDUAL_LONG_POLICY, type IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
 import type { IdleH1Candle } from "./idle-priority-short-signal";
 import type { ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { RENDER_H1_MS, RENDER_M5_MS, type ClosedM5 } from "./render-highwr-and-legacy-stop";
 
 const HOUR = 3_600_000;
 const FIVE_MINUTE = 5 * 60_000;
@@ -172,6 +173,41 @@ export class IdlePriorityAsterMarketDataProvider {
       throw new Error(`IDLE_5M_CANDLE_INVALID:${symbol}:${latestClosedOpen}`);
     }
     return result;
+  }
+
+  /**
+   * Fully complete 72h OHLCV / RENDER taker-flow source, no OI dependency.
+   * Only called on a new H1 decision. Missing first/last/intermediate bars
+   * and unconfirmed volumes all reject the new RENDER route.
+   */
+  async loadRenderIndependentM5(decisionTs: number): Promise<{btcM5: ClosedM5[]; renderM5: ClosedM5[]}> {
+    if(!Number.isSafeInteger(decisionTs)||decisionTs%RENDER_H1_MS!==0)throw Error("RENDER_MARKET_DECISION_TS_INVALID");
+    const start=decisionTs-72*RENDER_H1_MS;
+    const count=(decisionTs-start)/RENDER_M5_MS;
+    const read=async(symbol:string,requireFlow:boolean):Promise<ClosedM5[]>=>{
+      const rows=await this.client.getKlines(symbol,"5m",count+2,{startTime:start,endTime:decisionTs-1});
+      const mapped=rows.map((row)=>({
+        ts:Number(row[0]),open:Number(row[1]),high:Number(row[2]),low:Number(row[3]),close:Number(row[4]),
+        baseVolume:requireFlow?Number(row[5]):undefined,
+        takerBuyBaseVolume:requireFlow?Number(row[9]):undefined,
+        closeTime:Number(row[6])
+      })).filter(row=>row.ts>=start&&row.ts<decisionTs);
+      if(mapped.length!==count)throw Error(`RENDER_MARKET_M5_COUNT_GAP:${symbol}:${mapped.length}/${count}`);
+      for(let i=0;i<mapped.length;i++){
+        const x=mapped[i]!;
+        if(x.ts!==start+i*RENDER_M5_MS||!(x.closeTime<decisionTs)||
+          ![x.open,x.high,x.low,x.close].every(v=>Number.isFinite(v)&&v>0)||
+          x.high<Math.max(x.open,x.close)||x.low>Math.min(x.open,x.close)||
+          (requireFlow&&(!Number.isFinite(x.baseVolume)||!Number.isFinite(x.takerBuyBaseVolume)||
+            x.baseVolume!<0||x.takerBuyBaseVolume!<0||x.takerBuyBaseVolume!>x.baseVolume!))) {
+          throw Error(`RENDER_MARKET_M5_MALFORMED:${symbol}:${i}`);
+        }
+      }
+      return mapped.map(({closeTime,...bar})=>bar);
+    };
+    const btcM5=await read("BTCUSDT",false);
+    const renderM5=await read("RENDERUSDT",true);
+    return {btcM5,renderM5};
   }
 
   /** Load only completed contiguous 5m candles for a causal entry/exit rule. */

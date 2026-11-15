@@ -17,5 +17,5 @@ test("real account mark precedes later durable reservation without backdating it
  const next=applyProductionEvent(state,entry);
  assert.equal(next.journal.length,2);
  await assert.rejects(()=>planProductionEntry(state,{candidate,ts:signal,observedAtMs:signal+900001,
-  eventId:"stale",referencePrice:100,minimumOrderNotionalUsd:5,quantityNormalizer:normalize}),/OBSERVATION_STALE_OR_REVERSED/);
+  eventId:"stale",referencePrice:100,minimumOrderNotionalUsd:5,quantityNormalizer:normalize}),/OBSERVATION_EXPIRED/);
 });

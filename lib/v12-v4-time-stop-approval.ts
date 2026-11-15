@@ -7,8 +7,13 @@ import {open,constants} from "node:fs/promises";
 import {resolve} from "node:path";
 import {productionExitSpec} from "./v12-v4-production-lifecycle";
 import {V12_V4_TIME_EMERGENCY_RESEARCH_ID} from "./v12-v4-time-emergency-stop-research";
-export const V4_TIME_STOP_APPROVAL_PATH="/etc/disdex/v12-v4-time-stop-approval.json";
+export const V4_TIME_STOP_APPROVAL_DIRECTORY="/etc/disdex/v12-v4-time-stop-approvals";
 const SHA=/^[0-9a-f]{40}$/;
+// Separate root-owned approvals prevent another release from overwriting this SHA's authority.
+export function v4TimeStopApprovalPathForSha(sha:string):string{
+ if(!SHA.test(sha))throw Error("V4_TIME_STOP_APPROVAL_SHA_INVALID");
+ return V4_TIME_STOP_APPROVAL_DIRECTORY+"/"+sha+".json";
+}
 export type V4TimeApproval={
  schema:"disdex-v12-v4-time-stop-approval/v1";
  approvedSha:string;approvedAt:string;routeCount:37;
@@ -28,8 +33,8 @@ export function validateV4TimeApproval(raw:unknown,sha:string,now=Date.now()):V4
   throw Error("V4_TIME_STOP_APPROVAL_TIMESTAMP_INVALID");
  return x as V4TimeApproval;
 }
-export async function readV4TimeStopApproval(sha:string,path=V4_TIME_STOP_APPROVAL_PATH){
- if(resolve(path)!==V4_TIME_STOP_APPROVAL_PATH)
+export async function readV4TimeStopApproval(sha:string,path=v4TimeStopApprovalPathForSha(sha)){
+ if(resolve(path)!==v4TimeStopApprovalPathForSha(sha))
   throw Error("V4_TIME_STOP_APPROVAL_PATH_INVALID");
  const handle=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
  try{

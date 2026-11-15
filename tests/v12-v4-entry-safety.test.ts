@@ -27,6 +27,18 @@ test("V4 new-entry global controls require fresh risk, margin and inactive kill 
  writeFileSync(x.kill,JSON.stringify({active:true,action:"HOLD_PROTECTED",reason:"TEST"}));
  await assert.rejects(()=>assertV4EntrySafety({now,env,dailyRiskPath:x.risk,marginPath:x.margin}),/KILL_SWITCH_ACTIVE/);
 });
+test("V4 ignores only an explicitly scoped V52 reference-data hold",async()=>{
+ const now=Date.parse("2026-10-11T00:00:00Z"),x=setup(now);
+ const env={...process.env,DISDEX_SHARED_KILL_SWITCH_FILE:x.kill};
+ writeFileSync(x.kill,JSON.stringify({
+  active:true,action:"HOLD_PROTECTED",recoverable:true,scope:"V52_REFERENCE_ONLY",
+  operator:"disdex-v52-aster-only",
+  reason:'V52 recoverable tick error: HTTP 503 http://127.0.0.1:8797/quote?symbol=TSLA: {"error":"stale_quote","symbol":"TSLA","ageMs":32286,"maximumAgeMs":30000}',
+ }));
+ await assert.doesNotReject(()=>assertV4EntrySafety({now,env,dailyRiskPath:x.risk,marginPath:x.margin}));
+ writeFileSync(x.kill,JSON.stringify({active:true,action:"HOLD_PROTECTED",recoverable:true,scope:"V52_REFERENCE_ONLY",operator:"other",reason:"same"}));
+ await assert.rejects(()=>assertV4EntrySafety({now,env,dailyRiskPath:x.risk,marginPath:x.margin}),/SHARED_KILL_SWITCH_MALFORMED/);
+});
 test("stale or unhealthy shared risk and margin fail closed",async()=>{
  const now=Date.parse("2026-10-11T00:00:00Z"),x=setup(now);
  const env={...process.env,DISDEX_SHARED_KILL_SWITCH_FILE:x.kill};

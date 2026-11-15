@@ -1,0 +1,23 @@
+name: V4 TIME37 SHA-bound uptime regression
+on:
+  push:
+    branches: ["fix/v4-sha-bound-time37-no-flat-crash-20261025"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci --ignore-scripts
+      - name: Typecheck
+        run: npm run typecheck
+      - name: TIME37 and daemon fail-closed regression
+        run: node --import tsx --test tests/v12-v4-time-stop-approval.test.ts tests/v12-v4-rate-budget-resilience.test.ts
+      - name: No production mutation
+        run: echo "CI validates code only. No operator permit, exchange order, service restart, or deployment."

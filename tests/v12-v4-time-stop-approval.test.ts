@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {PRODUCTION_EXIT_CATALOG} from "../lib/v12-v4-production-lifecycle";
 import {V12_V4_TIME_EMERGENCY_RESEARCH_ID} from "../lib/v12-v4-time-emergency-stop-research";
-import {approvedV4TimeStopQuote,validateV4TimeApproval,readV4TimeStopApproval} from "../lib/v12-v4-time-stop-approval";
+import {approvedV4TimeStopQuote,validateV4TimeApproval,readV4TimeStopApproval,v4TimeStopApprovalPathForSha} from "../lib/v12-v4-time-stop-approval";
 test("exact SHA and operator acknowledgement are mandatory; no implicit research activation",()=>{
  const sha="a".repeat(40),time=new Date().toISOString();
  const value={schema:"disdex-v12-v4-time-stop-approval/v1",
@@ -22,4 +22,16 @@ test("exact SHA and operator acknowledgement are mandatory; no implicit research
 });
 test("cannot redirect operator approval to an untrusted file",async()=>{
  await assert.rejects(()=>readV4TimeStopApproval("a".repeat(40),"/tmp/unapproved.json"),/PATH_INVALID/);
+});
+
+test("TIME37 approval lookup is release-SHA specific and cannot cross-bind another release",()=>{
+ const first="a".repeat(40),second="b".repeat(40);
+ assert.equal(v4TimeStopApprovalPathForSha(first),"/etc/disdex/v12-v4-time-stop-approvals/"+first+".json");
+ assert.notEqual(v4TimeStopApprovalPathForSha(first),v4TimeStopApprovalPathForSha(second));
+ assert.throws(()=>v4TimeStopApprovalPathForSha("../untrusted"),/SHA_INVALID/);
+});
+
+test("TIME37 approval cannot be redirected to a different valid release",async()=>{
+ const first="a".repeat(40),second="b".repeat(40);
+ await assert.rejects(()=>readV4TimeStopApproval(first,v4TimeStopApprovalPathForSha(second)),/PATH_INVALID/);
 });

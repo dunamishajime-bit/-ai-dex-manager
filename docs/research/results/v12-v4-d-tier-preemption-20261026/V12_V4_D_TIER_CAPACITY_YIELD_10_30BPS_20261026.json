@@ -1,0 +1,152 @@
+{
+  "schema": "v12-v4-d-tier-capacity-yield-study-20261026/v1",
+  "status": "RESEARCH_COMPLETE_NO_LIVE_RECONFIGURATION_NOT_ACTUAL_VENUE_L2",
+  "scope": "G3 requestedGross 0.25, X13 0.15, CONT_SHORT 0.15; other D=0.05; C=0.25; all other sleeves unchanged",
+  "source": "archived frozen 2026-10-09 eight-sleeve H1 simulation; sample 2025-08-10--2026-08-10",
+  "costsBps": [
+    10,
+    30
+  ],
+  "models": {
+    "BASE_NO_PREEMPT": "no additional D yield",
+    "D_CAPACITY_PREEMPT": "after eligible higher candidate risk/slot checks, if any shared Gross shortage exists, liquidate as many held target D routes as needed (existing model H1 mark and exit fee applied)",
+    "D_MATERIAL_PREEMPT": "same as capacity preempt but only if shared Gross shortage >=0.10x (arbitrary research guardrail, not adopted live setting)"
+  },
+  "results": {
+    "BASE_NO_PREEMPT": {
+      "name": "BASE_NO_PREEMPT",
+      "preempt": false,
+      "requestedGross": {
+        "REC_G3_LATE_BTC_REL": 0.25,
+        "REC_X13_TP1.5_SL1_H24": 0.15,
+        "CONT_SHORT_MID_AGE24_48": 0.15
+      },
+      "seconds": 15.106459499977063,
+      "results": {
+        "10bps": {
+          "finalEquityJpy": 304799545.6753143,
+          "maxDdPct": -20.340188405498495,
+          "PF": 4.01622309616191,
+          "WR": 0.7151067323481116,
+          "trades": 1218,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "8d107b880d4c1214961e1c0a2b867029c86d431e9e85fad698aa158d5d3ed08f"
+        },
+        "30bps": {
+          "finalEquityJpy": 193683202.52534655,
+          "maxDdPct": -18.349495980037812,
+          "PF": 3.419971255290329,
+          "WR": 0.6836483155299918,
+          "trades": 1217,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "a303a951807ecee29b36b7647f9eb319f24dc2d61c59e369587f5038d27dd275"
+        }
+      }
+    },
+    "D_CAPACITY_PREEMPT": {
+      "name": "D_CAPACITY_PREEMPT",
+      "preempt": true,
+      "requestedGross": {
+        "REC_G3_LATE_BTC_REL": 0.25,
+        "REC_X13_TP1.5_SL1_H24": 0.15,
+        "CONT_SHORT_MID_AGE24_48": 0.15
+      },
+      "seconds": 15.615804200002458,
+      "results": {
+        "10bps": {
+          "finalEquityJpy": 302859135.4767266,
+          "maxDdPct": -20.407421641803126,
+          "PF": 4.019220268506659,
+          "WR": 0.7142857142857143,
+          "trades": 1218,
+          "accounting": "PASS",
+          "preemptCount": 1,
+          "preemptEvents": [
+            {
+              "route": "REC_G3_LATE_BTC_REL",
+              "ts": 1760113800000,
+              "gross": 0.205740392763888,
+              "pnl": -0.25396000000000285,
+              "reason": "D_CAPACITY_YIELD:V52:V50_POST_OPEN_BASIS"
+            }
+          ],
+          "ledgerSha256": "a55e24602aa4ea3fcf5d173e3db40d0873cef1708b284ecf652d231c4d7901b8"
+        },
+        "30bps": {
+          "finalEquityJpy": 193683202.52534655,
+          "maxDdPct": -18.349495980037812,
+          "PF": 3.419971255290329,
+          "WR": 0.6836483155299918,
+          "trades": 1217,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "a303a951807ecee29b36b7647f9eb319f24dc2d61c59e369587f5038d27dd275"
+        }
+      }
+    },
+    "D_MATERIAL_PREEMPT": {
+      "name": "D_MATERIAL_PREEMPT",
+      "preempt": true,
+      "requestedGross": {
+        "REC_G3_LATE_BTC_REL": 0.25,
+        "REC_X13_TP1.5_SL1_H24": 0.15,
+        "CONT_SHORT_MID_AGE24_48": 0.15
+      },
+      "seconds": 15.460410300001968,
+      "results": {
+        "10bps": {
+          "finalEquityJpy": 304799545.6753143,
+          "maxDdPct": -20.340188405498495,
+          "PF": 4.01622309616191,
+          "WR": 0.7151067323481116,
+          "trades": 1218,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "8d107b880d4c1214961e1c0a2b867029c86d431e9e85fad698aa158d5d3ed08f"
+        },
+        "30bps": {
+          "finalEquityJpy": 193683202.52534655,
+          "maxDdPct": -18.349495980037812,
+          "PF": 3.419971255290329,
+          "WR": 0.6836483155299918,
+          "trades": 1217,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "a303a951807ecee29b36b7647f9eb319f24dc2d61c59e369587f5038d27dd275"
+        }
+      }
+    }
+  },
+  "comparison": {
+    "10bps": {
+      "deltaAutoVsBaseJpy": -1940410.1985877156,
+      "deltaAutoVsBaseDdPp": -0.06723323630463085,
+      "autoPreemptCount": 1,
+      "materialPreemptCount": 0
+    },
+    "30bps": {
+      "deltaAutoVsBaseJpy": 0.0,
+      "deltaAutoVsBaseDdPp": 0.0,
+      "autoPreemptCount": 0,
+      "materialPreemptCount": 0
+    }
+  },
+  "limitations": [
+    "The patch does not preempt for higher candidates rejected earlier for same symbol/slots/ownership; it is capacity-gap only and cannot certify all general priority handoffs",
+    "Exit at model H1 mark; real exchange time, L2 fill, spread, resident reduce-only STOP cancellation/replacement and hedge mode are not certified",
+    "No comparison to an always-close-on-any-signal policy; that would be too indiscriminate for LIVE",
+    "One 10bps case yielded G3 AVAX SHORT so V52 AMZN gross grew roughly 1.955x to 1.997x, but final wallet worsened 1.94m JPY from downstream path effects",
+    "Frozen source is selected/optimized on same sample and lacks the latest October overlay/RENDER dual source parity",
+    "Material 0.10 Gross threshold was selected as research sensitivity only; zero trigger does not validate it as an optimal production threshold"
+  ],
+  "productionChanged": false,
+  "ordersSent": 0,
+  "positionTopups": 0
+}

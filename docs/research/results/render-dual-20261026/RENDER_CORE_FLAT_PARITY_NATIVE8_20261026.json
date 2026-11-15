@@ -1,0 +1,50 @@
+{
+  "schema": "render-core-flat-native8-research-parity/v1",
+  "status": "RESEARCH_CORE_FLAT_PREFILTER_NOT_SIGNED_VENUE_PARITY",
+  "modelNotionalMaxGross": 0.75,
+  "modelMinimumGross": 0.25,
+  "entrySource": "25 monthly public BTC/RENDER futures M5 archives",
+  "period": "2025-08-10/2026-08-10 UTC",
+  "rawH1MarketGateSignals": 11,
+  "historicalUnmodifiedBaselineFlatAndNoSameTimeCoreEntry": 1,
+  "flatIndependentDateUTC": "2026-05-28T01:00:00Z",
+  "legacyEarlyAdverseIncluded": true,
+  "independentExit": "TP2.5 SL2 MAX_HOLD_6H",
+  "note": "Strict flat original baseline prefilter is an additional research approximation, not a signed current-production order book; simultaneous and future scenario account positions can evolve.",
+  "cases": {
+    "10bps": {
+      "finalEquityJpy": 281029648.3031308,
+      "deltaVsExistingLegacyOnlyJpy": 1942600.228427112,
+      "deltaVsUnrestrictedDefaultOwnerModelJpy": -224905.20928907394,
+      "maxMtMDdPct": -14.514985270751623,
+      "closedTrades": 1288,
+      "acceptedIndependentTrades": 1,
+      "acceptedIndependentGross": 0.6307930487913637,
+      "modeledEntryTimestamp": 1779930000000,
+      "portfolioReplays": 3,
+      "accounting": "PASS",
+      "ledgerSha256": [
+        "1804c7e95c9ec2f9ac28e107d6ff65b8a440c333cb124e5a376f6da32bbc862e",
+        "b8656fb2048de881d1bd6dd0bd0f7daa4667c884ab63e0ba3c9463ee5dbf0d5a",
+        "b8656fb2048de881d1bd6dd0bd0f7daa4667c884ab63e0ba3c9463ee5dbf0d5a"
+      ]
+    },
+    "30bps": {
+      "finalEquityJpy": 169522780.6325867,
+      "deltaVsExistingLegacyOnlyJpy": 427445.10348796844,
+      "deltaVsUnrestrictedDefaultOwnerModelJpy": 28366.902431219816,
+      "maxMtMDdPct": -15.014723812726594,
+      "closedTrades": 1285,
+      "acceptedIndependentTrades": 1,
+      "acceptedIndependentGross": 0.7499997911331239,
+      "modeledEntryTimestamp": 1779930000000,
+      "portfolioReplays": 3,
+      "accounting": "PASS",
+      "ledgerSha256": [
+        "2982ca95c454edfa7bb1aa74fb73572382886c57913b9f0632e1b612dc6288fc",
+        "219d7cea3b081a167b26470715311f0a172ff0fe2f3e537b65ca28c8a37c0d88",
+        "219d7cea3b081a167b26470715311f0a172ff0fe2f3e537b65ca28c8a37c0d88"
+      ]
+    }
+  }
+}

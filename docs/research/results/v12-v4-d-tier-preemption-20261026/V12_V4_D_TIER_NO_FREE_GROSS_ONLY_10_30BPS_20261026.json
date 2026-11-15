@@ -1,0 +1,127 @@
+{
+  "schema": "v12-v4-d-tier-zero-available-gross-yield-20261026/v1",
+  "status": "RESEARCH_PASS_USER_POLICY_DESIGN_NOT_DEPLOYED",
+  "instruction": "Yield an eligible lower-priority D position only when no applicable shared Gross remains for an otherwise executable higher-priority candidate; no yield merely to top up an accepted higher order.",
+  "scope": "G3=.25, X13=.15, CONT=.15 as research candidate; C=.25 approved, other D=.05 unchanged",
+  "researchTrigger": "After normal slot/risk/route validation, positive candidate strategy_room, min(crypto_sleeve_room,total_room)<=1e-9. Model does NOT cover exact venue lot sizing or same-strategy zero-room.",
+  "period": "2025-08-10 to 2026-08-10 frozen 2026-10-09 H1 eight-strategy research",
+  "results": {
+    "baseline": {
+      "name": "BASE_NO_PREEMPT",
+      "preempt": false,
+      "requestedGross": {
+        "REC_G3_LATE_BTC_REL": 0.25,
+        "REC_X13_TP1.5_SL1_H24": 0.15,
+        "CONT_SHORT_MID_AGE24_48": 0.15
+      },
+      "seconds": 15.106459499977063,
+      "results": {
+        "10bps": {
+          "finalEquityJpy": 304799545.6753143,
+          "maxDdPct": -20.340188405498495,
+          "PF": 4.01622309616191,
+          "WR": 0.7151067323481116,
+          "trades": 1218,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "8d107b880d4c1214961e1c0a2b867029c86d431e9e85fad698aa158d5d3ed08f"
+        },
+        "30bps": {
+          "finalEquityJpy": 193683202.52534655,
+          "maxDdPct": -18.349495980037812,
+          "PF": 3.419971255290329,
+          "WR": 0.6836483155299918,
+          "trades": 1217,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "a303a951807ecee29b36b7647f9eb319f24dc2d61c59e369587f5038d27dd275"
+        }
+      }
+    },
+    "anyShortage": {
+      "name": "D_CAPACITY_PREEMPT",
+      "preempt": true,
+      "requestedGross": {
+        "REC_G3_LATE_BTC_REL": 0.25,
+        "REC_X13_TP1.5_SL1_H24": 0.15,
+        "CONT_SHORT_MID_AGE24_48": 0.15
+      },
+      "seconds": 15.615804200002458,
+      "results": {
+        "10bps": {
+          "finalEquityJpy": 302859135.4767266,
+          "maxDdPct": -20.407421641803126,
+          "PF": 4.019220268506659,
+          "WR": 0.7142857142857143,
+          "trades": 1218,
+          "accounting": "PASS",
+          "preemptCount": 1,
+          "preemptEvents": [
+            {
+              "route": "REC_G3_LATE_BTC_REL",
+              "ts": 1760113800000,
+              "gross": 0.205740392763888,
+              "pnl": -0.25396000000000285,
+              "reason": "D_CAPACITY_YIELD:V52:V50_POST_OPEN_BASIS"
+            }
+          ],
+          "ledgerSha256": "a55e24602aa4ea3fcf5d173e3db40d0873cef1708b284ecf652d231c4d7901b8"
+        },
+        "30bps": {
+          "finalEquityJpy": 193683202.52534655,
+          "maxDdPct": -18.349495980037812,
+          "PF": 3.419971255290329,
+          "WR": 0.6836483155299918,
+          "trades": 1217,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "a303a951807ecee29b36b7647f9eb319f24dc2d61c59e369587f5038d27dd275"
+        }
+      }
+    },
+    "onlyNoFreeGross": {
+      "name": "D_NO_FREE_GROSS_PREEMPT",
+      "preempt": true,
+      "requestedGross": {
+        "REC_G3_LATE_BTC_REL": 0.25,
+        "REC_X13_TP1.5_SL1_H24": 0.15,
+        "CONT_SHORT_MID_AGE24_48": 0.15
+      },
+      "seconds": 14.450095999985933,
+      "results": {
+        "10bps": {
+          "finalEquityJpy": 304799545.6753143,
+          "maxDdPct": -20.340188405498495,
+          "PF": 4.01622309616191,
+          "WR": 0.7151067323481116,
+          "trades": 1218,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "8d107b880d4c1214961e1c0a2b867029c86d431e9e85fad698aa158d5d3ed08f"
+        },
+        "30bps": {
+          "finalEquityJpy": 193683202.52534655,
+          "maxDdPct": -18.349495980037812,
+          "PF": 3.419971255290329,
+          "WR": 0.6836483155299918,
+          "trades": 1217,
+          "accounting": "PASS",
+          "preemptCount": 0,
+          "preemptEvents": [],
+          "ledgerSha256": "a303a951807ecee29b36b7647f9eb319f24dc2d61c59e369587f5038d27dd275"
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Zero actual yield events at 10bps and 30bps; not evidence a future forced exit improves performance",
+    "H1 model is not current exact LIVE Aster partial-fill/protection lifecycle",
+    "Must check higher candidate signed executability, account owner/pending exposure, risk gates and resident STOP before any preempt",
+    "No production code switch or venue order modifications"
+  ],
+  "researchOnly": true
+}

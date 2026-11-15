@@ -1,0 +1,319 @@
+{
+  "schema": "render-gross075-first-priority-native8/v1",
+  "status": "RESEARCH_ONLY_NOT_PRODUCTION_CERTIFIED_NOT_DEPLOYED",
+  "period": "2025-08-10 through 2026-08-10 UTC",
+  "marketGate": "OI-free completed H1 BTC>=+0.15%; RENDER H1<=-0.5%, H4<=-0.15%, sellShare>=53%, wick/open>=0.35%, no 6h Shadow quality prerequisite",
+  "exit": "TP+2.5% STOP-2% maximum 6h",
+  "venueLeverageAssumption": 5,
+  "requestedGross": {
+    "0.25": "25% of account-equity notional",
+    "0.75": "75% of account-equity notional"
+  },
+  "accountMarginApprox": "0.75x gross at venue 5x leverage requires 0.15x equity initial margin, excluding venue maintenance/funding/buffer",
+  "originalLegacyStopEnabled": "RENDER_TOUCH1_WATCH2_MFE0P25",
+  "baselineLegacyStopOnlyFinalJpy": {
+    "10bps": 279087048.0747037,
+    "30bps": 169095335.52909872
+  },
+  "rawYearlyIndependentMarketCandidates": 11,
+  "unconditionalTopPriorityDefinition": "Only contemporaneous NEW signals are preempted at the same H1 timestamp. Existing positions are NEVER force liquidated. All native model resource constraints still apply. Model does NOT prove all 11 signals can enter.",
+  "sourceLimitations": [
+    "Official Binance futures historical M5 source, not authenticated Aster fills or L2 slippage",
+    "Native8 research replays use archived H1 model and forecast funding simplifications; new RENDER route funding was modeled as zero",
+    "No signed venue 5x cross margin parity, partial fill/reduce-only and current Production SHA matching",
+    "Only 11 independent original raw economic-year signals; 9 coincided with existing wallet positions; avoid overfitting",
+    "Same-time new signal preemption may reject winning V12 or Q102 instead of realizing a nominal high-probability trade"
+  ],
+  "scenarios": {
+    "requestedGross025_defaultOwner": {
+      "gross": 0.25,
+      "priority": "NORMAL_OWNER",
+      "costs": {
+        "10bps": {
+          "finalEquityJpy": 278549499.9186964,
+          "deltaVsLegacyStopOnlyJpy": -537548.1560072899,
+          "maxMtMDdPct": -14.514985270751623,
+          "profitFactor": 4.704124772630047,
+          "closedTrades": 1291,
+          "modelWalletIndependentsAccepted": 3,
+          "acceptedGross": [
+            0.24997800558229324,
+            0.24998282946488648,
+            0.2499999582164334
+          ],
+          "entryTimestamps": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "directWalletPnlInModelUnits": [
+            9.609037101928134,
+            64.25828306396207,
+            3989.0580709175033
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 73,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "repeatRuns": 3,
+          "accounting": "PASS",
+          "ledgersSha256": [
+            "11559105254d221e708140b3f106fe23f7882be041e892d2f8eaaf459264029b",
+            "90373477617220d606b9b6bbbb4400a4b2e2badbae200a35fa948a16555b7479",
+            "90373477617220d606b9b6bbbb4400a4b2e2badbae200a35fa948a16555b7479"
+          ]
+        },
+        "30bps": {
+          "finalEquityJpy": 167477398.68058297,
+          "deltaVsLegacyStopOnlyJpy": -1617936.848515749,
+          "maxMtMDdPct": -15.014723812726594,
+          "profitFactor": 3.820735742656595,
+          "closedTrades": 1288,
+          "modelWalletIndependentsAccepted": 3,
+          "acceptedGross": [
+            0.24999277982871293,
+            0.2499823967488147,
+            0.2499998062657233
+          ],
+          "entryTimestamps": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "directWalletPnlInModelUnits": [
+            2.4150061461540697,
+            30.489913645632036,
+            2012.189261030002
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 75,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "repeatRuns": 3,
+          "accounting": "PASS",
+          "ledgersSha256": [
+            "ece94f77273499a7aa8bff2f81e46c16842689b2a0d805a3cdde598c6465d829",
+            "c56af30bed25b3e5cd2592ae12ca56b483057628820ddc91934f4603b05ae1a2",
+            "c56af30bed25b3e5cd2592ae12ca56b483057628820ddc91934f4603b05ae1a2"
+          ]
+        }
+      }
+    },
+    "requestedGross075_defaultOwner": {
+      "gross": 0.75,
+      "priority": "NORMAL_OWNER",
+      "costs": {
+        "10bps": {
+          "finalEquityJpy": 281254553.5124199,
+          "deltaVsLegacyStopOnlyJpy": 2167505.437716186,
+          "maxMtMDdPct": -14.514985270751623,
+          "profitFactor": 4.719020407869473,
+          "closedTrades": 1291,
+          "modelWalletIndependentsAccepted": 3,
+          "acceptedGross": [
+            0.749978751536712,
+            0.7499877744744833,
+            0.6300131166483861
+          ],
+          "entryTimestamps": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "directWalletPnlInModelUnits": [
+            28.82883089009041,
+            193.1480822009702,
+            10110.117500000008
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 73,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 836,
+            "V52": 87
+          },
+          "repeatRuns": 3,
+          "accounting": "PASS",
+          "ledgersSha256": [
+            "80c1855211a5560e5f067614d4d0bd46ccf692e0c7dcc808e3acb7c1ad90a5c1",
+            "19186ed7808a86ed566d92c51749261fac05ff3c5953643cc4e537422ae7aee1",
+            "19186ed7808a86ed566d92c51749261fac05ff3c5953643cc4e537422ae7aee1"
+          ]
+        },
+        "30bps": {
+          "finalEquityJpy": 169494413.73015547,
+          "deltaVsLegacyStopOnlyJpy": 399078.2010567486,
+          "maxMtMDdPct": -15.014723812726594,
+          "profitFactor": 3.828337609536861,
+          "closedTrades": 1288,
+          "modelWalletIndependentsAccepted": 3,
+          "acceptedGross": [
+            0.7499783394861388,
+            0.7499719125328604,
+            0.7499997206120324
+          ],
+          "entryTimestamps": [
+            1768640400000,
+            1768896000000,
+            1779930000000
+          ],
+          "directWalletPnlInModelUnits": [
+            7.245018438462208,
+            91.57072999419012,
+            6094.652390823754
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 75,
+            "PENGU": 68,
+            "Q102": 183,
+            "RESIDUAL": 18,
+            "V12": 833,
+            "V52": 86
+          },
+          "repeatRuns": 3,
+          "accounting": "PASS",
+          "ledgersSha256": [
+            "472e3ee26fc201a83e2863c30e16c5a7da30ab25db773ba840e0c508d053fa29",
+            "d510799ee5a18678322c2190deeb02da3dc00bde35655110b1872cdcfd5a2d78",
+            "d510799ee5a18678322c2190deeb02da3dc00bde35655110b1872cdcfd5a2d78"
+          ]
+        }
+      }
+    },
+    "requestedGross075_topNewSignalPriority": {
+      "gross": 0.75,
+      "priority": "PREFILTER_ALL_SAME_TIME_NEW_SIGNAL_PREEMPTION",
+      "costs": {
+        "10bps": {
+          "finalEquityJpy": 281150306.7737505,
+          "deltaVsLegacyStopOnlyJpy": 2063258.6990467906,
+          "maxMtMDdPct": -14.514985270751623,
+          "profitFactor": 4.7191868810770465,
+          "closedTrades": 1291,
+          "modelWalletIndependentsAccepted": 4,
+          "acceptedGross": [
+            0.749978751536712,
+            0.7499952809312624,
+            0.6845736667307347,
+            0.6303755344821883
+          ],
+          "entryTimestamps": [
+            1768640400000,
+            1768896000000,
+            1779469200000,
+            1779930000000
+          ],
+          "directWalletPnlInModelUnits": [
+            28.82883089009041,
+            193.16722235528223,
+            9509.072499999987,
+            10110.117500000008
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 18,
+            "IDLE": 76,
+            "PENGU": 68,
+            "Q102": 182,
+            "RESIDUAL": 18,
+            "V12": 834,
+            "V52": 87
+          },
+          "repeatRuns": 3,
+          "accounting": "PASS",
+          "ledgersSha256": [
+            "22211865b9b53ececdcd8a5fc91e1d94ccd21d13f960cb747ca130db73a39fef",
+            "37162b099306039e0730cbb1db8f44ac71d88cc7ad102a4192c9b9269cc355d0",
+            "37162b099306039e0730cbb1db8f44ac71d88cc7ad102a4192c9b9269cc355d0"
+          ]
+        },
+        "30bps": {
+          "finalEquityJpy": 167935779.534761,
+          "deltaVsLegacyStopOnlyJpy": -1159555.9943377078,
+          "maxMtMDdPct": -15.014723812726594,
+          "profitFactor": 3.8209657473155834,
+          "closedTrades": 1288,
+          "modelWalletIndependentsAccepted": 4,
+          "acceptedGross": [
+            0.7499783394861388,
+            0.7499669878831943,
+            0.7499995077445354,
+            0.7499999818556305
+          ],
+          "entryTimestamps": [
+            1768640400000,
+            1768896000000,
+            1779469200000,
+            1779930000000
+          ],
+          "directWalletPnlInModelUnits": [
+            7.245018438462208,
+            91.59268413708013,
+            5039.435088157493,
+            6011.916970653754
+          ],
+          "strategyCounts": {
+            "FET": 8,
+            "HYPE_LONG": 17,
+            "IDLE": 78,
+            "PENGU": 68,
+            "Q102": 182,
+            "RESIDUAL": 18,
+            "V12": 831,
+            "V52": 86
+          },
+          "repeatRuns": 3,
+          "accounting": "PASS",
+          "ledgersSha256": [
+            "bcc3790c7f37fc9fecf086c7d9277c308d4ec4b01b4c1e0f3b73be1198235fd9",
+            "cc87f6dddcc46d7d10e22c4982bb4a516376c423a18499fb81cf5fd46d69cc2f",
+            "cc87f6dddcc46d7d10e22c4982bb4a516376c423a18499fb81cf5fd46d69cc2f"
+          ]
+        }
+      }
+    }
+  },
+  "standalonePriceModel": {
+    "10bps": {
+      "n": 11,
+      "wr": 0.9090909090909091,
+      "pf": 9.25383720184532,
+      "mean": 1.5757325567159257,
+      "netTotalPct": 17.333058,
+      "compoundPct": 18.644535,
+      "closedTradeDdPct": -2.1,
+      "stops": 1,
+      "takeProfits": 7,
+      "timeExits": 3
+    },
+    "30bps": {
+      "n": 11,
+      "wr": 0.9090909090909091,
+      "pf": 7.579590488641381,
+      "mean": 1.3757325567159262,
+      "netTotalPct": 15.133058,
+      "compoundPct": 16.099526,
+      "closedTradeDdPct": -2.3,
+      "stops": 1,
+      "takeProfits": 7,
+      "timeExits": 3
+    }
+  }
+}

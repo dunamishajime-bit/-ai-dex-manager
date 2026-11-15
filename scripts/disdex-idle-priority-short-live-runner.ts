@@ -9,6 +9,7 @@ import { runWithBoundedAccountLockRetry } from "../lib/disdex-account-lock-bound
 import { IdlePriorityAsterMarketDataProvider } from "../lib/idle-priority-short-market-data";
 import { IdlePriorityShortRunner, idleRunnerSelfTest } from "../lib/idle-priority-short-runner";
 import { FileIdlePriorityShortStateStore } from "../lib/idle-priority-short-state";
+import {nextRenderIndependentExpiryWakeMs,isIndependentRenderRoute} from "../lib/render-independent-execution-contract";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { resolveIdlePriorityShortRuntime } from "../config/idlePriorityShortRuntime";
 import { resolveIdleResidualLongRuntime } from "../config/idleResidualLongRuntime";
@@ -75,6 +76,7 @@ async function main() {
         },
         loadFiveMinute: (symbol: Parameters<typeof provider.loadFiveMinute>[0]) => provider.loadFiveMinute(symbol),
         loadFiveMinuteSince: (symbol: string, startTs: number, endTs?: number) => provider.loadFiveMinuteSince(symbol, startTs, endTs),
+        loadRenderIndependentM5: (decisionTs: number) => provider.loadRenderIndependentM5(decisionTs),
     };
     const coreStateStore = new FileIdlePriorityShortStateStore(runtime.statePath, runtime.runtimeSha);
     const residualStateStore = new FileIdleResidualLongStateStore(residualRuntime.statePath, residualRuntime.runtimeSha);
@@ -156,9 +158,23 @@ async function main() {
         // are already protecting the position. Only the defer path backs off.
         const budgetRetryMs = Math.max(30_000, Math.min(120_000,
             numberEnv("DISDEX_IDLE_PRIORITY_RATE_BUDGET_RETRY_MS", 60_000)));
-        await delay.wait(rateBudgetDeferred
-            ? budgetRetryMs
-            : nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
+        const baseWait = rateBudgetDeferred ? budgetRetryMs :
+            nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs);
+        // A newly admitted independent 6h position needs expiry-aware observation beyond
+        // normal 5m idle polling. Venue stops remain the primary protection.
+        let waitMs=baseWait;
+        try{
+            const persisted=await coreStateStore.load();
+            const expiry=persisted.positions.filter(row=>isIndependentRenderRoute(row.symbol,row.route))
+                .map(row=>row.exitTs);
+            if(expiry.length)waitMs=nextRenderIndependentExpiryWakeMs({
+                normalWaitMs:Math.max(5000,baseWait),now:Date.now(),exitTimestamps:expiry
+            });
+        }catch{
+            // Do not shorten unrelated runner's rate budget delay on unknown
+            // state; the state store itself fails closed at the next tick.
+        }
+        await delay.wait(waitMs);
     } while (!stopping);
 }
 

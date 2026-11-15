@@ -1,13 +1,156 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {mkdtempSync,rmSync} from "node:fs";
+import {mkdtempSync,rmSync,writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
-import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
-import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent} from "../lib/v12-v4-runner-engine";
+import {assertSharedKillSwitchAllowsNewEntry} from "../lib/disdex-shared-kill-switch";
+import {V4ExecutionStore,advanceV4Intent,v4OrderIdentity} from "../lib/v12-v4-execution-store";
+import {V4RunnerEngine,hasUnresolvedV4EntryLifecycle,isReconciliableV4EntryIntent,classifyV4StaleExitDecisionFailure,classifyV4AccountLeaseRenewalFailure,classifyV4MarketDataReadFailure} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
+import {MarketSlippageGuardError} from "../lib/market-slippage-guard-error";
+import {MarketPreSubmitEntryError} from "../lib/market-pre-submit-entry-error";
+import {readPendingExposureRegistry} from "../lib/disdex-pending-exposure-registry";
+import {V4SharedReservations} from "../lib/v12-v4-shared-reservations";
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
+test("bound pre-submit margin rejection releases only the unsent entry and keeps the runner alive",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  let attempts=0;h.engine.deps.adapter.executeEntry=async x=>{attempts++;throw new MarketPreSubmitEntryError(x.symbol,x.clientOrderId!,"MARGIN_PREPARATION",Error("ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:NON_ZERO_POSITION"));};
+  const first=await h.engine.tick();assert.equal(first.status,"blocked");assert.match(first.reason,/PRE_SUBMIT/);
+  const doc=h.store.read(),intent=Object.values(doc.intents)[0];assert.equal(intent.stage,"TERMINAL");assert.equal(doc.state.legs[intent.legId].status,"CANCELLED");assert.equal(doc.protections[intent.legId].phase,"CLOSED");
+  assert.equal((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries.find(r=>r.reservationId===intent.clientOrderId)?.status,"RELEASED");
+  h.time+=1000;assert.equal((await h.engine.tick()).status,"observing");assert.equal(attempts,1);assert.equal(h.stopSends,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+test("unbound margin-shaped exceptions retain unknown execution and cannot release shared capacity",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{h.engine.deps.adapter.executeEntry=async()=>{throw Error("ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:NON_ZERO_POSITION");};await assert.rejects(h.engine.tick(),/VENUE_MARGIN/);assert.equal(Object.values(h.store.read().intents)[0].stage,"UNKNOWN");}
+ finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+for(const field of ["symbol","clientOrderId"] as const)test(`pre-submit rejection with a different ${field} cannot retire the entry`,async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.adapter.executeEntry=async x=>{throw new MarketPreSubmitEntryError(field==="symbol"?"OTHERUSDT":x.symbol,field==="clientOrderId"?"other-client":x.clientOrderId!,"QUOTE",Error("READ_FAILED"));};
+  await assert.rejects(h.engine.tick(),/PRE_SUBMIT/);const intent=Object.values(h.store.read().intents)[0];assert.equal(intent.stage,"UNKNOWN");
+  assert.notEqual((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries.find(r=>r.reservationId===intent.clientOrderId)?.status,"RELEASED");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("entry overrun review holds new orders without stopping protected position reconciliation",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const execute=h.engine.deps.adapter.executeEntry;
+  h.engine.deps.adapter.executeEntry=async x=>{
+   await execute(x);const order=h.orders.get(x.clientOrderId!)!;
+   Object.assign(order,{status:"FILLED",executedQty:String(x.quantity),avgPrice:"101",cumQuote:String(x.quantity*101)});
+   Object.assign(h.fills[0],{qty:String(x.quantity),price:"101"});
+   h.positionQty=x.quantity*(x.side==="LONG"?1:-1);
+   return {status:"FILLED",executionUnknown:false} as any;
+  };
+  assert.equal((await h.engine.tick()).status,"submitted");
+  assert.match(h.store.read().state.executionReview!,/^ENTRY_FILL_OVER_RESERVED_NOTIONAL:/);
+  h.time+=7200000;
+  h.engine.deps.fetchExitFeed=async()=>({closed:Array.from({length:2},(_,i)=>({openTs:h.candidate.eligibleEntryTs+i*3600000,open:101,high:101.1,low:100.9,close:101})),nextOpens:[{ts:h.candidate.eligibleEntryTs+7200000,price:101}]});
+  const decision=await h.engine.deps.fetchDecision(),candidate={...h.candidate,eligibleEntryTs:h.candidate.eligibleEntryTs+7200000};
+  const key=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
+  h.engine.deps.fetchDecision=async()=>({...decision,capturedAtMs:h.time,decisionTs:candidate.eligibleEntryTs,candidates:[candidate],entryAtrByCandidate:{[key]:1}});
+  const held=await h.engine.tick();assert.equal(held.status,"blocked");assert.match(held.reason,/EXECUTION_REVIEW/);
+  assert.equal(h.entrySends,1);assert.equal(h.store.read().protections[Object.keys(h.store.read().state.legs)[0]].phase,"STOP_CONFIRMED");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+test("ordinary entry minimum/cap rejection remains a live blocked cycle without order intent",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.minimumVenueOrderNotional=async()=>100000;
+  const result=await h.engine.tick();assert.equal(result.status,"blocked");assert.match(result.reason,/MIN_LIFT_BLOCKED/);
+  assert.equal(h.entrySends,0);assert.equal(Object.keys(h.store.read().intents).length,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("expired entry admission window holds new orders and keeps later reconciliation cycles running",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.time=h.candidate.eligibleEntryTs+14*60_000;
+  h.engine.deps.referencePrice=async()=>{h.time+=2*60_000;return 100;};
+  const first=await h.engine.tick();
+  assert.equal(first.status,"blocked");assert.match(first.reason,/ENTRY_LIVE_OBSERVATION_EXPIRED/);
+  h.time+=1000;
+  assert.equal((await h.engine.tick()).status,"observing");
+  assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+  assert.equal(Object.keys(h.store.read().intents).length,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("pre-send slippage rejection retires only the unsent entry and keeps subsequent ticks running",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  let attempts=0;
+  const acceptedEntry=h.engine.deps.adapter.executeEntry;
+  h.engine.deps.adapter.executeEntry=async x=>{attempts++;throw new MarketSlippageGuardError(x.symbol,x.clientOrderId!,false,22.39,20);};
+  const result=await h.engine.tick();
+  assert.equal(result.status,"observing");
+  assert.equal(result.reason,"V4_ENTRY_SLIPPAGE_REJECTED");
+  assert.equal(result.orderEnabled,false);
+  const doc=h.store.read(),intent=Object.values(doc.intents)[0],leg=doc.state.legs[intent.legId];
+  assert.equal(intent.stage,"TERMINAL");assert.equal(leg.status,"CANCELLED");
+  assert.equal(leg.qty,0);assert.equal(leg.reservationUsd,0);
+  assert.equal(doc.protections[leg.id].phase,"CLOSED");
+  const row=(await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries.find(r=>r.reservationId===intent.clientOrderId);
+  assert.equal(row?.status,"RELEASED");
+  h.time+=1000;assert.equal((await h.engine.tick()).status,"observing");
+  assert.equal(attempts,1);assert.equal(h.stopSends,0);
+  h.engine.deps.adapter.executeEntry=acceptedEntry;
+  h.time+=7_200_000;
+  const candidate={...h.candidate,eligibleEntryTs:h.candidate.eligibleEntryTs+7_200_000};
+  const priorDecision=await h.engine.deps.fetchDecision();
+  const key=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
+  h.engine.deps.fetchDecision=async()=>({...priorDecision,capturedAtMs:h.time,decisionTs:candidate.eligibleEntryTs,
+   candidates:[candidate],entryAtrByCandidate:{[key]:1}});
+  assert.equal((await h.engine.tick()).status,"submitted");
+  const next=Object.values(h.store.read().state.legs).find(x=>x.status==="PENDING_ENTRY"||x.status==="OPEN")!;
+  assert.ok(next.qty>0);assert.equal(h.store.read().protections[next.id].phase,"STOP_CONFIRMED");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("generic slippage-shaped errors remain unknown and require signed reconciliation",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.adapter.executeEntry=async()=>{throw Error("Slippage guard blocked AAVEUSDT: 22.39bps > 20.00bps.");};
+  await assert.rejects(h.engine.tick(),/Slippage guard blocked/);
+  assert.equal(Object.values(h.store.read().intents)[0].stage,"UNKNOWN");
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("restart finishes shared release after a committed local slippage rejection",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ const synchronize=V4SharedReservations.prototype.synchronize;
+ try{
+  h.engine.deps.adapter.executeEntry=async x=>{throw new MarketSlippageGuardError(x.symbol,x.clientOrderId!,false,22.39,20);};
+  V4SharedReservations.prototype.synchronize=async()=>{throw Error("simulated crash before shared release");};
+  await assert.rejects(h.engine.tick(),/simulated crash/);
+  const cid=Object.keys(h.store.read().intents)[0];
+  assert.equal(h.store.read().intents[cid].stage,"TERMINAL");
+  assert.notEqual((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries[0].status,"RELEASED");
+  V4SharedReservations.prototype.synchronize=synchronize;
+  const restarted=new V4RunnerEngine({...h.engine.deps,store:new V4ExecutionStore(join(h.dir,"state.json"),sha)});
+  h.time+=1000;assert.equal((await restarted.tick()).status,"observing");
+  assert.equal((await readPendingExposureRegistry(join(h.dir,"pending.json"))).entries[0].status,"RELEASED");
+  assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+ }finally{V4SharedReservations.prototype.synchronize=synchronize;rmSync(h.dir,{recursive:true,force:true});}
+});
+
+for(const mismatch of ["symbol","clientOrderId","reduceOnly"]){
+ test(`slippage error with mismatched ${mismatch} cannot retire an unknown submission`,async()=>{
+  const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+  try{
+   h.engine.deps.adapter.executeEntry=async x=>{throw new MarketSlippageGuardError(
+    mismatch==="symbol"?"OTHERUSDT":x.symbol,mismatch==="clientOrderId"?"other":x.clientOrderId!,mismatch==="reduceOnly",22.39,20);};
+   await assert.rejects(h.engine.tick(),/Slippage guard blocked/);
+   assert.equal(Object.values(h.store.read().intents)[0].stage,"UNKNOWN");
+  }finally{rmSync(h.dir,{recursive:true,force:true});}
+ });
+}
 
 test("unresolved V4 entry lifecycle blocks fresh candidate admission",()=>{
  const doc:any={
@@ -22,6 +165,119 @@ test("terminal V4 entry intents are not reconciled again after restart",()=>{
  assert.equal(isReconciliableV4EntryIntent({action:"ENTRY",stage:"UNKNOWN"}),true);
  assert.equal(isReconciliableV4EntryIntent({action:"STOP",stage:"ACKNOWLEDGED"}),false);
 });
+test("terminal V4 intents do not block flat market-data preparation",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-terminal-flat-"));
+ try{
+  const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
+  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  const doc=store.read();
+  const terminalId=v4OrderIdentity(sha,"BTCUSDT:ROUTE:SHORT:1","EXIT",0);
+  store.commit(doc.revision,{...doc,intents:{
+   [terminalId]:{clientOrderId:terminalId,legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,stage:"PREPARED",
+    createdAt:1,updatedAt:1,command:{legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,symbol:"BTCUSDT",
+     positionSide:"SHORT",quantity:1,price:100,signalTs:1}},
+  } as any});
+  const terminalDoc=store.read();
+  store.commit(terminalDoc.revision,advanceV4Intent(terminalDoc,terminalId,"TERMINAL",2));
+  let fetches=0;
+  const engine=new V4RunnerEngine({store,fetchDecision:async()=>{fetches++;return {schema:"v12-v4-live-decision/v1",errors:[],candidateCount:0} as any}} as any);
+  const prepared=await engine.prepareFlatMarketDecision();
+  assert.equal(prepared?.kind,"READY");
+  assert.equal(fetches,1);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test("terminal V4 reduction intents are not re-queried on every tick",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-terminal-reduction-"));
+ try{
+  const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
+  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  const doc=store.read();
+  const terminalId=v4OrderIdentity(sha,"BTCUSDT:ROUTE:SHORT:1","EXIT",0);
+  store.commit(doc.revision,{...doc,intents:{
+   [terminalId]:{clientOrderId:terminalId,legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,stage:"PREPARED",
+    createdAt:1,updatedAt:1,command:{legId:"BTCUSDT:ROUTE:SHORT:1",action:"EXIT",sequence:0,symbol:"BTCUSDT",
+     positionSide:"SHORT",quantity:1,price:100,signalTs:1}},
+  } as any});
+  const terminalDoc=store.read();
+  store.commit(terminalDoc.revision,advanceV4Intent(terminalDoc,terminalId,"TERMINAL",2));
+  let reconciles=0;
+  const engine=new V4RunnerEngine({store} as any);
+  await (engine as any).reconcileReductions({reconcile:async()=>{reconciles++;return null;}},{reconcileExit:async()=>{}});
+  assert.equal(reconciles,0);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test("stale V4 exit decisions remain blocked review instead of terminating the daemon",()=>{
+ const result=classifyV4StaleExitDecisionFailure(
+  new Error("V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:AAVEUSDT:REC_Y06_REV_D0_T72:SHORT:1792598400000"),
+  1792859642887,
+ );
+ assert.deepEqual(result,{
+  status:"blocked",
+  reason:"V4_STALE_EXIT_REVIEW_REQUIRED:V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:AAVEUSDT:REC_Y06_REV_D0_T72:SHORT:1792598400000",
+  eventTs:1792859642887,
+  candidateCount:0,
+  orderEnabled:false,
+ });
+ assert.equal(classifyV4StaleExitDecisionFailure(new Error("OTHER_FAILURE")),undefined);
+});
+test("account lease renewal failure is a bounded blocked retry, never an order-enabled heartbeat",()=>{
+ const eventTs=1792859642887;
+ assert.deepEqual(classifyV4AccountLeaseRenewalFailure(new Error("V4_ACCOUNT_LEASE_RENEWAL_FAILED"),eventTs),{
+  status:"blocked",
+  reason:"V4_ACCOUNT_LEASE_RENEWAL_FAILED_RETRY:V4_ACCOUNT_LEASE_RENEWAL_FAILED",
+  eventTs,
+  candidateCount:0,
+  orderEnabled:false,
+  retryAfterMs:15000,
+ });
+ assert.equal(classifyV4AccountLeaseRenewalFailure(new Error("ACCOUNT_LOCK_NOT_OWNER"),eventTs),undefined);
+});
+test("startup exchange-read failures distinguish bounded transient retries from fatal integrity errors",()=>{
+ const eventTs=1792859642887;
+ for(const message of ["ECONNRESET","ETIMEDOUT","EAI_AGAIN","HTTP 503 /fapi/v3/exchangeInfo","HTTP 429 /fapi/v3/exchangeInfo"]){
+  const result=classifyV4MarketDataReadFailure(new Error(message),eventTs);
+  assert.equal(result?.status,"blocked",message);
+  assert.equal(result?.reason,"V4_MARKET_DATA_UNAVAILABLE:"+message,message);
+  assert.equal(result?.eventTs,eventTs,message);
+  assert.equal(result?.candidateCount,0,message);
+  assert.equal(result?.orderEnabled,false,message);
+  assert.equal(result?.retryAfterMs,15000,message);
+ }
+ assert.equal(classifyV4MarketDataReadFailure(new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"),eventTs)?.status,"observing");
+ for(const message of [
+  "V4_MISSING_CONFIGURATION:ASTER_USER_ADDRESS",
+  "V4_SIGNED_VENUE_CREDENTIALS_REQUIRED",
+  "V4_TIME37_APPROVAL_SHA_MISSING_OR_MISMATCH",
+  "V4_STATE_INTEGRITY_MISMATCH",
+  "V4_SHARED_RISK_FATAL",
+  "UNKNOWN_INFRASTRUCTURE_FAILURE",
+ ]) assert.equal(classifyV4MarketDataReadFailure(new Error(message),eventTs),undefined,message);
+});
+test("transient wording alone never downgrades integrity, credential, approval, or risk failures",()=>{
+ for(const message of [
+  "V4_RISK_TEMPORARY_APPROVAL_REQUIRED",
+  "V4_CREDENTIAL_TRANSIENT_FAILURE",
+  "V4_STATE_INTEGRITY_TEMPORARY_MISMATCH",
+  "UNKNOWN_TRANSIENT_INFRASTRUCTURE_FAILURE",
+ ]) assert.equal(classifyV4MarketDataReadFailure(new Error(message)),undefined,message);
+});
+test("in-lease rate-budget saturation is BLOCKED when durable state is non-flat",()=>{
+ const eventTs=1792859642887;
+ const active={
+  schema:2,releaseSha:sha,revision:0,
+  state:{legs:{leg:{qty:1,status:"OPEN"}},journal:[],initial:{}},
+  intents:{},protections:{},
+ } as any;
+ assert.deepEqual(classifyV4MarketDataReadFailure(
+  new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"),eventTs,active),{
+  status:"blocked",
+  reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200",
+  eventTs,
+  candidateCount:0,
+  orderEnabled:false,
+  retryAfterMs:15000,
+ });
+});
 function peers(now:number){return families.map(kind=>({kind,programSha:sha,raw:{
  updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
  kind==="V52"?{positions:{}}:kind==="IDLE"||kind==="HYPE_LONG"?{positions:[]}:kind==="PENGU"?{version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE",position:null}:{position:null})
@@ -35,7 +291,7 @@ function attestedPeers(observedAt:number,updatedAt:number){return families.map(k
  {schema:"fet-brk48-residual-state/v1",strategyId:"FET_BRK48_RESIDUAL",position:null})},
  service:{unit:`peer@${sha}.service`,active:true,retiredV12:false,observedAt,mainPid:123}
  }));}
-test("runner takes real shared lock and signed account mark, then stays non-ordering with no signals",async()=>{
+test("runner keeps signed reconciliation alive while the shared switch blocks new entry",async()=>{
  const dir=mkdtempSync(join(tmpdir(),"v4-engine-"));const now=Date.now();
  try{
   const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
@@ -45,16 +301,19 @@ test("runner takes real shared lock and signed account mark, then stays non-orde
   const client:any={getBalances:async()=>{apiReads++;return [{asset:"USDT",balance:"1000",availableBalance:"1000"}]},
    getPositions:async()=>[],getOpenOrders:async()=>[],
    getUserTrades:async()=>[],getIncomeHistory:async()=>[]};
-  let time=now;
+  let time=now,hasCandidate=false;
+  const killPath=join(dir,"kill.json");
   const engine=new V4RunnerEngine({store,accountLock:lock,adapter:{} as any,client,
    pendingRegistryPath:join(dir,"pending.json"),fetchPeers:async()=>peers(time),
    fetchExitFeed:async()=>({closed:[]}),
    fetchDecision:async()=>({schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
-    decisionTs:time-5000,capturedAtMs:time,sourceFingerprint:"1",candidateCount:0,filteredCount:0,
-    sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[],candidates:[],filtered:[],
+    decisionTs:time-5000,capturedAtMs:time,sourceFingerprint:"1",candidateCount:hasCandidate?1:0,filteredCount:0,
+    sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[],candidates:hasCandidate?[{} as any]:[],filtered:[],
     orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0}),
    assertAuthority:async()=>{mutationCalls++;throw Error("AUTHORITY_FORBIDDEN")},
-   assertEntrySafety:async()=>{},
+   assertEntrySafety:async()=>{await assertSharedKillSwitchAllowsNewEntry({
+    NODE_ENV:"test",DISDEX_SHARED_KILL_SWITCH_FILE:killPath,
+   });},
    assertSourceParity:async()=>{throw Error("SOURCE_PARITY_NOT_PROVEN")},
    requiredResidentStop:async()=>{throw Error("STOP_NOT_CERTIFIED")},
    quantityNormalizer:{} as any,referencePrice:async()=>{throw Error("NO_PRICE")},
@@ -67,6 +326,23 @@ test("runner takes real shared lock and signed account mark, then stays non-orde
   time+=1000;
   assert.equal((await engine.tick()).status,"observing");
   assert.equal(store.read().state.journal.length,2);
+  for(const action of ["HOLD_PROTECTED","FLATTEN_MANAGED"]){
+   writeFileSync(killPath,JSON.stringify({active:true,scope:"GLOBAL",action,reason:"shared incident"}));
+   hasCandidate=true;
+   time+=1000;
+   const tick=await engine.tick();
+   assert.equal(tick.status,"blocked");
+   assert.equal(tick.reason,"SHARED_KILL_SWITCH_ACTIVE:shared incident");
+   assert.equal(tick.orderEnabled,false);
+   assert.equal(mutationCalls,0);
+  }
+  writeFileSync(killPath,JSON.stringify({active:true,action:"UNKNOWN"}));
+  time+=1000;
+  await assert.rejects(engine.tick(),/SHARED_KILL_SWITCH_MALFORMED/);
+  writeFileSync(killPath,JSON.stringify({active:false}));
+  hasCandidate=false;
+  time+=1000;
+  assert.equal((await engine.tick()).status,"observing");
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test("market-data prefetch failure stays fail-closed without terminating the V4 tick loop",async()=>{
@@ -163,7 +439,7 @@ test("candidate source errors and stale data remain fail-closed observations",as
   }
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
-test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservation retirement",async()=>{
+for(const venueExpiresStop of [false,true])test(`signed full route exit preserves protection when venue expires STOP=${venueExpiresStop}`,async()=>{
  const fixture=(await import("./fixtures/v12-v4-native-route-20261009.json")).default;
  const {adaptProductionCandidates}=await import("../lib/v12-v4-production-features");
  const {readPendingExposureRegistry}=await import("../lib/disdex-pending-exposure-registry");
@@ -195,6 +471,7 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
    },
    executeExit:async(x:any)=>{
     exits++;const qty=x.quantity,id=53;positionQty=0;
+    if(venueExpiresStop)for(const order of orders.values())if(order.type==="STOP_MARKET")order.status="EXPIRED";
     const side=x.positionSide==="LONG"?"SELL":"BUY";
     orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,
      orderId:id,status:"FILLED",side,reduceOnly:true,origQty:String(qty),
@@ -210,6 +487,7 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
     return signedQty?[{symbol:candidate.symbol,positionAmt:String(signedQty),markPrice:"100",unRealizedProfit:"0"}]:[];
    },
    getOpenOrders:async()=>[...orders.values()].filter(o=>o.status==="NEW"),
+   getOrder:async(_s:string,cid:string)=>orders.get(cid),
    getUserTrades:async()=>fills,getIncomeHistory:async()=>[]};
   const atrKey=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
   const runner=new V4RunnerEngine({store,accountLock:lock,adapter,client,
@@ -242,6 +520,13 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
   exitFeed={closed:Array.from({length:spec.hours},(_,i)=>({openTs:candidate.eligibleEntryTs+i*3600000,
    open:100,high:100.1,low:99.9,close:100})),nextOpens:[{ts:end,price:100}]};
   time=end+5000;
+  if(venueExpiresStop){
+   const result=await runner.tick();
+   assert.equal(result.status,"exited");assert.equal(exits,1);assert.equal(cancelCount,0);
+   assert.equal(store.read().protections[leg.id].phase,"CLOSED");
+   time+=1000;assert.equal((await runner.tick()).status,"observing");assert.equal(exits,1);
+   return;
+  }
   venueExitDrift=true;
   await assert.rejects(runner.tick(),/V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT/);
   assert.equal(exits,1);
@@ -270,7 +555,7 @@ async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH
  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
  const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
  const orders=new Map<string,any>(),fills:any[]=[];
- let entrySends=0,stopSends=0,cancels=0,positionQty=0,firstStop=true;
+ let entrySends=0,stopSends=0,cancels=0,positionQty=0,firstStop=true,decisionFailure:Error|undefined;
  const adapter:any={
   client:{getOrder:async(_s:string,cid:string)=>orders.get(cid)},
   executor:{},
@@ -307,11 +592,11 @@ async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH
  const engine=new V4RunnerEngine({store,accountLock:lock,adapter,client,
   pendingRegistryPath:join(dir,"pending.json"),fetchPeers:async()=>peers(time),
   fetchExitFeed:async()=>({closed:[]}),
-  fetchDecision:async()=>({schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
+  fetchDecision:async()=>{if(decisionFailure)throw decisionFailure;return {schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
    decisionTs:candidate.eligibleEntryTs,capturedAtMs:time,sourceFingerprint:"recovery-fixture",
    candidateCount:1,filteredCount:0,sourceCount:1,nativeCoreEvents:[],
    entryAtrByCandidate:{[atrKey]:1},errors:[],candidates:[candidate],filtered:[],
-   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0}),
+   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0};},
   assertAuthority:async()=>{},assertEntrySafety:async()=>{},assertSourceParity:async()=>{},
   requiredResidentStop:async({entryPrice}:any)=>candidate.effectiveSide==="LONG"?entryPrice*.92:entryPrice*1.08,
   quantityNormalizer:{normalizeMarketQuantity:async(_s:string,q:number,p:number)=>({quantity:q,notional:q*p})} as any,
@@ -319,9 +604,92 @@ async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH
  });
  return {dir,store,engine,orders,fills,candidate,
   get time(){return time},set time(v:number){time=v},
+  failDecision(error:Error){decisionFailure=error},
   get entrySends(){return entrySends},get stopSends(){return stopSends},get cancels(){return cancels},
   get positionQty(){return positionQty},set positionQty(v:number){positionQty=v}};
 }
+
+test("slow cold decisions refresh signed account inputs instead of spending an expired account mark",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  let reads=0;const balances=h.engine.deps.client.getBalances.bind(h.engine.deps.client);
+  h.engine.deps.client.getBalances=async()=>{reads++;return balances();};
+  const decision=h.engine.deps.fetchDecision;
+  h.engine.deps.fetchDecision=async()=>{h.time+=31_000;return decision();};
+  const result=await h.engine.tick();
+  assert.equal(result.status,"submitted");assert.ok(reads>=2,"must refetch genuine signed account data, not redate a mark");
+  assert.equal(h.entrySends,1);assert.equal(h.stopSends,1);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("flat terminal history reuses its prepared decision without a second account-locked cold scan",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const old=h.store.read(),id=v4OrderIdentity(sha,"BTCUSDT:RETIRED:SHORT:1","EXIT",0);
+  h.store.commit(old.revision,{...old,intents:{[id]:{clientOrderId:id,legId:"BTCUSDT:RETIRED:SHORT:1",
+   action:"EXIT",sequence:0,stage:"PREPARED",createdAt:1,updatedAt:1,command:{legId:"BTCUSDT:RETIRED:SHORT:1",
+   action:"EXIT",sequence:0,symbol:"BTCUSDT",positionSide:"SHORT",quantity:1,price:100,signalTs:1}}}} as any);
+  const prepared=h.store.read();h.store.commit(prepared.revision,advanceV4Intent(prepared,id,"TERMINAL",2));
+  let scans=0;const fetch=h.engine.deps.fetchDecision;h.engine.deps.fetchDecision=async()=>{scans++;return fetch();};
+  const decision=await h.engine.prepareFlatMarketDecision();assert.equal(decision?.kind,"READY");
+  assert.equal((await h.engine.tick(decision)).status,"submitted");assert.equal(scans,1);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("slow entry preparation blocks before persisting a PREPARED intent beyond the approved 120 seconds",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.referencePrice=async()=>{h.time+=121_000;return 100;};
+  const result=await h.engine.tick();
+  assert.equal(result.status,"blocked");assert.equal(result.reason,"V4_ENTRY_ACCOUNT_LEDGER_REFRESH_REQUIRED");
+  assert.equal(result.orderEnabled,false);assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+  assert.equal(Object.keys(h.store.read().intents).length,0);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("an old positions response is not redated when a different signed account read finishes late",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const balances=h.engine.deps.client.getBalances.bind(h.engine.deps.client);
+  h.engine.deps.client.getBalances=async()=>{
+   await new Promise<void>(done=>setImmediate(done));h.time+=121_000;return balances();
+  };
+  await assert.rejects(h.engine.tick(),/V4_SIGNED_ACCOUNT_READ_WINDOW_STALE/);
+  assert.equal(h.entrySends,0);assert.equal(h.stopSends,0);
+  assert.equal(h.store.read().state.journal.some(row=>row.type==="ACCOUNT_MARK"),false);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("entry preparation lasting 65 seconds remains admissible under the owner-approved 120 seconds",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  h.engine.deps.referencePrice=async()=>{h.time+=65_000;return 100;};
+  assert.equal((await h.engine.tick()).status,"submitted");
+  assert.equal(h.entrySends,1);assert.equal(h.stopSends,1);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("in-lease decision read keeps a protected non-flat store BLOCKED on rate saturation",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const first=await h.engine.tick();
+  assert.equal(first.status,"submitted");
+  let doc=h.store.read(),leg=Object.values(doc.state.legs)[0];
+  const entry=Object.values(doc.intents).find(i=>i.legId===leg.id&&i.action==="ENTRY")!;
+  const entryOrder=h.orders.get(entry.clientOrderId),extra=leg.requestedQty-leg.qty;
+  entryOrder.status="FILLED";entryOrder.executedQty=String(leg.requestedQty);
+  entryOrder.cumQuote=String(leg.requestedQty*99);entryOrder.avgPrice="99";
+  h.fills.push({symbol:h.candidate.symbol,id:803,orderId:entryOrder.orderId,side:entryOrder.side,
+   price:"99",qty:String(extra),commission:"0",commissionAsset:"USDT",time:h.time+500});
+  h.positionQty=leg.requestedQty*(h.candidate.effectiveSide==="LONG"?1:-1);
+  h.failDecision(new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200"));
+  h.time+=1000;
+  const result=await h.engine.tick();
+  assert.equal(result.status,"blocked");
+  assert.equal(result.reason,"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:4200");
+  assert.equal(result.orderEnabled,false);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
 
 test("restart recovers venue-accepted STOP after response loss without duplicate ENTRY or STOP",async()=>{
  const h=await protectionRecoveryHarness("UNKNOWN_STOP_ACK");

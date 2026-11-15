@@ -1,0 +1,2899 @@
+{
+  "status": "RESEARCH_PUBLIC_BINANCE_OFFICIAL_M5_NO_SHADOW_QUALITY_GATE",
+  "sourceChecksums": {
+    "RENDERUSDT": [
+      {
+        "name": "RENDERUSDT-5m-2024-08.zip",
+        "sha256": "560fd59cbfb57a05c33798f9418c07595d8d4ea8b08f616271bafa79e9768f4f"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-09.zip",
+        "sha256": "f348516b533353751a1552b876d2a34357458dae7a1a6bfadfa4fe72cc892fc8"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-10.zip",
+        "sha256": "825d7ee092cbee13461f2cb5db63bd7412f523145cf810e879fb3aad32fa9106"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-11.zip",
+        "sha256": "bd2e7c9ab27287ed480037bf4029ca616601c1eda3ae5279df44378ba22c53d8"
+      },
+      {
+        "name": "RENDERUSDT-5m-2024-12.zip",
+        "sha256": "95ec99ae56cbb97928ba00af9e72e22f83be3c8a03ff35df058dac0d50c36b5b"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-01.zip",
+        "sha256": "613caee201751c24d87a0e964b62ff4fe82e9ddc6d2c163a31b542c4084930ee"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-02.zip",
+        "sha256": "a5f730f0dd181153e060ea187adb043f61bf5e94b94ca68a81f0a4afdb7fd104"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-03.zip",
+        "sha256": "6959c90e9e8fa070ae8a490ae9e7eb31cbfd7073be53d87fddc138b330d06de5"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-04.zip",
+        "sha256": "afa12c8c3abe19324e8ebf5446fd16cf7ab0f738e7252667ee866668fda05760"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-05.zip",
+        "sha256": "e823a99b194906b76b59eb2a968edee67bd54fa566b3885e96c9ad43ce5e486a"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-06.zip",
+        "sha256": "c3a22f3c861d5f3c47665ff3d7d2b8f4465f4dde4a20a2cbb930af065e6b5978"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-07.zip",
+        "sha256": "a7f2803891f0c4dca43ba23466b8db375e822fb85ecdf4a100fba67d28d29004"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-08.zip",
+        "sha256": "960a0505df0e4986442ee946f7cf5680c085c65f0fb77142c6ff99a7dff3262f"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-09.zip",
+        "sha256": "e74973f90a05f46f2589ebbeae0481f10a034245088dfe82a484a88a3f9b301f"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-10.zip",
+        "sha256": "fa5393c7e5262d5902d029d5e33c16f26cb2e41d812d4ffa7ec24be14aae57af"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-11.zip",
+        "sha256": "a3ff4cf7a4c7b93bfe55583b352ce44b1694cd8af921aec6585c39d826049f63"
+      },
+      {
+        "name": "RENDERUSDT-5m-2025-12.zip",
+        "sha256": "17b9690bec9f7443e6f3676c6a908df05b4a4a17e3324a1b41e4c2af09e1be47"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-01.zip",
+        "sha256": "5c49d0d0250f69be36f0467d3544d9a327f84c78178606cf87b3d10318a6ebc6"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-02.zip",
+        "sha256": "8ddc453b8198028b2dc83d1a924434c4debc513fbe01b0383673e7ef04103a12"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-03.zip",
+        "sha256": "4be8e87abecf80cfb2f65418b8f46788994d46a1cfb5e9846cb2abf705f6b0c8"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-04.zip",
+        "sha256": "d68d85751780422a37b48b833beb1dbb10101ce88cb2bcdb2d5021ac1ffab142"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-05.zip",
+        "sha256": "1905f2b0e4f250c8ed1fe3a7fdfa11493efa71cf0e8310ba3b38582bb8278f57"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-06.zip",
+        "sha256": "ec765da120b89c202ecd6d8b7fe81e95b12010c54ec2d61d4fa12a00fa4eeb71"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-07.zip",
+        "sha256": "b64425c6021bf7def4e8db61ca1aa62b22f837347a3b80ba977eb6457b6c0070"
+      },
+      {
+        "name": "RENDERUSDT-5m-2026-08.zip",
+        "sha256": "f61627bfc5a770bb33d14de7ceec304b69cdb55a2b12c8a7542df7dcf0ba1945"
+      }
+    ],
+    "BTCUSDT": [
+      {
+        "name": "BTCUSDT-5m-2024-08.zip",
+        "sha256": "5804758756c980445eb6bbba96f10bd98bb7da471b6041bc31337cb0c7236a16"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-09.zip",
+        "sha256": "15ffdcf3d23f9fb6743c54d9d783cdc20373aaf8f60fd949a85653e7bee29170"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-10.zip",
+        "sha256": "024d574aec22d830443dfe557c12137d24423c18b228e2c10045851cd056434d"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-11.zip",
+        "sha256": "bf2ff598c07f5f78a4265c376b3a8f3277e39b42d66bf79610b8b3199a34fa45"
+      },
+      {
+        "name": "BTCUSDT-5m-2024-12.zip",
+        "sha256": "261ced4d4a389f680ae730c53ba82b42f97f656b630352713e2d7fd738f57b8c"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-01.zip",
+        "sha256": "0c99422d64fa3cc58564cf77969fc5a96d6f44783c79ecfcf94b103753bf7570"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-02.zip",
+        "sha256": "fdd6fb92b75bae5c02dd583b5be44ca6673d1807ce4b0c08160d3c5cf7677a46"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-03.zip",
+        "sha256": "46f83773b9cec38a09be429727a5a300ccca6d11c8e8ca5fa9545fad6eda131f"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-04.zip",
+        "sha256": "9eda69fd858e9ced7e72cfbb75bffe34458763c37c8ee73910e572b4baba21ed"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-05.zip",
+        "sha256": "073da284f178e72777abbfbcf79faa99fcf77bd69c4a678938abbf6cd7d14f5b"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-06.zip",
+        "sha256": "da39c04e24a90c87406b9030e1aaf376655ad59d4bc0496f38e4162a9babf514"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-07.zip",
+        "sha256": "2cea4750d51d9c064d674ec8d0d8d1f39448960284272fdc74698562c873bf0f"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-08.zip",
+        "sha256": "7f78f6f88ae1946f8bd8312a37d1d74b24e24d6b13bc37d2909ad7c8c0c7e9ae"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-09.zip",
+        "sha256": "dbfb8bc2f9343107c7a702acd6919d77060a8f7ea4b25359c71e5fc018a85209"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-10.zip",
+        "sha256": "fab262ca4318f8f65164ae33a020458439adc6f7bc2e59bbfce1886118d05a48"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-11.zip",
+        "sha256": "2759d4be0fe68cc2be3d4d91940fcd95abc69f0c31f25d0b6cb5e0629c625d2d"
+      },
+      {
+        "name": "BTCUSDT-5m-2025-12.zip",
+        "sha256": "0e923a3d2ac4f6711d8c841220f4e5d2e479c1bdb40b41515eb250e16808304f"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-01.zip",
+        "sha256": "c092f3b26036f203bb5b11c28958574aa8501315ed26dd0f8c017051b9fb3abf"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-02.zip",
+        "sha256": "8be83befce2cd9bf0959c872d91108debd03e1b51a451bac3a56b8ddca196bb4"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-03.zip",
+        "sha256": "0302ccef9b3e5e38c35bc8667a1e890138c9136e89145688220eea99b748200e"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-04.zip",
+        "sha256": "e2934467bdb6a000124948f4c8fef176e2066520a6b2e5a0522450fed51396f7"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-05.zip",
+        "sha256": "b1a73378796bb62084c32ca5865903beeaf87d521d950d5e7776343f682dea93"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-06.zip",
+        "sha256": "782c555963c852ca768335de21d5743147e5d50bff449600f8fceb9ebe5273de"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-07.zip",
+        "sha256": "ec750f7aa69c8f842fa1464a90ad4aa92452cfa767df9e8d70dc484e466c8fc3"
+      },
+      {
+        "name": "BTCUSDT-5m-2026-08.zip",
+        "sha256": "14fd408e5d2902665c66b701e861b173568b66399e3fa462b94c766d209567d1"
+      }
+    ]
+  },
+  "periodStartUTC": "2025-08-10T00:00:00Z",
+  "periodEndUTC": "2026-08-10T00:00:00Z",
+  "rawFullPeriod": 25,
+  "raw12Month": 11,
+  "cases": [
+    {
+      "id": "TP1p5_SL2_H55M",
+      "tpPct": 1.5,
+      "stopPct": 2,
+      "maxHoldMinutes": 55,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762290600000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8124,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764906900000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.693,
+          "grossPct": 0.5871990604815025,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768262100000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.37,
+          "grossPct": -0.4237288135593209,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768496100000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.235,
+          "grossPct": 0.3566651805617438,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642200000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.195565,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768899300000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.97,
+          "grossPct": 1.3026052104208374,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.514,
+          "grossPct": 1.1749347258485643,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772488500000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.369,
+          "grossPct": -0.07309941520468044,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779472500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.972,
+          "grossPct": 0.3537139969681746,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779933300000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.086,
+          "grossPct": 0.808368996671438,
+          "reason": "TIME"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 2.42542144747662,
+        "mean": 0.36242354019893247,
+        "netTotalPct": 3.986659,
+        "compoundPct": 4.0042,
+        "closedTradeDdPct": -2.269464,
+        "netPerTrade": [
+          1.4,
+          0.4872,
+          -0.5237,
+          0.2567,
+          1.4,
+          1.2026,
+          1.0749,
+          -2.1,
+          -0.1731,
+          0.2537,
+          0.7084
+        ],
+        "stops": 1,
+        "takeProfits": 2,
+        "timeExits": 8
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 1.5259785958733527,
+        "mean": 0.1624235401989325,
+        "netTotalPct": 1.786659,
+        "compoundPct": 1.746733,
+        "closedTradeDdPct": -2.664518,
+        "netPerTrade": [
+          1.2,
+          0.2872,
+          -0.7237,
+          0.0567,
+          1.2,
+          1.0026,
+          0.8749,
+          -2.3,
+          -0.3731,
+          0.0537,
+          0.5084
+        ],
+        "stops": 1,
+        "takeProfits": 2,
+        "timeExits": 8
+      }
+    },
+    {
+      "id": "TP1p5_SL2_H120M",
+      "tpPct": 1.5,
+      "stopPct": 2,
+      "maxHoldMinutes": 120,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762290600000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8124,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909000000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.6774550000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768266000000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.376,
+          "grossPct": -0.6779661016949268,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768499700000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.209355,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642200000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.195565,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768903200000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.985,
+          "grossPct": 0.5511022044088154,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50902,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772492400000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.384,
+          "grossPct": -1.1695906432748426,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9493150000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0714550000000003,
+          "grossPct": 1.5,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 2.471600229904396,
+        "mean": 0.5548677690399131,
+        "netTotalPct": 6.103545,
+        "compoundPct": 6.184749,
+        "closedTradeDdPct": -3.342929,
+        "netPerTrade": [
+          1.4,
+          1.4,
+          -0.778,
+          1.4,
+          1.4,
+          0.4511,
+          1.4,
+          -2.1,
+          -1.2696,
+          1.4,
+          1.4
+        ],
+        "stops": 1,
+        "takeProfits": 7,
+        "timeExits": 3
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 1.8222219699796132,
+        "mean": 0.3548677690399131,
+        "netTotalPct": 3.903545,
+        "compoundPct": 3.884185,
+        "closedTradeDdPct": -3.73579,
+        "netPerTrade": [
+          1.2,
+          1.2,
+          -0.978,
+          1.2,
+          1.2,
+          0.2511,
+          1.2,
+          -2.3,
+          -1.4696,
+          1.2,
+          1.2
+        ],
+        "stops": 1,
+        "takeProfits": 7,
+        "timeExits": 3
+      }
+    },
+    {
+      "id": "TP1p5_SL2_H360M",
+      "tpPct": 1.5,
+      "stopPct": 2,
+      "maxHoldMinutes": 360,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762290600000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8124,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909000000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.6774550000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768280400000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.344,
+          "grossPct": 0.6779661016949157,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768499700000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.209355,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642200000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.195565,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768909200000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.96606,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50902,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772496600000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34748,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9493150000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0714550000000003,
+          "grossPct": 1.5,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.9090909090909091,
+        "pf": 6.2752219531880495,
+        "mean": 1.0070878274268102,
+        "netTotalPct": 11.077966,
+        "compoundPct": 11.590477,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.4,
+          1.4,
+          0.578,
+          1.4,
+          1.4,
+          1.4,
+          1.4,
+          -2.1,
+          1.4,
+          1.4,
+          1.4
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.9090909090909091,
+        "pf": 4.859985261606481,
+        "mean": 0.8070878274268104,
+        "netTotalPct": 8.877966,
+        "compoundPct": 9.18364,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.2,
+          1.2,
+          0.378,
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          -2.3,
+          1.2,
+          1.2,
+          1.2
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      }
+    },
+    {
+      "id": "TP1p5_SL2_H720M",
+      "tpPct": 1.5,
+      "stopPct": 2,
+      "maxHoldMinutes": 720,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762290600000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8124,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909000000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.6774550000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768302000000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.362,
+          "grossPct": -0.08474576271186862,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768499700000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.209355,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642200000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.195565,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768909200000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.96606,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50902,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772496600000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34748,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9493150000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0714550000000003,
+          "grossPct": 1.5,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 5.514836795252211,
+        "mean": 0.9377503852080117,
+        "netTotalPct": 10.315254,
+        "compoundPct": 10.744255,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.4,
+          1.4,
+          -0.1847,
+          1.4,
+          1.4,
+          1.4,
+          1.4,
+          -2.1,
+          1.4,
+          1.4,
+          1.4
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 4.022727272727264,
+        "mean": 0.7377503852080117,
+        "netTotalPct": 8.115254,
+        "compoundPct": 8.354019,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.2,
+          1.2,
+          -0.3847,
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          -2.3,
+          1.2,
+          1.2,
+          1.2
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      }
+    },
+    {
+      "id": "TP1p5_SL2_H1440M",
+      "tpPct": 1.5,
+      "stopPct": 2,
+      "maxHoldMinutes": 1440,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762290600000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8124,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909000000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.6774550000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768313700000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.4072,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768499700000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.209355,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642200000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.195565,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768909200000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.96606,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50902,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772496600000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34748,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9493150000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0714550000000003,
+          "grossPct": 1.5,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 2.9999999999999973,
+        "mean": 0.7636363636363632,
+        "netTotalPct": 8.4,
+        "compoundPct": 8.619295,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.4,
+          1.4,
+          -2.1,
+          1.4,
+          1.4,
+          1.4,
+          1.4,
+          -2.1,
+          1.4,
+          1.4,
+          1.4
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 2.3478260869565197,
+        "mean": 0.5636363636363634,
+        "netTotalPct": 6.2,
+        "compoundPct": 6.270749,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.2,
+          1.2,
+          -2.3,
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          -2.3,
+          1.2,
+          1.2,
+          1.2
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      }
+    },
+    {
+      "id": "TP1p5_SL2_NO_TIME",
+      "tpPct": 1.5,
+      "stopPct": 2,
+      "maxHoldMinutes": null,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762290600000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8124,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909000000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.6774550000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768313700000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.4072,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768499700000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.209355,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642200000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.195565,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768909200000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.96606,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50902,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772496600000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34748,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9493150000000001,
+          "grossPct": 1.5,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0714550000000003,
+          "grossPct": 1.5,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 2.9999999999999973,
+        "mean": 0.7636363636363632,
+        "netTotalPct": 8.4,
+        "compoundPct": 8.619295,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.4,
+          1.4,
+          -2.1,
+          1.4,
+          1.4,
+          1.4,
+          1.4,
+          -2.1,
+          1.4,
+          1.4,
+          1.4
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 2.3478260869565197,
+        "mean": 0.5636363636363634,
+        "netTotalPct": 6.2,
+        "compoundPct": 6.270749,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.2,
+          1.2,
+          -2.3,
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          -2.3,
+          1.2,
+          1.2,
+          1.2
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      }
+    },
+    {
+      "id": "TP2p0_SL2_H55M",
+      "tpPct": 2.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 55,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291200000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8032000000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764906900000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.693,
+          "grossPct": 0.5871990604815025,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768262100000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.37,
+          "grossPct": -0.4237288135593209,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768496100000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.235,
+          "grossPct": 0.3566651805617438,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642500000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.1844200000000003,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768899300000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.97,
+          "grossPct": 1.3026052104208374,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.514,
+          "grossPct": 1.1749347258485643,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772488500000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.369,
+          "grossPct": -0.07309941520468044,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779472500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.972,
+          "grossPct": 0.3537139969681746,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779933300000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.086,
+          "grossPct": 0.808368996671438,
+          "reason": "TIME"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 2.7829693260754884,
+        "mean": 0.4533326311080234,
+        "netTotalPct": 4.986659,
+        "compoundPct": 5.032411,
+        "closedTradeDdPct": -2.269464,
+        "netPerTrade": [
+          1.9,
+          0.4872,
+          -0.5237,
+          0.2567,
+          1.9,
+          1.2026,
+          1.0749,
+          -2.1,
+          -0.1731,
+          0.2537,
+          0.7084
+        ],
+        "stops": 1,
+        "takeProfits": 2,
+        "timeExits": 8
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 1.8203708738025395,
+        "mean": 0.2533326311080234,
+        "netTotalPct": 2.786659,
+        "compoundPct": 2.754619,
+        "closedTradeDdPct": -2.664518,
+        "netPerTrade": [
+          1.7,
+          0.2872,
+          -0.7237,
+          0.0567,
+          1.7,
+          1.0026,
+          0.8749,
+          -2.3,
+          -0.3731,
+          0.0537,
+          0.5084
+        ],
+        "stops": 1,
+        "takeProfits": 2,
+        "timeExits": 8
+      }
+    },
+    {
+      "id": "TP2p0_SL2_H120M",
+      "tpPct": 2.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 120,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291200000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8032000000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909300000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.66894,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768266000000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.376,
+          "grossPct": -0.6779661016949268,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768500000000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.213,
+          "grossPct": 1.3374944271065448,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642500000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.1844200000000003,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768903200000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.985,
+          "grossPct": 0.5511022044088154,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770214800000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50136,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772492400000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.384,
+          "grossPct": -1.1695906432748426,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9394200000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.06094,
+          "grossPct": 2.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 3.155736602612957,
+        "mean": 0.8128218078677808,
+        "netTotalPct": 8.94104,
+        "compoundPct": 9.190022,
+        "closedTradeDdPct": -3.342929,
+        "netPerTrade": [
+          1.9,
+          1.9,
+          -0.778,
+          1.2375,
+          1.9,
+          0.4511,
+          1.9,
+          -2.1,
+          -1.2696,
+          1.9,
+          1.9
+        ],
+        "stops": 1,
+        "takeProfits": 6,
+        "timeExits": 4
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 2.4198966434025238,
+        "mean": 0.6128218078677808,
+        "netTotalPct": 6.74104,
+        "compoundPct": 6.830223,
+        "closedTradeDdPct": -3.73579,
+        "netPerTrade": [
+          1.7,
+          1.7,
+          -0.978,
+          1.0375,
+          1.7,
+          0.2511,
+          1.7,
+          -2.3,
+          -1.4696,
+          1.7,
+          1.7
+        ],
+        "stops": 1,
+        "takeProfits": 6,
+        "timeExits": 4
+      }
+    },
+    {
+      "id": "TP2p0_SL2_H360M",
+      "tpPct": 2.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 360,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291200000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8032000000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909300000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.66894,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768280400000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.344,
+          "grossPct": 0.6779661016949157,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768500600000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.19814,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642500000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.1844200000000003,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768914000000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.95608,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770214800000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50136,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772503200000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34064,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9394200000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.06094,
+          "grossPct": 2.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.9090909090909091,
+        "pf": 8.41807909604519,
+        "mean": 1.4161787365177194,
+        "netTotalPct": 15.577966,
+        "compoundPct": 16.641527,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.9,
+          1.9,
+          0.578,
+          1.9,
+          1.9,
+          1.9,
+          1.9,
+          -2.1,
+          1.9,
+          1.9,
+          1.9
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.9090909090909091,
+        "pf": 6.816507000736915,
+        "mean": 1.2161787365177195,
+        "netTotalPct": 13.377966,
+        "compoundPct": 14.135707,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.7,
+          1.7,
+          0.378,
+          1.7,
+          1.7,
+          1.7,
+          1.7,
+          -2.3,
+          1.7,
+          1.7,
+          1.7
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      }
+    },
+    {
+      "id": "TP2p0_SL2_H720M",
+      "tpPct": 2.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 720,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291200000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8032000000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909300000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.66894,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768302000000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.362,
+          "grossPct": -0.08474576271186862,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768500600000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.19814,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642500000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.1844200000000003,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768914000000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.95608,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770214800000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50136,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772503200000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34064,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9394200000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.06094,
+          "grossPct": 2.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 7.484421364985142,
+        "mean": 1.3468412942989207,
+        "netTotalPct": 14.815254,
+        "compoundPct": 15.757001,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.9,
+          1.9,
+          -0.1847,
+          1.9,
+          1.9,
+          1.9,
+          1.9,
+          -2.1,
+          1.9,
+          1.9,
+          1.9
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 5.698863636363624,
+        "mean": 1.1468412942989208,
+        "netTotalPct": 12.615254,
+        "compoundPct": 13.268458,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.7,
+          1.7,
+          -0.3847,
+          1.7,
+          1.7,
+          1.7,
+          1.7,
+          -2.3,
+          1.7,
+          1.7,
+          1.7
+        ],
+        "stops": 1,
+        "takeProfits": 9,
+        "timeExits": 1
+      }
+    },
+    {
+      "id": "TP2p0_SL2_H1440M",
+      "tpPct": 2.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 1440,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291200000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8032000000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909300000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.66894,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768313700000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.4072,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768500600000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.19814,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642500000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.1844200000000003,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768914000000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.95608,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770214800000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50136,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772503200000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34064,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9394200000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.06094,
+          "grossPct": 2.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 4.071428571428568,
+        "mean": 1.1727272727272722,
+        "netTotalPct": 12.9,
+        "compoundPct": 13.535856,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.9,
+          1.9,
+          -2.1,
+          1.9,
+          1.9,
+          1.9,
+          1.9,
+          -2.1,
+          1.9,
+          1.9,
+          1.9
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 3.3260869565217366,
+        "mean": 0.9727272727272723,
+        "netTotalPct": 10.7,
+        "compoundPct": 11.0907,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.7,
+          1.7,
+          -2.3,
+          1.7,
+          1.7,
+          1.7,
+          1.7,
+          -2.3,
+          1.7,
+          1.7,
+          1.7
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      }
+    },
+    {
+      "id": "TP2p0_SL2_NO_TIME",
+      "tpPct": 2.0,
+      "stopPct": 2,
+      "maxHoldMinutes": null,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291200000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.8032000000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764909300000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.66894,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768313700000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.4072,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768500600000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.19814,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768642500000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.1844200000000003,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768914000000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.95608,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770214800000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.50136,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772503200000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.34064,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779474900000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.9394200000000001,
+          "grossPct": 2.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.06094,
+          "grossPct": 2.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 4.071428571428568,
+        "mean": 1.1727272727272722,
+        "netTotalPct": 12.9,
+        "compoundPct": 13.535856,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          1.9,
+          1.9,
+          -2.1,
+          1.9,
+          1.9,
+          1.9,
+          1.9,
+          -2.1,
+          1.9,
+          1.9,
+          1.9
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 3.3260869565217366,
+        "mean": 0.9727272727272723,
+        "netTotalPct": 10.7,
+        "compoundPct": 11.0907,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          1.7,
+          1.7,
+          -2.3,
+          1.7,
+          1.7,
+          1.7,
+          1.7,
+          -2.3,
+          1.7,
+          1.7,
+          1.7
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      }
+    },
+    {
+      "id": "TP3p0_SL2_H55M",
+      "tpPct": 3.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 55,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291800000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.7848,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764906900000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.693,
+          "grossPct": 0.5871990604815025,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768262100000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.37,
+          "grossPct": -0.4237288135593209,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768496100000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.235,
+          "grossPct": 0.3566651805617438,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768643700000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.201,
+          "grossPct": 1.2561686855091958,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768899300000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.97,
+          "grossPct": 1.3026052104208374,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770213300000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.514,
+          "grossPct": 1.1749347258485643,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772488500000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.369,
+          "grossPct": -0.07309941520468044,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779472500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.972,
+          "grossPct": 0.3537139969681746,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779933300000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.086,
+          "grossPct": 0.808368996671438,
+          "reason": "TIME"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 2.874561896142762,
+        "mean": 0.4766206934270412,
+        "netTotalPct": 5.242828,
+        "compoundPct": 5.28893,
+        "closedTradeDdPct": -2.269464,
+        "netPerTrade": [
+          2.9,
+          0.4872,
+          -0.5237,
+          0.2567,
+          1.1562,
+          1.2026,
+          1.0749,
+          -2.1,
+          -0.1731,
+          0.2537,
+          0.7084
+        ],
+        "stops": 1,
+        "takeProfits": 1,
+        "timeExits": 9
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 1.895784956663717,
+        "mean": 0.2766206934270412,
+        "netTotalPct": 3.042828,
+        "compoundPct": 3.006055,
+        "closedTradeDdPct": -2.664518,
+        "netPerTrade": [
+          2.7,
+          0.2872,
+          -0.7237,
+          0.0567,
+          0.9562,
+          1.0026,
+          0.8749,
+          -2.3,
+          -0.3731,
+          0.0537,
+          0.5084
+        ],
+        "stops": 1,
+        "takeProfits": 1,
+        "timeExits": 9
+      }
+    },
+    {
+      "id": "TP3p0_SL2_H120M",
+      "tpPct": 3.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 120,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291800000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.7848,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764910800000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.678,
+          "grossPct": 1.4679976512037674,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768266000000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.376,
+          "grossPct": -0.6779661016949268,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768500000000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.213,
+          "grossPct": 1.3374944271065448,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768647600000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.217,
+          "grossPct": 0.538358008075368,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768903200000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.985,
+          "grossPct": 0.5511022044088154,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770217200000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.492,
+          "grossPct": 2.610966057441255,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772492400000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.384,
+          "grossPct": -1.1695906432748426,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779475500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.91963,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0399100000000003,
+          "grossPct": 3.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 3.545682254033376,
+        "mean": 0.9598510548423618,
+        "netTotalPct": 10.558362,
+        "compoundPct": 10.905931,
+        "closedTradeDdPct": -3.342929,
+        "netPerTrade": [
+          2.9,
+          1.368,
+          -0.778,
+          1.2375,
+          0.4384,
+          0.4511,
+          2.511,
+          -2.1,
+          -1.2696,
+          2.9,
+          2.9
+        ],
+        "stops": 1,
+        "takeProfits": 3,
+        "timeExits": 7
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.7272727272727273,
+        "pf": 2.760560653039483,
+        "mean": 0.7598510548423618,
+        "netTotalPct": 8.358362,
+        "compoundPct": 8.512316,
+        "closedTradeDdPct": -3.73579,
+        "netPerTrade": [
+          2.7,
+          1.168,
+          -0.978,
+          1.0375,
+          0.2384,
+          0.2511,
+          2.311,
+          -2.3,
+          -1.4696,
+          2.7,
+          2.7
+        ],
+        "stops": 1,
+        "takeProfits": 3,
+        "timeExits": 7
+      }
+    },
+    {
+      "id": "TP3p0_SL2_H360M",
+      "tpPct": 3.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 360,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291800000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.7848,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764925200000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.673,
+          "grossPct": 1.7615971814445075,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768280400000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.344,
+          "grossPct": 0.6779661016949157,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768509900000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.17571,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768662000000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.218,
+          "grossPct": 0.4934948407357642,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768917600000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.94,
+          "grossPct": 2.8056112224448926,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770217200000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.48604,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772506800000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.345,
+          "grossPct": 1.6812865497076168,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779475500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.91963,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0399100000000003,
+          "grossPct": 3.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.9090909090909091,
+        "pf": 10.199978998108417,
+        "mean": 1.7563596269116084,
+        "netTotalPct": 19.319956,
+        "compoundPct": 20.957498,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          2.9,
+          1.6616,
+          0.578,
+          2.9,
+          0.3935,
+          2.7056,
+          2.9,
+          -2.1,
+          1.5813,
+          2.9,
+          2.9
+        ],
+        "stops": 1,
+        "takeProfits": 5,
+        "timeExits": 5
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.9090909090909091,
+        "pf": 8.443459085229428,
+        "mean": 1.556359626911609,
+        "netTotalPct": 17.119956,
+        "compoundPct": 18.367324,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          2.7,
+          1.4616,
+          0.378,
+          2.7,
+          0.1935,
+          2.5056,
+          2.7,
+          -2.3,
+          1.3813,
+          2.7,
+          2.7
+        ],
+        "stops": 1,
+        "takeProfits": 5,
+        "timeExits": 5
+      }
+    },
+    {
+      "id": "TP3p0_SL2_H720M",
+      "tpPct": 3.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 720,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291800000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.7848,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764926700000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.65191,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768302000000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.362,
+          "grossPct": -0.08474576271186862,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768509900000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.17571,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768683600000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.217,
+          "grossPct": 0.538358008075368,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768930800000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.9361199999999998,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770217200000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.48604,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772514000000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.3269600000000001,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779475500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.91963,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0399100000000003,
+          "grossPct": 3.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 10.346165597006253,
+        "mean": 1.941237476851227,
+        "netTotalPct": 21.353612,
+        "compoundPct": 23.367911,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          2.9,
+          2.9,
+          -0.1847,
+          2.9,
+          0.4384,
+          2.9,
+          2.9,
+          -2.1,
+          2.9,
+          2.9,
+          2.9
+        ],
+        "stops": 1,
+        "takeProfits": 8,
+        "timeExits": 2
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 8.134236884320986,
+        "mean": 1.7412374768512273,
+        "netTotalPct": 19.153612,
+        "compoundPct": 20.730752,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          2.7,
+          2.7,
+          -0.3847,
+          2.7,
+          0.2384,
+          2.7,
+          2.7,
+          -2.3,
+          2.7,
+          2.7,
+          2.7
+        ],
+        "stops": 1,
+        "takeProfits": 8,
+        "timeExits": 2
+      }
+    },
+    {
+      "id": "TP3p0_SL2_H1440M",
+      "tpPct": 3.0,
+      "stopPct": 2,
+      "maxHoldMinutes": 1440,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291800000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.7848,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764926700000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.65191,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768313700000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.4072,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768509900000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.17571,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768726800000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.187,
+          "grossPct": 1.8842530282638048,
+          "reason": "TIME"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768930800000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.9361199999999998,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770217200000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.48604,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772514000000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.3269600000000001,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779475500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.91963,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0399100000000003,
+          "grossPct": 3.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 5.948631673396139,
+        "mean": 1.889477548023982,
+        "netTotalPct": 20.784253,
+        "compoundPct": 22.622164,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          2.9,
+          2.9,
+          -2.1,
+          2.9,
+          1.7843,
+          2.9,
+          2.9,
+          -2.1,
+          2.9,
+          2.9,
+          2.9
+        ],
+        "stops": 2,
+        "takeProfits": 8,
+        "timeExits": 1
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 5.040055006144303,
+        "mean": 1.689477548023982,
+        "netTotalPct": 18.584253,
+        "compoundPct": 19.999398,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          2.7,
+          2.7,
+          -2.3,
+          2.7,
+          1.5843,
+          2.7,
+          2.7,
+          -2.3,
+          2.7,
+          2.7,
+          2.7
+        ],
+        "stops": 2,
+        "takeProfits": 8,
+        "timeExits": 1
+      }
+    },
+    {
+      "id": "TP3p0_SL2_NO_TIME",
+      "tpPct": 3.0,
+      "stopPct": 2,
+      "maxHoldMinutes": null,
+      "rawMarketSignalCountAllHistory": 25,
+      "rawMarketSignalCount12m": 11,
+      "trades": [
+        {
+          "entryTs": 1762290000000,
+          "exitTs": 1762291800000,
+          "entryPrice": 1.84,
+          "exitPrice": 1.7848,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1764903600000,
+          "exitTs": 1764926700000,
+          "entryPrice": 1.703,
+          "exitPrice": 1.65191,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768258800000,
+          "exitTs": 1768313700000,
+          "entryPrice": 2.36,
+          "exitPrice": 2.4072,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1768492800000,
+          "exitTs": 1768509900000,
+          "entryPrice": 2.243,
+          "exitPrice": 2.17571,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768640400000,
+          "exitTs": 1768728000000,
+          "entryPrice": 2.229,
+          "exitPrice": 2.16213,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1768896000000,
+          "exitTs": 1768930800000,
+          "entryPrice": 1.996,
+          "exitPrice": 1.9361199999999998,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770210000000,
+          "exitTs": 1770217200000,
+          "entryPrice": 1.532,
+          "exitPrice": 1.48604,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1770300000000,
+          "exitTs": 1770302100000,
+          "entryPrice": 1.396,
+          "exitPrice": 1.4239199999999999,
+          "grossPct": -2.0000000000000018,
+          "reason": "STOP"
+        },
+        {
+          "entryTs": 1772485200000,
+          "exitTs": 1772514000000,
+          "entryPrice": 1.368,
+          "exitPrice": 1.3269600000000001,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779469200000,
+          "exitTs": 1779475500000,
+          "entryPrice": 1.979,
+          "exitPrice": 1.91963,
+          "grossPct": 3.0,
+          "reason": "TP"
+        },
+        {
+          "entryTs": 1779930000000,
+          "exitTs": 1779935100000,
+          "entryPrice": 2.103,
+          "exitPrice": 2.0399100000000003,
+          "grossPct": 3.0,
+          "reason": "TP"
+        }
+      ],
+      "unresolved": [],
+      "10bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 6.214285714285708,
+        "mean": 1.9909090909090905,
+        "netTotalPct": 21.9,
+        "compoundPct": 23.966334,
+        "closedTradeDdPct": -2.1,
+        "netPerTrade": [
+          2.9,
+          2.9,
+          -2.1,
+          2.9,
+          2.9,
+          2.9,
+          2.9,
+          -2.1,
+          2.9,
+          2.9,
+          2.9
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      },
+      "30bps": {
+        "n": 11,
+        "wr": 0.8181818181818182,
+        "pf": 5.28260869565217,
+        "mean": 1.7909090909090908,
+        "netTotalPct": 19.7,
+        "compoundPct": 21.317407,
+        "closedTradeDdPct": -2.3,
+        "netPerTrade": [
+          2.7,
+          2.7,
+          -2.3,
+          2.7,
+          2.7,
+          2.7,
+          2.7,
+          -2.3,
+          2.7,
+          2.7,
+          2.7
+        ],
+        "stops": 2,
+        "takeProfits": 9,
+        "timeExits": 0
+      }
+    }
+  ],
+  "executionAssumptions": "After completed H1 enter next M5 open; if SL and TP touched same M5 assume STOP first; 12-hour entry cooldown; same-symbol no overlap; stop2% all; TP variants 1.5%,2%,3%; no-time exits only on TP or SL, no forced closing. Cost is total roundtrip basis points.",
+  "limitation": "RESEARCH-only independent signal outcomes; capital/gross ownership and portfolio effects require separate Native8 replay; no signed Aster fills, funding or L2 evidence."
+}

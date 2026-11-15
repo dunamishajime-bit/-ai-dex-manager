@@ -5,6 +5,8 @@ import { resolveDisDexStable4Mode } from "@/config/disdexStable4Opportunity";
 import { type AccountLockDocument, ACCOUNT_LOCK_SCHEMA } from "./disdex-account-order-lock";
 import { pendingExposurePath, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { assertStable4EntryGrossAdmission, Stable4EntryGrossAdmissionError } from "./stable4-entry-gross-guard";
+import {MarketSlippageGuardError} from "./market-slippage-guard-error";
+import {MarketPreSubmitEntryError} from "./market-pre-submit-entry-error";
 
 import {
     AsterApiError,
@@ -348,10 +350,17 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         const row = matchingRows[0];
         if (!row) throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_RISK_ROW_MISSING`);
         for (const candidate of matchingRows) {
-            const positionAmount = Number(candidate.positionAmt);
+            const positionAmount = requiredVenueNumber(candidate.positionAmt,"POSITION_AMOUNT");
             if (!Number.isFinite(positionAmount)) {
                 throw new Error(`ASTER_VENUE_MARGIN_UNCONFIRMED:${normalized}:POSITION_AMOUNT_UNKNOWN`);
             }
+        }
+        // Existing owned inventory can already satisfy the venue contract.
+        // Verify every returned side; never modify settings beneath a position
+        // or cancel its resident protection merely to prepare another leg.
+        if(matchingRows.every(candidate=>Number(candidate.leverage)===5&&venueMarginType(candidate)==="cross"))return;
+        for (const candidate of matchingRows) {
+            const positionAmount = requiredVenueNumber(candidate.positionAmt,"POSITION_AMOUNT");
             if (Math.abs(positionAmount) > 1e-12) {
                 throw new Error(`ASTER_VENUE_MARGIN_PREPARATION_BLOCKED:${normalized}:NON_ZERO_POSITION`);
             }
@@ -805,14 +814,19 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         }
     }
 
+    private async preSubmitCheck<T>(command:DirectTradeCommand,stage:ConstructorParameters<typeof MarketPreSubmitEntryError>[2],check:()=>Promise<T>):Promise<T>{
+        try{return await check();}
+        catch(error){if(command.reduceOnly===true)throw error;throw new MarketPreSubmitEntryError(command.symbol.toUpperCase(),sanitizeClientOrderId(command.clientOrderId),stage,error);}
+    }
+
     async executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult> {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
         if (command.reduceOnly !== true) {
-            if (command.requireVenueMargin5xCross === true) await this.prepareVenueMargin5xCross(symbol);
-            await runFreshMarginGuardBeforeExposureOrder(symbol);
+            if (command.requireVenueMargin5xCross === true) await this.preSubmitCheck(command,"MARGIN_PREPARATION",()=>this.prepareVenueMargin5xCross(symbol));
+            await this.preSubmitCheck(command,"MARGIN_GUARD",()=>runFreshMarginGuardBeforeExposureOrder(symbol));
         }
-        const quote = await this.getMarketQuote(symbol);
+        const quote = await this.preSubmitCheck(command,"QUOTE",()=>this.getMarketQuote(symbol));
         const executablePrice = command.side === "BUY" ? quote.askPrice : quote.bidPrice;
         const adverseSlippageBps = command.expectedPrice > 0
             ? command.side === "BUY"
@@ -820,16 +834,15 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 : Math.max(0, ((command.expectedPrice - executablePrice) / command.expectedPrice) * 10_000)
             : 0;
         if (adverseSlippageBps > command.maxSlippageBps) {
-            throw new Error(
-                `Slippage guard blocked ${symbol}: ${adverseSlippageBps.toFixed(2)}bps > ${command.maxSlippageBps.toFixed(2)}bps.`,
-            );
+            throw new MarketSlippageGuardError(symbol,clientOrderId,command.reduceOnly===true,
+                adverseSlippageBps,command.maxSlippageBps);
         }
-        const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice, { allowBelowMinNotional: command.reduceOnly === true });
+        const normalized = await this.preSubmitCheck(command,"QUANTITY",()=>this.normalizeMarketQuantity(symbol, command.quantity, executablePrice, { allowBelowMinNotional: command.reduceOnly === true }));
         if (command.maxEntryNotionalUsd !== undefined && command.reduceOnly !== true) {
             if (!Number.isFinite(command.maxEntryNotionalUsd) || command.maxEntryNotionalUsd <= 0 ||
                 !Number.isFinite(normalized.notional) ||
                 normalized.notional > command.maxEntryNotionalUsd * (1 + 1e-9)) {
-                throw new Error("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:" + symbol);
+                throw new MarketPreSubmitEntryError(symbol,clientOrderId,"ENTRY_NOTIONAL",new Error("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:"+symbol));
             }
         }
         if (command.reduceOnly !== true && resolveDisDexStable4Mode(process.env) === "LIVE") {

@@ -16,7 +16,10 @@ test("V4 daemon emits an exact-release heartbeat after each successful tick",()=
  assert.match(runner,/disdex-v12-v4-runner-heartbeat\/v1/);
  assert.match(runner,/V12_V4_HEALTH_STATE_PATH/);
  assert.match(runner,/\/var\/lib\/disdex\/v12-v4\/heartbeat\.json/);
- assert.match(runner,/await writeV4Health\(releaseSha,operationMode,result\)/);
+ assert.match(runner,/await writeV4Health\(releaseSha,operationMode,result,lastCompletedTickAt\)/);
+ assert.match(runner,/let lastCompletedTickAt:number\|null=null/);
+ assert.match(runner,/lastCompletedTickAt=tickCompletedAt/);
+ assert.match(runner,/operationMode,mode:"LIVE",updatedAt:now,lastTickAt/);
 });
 
 test("V4 heartbeat includes the fields required by the release-pinned watchdog",()=>{

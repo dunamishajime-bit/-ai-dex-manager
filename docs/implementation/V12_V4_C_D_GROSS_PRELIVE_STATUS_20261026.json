@@ -1,0 +1,59 @@
+{
+  "schema": "v12-v4-cd-live-prep-20261026/v1",
+  "status": "CODE_TEST_PASS_LIVE_BLOCKED_SOURCE_EVIDENCE",
+  "branch": "research/render-dual-production-prep-20261025",
+  "candidateSha": "PIN_REMOTE_BRANCH_HEAD_AFTER_COMMIT",
+  "v4DeployedSha": "23ddd4b01fcff38cd10d4d4614221f93dc6b44e5",
+  "sharedDeployedSha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+  "v4Status": "FAILED_STALE_ROUTE_SOURCE_PARITY",
+  "cRoutes": [
+    "REC_X06_TIME_12H",
+    "REC_Y08_REV_D0_T6",
+    "REC_G2_EARLY_BTC_OPPOSE_VOL",
+    "REC_X02_TIME_36H",
+    "REC_Y17_REV_D1_T3",
+    "REC_X04_TIME_24H",
+    "REC_Y19_REV_D1_TP2_SL1_H36",
+    "REC_X09_TIME_48H",
+    "REC_G1_MID_REL_LOWVOL"
+  ],
+  "cGross": 0.25,
+  "dUpdated": {
+    "REC_G3_LATE_BTC_REL": 0.25,
+    "REC_X13_TP1.5_SL1_H24": 0.15,
+    "CONT_SHORT_MID_AGE24_48": 0.15
+  },
+  "dUnchanged": [
+    "REC_X07_TIME_6H",
+    "REC_X14_TIME_48H",
+    "REC_Y15_REV_D0_T3",
+    "REC_Y18_REV_D2_T18"
+  ],
+  "dUnchangedGross": 0.05,
+  "noFreeGrossYield": {
+    "rulesWritten": true,
+    "pureModuleWritten": true,
+    "liveExecutionConnected": false,
+    "historicalTriggers": {
+      "10bps": 0,
+      "30bps": 0
+    }
+  },
+  "modelResults": {
+    "10bps": {
+      "finalEquityJpy": 304799545.6753143,
+      "maxDdPct": -20.340188405498495
+    },
+    "30bps": {
+      "finalEquityJpy": 193683202.52534655,
+      "maxDdPct": -18.349495980037812
+    }
+  },
+  "runnerTestsPassed": 257,
+  "typecheckPassed": true,
+  "current8LiveParityProven": false,
+  "venueProofCertified": false,
+  "liveDeployed": false,
+  "vpsModified": false,
+  "ordersModified": false
+}
