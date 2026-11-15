@@ -94,3 +94,8 @@ BT Python回帰テスト合計 **282件PASS**。3タスク各々テスト→Git 
 - 元モデルNormal費用 perSide0.0006/fundingDay0.0002 とユーザー指定10/30bps統合BTは別。Model eventsの個票JsonとSHA256はOwner PC非公開 `C:\Users\dis\disdex-bt481-private-evidence-20261116`。再実行・証拠は `BT_HP_Q102_S1_S2_180D_NATIVE_CLOSED_MODEL_REPLAY_20261116.md`。固定本番Q102 pin、上流S1/S2 ID、完全市場のOOS、Portfolio/Shared Risk/Gross/venue経済パリティは今後のタスク。V4 Codex切替・Productionは触れない。
 
 - **BT-481-J追補（同日）**：人工月末でNative未決済の右打切りを合成検査。未決済候補をルール内slotとして保持し後続モデル発注重複を防止。基準27件の研究結果は不変。最新Owner private証拠 SHA256 `2E276765462D6ED0E6BCDF0DA458E50F22DB34937A8398609194F80F3DF293E8`。実S1/S2所属ID・本番取引認証は引続き未達。
+
+## 追記：2026-11-16 BT-481-K — Q102 S1/S2旧研究フィクスチャの出所監査
+
+- Owner PCの旧S1/S2 `quality102_s1s2_known_fixture.csv`（18行：S1=8/S2=10、6通貨）と元Pinned Native source SHA `7483c4...b8f` をread-only照合。元旧研究コードが `ORIGINAL_RAW_GENERATOR_PROVEN=False` を明示しており、**原30 Expanded候補と所属IDが未証明**。したがって **`LEGACY_FIXTURE_CONTRACT_ONLY_STAGE_MEMBERSHIP_UNVERIFIED`（期待exit2）** を維持。歴史的18件はBT-481-Jの人工H1モデル決済27件とは別母集団。
+- `scripts/bt_hp_q102_legacy_stage_membership_audit.py` + `tests/test_bt_hp_q102_legacy_stage_membership_audit.py`（合成9件PASS）、非公開Owner監査JSON SHA `0EAC69AEFCC69468DA15C9BD70B7CB7476C07263820B26F16E7489E21AA46B76`。詳細 `BT_HP_Q102_S1S2_LEGACY_STAGE_PROVENANCE_20261116.md`。実注文・LIVE・STOPS・Codexには変更なし。
