@@ -6,7 +6,7 @@ import {createPreviewReplay,DEMO_WARMUP_HOURS,DEMO_TICKS_PER_HOUR,DEMO_BASE_JPY,
  * In particular, no V4 preemption, Q102, Layer2/3, Funding or venue execution is modeled.
  */
 export const H48_RESEARCH_THRESHOLDS=Object.freeze({
-  h12Max:.0042978523,h24Min:.020474266,rel24Max:.0262025534,
+  h12Max:.004297852251518686,h24Min:.02047426596091347,rel24Max:.026202553353817715,
   holdingHours:48,requestedGrossX:1.0,entryGridHours:6,researchCandidateHardStopPct:.06
 });
 export const H48_RESEARCH_LOGIC="HYPE_H48_RESEARCH";

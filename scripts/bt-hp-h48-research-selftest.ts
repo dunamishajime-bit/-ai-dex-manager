@@ -1,11 +1,32 @@
 import assert from "node:assert/strict";
-import {evaluateH48ClosedHourly,createH48ResearchReplay,H48_RESEARCH_LOGIC} from "../lib/bt-verification/h48-research-sandbox";
+import {evaluateH48ClosedHourly,createH48ResearchReplay,H48_RESEARCH_LOGIC,H48_RESEARCH_THRESHOLDS} from "../lib/bt-verification/h48-research-sandbox";
 import {validateReplay,grossForFrame} from "../lib/bt-verification/replay";
 
 const observation=Array.from({length:25},(_,i)=>({
   btcClose:100+i/24,
   hypeClose:i<=12?100+2.9*i/12:102.9+.1*(i-12)/12
 }));
+// Assert exact thresholds from frozen research entryRule; rounded decimals must
+// not silently widen/narrow the accepted boundary.
+assert.equal(H48_RESEARCH_THRESHOLDS.h12Max,0.004297852251518686);
+assert.equal(H48_RESEARCH_THRESHOLDS.h24Min,0.02047426596091347);
+assert.equal(H48_RESEARCH_THRESHOLDS.rel24Max,0.026202553353817715);
+const boundary=Array.from({length:25},()=>({btcClose:100,hypeClose:100}));
+boundary[12].hypeClose=103;
+boundary[24].hypeClose=103*(1+H48_RESEARCH_THRESHOLDS.h12Max);
+boundary[0].hypeClose=100;
+boundary[24].btcClose=100*(1+0.02);
+assert.equal(evaluateH48ClosedHourly(boundary).candidate,true);
+const tooFast=boundary.map(x=>({...x}));
+tooFast[24].hypeClose=103*(1+H48_RESEARCH_THRESHOLDS.h12Max+1e-8);
+assert.equal(evaluateH48ClosedHourly(tooFast).candidate,false,"H12 strict boundary");
+const low24=boundary.map(x=>({...x}));
+low24[0].hypeClose=low24[24].hypeClose/(1+H48_RESEARCH_THRESHOLDS.h24Min-1e-8);
+assert.equal(evaluateH48ClosedHourly(low24).candidate,false,"H24 strict boundary");
+const highRel=boundary.map(x=>({...x}));
+const currentH24=highRel[24].hypeClose/highRel[0].hypeClose-1;
+highRel[24].btcClose=highRel[0].btcClose*(1+currentH24-H48_RESEARCH_THRESHOLDS.rel24Max-1e-8);
+assert.equal(evaluateH48ClosedHourly(highRel).candidate,false,"Relative return strict boundary");
 const pass=evaluateH48ClosedHourly(observation);
 assert.equal(pass.ready,true);
 assert.equal(pass.candidate,true);

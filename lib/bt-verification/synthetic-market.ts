@@ -154,6 +154,15 @@ export class SyntheticMarket5m {
  latestH1(symbol:SyntheticSymbol):MarketCandle5m|null{
     const c=this.lastCandle(symbol);return c?{...c}:null;
  }
+ /** In-progress H1 contains only price/volume ticks already emitted by step(). */
+ formingH1(symbol:SyntheticSymbol):MarketCandle5m|null{
+   if(!SYNTHETIC_FEED_SYMBOLS.includes(symbol))throw Error("SYNTHETIC_SYMBOL_INVALID");
+   const a=this.bars.get(symbol);
+   if(!a)return null;
+   return {symbol,category:a.category,openTime:iso(a.hour),closedAt:iso(a.hour+H1),
+      open:a.open,high:a.high,low:a.low,close:a.close,volume:digits(a.volume),
+      ticks:a.ticks,partialSession:a.ticks!==12};
+ }
  step():SyntheticStep|null{
    if(this.marketTick>=this.totalTicks)return null;
    this.marketTick++;

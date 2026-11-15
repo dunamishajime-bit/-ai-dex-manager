@@ -70,6 +70,8 @@ export type ReplayFrame = {
   formingBtcCandle?: BtcCandle;
   /** Synthetic-only HYPE live quote and latest closed-H1 H48 study decision. */
   h48Research?:H48SyntheticObservation;
+  /** Fictional JPY per USD used for this H48 tick's model mark/funding. */
+  syntheticFxJpy?:number;
   /** Synthetic-only threshold checks recorded at this exact tick. */
   demoSignals?: DemoSignal[];
 };
@@ -301,10 +303,16 @@ export function validateReplay(value:unknown):value is Replay {
         c.low>Math.min(c.open,c.close)||c.high<Math.max(c.open,c.close)||
         frame.btc!==c.close)return false;
     }
+    if(frame.syntheticFxJpy!==undefined||isObj(value.source)&&
+       value.source.kind==="SYNTHETIC_MULTI_ASSET_H48_CANDIDATE"){
+      if(value.mode!=="DEMO"||!isObj(value.source)||
+         value.source.kind!=="SYNTHETIC_MULTI_ASSET_H48_CANDIDATE"||
+         !number(frame.syntheticFxJpy)||frame.syntheticFxJpy<=0)return false;
+    }
     if(frame.h48Research!==undefined){
       const h=frame.h48Research;
       if(value.mode!=="DEMO"||!isObj(value.source)||
-         value.source.kind!=="SYNTHETIC_H48_RESEARCH_RULE_ONLY"||!isObj(h)||
+         !(["SYNTHETIC_H48_RESEARCH_RULE_ONLY","SYNTHETIC_MULTI_ASSET_H48_CANDIDATE"].includes(String(value.source.kind)))||!isObj(h)||
          !number(h.hypePrice)||h.hypePrice<=0||
          !nullableNumber(h.h12)||!nullableNumber(h.h24)||!nullableNumber(h.btc24)||!nullableNumber(h.rel24)||
          typeof h.ready!=="boolean"||typeof h.candidate!=="boolean"||

@@ -13,6 +13,7 @@ import {Stable4BaselineComparisonPanel} from "@/components/bt-verification/Stabl
 import {BTWorkspaceShell,type BTWorkspaceTab} from "@/components/bt-verification/BTWorkspaceShell";
 import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo";
 import {createH48ResearchReplay} from "@/lib/bt-verification/h48-research-sandbox";
+import {createMultiassetH48Replay} from "@/lib/bt-verification/multiasset-h48-replay";
 import {auditSyntheticFeed,type SyntheticFeedAudit} from "@/lib/bt-verification/synthetic-feed-audit";
 import {observedV4MismatchInResearchSource,V4_PIN_OBSERVED_2026_11_15} from "@/lib/bt-verification/source-pin-observation";
 import {buildNativeHypeSensitivityComparison} from "@/lib/bt-verification/native-hype-sensitivity-comparison";
@@ -29,7 +30,7 @@ const [tab,setTab]=useState<BTWorkspaceTab>("config");
 const [previewMode,setPreviewMode]=useState<"synthetic"|"historical">("synthetic");
 const [scenario,setScenario]=useState<DemoScenario>("trend");
 const [previewSeed,setPreviewSeed]=useState(123456);
-const [syntheticStrategy,setSyntheticStrategy]=useState<"proxy"|"h48">("proxy");
+const [syntheticStrategy,setSyntheticStrategy]=useState<"proxy"|"h48"|"h48multi">("proxy");
 const [syntheticFeeBps,setSyntheticFeeBps]=useState<10|30>(10);
 const [feedAudit,setFeedAudit]=useState<SyntheticFeedAudit|null>(null);
 const [feedAuditNotice,setFeedAuditNotice]=useState("");
@@ -93,7 +94,7 @@ const changePct=initialEquity?equityChange/initialEquity*100:0;
 let peak=-Infinity,maxDrawdown=0;
 for(let i=0;i<=cursor;i++){const value=replay.frames[i].equity;peak=Math.max(peak,value);if(peak>0)maxDrawdown=Math.min(maxDrawdown,100*(value/peak-1))}
 const isResearch=replay.mode==="EXTERNAL";
-const sourceLabel=isResearch?(verifiedResearch?"研究モデル・SHA照合済み":"研究データ・出所未認証"):(replay.source?.kind==="SYNTHETIC_H48_RESEARCH_RULE_ONLY"?"人工市場・H48研究判定のみ":"模擬再生・デモ");
+const sourceLabel=isResearch?(verifiedResearch?"研究モデル・SHA照合済み":"研究データ・出所未認証"):((replay.source?.kind==="SYNTHETIC_H48_RESEARCH_RULE_ONLY"||replay.source?.kind==="SYNTHETIC_MULTI_ASSET_H48_CANDIDATE")?"人工市場・H48候補研究のみ":"模擬再生・デモ");
 const signalState=frame.demoSignals??[];
 const activeCandlestick=frame.formingBtcCandle;
 const currentCrossings=signalState.filter(x=>x.crossed);
@@ -109,7 +110,7 @@ function runInputAudit(){
  }catch(e){setFeedAudit(null);setFeedAuditNotice("人工市場入力エラー："+String(e))}
 }
 function prepareDemo(){
-  const demo=syntheticStrategy==="h48"?createH48ResearchReplay(previewSeed,scenario,syntheticFeeBps):createPreviewReplay(previewSeed,scenario);
+  const demo=syntheticStrategy==="h48multi"?createMultiassetH48Replay(previewSeed,scenario,syntheticFeeBps):syntheticStrategy==="h48"?createH48ResearchReplay(previewSeed,scenario,syntheticFeeBps):createPreviewReplay(previewSeed,scenario);
   setReplay(demo);setVerifiedResearch(null);setCursor(0);setRunning(false);setError("");
   setLogicFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.logic)))]);
   setSymbolFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.symbol)))]);
@@ -392,7 +393,9 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                 <button type="button" aria-pressed={syntheticStrategy==="proxy"} onClick={()=>setSyntheticStrategy("proxy")}
                   className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="proxy"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>チャート動作確認（簡易デモ）</button>
                 <button type="button" aria-pressed={syntheticStrategy==="h48"} onClick={()=>setSyntheticStrategy("h48")}
-                  className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>HYPE H48研究版の入口判定</button>
+                  className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>HYPE H48単体研究デモ</button>
+                <button type="button" aria-pressed={syntheticStrategy==="h48multi"} onClick={()=>setSyntheticStrategy("h48multi")}
+                  className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48multi"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>23銘柄OHLCV → H48候補研究</button>
               </div>
               <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -417,18 +420,23 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                   </details>
                 </div>}
               </div>
-              {syntheticStrategy==="h48"&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
+              {(syntheticStrategy==="h48"||syntheticStrategy==="h48multi")&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
                 <p>確定H1のH12/H24/BTC相対24hと6時間UTC入場枠で判定。次の足の始値で入り、最大48時間後に決済。元候補研究にある6%STOPは観測済み5分模擬価格で評価します（本番STOPの再現ではありません）。</p>
+                {syntheticStrategy==="h48multi"&&<p className="text-cyan-100">23銘柄の独立した模擬OHLCVからBTC・HYPEの確定足を作り、同じH48候補研究関数へ接続します。他の銘柄はまだ売買判定しません。モデルFunding・変動USDJPYを収支に含めます。</p>}
                 <label className="flex items-center gap-2">往復モデル費用
                   <select aria-label="H48模擬往復費用" value={syntheticFeeBps} onChange={e=>setSyntheticFeeBps(Number(e.target.value) as 10|30)}
                     className="rounded-md border border-[#46637b] bg-[#102b41] px-2 py-1 text-white">
                     <option value={10}>10bps</option><option value={30}>30bps</option>
                   </select>
                 </label>
-                <button type="button" onClick={()=>{setPreviewSeed(11);setScenario("trend")}}
+                {syntheticStrategy==="h48"&&<button type="button" onClick={()=>{setPreviewSeed(11);setScenario("trend")}}
                   className="rounded-lg border border-cyan-500/40 bg-[#15495a] px-3 py-2 text-[11px] text-cyan-100">
-                  H48発火例（人工市場シード11）を設定
-                </button>
+                  H48発火例（単体研究シード11）を設定
+                </button>}
+                {syntheticStrategy==="h48multi"&&<button type="button" onClick={()=>{setPreviewSeed(1);setScenario("trend")}}
+                  className="rounded-lg border border-cyan-500/40 bg-[#15495a] px-3 py-2 text-[11px] text-cyan-100">
+                  23銘柄入力でH48が発火する例（シード1）を設定
+                </button>}
                 <p className="text-amber-200">H48研究入口と候補研究の簡易STOPのみ。V4枠譲渡・Q102等6系統・Online Layer2/3・Funding・本番STOPは未接続。統合STABLE4の利益やDDではありません。</p>
               </div>}
             </div>}
