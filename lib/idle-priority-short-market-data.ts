@@ -1,7 +1,8 @@
 import type { AsterKline, AsterV3Client } from "./aster-v3-client";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 import { IDLE_RESIDUAL_LONG_POLICY, type IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
-import type { IdleH1Candle } from "./idle-priority-short-signal";
+import {computeIdlePriorityFeatures,evaluateIdleGenericCandidate,evaluateIdlePriorityShort,type IdleH1Candle,type IdleSignal} from "./idle-priority-short-signal";
+import {dispatchStable4NativeShadowObservation} from "./stable4-native-shadow-observer";
 import type { ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
 import { RENDER_H1_MS, RENDER_M5_MS, type ClosedM5 } from "./render-highwr-and-legacy-stop";
 
@@ -96,7 +97,10 @@ export class IdlePriorityAsterMarketDataProvider {
   private readonly requestSpacingMs: number;
   constructor(
     private readonly client: AsterV3Client,
-    private readonly options: { limit?: number; now?: () => number; requestSpacingMs?: number } = {},
+    private readonly options: { limit?: number; now?: () => number; requestSpacingMs?: number;
+      nativeShadowObserver?:(input:{market:IdlePriorityMarketSnapshot;signals:IdleSignal[];capturedAt:number})=>Promise<unknown>;
+      nativeShadowDiagnostic?:(input:{strategy:"IDLE";logicalEntryTs:number;observedAt:number;complete:false;reason:string})=>void;
+    } = {},
   ) {
     this.requestSpacingMs = Math.max(0, Math.min(5_000, Math.floor(options.requestSpacingMs ?? 0)));
   }
@@ -145,7 +149,21 @@ export class IdlePriorityAsterMarketDataProvider {
     }
     // Force an explicit positive close at the signal boundary before signal math.
     finitePositive(btc.rows.at(-1)?.close, "IDLE_MARKET_DATA_BTC_CLOSE_INVALID");
-    return { decisionTs: btc.decisionTs, btc: btc.rows, symbols: mapped, residualSymbols: residualMapped };
+    const snapshot={ decisionTs: btc.decisionTs, btc: btc.rows, symbols: mapped, residualSymbols: residualMapped };
+    if(this.options.nativeShadowObserver){
+      const incomplete=(reason:string)=>{
+        const frame={strategy:"IDLE" as const,logicalEntryTs:snapshot.decisionTs,observedAt:(this.options.now||Date.now)(),complete:false as const,reason};
+        try{if(this.options.nativeShadowDiagnostic)this.options.nativeShadowDiagnostic(frame);else console.warn(JSON.stringify({event:"STABLE4_NATIVE_SHADOW_INCOMPLETE",...frame}));}catch{/* Diagnostics cannot interrupt native management. */}
+      };
+      try{
+        const signals=(Object.keys(snapshot.symbols) as IdlePrioritySymbol[]).map(symbol=>{
+          const features=computeIdlePriorityFeatures(snapshot.decisionTs,snapshot.symbols[symbol],snapshot.btc);
+          return evaluateIdlePriorityShort(symbol,features,evaluateIdleGenericCandidate(features));
+        });
+        dispatchStable4NativeShadowObservation(this.options.nativeShadowObserver,{market:snapshot,signals,capturedAt:(this.options.now||Date.now)()},incomplete);
+      }catch(error){incomplete(error instanceof Error?error.message:String(error));}
+    }
+    return snapshot;
   }
 
   /** Read the latest completed Aster 5m candle only; never use the forming bar. */

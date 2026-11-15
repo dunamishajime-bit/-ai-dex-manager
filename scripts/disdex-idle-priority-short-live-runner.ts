@@ -17,6 +17,7 @@ import { IdleResidualLongRunner } from "../lib/idle-residual-long-runner";
 import { FileIdleResidualLongStateStore } from "../lib/idle-residual-long-state";
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
+import {createStable4IdleNativeShadowObserver} from "../lib/stable4-native-shadow-runtime";
 
 function numberEnv(name: string, fallback: number) {
     const value = Number(process.env[name]);
@@ -63,6 +64,7 @@ async function main() {
     });
     const residualRuntime = resolveIdleResidualLongRuntime();
     const provider = new IdlePriorityAsterMarketDataProvider(client, {
+        nativeShadowObserver:createStable4IdleNativeShadowObserver(runtime.stable4Mode,runtime.runtimeSha.toLowerCase()),
         limit: numberEnv("DISDEX_IDLE_PRIORITY_H1_LIMIT", 160),
         requestSpacingMs: numberEnv("DISDEX_IDLE_PRIORITY_REQUEST_SPACING_MS", 100),
     });

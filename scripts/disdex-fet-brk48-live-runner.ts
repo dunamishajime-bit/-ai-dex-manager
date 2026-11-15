@@ -12,6 +12,7 @@ import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry
 import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
 import {resolveDisDexStable4Mode} from "../config/disdexStable4Opportunity";
 import {FET_BRK48_RESIDUAL} from "../config/fetBrk48Runtime";
+import {createStable4FetNativeShadowObserver} from "../lib/stable4-native-shadow-runtime";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -80,6 +81,7 @@ async function main() {
     readRequestSpacingMs: numberEnv("V12_X1_ALL_REQUEST_SPACING_MS", 100),
   });
   const runner = new FetBrk48LiveRunner({
+    nativeShadowObserver:createStable4FetNativeShadowObserver(resolveDisDexStable4Mode(),runtimeSha.toLowerCase()),
     client,
     executor: adapter.executor,
     adapter,

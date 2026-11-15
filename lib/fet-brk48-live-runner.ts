@@ -24,7 +24,7 @@ import {
   findManagedV12ProtectiveOrders,
 } from "@/lib/disdex-managed-protective-orders";
 import type { DirectOpenOrder, DirectPosition, DirectTradeExecutor } from "@/lib/direct-trade-executor";
-import { fetCompletedReturn72h, buildFetBrk48Signal, normalizeFetH1, type FetBrk48Signal } from "@/lib/fet-brk48-signal";
+import { fetCompletedReturn72h, buildFetBrk48Signal, normalizeFetH1, type FetBrk48Signal,type FetBrk48Bar } from "@/lib/fet-brk48-signal";
 import {
   readFetBrk48State,
   writeFetBrk48State,
@@ -90,6 +90,9 @@ export interface FetBrk48LiveRunnerDependencies {
   minimumOrderNotionalUsd?: number;
   now?: () => number;
   entryOpportunityBuilder?: (input:{signal:FetBrk48Signal;pending:FetBrk48PendingState;decisionTs:number;lock:AccountLockHandle})=>Promise<Stable4EntryOpportunityRecord|undefined>;
+  /** Isolated raw native discovery, including held/cooldown/capacity-blocked cases. */
+  nativeShadowObserver?: (input:{rows:readonly FetBrk48Bar[];decisionTs:number;capturedAt:number})=>Promise<unknown>;
+  nativeShadowDiagnostic?: (input:{strategy:"FET";logicalEntryTs:number;observedAt:number;complete:false;reason:string})=>void;
 }
 
 export interface FetBrk48TickResult {
@@ -596,7 +599,37 @@ async function executeExit(
 }
 
 export class FetBrk48LiveRunner {
+  private nativeShadowInFlight=false;
+  private nativeShadowBoundary:number|undefined;
+  private sharedNativeH1:{boundary:number;promise:Promise<AsterKline[]>}|undefined;
   constructor(private readonly deps: FetBrk48LiveRunnerDependencies) {}
+
+  private loadNativeH1(now:number):Promise<AsterKline[]>{
+    if(!this.deps.nativeShadowObserver)return this.deps.client.getKlines("FETUSDT","1h",120);
+    const boundary=Math.floor(now/3_600_000)*3_600_000;
+    if(this.sharedNativeH1?.boundary===boundary)return this.sharedNativeH1.promise;
+    const promise=this.deps.client.getKlines("FETUSDT","1h",120);
+    this.sharedNativeH1={boundary,promise};
+    const clear=()=>{if(this.sharedNativeH1?.promise===promise)this.sharedNativeH1=undefined;};
+    void promise.then(clear,clear);
+    return promise;
+  }
+
+  private dispatchNativeShadow(now:number):void{
+    const observe=this.deps.nativeShadowObserver,boundary=Math.floor(now/3_600_000)*3_600_000;
+    if(!observe||this.nativeShadowInFlight||this.nativeShadowBoundary===boundary||now-boundary>FET_BRK48_RESIDUAL.liveEntryWindowMs||
+      new Date(boundary).getUTCHours()%FET_BRK48_RESIDUAL.decisionEntryHourModulo!==FET_BRK48_RESIDUAL.decisionEntryHourRemainder)return;
+    this.nativeShadowInFlight=true;
+    // Never await discovery or its writer from the protection/exit loop. The
+    // same H1 read is reused if ordinary native discovery also needs it.
+    void Promise.resolve().then(()=>this.loadNativeH1(now)).then(async raw=>{
+      await observe({rows:normalizeFetH1(raw,now),decisionTs:now,capturedAt:(this.deps.now||Date.now)()});
+      this.nativeShadowBoundary=boundary;
+    }).catch(error=>{
+      const frame={strategy:"FET" as const,logicalEntryTs:boundary,observedAt:(this.deps.now||Date.now)(),complete:false as const,reason:error instanceof Error?error.message:String(error)};
+      try{if(this.deps.nativeShadowDiagnostic)this.deps.nativeShadowDiagnostic(frame);else console.warn(JSON.stringify({event:"STABLE4_NATIVE_SHADOW_INCOMPLETE",...frame}));}catch{/* Diagnostics cannot interrupt protection. */}
+    }).finally(()=>{this.nativeShadowInFlight=false;});
+  }
 
   private async prepareEntryOpportunity(signal:FetBrk48Signal,pending:FetBrk48PendingState,lock:AccountLockHandle):Promise<Stable4EntryOpportunityRecord|undefined>{
     if(!this.deps.entryOpportunityBuilder)return undefined;
@@ -616,6 +649,7 @@ export class FetBrk48LiveRunner {
 
   async tick(): Promise<FetBrk48TickResult> {
     const now = (this.deps.now || Date.now)();
+    this.dispatchNativeShadow(now);
 
     // Flat/no-pending/no-review ticks are read-only until a BRK48 candidate
     // actually exists. Avoid monopolizing the shared account-order lock for
@@ -626,7 +660,7 @@ export class FetBrk48LiveRunner {
     const boundaryTs = Math.floor(now/3_600_000)*3_600_000;
     let heldReturnTelemetry: {value:number|undefined;boundaryTs:number}|undefined;
     if (preState.position && preState.lastEvaluationReturn72hObservedTs !== boundaryTs) {
-      try { const rows = normalizeFetH1(await this.deps.client.getKlines("FETUSDT", "1h", 120), now); heldReturnTelemetry = {value:fetCompletedReturn72h(rows,boundaryTs),boundaryTs}; }
+      try { const rows = normalizeFetH1(await this.loadNativeH1(now), now); heldReturnTelemetry = {value:fetCompletedReturn72h(rows,boundaryTs),boundaryTs}; }
       catch { heldReturnTelemetry = {value:undefined,boundaryTs}; }
     }
     if (!preState.position && !preState.pending && !preState.manualReview) {
@@ -643,7 +677,7 @@ export class FetBrk48LiveRunner {
       const venueFlat = prePositionRows.every((row) => Math.abs(finite(row.positionAmt)) <= EPS)
         && preOpenOrders.length === 0;
       if (venueFlat && now >= (preState.cooldownUntilTs || 0)) {
-        const preKlines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
+        const preKlines = await this.loadNativeH1(now);
         const preDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
         const preSignal = buildFetBrk48Signal(normalizeFetH1(preKlines, now), now);
         if (!preSignal) {
@@ -805,7 +839,7 @@ export class FetBrk48LiveRunner {
         state.lastEvaluationDecisionTs=Math.floor(now/3_600_000)*3_600_000;state.lastEvaluationCandidate=false;state.lastEvaluationReason="FET_POST_EXIT_COOLDOWN_24H";
         await writeFetBrk48State(this.deps.statePath,state);return {status:"held",message:"FET_POST_EXIT_COOLDOWN_24H",ordersSent:0};
       }
-      const klines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
+      const klines = await this.loadNativeH1(now);
       const evaluationDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
       const signal = now < (state.cooldownUntilTs||0) ? undefined : buildFetBrk48Signal(normalizeFetH1(klines, now), now);
       state.lastEvaluationReason=now < (state.cooldownUntilTs||0)?"FET_POST_EXIT_COOLDOWN_24H":signal?"FET_BRK48_R72_SIGNAL":"FET_NO_BRK48_R72_SIGNAL";

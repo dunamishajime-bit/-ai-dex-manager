@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 import type { AccountLockHandle } from "./disdex-account-order-lock";
 import {validateStable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 import {STABLE4_OPPORTUNITY_MODEL_VERSION} from "./stable4-opportunity-corpus";
+import {validateHypeH48TimeOnlyContract,type HypeH48TimeOnlyContract} from "./hype-stable4-time-only-contract";
 
 export const HYPE_ZEC_LONG_STATE_SCHEMA = "disdex-hype-zec-long/v1" as const;
 /** HYPE/ZEC state heartbeat freshness contract used by runtime health. */
@@ -14,6 +15,7 @@ export type HypeZecLongStateMode = "LIVE" | "SHADOW" | "PAPER";
 export type HypeZecLongPendingPhase = "planned" | "submitted" | "manual_review";
 
 export interface HypeZecLongPositionState {
+  nativeExitContract?:HypeH48TimeOnlyContract;
   entryOpportunity?: Stable4EntryOpportunityRecord;
   strategy: "HYPE_LONG" | "ZEC_LONG";
   symbol: "HYPEUSDT" | "ZECUSDT";
@@ -38,6 +40,7 @@ export interface HypeZecLongPositionState {
 }
 
 export interface HypeZecLongPending {
+  nativeExitContract?:HypeH48TimeOnlyContract;
   entryOpportunity?: Stable4EntryOpportunityRecord;
   signalTs?: number;
   idempotencyKey: string;
@@ -120,6 +123,9 @@ function optionalHypeEntryOpportunity(value:unknown,expected:{positionId:string;
   if(value===undefined)return undefined;
   try{return validateHypeEntryOpportunity(value,expected);}catch{return undefined;}
 }
+function nativeContract(value:unknown,expected:{positionId:string;sourceSha:string;logicalEntryTs:number}) {
+  return value===undefined?undefined:validateHypeH48TimeOnlyContract(value,expected);
+}
 function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMode?: HypeZecLongStateMode): HypeZecLongRunnerState {
   if (!value || typeof value !== "object") throw new Error("HYPE_ZEC_LONG_STATE_MALFORMED");
   const raw = value as Partial<HypeZecLongRunnerState>;
@@ -140,8 +146,8 @@ function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMo
     updatedAt,
     lastDecisionTs: raw.lastDecisionTs,
     lastDecision: raw.lastDecision,
-    positions: Array.isArray(raw.positions) ? raw.positions.map((position) => ({ ...position,entryOpportunity:optionalHypeEntryOpportunity(position.entryOpportunity,{positionId:position.positionId,logicalEntryTs:position.signalTs}) })) : undefined,
-    pending: raw.pending?{...raw.pending,entryOpportunity:optionalHypeEntryOpportunity(raw.pending.entryOpportunity,{positionId:raw.pending.idempotencyKey,logicalEntryTs:raw.pending.signalTs??0})}:undefined,
+    positions: Array.isArray(raw.positions) ? raw.positions.map((position) => ({ ...position,nativeExitContract:nativeContract(position.nativeExitContract,{positionId:position.positionId,sourceSha:raw.runtimeCommitSha!,logicalEntryTs:position.signalTs}),entryOpportunity:optionalHypeEntryOpportunity(position.entryOpportunity,{positionId:position.positionId,logicalEntryTs:position.signalTs}) })) : undefined,
+    pending: raw.pending?{...raw.pending,nativeExitContract:nativeContract(raw.pending.nativeExitContract,{positionId:raw.pending.action==="ENTRY"?raw.pending.idempotencyKey:raw.pending.nativeExitContract?.positionId??"",sourceSha:raw.runtimeCommitSha!,logicalEntryTs:raw.pending.signalTs??0}),entryOpportunity:optionalHypeEntryOpportunity(raw.pending.entryOpportunity,{positionId:raw.pending.idempotencyKey,logicalEntryTs:raw.pending.signalTs??0})}:undefined,
     manualReview: raw.manualReview,
     failures: Array.isArray(raw.failures) ? raw.failures.slice(-100) : [],
   };

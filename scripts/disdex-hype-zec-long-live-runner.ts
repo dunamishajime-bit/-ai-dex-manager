@@ -15,7 +15,7 @@ import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
 import {stable4HypeEntryFeatures} from "../lib/stable4-hype-entry-features";
-import {publishPreparedStable4EntryOpportunityRecord} from "../lib/stable4-entry-opportunity-publisher";
+import {createH48TimeOnlyPolicyAuthority} from "../lib/hype-stable4-time-only-authority";
 
 function numberEnv(name: string, fallback: number) {
   const parsed = Number(process.env[name]);
@@ -69,6 +69,7 @@ async function main() {
   const stateStore = new FileHypeZecLongRunnerStateStore(resolve(runtime.statePath), runtimeSha(runtime.runtimeSha), runtime.mode);
   let opportunityRuntime:ReturnType<typeof createStable4EntryOpportunityRuntime>|undefined;
   const runner = new HypeZecLongRunner({
+    h48TimeOnlyPolicy:runtime.mode==="LIVE"&&runtime.signalMode==="STABLE4"?createH48TimeOnlyPolicyAuthority(runtimeSha(runtime.runtimeSha),executor):undefined,
     entryOpportunityBuilder:runtime.mode==="LIVE"&&runtime.stable4Mode==="LIVE"&&runtime.signalMode==="STABLE4"?async({signal,market,pending,decisionTs,lock,gross})=>{
       opportunityRuntime??=createStable4EntryOpportunityRuntime();
       if(!market)throw Error("STABLE4_HYPE_ENTRY_MARKET_EVIDENCE_MISSING");
