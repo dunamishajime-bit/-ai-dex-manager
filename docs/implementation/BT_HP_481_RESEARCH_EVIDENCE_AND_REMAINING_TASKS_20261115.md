@@ -85,3 +85,10 @@ BT Python回帰テスト **252件PASS**（今回まで）。研究Owner private 
 3. **`4ddcfd195`**：Q102 HIGH_VOL Native 19候補（ONDO10/SUI7/ARB2）をsource pinの3台帳へIDで照合し、対象年終端までに**18件決済、SUI LONG1件右打切り**と確定。未決済 Native ID `HIGH_VOL:SUIUSDT:1790650800000`、2026-09-29 04:00 UTC entry、予定Exit2026-10-02 03:00 UTC。基本native出口は`RIGHT_CENSORED_PERIOD_END`でFillなし。統合10/30bps双方で`Q102P_00224`の期末未決済を再確認。研究Shadow baseline18との**件数差は正しく区別できた**がOnline通過15件の行単位ID完全一致までは未証明。`BT_HP_Q102_HIGHVOL_19_TO_18_CLOSED_END_BOUNDARY_20261115.md`。
 
 BT Python回帰テスト合計 **282件PASS**。3タスク各々テスト→Git commit→Push済み。元Private証拠データはPC維持、public/Productionへ無断公開していない。GitHub PR #481 はDraft維持。最新V4 source完全一致、8Runner役割/全銘柄統合OOS、最大DD20%以下・勝率向上は継続ブロッカー。実注文・決済・STOP・Kill Switch・GitHub master merge・HP本番デプロイ0件。
+
+
+## 追記：2026-11-16 BT-481-J — Q102 S1/S2 前180日Nativeモデル決済台帳（人工H1）
+
+- 元Pinned native HIGH_VOLのgrid/72h出口/normal費用/180日月次Selectorを変更せず、独立人工H1で入口→出口が完成したモデル取引のみを再生。前336Hウォームアップ＋正確な前180日学習窓を証明。固定2ルールでgrid一致87、ルール内overlap遮断60、**Native出口済モデル27件**。将来・欠損・偽グリッド・未決済を拒否し、各Native Exitの価格/理由/純Returnの全件再計算とdeterministic再実行がPASS。
+- Native selectorが人工研究ルール1件を選択したが、上流S1/S2のstage membership証明がないため `SELECTED_RESEARCH_ONLY`、`nativeS1S2Orders=0`。対象は人工H1のモデル出口で、**LIVEや現行Targetの実約定27件ではない**。対象年の勝率・DD改善も一切主張しない。
+- 元モデルNormal費用 perSide0.0006/fundingDay0.0002 とユーザー指定10/30bps統合BTは別。Model eventsの個票JsonとSHA256はOwner PC非公開 `C:\Users\dis\disdex-bt481-private-evidence-20261116`。再実行・証拠は `BT_HP_Q102_S1_S2_180D_NATIVE_CLOSED_MODEL_REPLAY_20261116.md`。固定本番Q102 pin、上流S1/S2 ID、完全市場のOOS、Portfolio/Shared Risk/Gross/venue経済パリティは今後のタスク。V4 Codex切替・Productionは触れない。
