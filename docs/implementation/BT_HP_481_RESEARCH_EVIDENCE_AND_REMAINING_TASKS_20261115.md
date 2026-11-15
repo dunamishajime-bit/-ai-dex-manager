@@ -77,3 +77,11 @@
 BT Python回帰テスト **252件PASS**（今回まで）。研究Owner private JSON元資料は非公開維持、GitHubへは監査ソース・ユニットテスト・文書だけ。既存のsourceピン不一致（新V4/HYPE）と残存のDD20%超過、Signed venue STOP/Fillの不一致、独立相場による全Runner統合OOSの欠落は依然として最重要ブロッカー。本番LIVE Runner・注文・STOP・Kill Switch・資金Grossの操作は0件。
 
 次の優先研究はIDLE/ HYPE Layer3同時点EVの証拠確認、Q102 HIGH_VOL独立Forward集計、Risk/fee/gross同時競合・V4最新版元Sourceの研究統合リプレイ。結果を見てから対象年の損失Gateを逆算最適化しない。
+
+## 追記：2026-11-15 13:55 JST以降 — BTCレジームとQ102 HIGH_VOL年度末右打切り
+
+1. **`7a9f449f4`**：Aster BTC H1連続8,928本に限定、ENTRYの直前に確定した足のみを使用した24h/72h return・24h volatilityを固定の説明用カテゴリに集計。DD谷2026-09-22の10bps model exit59件のうち、BTC高変動タグ11件中10件敗北。ただし30bpsは同じ11件中6敗で、対象年に合わせたHigh-vol Gate導入は不可。10bps/30bpsの全モデルFee/Funding、source SHAとDD区間を元台帳に照合。 `BT_HP_BTC_CLOSED_H1_MAXDD_REGIME_FALSE_DIRECTION_20261115.md`。
+2. **`86df81bb9`**：Q102 HIGH_VOLの事前固定90日min5/PF0.60 online shadow GateはPretarget202件の基準勝率49.01%→Gate採用138件44.20%、Target一回だけ18件33.33%→通過15件20.00%に悪化。ターゲット遮断3件は結果的に全勝、対象年へリフィット禁止。150候補のrobust gate0。研究Target baseline18とNative19は母数が異なるまま別Gate。 `BT_HP_Q102_HIGHVOL_FROZEN_SHADOW_TARGET_GATE_20261115.md`。
+3. **`4ddcfd195`**：Q102 HIGH_VOL Native 19候補（ONDO10/SUI7/ARB2）をsource pinの3台帳へIDで照合し、対象年終端までに**18件決済、SUI LONG1件右打切り**と確定。未決済 Native ID `HIGH_VOL:SUIUSDT:1790650800000`、2026-09-29 04:00 UTC entry、予定Exit2026-10-02 03:00 UTC。基本native出口は`RIGHT_CENSORED_PERIOD_END`でFillなし。統合10/30bps双方で`Q102P_00224`の期末未決済を再確認。研究Shadow baseline18との**件数差は正しく区別できた**がOnline通過15件の行単位ID完全一致までは未証明。`BT_HP_Q102_HIGHVOL_19_TO_18_CLOSED_END_BOUNDARY_20261115.md`。
+
+BT Python回帰テスト合計 **282件PASS**。3タスク各々テスト→Git commit→Push済み。元Private証拠データはPC維持、public/Productionへ無断公開していない。GitHub PR #481 はDraft維持。最新V4 source完全一致、8Runner役割/全銘柄統合OOS、最大DD20%以下・勝率向上は継続ブロッカー。実注文・決済・STOP・Kill Switch・GitHub master merge・HP本番デプロイ0件。
