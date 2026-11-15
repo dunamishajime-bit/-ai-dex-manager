@@ -105,3 +105,9 @@ BT Python回帰テスト合計 **282件PASS**。3タスク各々テスト→Git 
 - Owner PC旧Q102 S1/S2フィクスチャ6銘柄のうち既存v4フィードで不足したONDO/SUI/OP/SEI/ARBを、独立opt-in synthetic v5へ追加。v5 38銘柄（暗号資産30/株8）、6銘柄全てでNative特徴量計算が可能。22日528確定H1のうち336Hウォームアップ後192H×6=1,152評価、元のRaw Grid Match 332（閾値組合せの重複があり、332約定ではない）。
 - v1～v4の既存分岐・研究元pinに変更なし。v5とv4の価格経路は別のseed stream消費で異なるので、v4旧実績へ継ぎ足さない。Stage membership、Native monthly rules、30 expanded raw IDs、前180d実市場学習は引き続き未証明。正式S1/S2シグナル/Fill0。
 - `bt-hp-q102-legacy-s12-v5-synthetic-selftest.ts`、既存S34 v3/Native HIGH_VOL自己テスト、限定TypeScript型検査PASS。非公開再現集計SHA256 `F612514035A6E0FAEF02FA01E4FB62BB696048CC06FCFF9B88B246B287E9A056`。詳細 `BT_HP_Q102_LEGACY_S12_SYNTHETIC_V5_SOURCE_COVERAGE_20261116.md`。本番/注文/STOP/Codex変更なし。
+
+## 追記：2026-11-16 BT-481-M — Synthetic v5の194日M5からNative 180d出口付き台帳
+
+- v5限定で最大60,000 M5 Tickを許可、旧v1～v4上限53,000は保持。Seed20261116で2025-08-19～2026-02-28の55,860 M5 Tickを生成し、6旧S1/S2資料銘柄それぞれで確定H1 4,655本→Native元ソースGrid・72h EXIT・Normal cost・180日月次Selectorを実際に計算。
+- 2固定代替研究ルール×6銘柄のRaw Grid一致**1,538**（重複閾値あり）、保有重複遮断**1,069**、月末OPEN打切り**2**、Native終了モデル延べ**467**。SUIのみ研究月次ルール1つ選抜、他5通貨は要件不合格。これは**6×2独立シナリオの研究モデル**で、Portfolio Fill数ではない。Native stage所属ID・正式実注文は0/未証明。
+- 合成M5→H1の時点因果性／モデル出口／Window境界を新 `bt-hp-q102-v5-180d-m5-native-replay-selftest.ts` で検証。非公開モデル個票JSON SHA256 `98AB4C2C56B3C97018A1EC7C38BDA512E4B69191E911C383417F468659D77BE2`。詳細 `BT_HP_Q102_S12_V5_M5_180D_NATIVE_EXIT_MODELS_20261116.md`。これは元Native Normalモデル費用であり10bps/30bps統合BT認証には使えない。V4 LIVE/注文/STOP変更0。
