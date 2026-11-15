@@ -7,9 +7,11 @@ import {makeZip,type ZipEntry} from "@/lib/bt-verification/zip-store";
 import {BtcCandlestickChart} from "@/components/bt-verification/BtcCandlestickChart";
 import {EquityTimelineChart} from "@/components/bt-verification/EquityTimelineChart";
 import {GrossAllocationPanel} from "@/components/bt-verification/GrossAllocationPanel";
+import {NativeHypeSensitivityPanel} from "@/components/bt-verification/NativeHypeSensitivityPanel";
 import {BTWorkspaceShell,type BTWorkspaceTab} from "@/components/bt-verification/BTWorkspaceShell";
 import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo";
 import {observedV4MismatchInResearchSource,V4_PIN_OBSERVED_2026_11_15} from "@/lib/bt-verification/source-pin-observation";
+import {buildNativeHypeSensitivityComparison} from "@/lib/bt-verification/native-hype-sensitivity-comparison";
 import type {ResearchLibraryEntry} from "@/lib/server/bt-research-library";
 import {Activity,Archive,BarChart3,CalendarDays,Clock3,Download,FileText,Pause,Play,RotateCcw,Save,Settings2,ShieldAlert,Upload} from "lucide-react";
 const DEMO=createPreviewReplay(123456,"trend");
@@ -30,6 +32,7 @@ type ServerRun={id:string;name:string;createdAt:string;frames:number;mode:string
 const [serverRuns,setServerRuns]=useState<ServerRun[]>([]);
 const [serverNotice,setServerNotice]=useState("");
  const [researchItems,setResearchItems]=useState<ResearchLibraryEntry[]>([]);
+ const nativeHypeSensitivity=useMemo(()=>buildNativeHypeSensitivityComparison(researchItems),[researchItems]);
  const [researchNotice,setResearchNotice]=useState("");
  const [researchBusy,setResearchBusy]=useState(false);
  const [researchSelected,setResearchSelected]=useState("");
@@ -624,6 +627,7 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
           className="rounded-lg border border-[#396984] bg-[#18384d] px-4 py-2 text-xs text-cyan-200 disabled:opacity-50">研究BT一覧を更新</button>
       </div>
       {researchNotice&&<p className="mb-3 text-xs text-cyan-200">{researchNotice}</p>}
+      {nativeHypeSensitivity&&<NativeHypeSensitivityPanel comparison={nativeHypeSensitivity}/>}
       <div className="space-y-2">{researchItems.map(item=><div key={item.id}
           className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#304e64] bg-[#10263a] px-3 py-3">
           <div className="min-w-0"><p className="text-xs font-bold text-cyan-100">{item.sourceCase} <span className="ml-2 rounded bg-[#1c5467] px-2 py-1 text-[10px]">{item.bps}bps</span></p>
