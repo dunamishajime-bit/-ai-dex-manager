@@ -8,21 +8,38 @@ before any external transfer. Dependencies (node_modules) are NOT included.
 import argparse,ast,hashlib,io,json,re,subprocess,tarfile
 from pathlib import PurePosixPath,Path
 
-SHA='7a1e2eba208fa4eb6115e6068f1d831f1c44bc2b'
+# Never implicitly use a stale source SHA or infer activation authority.
+# The operator supplies the reviewed immutable candidate commit.
 ROOTS=['scripts/v12-v4-production-runner.ts','scripts/v12-v4-monitor-only-runner.ts','scripts/disdex-hype-zec-long-live-runner.ts','scripts/disdex-hype-trend-live-runner.ts','scripts/disdex-quality102-causal-v1-live-runner.ts','scripts/disdex-pengu-dual-ls-v2-live-runner.ts','scripts/disdex-fet-brk48-live-runner.ts','scripts/disdex-idle-priority-short-live-runner.ts','scripts/disdex_v52_aster_only_live_engine.py','scripts/ops/root/disdex-live-operator-activation-gate.mjs','package.json','package-lock.json','tsconfig.json','config/stable4/opportunity-corpus-seed-20261115.json','config/stable4/q102-online-recovery-seed-20261114.json','config/stable4/q102-avax-knn-seed-20261114.json']
+# Root-side switches and runtime data are required by the existing integration.
+# Keep the allowlist exact; never bundle arbitrary docs, research or private files.
+ROOTS += ['scripts/ops/root/disdex_pending_composite_upgrade.py',
+          'scripts/ops/root/disdex_pending_composite_recover.py',
+          'scripts/ops/root/disdex_stable4_h48_root_patch.py',
+          'scripts/ops/root/disdex_stable4_h48_policy.py',
+          'scripts/ops/root/disdex_stable4_q102_bootstrap_seal.py',
+          'scripts/ops/root/disdex_stable4_composite_root_bridge.py',
+          'scripts/ops/root/disdex_stable4_flat_peer_cutover.py',
+          'scripts/ops/root/disdex_v4_nonflat_ownership.py',
+          'scripts/ops/root/prepare_stable4_root_sources.py']
+RUNTIME_JSON=('docs/implementation/v12-v4-v2-full-year-priority.json',
+              'docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json')
+ROOTS += list(RUNTIME_JSON)
 ALLOWED_PREFIXES=('lib/','config/','scripts/')
 EXTS=('.ts','.tsx','.js','.mjs','.cjs','.py','.json')
 DENY=re.compile(r'(^|/)(?:\.env[^/]*|\.git|reports?|research[^/]*|tests?|fixtures?|credentials?|secrets?|private|wallets?|node_modules)(?:/|$)|(?:\.pem|\.key|\.p12|\.pfx)$',re.I)
 JS_IMPORT=re.compile(r'''(?:\b(?:import|export)\s+(?:[^;\n]*?\s+from\s+)?|\b(?:require|import)\s*\(\s*)["']([^"']+)["']''')
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--archive');args=p.parse_args()
- paths=set(subprocess.check_output(['git','ls-tree','-r','--name-only',SHA],text=True).splitlines())
+ p=argparse.ArgumentParser();p.add_argument('--archive');p.add_argument('--source-sha',required=True,help='Explicit reviewed 40-character commit SHA');args=p.parse_args()
+ source_sha=args.source_sha
+ if not re.fullmatch(r'[0-9a-f]{40}',source_sha):p.error('SOURCE_SHA_MUST_BE_EXACT_40_HEX')
+ paths=set(subprocess.check_output(['git','ls-tree','-r','--name-only',source_sha],text=True).splitlines())
  missing=[f for f in ROOTS if f not in paths]
  if missing:raise ValueError('PINNED_ROOT_MISSING:'+','.join(missing))
  proc=subprocess.Popen(['git','cat-file','--batch'],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
  def blob(path):
-  proc.stdin.write((SHA+':'+path+'\n').encode());proc.stdin.flush()
+  proc.stdin.write((source_sha+':'+path+'\n').encode());proc.stdin.flush()
   header=proc.stdout.readline().decode().strip().split()
   if len(header)!=3 or header[1]!='blob':raise ValueError('NOT_PINNED_BLOB:'+path)
   data=proc.stdout.read(int(header[2]));assert proc.stdout.read(1)==b'\n';return data
@@ -47,7 +64,7 @@ def main():
  while todo:
   path=todo.pop()
   if path in seen:continue
-  if DENY.search(path) or not (path in ROOTS or path.startswith(ALLOWED_PREFIXES)):
+  if path not in RUNTIME_JSON and (DENY.search(path) or not (path in ROOTS or path.startswith(ALLOWED_PREFIXES))):
    dynamic.append({'source':path,'kind':'excluded-source-review-required'});continue
   data=blob(path);seen[path]=data
   if path.endswith(('.ts','.tsx','.js','.mjs','.cjs')):
@@ -63,14 +80,21 @@ def main():
     elif isinstance(node,ast.ImportFrom) and node.module:modules=[node.module.split('.')[0]]
     else:modules=[]
     for name in modules:
-     dep=next((x for x in ['scripts/'+name+'.py','lib/'+name+'.py',name+'.py'] if x in paths),None)
+     possibilities=[str(PurePosixPath(path).parent/name)+'.py',
+                    'scripts/ops/root/'+name+'.py',
+                    'scripts/ops/deploy/'+name+'.py',
+                    'scripts/'+name+'.py',
+                    'lib/'+name+'.py',name+'.py']
+     dep=next((x for x in possibilities if x in paths),None)
      if dep:todo.append(dep)
+     elif name.startswith(('disdex_','stable4_','v12_','hype_')):
+      unresolved.append({'source':path,'import':name,'kind':'missing-local-python-module'})
     if isinstance(node,ast.Constant) and isinstance(node.value,str) and node.value.startswith(('scripts/','lib/','config/')) and node.value.endswith(('.py','.ts','.mjs','.json')):
      if node.value in paths:todo.append(node.value)
      else:dynamic.append({'source':path,'kind':'unresolved-python-path','path':node.value})
     if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id=='__import__' and (not node.args or not isinstance(node.args[0],ast.Constant)):dynamic.append({'source':path,'kind':'dynamic-python-import','line':node.lineno})
  proc.stdin.close();proc.wait()
- manifest={'schema':'disdex-stable4-runtime-source-review/v1','sourceSha':SHA,'scope':'REVIEW_ONLY','files':[{'path':name,'size':len(raw),'sha256':hashlib.sha256(raw).hexdigest()} for name,raw in sorted(seen.items())],'unresolvedLocalImports':unresolved,'dynamicPathReview':dynamic,'nodeModulesIncluded':False,'credentialsIncluded':False,'ordersEnabled':False}
+ manifest={'schema':'disdex-stable4-runtime-source-review/v1','sourceSha':source_sha,'scope':'REVIEW_ONLY','files':[{'path':name,'size':len(raw),'sha256':hashlib.sha256(raw).hexdigest()} for name,raw in sorted(seen.items())],'unresolvedLocalImports':unresolved,'dynamicPathReview':dynamic,'nodeModulesIncluded':False,'credentialsIncluded':False,'ordersEnabled':False}
  if args.archive:
   if unresolved or dynamic:raise ValueError('DEPENDENCY_REVIEW_INCOMPLETE_NO_ARCHIVE_CREATED')
   output=Path(args.archive)

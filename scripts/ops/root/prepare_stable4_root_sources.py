@@ -25,7 +25,7 @@ def prepare(captured,old_by_role,old_hype):
  combined=result['disdex_unified_root_gate.py']
  result['disdex_unified_root_gate.py']=build_upgrade_dispatch(combined,expected_sha256=digest(combined))
  result['disdex_v4_venue_witness.py']=build_composite_venue_witness(captured['disdex_v4_venue_witness.py'])
- for name in ['disdex_stable4_flat_peer_cutover.py','disdex_stable4_h48_root_patch.py','disdex_stable4_h48_policy.py','disdex_composite_owner_witness.py','disdex_stable4_composite_root_bridge.py','disdex_pending_composite_upgrade.py','disdex_pending_composite_recover.py','disdex_stable4_q102_bootstrap_seal.py']:
+ for name in ['disdex_stable4_flat_peer_cutover.py','disdex_stable4_h48_root_patch.py','disdex_stable4_h48_policy.py','disdex_composite_owner_witness.py','disdex_stable4_composite_root_bridge.py','disdex_pending_composite_upgrade.py','disdex_pending_composite_recover.py','disdex_stable4_q102_bootstrap_seal.py','disdex_v4_nonflat_ownership.py']:
   result[name]=Path(__file__).resolve().with_name(name).read_bytes()
  return result
 

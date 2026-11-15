@@ -21,6 +21,8 @@ jobs:
       - run: npm ci
       - name: Causal opportunity, native provenance and final admission
         run: npx tsx --test tests/stable4-*.test.ts
+      - name: H48 due exits and V4 preemption regression
+        run: npx tsx --test tests/hype-h48-*.test.ts tests/hype-stable4-*.test.ts
       - name: Python signed final admission and entry provenance
         run: |
           python3 -B scripts/disdex_stable4_entry_gross_guard_selftest.py
@@ -32,5 +34,25 @@ jobs:
           npx tsx scripts/stable4-pengu-livebase-selftest.ts
           npx tsx scripts/stable4-hype-livebase-selftest.ts
           npx tsx scripts/stable4-idle-livebase-selftest.ts
+      - name: Immutable candidate source inventory (review-only)
+        env:
+          CANDIDATE_SHA: ${{ github.sha }}
+        run: |
+          python3 -B scripts/ops/build_stable4_runtime_source_manifest.py --source-sha "$CANDIDATE_SHA" > stable4-runtime-source-review.json
+          python3 -c "import json,os; d=json.load(open('stable4-runtime-source-review.json',encoding='utf-8')); assert d['sourceSha']==os.environ['CANDIDATE_SHA'] and d['scope']=='REVIEW_ONLY' and d['ordersEnabled'] is False"
+      - name: Preserve source inventory for external-root review
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable4-source-review
+          path: stable4-runtime-source-review.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Root source-only cutover and rollback contracts
+        run: |
+          python3 -B -m unittest discover -s scripts/ops/root -p 'test_disdex_pending_composite_*.py' -v
+          python3 -B -m unittest discover -s scripts/ops/root -p 'test_*stable4*.py' -v
+          python3 -B -m unittest discover -s scripts/ops/root -p 'test_disdex_v4_nonflat_ownership.py' -v
+          python3 -B -m unittest discover -s scripts/ops/root -p 'test_disdex_composite_owner_witness.py' -v
+          python3 -B -m unittest discover -s scripts/ops -p 'test_build_stable4_runtime_source_manifest.py' -v
       - name: Repository typecheck
         run: npm run typecheck
