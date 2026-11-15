@@ -513,6 +513,13 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
           現行HYPE TREND入口関数を過去の確定H1足で再実行した候補は78件で、
           H48R4研究5件との同時刻発火は0件でした。
           研究結果を現行HYPEの勝率・実約定・損益として扱うことはできません。
+          <p className="mt-2 border-t border-amber-600/30 pt-2">
+            <strong className="text-amber-200">V4登録SHA差分（2026-11-15確認）：</strong>
+            この研究BTで使用したV4ソースSHAは、切替後のV4登録SHA
+            <span className="mx-1 break-all font-mono text-[10px]">e788abc82e80f9fc7ab0e1ba83fdb8be267eb513</span>
+            と一致していません。新V4の実装による統合BT再計算が必要です。
+            登録SHAの確認はLIVE稼働、実約定、STOP保護や経済条件の一致を証明しません。
+          </p>
         </div>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {([

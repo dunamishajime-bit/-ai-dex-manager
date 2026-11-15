@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
+
+const page=readFileSync(join(process.cwd(),"app/bt-verification/page.tsx"),"utf8");
+const condition='verifiedResearch?.sourceCase==="STABLE4_OPPORTUNITY_PROD_CAPS_20261114_GROSS_CAPTURE_V1"';
+const v4Pin="e788abc82e80f9fc7ab0e1ba83fdb8be267eb513";
+assert.equal(page.split(condition).length-1,1,"Must be one STABLE4 historical mismatch condition");
+const start=page.indexOf(condition);
+const end=page.indexOf("</div>}",start);
+assert.ok(start>=0 && end>start,"Missing conditional mismatch notice");
+const block=page.slice(start,end);
+assert.ok(block.includes("HYPE実装差分（確認済み）"),"Native-HYPE vs H48 research warning lost");
+assert.ok(block.includes("V4登録SHA差分"),"New V4 manifest pin mismatch is not displayed");
+assert.ok(block.includes(v4Pin),"Observed dated V4 release pin missing");
+assert.ok(block.includes("2026-11-15"),"Historical observation date required");
+assert.ok(block.includes("実装による統合BT再計算が必要"),"Rematerializing V4 BT must be mandatory");
+assert.ok(block.includes("LIVE稼働"),"No claim that source pin matches active runner");
+assert.ok(block.includes("実約定"),"No claim venue fills proved by pin comparison");
+assert.ok(block.includes("STOP"),"Source SHA check must not certify stop protection");
+assert.ok(!block.includes("正式LIVE認証済み"),"Do not add false production certification");
+console.log("BT V4 post-Codex source mismatch notice PASS (10 source assertions)");
