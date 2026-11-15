@@ -10,6 +10,7 @@ import {GrossAllocationPanel} from "@/components/bt-verification/GrossAllocation
 import {NativeHypeSensitivityPanel} from "@/components/bt-verification/NativeHypeSensitivityPanel";
 import {BTWorkspaceShell,type BTWorkspaceTab} from "@/components/bt-verification/BTWorkspaceShell";
 import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo";
+import {createH48ResearchReplay} from "@/lib/bt-verification/h48-research-sandbox";
 import {observedV4MismatchInResearchSource,V4_PIN_OBSERVED_2026_11_15} from "@/lib/bt-verification/source-pin-observation";
 import {buildNativeHypeSensitivityComparison} from "@/lib/bt-verification/native-hype-sensitivity-comparison";
 import type {ResearchLibraryEntry} from "@/lib/server/bt-research-library";
@@ -24,6 +25,8 @@ const [tab,setTab]=useState<BTWorkspaceTab>("config");
 const [previewMode,setPreviewMode]=useState<"synthetic"|"historical">("synthetic");
 const [scenario,setScenario]=useState<DemoScenario>("trend");
 const [previewSeed,setPreviewSeed]=useState(123456);
+const [syntheticStrategy,setSyntheticStrategy]=useState<"proxy"|"h48">("proxy");
+const [syntheticFeeBps,setSyntheticFeeBps]=useState<10|30>(10);
 
 const [replay,setReplay]=useState<Replay>(DEMO),[cursor,setCursor]=useState(0),[running,setRunning]=useState(false),[speed,setSpeed]=useState(1),[selected,setSelected]=useState<string|null>(null),[error,setError]=useState("");
 const [selectedEvent,setSelectedEvent]=useState("");
@@ -62,6 +65,7 @@ const coverage=useMemo(()=>replayCoverage(replay),[replay]);
   const allSymbols=new Set<string>();
   for(const item of replay.strategyCatalog??[]) allLogics.add(item.logic);
   for(const f of replay.frames)for(const p of f.positions){allLogics.add(p.logic);allSymbols.add(p.symbol)}
+  if(replay.source?.kind==="SYNTHETIC_H48_RESEARCH_RULE_ONLY"){allLogics.add("HYPE_H48_RESEARCH");allSymbols.add("HYPEUSDT")}
   return {logics:[...allLogics].sort(),symbols:[...allSymbols].sort()};
 },[replay]);
 const frame=replay.frames[cursor];const positions=frame.positions.filter(p=>logicFilter.includes(p.logic)&&symbolFilter.includes(p.symbol));
@@ -82,7 +86,7 @@ const changePct=initialEquity?equityChange/initialEquity*100:0;
 let peak=-Infinity,maxDrawdown=0;
 for(let i=0;i<=cursor;i++){const value=replay.frames[i].equity;peak=Math.max(peak,value);if(peak>0)maxDrawdown=Math.min(maxDrawdown,100*(value/peak-1))}
 const isResearch=replay.mode==="EXTERNAL";
-const sourceLabel=isResearch?(verifiedResearch?"研究モデル・SHA照合済み":"研究データ・出所未認証"):"模擬再生・デモ";
+const sourceLabel=isResearch?(verifiedResearch?"研究モデル・SHA照合済み":"研究データ・出所未認証"):(replay.source?.kind==="SYNTHETIC_H48_RESEARCH_RULE_ONLY"?"人工市場・H48研究判定のみ":"模擬再生・デモ");
 const signalState=frame.demoSignals??[];
 const activeCandlestick=frame.formingBtcCandle;
 const currentCrossings=signalState.filter(x=>x.crossed);
@@ -91,7 +95,7 @@ const firedCount=replay.mode==="DEMO"?replay.frames.slice(0,cursor+1).reduce(
 
 const titleCase=(s:string)=>s.replace("T"," ").replace("Z"," UTC");
 function prepareDemo(){
-  const demo=createPreviewReplay(previewSeed,scenario);
+  const demo=syntheticStrategy==="h48"?createH48ResearchReplay(previewSeed,scenario,syntheticFeeBps):createPreviewReplay(previewSeed,scenario);
   setReplay(demo);setVerifiedResearch(null);setCursor(0);setRunning(false);setError("");
   setLogicFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.logic)))]);
   setSymbolFilter([...new Set(demo.frames.flatMap(f=>f.positions.map(p=>p.symbol)))]);
@@ -339,7 +343,26 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
               className={"flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-[13px] font-semibold "+(previewMode==="synthetic"?"border-cyan-400 bg-[#11434a] text-cyan-100":"border-[#37516a] bg-[#102139] text-[#92abc3]")}>
               <Activity className="h-4 w-4"/> 模擬チャート再生
             </button>
-            <p className="text-[11px] leading-5 text-[#8ca8bb] sm:col-span-2">実データは研究BTのJSON読込後に再生できます。新規BT計算は未接続です。</p>
+            <p className="text-[11px] leading-5 text-[#8ca8bb] sm:col-span-2">保存済みの実データは研究BTとして再生します。人工市場は別の検証モードで、LIVEにはアクセスしません。</p>
+            {previewMode==="synthetic"&&<div className="sm:col-span-2 space-y-2 rounded-xl border border-[#2e5069] bg-[#0b2133] p-3">
+              <p className="text-[12px] font-semibold text-cyan-100">人工市場で実行する判定</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button type="button" aria-pressed={syntheticStrategy==="proxy"} onClick={()=>setSyntheticStrategy("proxy")}
+                  className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="proxy"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>チャート動作確認（簡易デモ）</button>
+                <button type="button" aria-pressed={syntheticStrategy==="h48"} onClick={()=>setSyntheticStrategy("h48")}
+                  className={"rounded-lg border px-3 py-2 text-[12px] "+(syntheticStrategy==="h48"?"border-cyan-400 bg-[#174451] text-white":"border-[#415970] text-[#a9bdce]")}>HYPE H48研究版の入口判定</button>
+              </div>
+              {syntheticStrategy==="h48"&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
+                <p>確定H1のH12/H24/BTC相対24hを使い、H48研究版の3条件で判定。成立後、次の足の始値で模擬エントリーし48時間後の始値で決済します。</p>
+                <label className="flex items-center gap-2">往復モデル費用
+                  <select aria-label="H48模擬往復費用" value={syntheticFeeBps} onChange={e=>setSyntheticFeeBps(Number(e.target.value) as 10|30)}
+                    className="rounded-md border border-[#46637b] bg-[#102b41] px-2 py-1 text-white">
+                    <option value={10}>10bps</option><option value={30}>30bps</option>
+                  </select>
+                </label>
+                <p className="text-amber-200">H48入口と時間出口だけの検証です。V4の枠譲渡・Q102等6系統・Online Layer2/3・Funding・本番STOPは未接続。統合STABLE4の利益やDDではありません。</p>
+              </div>}
+            </div>}
           </div>
         </div>
         <div className="grid gap-3 border-t border-[#223a50] pt-4 lg:grid-cols-[164px_minmax(0,1fr)]">
