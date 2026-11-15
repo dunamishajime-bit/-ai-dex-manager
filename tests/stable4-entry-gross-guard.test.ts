@@ -20,12 +20,12 @@ test("crypto exact cap admits and an additional cent rejects", () => {
   rejects(value, "CRYPTO_CAP_EXCEEDED");
 });
 test("stock and combined caps independently admit exact boundaries", () => {
-  const value = input(); value.candidate = { symbol: "NVDAUSDT", notionalUsd: 150 };
-  value.positions = [{ symbol: "BTCUSDT", quantity: -2, markPrice: 100, observedAt: NOW }];
-  const result = assertStable4EntryGrossAdmission(value);
-  assert.equal(result.after.totalGross, 3.5); assert.equal(result.after.stockGross, 1.5);
-  value.candidate.notionalUsd = 150.01; rejects(value, "STOCK_CAP_EXCEEDED");
-  value.candidate.notionalUsd = 150; value.positions[0].quantity = -2.01; rejects(value, "TOTAL_CAP_EXCEEDED");
+  const value = input(); value.candidate = { symbol: "NVDAUSDT", notionalUsd: 400 };
+  assert.equal(assertStable4EntryGrossAdmission(value).after.stockGross,4);
+  value.candidate.notionalUsd=400.01;rejects(value,"STOCK_CAP_EXCEEDED");
+  value.candidate.notionalUsd=225;value.positions=[{symbol:"BTCUSDT",quantity:-2,markPrice:100,observedAt:NOW}];
+  assert.equal(assertStable4EntryGrossAdmission(value).after.totalGross,4.25);
+  value.candidate.notionalUsd=225.01;rejects(value,"TOTAL_CAP_EXCEEDED");
 });
 test("pending dollars rebase on current equity instead of stored gross", () => {
   const value = input(); value.candidate.notionalUsd = 200; value.pending.entries = [pending()];

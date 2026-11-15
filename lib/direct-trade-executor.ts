@@ -726,6 +726,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
 
     private async assertStable4SignedEntryAdmission(command: DirectTradeCommand, symbol: string, notionalUsd: number): Promise<void> {
         try {
+            let v4ReservationVerified=false;
             const admission = command.stable4Admission;
             if (!admission?.lease || typeof admission.lease.document !== "function") {
                 throw new Stable4EntryGrossAdmissionError("INVALID_INPUT", "owned admission lease required");
@@ -803,6 +804,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                     if(owned.length!==0||registered.length!==1||admission.ownReservationId!==sanitizeClientOrderId(command.clientOrderId)||typeof admission.v4Reservation.readDocument!=="function")throw new Stable4EntryGrossAdmissionError("OWN_RESERVATION_CONFLICT","V4 reservation capability invalid");
                     const sourceSha=String(process.env.DISDEX_RELEASE_SHA||process.env.DISDEX_RUNTIME_COMMIT_SHA||"").trim().toLowerCase();
                     assertStable4V4ReservationOwnership({sourceSha,lease:finalLease,document:admission.v4Reservation.readDocument(),row,command:{...command,symbol}});
+                    v4ReservationVerified=true;
                     await validateLease();
                 }else if(owned.length!==1||registered.length!==1||own.status!=="RESERVED"||row.status==="RELEASED"||own.strategyId!==row.strategyId||normalize(own.symbol)!==normalize(symbol)||normalize(row.symbol)!==normalize(symbol)||own.side!==side||row.side!==side||!Number.isFinite(own.notionalUsd)||own.notionalUsd!==row.notionalUsd){
                     throw new Stable4EntryGrossAdmissionError("OWN_RESERVATION_CONFLICT","reservation does not belong to current account lease");
@@ -820,7 +822,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             if (command.side !== "BUY" && command.side !== "SELL") throw new Stable4EntryGrossAdmissionError("INVALID_CANDIDATE", "order side invalid");
             assertStable4EntryGrossAdmission({
                 now, account: { equityUsd, observedAt: balancesObservedAt }, positions, pending,
-                candidate: { symbol, notionalUsd, side: command.side === "BUY" ? "LONG" : "SHORT", ownReservationId: admission.ownReservationId },
+                candidate: { symbol, notionalUsd, side: command.side === "BUY" ? "LONG" : "SHORT", ownReservationId: admission.ownReservationId, v4ReservationVerified },
             });
         } catch (error) {
             if (error instanceof Stable4EntryGrossAdmissionError) throw error;

@@ -9,7 +9,7 @@ const p=DISDEX_STABLE4_OPPORTUNITY.pengu;
 assert.equal(p.shortV20Btc24hMax,-0.010836782776818987);
 assert.equal(p.shortV20Pengu72hMax,-0.05237466490617382);
 assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap,3);
-assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,3.5);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,4.25);
 const good={btcReturn24h:p.shortV20Btc24hMax-.0001,penguReturn72h:p.shortV20Pengu72hMax-.0001};
 const badBtc={...good,btcReturn24h:p.shortV20Btc24hMax+.0001};
 const badPengu={...good,penguReturn72h:p.shortV20Pengu72hMax+.0001};

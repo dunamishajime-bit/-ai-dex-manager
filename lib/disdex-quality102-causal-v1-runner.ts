@@ -1,4 +1,5 @@
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
+import {DISDEX_STABLE4_OPPORTUNITY} from "../config/disdexStable4Opportunity";
 import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import type {Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 import {validateQuality102EntryOpportunity} from "./disdex-quality102-causal-v1-state";
@@ -576,7 +577,7 @@ export class Quality102CausalV1Runner {
         this.symbolSet = new Set(this.symbols);
         if (Math.abs(dependencies.config.maximumGross - QUALITY102_CAUSAL_V1.maximumGross) > EPSILON
             || Math.abs(dependencies.config.cryptoGrossCap - QUALITY102_CAUSAL_V1.cryptoGrossCap) > EPSILON
-            || Math.abs(dependencies.config.totalGrossCap - QUALITY102_CAUSAL_V1.totalGrossCap) > EPSILON
+            || Math.abs(dependencies.config.totalGrossCap - (dependencies.config.stable4Mode==="LIVE"?DISDEX_STABLE4_OPPORTUNITY.productionRisk.totalGrossCap:QUALITY102_CAUSAL_V1.totalGrossCap)) > EPSILON
             || dependencies.config.maximumPositions !== QUALITY102_CAUSAL_V1.maximumPositions) {
             throw new Error("QUALITY102_CAUSAL_V1_GROSS_CONFIG_MISMATCH");
         }

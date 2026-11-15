@@ -7,8 +7,8 @@ const ts=1_800_000_000_000;
 assert.equal(DISDEX_STABLE4_OPPORTUNITY.idle.renderWait,true);
 assert.equal(DISDEX_STABLE4_OPPORTUNITY.idle.taoRiskOffHours,12);
 assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap,3);
-assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.stockGrossCap,1.5);
-assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,3.5);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.stockGrossCap,4.0);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,4.25);
 
 assert.equal(stable4IdleBlocks("OFF","RENDERUSDT",ts,0),false);
 assert.equal(stable4IdleBlocks("SHADOW","RENDERUSDT",ts,0),false);

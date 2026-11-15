@@ -31,7 +31,7 @@ class EntryGrossTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, code)
 
     def test_exact_caps_pass_and_above_caps_reject_without_tolerance(self):
-        for symbol, amount, code in [("BTC", 300, "CRYPTO_GROSS_CAP"), ("META", 150, "STOCK_GROSS_CAP")]:
+        for symbol, amount, code in [("BTC", 300, "CRYPTO_GROSS_CAP"), ("META", 400, "STOCK_GROSS_CAP")]:
             p = fixture()
             p["candidate"].update(symbol=symbol, notionalUsd=amount)
             self.assertTrue(evaluate_stable4_entry_gross(p)["allowed"])
@@ -39,8 +39,8 @@ class EntryGrossTests(unittest.TestCase):
             self.rejected(p, code)
         p = fixture()
         p["positions"] = [{"symbol": "BTC", "quantity": -2, "markPrice": 100, "observedAt": NOW}]
-        p["candidate"].update(symbol="META", notionalUsd=150)
-        self.assertEqual(evaluate_stable4_entry_gross(p)["projectedGross"]["total"], 3.5)
+        p["candidate"].update(symbol="META", notionalUsd=225)
+        self.assertEqual(evaluate_stable4_entry_gross(p)["projectedGross"]["total"], 4.25)
         p["positions"][0]["quantity"] = -2.00000000001
         self.rejected(p, "TOTAL_GROSS_CAP")
 

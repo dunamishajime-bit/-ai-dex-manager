@@ -206,7 +206,7 @@ def evaluate_stable4_entry_gross(payload: dict, classifier: Callable[[str], str 
             "projectedGross": {"crypto": float(projected["CRYPTO"] / equity), "stock": float(projected["STOCK"] / equity), "total": float(total / equity)},
             "ownReservationExcluded": own_found,
         }
-        for value, cap, code in [(projected["CRYPTO"], Decimal("3"), "CRYPTO_GROSS_CAP"), (projected["STOCK"], Decimal("1.5"), "STOCK_GROSS_CAP"), (total, Decimal("3.5"), "TOTAL_GROSS_CAP")]:
+        for value, cap, code in [(projected["CRYPTO"], Decimal("3"), "CRYPTO_GROSS_CAP"), (projected["STOCK"], Decimal("4"), "STOCK_GROSS_CAP"), (total, Decimal("4.25"), "TOTAL_GROSS_CAP")]:
             if value > cap * equity:
                 _reject(code, dict(diagnostics, allowed=False))
         return diagnostics

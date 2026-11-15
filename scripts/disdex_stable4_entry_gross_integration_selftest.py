@@ -59,7 +59,7 @@ class V52FinalEntryTests(unittest.TestCase):
 
     def test_above_cap_final_signed_exposure_sends_nothing_and_releases_own(self):
         engine = self.make_engine()
-        engine.aster.positions = lambda: [{"symbol": "AMZNUSDT", "positionAmt": "1.25", "markPrice": "100", "unRealizedProfit": "0"}]
+        engine.aster.positions = lambda: [{"symbol": "AMZNUSDT", "positionAmt": "3.75", "markPrice": "100", "unRealizedProfit": "0"}]
         self.assertFalse(self.run_entry(engine))
         self.assertEqual(self.sent, [])
         self.assertEqual(self.released, ["my-client"])
@@ -122,7 +122,7 @@ class V52FinalEntryTests(unittest.TestCase):
 
     def test_equity_includes_unrealized_pnl_for_nonzero_positions(self):
         engine = self.make_engine()
-        engine.aster.positions = lambda: [{"symbol": "AMZNUSDT", "positionAmt": "1", "markPrice": "100", "unRealizedProfit": "-50"}]
+        engine.aster.positions = lambda: [{"symbol": "AMZNUSDT", "positionAmt": "1", "markPrice": "100", "unRealizedProfit": "-75"}]
         self.assertFalse(self.run_entry(engine))
         self.assertEqual(self.sent, [])
 

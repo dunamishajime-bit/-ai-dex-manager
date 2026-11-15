@@ -26,7 +26,7 @@ assert.equal(DISDEX_STABLE4_OPPORTUNITY.hype.gross,1);
 assert.equal(DISDEX_STABLE4_OPPORTUNITY.hype.holdHours,48);
 assert.equal(DISDEX_STABLE4_OPPORTUNITY.hype.emergencyStopPct,.06);
 assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap,3);
-assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,3.5);
+assert.equal(DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap,4.25);
 assert.equal(stable4HypeFormalPriorityOpen(["QUALITY102_CAUSAL_V1"]),true);
 assert.equal(stable4HypeFormalPriorityOpen(["IDLE_PRIORITY_SHORT"]),false);
 

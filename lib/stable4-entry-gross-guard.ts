@@ -18,7 +18,7 @@ export interface Stable4EntryGrossInput {
   positions: readonly { symbol: string; quantity: number; markPrice: number; observedAt: number }[];
   /** Caller must hold the shared admission lock through reservation/order submission. */
   pending: PendingExposureRegistry;
-  candidate: { symbol: string; notionalUsd: number; side?: "LONG" | "SHORT"; ownReservationId?: string };
+  candidate: { symbol: string; notionalUsd: number; side?: "LONG" | "SHORT"; ownReservationId?: string; v4ReservationVerified?: boolean };
   classifySymbol?: (symbol: string) => Pick<ReturnType<typeof classifyAsterSymbol>, "assetClass">;
 }
 export type Stable4EntryGrossAdmissionCode =
@@ -67,7 +67,8 @@ export function assertStable4EntryGrossAdmission(input: Stable4EntryGrossInput):
   const equity = input.account.equityUsd;
   const candidate = input.candidate;
   if (!candidate || !identity(candidate.symbol) || !numeric(candidate.notionalUsd)
-    || (candidate.side !== undefined && candidate.side !== "LONG" && candidate.side !== "SHORT")) fail("INVALID_CANDIDATE");
+    || (candidate.side !== undefined && candidate.side !== "LONG" && candidate.side !== "SHORT")
+    || (candidate.v4ReservationVerified!==undefined&&typeof candidate.v4ReservationVerified!=="boolean")) fail("INVALID_CANDIDATE");
   const classify = input.classifySymbol ?? classifyStable4AdmissionSymbol;
   function assetClass(symbol: string): Exclude<AsterAssetClass, "UNKNOWN"> {
     if (!identity(symbol)) fail("UNKNOWN_SYMBOL");
@@ -125,7 +126,7 @@ export function assertStable4EntryGrossAdmission(input: Stable4EntryGrossInput):
   for (const [actual, cap, code] of [
     [result.after.cryptoNotionalUsd, caps.cryptoGrossCap, "CRYPTO_CAP_EXCEEDED"],
     [result.after.stockNotionalUsd, caps.stockGrossCap, "STOCK_CAP_EXCEEDED"],
-    [result.after.totalNotionalUsd, caps.totalGrossCap, "TOTAL_CAP_EXCEEDED"],
+    [result.after.totalNotionalUsd, candidate.v4ReservationVerified===true?caps.v4TotalGrossCap:caps.totalGrossCap, "TOTAL_CAP_EXCEEDED"],
   ] as const) {
     const limitUsd = cap * equity;
     if (!Number.isFinite(limitUsd)) fail("INVALID_ACCOUNT", "cap arithmetic overflow");

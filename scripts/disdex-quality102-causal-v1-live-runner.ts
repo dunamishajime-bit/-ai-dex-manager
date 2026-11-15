@@ -10,7 +10,7 @@ import {
     resolveQuality102CausalV1Runtime,
     type Quality102CausalV1Mode,
 } from "../config/disdexQuality102CausalV1Runtime";
-import { resolveDisDexStable4Mode, assertStable4GlobalLiveAck, type DisDexStable4Mode } from "../config/disdexStable4Opportunity";
+import { DISDEX_STABLE4_OPPORTUNITY, resolveDisDexStable4Mode, assertStable4GlobalLiveAck, type DisDexStable4Mode } from "../config/disdexStable4Opportunity";
 import {
     QUALITY102_CAUSAL_V4_CAPABILITIES,
     QUALITY102_CAUSAL_V4_S34_MODEL,
@@ -294,7 +294,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
     };
     if (Math.abs(config.maximumGross - QUALITY102_CAUSAL_V1.maximumGross) > 1e-12
         || Math.abs(config.cryptoGrossCap - QUALITY102_CAUSAL_V1.cryptoGrossCap) > 1e-12
-        || Math.abs(config.totalGrossCap - QUALITY102_CAUSAL_V1.totalGrossCap) > 1e-12
+        || Math.abs(config.totalGrossCap - (config.stable4Mode==="LIVE"?DISDEX_STABLE4_OPPORTUNITY.productionRisk.totalGrossCap:QUALITY102_CAUSAL_V1.totalGrossCap)) > 1e-12
         || config.maximumPositions !== QUALITY102_CAUSAL_V1.maximumPositions) {
         throw new Error("QUALITY102_CAUSAL_V1_GROSS_CONTRACT_MISMATCH");
     }

@@ -1,6 +1,6 @@
 export type DisDexStable4Mode = "OFF" | "SHADOW" | "LIVE";
 
-const productionRisk = Object.freeze({ cryptoGrossCap: 3.0, stockGrossCap: 1.5, totalGrossCap: 3.5, sharedDailyLossPct: 7.5 });
+const productionRisk = Object.freeze({ cryptoGrossCap: 3.0, stockGrossCap: 4.0, totalGrossCap: 4.25, v4TotalGrossCap: 4.75, sharedDailyLossPct: 7.5 });
 
 export const DISDEX_STABLE4_OPPORTUNITY = Object.freeze({
   name: "STABLE4_OPPORTUNITY",

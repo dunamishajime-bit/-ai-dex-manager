@@ -1,4 +1,5 @@
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "./integratedProductionRiskPolicy";
+import {resolveDisDexStable4Mode,DISDEX_STABLE4_OPPORTUNITY} from "./disdexStable4Opportunity";
 
 export type Quality102CausalV1Mode = "SHADOW" | "PAPER" | "LIVE";
 
@@ -45,7 +46,7 @@ export function resolveQuality102CausalV1Runtime(
     operatorArmed: bool("QUALITY102_CAUSAL_V1_OPERATOR_ARMED"),
     maximumGross: Math.min(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, Math.max(0, Number.isFinite(requestedGross) ? requestedGross : INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross)),
     cryptoGrossCap: QUALITY102_CAUSAL_V1.cryptoGrossCap,
-    totalGrossCap: QUALITY102_CAUSAL_V1.totalGrossCap,
+    totalGrossCap: resolveDisDexStable4Mode(env)==="LIVE"?DISDEX_STABLE4_OPPORTUNITY.productionRisk.totalGrossCap:QUALITY102_CAUSAL_V1.totalGrossCap,
     maximumPositions: 1,
     historicalSelectorParity: false,
     brkEnabled: false,

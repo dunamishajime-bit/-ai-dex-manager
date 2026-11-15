@@ -14,6 +14,7 @@ import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-sch
 import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry";
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
+import {stable4HypeEntryFeatures} from "../lib/stable4-hype-entry-features";
 import {publishPreparedStable4EntryOpportunityRecord} from "../lib/stable4-entry-opportunity-publisher";
 
 function numberEnv(name: string, fallback: number) {
@@ -68,13 +69,11 @@ async function main() {
   const stateStore = new FileHypeZecLongRunnerStateStore(resolve(runtime.statePath), runtimeSha(runtime.runtimeSha), runtime.mode);
   let opportunityRuntime:ReturnType<typeof createStable4EntryOpportunityRuntime>|undefined;
   const runner = new HypeZecLongRunner({
-    entryOpportunityBuilder:runtime.mode==="LIVE"&&runtime.stable4Mode==="LIVE"&&runtime.signalMode==="STABLE4"?async({signal,pending,decisionTs,lock,gross})=>{
+    entryOpportunityBuilder:runtime.mode==="LIVE"&&runtime.stable4Mode==="LIVE"&&runtime.signalMode==="STABLE4"?async({signal,market,pending,decisionTs,lock,gross})=>{
       opportunityRuntime??=createStable4EntryOpportunityRuntime();
-      // Full h6/h72/er24/pos24/rv24 research-feature reconstruction is not certified.
-      // Keep this baseline explicitly unknown; never compare UNI against a partial-feature score.
-      const prepared=opportunityRuntime.prepare({sourceGitSha:runtimeSha(runtime.runtimeSha),nativePositionId:pending.idempotencyKey,strategy:"HYPE",symbol:"HYPEUSDT",side:"LONG",route:"HYPE_REDESIGN_CAUSAL_H48R4_WSIG",logicalEntryTs:signal.signalTs??0,gross,plannedHoldHours:48,entrySnapshot:{},capturedAt:decisionTs});
-      console.warn(JSON.stringify({event:"STABLE4_HYPE_ENTRY_SCORE_UNKNOWN",reason:"FULL_RESEARCH_ENTRY_FEATURE_PARITY_UNVERIFIED"}));
-      return publishPreparedStable4EntryOpportunityRecord({...prepared,score:null},{store:opportunityRuntime.store,lease:lock});
+      if(!market)throw Error("STABLE4_HYPE_ENTRY_MARKET_EVIDENCE_MISSING");
+      const features=stable4HypeEntryFeatures(market.hype1h,market.btc1h,signal.signalTs??0);
+      return opportunityRuntime.prepareAndPublish({sourceGitSha:runtimeSha(runtime.runtimeSha),nativePositionId:pending.idempotencyKey,strategy:"HYPE",symbol:"HYPEUSDT",side:"LONG",route:"HYPE_REDESIGN_CAUSAL_H48R4_WSIG",logicalEntryTs:signal.signalTs??0,gross,plannedHoldHours:48,entrySnapshot:{features},capturedAt:decisionTs},lock);
     }:undefined,
     marketData: new HypeZecAsterMarketDataProvider(client, {
       fifteenMinuteLimit: numberEnv("DISDEX_HYPE_ZEC_15M_LIMIT", 240),
