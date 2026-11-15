@@ -1,0 +1,105 @@
+{
+  "schema": "bt-pr481-v4-full-source-frozen-audit-v1",
+  "taskId": "BT-481-I_SOURCE_SUBTASK",
+  "gitRevision": "9118eeaa6c209dc6e37887cf5be139b3baaa005d",
+  "originalV2Status": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06",
+  "policy": "V2_M150_D05_CORE_NATIVE",
+  "seed": 20261115,
+  "scenario": "rotation",
+  "feedVersion": "v4",
+  "periodStart": "2025-10-01T00:00:00Z",
+  "periodEndExclusive": "2025-10-23T00:00:00Z",
+  "sourceManifestSha256": "aac4abb508846cd36b8e5babfa0bbe9b3dfaad1c55335db3d9e23dff6d39aeda",
+  "scheduledH2": 264,
+  "warmupH2": 122,
+  "sourceEvaluations": 142,
+  "firstEvaluation": "2025-10-11T06:00:00Z",
+  "sourceCandidateRows": 118,
+  "originalReportedFilteredRows": 9,
+  "sourceNativeCoreEvents": 2,
+  "routeCounts": {
+    "CONT_SHORT_MID_AGE24_48": 7,
+    "REC_G1_MID_REL_LOWVOL": 2,
+    "REC_G2_EARLY_BTC_OPPOSE_VOL": 4,
+    "REC_G4_MATURE_REL_RANGE": 2,
+    "REC_G5_SLOW_TREND": 1,
+    "REC_X01_TIME_24H": 3,
+    "REC_X02_TIME_36H": 9,
+    "REC_X04_TIME_24H": 7,
+    "REC_X05_TIME_36H": 7,
+    "REC_X07_TIME_6H": 2,
+    "REC_X09_TIME_48H": 7,
+    "REC_X10_TIME_48H": 1,
+    "REC_X11_TIME_48H": 2,
+    "REC_X12_TIME_12H": 6,
+    "REC_X13_TP1.5_SL1_H24": 2,
+    "REC_Y01_REV_D0_T72": 7,
+    "REC_Y02_REV_D0_T12": 1,
+    "REC_Y03_REV_D0_T36": 3,
+    "REC_Y06_REV_D0_T72": 38,
+    "REC_Y07_REV_D0_T72": 1,
+    "REC_Y08_REV_D0_T6": 2,
+    "REC_Y11_REV_D0_T36": 1,
+    "REC_Y15_REV_D0_T3": 3
+  },
+  "sampleCandidates": [
+    {
+      "at": "2025-10-11T06:00:00Z",
+      "symbol": "AVAXUSDT",
+      "route": "REC_X09_TIME_48H",
+      "side": "LONG"
+    },
+    {
+      "at": "2025-10-11T06:00:00Z",
+      "symbol": "BNBUSDT",
+      "route": "REC_X09_TIME_48H",
+      "side": "LONG"
+    },
+    {
+      "at": "2025-10-11T08:00:00Z",
+      "symbol": "ATOMUSDT",
+      "route": "REC_Y06_REV_D0_T72",
+      "side": "SHORT"
+    },
+    {
+      "at": "2025-10-11T08:00:00Z",
+      "symbol": "AVAXUSDT",
+      "route": "REC_X09_TIME_48H",
+      "side": "LONG"
+    },
+    {
+      "at": "2025-10-11T12:00:00Z",
+      "symbol": "AVAXUSDT",
+      "route": "REC_X09_TIME_48H",
+      "side": "LONG"
+    },
+    {
+      "at": "2025-10-11T14:00:00Z",
+      "symbol": "AVAXUSDT",
+      "route": "REC_X09_TIME_48H",
+      "side": "LONG"
+    },
+    {
+      "at": "2025-10-11T16:00:00Z",
+      "symbol": "AVAXUSDT",
+      "route": "REC_X09_TIME_48H",
+      "side": "LONG"
+    },
+    {
+      "at": "2025-10-11T18:00:00Z",
+      "symbol": "LINKUSDT",
+      "route": "REC_Y06_REV_D0_T72",
+      "side": "SHORT"
+    }
+  ],
+  "currentProductionPinCertified": false,
+  "fullV4EconomicParity": false,
+  "researchHindsightY06IssueResolved": false,
+  "entryVerified": 0,
+  "orderAuthority": false,
+  "orders": 0,
+  "fills": 0,
+  "gross": null,
+  "pnl": null,
+  "note": "This is source reconstruction from pre-Codex Git 9118eeaa. Frozen V2 route status is explicitly BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06. 118 source-level candidates are not 118 fills, nor validated trading rules. No current LIVE or STABLE4 economic parity is claimed."
+}

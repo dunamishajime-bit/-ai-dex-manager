@@ -82,9 +82,17 @@
       "tests": "BT verification React static markup, full Next.js build, TypeScript typecheck PASS"
     },
     {
+      "id": "BT-481-I1",
+      "status": "committed",
+      "scope": "Pin original pre-Codex V4 full pure candidate-builder and dependencies by exact Git object; 22-day 245-H1 artificial source replay, 118 unadmitted candidates across 23 routes, no trade or current LIVE parity.",
+      "proof": "docs/implementation/BT_PR481_I1_V4_FULL_NATIVE_SOURCE_20261116.md",
+      "test": "scripts/bt-hp-v4-full-source-integrity-selftest.py plus scripts/bt-hp-v4-full-native-source-selftest.ts",
+      "risk": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06"
+    },
+    {
       "id": "BT-481-I",
       "status": "pending",
-      "scope": "Recover current V4 original route family/source pin and complete causally integrated V4 entry"
+      "scope": "Recover current V4 original route family/source pin and complete causally integrated V4 entry (I1 original Git source reconstruction completed; next compare current V4 active pin, resolve blocked Y06 hindsight, and prove complete causal strategy/admission before simulated entries)"
     },
     {
       "id": "BT-481-J",
