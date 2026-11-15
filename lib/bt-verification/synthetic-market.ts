@@ -18,8 +18,15 @@ export const SYNTHETIC_FEED_SYMBOLS_V3=[...SYNTHETIC_FEED_SYMBOLS_V2,"APTUSDT","
 /** Opt-in complete pinned V4 v12 X1 ALL native venue symbol universe. */
 export const SYNTHETIC_FEED_SYMBOLS_V4=[...SYNTHETIC_FEED_SYMBOLS_V3,
   "BNBUSDT","LINKUSDT","INJUSDT","XRPUSDT","ADAUSDT","LTCUSDT","ATOMUSDT"] as const;
-export type SyntheticSymbol = typeof SYNTHETIC_FEED_SYMBOLS_V4[number];
-export type SyntheticFeedVersion="v1"|"v2"|"v3"|"v4";
+/** Opt-in Q102 legacy S1/S2 6-symbol study; five new tickers, TAO already in v1.
+ * The legacy 18-row fixture is NOT an authenticated upstream S1/S2 universe.
+ * This version must not assert 30 native raw stage IDs or actual trades. */
+export const SYNTHETIC_FEED_SYMBOLS_V5=[
+ ...SYNTHETIC_FEED_SYMBOLS_V4,
+ "ONDOUSDT","SUIUSDT","OPUSDT","SEIUSDT","ARBUSDT"
+] as const;
+export type SyntheticSymbol = typeof SYNTHETIC_FEED_SYMBOLS_V5[number];
+export type SyntheticFeedVersion="v1"|"v2"|"v3"|"v4"|"v5";
 export type SyntheticKind = "crypto"|"stock";
 export type SyntheticScenario = "trend"|"range"|"down"|"volatile"|"rotation";
 export type MarketCandle5m = {
@@ -41,7 +48,7 @@ export type SyntheticStep={
   funding:readonly SyntheticFunding[];
 };
 export type SyntheticFeedDescription = {
-  schema:"disdex-bt-synthetic-feed-v1"|"disdex-bt-synthetic-feed-v2"|"disdex-bt-synthetic-feed-v3"|"disdex-bt-synthetic-feed-v4";seed:number;scenario:SyntheticScenario;
+  schema:"disdex-bt-synthetic-feed-v1"|"disdex-bt-synthetic-feed-v2"|"disdex-bt-synthetic-feed-v3"|"disdex-bt-synthetic-feed-v4"|"disdex-bt-synthetic-feed-v5";seed:number;scenario:SyntheticScenario;
   start:string;endExclusive:string;intervalMinutes:5;
   symbols:readonly SyntheticSymbol[];fundingIntervalHours:8;warmupHoursRequired:96;
   equityCalendar:"NY_WEEKDAY_RTH_ONLY_NO_HOLIDAYS";
@@ -85,6 +92,11 @@ const profiles:Record<SyntheticSymbol,{kind:SyntheticKind;start:number;beta:numb
  ADAUSDT:{kind:"crypto",start:.8,beta:.9,sigma:.0024,volume:9e6},
  LTCUSDT:{kind:"crypto",start:130,beta:.72,sigma:.002,volume:4.5e6},
  ATOMUSDT:{kind:"crypto",start:5.5,beta:.96,sigma:.0026,volume:2.1e6},
+ ONDOUSDT:{kind:"crypto",start:.93,beta:1.14,sigma:.0041,volume:2.8e6},
+ SUIUSDT:{kind:"crypto",start:3.15,beta:1.22,sigma:.0045,volume:6.4e6},
+ OPUSDT:{kind:"crypto",start:1.35,beta:1.14,sigma:.0042,volume:3.6e6},
+ SEIUSDT:{kind:"crypto",start:.23,beta:1.30,sigma:.0048,volume:2.3e6},
+ ARBUSDT:{kind:"crypto",start:.58,beta:1.21,sigma:.0041,volume:4.3e6},
 };
 const check=(v:number)=>Number.isFinite(v)&&v>0;
 const iso=(n:number)=>new Date(n).toISOString().replace(".000Z","Z");
@@ -137,10 +149,11 @@ export class SyntheticMarket5m {
      from%H1!==0||to%H1!==0||(to-from)/M5>53000||
      from<Date.parse("2025-01-01T00:00:00Z")||to>Date.parse("2027-01-01T00:00:00Z"))
      throw Error("SYNTHETIC_WINDOW_INVALID");
-   if(options?.version!==undefined&&options.version!=="v1"&&options.version!=="v2"&&options.version!=="v3"&&options.version!=="v4")
+   if(options?.version!==undefined&&options.version!=="v1"&&options.version!=="v2"&&options.version!=="v3"&&options.version!=="v4"&&options.version!=="v5")
      throw Error("SYNTHETIC_VERSION_INVALID");
    const version=options?.version??"v1";
-   this.symbols=version==="v4"?SYNTHETIC_FEED_SYMBOLS_V4:
+   this.symbols=version==="v5"?SYNTHETIC_FEED_SYMBOLS_V5:
+    version==="v4"?SYNTHETIC_FEED_SYMBOLS_V4:
      version==="v3"?SYNTHETIC_FEED_SYMBOLS_V3:
      version==="v2"?SYNTHETIC_FEED_SYMBOLS_V2:SYNTHETIC_FEED_SYMBOLS;
    this.startMs=from;this.endMs=to;this.lastObservedAt=from;
@@ -150,7 +163,8 @@ export class SyntheticMarket5m {
       this.completed.set(symbol,[]);
    }
    this.description=Object.freeze({
-      schema:version==="v4"?"disdex-bt-synthetic-feed-v4":
+      schema:version==="v5"?"disdex-bt-synthetic-feed-v5":
+          version==="v4"?"disdex-bt-synthetic-feed-v4":
          version==="v3"?"disdex-bt-synthetic-feed-v3":
          version==="v2"?"disdex-bt-synthetic-feed-v2":"disdex-bt-synthetic-feed-v1",
        seed,scenario,start:iso(from),

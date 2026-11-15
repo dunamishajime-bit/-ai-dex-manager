@@ -99,3 +99,9 @@ BT Python回帰テスト合計 **282件PASS**。3タスク各々テスト→Git 
 
 - Owner PCの旧S1/S2 `quality102_s1s2_known_fixture.csv`（18行：S1=8/S2=10、6通貨）と元Pinned Native source SHA `7483c4...b8f` をread-only照合。元旧研究コードが `ORIGINAL_RAW_GENERATOR_PROVEN=False` を明示しており、**原30 Expanded候補と所属IDが未証明**。したがって **`LEGACY_FIXTURE_CONTRACT_ONLY_STAGE_MEMBERSHIP_UNVERIFIED`（期待exit2）** を維持。歴史的18件はBT-481-Jの人工H1モデル決済27件とは別母集団。
 - `scripts/bt_hp_q102_legacy_stage_membership_audit.py` + `tests/test_bt_hp_q102_legacy_stage_membership_audit.py`（合成9件PASS）、非公開Owner監査JSON SHA `0EAC69AEFCC69468DA15C9BD70B7CB7476C07263820B26F16E7489E21AA46B76`。詳細 `BT_HP_Q102_S1S2_LEGACY_STAGE_PROVENANCE_20261116.md`。実注文・LIVE・STOPS・Codexには変更なし。
+
+## 追記：2026-11-16 BT-481-L — S1/S2旧研究6銘柄Synthetic v5ソース照合
+
+- Owner PC旧Q102 S1/S2フィクスチャ6銘柄のうち既存v4フィードで不足したONDO/SUI/OP/SEI/ARBを、独立opt-in synthetic v5へ追加。v5 38銘柄（暗号資産30/株8）、6銘柄全てでNative特徴量計算が可能。22日528確定H1のうち336Hウォームアップ後192H×6=1,152評価、元のRaw Grid Match 332（閾値組合せの重複があり、332約定ではない）。
+- v1～v4の既存分岐・研究元pinに変更なし。v5とv4の価格経路は別のseed stream消費で異なるので、v4旧実績へ継ぎ足さない。Stage membership、Native monthly rules、30 expanded raw IDs、前180d実市場学習は引き続き未証明。正式S1/S2シグナル/Fill0。
+- `bt-hp-q102-legacy-s12-v5-synthetic-selftest.ts`、既存S34 v3/Native HIGH_VOL自己テスト、限定TypeScript型検査PASS。非公開再現集計SHA256 `F612514035A6E0FAEF02FA01E4FB62BB696048CC06FCFF9B88B246B287E9A056`。詳細 `BT_HP_Q102_LEGACY_S12_SYNTHETIC_V5_SOURCE_COVERAGE_20261116.md`。本番/注文/STOP/Codex変更なし。
