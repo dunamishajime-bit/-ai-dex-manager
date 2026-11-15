@@ -41,3 +41,7 @@ not the original H2 checkpoint baseline.
 ## BT-481-I1 source snapshot (2026-11-16)
 
 V4 pre-Codex frozen SHA 9118eeaa6, nine original source objects and two shared dependency pin checks PASS. 22-day v4 synthetic source-only route candidate replay observed 118 candidate rows across 23 route names after 245-H1 warmup; 0 executable entries/orders/fills. Original V2 selector is **BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06**, so I remains pending for current LIVE pin read-only reconciliation and independent anti-leakage proof. See BT_PR481_I1_V4_FULL_NATIVE_SOURCE_20261116.md. Commit/Push source-only I1 before advancing.
+
+## BT-481-I2 source-only master comparison (2026-11-16)
+
+Read-only Git comparison confirms all 11 frozen old V4 source/config paths are absent in master commit 6f1a14862fb2d2e458632580178cc91ca92540ed at identical locations. Do NOT confuse master tree with loaded LIVE runtime or Codex in-progress branch. I is now BLOCKED on current deployed pin and upstream V2 Y06 hindsight leakage. I1 and I2 are committed source evidence, next independent pending task is **BT-481-J**, Q102 S1/S2 true 180d completed-trade source simulation and monthly selector; never manufacture winners/fills. See BT_PR481_I2_V4_GIT_MASTER_SOURCE_DIFF_20261116.md.

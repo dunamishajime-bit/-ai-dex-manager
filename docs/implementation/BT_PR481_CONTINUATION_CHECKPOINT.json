@@ -90,9 +90,19 @@
       "risk": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06"
     },
     {
+      "id": "BT-481-I2",
+      "status": "committed",
+      "scope": "Read-only Git old 9118 V4 source vs master 6f1: 11 identical paths absent from master tree; not current VPS pin proof",
+      "proof": "docs/implementation/BT_PR481_I2_V4_GIT_MASTER_SOURCE_DIFF_20261116.md",
+      "test": "scripts/bt-hp-v4-research-vs-master-pin-audit.py; Git cat-file master commit PASS",
+      "liveChanges": 0
+    },
+    {
       "id": "BT-481-I",
-      "status": "pending",
-      "scope": "Recover current V4 original route family/source pin and complete causally integrated V4 entry (I1 original Git source reconstruction completed; next compare current V4 active pin, resolve blocked Y06 hindsight, and prove complete causal strategy/admission before simulated entries)"
+      "status": "blocked_by_current_production_pin_and_y06_leakage",
+      "scope": "Recover current V4 original route family/source pin and complete causally integrated V4 entry (I1 original Git source reconstruction completed; next compare current V4 active pin, resolve blocked Y06 hindsight, and prove complete causal strategy/admission before simulated entries)",
+      "blocker": "Cannot certify actual live V4 runner SHA from historical Git/master alone; frozen V2 reports BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06 and independent causal proof is unavailable",
+      "nextReadOnlyEvidence": "Owner-approved operator runtime pin/immutable release + independent forward Y06 source test without altering Codex"
     },
     {
       "id": "BT-481-J",

@@ -1,0 +1,97 @@
+{
+  "changedOrMissingPaths": 11,
+  "currentLiveRunnerShaVerified": false,
+  "economicParityVerified": false,
+  "fills": 0,
+  "frozenResearchSha": "9118eeaa6c209dc6e37887cf5be139b3baaa005d",
+  "hindsightY06Resolved": false,
+  "method": "git show of existing local Git objects only; no Git fetch or mutation",
+  "note": "An old pinned research SHA or a GitHub master SHA does not identify the currently loaded V4 process on VPS. Current LIVE pin, Y06 causal validity and integrated trade admission remain blocked.",
+  "observedRemoteMasterSha": "6f1a14862fb2d2e458632580178cc91ca92540ed",
+  "orders": 0,
+  "schema": "bt-pr481-v4-git-master-pin-comparison-v1",
+  "scope": "repository master only, NOT VPS or actual deployed V4 runner",
+  "sourceFiles": [
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
+      "path": "config/integratedProductionRiskPolicy.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "9060246d828c9a0052b677ffd424acb8607f217c1a79e46de0615fb49019fc3f",
+      "path": "config/v12X1AllRuntime.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "bae4573f6ff516bec2b27e7e10d35e5027c7265c67bbdb101c1038066b5f7c27",
+      "path": "docs/implementation/v12-v4-v2-full-year-priority.json"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "3b30e222b6d175845f34e1ac614e8d1a92c8980d01da6b38d955f59261ad59e8",
+      "path": "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "b3045118116422d7c950de54b05e751b0f62dbe542413889f9943e45c09e0105",
+      "path": "lib/v12-multilogic-v4-shadow.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "c1817d626fae2d885bf91480b53d0c8afac2bb507099a0ecdf2bbf59d2996069",
+      "path": "lib/v12-v4-live-candidate-builder.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "55bc8917969acee14b43e04d46bc51eb3b9a6a5f35460ad59d022bd0f1c9583c",
+      "path": "lib/v12-v4-native-core.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "8220063dcd0ae2a738632b271b86dcfe7d0eb58affa6df2eaf9fdd2c578bcddb",
+      "path": "lib/v12-v4-native-source.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "03c71845c829751a1122747fa3e1a72f2bac067e18a8237d57a0d48a261c6a02",
+      "path": "lib/v12-v4-production-features.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "74909ff3863ed894c9ed1cd0e172e3eca075be2b324c9ad08578489e6549f370",
+      "path": "lib/v12-v4-v2-shadow.ts"
+    },
+    {
+      "isProductionParity": false,
+      "kind": "MISSING_FROM_MASTER",
+      "masterSha256": null,
+      "oldSha256": "968d8cb98fe8327c3f39bad6291caaeda0d1eaef53e66c302d8d7bd1260bde14",
+      "path": "lib/v12-x1-all.ts"
+    }
+  ],
+  "sourceFilesExamined": 11,
+  "sourceSemanticParityVerified": false,
+  "strategyReadyForAdmission": false,
+  "taskId": "BT-481-I2_READONLY_GITHUB_CHECK"
+}
