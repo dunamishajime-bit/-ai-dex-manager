@@ -40,9 +40,9 @@ def main():
          return env
         env=service_env(unit)
         deploy=pwd.getpwnam('deploy')
-        
-        
-        
+
+
+
         sys.path.insert(0,'/usr/local/libexec/disdex-unified')
         from disdex_v4_durable_owner_probe import attest_current_sole_v4_owner
         from disdex_unified_root_gate import read_root_json,parse_live_pins,validate_bootstrap_plan
@@ -53,7 +53,7 @@ def main():
         venue=json.loads(next(l for l in r.stdout.splitlines() if l.startswith('{')))
         assert 0<=int(time.time()*1000)-venue['signedAt']<=30000
         proof=attest_current_sole_v4_owner(old,sha,venue['positions'],venue['orders'])
-        
+
         import hashlib,fcntl
         from types import SimpleNamespace
         import disdex_pending_maintenance_install as maintenance
@@ -115,9 +115,8 @@ def main():
           temp=pending_service.with_suffix('.owner-rollback-tmp');temp.write_bytes(old_unit);temp.chmod(0o644);os.replace(temp,pending_service)
           subprocess.run(['systemctl','daemon-reload'],check=True,capture_output=True)
          raise
-        
+
     finally:
         fcntl.flock(lock,fcntl.LOCK_UN);os.close(lock)
 
 if __name__=='__main__':main()
-

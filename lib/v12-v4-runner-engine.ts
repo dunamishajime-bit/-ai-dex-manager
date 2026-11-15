@@ -4,6 +4,8 @@
  * missing signed positions or assumes an ACK means an executed fill.
  */
 import type {AsterV3Client,AsterBalanceRow,AsterPositionRiskRow,AsterOrderResponse} from "./aster-v3-client";
+import {validateV4EntryOpportunity,type EntryEvent} from "./v12-v4-production-lifecycle";
+import type {Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 import type {AccountLockHandle,FileAccountOrderLock} from "./disdex-account-order-lock";
 import {readPendingExposureRegistry,type PendingExposureRegistry} from "./disdex-pending-exposure-registry";
 import {V4ExecutionStore,advanceV4Protection,advanceV4Intent,type V4ExecutionDocument,type V4OrderIntent,type V4ProtectionPhase} from "./v12-v4-execution-store";
@@ -33,6 +35,21 @@ export type V4OperatorExitAuthorizationInput={
  legId:string;symbol:string;positionSide:"LONG"|"SHORT";quantity:number;plannedExit?:ExitDecision;
 };
 export type V4OperatorExitAuthorization=(input:V4OperatorExitAuthorizationInput)=>Promise<void>;
+function freezeV4EntrySnapshot<T>(value:T):T{
+ if(value&&typeof value==="object"){for(const child of Object.values(value))freezeV4EntrySnapshot(child);Object.freeze(value);}
+ return value;
+}
+/** Match the frozen research entry schemas: ordinary routes rank only; Core uses its exact native event. */
+export function v4OpportunityEntrySnapshot(decision:Pick<V4LiveDecisionSnapshot,"nativeCoreEvents">,candidate:EntryEvent["leg"]["candidate"]):Readonly<Record<string,number>>{
+ const snapshot:Record<string,number>={rank:candidate.rank};
+ if(candidate.route==="FAILED_BREAK_REV_SHORT_6H"){
+  const matches=decision.nativeCoreEvents.filter(e=>(e.symbol.endsWith("USDT")?e.symbol:e.symbol+"USDT")===candidate.symbol&&e.route===candidate.route&&e.side===candidate.effectiveSide&&e.entry_ts_ms===candidate.eligibleEntryTs&&e.decision_ts_ms<=candidate.eligibleEntryTs);
+  if(matches.length!==1)throw Error("V4_ENTRY_OPPORTUNITY_NATIVE_CORE_EVIDENCE_MISSING");
+  const e=matches[0];Object.assign(snapshot,{sg:e.sg,state_age_h:e.state_age_h,onset_momentum90:e.onset_momentum90,atr:e.atr,score:e.score});
+ }
+ if(!Object.values(snapshot).every(Number.isFinite))throw Error("V4_ENTRY_OPPORTUNITY_FEATURE_INVALID");
+ return Object.freeze(snapshot);
+}
 export function isReconciliableV4EntryIntent(intent:Pick<V4OrderIntent,"action"|"stage">):boolean{
  return intent.action==="ENTRY"&&intent.stage!=="TERMINAL";
 }
@@ -102,6 +119,8 @@ export function v4ExitFeedWindow(entryTs:number,durationHours:number,now:number)
  return {fromTs:entryTs,untilTs:Math.min(now,entryTs+durationHours*3600000)};
 }
 export interface V4RunnerDependencies{
+ entryOpportunityBuilder?:(input:{candidate:EntryEvent["leg"]["candidate"];reservation:EntryEvent;decisionTs:number;lock:AccountLockHandle;entrySnapshot:Readonly<Record<string,number>>})=>Promise<Stable4EntryOpportunityRecord|undefined>;
+ entryOpportunityDiagnostic?:(message:string,payload?:Record<string,unknown>)=>void;
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
  adapter:V12AsterLiveAdapter;
  client:Pick<AsterV3Client,"getBalances"|"getPositions"|"getOpenOrders"|"getUserTrades"|"getIncomeHistory"|"getOrder">;
@@ -431,7 +450,7 @@ export class V4RunnerEngine{
    await reserv.assertAccountLease();
    await this.refreshSignedAccountLedger();
   }
-  return await this.tryCandidate(decision,dispatcher,cycle);
+  return await this.tryCandidate(decision,dispatcher,cycle,lease);
  }
  private async processExitBars(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle):Promise<V4TickResult|null>{
   const d=this.deps;
@@ -525,7 +544,7 @@ export class V4RunnerEngine{
   return null;
  }
  private async tryCandidate(decision:V4LiveDecisionSnapshot,dispatcher:V4DurableOrderDispatcher,
-  cycle:V4OrderCycle):Promise<V4TickResult>{
+  cycle:V4OrderCycle,lease?:AccountLockHandle):Promise<V4TickResult>{
   const d=this.deps,now=this.now();
   // Existing positions are reconciled and exited before this point. These
   // global controls gate new ENTRY only and therefore never strand protection.
@@ -597,6 +616,21 @@ export class V4RunnerEngine{
     symbol:candidate.symbol,positionSide:candidate.effectiveSide,
     quantity:plan.leg.requestedQty,price,signalTs:candidate.eligibleEntryTs};
    await d.assertAuthority(command);
+   if(!hasFreshV4SharedAccountLedger(d.store.read(),this.now()))
+    return {status:"blocked",reason:"V4_ENTRY_ACCOUNT_LEDGER_REFRESH_REQUIRED",
+     eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
+   try{
+    if(!d.entryOpportunityBuilder||!lease)throw Error("BUILDER_OR_ACCOUNT_LEASE_MISSING");
+    const snapshot=freezeV4EntrySnapshot(structuredClone(plan));
+    const entrySnapshot=v4OpportunityEntrySnapshot(decision,candidate);
+    const row=await d.entryOpportunityBuilder({candidate:snapshot.leg.candidate,reservation:snapshot,decisionTs:this.now(),lock:lease,entrySnapshot});
+    if(!row)throw Error("RECORD_MISSING");
+    const reservedAt=this.now(),validated=validateV4EntryOpportunity(row,plan.leg,reservedAt);
+    if(validated.sourceSha!==d.store.releaseSha)throw Error("SOURCE_SHA_MISMATCH");
+    plan={...plan,ts:reservedAt,leg:{...plan.leg,entryOpportunity:validated}};
+   }catch(error){
+    d.entryOpportunityDiagnostic?.("STABLE4_V4_ENTRY_OPPORTUNITY_MISSING",{legId:plan.leg.id,reason:safeDecisionFailureReason(error)});
+   }
    if(!hasFreshV4SharedAccountLedger(d.store.read(),this.now()))
     return {status:"blocked",reason:"V4_ENTRY_ACCOUNT_LEDGER_REFRESH_REQUIRED",
      eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};

@@ -18,7 +18,8 @@ import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLi
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
-import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
+import { FileIdlePriorityShortStateStore,validateIdleEntryOpportunity, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
+import type {Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
 import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
@@ -93,6 +94,7 @@ export type IdlePriorityShortRunnerDependencies = {
     lock: FileAccountOrderLock;
     runtime: IdlePriorityShortRuntime;
     now?: () => number;
+    entryOpportunityBuilder?: (input:{signal:IdleSignal;pending:IdlePending;decisionTs:number;lock:AccountLockHandle})=>Promise<Stable4EntryOpportunityRecord|undefined>;
     logger?: { info(message: string, payload?: Record<string, unknown>): void; warn(message: string, payload?: Record<string, unknown>): void; error(message: string, payload?: Record<string, unknown>): void };
 };
 
@@ -331,6 +333,24 @@ export class IdlePriorityShortRunner {
         }
     }
 
+    private async prepareEntryOpportunity(signal:IdleSignal,pending:IdlePending,lock:AccountLockHandle):Promise<Stable4EntryOpportunityRecord|undefined>{
+        if(!this.dependencies.entryOpportunityBuilder)return undefined;
+        try{
+            await lock.document();
+            const copiedSignal=structuredClone(signal);
+            Object.freeze(copiedSignal.features);Object.freeze(copiedSignal);
+            const built=await this.dependencies.entryOpportunityBuilder({signal:copiedSignal,pending:Object.freeze(structuredClone(pending)),decisionTs:this.now(),lock});
+            if(!built)throw Error("RECORD_MISSING");
+            const entry=validateIdleEntryOpportunity(built,{symbol:pending.symbol,positionId:pending.idempotencyKey,logicalEntryTs:pending.decisionTs});
+            if(entry.sourceSha!==this.dependencies.runtime.runtimeSha.toLowerCase()||entry.capturedAt>this.now())throw Error("ENTRY_SOURCE_OR_TIME_MISMATCH");
+            await lock.document();
+            return entry;
+        }catch(error){
+            this.log.warn("STABLE4_IDLE_ENTRY_OPPORTUNITY_MISSING",{message:error instanceof Error?error.message:String(error)});
+            return undefined;
+        }
+    }
+
     private async installProtection(state: IdleState, pending: IdlePending, actual: DirectPosition): Promise<IdleOwnedPosition> {
         const symbol = pending.symbol;
         const plan = isIndependentRenderRoute(symbol,pending.route)
@@ -347,6 +367,7 @@ export class IdlePriorityShortRunner {
         }
         return {
             symbol,
+            ...(pending.entryOpportunity?{entryOpportunity:validateIdleEntryOpportunity(pending.entryOpportunity,{symbol,positionId:pending.idempotencyKey,logicalEntryTs:pending.decisionTs})}:{}),
             route: pending.route,
             side: "SHORT",
             signalTs: pending.signalTs,
@@ -688,6 +709,8 @@ export class IdlePriorityShortRunner {
 
         const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: admission.gross, notionalUsd: equity * admission.gross });
         const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: admission.gross };
+        const entryOpportunity=await this.prepareEntryOpportunity(signal,pending,lock);
+        if(entryOpportunity)pending.entryOpportunity=entryOpportunity;
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         try {

@@ -26,6 +26,7 @@ import {
     recordPenguM05ShadowEntryFillOutcome,
     recordPenguM05ShadowExitOutcome,
     recordPenguM05ShadowTickOutcome,
+    validatePenguEntryOpportunity,
     type PenguDualLsV2PendingOrder,
     type PenguDualLsV2RunnerState,
     type PenguDualLsV2RunnerStateStore,
@@ -88,6 +89,7 @@ export interface PenguDualLsV2PortfolioRunnerConfig {
     recoveryV8Enabled?: boolean;
     v64DynamicLongEnabled?: boolean;
     stable4Mode?: DisDexStable4Mode;
+    runtimeCommitSha?: string;
 }
 
 export interface PenguDualLsV2RunnerLogger {
@@ -115,6 +117,7 @@ export interface PenguDualLsV2AccountLock extends LiveRunnerLock {
 }
 
 export interface PenguDualLsV2PortfolioRunnerDependencies {
+    entryOpportunityBuilder?:(input:{signal:PenguDualLsV2Signal;history:PenguDualLsV2History;pending:PenguDualLsV2PendingOrder;decisionTs:number;lock:PenguDualLsV2LockHandle})=>Promise<import("./stable4-entry-opportunity-book").Stable4EntryOpportunityRecord|undefined>;
     marketData: {
         load(force?: boolean): Promise<PenguDualLsV2History>;
         loadFiveMinuteSince?(startTs: number, endTs?: number): Promise<import("@/lib/disdex-exit-overlay-contract").ConfirmedFiveMinuteBar[]>;
@@ -343,10 +346,11 @@ async function readPortfolioDailyLoss(pathValue?: string) {
     }
 }
 
-function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV2Position): PenguDualLsV2Position {
+export function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV2Position): PenguDualLsV2Position {
     const side = positionSide(actual);
     return {
         side,
+        ...(previous?.entryOpportunity?{entryOpportunity:previous.entryOpportunity,entryIdempotencyKey:previous.entryIdempotencyKey}:{}),
         entryTs: previous?.entryTs || actual.updatedAt || Date.now(),
         entryPrice: actual.entryPrice,
         quantity: Math.abs(actual.quantity),
@@ -396,6 +400,7 @@ export class PenguDualLsV2PortfolioRunner {
         signal: PenguDualLsV2Signal;
     }) {
         if (!/^(1|true|yes|on)$/i.test(String(process.env.DISDEX_HYPE_ZEC_PREEMPTION_ENABLED || "").trim())) return undefined;
+        if(this.dependencies.config.stable4Mode==="LIVE")return undefined;
         if (!this.dependencies.v12DynamicAdapter || typeof input.lock.document !== "function") return { status: "blocked" as const, message: "PENGU_HYPE_ZEC_PREEMPTION_LOCK_OR_ADAPTER_REQUIRED" };
         const candidate: StrictPortfolioIntent = {
             idempotencyKey: `${input.signal.strategyId}|${input.signal.referenceTs}|${input.signal.side}|ENTRY`,
@@ -416,12 +421,8 @@ export class PenguDualLsV2PortfolioRunner {
             candidate,
             pendingCryptoGross: input.pendingCryptoGross,
             pendingTotalGross: input.pendingTotalGross,
-            cryptoEntryCap: this.dependencies.config.stable4Mode === "LIVE"
-                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.cryptoGrossCap
-                : INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
-            totalEntryCap: this.dependencies.config.stable4Mode === "LIVE"
-                ? DISDEX_STABLE4_OPPORTUNITY.portfolio.totalGrossCap
-                : INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
             causeIdempotencyKey: candidate.idempotencyKey,
             expectedRuntimeSha: process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
             enabled: true,
@@ -520,6 +521,18 @@ export class PenguDualLsV2PortfolioRunner {
         return { status: "manual-review", message, idempotencyKey };
     }
 
+    private async captureEntryOpportunity(pending:PenguDualLsV2PendingOrder,signal:PenguDualLsV2Signal,history:PenguDualLsV2History,lock:PenguDualLsV2LockHandle):Promise<void>{
+        if(pending.reduceOnly||this.dependencies.config.mode!=="LIVE"||this.dependencies.config.stable4Mode!=="LIVE")return;
+        try{
+            if(!this.dependencies.entryOpportunityBuilder||!lock.document)throw Error("BUILDER_OR_ACCOUNT_LEASE_MISSING");
+            await lock.document();
+            const built=await this.dependencies.entryOpportunityBuilder({signal,history,pending:Object.freeze(structuredClone(pending)),decisionTs:this.now(),lock});
+            const entry=validatePenguEntryOpportunity(built,{positionId:pending.idempotencyKey,side:pending.side==="BUY"?"LONG":"SHORT",logicalEntryTs:pending.referenceTs+3600000});
+            const source=this.dependencies.config.runtimeCommitSha||process.env.DISDEX_RELEASE_SHA||process.env.DISDEX_RUNTIME_COMMIT_SHA;
+            if(entry.capturedAt>this.now()||!source||entry.sourceSha!==source)throw Error("ENTRY_SOURCE_OR_CAPTURE_MISMATCH");
+            pending.entryOpportunity=entry;
+        }catch(error){delete pending.entryOpportunity;this.log.warn("STABLE4_PENGU_ENTRY_OPPORTUNITY_MISSING",{message:error instanceof Error?error.message:String(error)});}
+    }
     private async applyResult(state: PenguDualLsV2RunnerState, pending: PenguDualLsV2PendingOrder, result: DirectTradeResult): Promise<PenguDualLsV2TickResult> {
         if (!resultMatchesPending(result, pending)) return this.manualReview(state, "PENGU_DUAL_LS_EXECUTION_RESULT_IDENTITY_MISMATCH", pending.idempotencyKey);
         if (result.status === "UNKNOWN" || result.executionUnknown) {
@@ -593,6 +606,7 @@ export class PenguDualLsV2PortfolioRunner {
             const entryPrice = actual!.entryPrice > 0 ? actual!.entryPrice : result.averagePrice;
             const isRecoveryV8 = pending.entryVersion === "RECOVERY_V8";
             state.position = {
+                ...(pending.entryOpportunity?{entryOpportunity:pending.entryOpportunity,entryIdempotencyKey:pending.idempotencyKey}:{}),
                 side: pending.side === "BUY" ? 1 : -1,
                 entryTs: pending.referenceTs + 3_600_000,
                 entryPrice,
@@ -1414,6 +1428,7 @@ export class PenguDualLsV2PortfolioRunner {
                     notionalUsd: targetNotional,
                 });
             }
+            await this.captureEntryOpportunity(pending,signal,history,lock);
             state.pending = pending;
             await this.dependencies.stateStore.save(state);
             this.log.info("PENGU Dual LS order planned", {

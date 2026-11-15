@@ -45,6 +45,8 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
   const openOrders: any[] = [];
   const tradeCalls: any[] = [];
   const orderResults = new Map<string, any>();
+  let entryCaptureCalls=0;
+  let entryEvidence:any;
   let liveMarkPrice = 110;
 
   const oldKill = process.env.DISDEX_SHARED_KILL_SWITCH_FILE;
@@ -95,6 +97,10 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
         notional: quantity * price,
       }),
       executeMarket: async (input: any) => {
+        if(!input.reduceOnly){
+          const persisted=await readFetBrk48State(statePath,RUNTIME_SHA);
+          assert.deepEqual(persisted.pending?.entryOpportunity,entryEvidence,"entry provenance must be durable before submission");
+        }
         tradeCalls.push({ ...input });
         const result = {
           requestId: input.requestId,
@@ -199,6 +205,15 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
       maxSlippageBps: 20,
       minimumOrderNotionalUsd: 5,
       now: () => now,
+      entryOpportunityBuilder:async({signal,pending,lock}:any)=>{
+        entryCaptureCalls++;
+        assert.equal(tradeCalls.length,0);
+        assert.equal((await readFetBrk48State(statePath,RUNTIME_SHA)).pending,undefined,"capture precedes first pending write");
+        assert.ok((await lock.document()).leaseId);
+        assert.ok(Object.isFrozen(pending));
+        entryEvidence={strategy:"FET",positionId:pending.idempotencyKey,sourceSha:RUNTIME_SHA,symbol:"FETUSDT",side:"LONG",entryTs:signal.entryTs,modelVersion:"entry-v1",score:.1,capturedAt:now};
+        return entryEvidence;
+      },
     };
 
     const blocker = await deps.accountLock.acquire("TEST_BLOCKER", "ASTER_FUTURES");
@@ -245,6 +260,8 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     assert.equal(afterEntry.position?.protectionMode, "INITIAL_HARD_STOP");
     assert.equal(afterEntry.position?.hardStop, 111 * 0.95);
     assert.equal(afterEntry.pending, undefined);
+    assert.deepEqual(afterEntry.position?.entryOpportunity,entryEvidence);
+    assert.equal(entryCaptureCalls,1);
 
     // A fresh runner instance must reconcile the same state and must not enter twice.
     now += 60_000;
@@ -269,6 +286,8 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     const upgradedStopClientOrderId = openOrders[0].clientOrderId;
 
     const armedState = await readFetBrk48State(statePath, RUNTIME_SHA);
+    assert.deepEqual(armedState.position?.entryOpportunity,entryEvidence,"protection reconstruction preserves original entry score");
+    assert.equal(entryCaptureCalls,1);
     assert.equal(armedState.position?.protectionMode, "PROFIT_FLOOR_3P0");
     assert.equal(armedState.position?.hardStop, 111 * 1.03);
     assert.equal(armedState.position?.stopClientOrderId, upgradedStopClientOrderId);

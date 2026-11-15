@@ -1,11 +1,13 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { FetBrk48TrailingStopState } from "./fet-brk48-trailing-stop";
+import {validateStable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 
 export const FET_BRK48_STATE_SCHEMA = "fet-brk48-residual-state/v1" as const;
 export type FetPendingAction = "ENTRY" | "EXIT" | "PREEMPT";
 
 export interface FetBrk48PositionState {
+  entryOpportunity?: Stable4EntryOpportunityRecord;
   symbol: "FETUSDT";
   side: 1;
   quantity: number;
@@ -22,6 +24,7 @@ export interface FetBrk48PositionState {
 }
 
 export interface FetBrk48PendingState {
+  entryOpportunity?: Stable4EntryOpportunityRecord;
   action: FetPendingAction;
   idempotencyKey: string;
   clientOrderId: string;
@@ -63,6 +66,13 @@ export interface FetBrk48State {
 function finitePositive(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) && n > 0;
+}
+
+export function validateFetEntryOpportunity(value:unknown,binding:{symbol:string;positionId?:string;logicalEntryTs:number}):Stable4EntryOpportunityRecord {
+  const entry=validateStable4EntryOpportunityBook({schemaVersion:1,records:[value]}).records[0];
+  if(entry.strategy!=="FET"||entry.symbol!==binding.symbol||entry.side!=="LONG"||entry.entryTs!==binding.logicalEntryTs||
+    (binding.positionId!==undefined&&entry.positionId!==binding.positionId))throw Error("FET_ENTRY_OPPORTUNITY_BINDING_INVALID");
+  return entry;
 }
 
 function validTrailingStop(value: unknown): value is FetBrk48TrailingStopState {
@@ -128,6 +138,11 @@ export async function readFetBrk48State(path: string, runtimeCommitSha?: string,
   if(raw.lastEvaluationReturn72h!==undefined&&!Number.isFinite(raw.lastEvaluationReturn72h))throw new Error("FET_RETURN72_TELEMETRY_INVALID");
   if (raw.position && !validPosition(raw.position)) throw new Error("FET_STATE_POSITION_INVALID");
   if (raw.pending && !validPending(raw.pending)) throw new Error("FET_STATE_PENDING_INVALID");
+  if(raw.position?.entryOpportunity!==undefined)raw.position.entryOpportunity=validateFetEntryOpportunity(raw.position.entryOpportunity,{symbol:raw.position.symbol,logicalEntryTs:raw.position.entryTs});
+  if(raw.pending?.entryOpportunity!==undefined){
+    if(raw.pending.action!=="ENTRY")throw Error("FET_ENTRY_OPPORTUNITY_ON_REDUCTION");
+    raw.pending.entryOpportunity=validateFetEntryOpportunity(raw.pending.entryOpportunity,{symbol:raw.pending.symbol,positionId:raw.pending.idempotencyKey,logicalEntryTs:raw.pending.entryTs});
+  }
   return {
     ...raw,
     failures: Array.isArray(raw.failures) ? raw.failures : [],

@@ -19,6 +19,7 @@ import { PENGU_RECOVERY_V8_PROMOTION } from "../config/penguRecoveryV8";
 import { nextPenguDaemonWaitMs } from "../lib/pengu-live-scheduling";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
+import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
 
 function numberEnv(name: string, fallback: number) {
     const parsed = Number(process.env[name]);
@@ -92,7 +93,16 @@ async function main() {
         cacheTtlMs: numberEnv("PENGU_DUAL_LS_V2_HISTORY_CACHE_TTL_MS", 5 * 60_000),
     });
     const accountLock = new FileAccountOrderLock(process.env.DISDEX_ACCOUNT_LOCK_PATH || ".runtime-state/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
+    const sourceSha=String(process.env.DISDEX_RELEASE_SHA||process.env.DISDEX_RUNTIME_COMMIT_SHA||process.env.DISDEX_RUNTIME_SHA||process.env.GIT_COMMIT||"").trim().toLowerCase();
+    let opportunityRuntime:ReturnType<typeof createStable4EntryOpportunityRuntime>|undefined;
     const runner = new PenguDualLsV2PortfolioRunner({
+        entryOpportunityBuilder:runtime.mode==="LIVE"&&runtime.stable4Mode==="LIVE"?async({signal,pending,decisionTs,lock})=>{
+            if(!lock.document)throw Error("STABLE4_PENGU_ACCOUNT_LEASE_REQUIRED");
+            opportunityRuntime??=createStable4EntryOpportunityRuntime();
+            // Frozen opportunity estimator uses longMaxHoldHours=120 for Recovery V8 too;
+            // this scoring horizon does not alter the native Recovery V8 exit contract.
+            return opportunityRuntime.prepareAndPublish({sourceGitSha:sourceSha,nativePositionId:pending.idempotencyKey,strategy:"PENGU",symbol:"PENGUUSDT",side:pending.side==="BUY"?"LONG":"SHORT",route:pending.entryVersion==="RECOVERY_V8"?"RECOVERY_V8":pending.side==="SELL"?"SHORT_V20":"LONG_V64",logicalEntryTs:pending.referenceTs+3600000,gross:pending.targetGross,plannedHoldHours:pending.side==="SELL"?72:120,entrySnapshot:{pengu72h:signal.features?.penguReturn72h,btc24h:signal.features?.btcReturn24h},capturedAt:decisionTs},{document:lock.document});
+        }:undefined,
         marketData,
         executor,
         stateStore: new FilePenguDualLsV2RunnerStateStore(resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`), runtime.mode),
@@ -120,6 +130,7 @@ async function main() {
             recoveryV8Enabled,
             v64DynamicLongEnabled: recoveryV8Enabled,
             stable4Mode: runtime.stable4Mode,
+            runtimeCommitSha:sourceSha,
         },
         residentStopGateway: runtime.mode === "LIVE" ? new AsterResidentStopGateway(client) : undefined,
         recoveryV8Protection,

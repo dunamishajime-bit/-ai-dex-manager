@@ -9,6 +9,9 @@ import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-sch
 import { FET_BRK48_TRAILING_STOP_POLICY } from "../lib/fet-brk48-trailing-stop";
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
 import { runnerMutationTelemetry } from "../lib/disdex-runner-mutation-telemetry";
+import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
+import {resolveDisDexStable4Mode} from "../config/disdexStable4Opportunity";
+import {FET_BRK48_RESIDUAL} from "../config/fetBrk48Runtime";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -85,6 +88,8 @@ async function main() {
     sharedRiskPath: process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_FILE,
     maxSlippageBps: numberEnv("FET_BRK48_MAX_SLIPPAGE_BPS", 20),
     minimumOrderNotionalUsd: numberEnv("FET_BRK48_MIN_ORDER_NOTIONAL_USD", 5),
+    ...(resolveDisDexStable4Mode()==="LIVE"?{entryOpportunityBuilder:async({signal,pending,decisionTs,lock})=>
+      createStable4EntryOpportunityRuntime().prepareAndPublish({sourceGitSha:runtimeSha.toLowerCase(),nativePositionId:pending.idempotencyKey,strategy:"FET",symbol:pending.symbol,side:"LONG",route:FET_BRK48_RESIDUAL.strategyId,logicalEntryTs:signal.entryTs,gross:pending.targetGross!,plannedHoldHours:FET_BRK48_RESIDUAL.holdHours,entrySnapshot:signal,capturedAt:decisionTs},lock)}:{}),
   });
 
   const daemon = process.argv.includes("--daemon");

@@ -13,14 +13,14 @@ from decimal import Decimal, localcontext
 from typing import Any, Callable
 
 
-# Generic classifier classes plus the approved nine QHV assets solely for
+# Generic classifier classes plus the approved QHV and S34 assets solely for
 # account admission accounting. This does not grant strategy eligibility.
 _STOCK = frozenset({"AMZN", "META", "MSFT", "NVDA", "TSLA"})
 _CRYPTO = frozenset({
     "BTC", "ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP",
     "ADA", "LTC", "ATOM", "AAVE", "NEAR", "PENGU", "FET", "HYPE", "ZEC",
     "TAO", "TIA", "DOT", "JUP", "RENDER",
-    "SUI", "SEI", "APT", "ARB", "OP", "ENA", "ONDO", "FIL", "TRX",
+    "SUI", "SEI", "APT", "ARB", "OP", "ENA", "ONDO", "FIL", "TRX", "UNI", "LDO",
 })
 _ACTIVE = frozenset({"PENDING", "SUBMITTED", "UNKNOWN"})
 

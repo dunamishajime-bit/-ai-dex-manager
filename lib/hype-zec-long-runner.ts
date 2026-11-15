@@ -24,7 +24,7 @@ import { buildHypeTrendSignal, type HypeTrendCandle } from "./hype-trend-long-si
 import { evaluateStable4HypeSignal, stable4HypeFormalPriorityOpen } from "./hype-stable4-opportunity-signal";
 import { evaluateHypeTrendEntryGate } from "./hype-trend-long-runner";
 import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
-import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
+import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral, validateHypeEntryOpportunity, type HypeZecLongPending, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
 import { BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW } from "./hype-zec-long-recovery-contract";
 import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
 
@@ -48,6 +48,7 @@ export function refreshHypeZecNoEntryDecision(
 }
 
 export interface HypeZecLongRunnerDependencies {
+  entryOpportunityBuilder?:(input:{signal:HypeZecSignalResult;market:HypeZecLongMarketData|undefined;pending:HypeZecLongPending;decisionTs:number;lock:AccountLockHandle;gross:number})=>Promise<import("./stable4-entry-opportunity-book").Stable4EntryOpportunityRecord|undefined>;
   marketData: { load(): Promise<HypeZecLongMarketData> };
   executor: DirectTradeExecutor;
   adapter: V12AsterLiveAdapter;
@@ -391,7 +392,18 @@ export class HypeZecLongRunner {
     return { status: "held", message: reason, strategy: signal.strategy };
   }
 
-  private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
+  private async captureEntryOpportunity(pending:HypeZecLongPending,signal:HypeZecSignalResult,market:HypeZecLongMarketData|undefined,lock:AccountLockHandle,gross:number):Promise<void>{
+    if(this.dependencies.runtime.mode!=="LIVE"||this.dependencies.runtime.stable4Mode!=="LIVE"||this.dependencies.runtime.signalMode!=="STABLE4")return;
+    try{
+      if(!this.dependencies.entryOpportunityBuilder)throw Error("BUILDER_MISSING");
+      await lock.document();
+      const built=await this.dependencies.entryOpportunityBuilder({signal,market,pending:Object.freeze(structuredClone(pending)),decisionTs:this.now(),lock,gross});
+      const entry=validateHypeEntryOpportunity(built,{positionId:pending.idempotencyKey,logicalEntryTs:signal.signalTs??0});
+      if(entry.capturedAt>this.now()||entry.sourceSha!==this.dependencies.runtime.runtimeSha)throw Error("ENTRY_SOURCE_OR_CAPTURE_MISMATCH");
+      pending.entryOpportunity=entry;
+    }catch(error){delete pending.entryOpportunity;this.log.warn("STABLE4_HYPE_ENTRY_OPPORTUNITY_MISSING",{message:error instanceof Error?error.message:String(error)});}
+  }
+  private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle,market?:HypeZecLongMarketData): Promise<HypeZecLongTickResult> {
     if (!signal.accepted || !signal.entryPrice || !signal.stopPrice || !signal.signalTs) return { status: "no-change", message: signal.reason, strategy: signal.strategy };
     const entryHold = await this.sharedEntryHold(state, signal);
     if (entryHold) return entryHold;
@@ -477,7 +489,8 @@ export class HypeZecLongRunner {
     const preOrderHold = await this.sharedEntryHold(state, signal);
     if (preOrderHold) return preOrderHold;
     const idempotencyKey = hashId([signal.strategy, signal.signalTs, symbol, quantity.quantity], "hz-entry");
-    const pendingEntry = { idempotencyKey, clientOrderId: idempotencyKey, action: "ENTRY" as const, strategy: signal.strategy, symbol, side: "BUY" as const, quantity: quantity.quantity, expectedPrice: signal.entryPrice, phase: "planned" as const, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason };
+    const pendingEntry:HypeZecLongPending = { idempotencyKey, clientOrderId: idempotencyKey, action: "ENTRY" as const, strategy: signal.strategy, symbol, side: "BUY" as const, quantity: quantity.quantity, expectedPrice: signal.entryPrice, phase: "planned" as const, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason,...(this.dependencies.runtime.stable4Mode==="LIVE"?{signalTs:signal.signalTs}:{}) };
+    await this.captureEntryOpportunity(pendingEntry,signal,market,lock,accepted.gross);
     state.pending = pendingEntry;
     await this.dependencies.stateStore.save(state);
     let result: DirectTradeResult;
@@ -533,6 +546,7 @@ export class HypeZecLongRunner {
       return this.manualReview(state, `HYPE_ZEC_PROTECTION_INSTALL_FAILED:${error instanceof Error ? error.message : String(error)}`);
     }
     const position: HypeZecLongPositionState = { strategy: signal.strategy, symbol, side: "LONG", positionId: idempotencyKey, quantity: actualQty, entryPrice: actual.entryPrice || signal.entryPrice, entryTs: this.now(), signalTs: signal.signalTs, stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, stopClientOrderId: stopId, takeProfitClientOrderId: tpId, stopReadBackAt: this.now(), peakPrice: actual.markPrice || signal.entryPrice, acceptedEntryGross, walletStopRiskPct: signal.strategy === "HYPE_LONG" ? HYPE_ZEC_LONG_POLICY.HYPE_LONG.walletStopRiskPct : undefined, updatedAt: this.now() };
+    if(pendingEntry.entryOpportunity)position.entryOpportunity=pendingEntry.entryOpportunity;
     state.positions = [...(state.positions || []).filter((row) => row.strategy !== signal.strategy), position];
     state.pending = undefined;
     await stateStoreSave(this.dependencies.stateStore, state);
@@ -709,7 +723,7 @@ export class HypeZecLongRunner {
       }
       for (const signal of signals) {
         if (existingStrategies.has(signal.strategy)) continue;
-        const result = await this.enter(state, signal, account, positions, lock);
+        const result = await this.enter(state, signal, account, positions, lock,market);
         if (result.status === "completed" || result.status === "manual-review" ||
             result.message === "HYPE_ZEC_SHARED_KILL_SWITCH_ACTIVE") return result;
       }

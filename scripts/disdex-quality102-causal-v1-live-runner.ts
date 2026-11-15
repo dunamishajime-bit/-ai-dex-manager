@@ -10,7 +10,7 @@ import {
     resolveQuality102CausalV1Runtime,
     type Quality102CausalV1Mode,
 } from "../config/disdexQuality102CausalV1Runtime";
-import { resolveDisDexStable4Mode, type DisDexStable4Mode } from "../config/disdexStable4Opportunity";
+import { resolveDisDexStable4Mode, assertStable4GlobalLiveAck, type DisDexStable4Mode } from "../config/disdexStable4Opportunity";
 import {
     QUALITY102_CAUSAL_V4_CAPABILITIES,
     QUALITY102_CAUSAL_V4_S34_MODEL,
@@ -34,6 +34,10 @@ import { Quality102CausalV1Runner } from "../lib/disdex-quality102-causal-v1-run
 import { buildQuality102CausalV4Signal } from "../lib/disdex-quality102-causal-v4-signal";
 import { Stable4Q102OnlineEngine } from "../lib/disdex-quality102-stable4-online";
 import {Stable4Q102ShadowEvidenceProvider} from "../lib/stable4-q102-shadow-evidence";
+import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
+import {createStable4UniOwnerEvidenceReader} from "../lib/stable4-uni-owner-evidence";
+import {stable4Q102EntryCapture} from "../lib/stable4-q102-entry-capture";
+import {compareStable4UniEntryScore} from "../lib/stable4-entry-opportunity-book";
 import { buildQuality102CausalV4DecisionSnapshot } from "../lib/disdex-quality102-causal-v4-observability";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
@@ -315,6 +319,7 @@ export function assertQuality102CausalV1ReadOnlyPreflightConfiguration(
     const ack = String(env.QUALITY102_CAUSAL_V1_LIVE_ACK || "").trim().toLowerCase();
     if (ack !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_CAUSAL_V1_LIVE_ACK_MUST_MATCH_RUNTIME_SHA");
     if (config.stable4Mode === "LIVE") {
+        assertStable4GlobalLiveAck(config.stable4Mode,config.runtimeCommitSha,env);
         const stable4Ack = String(env.DISDEX_STABLE4_Q102_LIVE_ACK || "").trim().toLowerCase();
         if (stable4Ack !== config.runtimeCommitSha.toLowerCase()) throw new Error("DISDEX_STABLE4_Q102_LIVE_ACK_MUST_MATCH_RUNTIME_SHA");
         new Stable4Q102OnlineEngine({
@@ -524,7 +529,7 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
 
 export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.env) {
     const config = resolveQuality102CausalV1LiveConfig(env);
-    assertQuality102CausalV1LiveActivation(config);
+    assertQuality102CausalV1LiveActivation(config,env);
     const client = createClient(env, config.runtimeCommitSha);
     if (config.mode === "LIVE" && !client.hasTradingCredentials()) throw new Error("QUALITY102_CAUSAL_V1_LIVE_CREDENTIALS_REQUIRED");
     const aster = new AsterDirectTradeExecutor(client, {
@@ -558,6 +563,8 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         logger: (message, payload) => console.log(JSON.stringify({ level: "info", strategyId: QUALITY102_CAUSAL_V1.strategyId, message, ...(payload || {}) })),
     });
     const stable4Evidence = stable4Engine ? new Stable4Q102ShadowEvidenceProvider(client) : undefined;
+    const opportunity=config.stable4Mode==="LIVE"?createStable4EntryOpportunityRuntime(env,{continuationLabels:()=>stable4Engine!.completedOpportunityLabels()}):undefined;
+    const readOpportunityOwners=opportunity?createStable4UniOwnerEvidenceReader(env):undefined;
     const runner = new Quality102CausalV1Runner({
         marketData: new Quality102CausalV1AsterMarketDataProvider(client, {
             symbols: config.symbols,
@@ -575,6 +582,22 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         onlineObserver: stable4Engine && stable4Evidence
             ? async ({history,decisionTs}) => stable4Engine.observeAndRefresh(history,decisionTs,stable4Evidence)
             : undefined,
+        entryOpportunityBuilder: opportunity?async({signal,history,pending,decisionTs,lock})=>{
+            if(!lock.document)throw Error("STABLE4_Q102_SCORE_OWNED_LEASE_MISSING");
+            return opportunity.prepareAndPublish(stable4Q102EntryCapture({signal,history,sourceSha:config.runtimeCommitSha,positionId:pending.idempotencyKey,capturedAt:decisionTs}),{document:lock.document});
+        }:undefined,
+        recoveredEntryAdmission:opportunity&&readOpportunityOwners?async({signal,history,decisionTs,positions,lock})=>{
+            if(!lock.document)return{allowed:false,reason:"OWNED_LEASE_MISSING"};
+            await lock.document();
+            const candidate=opportunity.prepare(stable4Q102EntryCapture({signal,history,sourceSha:config.runtimeCommitSha,positionId:"ADMISSION:"+signal.referenceTs,capturedAt:decisionTs}));
+            const evidence=await readOpportunityOwners();await lock.document();
+            const result=compareStable4UniEntryScore({now:Date.now(),candidate,book:evidence.book,owners:evidence.owners,signed:{complete:true,observedAt:Math.min(decisionTs,...positions.map(p=>p.updatedAt)),positions:positions.filter(p=>p.quantity!==0).map(p=>({symbol:p.symbol,side:p.quantity>0?"LONG":"SHORT",quantity:Math.abs(p.quantity)}))}});
+            return{allowed:result.allowed,reason:result.reason};
+        }:undefined,
+        recoveredEntryOwnerReader:readOpportunityOwners?async pending=>{
+            if(!pending.entryOpportunity)throw Error("STABLE4_Q102_DURABLE_ENTRY_RECORD_MISSING");
+            return readOpportunityOwners(pending.entryOpportunity,pending.clientOrderId);
+        }:undefined,
         signalBuilder: (input) => {
             const nativeSignal = buildQuality102CausalV4Signal(input, { highVolSymbols: config.highVolSymbols });
             return stable4Engine ? stable4Engine.select(nativeSignal, input.history, input.decisionTs).signal : nativeSignal;
@@ -593,6 +616,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             await rename(temporary, target);
         },
         config: {
+            stable4Mode:config.stable4Mode,
             residentStopRequired: config.mode === "LIVE",
             profitFloorEnabled: config.profitFloorEnabled,
             adoptedExitPoliciesEnabled: config.adoptedExitPoliciesEnabled,

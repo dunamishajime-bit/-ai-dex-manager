@@ -16,6 +16,7 @@ import { resolveIdleResidualLongRuntime } from "../config/idleResidualLongRuntim
 import { IdleResidualLongRunner } from "../lib/idle-residual-long-runner";
 import { FileIdleResidualLongStateStore } from "../lib/idle-residual-long-state";
 import { observePeerDecisionCycle } from "../lib/disdex-peer-decision-cycle";
+import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
 
 function numberEnv(name: string, fallback: number) {
     const value = Number(process.env[name]);
@@ -89,6 +90,8 @@ async function main() {
         stateStore: coreStateStore,
         lock: makeLock(),
         runtime,
+        ...(runtime.stable4Mode==="LIVE"?{entryOpportunityBuilder:async({signal,pending,decisionTs,lock})=>
+            createStable4EntryOpportunityRuntime().prepareAndPublish({sourceGitSha:runtime.runtimeSha.toLowerCase(),nativePositionId:pending.idempotencyKey,strategy:"IDLE",symbol:pending.symbol,side:"SHORT",route:pending.route,logicalEntryTs:pending.decisionTs,gross:pending.gross!,plannedHoldHours:pending.holdHours,entrySnapshot:signal,capturedAt:decisionTs},lock)}:{}),
     });
     const residualRunner = new IdleResidualLongRunner({
         marketData,

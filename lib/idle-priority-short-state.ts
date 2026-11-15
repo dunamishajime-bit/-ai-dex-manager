@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
+import {validateStable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 import { RENDER_ENTRY_POLICY, RENDER_INDEPENDENT_ROUTE, RENDER_M5_MS, type LegacyRenderAdverseState } from "./render-highwr-and-legacy-stop";
 
 export const IDLE_STATE_SCHEMA="disdex-idle-priority-state/v2" as const;
@@ -9,6 +10,7 @@ export type IdlePendingPhase="planned"|"submitted"|"manual_review";
 export type IdlePendingAction="ENTRY"|"EXIT";
 
 export type IdleOwnedPosition={
+  entryOpportunity?:Stable4EntryOpportunityRecord;
   symbol:IdlePrioritySymbol;
   route:string;
   side:"SHORT";
@@ -33,6 +35,7 @@ export type IdleOwnedPosition={
 };
 
 export type IdlePending={
+  entryOpportunity?:Stable4EntryOpportunityRecord;
   action:IdlePendingAction;
   phase:IdlePendingPhase;
   symbol:IdlePrioritySymbol;
@@ -85,12 +88,22 @@ function independentFor(symbol:IdlePrioritySymbol,route:string){return symbol===
 function routeValid(symbol:IdlePrioritySymbol,route:string){return route===routeFor(symbol)||independentFor(symbol,route);}
 function holdValid(symbol:IdlePrioritySymbol,route:string,hours:number){return hours===(independentFor(symbol,route)?RENDER_ENTRY_POLICY.independentRealMaxMinutes/60:holdFor(symbol));}
 
+export function validateIdleEntryOpportunity(value:unknown,binding:{symbol:string;positionId?:string;logicalEntryTs?:number;observedEntryTs?:number}):Stable4EntryOpportunityRecord {
+ const entry=validateStable4EntryOpportunityBook({schemaVersion:1,records:[value]}).records[0];
+ if(entry.strategy!=="IDLE"||entry.symbol!==binding.symbol||entry.side!=="SHORT"||
+   (binding.positionId!==undefined&&entry.positionId!==binding.positionId)||
+   (binding.logicalEntryTs!==undefined&&entry.entryTs!==binding.logicalEntryTs)||
+   (binding.observedEntryTs!==undefined&&entry.entryTs>binding.observedEntryTs))throw Error("IDLE_ENTRY_OPPORTUNITY_BINDING_INVALID");
+ return entry;
+}
+
 export function emptyIdleState(runtimeSha:string,now=Date.now()):IdleState{
  if(!validSha(runtimeSha))throw new Error("IDLE_STATE_RUNTIME_SHA_INVALID");
  return {schema:IDLE_STATE_SCHEMA,runtimeSha:runtimeSha.toLowerCase(),updatedAt:now,positions:[],manualReview:null,pending:null,lastAcceptedBySymbol:{},failures:[]};
 }
 
 function validatePosition(p:IdleOwnedPosition){
+ if(p?.entryOpportunity!==undefined)validateIdleEntryOpportunity(p.entryOpportunity,{symbol:p.symbol,observedEntryTs:p.entryTs});
  if(!p||!validSymbol(p.symbol)||p.side!=="SHORT"||!routeValid(p.symbol,p.route))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.entryTs)||!validTs(p.exitTs)||p.exitTs<=p.entryTs)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!finitePositive(p.entryPrice)||!finitePositive(p.quantity)||(independentFor(p.symbol,p.route) ? (p.gross < 0.25-1e-9 || p.gross > RENDER_ENTRY_POLICY.independentRequestedGross+1e-9) : Math.abs(p.gross-grossFor(p.symbol))>1e-9)||!holdValid(p.symbol,p.route,p.holdHours))throw new Error("IDLE_STATE_POSITION_INVALID");
@@ -116,6 +129,10 @@ function validatePosition(p:IdleOwnedPosition){
 }
 
 function validatePending(p:IdlePending){
+ if(p?.entryOpportunity!==undefined){
+  if(p.action!=="ENTRY")throw Error("IDLE_ENTRY_OPPORTUNITY_ON_REDUCTION");
+  validateIdleEntryOpportunity(p.entryOpportunity,{symbol:p.symbol,positionId:p.idempotencyKey,logicalEntryTs:p.decisionTs});
+ }
  if(!p||!["ENTRY","EXIT"].includes(p.action)||!["planned","submitted","manual_review"].includes(p.phase))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!validSymbol(p.symbol)||!routeValid(p.symbol,p.route)||!holdValid(p.symbol,p.route,p.holdHours))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!p.clientOrderId||!p.idempotencyKey||!finitePositive(p.quantity)||!finitePositive(p.expectedPrice))throw new Error("IDLE_STATE_PENDING_INVALID");
@@ -144,9 +161,9 @@ export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{
   schema:IDLE_STATE_SCHEMA,
   runtimeSha:String(x.runtimeSha).toLowerCase(),
   updatedAt:Number(x.updatedAt),
-  positions:x.positions,
+  positions:x.positions.map(p=>({...p,...(p.entryOpportunity?{entryOpportunity:validateIdleEntryOpportunity(p.entryOpportunity,{symbol:p.symbol,observedEntryTs:p.entryTs})}:{})})),
   manualReview:x.manualReview??null,
-  pending:x.pending??null,
+  pending:x.pending?{...x.pending,...(x.pending.entryOpportunity?{entryOpportunity:validateIdleEntryOpportunity(x.pending.entryOpportunity,{symbol:x.pending.symbol,positionId:x.pending.idempotencyKey,logicalEntryTs:x.pending.decisionTs})}:{})}:null,
   lastDecision:x.lastDecision,
   lastAcceptedBySymbol:{...cooldown},
   stable4TaoRiskOffUntil:x.stable4TaoRiskOffUntil===undefined?undefined:Number(x.stable4TaoRiskOffUntil),

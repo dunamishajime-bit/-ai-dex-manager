@@ -39,6 +39,8 @@ export interface PenguDualLsV2History {
 }
 
 export interface PenguDualLsV2Position {
+    entryOpportunity?: import("./stable4-entry-opportunity-book").Stable4EntryOpportunityRecord;
+    entryIdempotencyKey?: string;
     stopLedger?: import("./resident-stop-ledger").StopLedger;
     residentStop?: import("./venue-resident-stop").ResidentStopProtection;
     side: -1 | 1;

@@ -1,5 +1,8 @@
 ﻿import "dotenv/config";
 import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
+import {resolveDisDexStable4Mode} from "../config/disdexStable4Opportunity";
+import {createStable4EntryOpportunityRuntime} from "../lib/stable4-entry-opportunity-runtime";
+import {expectedStable4OpportunityHoldHours} from "../lib/stable4-opportunity-expected-hold";
 import {v4ExecutionPhase,v4MonitorIdentity,v4ReadOnlyRuntimeSha} from "../lib/v12-v4-execution-phase";
 import {dirname} from "node:path";
 import {setTimeout as delay} from "node:timers/promises";
@@ -351,7 +354,16 @@ export async function buildV4ProductionRuntime(options:V4ProductionRuntimeOption
   cache={boundary,value};
   return value;
  };
+ let entryOpportunityRuntime:ReturnType<typeof createStable4EntryOpportunityRuntime>|undefined;
+ const stable4Mode=resolveDisDexStable4Mode();
  const engine=new V4RunnerEngine({
+  ...(stable4Mode==="OFF"?{}:{
+   entryOpportunityBuilder:async({candidate,reservation,decisionTs,lock,entrySnapshot})=>{
+    entryOpportunityRuntime??=createStable4EntryOpportunityRuntime();
+    return entryOpportunityRuntime.prepareAndPublish({sourceGitSha:releaseSha,nativePositionId:reservation.leg.id,strategy:"V4",symbol:candidate.symbol,side:candidate.effectiveSide,route:candidate.route,logicalEntryTs:candidate.eligibleEntryTs,gross:candidate.requestedGross,plannedHoldHours:expectedStable4OpportunityHoldHours({strategy:"V4",side:candidate.effectiveSide,route:candidate.route,entrySnapshot}),entrySnapshot,capturedAt:decisionTs},lock);
+   },
+   entryOpportunityDiagnostic:(message,payload)=>console.warn(JSON.stringify({level:"warn",strategy:"V4",message,...payload})),
+  }),
   store,accountLock:lock,adapter,client,pendingRegistryPath,
   fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
   fetchExitFeed:async (symbol,fromTs,untilTs)=>{

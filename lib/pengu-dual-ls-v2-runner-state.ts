@@ -1,4 +1,6 @@
 import { validateStopLedger } from "./resident-stop-ledger";
+import {validateStable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
+import {STABLE4_OPPORTUNITY_MODEL_VERSION} from "./stable4-opportunity-corpus";
 import { validateResidentStopProtection } from "./venue-resident-stop";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -12,6 +14,7 @@ import {
 } from "@/lib/pengu-route-quarantine-dd-governor";
 
 export interface PenguDualLsV2PendingOrder {
+    entryOpportunity?: Stable4EntryOpportunityRecord;
     idempotencyKey: string;
     clientOrderId: string;
     phase: "planned" | "submitted" | "manual_review";
@@ -374,6 +377,15 @@ export function recordPenguM05ShadowExitOutcome(
     return true;
 }
 
+export function validatePenguEntryOpportunity(value:unknown,expected:{positionId:string;side:"LONG"|"SHORT";logicalEntryTs:number}):Stable4EntryOpportunityRecord {
+    const record=validateStable4EntryOpportunityBook({schemaVersion:1,records:[value]}).records[0];
+    if(record.strategy!=="PENGU"||record.symbol!=="PENGUUSDT"||record.positionId!==expected.positionId||record.side!==expected.side||record.entryTs!==expected.logicalEntryTs||record.modelVersion!==STABLE4_OPPORTUNITY_MODEL_VERSION)throw Error("STABLE4_PENGU_ENTRY_OPPORTUNITY_IDENTITY");
+    return record;
+}
+function optionalPenguEntryOpportunity(value:unknown,expected:{positionId:string;side:"LONG"|"SHORT";logicalEntryTs:number}) {
+    if(value===undefined)return undefined;
+    try{return validatePenguEntryOpportunity(value,expected);}catch{return undefined;}
+}
 function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
     if (!value || typeof value !== "object") return defaultState(mode);
     const raw = value as Partial<PenguDualLsV2RunnerState>;
@@ -387,6 +399,7 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
     const position = rawPosition
         ? {
             ...rawPosition,
+            entryOpportunity:optionalPenguEntryOpportunity(rawPosition.entryOpportunity,{positionId:rawPosition.entryIdempotencyKey||"",side:rawPosition.side>0?"LONG":"SHORT",logicalEntryTs:rawPosition.entryTs}),
             residentStop: validateResidentStopProtection(rawPosition.residentStop),
             stopLedger: validateStopLedger(rawPosition.stopLedger),
             // State written before Short V20 is explicitly legacy and never
@@ -409,7 +422,7 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
         cooldownUntilTs: Number.isFinite(Number(raw.cooldownUntilTs)) ? Number(raw.cooldownUntilTs) : undefined,
         riskOverlay: normalizePenguRiskOverlayState(raw.riskOverlay),
         position: position && (position.side === 1 || position.side === -1) ? position : undefined,
-        pending: raw.pending && typeof raw.pending === "object" ? raw.pending as PenguDualLsV2PendingOrder : undefined,
+        pending: raw.pending && typeof raw.pending === "object" ? {...raw.pending,entryOpportunity:optionalPenguEntryOpportunity(raw.pending.entryOpportunity,{positionId:raw.pending.idempotencyKey,side:raw.pending.side==="BUY"?"LONG":"SHORT",logicalEntryTs:raw.pending.referenceTs+3600000})} as PenguDualLsV2PendingOrder : undefined,
         failures: Array.isArray(raw.failures)
             ? raw.failures.filter((item): item is PenguDualLsV2RunnerFailure => Boolean(item && typeof item.message === "string")).slice(-100)
             : [],

@@ -1,9 +1,10 @@
 import { DISDEX_STABLE4_OPPORTUNITY } from "../config/disdexStable4Opportunity";
 import { classifyAsterSymbol, type AsterAssetClass } from "./disdex-aster-portfolio-classifier";
 import { normalizePendingExposureRegistry, type PendingExposureRegistry } from "./disdex-pending-exposure-registry";
+import { QUALITY102_CAUSAL_V4_S34_MODEL } from "../config/disdexQuality102CausalV4Model";
 
 // Admission asset classification only: generic strategy eligibility intentionally stays unchanged.
-const STABLE4_APPROVED_QHV_SYMBOLS = new Set(["SUIUSDT", "SEIUSDT", "APTUSDT", "ARBUSDT", "OPUSDT", "ENAUSDT", "ONDOUSDT", "FILUSDT", "TRXUSDT"]);
+const STABLE4_APPROVED_QHV_SYMBOLS = new Set(["SUIUSDT", "SEIUSDT", "APTUSDT", "ARBUSDT", "OPUSDT", "ENAUSDT", "ONDOUSDT", "FILUSDT", "TRXUSDT", ...QUALITY102_CAUSAL_V4_S34_MODEL.map(row=>row.symbol)]);
 function classifyStable4AdmissionSymbol(symbol: string): Pick<ReturnType<typeof classifyAsterSymbol>, "assetClass"> {
   const generic = classifyAsterSymbol(symbol);
   return generic.assetClass === "UNKNOWN" && STABLE4_APPROVED_QHV_SYMBOLS.has(symbol.toUpperCase()) ? { assetClass: "CRYPTO" } : generic;

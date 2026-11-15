@@ -3,6 +3,8 @@ import { chmod, chown, constants as fsConstants, copyFile, lstat, mkdir, open, r
 import { dirname, resolve } from "node:path";
 
 import type { AccountLockHandle } from "./disdex-account-order-lock";
+import {validateStable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
+import {STABLE4_OPPORTUNITY_MODEL_VERSION} from "./stable4-opportunity-corpus";
 
 export const HYPE_ZEC_LONG_STATE_SCHEMA = "disdex-hype-zec-long/v1" as const;
 /** HYPE/ZEC state heartbeat freshness contract used by runtime health. */
@@ -12,6 +14,7 @@ export type HypeZecLongStateMode = "LIVE" | "SHADOW" | "PAPER";
 export type HypeZecLongPendingPhase = "planned" | "submitted" | "manual_review";
 
 export interface HypeZecLongPositionState {
+  entryOpportunity?: Stable4EntryOpportunityRecord;
   strategy: "HYPE_LONG" | "ZEC_LONG";
   symbol: "HYPEUSDT" | "ZECUSDT";
   side: "LONG";
@@ -35,6 +38,8 @@ export interface HypeZecLongPositionState {
 }
 
 export interface HypeZecLongPending {
+  entryOpportunity?: Stable4EntryOpportunityRecord;
+  signalTs?: number;
   idempotencyKey: string;
   clientOrderId: string;
   action: "ENTRY" | "EXIT";
@@ -106,6 +111,15 @@ export type HypeZecLongStaleRecoveryResult = {
   positionChangesSent: 0;
 };
 
+export function validateHypeEntryOpportunity(value:unknown,expected:{positionId:string;logicalEntryTs:number}):Stable4EntryOpportunityRecord {
+  const record=validateStable4EntryOpportunityBook({schemaVersion:1,records:[value]}).records[0];
+  if(record.strategy!=="HYPE"||record.symbol!=="HYPEUSDT"||record.side!=="LONG"||record.positionId!==expected.positionId||record.entryTs!==expected.logicalEntryTs||record.modelVersion!==STABLE4_OPPORTUNITY_MODEL_VERSION)throw Error("STABLE4_HYPE_ENTRY_OPPORTUNITY_IDENTITY");
+  return record;
+}
+function optionalHypeEntryOpportunity(value:unknown,expected:{positionId:string;logicalEntryTs:number}) {
+  if(value===undefined)return undefined;
+  try{return validateHypeEntryOpportunity(value,expected);}catch{return undefined;}
+}
 function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMode?: HypeZecLongStateMode): HypeZecLongRunnerState {
   if (!value || typeof value !== "object") throw new Error("HYPE_ZEC_LONG_STATE_MALFORMED");
   const raw = value as Partial<HypeZecLongRunnerState>;
@@ -126,8 +140,8 @@ function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMo
     updatedAt,
     lastDecisionTs: raw.lastDecisionTs,
     lastDecision: raw.lastDecision,
-    positions: Array.isArray(raw.positions) ? raw.positions.map((position) => ({ ...position })) : undefined,
-    pending: raw.pending,
+    positions: Array.isArray(raw.positions) ? raw.positions.map((position) => ({ ...position,entryOpportunity:optionalHypeEntryOpportunity(position.entryOpportunity,{positionId:position.positionId,logicalEntryTs:position.signalTs}) })) : undefined,
+    pending: raw.pending?{...raw.pending,entryOpportunity:optionalHypeEntryOpportunity(raw.pending.entryOpportunity,{positionId:raw.pending.idempotencyKey,logicalEntryTs:raw.pending.signalTs??0})}:undefined,
     manualReview: raw.manualReview,
     failures: Array.isArray(raw.failures) ? raw.failures.slice(-100) : [],
   };

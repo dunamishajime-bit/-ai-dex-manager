@@ -148,7 +148,7 @@ class EntryGrossTests(unittest.TestCase):
         self.assertEqual(evaluate_stable4_entry_gross(p)["projectedGross"]["crypto"], 0.1)
 
     def test_approved_qhv_positions_count_as_crypto_for_account_admission(self):
-        for symbol in ["SUI", "SEI", "APT", "ARB", "OP", "ENA", "ONDO", "FIL", "TRX"]:
+        for symbol in ["UNI", "LDO", "SUI", "SEI", "APT", "ARB", "OP", "ENA", "ONDO", "FIL", "TRX"]:
             p = fixture()
             p["positions"] = [{"symbol": symbol, "quantity": 2, "markPrice": 5, "observedAt": NOW}]
             self.assertEqual(evaluate_stable4_entry_gross(p)["projectedGross"]["crypto"], 0.2)

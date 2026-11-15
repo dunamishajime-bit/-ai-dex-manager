@@ -6,7 +6,9 @@ import { FET_BRK48_RESIDUAL } from "@/config/fetBrk48Runtime";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import type { AsterKline, AsterV3Client } from "@/lib/aster-v3-client";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
-import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
+import { FileAccountOrderLock,type AccountLockHandle } from "@/lib/disdex-account-order-lock";
+import type {Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
+import {resolveDisDexStable4Mode} from "../config/disdexStable4Opportunity";
 import {
   readQuality102CausalV1Ownership,
   quality102OwnsOrder,
@@ -26,6 +28,7 @@ import { fetCompletedReturn72h, buildFetBrk48Signal, normalizeFetH1, type FetBrk
 import {
   readFetBrk48State,
   writeFetBrk48State,
+  validateFetEntryOpportunity,
   type FetBrk48PendingState,
   type FetBrk48PositionState,
   type FetBrk48State,
@@ -86,6 +89,7 @@ export interface FetBrk48LiveRunnerDependencies {
   maxSlippageBps?: number;
   minimumOrderNotionalUsd?: number;
   now?: () => number;
+  entryOpportunityBuilder?: (input:{signal:FetBrk48Signal;pending:FetBrk48PendingState;decisionTs:number;lock:AccountLockHandle})=>Promise<Stable4EntryOpportunityRecord|undefined>;
 }
 
 export interface FetBrk48TickResult {
@@ -192,6 +196,7 @@ async function ensureProtection(
   state: FetBrk48State,
   actual: DirectPosition,
   input: {
+    entryOpportunity?:Stable4EntryOpportunityRecord;
     entryTs: number;
     exitTs: number;
     targetGross: number;
@@ -212,7 +217,9 @@ async function ensureProtection(
     : entryPrice * (1 - input.hardStopPct);
   const normalizedStop = await deps.adapter.normalizeStopPrice("FETUSDT", requestedStop);
   const stopClientOrderId = input.stopClientOrderId || deterministicId("stop", `${input.entryTs}|${quantity}|${entryPrice}`);
+  const entryOpportunity=input.entryOpportunity??(state.pending?.action==="ENTRY"?state.pending.entryOpportunity:undefined)??state.position?.entryOpportunity;
   const position: FetBrk48PositionState = {
+    ...(entryOpportunity?{entryOpportunity:validateFetEntryOpportunity(entryOpportunity,{symbol:"FETUSDT",logicalEntryTs:input.entryTs})}:{}),
     symbol: "FETUSDT",
     side: 1,
     quantity,
@@ -591,6 +598,22 @@ async function executeExit(
 export class FetBrk48LiveRunner {
   constructor(private readonly deps: FetBrk48LiveRunnerDependencies) {}
 
+  private async prepareEntryOpportunity(signal:FetBrk48Signal,pending:FetBrk48PendingState,lock:AccountLockHandle):Promise<Stable4EntryOpportunityRecord|undefined>{
+    if(!this.deps.entryOpportunityBuilder)return undefined;
+    try{
+      await lock.document();
+      const built=await this.deps.entryOpportunityBuilder({signal:Object.freeze(structuredClone(signal)),pending:Object.freeze(structuredClone(pending)),decisionTs:(this.deps.now||Date.now)(),lock});
+      if(!built)throw Error("RECORD_MISSING");
+      const entry=validateFetEntryOpportunity(built,{symbol:pending.symbol,positionId:pending.idempotencyKey,logicalEntryTs:pending.entryTs!});
+      if(entry.sourceSha!==this.deps.runtimeSha.toLowerCase()||entry.capturedAt>(this.deps.now||Date.now)())throw Error("ENTRY_SOURCE_OR_TIME_MISMATCH");
+      await lock.document();
+      return entry;
+    }catch(error){
+      console.warn(JSON.stringify({event:"STABLE4_FET_ENTRY_OPPORTUNITY_MISSING",message:error instanceof Error?error.message:String(error)}));
+      return undefined;
+    }
+  }
+
   async tick(): Promise<FetBrk48TickResult> {
     const now = (this.deps.now || Date.now)();
 
@@ -843,7 +866,7 @@ export class FetBrk48LiveRunner {
           FET_BRK48_RESIDUAL.maximumGross,
           Math.max(0, account.availableBalance) * FET_BRK48_RESIDUAL.requiredLeverage / equity,
         );
-        const preemptionEnabled = /^(1|true|yes|on)$/i.test(String(process.env.DISDEX_HYPE_ZEC_PREEMPTION_ENABLED || ""));
+        const preemptionEnabled = resolveDisDexStable4Mode()!=="LIVE"&&/^(1|true|yes|on)$/i.test(String(process.env.DISDEX_HYPE_ZEC_PREEMPTION_ENABLED || ""));
         const candidate: StrictPortfolioIntent = {
           idempotencyKey: `FET_BRK48_RESIDUAL|${signal.referenceTs}|HYPE_ZEC_PREEMPTION`,
           strategy: "FET_RESIDUAL",
@@ -915,7 +938,7 @@ export class FetBrk48LiveRunner {
         return { status: "held", message: "FET_ENTRY_ALREADY_COMPLETED", ordersSent: 0, signal, gross: targetGross };
       }
       const clientOrderId = deterministicId("entry", idempotencyKey);
-      state.pending = {
+      const pendingEntry:FetBrk48PendingState = {
         action: "ENTRY",
         idempotencyKey,
         clientOrderId,
@@ -932,6 +955,9 @@ export class FetBrk48LiveRunner {
         exitTs: signal.exitTs,
         hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
       };
+      const entryOpportunity=await this.prepareEntryOpportunity(signal,pendingEntry,lock);
+      if(entryOpportunity)pendingEntry.entryOpportunity=entryOpportunity;
+      state.pending=pendingEntry;
       await writeFetBrk48State(this.deps.statePath, state);
       const reservation = await lock.reserve({
         strategyId: FET_BRK48_RESIDUAL.strategyId,

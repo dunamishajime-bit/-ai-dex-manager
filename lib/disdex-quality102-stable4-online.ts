@@ -188,6 +188,9 @@ export class Stable4Q102OnlineEngine{
  }
  isHealthy(){return this.healthy;}
  learningStatus(){return{healthy:this.healthy,seedCoverageThrough:this.seedCoverageThrough,observedThrough:this.state.observedThrough??(this.seedCoverageThrough?this.seedCoverageThrough-HOUR:undefined),completedContinuationRows:this.state.recoveryRows.length,pendingContinuationRows:this.state.recoveryPending.length,unresolvedContinuationRows:this.state.recoveryUnresolved.length,avaxLastSelectedEntryTs:this.state.avaxLastSelectedEntryTs};}
+ /** Completed causal native shadow labels only; unresolved and pending rows never
+  * enter portfolio opportunity scoring. Return a detached evidence snapshot. */
+ completedOpportunityLabels(){return structuredClone(this.state.recoveryRows.map(r=>({...r,strategy:"Q102"})));}
  pendingEvidenceRequests(through:number){
   const groups=new Map<string,PendingRecovery[]>();for(const q of this.state.recoveryPending)groups.set(q.symbol,[...(groups.get(q.symbol)??[]),q]);
   return[...groups].map(([symbol,pending])=>({symbol,from:Math.min(...pending.map(q=>q.entryTs)),through:Math.min(through,Math.max(...pending.map(q=>q.exitTs))),includeM5:pending.some(q=>q.exitPolicy!=="HIGH_VOL_TRAIL72"),pendingCount:pending.length}));

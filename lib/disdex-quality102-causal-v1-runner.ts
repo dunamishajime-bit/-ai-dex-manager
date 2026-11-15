@@ -2,6 +2,7 @@ import { quality102GrossForFamily } from "../config/integratedProductionRiskPoli
 import {Stable4EntryGrossAdmissionError} from "./stable4-entry-gross-guard";
 import type {Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 import {validateQuality102EntryOpportunity} from "./disdex-quality102-causal-v1-state";
+import type {Stable4UniFinalAdmissionCapability} from "./stable4-uni-final-admission";
 import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
 import { residentStopPlan, verifyResidentStopPartial, retireResidentStop, ensureResidentStop, type ResidentStopGateway } from "./venue-resident-stop";
 import { createHash, randomUUID } from "node:crypto";
@@ -100,6 +101,7 @@ export interface Quality102CausalV1TickResult {
 }
 
 export interface Quality102CausalV1RunnerConfig {
+    stable4Mode?: "OFF"|"SHADOW"|"LIVE";
     residentStopRequired?: boolean;
     profitFloorEnabled?: boolean;
     adoptedExitPoliciesEnabled?: boolean;
@@ -182,6 +184,7 @@ export interface Quality102CausalV1RunnerDependencies {
         positions: DirectPosition[];
         lock: Quality102CausalV1LockHandle;
     }) => Promise<{ allowed: boolean; reason: string }>;
+    recoveredEntryOwnerReader?: (pending:Quality102CausalV1PendingOrder) => ReturnType<Stable4UniFinalAdmissionCapability["readOwners"]>;
     entryOpportunityBuilder?: (input: {
         signal: Quality102CausalV1Signal;
         history: Quality102CausalV1History;
@@ -1290,7 +1293,8 @@ export class Quality102CausalV1Runner {
                 maxSlippageBps: this.dependencies.config.maxSlippageBps,
                 reason: `${pending.reason || STRATEGY_ID} family=${pending.family || state.position?.family || "UNKNOWN"} variant=${pending.variant || state.position?.variant || "UNKNOWN"} layer=${pending.layer || state.position?.layer || "UNKNOWN"}`,
                 requireVenueMargin5xCross: !pending.reduceOnly,
-                ...(!pending.reduceOnly&&lock.document?{stable4Admission:{lease:{document:lock.document},ownReservationId:reservation?.reservationId}}:{}),
+                ...(!pending.reduceOnly&&lock.document?{stable4Admission:{lease:{document:lock.document},ownReservationId:reservation?.reservationId,
+                    ...(pending.reason?.split(":")[0]==="STABLE4_Q102_UNI_ONLINE_RECOVERY"&&pending.entryOpportunity&&this.dependencies.recoveredEntryOwnerReader?{uniOpportunity:{candidate:pending.entryOpportunity,readOwners:()=>this.dependencies.recoveredEntryOwnerReader!(pending)}}:{})}}:{}),
             };
             let result: DirectTradeResult;
             try {
@@ -1808,7 +1812,7 @@ export class Quality102CausalV1Runner {
                 return { status: "blocked-local", message: "Q102 entry waits for unmanaged open orders to clear; managed protective orders remain untouched.", signal, ordersSent: 0 };
             }
             const quote = await this.dependencies.executor.getMarketQuote(signal.symbol);
-            const planned = await this.planEntry(state, signal, live.account, live.positions, quote, true, true, lock, history);
+            const planned = await this.planEntry(state, signal, live.account, live.positions, quote, true, this.dependencies.config.stable4Mode!=="LIVE", lock, history);
             return planned.status === "planned" ? this.executePending(state, lock) : planned;
         } catch (error) {
             const rateBudget = classifyAsterRateBudgetFailure(error);

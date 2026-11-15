@@ -6,6 +6,7 @@ import { type AccountLockDocument, ACCOUNT_LOCK_SCHEMA } from "./disdex-account-
 import { pendingExposurePath, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { assertStable4EntryGrossAdmission, Stable4EntryGrossAdmissionError } from "./stable4-entry-gross-guard";
 import {assertStable4V4ReservationOwnership} from "./stable4-v4-reservation-proof";
+import {assertStable4UniFinalAdmission,type Stable4UniFinalAdmissionCapability} from "./stable4-uni-final-admission";
 import type {V4ExecutionDocument} from "./v12-v4-execution-store";
 import {MarketSlippageGuardError} from "./market-slippage-guard-error";
 import {MarketPreSubmitEntryError} from "./market-pre-submit-entry-error";
@@ -48,7 +49,7 @@ export interface DirectTradeCommand {
     /** Optional pre-order gross cap. Never rounds a lot upwards. */
     maxEntryNotionalUsd?: number;
     /** Explicit capability for the caller's currently owned shared admission lease. */
-    stable4Admission?: { lease: { document(): Promise<AccountLockDocument> }; ownReservationId?: string; v4Reservation?:{readDocument():V4ExecutionDocument} };
+    stable4Admission?: { lease: { document(): Promise<AccountLockDocument> }; ownReservationId?: string; v4Reservation?:{readDocument():V4ExecutionDocument}; uniOpportunity?:Stable4UniFinalAdmissionCapability };
 }
 
 export interface DirectTradeResult {
@@ -808,6 +809,11 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 }
             }
             else if(admission.v4Reservation)throw new Stable4EntryGrossAdmissionError("OWN_RESERVATION_CONFLICT","V4 client identity required");
+            if(command.reason.includes("STABLE4_Q102_UNI_ONLINE_RECOVERY")&&!admission.uniOpportunity)throw new Stable4EntryGrossAdmissionError("INVALID_INPUT","recovered UNI final evidence required");
+            if(admission.uniOpportunity){
+                await assertStable4UniFinalAdmission(admission.uniOpportunity,{sourceSha:String(process.env.DISDEX_RELEASE_SHA||process.env.DISDEX_RUNTIME_COMMIT_SHA||"").trim().toLowerCase(),symbol,side:command.side,now:Date.now,positionsObservedAt,positions});
+                await validateLease();
+            }
             const now = Date.now();
             // The response time of the earlier read must survive later slow reads, even when all positions are flat.
             if (positionsObservedAt > now || now - positionsObservedAt > 120_000) throw new Stable4EntryGrossAdmissionError("STALE_POSITION");

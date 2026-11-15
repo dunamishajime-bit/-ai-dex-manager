@@ -84,8 +84,8 @@ test("admission is pure and returns separate position and pending diagnostics", 
   assert.equal(result.positions.cryptoNotionalUsd, 100); assert.equal(result.pending.cryptoNotionalUsd, 50); assert.equal(result.after.totalGross, 2.5);
   assert.equal(JSON.stringify(value), snapshot);
 });
-test("approved Quality102 high-vol symbols count as crypto without broad unknown fallback", () => {
-  for (const symbol of ["SUIUSDT", "SEIUSDT", "APTUSDT", "ARBUSDT", "OPUSDT", "ENAUSDT", "ONDOUSDT", "FILUSDT", "TRXUSDT"]) {
+test("approved Quality102 high-vol and S34 symbols count as crypto without broad unknown fallback", () => {
+  for (const symbol of ["UNIUSDT", "SUIUSDT", "SEIUSDT", "APTUSDT", "ARBUSDT", "OPUSDT", "ENAUSDT", "ONDOUSDT", "FILUSDT", "TRXUSDT"]) {
     const value = input(); value.candidate = { symbol, notionalUsd: 200 };
     value.positions = [{ symbol, quantity: 1, markPrice: 100, observedAt: NOW }];
     assert.equal(assertStable4EntryGrossAdmission(value).after.cryptoGross, 3);

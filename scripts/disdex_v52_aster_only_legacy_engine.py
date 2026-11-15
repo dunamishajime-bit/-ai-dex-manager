@@ -8,6 +8,7 @@ import math
 import os
 import shutil
 import signal
+import subprocess
 import tempfile
 import time
 from decimal import Decimal, InvalidOperation
@@ -915,6 +916,38 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             raise Stable4EntryGrossRejected("ACCOUNT_LOCK_CHANGED")
         return decision
 
+    @staticmethod
+    def _stable4_v50_planned_exit_at(entry_ts: int) -> int:
+        local = dt.datetime.fromtimestamp(entry_ts / 1000, tz=base.NY)
+        maximum_exit = min(local + dt.timedelta(hours=V50_MAX_HOLDING_HOURS), local.replace(hour=15, minute=30, second=0, microsecond=0))
+        return int(maximum_exit.timestamp() * 1000)
+
+    def _prepare_stable4_entry_opportunity(self, slot: str, candidate: dict, target_gross: float, client: str, planned_exit_at=None):
+        if not self.live or os.getenv("DISDEX_STABLE4_MODE") != "LIVE" or slot != V50_SLOT:
+            # V11 has no matching research corpus; never invent its score from V50.
+            return None
+        lease = self.lock._owned()
+        if lease.get("accountScope") != "ASTER_FUTURES":
+            raise RuntimeError("STABLE4_ENTRY_SCORE_ACCOUNT_SCOPE_INVALID")
+        now = base.now_ms()
+        planned_exit_at = planned_exit_at if planned_exit_at is not None else self._stable4_v50_planned_exit_at(now)
+        if planned_exit_at <= now:
+            raise RuntimeError("STABLE4_ENTRY_SCORE_PLANNED_SESSION_EXIT_INVALID")
+        sha = (os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or os.getenv("DISDEX_RELEASE_SHA") or "").lower()
+        capture = {"sourceGitSha": sha, "nativePositionId": client, "strategy": "V52", "symbol": base.ASTER_SYMBOL[str(candidate["symbol"])], "side": "LONG" if candidate["side"] == "BUY" else "SHORT", "route": V50_SLOT, "logicalEntryTs": now, "gross": target_gross, "plannedHoldHours": max(1, (planned_exit_at - now) / 3_600_000), "entrySnapshot": {"capture_basis_bps": candidate["signalBasisBps"], "entry_basis_bps": candidate["basisBps"]}, "capturedAt": now}
+        root = Path(__file__).resolve().parents[1]
+        result = subprocess.run(["node", "--import", str(root / "node_modules/tsx/dist/loader.mjs"), str(root / "scripts/stable4-publish-native-entry.ts")], input=json.dumps({"input": capture, "lockPath": str(self.lock.path), "ownerId": lease["ownerId"], "leaseId": lease["leaseId"]}), text=True, capture_output=True, cwd=root, timeout=60, check=False)
+        current = self.lock._owned()
+        if (current.get("ownerId"), current.get("leaseId")) != (lease.get("ownerId"), lease.get("leaseId")):
+            raise RuntimeError("STABLE4_ENTRY_SCORE_ACCOUNT_LEASE_CHANGED")
+        if result.returncode != 0:
+            raise RuntimeError("STABLE4_ENTRY_SCORE_PUBLICATION_UNAVAILABLE")
+        record = json.loads(result.stdout)
+        expected = {"strategy": "V52", "positionId": client, "sourceSha": sha, "symbol": capture["symbol"], "side": capture["side"], "entryTs": now, "modelVersion": "STABLE4_CAUSAL_ENTRY_FEATURES_V1", "capturedAt": now}
+        if not isinstance(record, dict) or set(record) != set(expected) | {"score"} or any(record[k] != v for k, v in expected.items()) or record["score"] is not None and (type(record["score"]) not in (int, float) or not math.isfinite(record["score"])):
+            raise RuntimeError("STABLE4_ENTRY_SCORE_RECORD_CONFLICT")
+        return record
+
     def open_basis_position(self, slot: str, candidate: dict, target_gross: float) -> bool:
         if slot in self.positions() or any(p.get("symbol") == candidate["symbol"] for p in self.positions().values()):
             return False
@@ -937,7 +970,15 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         quantity = target_notional / base.finite(candidate["entryPrice"])
         quantity, price = self.aster.normalize(aster_symbol, quantity, base.finite(candidate["entryPrice"]), side)
         client = self.client_id(slot, symbol, "OPEN")
-        self._set_pending({"slot": slot, "action": "OPEN", "symbol": symbol, "side": side, "quantity": quantity, "clientId": client, "candidate": candidate, "targetGross": target_gross, "price": price})
+        planned_exit_at = self._stable4_v50_planned_exit_at(base.now_ms()) if self.live and os.getenv("DISDEX_STABLE4_MODE") == "LIVE" and slot == V50_SLOT else None
+        entry_opportunity = None
+        try:
+            entry_opportunity = self._prepare_stable4_entry_opportunity(slot, candidate, target_gross, client, planned_exit_at)
+        except Exception:
+            # Missing baseline evidence blocks future recovered UNI comparison,
+            # while native eligibility and the final signed cap guard remain intact.
+            self.log("v52-stable4-entry-score-unavailable", slot=slot, clientId=client)
+        self._set_pending({"slot": slot, "action": "OPEN", "symbol": symbol, "side": side, "quantity": quantity, "clientId": client, "candidate": candidate, "targetGross": target_gross, "price": price, **({"entryOpportunity": entry_opportunity} if entry_opportunity is not None else {}), **({"plannedMaximumExitAt": planned_exit_at} if planned_exit_at is not None else {})})
         if self.live and os.getenv("DISDEX_STABLE4_MODE") == "LIVE":
             try:
                 admission = self._stable4_final_entry_gross(aster_symbol, side, quantity, price, client)
@@ -968,8 +1009,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         next_checkpoint = local.replace(minute=30, second=0, microsecond=0) + dt.timedelta(hours=1)
         maximum_exit = min(local + dt.timedelta(hours=V50_MAX_HOLDING_HOURS), local.replace(hour=15, minute=30, second=0, microsecond=0))
         position = {"strategy": slot, "positionId": client, "entryClientOrderId": client, "symbol": symbol, "openedAt": base.now_ms(), "entryBasisBps": candidate["basisBps"], "signalBasisBps": candidate.get("signalBasisBps"), "asterOpenSide": side, "asterQty": fill.executed_qty, "asterEntryPrice": fill.average_price or price, "entryCommission": (fill.executed_qty * (fill.average_price or price)) * self.aster_taker_fee_bps / 10000.0, "targetGross": target_gross, "route": candidate.get("route")}
+        if entry_opportunity is not None:
+            position["entryOpportunity"] = entry_opportunity
         if slot == V50_SLOT:
-            position.update({"checksCompleted": 0, "nextCheckpointAt": int(next_checkpoint.timestamp() * 1000), "maximumExitAt": int(maximum_exit.timestamp() * 1000)})
+            position.update({"checksCompleted": 0, "nextCheckpointAt": int(next_checkpoint.timestamp() * 1000), "maximumExitAt": planned_exit_at if planned_exit_at is not None else int(maximum_exit.timestamp() * 1000)})
         self.positions()[slot] = position
         self._clear_pending()
         self.save()

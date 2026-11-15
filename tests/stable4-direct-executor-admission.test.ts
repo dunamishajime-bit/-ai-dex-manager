@@ -40,6 +40,17 @@ async function blocked(f: ReturnType<typeof setup>, code?: string) {
 }
 test("LIVE rejects over-cap normalized order before send or reconciliation", async () => fixture(async f => { f.command.quantity = 2.01; await blocked(f, "CRYPTO_CAP_EXCEEDED"); }));
 test("LIVE requires explicit owned lease capability", async () => fixture(async f => { delete f.command.stable4Admission; await blocked(f, "INVALID_INPUT"); }));
+
+test("SDK rechecks recovered UNI opportunity against full signed inventory before HTTP",async()=>fixture(async f=>{
+ const now=Date.now(),modelVersion="STABLE4_CAUSAL_ENTRY_FEATURES_V1";
+ const candidate={strategy:"Q102",positionId:"native-uni",sourceSha:"a".repeat(40),symbol:"UNIUSDT",side:"SHORT",entryTs:now-1000,capturedAt:now,score:.01,modelVersion};
+ const baseline={...candidate,strategy:"V4",positionId:"actual-btc",symbol:"BTCUSDT",side:"LONG",score:.02};let reads=0;
+ f.command.symbol="UNIUSDT";f.command.side="SELL";
+ f.client.getBookTickers=async()=>[{symbol:"UNIUSDT",bidPrice:"100",askPrice:"100",bidQty:"10",askQty:"10",time:Date.now()}];
+ const getInfo=f.client.getExchangeInfo;f.client.getExchangeInfo=async()=>{const info=await getInfo();info.symbols[0].symbol="UNIUSDT";return info;};
+ (f.command.stable4Admission as any).uniOpportunity={candidate,readOwners:async()=>{reads++;return{book:{schemaVersion:1,records:[baseline]},owners:{complete:true,observedAt:Date.now(),positions:[{strategy:"V4",positionId:"actual-btc",symbol:"BTCUSDT",side:"LONG",entryTs:baseline.entryTs,quantity:1}]}};}};
+ await blocked(f,"INVALID_INPUT");assert.equal(reads,1);
+}));
 test("LIVE cannot exclude a foreign same-symbol reservation without current lease ownership", async () => fixture(async (f,path) => {
   const now=Date.now(),registry=emptyPendingExposureRegistry(now);
   registry.entries=[{reservationId:"foreign",strategyId:"V12",sleeve:"CRYPTO",symbol:"BTCUSDT",side:"LONG",gross:1,notionalUsd:100,status:"PENDING",createdAt:now,updatedAt:now}];

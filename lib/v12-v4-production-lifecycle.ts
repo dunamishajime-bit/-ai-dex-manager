@@ -1,4 +1,5 @@
 import {observeV4FourRuleH1,observeV4FourRuleM5,createV4FourRuleState,type V4FourRuleH1Bar,type V4FourRuleM5Bar,type V4FourRuleState} from "./v12-v4-four-rule-policy";
+import {validateStable4EntryOpportunityBook,type Stable4EntryOpportunityRecord} from "./stable4-entry-opportunity-book";
 /**
  * Executable OFFLINE V4 lifecycle. No venue mutation dependency or order authority.
  * Journal records are data; persistence is caller-owned and must complete before consumption.
@@ -40,6 +41,7 @@ export function nativeEvidenceForProductionRoute(route:string):"WR60_BASELINE_19
 }
 export type H1Bar = { openTs: number; open: number; high: number; low: number; close: number };
 export type Leg = {
+  entryOpportunity?: Stable4EntryOpportunityRecord;
   id: string; candidate: V12V4ShadowCandidate; qty: number; entryNotional: number;
   requestedQty: number; reservationUsd: number; entryTs: number; entryAtr?: number;
   status: "PENDING_ENTRY" | "OPEN" | "PENDING_EXIT" | "CLOSED" | "CANCELLED";
@@ -88,6 +90,15 @@ export type ForeignExposure = { owner: string; symbol: string; side: "LONG" | "S
   gross: number; crypto: boolean; pendingGross: number };
 export type InitialState = { equityUsd: number; foreign: ForeignExposure[]; holdProtected: boolean };
 export type EntryEvent = { type: "RESERVE"; eventId: string; ts: number; leg: Leg };
+/** Entry evidence is journal-owned and bound to the native leg, never attached retrospectively. */
+export function validateV4EntryOpportunity(value:unknown,leg:Leg,reservedAt:number):Stable4EntryOpportunityRecord{
+  let row:Stable4EntryOpportunityRecord;
+  try{row=validateStable4EntryOpportunityBook({schemaVersion:1,records:[value]}).records[0];}
+  catch{throw Error("V4_ENTRY_OPPORTUNITY_INVALID");}
+  if(row.strategy!=="V4"||row.positionId!==leg.id||row.symbol!==leg.candidate.symbol||row.side!==leg.candidate.effectiveSide||row.entryTs!==leg.entryTs||row.capturedAt>reservedAt)
+    throw Error("V4_ENTRY_OPPORTUNITY_BINDING_INVALID");
+  return row;
+}
 export type Event = EntryEvent |
   { type: "ACCOUNT_MARK"; eventId:string; ts:number; equityUsd:number; prices:Record<string,number>; foreign?:ForeignExposure[] } |
   { type: "M5_POLICY_BAR"; eventId:string; ts:number; id:string; bar:V4FourRuleM5Bar } |
@@ -239,6 +250,7 @@ export function applyProductionEvent(state: State, event: Event): State {
     delete next.executionReview;
   } else if (event.type==="RESERVE") {
     const l=event.leg,c=l.candidate, catalog=V12_V4_ROUTE_CATALOG.find(x=>x.route===c.route);
+    if(l.entryOpportunity!==undefined)validateV4EntryOpportunity(l.entryOpportunity,l,event.ts);
     positive(l.requestedQty,"RESERVED_QTY");positive(l.reservationUsd,"RESERVED_USD");
     if (!catalog || c.family!==catalog.family || l.id!==key(c) || l.status!=="PENDING_ENTRY" || l.qty!==0 || l.entryNotional!==0 ||
       l.entryTs!==c.eligibleEntryTs || event.ts<l.entryTs || event.ts-l.entryTs>15*60_000 || c.orderEnabled!==false || c.shadow!==true ||

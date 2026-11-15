@@ -1,0 +1,36 @@
+name: STABLE4 production integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/stable4-production-integration-20261115']
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Causal opportunity, native provenance and final admission
+        run: npx tsx --test tests/stable4-*.test.ts
+      - name: Python signed final admission and entry provenance
+        run: |
+          python3 -B scripts/disdex_stable4_entry_gross_guard_selftest.py
+          python3 -B scripts/disdex_stable4_entry_gross_integration_selftest.py
+          python3 -B scripts/disdex_stable4_v52_entry_provenance_selftest.py
+      - name: Native Stable4 strategy contracts
+        run: |
+          npx tsx scripts/stable4-q102-selftest.ts
+          npx tsx scripts/stable4-pengu-livebase-selftest.ts
+          npx tsx scripts/stable4-hype-livebase-selftest.ts
+          npx tsx scripts/stable4-idle-livebase-selftest.ts
+      - name: Repository typecheck
+        run: npm run typecheck
