@@ -15,6 +15,7 @@ import {createPreviewReplay,type DemoScenario} from "@/lib/bt-verification/demo"
 import {createH48ResearchReplay} from "@/lib/bt-verification/h48-research-sandbox";
 import {createMultiassetH48Replay} from "@/lib/bt-verification/multiasset-h48-replay";
 import {auditSyntheticFeed,type SyntheticFeedAudit} from "@/lib/bt-verification/synthetic-feed-audit";
+import {auditQ102NativeS34,type Q102NativeS34Audit} from "@/lib/bt-verification/q102-s34-synthetic-audit";
 import {observedV4MismatchInResearchSource,V4_PIN_OBSERVED_2026_11_15} from "@/lib/bt-verification/source-pin-observation";
 import {buildNativeHypeSensitivityComparison} from "@/lib/bt-verification/native-hype-sensitivity-comparison";
 import {buildStable4BaselineComparison} from "@/lib/bt-verification/stable4-baseline-comparison";
@@ -35,6 +36,9 @@ const [syntheticFeedVersion,setSyntheticFeedVersion]=useState<"v1"|"v2">("v1");
 const [syntheticFeeBps,setSyntheticFeeBps]=useState<10|30>(10);
 const [feedAudit,setFeedAudit]=useState<SyntheticFeedAudit|null>(null);
 const [feedAuditNotice,setFeedAuditNotice]=useState("");
+const [q102NativeAudit,setQ102NativeAudit]=useState<Q102NativeS34Audit|null>(null);
+const [q102NativeBusy,setQ102NativeBusy]=useState(false);
+const [q102NativeNotice,setQ102NativeNotice]=useState("");
 const [serverJobBusy,setServerJobBusy]=useState(false);
 const [serverJobNotice,setServerJobNotice]=useState("");
 
@@ -111,6 +115,22 @@ function runInputAudit(){
    setFeedAudit(result);
    setFeedAuditNotice("人工市場"+(syntheticFeedVersion==="v2"?"24":"23")+"銘柄・7日間のOHLCV入力検査PASS。全Runnerの約定判定は未接続です。");
  }catch(e){setFeedAudit(null);setFeedAuditNotice("人工市場入力エラー："+String(e))}
+}
+function runQ102NativeS34Audit(){
+ if(q102NativeBusy)return;
+ setQ102NativeBusy(true);
+ setQ102NativeNotice("");
+ // Allow the loading state to paint before the isolated 22-day calculation.
+ window.setTimeout(()=>{
+   try{
+     const data=auditQ102NativeS34(previewSeed,scenario,syntheticFeedVersion);
+     setQ102NativeAudit(data);
+     setQ102NativeNotice("元Q102 S3/S4候補判定の22日間検査PASS。発火候補は約定ではありません。");
+   }catch(e){
+     setQ102NativeAudit(null);
+     setQ102NativeNotice("元Q102候補の検証を拒否: "+String(e));
+   }finally{setQ102NativeBusy(false)}
+ },0);
 }
 async function runServerH48ResearchJob(){
  if(serverJobBusy)return;
@@ -459,6 +479,37 @@ return <BTWorkspaceShell activeTab={tab} onTabChange={switchTab} sourceStatus={s
                     <ul className="mt-2 list-disc space-y-1 pl-4">{feedAudit.blockers.map((reason,i)=><li key={i}>{reason}</li>)}</ul>
                   </details>
                 </div>}
+              </div>
+              <div className="rounded-lg border border-[#365875] bg-[#0b283d] p-3 text-[11px] leading-5 text-[#adc7d8]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div><p className="font-bold text-cyan-200">Q102元S3/S4候補・22日間の人工市場判定</p>
+                    <p>元の凍結S3/S4候補コードに336時間の確定H1を渡し、候補数と品質条件通過数を再計算します。Online Layer2/3・約定・損益は未接続です。</p></div>
+                  <button type="button" disabled={q102NativeBusy} onClick={runQ102NativeS34Audit}
+                    className="rounded-md border border-cyan-500/50 bg-[#155069] px-3 py-2 font-bold text-white disabled:opacity-50">
+                    {q102NativeBusy?"Q102研究判定を計算中":"Q102元候補を判定（22日間）"}
+                  </button>
+                </div>
+                {q102NativeNotice&&<p className="mt-2 text-amber-200">{q102NativeNotice}</p>}
+                {q102NativeAudit&&q102NativeAudit.seed===previewSeed&&
+                 q102NativeAudit.scenario===scenario&&q102NativeAudit.feedVersion===syntheticFeedVersion&&
+                 <div className="mt-3 border-t border-[#355471] pt-3">
+                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                     <div><p className="text-[#819cb2]">336時間準備後の判定枠</p><p className="font-bold text-white">{q102NativeAudit.evaluatedDecisionHours}</p></div>
+                     <div><p className="text-[#819cb2]">元の生候補</p><p className="font-bold text-white">{q102NativeAudit.rawNativeCandidates}</p></div>
+                     <div><p className="text-[#819cb2]">品質条件通過</p><p className="font-bold text-cyan-200">{q102NativeAudit.gatedNativeCandidates}</p></div>
+                     <div><p className="text-[#819cb2]">模擬約定</p><p className="font-bold text-amber-200">0（未接続）</p></div>
+                   </div>
+                   <p className="mt-2">元コードSHA：{q102NativeAudit.sourceSha256.slice(0,12)}…</p>
+                   <p>評価した銘柄：{q102NativeAudit.processedModelSymbols.join(" / ")}</p>
+                   <p className="font-bold text-amber-200">未登録の必要銘柄：{q102NativeAudit.missingModelSymbols.join(" / ")||"なし"}</p>
+                   <details className="mt-2"><summary className="cursor-pointer text-cyan-200">Q102銘柄別の候補件数</summary>
+                     <table className="mt-2 w-full text-left"><thead><tr><th>銘柄</th><th>生候補</th><th>品質通過</th></tr></thead>
+                       <tbody>{q102NativeAudit.perSymbol.map(r=><tr key={r.symbol} className="border-t border-[#355471]">
+                         <td>{r.symbol}</td><td>{r.raw}</td><td>{r.gated}</td></tr>)}</tbody>
+                     </table>
+                   </details>
+                   <p className="mt-2 text-amber-200">この結果はS3/S4の元入口候補判定だけです。S1/S2・AVAX Online KNN・UNI復活・Portfolio Opportunity・全Runnerの約定は未接続です。</p>
+                 </div>}
               </div>
               {(syntheticStrategy==="h48"||syntheticStrategy==="h48multi")&&<div className="space-y-2 text-[11px] leading-5 text-[#b5c6d7]">
                 <p>確定H1のH12/H24/BTC相対24hと6時間UTC入場枠で判定。次の足の始値で入り、最大48時間後に決済。元候補研究にある6%STOPは観測済み5分模擬価格で評価します（本番STOPの再現ではありません）。</p>

@@ -12,9 +12,9 @@ const originalSignal=readFileSync(join(root,"fet-brk48-signal.ts"),"utf8")
  .replace('from "./fetBrk48Runtime"','from "@/config/fetBrk48Runtime"');
 const originalConfig=readFileSync(join(root,"fetBrk48Runtime.ts"));
 const sha=(x:string|Uint8Array)=>createHash("sha256").update(x).digest("hex");
-assert.equal(sha(originalSignal),"ee8213adbb695a387e653d89bb4a494c36640e0845ffcf648ec61927fc47be78",
+assert.equal(sha(originalSignal.split(String.fromCharCode(13,10)).join(String.fromCharCode(10))),"91242302f27274450bcf72facad2b5126611cf9ad2d827af32c814ff23eabc65",
   "The only allowed native signal source change is the local config import");
-assert.equal(sha(originalConfig),"8a96dc4a7cf224d3012947ab882a88f71b2431f0b5b9df8adde9c7e53dfa06bf",
+assert.equal(sha(originalConfig.toString("utf8").split(String.fromCharCode(13,10)).join(String.fromCharCode(10))),"39151c4ae6950bd14e89410ccbf6ca0f411798da44639fe5eef9e3c987b518be",
   "Native FET config must remain source-byte-identical");
 const HOUR=3600000,entryTs=Date.parse("2025-10-08T05:00:00Z");
 const history:MarketCandle5m[]=Array.from({length:73},(_,i)=>{

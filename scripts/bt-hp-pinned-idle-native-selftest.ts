@@ -11,9 +11,10 @@ const root=join(process.cwd(),"lib","bt-verification","pinned-native-idle");
 const sha=(x:string|Uint8Array)=>createHash("sha256").update(x).digest("hex");
 const orig=readFileSync(join(root,"idle-priority-short-signal.ts"),"utf8")
   .replace('from "./idlePriorityShortPolicy"','from "../config/idlePriorityShortPolicy"');
-assert.equal(sha(orig),"76f68ba1ec78f5adb34c68718a28b199f58bd29dd6651a404631326906c2f827");
-assert.equal(sha(readFileSync(join(root,"idlePriorityShortPolicy.ts"))),
- "4faf0c02fcfad787305da17b75ca4ae8cfc9144681cea631cdfa7b340f8fe760");
+assert.equal(sha(orig.split(String.fromCharCode(13,10)).join(String.fromCharCode(10))),
+ "dbd1dd40aaed0620dc071b39d9535280950ee71624769c5493d4bf35eab4aae7");
+assert.equal(sha(readFileSync(join(root,"idlePriorityShortPolicy.ts"),"utf8").split(String.fromCharCode(13,10)).join(String.fromCharCode(10))),
+ "6e08ee22503bc44da771cad89320f9d53ac75682881a5efd6eeaf6286e7d7aa8");
 const H=3600000,at=Date.parse("2025-10-08T05:00:00Z"),asOf=new Date(at).toISOString();
 function rows(symbol:"BTCUSDT"|IdlePrioritySymbol,mode:"base"|"jup"|"jupWeak"|"jupVol"|"tao"|"dot"){
  return Array.from({length:73},(_,i):MarketCandle5m=>{
