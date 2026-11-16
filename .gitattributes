@@ -4,3 +4,5 @@
 /scripts/ops/root/* text eol=lf
 /docs/ops/v12-v4-cert-20261009/preformal-2025-native-route-coverage.json text eol=lf
 /config/stable4/opportunity-corpus-seed-20261115.json text eol=lf
+# Preserve the byte-exact CRLF preimage frozen in pending Root HASHES.
+/scripts/ops/deploy/disdex_pending_refresh.py -text whitespace=cr-at-eol
