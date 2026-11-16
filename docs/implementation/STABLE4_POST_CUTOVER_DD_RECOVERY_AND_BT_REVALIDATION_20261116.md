@@ -31,3 +31,9 @@ Current working branch: codex/stable4-production-integration-20261115. Main cuto
 - Every post-cutover change remains **RESEARCH-ONLY** until its own independent tests, historical and genuinely unused-period verification, owner approval and formal Actions/HP activation. Preserve existing position, resident STOP, Kill Switch, FET/PENGU/Q102/V4/HYPE/IDLE/V52 and daily Shared Risk operations. No order/test order, liquidation or silent risk reset.
 - Each task must have a reproducible source-pinned ledger, before/after results (10/30bps), test report, audit trail, dated SHA/CI and remaining blockers; commit+push after each task.
 - **Start these tasks only after verified cutover and successful actual decision-cycle proofs.** If unresolved authorization/source/risk gates prevent cutover, keep the backlog deferred rather than using it to justify bypass.
+
+## Updated Owner execution sequencing — 2026-11-17 JST
+
+Owner explicitly authorized proceeding with **the planned STABLE4 cutover without waiting for the historical research BT maximum-DD<=20% acceptance**. This updates the older first-section phrase that prevented any cutover while research DD20% fails. The exact 21.571152% / 22.281591% research failures remain on record and are not treated as positive backtest evidence.
+
+The DD performance and acceptance recalibration (POST-ST4-01..07) starts **after** independently verified formal LIVE and advancing decision ticks, as previously planned. This limited deferral does **not** reset or disable a live DD latch or another existing live runtime risk control, nor does it authorize a position/STOP change, new order, Gross/H48 change without the required exact-scope owner approval, Q102 bootstrap with unresolved writer conflicts or Root source/rollback bypass. See STABLE4_OWNER_DD_CUTOVER_DEFERRAL_20261117.md.

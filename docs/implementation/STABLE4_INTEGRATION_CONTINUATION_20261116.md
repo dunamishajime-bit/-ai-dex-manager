@@ -132,3 +132,7 @@ No trade, order cancellation, position adjustment, STOP, Kill Switch, Runner act
 ## 2026-11-16 owner priority: complete current STABLE4 cutover first; defer recovery/BT redesign
 
 The owner explicitly prioritizes finishing the existing Codex V4 three-layer + H48 + research Gross formal cutover. Newly proposed 15% research BT buffer, DD recovery phases, current-vs-maximum DD, more pessimistic LIVE/BACKTEST assumptions and all revised BT acceptance tests belong to the **post-cutover backlog**: [STABLE4_POST_CUTOVER_DD_RECOVERY_AND_BT_REVALIDATION_20261116.md](STABLE4_POST_CUTOVER_DD_RECOVERY_AND_BT_REVALIDATION_20261116.md), POST-ST4-01 through POST-ST4-07. These are proposals, not approved current LIVE rules. Original protective STOP, source/pin, owner-authorization and mandatory risk gates stay fail-closed. This is documentation-only, with no VPS or trading mutation.
+
+## Owner DD sequence change — 2026-11-17 JST
+
+A later explicit Owner decision defers **the research backtest maximum-DD acceptance and detailed DD/rule redesign** until after verified STABLE4 cutover. Earlier dated DD20% cutover blockers in this audit are accurate *at the time of those checkpoints* and are **superseded as cutover sequencing** by STABLE4_OWNER_DD_CUTOVER_DEFERRAL_20261117.md. Historical results remain failures, not silently converted into successful research. Live DD latch/risk guards and all independent source/STOP/Root/Q102/Owner formal approval gates are unchanged.
