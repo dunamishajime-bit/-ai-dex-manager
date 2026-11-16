@@ -1,0 +1,54 @@
+{
+  "schema": "disdex-stable4-owner-root-observed-pins/v1",
+  "capturedAt": "2026-11-16",
+  "observedSource": "OWNER_PC_PRIVATE_ROOT_SNAPSHOT_NOT_VPS_LIVE",
+  "rootPath": "/usr/local/libexec/disdex-unified",
+  "moduleSha256ByName": {
+    "disdex_deployment_contract": "c5fc9aca529fe32fe2716d070550bc5a7561e65110aa34fd68b0a5192e734b73",
+    "disdex_deployment_plan": "ada3cffa722acf88a8418b4db4ecbf6272a0def55f49c2691d140136a87546f4",
+    "disdex_deployment_serialization": "2bef555e679fbf577d684849767136bba06f4b5c5d36578ad2831237e0f092f5",
+    "disdex_hype_scoped_root_cutover": "710ae088dcb9a8a2793bd3890f276696dd2ae3cddebe365757bcda6c5eb80882",
+    "disdex_monitor_snapshot_cutover": "e3e0a9899301ba09b91fdcbfa7e22762cfc7f5394455ecfebfa805f95892c78a",
+    "disdex_owner_approval": "9f033abce5cc2cc17b81d372a7421bde4c1b825cb21dc2720dc9d1f213d830f9",
+    "disdex_pending_maintenance_install": "b852b283cffb189f92be8ac50611621dff0dae3f3aa810af2022de2d5de9a1a5",
+    "disdex_shared_risk_audit": "f05d89e364761c2ac79ad5f34e3e8f5276518f0a748d91f79d790400937726dc",
+    "disdex_shared_risk_monitor_wiring": "25cbef88bf7a52f57c2f25f9e33f7ad1430c447a4f1e410128703dbb5d0a74b8",
+    "disdex_shared_risk_witness": "25cc0a0b573a1787ca06dc64944da0189334b193c2711664d726f9df75310275",
+    "disdex_unified_root_gate": "dd8ea03b2d890c355050e5d029f0fc74dbc101ae37ab766907c108966c25f529",
+    "disdex_v4_admission_clock_compatibility": "c91794c977cbf3ad8f2b26328cb48825dea7d7681cca7dd0996790f11dbb29b2",
+    "disdex_v4_canonical_prestart": "4889bd25d3bb9d08f39497ae8085516dd21f1e93058e4d8480f59b67ec52da5b",
+    "disdex_v4_durable_owner_probe": "23780b019d5b8d94a6ce6dd861a567f45ccd0b5691483268895441f7f1b75854",
+    "disdex_v4_monitor_cutover": "fdc13cafc1a160ba065c600ab9d8174e13b0a6dcc1da52009d15446f40e680f5",
+    "disdex_v4_nonflat_ownership": "ea2025ffc4ef2b8aab609846e52dd0a7f3a383cdc000edcb1cdc0872c6dbb982",
+    "disdex_v4_priority_live": "8d0583b454b2782b1c6530490938e7a6091d089c94079b4bce10a126c9441810",
+    "disdex_v4_root_cutover": "5e8ef39878fa5dffbb2d89acab61b0cb24084a6781b9e320e80b4eda6705d309",
+    "disdex_v4_startup_wait_budget": "3a4670caf6258264c0f5a11a38d80bb68ac7d54148715b6850a800233c814458",
+    "disdex_v4_venue_witness": "99c224070708f4714090e1dfb969ffbec41b12a5933bf37c22373a55cdba6c3c",
+    "disdex_v52_scoped_root_cutover": "85f00696dd0cc6efda3a4351b1758a12e884890912988872e0976ae99c99603e"
+  },
+  "expectedDynamicImports": [
+    {
+      "kind": "EXTERNAL_CODE_LOADER_REQUIRES_REVIEW",
+      "module": "disdex_pending_maintenance_install",
+      "line": 65
+    },
+    {
+      "kind": "EXTERNAL_CODE_LOADER_REQUIRES_REVIEW",
+      "module": "disdex_pending_maintenance_install",
+      "line": 67
+    },
+    {
+      "kind": "EXTERNAL_CODE_LOADER_REQUIRES_REVIEW",
+      "module": "disdex_v4_priority_live",
+      "line": 556
+    },
+    {
+      "kind": "EXTERNAL_CODE_LOADER_REQUIRES_REVIEW",
+      "module": "disdex_v4_priority_live",
+      "line": 556
+    }
+  ],
+  "sourceClosureCertified": false,
+  "productionReady": false,
+  "ownerActivationAuthorized": false
+}
