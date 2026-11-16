@@ -101,3 +101,13 @@ Runtime unit inspection: active V4 e788abc82e80f9fc7ab0e1ba83fdb8be267eb513; act
 Current candidate SHA b57bf6c5f4cd9513ebcef1a7bdd3d2cc50afb9b3 is not staged under VPS immutable releases yet. New Q102 bootstrap state was absent or not readable on stat; the old Q102 Writer remains active. Never run new Writer concurrently or stop existing exit/STOP protection merely to speed up cutover.
 
 See STABLE4_LIVE_VPS_PRECUTOVER_READONLY_20261117.md for exact evidence and latest preflight order. Historic Root hash and runner SHA references earlier in this handoff must not substitute for the fresh source/pins. Owner's deferred **research BT DD** is already recorded in STABLE4_OWNER_DD_CUTOVER_DEFERRAL_20261117.md. No VPS changes or order/STOP/systemd writes made.
+
+## 2026-11-17 public-only Q102 recovery outcomes captured and replayed
+
+**Progress:** the previously missing seven-symbol Q102 public market evidence request plan was executed on the authorized VPS against the immutable 7688 SDK and shared public API budget; Aster endpoint requests were GET-only and did not load any trading credentials. Seven data files were copied back to Owner PC and their 7/7 remote SHA256 checked. Only public evidence was stored in an isolated VPS /var/tmp research folder; no live trading/STOP/Runner change.
+
+The 52 old Q102 recovery continuation candidates have now been causally reconciled against this real public market evidence on a **private copy** of the learning state: 47 completed, 5 explicitly unresolved (APT3/FET2, all zero-trade entry M5-open mismatch), **0 matured pending recovery**; AVAX's separate KNN continuation has 31 completed and 4 pending. Do not fabricate prices for the unresolved rows. The Root candidate evidence-hash validator passes for the historical snapshot only.
+
+Critical remaining condition: the evidence snapshot observedThrough=1794826800000 (2026-11-16 11:00 UTC) is stale against current VPS time; the Root validator correctly rejects it with Q102_BOOTSTRAP_OBSERVATION_FRONTIER_STALE. Latest-H1 observation catch-up on all 20 rolling symbols and any newly matured outcomes is needed. Old Q102 Writer remains active; signed venue flat confirmation and exclusive migration/rollback remain mandatory. Exact public GET source/hashes, state snapshot digests and private evidence paths are recorded in STABLE4_Q102_PUBLIC_OUTCOMES_REPLAY_20261117.md. No private state or market raw data is public in Git.
+
+The Owner's research max-DD acceptance deferral remains in effect; do not confuse that with permission to bypass Q102 source, Writer, STOP, owner authorization or account protection gates.
