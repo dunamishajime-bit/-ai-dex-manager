@@ -91,3 +91,13 @@ DDの復旧階層、0.25x/0.5xの段階復帰、新BT acceptance、目標BT DD15
 ST4-C04 now splits into: (a) **BEFORE cutover** candidate immutable source/config/economic contract, H48 and Gross approvals, protection/risk wiring and mechanical correctness/parity of the actual deployed SHA; and (b) **AFTER cutover** full-year source-exact/OOS DD acceptance, recovery and strategy redesign. Do not confuse deferred research backtesting with a license to skip any source identity, ownership, STOP, risk function, current live-account DD latch, signed venue GET or owner approval.
 
 All other C01/C02/C03/C05/C06/C07 pre-cutover gates remain. In particular, intentionally DRAFT_BLOCKED Q102 bootstrap and unresolved external Root dynamic loader provenance still bar LIVE activation until fixed. The existing live DD/latch/Shared Risk/Kill Switch code is **not changed or overridden**. This chat decision is not an HP approval receipt for a new operation/scope/SHA/plan.
+
+## 2026-11-17 current LIVE VPS authenticated SSH baseline (read-only)
+
+Fresh owner-PC strict-known-hosts Root SSH successfully read **current** VPS. Checked installed external Root SHA256: 21/21 reviewed module digests match the prior pinned Owner PC inventory (37 total disdex Python files; the extra 16 are not covered by the pinned 21). Root path root:root mode755. The installed Root dynamic import child provenance and the full candidate dependency closure remain to be independently certified.
+
+Runtime unit inspection: active V4 e788abc82e80f9fc7ab0e1ba83fdb8be267eb513; active PENGU 1657e173d250ad58f53e62f7bb0a3428fb405496; active HYPE a7eee1f91d86d51f2333da117243d044ae1332dc; active Q102 ef1ab178e26a7bf5bddb6473467765edba242e1d (MainPID805183, cwd exact old pin); FET, IDLE, Margin Guard active on 7688ed7c93a1918d8b44837339b7da5584a868f5. Current release symlink also at 7688ed7c... . This is systemd status only, not signed venue protection proof or advancing tick validation.
+
+Current candidate SHA b57bf6c5f4cd9513ebcef1a7bdd3d2cc50afb9b3 is not staged under VPS immutable releases yet. New Q102 bootstrap state was absent or not readable on stat; the old Q102 Writer remains active. Never run new Writer concurrently or stop existing exit/STOP protection merely to speed up cutover.
+
+See STABLE4_LIVE_VPS_PRECUTOVER_READONLY_20261117.md for exact evidence and latest preflight order. Historic Root hash and runner SHA references earlier in this handoff must not substitute for the fresh source/pins. Owner's deferred **research BT DD** is already recorded in STABLE4_OWNER_DD_CUTOVER_DEFERRAL_20261117.md. No VPS changes or order/STOP/systemd writes made.
