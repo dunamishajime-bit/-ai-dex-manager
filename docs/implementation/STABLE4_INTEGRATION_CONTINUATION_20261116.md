@@ -26,3 +26,17 @@ Continuation of the original Codex branch codex/stable4-production-integration-2
 - H48 time-only/no resident STOP and proposed Gross enlargement materially change the prior Production policy. Apply only with exact intended authorization.
 
 No trade, order cancellation, position adjustment, STOP, Kill Switch, Runner activation or Production deploy was made in this checkpoint.
+## 2026-11-16 continuation: independent read-only Root baseline recheck
+
+- This is continuation on the unchanged Codex worktree/branch, not a new release or LIVE change.
+- Owner VPS read-only SSH audit verified the *installed* active Root modules:
+  - disdex_hype_scoped_root_cutover.py SHA256 710ae088dcb9a8a2793bd3890f276696dd2ae3cddebe365757bcda6c5eb80882 matches H48 reviewed baseline.
+  - disdex_unified_root_gate.py SHA256 dd8ea03b2d890c355050e5d029f0fc74dbc101ae37ab766907c108966c25f529 matches H48 reviewed baseline.
+  - disdex_v4_venue_witness.py SHA256 99c224070708f4714090e1dfb969ffbec41b12a5933bf37c22373a55cdba6c3c matches composite reviewed baseline.
+  - disdex_pending_maintenance_install.py SHA256 b852b283cffb189f92be8ac50611621dff0dae3f3aa810af2022de2d5de9a1a5 was *observed*, not independently source-reviewed, so it does not certify external dependency closure.
+- Added scripts/ops/root/disdex_stable4_root_preimage_readonly.py and source-only unit tests. This never imports inspected Root code, never changes production, rejects swapped/writable/missing source, and returns nonzero even when all three base digests match: external provenance and authorizations are still outstanding.
+- PC Windows Python unit: 2 cross-platform contracts passed; seven POSIX permission/symlink tests are skipped locally by design and must run on Ubuntu in GitHub CI.
+- Explicit candidate source inventory at bf2726d9e: 236 Git blobs; 5 unresolved local imports and 8 dynamic/unresolved paths. The release is NOT dependency-closed. No archive or Production promotion was authorized by this inventory.
+- Production observation: pins V12_V4=e788abc82e80, QUALITY102_CAUSAL_V1=ef1ab178e26a, HYPE_TREND_LONG=a7eee1f91d86, SHARED_CRYPTO_RISK=2737c30e1f6d; all four unit states active/running at audit time. Q102 Stable4 online state file is not present.
+- No venue signed protection proof was generated, no Q102 writer exclusion or source-parser trust was approved, no H48 time-only exit or enlarged Gross authorization was established, and no Runner, STOP, position, order, Owner approval or VPS code changed.
+- Next: independently review external Root source and dynamic imports; redesign Q102 state install with fully isolated old writer and trusted parser; verify protected inventory via signed venue GET; verify Gross/Shared Risk and the exact Owner-approved economics; then formal staging and approval route. Fail closed meanwhile.
