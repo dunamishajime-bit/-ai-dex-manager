@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,6 +36,18 @@ class Stable4RuntimeManifestTests(unittest.TestCase):
         self.assertIs(row["ordersEnabled"], False)
         self.assertIs(row["credentialsIncluded"], False)
         self.assertIs(row["nodeModulesIncluded"], False)
+        self.assertIs(row["sourceClosureCertified"], False)
+        self.assertIs(row["productionReady"], False)
+        self.assertIs(row["externalRootIndependentlyReviewed"], False)
+        self.assertIs(row["signedVenueEvidenceVerified"], False)
+        self.assertIs(row["productionEconomicParityVerified"], False)
+        self.assertEqual(len(row["externalRootObservedSha256"]), 2)
+        self.assertIn(row["dependencyClosureStatus"], (
+            "BLOCKED_SOURCE_DEPENDENCIES_UNRESOLVED",
+            "GIT_DEPENDENCIES_OBSERVED_EXTERNAL_ROOT_REVIEW_REQUIRED"))
+        if row["unresolvedLocalImports"] or row["dynamicPathReview"]:
+            self.assertEqual(row["dependencyClosureStatus"],
+                             "BLOCKED_SOURCE_DEPENDENCIES_UNRESOLVED")
         self.assertTrue(row["files"])
         by_path = {record["path"]: record for record in row["files"]}
         self.assertEqual(len(by_path), len(row["files"]))
@@ -50,5 +63,19 @@ class Stable4RuntimeManifestTests(unittest.TestCase):
                               "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json"):
             self.assertIn(required_data, by_path)
 
+    def test_unresolved_dependencies_cannot_create_archives(self):
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"],
+                                      cwd=ROOT, text=True).strip()
+        probe = command("--source-sha", sha)
+        self.assertEqual(probe.returncode, 0, probe.stderr[-1200:])
+        row = json.loads(probe.stdout)
+        if row["unresolvedLocalImports"] or row["dynamicPathReview"]:
+            with tempfile.TemporaryDirectory() as directory:
+                archive = Path(directory) / "would-be-release.tar"
+                rejected = command("--source-sha", sha, "--archive", str(archive))
+                self.assertNotEqual(rejected.returncode, 0)
+                self.assertFalse(archive.exists())
+                self.assertIn("DEPENDENCY_REVIEW_INCOMPLETE_NO_ARCHIVE_CREATED",
+                              rejected.stderr)
 if __name__ == "__main__":
     unittest.main()

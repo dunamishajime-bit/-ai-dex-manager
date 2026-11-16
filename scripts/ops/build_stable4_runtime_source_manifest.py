@@ -25,6 +25,14 @@ ROOTS += ['scripts/ops/root/disdex_pending_composite_upgrade.py',
 RUNTIME_JSON=('docs/implementation/v12-v4-v2-full-year-priority.json',
               'docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json')
 ROOTS += list(RUNTIME_JSON)
+# These checksums are observations of installed owner VPS Root preimages, not
+# versioned source dependencies, independent review, or deploy permissions.
+EXTERNAL_ROOT_OBSERVED_SHA256 = {
+    'disdex_unified_root_gate.py':
+        'dd8ea03b2d890c355050e5d029f0fc74dbc101ae37ab766907c108966c25f529',
+    'disdex_pending_maintenance_install.py':
+        'b852b283cffb189f92be8ac50611621dff0dae3f3aa810af2022de2d5de9a1a5',
+}
 ALLOWED_PREFIXES=('lib/','config/','scripts/')
 EXTS=('.ts','.tsx','.js','.mjs','.cjs','.py','.json')
 DENY=re.compile(r'(^|/)(?:\.env[^/]*|\.git|reports?|research[^/]*|tests?|fixtures?|credentials?|secrets?|private|wallets?|node_modules)(?:/|$)|(?:\.pem|\.key|\.p12|\.pfx)$',re.I)
@@ -94,7 +102,13 @@ def main():
      else:dynamic.append({'source':path,'kind':'unresolved-python-path','path':node.value})
     if isinstance(node,ast.Call) and isinstance(node.func,ast.Name) and node.func.id=='__import__' and (not node.args or not isinstance(node.args[0],ast.Constant)):dynamic.append({'source':path,'kind':'dynamic-python-import','line':node.lineno})
  proc.stdin.close();proc.wait()
- manifest={'schema':'disdex-stable4-runtime-source-review/v1','sourceSha':source_sha,'scope':'REVIEW_ONLY','files':[{'path':name,'size':len(raw),'sha256':hashlib.sha256(raw).hexdigest()} for name,raw in sorted(seen.items())],'unresolvedLocalImports':unresolved,'dynamicPathReview':dynamic,'nodeModulesIncluded':False,'credentialsIncluded':False,'ordersEnabled':False}
+ manifest={'schema':'disdex-stable4-runtime-source-review/v1','sourceSha':source_sha,'scope':'REVIEW_ONLY','files':[{'path':name,'size':len(raw),'sha256':hashlib.sha256(raw).hexdigest()} for name,raw in sorted(seen.items())],'unresolvedLocalImports':unresolved,'dynamicPathReview':dynamic,'nodeModulesIncluded':False,'credentialsIncluded':False,'ordersEnabled':False,
+           'externalRootObservedSha256':EXTERNAL_ROOT_OBSERVED_SHA256,
+           'externalRootIndependentlyReviewed':False,
+           'dependencyClosureStatus':'BLOCKED_SOURCE_DEPENDENCIES_UNRESOLVED' if unresolved or dynamic else 'GIT_DEPENDENCIES_OBSERVED_EXTERNAL_ROOT_REVIEW_REQUIRED',
+           'sourceClosureCertified':False,'productionEconomicParityVerified':False,
+           'signedVenueEvidenceVerified':False,'ownerApprovalVerified':False,
+           'productionReady':False}
  if args.archive:
   if unresolved or dynamic:raise ValueError('DEPENDENCY_REVIEW_INCOMPLETE_NO_ARCHIVE_CREATED')
   output=Path(args.archive)
