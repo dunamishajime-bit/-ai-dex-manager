@@ -58,5 +58,9 @@ jobs:
         run: python3 -B -m unittest discover -s scripts/ops -p 'test_stable4_research_dd_independent_audit.py' -v
       - name: Research Gross vs candidate pin parity (synthetic, private BT never uploaded)
         run: python3 -B -m unittest discover -s scripts/ops -p 'test_stable4_gross_policy_parity_gate.py' -v
+      - name: Reconstructed pending no-order overlay contracts (synthetic only)
+        run: |
+          python3 -B -m unittest discover -s scripts/ops/patches -p 'test_apply_pending_composite_worker_patch.py' -v
+          npx tsx --test scripts/ops/patches/disdex-pending-h48-composite.test.ts scripts/ops/patches/disdex-pending-protected-hold.test.ts
       - name: Repository typecheck
         run: npm run typecheck
