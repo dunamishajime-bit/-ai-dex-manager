@@ -7,7 +7,11 @@ import { dirname } from "node:path";
 import { AsterV3Client } from "../../../lib/aster-v3-client";
 import { FileAccountOrderLock } from "../../../lib/disdex-account-order-lock";
 import { normalizePendingExposureRegistry } from "../../../lib/disdex-pending-exposure-registry";
-import { assertV4SharedRateBudget, createV4EvidenceFetch } from "../../../lib/v12-v4-monitor-only";
+import { assertSharedAsterReadBudget, createAsterReadonlyEvidenceFetch } from "../../../lib/aster-readonly-evidence-fetch";
+import {validateOwnedPendingVenue} from '../../../lib/disdex-pending-owned-venue';
+import {collectPendingOwnerEvidence} from '../../../lib/disdex-pending-owner-evidence';
+import {preflightPendingV4Replay,preparePendingCompositeOwnership,buildPendingCompositeWitness} from '../../../lib/disdex-pending-owned-witness';
+import {attestPendingNoOrderRootParent} from '../../../lib/disdex-pending-protected-hold';
 
 type JsonRecord = Record<string, any>;
 
@@ -22,6 +26,7 @@ export function validatePendingReadonlyReconcile(input: {
   registry: unknown;
   positions: JsonRecord[];
   openOrders: JsonRecord[];
+  ownership?: Parameters<typeof validateOwnedPendingVenue>[0];
 }) {
   if (!input.registry || typeof input.registry !== "object" || Array.isArray(input.registry)
       || (input.registry as JsonRecord).accountScope !== "ASTER_FUTURES") {
@@ -56,10 +61,10 @@ export function validatePendingReadonlyReconcile(input: {
     return Math.abs(amount) > 1e-12;
   });
   if (positions.length || input.openOrders.length) {
-    throw new Error(
-      "PENDING_RECONCILE_NONFLAT_REQUIRES_OWNERSHIP_PROOF:"
-      + positions.length + ":" + input.openOrders.length,
-    );
+    if(!input.ownership)throw new Error(
+        "PENDING_RECONCILE_NONFLAT_REQUIRES_OWNERSHIP_PROOF:"
+        + positions.length + ":" + input.openOrders.length);
+    validateOwnedPendingVenue({...input.ownership,positions:input.positions,orders:input.openOrders});
   }
   return { registry, positionCount: positions.length, openOrderCount: input.openOrders.length };
 }
@@ -147,32 +152,44 @@ async function atomicPreserveMetadata(path: string, raw: string, uid: number, gi
   }
 }
 
-export function parsePendingReconcileArgs(argv: readonly string[]) {
-  if (argv.length !== 1 || !["--verify-only", "--apply-refresh"].includes(argv[0])) {
+export function parsePendingReconcileArgs(argv: readonly string[]):{apply:boolean;verifyOwned?:boolean;witnessNonce?:string} {
+  if(argv.length===2&&argv[0]==="--owned-venue-witness"&&/^[a-f0-9]{32}$/.test(argv[1]))return{apply:false,verifyOwned:true,witnessNonce:argv[1]};
+  if (argv.length !== 1 || !["--verify-only", "--verify-owned", "--apply-refresh"].includes(argv[0])) {
     throw new Error("PENDING_RECONCILE_MODE_REQUIRED_OR_CONFLICT");
   }
-  return { apply: argv[0] === "--apply-refresh" };
+  return argv[0] === "--verify-owned" ? {apply:false,verifyOwned:true} : { apply: argv[0] === "--apply-refresh" };
 }
 
 type PendingGrantContext = {now:number;sha:string;registryHash:string;parentPid:number};
 
 export function validatePendingRefreshGrant(value: unknown, context: PendingGrantContext): void {
+  if(!value||typeof value!=='object'||Array.isArray(value))throw Error('PENDING_REFRESH_GRANT_INVALID');
   const g=value as JsonRecord;
+  const service=g.schema==='disdex-pending-refresh-root-grant/v2';
   const fields=['schema','scope','repository','target','route','authorizationMethod','ordersEnabled',
     'sourceSha','registryHash','parentPid','nonce','issuedAt','expiresAt'];
-  if (!g || typeof g!=='object' || Array.isArray(g)
-    || Object.keys(g).sort().join('|')!==fields.sort().join('|')
-    || g.schema!=='disdex-pending-refresh-root-grant/v1' || g.scope!=='PENDING_RECONCILE_ONLY'
+  if(service)fields.push('maintenanceReceiptSha256');
+  if (Object.keys(g).sort().join('|')!==fields.sort().join('|')
+    || (!service&&g.schema!=='disdex-pending-refresh-root-grant/v1') || g.scope!=='PENDING_RECONCILE_ONLY'
     || g.repository!=='dunamishajime-bit/-ai-dex-manager' || g.target!=='DD1296_FINAL_ALLIN_10BPS'
-    || g.route!=='CODEX_SSH' || g.authorizationMethod!=='ROOT_SSH_SESSION' || g.ordersEnabled!==false
+    || (service?(g.route!=='ROOT_SERVICE'||g.authorizationMethod!=='ROOT_COMMITTED_NO_ORDER_MAINTENANCE'
+          ||typeof g.maintenanceReceiptSha256!=='string'||!/^[a-f0-9]{64}$/.test(g.maintenanceReceiptSha256)):
+        (g.route!=='CODEX_SSH'||g.authorizationMethod!=='ROOT_SSH_SESSION')) || g.ordersEnabled!==false
     || !/^[a-f0-9]{40}$/.test(g.sourceSha) || g.sourceSha!==context.sha
     || !/^[a-f0-9]{64}$/.test(g.registryHash) || g.registryHash!==context.registryHash
     || typeof g.nonce!=='string' || !/^[a-f0-9]{32}$/.test(g.nonce) || !Number.isSafeInteger(g.parentPid) || g.parentPid<=0
     || g.parentPid!==context.parentPid || !Number.isSafeInteger(context.now)
     || !Number.isSafeInteger(g.issuedAt) || !Number.isSafeInteger(g.expiresAt)
-    || g.issuedAt>context.now || g.expiresAt<=context.now || g.expiresAt-g.issuedAt>60_000) {
+    || g.issuedAt>context.now || g.expiresAt<=context.now || g.expiresAt-g.issuedAt>(service?600_000:60_000)) {
     throw new Error('PENDING_REFRESH_GRANT_INVALID');
   }
+}
+
+export function validatePendingServiceParent(grant: JsonRecord, context:{uid:number;argv:string[]}):void {
+  if(grant.schema!=='disdex-pending-refresh-root-grant/v2')return;
+  if(context.uid!==0||context.argv.length!==3||context.argv[0]!=='/usr/bin/python3'
+      ||context.argv[1]!==`/home/deploy/disdex-trading/releases/${grant.sourceSha}/scripts/ops/deploy/disdex_pending_maintenance.py`
+      ||context.argv[2]!=='--service-cycle')throw Error('PENDING_SERVICE_PARENT_IDENTITY_INVALID');
 }
 
 async function rootRefreshGrant(): Promise<JsonRecord> {
@@ -192,6 +209,11 @@ async function rootRefreshGrant(): Promise<JsonRecord> {
     }
     const g=JSON.parse(await fd.readFile('utf8'));
     if (path!==`/run/disdex-pending-refresh/${g.nonce}.json`) throw new Error('PENDING_REFRESH_GRANT_INVALID');
+    if(g.schema==='disdex-pending-refresh-root-grant/v2'){
+      const parentProcess=await lstat(`/proc/${process.ppid}`);
+      const argv=(await readFile(`/proc/${process.ppid}/cmdline`,'utf8')).split('\0').filter(Boolean);
+      validatePendingServiceParent(g,{uid:parentProcess.uid,argv});
+    }
     return g;
   } finally {await fd.close();}
 }
@@ -203,9 +225,9 @@ export function assertPendingApplyCertified(apply: boolean, grant?:unknown, cont
 }
 
 async function main() {
-  const { apply } = parsePendingReconcileArgs(process.argv.slice(2));
+  const { apply,verifyOwned,witnessNonce } = parsePendingReconcileArgs(process.argv.slice(2));
   const grant=apply?await rootRefreshGrant():undefined;
-  assertV4SharedRateBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
+  assertSharedAsterReadBudget(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH);
   const deploy = await readDeployIds();
   if (typeof process.getuid !== "function" || typeof process.getgid !== "function") {
     throw new Error("PENDING_RECONCILE_EXECUTION_USER_INVALID");
@@ -222,14 +244,21 @@ async function main() {
     privateKey: process.env.ASTER_API_PRIVATE_KEY as `0x${string}` | undefined,
     requestTimeoutMs: 10_000,
     readOnlyRateLimitMaxRetries: 0,
-    fetchImpl: createV4EvidenceFetch(fetch),
+    fetchImpl: createAsterReadonlyEvidenceFetch(fetch),
     userAgent: "DisDex-Pending-Reconcile/1",
   });
   if (!client.hasTradingCredentials()) throw new Error("PENDING_RECONCILE_SIGNED_CREDENTIALS_REQUIRED");
 
+  const workerSha=String(process.env.DISDEX_RELEASE_SHA||"");
+  const service=grant?.schema==="disdex-pending-refresh-root-grant/v2";
+  const replay=service||verifyOwned?await preflightPendingV4Replay():undefined;
+  const context=witnessNonce?await attestPendingNoOrderRootParent(workerSha,{requestNonce:witnessNonce}):service?await attestPendingNoOrderRootParent(workerSha,{grant}):undefined;
   const lock = new FileAccountOrderLock(lockPath, 120_000, pendingPath);
-  const handle = await lock.acquire("PENDING_READONLY_RECONCILE:" + process.pid + ":" + Date.now());
+  const handle = await lock.acquire(witnessNonce?"PENDING_READONLY_WITNESS":"PENDING_READONLY_RECONCILE:" + process.pid + ":" + Date.now());
   if (!handle) throw new Error("PENDING_RECONCILE_ACCOUNT_LOCK_BUSY");
+  let renewalError:unknown;
+  const keepAlive=setInterval(()=>{void handle.renew().catch(error=>{renewalError=error;});},20000);keepAlive.unref();
+  const assertRenewal=()=>{if(renewalError)throw Error("PENDING_RECONCILE_LEASE_RENEWAL_FAILED");};
   try {
     await handle.renew();
     const before = await trustedRegistry(pendingPath);
@@ -237,19 +266,32 @@ async function main() {
       registryHash:sha256(before.raw),parentPid:process.ppid});
     assertPendingApplyCertified(apply,grant,grantContext());
     // Sequential signed reads avoid self-saturating the shared priority queue.
-    const positions=await client.getPositions();
-    const openOrders=await client.getOpenOrders();
-    const balances=await client.getBalances();
+    const positions=await client.getPositions();const positionsObservedAt=Date.now();
+    const openOrders=await client.getOpenOrders();const ordersObservedAt=Date.now();
+    const balances=await client.getBalances();const balancesObservedAt=Date.now();
     if (!Array.isArray(balances)) throw new Error("PENDING_RECONCILE_BALANCE_SNAPSHOT_INVALID");
+    const nonFlat=(positions as JsonRecord[]).some(row=>Number(row.positionAmt)!==0)||openOrders.length>0;
+    const composite=replay?await preparePendingCompositeOwnership({positions:positions as JsonRecord[],orders:openOrders as JsonRecord[],workerSha,lease:handle,client,context,replay}):undefined;
+    const ownership=composite?.ownership??((service||verifyOwned)&&nonFlat?await collectPendingOwnerEvidence(positions as JsonRecord[],openOrders as JsonRecord[],workerSha):undefined);
     const checked = validatePendingReadonlyReconcile({
       registry: before.parsed,
-      positions: positions as unknown as JsonRecord[],
+      positions: composite?.partition.positions??positions as unknown as JsonRecord[],
       openOrders: openOrders as unknown as JsonRecord[],
+      ownership:ownership?.input,
     });
     await handle.renew();
     const second = await trustedRegistry(pendingPath);
     if (sha256(second.raw) !== sha256(before.raw)) {
       throw new Error("PENDING_RECONCILE_REGISTRY_CHANGED_DURING_PROOF");
+    }
+    if(ownership)await ownership.verifyUnchanged();
+    if(composite)await composite.verifyUnchanged();
+    assertRenewal();
+    if(witnessNonce){
+      if(!composite)throw Error("PENDING_WITNESS_COMPOSITE_REQUIRED");
+      const proof=await buildPendingCompositeWitness({workerSha,requestNonce:witnessNonce,positions:positions as JsonRecord[],orders:openOrders as JsonRecord[],signedObservedAt:{positions:positionsObservedAt,orders:ordersObservedAt,balances:balancesObservedAt},registrySha256:sha256(before.raw),lease:handle,composite});
+      const last=await trustedRegistry(pendingPath);if(sha256(last.raw)!==sha256(before.raw))throw Error("PENDING_RECONCILE_REGISTRY_CHANGED_DURING_PROOF");
+      await composite.verifyUnchanged();assertRenewal();console.log(JSON.stringify(proof));return;
     }
 
     const verifiedAt = Date.now();
@@ -257,6 +299,9 @@ async function main() {
     if (apply) {
       await handle.renew();
       assertPendingApplyCertified(true,grant,grantContext());
+      if(ownership)await ownership.verifyUnchanged();
+      if(composite)await composite.verifyUnchanged();
+      assertRenewal();
       const next = buildPendingReconciledRegistry(before.parsed, verifiedAt);
       const raw = JSON.stringify(next, null, 2) + "\n";
       await atomicPreserveMetadata(
@@ -278,9 +323,10 @@ async function main() {
       priorUpdatedAt: checked.registry.updatedAt,
       currentUpdatedAt: apply ? verifiedAt : checked.registry.updatedAt,
       registryEntries: checked.registry.entries.length,
-      positionCount: checked.positionCount,
-      openOrderCount: checked.openOrderCount,
+      positionCount: composite?.positionCount??checked.positionCount,
+      openOrderCount: composite?.openOrderCount??checked.openOrderCount,
       balanceRows: balances.length,
+      ownershipMode:(composite?.positionCount??checked.positionCount)||(composite?.openOrderCount??checked.openOrderCount)?'PINNED_OWNER_PROOF':'FLAT_NO_OPEN_ORDERS',
       beforeHash: sha256(before.raw),
       afterHash,
       ordersSent: 0,
@@ -288,6 +334,7 @@ async function main() {
       positionChangesSent: 0,
     }));
   } finally {
+    clearInterval(keepAlive);
     await handle.release();
   }
 }
