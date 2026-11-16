@@ -51,3 +51,13 @@
 DDの復旧階層、0.25x/0.5xの段階復帰、新BT acceptance、目標BT DD15%、勝率70%向け再設計、誤方向ロジックの改善は `STABLE4_POST_CUTOVER_DD_RECOVERY_AND_BT_REVALIDATION_20261116.md` のPOST-ST4-01〜07で管理。今回の既存STABLE4安全ゲートの代替ではない。
 
 **安全境界:** 本文作成時点では、Owner PC上の非本番診断・回帰テストのみ。LIVE注文、建玉、STOP取消・再登録、Kill Switch変更、Runner再起動、systemd切替、VPSファイル変更、Owner承認、GitHubマージは実施していない。
+
+## 2026-11-17 continuation: completed non-live hardening and remaining blockers
+
+- `f4614a423231c72aea93865bedde2e57bb7f345c`: Q102 bootstrap JSON now rejects non-standard NaN/Infinity even with SHA-bound evidence. Local Root 50 tests, no failures (10 expected skips). GitHub Actions run `43925808817` succeeded.
+- `5b6e6ab1c0e0d161fbbec26d57b130f1ac539077`: active legacy pinned Q102 cannot be declared writer-quiesced merely through `DISDEX_STABLE4_MODE=OFF`; old ef1 source does not honor it. Root 50 local tests passed (10 skips); GitHub Actions run `43926104158` succeeded. Q102 installation remains intentionally DRAFT_BLOCKED.
+- `252dedb86afc0096b136118327b0dd673d053f6a`: added deterministic offline Q102 public-only request planner, 9 synthetic tests, dedicated Ubuntu CI step, and source-bound private plan for 7 symbols / 52 outcomes. GitHub Actions run `43927572024` succeeded. See `STABLE4_Q102_PUBLIC_EVIDENCE_PLAN_20261117.md`. Private plan is NOT a deployment token and has NOT fetched venue data.
+- `da5af1fba58f6321521cffa752b9eb42b5755b6b`: documented why the frozen 7/7 pending no-order source overlay **cannot currently be merged into the integrated candidate**: Python 8 and TS 11 component tests pass but full TS typecheck rejects 10 incompatible/missing transitive dependencies and STOP owner exports. An experimental source-only worktree assembly was fully reverted; no incomplete candidate runtime was pushed. See `STABLE4_ROOT_PENDING_OVERLAY_PROVENANCE_GAP_20261117.md` for independent hashes, dynamic Root loader targets and missing V4 refresh helper.
+- Live baseline is unchanged; no account/STOP, Runner, Kill Switch, owner approval, VPS mutation or activation took place in these tasks.
+- **Next order:** solve pending/Root transitive source and dynamic loader closure without importing historical STOP semantics; finish Q102 public evidence outcomes + safe parser/writer exclusion; then independently pass source-exact risk/DD (current research 10bps 21.571152% / 30bps 22.281591% both exceed DD20%); signed venue preflight; exact scope Owner approval; formal cutover and three advancing decision ticks. Do not treat CI success or source-only request-plan success as LIVE readiness.
+- Commit/CI state MUST be reacquired from the actual HEAD when Codex resumes; do not reuse any older SHA for an approval plan.
