@@ -92,8 +92,12 @@ def inspect_legacy_state(*, expected_sha, state_path=LEGACY_STATE, now_ms=None):
         raise ValueError("Q102_LEGACY_JSON_NONFINITE:" + value)
     data = json.loads(raw, object_pairs_hook=unique,
                       parse_constant=reject_nonfinite)
-    if (not isinstance(data, dict) or "position" not in data
-            or "pending" not in data):
+    # The pinned ef1 Q102 TypeScript schema declares position and pending
+    # as OPTIONAL: JSON serialization omits them when flat. Require the
+    # canonical version/strategy instead of inventing required keys.
+    if (not isinstance(data, dict) or data.get("version") != 1
+            or data.get("strategyId") != "QUALITY102_CAUSAL_V1"
+            or not isinstance(data.get("failures"), list)):
         raise ValueError("Q102_LEGACY_STATE_SCHEMA_INVALID")
     source_matches = data.get("runtimeCommitSha") == expected_sha
     mode_live = data.get("mode") == "LIVE"
@@ -101,7 +105,7 @@ def inspect_legacy_state(*, expected_sha, state_path=LEGACY_STATE, now_ms=None):
     time_valid = (type(updated) is int and 0 < updated <= clock + 5000)
     age = clock - updated if time_valid else None
     recent = age is not None and -5000 <= age <= 300000
-    local_flat = data["position"] is None and data["pending"] is None
+    local_flat = data.get("position") is None and data.get("pending") is None
     status = ("LEGACY_LOCAL_FLAT_OBSERVED_NOT_VENUE_CERTIFIED"
               if source_matches and mode_live and recent and local_flat
               else "BLOCKED_LEGACY_STATE_OR_FRESHNESS_UNVERIFIED")
@@ -113,8 +117,8 @@ def inspect_legacy_state(*, expected_sha, state_path=LEGACY_STATE, now_ms=None):
         "modeLiveObserved": mode_live,
         "updatedAtMs": updated if type(updated) is int else None,
         "stateAgeMs": age,
-        "localPositionAbsent": data["position"] is None,
-        "localPendingAbsent": data["pending"] is None,
+        "localPositionAbsent": data.get("position") is None,
+        "localPendingAbsent": data.get("pending") is None,
         "localStateFresh": recent,
         "localFlatnessObserved": local_flat,
         "signedVenueFlatnessCertified": False,

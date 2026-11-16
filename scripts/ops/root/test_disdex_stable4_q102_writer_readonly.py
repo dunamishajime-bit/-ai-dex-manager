@@ -76,8 +76,9 @@ class OldQ102ReadOnlyAuditTests(unittest.TestCase):
         now = 1800000000000
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "state.json"
-            payload = {"runtimeCommitSha": sha, "mode": "LIVE",
-                       "position": None, "pending": None, "updatedAt": now}
+            payload = {"version": 1, "strategyId": "QUALITY102_CAUSAL_V1",
+                       "failures": [], "runtimeCommitSha": sha, "mode": "LIVE",
+                       "updatedAt": now}
             raw = json.dumps(payload).encode("utf8")
             path.write_bytes(raw)
             before = hashlib.sha256(raw).hexdigest()
@@ -96,8 +97,9 @@ class OldQ102ReadOnlyAuditTests(unittest.TestCase):
     def test_legacy_state_open_position_pending_or_stale_blocks(self):
         sha = "a" * 40
         now = 1800000000000
-        baseline = {"runtimeCommitSha": sha, "mode": "LIVE",
-                    "position": None, "pending": None, "updatedAt": now}
+        baseline = {"version": 1, "strategyId": "QUALITY102_CAUSAL_V1",
+                    "failures": [], "runtimeCommitSha": sha, "mode": "LIVE",
+                    "updatedAt": now}
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "state.json"
             for modified in (
@@ -123,7 +125,7 @@ class OldQ102ReadOnlyAuditTests(unittest.TestCase):
             records = [
                 '{"position":null,"position":null,"pending":null}',
                 '{"position":null,"pending":null,"runtimeCommitSha":NaN}',
-                '{"position":null,"runtimeCommitSha":"' + sha + '"}',
+                '{"version":1,"runtimeCommitSha":"' + sha + '"}',
             ]
             for raw in records:
                 with self.subTest(raw=raw):
@@ -132,6 +134,23 @@ class OldQ102ReadOnlyAuditTests(unittest.TestCase):
                                                 "DUPLICATE|NONFINITE|SCHEMA"):
                         inspect_legacy_state(expected_sha=sha,
                                              state_path=path, now_ms=now)
+
+    def test_legacy_state_canonical_optional_position_pending_absence(self):
+        sha = "a" * 40
+        now = 1800000000000
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            baseline = {"version": 1, "strategyId": "QUALITY102_CAUSAL_V1",
+                        "failures": [], "runtimeCommitSha": sha,
+                        "mode": "LIVE", "updatedAt": now}
+            path.write_text(json.dumps(baseline))
+            proof = inspect_legacy_state(expected_sha=sha,
+                                         state_path=path, now_ms=now)
+            self.assertEqual(proof["status"],
+                             "LEGACY_LOCAL_FLAT_OBSERVED_NOT_VENUE_CERTIFIED")
+            self.assertTrue(proof["localPositionAbsent"])
+            self.assertTrue(proof["localPendingAbsent"])
+            self.assertFalse(proof["writerExclusionCertified"])
 
     def test_legacy_state_missing_file_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
