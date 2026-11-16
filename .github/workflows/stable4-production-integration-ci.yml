@@ -62,5 +62,7 @@ jobs:
         run: |
           python3 -B -m unittest discover -s scripts/ops/patches -p 'test_apply_pending_composite_worker_patch.py' -v
           npx tsx --test scripts/ops/patches/disdex-pending-h48-composite.test.ts scripts/ops/patches/disdex-pending-protected-hold.test.ts
+      - name: Route-direction error audit contract (synthetic, no private fills)
+        run: python3 -B -m unittest discover -s scripts/ops -p 'test_stable4_route_direction_audit.py' -v
       - name: Repository typecheck
         run: npm run typecheck
