@@ -59,6 +59,16 @@ class Stable4RuntimeManifestTests(unittest.TestCase):
                           "disdex_pending_composite_upgrade.py",
                           "disdex_stable4_q102_bootstrap_seal.py"):
             self.assertIn("scripts/ops/root/" + root_tool, by_path)
+        dynamic_child = "scripts/ops/deploy/disdex_v4_evidence_refresh_activation.py"
+        self.assertIn(dynamic_child, by_path)
+        expected_child = subprocess.check_output(
+            ["git", "show", sha + ":" + dynamic_child], cwd=ROOT)
+        self.assertEqual(by_path[dynamic_child]["sha256"],
+                         hashlib.sha256(expected_child).hexdigest())
+        self.assertEqual(row["dynamicReleaseChildSources"],
+                         [{"path": dynamic_child,
+                           "sha256": hashlib.sha256(expected_child).hexdigest()}])
+        self.assertFalse(row["sourceClosureCertified"])
         for required_data in ("docs/implementation/v12-v4-v2-full-year-priority.json",
                               "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json"):
             self.assertIn(required_data, by_path)
