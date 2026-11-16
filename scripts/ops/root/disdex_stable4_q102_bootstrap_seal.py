@@ -80,6 +80,11 @@ def assert_old_q_not_learning(source_sha,*,run=subprocess.run,proc=Path('/proc')
   env=(proc/str(pid)/'environ').read_bytes().split(b'\0')
   modes=[x.split(b'=',1)[1] for x in env if x.startswith(b'DISDEX_STABLE4_MODE=')]
   require(len(modes)==1 and modes[0].strip().upper()==b'OFF','OLD_Q102_WRITER_EXCLUSION_NOT_PROVEN')
+  # The deployed ef1ab178 legacy Q102 runner does not read this flag.
+  # Even OFF cannot prove a live process has stopped writing/admitting.
+  # Future migration must independently prove quiescence/exit protection
+  # before allowing any bootstrap; the draft remains blocked regardless.
+  require(False,'OLD_ACTIVE_Q102_WRITER_CANNOT_BE_PROVEN_QUIESCED_BY_ENV_FLAG')
   return pid
  before=observe();require(observe()==before,'OLD_UNIT_CHANGED');return before
 

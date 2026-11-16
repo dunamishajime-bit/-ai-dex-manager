@@ -67,8 +67,10 @@ class OldQ102WriterExclusionTests(unittest.TestCase):
               b'DISDEX_STABLE4_MODE=OFF\x00DISDEX_STABLE4_MODE=OFF\x00'):
    with self.subTest(raw=raw), self.assertRaisesRegex(ValueError,'WRITER_EXCLUSION'):
     seal.assert_old_q_not_learning(source_sha,run=run,proc=FakeProc(raw,correct))
-  self.assertEqual(seal.assert_old_q_not_learning(
-   source_sha,run=run,proc=FakeProc(b'DISDEX_STABLE4_MODE=OFF\x00',correct)),123)
+  # OFF is a misleading no-op on the pinned legacy ef1ab178 source.
+  with self.assertRaisesRegex(ValueError,'CANNOT_BE_PROVEN_QUIESCED'):
+   seal.assert_old_q_not_learning(
+    source_sha,run=run,proc=FakeProc(b'DISDEX_STABLE4_MODE=OFF\x00',correct))
   with self.assertRaisesRegex(ValueError,'IDENTITY'):
    seal.assert_old_q_not_learning(source_sha,run=run,proc=FakeProc(
     b'DISDEX_STABLE4_MODE=OFF\x00',seal.RELEASES/('a'*40)))
