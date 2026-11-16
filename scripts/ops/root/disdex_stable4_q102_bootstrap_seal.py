@@ -75,7 +75,7 @@ def assert_old_q_not_learning(source_sha,*,run=subprocess.run,proc=Path('/proc')
   require(rows.get('ActiveState')=='active' and (proc/str(pid)/'cwd').resolve()==RELEASES/source_sha,'OLD_UNIT_IDENTITY')
   env=(proc/str(pid)/'environ').read_bytes().split(b'\0')
   modes=[x.split(b'=',1)[1] for x in env if x.startswith(b'DISDEX_STABLE4_MODE=')]
-  require(len(modes)<=1 and (not modes or modes[0].strip().upper()==b'OFF'),'OLD_Q102_MAY_WRITE_BOOTSTRAP')
+  require(len(modes)==1 and modes[0].strip().upper()==b'OFF','OLD_Q102_WRITER_EXCLUSION_NOT_PROVEN')
   return pid
  before=observe();require(observe()==before,'OLD_UNIT_CHANGED');return before
 

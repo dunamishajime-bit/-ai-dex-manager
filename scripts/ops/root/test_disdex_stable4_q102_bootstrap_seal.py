@@ -35,4 +35,33 @@ class Q102BootstrapTests(unittest.TestCase):
  def test_install_refuses_even_apparently_valid_input_before_filesystem_io(self):
   with self.assertRaisesRegex(RuntimeError,'DRAFT_BLOCKED'):
    seal.install(receipt={},state_raw=b'',expected_prior_sha256=None,pins_path=Path('/not-used'),pins_before=b'',deploy_uid=1,deploy_gid=1)
+
+class OldQ102WriterExclusionTests(unittest.TestCase):
+ def test_active_legacy_q102_requires_explicit_stable4_off(self):
+  source_sha = 'b'*40
+  class FakeProc:
+   def __init__(self, raw, release):self.raw=raw;self.release=release
+   def __truediv__(self, _):return self
+   def resolve(self):return self.release
+   def read_bytes(self):return self.raw
+  def run(args, **_):
+   class Reply: returncode=0;stdout='ActiveState=active\nMainPID=123\n'
+   return Reply()
+  correct = seal.RELEASES/source_sha
+  for raw in (b'PATH=/usr/bin\x00', b'DISDEX_STABLE4_MODE=LIVE\x00',
+              b'DISDEX_STABLE4_MODE=OFF\x00DISDEX_STABLE4_MODE=OFF\x00'):
+   with self.subTest(raw=raw), self.assertRaisesRegex(ValueError,'WRITER_EXCLUSION'):
+    seal.assert_old_q_not_learning(source_sha,run=run,proc=FakeProc(raw,correct))
+  self.assertEqual(seal.assert_old_q_not_learning(
+   source_sha,run=run,proc=FakeProc(b'DISDEX_STABLE4_MODE=OFF\x00',correct)),123)
+  with self.assertRaisesRegex(ValueError,'IDENTITY'):
+   seal.assert_old_q_not_learning(source_sha,run=run,proc=FakeProc(
+    b'DISDEX_STABLE4_MODE=OFF\x00',seal.RELEASES/('a'*40)))
+
+ def test_old_q102_stopped_has_no_active_writer_pid(self):
+  def run(args, **_):
+   class Reply: returncode=0;stdout='ActiveState=inactive\nMainPID=0\n'
+   return Reply()
+  self.assertEqual(seal.assert_old_q_not_learning('b'*40,run=run),0)
+
 if __name__=='__main__':unittest.main()
