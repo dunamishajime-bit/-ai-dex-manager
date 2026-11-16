@@ -28,12 +28,16 @@ def require(value,reason):
 def digest(raw):return hashlib.sha256(raw).hexdigest()
 def sha(s,n=64):return isinstance(s,str) and re.fullmatch('[a-f0-9]{'+str(n)+'}',s) is not None
 def parse(raw):
+ # JSON is an externally hashed evidence format, not Python's permissive
+ # JavaScript-like numeric dialect. NaN/Infinity can evade downstream checks.
  def unique(pairs):
   out={}
   for k,v in pairs:
    require(k not in out,'DUPLICATE_JSON');out[k]=v
   return out
- return json.loads(raw,object_pairs_hook=unique)
+ def invalid_constant(value):
+  raise ValueError('Q102_BOOTSTRAP_NONFINITE_JSON_NUMBER:'+value)
+ return json.loads(raw,object_pairs_hook=unique,parse_constant=invalid_constant)
 
 def validate_candidate(*,state_raw,result_raw,source_cache_raw,request_plan_raw,evidence_files,expected_state_sha256,expected_result_sha256,now_ms):
  require(sha(expected_state_sha256) and sha(expected_result_sha256) and digest(state_raw)==expected_state_sha256 and digest(result_raw)==expected_result_sha256,'EXTERNAL_HASH_MISMATCH')

@@ -14,6 +14,21 @@ class Q102BootstrapTests(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'STALE'):seal.validate_candidate(**{**args,'now_ms':args['now_ms']+seal.HOUR})
   with self.assertRaisesRegex(ValueError,'HASH'):seal.validate_candidate(**{**args,'expected_state_sha256':'f'*64})
   with self.assertRaisesRegex(ValueError,'SOURCE_EVIDENCE'):seal.validate_candidate(**{**args,'evidence_files':{'APTUSDT':b'wrong'}})
+ def test_strict_json_parser_rejects_nonfinite_evidence_even_with_matching_hashes(self):
+  # Permissive json.loads accepts NaN/Infinity; a valid SHA alone is not trust.
+  baseline=self.fixture()
+  for field in ('state_raw','result_raw'):
+   for token in (b'NaN',b'Infinity',b'-Infinity'):
+    with self.subTest(field=field,token=token):
+     raw=baseline[field][:-1]+b',"untrustedMetric":'+token+b'}'
+     args={**baseline,field:raw}
+     args['expected_'+('state' if field=='state_raw' else 'result')+'_sha256']=seal.digest(raw)
+     with self.assertRaisesRegex(ValueError,'NONFINITE_JSON_NUMBER'):
+      seal.validate_candidate(**args)
+  for raw in (b'{"a":1,"a":2}',b'{"a":NaN}'):
+   with self.assertRaises(ValueError):seal.parse(raw)
+  self.assertEqual(seal.validate_candidate(**baseline)['stateSha256'],baseline['expected_state_sha256'])
+
  def test_unresolved_and_mutation_claims_are_checked(self):
   args=self.fixture();report=json.loads(args['result_raw']);report['ordersSent']=1
   raw=json.dumps(report).encode()
