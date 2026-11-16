@@ -1,6 +1,6 @@
 import unittest
 
-from disdex_stable4_q102_writer_readonly import assess
+from disdex_stable4_q102_writer_readonly import assess, observe
 
 
 class OldQ102ReadOnlyAuditTests(unittest.TestCase):
@@ -39,6 +39,27 @@ class OldQ102ReadOnlyAuditTests(unittest.TestCase):
         result = assess(**{**self.base(), "active_state": "inactive",
                            "pid": 0, "cwd": None, "mode_flags": []})
         self.assertEqual(result["status"], "OLD_UNIT_INACTIVE_OTHER_WRITERS_UNVERIFIED")
+        self.assertFalse(result["bootstrapInstallationAuthorized"])
+
+    def test_dangling_bootstrap_symlink_is_treated_as_occupied(self):
+        old = "a" * 40
+        class FakePins:
+            def read_text(self, **_):
+                return '{"runners":{"QUALITY102_CAUSAL_V1":{"sha":"' + old + '"}}}'
+        class DanglingTarget:
+            def exists(self):
+                return False
+            def is_symlink(self):
+                return True
+        def run(*_, **__):
+            class Reply:
+                returncode = 0
+                stdout = "ActiveState=inactive\nMainPID=0\n"
+            return Reply()
+        result = observe(expected_sha=old, pins=FakePins(),
+                         target=DanglingTarget(), run=run)
+        self.assertEqual(result["status"],
+                         "BLOCKED_Q102_BOOTSTRAP_DESTINATION_OCCUPIED")
         self.assertFalse(result["bootstrapInstallationAuthorized"])
 
     def test_bad_source_identity_rejected(self):

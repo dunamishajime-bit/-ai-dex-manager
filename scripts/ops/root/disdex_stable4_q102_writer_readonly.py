@@ -85,7 +85,8 @@ def observe(*, expected_sha, pins=PINS, target=TARGET, releases=RELEASES,
             raise RuntimeError("Q102_PROCESS_METADATA_UNAVAILABLE") from ex
     row = assess(expected_sha=expected_sha, pinned_sha=pinned,
                  active_state=pairs.get("ActiveState"), pid=pid,
-                 cwd=cwd, mode_flags=modes, new_state_exists=target.exists())
+                 cwd=cwd, mode_flags=modes,
+                 new_state_exists=(target.exists() or target.is_symlink()))
     row["observedUnit"] = unit
     return row
 
