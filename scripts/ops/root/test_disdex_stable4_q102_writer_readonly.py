@@ -1,6 +1,10 @@
+import hashlib
+import json
+from pathlib import Path
+import tempfile
 import unittest
 
-from disdex_stable4_q102_writer_readonly import assess, observe
+from disdex_stable4_q102_writer_readonly import assess, observe, inspect_legacy_state
 
 
 class OldQ102ReadOnlyAuditTests(unittest.TestCase):
@@ -65,6 +69,75 @@ class OldQ102ReadOnlyAuditTests(unittest.TestCase):
     def test_bad_source_identity_rejected(self):
         with self.assertRaisesRegex(ValueError, "SHA_INVALID"):
             assess(**{**self.base(), "expected_sha": "HEAD"})
+
+
+    def test_legacy_local_state_flat_can_never_certify_exchange_or_writer(self):
+        sha = "a" * 40
+        now = 1800000000000
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            payload = {"runtimeCommitSha": sha, "mode": "LIVE",
+                       "position": None, "pending": None, "updatedAt": now}
+            raw = json.dumps(payload).encode("utf8")
+            path.write_bytes(raw)
+            before = hashlib.sha256(raw).hexdigest()
+            proof = inspect_legacy_state(expected_sha=sha,
+                                         state_path=path, now_ms=now+10)
+            self.assertEqual(proof["status"],
+                             "LEGACY_LOCAL_FLAT_OBSERVED_NOT_VENUE_CERTIFIED")
+            self.assertTrue(proof["localFlatnessObserved"])
+            self.assertTrue(proof["localStateFresh"])
+            self.assertFalse(proof["signedVenueFlatnessCertified"])
+            self.assertFalse(proof["writerExclusionCertified"])
+            self.assertFalse(proof["bootstrapInstallationAuthorized"])
+            self.assertEqual(proof["stateSha256"], before)
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), before)
+
+    def test_legacy_state_open_position_pending_or_stale_blocks(self):
+        sha = "a" * 40
+        now = 1800000000000
+        baseline = {"runtimeCommitSha": sha, "mode": "LIVE",
+                    "position": None, "pending": None, "updatedAt": now}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            for modified in (
+                {"position": {"symbol": "TESTUSDT"}},
+                {"pending": {"clientOrderId": "pending"}},
+                {"updatedAt": now-300001},
+                {"runtimeCommitSha": "b" * 40},
+                {"mode": "OFF"},
+            ):
+                with self.subTest(modified=modified):
+                    path.write_text(json.dumps({**baseline, **modified}))
+                    proof = inspect_legacy_state(expected_sha=sha,
+                                                 state_path=path, now_ms=now)
+                    self.assertTrue(proof["status"].startswith("BLOCKED_"))
+                    self.assertFalse(proof["bootstrapInstallationAuthorized"])
+                    self.assertFalse(proof["signedVenueFlatnessCertified"])
+
+    def test_legacy_local_state_rejects_json_duplicates_nan_and_missing_pending(self):
+        sha = "a" * 40
+        now = 1800000000000
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            records = [
+                '{"position":null,"position":null,"pending":null}',
+                '{"position":null,"pending":null,"runtimeCommitSha":NaN}',
+                '{"position":null,"runtimeCommitSha":"' + sha + '"}',
+            ]
+            for raw in records:
+                with self.subTest(raw=raw):
+                    path.write_text(raw)
+                    with self.assertRaisesRegex(ValueError,
+                                                "DUPLICATE|NONFINITE|SCHEMA"):
+                        inspect_legacy_state(expected_sha=sha,
+                                             state_path=path, now_ms=now)
+
+    def test_legacy_state_missing_file_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(FileNotFoundError):
+                inspect_legacy_state(expected_sha="a"*40,
+                                     state_path=Path(directory)/"missing")
 
 
 if __name__ == "__main__":
