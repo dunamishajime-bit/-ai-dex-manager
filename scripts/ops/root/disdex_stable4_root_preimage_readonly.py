@@ -23,6 +23,8 @@ REVIEWED_PREIMAGES = {
         '99c224070708f4714090e1dfb969ffbec41b12a5933bf37c22373a55cdba6c3c',
 }
 EXTERNAL_MODULE = 'disdex_pending_maintenance_install.py'
+# Independently observed file bytes, not source review or owner approval.
+EXTERNAL_OBSERVED_SHA256 = 'b852b283cffb189f92be8ac50611621dff0dae3f3aa810af2022de2d5de9a1a5'
 
 
 def _snapshot(path, *, owner_uid=0):
@@ -41,7 +43,7 @@ def _snapshot(path, *, owner_uid=0):
     return {'sha256': hashlib.sha256(raw).hexdigest(), 'size': len(raw)}
 
 
-def audit(root=ROOT, *, reviewed=REVIEWED_PREIMAGES, external=EXTERNAL_MODULE, owner_uid=0):
+def audit(root=ROOT, *, reviewed=REVIEWED_PREIMAGES, external=EXTERNAL_MODULE, observed_external_sha256=EXTERNAL_OBSERVED_SHA256, owner_uid=0):
     result = {
         'schema': 'disdex-stable4-external-root-preimage-readonly/v1',
         'scope': 'READ_ONLY_NON_AUTHORIZING',
@@ -81,7 +83,13 @@ def audit(root=ROOT, *, reviewed=REVIEWED_PREIMAGES, external=EXTERNAL_MODULE, o
 
     try:
         found = _snapshot(root / external, owner_uid=owner_uid)
-        found['status'] = 'OBSERVED_NOT_INDEPENDENTLY_REVIEWED'
+        if not re.fullmatch(r'[0-9a-f]{64}', observed_external_sha256):
+            raise ValueError('INVALID_OBSERVED_EXTERNAL_BASELINE')
+        found['observedExpectedSha256'] = observed_external_sha256
+        found['status'] = ('OBSERVED_NOT_INDEPENDENTLY_REVIEWED'
+                           if found['sha256'] == observed_external_sha256
+                           else 'BLOCKED_OBSERVED_EXTERNAL_CHANGED')
+        blocked |= found['status'] != 'OBSERVED_NOT_INDEPENDENTLY_REVIEWED'
         result['externalModule'] = {'name': external, **found}
     except (OSError, ValueError) as exc:
         result['externalModule'] = {

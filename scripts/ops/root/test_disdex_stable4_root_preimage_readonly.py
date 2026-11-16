@@ -32,7 +32,7 @@ class RootPreimageReadonlyTests(unittest.TestCase):
         tmp, root, data, expected = self.fixture()
         with tmp:
             row = audit.audit(root, reviewed=expected, external='external.py',
-                              owner_uid=root.stat().st_uid)
+                              owner_uid=root.stat().st_uid, observed_external_sha256=hashlib.sha256((root / 'external.py').read_bytes()).hexdigest() if (root / 'external.py').exists() else audit.EXTERNAL_OBSERVED_SHA256)
             self.assertEqual(row['status'], 'BASE_PREIMAGES_MATCH_EXTERNAL_REVIEW_REQUIRED')
             self.assertEqual(len(row['reviewedPreimages']), 3)
             self.assertTrue(all(v['status'] == 'EXACT_PREIMAGE_MATCH'
@@ -49,7 +49,7 @@ class RootPreimageReadonlyTests(unittest.TestCase):
         with tmp:
             (root / 'old_gate.py').write_bytes(b'changed')
             row = audit.audit(root, reviewed=expected, external='external.py',
-                              owner_uid=root.stat().st_uid)
+                              owner_uid=root.stat().st_uid, observed_external_sha256=hashlib.sha256((root / 'external.py').read_bytes()).hexdigest() if (root / 'external.py').exists() else audit.EXTERNAL_OBSERVED_SHA256)
             self.assertEqual(row['status'], 'BLOCKED_BASE_PREIMAGE_OR_METADATA')
             self.assertEqual(row['reviewedPreimages']['old_gate.py']['status'],
                              'HASH_MISMATCH')
@@ -60,7 +60,7 @@ class RootPreimageReadonlyTests(unittest.TestCase):
             (root / 'old_hype.py').rename(root / 'target.py')
             (root / 'old_hype.py').symlink_to('target.py')
             row = audit.audit(root, reviewed=expected, external='external.py',
-                              owner_uid=root.stat().st_uid)
+                              owner_uid=root.stat().st_uid, observed_external_sha256=hashlib.sha256((root / 'external.py').read_bytes()).hexdigest() if (root / 'external.py').exists() else audit.EXTERNAL_OBSERVED_SHA256)
             self.assertEqual(row['status'], 'BLOCKED_BASE_PREIMAGE_OR_METADATA')
             self.assertEqual(row['reviewedPreimages']['old_hype.py']['status'],
                              'BLOCKED_READ_OR_METADATA')
@@ -70,7 +70,7 @@ class RootPreimageReadonlyTests(unittest.TestCase):
         with tmp:
             (root / 'external.py').unlink()
             row = audit.audit(root, reviewed=expected, external='external.py',
-                              owner_uid=root.stat().st_uid)
+                              owner_uid=root.stat().st_uid, observed_external_sha256=hashlib.sha256((root / 'external.py').read_bytes()).hexdigest() if (root / 'external.py').exists() else audit.EXTERNAL_OBSERVED_SHA256)
             self.assertEqual(row['status'], 'BLOCKED_BASE_PREIMAGE_OR_METADATA')
             self.assertEqual(row['externalModule']['status'], 'BLOCKED_READ_OR_METADATA')
 
@@ -79,15 +79,27 @@ class RootPreimageReadonlyTests(unittest.TestCase):
         with tmp:
             (root / 'old_witness.py').chmod(0o664)
             row = audit.audit(root, reviewed=expected, external='external.py',
-                              owner_uid=root.stat().st_uid)
+                              owner_uid=root.stat().st_uid, observed_external_sha256=hashlib.sha256((root / 'external.py').read_bytes()).hexdigest() if (root / 'external.py').exists() else audit.EXTERNAL_OBSERVED_SHA256)
             self.assertEqual(row['reviewedPreimages']['old_witness.py']['status'],
                              'BLOCKED_READ_OR_METADATA')
 
+    def test_changed_observed_external_dependency_is_blocked(self):
+        tmp, root, data, expected = self.fixture()
+        with tmp:
+            old = hashlib.sha256((root / 'external.py').read_bytes()).hexdigest()
+            (root / 'external.py').write_bytes(b'changed dependency')
+            row = audit.audit(root, reviewed=expected, external='external.py',
+                              owner_uid=root.stat().st_uid,
+                              observed_external_sha256=old)
+            self.assertEqual(row['status'], 'BLOCKED_BASE_PREIMAGE_OR_METADATA')
+            self.assertEqual(row['externalModule']['status'],
+                             'BLOCKED_OBSERVED_EXTERNAL_CHANGED')
+            self.assertIs(row['sourceClosureCertified'], False)
     def test_invalid_root_directory_rejected(self):
         tmp, root, data, expected = self.fixture()
         with tmp:
             row = audit.audit(root / 'missing', reviewed=expected,
-                              external='external.py', owner_uid=root.stat().st_uid)
+                              external='external.py', owner_uid=root.stat().st_uid, observed_external_sha256=hashlib.sha256((root / 'external.py').read_bytes()).hexdigest() if (root / 'external.py').exists() else audit.EXTERNAL_OBSERVED_SHA256)
             self.assertEqual(row['status'], 'BLOCKED_ROOT_DIRECTORY')
 
     def test_writable_directory_rejected(self):
@@ -95,7 +107,7 @@ class RootPreimageReadonlyTests(unittest.TestCase):
         with tmp:
             root.chmod(0o777)
             row = audit.audit(root, reviewed=expected, external='external.py',
-                              owner_uid=root.stat().st_uid)
+                              owner_uid=root.stat().st_uid, observed_external_sha256=hashlib.sha256((root / 'external.py').read_bytes()).hexdigest() if (root / 'external.py').exists() else audit.EXTERNAL_OBSERVED_SHA256)
             self.assertEqual(row['status'], 'BLOCKED_ROOT_DIRECTORY')
 
 
