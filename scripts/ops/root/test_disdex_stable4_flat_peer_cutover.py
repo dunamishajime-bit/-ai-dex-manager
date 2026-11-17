@@ -79,11 +79,25 @@ class FlatPeerTests(unittest.TestCase):
     ops.paths=types.SimpleNamespace(pins=Path('/pins'),current_plan=Path('/current-plan'))
     ops.release=Path('/release')/NEW;ops.args=types.SimpleNamespace(sha=NEW);ops.plan_mode='fresh';ops.baselines={p:(b'previous-tick','root-metadata') for p in (ops.paths.pins,ops.paths.current_plan)};ops.replaced=[];ops.next_manifest={};ops.next_current={};ops.desired={'runners':{role:NEW}};ops.state_changed=False
     ops.parent=types.SimpleNamespace(_assert_expected_pins=lambda pins:None)
+    bootstrap_module = None
+    if role == 'QUALITY102_CAUSAL_V1':
+     bootstrap_module = types.ModuleType('disdex_stable4_q102_bootstrap_seal')
+     bootstrap_module.install = lambda **kwargs: (events.append('bootstrap-install') or {'receiptPath':'/receipt'})
+     ops.bootstrap_receipt = {'stateSha256':'c'*64}
+     ops.bootstrap_state_raw = b'bootstrap-state'
+     ops.bootstrap_prior_state_sha = None
+     ops.bootstrap_pins_before = b'previous-tick'
+     ops.deploy = types.SimpleNamespace(pw_uid=0,pw_gid=0)
+     ops.parent.clock = lambda: 2000
+    context = patch.dict(sys.modules, {'disdex_stable4_q102_bootstrap_seal': bootstrap_module}) if bootstrap_module else patch.dict(sys.modules, {})
     if fail_parser:
-     with self.assertRaisesRegex(ValueError,'CANDIDATE_NATIVE_PARSER_REJECTED'):ops.switch()
+     with context:
+      with self.assertRaisesRegex(ValueError,'CANDIDATE_NATIVE_PARSER_REJECTED'):ops.switch()
      self.assertNotIn('write',events);self.assertNotIn('start',events)
     else:
-     ops.switch();after=json.loads(store[0]);key=cutover.ROLES[role]['runtime']
+     with context:
+      ops.switch()
+     after=json.loads(store[0]);key=cutover.ROLES[role]['runtime']
      self.assertEqual(after[key],NEW);self.assertEqual({k:v for k,v in after.items() if k not in (key,'updatedAt')},{k:v for k,v in before.items() if k not in (key,'updatedAt')})
      self.assertLess(events.index('stop'),events.index('write'));self.assertLess(events.index('write'),events.index('start'))
  def test_real_native_public_parser_imports_accept_flat_sources_without_writing(self):

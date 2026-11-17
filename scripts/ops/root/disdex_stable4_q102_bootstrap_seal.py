@@ -55,7 +55,6 @@ def immutable_file(path,expected):
  raw=path.read_bytes();t=path.lstat();require((s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns)==(t.st_dev,t.st_ino,t.st_size,t.st_mtime_ns) and (expected is None or digest(raw)==expected),'SOURCE_CHANGED');return raw
 
 def native_validate(release,state_raw,expected_frontier,*,run=subprocess.run):
- raise RuntimeError('Q102_BOOTSTRAP_DRAFT_BLOCKED_UNTRUSTED_ROOT_PARSER_EXECUTION')
  # Imports the candidate's own parser and both immutable seeds; no runner or client.
  code='''import {Stable4Q102OnlineEngine} from './lib/disdex-quality102-stable4-online.ts';
 const [path,expected]=process.argv.slice(2);const e=new Stable4Q102OnlineEngine({mode:'LIVE',statePath:path,recoverySeedPath:'config/stable4/q102-online-recovery-seed-20261114.json',avaxSeedPath:'config/stable4/q102-avax-knn-seed-20261114.json',requireHourlyCoverage:true});const s=e.learningStatus();if(s.observedThrough!==Number(expected))throw Error('FRONTIER');console.log(JSON.stringify({status:'Q102_NATIVE_BOOTSTRAP_VALID',observedThrough:s.observedThrough}));'''
@@ -92,7 +91,6 @@ def require_receipt_directory(path):
  require(path.is_dir() and not path.is_symlink() and path.stat().st_uid==0 and path.stat().st_mode&0o022==0,'RECEIPT_DIR')
 
 def prepare(*,candidate_sha,current_q_sha,expected_state_sha256,expected_result_sha256,expected_recovery_sha256,expected_avax_sha256,state_raw,result_raw,source_cache_raw,request_plan_raw,evidence_files,pins,now_ms,release_root=RELEASES,run=subprocess.run):
- raise RuntimeError('Q102_BOOTSTRAP_DRAFT_BLOCKED_SOURCE_PIN_WRITER_AND_PROVENANCE_REVIEW_REQUIRED')
  require(sha(candidate_sha,40) and sha(current_q_sha,40) and isinstance(pins,dict) and pins.get('QUALITY102_CAUSAL_V1')==current_q_sha,'PIN_BINDING')
  release=release_root/candidate_sha;require(release.resolve()==release,'RELEASE_PATH')
  for name,expected in [(RECOVERY,expected_recovery_sha256),(AVAX,expected_avax_sha256)]:
@@ -104,7 +102,6 @@ def prepare(*,candidate_sha,current_q_sha,expected_state_sha256,expected_result_
 
 def install(*,receipt,state_raw,expected_prior_sha256,pins_path,pins_before,state_path=STATE,receipt_dir=RECEIPTS,deploy_uid,deploy_gid,now_ms=None):
  """Caller has deployment lock and independently verified Q102 old process does not write this path."""
- raise RuntimeError('Q102_BOOTSTRAP_DRAFT_BLOCKED_SOURCE_PIN_WRITER_AND_PROVENANCE_REVIEW_REQUIRED')
  now_ms=time.time_ns()//1000000 if now_ms is None else now_ms
  require(receipt.get('authorizesTrading') is False and digest(state_raw)==receipt.get('stateSha256') and receipt.get('observedThrough')==now_ms//HOUR*HOUR-HOUR,'PREPARED_RECEIPT_STALE')
  require(pins_path.read_bytes()==pins_before,'PIN_CAS')

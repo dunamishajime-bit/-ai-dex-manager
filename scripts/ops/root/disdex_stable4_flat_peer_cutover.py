@@ -201,6 +201,29 @@ def build_stable4_flat_peer_sources(hype_source,gate_source,*,old_by_role,h48_ol
         self.state_before_row = json.loads(self.state_before)
         validate_flat_hype_state(self.state_before_row,OLD)
         public_validate_peer_state_bytes(self.release,RUNNER,self.state_before,OLD)''')
+  if role == 'QUALITY102_CAUSAL_V1':
+   q102_install_anchor='''        self.systemd.mask(self.old_unit)
+        self.signed_flat()
+'''
+   _require(h.count(q102_install_anchor)==1,'Q102_BOOTSTRAP_INSTALL_ANCHOR_CHANGED')
+   h=h.replace(q102_install_anchor,'''        self.systemd.mask(self.old_unit)
+        from disdex_stable4_q102_bootstrap_seal import install as install_q102_bootstrap
+        installed = install_q102_bootstrap(
+            receipt=self.bootstrap_receipt,
+            state_raw=self.bootstrap_state_raw,
+            expected_prior_sha256=self.bootstrap_prior_state_sha,
+            pins_path=self.paths.pins,
+            pins_before=self.bootstrap_pins_before,
+            state_path=BOOTSTRAP_STATE,
+            receipt_dir=BOOTSTRAP_RECEIPTS,
+            deploy_uid=self.deploy.pw_uid,
+            deploy_gid=self.deploy.pw_gid,
+            now_ms=self.parent.clock(),
+        )
+        self.bootstrap_installed = True
+        self.bootstrap_receipt_path = Path(installed["receiptPath"])
+        self.signed_flat()
+''',1)
   once('''            new_state = dict(self.state_before_row,
                              runtimeCommitSha=self.args.sha,
                              updatedAt=int(time.time()*1000))''','''            new_state = migrate_flat_peer_state(RUNNER,self.state_before_row,OLD,self.args.sha,int(time.time()*1000))''')
@@ -213,6 +236,108 @@ def build_stable4_flat_peer_sources(hype_source,gate_source,*,old_by_role,h48_ol
   h=h[:start]+'''        for relative in (ENTRYPOINT,"node_modules/tsx/dist/loader.mjs","lib/disdex-peer-decision-cycle.ts","lib/disdex-runner-tick-heartbeat.ts","scripts/ops/root/disdex-live-operator-activation-gate.mjs"):
             require((self.release/relative).is_file(),"CANDIDATE_SOURCE_MISSING")
 '''+h[end:]
+  if role == 'QUALITY102_CAUSAL_V1':
+   q102_bootstrap = '''
+BOOTSTRAP_ROOT = Path("/var/tmp/disdex-stable4-q102-bootstrap")
+BOOTSTRAP_STATE = Path("/var/lib/disdex/quality102-causal-v1/stable4-online-state.json")
+BOOTSTRAP_RECEIPTS = Path("/etc/disdex/stable4/q102-bootstrap")
+
+def _q102_secure_bytes(path):
+    import stat
+    metadata = path.lstat()
+    require(stat.S_ISREG(metadata.st_mode) and not path.is_symlink()
+            and metadata.st_uid == 0 and stat.S_IMODE(metadata.st_mode) & 0o022 == 0,
+            "Q102_BOOTSTRAP_INPUT_METADATA")
+    before = (metadata.st_dev, metadata.st_ino, metadata.st_size, metadata.st_mtime_ns)
+    raw = path.read_bytes()
+    after = path.lstat()
+    require(before == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns),
+            "Q102_BOOTSTRAP_INPUT_CHANGED")
+    return raw
+
+def _q102_bootstrap_input_dir(sha):
+    root = BOOTSTRAP_ROOT / sha
+    metadata = root.lstat()
+    import stat
+    require(metadata.st_uid == 0 and stat.S_ISDIR(metadata.st_mode)
+            and not root.is_symlink() and stat.S_IMODE(metadata.st_mode) & 0o022 == 0,
+            "Q102_BOOTSTRAP_INPUT_DIR")
+    return root
+'''
+   anchor='SHARED_RATE_BUDGET = "/var/lib/disdex/shared/aster-rate-budget.json"\n'
+   _require(h.count(anchor)==1,'Q102_BOOTSTRAP_CONSTANT_ANCHOR_CHANGED')
+   h=h.replace(anchor,anchor+q102_bootstrap,1)
+   init_anchor='''        self.failure_phase = "prepare"\n'''
+   _require(h.count(init_anchor)>=1,'Q102_BOOTSTRAP_INIT_ANCHOR_CHANGED')
+   init_index=h.index(init_anchor)
+   h=h[:init_index]+h[init_index:].replace(init_anchor,init_anchor+'''        self.bootstrap_installed = False
+        self.bootstrap_receipt = None
+        self.bootstrap_state_before = None
+        self.bootstrap_state_before_meta = None
+        self.bootstrap_receipt_path = None
+''',1)
+   q102_prepare_method = '''    def _prepare_q102_bootstrap(self):
+        from disdex_stable4_q102_bootstrap_seal import prepare as prepare_q102_bootstrap, digest as q102_digest
+        input_root = _q102_bootstrap_input_dir(self.args.sha)
+        self.bootstrap_input_root = input_root
+        self.bootstrap_state_raw = _q102_secure_bytes(input_root / "state.json")
+        self.bootstrap_result_raw = _q102_secure_bytes(input_root / "result.json")
+        source_cache_raw = _q102_secure_bytes(input_root / "source-cache.json")
+        request_plan_raw = _q102_secure_bytes(input_root / "request-plan.json")
+        result_value = json.loads(self.bootstrap_result_raw)
+        evidence_hashes = result_value.get("evidenceSha256")
+        require(isinstance(evidence_hashes, dict), "Q102_BOOTSTRAP_EVIDENCE_INDEX")
+        evidence_files = {symbol: _q102_secure_bytes(input_root / "evidence" / (symbol + ".json"))
+                          for symbol in evidence_hashes}
+        require(not BOOTSTRAP_STATE.is_symlink(), "Q102_BOOTSTRAP_TARGET_SYMLINK")
+        if BOOTSTRAP_STATE.exists():
+            self.bootstrap_state_before = _safe_bytes(BOOTSTRAP_STATE)
+            self.bootstrap_state_before_meta = BOOTSTRAP_STATE.lstat()
+            prior_state_sha = q102_digest(self.bootstrap_state_before)
+        else:
+            prior_state_sha = None
+        self.bootstrap_pins_before = _safe_bytes(self.paths.pins)
+        self.bootstrap_receipt = prepare_q102_bootstrap(
+            candidate_sha=self.args.sha,
+            current_q_sha=OLD,
+            expected_state_sha256=q102_digest(self.bootstrap_state_raw),
+            expected_result_sha256=q102_digest(self.bootstrap_result_raw),
+            expected_recovery_sha256=q102_digest(_safe_bytes(self.release / "config/stable4/q102-online-recovery-seed-20261114.json")),
+            expected_avax_sha256=q102_digest(_safe_bytes(self.release / "config/stable4/q102-avax-knn-seed-20261114.json")),
+            state_raw=self.bootstrap_state_raw,
+            result_raw=self.bootstrap_result_raw,
+            source_cache_raw=source_cache_raw,
+            request_plan_raw=request_plan_raw,
+            evidence_files=evidence_files,
+            pins=self.pins,
+            now_ms=self.parent.clock(),
+            release_root=self.paths.releases,
+        )
+        self.bootstrap_prior_state_sha = prior_state_sha
+
+'''
+   _require(h.count('    def consume(self):')==1,'Q102_BOOTSTRAP_CONSUME_ANCHOR_CHANGED')
+   h=h.replace('    def consume(self):\n',q102_prepare_method+'    def consume(self):\n',1)
+   _require(h.count('        validate_flat_hype_state(self.state_before_row, expected_state_sha)')==1,'Q102_BOOTSTRAP_PREPARE_CALL_ANCHOR_CHANGED')
+   h=h.replace('        validate_flat_hype_state(self.state_before_row, expected_state_sha)\n',
+               '        validate_flat_hype_state(self.state_before_row, expected_state_sha)\n        if RUNNER == "QUALITY102_CAUSAL_V1":\n            self._prepare_q102_bootstrap()\n',1)
+   q102_rollback_anchor='        if self.state_changed:\n            cur=_safe_bytes(STATE)\n'
+   _require(h.count(q102_rollback_anchor)==1,'Q102_BOOTSTRAP_ROLLBACK_ANCHOR_CHANGED')
+   q102_rollback_code='''        if getattr(self, "bootstrap_installed", False):
+            from disdex_stable4_q102_bootstrap_seal import digest as q102_digest
+            current_bootstrap = _safe_bytes(BOOTSTRAP_STATE)
+            require(q102_digest(current_bootstrap) == self.bootstrap_receipt["stateSha256"], "Q102_BOOTSTRAP_ROLLBACK_RACE")
+            if self.bootstrap_state_before is None:
+                BOOTSTRAP_STATE.unlink()
+            else:
+                _atomic(BOOTSTRAP_STATE, self.bootstrap_state_before, self.bootstrap_state_before_meta)
+            if self.bootstrap_receipt_path is not None and self.bootstrap_receipt_path.exists():
+                self.bootstrap_receipt_path.unlink()
+            self.bootstrap_installed = False
+        if self.state_changed:
+            cur=_safe_bytes(STATE)
+'''
+   h=h.replace(q102_rollback_anchor,q102_rollback_code,1)
   # Reuse the existing formal root approval verifier synchronously. Do not
   # queue these roles into the legacy HYPE worker or fabricate its authority.
   start=h.index('class HypeScopedRootExecutor:')

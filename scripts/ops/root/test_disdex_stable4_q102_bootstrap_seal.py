@@ -35,20 +35,19 @@ class Q102BootstrapTests(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'EVIDENCE'):seal.validate_candidate(**{**args,'result_raw':raw,'expected_result_sha256':seal.digest(raw)})
   report['ordersSent']=0;report['unresolvedLabelsExcludedFromTraining']=[{'reason':'unverified'}];raw=json.dumps(report).encode()
   with self.assertRaisesRegex(ValueError,'UNRESOLVED'):seal.validate_candidate(**{**args,'result_raw':raw,'expected_result_sha256':seal.digest(raw)})
- @unittest.skip('blocked draft: install must fail before any I/O until writer exclusion is redesigned')
  def test_receipt_failure_restores_previous_state_and_never_sends_orders(self):
   args=self.fixture();state=args['state_raw'];now=args['now_ms'];receipt={'candidateSha':'a'*40,'priorQ102Sha':'b'*40,'authorizesTrading':False,'stateSha256':seal.digest(state),'observedThrough':now//seal.HOUR*seal.HOUR-seal.HOUR}
-  with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[3]/'.tmp') as d:
+  with tempfile.TemporaryDirectory() as d:
    root=Path(d);(root/'receipts').mkdir();pins=root/'pins.json';pins.write_bytes(b'pins');target=root/'state.json';target.write_bytes(b'old state')
    real_open=os.open
    def fail_receipt(path,flags,*rest,**kwargs):
     if str(path).endswith('a'*40+'.json'):raise PermissionError('test receipt failure')
     return real_open(path,flags,*rest,**kwargs)
-   with patch.object(seal,'assert_old_q_not_learning',return_value=123),patch.object(seal,'require_receipt_directory'),patch.object(seal.os,'chown',create=True),patch.object(seal.os,'open',side_effect=fail_receipt):
+   with patch.object(seal,'assert_old_q_not_learning',return_value=0),patch.object(seal,'require_receipt_directory'),patch.object(seal.os,'chown',create=True),patch.object(seal.os,'open',side_effect=fail_receipt):
     with self.assertRaises(PermissionError):seal.install(receipt=receipt,state_raw=state,expected_prior_sha256=seal.digest(b'old state'),pins_path=pins,pins_before=b'pins',state_path=target,receipt_dir=root/'receipts',deploy_uid=0,deploy_gid=0,now_ms=now)
    self.assertEqual(target.read_bytes(),b'old state');self.assertEqual(list((root/'receipts').iterdir()),[])
- def test_install_refuses_even_apparently_valid_input_before_filesystem_io(self):
-  with self.assertRaisesRegex(RuntimeError,'DRAFT_BLOCKED'):
+ def test_install_rejects_unprepared_receipt_before_filesystem_io(self):
+  with self.assertRaisesRegex(ValueError,'PREPARED_RECEIPT_STALE'):
    seal.install(receipt={},state_raw=b'',expected_prior_sha256=None,pins_path=Path('/not-used'),pins_before=b'',deploy_uid=1,deploy_gid=1)
 
 class OldQ102WriterExclusionTests(unittest.TestCase):
