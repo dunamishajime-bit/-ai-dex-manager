@@ -287,14 +287,14 @@ jobs:
           q102_code="$(curl -sS --max-time 30 -o /tmp/q102-symbols-post-score-fix.json -w '%{http_code}' http://127.0.0.1:3001/api/system/q102-symbol-status || true)"
           echo "Q102_SYMBOL_STATUS_HTTP=$q102_code"
           if [[ "$q102_code" != 200 ]]; then
-            python3 - <<'PY'
-            import json
-            try:
-                d=json.load(open("/tmp/q102-symbols-post-score-fix.json",encoding="utf-8"))
-                print("Q102_SYMBOL_STATUS_ERROR", {k:d.get(k) for k in ("ok","error","snapshotSource","productionSha")})
-            except Exception as exc:
-                print("Q102_SYMBOL_STATUS_BODY_UNAVAILABLE", type(exc).__name__)
-            PY
+          python3 - <<'PY'
+          import json
+          try:
+              d=json.load(open("/tmp/q102-symbols-post-score-fix.json",encoding="utf-8"))
+              print("Q102_SYMBOL_STATUS_ERROR", {k:d.get(k) for k in ("ok","error","snapshotSource","productionSha")})
+          except Exception as exc:
+              print("Q102_SYMBOL_STATUS_BODY_UNAVAILABLE", type(exc).__name__)
+          PY
             false
           fi
           python3 - <<'PY'
