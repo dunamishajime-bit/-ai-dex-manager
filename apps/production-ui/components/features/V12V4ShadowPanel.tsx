@@ -1,11 +1,12 @@
 "use client";
 
 import type { V12V4ShadowObservability } from "@/lib/server/v12-v4-shadow-observability";
+import { formatDisplayFractionPercent, formatDisplayNumber } from "@/lib/display-format";
 export type { V12V4ShadowObservability } from "@/lib/server/v12-v4-shadow-observability";
 
-const pct = (v?: number) => v === undefined || !Number.isFinite(v) ? "—" : (v * 100).toFixed(2) + "%";
-const gross = (v?: number) => v === undefined || !Number.isFinite(v) ? "未確認" : v.toFixed(3) + "x";
-const number = (v?: number) => v === undefined || !Number.isFinite(v) ? "—" : v.toFixed(3);
+const pct = (v?: number) => formatDisplayFractionPercent(v);
+const gross = (v?: number) => v === undefined || !Number.isFinite(v) ? "未確認" : formatDisplayNumber(v, 2) + "x";
+const number = (v?: number) => formatDisplayNumber(v, 2);
 const timestamp = (v?: string | number) => {
   if (v === undefined) return "未確認";
   const ts = typeof v === "number" ? v : Date.parse(v);

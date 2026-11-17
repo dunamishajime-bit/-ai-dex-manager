@@ -73,13 +73,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_KEY = "disdex_auth_user";
 const AUTH_COOKIE = "disdex_auth";
-
-
+const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 function setAuthCookie() {
   if (typeof document === "undefined") return;
   const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${AUTH_COOKIE}=1; Path=/; Max-Age=2592000; SameSite=Lax${secure}`;
+  document.cookie = `${AUTH_COOKIE}=1; Path=/; Max-Age=${AUTH_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
 }
 
 function clearAuthCookie() {
@@ -344,6 +343,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("storage", syncCurrentUser);
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !user) return;
+
+    const refreshSessionCookie = () => setAuthCookie();
+    const refreshInterval = window.setInterval(refreshSessionCookie, 15 * 60 * 1000);
+    window.addEventListener("focus", refreshSessionCookie);
+    document.addEventListener("visibilitychange", refreshSessionCookie);
+    refreshSessionCookie();
+
+    return () => {
+      window.clearInterval(refreshInterval);
+      window.removeEventListener("focus", refreshSessionCookie);
+      document.removeEventListener("visibilitychange", refreshSessionCookie);
+    };
+  }, [user]);
 
 
   const send2FACode = useCallback(async (email: string, code: string, type: "login" | "register") => {

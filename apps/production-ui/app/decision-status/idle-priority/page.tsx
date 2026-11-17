@@ -72,7 +72,7 @@ export default function IdlePriorityDecisionPage(){
       <div className="grid gap-2 md:grid-cols-4">
         <Gate label="Source Complete" ok={baseline?.sourceComplete===true} value={baseline?.sourceComplete===true?"PASS":"BLOCK"} />
         <Gate label="Formal Open" ok={Number(baseline?.baselineOpenPositions||0)===0} value={String(baseline?.baselineOpenPositions??"—")} />
-        <Gate label="Formal Pending" ok={Number(baseline?.baselinePendingExposure||0)===0} value={num(baseline?.baselinePendingExposure,3)} />
+        <Gate label="Formal Pending" ok={Number(baseline?.baselinePendingExposure||0)===0} value={num(baseline?.baselinePendingExposure)} />
         <Gate label="Same Timestamp" ok={Number(baseline?.baselineAcceptedThisTimestamp||0)===0} value={String(baseline?.baselineAcceptedThisTimestamp??"—")} />
       </div>
       <div className="mt-2 text-[11px] text-white/55">最終理由: {details?.finalReason||data?.state?.lastDecision?.reason||"—"}</div>
@@ -91,7 +91,7 @@ export default function IdlePriorityDecisionPage(){
             <Gate label="Ret 24h" value={pct(row.features.ret24)} />
             <Gate label="BTC 24h" value={pct(row.features.btc24)} />
             <Gate label="BTC比 24h" value={pct(row.features.rel24)} />
-            <Gate label="Volume Ratio" value={num(row.features.volumeRatio,3)} />
+            <Gate label="Volume Ratio" value={num(row.features.volumeRatio)} />
             <Gate label="ATR Ratio" value={pct(row.features.atrRatio)} />
             <Gate label="Breakout ↑" ok={row.features.breakoutLong24} value={row.features.breakoutLong24?"YES":"NO"} />
             <Gate label="Breakdown ↓" ok={row.features.breakoutShort24} value={row.features.breakoutShort24?"YES":"NO"} />
@@ -112,7 +112,7 @@ export default function IdlePriorityDecisionPage(){
           <div className={`rounded-full px-2 py-1 text-[10px] font-black ${row.decision.accepted?"bg-emerald-400/15 text-emerald-300":"bg-white/8 text-white/55"}`}>{row.decision.accepted?"候補":"待機"}</div></div>
           <div className="mt-3 grid gap-1.5 md:grid-cols-2">
             <Gate label="BTC比 24h" value={pct(row.features.rel24)} />
-            <Gate label="Volume Ratio" value={num(row.features.volumeRatio,3)} />
+            <Gate label="Volume Ratio" value={num(row.features.volumeRatio)} />
             <Gate label="ATR Ratio" value={pct(row.features.atrRatio)} />
             <Gate label="Route Gate" ok={row.decision.accepted} value={row.decision.reason} />
             <Gate label="保有上限" value={`${row.decision.holdHours}h`} />

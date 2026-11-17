@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Wallet, ExternalLink, RefreshCw, AlertCircle, ArrowRightLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { formatDisplayQuantity } from "@/lib/display-format";
 
 // Use a subset of chains for display
 const SUPPORTED_CHAINS = [
@@ -61,7 +62,7 @@ function ChainBalanceCard({ chainItem, address }: { chainItem: typeof SUPPORTED_
                     ) : isError ? (
                         <span className="text-red-400 text-sm flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Error</span>
                     ) : (
-                        <span>{parseFloat(balance?.formatted || "0").toFixed(4)} <span className="text-sm text-gray-400">{balance?.symbol}</span></span>
+                        <span>{formatDisplayQuantity(balance?.formatted || "0")} <span className="text-sm text-gray-400">{balance?.symbol}</span></span>
                     )}
                 </div>
                 {/* <div className="text-xs text-gray-500 font-mono">

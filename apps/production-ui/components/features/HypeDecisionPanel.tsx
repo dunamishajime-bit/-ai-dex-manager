@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { RefreshCw, ShieldCheck } from "lucide-react";
 import type { HypeOverview, HypeSleeve } from "@/lib/server/hype-runtime-observability";
+import { formatDisplayNumber, formatDisplayPercent, formatDisplayPrice, formatDisplayQuantity } from "@/lib/display-format";
 type Strategy="HYPE_LONG";
 const badge=(s:HypeSleeve["status"])=>s==="LIVE"?"border-emerald-400/40 bg-emerald-500/10 text-emerald-200":
   s==="SHADOW"?"border-sky-400/40 bg-sky-500/10 text-sky-200":
@@ -50,8 +51,8 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
           ["本番Runtime SHA",data?.releaseSha?.slice(0,12)||"未取得"],
           ["state SHA",row?.stateSha?.slice(0,12)||"未取得"],
           ["mode",row?.stateMode||"未取得"],
-          ["実設定Gross上限",row?.maxGross===undefined?"未取得":row.maxGross+"x"],
-          ["実設定risk budget",row?.riskPct===undefined?"未取得":row.riskPct+"%"],
+          ["実設定Gross上限",row?.maxGross===undefined?"未取得":formatDisplayNumber(row.maxGross,2)+"x"],
+          ["実設定risk budget",row?.riskPct===undefined?"未取得":formatDisplayPercent(row.riskPct)],
           ["state更新",dt(row?.stateUpdatedAt)],
           ["heartbeat",dt(row?.heartbeatAt)],
           ["本番サービス",row?.serviceActive?"active":"未確認"],
@@ -66,7 +67,7 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
       </div>
       {row?.manualReview?<p className="mt-3 rounded-xl border border-amber-400/30 p-3 text-xs text-amber-200">manualReview: {row.manualReview}</p>:null}
       {row?.deferralReason?<p className="mt-3 rounded-xl border border-sky-400/30 p-3 text-xs text-sky-200">rate-budget deferral: {row.deferralReason}</p>:null}
-      {row?.position?<p className="mt-3 text-sm text-white/85">建玉 {row.position.quantity} / Entry {row.position.entryPrice} / STOP {row.position.stopPrice} / TP {row.position.takeProfitPrice}</p>:
+      {row?.position?<p className="mt-3 text-sm text-white/85">建玉 {formatDisplayQuantity(row.position.quantity)} / Entry {formatDisplayPrice(row.position.entryPrice)} / STOP {formatDisplayPrice(row.position.stopPrice)} / TP {formatDisplayPrice(row.position.takeProfitPrice)}</p>:
         <p className="mt-3 text-xs text-white/60">このRunnerの対象建玉stateなし。Asterの実口座照合とは別です。</p>}
     </section>
     <section className="panel-gold min-w-0 overflow-hidden rounded-[26px] p-4 md:p-5">

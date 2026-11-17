@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Activity, ArrowLeft, RefreshCw, ShieldCheck } from "lucide-react";
+import { formatDisplayNumber, formatDisplayPercent } from "@/lib/display-format";
 
 type StatusResponse = {
   ok: boolean;
@@ -127,15 +128,15 @@ export default function FormalPriorityDecisionPage() {
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                   <div className="text-xs text-white/60">Rank1 / Rank2</div>
-                  <div className="mt-1 text-xl font-black text-white">{contract.v12.rank12Gross.toFixed(2)}x</div>
+                  <div className="mt-1 text-xl font-black text-white">{formatDisplayNumber(contract.v12.rank12Gross, 2)}x</div>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                   <div className="text-xs text-white/60">DOGE / LTC Rank1/2</div>
-                  <div className="mt-1 text-xl font-black text-white">{contract.v12.dogeLtcRank12Gross.toFixed(2)}x</div>
+                  <div className="mt-1 text-xl font-black text-white">{formatDisplayNumber(contract.v12.dogeLtcRank12Gross, 2)}x</div>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                   <div className="text-xs text-white/60">Rank3 residual</div>
-                  <div className="mt-1 text-xl font-black text-white">{contract.v12.rank3Gross.toFixed(2)}x</div>
+                  <div className="mt-1 text-xl font-black text-white">{formatDisplayNumber(contract.v12.rank3Gross, 2)}x</div>
                 </div>
               </div>
               <p className="mt-3 text-xs leading-5 text-white/65">5x Crossは証拠金設定であり、戦略GrossやBT損益を5倍化しません。</p>
@@ -193,13 +194,13 @@ export default function FormalPriorityDecisionPage() {
             <div className="text-sm font-bold text-white">DD12.96 正式10bps BT</div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <div><div className="text-xs text-white/55">Final</div><div className="font-black text-white">{fmtJpy(contract.formalBt.finalEquityJpy)}</div></div>
-              <div><div className="text-xs text-white/55">PF</div><div className="font-black text-white">{contract.formalBt.profitFactor.toFixed(4)}</div></div>
-              <div><div className="text-xs text-white/55">Max DD</div><div className="font-black text-white">{contract.formalBt.maxDrawdownPct.toFixed(2)}%</div></div>
-              <div><div className="text-xs text-white/55">Win Rate</div><div className="font-black text-white">{contract.formalBt.winRatePct.toFixed(2)}%</div></div>
+              <div><div className="text-xs text-white/55">PF</div><div className="font-black text-white">{formatDisplayNumber(contract.formalBt.profitFactor, 2)}</div></div>
+              <div><div className="text-xs text-white/55">Max DD</div><div className="font-black text-white">{formatDisplayPercent(contract.formalBt.maxDrawdownPct)}</div></div>
+              <div><div className="text-xs text-white/55">Win Rate</div><div className="font-black text-white">{formatDisplayPercent(contract.formalBt.winRatePct)}</div></div>
               <div><div className="text-xs text-white/55">Trades</div><div className="font-black text-white">{contract.formalBt.trades}</div></div>
             </div>
             <div className="mt-3 text-xs leading-5 text-white/55">
-              DD12.96研究BT / 2025-08-10〜2026-08-10 / 10bps round trip / accounting {contract.formalBt.accounting}。V12 {contract.formalBt.v12Wins}/{contract.formalBt.v12Trades}勝（{contract.formalBt.v12WinRatePct.toFixed(2)}%）。LIVE実約定・tick単位の同値性は未検証です。
+              DD12.96研究BT / 2025-08-10〜2026-08-10 / 10bps round trip / accounting {contract.formalBt.accounting}。V12 {contract.formalBt.v12Wins}/{contract.formalBt.v12Trades}勝（{formatDisplayPercent(contract.formalBt.v12WinRatePct)}）。LIVE実約定・tick単位の同値性は未検証です。
             </div>
           </section>
         </>
