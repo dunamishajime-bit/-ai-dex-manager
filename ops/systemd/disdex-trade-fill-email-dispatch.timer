@@ -1,0 +1,13 @@
+[Unit]
+Description=DisDex confirmed fill email dispatch every minute
+
+[Timer]
+OnBootSec=60s
+OnUnitInactiveSec=60s
+RandomizedDelaySec=3s
+AccuracySec=5s
+Persistent=true
+Unit=disdex-trade-fill-email-dispatch.service
+
+[Install]
+WantedBy=timers.target

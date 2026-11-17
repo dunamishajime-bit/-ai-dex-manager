@@ -1,0 +1,27 @@
+[Unit]
+Description=DisDex confirmed fill email dispatch (read-only venue / durable cursor)
+After=network-online.target
+Wants=network-online.target
+OnFailure=disdex-runner-health-alert.service
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+EnvironmentFile=/etc/disdex/ai-dex-manager-mail.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 -B /usr/local/libexec/disdex-notify/disdex_fill_email_dispatch.py --once
+TimeoutStartSec=55s
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+CapabilityBoundingSet=
+RestrictSUIDSGID=true
+ReadOnlyPaths=/usr/local/libexec/disdex-notify
+ReadOnlyPaths=/var/lib/disdex/shared/trade-fill-notifications/inbox.jsonl
+ReadWritePaths=/var/lib/disdex/shared/trade-fill-notifications
