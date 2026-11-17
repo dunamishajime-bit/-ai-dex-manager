@@ -254,7 +254,11 @@ jobs:
             if [[ "$active" == active && "$wd" == "$release" && "$code" == 200 ]]; then ok=1; break; fi
             sleep 1
           done
-          [[ "$ok" == 1 ]]
+          if [[ "$ok" != 1 ]]; then
+            echo "UI_READINESS_FAILED active=$active wd=$wd http=$code expected_release=$release"
+            systemctl show "$ui_service" -p ActiveState -p SubState -p MainPID -p WorkingDirectory -p ExecStart -p NRestarts || true
+            false
+          fi
 
           api_code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /tmp/realtime-ranking.json -w '%{http_code}' --max-time 20 http://127.0.0.1:3001/api/system/realtime-ranking)"
           [[ "$api_code" == 200 ]]
@@ -280,10 +284,23 @@ jobs:
           systemctl daemon-reload
           systemctl enable --now disdex-quality102-ranking-refresh.path
           systemctl start disdex-quality102-ranking-refresh.service
-          curl -fsS --max-time 30 http://127.0.0.1:3001/api/system/q102-symbol-status > /tmp/q102-symbols-post-score-fix.json
+          q102_code="$(curl -sS --max-time 30 -o /tmp/q102-symbols-post-score-fix.json -w '%{http_code}' http://127.0.0.1:3001/api/system/q102-symbol-status || true)"
+          echo "Q102_SYMBOL_STATUS_HTTP=$q102_code"
+          if [[ "$q102_code" != 200 ]]; then
+            python3 - <<'PY'
+            import json
+            try:
+                d=json.load(open("/tmp/q102-symbols-post-score-fix.json",encoding="utf-8"))
+                print("Q102_SYMBOL_STATUS_ERROR", {k:d.get(k) for k in ("ok","error","snapshotSource","productionSha")})
+            except Exception as exc:
+                print("Q102_SYMBOL_STATUS_BODY_UNAVAILABLE", type(exc).__name__)
+            PY
+            false
+          fi
           python3 - <<'PY'
           import json
           d=json.load(open("/tmp/q102-symbols-post-score-fix.json"))
+          print("Q102_DETAIL_META", {"ok":d.get("ok"),"rankingAvailable":d.get("rankingAvailable"),"snapshotSource":d.get("snapshotSource"),"productionSha":d.get("productionSha"),"items":len(d.get("items",[]))})
           assert d["rankingAvailable"] is True
           assert len(d["items"]) > 0
           assert all(r.get("diagnostics") for r in d["items"])
