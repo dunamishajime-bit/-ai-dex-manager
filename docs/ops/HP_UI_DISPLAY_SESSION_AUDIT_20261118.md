@@ -4,7 +4,7 @@
 
 - HPの表示層を小数点以下の上限付きフォーマッタへ統一した。
 - 10分無操作で強制ログアウトするクライアントタイマーを廃止し、30日Cookieと15分ごとのkeepalive、focus/visibility復帰更新へ変更した。
-- UI-onlyの正式GitHub Actions切替は成功し、ProductionのUI SHAは `6bc132fb543ba27b37eefbe0b87d93fbe8dc2a51`。
+- UI-onlyの正式GitHub Actions切替は成功し、初回のProduction UI SHAは `6bc132fb543ba27b37eefbe0b87d93fbe8dc2a51`、表示桁数追加修正後の最新UI SHAは `d8412c01b97f0f5198c8de30f891e76c09f9ee01`。
 - 売買RuntimeのSHA、建玉、STOP、Kill Switch、Shared Risk、Gross制限は変更していない。
 - UI切替後も判定周期は進行している。ただし、現在の注文発火0件はUI不具合ではなく、GLOBAL Kill Switch、V4 peer attestation、エントリー条件不成立、Q102のrate/kill-switch保護により安全側へ抑止されている。
 
@@ -17,18 +17,20 @@
 - `4fcd2275d` / `3eb0bdb17` — 正式切替ゲートの診断ログとheredoc修正。
 - `2a5a740b4` — UI-only不変性証明の対象を取引runnerへ限定。
 - `01f11979b` / `6bc132fb5` — realtime-rankingゲート診断と最終構文修正。
+- `d8412c01b` — ダッシュボード、建玉、Wallet、判定状況、Live banner、Realtime Rankingの直接`toFixed`を共通表示フォーマッタへ統一し、価格の最大小数桁を6桁へ制限。表層テストを追加。
 
 表示フォーマッタは `apps/production-ui/lib/display-format.ts` に集約し、ダッシュボード、建玉、判定状況、ランキング、HYPE/V4/Q102/FETの各パネルから利用する。無効値は長い小数や `NaN` を表示せず、`—` 等の安全なプレースホルダへ落とす。
 
-認証セッションは `apps/production-ui/context/AuthContext.tsx` で30日Cookieを使用し、15分間隔と画面復帰時にkeepaliveする。旧 `jdex_last_activity` / `INACTIVITY_LIMIT_MS` は本番静的チャンクに存在しないことを確認した。`visibilitychange` のkeepaliveコードは本番静的チャンクに存在する。
+認証セッションは `apps/production-ui/context/AuthContext.tsx` で30日Cookieを使用し、15分間隔と画面復帰時にkeepaliveする。旧 `jdex_last_activity` / `INACTIVITY_LIMIT_MS` は最新本番静的チャンクに存在しないことを確認した。`visibilitychange` のkeepaliveコードは最新本番静的チャンクに存在する。主要7画面のソースに生の`.toFixed()`が残っていないこともテストで固定した。
 
 ## 検証
 
-- UIテスト: 153 passed。
+- UIテスト: 154 passed。
 - TypeScript: `npx tsc --noEmit` 成功。
 - Lint: `npm run lint` 成功。
 - Production build: `npm run build` 成功。
 - 正式Actions: [run 44148127128](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/44148127128) 成功。
+- 表示桁数追加修正の正式Actions: [run 44154144939](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/44154144939) 成功。`STATUS=REALTIME_RANKING_SHOW_UI_DEPLOYED`、UI SHA `d8412c01b97f0f5198c8de30f891e76c09f9ee01`、`REALTIME_ROUTE=PASS`、`REALTIME_RANKING_API=PASS`。
 - Actions内のranking API: HTTP 200、49 rows、`ok: true`。
 - Actions内のQ102 detail: HTTP 200、`rankingAvailable: true`、`snapshotSource: ranking`、Q102 production SHA `ef1ab178e26a7bf5bddb6473467765edba242e1d`、19 items。
 - `COMPLETE_SCORE_100_INVARIANT=PASS`。
@@ -36,9 +38,9 @@
 
 ## Production UIと取引Runtimeの分離確認
 
-- `ai-dex-manager-ui.service`: active/running、MainPID `84785`。
-- UI WorkingDirectory: `/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-6bc132fb543b`。
-- UI release marker: `6bc132fb543ba27b37eefbe0b87d93fbe8dc2a51`。
+- `ai-dex-manager-ui.service`: active/running、MainPID `105087`、`NRestarts=0`。
+- UI WorkingDirectory: `/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-d8412c01b97f`。
+- UI release marker: `d8412c01b97f0f5198c8de30f891e76c09f9ee01`。
 - 取引Runtime `current`: `/home/deploy/disdex-trading/releases/7688ed7c93a1918d8b44837339b7da5584a868f5`。
 - Actionsの不変性証明: `TRADING_SHA_UNCHANGED=7688ed7c93a1918d8b44837339b7da5584a868f5`、`TRADING_RUNNER_PIDS_UNCHANGED=PASS`、`ORDER_MUTATION_ATTEMPTED=FALSE`。
 
@@ -50,6 +52,8 @@
 | HYPE | active/running。約15分周期で02:24〜03:25 JSTにtick | `ordersSent` なし、accepted entryなし | `HYPE_ZEC_NO_ACCEPTED_ENTRY`（entry window/条件不成立） |
 | Q102 | active/running。01:02、02:02、03:00〜03:01 JSTに周期ログ | `ordersSent=0` | `V96 Kill Switch file is active but invalid` または `ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT` の `blocked-local` |
 | FET | active/running。30秒前後で継続評価 | `ordersSent=0` | `FET_NO_BRK48_SIGNAL`。一部周期は `ASTER_GLOBAL_RATE_BUDGET_SATURATED` でdefer |
+
+最新UI切替後の追加read-only確認（2026-11-18 04:08 JST前後）でも、V4は約2分周期、HYPEは約15分周期、Q102は毎時、FETは約30秒周期でログが進行している。直近はV4が `candidateCount=0 / orderEnabled=false`、Q102が `blocked-local / ordersSent=0`、HYPEが `HYPE_ZEC_NO_ACCEPTED_ENTRY`、FETが `FET_NO_BRK48_SIGNAL` であり、UI反映後も判定ループ自体は継続している。
 
 従って「判定処理が止まっている」のではなく、各runnerは実周期を進めた上で、安全ゲートまたはシグナル条件により発注を抑止している。V4のpeer不在、Q102の保護BLOCK、HYPE/FETのno-signalは、今回のUI変更範囲を超える本番Runtime課題であり、UI切替のために解除・迂回していない。
 
