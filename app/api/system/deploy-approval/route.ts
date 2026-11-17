@@ -7,6 +7,7 @@ import {
 } from "@/lib/server/deploy-approval-store";
 import {
   DEPLOY_APPROVAL_OPERATION_POLICY,
+  isExactStable4H48OwnerApprovalRequest,
   type DeploymentApprovalOperation,
   issueDeploymentApprovalToken,
   loadDeploymentApprovalPrivateKey,
@@ -224,6 +225,13 @@ export async function POST(request: NextRequest) {
     }
 
     const policy = DEPLOY_APPROVAL_OPERATION_POLICY[operation];
+    // The no-resident-STOP H48 economic exception is never a generic HYPE restore.
+    if (operation === "HYPE_STABLE4_H48_TIME_ONLY_LIVE" &&
+        !isExactStable4H48OwnerApprovalRequest({
+          targetSha, planSha256, h48Policy: body.h48_policy, actor,
+        })) {
+      return NextResponse.json({ ok: false, error: "STABLE4 H48 exact policy, SHA or plan mismatch" }, { status: 409 });
+    }
     const requestedScope = body.scope == null ? policy.scope : String(body.scope).trim();
     if (body.orders_enabled != null && typeof body.orders_enabled !== "boolean") {
       return NextResponse.json({ ok: false, error: "orders_enabled must be boolean" }, { status: 400 });

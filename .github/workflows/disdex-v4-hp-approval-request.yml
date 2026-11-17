@@ -27,6 +27,7 @@ jobs:
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST ALL_RUNNERS_ORDER_ENABLE ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST IDLE_FLAT_STALE_REPAIR ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE ') ||
+        startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST HYPE_STABLE4_H48_TIME_ONLY_LIVE ') ||
         startsWith(github.event.comment.body, 'DISDEX_PROTECTED_REQUEST V4_HYPE_PEER_PIN_CONTINUITY ')
       )
     environment:
@@ -76,6 +77,10 @@ jobs:
           )
           hype_sha = re.fullmatch(
               r"DISDEX_PROTECTED_REQUEST HYPE_TREND_LONG_SHA_RESTORE SHA=([0-9a-f]{40})",
+              body,
+          )
+          hype_stable4 = re.fullmatch(
+              r"DISDEX_PROTECTED_REQUEST HYPE_STABLE4_H48_TIME_ONLY_LIVE SHA=([0-9a-f]{40}) PLAN=([0-9a-f]{64}) POLICY=H48_TIME_ONLY",
               body,
           )
           v4_continuity = re.fullmatch(
@@ -136,6 +141,13 @@ jobs:
                   "",
               ])
               plan = hashlib.sha256(context.encode("ascii")).hexdigest()
+          elif hype_stable4:
+              target, plan = hype_stable4.groups()
+              if target != "e0e4f1d8f22b62e9410188ef6e590a20e31f760f" or plan != "82d9eb3f4ff4c9787f59c1843a69249e66df6d95696e426b4ee984719ad152ce":
+                  raise SystemExit("STABLE4_H48_EXACT_SOURCE_AND_POLICY_PLAN_REQUIRED")
+              operation = "HYPE_STABLE4_H48_TIME_ONLY_LIVE"
+              scope = "HYPE_TREND_LONG"
+              orders_enabled = "true"
           elif v4_continuity:
               target, plan = v4_continuity.groups()
               if target != "3ad65403013b701db5d9e53e8814e6ab827a28e8":
@@ -149,6 +161,7 @@ jobs:
           print("operation=" + operation)
           print("scope=" + scope)
           print("orders_enabled=" + orders_enabled)
+          print("h48_policy=" + ("H48_TIME_ONLY" if operation == "HYPE_STABLE4_H48_TIME_ONLY_LIVE" else ""))
           print("target_sha=" + target)
           print("plan_sha256=" + plan)
           print("comment_id=" + os.environ["COMMENT_ID"])
@@ -161,6 +174,7 @@ jobs:
           OPERATION: ${{ steps.request.outputs.operation }}
           SCOPE: ${{ steps.request.outputs.scope }}
           ORDERS_ENABLED: ${{ steps.request.outputs.orders_enabled }}
+          H48_POLICY: ${{ steps.request.outputs.h48_policy }}
           TARGET_SHA: ${{ steps.request.outputs.target_sha }}
           PLAN_SHA256: ${{ steps.request.outputs.plan_sha256 }}
           COMMENT_ID: ${{ steps.request.outputs.comment_id }}
@@ -176,6 +190,7 @@ jobs:
               "operation": os.environ["OPERATION"],
               "scope": os.environ["SCOPE"],
               "orders_enabled": os.environ["ORDERS_ENABLED"].lower() == "true",
+              "h48_policy": os.environ["H48_POLICY"],
               "target_sha": os.environ["TARGET_SHA"],
               "plan_sha256": os.environ["PLAN_SHA256"],
               "actor": os.environ["ACTOR"],

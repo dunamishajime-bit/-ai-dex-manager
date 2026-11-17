@@ -7,6 +7,30 @@ export const DEPLOY_APPROVAL_TARGET = "professional-dismanager.net";
 export const DEPLOY_APPROVAL_OPERATOR_TARGET = "DD1296_FINAL_ALLIN_10BPS";
 export const DEPLOY_APPROVAL_ROUTE = "GITHUB_ACTIONS";
 
+/** Exact-scope STABLE4 H48 production policy; not a generic SHA restoration. */
+export const STABLE4_H48_TIME_ONLY_APPROVAL = Object.freeze({
+  targetSha: "e0e4f1d8f22b62e9410188ef6e590a20e31f760f",
+  planSha256: "82d9eb3f4ff4c9787f59c1843a69249e66df6d95696e426b4ee984719ad152ce",
+  researchSha: "9e1142f5ec6d4bc285deef023572623bb1c37a34",
+  policy: "H48_TIME_ONLY",
+  scope: "HYPE_TREND_LONG",
+  residentStopRequired: false,
+  residentTakeProfitRequired: false,
+  approvedGross: { crypto: 3, stock: 4, total: 4.25, hype: 1 },
+} as const);
+
+export function isExactStable4H48OwnerApprovalRequest(input: {
+  targetSha: unknown;
+  planSha256: unknown;
+  h48Policy: unknown;
+  actor: unknown;
+}): boolean {
+  return input.targetSha === STABLE4_H48_TIME_ONLY_APPROVAL.targetSha &&
+    input.planSha256 === STABLE4_H48_TIME_ONLY_APPROVAL.planSha256 &&
+    input.h48Policy === STABLE4_H48_TIME_ONLY_APPROVAL.policy &&
+    input.actor === "dunamishajime-bit";
+}
+
 export const DEPLOY_APPROVAL_SCOPES = [
   "V12_V4", "IDLE_PRIORITY_SHORT", "FULL_PROJECT", "V52",
   "HYPE_TREND_LONG", "QUALITY102_CAUSAL_V1", "PENGU_V8",
@@ -22,6 +46,7 @@ export const DEPLOY_APPROVAL_OPERATIONS = [
   "V4_DOGE_MISSED_TIME_EXIT",
   "IDLE_FLAT_STALE_REPAIR",
   "HYPE_TREND_LONG_SHA_RESTORE",
+  "HYPE_STABLE4_H48_TIME_ONLY_LIVE",
   "V4_HYPE_PEER_PIN_CONTINUITY",
   "ALL_RUNNERS_LIVE_RESTORE",
   "ALL_RUNNERS_ORDER_ENABLE_PREP",
@@ -69,6 +94,11 @@ export const DEPLOY_APPROVAL_OPERATION_POLICY: Record<
     scope: "HYPE_TREND_LONG",
     ordersEnabled: true,
     label: "HYPE専用SHA復旧（current-flat signed evidence）",
+  },
+  HYPE_STABLE4_H48_TIME_ONLY_LIVE: {
+    scope: "HYPE_TREND_LONG",
+    ordersEnabled: true,
+    label: "STABLE4 HYPE H48時間決済（常駐STOP・TPなし／Crypto3.0x・Stock4.0x・Total4.25x・HYPE1.0x）",
   },
   V4_HYPE_PEER_PIN_CONTINUITY: {
     scope: "V12_V4",
