@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { Copy, Loader2, Plus, QrCode, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
+import { formatDisplayNumber } from "@/lib/display-format";
 
 function formatUsd(value?: number) {
-  return `$${Number(value || 0).toFixed(2)}`;
+  return `$${formatDisplayNumber(value || 0, 2)}`;
 }
 
 function formatDate(value?: string) {
@@ -420,7 +421,7 @@ export default function WalletsPage() {
 
                   <div className="mt-3 grid gap-2 text-[11px] text-white/72 md:grid-cols-2">
                     <div>Aster口座評価額 {totalHoldingsUsd === null ? "取得待ち" : formatUsd(totalHoldingsUsd)}</div>
-                    <div>Aster available balance {availableBalanceUsd === null ? "UNAVAILABLE" : `${availableBalanceUsd.toFixed(8)} USD`}</div>
+                    <div>Aster available balance {availableBalanceUsd === null ? "UNAVAILABLE" : `${formatDisplayNumber(availableBalanceUsd, 2)} USD`}</div>
                     <div>バックアップ確認 {wallet.backupConfirmed ? "済み" : "未確認"}</div>
                     <div>入金検知 {formatDate(wallet.depositDetectedAt)}</div>
                     <div>Owner接続 {formatDate(wallet.ownerReconnectedAt)}</div>
@@ -502,7 +503,7 @@ export default function WalletsPage() {
               <StatCard
                 title="総評価額"
                 value={totalHoldingsUsd === null ? "取得待ち" : formatUsd(totalHoldingsUsd)}
-                note={availableBalanceUsd === null ? "Aster account balance unavailable" : `Available ${availableBalanceUsd.toFixed(8)} USD / ${wallet?.lastAsterAccountSource || "AsterDEX"}`}
+                note={availableBalanceUsd === null ? "Aster account balance unavailable" : `Available ${formatDisplayNumber(availableBalanceUsd, 2)} USD / ${wallet?.lastAsterAccountSource || "AsterDEX"}`}
                 tone={totalHoldingsUsd !== null && totalHoldingsUsd > 0 ? "profit" : "default"}
               />
               <StatCard

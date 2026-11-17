@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { formatDisplayFractionPercent, formatDisplayNumber } from "@/lib/display-format";
 
 type Row = {
   symbol: string;
@@ -24,8 +25,8 @@ type Payload = {
   details?: { decisionTs: number; updatedAt: number; symbols: Row[]; residual: ResidualRow[]; finalReason?: string };
 };
 
-const pct=(v:number|undefined)=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(2)}%`:"—";
-const num=(v:number|undefined,d=2)=>Number.isFinite(Number(v))?Number(v).toFixed(d):"—";
+const pct=(v:number|undefined)=>formatDisplayFractionPercent(v);
+const num=(v:number|undefined,d=2)=>formatDisplayNumber(v,d);
 const ts=(v:number|null|undefined)=>v?new Date(v).toLocaleString("ja-JP",{timeZone:"Asia/Tokyo"}):"—";
 
 function Gate({label,ok,value}:{label:string;ok?:boolean;value:string}){

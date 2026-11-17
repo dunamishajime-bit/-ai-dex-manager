@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
 
 import {
@@ -22,10 +24,27 @@ test("display quantities keep useful precision without fixed trailing zeroes", (
 test("display prices avoid eight-decimal venue formatting in HP cards", () => {
   assert.equal(formatDisplayPrice(12345.678901), "12345.68");
   assert.equal(formatDisplayPrice(0.123456789), "0.12346");
+  assert.equal(formatDisplayPrice(0.00123456789), "0.001235");
 });
 
 test("display percentages use percentage units and two decimals", () => {
   assert.equal(formatDisplayPercent(12.345678), "12.35%");
   assert.equal(formatDisplayPercent(-0.004), "0%");
   assert.equal(formatDisplayFractionPercent(0.0227), "2.27%");
+});
+
+test("core dashboard and decision surfaces do not render raw fixed decimals", () => {
+  const surfaces = [
+    "app/page.tsx",
+    "app/positions/page.tsx",
+    "app/wallets/page.tsx",
+    "app/decision-status/idle-priority/page.tsx",
+    "components/layout/LiveProductionBanner.tsx",
+    "components/features/DecisionStatusPanel.tsx",
+    "components/features/RealtimeRankingBoard.tsx",
+  ];
+  for (const surface of surfaces) {
+    const source = readFileSync(join(process.cwd(), surface), "utf8");
+    assert.doesNotMatch(source, /\.toFixed\(/, surface);
+  }
 });

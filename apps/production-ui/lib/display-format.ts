@@ -35,7 +35,7 @@ export function formatDisplayPrice(value: number | string | null | undefined) {
   if (numeric === null) return "取引所未返却";
 
   const abs = Math.abs(numeric);
-  const digits = abs >= 100 ? 2 : abs >= 1 ? 4 : abs >= 0.01 ? 5 : 8;
+  const digits = abs >= 100 ? 2 : abs >= 1 ? 4 : abs >= 0.01 ? 5 : 6;
   return formatDisplayNumber(numeric, digits, { useGrouping: false });
 }
 
