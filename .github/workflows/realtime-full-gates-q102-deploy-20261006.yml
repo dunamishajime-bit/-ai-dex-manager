@@ -264,11 +264,23 @@ jobs:
             false
           fi
 
-          api_code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /tmp/realtime-ranking.json -w '%{http_code}' --max-time 20 http://127.0.0.1:3001/api/system/realtime-ranking)"
-          [[ "$api_code" == 200 ]]
+          api_code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /tmp/realtime-ranking.json -w '%{http_code}' --max-time 20 http://127.0.0.1:3001/api/system/realtime-ranking || true)"
+          echo "REALTIME_RANKING_HTTP=$api_code"
+          if [[ "$api_code" != 200 ]]; then
+            python3 - <<'PY'
+            import json
+            try:
+                d=json.load(open("/tmp/realtime-ranking.json",encoding="utf-8"))
+                print("REALTIME_RANKING_ERROR", {k:d.get(k) for k in ("ok","error","runtimeSha","checkedAt")})
+            except Exception as exc:
+                print("REALTIME_RANKING_BODY_UNAVAILABLE", type(exc).__name__)
+            PY
+            false
+          fi
           python3 - <<'PY'
           import json
           d=json.load(open('/tmp/realtime-ranking.json',encoding='utf-8'))
+          print("REALTIME_RANKING_META", {"ok":d.get("ok"),"rows":len(d.get("rows",[])),"errors":d.get("errors")})
           assert d.get('ok') is True
           assert isinstance(d.get('rows'),list)
           assert isinstance(d.get('checkedAt'),(int,float))
