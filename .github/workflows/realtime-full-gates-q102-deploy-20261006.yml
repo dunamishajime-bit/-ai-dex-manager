@@ -166,7 +166,11 @@ jobs:
 
           trading_sha_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
           trading_path_before="$(readlink -f "$current")"
-          mapfile -t runner_units < <(systemctl list-units --type=service --state=active --no-legend --plain 'disdex-*.service' | awk '$3=="active" && $4=="running" {print $1}' | sort -u)
+          # Only immutable trading runner instances belong in this proof.  The
+          # VPS also has short-lived read-only reconciliation/health units
+          # under the disdex-* namespace; including those makes a UI-only
+          # restart fail when an unrelated oneshot starts or exits.
+          mapfile -t runner_units < <(systemctl list-units --type=service --state=active --no-legend --plain | awk '$3=="active" && $4=="running" && $1 ~ /^disdex-(v12-v4|pengu-dual-ls-v2|v52-aster-only|quality102-causal-v1|fet-brk48|hype-long|idle-priority-short)@.*\.service$/ {print $1}' | sort -u)
           declare -A runner_pid_before runner_restart_before
           for unit in "${runner_units[@]}"; do
             runner_pid_before["$unit"]="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
@@ -187,7 +191,7 @@ jobs:
             cp -a "$final_dropin" "$final_dropin_backup"
             final_dropin_existed=1
           fi
-          echo "UI_PREFLIGHT old_ui=$old_ui trading_sha=$trading_sha_before runners=${#runner_units[@]} canonical_existed=$canonical_existed final_dropin_existed=$final_dropin_existed"
+          echo "UI_PREFLIGHT old_ui=$old_ui trading_sha=$trading_sha_before runners=${#runner_units[@]} runner_units=${runner_units[*]} canonical_existed=$canonical_existed final_dropin_existed=$final_dropin_existed"
 
           rm -rf "$release"
           install -d -o deploy -g deploy -m 0750 "$release"
