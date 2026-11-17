@@ -80,9 +80,10 @@ class H48RootPatchTests(unittest.TestCase):
    def is_active(self,unit):return self.active
    def main_pid(self,unit):return 7 if self.active else 0
    def stop(self,unit):calls.append('stop');self.active=False
+   def disable(self,unit):calls.append('disable')
    def mask(self,unit):calls.append('mask')
   obj=types.SimpleNamespace(systemd=Systemd(),old_unit='old',health=lambda:calls.append('health'),signed_flat=lambda:calls.append('signed-flat'))
-  ns['switch'](obj);self.assertEqual(calls,['health','signed-flat','stop','mask','signed-flat','validate'])
+  ns['switch'](obj);self.assertEqual(calls,['health','signed-flat','stop','disable','mask','signed-flat','validate'])
   calls.clear();obj.systemd=Systemd()
   def reject():calls.append('signed-flat');raise ValueError('owner changed')
   obj.signed_flat=reject
@@ -97,7 +98,11 @@ class H48RootPatchTests(unittest.TestCase):
   def run(argv,**kw):calls.append((argv,kw));return types.SimpleNamespace(returncode=0,stdout=json.dumps(payload),stderr='')
   result=f(release=Path('/home/deploy/disdex-trading/releases')/V4_SHA,deploy=deploy,sdk=sdk,credentials={},v4_sha=V4_SHA,hype_state_sha=SHA,now=lambda:NOW,run=run)
   self.assertTrue(result['hypeFlat']);self.assertEqual(result['positionCount'],1);self.assertEqual(result['openOrderCount'],1);self.assertEqual(result['afterHash'],'d'*64)
-  argv,kw=calls[0];self.assertEqual(kw['user'],1000);self.assertEqual(kw['env'],env);self.assertIn('lease.document()',kw['input']);self.assertIn('new V4ExecutionStore',kw['input']);self.assertIn('PUBLIC_SIGNED_GET_ONLY',kw['input']);self.assertNotIn('placeMarketOrder',kw['input'])
+  argv,kw=calls[0];self.assertEqual(argv[0],'/usr/bin/systemd-run');self.assertIn('--wait',argv);self.assertIn('--pipe',argv);self.assertIn('ReadWritePaths=/var/lib/disdex/shared',argv);self.assertIn('/usr/bin/setpriv',argv);self.assertIn('--reuid=1000',argv);self.assertIn('--regid=1000',argv);self.assertEqual(kw['input'],json.dumps(env));self.assertNotIn('user',kw);self.assertNotIn('group',kw);self.assertIn('--input-type=module',argv);self.assertIn('--eval',argv);self.assertEqual(argv[-1],V4_SHA)
+  retry_calls=[];sleeps=[];attempts=[types.SimpleNamespace(returncode=1,stdout='',stderr='Error: READONLY_ACCOUNT_LOCK_BUSY'),types.SimpleNamespace(returncode=0,stdout=json.dumps(payload),stderr='')]
+  def retry_run(*a,**kw):retry_calls.append((a,kw));return attempts.pop(0)
+  retry_result=f(release=Path('/home/deploy/disdex-trading/releases')/V4_SHA,deploy=deploy,sdk=sdk,credentials={},v4_sha=V4_SHA,hype_state_sha=SHA,now=lambda:NOW,run=retry_run,sleep=lambda delay:sleeps.append(delay))
+  self.assertEqual(retry_result['afterHash'],'d'*64);self.assertEqual(len(retry_calls),2);self.assertEqual(sleeps,[3])
   bad=copy.copy(payload);bad['ordersSent']=1
   with self.assertRaises(ValueError):f(release=Path('/home/deploy/disdex-trading/releases')/V4_SHA,deploy=deploy,sdk=sdk,credentials={},v4_sha=V4_SHA,hype_state_sha=SHA,now=lambda:NOW,run=lambda *a,**kw:types.SimpleNamespace(returncode=0,stdout=json.dumps(bad)))
   sdk.child_environment=lambda *a,**kw:{}

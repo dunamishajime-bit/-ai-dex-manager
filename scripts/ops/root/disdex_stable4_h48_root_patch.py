@@ -44,7 +44,28 @@ def build_h48_v4_priority_authority(*,certificate_raw,approved_sha,approved_plan
 def assert_deploy_readable_policy(path,deploy,expected_hash,*,run=subprocess.run):
  _require(isinstance(path,Path) and isinstance(expected_hash,str) and re.fullmatch('[a-f0-9]{64}',expected_hash) and deploy.pw_uid>0 and deploy.pw_gid>0,'DEPLOY_READ_BINDING')
  code='import hashlib,pathlib,sys;print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())'
- child=run(['/usr/bin/python3','-c',code,str(path)],user=deploy.pw_uid,group=deploy.pw_gid,extra_groups=[],cwd='/',env={'PATH':'/usr/bin:/bin'},capture_output=True,text=True,timeout=10,check=False)
+ if run is subprocess.run:
+  # The H48 worker runs under NoNewPrivileges. Python's Popen(user=...) path
+  # attempts setgroups/setuid in the child pre-exec hook and is rejected by
+  # that sandbox with EPERM even though the read itself is safe. Start a
+  # narrowly scoped transient unit instead, so systemd applies the deploy
+  # identity before NoNewPrivileges is active. This child only hashes one
+  # immutable policy file and has no writable paths or network access.
+  command=[
+   '/usr/bin/systemd-run','--quiet','--wait','--pipe','--collect',
+   '--service-type=exec',
+   '-p','User=deploy','-p','Group=deploy','-p','NoNewPrivileges=yes',
+   '-p','ProtectSystem=strict','-p','ProtectHome=read-only',
+   '-p','PrivateTmp=yes','-p','PrivateDevices=yes','-p','LimitCORE=0',
+   '-p','RestrictAddressFamilies=AF_UNIX','-p','RuntimeMaxSec=30s',
+   '-p','TimeoutStopSec=5s',
+   '/usr/bin/python3','-I','-c',code,str(path),
+  ]
+  child=run(command,cwd='/',env={'PATH':'/usr/bin:/bin'},capture_output=True,text=True,timeout=45,check=False)
+ else:
+  # Keep the injectable runner used by the deterministic unit tests. The
+  # production default above is always the transient systemd child.
+  child=run(['/usr/bin/python3','-c',code,str(path)],user=deploy.pw_uid,group=deploy.pw_gid,extra_groups=[],cwd='/',env={'PATH':'/usr/bin:/bin'},capture_output=True,text=True,timeout=10,check=False)
  _require(child.returncode==0 and child.stdout.strip()==expected_hash,'DEPLOY_POLICY_READ_DENIED')
 
 def read_h48_policy_certificate(sha,plan_sha256,now_ms):
@@ -90,13 +111,49 @@ try{
 }finally{await lease.release();}
 '''
 
-def collect_h48_signed_inventory(*,release,deploy,sdk,credentials,v4_sha,hype_state_sha,now=None,run=subprocess.run):
+def collect_h48_signed_inventory(*,release,deploy,sdk,credentials,v4_sha,hype_state_sha,now=None,run=subprocess.run,sleep=time.sleep):
  now=now or (lambda:time.time_ns()//1000000)
  _require(isinstance(v4_sha,str) and re.fullmatch('[a-f0-9]{40}',v4_sha) and release==Path('/home/deploy/disdex-trading/releases')/v4_sha,'IMMUTABLE_V4_SOURCE_REQUIRED')
  _require(deploy.pw_uid>0 and deploy.pw_gid>0,'DEPLOY_IDENTITY_REQUIRED')
  environment=sdk.child_environment(release.name,deploy.pw_dir,credentials=credentials)
  _require(environment.get('DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH')=='/var/lib/disdex/shared/aster-rate-budget.json' and environment.get('DISDEX_ASTER_RATE_BUDGET_PROXY_SOCKET')=='/run/disdex-v4-budget-'+v4_sha+'/budget.sock','EXISTING_SHARED_BUDGET_REQUIRED')
- result=run(['/usr/bin/node','--import',str(release/'node_modules/tsx/dist/loader.mjs'),'--input-type=module','-',v4_sha],input=SIGNED_INVENTORY_CHILD,cwd=release,user=deploy.pw_uid,group=deploy.pw_gid,extra_groups=[],env=environment,capture_output=True,text=True,timeout=600)
+ # The root H48 worker itself is deliberately mounted with a strict read-only
+ # filesystem.  The signed child needs only the canonical account-lock path
+ # writable so it can lease/release the shared account lock around GETs.  Run
+ # that child in its own transient sandbox, matching the existing production
+ # signed-read boundary, rather than granting the cutover worker broad access
+ # to /var/lib/disdex/shared.
+ bootstrap=(
+  "import json,os,sys\n"
+  "environment=json.loads(sys.stdin.read(16385))\n"
+  "os.execve(sys.argv[1],sys.argv[1:],environment)\n"
+ )
+ command=[
+  '/usr/bin/systemd-run','--quiet','--wait','--pipe','--collect',
+  '--service-type=exec',f'--working-directory={release}',
+  '-p','NoNewPrivileges=yes','-p','ProtectSystem=strict',
+  '-p','ProtectHome=read-only','-p','PrivateTmp=yes','-p','PrivateDevices=yes',
+  '-p','LimitCORE=0','-p','RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6',
+  '-p','RuntimeMaxSec=600s','-p','TimeoutStopSec=5s',
+  '-p','ReadWritePaths=/var/lib/disdex/shared',
+  '/usr/bin/setpriv',f'--reuid={deploy.pw_uid}',f'--regid={deploy.pw_gid}',
+  '--clear-groups','--no-new-privs','/usr/bin/python3','-I','-c',bootstrap,
+  '/usr/bin/node','--import',str(release/'node_modules/tsx/dist/loader.mjs'),
+  '--input-type=module','--eval',SIGNED_INVENTORY_CHILD,'-',v4_sha,
+ ]
+ payload=json.dumps(environment)
+ _require(len(payload)<=16384,'SIGNED_CHILD_ENVIRONMENT_TOO_LARGE')
+ result=None
+ for delay in (3,6,12,24,48,None):
+  result=run(command,input=payload,cwd='/',env={'PATH':'/usr/bin:/bin'},capture_output=True,text=True,timeout=620)
+  if result.returncode==0:break
+  stderr=result.stderr or ''
+  retryable=any(code in stderr for code in (
+   'READONLY_ACCOUNT_LOCK_BUSY','PENDING_RECONCILE_ACCOUNT_LOCK_BUSY',
+   'V4_BUDGET_PROXY_RESPONSE_INVALID')) or re.search(
+   r'ASTER_GLOBAL_RATE_BUDGET_SATURATED(?::[0-9]{1,12})?',stderr) is not None
+  if not retryable or delay is None:break
+  sleep(delay)
  _require(result.returncode==0,'SIGNED_CHILD_FAILED')
  rows=[json.loads(line) for line in result.stdout.splitlines() if line.startswith('{')]
  _require(len(rows)==1,'SIGNED_CHILD_RESULT_INVALID');row=rows[0]
@@ -161,6 +218,10 @@ def build_h48_root_sources(hype_source,gate_source,*,old_hype_sha):
         if self.systemd.is_active(self.old_unit) or self.systemd.main_pid(self.old_unit):
             self.systemd.stop(self.old_unit)
             require(self.systemd.main_pid(self.old_unit)==0 and not self.systemd.is_active(self.old_unit), "HYPE_OLD_UNIT_DID_NOT_STOP")
+            # Disable before masking. systemctl disable on an already masked
+            # unit returns an error and can force reconciliation after a
+            # clean old-runner stop.
+            self.systemd.disable(self.old_unit)
             self.systemd.mask(self.old_unit)
             self.signed_flat()
             self.state_before = _safe_bytes(STATE); self.state_stat = STATE.lstat()
@@ -172,6 +233,26 @@ def build_h48_root_sources(hype_source,gate_source,*,old_hype_sha):
             evidenceMode="tick-v1")''','''        self.next_manifest["runners"][RUNNER].update(
             sha=self.args.sha, serviceUnit=self.new_unit, releaseRoot=str(self.release),
             evidenceMode="tick-v1", h48TimeOnly=build_h48_manifest_binding(self.release,self.args.sha))''')
+ h=replace_once(h,'''        if self.old_enabled:
+            # The old HYPE release does not enforce the current shared HOLD.
+            # Never re-enable or restart it as a rollback action.
+            attempt(lambda:self.systemd.disable(self.old_unit))''','''        if self.old_enabled:
+            # The old HYPE release does not enforce the current shared HOLD.
+            # Never re-enable or restart it as a rollback action. If it was
+            # masked after being stopped, it is already disabled and
+            # systemctl disable would fail on the masked unit.
+            attempt(lambda:self.systemd.disable(self.old_unit)
+                    if self.systemd.is_enabled(self.old_unit) else None)''')
+ h=replace_once(h,'''        # Keep the unsafe legacy instance from returning on reboot while the
+        # candidate collects three actual decision-cycle ticks.
+        self.systemd.disable(self.old_unit)
+        require(not self.systemd.is_enabled(self.old_unit), "OLD_UNIT_NOT_DISABLED")''','''        # Keep the unsafe legacy instance from returning on reboot while the
+        # candidate collects three actual decision-cycle ticks. A masked unit
+        # is already disabled; avoid a failing disable call after the guarded
+        # stop-and-mask above.
+        if self.systemd.is_enabled(self.old_unit):
+            self.systemd.disable(self.old_unit)
+        require(not self.systemd.is_enabled(self.old_unit), "OLD_UNIT_NOT_DISABLED")''')
  h=replace_once(h,'''        self.activation = build_activation(self.desired, authority,
                                            self.inventory_digest, self.authorization_at)''','''        self.activation = build_activation(self.desired, authority,
                                            self.inventory_digest, self.authorization_at)
