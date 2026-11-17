@@ -62,6 +62,16 @@ type PersistedSnapshot = {
   items?: Quality102SymbolDecision[];
 };
 
+export type Quality102RuntimeLineage = {
+  releaseSha: string;
+  productionReleaseShas: { quality102?: string | null };
+};
+
+export function resolveQuality102SnapshotSha(runtime: Quality102RuntimeLineage): string {
+  const quality102Sha = String(runtime.productionReleaseShas.quality102 || "").trim();
+  return quality102Sha || runtime.releaseSha;
+}
+
 function normalizedItems(value: unknown): Quality102SymbolDecision[] {
   if (!Array.isArray(value)) throw new Error("Q102_DECISION_SNAPSHOT_ITEMS_INVALID");
   return value.map((item) => {
@@ -117,6 +127,7 @@ async function readSnapshot(path: string): Promise<PersistedSnapshot> {
 
 export async function loadQuality102SymbolObservability(): Promise<Quality102SymbolSnapshot> {
   const runtime = await loadCurrentProductionRuntime();
+  const quality102ReleaseSha = resolveQuality102SnapshotSha(runtime);
   const rankingPath = process.env.QUALITY102_RANKING_SNAPSHOT_PATH || DEFAULT_RANKING_SNAPSHOT_PATH;
   const decisionPath = process.env.QUALITY102_DECISION_SNAPSHOT_PATH || DEFAULT_DECISION_SNAPSHOT_PATH;
 
@@ -125,7 +136,7 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
   let rankingError: unknown;
   try {
     const candidate = await readSnapshot(rankingPath);
-    validateSnapshot(candidate, runtime.releaseSha);
+    validateSnapshot(candidate, quality102ReleaseSha);
     parsed = candidate;
     source = "ranking";
   } catch (error) {
@@ -134,7 +145,7 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
   if (!parsed) {
     try {
       const candidate = await readSnapshot(decisionPath);
-      validateSnapshot(candidate, runtime.releaseSha);
+      validateSnapshot(candidate, quality102ReleaseSha);
       parsed = candidate;
       source = "decision";
     } catch (decisionError) {
@@ -142,7 +153,7 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
     }
   }
 
-  const { capturedAt, items } = validateSnapshot(parsed, runtime.releaseSha);
+  const { capturedAt, items } = validateSnapshot(parsed, quality102ReleaseSha);
   const rankingAvailable = source === "ranking"
     && parsed.schemaVersion === 2
     && parsed.rankingModelVersion === "Q102_PROXIMITY_V1"
@@ -158,7 +169,7 @@ export async function loadQuality102SymbolObservability(): Promise<Quality102Sym
     ...(parsed.rankingModelVersion ? { rankingModelVersion: String(parsed.rankingModelVersion) } : {}),
     rankingAvailable,
     snapshotSource: source,
-    productionSha: runtime.releaseSha,
+    productionSha: quality102ReleaseSha,
     selectorMode: parsed.selectorMode || "CAUSAL_V4",
     referenceTs: Number(parsed.referenceTs || 0),
     ...(parsed.selectedSymbol ? { selectedSymbol: String(parsed.selectedSymbol).toUpperCase() } : {}),
