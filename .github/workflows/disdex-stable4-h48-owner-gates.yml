@@ -1,0 +1,174 @@
+name: STABLE4 H48 Owner certificate and GLOBAL protected HOLD
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/disdex-stable4-h48-owner-gates.yml"
+      - "scripts/ops/deploy/disdex_stable4_h48_formal_issue.py"
+      - "scripts/ops/deploy/disdex_stable4_global_hold_formal_arm.py"
+      - "scripts/ops/test_disdex_stable4_h48_formal_issue.py"
+      - "scripts/ops/test_disdex_stable4_global_hold_formal_arm.py"
+      - "scripts/ops/test_disdex_stable4_owner_workflow_contract.py"
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: Exact H48 HP Owner-approved request ID
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Test the signed Owner and Root operator boundaries
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s scripts/ops -p 'test_disdex_stable4_*formal*.py'
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s scripts/ops -p 'test_disdex_stable4_owner_workflow_contract.py' -v
+          python3 -B - <<'PY'
+          import ast
+          from pathlib import Path
+          for filename in ('disdex_stable4_h48_formal_issue.py','disdex_stable4_global_hold_formal_arm.py'):
+              ast.parse((Path('scripts/ops/deploy')/filename).read_text())
+              print('STABLE4_ROOT_FORMAL_SOURCE_OK',filename)
+          PY
+
+  formal-owner-gates:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: disdex-production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Require exact Owner request and run tests
+        shell: bash
+        env:
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s scripts/ops -p 'test_disdex_stable4_*formal*.py'
+          PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s scripts/ops -p 'test_disdex_stable4_owner_workflow_contract.py'
+      - name: Redeem exactly approved H48 policy from official HP bridge
+        shell: bash
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/stable4-h48-public.pem"
+          PYTHONPATH=scripts/ops/deploy python3 -B - <<'PY'
+          import json,os,re,urllib.request
+          from pathlib import Path
+          from disdex_owner_approval import verify
+          import disdex_stable4_h48_formal_issue as fixed
+          aid=os.environ['APPROVAL_ID'];run_id=os.environ['GITHUB_RUN_ID']
+          assert re.fullmatch(r'[0-9a-f-]{36}',aid)
+          body=json.dumps({
+              'action':'redeem','approval_id':aid,'operation':fixed.OPERATION,
+              'scope':'HYPE_TREND_LONG','target_sha':fixed.SOURCE,
+              'plan_sha256':fixed.PLAN,'run_id':run_id,
+          }).encode()
+          req=urllib.request.Request('https://professional-dismanager.net/api/system/deploy-approval',
+              data=body,method='POST',headers={
+                  'Authorization':'Bearer '+os.environ['BRIDGE'],
+                  'Content-Type':'application/json',
+              })
+          with urllib.request.urlopen(req,timeout=15) as response:
+              result=json.load(response)
+          a=result.get('approval') or {}
+          assert result.get('ok') is True
+          assert a.get('id')==aid and a.get('operation')==fixed.OPERATION
+          assert a.get('scope')=='HYPE_TREND_LONG' and a.get('targetSha')==fixed.SOURCE
+          assert a.get('planSha256')==fixed.PLAN and a.get('ordersEnabled') is True
+          token=result['token']
+          verify(token,Path(os.environ['RUNNER_TEMP'])/'stable4-h48-public.pem',
+              'dunamishajime-bit/-ai-dex-manager',fixed.SOURCE,
+              'HYPE_TREND_LONG','dunamishajime-bit',fixed.PLAN,
+              route='GITHUB_ACTIONS',deployment_target='professional-dismanager.net',
+              operator_target='DD1296_FINAL_ALLIN_10BPS',orders_enabled=True)
+          path=Path(os.environ['RUNNER_TEMP'])/'stable4-h48-owner-token'
+          path.write_text(token,encoding='ascii');path.chmod(0o600)
+          print('HP_SIGNED_H48_APPROVAL_EXACT_VALID=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
+      - name: Stage Root-owned SHA-bound source and run formal protected gates
+        shell: bash
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST_KEYS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          APPROVAL_ID: ${{ inputs.approval_id }}
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$HOST_KEYS" ]]
+          port="$PORT"
+          [[ -n "$port" ]] || port=22
+          [[ "$port" =~ ^[0-9]{1,5}$ ]]
+          umask 077
+          dir="$RUNNER_TEMP/stable4-h48-ssh"
+          mkdir -m 0700 -p "$dir"
+          printf '%s\n' "$KEY" > "$dir/id_root"
+          printf '%s\n' "$HOST_KEYS" > "$dir/known_hosts"
+          ssh-keygen -y -f "$dir/id_root" >/dev/null
+          opts=(-i "$dir/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$dir/known_hosts" -o ConnectTimeout=12 -p "$port")
+          root="/var/lib/disdex/unified-deploy/h48-formal-source/$GITHUB_SHA"
+          ssh -nT ${opts[@]} "root@$HOST" "install -d -o root -g root -m 0700 '$root'"
+          for source in scripts/ops/deploy/disdex_stable4_h48_formal_issue.py scripts/ops/deploy/disdex_stable4_global_hold_formal_arm.py; do
+            file="$(basename "$source")"
+            scp -q -i "$dir/id_root" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$dir/known_hosts" -P "$port" "$source" "root@$HOST:$root/$file"
+            expected="$(sha256sum "$source" | awk '{print $1}')"
+            actual="$(ssh -nT ${opts[@]} "root@$HOST" "chown root:root '$root/$file' && chmod 0444 '$root/$file' && sha256sum '$root/$file'" | awk '{print $1}')"
+            [[ "$expected" == "$actual" ]]
+          done
+          cert="$root/disdex_stable4_h48_formal_issue.py"
+          hold="$root/disdex_stable4_global_hold_formal_arm.py"
+          ssh -nT ${opts[@]} "root@$HOST" "/usr/bin/python3 -B '$cert' --preflight-readonly --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID'"
+          ssh -T ${opts[@]} "root@$HOST" "/usr/bin/python3 -B '$cert' --issue --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID'" < "$RUNNER_TEMP/stable4-h48-owner-token" > "$RUNNER_TEMP/stable4-h48-cert-result.json"
+          ssh -nT ${opts[@]} "root@$HOST" "/usr/bin/python3 -B '$hold' --preflight-readonly --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID'"
+          ssh -T ${opts[@]} "root@$HOST" "/usr/bin/python3 -B '$hold' --arm --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID'" < "$RUNNER_TEMP/stable4-h48-owner-token" > "$RUNNER_TEMP/stable4-h48-hold-result.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ['RUNNER_TEMP'])
+          cert=json.loads((d/'stable4-h48-cert-result.json').read_text())
+          hold=json.loads((d/'stable4-h48-hold-result.json').read_text())
+          assert cert['status']=='H48_OWNER_POLICY_CERTIFICATE_ISSUED_NOT_LIVE'
+          assert hold['status']=='STABLE4_GLOBAL_HOLD_PROTECTED_ARMED_OWNER_BOUND'
+          assert all(x.get('ordersSent')==x.get('cancelsSent')==x.get('positionChangesSent')==0 for x in [cert,hold])
+          print('H48_CERTIFICATE_ISSUED=TRUE')
+          print('GLOBAL_HOLD_PROTECTED_REARMED=TRUE')
+          print('STABLE4_LIVE_SWITCH_EXECUTED=FALSE')
+          print('TRADING_MUTATIONS=0')
+          PY
+      - name: Erase ephemeral SSH and token files
+        if: always()
+        shell: bash
+        run: |
+          rm -rf "$RUNNER_TEMP/stable4-h48-ssh"
+          rm -f "$RUNNER_TEMP/stable4-h48-owner-token" "$RUNNER_TEMP/stable4-h48-public.pem"
