@@ -5,6 +5,8 @@ import { generateKeyPairSync } from "crypto";
 import { spawnSync } from "child_process";
 import {
   DEPLOY_APPROVAL_OPERATOR_TARGET,
+  DEPLOY_APPROVAL_OPERATION_POLICY,
+  STABLE4_H48_TIME_ONLY_APPROVAL,
   DEPLOY_APPROVAL_REPOSITORY,
   DEPLOY_APPROVAL_ROUTE,
   DEPLOY_APPROVAL_TARGET,
@@ -97,6 +99,24 @@ try {
     ordersEnabled: false,
     planSha256: "3".repeat(64),
   });
+  const h48 = STABLE4_H48_TIME_ONLY_APPROVAL;
+  const h48Operation = DEPLOY_APPROVAL_OPERATION_POLICY.HYPE_STABLE4_H48_TIME_ONLY_LIVE;
+  if (h48.scope !== h48Operation.scope || h48Operation.ordersEnabled !== true ||
+      h48.policy !== "H48_TIME_ONLY" || h48.residentStopRequired !== false ||
+      h48.residentTakeProfitRequired !== false || !h48Operation.label.includes("常駐STOP") ||
+      h48.approvedGross.crypto !== 3 || h48.approvedGross.stock !== 4 ||
+      h48.approvedGross.total !== 4.25 || h48.approvedGross.hype !== 1) {
+    throw new Error("STABLE4 H48 production policy/owner acknowledgement is not exact");
+  }
+  verifyCase({ scope: h48.scope, ordersEnabled: true, planSha256: h48.planSha256 });
+  const ownerRequestWorkflow = fs.readFileSync(
+    ".github/workflows/disdex-v4-hp-approval-request.yml", "utf8");
+  for (const required of [
+    "HYPE_STABLE4_H48_TIME_ONLY_LIVE", h48.targetSha, h48.planSha256,
+    "POLICY=H48_TIME_ONLY", "STABLE4_H48_EXACT_SOURCE_AND_POLICY_PLAN_REQUIRED",
+  ]) {
+    if (!ownerRequestWorkflow.includes(required)) throw new Error("H48 owner request workflow missing " + required);
+  }
 
   const workflow = fs.readFileSync(
     ".github/workflows/disdex-hp-approval-ui-production-deploy.yml",

@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLatestDeploymentApprovalSummary } from "@/lib/server/deploy-approval-store";
-import { DEPLOY_APPROVAL_OPERATION_POLICY, type DeploymentApprovalOperation } from "@/lib/deploy-approval-token";
+import { DEPLOY_APPROVAL_OPERATION_POLICY, STABLE4_H48_TIME_ONLY_APPROVAL, type DeploymentApprovalOperation } from "@/lib/deploy-approval-token";
 import { ALL_RUNNERS_LIVE_TASK } from "@/lib/deploy-all-runners-task";
 import { loadOwnerSessionKey, OWNER_SESSION_COOKIE, verifyOwnerSession } from "@/lib/server/owner-session";
 
@@ -93,6 +93,20 @@ export default async function ProductionApprovalPage(props: { searchParams?: Sea
                 <span className="rounded-full border border-white/15 px-2 py-1">Orders: {(deployApproval.ordersEnabled ?? true) ? "ENABLED" : "DISABLED"}</span>
                 <span className="rounded-full border border-white/15 px-2 py-1">Status: {deployApproval.status}</span>
               </div>
+              {operation === "HYPE_STABLE4_H48_TIME_ONLY_LIVE" ? (
+                <div className="mt-4 rounded-xl border border-amber-300/35 bg-amber-300/[0.07] p-3 text-xs leading-6 text-amber-100">
+                  <div className="font-bold">STABLE4 H48_TIME_ONLY：時間決済ポリシーの正式承認</div>
+                  <div>対象：HYPEUSDT LONG、6時間間隔の入口、48時間の時間決済。</div>
+                  <div>このポリシーでは常駐STOP注文・常駐TP注文を要求しません。通常のSTOP保護方式と異なるリスクがあります。</div>
+                  <div>対象Gross：Crypto 3.0x / Stock 4.0x / Total 4.25x / HYPE 1.0x。</div>
+                  <div>対象SHA・Planが下記の固定値と一致する場合に限り、メールOTPで承認してください。</div>
+                  {deployApproval.targetSha !== STABLE4_H48_TIME_ONLY_APPROVAL.targetSha ||
+                   deployApproval.planSha256 !== STABLE4_H48_TIME_ONLY_APPROVAL.planSha256 ? (
+                    <div className="font-bold text-rose-200">SHAまたはPlanが一致しません。承認しないでください。</div>
+                  ) : null}
+                  <div>承認してもGLOBAL HOLD、共有リスク、Root証明書、切替前の保護検証は免除されません。</div>
+                </div>
+              ) : null}
               <div className="mt-4 text-xs text-white/50">Target SHA</div>
               <div className="mt-1 break-all font-mono text-xs text-white">{deployApproval.targetSha}</div>
               <div className="mt-4 text-xs text-white/50">Plan / Context SHA-256</div>
