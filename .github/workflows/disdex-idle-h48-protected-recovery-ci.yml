@@ -43,7 +43,8 @@ jobs:
           workflow = Path(".github/workflows/disdex-idle-h48-protected-recovery.yml").read_text()
           for item in (
               "allow_expired_observation=True",
-              "ordersEnabled\" is False",
+              "ordersEnabled",
+              "is False",
               "ordersSent\": 0",
               "cancelsSent\": 0",
               "positionChangesSent\": 0",
