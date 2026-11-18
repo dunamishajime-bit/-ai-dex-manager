@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Read-only replay export of STABLE4 research wallet (NOT production certified).
+
+Uses original 5-minute mark-to-market snapshots, preserves extrema per 1h bucket
+and event times. Never treats modeled fills as venue executions.
+"""
+import argparse,bisect,csv,gzip,hashlib,json,pathlib
+from collections import defaultdict
+from datetime import datetime,timezone
+
+CASE="EFFECTIVE_CURRENT_CANONICAL_CAUSAL_THREE_PRETARGET_STABLE3_Q102_ADOPTED_ON"
+START="2025-10-01T00:00:00Z";END="2026-10-01T00:00:00Z"
+def sha(path):
+    x=hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda:f.read(1048576),b""):x.update(block)
+    return x.hexdigest()
+def iso(ms):
+    return datetime.fromtimestamp(ms/1000,tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+def load_btc(gz):
+    rows=[]
+    with gzip.open(gz,"rt",encoding="utf8") as f:
+        for line in f:
+            x=json.loads(line);t=iso(int(x[0]))
+            if not START<=t<END:continue
+            o,h,l,c=map(float,x[1:5])
+            if min(o,h,l,c)<=0 or h<max(o,c) or l>min(o,c):raise ValueError("BAD_BTC_BAR")
+            rows.append({"time":t,"closedAt":iso(int(x[0])+3600000),
+              "open":o,"high":h,"low":l,"close":c})
+    if len(rows)<8000:raise ValueError("BTC_HISTORY_INCOMPLETE")
+    return rows
+def read_csv(path):
+    with path.open("r",encoding="utf-8-sig",newline="") as f:return list(csv.DictReader(f))
+def build(folder,bps,btc,btc_sha):
+    prefix=CASE+f"_{bps}BPS_"
+    files={name:folder/(prefix+suffix) for name,suffix in (
+        ("equity","EQUITY_30MIN.csv"),("fills","FILLS.csv"),
+        ("decisions","DECISIONS.csv"),("risk","SHARED_RISK_EVENTS.csv"),
+        ("summary","SUMMARY.json"))}
+    if any(not p.is_file() for p in files.values()):raise ValueError("MISSING_RESEARCH_SOURCE")
+    summary=json.loads(files["summary"].read_text(encoding="utf8"))
+    if summary.get("status")!="CAUSAL_THREE_PLUS_PRETARGET_STABLE_ROUTE_QUARANTINE_RESEARCH_ONLY":
+        raise ValueError("UNEXPECTED_RESEARCH_STATUS")
+    if summary.get("cost_bps_roundtrip")!=bps or summary.get("case")!=CASE:
+        raise ValueError("WRONG_RESEARCH_CASE")
+    raw=read_csv(files["equity"])
+    if len(raw)<10000:raise ValueError("MISSING_MARK_TO_MARKET_ROWS")
+    if raw[0]["utc"]!=START or raw[-1]["utc"]!=END:
+        raise ValueError("WRONG_HISTORICAL_PERIOD")
+    gross_cols=["crypto_gross_x","stock_gross_x","total_gross_x"]
+    for row in raw:
+        vals=[float(row[k]) for k in gross_cols]
+        if min(vals)<-0.000001 or abs(vals[0]+vals[1]-vals[2])>0.02:
+            raise ValueError("SOURCE_GROSS_INCONSISTENT "+row["utc"])
+    end_equity=float(raw[-1]["compounded_mtm_equity_jpy"])
+    if abs(end_equity-float(summary["final_compounded_jpy"]))>0.001:
+        raise ValueError("EQUITY_SUMMARY_MISMATCH")
+    # Min/max/last per hour preserves extrema and chronological order while keeping
+    # the complete replay below 50k frames (source contains far more raw samples).
+    buckets=defaultdict(list)
+    for row in raw:buckets[row["utc"][:13]].append(row)
+    chosen={}
+    for group in buckets.values():
+        for row in (group[0],min(group,key=lambda x:float(x["compounded_mtm_equity_jpy"])),
+                    max(group,key=lambda x:float(x["compounded_mtm_equity_jpy"])),group[-1]):
+            chosen[row["utc"]]=row
+    source_rows=[chosen[t] for t in sorted(chosen)]
+    if len(source_rows)>48000:raise ValueError("REPLAY_FRAME_OVER_LIMIT")
+    if source_rows[-1]["utc"]!=END:raise ValueError("MISSING_END_SNAPSHOT")
+    trades=read_csv(files["fills"])
+    if len(trades)!=summary["modeled_fills"]:raise ValueError("FILL_COUNT_MISMATCH")
+    events=defaultdict(list)
+    for item in trades:
+        if item["signed_execution_verified"]!="False" or item["actual_venue_order_id"]:
+            raise ValueError("UNEXPECTED_ACTUAL_FILL_FIELD")
+        name=item["strategy"]+" "+item["symbol"]+" "+item["side"]
+        enter,exit=item["entry_utc"],item["exit_utc"]
+        if not START<=enter<exit<END:raise ValueError("MODEL_FILL_OUTSIDE_PERIOD")
+        events[enter].append("MODEL ENTRY "+name+" / "+item["trade_id"]+" (NOT VENUE FILL)")
+        events[exit].append("MODEL EXIT "+name+" / "+item["exit_model_reason"]+
+                            " / "+format(float(item["net_pnl_jpy"]),"+.2f")+" JPY (NOT VENUE FILL)")
+    for item in read_csv(files["decisions"]):
+        time=item["utc"]
+        if not START<=time<END:raise ValueError("DECISION_OUTSIDE_PERIOD")
+        if item["decision"]=="BLOCK":
+            events[time].append("BLOCK "+item["strategy"]+" "+item["reason"])
+        elif item["decision"]=="MODEL_ENTER":
+            events[time].append("CANDIDATE "+item["strategy"]+" "+item["reason"])
+    for item in read_csv(files["risk"]):
+        time=item["utc"]
+        if START<=time<END:
+            events[time].append("RISK "+item["event"]+" "+str(item.get("loss_pct",""))+"% (research model)")
+    # Stamp each event on the NEXT available source valuation; never place a future
+    # event into an earlier frame. Its original UTC remains inside the event string.
+    times=[row["utc"] for row in source_rows]
+    attached=defaultdict(list)
+    for event_time,items in events.items():
+        i=bisect.bisect_left(times,event_time)
+        if i>=len(times):raise ValueError("EVENT_AFTER_SOURCE_END")
+        attached[times[i]].extend(event_time+" "+item for item in items)
+    btc_closes=[c["closedAt"] for c in btc]
+    frames=[]
+    for row in source_rows:
+        now=row["utc"]
+        i=bisect.bisect_right(btc_closes,now)-1
+        equity=float(row["compounded_mtm_equity_jpy"])
+        cash=float(row["wallet_cash_jpy"])
+        total,crypto,stock=map(float,(row["total_gross_x"],row["crypto_gross_x"],row["stock_gross_x"]))
+        open_count=int(row["open_count"])
+        frames.append({"timestamp":now,"btc":btc[i]["close"] if i>=0 else None,
+          "equity":equity,"realized":cash-10000,"positions":[],
+          "events":attached.get(now,[]),"sourceOpenCount":open_count,
+          "gross":{"totalX":total,"cryptoX":crypto,"stockX":stock,"source":"bt_equity_snapshot"}})
+    if not frames or len(frames)>50000:raise ValueError("FRAME_BOUNDS")
+    return {
+     "schema":"disdex-bt-portfolio-v1","mode":"EXTERNAL","seed":0,
+     "engineSha":"STABLE4_RESEARCH_SOURCE_ONLY_NOT_PRODUCTION_CERTIFIED",
+     "frames":frames,"btcCandles":btc,"limits":{"total":3.5,"crypto":3.0,"stock":1.5},
+     "researchSummary":{"costBps":bps,"initialJpy":summary["initial_jpy"],
+       "finalEquityJpy":summary["final_compounded_jpy"],"maxDdPct":summary["max_hourly_dd_pct"],
+       "modelFills":summary["modeled_fills"],"winRatePct":summary["win_rate_pct"],
+       "profitFactor":summary["profit_factor"]},
+     "source":{"kind":"HISTORICAL_STABLE4_RESEARCH_NOT_PRODUCTION",
+       "equitySha256":sha(files["equity"]),"fillsSha256":sha(files["fills"]),
+       "summarySha256":sha(files["summary"]),"btcCandlesSha256":btc_sha,
+       "positionExposureEvidence":"MISSING_SOURCE_POSITION_MARKS",
+       "note":json.dumps({"case":CASE,"costBps":bps,"dataInterval":"2025-10-01..2026-10-01 UTC",
+           "sourceStatus":summary["status"],"runnerCounts":summary["admitted_by_runner"],
+           "gross":"snapshot only; individual holdings incomplete",
+           "sampledFrom":"5-minute source equity, one-hour min/max/end; source reported DD independent",
+           "disclaimer":"RESEARCH ONLY; NOT current Production parity; modeled trades not actual fills"},
+           separators=(",",":"))}
+    }
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--source-dir",type=pathlib.Path,required=True)
+    parser.add_argument("--btc-gz",type=pathlib.Path,required=True)
+    parser.add_argument("--output-dir",type=pathlib.Path,required=True)
+    args=parser.parse_args()
+    btc=load_btc(args.btc_gz);btcsha=sha(args.btc_gz)
+    args.output_dir.mkdir(parents=True,exist_ok=True)
+    exports=[]
+    for bps in (10,30):
+        replay=build(args.source_dir,bps,btc,btcsha)
+        name=f"disdex-baseline-STABLE4-research-{bps}bps-UNCERTIFIED.json"
+        path=args.output_dir/name
+        path.write_text(json.dumps(replay,separators=(",",":"),ensure_ascii=False)+"\n",encoding="utf-8")
+        exports.append({"bps":bps,"file":name,"sha256":sha(path),
+                        "frames":len(replay["frames"]),"modelFills":replay["researchSummary"]["modelFills"],
+                        "researchMaxDdPct":replay["researchSummary"]["maxDdPct"]})
+    manifest={"schema":"disdex-private-stable4-research-replays/v1",
+      "dataset":"STABLE4_OPPORTUNITY_PROD_CAPS_20261114",
+      "research_integrated_model":True,"integrated_eight_runner":False,
+      "production_parity_verified":False,"actual_exchange_fills_verified":False,
+      "source_common_btc_sha256":btcsha,"exports":exports}
+    (args.output_dir/"MANIFEST_UNCERTIFIED.json").write_text(
+      json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    print(json.dumps(manifest,ensure_ascii=False,indent=2))
+if __name__=="__main__":main()

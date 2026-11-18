@@ -68,19 +68,25 @@ export default function BTVerification() {
       if(!manifestFile)throw new Error("同じフォルダー内のMANIFEST_UNCERTIFIED.jsonも選んでください。");
       const manifest:unknown=JSON.parse(await manifestFile.text());
       if(!manifest||typeof manifest!=="object")throw new Error("MANIFEST不正");
-      const m=manifest as {exports?:unknown;integrated_eight_runner?:unknown;production_parity_verified?:unknown;actual_exchange_fills_verified?:unknown};
+      const m=manifest as {schema?:unknown;exports?:unknown;integrated_eight_runner?:unknown;production_parity_verified?:unknown;actual_exchange_fills_verified?:unknown};
+      const stable4=m.schema==="disdex-private-stable4-research-replays/v1";
+      const standalone=m.schema==="disdex-private-baseline-standalone-replays/v1";
       if(m.integrated_eight_runner!==false||m.production_parity_verified!==false||
          m.actual_exchange_fills_verified!==false||!Array.isArray(m.exports)||
-         m.exports.length!==6)throw new Error("基準BTの認証状態または件数が一致しません。");
+         (m.exports.length!==(stable4?2:6)||(!stable4&&!standalone)))throw new Error("基準BTの認証状態または件数が一致しません。");
       const lookup=new Map<string,{sha256:string;strategy:string;bps:number}>();
       for(const entry of m.exports){
         if(!entry||typeof entry!=="object")throw new Error("MANIFEST項目不正");
         const row=entry as {file?:unknown;sha256?:unknown;strategy?:unknown;bps?:unknown};
-        if(typeof row.file!=="string"||!/^disdex-baseline-20251001-20261001-(idle|fet|hype)-(10|30)bps-UNCERTIFIED\.json$/.test(row.file)||
+        const knownFile=stable4
+          ?/^disdex-baseline-STABLE4-research-(10|30)bps-UNCERTIFIED\.json$/.test(String(row.file))
+          :/^disdex-baseline-20251001-20261001-(idle|fet|hype)-(10|30)bps-UNCERTIFIED\.json$/.test(String(row.file));
+        const strategy=stable4?"STABLE4":String(row.strategy);
+        if(typeof row.file!=="string"||!knownFile||
            typeof row.sha256!=="string"||!/^[a-f0-9]{64}$/.test(row.sha256)||
-           !["IDLE","FET","HYPE"].includes(String(row.strategy))||![10,30].includes(Number(row.bps))||
+           (!stable4&&!["IDLE","FET","HYPE"].includes(strategy))||![10,30].includes(Number(row.bps))||
            lookup.has(row.file))throw new Error("MANIFESTのシナリオ定義不正");
-        lookup.set(row.file,{sha256:row.sha256,strategy:String(row.strategy),bps:Number(row.bps)});
+        lookup.set(row.file,{sha256:row.sha256,strategy,bps:Number(row.bps)});
       }
       const imports:Record<string,{label:string;replay:Replay}>={};
       for(const file of files.filter(f=>f!==manifestFile)){
@@ -92,15 +98,16 @@ export default function BTVerification() {
         if(digest!==entry.sha256)throw new Error("SHA256不一致: "+file.name);
         const parsed:unknown=JSON.parse(new TextDecoder("utf-8").decode(bytes));
         if(!validateReplay(parsed)||parsed.mode!=="EXTERNAL"||
-           parsed.source?.kind!=="HISTORICAL_STANDALONE_MODEL_NOT_INTEGRATED"||
-           parsed.engineSha!=="REUSABLE_STANDALONE_MODEL_UNCERTIFIED")throw new Error("研究BT形式不一致: "+file.name);
+           parsed.source?.kind!==(stable4?"HISTORICAL_STABLE4_RESEARCH_NOT_PRODUCTION":"HISTORICAL_STANDALONE_MODEL_NOT_INTEGRATED")||
+           parsed.engineSha!==(stable4?"STABLE4_RESEARCH_SOURCE_ONLY_NOT_PRODUCTION_CERTIFIED":"REUSABLE_STANDALONE_MODEL_UNCERTIFIED"))throw new Error("研究BT形式不一致: "+file.name);
         if(parsed.frames.some(f=>f.positions.length>0))throw new Error("未確認建玉が含まれています。");
         const key=entry.strategy+"_"+entry.bps;
-        imports[key]={label:entry.strategy+" / "+entry.bps+"bps（未認証・単独研究）",replay:parsed};
+        imports[key]={label:entry.strategy+" / "+entry.bps+"bps（"+(stable4?"統合研究モデル":"単独研究")+"・未認証）",replay:parsed};
       }
       if(!Object.keys(imports).length)throw new Error("研究データがありません。");
-      setBaselineFiles(imports);setBaselineSelected(Object.keys(imports).sort()[0]);
-      setNotice(Object.keys(imports).length+"件をSHA256照合し、このブラウザに読み込みました。全8系統統合BTではありません。");
+      setBaselineFiles(previous=>({...previous,...imports}));setBaselineSelected(Object.keys(imports).sort()[0]);
+      setComparisonA(Object.keys(imports).sort()[0]);setComparisonB(Object.keys(imports).sort()[1]??Object.keys(imports)[0]);
+      setNotice(Object.keys(imports).length+"件をSHA256照合し、このブラウザに読み込みました。"+(stable4?"STABLE4の研究統合モデルです。Production完全一致ではありません。":"全8系統統合BTではありません。"));
       setTab("config");
     }catch(error){setNotice(error instanceof Error?error.message:"基準BT読込に失敗しました。");}
   }
@@ -124,12 +131,14 @@ export default function BTVerification() {
   const entryCount = events.filter(({ event }) => event.includes("ENTRY ")).length;
   const gross = grossForFrame(frame);
   const anchoredPriceOnly = replay.source?.kind === "SYNTHETIC_ANCHORED_DAILY_NO_STRATEGY";
+  const stable4Research = replay.source?.kind === "HISTORICAL_STABLE4_RESEARCH_NOT_PRODUCTION";
   const comparison = useMemo(()=>baselineFiles[comparisonA] && baselineFiles[comparisonB] && comparisonA!==comparisonB
     ?compareReplayPair(baselineFiles[comparisonA].replay,baselineFiles[comparisonB].replay):null,
     [baselineFiles,comparisonA,comparisonB]);
-  const sourceLabel = anchoredPriceOnly ? "前日終値アンカー・価格のみ（戦略未接続）" : isDemo ? "模擬デモ・実取引なし" : "持込BTデータ・未認証";
+  const sourceLabel = anchoredPriceOnly ? "前日終値アンカー・価格のみ（戦略未接続）" : stable4Research ? "STABLE4統合研究・Production未認証" : isDemo ? "模擬デモ・実取引なし" : "持込BTデータ・未認証";
   const sourceWarning = anchoredPriceOnly
     ? "前日実終値をAster公開日足で検証し、指定期間の価格のみ人工生成しています。実取引、Productionロジック判定、仮想約定は実施していません。"
+    : stable4Research ? "STABLE4統合研究モデルの約定と資産推移です。取引所の実約定や現行LIVEロジックの完全一致は未認証です。個別建玉の数量内訳は未復元です。"
     : isDemo
     ? "ここでのローソク足・判定・約定・損益はすべて模擬生成です。実際のV4・PENGU・Q102のロジックや過去相場、運用成績とは一致しません。"
     : "持込データの形式を検証して表示しています。実相場や最新LIVE pinとの一致・約定の正しさを認証したものではありません。";
@@ -231,9 +240,9 @@ export default function BTVerification() {
         </div>
         <div className="grid gap-4 xl:grid-cols-2">
           <section className={tile}>
-            <h3 className="mb-3 font-bold text-white">保有モデル建玉 {frame.positions.length}件</h3>
+            <h3 className="mb-3 font-bold text-white">保有モデル建玉 {frame.sourceOpenCount??frame.positions.length}件</h3>
             <div className="max-h-72 space-y-2 overflow-y-auto">
-              {frame.positions.length === 0 ? <p className="text-sm text-[#94aec1]">この時点のモデル建玉はありません。</p> :
+              {frame.positions.length === 0 ? <p className="text-sm text-[#94aec1]">{(frame.sourceOpenCount??0)>0?"ソースには建玉がありますが、個別数量・銘柄の再現が未完了です。":"この時点のモデル建玉はありません。"}</p> :
                 frame.positions.map((p) => <div key={p.id} className="rounded-lg border border-[#294257] bg-[#0b1d2e] p-3 text-xs text-[#b9cfe0]">
                   <div className="flex items-center justify-between"><strong className="text-cyan-200">{p.logic} / {p.symbol}</strong><span>{p.side}</span></div>
                   <div className="mt-1">Entry {NUM(p.entry)} / Mark {p.mark == null ? "未取得" : NUM(p.mark)} / Gross {p.gross == null ? "未算定" : NUM(p.gross) + "x"}</div>
@@ -331,7 +340,7 @@ export default function BTVerification() {
         </div>
         <div className="mt-5 rounded-xl border border-cyan-700/40 bg-[#0c2336] p-4">
           <h3 className="text-sm font-bold text-cyan-100">基準BTセットの読み込み</h3>
-          <p className="mt-2 text-xs leading-6 text-[#a8c4d4]">PC内で変換したMANIFEST_UNCERTIFIED.jsonと6つの研究再生JSONをまとめて選択してください。SHA256照合後、条件設定で単独モデルを選択できます。ブラウザ内だけで読み込み、サーバーへ送信しません。</p>
+          <p className="mt-2 text-xs leading-6 text-[#a8c4d4]">PC内で変換したMANIFEST_UNCERTIFIED.jsonと、STABLE4研究なら2件、単独モデルなら6件の研究再生JSONをまとめて選択してください。SHA256照合後、条件設定で選択・再生できます。ブラウザ内だけで読み込みます。</p>
           <label className={button+" mt-3 cursor-pointer"}><FileUp className="h-4 w-4"/>基準BTセット（最大7ファイル）を選択
             <input className="sr-only" type="file" multiple accept=".json,application/json" onChange={importBaselineSet}/>
           </label>
