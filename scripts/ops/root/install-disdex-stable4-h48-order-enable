@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+if [ "$#" -ne 1 ]; then
+  echo 'usage: install-disdex-stable4-h48-order-enable <staged-directory>' >&2
+  exit 64
+fi
+stage=$1
+case "$stage" in
+  /var/lib/disdex/unified-deploy/stable4-h48-order-enable/*) ;;
+  *) echo 'STABLE4_H48_ORDER_ENABLE_STAGE_INVALID' >&2; exit 65 ;;
+esac
+target=/usr/local/libexec/disdex-stable4-h48-order-enable
+install -d -o root -g root -m 0755 "$target"
+for file in disdex_stable4_h48_order_enable.py disdex_owner_approval.py disdex_deployment_contract.py hype-h48-order-permit.ts; do
+  install -o root -g root -m 0444 "$stage/$file" "$target/$file"
+done
+install -o root -g root -m 0555 "$stage/disdex-stable4-h48-order-enable" /usr/local/sbin/disdex-stable4-h48-order-enable
+printf '%s\n' STABLE4_H48_ORDER_ENABLE_ROOT_INSTALL=PASS
