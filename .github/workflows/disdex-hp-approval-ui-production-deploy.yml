@@ -190,6 +190,7 @@ jobs:
           release="$ui_root/ui-hp-approval-${TARGET_SHA:0:12}"
           stage="$ui_root/.ui-hp-approval-${TARGET_SHA:0:12}.tmp-$REQUEST_ID"
           archive="/tmp/disdex-hp-approval-ui-runtime-${REQUEST_ID#hp-approval-}.tgz"
+          owner_session_env='/etc/disdex/hp-owner-session.env'
           [[ -f "$archive" ]]
           [[ ! -e "$release" && ! -L "$release" ]]
           [[ -f "$owner_session_env" ]] || {
@@ -235,7 +236,6 @@ jobs:
           public_key="$approval_dir/approver-ed25519.pub"
           env_file='/etc/disdex/hp-approval.env'
           approval_store="$shared_data/deploy-approvals.json"
-          owner_session_env='/etc/disdex/hp-owner-session.env'
           install -d -o root -g deploy -m 0750 "$approval_dir"
           if [[ ! -f "$private_key" ]]; then
             openssl genpkey -algorithm ED25519 -out "$private_key"
