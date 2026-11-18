@@ -118,7 +118,18 @@ export async function buildLiveLogicSnapshot(options: {
   const pins = manifest.runners as Record<string, unknown>;
   const rows = await Promise.all((Object.keys(LOGIC_ROLES) as LogicRole[]).map(async (id) => {
     const config = LOGIC_ROLES[id];
-    const pin = validateManifestRole(id, pins[id]);
+    let pin: ReturnType<typeof validateManifestRole>;
+    try {
+      pin = validateManifestRole(id, pins[id]);
+    } catch {
+      // Read-only observation: a damaged individual pin must not erase other rows.
+      // No service probing or authorization inference is performed for this role.
+      return {
+        id, title: config.title, description: config.description, href: config.href,
+        pinSha: "", serviceUnit: "", serviceState: "UNVERIFIED",
+        mainPid: null, heartbeatFresh: false, mismatchReason: "個別pinが未検証",
+      } satisfies LogicRow;
+    }
     let serviceState: LogicRow["serviceState"] = "UNVERIFIED";
     let mainPid: number | null = null;
     let mismatchReason: string | undefined;
