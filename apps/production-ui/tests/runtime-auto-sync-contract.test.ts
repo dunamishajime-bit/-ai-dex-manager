@@ -30,13 +30,17 @@ test("Production UI does not fall back to stale strategy contract values", async
     readFile(files.positions, "utf8"),
     readFile(files.banner, "utf8"),
   ]);
-  for (const source of [home, positions, banner]) {
+  for (const source of [home, positions]) {
     assert.doesNotMatch(source, /\?\?\s*config\.(?:quality102Runtime|v52|v12|pengu|maximumGross|sharedCryptoGross)/);
     assert.match(source, /runtime未取得|RUNTIME MISMATCH/);
   }
+  // The banner now delegates to the read-only runner snapshot and must not
+  // recreate the old static strategy contract.
+  assert.match(banner, /CurrentLogicPanel/);
+  assert.match(banner, /old.*shared.*release|runner pin manifest/i);
+  assert.doesNotMatch(banner, /config\.(?:quality102Runtime|v52|v12|pengu|maximumGross|sharedCryptoGross)/);
   assert.match(home, /strongRegimeQualityScoreMinimum/);
   assert.match(positions, /strongRegimeQualityScoreMinimum/);
-  assert.match(banner, /strongRegimeQualityScoreMinimum/);
 });
 
 test("static metadata is explicitly non-authoritative", async () => {
