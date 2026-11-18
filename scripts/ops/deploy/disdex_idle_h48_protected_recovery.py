@@ -51,7 +51,9 @@ def require(ok: bool, reason: str) -> None:
 def read_json(path: Path) -> dict:
     require(path.is_file() and not path.is_symlink(), "STATE_FILE_INVALID:" + str(path))
     st = path.stat()
-    require(stat.S_ISREG(st.st_mode) and not st.st_mode & 0o022,
+    # Shared risk/margin/pending snapshots are written by their dedicated
+    # service group.  Group-write is therefore expected; world-write is not.
+    require(stat.S_ISREG(st.st_mode) and not st.st_mode & 0o002,
             "STATE_FILE_PERMISSIONS_INVALID:" + str(path))
     value = json.loads(path.read_text())
     require(isinstance(value, dict), "STATE_NOT_OBJECT:" + str(path))
