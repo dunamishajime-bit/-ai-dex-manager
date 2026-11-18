@@ -1,0 +1,198 @@
+name: DisDex IDLE H48 Protected Non-Order Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_id:
+        description: Approved ALL_RUNNERS_LIVE_RESTORE task ID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-unified-production
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: >-
+      github.repository == 'dunamishajime-bit/-ai-dex-manager' &&
+      github.ref == 'refs/heads/master' &&
+      github.actor == 'dunamishajime-bit'
+    environment:
+      name: disdex-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Claim exact non-order IDLE repair stage
+        id: claim
+        shell: bash
+        env:
+          TASK_ID: ${{ inputs.task_id }}
+          RUN_ID: ${{ github.run_id }}
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          PUBLIC_KEY: ${{ secrets.DISDEX_HP_APPROVER_PUBLIC_KEY_PEM }}
+        run: |
+          set -euo pipefail
+          [[ "$TASK_ID" =~ ^[0-9a-fA-F-]{36}$ && "$RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          [[ -n "$BRIDGE" && -n "$PUBLIC_KEY" ]]
+          umask 077
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          body = json.dumps({
+              "action": "claim_task_step",
+              "task_id": os.environ["TASK_ID"],
+              "step": "IDLE_FLAT_STALE_REPAIR",
+              "target_sha": "7688ed7c93a1918d8b44837339b7da5584a868f5",
+              "run_id": os.environ["RUN_ID"],
+          }).encode()
+          request = urllib.request.Request(
+              "https://professional-dismanager.net/api/system/deploy-approval",
+              data=body, method="POST",
+              headers={"Authorization": "Bearer " + os.environ["BRIDGE"],
+                       "Content-Type": "application/json"},
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              result = json.load(response)
+          assert result.get("ok") and result.get("step") == "IDLE_FLAT_STALE_REPAIR"
+          assert result.get("scope") == "IDLE_PRIORITY_SHORT"
+          assert result.get("ordersEnabled") is False
+          token = str(result.get("token") or "")
+          plan = str(result.get("planSha256") or "")
+          assert token and len(plan) == 64
+          root = pathlib.Path(os.environ["RUNNER_TEMP"])
+          (root / "idle-h48-token").write_text(token, encoding="ascii")
+          (root / "idle-h48-plan").write_text(plan, encoding="ascii")
+          print("::add-mask::" + token)
+          print("IDLE_H48_TASK_STAGE_CLAIMED=TRUE")
+          PY
+          printf '%s\n' "$PUBLIC_KEY" > "$RUNNER_TEMP/idle-h48-owner.pub"
+          cat "$RUNNER_TEMP/idle-h48-token" |
+            python3 scripts/ops/deploy_owner_approval.py verify \
+              --public-key "$RUNNER_TEMP/idle-h48-owner.pub" \
+              --repository "$GITHUB_REPOSITORY" \
+              --sha 7688ed7c93a1918d8b44837339b7da5584a868f5 \
+              --scope IDLE_PRIORITY_SHORT \
+              --operator dunamishajime-bit \
+              --plan-sha256 "$(cat "$RUNNER_TEMP/idle-h48-plan")" \
+              --deployment-target professional-dismanager.net \
+              --operator-target DD1296_FINAL_ALLIN_10BPS \
+              --route GITHUB_ACTIONS --orders-enabled false
+
+      - name: Configure reviewed root maintenance SSH
+        env:
+          KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          KNOWN: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$HOST" == "professional-dismanager.net" && -n "$KEY" && -n "$KNOWN" ]]
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP/idle-h48-ssh"
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/idle-h48-ssh/key"
+          printf '%s\n' "$KNOWN" > "$RUNNER_TEMP/idle-h48-ssh/known_hosts"
+          chmod 0600 "$RUNNER_TEMP/idle-h48-ssh/"*
+          ssh-keygen -y -f "$RUNNER_TEMP/idle-h48-ssh/key" >/dev/null
+
+      - name: Upload exact guarded non-order helper
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          [[ "$PORT" =~ ^[0-9]{1,5}$ && "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ ]]
+          python3 -m py_compile \
+            scripts/ops/deploy/disdex_idle_h48_protected_recovery.py \
+            scripts/ops/deploy/disdex_h48_protected_hold.py
+          remote="/tmp/disdex-idle-h48-$GITHUB_RUN_ID"
+          ssh -T -i "$RUNNER_TEMP/idle-h48-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-h48-ssh/known_hosts" \
+            -P "$PORT" "root@$HOST" "install -d -o root -g root -m 0700 '$remote'"
+          scp -i "$RUNNER_TEMP/idle-h48-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-h48-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_idle_h48_protected_recovery.py \
+            "root@$HOST:$remote/disdex_idle_h48_protected_recovery.py"
+          scp -i "$RUNNER_TEMP/idle-h48-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-h48-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_h48_protected_hold.py \
+            "root@$HOST:$remote/disdex_h48_protected_hold.py"
+
+      - name: Execute H48-protected IDLE recovery
+        id: execute
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          ssh -T -i "$RUNNER_TEMP/idle-h48-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/idle-h48-ssh/known_hosts" \
+            -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 \
+            -p "$PORT" "root@$HOST" \
+            "python3 /tmp/disdex-idle-h48-$GITHUB_RUN_ID/disdex_idle_h48_protected_recovery.py --run-id $GITHUB_RUN_ID"
+
+      - name: Finish exact task stage
+        if: ${{ always() && steps.claim.outcome == 'success' }}
+        env:
+          BRIDGE: ${{ secrets.DISDEX_HP_APPROVAL_BRIDGE_SECRET }}
+          TASK_ID: ${{ inputs.task_id }}
+          RUN_ID: ${{ github.run_id }}
+          EXECUTION: ${{ steps.execute.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          passed = os.environ["EXECUTION"] == "success"
+          body = json.dumps({
+              "action": "finish_task_step",
+              "task_id": os.environ["TASK_ID"],
+              "step": "IDLE_FLAT_STALE_REPAIR",
+              "run_id": os.environ["RUN_ID"],
+              "outcome": "success" if passed else "failure",
+          }).encode()
+          request = urllib.request.Request(
+              "https://professional-dismanager.net/api/system/deploy-approval",
+              data=body, method="POST",
+              headers={"Authorization": "Bearer " + os.environ["BRIDGE"],
+                       "Content-Type": "application/json"},
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              result = json.load(response)
+          assert result.get("ok") and result.get("status") == "APPROVED"
+          print("IDLE_H48_TASK_STAGE=" + ("SUCCESS" if passed else "RETRYABLE"))
+          PY
+
+      - name: Destroy ephemeral material
+        if: always()
+        env:
+          HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        shell: bash
+        run: |
+          set +e
+          PORT="${PORT:-22}"
+          if [[ -s "$RUNNER_TEMP/idle-h48-ssh/key" && -n "$HOST" ]]; then
+            ssh -T -i "$RUNNER_TEMP/idle-h48-ssh/key" \
+              -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$RUNNER_TEMP/idle-h48-ssh/known_hosts" \
+              -o ConnectTimeout=6 -p "$PORT" "root@$HOST" \
+              "rm -rf -- /tmp/disdex-idle-h48-$GITHUB_RUN_ID" >/dev/null 2>&1
+          fi
+          rm -rf "$RUNNER_TEMP/idle-h48-ssh" "$RUNNER_TEMP/idle-h48-token" \
+            "$RUNNER_TEMP/idle-h48-plan" "$RUNNER_TEMP/idle-h48-owner.pub"

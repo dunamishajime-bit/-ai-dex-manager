@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/ops/deploy/disdex_allrunner_final_verify.py"
+      - "scripts/ops/deploy/disdex_h48_protected_hold.py"
       - "scripts/ops/deploy/disdex_allrunner_order_enable.py"
       - "scripts/ops/deploy/disdex_v4_venue_witness.py"
       - "tests/test_allrunner_final_verify_flat.py"
@@ -28,7 +29,7 @@ jobs:
         shell: bash
         run: python3 -m py_compile scripts/ops/deploy/disdex_allrunner_final_verify.py
       - name: Verify venue freshness and shared-risk contracts
-        run: python3 -m unittest tests.test_disdex_v4_venue_witness tests.test_allrunner_final_verify_flat tests.test_allrunner_shared_risk_freshness -v
+        run: python3 -m unittest tests.test_disdex_h48_protected_hold tests.test_disdex_v4_venue_witness tests.test_allrunner_final_verify_flat tests.test_allrunner_shared_risk_freshness -v
       - name: Enforce read-only final audit policy
         shell: bash
         run: |
@@ -42,6 +43,7 @@ jobs:
             'FINAL_ALL_RUNNERS_AUDIT','ALL_SEVEN_RUNNERS_ACTIVE=TRUE',
             'HYPE_V4_STOP_OVERLAY_VERIFIED=TRUE','SIGNED_ASTER_GETS=3',
             'READ_ONLY_FINAL_AUDIT=PASS','KILL_SWITCH_ACTIVE',
+            'H48_NO_ORDER','allow_expired_observation',
             'PENDING_ACTIVE','HYPE_OVERLAY_HASH_MISMATCH',
           ]:
               assert x in h,x

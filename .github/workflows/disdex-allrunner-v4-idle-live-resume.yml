@@ -143,11 +143,22 @@ jobs:
           if [[ -z "$PORT" ]]; then PORT=22; fi
           [[ "$PORT" =~ ^[0-9]{1,5}$ ]]
           python3 -m py_compile scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py
+          python3 -m py_compile scripts/ops/deploy/disdex_h48_protected_hold.py
+          remote="/tmp/disdex-allrunner-live-$GITHUB_RUN_ID"
+          ssh -T -i "$RUNNER_TEMP/allrunner-live-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-live-ssh/known_hosts" \
+            -P "$PORT" "root@$HOST" "install -d -o root -g root -m 0700 '$remote'"
           scp -i "$RUNNER_TEMP/allrunner-live-ssh/key" \
             -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-live-ssh/known_hosts" \
             -P "$PORT" scripts/ops/deploy/disdex_allrunner_v4_idle_live_resume.py \
-            "root@$HOST:/tmp/disdex-allrunner-live-$GITHUB_RUN_ID.py"
+            "root@$HOST:$remote/disdex_allrunner_v4_idle_live_resume.py"
+          scp -i "$RUNNER_TEMP/allrunner-live-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-live-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_h48_protected_hold.py \
+            "root@$HOST:$remote/disdex_h48_protected_hold.py"
 
       - name: Resume exact existing certified service
         id: execute
@@ -164,7 +175,7 @@ jobs:
             -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-live-ssh/known_hosts" \
             -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 \
             -p "$PORT" "root@$HOST" \
-            "python3 /tmp/disdex-allrunner-live-$GITHUB_RUN_ID.py --runner $TARGET_RUNNER --run-id $GITHUB_RUN_ID"
+            "python3 /tmp/disdex-allrunner-live-$GITHUB_RUN_ID/disdex_allrunner_v4_idle_live_resume.py --runner $TARGET_RUNNER --run-id $GITHUB_RUN_ID"
 
       - name: Finish task stage for success or safe retry
         if: ${{ always() && steps.task_claim.outcome == 'success' }}
@@ -213,7 +224,7 @@ jobs:
               -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
               -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-live-ssh/known_hosts" \
               -o ConnectTimeout=5 -p "$PORT" "root@$HOST" \
-              "rm -f -- /tmp/disdex-allrunner-live-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+              "rm -rf -- /tmp/disdex-allrunner-live-$GITHUB_RUN_ID" >/dev/null 2>&1
           fi
           rm -rf "$RUNNER_TEMP/allrunner-live-ssh" "$RUNNER_TEMP/allrunner-live-token" \
             "$RUNNER_TEMP/allrunner-live-plan" "$RUNNER_TEMP/allrunner-owner.pub"

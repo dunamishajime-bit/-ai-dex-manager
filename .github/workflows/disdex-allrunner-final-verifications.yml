@@ -161,11 +161,22 @@ jobs:
           set -euo pipefail
           if [[ -z "$PORT" ]]; then PORT=22; fi
           python3 -m py_compile scripts/ops/deploy/disdex_allrunner_final_verify.py
+          python3 -m py_compile scripts/ops/deploy/disdex_h48_protected_hold.py
+          remote="/tmp/disdex-allrunner-verify-$GITHUB_RUN_ID"
+          ssh -T -i "$RUNNER_TEMP/allrunner-verify-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
+            -P "$PORT" "root@$HOST" "install -d -o root -g root -m 0700 '$remote'"
           scp -i "$RUNNER_TEMP/allrunner-verify-ssh/key" \
             -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
             -P "$PORT" scripts/ops/deploy/disdex_allrunner_final_verify.py \
-            "root@$HOST:/tmp/disdex-allrunner-verify-$GITHUB_RUN_ID.py"
+            "root@$HOST:$remote/disdex_allrunner_final_verify.py"
+          scp -i "$RUNNER_TEMP/allrunner-verify-ssh/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
+            -P "$PORT" scripts/ops/deploy/disdex_h48_protected_hold.py \
+            "root@$HOST:$remote/disdex_h48_protected_hold.py"
 
       - name: Execute read-only verification
         id: execute
@@ -182,7 +193,7 @@ jobs:
             -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
             -o ConnectTimeout=12 -o ServerAliveInterval=10 -o ServerAliveCountMax=8 \
             -p "$PORT" "root@$HOST" \
-            "python3 /tmp/disdex-allrunner-verify-$GITHUB_RUN_ID.py --step $STEP"
+            "python3 /tmp/disdex-allrunner-verify-$GITHUB_RUN_ID/disdex_allrunner_final_verify.py --step $STEP"
 
       - name: Finish verification stage
         if: ${{ always() && steps.claim.outcome == 'success' }}
@@ -236,7 +247,7 @@ jobs:
               -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
               -o UserKnownHostsFile="$RUNNER_TEMP/allrunner-verify-ssh/known_hosts" \
               -o ConnectTimeout=5 -p "$PORT" "root@$HOST" \
-              "rm -f -- /tmp/disdex-allrunner-verify-$GITHUB_RUN_ID.py" >/dev/null 2>&1
+              "rm -rf -- /tmp/disdex-allrunner-verify-$GITHUB_RUN_ID" >/dev/null 2>&1
           fi
           rm -rf "$RUNNER_TEMP/allrunner-verify-ssh" "$RUNNER_TEMP/allrunner-verify-token" \
             "$RUNNER_TEMP/allrunner-verify-plan" "$RUNNER_TEMP/allrunner-verify-owner.pub"
