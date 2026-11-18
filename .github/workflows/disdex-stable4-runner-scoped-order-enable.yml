@@ -67,6 +67,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
           PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest scripts/ops/test_disdex_runner_scoped_order_enable.py scripts/ops/test_disdex_runner_scoped_order_enable_workflow.py -v
           npx tsx tests/runner-order-permit.test.ts
           npx tsc --noEmit
@@ -104,6 +105,7 @@ jobs:
           APPROVAL_ID: ${{ inputs.approval_id }}
         run: |
           set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
           [[ "$APPROVAL_ID" =~ ^[0-9a-f-]{36}$ ]]
           [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
           [[ "$PLAN_SHA256" =~ ^[0-9a-f]{64}$ ]]
