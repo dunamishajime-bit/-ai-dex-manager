@@ -25,7 +25,11 @@ const yesterdayJst = () => {
   today.setUTCDate(today.getUTCDate()-1);
   return today.toISOString().slice(0,10);
 };
-export function BTResearchConditions({onReplay,onOpenLibrary}:{onReplay:(replay:Replay)=>void;onOpenLibrary:()=>void}) {
+export function BTResearchConditions({onReplay,onOpenLibrary,availableBaselines,selectedBaseline,onChangeBaseline,onLoadBaseline}:{
+  onReplay:(replay:Replay)=>void;onOpenLibrary:()=>void;
+  availableBaselines:{key:string;label:string}[];
+  selectedBaseline:string;onChangeBaseline:(key:string)=>void;onLoadBaseline:(key:string)=>void;
+}) {
   const [mode,setMode]=useState<DataMode>("SYNTHETIC");
   const [start,setStart]=useState("2026-01-01");
   const [end,setEnd]=useState("2026-08-31");

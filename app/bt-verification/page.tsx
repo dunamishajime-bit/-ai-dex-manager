@@ -54,6 +54,62 @@ export default function BTVerification() {
   const [selected, setSelected] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
   const [notice, setNotice] = useState("");
+  const [baselineFiles,setBaselineFiles]=useState<Record<string,{label:string;replay:Replay}>>({});
+  const [baselineSelected,setBaselineSelected]=useState("");
+  function openBaseline(key:string){
+    const item=baselineFiles[key];
+    if(!item)return;
+    setReplay(item.replay);setCursor(0);setRunning(false);setSelected(null);
+    setFileName(item.label);setTab("playback");
+  }
+  async function importBaselineSet(event:ChangeEvent<HTMLInputElement>){
+    const files=Array.from(event.currentTarget.files??[]);
+    event.currentTarget.value="";
+    if(!files.length)return;
+    if(files.length>7||files.some(f=>f.size>24*1024*1024)){
+      setNotice("基準BTのMANIFESTと最大6件のJSONを選んでください。各ファイルは24MB以下です。");return;
+    }
+    try {
+      const manifestFile=files.find(f=>f.name==="MANIFEST_UNCERTIFIED.json");
+      if(!manifestFile)throw new Error("同じフォルダー内のMANIFEST_UNCERTIFIED.jsonも選んでください。");
+      const manifest:unknown=JSON.parse(await manifestFile.text());
+      if(!manifest||typeof manifest!=="object")throw new Error("MANIFEST不正");
+      const m=manifest as {exports?:unknown;integrated_eight_runner?:unknown;production_parity_verified?:unknown;actual_exchange_fills_verified?:unknown};
+      if(m.integrated_eight_runner!==false||m.production_parity_verified!==false||
+         m.actual_exchange_fills_verified!==false||!Array.isArray(m.exports)||
+         m.exports.length!==6)throw new Error("基準BTの認証状態または件数が一致しません。");
+      const lookup=new Map<string,{sha256:string;strategy:string;bps:number}>();
+      for(const entry of m.exports){
+        if(!entry||typeof entry!=="object")throw new Error("MANIFEST項目不正");
+        const row=entry as {file?:unknown;sha256?:unknown;strategy?:unknown;bps?:unknown};
+        if(typeof row.file!=="string"||!/^disdex-baseline-20251001-20261001-(idle|fet|hype)-(10|30)bps-UNCERTIFIED\.json$/.test(row.file)||
+           typeof row.sha256!=="string"||!/^[a-f0-9]{64}$/.test(row.sha256)||
+           !["IDLE","FET","HYPE"].includes(String(row.strategy))||![10,30].includes(Number(row.bps))||
+           lookup.has(row.file))throw new Error("MANIFESTのシナリオ定義不正");
+        lookup.set(row.file,{sha256:row.sha256,strategy:String(row.strategy),bps:Number(row.bps)});
+      }
+      const imports:Record<string,{label:string;replay:Replay}>={};
+      for(const file of files.filter(f=>f!==manifestFile)){
+        const entry=lookup.get(file.name);
+        if(!entry)throw new Error("登録外の研究データ: "+file.name);
+        const bytes=await file.arrayBuffer();
+        const digest=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)))
+          .map(v=>v.toString(16).padStart(2,"0")).join("");
+        if(digest!==entry.sha256)throw new Error("SHA256不一致: "+file.name);
+        const parsed:unknown=JSON.parse(new TextDecoder("utf-8").decode(bytes));
+        if(!validateReplay(parsed)||parsed.mode!=="EXTERNAL"||
+           parsed.source?.kind!=="HISTORICAL_STANDALONE_MODEL_NOT_INTEGRATED"||
+           parsed.engineSha!=="REUSABLE_STANDALONE_MODEL_UNCERTIFIED")throw new Error("研究BT形式不一致: "+file.name);
+        if(parsed.frames.some(f=>f.positions.length>0))throw new Error("未確認建玉が含まれています。");
+        const key=entry.strategy+"_"+entry.bps;
+        imports[key]={label:entry.strategy+" / "+entry.bps+"bps（未認証・単独研究）",replay:parsed};
+      }
+      if(!Object.keys(imports).length)throw new Error("研究データがありません。");
+      setBaselineFiles(imports);setBaselineSelected(Object.keys(imports).sort()[0]);
+      setNotice(Object.keys(imports).length+"件をSHA256照合し、このブラウザに読み込みました。全8系統統合BTではありません。");
+      setTab("config");
+    }catch(error){setNotice(error instanceof Error?error.message:"基準BT読込に失敗しました。");}
+  }
 
   const isDemo = replay.mode === "DEMO";
   const totalFrames = replay.frames.length;
@@ -111,7 +167,11 @@ export default function BTVerification() {
 
       {tab === "config" && display(<>
         <BTResearchConditions onReplay={(generated) => {setReplay(generated);setCursor(0);setRunning(false);setSelected(null);setFileName("");setTab("playback");}}
-          onOpenLibrary={()=>setTab("library")}/>
+          onOpenLibrary={()=>setTab("library")}
+          availableBaselines={Object.entries(baselineFiles).map(([key,item])=>({key,label:item.label}))}
+          selectedBaseline={baselineSelected}
+          onChangeBaseline={setBaselineSelected}
+          onLoadBaseline={openBaseline}/>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <section className={tile}>
             <h2 className="text-lg font-bold text-white">模擬BTの条件設定</h2>
@@ -162,7 +222,7 @@ export default function BTVerification() {
         </section>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[["評価資産", JPY(summary.current)], ["確定損益・モデル", JPY(frame.realized)],
-            ["期間最大DD（再生済）", pct(summary.maxDD)], ["総Gross", NUM(gross.total) + "x"]].map(([name, value]) =>
+            ["期間最大DD（再生済）", pct(summary.maxDD)], ["総Gross", (isDemo || frame.gross ? NUM(gross.total)+"x" : "未確認")]].map(([name, value]) =>
             <div className={tile} key={name}><div className="text-xs text-[#8aacc3]">{name}</div><div className="mt-2 text-xl font-bold text-white">{value}</div></div>)}
         </div>
         <section className={tile}><BtcCandlestickChart replay={replay} cursor={cursor} onEventSelect={(index) => {setCursor(index); setRunning(false);}} /></section>
@@ -201,7 +261,7 @@ export default function BTVerification() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[["開始資金", JPY(summary.first)], ["現在資産", JPY(summary.current)], ["損益差額", JPY(summary.net)],
               ["最大DD", pct(summary.maxDD)], ["モデル建玉", frame.positions.length + "件"], ["イベント（直近80件）", events.length + "件"],
-              ["総Gross", NUM(gross.total) + "x"], ["対象時点", (cursor + 1) + "/" + totalFrames]].map(([name, value]) =>
+              ["総Gross", (isDemo || frame.gross ? NUM(gross.total)+"x" : "未確認")], ["対象時点", (cursor + 1) + "/" + totalFrames]].map(([name, value]) =>
               <div key={name} className="rounded-lg border border-[#2a4459] bg-[#0c2033] p-4"><p className="text-xs text-[#91adc3]">{name}</p><p className="mt-2 text-lg font-bold text-white">{value}</p></div>)}
           </div>
         </section>
@@ -236,6 +296,13 @@ export default function BTVerification() {
         <div className="mt-4 rounded-xl border border-[#35546b] bg-[#0b2133] p-4 text-sm">
           現在のデータ：<strong className="text-cyan-200">{fileName || "人工市場デモ"}</strong><br/>
           <span className="text-xs text-[#91b1c4]">識別：{replay.source?.kind ?? replay.mode}</span>
+        </div>
+        <div className="mt-5 rounded-xl border border-cyan-700/40 bg-[#0c2336] p-4">
+          <h3 className="text-sm font-bold text-cyan-100">基準BTセットの読み込み</h3>
+          <p className="mt-2 text-xs leading-6 text-[#a8c4d4]">PC内で変換したMANIFEST_UNCERTIFIED.jsonと6つの研究再生JSONをまとめて選択してください。SHA256照合後、条件設定で単独モデルを選択できます。ブラウザ内だけで読み込み、サーバーへ送信しません。</p>
+          <label className={button+" mt-3 cursor-pointer"}><FileUp className="h-4 w-4"/>基準BTセット（最大7ファイル）を選択
+            <input className="sr-only" type="file" multiple accept=".json,application/json" onChange={importBaselineSet}/>
+          </label>
         </div>
         <div className="mt-5 flex flex-wrap gap-3">
           <label className={button + " cursor-pointer"}><FileUp className="h-4 w-4"/>研究BTの再生JSONを読み込む
