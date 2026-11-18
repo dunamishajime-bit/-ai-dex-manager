@@ -129,6 +129,8 @@ try {
     "tar -C \"$runtime\" -czf /tmp/disdex-hp-approval-ui-runtime.tgz .",
     "[[ -f \"$stage/server.js\" && -f \"$stage/.next/BUILD_ID\" ]]",
     "runuser -u deploy -- node --check \"$stage/server.js\"",
+    "EnvironmentFile=/etc/disdex/hp-owner-session.env",
+    "DISDEX_OWNER_SESSION_HMAC_KEY",
   ]) {
     if (!workflow.includes(required)) {
       throw new Error("HP deploy standalone runtime contract missing: " + required);
