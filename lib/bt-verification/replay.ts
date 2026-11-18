@@ -121,6 +121,8 @@ export type Replay = {
   seed: number;
   frames: ReplayFrame[];
   btcCandles?: BtcCandle[];
+  /** Optional source-labeled per-symbol candles for read-only chart review. */
+  symbolCandles?: Record<string, BtcCandle[]>;
   strategyCatalog?: StrategyCatalogEntry[];
   researchSummary?: ResearchSummary | null;
   /** Sourced model positions still open at period end and absent from completed FILLS. */
@@ -265,7 +267,19 @@ export function validateReplay(value:unknown):value is Replay {
       }
     }
   }
-  if(value.btcCandles!==undefined){
+  if(value.symbolCandles!==undefined){
+    if(!isObj(value.symbolCandles)||Object.keys(value.symbolCandles).length>48)return false;
+    for(const [symbol,bars] of Object.entries(value.symbolCandles)){
+      if(!/^[A-Z0-9]{2,30}$/.test(symbol)||!Array.isArray(bars)||bars.length>20000)return false;
+      let previous="";
+      for(const bar of bars){
+        if(!isObj(bar)||!date(bar.time)||!date(bar.closedAt)||bar.time<=previous||bar.closedAt<=bar.time)return false;
+        if(!number(bar.open)||!number(bar.high)||!number(bar.low)||!number(bar.close)||
+           bar.low<=0||bar.low>Math.min(bar.open,bar.close)||bar.high<Math.max(bar.open,bar.close))return false;
+        previous=bar.time;
+      }
+    }
+  }  if(value.btcCandles!==undefined){
     if(!Array.isArray(value.btcCandles)||value.btcCandles.length>20000)return false;
     let previousClose="";
     for(const c of value.btcCandles){

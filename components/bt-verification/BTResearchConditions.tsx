@@ -1,10 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import type { Replay } from "@/lib/bt-verification/replay";
+import {createAnchoredChartReplay} from "@/lib/bt-verification/anchored-replay";
 
 type DataMode = "SYNTHETIC" | "BASELINE";
 type StrategyKey = "V4" | "PENGU" | "Q102" | "V52" | "FET" | "HYPE" | "IDLE";
 const STRATEGIES: StrategyKey[] = ["V4", "PENGU", "Q102", "V52", "FET", "HYPE", "IDLE"];
+/** Research ledger candidates only: not a current production route inventory. */
+const LEDGER_SYMBOLS:Record<StrategyKey,string[]>={
+ V4:["AAVEUSDT","ADAUSDT","ATOMUSDT","AVAXUSDT","BNBUSDT","BTCUSDT","DOGEUSDT","ETHUSDT","INJUSDT","LINKUSDT","LTCUSDT","NEARUSDT","SOLUSDT","XRPUSDT"],
+ PENGU:["PENGUUSDT"],
+ Q102:["APTUSDT","AVAXUSDT","DOGEUSDT","FETUSDT","NEARUSDT","RENDERUSDT","UNIUSDT"],
+ V52:[],
+ FET:["FETUSDT"],HYPE:["HYPEUSDT"],
+ IDLE:["DOTUSDT","JUPUSDT","RENDERUSDT","TAOUSDT","TIAUSDT"]
+};
 const field = "w-full rounded-lg border border-[#365a70] bg-[#0a1b2b] px-3 py-2 text-sm text-white";
 const label = "block text-xs font-semibold text-[#a5c1d3]";
 const yesterdayJst = () => {
@@ -14,7 +25,7 @@ const yesterdayJst = () => {
   today.setUTCDate(today.getUTCDate()-1);
   return today.toISOString().slice(0,10);
 };
-export function BTResearchConditions() {
+export function BTResearchConditions({onReplay,onOpenLibrary}:{onReplay:(replay:Replay)=>void;onOpenLibrary:()=>void}) {
   const [mode,setMode]=useState<DataMode>("SYNTHETIC");
   const [start,setStart]=useState("2026-01-01");
   const [end,setEnd]=useState("2026-08-31");
@@ -26,14 +37,54 @@ export function BTResearchConditions() {
   const [day,setDay]=useState("1");
   const [cost,setCost]=useState("30");
   const [selected,setSelected]=useState<StrategyKey[]>(["V4","PENGU","Q102"]);
+  const [symbols,setSymbols]=useState<string[]>(["BTCUSDT","FETUSDT"]);
+  const [seed,setSeed]=useState("123456");
+  const [busy,setBusy]=useState(false);
+  const [message,setMessage]=useState("");
+  const candidateSymbols=Array.from(new Set(selected.flatMap(strategy=>LEDGER_SYMBOLS[strategy]))).sort();
+  const enabledSymbols=candidateSymbols.filter(symbol=>symbols.includes(symbol));
+  async function startAnchoredChart(){
+    if(busy||!valid||mode!=="SYNTHETIC")return;
+    setBusy(true);setMessage("");
+    try {
+      const requested=Array.from(new Set(["BTCUSDT",...enabledSymbols]));
+      const anchored:{symbol:string;anchorClose:number}[]=[];
+      let utcDate="";
+      // Bounded concurrency avoids rate spikes against the public market API.
+      for(let i=0;i<requested.length;i+=4){
+        const batch=await Promise.all(requested.slice(i,i+4).map(async symbol=>{
+          const res=await fetch("/api/bt-verification/anchors?symbol="+encodeURIComponent(symbol),
+            {method:"GET",credentials:"same-origin",cache:"no-store"});
+          const data:unknown=await res.json();
+          if(!res.ok||!data||typeof data!=="object")throw new Error(symbol+" の実終値を検証できません（HTTP "+res.status+"）。");
+          const d=data as {close?:unknown;utcDate?:unknown;symbol?:unknown};
+          if(d.symbol!==symbol||typeof d.utcDate!=="string"||!Number.isFinite(d.close)||Number(d.close)<=0)
+            throw new Error(symbol+" の終値応答が不正です。");
+          return {symbol,anchorClose:Number(d.close),utcDate:d.utcDate};
+        }));
+        for(const item of batch){
+          if(utcDate&&utcDate!==item.utcDate)throw new Error("銘柄の基準日が一致しません。");
+          utcDate=item.utcDate;
+          anchored.push({symbol:item.symbol,anchorClose:item.anchorClose});
+        }
+      }
+      const replay=createAnchoredChartReplay({
+        startDate:start,endDate:end,seed:Number(seed),initialJpy:Number(capital),
+        anchorUtcDate:utcDate,symbols:anchored,costBps:Number(cost) as 10|30,interest,
+        contribution:deposit?{amountJpy:Number(depositAmount),frequency,day:Number(day)}:undefined
+      });
+      onReplay(replay);
+    }catch(error){setMessage(error instanceof Error?error.message:"生成に失敗しました。");}
+    finally{setBusy(false);}
+  }
   const maxEnd=yesterdayJst();
   const validDates=start.length===10&&end.length===10&&start<=end&&end<=maxEnd;
   const validCapital=Number.isFinite(Number(capital))&&Number(capital)>0;
   const validDeposit=!deposit||(Number.isFinite(Number(depositAmount))&&Number(depositAmount)>0);
   const valid=validCapital&&validDeposit&&(mode==="BASELINE"||validDates)&&selected.length>0;
   return <section className="rounded-xl border border-[#29475b] bg-[linear-gradient(145deg,#13283b,#0d1e30)] p-4 shadow-[0_8px_32px_rgba(1,10,26,.16)]">
-    <h2 className="text-lg font-bold text-white">BT条件設定（新仕様・接続準備中）</h2>
-    <p className="mt-2 text-xs leading-6 text-[#95b5ca]">この設定欄は入力仕様の先行実装です。下の従来デモ再生にはまだ反映されません。基準BTのデータ照合・Productionロジック接続後に実行を有効化します。</p>
+    <h2 className="text-lg font-bold text-white">BT条件設定・模擬価格研究</h2>
+    <p className="mt-2 text-xs leading-6 text-[#95b5ca]">終値アンカー型チャート生成は実行可能です。Productionロジックの判定・約定はまだ接続されていません。従来デモ再生とも独立しています。</p>
     <div className="mt-4 grid gap-4 sm:grid-cols-2">
       <div><label className={label} htmlFor="bt-mode">データモード</label><select id="bt-mode" className={field+" mt-2"} value={mode} onChange={e=>setMode(e.target.value as DataMode)}>
         <option value="SYNTHETIC">模擬チャート（終値アンカー型）</option><option value="BASELINE">基準BT（実市場データ）</option>

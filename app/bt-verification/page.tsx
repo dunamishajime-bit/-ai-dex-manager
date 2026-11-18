@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "
 import { Activity, ArrowRight, Download, FileUp, Pause, Play, RotateCcw, ShieldCheck } from "lucide-react";
 import { BTWorkspaceShell, type BTWorkspaceTab } from "@/components/bt-verification/BTWorkspaceShell";
 import { BTResearchConditions } from "@/components/bt-verification/BTResearchConditions";
+import { ResearchSymbolCharts } from "@/components/bt-verification/ResearchSymbolCharts";
 import { BtcCandlestickChart } from "@/components/bt-verification/BtcCandlestickChart";
 import { EquityTimelineChart } from "@/components/bt-verification/EquityTimelineChart";
 import { GrossAllocationPanel } from "@/components/bt-verification/GrossAllocationPanel";
@@ -72,8 +73,11 @@ export default function BTVerification() {
     f.events.map((event) => ({ event, time: f.timestamp, index: i }))).slice(-80).reverse(), [replay, cursor]);
   const entryCount = events.filter(({ event }) => event.includes("ENTRY ")).length;
   const gross = grossForFrame(frame);
-  const sourceLabel = isDemo ? "模擬デモ・実取引なし" : "持込BTデータ・未認証";
-  const sourceWarning = isDemo
+  const anchoredPriceOnly = replay.source?.kind === "SYNTHETIC_ANCHORED_DAILY_NO_STRATEGY";
+  const sourceLabel = anchoredPriceOnly ? "前日終値アンカー・価格のみ（戦略未接続）" : isDemo ? "模擬デモ・実取引なし" : "持込BTデータ・未認証";
+  const sourceWarning = anchoredPriceOnly
+    ? "前日実終値をAster公開日足で検証し、指定期間の価格のみ人工生成しています。実取引、Productionロジック判定、仮想約定は実施していません。"
+    : isDemo
     ? "ここでのローソク足・判定・約定・損益はすべて模擬生成です。実際のV4・PENGU・Q102のロジックや過去相場、運用成績とは一致しません。"
     : "持込データの形式を検証して表示しています。実相場や最新LIVE pinとの一致・約定の正しさを認証したものではありません。";
 
@@ -106,7 +110,8 @@ export default function BTVerification() {
       </div>
 
       {tab === "config" && display(<>
-        <BTResearchConditions />
+        <BTResearchConditions onReplay={(generated) => {setReplay(generated);setCursor(0);setRunning(false);setSelected(null);setFileName("");setTab("playback");}}
+          onOpenLibrary={()=>setTab("library")}/>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <section className={tile}>
             <h2 className="text-lg font-bold text-white">模擬BTの条件設定</h2>
@@ -161,6 +166,7 @@ export default function BTVerification() {
             <div className={tile} key={name}><div className="text-xs text-[#8aacc3]">{name}</div><div className="mt-2 text-xl font-bold text-white">{value}</div></div>)}
         </div>
         <section className={tile}><BtcCandlestickChart replay={replay} cursor={cursor} onEventSelect={(index) => {setCursor(index); setRunning(false);}} /></section>
+        <ResearchSymbolCharts replay={replay} cursor={cursor} onSelectEvent={(index)=>{setCursor(index);setRunning(false);}} />
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
           <section className={tile}><h3 className="mb-3 text-base font-bold text-white">評価資産・ドローダウン</h3><EquityTimelineChart frames={replay.frames} cursor={cursor}/></section>
           <GrossAllocationPanel frame={frame} limits={replay.limits} unverifiedCap={!isDemo} researchManifestCap={false}
