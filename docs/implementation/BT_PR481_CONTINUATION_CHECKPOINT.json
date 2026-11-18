@@ -1,0 +1,138 @@
+{
+  "schema": "disdex-bt-pr481-continuation-checkpoint-v1",
+  "repository": "dunamishajime-bit/-ai-dex-manager",
+  "pr": 481,
+  "branch": "feat/bt-visual-gross-20261114",
+  "baseWorktree": "C:\\tmp\\disdex-bt-visual-gross-20261114",
+  "lastCommittedHead": "799d106bbb39a6886d7d325b1c2e4efd0b42a1e0",
+  "liveReadWriteProhibited": true,
+  "productionMergeProhibited": true,
+  "codexWorktreeWriteProhibited": true,
+  "runnerStopsOrdersKillSwitchProhibited": true,
+  "sourceRef": "9118eeaa6c209dc6e37887cf5be139b3baaa005d",
+  "autoResumeAutomation": "6af9fb8511708191990cdbd6cb9985f4",
+  "checkpointSemantics": "Task complete only if tests pass and head pushed. On reconnect, read actual git head first; status file can lag latest commit. Do not trust source manifest as live production.",
+  "tasks": [
+    {
+      "id": "BT-481-A",
+      "status": "committed",
+      "head": "e2da78c31",
+      "scope": "PENGU original V2 Short V20 Recovery V8 pure entry shadow"
+    },
+    {
+      "id": "BT-481-B",
+      "status": "committed",
+      "head": "db316dfdb",
+      "scope": "Q102 HIGH_VOL S1/S2 source features, fail-closed monthly rule absent"
+    },
+    {
+      "id": "BT-481-C",
+      "status": "committed",
+      "head": "c8a9caf24",
+      "scope": "33 symbols, V4 pinned FAILED_BREAK native H2 core shadow, no full V4 parity"
+    },
+    {
+      "id": "BT-481-D",
+      "status": "committed",
+      "head": "029df04c7",
+      "scope": "V52 AMZN pure original Yahoo gate"
+    },
+    {
+      "id": "BT-481-E",
+      "status": "committed",
+      "head": "1ed741a32",
+      "scope": "V52 exact V50 candidate method dual-source isolated fixture"
+    },
+    {
+      "id": "BT-481-F",
+      "status": "committed",
+      "head": "6715fbef8",
+      "scope": "V52 causal two-source microquote artificial temporal regression"
+    },
+    {
+      "id": "BT-481-G",
+      "status": "committed",
+      "head": "799d106bb",
+      "scope": "Q102 original native 180-day selector over closed-trade research fixtures only"
+    },
+    {
+      "id": "BT-481-H1",
+      "status": "committed",
+      "scope": "Offline seven-family causal observation schema/validator; 11 negative regression cases; no real signals or fills",
+      "requirements": [
+        "each data source locked to cutoff",
+        "source pin",
+        "runner identity",
+        "feature-only vs candidate vs true entry distinguished",
+        "no simulated order unless independent lifecycle validated"
+      ]
+    },
+    {
+      "id": "BT-481-H2",
+      "status": "committed",
+      "scope": "Connect actual SHA-pinned native candidate outputs for all seven families to the offline causal observation ledger; prove source availability timestamps and stage mapping; no invented fills",
+      "head": "ba23fe3100c94cebf6c14bd2a7ded8f81692667d",
+      "proofLedgerSha256": "b1a2714e028a11c2779ab0d430120be15a50bb1b6d8fb9bf83071d4727cd197b"
+    },
+    {
+      "id": "BT-481-H3",
+      "status": "committed",
+      "scope": "Show the source-only seven-family H2 archive manifest and explicit feature/candidate/zero-fills stage distinction on the dedicated BT page, with regression and UI tests; no production or LIVE changes",
+      "evidence": "docs/implementation/BT_PR481_H3_SAVED_SOURCE_EVIDENCE_UI_20261116.md",
+      "tests": "BT verification React static markup, full Next.js build, TypeScript typecheck PASS"
+    },
+    {
+      "id": "BT-481-I1",
+      "status": "committed",
+      "scope": "Pin original pre-Codex V4 full pure candidate-builder and dependencies by exact Git object; 22-day 245-H1 artificial source replay, 118 unadmitted candidates across 23 routes, no trade or current LIVE parity.",
+      "proof": "docs/implementation/BT_PR481_I1_V4_FULL_NATIVE_SOURCE_20261116.md",
+      "test": "scripts/bt-hp-v4-full-source-integrity-selftest.py plus scripts/bt-hp-v4-full-native-source-selftest.ts",
+      "risk": "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06"
+    },
+    {
+      "id": "BT-481-I2",
+      "status": "committed",
+      "scope": "Read-only Git old 9118 V4 source vs master 6f1: 11 identical paths absent from master tree; not current VPS pin proof",
+      "proof": "docs/implementation/BT_PR481_I2_V4_GIT_MASTER_SOURCE_DIFF_20261116.md",
+      "test": "scripts/bt-hp-v4-research-vs-master-pin-audit.py; Git cat-file master commit PASS",
+      "liveChanges": 0
+    },
+    {
+      "id": "BT-481-I",
+      "status": "blocked_by_current_production_pin_and_y06_leakage",
+      "scope": "Recover current V4 original route family/source pin and complete causally integrated V4 entry (I1 original Git source reconstruction completed; next compare current V4 active pin, resolve blocked Y06 hindsight, and prove complete causal strategy/admission before simulated entries)",
+      "blocker": "Cannot certify actual live V4 runner SHA from historical Git/master alone; frozen V2 reports BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06 and independent causal proof is unavailable",
+      "nextReadOnlyEvidence": "Owner-approved operator runtime pin/immutable release + independent forward Y06 source test without altering Codex"
+    },
+    {
+      "id": "BT-481-J",
+      "status": "pending",
+      "scope": "Generate Q102 S1/S2 180-day completed source simulation and prove stage membership; no hand-picked rules"
+    },
+    {
+      "id": "BT-481-K",
+      "status": "pending",
+      "scope": "Q102 online Layer2 and portfolio opportunity Layer3 source-consistent causal replay"
+    },
+    {
+      "id": "BT-481-L",
+      "status": "pending",
+      "scope": "Native STOP, exits and position quantity/mark ledger, real per-source cost/funding applied only where backed by data"
+    },
+    {
+      "id": "BT-481-M",
+      "status": "pending",
+      "scope": "Seven-runner integrated synthetic timepath under production gross caps, OOS/checks, isolated 10bps vs 30bps, 6-month run and preserved event SHA; do not borrow historical STABLE4 return"
+    },
+    {
+      "id": "BT-481-N",
+      "status": "pending",
+      "scope": "Owner archive plus BT page UI end-to-end authenticated desktop/mobile; never unapproved public release"
+    },
+    {
+      "id": "BT-481-O",
+      "status": "blocked_owner_approval",
+      "scope": "Formal PR merge/HP deployment once tests and approval pass; no LIVE changes"
+    }
+  ]
+}

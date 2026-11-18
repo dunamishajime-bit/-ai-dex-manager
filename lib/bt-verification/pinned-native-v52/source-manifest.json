@@ -1,0 +1,25 @@
+{
+  "sourceRevision": "9118eeaa6c209dc6e37887cf5be139b3baaa005d",
+  "sourcePath": "scripts/dd-reduction/v52_amzn_yahoo_gate.py",
+  "upstreamRawSha256": "a460ec08d3b9d5dfc5df0d43edb41e54a37e6fc280af8ebf9f8a20ab4821e920",
+  "extractedNativeFunctionSha256": {
+    "_finite_positive": "068d2574bd9a8f033e802ebd86d635cc6adf82119b02773e6e2cf4c545a6495e",
+    "_date_from_ms": "55e6c9cb9240db7e940a78b9780eca1d44f06784c18837200ec897e4a3b14448",
+    "_observed_fixed_holiday": "f12dc0f405cb74fb6106743f8c4248501e995b45dfccd938447ee50421c56c15",
+    "_nth_weekday": "c7ddbbeec6165a8dab25147718361ee4e304efcbda7e329d2f2434ec68785427",
+    "_last_weekday": "656567a542b54f8a9fea1f8139874a58b53b03afdb226a07715b86cd3911cb82",
+    "_easter_sunday": "dcae29075295282f71fd81b4ff2d0b384be4da431f0888dc4f03c92357f96f35",
+    "nyse_holiday_dates": "35e6675c48569298339eaba02ef86f7cb5f2c1e1d592bdabe0b912cb56297dca",
+    "is_nyse_session_date": "257c975a1257f83643b17e64e8def75123d3ea02c7faa824bc1a02e41b5cdf7f",
+    "previous_nyse_session_date": "90999b9e841261706118a5cc85d2d3731c869e90dbd15a80cf9cd4a0b28da38f",
+    "_is_regular_session_start": "7f4dc3c32acb7e9635615c9dde7045d2a65084c03e8b0cbd9e0cffe1cacc8e2e",
+    "normalize_yahoo_h1_bars": "60fcd87070a53101f019c148fc331cbe53e4e09f84ebbfc69d971163b2418ebb",
+    "_data_unavailable": "58c53e184e3a0feee2a4606430b1e0d182c0df8fe18db3fe1dc8b67669a5f67b",
+    "evaluate_amzn_short_yahoo_gate": "29e856929c899dc7e8db6110f9517f018b601b5798dafea20b34655f6230a62d"
+  },
+  "nativeFunctionCount": 13,
+  "noLiveHttpOrOrders": true,
+  "fullV52Parity": false,
+  "outputKind": "AMZN_SHORT_REFERENCE_GATE_ONLY",
+  "requiresIndependentAsterAndYahooBasisForV52Trades": true
+}

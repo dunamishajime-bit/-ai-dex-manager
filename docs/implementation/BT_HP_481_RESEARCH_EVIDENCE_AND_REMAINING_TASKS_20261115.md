@@ -1,0 +1,113 @@
+# PR #481 — BT検証の恒久タスク・証拠台帳（2026-11-15）
+
+## 運用方式（ユーザー指示）
+
+完了したタスクは**そのタスクのソース／ユニットテスト／検証手順／結果証拠を揃えて単独コミット→GitHubへPush→記録**。報告を挟まず次のタスクを開始する。調査途中の未検証統計を「改善済み」へ昇格させない。結果はOwner PCのprivate JSON/CSVに保存し、GitHubへは元データをPushしない。全BTの正式本番経済パリティ・OOS過学習排除が成立する前に、LIVE切替に結びつけない。
+
+## 完了済みの主な研究タスク（正しい対象と限界）
+
+| Commits | テーマ | 結果・上限 |
+| --- | --- | --- |
+| `844aabf6f` | HYPE native M5出口契約 | native STABLE TREND候補78のATR/Stop/TP/モデル出口78/78一致、**実約定Fill/Source KillSwitch証明は未成立** |
+| `2ec22c581` | HYPE standalone DD | 56/78モデル採用、15勝41敗。10bps DD−19.32%、30bps DD−23.26%、30bpsは基準DD20%超過 |
+| `ace560545` | 8ロジックの名称スコープ | native売買系統7と共通制御2。V12を独立第8戦略として数える根拠なし |
+| `b06791c14` | HYPE/native/H48/no-HYPE統合BT | HYPE nativeのモデルDD−40.24%(10) /−27.37%(30)。全6ケース各105,121 source Gross/Equity観測を再計算 |
+| `c1af03936` | Q102 FET PB168 | Pretarget train PF0.413／validation2.132／prehold4勝。target統合6件5勝1敗でも対象年1負けで削除不可 |
+| `206f469d7` | Q102 HIGH_VOL | 19元候補(ONDO10 SUI7 ARB2)、10bps入場7(未決済1)、30bps入場8(未決済1)、独立OOS不足 |
+| `2baeb0021` | HYPE Layer2/3 as-of Shadow | 78候補、直近20完了取引の参考勝率を計算可能な51候補。採用権限なし |
+| `0f7c93ce5` | HYPE Layer3同時刻競合 | 78時刻のうち20時刻で別Runner候補計28、EV推定不足で優先順位null |
+| `8b016fd05` | HYPE Layer2 prequential | モデル採用36件でrecent20 Brier0.2162はall-history0.20594に劣る、採用不可 |
+| `2d1db5f72` | PENGU SHORT_V20 | Pretarget候補121でrobust0、Forward6全BLOCKは勝ち2件も失う。方向SHORT固定、Gate採用なし |
+| `0a67c439c` | V4 Y06出口研究 | Horizon4、ProfitLock10、OnlineSkip65すべてPretarget/Forward合格0 |
+| `e015102b3` | V4 Y06方向とEpisode | 352候補の誤方向proxy Train18.48%→Validation47.14%→Test67.61%。非IID Episode31、境界跨ぎ2 |
+| `3a7302b2f` | Q102 AVAX/UNI再設計Forward | AVAX/UNI構造候補Pretarget3/9でForwardは混在、Online AVAX3 target mean全負/UNI0、採用なし |
+
+これらの成績は**現行本番のNative Quantities/venue Filled Ordersで検証された結果ではなく、historical researchモデル**。STABLE4研究wrapperには元sourceのProduction以外のGateが残る。以前のHYPE H48研究入口5件と現行HYPE TREND入口78候補は別ロジックであり、長期複利最終金額を同一政策として比較しない。
+
+## 残存タスクの優先順位（未完＝未認証）
+
+1. **全Runner最新immutable pin / Source→Decision→Executor provenance**：V4を含む各pinとResearch使用source SHAの表・差分・バージョン固定を作る。V4はCodex切替中につき作業競合回避、本番設定・認証・systemd操作はしない。
+2. **Shared Risk／Gross／STOP／KillSwitchのhistorical as-of証拠**：入口時点の既存建玉、未約定注文、プロテクトSTOP所有、risk7.5%、Crypto3.0x/Stock1.5x/Total3.5x、API競合・margin、Fee/Fundingの証拠を元ソース/ledgerと照合する。HYPE過去研究5件に関する元のas-of共有Gateは0/5証明済み、UNKNOWNならFail Closed。Venueレベルは署名済みソース以外で断定しない。
+3. **Q102 HIGH_VOLの対象年前→Forward別期間 native再生**：ONDO/SUI/ARBの19候補は2026年7〜9月集中。独立期間が不足したらゲート採用せず、別市場データ＋時間分離・Episode相関で方向/出口を検査。
+4. **V4 REC_Y06のEpisode単位の誤SHORT回避研究**：352候補を31 Exposure Episodeへ再分解、Validation悪化を再検証。Code/Live切替はCodexが実施。対象年のtest損失を選別・しきい値調整に使わない。
+5. **PENGU SHORT_V20の固定SHORT複合判定**：Prehold/Forwardでロバストな候補がまだ0、Forward6件の全遮断は改善ではない。V2/Recovery V8にShort V20変更を誤適用しない。
+6. **Q102 AVAX MR24／UNI MR72の方向・出口**：研究候補AVAX3/UNI9からForward bestを遡及採用しない。現行pin/exit一致・独立OOS・5分M5経済・同一レイヤーで保留。
+7. **HYPE/IDLE Layer2 OnlineとLayer3 Opportunity**：HYPE過去参考最近勝率のCalibrationは基準に劣る。V4/Q102/PENGU/FET同時候補のas-of EV・信用度・採用機会費用、将来コスト条件をソースから生成し事前freeze。不明ならEV順位を空欄のままにする。
+8. **10bps／30bps統合複利BT完全再計算**：全7売買系統と管理Runner責務の明示、全Fill、model-open/terminal position, DD, False direction, Gross, 10/30bps、JPY10,000開始／2025-10-01〜2026-10-01 UTC。モデルDD20%以下は達成前提ではなく合否条件。勝率改善・利益維持は確認してからGate採用。
+9. **UI専用BT研究ページ**：ローソク足を完了H1/M5生成・as-of足ごとのprice/OHLC上下実動作と連動させ、背景/Balance/専用メニュー／HP戻る・動的Grossマーカーと仮想決済を検証。研究モデルに本番認証済み表示を付けない。HP正式反映は別途Owner承認とCIパイプライン。
+10. **最終Approval/Production**：GitHub Actions/HPの正式承認とCodexによるV4切替、Ownerの許可されたscopeでのみLIVEへ。研究PR #481はDraftを維持し、本番注文・Cancel・STOP/保有建玉の操作は別経路にする。
+
+## この台帳作成時点でのオフライン回帰検証
+
+- `python -m unittest discover -s tests -p 'test_bt_hp_*.py' -q`: **194 tests PASS**。
+- `npx tsx scripts/bt-hp-native-hype-trend-h1-selftest.ts`: **12 tests PASS**。
+- `npx tsx scripts/bt-hp-native-hype-exit-contract-selftest.ts`: **15 tests PASS**。
+- `npx tsx scripts/bt-hp-replay-selftest.ts`: **10 tests PASS**。
+- `npm run typecheck` と `npm run build`（Next.js 16.2.6 webpack）：**PASS**、researchページ `/bt-verification` のビルドルートを確認。
+- このPASSは**開発ブランチのオフライン検証**。GitHub CI・HP正式承認・LIVE切替・Portfolio経済パリティ証明とは区別する。
+
+## Fail-closed継続規則
+
+- Target-year 2025-10〜2026-10の負けから停止Gate・閾値・post-entry Exitを作り、同じ期間で成果を誇示しない。研究と認証・Forwardの母集団は明確に切る。
+- Episode相関・保有中MTMと約定済み損益・実venue FillとモデルFill・資金予約Grossと時価Grossを区別する。
+- 独立市場と経済パリティを満たす改善が出るまでは、**利益・勝率・DD改善済み／本番へ採用可能**とは書かない。
+- この台帳を次回再開地点とし、タスクごとに文書・ユニットテスト・コミットを積み上げて続行する。
+
+## 追記：2026-11-15 Codex V4切替後の新たな研究ブロッカー
+
+- ユーザー申告のV4切替完了を踏まえ、VPS登録manifestをread-onlyで確認：`V12_V4=e788abc82e80f9fc7ab0e1ba83fdb8be267eb513`。V4対応Broker稼働は観測したが、新V4本体のactive/runningとvenue状態は未認証。旧unit failedが残るため、旧unitの失敗を新V4に直接帰属しない。詳細：`V4_CODEX_POST_ACTIVATION_READONLY_HANDOFF_20261115.md`。
+- `01c8f7a13` 現行9pin manifestと10/30bps研究BT7系統を比較。**V4とHYPEにsource mismatch**、Q102/PENGU/V52/IDLE/FETはpin SHA一致のみ。新V4 sourceの本番経済完全再計算まで`BLOCKED_REPLAY_REQUIRED`。本番LIVE/STOP証明は別。
+- `fe0269635` 研究BT結果画面に切替後V4ピン差分を明示。既存HYPE H48との差分警告は維持。
+- `0742bc89b` HYPE native TRENDとHYPEなし対照の10/30bps、合計4つのsource-hashed private ReplayをOwner PC内へ生成。Aster BTC確定H1 8,928本、研究元Gross・Funding/Partialイベント、未決済モデル建玉を保持。研究ケース3種を`source-pin-observation.ts`で明示警告、SHA256検証4/4 PASS。Private: `C:\tmp\bt481-hp-replay-library-native-hype-nohype-20261115`。**HP正式配信・publicへのコピーはしていない**。
+- `ec7a315ef` V4 Codexに返すread-only確認とimmutable release source取得・検証の要件を文書化。
+- 追加後のオフライン検証：Python204件PASS、追加native/noHYPE private library 4件SHA256 PASS、V4 pin複数ケースUI assertion PASS、TypeScript typecheck／Next.js webpack build PASS。GitHub CIは最新SHAについて別途確認。
+- **未完了の最優先**：新V4 release `e788...` のexact runtime sourceと正式LIVE本体・STOPの読取専用証拠。GitHub commit APIにはこのSHAのcommit objectなし。旧STABLE4のV4をこの新V4へそのまま同一視してBT完成/正式LIVE経済一致としない。要求DD≤20%は元研究シナリオの現状で未達成であり、改善済みを主張しない。
+
+## 追記：2026-11-15 Shared Risk・V52資本・最大DD・IDLE Layer2・同時刻Gross Gateの実証
+
+順番にテスト→証拠作成→単独コミット→GitHub Pushを終えてから次タスクへ移動。
+
+1. `cfcd3ad81`：Shared Risk 7.5% と日次Gate・Gross時価・V52専用日次リスクを10/30bps全105,121×2の5分時点で照合。10bps 1,025・30bps1,026モデルAdmissionでGate True時新規Entry0。Gross MTMの上限超過は存在し、入場超過と分離。V52の損失率が極端になり分母スケール未解決と判定。根拠 `BT_HP_SHARED_RISK_V52_GROSS_ASOF_AUDIT_20261115.md`。
+2. `0ac782968`：上記V52分母の元研究ソース式を再現。V52資本は `max(約800円, equity - 他のV96対象銘柄のGross Notional - 10%reserve)`。10bps81、30bps83の最低資本分母すべてが元5分時価Positionから再現可能。ただし本番運用設計の妥当性・V52ライブ約定は未認証。根拠 `BT_HP_V52_MINIMUM_CAPITAL_DENOMINATOR_PROVENANCE_20261115.md`。
+3. `44751c5f1`：元研究全5分MTMで最大DDピーク 2026-08-05 07:00 UTC → 2026-09-22 11:00 UTC。10bps −40.2388%/−383.66万円、30bps −27.37075%/−112.68万円。Cash＋元建玉未実現PnLとEquity完全一致。決済ベースはQ102が最大損失だが原因の識別は別検証必要。DDの悪い期間から閾値fitを禁ずる。根拠 `BT_HP_INTEGRATED_MTM_MAX_DD_FALSE_DIRECTION_WINDOW_20261115.md`。
+4. `5889157e7`：Owner非公開のHYPE TRENDあり／なし比較モデル(10/30bps)をBT研究ライブラリのUIへ追加。4-case INDEXが揃いSHA/出所/Grossが妥当な場合だけ比較表示。両経路でDD20%未達。過去研究のHYPE非採用が本番停止の根拠になると主張しない。型検査＋Next build＋全Python PASS。根拠 `BT_HP_NATIVE_HYPE_SIDE_BY_SIDE_MODEL_COMPARISON_20261115.md`。
+5. `6f05aa82e`：IDLE新1x/1-slot（RENDER固定SHORT、DOT固定LONG、JUP/TIA Online）の研究元Frozen pretarget→Target270・Forward33の別市場照合。Target30bps勝率53.70%、単独決済DD−33.26%、Forward30bps勝率66.67%・DD−14.38%。母数33で高勝率保証不可。別ALL5P Online確認は218件中反対Gateが0で成績改善なし。根拠 `BT_HP_IDLE_1X_VNEXT_LAYER2_FORWARD_20261115.md`。
+6. `6d175ad9f`：Gross3.0/1.5/3.5xの研究新規Admission Gateを同じtickの**複数Entryの合算**で確認。10bps計1,025件（176回複数同時）、30bps1,026件（174回複数同時）。新規入場によるモデルGross上限超過0。既存Stock MTM 1.5x超過は同時点10bps15・30bps16件だが、その際に新Stock Grossを増やしたわけではない。モデル登録時点での約定実態は未認証。根拠 `BT_HP_GROSS_ENTRY_ASOF_TICK_MULTIPLE_ADMISSIONS_20261115.md`。
+
+BT Python回帰テスト **252件PASS**（今回まで）。研究Owner private JSON元資料は非公開維持、GitHubへは監査ソース・ユニットテスト・文書だけ。既存のsourceピン不一致（新V4/HYPE）と残存のDD20%超過、Signed venue STOP/Fillの不一致、独立相場による全Runner統合OOSの欠落は依然として最重要ブロッカー。本番LIVE Runner・注文・STOP・Kill Switch・資金Grossの操作は0件。
+
+次の優先研究はIDLE/ HYPE Layer3同時点EVの証拠確認、Q102 HIGH_VOL独立Forward集計、Risk/fee/gross同時競合・V4最新版元Sourceの研究統合リプレイ。結果を見てから対象年の損失Gateを逆算最適化しない。
+
+## 追記：2026-11-15 13:55 JST以降 — BTCレジームとQ102 HIGH_VOL年度末右打切り
+
+1. **`7a9f449f4`**：Aster BTC H1連続8,928本に限定、ENTRYの直前に確定した足のみを使用した24h/72h return・24h volatilityを固定の説明用カテゴリに集計。DD谷2026-09-22の10bps model exit59件のうち、BTC高変動タグ11件中10件敗北。ただし30bpsは同じ11件中6敗で、対象年に合わせたHigh-vol Gate導入は不可。10bps/30bpsの全モデルFee/Funding、source SHAとDD区間を元台帳に照合。 `BT_HP_BTC_CLOSED_H1_MAXDD_REGIME_FALSE_DIRECTION_20261115.md`。
+2. **`86df81bb9`**：Q102 HIGH_VOLの事前固定90日min5/PF0.60 online shadow GateはPretarget202件の基準勝率49.01%→Gate採用138件44.20%、Target一回だけ18件33.33%→通過15件20.00%に悪化。ターゲット遮断3件は結果的に全勝、対象年へリフィット禁止。150候補のrobust gate0。研究Target baseline18とNative19は母数が異なるまま別Gate。 `BT_HP_Q102_HIGHVOL_FROZEN_SHADOW_TARGET_GATE_20261115.md`。
+3. **`4ddcfd195`**：Q102 HIGH_VOL Native 19候補（ONDO10/SUI7/ARB2）をsource pinの3台帳へIDで照合し、対象年終端までに**18件決済、SUI LONG1件右打切り**と確定。未決済 Native ID `HIGH_VOL:SUIUSDT:1790650800000`、2026-09-29 04:00 UTC entry、予定Exit2026-10-02 03:00 UTC。基本native出口は`RIGHT_CENSORED_PERIOD_END`でFillなし。統合10/30bps双方で`Q102P_00224`の期末未決済を再確認。研究Shadow baseline18との**件数差は正しく区別できた**がOnline通過15件の行単位ID完全一致までは未証明。`BT_HP_Q102_HIGHVOL_19_TO_18_CLOSED_END_BOUNDARY_20261115.md`。
+
+BT Python回帰テスト合計 **282件PASS**。3タスク各々テスト→Git commit→Push済み。元Private証拠データはPC維持、public/Productionへ無断公開していない。GitHub PR #481 はDraft維持。最新V4 source完全一致、8Runner役割/全銘柄統合OOS、最大DD20%以下・勝率向上は継続ブロッカー。実注文・決済・STOP・Kill Switch・GitHub master merge・HP本番デプロイ0件。
+
+
+## 追記：2026-11-16 BT-481-J — Q102 S1/S2 前180日Nativeモデル決済台帳（人工H1）
+
+- 元Pinned native HIGH_VOLのgrid/72h出口/normal費用/180日月次Selectorを変更せず、独立人工H1で入口→出口が完成したモデル取引のみを再生。前336Hウォームアップ＋正確な前180日学習窓を証明。固定2ルールでgrid一致87、ルール内overlap遮断60、**Native出口済モデル27件**。将来・欠損・偽グリッド・未決済を拒否し、各Native Exitの価格/理由/純Returnの全件再計算とdeterministic再実行がPASS。
+- Native selectorが人工研究ルール1件を選択したが、上流S1/S2のstage membership証明がないため `SELECTED_RESEARCH_ONLY`、`nativeS1S2Orders=0`。対象は人工H1のモデル出口で、**LIVEや現行Targetの実約定27件ではない**。対象年の勝率・DD改善も一切主張しない。
+- 元モデルNormal費用 perSide0.0006/fundingDay0.0002 とユーザー指定10/30bps統合BTは別。Model eventsの個票JsonとSHA256はOwner PC非公開 `C:\Users\dis\disdex-bt481-private-evidence-20261116`。再実行・証拠は `BT_HP_Q102_S1_S2_180D_NATIVE_CLOSED_MODEL_REPLAY_20261116.md`。固定本番Q102 pin、上流S1/S2 ID、完全市場のOOS、Portfolio/Shared Risk/Gross/venue経済パリティは今後のタスク。V4 Codex切替・Productionは触れない。
+
+- **BT-481-J追補（同日）**：人工月末でNative未決済の右打切りを合成検査。未決済候補をルール内slotとして保持し後続モデル発注重複を防止。基準27件の研究結果は不変。最新Owner private証拠 SHA256 `2E276765462D6ED0E6BCDF0DA458E50F22DB34937A8398609194F80F3DF293E8`。実S1/S2所属ID・本番取引認証は引続き未達。
+
+## 追記：2026-11-16 BT-481-K — Q102 S1/S2旧研究フィクスチャの出所監査
+
+- Owner PCの旧S1/S2 `quality102_s1s2_known_fixture.csv`（18行：S1=8/S2=10、6通貨）と元Pinned Native source SHA `7483c4...b8f` をread-only照合。元旧研究コードが `ORIGINAL_RAW_GENERATOR_PROVEN=False` を明示しており、**原30 Expanded候補と所属IDが未証明**。したがって **`LEGACY_FIXTURE_CONTRACT_ONLY_STAGE_MEMBERSHIP_UNVERIFIED`（期待exit2）** を維持。歴史的18件はBT-481-Jの人工H1モデル決済27件とは別母集団。
+- `scripts/bt_hp_q102_legacy_stage_membership_audit.py` + `tests/test_bt_hp_q102_legacy_stage_membership_audit.py`（合成9件PASS）、非公開Owner監査JSON SHA `0EAC69AEFCC69468DA15C9BD70B7CB7476C07263820B26F16E7489E21AA46B76`。詳細 `BT_HP_Q102_S1S2_LEGACY_STAGE_PROVENANCE_20261116.md`。実注文・LIVE・STOPS・Codexには変更なし。
+
+## 追記：2026-11-16 BT-481-L — S1/S2旧研究6銘柄Synthetic v5ソース照合
+
+- Owner PC旧Q102 S1/S2フィクスチャ6銘柄のうち既存v4フィードで不足したONDO/SUI/OP/SEI/ARBを、独立opt-in synthetic v5へ追加。v5 38銘柄（暗号資産30/株8）、6銘柄全てでNative特徴量計算が可能。22日528確定H1のうち336Hウォームアップ後192H×6=1,152評価、元のRaw Grid Match 332（閾値組合せの重複があり、332約定ではない）。
+- v1～v4の既存分岐・研究元pinに変更なし。v5とv4の価格経路は別のseed stream消費で異なるので、v4旧実績へ継ぎ足さない。Stage membership、Native monthly rules、30 expanded raw IDs、前180d実市場学習は引き続き未証明。正式S1/S2シグナル/Fill0。
+- `bt-hp-q102-legacy-s12-v5-synthetic-selftest.ts`、既存S34 v3/Native HIGH_VOL自己テスト、限定TypeScript型検査PASS。非公開再現集計SHA256 `F612514035A6E0FAEF02FA01E4FB62BB696048CC06FCFF9B88B246B287E9A056`。詳細 `BT_HP_Q102_LEGACY_S12_SYNTHETIC_V5_SOURCE_COVERAGE_20261116.md`。本番/注文/STOP/Codex変更なし。
+
+## 追記：2026-11-16 BT-481-M — Synthetic v5の194日M5からNative 180d出口付き台帳
+
+- v5限定で最大60,000 M5 Tickを許可、旧v1～v4上限53,000は保持。Seed20261116で2025-08-19～2026-02-28の55,860 M5 Tickを生成し、6旧S1/S2資料銘柄それぞれで確定H1 4,655本→Native元ソースGrid・72h EXIT・Normal cost・180日月次Selectorを実際に計算。
+- 2固定代替研究ルール×6銘柄のRaw Grid一致**1,538**（重複閾値あり）、保有重複遮断**1,069**、月末OPEN打切り**2**、Native終了モデル延べ**467**。SUIのみ研究月次ルール1つ選抜、他5通貨は要件不合格。これは**6×2独立シナリオの研究モデル**で、Portfolio Fill数ではない。Native stage所属ID・正式実注文は0/未証明。
+- 合成M5→H1の時点因果性／モデル出口／Window境界を新 `bt-hp-q102-v5-180d-m5-native-replay-selftest.ts` で検証。非公開モデル個票JSON SHA256 `98AB4C2C56B3C97018A1EC7C38BDA512E4B69191E911C383417F468659D77BE2`。詳細 `BT_HP_Q102_S12_V5_M5_180D_NATIVE_EXIT_MODELS_20261116.md`。これは元Native Normalモデル費用であり10bps/30bps統合BT認証には使えない。V4 LIVE/注文/STOP変更0。

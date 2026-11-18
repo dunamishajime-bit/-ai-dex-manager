@@ -74,6 +74,19 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     return <AuthGuard>{children}</AuthGuard>;
   }
 
+  // BT is a standalone, READ-ONLY workspace. Preserve the same AuthGuard,
+  // but do not render the trading dashboard navigation or LIVE controls here.
+  // All routes other than the BT workspace keep their existing layout.
+  if (pathname === "/bt-verification" || pathname?.startsWith("/bt-verification/")) {
+    return (
+      <AuthGuard>
+        <div className="min-h-dvh w-full bg-[#081321] text-slate-100">
+          {children}
+        </div>
+      </AuthGuard>
+    );
+  }
+
   return (
     <AuthGuard>
       <div className="flex h-dvh min-h-0 overflow-hidden bg-cyber-black text-white">

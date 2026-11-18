@@ -1,0 +1,13 @@
+{
+  "sourceRevision": "9118eeaa6c209dc6e37887cf5be139b3baaa005d",
+  "upstreamPath": "scripts/disdex_v52_aster_only_legacy_engine.py",
+  "upstreamSha256": "5f7b5299b50ac2b85bfab6cef1dd746d7e114ce70c442f5f6fcadbe47dc78762",
+  "methodName": "V52AsterOnlyEngine.v50_candidate",
+  "methodSha256NormalLf": "4d14659a7da1cd006f673834087940ad4640f82905506f2d9cd1426c744e5478",
+  "lines": 85,
+  "upstreamPolicySha256": "16c24ec472df9141bbde60b993120fb0a9b9bc3739a0bb8251c6371119e3390c",
+  "policyId": "V50_B60_C20_STOP1.75_EDGE7.5_COST60_SPREAD20",
+  "type": "SOURCE_EXACT_METHOD_WITH_OFFLINE_STUBS",
+  "realOrderEntryEnabled": false,
+  "fullV52Parity": false
+}
