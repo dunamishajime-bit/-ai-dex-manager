@@ -203,6 +203,17 @@ jobs:
             [[ "$expected" == "$actual" ]]
           done
           ssh -nT ${opts[@]} "root@$HOST" "chmod 0555 '$stage/disdex-runner-scoped-order-enable' '$stage/install-disdex-runner-scoped-order-enable' && '$stage/install-disdex-runner-scoped-order-enable' '$stage'"
+          ssh -T ${opts[@]} "root@$HOST" "/usr/local/sbin/disdex-runner-scoped-order-enable --runner '$RUNNER' --source-sha '$SOURCE_SHA' --normalize-source" > "$RUNNER_TEMP/runner-scoped-order-normalize.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result=json.loads((Path(os.environ['RUNNER_TEMP'])/'runner-scoped-order-normalize.json').read_text())
+          assert result['status']=='COMMON_MODULE_IMMUTABLE_NORMALIZED'
+          assert result['runner']==os.environ['RUNNER'] and result['sourceSha']==os.environ['SOURCE_SHA']
+          assert all(result.get(k)==0 for k in ('ordersSent','cancelsSent','positionChangesSent'))
+          print('COMMON_MODULE_IMMUTABLE_NORMALIZED=TRUE')
+          print('TRADING_MUTATIONS=0')
+          PY
           ssh -T ${opts[@]} "root@$HOST" "/usr/local/sbin/disdex-runner-scoped-order-enable --runner '$RUNNER' --source-sha '$SOURCE_SHA' --plan-sha256 '$PLAN_SHA256' --scope '$SCOPE' --operation '$OPERATION' --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID' --preflight-readonly --read-approval-stdin" < "$RUNNER_TEMP/runner-scoped-order-token" > "$RUNNER_TEMP/runner-scoped-order-preflight.json"
           ssh -T ${opts[@]} "root@$HOST" "/usr/local/sbin/disdex-runner-scoped-order-enable --runner '$RUNNER' --source-sha '$SOURCE_SHA' --plan-sha256 '$PLAN_SHA256' --scope '$SCOPE' --operation '$OPERATION' --approval-id '$APPROVAL_ID' --run-id '$GITHUB_RUN_ID' --execute --read-approval-stdin" < "$RUNNER_TEMP/runner-scoped-order-token" > "$RUNNER_TEMP/runner-scoped-order-result.json"
           python3 - <<'PY'
@@ -221,4 +232,4 @@ jobs:
         shell: bash
         run: |
           rm -rf "$RUNNER_TEMP/runner-scoped-order-ssh"
-          rm -f "$RUNNER_TEMP/runner-scoped-order-token" "$RUNNER_TEMP/runner-scoped-order-public.pem" "$RUNNER_TEMP/runner-scoped-order-preflight.json" "$RUNNER_TEMP/runner-scoped-order-result.json"
+          rm -f "$RUNNER_TEMP/runner-scoped-order-token" "$RUNNER_TEMP/runner-scoped-order-public.pem" "$RUNNER_TEMP/runner-scoped-order-normalize.json" "$RUNNER_TEMP/runner-scoped-order-preflight.json" "$RUNNER_TEMP/runner-scoped-order-result.json"
