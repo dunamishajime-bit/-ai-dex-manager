@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Activity, AlertTriangle, ShieldAlert } from "lucide-react";
 
 import type { LogicSnapshot, LogicRow } from "@/lib/server/current-live-logic-catalog";
+import { classifyRunnerObservation } from "@/lib/runner-observation";
 
 const POLL_MS = 45_000;
 
@@ -15,8 +16,7 @@ function statusLabel(row: LogicRow) {
   return "実行状態未検証";
 }
 function statusStyle(row: LogicRow) {
-  if (row.serviceState === "RUNNING" && !row.mismatchReason &&
-      row.safetyState !== "BLOCKED" && row.heartbeatFresh) {
+  if (row.serviceState === "RUNNING") {
     return "border-emerald-400/35 bg-emerald-500/10 text-emerald-100";
   }
   return "border-amber-400/35 bg-amber-500/10 text-amber-100";
@@ -72,16 +72,23 @@ export function CurrentLogicPanel() {
           <Activity className="h-3.5 w-3.5" />
           現行ロジック（本番pin・実PID・heartbeat照合）
         </span>
-        <span>稼働中 {running} / 全 {snapshot.rows.length}</span>
+        <span>プロセス稼働 {running} / 全 {snapshot.rows.length}</span>
         <span className={hold === true ? "font-semibold text-amber-200" : "text-white/65"}>
           {hold === true
-            ? "GLOBAL HOLD_PROTECTED 有効（新規注文制限）"
-            : hold === false ? "GLOBAL HOLD解除状態" : "GLOBAL HOLD未検証"}
+            ? "共有HOLD有効（対象: " + (snapshot.safety.scope || "未検証") + "）"
+            : hold === false ? "共有HOLD非アクティブ（取引許可は別判定）" : "共有HOLD未検証"}
         </span>
         <span className="text-white/50">確認 {timestamp(Date.parse(snapshot.checkedAt))}</span>
       </div>
       <div className="custom-scrollbar grid max-h-[230px] min-w-0 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 xl:grid-cols-3" aria-label="現行Runner別ロジック詳細">
-        {snapshot.rows.map((row) => (
+        {snapshot.rows.map((row) => {
+          const observed = classifyRunnerObservation(row, snapshot.safety, row.id !== "SHARED_CRYPTO_RISK" && row.id !== "MARGIN_GUARD");
+          const localLabel = { FAULT: "停止検知", ATTENTION: "要確認", UNVERIFIED: "未検証", OBSERVED: "観測一致" }[observed.local];
+          const protectionLabel = { BLOCK_REPORTED: "BLOCKを報告", SHARED_HOLD_REPORTED: "共有HOLDを観測（適用範囲は別判定）", AUTHORITY_UNVERIFIED: "取引許可未検証" }[observed.protection];
+          const recoveryLabel = row.recovery ? {
+            UNKNOWN: "未検証", ATTENTION: "異常継続", VERIFYING: "復旧確認中", HEALTHY_OBSERVED: "正常復帰検知",
+          }[row.recovery.label] : undefined;
+          return (
           <div key={row.id} className="min-w-0 rounded-xl border border-white/15 bg-black/25 p-2.5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <Link href={row.href} className="font-bold text-white underline-offset-2 hover:underline">
@@ -91,12 +98,17 @@ export function CurrentLogicPanel() {
                 {statusLabel(row)}
               </span>
             </div>
+            <dl className="mt-2 grid gap-1 text-[10px]">
+              <div className="flex flex-wrap items-center gap-2"><dt className="text-white/55">個別監視</dt><dd className={observed.local === "OBSERVED" ? "text-white/80" : "text-amber-200"}>{localLabel}</dd></div>
+              {recoveryLabel ? <div className="flex flex-wrap items-center gap-2"><dt className="text-white/55">復旧確認</dt><dd className={row.recovery?.label === "HEALTHY_OBSERVED" ? "text-emerald-200" : "text-amber-200"}>{recoveryLabel}{row.recovery?.streak ? `（${row.recovery.streak}/3）` : ""}</dd></div> : null}
+              <div className="flex flex-wrap items-center gap-2"><dt className="text-white/55">取引保護・許可</dt><dd className="text-amber-200">{protectionLabel}</dd></div>
+            </dl>
             <p className="mt-1 break-words leading-5 text-white/75">{row.description}</p>
             {row.policy ? (
               <p className="mt-1 break-words font-medium text-amber-100">{row.policy}</p>
             ) : null}
             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[10px] text-white/60">
-              <span>正式SHA {row.pinSha.slice(0, 12)}</span>
+              <span>正式SHA {row.pinSha ? row.pinSha.slice(0, 12) : "未検証"}</span>
               <span>PID {row.mainPid ?? "—"}</span>
               <span>heartbeat {row.heartbeatFresh ? "新鮮" : "古い/未取得"}</span>
             </div>
@@ -120,12 +132,13 @@ export function CurrentLogicPanel() {
               </p>
             ) : null}
           </div>
-        ))}
+        ); })}
       </div>
       <p className="inline-flex items-center gap-1.5 text-[10px] text-white/55">
         <ShieldAlert className="h-3 w-3" />
-        systemd稼働は約定許可を意味しません。発火候補、実約定、保護HOLDは独立して照合します。
+        プロセス・個別監視・復旧観測と取引保護は別表示です。正常復帰検知は新しいheartbeatの3回連続観測を示すだけで、発注許可を意味しません。この画面は読み取り専用です。
       </p>
     </div>
   );
 }
+

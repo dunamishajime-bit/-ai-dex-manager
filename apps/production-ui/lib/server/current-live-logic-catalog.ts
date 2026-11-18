@@ -1,12 +1,14 @@
 import { execFile as execFileCallback } from "node:child_process";
 import { readFile, readlink } from "node:fs/promises";
 import { promisify } from "node:util";
+import { createRunnerObservationTracker, type RunnerRecoveryState } from "../runner-observation";
 
 const execFile = promisify(execFileCallback);
 const SHA = /^[a-f0-9]{40}$/;
 const SERVICE = /^disdex-[a-z0-9-]+@[a-f0-9]{40}\.service$/;
 const MANIFEST = "/etc/disdex/runner-pins.json";
 const KILL = "/var/lib/disdex/shared/kill-switch.json";
+const defaultObservationTracker = createRunnerObservationTracker();
 
 export const LOGIC_ROLES = {
   V12_V4: { title: "V4", description: "V12 / V4：入口・出口判定", href: "/decision-status/v12", heartbeat: "/var/lib/disdex/runner-health/heartbeats/v12-v4.json" },
@@ -38,6 +40,7 @@ export type LogicRow = {
   decisionDetail?: string;
   mismatchReason?: string;
   policy?: string;
+  recovery?: RunnerRecoveryState;
 };
 export type LogicSnapshot = {
   ok: true; readOnly: true; tradingMutation: 0; checkedAt: string;
@@ -99,6 +102,7 @@ export async function buildLiveLogicSnapshot(options: {
   showService?: (unit: string) => Promise<SystemctlResult>;
   readProcessCwd?: (pid: number) => Promise<string>;
   now?: () => number;
+  observationTracker?: ReturnType<typeof createRunnerObservationTracker>;
 } = {}): Promise<LogicSnapshot> {
   const readText = options.readText || ((path: string) => readFile(path, "utf8"));
   const showService = options.showService || (async (unit: string) => {
@@ -107,6 +111,7 @@ export async function buildLiveLogicSnapshot(options: {
     ], { timeout: 4000, maxBuffer: 16384 });
     return { stdout: output.stdout, stderr: output.stderr };
   });
+  const observationTracker = options.observationTracker || defaultObservationTracker;
   const readProcessCwd = options.readProcessCwd || ((pid: number) => readlink("/proc/" + pid + "/cwd"));
   const now = options.now?.() ?? Date.now();
   const manifest = JSON.parse(await readText(MANIFEST)) as Record<string, unknown>;
@@ -118,7 +123,19 @@ export async function buildLiveLogicSnapshot(options: {
   const pins = manifest.runners as Record<string, unknown>;
   const rows = await Promise.all((Object.keys(LOGIC_ROLES) as LogicRole[]).map(async (id) => {
     const config = LOGIC_ROLES[id];
-    const pin = validateManifestRole(id, pins[id]);
+    let pin: ReturnType<typeof validateManifestRole>;
+    try {
+      pin = validateManifestRole(id, pins[id]);
+    } catch {
+      // Read-only observation: a damaged individual pin must not erase other rows.
+      // No service probing or authorization inference is performed for this role.
+      return {
+        id, title: config.title, description: config.description, href: config.href,
+        pinSha: "", serviceUnit: "", serviceState: "UNVERIFIED",
+        mainPid: null, heartbeatFresh: false, mismatchReason: "個別pinが未検証",
+        recovery: observationTracker.observe(id, { healthy: false }),
+      } satisfies LogicRow;
+    }
     let serviceState: LogicRow["serviceState"] = "UNVERIFIED";
     let mainPid: number | null = null;
     let mismatchReason: string | undefined;
@@ -174,12 +191,18 @@ export async function buildLiveLogicSnapshot(options: {
         }
       } catch { /* 未検証のポリシーを表示しない */ }
     }
+    const heartbeatFresh = heartbeatAt != null && now - heartbeatAt <= 300000 && heartbeatAt <= now + 30000;
+    const recovery = config.heartbeat
+      ? observationTracker.observe(id, {
+        sequence: heartbeatAt,
+        healthy: serviceState === "RUNNING" && heartbeatFresh && heartbeatSha === pin.sha && !mismatchReason,
+      })
+      : undefined;
     return {
       id, title: config.title, description: config.description, href: config.href,
       pinSha: pin.sha, serviceUnit: pin.serviceUnit, serviceState, mainPid,
       heartbeatSha, heartbeatAt,
-      heartbeatFresh: heartbeatAt != null && now - heartbeatAt <= 300000 && heartbeatAt <= now + 30000,
-      safetyState, healthReason, decisionDetail, mismatchReason, policy,
+      heartbeatFresh, safetyState, healthReason, decisionDetail, mismatchReason, policy, recovery,
     };
   }));
   let safety: LogicSnapshot["safety"] = { holdActive: null };
@@ -197,3 +220,4 @@ export async function buildLiveLogicSnapshot(options: {
     safety, rows,
   };
 }
+
