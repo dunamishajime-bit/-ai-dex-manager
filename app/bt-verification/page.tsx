@@ -5,6 +5,7 @@ import { Activity, ArrowRight, Download, FileUp, Pause, Play, RotateCcw, ShieldC
 import { BTWorkspaceShell, type BTWorkspaceTab } from "@/components/bt-verification/BTWorkspaceShell";
 import { BTResearchConditions } from "@/components/bt-verification/BTResearchConditions";
 import { ResearchSymbolCharts } from "@/components/bt-verification/ResearchSymbolCharts";
+import { BTMarketPackImport } from "@/components/bt-verification/BTMarketPackImport";
 import { BtcCandlestickChart } from "@/components/bt-verification/BtcCandlestickChart";
 import { EquityTimelineChart } from "@/components/bt-verification/EquityTimelineChart";
 import { GrossAllocationPanel } from "@/components/bt-verification/GrossAllocationPanel";
@@ -13,6 +14,8 @@ import { grossForFrame, validateReplay, type Replay, type ReplayFrame } from "@/
 import {portfolioMetrics} from "@/lib/bt-verification/portfolio-metrics";
 import {compareReplayPair} from "@/lib/bt-verification/compare-replays";
 import {classifyBTEvent} from "@/lib/bt-verification/event-types";
+import {attachHistoricalCandles,type HistoricalPackManifest} from "@/lib/bt-verification/historical-symbol-pack";
+import type {BtcCandle} from "@/lib/bt-verification/replay";
 
 const SCENARIOS: { value: DemoScenario; label: string; hint: string }[] = [
   { value: "trend", label: "上昇トレンド", hint: "トレンドが続く相場" },
@@ -51,10 +54,18 @@ export default function BTVerification() {
   const [baselineSelected,setBaselineSelected]=useState("");
   const [comparisonA,setComparisonA]=useState("IDLE_10");
   const [comparisonB,setComparisonB]=useState("IDLE_30");
+  const [historicalMarket,setHistoricalMarket]=useState<{
+    manifest:HistoricalPackManifest; candles:Record<string,BtcCandle[]>;
+  }|null>(null);
+  function withVerifiedHistoricalMarket(input:Replay,market=historicalMarket):Replay{
+    if(!market)return input;
+    try{return attachHistoricalCandles(input,market.manifest,market.candles);}
+    catch{return input;}
+  }
   function openBaseline(key:string){
     const item=baselineFiles[key];
     if(!item)return;
-    setReplay(item.replay);setCursor(0);setRunning(false);setSelected(null);
+    setReplay(withVerifiedHistoricalMarket(item.replay));setCursor(0);setRunning(false);setSelected(null);
     setFileName(item.label);setTab("playback");
   }
   async function importBaselineSet(event:ChangeEvent<HTMLInputElement>){
@@ -154,12 +165,12 @@ export default function BTVerification() {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
-    if (file.size > 24 * 1024 * 1024) { setNotice("24MB以下の再生JSONを選んでください。"); return; }
+    if (file.size > 64 * 1024 * 1024) { setNotice("64MB以下の再生JSONを選んでください。"); return; }
     try {
       const parsed: unknown = JSON.parse(await file.text());
       if (!validateReplay(parsed)) throw new Error("BTの再生データ形式が一致しません");
       if (parsed.mode !== "EXTERNAL") throw new Error("この画面への読込は研究BTのEXTERNAL形式のみ対応します");
-      setReplay(parsed); setCursor(0); setRunning(false); setSelected(null); setFileName(file.name);
+      setReplay(withVerifiedHistoricalMarket(parsed)); setCursor(0); setRunning(false); setSelected(null); setFileName(file.name);
       setNotice("再生データを読み込みました。検証済みのLIVE実績ではありません。");
       setTab("playback");
     } catch (error) { setNotice(error instanceof Error ? error.message : "読込に失敗しました。"); }
@@ -347,6 +358,19 @@ export default function BTVerification() {
           現在のデータ：<strong className="text-cyan-200">{fileName || "人工市場デモ"}</strong><br/>
           <span className="text-xs text-[#91b1c4]">識別：{replay.source?.kind ?? replay.mode}</span>
         </div>
+        <BTMarketPackImport onLoaded={(manifest,candles)=>{
+          setHistoricalMarket({manifest,candles});
+          setReplay(previous=>withVerifiedHistoricalMarket(previous,{manifest,candles}));
+          const incomplete=Object.values(manifest.source_coverage).filter(x=>!x.complete_h1_period);
+          setNotice("過去実市場H1 "+Object.keys(candles).length+"通貨をSHA256照合して追加。"
+           +(incomplete.length?incomplete.length+"通貨は先頭期間の欠損を明示します。":"全通貨の期間を照合済み。")
+           +" Productionの約定一致は未認証です。");
+        }}/>
+        {historicalMarket&&<p className="mt-3 text-xs text-cyan-200">
+          現在の実市場追加：{Object.keys(historicalMarket.candles).length}通貨 /
+          欠損のある通貨：{Object.entries(historicalMarket.manifest.source_coverage)
+            .filter(([,v])=>!v.complete_h1_period).map(([symbol])=>symbol).join("、")||"なし"}
+        </p>}
         <div className="mt-5 rounded-xl border border-cyan-700/40 bg-[#0c2336] p-4">
           <h3 className="text-sm font-bold text-cyan-100">基準BTセットの読み込み</h3>
           <p className="mt-2 text-xs leading-6 text-[#a8c4d4]">PC内で変換したMANIFEST_UNCERTIFIED.jsonと、STABLE4研究なら2件、単独モデルなら6件の研究再生JSONをまとめて選択してください。SHA256照合後、条件設定で選択・再生できます。ブラウザ内だけで読み込みます。</p>
