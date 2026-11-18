@@ -1,0 +1,25 @@
+{
+  "dataset_id": "baseline-20251001-20261001-reusable-ledger-v1",
+  "period_utc_start_inclusive": "2025-10-01T00:00:00Z",
+  "period_utc_end_exclusive": "2026-10-01T00:00:00Z",
+  "integrity": "PASS",
+  "verified_file_hashes": 12,
+  "issues": [],
+  "source_status": "NATIVE_RAW_INTENT_REPLAY_AND_THREE_STANDALONE_MODELS_ONLY_NOT_FULL_EIGHT_RUNNER",
+  "raw_intents_total": 3029,
+  "raw_intents_by_source": {
+    "V4": 1394,
+    "Q102_S34_ONLY": 519,
+    "PENGU": 116,
+    "IDLE": 183,
+    "FET": 11,
+    "RESIDUAL": 728,
+    "HYPE": 78
+  },
+  "unique_modeled_trades": 198,
+  "standalone_scenario_rows": 396,
+  "actual_exchange_fills_verified": "NOT_VERIFIED_AND_NOT_IMPORTED",
+  "certification": "NOT_CERTIFIED_EIGHT_RUNNER",
+  "complete_eight_runner_portfolio": false,
+  "note": "Integrity PASS does not establish production runner parity or a complete integrated portfolio."
+}
