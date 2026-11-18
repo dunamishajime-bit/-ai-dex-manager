@@ -1,0 +1,32 @@
+name: BT Replay Read-only Contract CI
+
+on:
+  pull_request:
+    paths:
+      - 'app/bt-verification/**'
+      - 'lib/bt-portfolio-replay.ts'
+      - 'lib/bt-ui-demo.ts'
+      - 'lib/bt-export-package.ts'
+      - 'tests/bt-portfolio-replay.test.ts'
+      - 'tests/bt-export-package.test.ts'
+      - '.github/workflows/bt-portfolio-replay-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Read-only Gross and replay tests
+        run: npx tsx --test tests/bt-portfolio-replay.test.ts tests/bt-export-package.test.ts
+      - name: Type-check HP additions
+        run: npx tsc --noEmit

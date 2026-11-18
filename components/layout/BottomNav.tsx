@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CalendarDays, FileText, Home, Settings, Wallet } from "lucide-react";
+import { BarChart3, FlaskConical, CalendarDays, FileText, Home, Settings, Wallet } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -14,13 +14,14 @@ const NAV_ITEMS = [
   { icon: Wallet, label: "ウォレット", href: "/wallets" },
   { icon: CalendarDays, label: "損益", href: "/performance" },
   { icon: FileText, label: "履歴", href: "/history" },
+  { icon: FlaskConical, label: "BT検証", href: "/bt-verification" },
   { icon: Settings, label: "設定", href: "/settings" },
 ] as const;
 
 export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#7c6d38]/30 bg-[#06090f]/95 backdrop-blur-xl safe-area-bottom md:hidden">
-      <div className="flex items-stretch">
+      <div className="flex items-stretch overflow-x-auto">
         {NAV_ITEMS.map((item) => (
           <BottomNavItem key={item.href} {...item} />
         ))}
@@ -37,7 +38,7 @@ function BottomNavItem({ icon: Icon, label, href }: (typeof NAV_ITEMS)[number]) 
     <Link
       href={href}
       className={cn(
-        "relative flex flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-center transition-all duration-200",
+        "relative flex min-w-[48px] flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-center transition-all duration-200",
         isActive ? "text-[#f0df9c]" : "text-white/45 hover:text-white/72 active:text-[#f0df9c]",
       )}
     >
