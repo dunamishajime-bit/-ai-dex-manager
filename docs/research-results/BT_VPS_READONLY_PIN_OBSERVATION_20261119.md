@@ -17,3 +17,13 @@ Evidence command family: readlink -f /home/deploy/disdex-trading/current; system
 The current symlink is NOT a single complete active-runner pin. At least HYPE and PENGU are running from other immutable releases. Any baseline BT that uses current symlink only, or treats STABLE4 research source as current runtime, fails exact production-parity gate.
 ## Next read-only evidence
 Collect remaining active V4/Q102/V52/shared risk unit pins and relevant executable source hashes, compare with research source SHA per runner; never read credentials or change orders/STOP/Runner state.
+## Extended live service snapshot (same read-only session)
+The following running systemd service instances were additionally observed:
+- V4 production: e788abc82e80f9fc7ab0e1ba83fdb8be267eb513
+- Q102 causal: ef1ab178e26a7bf5bddb6473467765edba242e1d
+- V52 Aster-only: 8495daf24e53a6cf0dd5e38f022008fa8f78c688
+- Shared Crypto Risk refresher: 2737c30e1f6d014d24a2c6d025e7f91332bf7962
+- Margin Guard: 7688ed7c93a1918d8b44837339b7da5584a868f5
+- V52 monitor (read-only): 0d955214a4aeeb7481bced711e1df7f163d2d25c
+- V4 rate budget broker: multiple concurrent active SHA-tagged units (including e788abc82...); exact runtime authority and overlap NOT established.
+These are service instance names with running state, not independent proof of trade permission, actual source execution parity, healthy orders or certified backtest. Confirm ExecStart/WorkingDirectory, immutable release source content and strategy-to-route mapping before reproducing BT. No mutation performed.
