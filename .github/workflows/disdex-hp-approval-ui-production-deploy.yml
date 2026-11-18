@@ -192,6 +192,29 @@ jobs:
           archive="/tmp/disdex-hp-approval-ui-runtime-${REQUEST_ID#hp-approval-}.tgz"
           [[ -f "$archive" ]]
           [[ ! -e "$release" && ! -L "$release" ]]
+          [[ -f "$owner_session_env" ]] || {
+            echo "OWNER_SESSION_ENV_MISSING=$owner_session_env"
+            exit 47
+          }
+          python3 - "$owner_session_env" <<'PY'
+          import base64, sys
+          from pathlib import Path
+          entries = {}
+          for raw in Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+              if not raw or raw.startswith("#") or "=" not in raw:
+                  continue
+              key, value = raw.split("=", 1)
+              entries[key] = value.strip()
+          value = entries.get("DISDEX_OWNER_SESSION_HMAC_KEY", "")
+          if not value:
+              raise SystemExit("OWNER_SESSION_KEY_MISSING")
+          try:
+              decoded = base64.urlsafe_b64decode(value + "=" * ((4 - len(value) % 4) % 4))
+          except Exception as exc:
+              raise SystemExit("OWNER_SESSION_KEY_INVALID") from exc
+          if len(decoded) < 32:
+              raise SystemExit("OWNER_SESSION_KEY_TOO_SHORT")
+          PY
           rm -rf -- "$stage"
           install -d -o deploy -g deploy -m 0755 "$stage"
           tar --no-same-owner -xzf "$archive" -C "$stage"
@@ -212,6 +235,7 @@ jobs:
           public_key="$approval_dir/approver-ed25519.pub"
           env_file='/etc/disdex/hp-approval.env'
           approval_store="$shared_data/deploy-approvals.json"
+          owner_session_env='/etc/disdex/hp-owner-session.env'
           install -d -o root -g deploy -m 0750 "$approval_dir"
           if [[ ! -f "$private_key" ]]; then
             openssl genpkey -algorithm ED25519 -out "$private_key"
@@ -358,6 +382,7 @@ jobs:
           cat > "$approval_dropin" <<EOF
           [Service]
           EnvironmentFile=$env_file
+          EnvironmentFile=$owner_session_env
           EOF
           chown root:root "${work_files[0]}" "${sha_files[0]}" "$approval_dropin"
           chmod 0644 "${work_files[0]}" "${sha_files[0]}" "$approval_dropin"
@@ -383,7 +408,7 @@ jobs:
 
           pid="$(systemctl show "$svc" --property MainPID --value)"
           env_names="$(tr '\0' '\n' < "/proc/$pid/environ" | sed -n 's/=.*//p')"
-          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH DISDEX_ADMIN_ENABLED; do
+          for name in DISDEX_DEPLOY_OTP_PEPPER DISDEX_HP_APPROVER_PRIVATE_KEY_PATH DISDEX_DEPLOY_APPROVAL_STORE_PATH DISDEX_ADMIN_ENABLED DISDEX_OWNER_SESSION_HMAC_KEY; do
             grep -qx "$name" <<<"$env_names"
           done
           if grep -qx 'GMAIL_USER' <<<"$env_names" && grep -qx 'GMAIL_APP_PASSWORD' <<<"$env_names"; then
